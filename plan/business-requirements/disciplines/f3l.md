@@ -1,0 +1,1 @@
+# RC Soar Score Contest Scoring Rules - F3L

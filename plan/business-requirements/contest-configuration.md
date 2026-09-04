@@ -1,4 +1,4 @@
-# RC Soar Score Business Requirements
+# RC Soar Score Business Requirements - Contest Configuration
 
 The RC Soar Score solution is a set of applications and APIs to track, score, and publish results for radio controlled sailplane contests. Management of the contest is included a web application used in online access. The application is also wrapped in a desktop shell for use when there is no internet or as desired by the contest director.
 
@@ -16,12 +16,20 @@ The initial and most import piece of configuration is the discipline or "class" 
 
 Selecting a discipline will indicate if additional configuration necessary. The additional configuration comes down to differences in how scoring, tasks, and drawing of groups occur.
 
+The selection of a discipline can alter contest configuration outside of just what Scoring Rules are necessary. For example, the ALES discipline will set the default "Group Score" under the scoring options to "Time" and the Thermal discipline will set default it to "Normalized".
+
 Initial supported disciplines:
 
+* ALES
 * F3J
-* F3K
 * F5J
 * F3L
+* Thermal Duration
+
+The following disciplines are to be considered during design but will not be immediately implemented:
+
+* F3B
+* F3K
 
 ### Competitors and Pilots
 
