@@ -1,6 +1,18 @@
-# # RC Soar Score Architecture - Contest State and Transitions
+# RC Soar Score Architecture - Contest State and Transitions
 
-A contest is both a conceptual and entity data point. The contest phases document describes the logical steps in contest's life. This document breaks those down to more technically aligned states.
+A contest is both a conceptual and entity data point. The contest phases document describes the logical steps in contest's life. This defines the lifecycle states of a contest in a technically competent manner.
+
+|State|Meaning|Entry condition|Exit / next transition|
+|-----|-------|---------------|----------------------|
+|Created|Contest exists but is not yet configured|Director creates the contest with minimum properties: name, dates, host, location|Created → Configuring when discipline or first configuration action begins|
+|Configuring|Contest is being set up|Discipline selected or configuration begins|Configuring → Ready after required configuration and valid draw are complete|
+|Ready|Contest is configured and draw exists, but scoring has not started|Valid flight matrix exists|Ready → Running when first score is entered|
+|Running|Scores are in progress|At least one official or participant-submitted score exists|Running → Completed when contest is ended|
+|Completed|Contest is finished|Director marks complete, or completion conditions are met|Completed → Published or Archived|
+|Published|Public historical record, no more edits|Completion is met, contest has been published to the remote site, and is made public|Published → Pending Delete|
+|Pending Delete|Contest director is requesting the removal of one of their contests which is published|Contest director makes the request|Pending Delete → Restored or Deleted|
+|Restored|Contest is restored by an administrator.|Administrator denies the delete request|terminal|
+|Deleted|Contest is removed from the public site|Administrator approves the delete request|terminal|
 
 ## Created State
 
@@ -95,19 +107,19 @@ An assumption can be made that the contest is completed with the following condi
 
 It is only an assumption because the contest director may be instructing the pilots to actively complete their scoring before the next round starts. Thus, if the assumption was made in round 7 of a 9 round contest, the contest may not be over, but the contest director is making sure that everyone is aware of their placing before entering the last two rounds.
 
-## Archived State
+## Published State
+
+A contest that is completed and has been marked as published and public enters this state. The transition from completed to published may be immediate as contests may be marked as published and public during the running state thus once the contest is marked as completed it transitions to the completed state and then immediately to the published state.
+
+This state defines a contest that is now being shown on the public site for historical purposes. It is no longer editable.
+
+<!-- ## Archived State
 
 Contest directors storing their data as a backup on the remote site may wish to archive contests. This is done to prevent them from showing in their list of contests in the UI when they're requesting a contest to open for reference or when copying from an old contests. Contest directors may run many contests and having old contests that are not needing administration can be archived from view. These contests are not deleted. Any published data from the contest still remains public and searchable.
 
 A contest in the completed state can be archived.
 
-Once the contest enters the archived state it can be transitioned back to completed.
-
-### Delisted
-
-Once a contest has been published and is public it can be made private by the contest director. This is generally done to hide the overall results before an awards ceremony. This does not indicate that the contest is delisted.
-
-Delisting occurs when the contest director wishes to retract a published contest. The contest director will find a contest that they have published previously and was **not** made public. They indicate that they wish to delist it. This disables the contest from any self-scoring functionality. This is intended to retract a contest that may have been published in error and prevent scores from being entered.
+Once the contest enters the archived state it can be transitioned back to completed. -->
 
 ## Deleted
 
@@ -132,33 +144,3 @@ A contest moves here when a site administrator deems that a contest in the pendi
 The contest is made public on the site again.
 
 At this point only an administrator may go back and fully delete the contest.
-
-## Contest Attributes
-
-The following are not "states" for the contest but attributes which are given to contests throughout their life. These attributes may be applied in certain states or can deny an contest from entering another state.
-
-### Scoring Opened
-
-A contest having the published attribute can have a contest director open the contest to scoring. This is not required. The contest may be published and marked as public, but the contest will be scored only by the contest director or another official.
-
-When the contest director opens scoring to participants the system will look at the participants and invite them to a special URL that enables them to enter their scores.
-
-The system will use follow the process in [`self-scoring-invites.md`](./self-scoring-invites.md) to determine how to send the invites to participants.
-
-### Published
-
-A contest director may chose to publish the contest at any point after the matrix has been created. The act of publishing the contest prepares the contest for public consumption and the ability for participants to add scoring data. A contest does not have to be published for the application to track its data.
-
-A contest must be published to:
-
-* Enable pilots or participants to enter scores online.
-* For the contest to be marked as public and it to be found via searching on the public site.
-* Users to see their past performance related to contests they may have participated in.
-
-Publishing a contest does not immediately open scoring. It is the first step to enabling that functionality.
-
-After publishing the contest director can open online scoring.
-
-### Public Contest
-
-A contest director may mark a contest as public or private. This is only applicable to published contests. A published contest that has been marked private enables the contest to be self-scored by pilots and participants but not visible on the public site. A published contest may be marked as public so that it can be found on the public web site and viewed but have scoring locked so that only officials may enter scores.
