@@ -30,6 +30,18 @@ A contest can be considered started once the first scores have been entered for 
 
 At this point the contest is underway. Scores have been entered and the contest is progressing. Participants or officials are entering scores. Participants will be entering the scores using the web application. Officials will be entering scores using a specialized official screen in the management application either through the web or the desktop version.
 
+Once a contest underway the logic flow for the contest is:
+
+1. A round is started
+2. The first group in the round competes.
+3. The group concludes its flights and scores are noted either immediately in the app or on a piece of paper.
+4. The next group competes.
+5. Steps 2-4 are repeated until all the groups for the round have flown.
+6. After the last group it is ideal that pilots enter their scores before the next round starts.
+7. The next round starts.
+
+Rounds and groups fly sequentially. Scores should be entered sequentially, however, some pilots may forget to enter a their score after their group's completion. Therefore, there will be some pilots entering scores on a timely basis and others that are lagging. It is highly unlikely that a pilot would enter future scores. This could be detected by seeing that one pilot is entering data in rounds more than one of the rest of all the other pilots. However, consideration still has to be given that the first pilot entering scoring data after the completion of the first group in the round will now be at least one ahead of all other pilots and may be more rounds ahead than those lagging in entering their scores.
+
 ## Completed
 
 A contest can be completed/finished in a number of conceptual ways:

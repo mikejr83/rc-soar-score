@@ -19,6 +19,6 @@ The contest director should be able to look at this indicator of fairness at any
 
 Contest directors are generally optimistic about how many rounds may be flown in a contest. For instance, a contest director may think 16 rounds can be performed over two days when they may actually only get 12. However, the contest director may select too few rounds initially and wish to add more. The application should let them add rounds to the matrix and complete a draw for those rounds.
 
-A contest director may change contest configuration options after a draw is performed. The application should warn the contest director of any changes which would affect the outcome in the matrix. The contest director should then have the option to perform a re-draw to create a new matrix.
+A contest director may change certain contest configuration options after a draw is performed (the discipline cannot be changed once set). The application should warn the contest director of any changes which would affect the the matrix. The contest director should then have the option to perform a re-draw to create a new matrix.
 
 If a pilot was added after a draw was made it should be alerted to the contest director that the pilot was randomly added to the existing groups over the rounds. A new draw is advisable.

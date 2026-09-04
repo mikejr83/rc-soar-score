@@ -12,6 +12,9 @@ A contest director may publish a public contest without creating an account.
 
 Users viewing the public contests do not need an account.
 
+### Contests
+
+
 ## Account Related Functionality
 
 Contest directors can create accounts. This will enable the syncing of any offline data to service layer.

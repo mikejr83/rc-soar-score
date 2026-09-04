@@ -71,9 +71,9 @@ A set of options for the "Group Score" are presented:
 
 The default selection will be "Normalized".
 
-An option to round or truncate the pilots total score is presented along with the number of decimals places, 0 - 3, used for score calculation.
+Configuration for calculating a pilot's score will be presented. There are two options, to round to a number of decimal places or truncated after a number of decimal places. The number of decimals places are selectable, 0 - 3.
 
-The contest director can indicate that the worst score for a round can be discarded. This is configured by providing the round number after which the score is discarded.
+The contest director can indicate that the worst score for a pilot in a round can be discarded. This is configured by providing the round number after which the score is discarded.
 
 ### Scoring Rules
 
