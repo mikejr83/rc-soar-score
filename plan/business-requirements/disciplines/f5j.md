@@ -4,9 +4,15 @@ The RC Soar Score solution is a set of applications and APIs to track, score, an
 
 The FAI F5J task is similar to the FAI F3J task. It differs in that there are additional data points collected and used to calculate the pilots score.
 
+The flight time is calculated by a timer started when the model leaves the pilot's hand with the motor running. The pilot may not launch before the working time starts. The pilot attempts to fly as long as possible during the working time and perform a precision landing before the working time expires. If the pilot lands before the working time expires the pilot receives any calculated landing points as a bonus. If the pilot has landed after the working time expires they forfeit the landing bonus but still may keep the score generated from their flight time minus launch penalty.
+
+F5J has a provision for an over-flight window. The pilot may continue flying for up to 1 minute past the end of the window. If this occurs the pilot's recorded time stops when the working time ends. If the pilot lands within that 1 minute over-fly time and is within bounds, the pilot will receive their flight points as calculated minus any height penalty. If they are flying beyond that 1 minute over-fly time their score is forfeit and recorded as a 0. For scoring purposes in the application this scenario is not tracked. It is provided purely for clarity. The application does not record actual landing time or validate the one-minute overflight limit. The participant or official must select Late landing when applicable. A zero-score submission is used when the pilot exceeded the permitted overflight period.
+
+This document serves as a primer for F5J scoring within the context of the RC Soar Score Contest application. Topics that go beyond recording scores are best left for the official FAI documentation for the F5J discipline.
+
 ## Scoring Options
 
-F5J is a variation of how a duration type task is scored. F5J has a provision for an over-flight window. The pilot may continue flying for up to 1 minute past the end of the window. If this occurs the pilot's recorded time stops when the window ends. If the pilot lands within that 1 minute over-fly time, the pilot will receive their flight points as calculated minus any height penalty. If they are flying beyond that 1 minute over-fly time their score is 0.
+F5J is a variation of how a duration type task is scored.
 
 The following defaults are set in the scoring options section when this discipline is selected:
 
@@ -24,7 +30,7 @@ The F5J discipline changes the wording for a typical duration task. The concept 
 * Motor Restart - This is a selection of three options to determine how motor restarts affect the overall results.
   * Allowed - Restart is allowed. The pilot receives a 0 for the round. The round can be dropped. This is the default.
   * Non-Droppable 0 - Restart is allowed and can be identified on the scoring screen. The pilot receives a 0 for the round. The round's score cannot be dropped from the pilots final results.
-  * Not Allowed - The contest will not consider motor restarts as they are forbidden. The option to select a motor restart is not shown on the scoring screen.
+  * Not Allowed - The contest will not consider motor restarts as they are forbidden. The option to select a motor restart is not shown on the scoring screen. The scoring application is not responsible for enforcing this. This is configuration for the scoring screens only.
 
 This discipline introduces the concept of a launch height penalty. The height penalty has the following components:
 
@@ -63,7 +69,7 @@ The following is data is requested to be entered for a score to be computed:
 * Launch height - in whole meters.
 * Landing - Input based on the landing table selected.
 * Late landing - The pilot did not land the model before the working time expired (but did not fly over one minute past the window closing).
-* Motor Restart - The pilot restarted their motor during flight. This is show based on the scoring rules configuration.
+* Motor Restart - The pilot restarted their motor during flight. This is shown based on the scoring rules configuration.
 * Out of bounds landing - An indicator that the pilot landed more than 75m from their landing marker.
 * No Altitude Recorded - A participant may select this if the pilot's altitude recording device fails to record their F5J altitude. This case follows the same as a zero score situation. It is used for categorization of the zero score only.
 
@@ -75,17 +81,21 @@ The screen should disable and 0 all fields if the pilot indicates a motor restar
 
 ### Validation
 
-Time should never be a negative number nor should it exceed the window time.
+Time should never be a negative number nor should it exceed the window time. A pilot may physically fly their model past the window but the recorded time cannot exceed the window time. A pilot overflying the window can only achieve a theoretical maximum time that is the specified working time minus the smallest representable time unit (as configured for the number of decimals store for the flight time). A pilot may not have started their flight when the working time started, thus if they are still flying when the working time ends they would be less than the theoretical maximum time and receive the time as recorded by their timer. In both cases the pilot would lose their landing bonus and the score would have the "Late landing" option selected.
+
+The time entered cannot be the same as the working time. It is physically impossible for that situation to occur.
+
+An altitude of 0 is not possible.
 
 A launch height over 300 meters should be accompanied by an indication if the user entered a correct value.
 
-Landing bonuses taken from the landing bonus table based on the configuration of the contest. The user selects the displayed value and the key for that displayed value is what is stored as the landing bonus.
+The landing bonus is displayed to the user a selection option from the landing table configured for the contest. The purpose of this selection is to provide a UI construct to help a user enter a valid landing bonus. Some contest uses distance from the landing marker as how the points are store vs. other contest directors having the displayed values be the actual points awarded.
 
-A user submitting a form with motor restart or out-of-bounds selected should acknowledge the pilot is receiving a zero score.
-
-The user pressing submit on the form with no fields filled out should receive a warning that they are entering a zero score for the round. If they acknowledge the zero score is kept. This is sufficient to indicate that the pilot overflow the over-fly time of 1 minute.
+A user submitting a form with motor restart or out-of-bounds selected should acknowledge the pilot is receiving a zero score when motor restarts are prevented from being discarded.
 
 A user may select both out of bounds landing and motor restart. This is applicable if the contest is not allowing a zero to be dropped when a motor restart occurs. The user should be notified of this situation when both are selected.
+
+The user pressing submit on the form with no fields filled out should receive a warning that they are entering a zero score for the round. If they acknowledge the zero score is kept. This is sufficient to indicate that the pilot overflow the over-fly time of 1 minute.
 
 The selection of the "No Altitude Record" should not allow any other values to be entered. The selections for late landing, motor restart, and out of bounds landing should be unselected and unavailable.
 
@@ -93,19 +103,61 @@ The selection of the "No Altitude Record" should not allow any other values to b
 
 A pilot's raw score is computed by the following formula:
 
-The hight penalty for the flight is calculated. If the altitude recorded is at or under the reference altitude the penalty is the minor penalty points per meter multiplied by the recorded altitude. If the altitude is over the reference then the penalty is the reference altitude multiplied by the minor penalty points per meter plus the difference between the recorded altitude and the reference altitude multiplied by the major penalty points per meter.
+The height penalty for the flight is calculated. If the altitude recorded is at or under the reference altitude the penalty is the minor penalty points per meter multiplied by the recorded altitude. If the altitude is over the reference then the penalty is the reference altitude multiplied by the minor penalty points per meter plus the difference between the recorded altitude and the reference altitude multiplied by the major penalty points per meter.
 
 The base points for the pilot is found by using the number of points per second as defined by the contest multiplied by the number of seconds the pilot has flown.
 
-The hight penalty is subtracted from the base points.
+The height penalty is subtracted from the base points.
 
-The landing score is added based on the "Group Score" configuration.
+Landing bonuses are taken from the landing bonus table based on the configuration of the contest at the time of score entry. The system is not concerned with the bonus table changing during a contest. The key/value pair presented in the UI is done in order to help the user provide a selection that tells the system what value is recorded for the landing bonus. Regardless of what the UI shows, the system should assume that the key/value lookup will indicate the value to be stored based on what the user selected.
+
+The landing score is added based on the "Group Score" configuration only if the flight was not marked as having a late landing.
 
 The total is the pilots raw score.
 
+The lowest score a pilot can receive for their raw score is 0. This would be if the height penalty exceeded the points earned from their flight time (plus any landing bonus).
+
+Pilots may receive the same calculated raw score. In this case their normalized score would be exactly the same.
+
+Pilots which have no submitted score are considered a zero score. They will be indicated in the UI as to not confuse the users. As their scores are entered the normalized scores will be recalculated.
+
+### Late Landing Behavior
+
+A late landing is when the pilot flies over the working time but lands within bound and within the one minute overfly time. The pilot will keep their flight time. Their score will be calculated as normal, however, they forfeit their landing bonus points.
+
+### Zero Score Clarifications
+
+Score details entered that have any of the following conditions met:
+
+* Motor Restart
+* No altitude Recorded
+* Out of bounds
+
+Receive a 0 for the flight. No time, height, or landing is recorded for these situations.
+
+There is only one situation where multiple zero selections can occur: Motor restart & Out of bounds - Both statuses are recorded. A notification that this will result in a 0 score that cannot be dropped is shown if the scoring rules have been configured such that motor restarts result in a non-dropped 0.
+
+If "Motor Restart" is selected then the "No altitude recorded" option is not selectable. If "No altitude recorded" is selected then "Motor restart" and "Out of bounds" are not selectable.
+
+These zero condition flags are stored for reporting later in the contest and in the case of motor restart it is considered when discarding the lowest score when the scoring rules disallow motor restarts being discarded.
+
+If every pilot receives a zero as a raw score due to:
+
+* Out of bounds
+* No altitude recorded
+* Motor restart
+
+All pilots will receive a 0 for their normalized group score.
+
+### Truncating and Rounding
+
+Truncating of calculated values never takes place until the final group score is computed. Rounding follows the same requirement, it never takes place at an intermediate calculation step.
+
+As truncating and rounding are configuration options which are only applicable to the final group score, this does not affect the raw score and only the final group score for pilots.
+
 ### Examples
 
-The window configuration is set to 600 seconds or 10 minutes, earning 1 point per second, with a reference altitude of 200m, a minor penalty of 0.5 points per meter and a major penalty of 3 points per meter.
+The window configuration is set to 600 seconds or 10 minutes, earning 1 point per second, 0 decimals for time precision, with a reference altitude of 200m, a minor penalty of 0.5 points per meter and a major penalty of 3 points per meter.
 
 F5J is flown where the "Group Score" is "normalized" meaning the flight score and landing bonus are added together for the pilot's raw score and the normalized to 1000 being the pilot who had the highest score for the group. The total score is "rounded" to 1 decimal place. The following examples use that assumption.
 
@@ -113,7 +165,7 @@ The pilot A flies 9:30, nine minutes and 30 seconds. The pilot launched to an al
 
 Pilot B flies 9:55, nine minutes and 55 seconds. They launched to an altitude of 46m. Their landing was 50 points.
 
-Pilot C files 7:45, seven minutes and 45 seconds. They launched to an altitude of 204m. Their landing was 30 points.
+Pilot C flies 7:45, seven minutes and 45 seconds. They launched to an altitude of 204m. Their landing was 30 points.
 
 Pilot A's flight score = 570 seconds of flight time \* 1 point per sec - 13m \* 0.5 points per meter = 563.5 flight points
 
@@ -123,7 +175,7 @@ Pilot B's flight score = 595 seconds of flight time \* 1 point per sec - 46m \* 
 
 Pilot B's raw score = 572 flight points + 50 landing points = 622.
 
-Pilot C's hight penalty = 200m reference altitude \* 0.5 points per meter + (204m recorded altitude - 200m reference altitude) \* 3 points per meter = 112
+Pilot C's height penalty = 200m reference altitude \* 0.5 points per meter + (204m recorded altitude - 200m reference altitude) \* 3 points per meter = 112
 
 Pilot C's flight score = 465 seconds of flight time \* 1 point per second - 112 height penalty = 353 flight points
 
@@ -138,3 +190,11 @@ Normalization is performed by `pilots raw score` / `highest raw score in the gro
 |C|383|615.8|
 
 \* Pilot B received the highest score and is awarded the 1000 points for the round. All other pilot's raw scores are normalized to their score.
+
+#### Late Landing Examples
+
+A pilot releases their model at the opening of the window and the timer starts. They do not land before the working time ends. Using the configured 0 decimals for precision indicates that the second is the most precise unit of time recorded. This would make the maximum achievable flight time 599 seconds. The pilot lands before one minute of overly has occurred. The score would be entered as 9 minutes 59 seconds, late landing selected. No bonus landing points would be selectable or applied.
+
+A pilot does not release their model at the opening of the window. Instead they wait 30 seconds. They start flying and their timer starts. They fly past the working time limit. The time stops at the end of the working time. Using the configured 0 decimals for precision indicates that the second is the most precise unit of time recorded. This would make the maximum achieve flight time of 599 seconds. The pilot did not start immediately so their time is recorded from when their timer started to when the working time ended, 570 seconds. This is less than the theoretical max of 599. 9 minutes and 30 seconds are recorded for their flight time and late landing is selected. NO bonus landing points would be selectable or applied.
+
+If the contest director overrode the decimals for flight time to one decimal point and the pilot did the same as the first scenario, the theoretical max the pilot could achieve would be 599.9 seconds. The second scenario has the same theoretical max but since their actual flight time is under that max that is the value recorded.
