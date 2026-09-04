@@ -50,3 +50,4 @@ The contest director should be able to use the offline application to pull and p
 The "RC Soar Score" site is the public face of the project. It will contain the information about this project, help and guides for using the software, and host the viewing of past and ongoing contests.
 
 The main purpose for the site is for interested parties to view an ongoing contest or to retrieve results from past contests.
+
