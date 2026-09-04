@@ -9,7 +9,7 @@ A contest is both a conceptual and entity data point. The contest phases documen
 |Ready|Contest is configured and draw exists, but scoring has not started|Valid flight matrix exists|Ready → Running when first score is entered|
 |Running|Scores are in progress|At least one official or participant-submitted score exists|Running → Completed when contest is ended|
 |Completed|Contest is finished|Director marks complete, or completion conditions are met|Completed → Published or Archived|
-|Published|Public historical record, no more edits|Completion is met, contest has been published to the remote site, and is made public|Published → Pending Delete|
+|Archived|Public historical record, no more edits|Completion is met and is made public|Published → Pending Delete|
 |Pending Delete|Contest director is requesting the removal of one of their contests which is published|Contest director makes the request|Pending Delete → Restored or Deleted|
 |Restored|Contest is restored by an administrator.|Administrator denies the delete request|terminal|
 |Deleted|Contest is removed from the public site|Administrator approves the delete request|terminal|
@@ -86,6 +86,8 @@ The following can be changed at any point scores have been entered. These change
 
 ## Locked State
 
+*Does not apply to contests which are only stored offline.*
+
 A contest in the running state can be moved into the locked state. This indicates that no new scores can be entered through the self-scoring screens. The contest director or officials may enter scores.
 
 The contest director may "unlock" the contest to return it back to the running state.
@@ -107,29 +109,35 @@ An assumption can be made that the contest is completed with the following condi
 
 It is only an assumption because the contest director may be instructing the pilots to actively complete their scoring before the next round starts. Thus, if the assumption was made in round 7 of a 9 round contest, the contest may not be over, but the contest director is making sure that everyone is aware of their placing before entering the last two rounds.
 
-## Published State
+## Archived State
 
-A contest that is completed and has been marked as published and public enters this state. The transition from completed to published may be immediate as contests may be marked as published and public during the running state thus once the contest is marked as completed it transitions to the completed state and then immediately to the published state.
+### Contests Stored Only Locally
+
+A contest that is stored only on the local offline instance of the application can be archived. This can happen at any point. It is intended to hide the contest from any local selection but not remove the data. An archive contest can return to its prior state through the contest director action.
+
+### Contests Stored Remotely
+
+A contest that is completed and has been marked as public enters this state. The transition from completed to archived may be immediate as contests may be on the remote site and marked public during the running state. Thus, once the contest is marked as completed it transitions to the completed state and then immediately to the archived state.
 
 This state defines a contest that is now being shown on the public site for historical purposes. It is no longer editable.
 
-<!-- ## Archived State
-
-Contest directors storing their data as a backup on the remote site may wish to archive contests. This is done to prevent them from showing in their list of contests in the UI when they're requesting a contest to open for reference or when copying from an old contests. Contest directors may run many contests and having old contests that are not needing administration can be archived from view. These contests are not deleted. Any published data from the contest still remains public and searchable.
-
-A contest in the completed state can be archived.
-
-Once the contest enters the archived state it can be transitioned back to completed. -->
-
 ## Deleted
 
-A contest director can delete data on their local instance of the application. Deleting a contest removes it and its associated data from the contest director's instance. They will be notified that upon sync with the remote system it will be deleted in their remote data.
+It may become necessary that a contest director needs to delete a contest. It could be that the contest was a test or that it was created in error.
 
-Contests that have been published and made public at least once cannot be immediately deleted. These contest move to a "Pending Delete" state.
+### Contests Stored Locally
+
+For contests that were created and stored exclusively locally, a contest director can delete the data. After confirmation the contest is removed and there is no further actions.
+
+### Contest Stored Remotely
+
+A contest director may wish to delete a contest that they created and is also synced to the the remote site. Deleting a contest removes it and its associated data from their local data after an acknowledgement. If the delete was performed offline they will be notified that on the next sync it will be removed in their remote data. When the sync occurs the contest director will be notified that contests will be delete on the remote site and that they may cancel and restore their local data.
+
+If the contest has been made public at least once cannot be immediately deleted. These contest move to a "Pending Delete" state.
 
 ## Pending Delete State
 
-This state is for contests that a contest director has deleted but were once publicly published. It will receive the same type of treatment as a delisted contest, no scoring can be entered. It is removed from the contest director's local data. It is marked as pending delete in their remote data. Additionally, it is hidden from the public site.
+This state is for contests that a contest director has deleted but were once publicly visible. It will receive the same type of treatment as a delisted contest, no scoring can be entered. It is removed from the contest director's local data. It is marked as pending delete in their remote data. Additionally, it is hidden from the public site.
 
 The data necessary for it to be retained in its public published form will not be removed. A global site administrator (not covered in this documentation) can view these and approve their removal. If the administrator deems the delete is taking place in good faith all the public data and the contest director's remote data for the contest is removed. However, if the administrator believes that the delete was made in error or maliciously the administrator may restore the data.
 
