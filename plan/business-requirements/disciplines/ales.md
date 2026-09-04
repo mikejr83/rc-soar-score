@@ -46,3 +46,13 @@ The screen should allow the user to enter a time greater than a target time. Tim
 The screen should disable and 0 all fields if the pilot selects an out of bounds landing.
 
 The screen should disable and 0 all fields if the pilot indicates a motor restart.
+
+## Scoring Formula
+
+A pilot's raw score is computed by the following formula:
+
+The number of points per second as defined by the contest multiplied by the number of seconds the pilot has flown.
+
+The landing score is added based on the "Group Score" configuration.
+
+The total is the pilots raw score.

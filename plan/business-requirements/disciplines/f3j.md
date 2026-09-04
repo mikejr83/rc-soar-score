@@ -46,3 +46,13 @@ The following is data is requested to be entered for a score to be computed:
 * Out of bounds landing - An indicator that the pilot landed more than 75m from their landing marker.
 
 The screen should **not** allow the user to enter a time greater than a working time. Indicating a late landing should zero the landing bonus option and make it unavailable for selection.
+
+## Scoring Formula
+
+A pilot's raw score is computed by the following formula:
+
+The number of points per second as defined by the contest multiplied by the number of seconds the pilot has flown.
+
+The landing score is added based on the "Group Score" configuration.
+
+The total is the pilots raw score.
