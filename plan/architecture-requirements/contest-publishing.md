@@ -1,15 +1,17 @@
 # RC Soar Score Architecture - Contest Publishing
 
-The RC Soar Score application has the ability to be run via the internet or as a local application wrapped in a desktop shell (like Electron). The concept of publishing relates to users of the application in the desktop shell context.
+The RC Soar Score application is being created to help provide contest directors and participants with an easy way to manage and score a soaring contest **as well as** provide a way for the public to follow ongoing and completed contests. Just as it is important for the application to configure a contests and participants to enter scoring data, it is extremely important for people to see the results.
 
-The goal of the system is that desktop version of the app can function completely without an internet connection. If a connection becomes available to the application it should enable the contest director or user the ability to sync data back to the remote site. This is so that any data that was generated in the local environment is backed up.
+Therefore, the act of publishing a contest is defined as taking the current results and making them available to the public site.
 
-The term publishing refers to the process of synching the local data to the remote system. This term does not describe a contest lifecycle state.
+This is not to be confused with the syncing of data. The data syncing functionality is for backing up the raw data needed by a contest to provide results.
 
-## Syncing Data
+Contest data, for the most part, is the property of the contest director. This means that the contest, its configuration, and the scores entered by participants are directly part of the contest director's data. It is not immediately provided to the public. Many contest directors create small contests for individual clubs. These contests were never really intended to be published for public use. These friendly contests are scored for the contest director and remains unpublished and private to only the contest director.
 
-The contest director using the application in an offline mode can create a contest and perform all operations to run the contest without the need to be connected to the internet. At some point it they may wish to "publish" their data to the remote site for backup purposes or to make the contest available for public viewing.
+## Publishing
 
-A contest that is created offline will not be sent to the remote site for storage unless the contest director has a user account with the site. The contest director will need to indicate that they wish to publish the locally created contest to the remote site.
+To publish the contest director must explicitly state that the contest is being published for public consumption. This is not the same as declaring visibility. 
 
-Contests that were created when the contest director is using the web application connected to the internet will require the contest director to have a user account and the contest is synced automatically. If the contest director latest goes to their offline version of the application while connected to the internet the contest will be pulled from the remote site. Any changes that were made to the contest while offline will be pushed to the remote site on the next connection.
+### Visibility Difference
+
+A published contest can still be marked with different visibility states. A contest can be p
