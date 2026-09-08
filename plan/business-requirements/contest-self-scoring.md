@@ -55,7 +55,7 @@ The user clicks the "Submit" button. The form is then presented as a readonly vi
 
 Additional scores are shown when the user is viewing the page after the round's score has been entered.
 
-A section will appear under the pilots scoring details shows all pilots that participated in the same group as the pilot. This table will show columns for pilot name, each of the scoring details, the raw score, and the round score. These values will update as participants enter the data.
+A section will appear under the pilots scoring details shows all pilots that participated in the same group as the pilot. This table will show columns for pilot name, each of the scoring details, the raw score, and the round score. These values will update as participants enter the data. This is presented as preliminary results. They update as pilots enter the data regardless of the 
 
 An indicator will be shown for the row if that pilot has a pending review request. The scores for the pilot will be those that were initially entered and will only updated once the review request process ends.
 

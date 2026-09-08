@@ -84,13 +84,23 @@ The following can be changed at any point scores have been entered. These change
 * Total score: number of decimals
 * When the dropped round score takes effect.
 
-## Locked State
+## Paused State
 
 *Does not apply to contests which are only stored offline.*
 
-A contest in the running state can be moved into the locked state. This indicates that no new scores can be entered through the self-scoring screens. The contest director or officials may enter scores.
+A contest in the running state can be moved into a paused state. This indicates that no new scores can be entered through the self-scoring screens. The contest director or officials may enter scores.
 
-The contest director may "unlock" the contest to return it back to the running state.
+This can be used for a number of reasons. Often, contest directors will put self-service entry of scores into a paused state during a break in the contest while they are performing an overall validation of the contest. The contest director may be updating scores via paper backups but does not wish participants to enter any other scores.
+
+The contest director may "unpause" the contest to return it back to the running state.
+
+## Locked State
+
+A contest in the running state can be moved into the locked state. This indicates that scores cannot be modified, no new rounds may be added, and participation may not change.
+
+This is often done by contest directors to prevent any accidental changes when a contest is paused. An example would be a contest director locking a contest after the completion of competition for the day and then unlocking it at the start of the next day.
+
+The contest directory may "unlock" the contest to return it back to the running state.
 
 ## Completed State
 

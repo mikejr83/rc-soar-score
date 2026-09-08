@@ -37,7 +37,7 @@ Contests are attended by competitors. Not all competitors are pilots. The applic
 
 Pilots may be organized into teams. The number of team pilots for calculating the team score is necessary if teams are to be used in the contest, otherwise the option is not presented.
 
-An option for giving the participant a unique number for the contest is available. This is an integer value that enables participant to be referred to as "Participant_Type X" where Participant_Type is comes from the role they were assigned or "Pilot" by default and X is that number. The number starts at 1 and increases with the number of pilots in the contest. The number is assigned when the first draw occurs. It cannot be changed afterwards.
+An option for giving the participant a unique number for the contest is available. This is an integer value that enables participant to be referred to as "Participant_Type X" where Participant_Type is comes from the role they were assigned or "Pilot" by default and X is that number. The number starts at 1 and increases with the number of pilots in the contest. The number is assigned when the first draw occurs. It cannot be changed afterwards. Pilots added post draw will receive the next number in sequence. *The general use case for the unique numbering for participants is for identifying information placed on specific printed materials.*
 
 The option for pilot classes is presented. This is used to classify pilots. Generally, "expert", "advanced", "junior", etc. but can be used for any purpose. This is a reporting only feature. A report may show "the top scoring pilot in each class".
 
@@ -68,6 +68,27 @@ The number of groups per round is required. This is a positive integer number. W
 An option to enable "Team Protection" is available if pilots are grouped into teams. Two pilots from the same team do not compete against one another in a group. This is used to compute the matrix when performing the draw for groups.
 
 An option to assign lane number is presented. Lane positions can be assigned during the draw. This defaults to "None", pilots are not assigned a lane from which to fly. The contest director may select "Random" to have a random lane assigned to each pilot in the group.
+
+### Seeded Man on Man
+
+When the contest director selects seeded man on man for a draw format an additional option is displayed. This option is an integer value called "Preliminary Man on Man Rounds". This configuration tells the functionality generating the draw to use man on man drawing for the first rounds of the contest where the number of those rounds are equal to the value. This value defaults to 1 and cannot be smaller than 1. At least one round must be flown so that all pilots have a score to seed the pilots for seeded man on man.
+
+Seeded man on man expects the contest director to generate the draw and add it to the matrix after all scores are entered. This format generally has one or more officials helping the contest director collect and validate scores. When the contest director is performing the initial draw, a total number of rounds intended to be flown value can be specified. This is purely as reference/display. It can be used when printing score cards or for display in the public site.
+
+A common example of a seeded man on man contest:
+
+1. Contest director configures a contest discipline.
+2. The configuration for the draw options is set to seeded man on man.
+3. Additionally, the contest director indicates that 4 rounds will be flown until the seeding comes into play. The contest director sets the "Preliminary Man on Man Rounds" value to 4.
+4. After all other configuration, including pilot selection, the contest director performs the draw for the matrix.
+5. The draw will be performed for 4 rounds.
+6. The contest director runs the contest and it continues such that participants are entering scores through the four rounds.
+7. All scores are entered for the 4 rounds.
+8. The contest director has validated/verified all the score data.
+9. The contest director draws the next round, round 5.
+10. The contest director starts the round and the competitors compete against one another.
+11. The scores are entered by the competitors for the round.
+12. Steps 8 through 11 are repeated until the contest is completed.
 
 ### Scoring Options
 
@@ -113,10 +134,16 @@ The contest director will have the option to lock scoring. Participants cannot e
 
 An option is presented for the contest director to allow participants to make review requests for previously entered scores.
 
-The contest director will have options to dictate how scores are displayed for the contest. There will be the following options:
+The contest director will have options to dictate how scores are displayed for the contest on the public site. Contest directors will use this to help control how scores and contest progression is presented. There will be the following options:
 
 * Automatic score updates
-* Updates at threshold
-* Require validation before score calculation
+* Updates at assumed round completion
+* Manual / Require validation before score calculation
 
-The default for this selection is "Require validation before score calculation".
+The default for this selection is "Updates at assumed round completion".
+
+Automatic score updates will update as soon as the participants enter the data. The public site will be showing the most up to date information as it is entered.
+
+When the "Updates at assumed round completion" is selected the scores update on the public site will show when all scores have been entered by participants for the round.
+
+The "Manual" setting requires the contest director to mark the round as completed or have all the scores marked as official.

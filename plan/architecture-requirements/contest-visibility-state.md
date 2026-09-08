@@ -24,7 +24,7 @@ Scoring visibility refers to the ability for participants to enter scores on the
 |State|Meaning|Entry condition|Exit / next transition|
 |-----|-------|---------------|----------------------|
 |Closed|Scores can only be entered by contest directors|Initial state|Closed → Locked or Open|
-|Locked|The contest scores have been locked.|The contest director indicates all scoring is to be suspended.|Locked → Closed or Open|
+|Locked|The contest scores have been locked. Participants are see the scores as read-only and may not enter scores. The contest director may still modify scores through their administrative scoring screens.|The contest director indicates all scoring is to be suspended.|Locked → Closed or Open|
 |Open|Scores can be entered by the contest directors or through the self-enter interface|Contest director marks scoring open|Open → Closed or Locked|
 
 ### Closed
