@@ -7,7 +7,7 @@ This document defines participant-requested score reviews and participant retire
 ## Review requests
 
 1. A review request may be created only for an accepted participant score when review is enabled, the score is not locked or official under the configured policy, and no other review for that group score is pending.
-2. A review request must preserve the current official score, the participant's proposed raw components, optional message, actor, base score revision, and request time. It must not mutate the original participant submission in place.
+2. A review request must preserve the current official score, the participant's proposed raw components including `Cumulative Penalty`, optional message, actor, base score revision, and request time. It must not mutate the original participant submission in place.
 3. If the official score or its revision changes before a review is decided, the director must explicitly approve, reject, or supersede the request. The service must not apply a stale proposal automatically.
 
 ## Retirement

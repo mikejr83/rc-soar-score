@@ -33,6 +33,8 @@ A form with inputs for each of the scoring parameters is presented to the user w
 
 The contest discipline dictates what inputs or scoring parameters are shown on the form or view. These are outlined in each document for that soaring discipline.
 
+One input is required for every discipline. An input must take an integer value for "Cumulative Penalty". This is input is to store a penalty incurred by the pilot during their flight that must be deducted from their total score at the end of the contest.
+
 The form will have submission, navigation, and optional operations. These are enabled under different conditions.
 
 ### Navigation

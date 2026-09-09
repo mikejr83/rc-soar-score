@@ -111,6 +111,7 @@ The common properties that will need to be tracked for all scores are:
 * Participant Link
 * Raw Score or Points - The non-normalized points that were awarded to the pilot in the round. This can be a computed data point based on the configuration and the raw data recorded based on the soaring discipline.
 * Normalized Score or Score - This can be a computed data point. It is calculated based on the other raw scores for pilots in the group.
+* Cumulative Penalty - A required integer raw value entered for every soaring discipline. It represents a penalty incurred by the pilot during the flight and is deducted from the pilot's total contest score at the contest calculation stage. It is distinct from discipline-specific penalties and from any penalty applied by the contest director.
 * Penalty - A raw point penalty.
 * Penalty Not Discarded - An indicator that the penalty is applied to the pilots final score. If the flight is discarded due to the "dropped round" configuration for the contest and this is set the penalty applied in this round will still apply to the pilots overall score.
 * Pilot Retired - The pilot has retired in this round or an earlier round and their score is zero for the round. This is separated from the "Zero Score" to show that the pilot is no longer competing in the contest.
