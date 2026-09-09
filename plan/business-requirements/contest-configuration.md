@@ -73,7 +73,7 @@ An option to assign lane number is presented. Lane positions can be assigned dur
 
 When the contest director selects seeded man on man for a draw format an additional option is displayed. This option is an integer value called "Preliminary Man on Man Rounds". This configuration tells the functionality generating the draw to use man on man drawing for the first rounds of the contest where the number of those rounds are equal to the value. This value defaults to 1 and cannot be smaller than 1. At least one round must be flown so that all pilots have a score to seed the pilots for seeded man on man.
 
-Seeded man on man expects the contest director to generate the draw and add it to the matrix after all scores are entered. This format generally has one or more officials helping the contest director collect and validate scores. When the contest director is performing the initial draw, a total number of rounds intended to be flown value can be specified. This is purely as reference/display. It can be used when printing score cards or for display in the public site.
+Seeded man on man expects the contest director to generate the draw and add it to the matrix after all scores are entered. This format generally has one or more local operators helping the contest director collect and validate scores on the same application installation. When the contest director is performing the initial draw, a total number of rounds intended to be flown value can be specified. This is purely as reference/display. It can be used when printing score cards or for display in the public site.
 
 A common example of a seeded man on man contest:
 
@@ -112,7 +112,7 @@ Scoring rules for each discipline are covered in detail within their own documen
 
 ## Publishing And Online Configuration
 
-Scoring for the contest involves pilots, their helpers, or an official (often the contest director) entering scores into the application. Further, interested parties may want to monitor ongoing contests or look at previously held contests. The publishing and online configuration section enables contest directors to determine if and how these things are performed.
+Scoring for the contest involves pilots, their helpers, or the contest director and local operators entering scores into the application. Further, interested parties may want to monitor ongoing contests or look at previously held contests. The publishing and online configuration section enables contest directors to determine if and how these things are performed.
 
 Contests can be run by a contest director strictly offline. The desktop version of the application is used, participants are manually entered, and the contest has scores entered into the system by an official. This can vary slightly, where the contest director performs all those functions offline except they wish to publish the finalized scores after the completion of the contest. Finally, a contest director may desire to have the contest run such that they pull participant information from the service API, have participants enter their scores, those scores update on the public site as they change, and they perform the role of validating those scores.
 

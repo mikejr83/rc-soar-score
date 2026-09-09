@@ -4,7 +4,7 @@ The contest director may give participants the ability to request a score review
 
 This document will use the term "score" to mean the individual components that make up the final round score. When a participant requests a score review they are providing new details for the contest director to review and accept in order to update their score. This functionality is provide so that if a pilot enters data incorrectly they may submit new data. It is done as a request so that a contest director may review any updates before they take effect.
 
-In this process the participant is the pilot or helper entering the score. The contest director or official will be reviewing these requests. In places where the term "official" is used the contest director can be used interchangeably.
+In this process the participant is the pilot or helper entering the score. The contest director will be reviewing these requests, with assistance from local operators on the same application installation when applicable. In places where the term "official" is used, it is synonymous with the contest director and does not identify a separate application user type.
 
 ## Process
 
