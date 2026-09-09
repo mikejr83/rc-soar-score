@@ -10,7 +10,7 @@ In the case of a non-flier entering scores for their team, the participant will 
 
 The main mode of use for this portion of the application will be on mobile devices. As mentioned, this is not the only way scores can be entered for pilots. It is intended to provide an interface to help pilots see when and where they're supposed to fly as well as scores to be entered on the individual basis. It should be presented as a neat and tidy interface suitable for mobile devices.
 
-Participants are directed to an overview screen that summarizes their participation in the contest. The screen shows their name and if enabled their pilot number. It will have a table with a row for each round in the contest. The rows display the following:
+Participants are directed to an overview screen that summarizes their participation in the contest. The invitation link used to reach the scores must remain usable for the participant to return to this overview after closing or leaving the application. Only the most recently issued invitation link for the participant may open the score interface; an older link must direct the participant to obtain the latest invitation link from the contest director. The screen shows their name and if enabled their pilot number. It will have a table with a row for each round in the contest. The rows display the following:
 
 * The round number.
 * The group in which they fly in that round.
@@ -22,6 +22,8 @@ A selection button may be visible on the table row.
 The button will be visible and titled "Enter" when that round has not had a score entered. The "Enter" button is only shown for the first round which has no score for the pilot. As an example, the pilot has not entered their score for round one. The "Enter" button will appear on that row only. The table will then show the "Enter" button on round two after they have entered their score for the first round. Subsequent rounds will not show the button to enter scores.
 
 The table will have a button labeled "View" for rounds in which the pilot has a score entered. When the pilot selects this button they will be presented with the detailed information which was entered for that flight.
+
+The participant must have a way to retain or copy the current invitation link so they can navigate back to their score overview after closing the application. Returning through the most recent invitation link must show their existing scores and current next-entry round without requiring account creation.
 
 ## Score Entry and Viewing
 
@@ -55,7 +57,7 @@ The user clicks the "Submit" button. The form is then presented as a readonly vi
 
 Additional scores are shown when the user is viewing the page after the round's score has been entered.
 
-A section will appear under the pilots scoring details shows all pilots that participated in the same group as the pilot. This table will show columns for pilot name, each of the scoring details, the raw score, and the round score. These values will update as participants enter the data. This is presented as preliminary results. They update as pilots enter the data regardless of the 
+A section will appear under the pilots scoring details shows all pilots that participated in the same group as the pilot. This table will show columns for pilot name, each of the scoring details, the raw score, and the round score. These values will update as participants enter the data. They update as submissions are entered regardless of the settings used for updating the scores on the public site. This is presented as preliminary results to participants.
 
 An indicator will be shown for the row if that pilot has a pending review request. The scores for the pilot will be those that were initially entered and will only updated once the review request process ends.
 
