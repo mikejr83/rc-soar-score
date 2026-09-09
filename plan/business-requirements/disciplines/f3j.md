@@ -1,6 +1,6 @@
 # RC Soar Score Contest Scoring Rules - F3J
 
-The RC Soar Score solution is a set of applications and APIs to track, score, and publish results for radio controlled sailplane contests. This document describes the FAI class designation of F3J, a thermal duration type discipline.
+The RC Soar Score solution is a set of applications and APIs to track, score, and publish results for radio controlled sailplane contests. This document describes the FAI class designation of F3J, a thermal duration type discipline. This is the official profile for F3J when selecting it as a contest discipline. It is a variation on the shared duration-scoring model. Local deviations are allowed by the contest director but are treaded as overrides.
 
 The FAI F3J task is similar to the Thermal Duration task. It differs in that pilots must attempt to fly the longest time within a working time without overflying it. The pilot attempts a precision landing to earn bonus points. This landing must occur within the working time to count. Overflying the working time results in a penalty.
 

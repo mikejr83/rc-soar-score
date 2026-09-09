@@ -106,7 +106,7 @@ The contest director can indicate that the worst score for a pilot in a round ca
 
 ### Scoring Rules
 
-The configuration of scoring rules are dependent upon the class/discipline.
+Each contest is associated with a discipline, and each discipline defines a default official scoring profile that represents the canonical rules for that format. The scoring model for duration-based disciplines shares a common structure, including flight time, target or working time, points per unit of time, landing bonuses, late-flight handling, and group-score calculation, while each discipline may add its own specific rule variations and validation requirements. A contest director may choose to use the official discipline profile as-is or apply contest-specific overrides for local variations, but any deviation from the official rules must be identified as a contest override rather than a new discipline definition. This approach allows the application to support recognized disciplines, future duration-based disciplines, and limited local rule deviations without requiring a separate scoring architecture for each custom configuration.
 
 Scoring rules for each discipline are covered in detail within their own documents.
 

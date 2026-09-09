@@ -1,6 +1,6 @@
 # RC Soar Score Contest Scoring Rules - F5J
 
-The RC Soar Score solution is a set of applications and APIs to track, score, and publish results for radio controlled sailplane contests. This document describes the FAI class designation of F5J, a thermal duration type discipline undertaken by pilots flying sailplanes with an electric motor launching system.
+The RC Soar Score solution is a set of applications and APIs to track, score, and publish results for radio controlled sailplane contests. This document describes the FAI class designation of F5J, a thermal duration type discipline undertaken by pilots flying sailplanes with an electric motor launching system. This is the official profile for F5J when selecting it as a contest discipline. It is a variation on the shared duration-scoring model. Local deviations are allowed by the contest director but are treaded as overrides.
 
 The FAI F5J task is similar to the FAI F3J task. It differs in that there are additional data points collected and used to calculate the pilots score.
 
@@ -24,7 +24,6 @@ The following defaults are set in the scoring options section when this discipli
 The F5J discipline changes the wording for a typical duration task. The concept of target time is now "Working Time".
 
 * Working Time - The length of the window for the pilots to fly.
-* Fractional seconds - How many tenths, hundredths of a second to count. Shown as a drop down indicating the number of decimal places, 0 - 3. Defaults to 0.
 * Points Per Second - How many raw points are awarded to the pilot based on their flight time. Defaults to 1.
 * Landing Bonus - The selection of a landing bonus table. Should default to the system default for F5J contests or the last one used by the contest director for an F5J contest.
 * Motor Restart - This is a selection of three options to determine how motor restarts affect the overall results.
@@ -65,7 +64,7 @@ The configuration also allows for the option "Non-Droppable 0". General contest 
 
 The following is data is requested to be entered for a score to be computed:
 
-* Time flown
+* Time flown - Truncated to the second.
 * Launch height - in whole meters.
 * Landing - Input based on the landing table selected.
 * Late landing - The pilot did not land the model before the working time expired (but did not fly over one minute past the window closing).
@@ -196,5 +195,3 @@ Normalization is performed by `pilots raw score` / `highest raw score in the gro
 A pilot releases their model at the opening of the window and the timer starts. They do not land before the working time ends. Using the configured 0 decimals for precision indicates that the second is the most precise unit of time recorded. This would make the maximum achievable flight time 599 seconds. The pilot lands before one minute of overly has occurred. The score would be entered as 9 minutes 59 seconds, late landing selected. No bonus landing points would be selectable or applied.
 
 A pilot does not release their model at the opening of the window. Instead they wait 30 seconds. They start flying and their timer starts. They fly past the working time limit. The time stops at the end of the working time. Using the configured 0 decimals for precision indicates that the second is the most precise unit of time recorded. This would make the maximum achieve flight time of 599 seconds. The pilot did not start immediately so their time is recorded from when their timer started to when the working time ended, 570 seconds. This is less than the theoretical max of 599. 9 minutes and 30 seconds are recorded for their flight time and late landing is selected. NO bonus landing points would be selectable or applied.
-
-If the contest director overrode the decimals for flight time to one decimal point and the pilot did the same as the first scenario, the theoretical max the pilot could achieve would be 599.9 seconds. The second scenario has the same theoretical max but since their actual flight time is under that max that is the value recorded.

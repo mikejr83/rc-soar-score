@@ -1,6 +1,6 @@
 # RC Soar Score - Discipline Scoring Rules - ALES
 
-The RC Soar Score solution is a set of applications and APIs to track, score, and publish results for radio controlled sailplane contests. This document covers the scoring rules governing the ALES discipline.
+The RC Soar Score solution is a set of applications and APIs to track, score, and publish results for radio controlled sailplane contests. This document covers the scoring rules governing the ALES discipline. This is the official profile for ALES when selecting it as a contest discipline. It is a variation on the shared duration-scoring model. Local deviations are allowed by the contest director but are treaded as overrides.
 
 ALES is an acronym for Altitude Limited Electronic Soaring.
 
@@ -15,7 +15,6 @@ The largest change is that the "Group Score" selection should be set to "Time" a
 The ALES discipline is a duration task. The pilot is attempting to fly a prescribed time and perform a precision landing. Thus the following must be configured by the contest director:
 
 * Target Time - The duration of the flight the pilots will be attempting. Should be enterable as MM:ss or seconds.
-* Fractional Seconds - How many tenths, hundredths of a second to count. Shown as a drop down indicating the number of decimal places, 0 - 3. Defaults to 0.
 * Points Per Second - How many raw points are awarded to the pilot based on their flight time. Defaults to 1.
 * Landing Bonus - The selection of a landing bonus table. Should default to the system default for ALES contests or the last one used by the contest director for an ALES contest.
 
