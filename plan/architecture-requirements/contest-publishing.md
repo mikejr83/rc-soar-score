@@ -1,17 +1,68 @@
 # RC Soar Score Architecture - Contest Publishing
 
-The RC Soar Score application is being created to help provide contest directors and participants with an easy way to manage and score a soaring contest **as well as** provide a way for the public to follow ongoing and completed contests. Just as it is important for the application to configure a contests and participants to enter scoring data, it is extremely important for people to see the results.
+## Purpose and boundaries
 
-Therefore, the act of publishing a contest is defined as taking the current results and making them available to the public site.
+Publishing makes a contest's results available through the public site. It is an explicit director action and is separate from synchronization:
 
-This is not to be confused with the syncing of data. The data syncing functionality is for backing up the raw data needed by a contest to provide results.
+* Synchronization stores the director's private contest data for backup and collaboration.
+* Publishing creates or updates a public projection of the contest from an authorized private revision.
+* A contest may remain private and unpublished indefinitely.
 
-Contest data, for the most part, is the property of the contest director. This means that the contest, its configuration, and the scores entered by participants are directly part of the contest director's data. It is not immediately provided to the public. Many contest directors create small contests for individual clubs. These contests were never really intended to be published for public use. These friendly contests are scored for the contest director and remains unpublished and private to only the contest director.
+The private contest remains the source of truth. Public data must never be merged back into it.
 
-## Publishing
+## Publishing requirements
 
-To publish the contest director must explicitly state that the contest is being published for public consumption. This is not the same as declaring visibility. 
+1. The application must allow only the contest director, or an authenticated session authorized for that contest, to publish it.
+2. Publishing must identify the private contest revision being published. The service must reject a stale or unauthorized request without changing either the private contest or its existing public projection.
+3. The service must validate the contest data, calculation version, contest state, and privacy rules before creating or updating the public projection.
+4. The first successful publish must create a distinct published-contest record with its own identifier and revision history. It must record the source contest, source revision, publishing actor, and publication time.
+5. A later publish must replace the public projection with a new version derived from the selected private revision. It must be atomic: readers see either the previous complete projection or the new complete projection, never a partial update.
+6. Publishing may occur while a contest is running or after it is completed. The director must be able to publish a final update after offline administration.
+7. A failed publish must leave the private contest and the last successful public projection unchanged. The application must show the failure and allow a retry.
+8. Publish requests must be safe to retry. The service must not create duplicate published contests or duplicate publication effects for the same request.
+9. The service must retain an audit record of each successful and rejected publication attempt, including the source revision and actor.
 
-### Visibility Difference
+## Public projection and privacy
 
-A published contest can still be marked with different visibility states. A contest can be p
+The public projection must contain only data needed for public contest viewing. At minimum this includes contest identity and dates, host and location, discipline, participant display data, teams when applicable, matrix information, scores, rankings, and the publication status. Participant email addresses and other private director data must never be published.
+
+The projection must retain the calculation metadata needed to explain or reproduce displayed results, including the matrix revision, contest configuration revision, discipline rules version, and calculation version. Raw private inputs, audit history, pending mutations, and review-request details are not public unless a separate requirement explicitly permits them.
+
+## Visibility and update policy
+
+Publishing and visibility are independent:
+
+* **Public**: the published projection can be found and viewed by anyone without an account.
+* **Hidden**: the projection is not searchable or generally listed, but remains available to authorized participants through their contest access.
+* **Private**: the projection is not available to the public or participants through the public site.
+
+The first publish must default to **Private**. The director must explicitly change visibility to **Public** or **Hidden**. Changing visibility must not modify the private contest data.
+
+The director must be able to choose when eligible result changes are copied to the public projection:
+
+* **Automatic**: publish eligible changes as they are accepted.
+* **Round completion**: publish when a round is complete according to the contest's completion rules.
+* **Manual**: publish only after the director confirms the round or contest is ready.
+
+This policy controls public projection updates; it does not prevent private scoring, synchronization, or recalculation.
+
+## Anonymous publishing
+
+A director may publish an offline contest without creating an account. Anonymous publishing does not create ordinary remote backup data and does not make the director's private contest data available for synchronization.
+
+The service must verify control of a private email address before accepting the first anonymous publish:
+
+1. The offline application prepares a publish request and connects to the service.
+2. The director supplies an email address.
+3. The service sends a single-use verification code.
+4. The code expires after 10 minutes; another code cannot be sent to the same address until 2 minutes after the previous request.
+5. The director enters the code, and the service validates it.
+6. After successful validation, the service creates the published projection and associates it with a non-public anonymous publisher record.
+
+The email address must remain private and must be used only for verification, publication management, and future claiming. The service must apply rate limits and must not disclose whether an email address has previously published a contest.
+
+An anonymously published contest may be claimed by an account created with the verified email address. Claiming must transfer publication management without changing the public projection or its history.
+
+## Deletion and delisting
+
+A contest published at least once must not be physically deleted through ordinary synchronization. A director's delete request must first delist the public projection and enter the pending-delete flow described by the contest lifecycle requirements. Administrative approval is required before the published record and its retained public history are removed.
