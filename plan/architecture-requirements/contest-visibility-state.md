@@ -1,40 +1,21 @@
-# RC Soar Score Architecture - Visibility States
+# RC Soar Score Architecture - Public-Site Visibility
 
-## Public Site Visibility
-
-A contest must be published by a contest director before it can be visible in the public site. Once the contest is published it still can be given a visibility state.
+Publication and visibility are separate controls. A contest must be published by a contest director before its public projection can be viewed. The first publication defaults to `Private`; the director can then change the visibility of the published projection.
 
 |State|Meaning|Entry condition|Exit / next transition|
 |-----|-------|---------------|----------------------|
-|Public|The contest director has made the contest and its progress visible on the public site|The contest director marks the contest as public|Public → Hidden or Private|
-|Hidden|The contest is hidden from searching and general public consumption.|The contest director marks the contest as hidden.|Hidden -> Public or Private|
-|Private|The contest director hides the progress and scores from being visible on the public site.|The contest director marks it as private.|Private → Hidden or Public|
+|`Public`|The published contest and its progress are searchable and viewable without an account.|The contest director marks the published projection as public.|`Public -> Hidden` or `Public -> Private`|
+|`Hidden`|The published contest is not searchable or generally listed, but is available to authorized participants.|The contest director marks the published projection as hidden.|`Hidden -> Public` or `Hidden -> Private`|
+|`Private`|The published contest is not searchable or publicly viewable.|The first publication defaults to private, or the contest director marks the published projection as private.|`Private -> Hidden` or `Public`|
 
-### Public
+## Public
 
-A contest that is published can be marked as public by the contest director. This now makes the contest available to be found in the public site through searching.
+A published contest can be marked as public by the contest director. It then becomes available through public-site searching and can be viewed without an account.
 
-### Hidden
+## Hidden
 
-A contest that is published can be marked as hidden by the contest director. This makes the contest only visible to the participants.
+A published contest can be marked as hidden by the contest director. It is excluded from public searching and general listings but remains available to authorized participants.
 
-### Private
+## Private
 
-A contest that is published can be marked as private by the contest director. This makes the contest hidden from the public site completely.
-
-## Participant Scoring Visibility
-
-The participant scoring visibility refers to the ability for participants to enter scores on the web site. This state does not reflect in the contest directors ability to enter scores.
-
-|State|Meaning|Entry condition|Exit / next transition|
-|-----|-------|---------------|----------------------|
-|Closed|Scores can only be entered by contest directors|Initial state|Closed → Locked or Open|
-|Open|Scores can be entered by the contest directors or through the self-enter interface|Contest director marks scoring open|Open → Closed or Locked|
-
-### Closed
-
-The closed state for scoring indicates that the contest director is entering all score parameters. This is common in larger championship contests. The scores are written on paper by helpers and taken to an official. They are validated by the contest director and then manually entered into the application.
-
-### Open
-
-Scoring is open to participants via their scoring interface.
+A published contest can be marked as private by the contest director. Its public projection remains unavailable to general viewers, while the private contest remains available to authorized users as permitted by the access rules.

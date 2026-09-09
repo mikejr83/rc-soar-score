@@ -83,7 +83,7 @@ Deletion is an administrative workflow, not a normal execution state.
 | --- | --- |
 | `None` | No deletion request exists. |
 | `PendingDelete` | A contest published at least once was delisted and awaits administrator approval. No scoring or ordinary editing is allowed. |
-| `Restored` | An administrator denied the request. The contest and its public projection are restored, and the restoration is retained as audit history. |
+| `Restored` | An administrator denied the request. The contest and its prior publication and visibility state are restored, and the restoration is retained as audit history. |
 | `Deleted` | An administrator approved removal, or an unpublished local contest was deleted by its director. This is terminal. |
 
 Transitions:
@@ -124,4 +124,4 @@ The automatic completion signals are advisory until accepted by the director: al
 4. The first accepted score changes `Ready` to `Running` atomically with the score mutation.
 5. Completion closes participant scoring and prevents future matrix or participation changes.
 6. Public projections never become the source of truth. Publishing always identifies the private contest revision and preserves publication history.
-7. Pending deletion prevents scoring and publication updates. Restoration returns the contest to its prior execution lifecycle and restores public visibility; the deletion decision remains in audit history.
+7. Pending deletion prevents scoring and publication updates. Restoration returns the contest to its prior execution lifecycle and prior publication and visibility state; the deletion decision remains in audit history.
