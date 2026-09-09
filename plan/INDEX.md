@@ -9,6 +9,10 @@ Documents in the sub-folder `architecture-requirements` define how application a
 * [`contest-state-and-transitions.md`](architecture-requirements/contest-state-and-transitions.md)
 * [`data.md`](architecture-requirements/data.md) - A list of entities and their properties.
 * [`offline-synchronization.md`](architecture-requirements/offline-synchronization.md)
+* [`self-scoring-invites.md`](architecture-requirements/self-scoring-invites.md) - Requirements for issuing and enforcing participant self-scoring invitations.
+* [`participant-score-entry.md`](architecture-requirements/participant-score-entry.md) - Requirements for participant score access, submission, and synchronization.
+* [`participant-score-review.md`](architecture-requirements/participant-score-review.md) - Requirements for participant score reviews and retirement.
+* [`participant-score-results.md`](architecture-requirements/participant-score-results.md) - Requirements for participant-visible group results and placement.
 
 ## Business Specifications and Requirements
 
