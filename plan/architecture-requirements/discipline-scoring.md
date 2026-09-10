@@ -38,6 +38,8 @@ The service must calculate scores in the following logical order. Each stage mus
 8. Calculate team totals from the resulting pilot contest totals according to the contest's configured number of pilots, ordering eligible pilot totals from highest to lowest.
 9. Store or return the resulting values with their input revisions and calculation version. Recalculation from the same inputs and versions must produce the same values on every supported client and service instance.
 
+10. For re-flight attempts, the profile must define the eligible normalization population, how the attempt contributes to each affected pilot's official round score, and how non-awarded pilots compare original and re-flight group results. The calculation must retain the attempt identifier and selection rule used.
+
 ## Shared duration-scoring behavior
 
 1. Duration profiles must support target time or working time, points per second, optional fractional-second precision from 0 through 3 decimal places, a landing-bonus table, and an out-of-bounds landing status.

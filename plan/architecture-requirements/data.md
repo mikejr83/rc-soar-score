@@ -119,6 +119,14 @@ The common properties that will need to be tracked for all scores are:
 
 The group score entity will need to accommodate the different data points needed to be collected for various soaring disciplines. In addition the need to track the originally entered score and official score will be needed.
 
+## Flight Assignments and Re-Flights
+
+Assignment history must be retained separately from score data. A flight assignment records the participant, scheduled flight round, credited round, group, matrix revision, assignment type (original, moved, or re-flight), source assignment, actor, reason, and timestamps. A later move must reference the original credited round rather than replacing it.
+
+A re-flight record is linked to the contest, credited round, source attempt or group, and resulting group. It records the re-flight type, sequence number, lifecycle status, reason, discipline rules/calculation versions, creating and finalizing actors, and audit timestamps. It also records awarded pilots, draw candidates and exclusions, selected pilots, participant responses, notification events, and the director's finalization decision.
+
+Group-score records must identify the flight attempt and assignment revision that produced them. Original, re-flight, superseded, and current official results must remain distinguishable so that recalculation and review never erase historical attempts.
+
 ## Review Request
 
 This entity represents a review request for a previously recorded score.

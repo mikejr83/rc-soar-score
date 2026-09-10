@@ -113,7 +113,7 @@ The automatic completion signals are advisory until accepted by the director: al
 * `Created`: only minimum contest identity and location data are available.
 * `Configuring`: discipline, participants, scoring options, rules, draw options, and matrix may be changed. Changes that affect an existing matrix require a redraw or explicit matrix revision.
 * `Ready`: scores may be entered, and configuration may still be changed only while it does not violate matrix and lock rules. A matrix change creates a new matrix revision.
-* `Running`: participation, teams, roles, draw mode, groups per round, discipline, and discipline scoring rules are fixed. Lane assignments may change only for groups without scores. Derived-score options may change and must trigger recalculation from immutable raw score data.
+* `Running`: participation, teams, roles, draw mode, groups per round, discipline, and discipline scoring rules are fixed. Lane assignments may change only for groups without scores. Derived-score options may change and must trigger recalculation from immutable raw score data. A re-flight may be created as an explicit exception while the affected scores are not locked; it creates a new attempt and does not rewrite the matrix or prior scores.
 * `Completed`: participant scoring is closed. No new rounds, participation, or matrix changes are allowed. Authorized score corrections preserve prior values and audit history.
 
 ## Transition invariants
