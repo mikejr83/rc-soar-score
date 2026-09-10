@@ -195,3 +195,13 @@ Normalization is performed by `pilots raw score` / `highest raw score in the gro
 A pilot releases their model at the opening of the window and the timer starts. They do not land before the working time ends. Using the configured 0 decimals for precision indicates that the second is the most precise unit of time recorded. This would make the maximum achievable flight time 599 seconds. The pilot lands before one minute of overly has occurred. The score would be entered as 9 minutes 59 seconds, late landing selected. No bonus landing points would be selectable or applied.
 
 A pilot does not release their model at the opening of the window. Instead they wait 30 seconds. They start flying and their timer starts. They fly past the working time limit. The time stops at the end of the working time. Using the configured 0 decimals for precision indicates that the second is the most precise unit of time recorded. This would make the maximum achieve flight time of 599 seconds. The pilot did not start immediately so their time is recorded from when their timer started to when the working time ended, 570 seconds. This is less than the theoretical max of 599. 9 minutes and 30 seconds are recorded for their flight time and late landing is selected. NO bonus landing points would be selectable or applied.
+
+## Re-Flights
+
+The granting of re-flights are performed according the following order of priorities:
+
+1. In an incomplete group. If a group within the same round has an available spot (because the division of pilots was not evenly distributed between all groups) the contest director will assign them to that group. This can be determined by assessing if other groups within the round have recorded scores.
+2. A new group of a minimum of 6 pilots, or the largest group size if the largest group size is less than 6. The group of pilots is made up by competitors selected by random draw. Competitors from the same team are excluded. A randomly selected competitor may decline to fly. The draw is repeated until the group is filled. If a group cannot be filled because the randomly selected pilots decline the priority moves to the next.
+3. The original group is re-flown at the end of the ongoing round.
+
+In cases 2 and 3, for the competitors allocated the re-flight, the result of the re-flight is their score. For the other competitors, the better of their score in the ongoing round and the re-flight score will become their round score.

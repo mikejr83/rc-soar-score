@@ -56,3 +56,13 @@ The number of points per second as defined by the contest multiplied by the numb
 The landing score is added based on the "Group Score" configuration.
 
 The total is the pilots raw score.
+
+## Re-Flights
+
+The granting of re-flights are performed according the following order of priorities:
+
+1. In the next available group within the round. If a group within the same round has an available spot (because the division of pilots was not evenly distributed between all groups) the contest director will assign them to that group. This can be determined by assessing if other groups within the round have recorded scores. The pilot cannot be placed into the same group with another team member if teams are in use.
+2. A new group of a minimum of 4 pilots, or the largest group size if the largest group size is less than 6. The group of pilots is made up by competitors selected by random draw. Competitors from the same team are excluded. A randomly selected competitor may decline to fly. The draw is repeated until the group is filled. If a group cannot be filled because the randomly selected pilots decline the priority moves to the next.
+3. The original group is re-flown at the end of the ongoing round.
+
+In cases 2 and 3, for the competitors allocated the re-flight, the result of the re-flight is their score. For the other competitors, the better of their score in the ongoing round and the re-flight score will become their round score.
