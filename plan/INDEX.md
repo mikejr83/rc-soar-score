@@ -50,18 +50,9 @@ The [`disciplines/README.md`](business-requirements/disciplines/README.md) docum
 
 Documents in the `ui` sub-folder define the user experience and page-level requirements.
 
-* [`overview.md`](ui/overview.md) - Shared UI and application-frame requirements.
-* [`landing-page.md`](ui/landing-page.md) - Landing page requirements.
-* [`main-page.md`](ui/main-page.md) - Main contest-management page requirements.
-* [`contest-workspace.md`](ui/contest-workspace.md) - Contest configuration, matrix, and state actions.
-* [`matrix.md`](ui/matrix.md) - Flight matrix inspection and redraw interactions.
-* [`official-scoring.md`](ui/official-scoring.md) - Director and local-operator score entry.
-* [`new-contest-wizard.md`](ui/new-contest-wizard.md) - New contest and initial configuration workflow.
-* [`offline-ui.md`](ui/offline-ui.md) - Offline application-frame, connectivity, and synchronization UI.
-* [`participant-data.md`](ui/participant-data.md) - Director-owned participant editing requirements.
-* [`participant-scoring.md`](ui/participant-scoring.md) - Invitation-based participant score entry and review.
-* [`public-contest.md`](ui/public-contest.md) - Public published-contest viewing and publication controls.
-* [`reports.md`](ui/reports.md) - Contest standings, result, and export views.
+* [`contest-administration/README.md`](ui/contest-administration/README.md) - Contest director administration UI requirements.
+* [`participant-scoring/README.md`](ui/participant-scoring/README.md) - Participant score-entry and review UI requirements.
+* [`public-site/README.md`](ui/public-site/README.md) - Public contest site UI requirements.
 
 ## Application Plans
 

@@ -1,5 +1,19 @@
 # RC Soar Score User Interface
 
+The documents in this folder define the contest director's administration experience, including contest selection, configuration, matrix management, scoring, offline operation, and reporting.
+
+## Documents
+
+* [`contest-workspace.md`](contest-workspace.md) - Contest configuration, matrix, and state actions.
+* [`landing-page.md`](landing-page.md) - Landing page requirements.
+* [`main-page.md`](main-page.md) - Contest selection and system-management page requirements.
+* [`matrix.md`](matrix.md) - Flight matrix inspection and redraw interactions.
+* [`new-contest-wizard.md`](new-contest-wizard.md) - New contest and initial configuration workflow.
+* [`official-scoring.md`](official-scoring.md) - Director and local-operator score entry.
+* [`offline-ui.md`](offline-ui.md) - Offline application-frame, connectivity, and synchronization UI.
+* [`participant-data.md`](participant-data.md) - Director-owned participant editing requirements.
+* [`reports.md`](reports.md) - Contest standings, result, and export views.
+
 ## Technology and visual rules
 
 The applications use Angular, Angular Material, Material 3, and Sass. Use Angular Material components and theme tokens before adding custom styles. Any custom values must be Sass or CSS variables defined at the application root so the theme can be adjusted centrally.
