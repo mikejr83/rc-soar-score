@@ -6,7 +6,7 @@ Publication and visibility are separate controls. A contest must be published by
 |-----|-------|---------------|----------------------|
 |`Public`|The published contest and its progress are searchable and viewable without an account.|The contest director marks the published projection as public.|`Public -> Hidden` or `Public -> Private`|
 |`Hidden`|The published contest is not searchable or generally listed, but is available to authorized participants.|The contest director marks the published projection as hidden.|`Hidden -> Public` or `Hidden -> Private`|
-|`Private`|The published contest is not searchable or publicly viewable.|The first publication defaults to private, or the contest director marks the published projection as private.|`Private -> Hidden` or `Public`|
+|`Private`|The published contest is not searchable or publicly viewable.|The first publication defaults to private, or the contest director marks the published projection as private.|`Private -> Hidden` or `Private -> Public`|
 
 ## Public
 

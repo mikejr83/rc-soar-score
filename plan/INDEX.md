@@ -7,7 +7,8 @@ The plans for RC Score Soar are split into Markdown files. These files contain i
 Documents in the sub-folder `architecture-requirements` define the application and service architecture.
 
 * [`contest-state-and-transitions.md`](architecture-requirements/contest-state-and-transitions.md)
-* [`data.md`](architecture-requirements/data.md) - A list of entities and their properties.
+* [`data.md`](architecture-requirements/data.md) - Data-model entry point, invariants, and entity links.
+* [`data/README.md`](architecture-requirements/data/README.md) - Canonical entity model, relationships, and open schema decisions.
 * [`discipline-scoring.md`](architecture-requirements/discipline-scoring.md) - The shared scoring engine, discipline profiles, validation, and recalculation requirements.
 * [`contest-publishing.md`](architecture-requirements/contest-publishing.md) - Requirements for publishing contest data and public projections.
 * [`contest-visibility-state.md`](architecture-requirements/contest-visibility-state.md) - The visibility states for contests on the public site.

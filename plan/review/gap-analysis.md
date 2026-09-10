@@ -1,6 +1,14 @@
 # RC Soar Score — Plan Gap Analysis
 
-Reviewed: `plan/**` (all 24 docs) + `implementation-plan.md`, at commit 4ef3ff0.
+Reviewed: `plan/**` and `implementation-plan.md`; this document is a historical baseline. The data-model and state findings below were rechecked on 2026-09-10.
+
+## Resolved in the current documentation
+
+- The former monolithic [`data.md`](../architecture-requirements/data.md) is now a schema entry point with entity documents under [`architecture-requirements/data`](../architecture-requirements/data/README.md).
+- Accounts, contest ownership, independent contest state dimensions, participant snapshots, teams, roles, models, configuration revisions, matrix revisions, score attempts, official revisions, reviews, invitations, publication revisions, synchronization, tombstones, and audit events are now documented.
+- `contest-official-scoring.md` now defines the administrative scoring contract instead of ending as a stub.
+- The initial discipline list no longer claims F3L is implementable before its rules exist.
+- Score submission and official score authority are separated; publication is no longer treated as a contest lifecycle state.
 
 Ranked by "blocks implementation" first. Items in **A** and **D** are decisions the owner must make;
 **B** and **C** are sections that need writing.
@@ -18,12 +26,10 @@ wrapped application locally." Those are mutually exclusive if the goal is code r
 inside Electron, and is scoring logic then implemented twice?
 
 **A2. "Locked" means three different things.**
-- `contest-state-and-transitions.md` §Locked State — a *contest lifecycle* state; self-scoring off,
   CD/officials **can** still enter scores.
-- `contest-visibility-state.md` §Locked — a *scoring-visibility* state; scores are **read-only**.
-- `score-review-and-validity-state.md` §Locked — a *per-score* state; can apply to contest, round, or group.
-
-The first two directly contradict each other on whether the CD can edit.
+**A2. Independent lock dimensions are now documented.** Administration lock, participant scoring
+access, and per-score/group/round lock are separate concerns. Publication visibility has no `Locked`
+state. Remaining work is to finalize lock precedence for the physical schema.
 → **Q:** Rename two of these. Is "locked" one flag or three independent ones?
 
 **A3. State tables reference states that don't exist.**
@@ -89,16 +95,9 @@ entire point of the document — is missing. Unanswered:
 - Record identity across devices — are IDs UUIDs generated client-side, or server-assigned?
 - Is sync per-contest or global? Can two devices hold the same contest?
 
-**B2. `self-scoring-invites.md` is 0 bytes.** This is the app's only trust boundary in MVP-adjacent scope.
-`data.md` defines a "Scoring UUID … used for the URL where the participant will enter scores", and
-nothing else. Unanswered: how is the URL delivered (email? QR? printed?), can it be revoked or
-regenerated, does it expire, what stops a shared/leaked URL from entering someone else's score, and how
-does a helper's URL resolve to "which pilots on my team may I score?"
+**B2. Invitation requirements are now defined.** [`self-scoring-invites.md`](../architecture-requirements/self-scoring-invites.md) defines opaque credentials, revisioning, replacement, revocation, delivery, team scope, and audit. Remaining decisions are expiry duration and session invalidation semantics.
 
-**B3. `contest-official-scoring.md` says "The rest of this document is pending."** Meanwhile
-`mvp-application.md` §Scoring fully specs the CD scoring grid (columns, round/group nav, time-entry
-shorthand, Score Check, lock, mark-Official).
-→ **Q:** Is the MVP doc canonical and this stub redundant, or does the BR doc still need writing?
+**B3. Official scoring is now documented.** The business document captures the group/round grid, validation, locks, corrections, and authority rules; the MVP document remains the UI detail source.
 
 **B4. `f3l.md` and `f3k.md` are title-only.** F3L is listed under "Initial supported disciplines" in
 `contest-configuration.md` and under "simple duration" in the disciplines README — but has no scoring

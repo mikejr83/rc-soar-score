@@ -23,10 +23,9 @@ Initial supported disciplines:
 * ALES
 * F3J
 * F5J
-* F3L
 * Thermal Duration
 
-The following disciplines are to be considered during design but will not be immediately implemented:
+F3L has a placeholder document but is not initially implementable until its scoring rules are defined. The following disciplines are to be considered during design but will not be immediately implemented:
 
 * F3B
 * F3K

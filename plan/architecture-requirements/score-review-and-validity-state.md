@@ -9,11 +9,12 @@ A score is the data that is entered for a pilot in a specific group and round.
 |State|Meaning|Entry condition|Exit / next transition|
 |-----|-------|---------------|----------------------|
 |Draft|Score form is active and not submitted|Initial state|Draft → Submitted or Retired|
-|Submitted|Score is recorded and official unless changed|The participant enters the scoring details in the form and submits.|Submitted -> Under review, Official, or Locked|
+|Submitted|Score is recorded as the current participant submission; its official status is determined by contest policy|The participant enters the scoring details in the form and submits.|Submitted -> Under review, Official, or Locked|
 |Review requested|The review request is sent to the contest director|The request for review has been sent.|Review requested → Under review|
 |Under review|Director or official is evaluating the request|The review request was received and has been viewed by the contest director.|Under review → Official|
-|Official|The score is reviewed and recorded as correct by the contest director.|A contest director marking an unofficial score as official or approving or rejecting a review.|Official → Locked|
+|Official|The current score revision is the contest director's accepted value. This does not erase earlier submissions.|A contest director marks a score official, approves a review, rejects a review, or makes an authorized correction.|Official → Locked, or a new official revision through the correction workflow|
 |Locked|Score is no longer editable due to contest lock or completion|The contest director locking the contest, round, or group scores|Previous state|
+|Retired|The participant has retired and this assignment is represented as a retirement/zero outcome under contest rules.|The participant's authorized retirement action is accepted.|Terminal for participant entry; read access remains available|
 
 ### Draft
 
@@ -39,7 +40,7 @@ A score becomes official when the following occurs:
 * The score review flow completes with a rejected outcome.
 * The score review flow completes with an approved outcome.
 
-Once a score is official the ability to submit a score review is denied. The contest director or official may still modify scores.
+Participant review eligibility after a score becomes official is controlled by contest review policy. An authorized director correction creates a new official revision and preserves the prior value.
 
 ### Locked
 
@@ -47,7 +48,7 @@ The contest director can lock scores. Locking scores prevents the scores from be
 
 ## Score Review States
 
-A participant can submit a score review request if the contest director has configured the contest to allow it. Score review requests can only be made for scores in the "Submitted" state.
+A participant can submit a score review request if the contest director has configured the contest to allow it and the score is not locked. The request must target the current eligible score revision; the exact policy for already-official scores is defined by the contest review configuration.
 
 |State|Meaning|Entry condition|Exit / next transition|
 |-----|-------|---------------|----------------------|
@@ -73,8 +74,8 @@ The contest director moves the review to the next state by either approving or r
 
 ### Approved
 
-The review request was approved and the proposed scores should be applied to the flight which had the review submitted. The associated score now becomes official.
+The review request was approved and the proposed scores become the current official revision for the flight. Earlier submissions remain in the audit history.
 
-### Denied
+### Rejected
 
-The review request was denied. The proposed score changes are not applied. The associated score now becomes official.
+The review request was rejected. The proposed score changes are not applied. The current official score remains authoritative.

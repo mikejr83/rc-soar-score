@@ -7,9 +7,9 @@ The application consists of the following parts:
 * Backend API
 * Public site for viewing contests and their scores.
 
-The MVP to be achieved is the offline version of the application. This will be referred to in the rest of the document as the desktop application.
+The MVP to be achieved is the offline administration version of the application. This will be referred to in the rest of the document as the desktop application. Participant self-scoring, remote synchronization, public publishing, and account authentication require the API and are outside the offline-only MVP unless a later MVP decision explicitly enables them.
 
-The desktop application does not require the contest director to create an account. However, since it is reusing the code from the website consideration should be given to all implementation where the client application is accessing the API layer for authn/authz. In the initial implementation it is understood that the authn/authz will not be present.
+The desktop application does not require the contest director to create an account. Since it reuses code from the website, API authentication and authorization boundaries should still be represented in the interfaces, but are not provided by the offline-only MVP. An account-backed synchronization and participant self-scoring phase requires an explicit authenticated API deployment.
 
 The UI should be designed in accordance with Material 3 standards.
 
