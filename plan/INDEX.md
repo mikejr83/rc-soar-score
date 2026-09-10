@@ -8,6 +8,7 @@ Documents in the sub-folder `architecture-requirements` define the application a
 
 * [`contest-state-and-transitions.md`](architecture-requirements/contest-state-and-transitions.md)
 * [`data.md`](architecture-requirements/data.md) - A list of entities and their properties.
+* [`discipline-scoring.md`](architecture-requirements/discipline-scoring.md) - The shared scoring engine, discipline profiles, validation, and recalculation requirements.
 * [`contest-publishing.md`](architecture-requirements/contest-publishing.md) - Requirements for publishing contest data and public projections.
 * [`contest-visibility-state.md`](architecture-requirements/contest-visibility-state.md) - The visibility states for contests on the public site.
 * [`offline-synchronization.md`](architecture-requirements/offline-synchronization.md)
