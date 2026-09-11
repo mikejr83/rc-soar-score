@@ -19,4 +19,4 @@ The detailed entities are maintained in the [`data`](data/README.md) folder:
 - [`Publication`](data/publication.md)
 - [`Synchronization and audit`](data/synchronization-and-audit.md)
 
-The folder README defines the relationship summary, cross-cutting invariants, and open decisions that must be resolved before a physical schema is treated as stable.
+The folder README defines the relationship summary, cross-cutting invariants, and the physical schema and architectural decisions.

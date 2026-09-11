@@ -40,15 +40,44 @@ All dates stored in the data store should be stored in UTC.
 - A review request proposes a new score revision without changing the original submission. An invitation authorizes a participant link and permitted team scope.
 - A contest may have one stable published-contest identity and many atomic publication revisions. The private contest remains the source of truth.
 
-## Open decisions before physical schema implementation
+## Physical schema and architectural decisions
 
-These are intentionally not hidden in entity descriptions because they require product or policy decisions:
+The architectural and schema design decisions are resolved as follows:
 
-- Physical database technology, identifier format, and uniqueness/index strategy.
-- Whether shared participant profiles are globally addressable or only linked through an account-controlled directory.
-- Whether retirement materializes future zero score records or uses a retirement overlay.
-- Tie-breaking rules and the exact order of penalties, dropped rounds, re-flight selection, and team totals.
-- Publication retention, anonymous publisher claiming, and invitation expiry duration.
-- Synchronization cursor storage, conflict-resolution UI contract, and tombstone retention.
+- **Database technology, identifier format, and indexing**:
+  - **Backend**: Relational database (hosting platform-agnostic standard SQL schema).
+  - **Client / Web**: IndexedDB for local offline web and PWA client persistence.
+  - **Identifier format**: UUIDv7 (128-bit time-ordered, collision-resistant UUIDs generated offline or online).
+  - **Keying and uniqueness**: Surrogate UUIDv7 primary keys on all tables/stores with composite unique constraint indexes matching natural business keys (e.g., `(contest_id, round_number, group_number, lane_number)` and `(contest_id, client_mutation_id)` for idempotency).
 
-The business and architecture requirements must resolve these decisions before migrations are treated as stable.
+- **Participant profile directory and sharing scope**:
+  - Directors maintain private/local participant directories by default.
+  - Participant account holders can opt into a shared profile directory.
+  - Contest Directors can search and auto-complete pilot profiles across the shared directory by Name, FAI/AMA/National Organization ID, and Email address.
+  - Email addresses used for director auto-completion remain private and are strictly excluded from public projections.
+
+- **Participant retirement representation**:
+  - Modeled as a **retirement overlay** (`status = Retired`, `retired_at_round = N`) on the contest participation link.
+  - The scoring engine dynamically evaluates unflown rounds $R \ge N$ as zero with a `Retired` status without preemptively materializing future dummy score records, preserving clean matrix redraws and schedule changes. Free-text retirement reasons are not tracked.
+
+- **Tie-breaking rules and calculation pipeline**:
+  - **Pipeline order**: Raw Flight Score $\rightarrow$ Normalized Group Score $\rightarrow$ Discard Dropped Rounds (excluding non-droppable zeros) $\rightarrow$ Cumulative Contest Penalties $\rightarrow$ Final Contest Total $\rightarrow$ Team Total.
+  - **Discipline precedence**: Discipline-specific tie-breaking rules take precedence if defined.
+  - **Default**: If no tie-breaker is defined by the discipline, ties remain unresolved (shared placement, e.g., `T-1`).
+  - **Director-enabled tie-breaker option**: Contest Directors can optionally enable automated tie-breaking with the following precedence:
+    1. Higher discarded (dropped) round score.
+    2. Total raw flight points across all rounds.
+  - **Team fallback tie-breaker**: If not specified by discipline rules:
+    1. Lowest sum of place numbers among scoring team members.
+    2. Best individual placing among team members.
+    3. Shared team placement if still tied.
+
+- **Publication retention, anonymous claiming, and invitation expiry**:
+  - **Publication retention**: Published contest projections are retained indefinitely as a permanent public archive. Deleting a published contest requires completing the formal delisting process requirements.
+  - **Anonymous contest claiming**: Contests published anonymously via a verified email can be claimed at any time in the future during the director's first-time login flow when creating/registering an account with that email.
+  - **Invitation expiry**: Magic URL email invitations expire 24 hours after contest completion. Field QR code tokens provide access for the entire contest duration and do not expire mid-contest unless explicitly revoked.
+
+- **Synchronization cursor storage, conflict resolution, and tombstone retention**:
+  - **Sync cursor**: Monotonically increasing sequence stream per contest (`contest_mutation_seq`); clients track their last acknowledged sequence (`last_synced_seq`).
+  - **Conflict resolution**: Official Director score submissions always take precedence over participant self-scores (participant submissions are preserved as immutable attempts in review/audit history). Concurrent Director conflicts or inactive installation mutations present a side-by-side conflict diff in the UI for explicit resolution. Derived values are always recalculated deterministically.
+  - **Tombstones**: Soft-deletion tombstones are retained for **90 days** (or until contest archiving + 90 days) to prevent offline devices from resurrecting deleted records during delayed sync.
