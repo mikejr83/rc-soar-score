@@ -4,6 +4,8 @@ The wizard is a guided way to create a contest. It is not the only configuration
 
 The wizard saves a local draft between steps. A draft is not a contest, does not appear in contest lists, and does not affect scoring or publication. Required fields are validated before advancing. Validation errors are shown next to the field and summarized at the top of the step. The user can navigate back without losing valid values.
 
+This wizard page is located at the route `/contest-administration/contests/new`.
+
 ## Step 1: Contest details and copy source
 
 Required fields:

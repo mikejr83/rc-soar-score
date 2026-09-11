@@ -1,5 +1,7 @@
 # RC Soar Score User Interface - Matrix
 
+The matrix and draw page is located at the route: `/contest-administration/contests/:id/matrix`.
+
 The matrix view shows one contest matrix revision with round and group navigation. Each assignment displays pilot number when assigned, pilot name, team, role, lane when enabled, and assignment status. Non-flying participants are not assigned score slots.
 
 The director can inspect the fairness summary, add future rounds, redraw permitted unscored rounds, and move or replace pilots only where the matrix and lifecycle rules allow it. Any action that affects a scored assignment is blocked or routed to the explicit correction/re-flight workflow; the UI must not silently reinterpret existing scores.

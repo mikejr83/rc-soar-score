@@ -2,7 +2,7 @@
 
 There are a number of reasons the user may navigate to a specific contest's url and the contest cannot be displayed.
 
-* Contest never existed - The user entered a bad contest id or the route beneath `/contests` doesn't exist.
+* Contest never existed - The user entered a bad contest id or the route beneath `/results/contests` doesn't exist.
 * Contest is delisted
 
 The cases for "Contest never existed" and "Contest is delisted" should result in a standard informational page stating the contest or contest results could not be found.

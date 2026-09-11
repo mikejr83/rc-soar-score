@@ -17,7 +17,7 @@ The contest will be broken into views. Views can be set to have their data shown
 
 All navigation which takes place within the views should be able to respect native browser back and forward navigation.
 
-The base route for viewing a contest will be `/contests/:contestId`. If the contest does not exist for the given identifier in the route a not-found page specific to a contest not being found should be shown. The route should not change. This page is detailed in the [`contest-not-found.md`](./contest-not-found.md) document.
+The base route for viewing a contest will be `/results/contests/:contestId`. If the contest does not exist for the given identifier in the route a not-found page specific to a contest not being found should be shown. The route should not change. This page is detailed in the [`contest-not-found.md`](./contest-not-found.md) document.
 
 ## Views
 
@@ -29,7 +29,7 @@ Views will present their data as a point in time. This means that if a user sele
 
 A data grid type paging device will be provided for selecting the scores as of a specific round. Chevrons should go to the beginning and end as well as increment and decrement. A dropdown will be available to select a specific round. This UI component should act as globally to all views for the contest. Meaning, if the user changes the current round to "Round 3" on the "Overall Individual Results" page and they then change the view to "Flight Group Scores", the current round should remain the same and the "Flight Group Scores" page will show its data for the third round.
 
-The route will change when the round changes: `/contests/:contestId/rounds/:roundNumber`.
+The route will change when the round changes: `/results/contests/:contestId/rounds/:roundNumber`.
 
 ### Contest Not Visible
 
@@ -95,7 +95,7 @@ An example of the table structure is given below:
 |2|1|5,792|98.5%|Mike Gardner|USA|2994|2994|998|998|998|-|
 |||||Chuck Waters|USA|2798|2798|990|950|858|-|
 
-This view will use the route `/contests/:contestId/teams/results` as its root when the latest contest round is selected or no round has been selected. The route `/contests/:contestId/teams/results/rounds/:roundNumber` is used if a round other than the latest is selected.
+This view will use the route `/results/contests/:contestId/teams/results` as its root when the latest contest round is selected or no round has been selected. The route `/results/contests/:contestId/teams/results/rounds/:roundNumber` is used if a round other than the latest is selected.
 
 A user navigating to this route will be redirected to the contest's root route if the contest does not support teams.
 
@@ -116,7 +116,7 @@ A table will appear for the flight group showing the following information as co
 * Score - The total points given to the pilot after normalization.
 * Penalty - Any penalty incurred on the flight
 
-This view will use the route `/contests/:id/rounds/:roundNumber/flight-groups`. This page is always specific to a round.
+This view will use the route `/results/contests/:id/rounds/:roundNumber/flight-groups`. This page is always specific to a round.
 
 ## View Navigation
 

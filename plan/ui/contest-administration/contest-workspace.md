@@ -2,6 +2,8 @@
 
 The contest workspace is the director's landing page after opening a contest. It shows the contest identity, the independent state values from [overview.md](./overview.md), and navigation to configuration, matrix, scoring, reports, publication, and audit/synchronization details.
 
+This page is located at the route: `/contest-administration/contests/:id/workspace`.
+
 ## Configuration
 
 Configuration is grouped into identity, discipline and scoring rules, participant options, participants, draw options, scoring access, administration lock, and public update policy. Each group shows its current revision and whether editing it would invalidate the matrix or derived scores.

@@ -12,3 +12,7 @@ The desktop application must allow offline continuation without an account. It m
 The online application does not show `Continue offline`. An authenticated user is taken to the contest selection page. A participant invitation link must bypass the director landing flow and open the participant overview after its token is validated.
 
 The page has loading, identity-provider unavailable, and offline-store unavailable states. External navigation is visibly identified and does not silently discard local work.
+
+## Route Information
+
+The landing page for the application in the web app will be `/contest-administration`.

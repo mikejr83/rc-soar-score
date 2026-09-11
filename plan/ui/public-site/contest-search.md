@@ -6,7 +6,7 @@ A summary should be displayed indicating how many contests were completed or are
 
 A contest list is shown with a filter to enable users to find contests and subsequently view their ongoing progress or results.
 
-This page will be located at the route: `/contests`.
+This page will be located at the route: `/results/contests`.
 
 ## Contest List
 

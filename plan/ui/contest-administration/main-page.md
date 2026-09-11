@@ -2,6 +2,8 @@
 
 The user reaches this page after signing in or choosing offline mode. It is the director's contest-selection and system-management page.
 
+The route that the application will come to after the user has logged in will be `/contest-administration/home`.
+
 ## Page actions
 
 The page provides:
