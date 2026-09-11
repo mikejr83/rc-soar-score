@@ -42,10 +42,8 @@ These are intentionally not hidden in entity descriptions because they require p
 
 - Physical database technology, identifier format, and uniqueness/index strategy.
 - Whether shared participant profiles are globally addressable or only linked through an account-controlled directory.
-- Exact score-review eligibility after a score is marked official, and the precedence of contest, round, group, assignment, and score locks.
 - Whether retirement materializes future zero score records or uses a retirement overlay.
 - Tie-breaking rules and the exact order of penalties, dropped rounds, re-flight selection, and team totals.
-- Draw algorithm, random seed retention, fairness metric, and seeded-round finalization behavior.
 - Publication retention, anonymous publisher claiming, and invitation expiry duration.
 - Synchronization cursor storage, conflict-resolution UI contract, and tombstone retention.
 - Time-zone policy for contest dates, server timestamps, and inactivity completion detection.
