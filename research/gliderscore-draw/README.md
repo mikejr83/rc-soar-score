@@ -29,8 +29,8 @@ stated restriction on reverse engineering. He is reachable at gerry.carter(at)gl
   spec's own cost function. Its cooling schedule freezes early, and 30,000 iterations is too small a budget.
 - **GliderScore has room to improve.** Running local search over its finished draw improves fairness by
   4–7% on the team contests: freezing each round is what holds it back.
-- **Clean-room methods can beat it.** A generic greedy construction followed by local search, or
-  conflict-directed annealing from a simple start, matches or beats GliderScore on all three contests.
+- **Clean-room methods can beat it.** A generic greedy construction followed by conflict-directed local
+  search matches or beats GliderScore on all three contests (MAD −7.8% at 30 pilots, −3.3% at 63).
 - **Recommended engine for Mike:** generic greedy construction → conflict-directed local search over all
   rounds with a size-scaled budget → seeded PRNG with best-of-several-seeds, plus an explicit penalty for
   pairs that never meet (§5).
@@ -274,6 +274,8 @@ group size).
   conflict-directed move used in local search for the **Social Golfer Problem**, which is the same
   combinatorial problem (CSPLib problem 010; Dotú & Van Hentenryck, *Scheduling Social Golfers Locally*,
   CPAIOR 2005).
+- **Greedy + conflict-directed polish** — the generic greedy construction, then the conflict-directed
+  annealer starting cool (T₀ = 2) for 300k iterations. This is the combination recommended below.
 - **GliderScore + local-search polish** — *measurement only, not a recommendation.* Polishing GliderScore's
   own output shows how much fairness its round-by-round construction leaves unclaimed.
 
@@ -289,7 +291,8 @@ Same harness, seeds, validity checks and metrics as §4.
 | GliderScore + local search *(measurement only)* | 0.683 | 193.5 | 4 | 13 |
 | Generic greedy | 0.698 | 213.9 | 4 | 13 |
 | Generic greedy + local search | 0.677 | **193.5** | 4 | 11 |
-| Conflict-directed annealing | **0.676** | **193.5** | 4 | 15 |
+| Conflict-directed annealing | 0.676 | **193.5** | 4 | 15 |
+| Greedy + conflict-directed polish | **0.674** | **193.5** | 4 | 14 |
 
 **c1 — 30 pilots, 8 teams, team protection**
 
@@ -299,7 +302,8 @@ Same harness, seeds, validity checks and metrics as §4.
 | GliderScore + local search *(measurement only)* | 0.415 | 517.7 | 5 | 0 |
 | Generic greedy | 0.522 | 766.9 | 5 | 0 |
 | Generic greedy + local search | 0.444 | 530.0 | 5 | 0 |
-| Conflict-directed annealing | **0.415** | **517.7** | 5 | 0 |
+| Conflict-directed annealing | 0.415 | 517.7 | 5 | 0 |
+| Greedy + conflict-directed polish | **0.410** | **513.7** | 5 | 0 |
 
 **c4 — 63 pilots, 14 teams, team protection**
 
@@ -308,8 +312,9 @@ Same harness, seeds, validity checks and metrics as §4.
 | GliderScore *(recorded)* | 0.710 | 2,291.7 | 6 | **2** |
 | GliderScore + local search *(measurement only)* | 0.684 | 2,177.7 | 6 | 2 |
 | Generic greedy | 0.738 | 2,722.7 | 6 | 8 |
-| Generic greedy + local search | **0.702** | **2,259.7** | **5** | 5 |
+| Generic greedy + local search | 0.702 | 2,259.7 | **5** | 5 |
 | Conflict-directed annealing | 0.707 | 2,267.4 | 6 | 3 |
+| Greedy + conflict-directed polish | **0.687** | **2,203.4** | 6 | 3 |
 
 ### Findings
 
@@ -317,14 +322,17 @@ Same harness, seeds, validity checks and metrics as §4.
    contests without adding repeats or never-met pairs: MAD −6.6% and J −3.2% at 30 pilots; MAD −3.7% and
    J −5.0% at 63. Freezing each round is the limitation — an early round can't be rearranged once later
    rounds show a better fit.
-2. **Clean-room methods match or beat it.** Generic greedy + local search matches or beats GliderScore on MAD,
-   J and max repeats on all three contests. Conflict-directed annealing is the best result at 30 pilots
-   (MAD 0.415 vs 0.445) and edges GliderScore at 63 (0.707 vs 0.710).
+2. **Clean-room methods match or beat it.** The best is the combination — greedy construction followed by
+   conflict-directed polish — with the lowest MAD and J of any recommended method on all three contests:
+   MAD −7.8% and J −3.9% at 30 pilots, MAD −3.3% and J −3.9% at 63. At 30 pilots it even edges polishing
+   GliderScore's own draw (0.410 vs 0.415). Generic greedy + plain local search also matches or beats
+   GliderScore on MAD, J and max repeats everywhere.
 3. **Construction alone isn't enough.** The generic greedy by itself trails GliderScore (63 pilots: MAD 0.738
    vs 0.710) — GliderScore's construction heuristic is better than simple insertion. Local search is what
    closes and then passes the gap.
-4. **The quadratic objective under-weights pairs that never meet.** With a mean of ~2.8 meetings (63 pilots),
-   a never-met pair costs (0 − 2.8)² ≈ 7.8 — less than a pair meeting six times (≈ 10.2). So the annealers
+4. **The quadratic objective under-weights pairs that never meet.** The spec's target at 63 pilots is
+   μ ≈ 2.6 meetings, so a never-met pair costs (0 − 2.6)² ≈ 6.9 — much less than a pair meeting six times
+   (≈ 11.4). So the annealers
    trade never-met pairs for fewer heavy repeats: lower max meets, slightly more unmet pairs (63 pilots: 3–5
    vs GliderScore's 2). If "I never flew against X" is the complaint CDs hear, weight it explicitly.
 5. **Best-of-several-seeds is worth having.** Per-seed spread is 4–13% of the median MAD. Best of 5 seeds for
@@ -333,14 +341,16 @@ Same harness, seeds, validity checks and metrics as §4.
 6. **Gains are modest and per-seed ranges overlap.** These are directionally consistent results across three
    contests and 5 seeds each, not a statistical study. On the no-teams contest every method ties on MAD.
 7. **Timing** (Python, relative only): generic greedy 0.01–0.18 s; + local search 2.3–3.0 s;
-   conflict-directed annealing 6.0–8.7 s. The targeted move costs O(group size²).
+   conflict-directed annealing 6.0–8.7 s; greedy + conflict-directed polish 3.7–8.4 s. The targeted move
+   costs O(group size²).
 
 ### Recommendations for `matrix-draw.md` §4
 
 In priority order. *Measured* means supported by the results above; *untested* means reasoned but not run.
 
 1. **Construct, then improve over all rounds.** Build a valid draw with a simple greedy construction, then run
-   conflict-directed local search across every round. *Measured.*
+   conflict-directed local search across every round, starting cool. It had the best MAD and J of every
+   recommended method on all three contests. *Measured.*
 2. **Scale the budget with problem size** (pilots × rounds). 300k iterations for 480–882 placements was enough
    to match or beat GliderScore; 30k was not. Treat T_min as a floor, and start polish cool (T₀ ≈ 2) when
    beginning from a greedy draw. *Measured.*

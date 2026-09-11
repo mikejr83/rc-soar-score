@@ -242,6 +242,8 @@ def main():
     a50 = (Tmin / 50) ** (1 / IT)
     a2 = (Tmin / 2) ** (1 / IT)
     polish = lambda init, rng: sa_draw(N, G, R, team, prot, rng, T0=2.0, alpha=a2, iters=IT, init=init)
+    tpolish = lambda init, rng: sa_draw(N, G, R, team, prot, rng, T0=2.0, alpha=a2, iters=IT, init=init,
+                                        targeted=True)
     variants = [
         # §4 — matrix-draw.md as written
         ('Spec SA, T_min stops run', lambda rng: sa_draw(N, G, R, team, prot, rng, stop_at_tmin=True)),
@@ -253,6 +255,7 @@ def main():
         ('Generic greedy + 300k polish', lambda rng: polish(generic_greedy(N, G, R, team, prot, rng), rng)),
         ('Conflict-directed SA 300k', lambda rng: sa_draw(N, G, R, team, prot, rng, alpha=a50, iters=IT,
                                                           targeted=True)),
+        ('Greedy + conflict polish 300k', lambda rng: tpolish(generic_greedy(N, G, R, team, prot, rng), rng)),
     ]
     for name, fn in variants:
         report(name, fn, N, G, R, team, prot, seeds)
