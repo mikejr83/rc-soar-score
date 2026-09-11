@@ -19,6 +19,7 @@ Documents in the sub-folder `architecture-requirements` define the application a
 * [`participant-score-review.md`](architecture-requirements/participant-score-review.md) - Requirements for participant score reviews and retirement.
 * [`participant-score-results.md`](architecture-requirements/participant-score-results.md) - Requirements for participant-visible group results and placement.
 * [`participant-scoring-access.md`](architecture-requirements/participant-scoring-access.md) - The states that control participant scoring access.
+* [`matrix-draw.md`](architecture-requirements/matrix-draw.md) - Flight matrix generation, simulated annealing optimization, team protection, and fairness metrics.
 * [`score-review-and-validity-state.md`](architecture-requirements/score-review-and-validity-state.md) - Score validity and score review states.
 
 ## Business Specifications and Requirements
