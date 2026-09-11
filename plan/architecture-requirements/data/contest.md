@@ -10,6 +10,10 @@ A contest is the private source-of-truth aggregate for one radio-controlled soar
 
 A contest director without an account may administer a local contest and may publish through the anonymous verification flow. Anonymous publication does not create an ordinary remote backup record.
 
+## Time zone policy
+
+The contest should store the time zone it was created in.
+
 ## Configuration and control state
 
 Contest configuration is revisioned. A revision references the discipline profile and overrides, participant options, team options, draw options, scoring options, rules, and publication update policy. A change that affects a matrix or calculation creates a new revision and follows lifecycle mutability rules.

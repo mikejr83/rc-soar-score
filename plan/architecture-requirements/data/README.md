@@ -15,6 +15,10 @@ This folder contains the canonical conceptual data model for RC Soar Score. The 
 9. [Publication](publication.md) defines the public projection and its history.
 10. [Synchronization and audit](synchronization-and-audit.md) defines offline mutations, conflicts, tombstones, and audit records.
 
+## Dates and Times
+
+All dates stored in the data store should be stored in UTC.
+
 ## Global invariants
 
 - Every entity has a stable opaque identifier. Identifiers are generated in a way that is safe offline and are never reused.
@@ -46,6 +50,5 @@ These are intentionally not hidden in entity descriptions because they require p
 - Tie-breaking rules and the exact order of penalties, dropped rounds, re-flight selection, and team totals.
 - Publication retention, anonymous publisher claiming, and invitation expiry duration.
 - Synchronization cursor storage, conflict-resolution UI contract, and tombstone retention.
-- Time-zone policy for contest dates, server timestamps, and inactivity completion detection.
 
 The business and architecture requirements must resolve these decisions before migrations are treated as stable.
