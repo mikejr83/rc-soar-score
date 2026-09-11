@@ -1,4 +1,4 @@
-"""Head-to-head: GliderScore greedy draw (behavioural port) vs matrix-draw.md simulated annealing.
+"""Draw benchmark: matrix-draw.md simulated annealing and clean-room alternatives.
 
 Usage: python draw_bench.py <config> [seeds]
   config: c1  (30 pilots / 5 groups / 16 rounds, 8 teams, team protection)
@@ -8,7 +8,9 @@ Usage: python draw_bench.py <config> [seeds]
 Standard library only. Team layouts are the team numbers of the non-retired pilots in three
 competitions from GliderScore's shipped sample database (team numbers only, no pilot data).
 Frequencies are ignored (all 2.4GHz); back-to-back is allowed, as in all three sample comps.
-See README.md §4 for results and caveats.
+
+GliderScore figures in README.md are recorded results from a local port that is intentionally not
+included here. See README.md §4–§5 for results and caveats.
 """
 import sys, math, random, time, itertools
 from collections import Counter, defaultdict
@@ -22,7 +24,7 @@ CONFIGS = {
     'c10': (3, 6, False, [0] * 23),
 }
 
-def sizes(N, G):  # both GliderScore and the spec: lower-numbered groups get the extra pilot
+def sizes(N, G):  # balanced; lower-numbered groups get the extra pilot
     b, r = divmod(N, G)
     return [b + 1] * r + [b] * (G - r)
 
@@ -36,7 +38,7 @@ def meetings(draw, N):
     return M
 
 def gs_mad(M, team, prot):
-    """GliderScore's metric: MAD over pairs, excluding never-met teammates under protection."""
+    """MAD of pairwise meeting counts over pairs that can meet (never-met teammates excluded)."""
     N = len(M)
     vals = [M[i][j] for i in range(N) for j in range(i + 1, N)
             if not (prot and team[i] and team[i] == team[j] and M[i][j] == 0)]
@@ -69,124 +71,82 @@ def spec_J(M, lane_cnt, N, G, R, L):
     jl = sum((x - lam) ** 2 for row in lane_cnt for x in row)
     return jm + 0.15 * jl
 
-# ---------------------------------------------------------------- GliderScore greedy (behavioural port)
-def gs_draw(N, G, R, team, prot, rng, K=10):
+# ---------------------------------------------------------------- clean-room greedy construction
+def generic_greedy(N, G, R, team, prot, rng, K=10):
+    """Most-constrained-first insertion: teams largest first, each pilot into the compatible non-full
+    group with the fewest prior meetings (random ties). Best of K builds per round, scored by the
+    increase in the sum of squared meeting counts."""
     sz = sizes(N, G)
     M = [[0] * N for _ in range(N)]
-    compat = lambda i, j: not (prot and team[i] and team[i] == team[j])
-    draw = []
+    by_team = defaultdict(list)
+    for p in range(N):
+        by_team[team[p] if (prot and team[p]) else ('solo', p)].append(p)
 
-    def build_round():
-        pool = set(range(N)); groups = []
-        for gi in range(G - 1):
-            size = sz[gi]; groups_left = G - gi
-            # m_min: pool pilot vs ANY pilot; zero counts only if compatible
-            mmin = min(M[i][j] for i in pool for j in range(N)
-                       if j != i and (M[i][j] > 0 or compat(i, j)))
-            # seeds: pool pilots with the most compatible opponents at exactly m_min
-            com = {i: sum(1 for j in range(N) if j != i and compat(i, j) and M[i][j] == mmin) for i in pool}
-            top = max(com.values())
-            cands = []
-            for seed in [i for i in pool if com[i] == top]:
-                s = [seed]; clash = {seed} | ({j for j in pool if prot and team[seed] and team[j] == team[seed]})
-                ok = True
-                sums = {j: M[j][seed] for j in pool}  # sum of prior meetings with the set, kept incrementally
-                while len(s) < size:
-                    forced = set()
-                    if prot:  # team pigeonhole forcing
-                        tc = Counter(team[j] for j in pool if j not in s and team[j])
-                        if any(v > groups_left for v in tc.values()):
-                            ok = False; break
-                        must = [t for t, v in tc.items() if v == groups_left]
-                        slots = size - len(s)
-                        if len(must) > slots:
-                            ok = False; break
-                        if must and len(must) == slots:
-                            forced = {j for j in pool if team[j] in must}
-                    avail = [j for j in pool if j not in clash and (not forced or j in forced)]
-                    if not avail:
-                        ok = False; break
-                    lo = min(sums[j] for j in avail)
-                    pick = rng.choice([j for j in avail if sums[j] == lo])
-                    s.append(pick); clash.add(pick)
-                    for j in pool:
-                        sums[j] += M[j][pick]
-                    if prot and team[pick]:
-                        clash |= {j for j in pool if team[j] == team[pick]}
-                if ok:
-                    cands.append((max(M[a][b] for a, b in itertools.combinations(s, 2)), s))
+    def build():
+        tl = list(by_team.values()); rng.shuffle(tl); tl.sort(key=len, reverse=True)
+        order = []
+        for t in tl:
+            t = t[:]; rng.shuffle(t); order += t
+        groups = [[] for _ in range(G)]
+        for p in order:
+            cands = [gi for gi in range(G) if len(groups[gi]) < sz[gi]
+                     and not (prot and team[p] and any(team[q] == team[p] for q in groups[gi]))]
             if not cands:
                 return None
-            best = min(c[0] for c in cands)
-            chosen = rng.choice([c[1] for c in cands if c[0] == best])
-            groups.append(chosen); pool -= set(chosen)
-        last = list(pool)
-        if prot:
-            ts = [team[p] for p in last if team[p]]
-            if len(ts) != len(set(ts)):
-                return None
-        groups.append(last)
+            cost = {gi: sum(M[p][q] for q in groups[gi]) for gi in cands}
+            lo = min(cost.values())
+            groups[rng.choice([gi for gi in cands if cost[gi] == lo])].append(p)
         return groups
 
-    def build_feasible():
-        for _ in range(5000):
-            g = build_round()
-            if g is not None:
-                return g
-        raise RuntimeError("GS port: no feasible round in 5000 attempts")
-
-    def add(rnd, d):
-        for g in rnd:
-            for a, b in itertools.combinations(g, 2):
-                M[a][b] += d; M[b][a] += d
-
+    draw = []
     for r in range(R):
-        if r == 0:
-            rnd = build_feasible(); add(rnd, 1); draw.append(rnd); continue
-        best_rnd, best_mad = None, None
-        for it in range(K):
-            rnd = build_feasible(); add(rnd, 1)
-            mad = gs_mad(M, team, prot)[0]
-            add(rnd, -1)
-            if best_rnd is None or mad < best_mad:
-                best_rnd, best_mad = rnd, mad
-        add(best_rnd, 1); draw.append(best_rnd)
-
-    # lanes: greedy min historical count per (pilot, lane), random ties
-    L = max(sz); cnt = [[0] * L for _ in range(N)]; lanes = []
-    for rnd in draw:
-        lr = {}
-        for g in rnd:
-            free_p, free_l = set(g), set(range(L))
-            for _ in range(len(g)):
-                lo = min(cnt[p][l] for p in free_p for l in free_l)
-                p, l = rng.choice([(p, l) for p in free_p for l in free_l if cnt[p][l] == lo])
-                lr[p] = l; cnt[p][l] += 1; free_p.discard(p); free_l.discard(l)
-        lanes.append(lr)
+        best, best_s = None, None
+        for _ in range(K):
+            for _ in range(1000):
+                g = build()
+                if g is not None:
+                    break
+            else:
+                raise RuntimeError("generic greedy: no feasible round in 1000 attempts")
+            s = sum(2 * M[a][b] + 1 for grp in g for a, b in itertools.combinations(grp, 2))
+            if best is None or s < best_s:
+                best, best_s = g, s
+        for grp in best:
+            for a, b in itertools.combinations(grp, 2):
+                M[a][b] += 1; M[b][a] += 1
+        draw.append(best)
+    lanes = [{p: k for grp in rnd for k, p in enumerate(grp)} for rnd in draw]
     return draw, lanes
 
 # ---------------------------------------------------------------- matrix-draw.md simulated annealing
-def sa_draw(N, G, R, team, prot, rng, alpha=0.992, T0=50.0, Tmin=0.001, iters=30000, stop_at_tmin=False):
+def sa_draw(N, G, R, team, prot, rng, alpha=0.992, T0=50.0, Tmin=0.001, iters=30000, stop_at_tmin=False,
+            init=None, targeted=False):
+    """init: optional (rounds, lanes) start state. targeted: half of pilot swaps take the pilot with the
+    most excess meetings in its group (conflict-directed local search, as for the social golfer problem)."""
     sz = sizes(N, G); L = math.ceil(N / G)
     gbar = N / G; mu = R * (gbar - 1) / (N - 1); lam = R / L; wl = 0.15
 
-    # initial feasible state — randomized round-robin deal, largest teams first (always valid)
-    by_team = defaultdict(list)
-    for p in range(N):
-        by_team[team[p] or ('solo', p)].append(p)
-    rounds, lane = [], []
-    for r in range(R):
-        order = []
-        tlist = list(by_team.values()); rng.shuffle(tlist); tlist.sort(key=len, reverse=True)
-        for t in tlist:
-            t = t[:]; rng.shuffle(t); order += t
-        groups = [[] for _ in range(G)]; gi = 0
-        for p in order:
-            while len(groups[gi % G]) >= sz[gi % G]:
-                gi += 1
-            groups[gi % G].append(p); gi += 1
-        rounds.append(groups)
-        lane.append({p: k for g in groups for k, p in enumerate(g)})
+    if init is None:
+        # initial feasible state — randomized round-robin deal, largest teams first (always valid)
+        by_team = defaultdict(list)
+        for p in range(N):
+            by_team[team[p] or ('solo', p)].append(p)
+        rounds, lane = [], []
+        for r in range(R):
+            order = []
+            tlist = list(by_team.values()); rng.shuffle(tlist); tlist.sort(key=len, reverse=True)
+            for t in tlist:
+                t = t[:]; rng.shuffle(t); order += t
+            groups = [[] for _ in range(G)]; gi = 0
+            for p in order:
+                while len(groups[gi % G]) >= sz[gi % G]:
+                    gi += 1
+                groups[gi % G].append(p); gi += 1
+            rounds.append(groups)
+            lane.append({p: k for g in groups for k, p in enumerate(g)})
+    else:
+        rounds = [[g[:] for g in rnd] for rnd in init[0]]
+        lane = [dict(lr) for lr in init[1]]
 
     M = meetings(rounds, N)
     lc = [[0] * L for _ in range(N)]
@@ -203,7 +163,13 @@ def sa_draw(N, G, R, team, prot, rng, alpha=0.992, T0=50.0, Tmin=0.001, iters=30
         if rng.random() < 0.8:  # inter-group pilot swap
             ga, gb = rng.sample(range(G), 2)
             A, B = rounds[r][ga], rounds[r][gb]
-            px, py = rng.choice(A), rng.choice(B)
+            if targeted and rng.random() < 0.5:
+                ex = [sum(M[p][q] - mu for q in A if q != p and M[p][q] > mu) for p in A]
+                hi = max(ex)
+                px = rng.choice([p for p, e in zip(A, ex) if e == hi])
+            else:
+                px = rng.choice(A)
+            py = rng.choice(B)
             if prot:
                 if team[px] and any(team[q] == team[px] for q in B if q != py):
                     T = max(T * alpha, Tmin); continue
@@ -246,39 +212,50 @@ def sa_draw(N, G, R, team, prot, rng, alpha=0.992, T0=50.0, Tmin=0.001, iters=30
     return rounds, lane, done
 
 # ---------------------------------------------------------------- run
+def report(name, fn, N, G, R, team, prot, seeds):
+    L = math.ceil(N / G); rows = []
+    for seed in range(seeds):
+        rng = random.Random(seed)
+        t0 = time.perf_counter(); draw, lanes, done = fn(rng); dt = time.perf_counter() - t0
+        check_valid(draw, N, G, team, prot)
+        M = meetings(draw, N)
+        mad, m, vals = gs_mad(M, team, prot)
+        ls, cnt = lane_std(lanes, N, L)
+        f = m - math.floor(m)
+        rows.append(dict(mad=mad, floor=2 * f * (1 - f), maxm=max(vals), unmet=vals.count(0),
+                         J=spec_J(M, cnt, N, G, R, L), lane=ls, t=dt, it=done))
+    med = lambda k: sorted(x[k] for x in rows)[len(rows) // 2]
+    print(f"{name:30} MAD={med('mad'):.4f} (floor {rows[0]['floor']:.4f}) maxMeet={med('maxm')} "
+          f"unmetFeasible={med('unmet')} J={med('J'):.1f} laneStd={med('lane'):.3f} "
+          f"time={med('t'):.2f}s" + (f" iters={med('it')}" if rows[0]['it'] else ""))
+    print(f"{'':30} MAD per seed={[round(x['mad'], 4) for x in rows]}")
+    return rows
+
 def main():
     cfg = sys.argv[1]; seeds = int(sys.argv[2]) if len(sys.argv) > 2 else 5
     G, R, prot, team = CONFIGS[cfg]
     N = len(team)
     tsz = Counter(t for t in team if t)
-    L = math.ceil(N / G)
     print(f"# {cfg}: N={N} G={G} R={R} protection={prot} teams={len(tsz)} "
           f"team sizes={dict(sorted(Counter(tsz.values()).items()))} group sizes={sizes(N, G)}")
-
+    IT, Tmin = 300000, 0.001
+    a50 = (Tmin / 50) ** (1 / IT)
+    a2 = (Tmin / 2) ** (1 / IT)
+    polish = lambda init, rng: sa_draw(N, G, R, team, prot, rng, T0=2.0, alpha=a2, iters=IT, init=init)
     variants = [
-        ('GliderScore greedy (K=10)', lambda rng: gs_draw(N, G, R, team, prot, rng) + (None,)),
+        # §4 — matrix-draw.md as written
         ('Spec SA, T_min stops run', lambda rng: sa_draw(N, G, R, team, prot, rng, stop_at_tmin=True)),
         ('Spec SA, 30k at T_min floor', lambda rng: sa_draw(N, G, R, team, prot, rng)),
         ('Spec SA, alpha=0.99964 30k', lambda rng: sa_draw(N, G, R, team, prot, rng, alpha=0.99964)),
-        ('Spec SA, 300k alpha matched', lambda rng: sa_draw(N, G, R, team, prot, rng,
-                                                            alpha=(0.001 / 50) ** (1 / 300000), iters=300000)),
+        ('Spec SA, 300k alpha matched', lambda rng: sa_draw(N, G, R, team, prot, rng, alpha=a50, iters=IT)),
+        # §5 — clean-room improvements
+        ('Generic greedy', lambda rng: generic_greedy(N, G, R, team, prot, rng) + (None,)),
+        ('Generic greedy + 300k polish', lambda rng: polish(generic_greedy(N, G, R, team, prot, rng), rng)),
+        ('Conflict-directed SA 300k', lambda rng: sa_draw(N, G, R, team, prot, rng, alpha=a50, iters=IT,
+                                                          targeted=True)),
     ]
     for name, fn in variants:
-        rows = []
-        for seed in range(seeds):
-            rng = random.Random(seed)
-            t0 = time.perf_counter(); draw, lanes, done = fn(rng); dt = time.perf_counter() - t0
-            check_valid(draw, N, G, team, prot)
-            M = meetings(draw, N)
-            mad, m, vals = gs_mad(M, team, prot)
-            ls, cnt = lane_std(lanes, N, L)
-            f = m - math.floor(m)
-            rows.append(dict(mad=mad, floor=2 * f * (1 - f), maxm=max(vals), unmet=vals.count(0),
-                             J=spec_J(M, cnt, N, G, R, L), lane=ls, t=dt, it=done))
-        med = lambda k: sorted(x[k] for x in rows)[len(rows) // 2]
-        print(f"{name:30} MAD={med('mad'):.4f} (floor {rows[0]['floor']:.4f}) maxMeet={med('maxm')} "
-              f"unmetFeasible={med('unmet')} J={med('J'):.1f} laneStd={med('lane'):.3f} "
-              f"time={med('t'):.2f}s" + (f" iters={med('it')}" if rows[0]['it'] else ""))
+        report(name, fn, N, G, R, team, prot, seeds)
 
 if __name__ == '__main__':
     main()
