@@ -58,7 +58,7 @@ The table should have the following columns:
 * A column for each round score up to and including the currently selected round.
 * Cumulative Penalty
 
-The ranking of individuals in the table is always by their overall score as of the selected round. Ties should be resolved using the contest discipline rules. If no contest discipline rules define tie breaking the pilots are shown as in the same numerical place and are ordered alphabetically by last name.
+The ranking of individuals in the table is always by their overall score as of the selected round. The service providing the data will prepare the places for each of the pilots. The service maintains the responsibility for looking at the contest's discipline and applying any tie-breaking rules. This data will, however, indicate any unresolvable ties. These ties should be shown as in the same numerical place and are ordered alphabetically by last name. An indicator that those pilots are tied should be shown.
 
 |Place|Name|Country|Score|Percentage|Raw Score|Round 1|Round 2|Round 3|Penalty|
 |-----|----|-------|-----|----------|---------|-------|-------|-------|-------|
