@@ -17,6 +17,8 @@ The contest will be broken into views. Views can be set to have their data shown
 
 All navigation which takes place within the views should be able to respect native browser back and forward navigation.
 
+The base route for viewing a contest will be `/contests/:contestId`. If the contest does not exist for the given identifier in the route a not-found page specific to a contest not being found should be shown. The route should not change. This page is detailed in the [`contest-not-found.md`](./contest-not-found.md) document.
+
 ## Views
 
 There is a lot of data to convey for a contest. The most important data visualization will be the overall ranking of the pilots known as "Overall Individual Results". The visualization of team scores and individual round data will also be presented as "Team Scores" and "Flight Group Scores".
@@ -26,6 +28,20 @@ The "Overall Individual Results" will be the initial view presented when a user 
 Views will present their data as a point in time. This means that if a user selects a round that is not the current the overall placement, drop-logic, etc should reflect at that point in the contest.
 
 A data grid type paging device will be provided for selecting the scores as of a specific round. Chevrons should go to the beginning and end as well as increment and decrement. A dropdown will be available to select a specific round. This UI component should act as globally to all views for the contest. Meaning, if the user changes the current round to "Round 3" on the "Overall Individual Results" page and they then change the view to "Flight Group Scores", the current round should remain the same and the "Flight Group Scores" page will show its data for the third round.
+
+The route will change when the round changes: `/contests/:contestId/rounds/:roundNumber`.
+
+### Contest Not Visible
+
+The user may navigate to the contest page or its sub-routes through a saved link or some other means. If this occurs when the contest is marked private the page should indicate that the contest is currently in private mode. The screen should indicate that private mode hides the contest information including all scores and results.
+
+A message explaining that this is a contest director action should be placed on the page. It should offer the following rational reasons why a contest is made private:
+
+* The contest has not started and the director does not wish it visible before it actually starts.
+* There is a major discrepancy in entered scores and the director is working to resolve them.
+* Winners are being announced and the director does not wish to spoil the surprise.
+
+ A suggestion to check back at a later time is made. The page should indicate that it will attempt to check after an interval (15 minutes) to see if the contest has become public.
 
 ### Overall Individual Results
 
@@ -50,6 +66,8 @@ The ranking of individuals in the table is always by their overall score as of t
 |2|Mike Gardner|USA|2994|99.8%|2994|998|998|998|-|
 |3|Dave Johnston|USA|2880|96%|2880|900|990|990|-|
 |3|Chuck Waters|USA|2798|93.3%|2798|990|950|858|-|
+
+This view will use the same route as the root of the contest view.
 
 ### Team Scores
 
@@ -77,6 +95,10 @@ An example of the table structure is given below:
 |2|1|5,792|98.5%|Mike Gardner|USA|2994|2994|998|998|998|-|
 |||||Chuck Waters|USA|2798|2798|990|950|858|-|
 
+This view will use the route `/contests/:contestId/teams/results` as its root when the latest contest round is selected or no round has been selected. The route `/contests/:contestId/teams/results/rounds/:roundNumber` is used if a round other than the latest is selected.
+
+A user navigating to this route will be redirected to the contest's root route if the contest does not support teams.
+
 ### Flight Group Scores
 
 The most detailed view is the "Flight Group Scores". This view shows the individual scoring details for a single round. The view still respects the selected round. Instead of a single table, the view shows each group within the round as its own table.
@@ -94,10 +116,14 @@ A table will appear for the flight group showing the following information as co
 * Score - The total points given to the pilot after normalization.
 * Penalty - Any penalty incurred on the flight
 
+This view will use the route `/contests/:id/rounds/:roundNumber/flight-groups`. This page is always specific to a round.
+
 ## View Navigation
 
 The initial view is of the "Overall Individual Results".
 
 A user clicking on a round number header or a round score in the "Overall Individual Results" or "Team Results" should be taken to the "Flight Group Scores" for that round. This involves changing the current round to that round. If the user has clicked a specific pilot's score for a round the resulting view of the "Flight Group Scores" should have that pilot's score scrolled to the upper most portion of the view.
+
+The navigation between the views should retain the last selected round.
 
 The "Flight Group Scores" and "Team Results" views will have a navigation element to go back to overall results. The "Overall Individual Results" view should have navigation elements to go to "Team Results" or the "Current Round's Flight Group Scores".
