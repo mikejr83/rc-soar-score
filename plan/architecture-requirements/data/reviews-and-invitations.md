@@ -2,9 +2,9 @@
 
 ## Review request
 
-A review request belongs to one score placeholder and preserves the current official score, proposed raw components, cumulative penalty, optional participant message, requester, base score revision, and request time. It has an explicit state such as `Submitted`, `UnderReview`, `Approved`, `Rejected`, or `Superseded`, plus decision actor, time, and message.
+A review request belongs to one score placeholder and preserves the current preliminary score (`Submitted`), proposed raw components, cumulative penalty, optional participant message, requester, base score revision, and request time. It has an explicit state such as `Submitted`, `UnderReview`, `Approved`, `Rejected`, or `Superseded`, plus decision actor, time, and message.
 
-A request never mutates the original submission. If the official score changes after the request's base revision, the director must explicitly approve, reject, or supersede it.
+A participant may submit a review request only against a preliminary (`Submitted`) score if review requests are enabled in the contest and the score is not locked. A review request cannot be submitted on scores that are marked `Official` or `Locked`. A request never mutates the original submission in place. If an official edits or marks the score official while a review is pending, the review request is superseded.
 
 ## Invitation
 

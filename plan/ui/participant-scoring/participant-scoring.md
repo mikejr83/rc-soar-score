@@ -12,7 +12,7 @@ Only the first round without a submitted score shows `Enter`. A round with a sub
 
 The entry form renders the discipline-specific fields plus cumulative penalty. It has `Submit`, `Back`, and available previous/next navigation. Before submission, a result that would produce zero shows a confirmation explaining the consequence. After accepted submission, the form becomes read-only and displays submission time and status.
 
-When review requests are enabled and no request is open for the score, `Request review` opens an editable copy of the submitted values and a short reason field. Submit is disabled until a value changes. After submission the form becomes read-only and marks changed fields and the pending review state. A locked or completed score hides review actions.
+When review requests are enabled and no review is open for the flight assignment, `Request review` is available only for a preliminary (`Submitted`) score that is not locked. It opens an editable form prepopulated with the participant's submitted values and an optional explanation field. Submit is disabled until at least one value changes. After submission, the form displays the pending review state and highlights the modified fields. If the score has been marked `Official` by the contest director or is locked (at the score, group, round, or contest level), review request actions are hidden.
 
 ## Results
 

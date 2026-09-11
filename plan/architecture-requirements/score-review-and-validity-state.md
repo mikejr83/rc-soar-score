@@ -36,19 +36,19 @@ The contest director has viewed the review request. The contest director hasn't 
 
 A score becomes official when the following occurs:
 
-* The contest director marks the score as official.
-* The score review flow completes with a rejected outcome.
-* The score review flow completes with an approved outcome.
+* The contest director enters or marks the score as official.
+* The score review flow completes with an approved outcome (applying the proposed revision as official).
+* The score review flow completes with a rejected outcome (retaining the existing official score).
 
-Participant review eligibility after a score becomes official is controlled by contest review policy. An authorized director correction creates a new official revision and preserves the prior value.
+A participant may submit a score review request against a `Submitted` score as long as review requests are enabled and the score is not locked. An authorized director correction creates a new official revision and preserves the prior value.
 
 ### Locked
 
-The contest director can lock scores. Locking scores prevents the scores from being modified. Score review requests cannot be submitted for locked scores. Locks are generally performed at the contest level. However, the lock may be enacted on a group or a round. The functionality here is that a contest director may be reviewing the scores as they're entered and marking them official. Once all the scores for a group or round become official they lock the scores so that they are not inadvertently modified.
+The contest director can lock scores. Locking scores prevents the scores from being modified. Score review requests cannot be submitted for locked scores. Locks can be enacted at the score, group, round, or contest level. Once scores for a group or round become official, the director may lock them so that they are not inadvertently modified or subject to further review requests.
 
 ## Score Review States
 
-A participant can submit a score review request if the contest director has configured the contest to allow it and the score is not locked. The request must target the current eligible score revision; the exact policy for already-official scores is defined by the contest review configuration.
+A participant can submit a score review request if the contest director has configured the contest to allow it and the score is not locked or `Official`. The request must target the current eligible score revision; the exact policy for already-official scores is defined by the contest review configuration.
 
 |State|Meaning|Entry condition|Exit / next transition|
 |-----|-------|---------------|----------------------|

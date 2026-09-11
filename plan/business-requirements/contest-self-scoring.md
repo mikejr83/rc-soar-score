@@ -49,9 +49,9 @@ When the user is entering scoring parameters the view will show a button to subm
 
 ### Review Request
 
-A button labeled "Request Review" will be available if the contest configuration has it enabled and the contest director has not disabled it for the round. It is not shown otherwise. This button is only available after a score has been submitted and while no other review for the pilot is open for the round in which the current score is linked.
+A button labeled "Request Review" is available if review requests are enabled in the contest configuration, the score is in the preliminary `Submitted` state, and the score is not locked (at the score, group, round, or contest level). If the contest director has already marked the score as `Official` or if the score is locked, the "Request Review" button is hidden.
 
-Clicking on this button will enable the form to be presented to the user with the current score details as the defaults in the inputs. The "Submit" button is also presented. It is enabled only if the user makes a change to any of the form fields. The user may change any of the values in the form. An additional text field is presented so the user may enter a short message on why they are requesting a review.
+Clicking on this button presents the form pre-populated with the participant's submitted score details. The "Submit" button is enabled only after at least one value changes. The participant may change any scoring values and enter an optional message explaining the reason for the review.
 
 The user clicks the "Submit" button. The form is then presented as a readonly view again. The view shows the values as they were entered by the user. The values which were altered will have an indicator next to their label. The page will also indicate that the pilots score for the round is under a requested review.
 

@@ -8,15 +8,18 @@ In this process the participant is the pilot or helper entering the score. The c
 
 ## Process
 
-1. The participant has entered a score in the system.
-2. The participant has no other pending reviews for the round.
-3. The participant indicates they need to submit a score review by clicking the button in the UI.
-4. The participant is presented with the editable scoring form. The form is prepopulated with the values that are currently considered official.
-5. The participant makes any adjustments needed.
-6. The participant submits the score review request.
-7. The contest director is notified in the application (after a sync or through some communication with the server) that a score review request is to be evaluated. The contest director may see the notification as they are moving between the group scoring pages.
-8. The contest director is presented with the current official score and the requested score modifications as entered by the participant. If the participant left a message, it is shown as well.
-9. The contest director may approve or reject the request. If the request is approved the modifications become the official score. If the contest director rejects the request a rejection message may be entered.
+1. The participant has entered a preliminary score in the self-scoring system (`Submitted` state).
+2. The score has not been marked `Official` by the contest director and is not locked (at the score, group, round, or contest level).
+3. The participant has no other pending review request for that flight assignment/round.
+4. The participant initiates a review by clicking "Request Review" in the self-scoring UI.
+5. The participant is presented with the editable scoring form, prepopulated with their originally submitted values.
+6. The participant adjusts the values (submit is enabled only if values change), optionally enters an explanation message, and submits the score review request.
+7. The contest director is notified in the application (after a sync or via real-time connection) that a score review request is pending evaluation.
+8. The contest director inspects the submitted preliminary score alongside the requested modifications and participant message.
+9. The contest director evaluates the request:
+   - **Approved**: The proposed modifications are accepted as the new official score revision (`Official` state) and trigger score recalculation.
+   - **Rejected**: The proposed modifications are rejected, and the existing score is confirmed as official (`Official` state). An optional rejection reason may be recorded.
+   - Once marked official through approval, rejection, or direct administrative entry, participant review requests are closed for that score.
 
 ## Auditing
 

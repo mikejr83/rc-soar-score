@@ -23,4 +23,4 @@ All-zero groups produce zero without division by zero. Missing, explicit zero, a
 
 ## Locks and review interaction
 
-Contest, round, group, assignment, and score lock scope must be represented independently or with an explicit precedence rule. A locked score cannot be modified by participant review. The final review eligibility policy remains an open decision and must be resolved before implementation.
+Contest, round, group, assignment, and score lock scopes are evaluated hierarchically (`Contest.Locked > Round.Locked > Group.Locked > Score.Locked`). A locked score cannot be modified by participant review. A participant may submit a score review request against any `Submitted` score as long as review requests are enabled for the contest, the score is not locked, and no other review for that assignment is pending.
