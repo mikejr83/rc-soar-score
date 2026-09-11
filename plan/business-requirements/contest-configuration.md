@@ -101,7 +101,7 @@ The default selection will be "Normalized".
 
 Configuration for calculating a pilot's score will be presented. There are two options, to round to a number of decimal places or truncated after a number of decimal places. The number of decimals places are selectable, 0 - 3.
 
-The contest director can indicate that the worst score for a pilot in a round can be discarded. This is configured by providing the round number after which the score is discarded.
+The contest director can indicate that the worst score for a pilot in a round can be discarded. This is configured by providing the round number after which the score is discarded. The application will provide for at most discarding two rounds per pilot in this manner. Disciplines typically specify the number of rounds completed before a single dropped round. The contest director should have the option to specify up to two. If no round number is supplied for the second then it is to be assumed that there is only one.
 
 ### Scoring Rules
 
