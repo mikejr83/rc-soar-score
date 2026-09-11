@@ -2,6 +2,8 @@
 
 Official scoring is optimized for a tablet or larger screen and displays one complete group for one round at a time. The route identifies the contest, matrix revision, round, and group.
 
+The scoring is performed with the following route scheme: `/contest-administration/contests/:id/scoring/rounds/:round/groups/:group`.
+
 ## Navigation and grid
 
 The page provides round navigation to first, previous, current, next, and last available rounds. Group navigation provides first, previous, next, and last groups within the selected round. The current round and group remain in the URL or route state so refresh and browser navigation restore them.
