@@ -12,6 +12,8 @@ The online and offline versions of RC Soar Score should effectively be the same.
 
 The initial thought for this parity is to use a front-end technology such as Angular to build the main application for contest directors. It can be built using PWA standards. Further, it can be wrapped with a technology like Electron. The desktop wrapping layer can host the API which the UI interacts with. The API layer will store all data locally.
 
+Flutter should also be considered. It will enable the production of web, Windows, iOS, and Android artifacts. This could be coupled with Dart for the server API language.
+
 ### Publishing Results
 
 The contest director using the offline application may still desire to have a record of the contest entered into the public site. Publishing results is the act of the contest director taking a contest which was create, configured, administered, and completed while using the offline application and sending the contest results to the public site.

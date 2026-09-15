@@ -4,8 +4,6 @@ The RC Soar Score solution is a set of applications and APIs to track, score, an
 
 The contest director will use an application to create contests and and configure contests. The following sections describe the requirements for creating contests, managing basic contest configuration, selecting participation, entering participant information, and managing global data.
 
-This will be done within an Angular PWA application. The PWA requirement comes from the desire to have the same code be used in both the web site and wrapped in a desktop shell.
-
 ## Main Contest Configuration
 
 A contest will need to have various configuration completed before it can be run. Configuration is needed for the contest discipline, the pilots participating, scoring options, scoring rules, and how the rounds and groups are drawn.

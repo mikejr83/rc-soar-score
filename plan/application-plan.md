@@ -8,8 +8,8 @@ A separate web application is provided for public viewing of contests and scores
 
 This creates the following main areas of concern for the initial application:
 
-* Angular application for managing and running contests
-* Angular application for hosting the project site along with access to published contests and scores.
+* Web application for managing and running contests
+* Web application for hosting the project site along with access to published contests and scores.
 * API layer for interacting with client applications
 * Desktop shells for running the application in a stand-alone offline mode.
 
