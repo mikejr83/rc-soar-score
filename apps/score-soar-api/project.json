@@ -8,14 +8,14 @@
       "executor": "nx:run-commands",
       "options": {
         "cwd": "apps/score-soar-api",
-        "command": "flutter pub get"
+        "command": "dart pub get"
       }
     },
     "build": {
       "executor": "nx:run-commands",
       "options": {
         "cwd": "apps/score-soar-api",
-        "command": "flutter build web --release --no-pub"
+        "command": "dart compile exe lib/main.dart -o build/score-soar-api"
       },
       "dependsOn": ["pub-get"],
       "outputs": ["{projectRoot}/build"]
@@ -24,7 +24,7 @@
       "executor": "nx:run-commands",
       "options": {
         "cwd": "apps/score-soar-api",
-        "command": "flutter run -d chrome --no-pub"
+        "command": "dart run lib/main.dart"
       },
       "dependsOn": ["pub-get"]
     },
@@ -32,7 +32,7 @@
       "executor": "nx:run-commands",
       "options": {
         "cwd": "apps/score-soar-api",
-        "command": "flutter test --no-pub"
+        "command": "dart test"
       },
       "dependsOn": ["pub-get"]
     },
@@ -40,7 +40,7 @@
       "executor": "nx:run-commands",
       "options": {
         "cwd": "apps/score-soar-api",
-        "command": "flutter analyze --no-pub"
+        "command": "dart analyze"
       },
       "dependsOn": ["pub-get"]
     }

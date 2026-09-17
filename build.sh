@@ -1,20 +1,21 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-PROJECTS="score_soar_api score_soar_contest score_soar_public"
 TARGET="${1:-web}"
 
-if [ "$TARGET" != "web" ]; then
-  echo "Usage: ./build.sh [web]"
-  exit 1
-fi
+cd apps/score-soar-api
 
-for project in $PROJECTS; do
-  echo "=== Building $project ($TARGET) ==="
-  cd "$project"
-  flutter pub get
-  flutter build "$TARGET" --release
-  cd ..
-done
+flutter pub get
+flutter build "$TARGET"
+
+cd ../score-soar-contest
+
+flutter pub get
+flutter build "$TARGET"
+
+cd ../score-soar-public
+
+flutter pub get
+flutter build "$TARGET"
 
 echo "=== All projects built successfully ==="
