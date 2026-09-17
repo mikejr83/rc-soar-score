@@ -7,58 +7,25 @@ on:
     branches: [ main, develop ]
 
 jobs:
-  analyze:
+  ci:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        project: [ score_soar_api, score_soar_contest, score_soar_public ]
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.24.0'
           cache: true
-      - name: Install dependencies
-        working-directory: ${{ matrix.project }}
-        run: flutter pub get
-      - name: Analyze
-        working-directory: ${{ matrix.project }}
-        run: flutter analyze --no-fatal-infos
-
-  test:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        project: [ score_soar_api, score_soar_contest, score_soar_public ]
-    needs: analyze
-    steps:
-      - uses: actions/checkout@v4
-      - uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.24.0'
-          cache: true
-      - name: Install dependencies
-        working-directory: ${{ matrix.project }}
-        run: flutter pub get
-      - name: Run tests
-        working-directory: ${{ matrix.project }}
-        run: flutter test --no-pub
-
-  build-web:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        project: [ score_soar_api, score_soar_contest, score_soar_public ]
-    needs: test
-    steps:
-      - uses: actions/checkout@v4
-      - uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.24.0'
-          cache: true
-      - name: Install dependencies
-        working-directory: ${{ matrix.project }}
-        run: flutter pub get
-      - name: Build web release
-        working-directory: ${{ matrix.project }}
-        run: flutter build web --release --no-pub
+      - name: Install NX dependencies
+        run: npm ci
+      - name: Install Flutter dependencies
+        run: npx nx run-many --target=pub-get --all
+      - name: Analyze all projects
+        run: npx nx run-many --target=analyze --all --parallel=3
+      - name: Test all projects
+        run: npx nx run-many --target=test --all --parallel=3
+      - name: Build all projects
+        run: npx nx run-many --target=build --all --parallel=1

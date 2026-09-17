@@ -1,0 +1,37 @@
+# Git Ignore for NX + Flutter Monorepo
+
+# NX cache
+.nx/
+nx-cache/
+
+# Node modules
+node_modules/
+
+# Flutter build artifacts (per app)
+apps/*/build/
+apps/*/ios/Flutter/
+apps/*/android/app/build/
+
+# Flutter IDE files
+apps/*/.flutter-plugins
+apps/*/.flutter-plugins-dependencies
+apps/*/.packages
+apps/*/.dart_tool/
+apps/*/lib/*.g.dart
+apps/*/test/*.g.dart
+
+# IDEs
+.vscode/
+.idea/
+*.iml
+*.suo
+*.user
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.swp
+*.swo

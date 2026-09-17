@@ -1,0 +1,22 @@
+{
+  "name": "score-soar",
+  "version": "1.0.0",
+  "private": true,
+  "description": "RC sailplane soaring contest scoring and management suite",
+  "scripts": {
+    "build": "nx run-many --target=build --all",
+    "test": "nx run-many --target=test --all",
+    "lint": "nx run-many --target=analyze --all",
+    "format": "nx format:write --all",
+    "build:api": "nx build score-soar-api",
+    "build:contest": "nx build score-soar-contest",
+    "build:public": "nx build score-soar-public",
+    "serve:api": "nx serve score-soar-api",
+    "serve:contest": "nx serve score-soar-contest",
+    "serve:public": "nx serve score-soar-public"
+  },
+  "devDependencies": {
+    "@nrwl/web": "^19.0.0",
+    "nx": "^19.0.0"
+  }
+}
