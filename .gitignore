@@ -13,6 +13,7 @@ apps/*/ios/Flutter/
 apps/*/android/app/build/
 
 # Flutter IDE files
+.dart_tool/
 apps/*/.flutter-plugins
 apps/*/.flutter-plugins-dependencies
 apps/*/.packages
