@@ -3,6 +3,10 @@
   "projects": {
     "soar-score-api": "apps/soar-score-api",
     "soar-score-contest": "apps/soar-score-contest",
-    "soar-score-public": "apps/soar-score-public"
+    "soar-score-public": "apps/soar-score-public",
+    "soar_score_core": "packages/soar_score_core",
+    "soar_score_data": "packages/soar_score_data",
+    "soar_score_ui": "packages/soar_score_ui",
+    "soar_score_api": "packages/soar_score_api"
   }
 }

@@ -1,0 +1,18 @@
+name: soar_score_ui
+description: Shared UI components, widgets, and screens for Soar Score.
+version: 1.0.0+1
+publish_to: 'none'
+
+environment:
+  sdk: ^3.13.3
+
+dependencies:
+  flutter:
+    sdk: flutter
+  soar_score_core:
+    path: ../soar_score_core
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  lints: ^6.0.0

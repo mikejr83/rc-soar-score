@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "score_soar_offline" "\0"
+            VALUE "FileDescription", "soar_score_contest" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "score_soar_offline" "\0"
+            VALUE "InternalName", "soar_score_contest" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2026 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "score_soar_offline.exe" "\0"
-            VALUE "ProductName", "score_soar_offline" "\0"
+            VALUE "OriginalFilename", "soar_score_contest.exe" "\0"
+            VALUE "ProductName", "soar_score_contest" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END
