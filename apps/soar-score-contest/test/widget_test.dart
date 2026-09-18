@@ -5,7 +5,6 @@
 // gestures. You can also use WidgetTester to find child widgets in the widget
 // tree, read text, and verify that the values of widget properties are correct.
 
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:soar_score_contest/main.dart';
@@ -16,7 +15,7 @@ void main() {
     await tester.pumpWidget(const ScoreSoarContest());
 
     // Verify that our app title is displayed.
-    expect(find.text('Score Soar'), findsOneWidget);
-    expect(find.text('Contest Management'), findsOneWidget);
+    expect(find.text('Contest'), findsOneWidget);
+    expect(find.text('Contest Screen'), findsOneWidget);
   });
 }
