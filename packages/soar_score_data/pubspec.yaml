@@ -9,7 +9,7 @@ environment:
 dependencies:
   soar_score_core:
     path: ../soar_score_core
-  sqlite3: ^2.4.0
+  sqlite3: ^3.6.0
   http: ^1.2.2
   json_annotation: ^4.9.0
 
