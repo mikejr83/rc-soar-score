@@ -7,17 +7,16 @@ nx-cache/
 # Node modules
 node_modules/
 
-# Flutter build artifacts (per app)
+# Flutter build artifacts
+/build/
 apps/*/build/
 apps/*/ios/Flutter/
-apps/*/android/app/build/
 
-# Flutter IDE files
+# Flutter/Dart tool & generated files
 .dart_tool/
-apps/*/.flutter-plugins
-apps/*/.flutter-plugins-dependencies
-apps/*/.packages
-apps/*/.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
 apps/*/lib/*.g.dart
 apps/*/test/*.g.dart
 
@@ -39,8 +38,8 @@ Thumbs.db
 *.swp
 *.swo
 
-# Pubspec lock (shared dependency versions)
-pubspec.lock
+# Flutter applications (including this repo root) must commit pubspec.lock
+# for reproducible builds. Do NOT ignore it in this monorepo.
 
 # Coverage reports
 coverage/

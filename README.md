@@ -1,12 +1,12 @@
-# Score Soar
+# Soar Score
 
 RC sailplane soaring contest scoring and management suite built with Flutter and managed with NX.
 
 ## Projects
 
-- **score-soar-api** - API layer for backend services and data persistence
-- **score-soar-contest** - Contest management web application for contest directors
-- **score-soar-public** - Public-facing "RC Soar Score" website for viewing contests
+- **soar-score-api** - API layer for backend services and data persistence
+- **soar-score-contest** - Contest management web application for contest directors
+- **soar-score-public** - Public-facing "RC Soar Score" website for viewing contests
 
 ## Quick Start
 
@@ -28,10 +28,10 @@ npm run lint
 
 ```bash
 # Build individual project
-npx nx build score-soar-api
+npx nx build soar-score-api
 
 # Run tests on a specific project
-npx nx test score-soar-contest
+npx nx test soar-score-contest
 
 # View dependency graph
 npx nx graph

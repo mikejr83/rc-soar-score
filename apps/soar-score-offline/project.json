@@ -1,0 +1,48 @@
+{
+  "name": "score-soar-offline",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/soar-score-offline",
+  "projectType": "application",
+  "targets": {
+    "pub-get": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/soar-score-offline",
+        "command": "flutter pub get"
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/soar-score-offline",
+        "command": "flutter build windows --release --no-pub"
+      },
+      "dependsOn": ["pub-get"],
+      "outputs": ["{projectRoot}/build"]
+    },
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/soar-score-offline",
+        "command": "flutter run -d windows --no-pub"
+      },
+      "dependsOn": ["pub-get"]
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/soar-score-offline",
+        "command": "flutter test --no-pub"
+      },
+      "dependsOn": ["pub-get"]
+    },
+    "analyze": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/soar-score-offline",
+        "command": "flutter analyze --no-pub"
+      },
+      "dependsOn": ["pub-get"]
+    }
+  }
+}

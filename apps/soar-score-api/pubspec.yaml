@@ -1,4 +1,4 @@
-name: score_soar_api
+name: soar_score_api
 description: REST HTTP API server for the Score Soar RC sailplane soaring contest management suite.
 version: 1.0.0+1
 

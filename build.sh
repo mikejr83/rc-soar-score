@@ -3,17 +3,17 @@ set -euo pipefail
 
 TARGET="${1:-web}"
 
-cd apps/score-soar-api
+cd apps/soar-score-api
 
 flutter pub get
 flutter build "$TARGET"
 
-cd ../score-soar-contest
+cd ../soar-score-contest
 
 flutter pub get
 flutter build "$TARGET"
 
-cd ../score-soar-public
+cd ../soar-score-public
 
 flutter pub get
 flutter build "$TARGET"

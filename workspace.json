@@ -1,8 +1,8 @@
 {
   "version": 2,
   "projects": {
-    "score-soar-api": "apps/score-soar-api",
-    "score-soar-contest": "apps/score-soar-contest",
-    "score-soar-public": "apps/score-soar-public"
+    "soar-score-api": "apps/soar-score-api",
+    "soar-score-contest": "apps/soar-score-contest",
+    "soar-score-public": "apps/soar-score-public"
   }
 }

@@ -1,16 +1,16 @@
 {
-  "name": "score-soar",
+  "name": "soar-score",
   "version": "1.0.0",
   "private": true,
   "description": "RC sailplane soaring contest scoring and management suite",
   "scripts": {
     "build": "bash build.sh",
-    "build:api": "cd apps/score-soar-api && flutter build web --release",
-    "build:contest": "cd apps/score-soar-contest && flutter build web --release",
-    "build:public": "cd apps/score-soar-public && flutter build web --release",
-    "serve:api": "cd apps/score-soar-api && flutter run -d chrome",
-    "serve:contest": "cd apps/score-soar-contest && flutter run -d chrome",
-    "serve:public": "cd apps/score-soar-public && flutter run -d chrome"
+    "build:api": "cd apps/soar-score-api && flutter build web --release",
+    "build:contest": "cd apps/soar-score-contest && flutter build web --release",
+    "build:public": "cd apps/soar-score-public && flutter build web --release",
+    "serve:api": "cd apps/soar-score-api && flutter run -d chrome",
+    "serve:contest": "cd apps/soar-score-contest && flutter run -d chrome",
+    "serve:public": "cd apps/soar-score-public && flutter run -d chrome"
   },
   "devDependencies": {
     "nx": "^19.0.0"
