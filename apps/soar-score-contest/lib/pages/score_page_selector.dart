@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'f3j_scoring_test_page.dart';
 import 'f5j_scoring_test_page.dart';
 import 'matrix_page.dart';
 
@@ -23,6 +24,17 @@ class ScorePageSelector extends StatelessWidget {
                 subtitle: const Text('Test the scoring engine'),
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute(builder: (context) => const F5JScoringTestScreen()),
+                ),
+              ),
+            ),
+            Card(
+              margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+              child: ListTile(
+                leading: const Icon(Icons.calculate),
+                title: const Text('F3J Score Testing'),
+                subtitle: const Text('Test the F3J scoring engine'),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => const F3JScoringTestScreen()),
                 ),
               ),
             ),
