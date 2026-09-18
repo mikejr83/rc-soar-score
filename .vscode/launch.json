@@ -2,20 +2,19 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Dart: server",
+      "name": "Dart: API server",
       "type": "dart",
       "request": "launch",
-      "program": "packages/server/bin/server.dart",
-      "args": [],
-      "cwd": "packages/server"
+      "program": "lib/main.dart",
+      "cwd": "apps/soar-score-api"
     },
     {
-      "name": "Dart: server (debug mode)",
+      "name": "Dart: API server (debug mode)",
       "type": "dart",
       "request": "launch",
-      "program": "packages/server/bin/server.dart",
+      "program": "lib/main.dart",
       "args": ["--debug"],
-      "cwd": "packages/server"
+      "cwd": "apps/soar-score-api"
     },
     {
       "name": "Flutter: score-soar-contest (web)",
@@ -23,30 +22,23 @@
       "request": "launch",
       "program": "lib/main.dart",
       "args": ["-d", "chrome"],
-      "cwd": "apps/score-soar-contest"
+      "cwd": "apps/soar-score-contest"
     },
     {
-      "name": "Flutter: web",
+      "name": "Flutter: score-soar-public (web)",
       "type": "dart",
       "request": "launch",
-      "program": "apps/web/main.dart",
-      "args": ["--web-browser", "chrome"],
-      "cwd": "apps/web"
+      "program": "lib/main.dart",
+      "args": ["-d", "chrome"],
+      "cwd": "apps/soar-score-public"
     },
     {
-      "name": "Flutter: android",
+      "name": "Flutter: score-soar-offline (windows)",
       "type": "dart",
       "request": "launch",
-      "program": "apps/mobile/main.dart",
-      "cwd": "apps/mobile"
-    },
-    {
-      "name": "Flutter: ios",
-      "type": "dart",
-      "request": "launch",
-      "program": "apps/mobile/main.dart",
-      "cwd": "apps/mobile",
-      "args": ["--target-platform", "ios"]
+      "program": "lib/main.dart",
+      "args": ["-d", "windows"],
+      "cwd": "apps/soar-score-offline"
     }
   ]
 }
