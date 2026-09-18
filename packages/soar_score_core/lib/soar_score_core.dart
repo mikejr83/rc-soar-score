@@ -2,6 +2,7 @@
 library soar_score_core;
 
 export 'src/models/contest.dart';
+export 'src/models/contest_state.dart';
 export 'src/models/pilot.dart';
 export 'src/models/flight.dart';
 export 'src/models/score.dart';
