@@ -18,6 +18,14 @@
       "cwd": "packages/server"
     },
     {
+      "name": "Flutter: score-soar-contest (web)",
+      "type": "dart",
+      "request": "launch",
+      "program": "lib/main.dart",
+      "args": ["-d", "chrome"],
+      "cwd": "apps/score-soar-contest"
+    },
+    {
       "name": "Flutter: web",
       "type": "dart",
       "request": "launch",
