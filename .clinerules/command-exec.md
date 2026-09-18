@@ -1,0 +1,2 @@
+- Always run Git commands in non-interactive mode using `--no-pager` (e.g., `git --no-pager log` or `git --no-pager diff`).
+- Never run commands that invoke an interactive terminal pager (like `less`, `more`).

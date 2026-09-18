@@ -13,6 +13,8 @@ dependencies:
     path: ../soar_score_data
   shelf: ^1.4.1
   shelf_router: ^1.1.4
+  shelf_cors_headers: ^0.1.2
+  logging: ^1.2.0
   http: ^1.2.2
   json_annotation: ^4.9.0
 

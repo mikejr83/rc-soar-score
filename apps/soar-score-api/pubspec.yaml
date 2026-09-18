@@ -1,11 +1,16 @@
-name: soar_score_api
+name: score_soar_api
 description: REST HTTP API server for the Score Soar RC sailplane soaring contest management suite.
 version: 1.0.0+1
+publish_to: 'none'
 
 environment:
   sdk: ^3.13.3
 
 dependencies:
+  soar_score_api:
+    path: ../../packages/soar_score_api
+  soar_score_data:
+    path: ../../packages/soar_score_data
   shelf: ^1.4.1
   shelf_router: ^1.1.4
   shelf_static: ^1.1.2

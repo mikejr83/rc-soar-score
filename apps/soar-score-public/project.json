@@ -1,20 +1,20 @@
 {
   "name": "score-soar-public",
   "$schema": "../../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "apps/score-soar-public",
+  "sourceRoot": "apps/soar-score-public",
   "projectType": "application",
   "targets": {
     "pub-get": {
       "executor": "nx:run-commands",
       "options": {
-        "cwd": "apps/score-soar-public",
+        "cwd": "apps/soar-score-public",
         "command": "flutter pub get"
       }
     },
     "build": {
       "executor": "nx:run-commands",
       "options": {
-        "cwd": "apps/score-soar-public",
+        "cwd": "apps/soar-score-public",
         "command": "flutter build web --release --no-pub"
       },
       "dependsOn": ["pub-get"],
@@ -23,7 +23,7 @@
     "serve": {
       "executor": "nx:run-commands",
       "options": {
-        "cwd": "apps/score-soar-public",
+        "cwd": "apps/soar-score-public",
         "command": "flutter run -d chrome --no-pub"
       },
       "dependsOn": ["pub-get"]
@@ -31,7 +31,7 @@
     "test": {
       "executor": "nx:run-commands",
       "options": {
-        "cwd": "apps/score-soar-public",
+        "cwd": "apps/soar-score-public",
         "command": "flutter test --no-pub"
       },
       "dependsOn": ["pub-get"]
@@ -39,7 +39,7 @@
     "analyze": {
       "executor": "nx:run-commands",
       "options": {
-        "cwd": "apps/score-soar-public",
+        "cwd": "apps/soar-score-public",
         "command": "flutter analyze --no-pub"
       },
       "dependsOn": ["pub-get"]
