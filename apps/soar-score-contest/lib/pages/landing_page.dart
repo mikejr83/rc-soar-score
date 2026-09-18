@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -128,9 +129,23 @@ class LandingPage extends StatelessWidget {
                   label: const Text('Create account'),
                 ),
                 const SizedBox(height: 32),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  alignment: WrapAlignment.center,
                   children: [
+                    // `Continue offline` is available only in the offline
+                    // (desktop) version of the app. The web build does not
+                    // show it.
+                    if (!kIsWeb)
+                      TextButton.icon(
+                        onPressed: () =>
+                            Navigator.of(context).pushNamed(
+                              '/contest-administration/home',
+                            ),
+                        icon: const Icon(Icons.wifi_off, size: 16),
+                        label: const Text('Continue offline'),
+                      ),
                     TextButton.icon(
                       onPressed: () => _openExternalLink(
                         context,
@@ -140,7 +155,6 @@ class LandingPage extends StatelessWidget {
                       icon: const Icon(Icons.open_in_new, size: 16),
                       label: const Text('Help'),
                     ),
-                    const SizedBox(width: 8),
                     TextButton.icon(
                       onPressed: () => _openExternalLink(
                         context,
