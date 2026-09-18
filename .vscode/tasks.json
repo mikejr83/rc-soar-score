@@ -1,0 +1,37 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build:api",
+      "type": "shell",
+      "command": "cd apps/soar-score-api && dart pub get && dart analyze",
+      "group": { "kind": "build", "isDefault": false },
+      "problemMatcher": ["$dart"],
+      "options": { "cwd": "${workspaceFolder}" }
+    },
+    {
+      "label": "build:contest",
+      "type": "shell",
+      "command": "cd apps/soar-score-contest && flutter pub get && flutter build web --release",
+      "group": "build",
+      "problemMatcher": ["$flutter"],
+      "options": { "cwd": "${workspaceFolder}" }
+    },
+    {
+      "label": "build:public",
+      "type": "shell",
+      "command": "cd apps/soar-score-public && flutter pub get && flutter build web --release",
+      "group": "build",
+      "problemMatcher": ["$flutter"],
+      "options": { "cwd": "${workspaceFolder}" }
+    },
+    {
+      "label": "build:all",
+      "type": "shell",
+      "command": "cd apps/soar-score-api && dart pub get && dart analyze && cd ../soar-score-contest && flutter pub get && flutter build web --release && cd ../soar-score-public && flutter pub get && flutter build web --release",
+      "group": { "kind": "build", "isDefault": true },
+      "problemMatcher": ["$dart", "$flutter"],
+      "options": { "cwd": "${workspaceFolder}" }
+    }
+  ]
+}

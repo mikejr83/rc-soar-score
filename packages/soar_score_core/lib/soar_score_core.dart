@@ -10,4 +10,4 @@ export 'src/models/score_result.dart';
 export 'src/models/flights/__init__.dart';
 export 'src/scoring/scoring_engine.dart';
 export 'src/scoring/discipline_strategy.dart';
-export 'src/services/contest_service.dart';
+export 'src/services/contest_service.dart';export "src/models/matrix/__init__.dart"; export "src/services/matrix/matrix_draw_service.dart";
