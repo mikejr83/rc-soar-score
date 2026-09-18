@@ -1,18 +1,14 @@
-/// Represents a flight during a contest.
-class Flight {
+/// Base class for flight attempts across all disciplines.
+///
+/// Each discipline has its own scoring fields. This abstract class provides
+/// the common structure while discipline-specific classes define their own
+/// scoring inputs.
+abstract class Flight {
   final String id;
   final String pilotId;
-  final DateTime startTime;
-  final DateTime endTime;
-  final double distanceKm;
-  final double durationMinutes;
 
   Flight({
     required this.id,
     required this.pilotId,
-    required this.startTime,
-    required this.endTime,
-    required this.distanceKm,
-    required this.durationMinutes,
   });
 }
