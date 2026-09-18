@@ -4,13 +4,15 @@
   "private": true,
   "description": "RC sailplane soaring contest scoring and management suite",
   "scripts": {
-    "build": "bash build.sh",
-    "build:api": "cd apps/soar-score-api && flutter build web --release",
-    "build:contest": "cd apps/soar-score-contest && flutter build web --release",
-    "build:public": "cd apps/soar-score-public && flutter build web --release",
-    "serve:api": "cd apps/soar-score-api && flutter run -d chrome",
+    "build": "cd apps/soar-score-api && dart pub get && dart analyze && cd ../soar-score-contest && flutter pub get && flutter build web --release && cd ../soar-score-public && flutter pub get && flutter build web --release",
+    "build:api": "cd apps/soar-score-api && dart pub get && dart analyze",
+    "build:contest": "cd apps/soar-score-contest && flutter pub get && flutter build web --release",
+    "build:public": "cd apps/soar-score-public && flutter pub get && flutter build web --release",
+    "serve:api": "cd apps/soar-score-api && dart run lib/main.dart",
     "serve:contest": "cd apps/soar-score-contest && flutter run -d chrome",
-    "serve:public": "cd apps/soar-score-public && flutter run -d chrome"
+    "serve:public": "cd apps/soar-score-public && flutter run -d chrome",
+    "test": "cd apps/soar-score-api && dart test && cd ../soar-score-contest && flutter test && cd ../soar-score-public && flutter test",
+    "lint": "cd apps/soar-score-api && dart analyze && cd ../soar-score-contest && flutter analyze && cd ../soar-score-public && flutter analyze"
   },
   "devDependencies": {
     "nx": "^19.0.0"
