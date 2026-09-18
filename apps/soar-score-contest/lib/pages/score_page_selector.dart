@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../main.dart';
+import 'f5j_scoring_test_page.dart';
 import 'matrix_page.dart';
 
 class ScorePageSelector extends StatelessWidget {
