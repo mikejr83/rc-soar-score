@@ -1,0 +1,44 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Dart: server",
+      "type": "dart",
+      "request": "launch",
+      "program": "packages/server/bin/server.dart",
+      "args": [],
+      "cwd": "packages/server"
+    },
+    {
+      "name": "Dart: server (debug mode)",
+      "type": "dart",
+      "request": "launch",
+      "program": "packages/server/bin/server.dart",
+      "args": ["--debug"],
+      "cwd": "packages/server"
+    },
+    {
+      "name": "Flutter: web",
+      "type": "dart",
+      "request": "launch",
+      "program": "apps/web/main.dart",
+      "args": ["--web-browser", "chrome"],
+      "cwd": "apps/web"
+    },
+    {
+      "name": "Flutter: android",
+      "type": "dart",
+      "request": "launch",
+      "program": "apps/mobile/main.dart",
+      "cwd": "apps/mobile"
+    },
+    {
+      "name": "Flutter: ios",
+      "type": "dart",
+      "request": "launch",
+      "program": "apps/mobile/main.dart",
+      "cwd": "apps/mobile",
+      "args": ["--target-platform", "ios"]
+    }
+  ]
+}
