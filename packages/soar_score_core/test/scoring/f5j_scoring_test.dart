@@ -23,22 +23,26 @@ void main() {
       final flight = F5JFlight(
         id: 'flight-1',
         pilotId: 'pilot-1',
-        durationSeconds: 590,
+        durationSeconds: 595,
+        landingBonus: 50,
+        launchAltitudeMeters: 163
       );
 
       final result = engine.computeRawScore(flight, config);
-      expect(result.rawScore, 630.0); // 590 + 40 landing bonus
+      expect(result.rawScore, 563.5); // 595 + 50 landing bonus - 81.5 altitude penalty
     });
 
-    test('time stops at working time end', () {
+    test('over reference altitude', () {
       final flight = F5JFlight(
         id: 'flight-1',
         pilotId: 'pilot-1',
-        durationSeconds: 650,
+        durationSeconds: 598,
+        landingBonus: 50,
+        launchAltitudeMeters: 213
       );
 
       final result = engine.computeRawScore(flight, config);
-      expect(result.rawScore, 640.0); // 600 + 40 landing bonus
+      expect(result.rawScore, 509.0); // 598 + 50 landing bonus - 139.0 altitude penalty
     });
 
     test('motor restart results in 0', () {
@@ -47,6 +51,7 @@ void main() {
         pilotId: 'pilot-1',
         durationSeconds: 590,
         zeroReason: const MotorRestart(),
+        landingBonus: null,
       );
 
       final result = engine.computeRawScore(flight, config);
@@ -60,6 +65,7 @@ void main() {
         pilotId: 'pilot-1',
         durationSeconds: 590,
         zeroReason: const OutOfBoundsLanding(),
+        landingBonus: null,
       );
 
       final result = engine.computeRawScore(flight, config);

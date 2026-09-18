@@ -20,7 +20,8 @@ void main() {
       final flight = ThermalDurationFlight(
         id: 'flight-1',
         pilotId: 'pilot-1',
-        durationSeconds: 595,
+          durationSeconds: 595,
+          landingBonus: 0,
       );
 
       final result = engine.computeRawScore(flight, config);
@@ -32,6 +33,7 @@ void main() {
         id: 'flight-1',
         pilotId: 'pilot-1',
         durationSeconds: 605,
+        landingBonus: 0,
       );
 
       final result = engine.computeRawScore(flight, config);
@@ -43,6 +45,7 @@ void main() {
         id: 'flight-1',
         pilotId: 'pilot-1',
         durationSeconds: 595,
+        landingBonus: 0,
         zeroReason: const OutOfBoundsLanding(),
       );
 

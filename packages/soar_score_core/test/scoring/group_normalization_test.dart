@@ -18,9 +18,9 @@ void main() {
 
     test('highest score gets 1000', () {
       final flights = [
-        AlesFlight(id: 'f1', pilotId: 'p1', durationSeconds: 477),
-        AlesFlight(id: 'f2', pilotId: 'p2', durationSeconds: 470),
-        AlesFlight(id: 'f3', pilotId: 'p3', durationSeconds: 472),
+        ThermalDurationFlight(id: 'f1', pilotId: 'p1', durationSeconds: 477, landingBonus: 0),
+        ThermalDurationFlight(id: 'f2', pilotId: 'p2', durationSeconds: 470, landingBonus: 0),
+        ThermalDurationFlight(id: 'f3', pilotId: 'p3', durationSeconds: 472, landingBonus: 0),
       ];
 
       final results = engine.normalizeGroupScores(flights, config);
@@ -32,9 +32,9 @@ void main() {
 
     test('tied highest scores both get 1000', () {
       final flights = [
-        AlesFlight(id: 'f1', pilotId: 'p1', durationSeconds: 477),
-        AlesFlight(id: 'f2', pilotId: 'p2', durationSeconds: 477),
-        AlesFlight(id: 'f3', pilotId: 'p3', durationSeconds: 470),
+        ThermalDurationFlight(id: 'f1', pilotId: 'p1', durationSeconds: 477, landingBonus: 0),
+        ThermalDurationFlight(id: 'f2', pilotId: 'p2', durationSeconds: 477, landingBonus: 0),
+        ThermalDurationFlight(id: 'f3', pilotId: 'p3', durationSeconds: 470, landingBonus: 0),
       ];
 
       final results = engine.normalizeGroupScores(flights, config);
@@ -45,14 +45,15 @@ void main() {
 
     test('zero score in group stays at 0', () {
       final flights = [
-        AlesFlight(id: 'f1', pilotId: 'p1', durationSeconds: 477),
-        AlesFlight(
+        ThermalDurationFlight(id: 'f1', pilotId: 'p1', durationSeconds: 477, landingBonus: 0),
+        ThermalDurationFlight(
           id: 'f2',
           pilotId: 'p2',
           durationSeconds: 470,
+          landingBonus: 0,
           zeroReason: const OutOfBoundsLanding(),
         ),
-        AlesFlight(id: 'f3', pilotId: 'p3', durationSeconds: 472),
+        ThermalDurationFlight(id: 'f3', pilotId: 'p3', durationSeconds: 472, landingBonus: 0),
       ];
 
       final results = engine.normalizeGroupScores(flights, config);
@@ -63,16 +64,18 @@ void main() {
 
     test('all zero scores result in all zeros', () {
       final flights = [
-        AlesFlight(
+        ThermalDurationFlight(
           id: 'f1',
           pilotId: 'p1',
           durationSeconds: 477,
+          landingBonus: 0,
           zeroReason: const OutOfBoundsLanding(),
         ),
-        AlesFlight(
+        ThermalDurationFlight(
           id: 'f2',
           pilotId: 'p2',
           durationSeconds: 470,
+          landingBonus: 0,
           zeroReason: const MotorRestart(),
         ),
       ];

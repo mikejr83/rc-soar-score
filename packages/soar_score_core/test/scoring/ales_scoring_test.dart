@@ -17,10 +17,11 @@ void main() {
     });
 
     test('pilot flies under target time', () {
-      final flight = AlesFlight(
+      final flight = ThermalDurationFlight(
         id: 'flight-1',
         pilotId: 'pilot-1',
         durationSeconds: 477,
+        landingBonus: 0,
       );
 
       final result = engine.computeRawScore(flight, config);
@@ -29,10 +30,11 @@ void main() {
     });
 
     test('pilot flies exactly target time', () {
-      final flight = AlesFlight(
+      final flight = ThermalDurationFlight(
         id: 'flight-1',
         pilotId: 'pilot-1',
         durationSeconds: 480,
+        landingBonus: 0,
       );
 
       final result = engine.computeRawScore(flight, config);
@@ -40,10 +42,11 @@ void main() {
     });
 
     test('pilot over-flies by 3 seconds', () {
-      final flight = AlesFlight(
+      final flight = ThermalDurationFlight(
         id: 'flight-1',
         pilotId: 'pilot-1',
         durationSeconds: 483,
+        landingBonus: 0,
       );
 
       final result = engine.computeRawScore(flight, config);
@@ -51,10 +54,11 @@ void main() {
     });
 
     test('out of bounds landing results in 0', () {
-      final flight = AlesFlight(
+      final flight = ThermalDurationFlight(
         id: 'flight-1',
         pilotId: 'pilot-1',
         durationSeconds: 477,
+        landingBonus: 0,
         zeroReason: const OutOfBoundsLanding(),
       );
 
@@ -65,10 +69,11 @@ void main() {
     });
 
     test('motor restart results in 0', () {
-      final flight = AlesFlight(
+      final flight = ThermalDurationFlight(
         id: 'flight-1',
         pilotId: 'pilot-1',
         durationSeconds: 477,
+        landingBonus: 0,
         zeroReason: const MotorRestart(),
       );
 
@@ -78,10 +83,11 @@ void main() {
     });
 
     test('over-flight over 1 minute results in 0', () {
-      final flight = AlesFlight(
+      final flight = ThermalDurationFlight(
         id: 'flight-1',
         pilotId: 'pilot-1',
         durationSeconds: 477,
+        landingBonus: 0,
         zeroReason: const OverFlightOverOneMinute(),
       );
 
@@ -97,10 +103,11 @@ void main() {
         pointsPerSecond: 2.0,
       );
 
-      final flight = AlesFlight(
+      final flight = ThermalDurationFlight(
         id: 'flight-1',
         pilotId: 'pilot-1',
         durationSeconds: 477,
+        landingBonus: 0,
       );
 
       final result = engine.computeRawScore(flight, config2);

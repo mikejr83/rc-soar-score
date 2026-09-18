@@ -12,3 +12,8 @@ abstract class Flight {
     required this.pilotId,
   });
 }
+
+mixin WithLandingBonus {
+  /// Landing bonus points (from configured landing table).
+  int? get landingBonus;
+}

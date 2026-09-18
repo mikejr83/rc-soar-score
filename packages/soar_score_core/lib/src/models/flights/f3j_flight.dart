@@ -5,18 +5,21 @@ import 'zero_reason.dart';
 ///
 /// F3J uses time-based scoring with 3 flights per round, best 2 count.
 /// Each flight has a duration and potential zero reasons.
-class F3JFlight extends Flight {
+class F3JFlight extends Flight implements WithLandingBonus {
   /// Flight duration in seconds (supports fractions).
   final double durationSeconds;
   /// Zero reason if applicable (out-of-bounds landing).
   ///
   /// F3J has no over-flight >1 min or motor restart conditions.
   final ZeroReason? zeroReason;
+  /// Landing bonus points (from configured landing table).
+  final int? landingBonus;
 
   F3JFlight({
     required String id,
     required String pilotId,
     required this.durationSeconds,
+    required this.landingBonus,
     this.zeroReason,
   }) : super(id: id, pilotId: pilotId);
 }

@@ -1,3 +1,7 @@
+import 'package:soar_score_core/src/scoring/f3j_scoring_strategy.dart';
+import 'package:soar_score_core/src/scoring/f5j_scoring_strategy.dart';
+import 'package:soar_score_core/src/scoring/simple_duration_strategy.dart';
+
 import '../models/contest_config.dart';
 import '../models/flight.dart';
 import '../models/score_result.dart';
@@ -29,7 +33,9 @@ class ScoringEngine {
   /// The pilot with the highest raw score receives 1000 points. All other
   /// scores are normalized proportionally. Zero scores remain at 0.
   GroupScores normalizeGroupScores(
-      List<Flight> flights, ContestScoringConfig config) {
+    List<Flight> flights,
+    ContestScoringConfig config,
+  ) {
     final results = <ScoreResult>[];
 
     for (final flight in flights) {
@@ -56,12 +62,14 @@ class ScoringEngine {
         normalized.add(result);
       } else {
         final groupScore = (result.rawScore / highestRaw) * 1000.0;
-        normalized.add(ScoreResult(
-          rawScore: result.rawScore,
-          groupScore: groupScore,
-          isZeroScore: result.isZeroScore,
-          zeroReason: result.zeroReason,
-        ));
+        normalized.add(
+          ScoreResult(
+            rawScore: result.rawScore,
+            groupScore: groupScore,
+            isZeroScore: result.isZeroScore,
+            zeroReason: result.zeroReason,
+          ),
+        );
       }
     }
 

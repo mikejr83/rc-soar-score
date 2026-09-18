@@ -15,7 +15,6 @@ void main() {
     await tester.pumpWidget(const ScoreSoarContest());
 
     // Verify that our app title is displayed.
-    expect(find.text('Contest'), findsOneWidget);
-    expect(find.text('Contest Screen'), findsOneWidget);
+    expect(find.text('Scoring Tests'), findsOneWidget);
   });
 }

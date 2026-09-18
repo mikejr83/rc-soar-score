@@ -24,6 +24,7 @@ void main() {
         id: 'flight-1',
         pilotId: 'pilot-1',
         durationSeconds: 295.5,
+        landingBonus: 0,
       );
 
       final result = engine.computeRawScore(flight, config);
@@ -35,6 +36,7 @@ void main() {
         id: 'flight-1',
         pilotId: 'pilot-1',
         durationSeconds: 310,
+        landingBonus: 0,
       );
 
       final result = engine.computeRawScore(flight, config);
@@ -46,6 +48,7 @@ void main() {
         id: 'flight-1',
         pilotId: 'pilot-1',
         durationSeconds: 295,
+        landingBonus: 0,
         zeroReason: const OutOfBoundsLanding(),
       );
 
