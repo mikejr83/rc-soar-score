@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
-import 'matrix/matrix_config_panel.dart';
-import 'matrix/matrix_results_view.dart';
+import '../matrix/matrix_config_panel.dart';
+import '../matrix/matrix_results_view.dart';
 
 
 class MatrixCreationPage extends StatefulWidget {

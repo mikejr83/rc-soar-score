@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'f3j_scoring_test_page.dart';
-import 'f5j_scoring_test_page.dart';
-import 'matrix_page.dart';
+import 'test/f3j_scoring_test_page.dart';
+import 'test/f5j_scoring_test_page.dart';
+import 'test/matrix_draw_test_page.dart';
 
 class ScorePageSelector extends StatelessWidget {
   const ScorePageSelector({super.key});
