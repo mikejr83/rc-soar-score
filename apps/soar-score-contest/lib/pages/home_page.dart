@@ -110,7 +110,16 @@ class HomePage extends StatelessWidget {
                     onPressed: null,
                     child: const Text('Open'),
                   ),
-                  _navigationButton(context, 'Participants', Icons.people),
+                  // The participant manager edits the director's reusable
+                  // local participant (pilot) records.
+                  TextButton.icon(
+                    onPressed: () =>
+                        Navigator.of(context).pushNamed(
+                          '/contest-administration/participants',
+                        ),
+                    icon: const Icon(Icons.people, size: 16),
+                    label: const Text('Participants'),
+                  ),
                   _navigationButton(context, 'Roles', Icons.assignment),
                   _navigationButton(context, 'Landing bonuses', Icons.local_florist),
                 ],
