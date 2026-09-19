@@ -89,7 +89,7 @@ class LandingPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Score Soar - Contest Administration'),
+        title: const Text('Contest Administration'),
         actions: const [
           // Development navigation item hiding the scoring/matrix test pages.
           _TestingNavItem(),

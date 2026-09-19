@@ -187,3 +187,7 @@ Documentation is provided in the `./plan` folder. This contains business, archit
 - Review `analysis_options.yaml` for linting rules
 - Consult Flutter documentation: https://docs.flutter.dev/
 - Consult Dart documentation: https://dart.dev/
+
+## Style guidelines
+
+When creating files keep them targeted to the domain at hand. Do not place many classes in a single file. Test case files should be broken into manageable sizes.
