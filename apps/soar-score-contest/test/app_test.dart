@@ -3,11 +3,13 @@
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:soar_score_contest/main.dart';
+import 'package:soar_score_contest/state/connectivity_state.dart';
 
 void main() {
   group('ScoreSoarContest', () {
     testWidgets('App starts on the landing page', (tester) async {
-      await tester.pumpWidget(const ScoreSoarContest());
+      final connectivity = ConnectivityState();
+      await tester.pumpWidget(ScoreSoarContest(connectivity: connectivity));
 
       expect(find.text('RC Soar Score'), findsOneWidget);
       expect(find.text('Sign in'), findsOneWidget);
@@ -16,7 +18,8 @@ void main() {
 
     testWidgets('Development nav item opens the testing pages',
         (tester) async {
-      await tester.pumpWidget(const ScoreSoarContest());
+      final connectivity = ConnectivityState();
+      await tester.pumpWidget(ScoreSoarContest(connectivity: connectivity));
 
       await tester.tap(find.byTooltip('Development testing pages'));
       await tester.pumpAndSettle();

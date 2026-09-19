@@ -2,6 +2,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../main.dart';
+import '../state/connectivity_state.dart';
+import '../widgets/connectivity_status_indicator.dart';
 import '../widgets/soar_logo.dart';
 
 /// The contest administration landing page.
@@ -90,9 +93,10 @@ class LandingPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Contest Administration'),
-        actions: const [
+        actions: [
+          _ConnectivityIndicators(),
           // Development navigation item hiding the scoring/matrix test pages.
-          _TestingNavItem(),
+          const _TestingNavItem(),
         ],
       ),
       body: Center(
@@ -186,6 +190,44 @@ class _TestingNavItem extends StatelessWidget {
       tooltip: 'Development testing pages',
       icon: const Icon(Icons.science_outlined),
       onPressed: () => Navigator.of(context).pushNamed('/testing'),
+    );
+  }
+}
+
+
+/// Displays the internet and API connectivity indicators in the app bar.
+///
+/// Reads the [ConnectivityState] from the widget tree and shows two
+/// [ConnectivityStatusIndicator] chips: one for internet connectivity and
+/// one for remote API connectivity.
+class _ConnectivityIndicators extends StatelessWidget {
+  const _ConnectivityIndicators();
+
+  @override
+  Widget build(BuildContext context) {
+    final connectivity = ConnectivityStateWidget.of(context);
+    if (connectivity == null) {
+      return const SizedBox.shrink();
+    }
+    return AnimatedBuilder(
+      animation: connectivity,
+      builder: (context, _) => Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ConnectivityStatusIndicator(
+            state: connectivity.internet,
+            label: 'Internet',
+            icon: Icons.wifi,
+            connectivity: connectivity,
+          ),
+          ConnectivityStatusIndicator(
+            state: connectivity.api,
+            label: 'API',
+            icon: Icons.cloud,
+            connectivity: connectivity,
+          ),
+        ],
+      ),
     );
   }
 }

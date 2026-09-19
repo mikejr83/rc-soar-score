@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../main.dart';
+import '../widgets/connectivity_status_indicator.dart';
+
 /// The contest-selection and system-management page.
 ///
 /// Route: `/contest-administration/home`
@@ -57,6 +60,7 @@ class HomePage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Soar Score - Contests'),
         actions: [
+          _ConnectivityIndicators(),
           IconButton(
             tooltip: 'Back to landing page',
             icon: const Icon(Icons.arrow_back),
@@ -134,6 +138,39 @@ class _EmptyContestListState extends StatelessWidget {
           Text('No contests yet.'),
           SizedBox(height: 8),
           Text('Create a contest to get started.'),
+        ],
+      ),
+    );
+  }
+}
+
+/// Displays the internet and API connectivity indicators in the app bar.
+class _ConnectivityIndicators extends StatelessWidget {
+  const _ConnectivityIndicators();
+
+  @override
+  Widget build(BuildContext context) {
+    final connectivity = ConnectivityStateWidget.of(context);
+    if (connectivity == null) {
+      return const SizedBox.shrink();
+    }
+    return AnimatedBuilder(
+      animation: connectivity,
+      builder: (context, _) => Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ConnectivityStatusIndicator(
+            state: connectivity.internet,
+            label: 'Internet',
+            icon: Icons.wifi,
+            connectivity: connectivity,
+          ),
+          ConnectivityStatusIndicator(
+            state: connectivity.api,
+            label: 'API',
+            icon: Icons.cloud,
+            connectivity: connectivity,
+          ),
         ],
       ),
     );
