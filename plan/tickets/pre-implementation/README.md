@@ -58,7 +58,7 @@ Outstanding questions that need to be answered before implementation begins. Eac
 | Ticket | Title | Priority |
 | ------ | ----- | -------- |
 | [025](025-matrix-draw-engine-recommendations.md) | Adopt GliderScore Research Recommendations (Ready) | High |
-| [026](026-matrix-seeded-round-order.md) | Seeded Round Order (Leaders First vs. Last) | High |
+| [026](026-matrix-seeded-round-order.md) | Seeded Round Order (Leaders First vs. Last) (Ready) | High |
 | [027](027-matrix-seeded-team-protection.md) | Seeded + Team Protection | Medium |
 | [028](028-matrix-back-to-back-constraint.md) | Back-to-Back Constraint | Low |
 | [029](029-matrix-lane-count-source.md) | Lane Count (Configured vs. Derived) | Low |
@@ -90,9 +90,9 @@ Outstanding questions that need to be answered before implementation begins. Eac
 4. ~~013~~ — Offline sync: score edit conflict resolution ✅
 5. ~~014~~ — Offline sync: matrix change + score entry ordering ✅
 6. ~~017~~ — Helper role capabilities ✅
+7. ~~021~~ — Mid-contest draw regeneration ✅
+8. ~~026~~ — Seeded round order (leaders first vs. last) ✅
 
 ### Remaining
 
-1. 021 — Mid-contest draw regeneration
-2. 026 — Seeded round order (leaders first vs. last)
-3. 031 — Score review workflow (pilot view)
+1. 031 — Score review workflow (pilot view)
