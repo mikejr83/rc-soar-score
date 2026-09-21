@@ -17,8 +17,8 @@ Outstanding questions that need to be answered before implementation begins. Eac
 | [002](002-data-lane-assignment-revision.md) | Lane Assignment: Derived or Independent Revision (Ready) | Medium |
 | [003](003-data-matrix-revision-granularity.md) | Matrix Revision Granularity (Ready) | High |
 | [004](004-data-config-override-scope.md) | Configuration Override Scope (Ready) | Medium |
-| [011](011-data-participant-identity-matching.md) | Participant Identity and Cross-Contest Matching | High |
-| [012](012-data-score-status-enum.md) | Score Status: Missing, Explicit Zero, Retired | Medium |
+| [011](011-data-participant-identity-matching.md) | Participant Identity and Cross-Contest Matching (Ready) | High |
+| [012](012-data-score-status-enum.md) | Score Outcome Status: Not Entered, Zero, Retired (Ready) | Medium |
 
 ### Scoring Engine
 | Ticket | Title | Priority |
@@ -26,9 +26,9 @@ Outstanding questions that need to be answered before implementation begins. Eac
 | [005](005-scoring-f5j-reference-height.md) | F5J Height Penalty: Reference Height Default and Scope | High |
 | [006](006-scoring-time-vs-normalized-rounding.md) | Time vs. Normalized Group-Score Rounding | Medium |
 | [007](007-scoring-f3j-late-landing-penalty.md) | F3J Fixed Late-Landing Penalty | Medium |
-| [008](008-scoring-normalized-retired-pilot.md) | Normalized Scoring: Retired Pilot in Group Maximum | Low |
-| [009](009-scoring-f5j-nondroppable-all-zeros.md) | F5J Non-Droppable Zero: All-Zeros Edge Case | Low |
-| [010](010-scoring-recalculation-invalidation-scope.md) | Recalculation Invalidation Scope | Medium |
+| [008](008-scoring-normalized-retired-pilot.md) | Normalized Scoring: Retired Pilot in Group Maximum (Ready) | Low |
+| [009](009-scoring-f5j-nondroppable-all-zeros.md) | F5J Non-Droppable Zero: All-Zeros Edge Case (Ready) | Low |
+| [010](010-scoring-recalculation-invalidation-scope.md) | Recalculation Invalidation Scope (Ready) | Medium |
 
 ### Offline Sync
 | Ticket | Title | Priority |
