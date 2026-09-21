@@ -67,7 +67,7 @@ Outstanding questions that need to be answered before implementation begins. Eac
 ### UI / UX
 | Ticket | Title | Priority |
 | ------ | ----- | -------- |
-| [031](031-ui-score-review-workflow.md) | Score Review Workflow (Pilot View) | High |
+| [031](031-ui-score-review-workflow.md) | Score Review Workflow (Pilot View) (Ready) | High |
 | [032](032-ui-offline-capable-pages.md) | Offline-Capable Pages | Medium |
 | [033](033-ui-score-entry-responsive.md) | Responsive Layout for Score Entry | Medium |
 
@@ -92,7 +92,8 @@ Outstanding questions that need to be answered before implementation begins. Eac
 6. ~~017~~ — Helper role capabilities ✅
 7. ~~021~~ — Mid-contest draw regeneration ✅
 8. ~~026~~ — Seeded round order (leaders first vs. last) ✅
+9. ~~031~~ — Score review workflow (pilot view) ✅
 
 ### Remaining
 
-1. 031 — Score review workflow (pilot view)
+(None)
