@@ -33,7 +33,7 @@ Outstanding questions that need to be answered before implementation begins. Eac
 ### Offline Sync
 | Ticket | Title | Priority |
 | ------ | ----- | -------- |
-| [013](013-sync-score-edit-conflict.md) | Score Edit Conflict Resolution | High |
+| [013](013-sync-score-edit-conflict.md) | Score Edit Conflict Resolution (Ready) | High |
 | [014](014-sync-matrix-score-ordering.md) | Matrix Change + Score Entry Ordering | High |
 | [015](015-sync-partial-failure-atomicity.md) | Partial Failure Mid-Sequence | Medium |
 | [016](016-sync-config-contention.md) | Concurrent Config Edits | Low |
