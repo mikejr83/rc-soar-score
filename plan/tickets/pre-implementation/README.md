@@ -23,7 +23,7 @@ Outstanding questions that need to be answered before implementation begins. Eac
 ### Scoring Engine
 | Ticket | Title | Priority |
 | ------ | ----- | -------- |
-| [005](005-scoring-f5j-reference-height.md) | F5J Height Penalty: Reference Height Default and Scope | High |
+| [005](005-scoring-f5j-reference-height.md) | F5J Height Penalty: Reference Height Default and Scope (Ready) | High |
 | [006](006-scoring-time-vs-normalized-rounding.md) | Time vs. Normalized Group-Score Rounding | Medium |
 | [007](007-scoring-f3j-late-landing-penalty.md) | F3J Fixed Late-Landing Penalty | Medium |
 | [008](008-scoring-normalized-retired-pilot.md) | Normalized Scoring: Retired Pilot in Group Maximum (Ready) | Low |
@@ -57,7 +57,7 @@ Outstanding questions that need to be answered before implementation begins. Eac
 ### Matrix / Draw
 | Ticket | Title | Priority |
 | ------ | ----- | -------- |
-| [025](025-matrix-draw-engine-recommendations.md) | Adopt GliderScore Research Recommendations | High |
+| [025](025-matrix-draw-engine-recommendations.md) | Adopt GliderScore Research Recommendations (Ready) | High |
 | [026](026-matrix-seeded-round-order.md) | Seeded Round Order (Leaders First vs. Last) | High |
 | [027](027-matrix-seeded-team-protection.md) | Seeded + Team Protection | Medium |
 | [028](028-matrix-back-to-back-constraint.md) | Back-to-Back Constraint | Low |
@@ -82,13 +82,17 @@ Outstanding questions that need to be answered before implementation begins. Eac
 
 ## Suggested answer order (High priority first)
 
-1. 025 — Matrix draw engine: adopt the GliderScore research recommendations?
-2. 005 — F5J reference height default and scope
-3. 011 — Participant identity and cross-contest matching
-4. 003 — Matrix revision granularity
-5. 013 — Offline sync: score edit conflict resolution
-6. 014 — Offline sync: matrix change + score entry ordering
-7. 017 — Helper role capabilities
-8. 021 — Mid-contest draw regeneration
-9. 026 — Seeded round order (leaders first vs. last)
-10. 031 — Score review workflow (pilot view)
+### Addressed
+
+1. ~~005~~ — F5J reference height default and scope ✅
+2. ~~011~~ — Participant identity and cross-contest matching ✅
+3. ~~003~~ — Matrix revision granularity ✅
+4. ~~013~~ — Offline sync: score edit conflict resolution ✅
+5. ~~014~~ — Offline sync: matrix change + score entry ordering ✅
+6. ~~017~~ — Helper role capabilities ✅
+
+### Remaining
+
+1. 021 — Mid-contest draw regeneration
+2. 026 — Seeded round order (leaders first vs. last)
+3. 031 — Score review workflow (pilot view)
