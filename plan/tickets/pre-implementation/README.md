@@ -34,15 +34,15 @@ Outstanding questions that need to be answered before implementation begins. Eac
 | Ticket | Title | Priority |
 | ------ | ----- | -------- |
 | [013](013-sync-score-edit-conflict.md) | Score Edit Conflict Resolution (Ready) | High |
-| [014](014-sync-matrix-score-ordering.md) | Matrix Change + Score Entry Ordering | High |
-| [015](015-sync-partial-failure-atomicity.md) | Partial Failure Mid-Sequence | Medium |
-| [016](016-sync-config-contention.md) | Concurrent Config Edits | Low |
+| [014](014-sync-matrix-score-ordering.md) | Matrix Change + Score Entry Ordering (Ready) | High |
+| [015](015-sync-partial-failure-atomicity.md) | Partial Failure Mid-Sequence (Ready) | Medium |
+| [016](016-sync-config-contention.md) | Concurrent Config Edits (Ready) | Low |
 
 ### Access / Permissions
 | Ticket | Title | Priority |
 | ------ | ----- | -------- |
-| [017](017-access-helper-role-capabilities.md) | Helper Role Capabilities | High |
-| [018](018-access-pilot-helper-score-conflict.md) | Pilot Self-Scoring vs. Helper Scoring Conflict | Medium |
+| [017](017-access-helper-role-capabilities.md) | Helper Role Capabilities (Ready) | High |
+| [018](018-access-pilot-helper-score-conflict.md) | Pilot Self-Scoring vs. Helper Scoring Conflict (Ready) | Medium |
 | [019](019-access-public-site-draft-visibility.md) | Public Site Visibility of In-Progress Scores | Medium |
 | [020](020-access-director-penalty-authority.md) | Director Penalty and Disqualification Authority | Low |
 
