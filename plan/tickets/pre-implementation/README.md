@@ -78,7 +78,7 @@ Outstanding questions that need to be answered before implementation begins. Eac
 | [035](035-business-reflight-better-of-scoring.md) | Re-Flight "Better Of" Scoring | Medium |
 | [036](036-business-out-of-bounds-measurement.md) | Out-of-Bounds Landing Distance Measurement (Ready) | Low |
 | [037](037-business-no-altitude-recorded.md) | F5J "No Altitude Recorded" — Purpose and Drop Behavior (Ready) | Low |
-| [038](038-business-ales-thermal-overflight.md) | ALES/Thermal Target-Time Over-Flight | Medium |
+| [038](038-business-ales-thermal-overflight.md) | ALES/Thermal Target-Time Over-Flight (Ready) | Medium |
 
 ## Suggested answer order (High priority first)
 
