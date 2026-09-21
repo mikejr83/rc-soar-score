@@ -49,7 +49,7 @@ Outstanding questions that need to be answered before implementation begins. Eac
 ### Contest State Machine
 | Ticket | Title | Priority |
 | ------ | ----- | -------- |
-| [021](021-state-mid-contest-redraw.md) | Mid-Contest Draw Regeneration | High |
+| [021](021-state-mid-contest-redraw.md) | Mid-Contest Draw Regeneration (Ready) | High |
 | [022](022-state-publish-unpublish-rules.md) | Publish/Unpublish Rules for Results | Medium |
 | [023](023-state-contest-ended-reversible.md) | Is "Contest Ended" Reversible? | Low |
 | [024](024-state-round-completion-gate.md) | Round Completion Gate | Medium |
@@ -76,8 +76,8 @@ Outstanding questions that need to be answered before implementation begins. Eac
 | ------ | ----- | -------- |
 | [034](034-business-reflight-decline-limits.md) | Re-Flight Decline Limits | Medium |
 | [035](035-business-reflight-better-of-scoring.md) | Re-Flight "Better Of" Scoring | Medium |
-| [036](036-business-out-of-bounds-measurement.md) | Out-of-Bounds Landing Distance Measurement | Low |
-| [037](037-business-no-altitude-recorded.md) | F5J "No Altitude Recorded" — Purpose and Drop Behavior | Low |
+| [036](036-business-out-of-bounds-measurement.md) | Out-of-Bounds Landing Distance Measurement (Ready) | Low |
+| [037](037-business-no-altitude-recorded.md) | F5J "No Altitude Recorded" — Purpose and Drop Behavior (Ready) | Low |
 | [038](038-business-ales-thermal-overflight.md) | ALES/Thermal Target-Time Over-Flight | Medium |
 
 ## Suggested answer order (High priority first)
