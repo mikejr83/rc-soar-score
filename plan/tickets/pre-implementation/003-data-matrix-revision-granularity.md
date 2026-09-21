@@ -3,7 +3,7 @@
 - **Category:** Data Model / Schema
 - **Priority:** High
 - **Status:** ready
-- **Depends on:** ticket 021 (mid-contest re-draw) — specifically the question of whether a re-draw ever re-optimizes *already-flown past* rounds. The granularity model here assumes a re-draw only (re)generates future rounds and leaves past rounds in their original revision; if 021 decides past rounds are re-optimized, "the current matrix = union of all revisions" still holds but the round→revision ownership for redrawn past rounds must be revisited.
+- **Depends on:** ticket 021 (mid-contest re-draw) — *conditional.* The granularity model here assumes a re-draw only (re)generates **future** rounds and leaves past rounds in their original revision; if 021 decides past rounds are re-optimized, "the current matrix = union of all revisions" still holds but the round→revision ownership for redrawn past rounds must be revisited. (021 is the ticket that depends on this model.)
 - **Decision:** Revisions are immutable full snapshots, one per draw/re-draw. Each revision stores only the rounds it generated; every round belongs to exactly one revision, and each group's `matrixRevisionId` points to the revision that drew that round. A pilot move or re-flight creates a new assignment record — never a new revision and never an amendment. A re-draw produces a new revision covering the (re)generated rounds; "the current matrix" is the union of all revisions.
 
 ## Context

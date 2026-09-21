@@ -14,7 +14,7 @@ In `Time` group-score mode, the relationship between per-round rounding and the 
 2. Does the same question apply to `Normalized` mode (round each normalized group score, or sum at full precision)? — **Resolved: same as `Time` — full precision; rounded only at the end. See Decisions.**
 3. How does the dropped-round selection interact with rounding — is the drop applied to rounded or unrounded values? — **Resolved: unrounded (full precision). See Decisions.**
 4. Is the rounding/truncation setting applied at the group level, the contest level, or both? — **Resolved: contest level (final total) only. See Decisions.**
-5. (Follow-up from Q1) Under full-precision pipeline, how is the **team total** derived — does each pilot's contest total get rounded/truncated per the contest configuration **before** summing into the team total, or is the team total computed at full precision and rounded once? — **Resolved: round/truncate each pilot total first, then sum. See Decisions.**
+5. (Follow-up from Q1) Under full-precision pipeline, how is the **team total** derived — does each pilot's contest total get rounded/truncated per the contest configuration **before** summing into the team total, or is the team total computed at full precision and rounded once? — **Resolved: round/truncate each pilot total first, then sum (within the team's own pilots). See Decisions.**
 
 ## Decisions Needed
 
@@ -29,7 +29,7 @@ In `Time` group-score mode, the relationship between per-round rounding and the 
   - **Conflict to resolve in the plan:** `discipline-scoring.md` pipeline rule 5 as currently worded ("apply the … rounding … once, after normalization and other group-score arithmetic") describes a **group-stage** rounding and must be reworded to: the configured rounding/truncation is applied **once, to the final contest total**, and no intermediate raw, penalty, normalization, or group-score value may be rounded or truncated.
 - **Level (Q4):** The precision setting is a single **contest-level** setting (rounding/truncation + decimal count). It is **not** applied at the group level and there is no separate per-group precision. There is exactly one application point (the final total).
 - **Dropped-round interaction (Q3):** Because the pipeline is full-precision (decision above), the dropped-round selection operates on **unrounded, full-precision** group/round scores. There is no upstream rounding that could alter which round is dropped. Dropped-round selection is unaffected by the configured precision setting; it always selects on the exact full-precision values (subject to the non-droppable-zero rule owned by ticket 009).
-- **Team total (Q5):** The team total is the **sum of the top N pilots' contest totals after each pilot total has already been rounded/truncated** per the contest configuration (team size N, ordered highest to lowest, per pipeline rule 8). Each pilot's rounded/truncated contest total is the canonical value fed into the team total; the team total is **not** recomputed from full-precision values and then rounded. Consequently the published team total **equals** the sum of the published (rounded/truncated) pilot totals, and no further rounding/truncation is applied to the team total itself (it is exactly the sum of the already-rounded pilot totals).
+- **Team total (Q5):** The team total is the **sum of the top N of the team's own pilots' contest totals after each pilot total has already been rounded/truncated** per the contest configuration (N = the configured number of pilots to use for the team score, ordered highest to lowest within that team, per `contest-configuration.md` and pipeline rule 8). Each pilot's rounded/truncated contest total is the canonical value fed into the team total; the team total is **not** recomputed from full-precision values and then rounded. Consequently the published team total **equals** the sum of the published (rounded/truncated) pilot totals for that team, and no further rounding/truncation is applied to the team total itself (it is exactly the sum of the already-rounded pilot totals).
 
 ## Acceptance criteria
 
@@ -37,9 +37,9 @@ In `Time` group-score mode, the relationship between per-round rounding and the 
 - The configured rounding/truncation setting (0–3 decimals, round or truncate) is applied **exactly once**, to the **final contest total** per pilot.
 - Group scores are stored at full precision; any rounding of a stored group score in a report/public view is a display-only rounding of that stored value, not an input to a downstream calculation.
 - Dropped-round selection is performed on full-precision group/round scores and is independent of the configured precision setting.
-- The team total is the sum of the top N pilots' contest totals **after** each pilot total has been rounded/truncated per the contest configuration; the team total is exactly the sum of those already-rounded pilot totals and is itself not independently rounded/truncated.
+- The team total is the sum of the top N of the team's own pilots' contest totals **after** each pilot total has been rounded/truncated per the contest configuration; the team total is exactly the sum of those already-rounded pilot totals and is itself not independently rounded/truncated.
 - `discipline-scoring.md` pipeline rule 5 is reworded so the single rounding/truncation application is described as applying to the **final contest total** (not "after normalization / group-score arithmetic"), removing the conflict with `ales.md` and the F3J/F5J "Total Score" labels.
-- Golden fixtures for a multi-round, dropped-round scenario (both `Time` and `Normalized` modes) confirm: (a) each pilot's final contest total equals the configured rounding/truncation of that pilot's full-precision total; and (b) the team total exactly equals the sum of the top-N pilots' already-rounded/truncated contest totals.
+- Golden fixtures for a multi-round, dropped-round scenario (both `Time` and `Normalized` modes) confirm: (a) each pilot's final contest total equals the configured rounding/truncation of that pilot's full-precision total; and (b) the team total exactly equals the sum of the top-N of that team's own pilots' already-rounded/truncated contest totals.
 - The same golden fixtures pass identically in the service and in the offline calculation library.
 
 ## Sources
@@ -47,3 +47,4 @@ In `Time` group-score mode, the relationship between per-round rounding and the 
 - `plan/architecture-requirements/data/disciplines-and-configuration.md`
 - `plan/architecture-requirements/data/scores-and-results.md`
 - `plan/architecture-requirements/discipline-scoring.md`
+- `plan/business-requirements/contest-configuration.md` (team score = top-N of the team's own pilots, ordered descending)

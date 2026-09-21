@@ -28,7 +28,7 @@ Pilot→team membership cardinality is not stated in the data model. `participan
 - [ ] Attempting to assign a pilot who is already on a team to another team is rejected or requires an explicit membership-change flow.
 - [ ] Team protection in the draw engine uses each pilot's single current team membership.
 - [ ] Re-flight draw exclusion excludes the members of the re-flight pilot's single current team from the candidate pool; the re-flight pilot is not a candidate in their own re-flight draw.
-- [ ] Team totals are computed from each team's own eligible pilot contest totals, with no cross-team double counting possible (guaranteed by one-to-one membership).
+- [ ] Team totals are computed from each team's own eligible pilot contest totals (using the already-rounded/truncated pilot totals, per ticket 006), with no cross-team double counting possible (guaranteed by one-to-one membership).
 - [ ] Membership change after a matrix exists triggers the redraw flow described in `contest-configuration.md` (teams locked once a matrix exists; new pilots may be added randomly without a redraw).
 - [ ] Seeded-mode team-protection fallback behavior is defined and tested per ticket 027.
 

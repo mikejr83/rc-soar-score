@@ -13,10 +13,10 @@ Outstanding questions that need to be answered before implementation begins. Eac
 ### Data Model / Schema
 | Ticket | Title | Priority |
 | ------ | ----- | -------- |
-| [001](001-data-team-membership-cardinality.md) | Team Membership Cardinality | Medium |
-| [002](002-data-lane-assignment-revision.md) | ~~Lane Assignment: Derived or Independent Revision~~ (Ready) | Medium |
-| [003](003-data-matrix-revision-granularity.md) | ~~Matrix Revision Granularity~~ (Ready) | High |
-| [004](004-data-config-override-scope.md) | ~~Configuration Override Scope~~ (Ready) | Medium |
+| [001](001-data-team-membership-cardinality.md) | Team Membership Cardinality (Ready) | Medium |
+| [002](002-data-lane-assignment-revision.md) | Lane Assignment: Derived or Independent Revision (Ready) | Medium |
+| [003](003-data-matrix-revision-granularity.md) | Matrix Revision Granularity (Ready) | High |
+| [004](004-data-config-override-scope.md) | Configuration Override Scope (Ready) | Medium |
 | [011](011-data-participant-identity-matching.md) | Participant Identity and Cross-Contest Matching | High |
 | [012](012-data-score-status-enum.md) | Score Status: Missing, Explicit Zero, Retired | Medium |
 

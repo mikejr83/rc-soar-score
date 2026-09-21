@@ -4,7 +4,7 @@
 - **Priority:** Medium
 - **Status:** ready
 - **Decision:** An override is a set of per-field deviations at the **contest level only** — no round- or group-level overrides — stored in the contest's revisioned configuration revision and computed as shared profile + overrides. Per-round behavior is derived, not configured. Q3 (inter-level conflict) is vacuous by construction; concurrency is ticket 016. Q4 (does an override force a new calculation revision when values don't change) is deferred to ticket 010.
-- **Depends on:** ticket 010 (calc-affecting vs. presentational settings; invalidation scope), ticket 016 (config-edit concurrency), ticket 003 (matrix revision for draw-affecting config changes).
+- **Cross-references (not blockers):** ticket 010 (calc-affecting vs. presentational settings; invalidation scope — owns Q4), ticket 016 (config-edit concurrency), ticket 003 (matrix revision for draw-affecting config changes). 004 fully resolves the storage/scope model; these tickets own the adjacent concerns it hands off.
 
 ## Context
 
