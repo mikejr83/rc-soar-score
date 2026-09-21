@@ -10,6 +10,7 @@
 The F5J "No Altitude Recorded" option produces a zero score but is tracked separately from a regular zero. Its purpose and interaction with the drop logic are not specified.
 
 Settled elsewhere (not re-decided here):
+
 - It is `OutcomeStatus = ZERO` with a `zeroReason` flag, never a distinct status (ticket 012, Decision 4).
 - Display: `0` in the numeric column plus a distinct reason marker (ticket 012, Decision 3).
 - Normalization: 0 raw score; an all-zero group normalizes to 0 with no division by zero (F5J doc "Zero Score Clarifications"; `discipline-scoring.md` rule 5).
