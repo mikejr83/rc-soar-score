@@ -19,6 +19,7 @@ Score entry, synchronization, review requests, retirement, and participant resul
 9. Issuing or replacing an invitation must not grant access to another contest, another participant, unassigned rounds, private participant contact data, director data, or administrative operations.
 10. A participant's pilot link grants access only to that pilot's scores. A non-flier link may select and enter scores only for pilots on the same team when teams are enabled. The service must enforce this relationship rather than relying on the client-selected pilot.
 11. The service must apply contest scoring access, lifecycle, administration-lock, round/group lock, retirement, and score-state rules on every read and mutation. A valid invitation is not by itself permission to submit.
+12. A contest organized offline cannot generate QR codes, display self-scoring links, or allow participant self-scoring until the contest and its matrix revision have been synchronized with the remote service. As long as the contest remains 100% offline, participant self-scoring is disabled and the contest director (or local operators on the director's device) is responsible for all score entry.
 
 ## Invitation delivery and audit
 
