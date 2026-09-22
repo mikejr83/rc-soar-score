@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:shelf/shelf_io.dart' as shelf_io;
 
 import 'handler.dart';
+import 'health_handler.dart';
 
 int _portFromEnv() {
   const envKey = 'PORT';

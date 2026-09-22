@@ -1,0 +1,15 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "soar_score_server",
+      "type": "dart",
+      "request": "launch",
+      "program": "apps/soar_score_server/lib/main.dart",
+      "env": {
+        "PORT": "8080"
+      },
+      "console": "integratedTerminal"
+    }
+  ]
+}
