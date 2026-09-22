@@ -10,6 +10,22 @@
         "PORT": "8080"
       },
       "console": "integratedTerminal"
+    },
+    {
+      "name": "soar_score_contest (Web)",
+      "type": "flutter",
+      "request": "launch",
+      "program": "lib/main.dart",
+      "cwd": "apps/soar_score_contest",
+      "args": [
+        "-d",
+        "chrome",
+        "--web-port",
+        "8091",
+        "--web-hostname",
+        "127.0.0.1"
+      ],
+      "console": "integratedTerminal"
     }
   ]
 }
