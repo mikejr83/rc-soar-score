@@ -18,7 +18,7 @@ Tickets for getting the repository basics in place: toolchain, Melos workspace, 
 | [003](003-scaffold-dart-api-app.md) | Scaffold `soar_score_server` (Dart/shelf) | High | Done |
 | [004](004-scaffold-contest-flutter-app.md) | Scaffold `soar_score_contest` (Flutter web) | High | In-Review |
 | [005](005-scaffold-public-flutter-app.md) | Scaffold `soar_score_public` (Flutter web) | High | Open |
-| [006](006-scaffold-core-package.md) | Scaffold `soar_score_core` Package | High | Open |
+| [006](006-scaffold-core-package.md) | Scaffold `soar_score_core` Package | High | In-Review |
 | [007](007-scaffold-data-package.md) | Scaffold `soar_score_data` Package | High | Open |
 | [008](008-scaffold-api-package.md) | Scaffold `soar_score_api` Package | High | Open |
 | [009](009-scaffold-ui-package.md) | Scaffold `soar_score_ui` Package | High | Open |
