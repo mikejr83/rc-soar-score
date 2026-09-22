@@ -9,7 +9,7 @@
       "env": {
         "PORT": "8080"
       },
-      "console": "integratedTerminal"
+      "console": "debugConsole"
     },
     {
       "name": "soar_score_contest (Web)",
@@ -24,6 +24,18 @@
         "8091",
         "--web-hostname",
         "127.0.0.1"
+      ],
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "soar_score_contest (Windows)",
+      "type": "flutter",
+      "request": "launch",
+      "program": "lib/main.dart",
+      "cwd": "apps/soar_score_contest",
+      "args": [
+        "-d",
+        "windows"
       ],
       "console": "integratedTerminal"
     }

@@ -41,6 +41,7 @@ The contest management application is a Flutter app used primarily on laptops/ta
 - Shared navigation/theme tokens move into `soar_score_ui` (ticket 009), which references both theme baselines; this app keeps its own local baseline until then.
 - Offline awareness (connection/ready state UI per `plan/architecture-requirements/offline-usage.md`) is deferred to the data/sync workstreams.
 - `flutter run -d chrome` verified via the served HTTP 200 and the debug-service connection; the theme/routes themselves are asserted in `test/widget_test.dart` since the CLI cannot drive the browser UI headlessly.
+- Windows target added by [015](015-scaffold-contest-windows-target.md) (`flutter create --platforms=windows`; offline frame UI still deferred).
 
 ## Dependencies
 

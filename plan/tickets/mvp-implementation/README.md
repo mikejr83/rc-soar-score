@@ -27,6 +27,7 @@ Tickets for getting the repository basics in place: toolchain, Melos workspace, 
 | [012](012-playwright-workflow.md) | ~~Playwright Integration-Test Workflow Scaffold~~ (replaced by native Flutter/Dart integration tests) | Medium | Rejected |
 | [013](013-agentic-coding-rules.md) | Agentic Coding Rules (Per-Project AGENTS.md) | Medium | Open |
 | [014](014-setup-melos-workspace.md) | Melos Workspace at Repository Root | High | Open |
+| [015](015-scaffold-contest-windows-target.md) | Add Windows target to `soar_score_contest` | High | In-Review |
 
 ## Suggested execution order
 
@@ -35,6 +36,7 @@ Tickets for getting the repository basics in place: toolchain, Melos workspace, 
 3. **007 → 008** — `soar_score_data`, then `soar_score_api` (both build on core).
 4. **003** — `soar_score_server` (its `/health` is the contract `soar_score_api`'s example DTO targets).
 5. **004, 005** — the two Flutter apps (theme baselines).
+5a. **015** — Windows platform for `soar_score_contest` (reuses 004's app; its CI job lands with 011).
 6. **009** — `soar_score_ui` (needs both theme baselines to reference).
 7. **014** — Melos workspace at repository root (handled after the Dart workspace and projects exist; links projects 003–009 and wires the bulk commands; naming comes from `plan/implementation-plan.md`). ~~002 (NX) is rejected.~~
 8. **010** — Auth0 tenant + JWT middleware + Flutter PKCE login.

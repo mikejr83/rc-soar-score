@@ -13,8 +13,8 @@ class SoarScoreContestApp extends StatelessWidget {
     return MaterialApp.router(
       title: title,
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.light(),
-      darkTheme: AppTheme.dark(),
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.system,
       routerConfig: buildAppRouter(),
     );

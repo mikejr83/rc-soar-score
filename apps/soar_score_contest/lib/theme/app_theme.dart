@@ -5,24 +5,54 @@ import 'package:flutter/material.dart';
 /// Single source of truth for theming: `MaterialApp` in `app.dart` takes its
 /// themes exclusively from this file (no inline `MaterialApp(theme:)` values).
 abstract final class AppTheme {
-  static const Color seedColor = Color(0xFF1E88E5);
+    // Primary Seed Color: Deep Sky Blue
+  static const Color _skyBlueSeed = Color(0xFF006399);
+  static const Color _primaryColor = Color(0xFF006399);
+  static const Color _secondaryColor = Color(0xFF2D6A4F);
+  static const Color _surfaceColor = Color(0xFFF8FAFC);
+  // Custom High-Viz Accent for Timers & Max Scores
+  static const Color _highVizAmber = Color(0xFFD97706);
 
-  static ThemeData light() {
-    return _build(Brightness.light);
-  }
+  static const double _defaultBorderRadius = 12;
 
-  static ThemeData dark() {
-    return _build(Brightness.dark);
-  }
-
-  static ThemeData _build(Brightness brightness) {
-    final scheme = ColorScheme.fromSeed(
-      seedColor: seedColor,
-      brightness: brightness,
-    );
+  static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
-      colorScheme: scheme,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: _skyBlueSeed,
+        brightness: Brightness.light,
+        primary: _primaryColor,
+        secondary: _secondaryColor,
+        tertiary: _highVizAmber,
+        surface: _surfaceColor,
+      ),
+      cardTheme: CardThemeData(
+        elevation: 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(_defaultBorderRadius),
+        ),
+      ),
+      appBarTheme: const AppBarTheme(
+        centerTitle: true,
+        scrolledUnderElevation: 3,
+      ),
+    );
+  }
+
+  static ThemeData get darkTheme {
+    return ThemeData(
+      useMaterial3: true,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: _skyBlueSeed,
+        brightness: Brightness.dark,
+        tertiary: _highVizAmber,
+      ),
+      cardTheme: CardThemeData(
+        elevation: 1,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(_defaultBorderRadius),
+        ),
+      ),
     );
   }
 }
