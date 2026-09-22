@@ -19,7 +19,6 @@
 - [ ] Add `lib/soar_score_ui.dart` exporting the public API.
 - [ ] Add one `flutter_test` widget test for the example widget, using `flutter_test` bindings.
 - [ ] Add `analysis_options.yaml` including `package:flutter_lints/flutter.yaml`.
-- [ ] Ensure the Melos commands in `014-setup-melos-workspace.md` cover this project: `bootstrap` (flutter pub get), `test` (`flutter test --no-pub`), `analyze` (`flutter analyze --no-pub`). No build step (library).
 
 ## Acceptance Criteria
 
@@ -32,7 +31,6 @@
 - [006-scaffold-core-package.md](006-scaffold-core-package.md)
 - [004-scaffold-contest-flutter-app.md](004-scaffold-contest-flutter-app.md) — theme baseline.
 - [005-scaffold-public-flutter-app.md](005-scaffold-public-flutter-app.md) — theme baseline.
-- [014-setup-melos-workspace.md](014-setup-melos-workspace.md) — bulk command wiring (replaces rejected 002).
 
 ## Sources
 

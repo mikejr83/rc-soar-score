@@ -10,10 +10,9 @@ The public web site presents both the project site (landing page, documentation,
 
 ## Work Items
 
-- [ ] Create `apps/soar_score_public` via `flutter create` (web platform, project name per ticket 014).
+- [ ] Create `apps/soar_score_public` via `flutter create` (web platform, project name per `plan/implementation-plan.md`).
 - [ ] Add a minimal routing skeleton with distinct route groups: site routes (landing, docs placeholder, help placeholder) and results routes (placeholder results listing), so the later tabular/report UI has a home.
 - [ ] Establish the Material 3 `ThemeData` baseline in a dedicated theme file, consistent with the contest app baseline (same seed, independent theme file — the two apps keep separate themes).
-- [ ] Ensure the Melos commands in `014-setup-melos-workspace.md` cover this project: `bootstrap` (flutter pub get), `build` (`flutter build web --no-pub`), `serve` (`flutter run -d chrome --no-pub`), `test` (`flutter test --no-pub`), `analyze` (`flutter analyze --no-pub`).
 - [ ] Add `analysis_options.yaml` including `package:flutter_lints/flutter.yaml`.
 - [ ] Add one example widget test (landing route) and one example unit test, both passing.
 
@@ -25,7 +24,8 @@ The public web site presents both the project site (landing page, documentation,
 
 ## Dependencies
 
-- [014-setup-melos-workspace.md](014-setup-melos-workspace.md) — naming convention + bulk command wiring (replaces rejected 002).
+- [001-setup-toolchain-baseline.md](001-setup-toolchain-baseline.md) — Flutter pin for `flutter create`.
+- `plan/implementation-plan.md` — project name and directory convention.
 
 ## Sources
 

@@ -36,7 +36,7 @@ Tickets for getting the repository basics in place: toolchain, Melos workspace, 
 4. **003** — `soar_score_server` (its `/healthz` is the contract `soar_score_api`'s example DTO targets).
 5. **004, 005** — the two Flutter apps (theme baselines).
 6. **009** — `soar_score_ui` (needs both theme baselines to reference).
-7. **014** — Melos workspace at repository root (handled after the Dart workspace and projects exist; links projects 003–009 and carries the naming convention). ~~002 (NX) is rejected.~~
+7. **014** — Melos workspace at repository root (handled after the Dart workspace and projects exist; links projects 003–009 and wires the bulk commands; naming comes from `plan/implementation-plan.md`). ~~002 (NX) is rejected.~~
 8. **010** — Auth0 tenant + JWT middleware + Flutter PKCE login.
 9. **011** — base CI workflow + root README (needs all projects present and Melos bootstrap working).
 10. ~~**012** — Playwright scaffold~~ — rejected; replaced by native Flutter/Dart integration tests.

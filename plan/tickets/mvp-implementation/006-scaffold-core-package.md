@@ -31,7 +31,7 @@
 ## Dependencies
 
 - [001-setup-toolchain-baseline.md](001-setup-toolchain-baseline.md)
-- [014-setup-melos-workspace.md](014-setup-melos-workspace.md) — naming convention + bulk command wiring (replaces rejected 002).
+- `plan/implementation-plan.md` — package name and directory convention.
 
 ## Sources
 

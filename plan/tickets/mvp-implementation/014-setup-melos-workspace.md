@@ -13,7 +13,7 @@
 
 This work is performed **after the Dart workspace and its projects exist** — i.e. after the scaffold tickets (003–009) have created the `apps/` and `packages/` entries. Melos then links them.
 
-**Project naming (settled here, carried over from the rejected ticket 002):** All Dart project names are snake_case and match their directory names — apps under `apps/` and packages under `packages/` — per the Dart package naming standard. Future projects (e.g. the self-scoring web app, the offline desktop shell described in `plan/application-plan.md`) follow the same pattern. No `AGENTS.md` edit is required: the naming table that previously contradicted the directory layout has been removed.
+**Project naming:** per `plan/implementation-plan.md`, all Dart project names are snake_case and match their directory names — apps under `apps/` and packages under `packages/` — per the Dart package naming standard. Future projects (e.g. the self-scoring web app, the offline desktop shell described in `plan/application-plan.md`) follow the same pattern. No `AGENTS.md` edit is required: the naming table that previously contradicted the directory layout has been removed.
 
 ## Work Items
 
@@ -36,7 +36,7 @@ This work is performed **after the Dart workspace and its projects exist** — i
 - [ ] `melos test` runs the test suite for all projects.
 - [ ] `melos analyze` runs across all projects and passes.
 - [ ] `melos exec -- flutter test --no-pub` / equivalent passes `--no-pub` for Flutter targets.
-- [ ] Every project created by tickets 003–009 uses its directory name as its Dart package name, per the convention recorded in this ticket.
+- [ ] Every project created by tickets 003–009 uses its directory name as its Dart package name, per the convention in `plan/implementation-plan.md`.
 - [ ] Root `melos.yaml` is the single source of truth for bulk commands referenced by `AGENTS.md` and the CI ticket (011).
 
 ## Dependencies
