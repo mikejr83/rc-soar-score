@@ -12,7 +12,7 @@ Tickets for getting the repository basics in place: toolchain, NX workspace, the
 
 | Ticket | Title | Priority | Status |
 | ------ | ----- | -------- | ------ |
-| [001](001-setup-toolchain-baseline.md) | Toolchain and Version Baseline | High | Open |
+| [001](001-setup-toolchain-baseline.md) | Toolchain and Version Baseline | High | Done |
 | [002](002-scaffold-nx-workspace.md) | NX Workspace at Repository Root | High | Open |
 | [003](003-scaffold-dart-api-app.md) | Scaffold `soar-score-api` (Dart/shelf) | High | Open |
 | [004](004-scaffold-contest-flutter-app.md) | Scaffold `soar-score-contest` (Flutter web) | High | Open |

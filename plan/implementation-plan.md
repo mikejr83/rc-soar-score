@@ -10,6 +10,18 @@ The `plan/` folder will remain to be a stable source of truth for the applicatio
 
 ## Technologies
 
+### Toolchain pins
+
+Version lines (not patch versions) form the toolchain baseline; consumers install the latest patch within the recorded line. Ticket `001-setup-toolchain-baseline.md` is the single source of truth for these pins and must be updated first if a line goes stale.
+
+| Tool | Pinned line |
+| ---- | ----------- |
+| Node.js | 24 (current active LTS) |
+| Flutter | 3.47.x (stable channel) |
+| NX | 23 |
+| Dart | Bundled with Flutter (no independent pin) |
+| Playwright | 1.x |
+
 ### Client Applications
 
 The client applications will be written in Flutter. The overall UI design should follow Material 3 design requirements.

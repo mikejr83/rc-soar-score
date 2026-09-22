@@ -17,7 +17,7 @@ The backend API is a Dart server using shelf, located at `apps/soar-score-api` (
 - [ ] Add `project.json` with targets per ticket 002: `pub-get`, `build` (`dart compile exe lib/main.dart` or equivalent), `serve` (`dart run lib/main.dart`), `test` (`dart test --no-pub`), `analyze` (`dart analyze --fatal-infos` — verify flag with pinned SDK).
 - [ ] Add `analysis_options.yaml` including `package:lints/recommended.yaml`.
 - [ ] Add `test/` with an example passing test exercising the shelf `Handler` directly (no live server) for the health endpoint.
-- [ ] Root script `npm run serve:api` (from ticket 002's script set) reaches this project.
+- [ ] Add root script `npm run serve:api` to the root `package.json`, reaching this project (e.g. `npx nx serve soar-score-api`).
 
 ## Acceptance Criteria
 

@@ -10,9 +10,7 @@ The repo root `AGENTS.md` is the single source of truth and is already solid (sc
 
 ## Work Items
 
-- [ ] Refine root `AGENTS.md`:
-  - Fix the project-naming inconsistency (text says `score-soar-*`, table says `soar-score-*`) per the decision recorded in ticket 002.
-  - Add a short section pointing to per-project `AGENTS.md` files and stating that when they conflict, the root file wins.
+- [ ] Add a short section to root `AGENTS.md` pointing to per-project `AGENTS.md` files and stating that when they conflict, the root file wins. (The old project-naming inconsistency was resolved by removing the naming sections from `AGENTS.md`; the convention is recorded in ticket 002 — no root `AGENTS.md` naming fix is required.)
 - [ ] Add per-project `AGENTS.md` files (short: scope, folder layout, key conventions, what must NOT be imported/depended on, example commands). One each for:
   - `apps/soar-score-api/AGENTS.md` — shelf handler structure, middleware order, DTO placement in `soar_score_api`, authn via Auth0 JWT (ref ticket 010), in-process handler tests only.
   - `apps/soar-score-contest/AGENTS.md` — offline-aware design note (UI must not assume connectivity; refer to `plan/architecture-requirements/offline-usage.md`), theme lives in the app, no direct database access (must go through `soar_score_data`), routing construct shared with public app.
@@ -25,7 +23,7 @@ The repo root `AGENTS.md` is the single source of truth and is already solid (sc
 
 ## Acceptance Criteria
 
-- [ ] Root `AGENTS.md` naming inconsistency is resolved.
+- [ ] Root `AGENTS.md` has a section pointing to the per-project files and the root-wins rule.
 - [ ] Seven per-project `AGENTS.md` files exist, each under ~40 lines, each deferring to root for shared conventions.
 - [ ] Each per-project file names exactly one thing that package must not do (e.g. core: no Flutter; data: no business logic) so agents can't violate the boundaries.
 
