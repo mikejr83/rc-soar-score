@@ -10,7 +10,7 @@ The repo root `AGENTS.md` is the single source of truth and is already solid (sc
 
 ## Work Items
 
-- [ ] Add a short section to root `AGENTS.md` pointing to per-project `AGENTS.md` files and stating that when they conflict, the root file wins. (The old project-naming inconsistency was resolved by removing the naming sections from `AGENTS.md`; the convention is recorded in ticket 002 — no root `AGENTS.md` naming fix is required.)
+- [ ] Add a short section to root `AGENTS.md` pointing to per-project `AGENTS.md` files and stating that when they conflict, the root file wins. (The old project-naming inconsistency was resolved by removing the naming sections from `AGENTS.md`; the convention is recorded in ticket 014 — no root `AGENTS.md` naming fix is required.)
 - [ ] Add per-project `AGENTS.md` files (short: scope, folder layout, key conventions, what must NOT be imported/depended on, example commands). One each for:
   - `apps/soar_score_server/AGENTS.md` — shelf handler structure, middleware order, DTO placement in `soar_score_api`, authn via Auth0 JWT (ref ticket 010), in-process handler tests only.
   - `apps/soar_score_contest/AGENTS.md` — offline-aware design note (UI must not assume connectivity; refer to `plan/architecture-requirements/offline-usage.md`), theme lives in the app, no direct database access (must go through `soar_score_data`), routing construct shared with public app.
@@ -29,7 +29,7 @@ The repo root `AGENTS.md` is the single source of truth and is already solid (sc
 
 ## Dependencies
 
-- [002-scaffold-nx-workspace.md](002-scaffold-nx-workspace.md) — naming decision.
+- [014-setup-melos-workspace.md](014-setup-melos-workspace.md) — naming decision (replaces rejected 002).
 - [003](003-scaffold-dart-api-app.md) through [009](009-scaffold-ui-package.md) — folders must exist.
 - [010-setup-auth0-identity.md](010-setup-auth0-identity.md) — auth conventions for the API app file.
 

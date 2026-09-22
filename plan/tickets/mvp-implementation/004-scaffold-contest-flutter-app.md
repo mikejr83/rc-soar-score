@@ -10,10 +10,10 @@ The contest management application is a Flutter app used primarily on laptops/ta
 
 ## Work Items
 
-- [ ] Create `apps/soar_score_contest` via `flutter create` (web platform, project name per ticket 002), keep the generated test scaffolding.
+- [ ] Create `apps/soar_score_contest` via `flutter create` (web platform, project name per ticket 014), keep the generated test scaffolding.
 - [ ] Add a minimal routing skeleton (e.g. go_router) with two placeholder routes: a home/dashboard route and a second placeholder, demonstrating the navigation construct that will be shared with the public app.
 - [ ] Establish the Material 3 `ThemeData` baseline in a dedicated theme file (seed color, scheme, light/dark).
-- [ ] Add `project.json` with targets per ticket 002: `pub-get` (flutter pub get), `build` (`flutter build web --no-pub`), `serve` (`flutter run -d chrome --no-pub`), `test` (`flutter test --no-pub`), `analyze` (`flutter analyze --no-pub`).
+- [ ] Ensure the Melos commands in `014-setup-melos-workspace.md` cover this project: `bootstrap` (flutter pub get), `build` (`flutter build web --no-pub`), `serve` (`flutter run -d chrome --no-pub`), `test` (`flutter test --no-pub`), `analyze` (`flutter analyze --no-pub`).
 - [ ] Add `analysis_options.yaml` including `package:flutter_lints/flutter.yaml`.
 - [ ] Add one example widget test and one example unit test, both passing.
 
@@ -25,7 +25,7 @@ The contest management application is a Flutter app used primarily on laptops/ta
 
 ## Dependencies
 
-- [002-scaffold-nx-workspace.md](002-scaffold-nx-workspace.md)
+- [014-setup-melos-workspace.md](014-setup-melos-workspace.md) — naming convention + bulk command wiring (replaces rejected 002).
 
 ## Sources
 

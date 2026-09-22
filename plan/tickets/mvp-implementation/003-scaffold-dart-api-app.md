@@ -6,7 +6,7 @@
 
 ## Context
 
-The backend API is a Dart server using shelf, located at `apps/soar_score_server` (project name per ticket 002). It needs an entry point, a minimal working shelf server, and the target wiring defined by ticket 002. Business endpoint design comes later; this ticket only establishes the runnable shell.
+The backend API is a Dart server using shelf, located at `apps/soar_score_server` (project name per ticket 014). It needs an entry point, a minimal working shelf server, and the Melos command wiring defined by ticket 014. Business endpoint design comes later; this ticket only establishes the runnable shell.
 
 ## Work Items
 
@@ -14,7 +14,7 @@ The backend API is a Dart server using shelf, located at `apps/soar_score_server
 - [ ] Add `lib/main.dart` with a shelf `Handler` serving:
   - `GET /healthz` returning a JSON health payload (server name + version).
   - A `/api/v1/` router prefix with one or two placeholder endpoints.
-- [ ] Add `project.json` with targets per ticket 002: `pub-get`, `build` (`dart compile exe lib/main.dart` or equivalent), `serve` (`dart run lib/main.dart`), `test` (`dart test --no-pub`), `analyze` (`dart analyze --fatal-infos` — verify flag with pinned SDK).
+- [ ] Ensure the Melos commands in `014-setup-melos-workspace.md` cover this project: `bootstrap` (pub get), `build` (`dart compile exe lib/main.dart` or equivalent), `serve` (`dart run lib/main.dart`), `test` (`dart test --no-pub`), `analyze` (`dart analyze --fatal-infos` — verify flag with pinned SDK).
 - [ ] Add `analysis_options.yaml` including `package:lints/recommended.yaml`.
 - [ ] Add `test/` with an example passing test exercising the shelf `Handler` directly (no live server) for the health endpoint.
 - [ ] Make the server startable from the repository root (e.g. running `lib/main.dart` from `apps/soar_score_server`).
@@ -27,7 +27,7 @@ The backend API is a Dart server using shelf, located at `apps/soar_score_server
 
 ## Dependencies
 
-- [002-scaffold-nx-workspace.md](002-scaffold-nx-workspace.md)
+- [014-setup-melos-workspace.md](014-setup-melos-workspace.md) — naming convention + bulk command wiring (replaces rejected 002).
 
 ## Sources
 
