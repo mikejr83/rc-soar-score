@@ -13,34 +13,6 @@ Soar Score is an RC sailplane soaring contest scoring and management suite. It c
 - NX
 - Node
 
-## Repository Structure
-
-```plain
-soar-score/
-├── apps/                    # Application entry points
-│   ├── soar-score-api/      # REST API server (Dart CLI + shelf)
-│   ├── soar-score-contest/  # Contest management web app (Flutter)
-│   └── soar-score-public/   # Public viewing web app (Flutter)
-├── packages/                # Shared packages
-│   ├── soar_score_api/      # API client/server code
-│   ├── soar_score_core/     # Domain models, business logic, scoring engine
-│   ├── soar_score_data/     # Data access layer (SQLite, HTTP)
-│   └── soar_score_ui/       # Shared Flutter UI components
-├── .github/workflows/       # CI/CD configuration
-├── nx.json                  # NX workspace configuration
-└── package.json             # Root package.json (NX scripts)
-```
-
-### Project Naming
-
-Note that NX project names use `score-soar-*` while directory names use `soar-score-*`:
-
-| Directory | NX Project Name |
-| ----------- | ----------------- |
-| `apps/soar-score-api` | `soar-score-api` |
-| `apps/soar-score-contest` | `soar-score-contest` |
-| `apps/soar-score-public` | `soar-score-public` |
-
 ## Environment Setup
 
 **Prerequisites:**
@@ -66,27 +38,6 @@ npx nx run-many --target=pub-get --all
 # Build all projects
 npm run build
 
-# Build individual project
-npx nx build score-soar-api
-npx nx build score-soar-contest
-npx nx build score-soar-public
-```
-
-### Run/Dev Servers
-
-```bash
-# API server
-npm run serve:api
-# Or: cd apps/soar-score-api && dart run lib/main.dart
-
-# Contest app (Chrome)
-npm run serve:contest
-# Or: cd apps/soar-score-contest && flutter run -d chrome
-
-# Public app (Chrome)
-npm run serve:public
-# Or: cd apps/soar-score-public && flutter run -d chrome
-```
 
 ### Test
 
@@ -94,11 +45,6 @@ npm run serve:public
 # Test all projects
 npm run test
 
-# Test individual project
-npx nx test score-soar-api
-npx nx test score-soar-contest
-npx nx test score-soar-public
-```
 
 ### Lint/Analyze
 
@@ -106,11 +52,6 @@ npx nx test score-soar-public
 # Analyze all projects
 npm run lint
 
-# Analyze individual project
-npx nx analyze score-soar-api
-npx nx analyze score-soar-contest
-npx nx analyze score-soar-public
-```
 
 ### NX Run Many
 
@@ -147,7 +88,6 @@ npx nx run-many --target=analyze --all --parallel=3
 - GitHub Actions workflow in `.github/workflows/ci.yml`
 - Runs on push/PR to `main` and `develop` branches
 - Steps: install deps → analyze → test → build
-- Uses `ubuntu-latest`, Node 20, Flutter 3.24.0
 
 ## Important Conventions
 

@@ -41,7 +41,7 @@ When an offline client reconnects, it pushes a batch of mutations (e.g. dozens o
 - [ ] The client's sync manager marks acknowledged mutations as completed and retains only unacknowledged or rejected mutations in the local outbox.
 - [ ] The client offline frame displays the exact count of failed/rejected mutations and provides an inspection view detailing the mutation, error reason, and options to retry, edit, or discard.
 - [ ] Server-side normalization calculations recompute provisional private standings immediately upon accepting raw score mutations.
-- [ ] Ingesting raw scores via background sync does not modify the public contest projection (`apps/soar-score-public`) without an explicit publish action or configured round publication trigger.
+- [ ] Ingesting raw scores via background sync does not modify the public contest projection (`apps/soar_score_public`) without an explicit publish action or configured round publication trigger.
 
 ## Sources
 

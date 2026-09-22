@@ -6,7 +6,7 @@
 
 ## Context
 
-`packages/soar_score_ui` holds the shared Flutter UI components used by `soar-score-contest` and `soar-score-public`. Per `plan/implementation-plan.md`, both apps can share navigation constructs. This ticket sets up the package with a single example reusable widget (a card or app-bar component) so the dependency path into the two Flutter apps is proven.
+`packages/soar_score_ui` holds the shared Flutter UI components used by `soar_score_contest` and `soar_score_public`. Per `plan/implementation-plan.md`, both apps can share navigation constructs. This ticket sets up the package with a single example reusable widget (a card or app-bar component) so the dependency path into the two Flutter apps is proven.
 
 ## Work Items
 
@@ -24,7 +24,7 @@
 ## Acceptance Criteria
 
 - [ ] `flutter test` passes against the example widget.
-- [ ] Both `soar-score-contest` and `soar-score-public` are able to import `soar_score_ui` (verify by adding the path dependency in a later integration ticket — at minimum, the package resolves standalone).
+- [ ] Both `soar_score_contest` and `soar_score_public` are able to import `soar_score_ui` (verify by adding the path dependency in a later integration ticket — at minimum, the package resolves standalone).
 - [ ] Lint is clean.
 
 ## Dependencies

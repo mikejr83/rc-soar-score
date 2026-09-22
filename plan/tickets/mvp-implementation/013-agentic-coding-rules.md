@@ -12,9 +12,9 @@ The repo root `AGENTS.md` is the single source of truth and is already solid (sc
 
 - [ ] Add a short section to root `AGENTS.md` pointing to per-project `AGENTS.md` files and stating that when they conflict, the root file wins. (The old project-naming inconsistency was resolved by removing the naming sections from `AGENTS.md`; the convention is recorded in ticket 002 — no root `AGENTS.md` naming fix is required.)
 - [ ] Add per-project `AGENTS.md` files (short: scope, folder layout, key conventions, what must NOT be imported/depended on, example commands). One each for:
-  - `apps/soar-score-api/AGENTS.md` — shelf handler structure, middleware order, DTO placement in `soar_score_api`, authn via Auth0 JWT (ref ticket 010), in-process handler tests only.
-  - `apps/soar-score-contest/AGENTS.md` — offline-aware design note (UI must not assume connectivity; refer to `plan/architecture-requirements/offline-usage.md`), theme lives in the app, no direct database access (must go through `soar_score_data`), routing construct shared with public app.
-  - `apps/soar-score-public/AGENTS.md` — two-area split (site pages vs. results), report-dense layouts may depart from strict Material 3 (ref implementation-plan), read-only of contest data.
+  - `apps/soar_score_server/AGENTS.md` — shelf handler structure, middleware order, DTO placement in `soar_score_api`, authn via Auth0 JWT (ref ticket 010), in-process handler tests only.
+  - `apps/soar_score_contest/AGENTS.md` — offline-aware design note (UI must not assume connectivity; refer to `plan/architecture-requirements/offline-usage.md`), theme lives in the app, no direct database access (must go through `soar_score_data`), routing construct shared with public app.
+  - `apps/soar_score_public/AGENTS.md` — two-area split (site pages vs. results), report-dense layouts may depart from strict Material 3 (ref implementation-plan), read-only of contest data.
   - `packages/soar_score_core/AGENTS.md` — pure Dart, no Flutter, no I/O, owns scoring engine + domain model types; all business rules trace to `plan/business-requirements/`.
   - `packages/soar_score_data/AGENTS.md` — repositories per entity (one file each), SQLite mechanism choice from ticket 007, HTTP client uses `soar_score_api` only, no business logic.
   - `packages/soar_score_api/AGENTS.md` — DTOs use `json_annotation`, no Flutter, token handling injected (ref ticket 010), errors typed in `errors/`.

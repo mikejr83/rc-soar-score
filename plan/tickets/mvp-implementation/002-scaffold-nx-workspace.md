@@ -6,15 +6,16 @@
 
 ## Context
 
-`plan/implementation-plan.md` defines this repository as an NX monorepo: applications live in `apps/`, shared packages in `packages/` (created when appropriate), and `plan/` remains the stable source of truth for design. `plan/application-plan.md` defines the application set: a contest management app (Flutter, laptop/tablet, must run disconnected), a public viewing site (Flutter web), and a Dart/shelf API layer. The MVP ticket series in this folder scaffolds seven projects: `soar-score-api`, `soar-score-contest`, `soar-score-public` (apps) and `soar_score_core`, `soar_score_data`, `soar_score_api`, `soar_score_ui` (packages).
+`plan/implementation-plan.md` defines this repository as an NX monorepo: applications live in `apps/`, shared packages in `packages/` (created when appropriate), and `plan/` remains the stable source of truth for design. `plan/application-plan.md` defines the application set: a contest management app (Flutter, laptop/tablet, must run disconnected), a public viewing site (Flutter web), and a Dart/shelf API layer. The MVP ticket series in this folder scaffolds seven projects: `soar_score_server`, `soar_score_contest`, `soar_score_public` (apps) and `soar_score_core`, `soar_score_data`, `soar_score_api`, `soar_score_ui` (packages).
 
 The repo currently contains only `plan/`, `research/`, `AGENTS.md`, and agent config folders. Per the toolchain baseline (ticket 001), the workspace must use the NX 23 line and Node 24. Per-project target conventions (pub-get separation, `--no-pub` for Flutter) are defined in `AGENTS.md` and must be implemented here.
 
-**Project naming (settled by this ticket):** NX project names match directory names — apps are kebab-case `soar-score-*` under `apps/`, packages are snake_case `soar_score_*` under `packages/`. Future projects (e.g. the self-scoring web app, the offline desktop shell described in `plan/application-plan.md`) follow the same pattern. No `AGENTS.md` edit is required: the naming table that previously contradicted the directory layout has been removed.
+**Project naming (settled by this ticket):** All Dart project names are snake_case and match their directory names — apps under `apps/` and packages under `packages/` — per the Dart package naming standard. Future projects (e.g. the self-scoring web app, the offline desktop shell described in `plan/application-plan.md`) follow the same pattern. No `AGENTS.md` edit is required: the naming table that previously contradicted the directory layout has been removed.
 
 ## Work Items
 
-- [ ] Create the NX workspace at the repository root: `nx.json`, root `package.json` (with `nx` pinned to the 23 line, `engines` Node 24, and the scripts referenced in `AGENTS.md`: `npm run build`, `npm run test`, `npm run lint`), root `.nvmrc` (Node 24), and any other NX config files the current NX version requires. Root `package.json`/`.nvmrc` ownership per ticket 001.
+- [ ] Create the NX workspace at the repository root using the standard nx workspace creation tools. The files: `nx.json`, root `package.json` (with `nx` pinned to the 23 line, `engines` Node 24, and the scripts referenced in `AGENTS.md`: `npm run build`, `npm run test`, `npm run lint`), root `.nvmrc` (Node 24), and any other NX config files the current NX version requires. Root `package.json`/`.nvmrc` ownership per ticket 001.
+- [ ] Use nx tooling for adding any projects.
 - [ ] Define the per-project target conventions that scaffold tickets will follow:
   - `pub-get` target, run as a dependency before `build`, `test`, and `analyze`.
   - Flutter (`flutter`) targets invoke `flutter ... --no-pub`; pure-Dart targets use `dart ... --no-pub` where supported.

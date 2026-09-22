@@ -14,9 +14,9 @@ Tickets for getting the repository basics in place: toolchain, NX workspace, the
 | ------ | ----- | -------- | ------ |
 | [001](001-setup-toolchain-baseline.md) | Toolchain and Version Baseline | High | Done |
 | [002](002-scaffold-nx-workspace.md) | NX Workspace at Repository Root | High | Open |
-| [003](003-scaffold-dart-api-app.md) | Scaffold `soar-score-api` (Dart/shelf) | High | Open |
-| [004](004-scaffold-contest-flutter-app.md) | Scaffold `soar-score-contest` (Flutter web) | High | Open |
-| [005](005-scaffold-public-flutter-app.md) | Scaffold `soar-score-public` (Flutter web) | High | Open |
+| [003](003-scaffold-dart-api-app.md) | Scaffold `soar_score_server` (Dart/shelf) | High | Open |
+| [004](004-scaffold-contest-flutter-app.md) | Scaffold `soar_score_contest` (Flutter web) | High | Open |
+| [005](005-scaffold-public-flutter-app.md) | Scaffold `soar_score_public` (Flutter web) | High | Open |
 | [006](006-scaffold-core-package.md) | Scaffold `soar_score_core` Package | High | Open |
 | [007](007-scaffold-data-package.md) | Scaffold `soar_score_data` Package | High | Open |
 | [008](008-scaffold-api-package.md) | Scaffold `soar_score_api` Package | High | Open |
@@ -32,7 +32,7 @@ Tickets for getting the repository basics in place: toolchain, NX workspace, the
 2. **002** — NX workspace + naming convention decision.
 3. **006** — `soar_score_core` (everything else depends on its types).
 4. **007 → 008** — `soar_score_data`, then `soar_score_api` (both build on core).
-5. **003** — `soar-score-api` server (its `/healthz` is the contract `soar_score_api`'s example DTO targets).
+5. **003** — `soar_score_server` (its `/healthz` is the contract `soar_score_api`'s example DTO targets).
 6. **004, 005** — the two Flutter apps (theme baselines).
 7. **009** — `soar_score_ui` (needs both theme baselines to reference).
 8. **010** — Auth0 tenant + JWT middleware + Flutter PKCE login.

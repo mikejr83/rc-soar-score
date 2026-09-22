@@ -1,4 +1,4 @@
-# Ticket 004 — Scaffold `soar-score-contest` (Flutter web)
+# Ticket 004 — Scaffold `soar_score_contest` (Flutter web)
 
 - **Category:** Scaffold
 - **Priority:** High
@@ -10,7 +10,7 @@ The contest management application is a Flutter app used primarily on laptops/ta
 
 ## Work Items
 
-- [ ] Create `apps/soar-score-contest` via `flutter create` (web platform, project name per ticket 002), keep the generated test scaffolding.
+- [ ] Create `apps/soar_score_contest` via `flutter create` (web platform, project name per ticket 002), keep the generated test scaffolding.
 - [ ] Add a minimal routing skeleton (e.g. go_router) with two placeholder routes: a home/dashboard route and a second placeholder, demonstrating the navigation construct that will be shared with the public app.
 - [ ] Establish the Material 3 `ThemeData` baseline in a dedicated theme file (seed color, scheme, light/dark).
 - [ ] Add `project.json` with targets per ticket 002: `pub-get` (flutter pub get), `build` (`flutter build web --no-pub`), `serve` (`flutter run -d chrome --no-pub`), `test` (`flutter test --no-pub`), `analyze` (`flutter analyze --no-pub`).
@@ -20,7 +20,7 @@ The contest management application is a Flutter app used primarily on laptops/ta
 ## Acceptance Criteria
 
 - [ ] `flutter run -d chrome` launches the app and renders the theme and both placeholder routes.
-- [ ] `npx nx test soar-score-contest` and `npx nx analyze soar-score-contest` pass.
+- [ ] `flutter test` and `flutter analyze` pass against `soar_score_contest`.
 - [ ] Theme is defined in a single file; no inline `MaterialApp(theme:)` values outside that file.
 
 ## Dependencies
