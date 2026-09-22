@@ -34,6 +34,9 @@ Version lines (not patch versions) form the toolchain baseline; consumers instal
 | ---- | ----------- |
 | Flutter | 3.47.x (stable channel) |
 | Dart | Bundled with Flutter (no independent pin) |
+| Melos | 8.x |
+
+Node/NX and Playwright lines are no longer part of the toolchain (tickets 002 and 012 rejected).
 
 ### Client Applications
 

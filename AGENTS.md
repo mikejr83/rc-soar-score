@@ -33,12 +33,17 @@ Soar Score is an RC sailplane soaring contest scoring and management suite. It c
 - Dart CLI projects include `package:lints/recommended.yaml`
 - Run `melos analyze` to check
 
-
 ## CI/CD
 
-- GitHub Actions workflow in `.github/workflows/ci.yml`
+- GitHub Actions workflow in `.github/workflows/ci.yml` (owned by ticket 011; not yet created)
 - Runs on push/PR to `main` and `develop` branches
 - Steps: install deps → analyze → test → build
+
+**Toolchain pins** (recorded in `plan/tickets/mvp-implementation/001-setup-toolchain-baseline.md`, which is the source of truth — CI must not drift from it):
+
+- Flutter 3.47.x (stable channel)
+- Dart: bundled with Flutter (3.13.x current, no independent pin)
+- Melos 8.x
 
 ## Important Conventions
 
