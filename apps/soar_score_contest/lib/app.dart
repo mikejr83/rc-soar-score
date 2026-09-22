@@ -1,0 +1,22 @@
+import 'package:flutter/material.dart';
+
+import 'router.dart';
+import 'theme/app_theme.dart';
+
+class SoarScoreContestApp extends StatelessWidget {
+  const SoarScoreContestApp({super.key});
+
+  static const String title = 'RC Soar Score Contest Management';
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp.router(
+      title: title,
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.light(),
+      darkTheme: AppTheme.dark(),
+      themeMode: ThemeMode.system,
+      routerConfig: buildAppRouter(),
+    );
+  }
+}
