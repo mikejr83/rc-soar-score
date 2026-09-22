@@ -15,7 +15,7 @@ Tickets for getting the repository basics in place: toolchain, Melos workspace, 
 | ------ | ----- | -------- | ------ |
 | [001](001-setup-toolchain-baseline.md) | Toolchain and Version Baseline | High | Done |
 | [002](002-scaffold-nx-workspace.md) | ~~NX Workspace at Repository Root~~ (replaced by 014) | High | Rejected |
-| [003](003-scaffold-dart-api-app.md) | Scaffold `soar_score_server` (Dart/shelf) | High | Open |
+| [003](003-scaffold-dart-api-app.md) | Scaffold `soar_score_server` (Dart/shelf) | High | Done |
 | [004](004-scaffold-contest-flutter-app.md) | Scaffold `soar_score_contest` (Flutter web) | High | In-Review |
 | [005](005-scaffold-public-flutter-app.md) | Scaffold `soar_score_public` (Flutter web) | High | Open |
 | [006](006-scaffold-core-package.md) | Scaffold `soar_score_core` Package | High | Open |
@@ -33,7 +33,7 @@ Tickets for getting the repository basics in place: toolchain, Melos workspace, 
 1. **001** — pin Flutter/Dart/Melos versions; update `plan/implementation-plan.md`.
 2. **006** — `soar_score_core` (everything else depends on its types).
 3. **007 → 008** — `soar_score_data`, then `soar_score_api` (both build on core).
-4. **003** — `soar_score_server` (its `/healthz` is the contract `soar_score_api`'s example DTO targets).
+4. **003** — `soar_score_server` (its `/health` is the contract `soar_score_api`'s example DTO targets).
 5. **004, 005** — the two Flutter apps (theme baselines).
 6. **009** — `soar_score_ui` (needs both theme baselines to reference).
 7. **014** — Melos workspace at repository root (handled after the Dart workspace and projects exist; links projects 003–009 and wires the bulk commands; naming comes from `plan/implementation-plan.md`). ~~002 (NX) is rejected.~~

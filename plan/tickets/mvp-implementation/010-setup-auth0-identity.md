@@ -20,7 +20,7 @@
   - API: `AUTH0_DOMAIN`, `API_AUDIENCE` (and any `AUTH0_JWKS` override for local mock identity during dev).
   - Flutter apps: `AUTH0_DOMAIN`, `AUTH0_CLIENT_ID` (per app), redirect URLs.
   - Provide a root `.env.example` documenting every required variable; add `.env` to `.gitignore`.
-- [ ] Integrate Auth0 JWT validation into `soar_score_server` (shelf middleware that verifies signature/JWKS, `aud`, and expiry on `Authorization: Bearer` headers); the public `GET /healthz` stays unauthenticated; all `/api/v1/` routes require a valid token except those explicitly marked public.
+- [ ] Integrate Auth0 JWT validation into `soar_score_server` (shelf middleware that verifies signature/JWKS, `aud`, and expiry on `Authorization: Bearer` headers); the public `GET /health` stays unauthenticated; all `/api/v1/` routes require a valid token except those explicitly marked public.
 - [ ] Integrate the Flutter Auth0 SDK into `soar_score_contest` behind the `TokenProvider` seam established in `soar_score_api` (ticket 008): the app acquires tokens via Authorization Code + PKCE and supplies them to the API client.
 - [ ] CI handling: record which secrets CI needs (currently only domain+client IDs for builds; token verification uses public JWKS so no client secret should ever be required — confirm this stays true).
 

@@ -2,9 +2,9 @@
 
 - **Category:** Scaffold
 - **Priority:** High
-- **Status:** In-Review
+- **Status:** Done
 
-> **Endpoint change (2026-09-22):** during implementation the maintainer changed the health endpoint from `GET /healthz` to `GET /health`. Ticket text below reflects `GET /health`. Other tickets still reference `/healthz` (see Follow-ups).
+> **Endpoint change (2026-09-22):** during implementation the maintainer changed the health endpoint from `GET /healthz` to `GET /health`. Ticket text below reflects `GET /health`; the other tickets that referenced the old path were updated the same day (see Follow-ups).
 
 ## Context
 
@@ -45,11 +45,11 @@ The backend API is a Dart server using shelf, located at `apps/soar_score_server
 - `apps/soar_score_server/lib/main.dart` — new; entry point: reads `PORT` (default 8080, invalid values fall back to 8080 with a stderr warning), starts `shelf_io.serve` on the top-level handler.
 - `apps/soar_score_server/lib/handler.dart` — new; `createServerHandler()` (`Handler`) serving `GET /health` (JSON: `name`, `displayName`, `version`) and a `shelf_router` `Router` mounted at `/api/v1` with placeholders `GET /meta` and `GET /ping`; unknown routes return 404.
 - `apps/soar_score_server/test/handler_test.dart` — new; in-process Handler tests for `/health`, both `/api/v1` placeholders, and 404 behavior (no port binding).
-- `plan/tickets/mvp-implementation/003-scaffold-dart-api-app.md` — this ticket: status In-Review, endpoint change note, work items/acceptance criteria checked, files listed.
+- `plan/tickets/mvp-implementation/003-scaffold-dart-api-app.md` — this ticket: status Done, endpoint change note, work items/acceptance criteria checked, files listed.
 
 ## Follow-ups
 
-- Rename `/healthz` to `/health` in the tickets that still reference the old path: 010 (the JWT middleware carve-out for the public health route), and the mvp README's execution-order note ("its `/healthz` is the contract `soar_score_api`'s example DTO targets"). (Ticket 012's reference is in rejected historical text; leave it.)
+- ~~Rename `/healthz` to `/health` in the tickets that still reference the old path: 010 (the JWT middleware carve-out for the public health route), and the mvp README's execution-order note ("its `/healthz` is the contract `soar_score_api`'s example DTO targets").~~ — done (2026-09-22; ticket 012's reference is in rejected historical text; left as-is.)
 - Wire `soar_score_api`'s `HealthDto` to the actual payload shape (ticket 008); the payload now carries `displayName` in addition to `name` + `version`.
 - Replace the `/api/v1` placeholder endpoints with real business routes (feature tickets), and consume the baseline `json_annotation` dep for serialized DTOs.
 - Add Auth0 JWT middleware (ticket 010): `/health` stays unauthenticated; `/api/v1` routes require a valid token.
