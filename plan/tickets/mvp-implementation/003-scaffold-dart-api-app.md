@@ -50,7 +50,7 @@ The backend API is a Dart server using shelf, located at `apps/soar_score_server
 ## Follow-ups
 
 - ~~Rename `/healthz` to `/health` in the tickets that still reference the old path: 010 (the JWT middleware carve-out for the public health route), and the mvp README's execution-order note ("its `/healthz` is the contract `soar_score_api`'s example DTO targets").~~ — done (2026-09-22; ticket 012's reference is in rejected historical text; left as-is.)
-- Wire `soar_score_api`'s `HealthDto` to the actual payload shape (ticket 008); the payload now carries `displayName` in addition to `name` + `version`.
+- ~~Wire `soar_score_api`'s `HealthDto` to the actual payload shape (ticket 008); the payload now carries `displayName` in addition to `name` + `version`.~~ — done (2026-09-23): `soar_score_api`'s `HealthDto` decodes/encodes the `name`/`displayName`/`version` payload, verified by round-trip tests.
 - Replace the `/api/v1` placeholder endpoints with real business routes (feature tickets), and consume the baseline `json_annotation` dep for serialized DTOs.
 - Add Auth0 JWT middleware (ticket 010): `/health` stays unauthenticated; `/api/v1` routes require a valid token.
 - Connect this app to the Melos workspace and bulk commands (ticket 014); add the per-project AGENTS.md (ticket 013).

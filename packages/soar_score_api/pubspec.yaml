@@ -1,0 +1,19 @@
+name: soar_score_api
+description: "Soar Score shared API client (pure Dart): HTTP transport over package:http, JSON DTOs, and typed API errors, with injectable token handling."
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ">=3.13.0 <4.0.0"
+
+dependencies:
+  http: ^1.6.0
+  json_annotation: ^4.12.0
+  soar_score_core:
+    path: ../soar_score_core
+
+dev_dependencies:
+  build_runner: ^2.16.1
+  json_serializable: ^6.14.1
+  lints: ^6.1.0
+  test: ^1.32.0

@@ -20,7 +20,7 @@ Tickets for getting the repository basics in place: toolchain, Melos workspace, 
 | [005](005-scaffold-public-flutter-app.md) | Scaffold `soar_score_public` (Flutter web) | High | Open |
 | [006](006-scaffold-core-package.md) | Scaffold `soar_score_core` Package | High | In-Review |
 | [007](007-scaffold-data-package.md) | Scaffold `soar_score_data_sqlite` Package | High | In-Review |
-| [008](008-scaffold-api-package.md) | Scaffold `soar_score_api` Package | High | Open |
+| [008](008-scaffold-api-package.md) | Scaffold `soar_score_api` Package | High | In-Review |
 | [009](009-scaffold-ui-package.md) | Scaffold `soar_score_ui` Package | High | Open |
 | [010](010-setup-auth0-identity.md) | Auth0 Identity Setup | High | Open |
 | [011](011-ci-workflow-and-docs.md) | GitHub Actions CI Workflow and Onboarding Docs | High | Open |
