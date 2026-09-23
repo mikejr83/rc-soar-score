@@ -1,4 +1,5 @@
 name: soar_score_ui
+resolution: workspace
 description: "Soar Score shared UI package: reusable Flutter widgets, composite components, and shared theme tokens for the contest and public apps."
 version: 0.1.0
 publish_to: none

@@ -1,0 +1,48 @@
+name: soar_score
+description: "Soar Score monorepo: Flutter apps in apps/, shared Dart packages in packages/."
+publish_to: none
+
+environment:
+  sdk: ^3.13.3
+
+workspace:
+  - apps/**
+  - packages/**
+
+dev_dependencies:
+  melos: ^8.9.0
+
+melos:
+  categories:
+    apps:
+      - apps/**
+    packages:
+      - packages/**
+
+  command:
+    analyze:
+      fatalInfos: true
+      noPub: true
+    test:
+      noPub: true
+
+  scripts:
+    build:
+      description: Build every project (flutter build web for the Flutter apps, dart compile exe for the Dart server).
+      run: melos build:web && melos build:dart
+
+    build:web:
+      description: Build the Flutter web apps.
+      exec:
+        command: flutter build web --no-pub
+      packageFilters:
+        category: apps
+        flutter: true
+
+    build:dart:
+      description: Build the pure-Dart CLI apps.
+      exec:
+        command: dart compile exe lib/main.dart -o build/cli/$MELOS_PACKAGE_NAME.exe
+      packageFilters:
+        category: apps
+        flutter: false
