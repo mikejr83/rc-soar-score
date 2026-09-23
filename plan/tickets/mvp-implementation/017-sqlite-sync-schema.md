@@ -1,35 +1,44 @@
-# Ticket 017 — SQLite Sync Schema (Offline Synchronization Fields)
+# Ticket 017 — Extract `soar_score_api_handlers` from `soar_score_server`
 
-- **Category:** Data
-- **Priority:** Medium
+- **Category:** Refactor / Scaffold
+- **Priority:** High
 - **Status:** Open
 
 ## Context
 
-Ticket 007 scaffolded `soar_score_data_sqlite` with a minimal `contests` table only, and recorded the decision that sync-related schema fields are **deferred to this ticket** (rather than included in the initial scaffold schema). `offline-synchronization.md` defines what the local store must retain: unsent mutations with their unique client identifiers, server-time ordering, durable sync cursors, tombstones until acknowledged, and audit history.
+`apps/soar_score_server/lib/handler.dart`'s `createServerHandler()` (003, Done) currently builds the entire routing table — the `GET /health` payload and the `/api/v1` router — directly inside the deployable executable app. That's fine for a standalone server, but it blocks the architecture discussed for `soar_score_contest`'s Windows build (015): running the *same* API in-process, offline, with no deployed server reachable. A `shelf.Handler` factory that lives inside an executable app can't be depended on by another app.
+
+This ticket extracts that routing logic into a new plain-Dart package, `packages/soar_score_api_handlers`, with no dependency on *how* it's served (`shelf_io.serve` on a bound port for `soar_score_server`, or hosted on `localhost` inside the Windows build per ticket 018) and no dependency on *which* data store backs it (`soar_score_data_postgres`, 016, server-side; `soar_score_data_sqlite`, 007, embedded). `apps/soar_score_server` becomes a thin executable: wire a repository implementation, call the factory, call `shelf_io.serve`.
 
 ## Work Items
 
-- [ ] Add the local sync schema to `soar_score_data_sqlite` (drift 2.x table DSL, schema version 2 migration):
-  - `client_mutation_log` — unsent mutations: unique client mutation id (composite unique `(contest_id, client_mutation_id)` for idempotency), payload, base revision, actor, authority, source device, client timestamp, created time.
-  - `sync_cursors` — per-contest last-acknowledged `contest_mutation_seq` (monotonically increasing, per `data/README.md`), durable across restarts.
-  - `tombstones` — soft-deleted entity records with deletion time, retained 90 days or until contest archiving + 90 days.
-  - Sync bookkeeping columns on `contests` (e.g. `revision`, `base_revision`, `last_modified_at` as UTC) as required by the sync protocol.
-- [ ] Add the matching repositories (`repositories/`) implementing `soar_score_core` interfaces; file and link any new abstract interface this requires in `soar_score_core`.
-- [ ] Add tests against an in-memory database proving: unsent mutations are retained and replayable, cursor only advances after changes are stored, and tombstones block resurrection by older changes.
+- [ ] Create `packages/soar_score_api_handlers` with a `pubspec.yaml` (path dependency on `soar_score_core` for repository interfaces/types; `shelf`, `shelf_router`).
+- [ ] Move the route-building logic out of `apps/soar_score_server/lib/handler.dart` into this package, exposing a factory (e.g. `Handler buildApiHandler({required SomeRepository repo, ...})`) that takes its data dependencies as parameters rather than assuming a global or a concrete implementation.
+- [ ] Preserve the existing `GET /health` payload shape and the `/api/v1` router prefix (`/meta`, `/ping` placeholders) exactly, so `soar_score_server`'s existing behavior and tests are unaffected by the move.
+- [ ] Update `apps/soar_score_server` to depend on `packages/soar_score_api_handlers`; reduce its own `lib/main.dart`/`lib/handler.dart` to: wire `soar_score_data_postgres` repositories, call `buildApiHandler(...)`, and `shelf_io.serve(...)`.
+- [ ] Move `test/handler_test.dart`'s in-process routing tests from `apps/soar_score_server` into `packages/soar_score_api_handlers`, since they now test behavior that lives there; leave only wiring-level tests (if any) behind in the app.
+- [ ] Decide where the eventual Auth0 JWT middleware (ticket 010) is applied — inside `soar_score_api_handlers` as an injectable/optional layer, or wrapped around the handler only in `apps/soar_score_server`'s `lib/main.dart`. The embedded Windows instance (018) likely shouldn't require a network auth token at all, so this decision determines whether 018 needs to opt out of something or simply never adds it. Record the decision here.
+- [ ] Add `analysis_options.yaml` including `package:lints/recommended.yaml` to the new package.
 
 ## Acceptance Criteria
 
-- [ ] All requirements 1–8 of `offline-synchronization.md`'s *Synchronization Requirements* are satisfiable from the local schema alone (server-side behavior remains server work).
-- [ ] `dart analyze` and `dart test` pass from the package directory.
+- [ ] `apps/soar_score_server`'s externally-observable behavior is unchanged: `dart run lib/main.dart` still serves `GET /health` and the `/api/v1` placeholders identically; ticket 003's acceptance criteria still hold.
+- [ ] `dart test` passes in both `packages/soar_score_api_handlers` (in-process routing tests, no port binding) and `apps/soar_score_server` (whatever thin wiring remains there).
+- [ ] `dart analyze` is clean in both.
+- [ ] `packages/soar_score_api_handlers` depends only on repository *interfaces* from `soar_score_core` — no dependency on `soar_score_data_postgres`, `soar_score_data_sqlite`, `shelf_io`, or Flutter — so it can be wired against either data package without modification.
+- [ ] The auth-middleware placement decision above is recorded.
 
 ## Dependencies
 
-- [007-scaffold-data-package.md](007-scaffold-data-package.md)
-- [006-scaffold-core-package.md](006-scaffold-core-package.md)
+- [003-scaffold-dart-api-app.md](003-scaffold-dart-api-app.md) — code being extracted from (Done).
+- [006-scaffold-core-package.md](006-scaffold-core-package.md) — repository interfaces.
+
+## Follow-ups
+
+- Ticket 018 wires this package into the Windows target of `soar_score_contest`, using `soar_score_data_sqlite` (007) instead of `soar_score_data_postgres` (016).
+- Ticket 010 (Auth0 JWT middleware) should be written against wherever this ticket decides middleware lives.
 
 ## Sources
 
-- `plan/architecture-requirements/offline-synchronization.md`
-- `plan/architecture-requirements/data/synchronization-and-audit.md`
-- `plan/architecture-requirements/data/README.md` (sync cursor storage, tombstone retention)
+- `AGENTS.md`
+- `plan/implementation-plan.md`

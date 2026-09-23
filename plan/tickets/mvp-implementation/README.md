@@ -29,7 +29,8 @@ Tickets for getting the repository basics in place: toolchain, Melos workspace, 
 | [014](014-setup-melos-workspace.md) | Melos Workspace at Repository Root | High | Open |
 | [015](015-scaffold-contest-windows-target.md) | Add Windows target to `soar_score_contest` | High | In-Review |
 | [016](016-scaffold-data-postres-package.md) | Scaffold `soar_score_data_postgres` Package | High | In-Review |
-| [017](017-sqlite-sync-schema.md) | SQLite Sync Schema (Offline Synchronization Fields) | Medium | Open |
+| [017](017-sqlite-sync-schema.md) | SQLite Sync Schema (Offline Synchronization Fields) | High | Open |
+| [017](018-embed-soar_score_api_handlers.md) | Embed soar_score_api_handlers in the Windows Target of soar_score_contest | High | Open |
 
 ## Suggested execution order
 
