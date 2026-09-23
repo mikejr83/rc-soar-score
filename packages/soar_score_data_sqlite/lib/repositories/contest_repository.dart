@@ -11,9 +11,9 @@ class ContestSqliteRepository implements ContestRepository {
 
   @override
   Future<Contest?> findById(Id id) async {
-    final row = await (_database.select(_database.contests)
-          ..where((c) => c.id.equals(id.value)))
-        .getSingleOrNull();
+    final row = await (_database.select(
+      _database.contests,
+    )..where((c) => c.id.equals(id.value))).getSingleOrNull();
     return row == null ? null : _toDomain(row);
   }
 
@@ -31,9 +31,9 @@ class ContestSqliteRepository implements ContestRepository {
         name: Value(contest.name),
         startedAt: Value(contest.startedAt.toUtc().toIso8601String()),
       );
-      final updated = await (_database.update(_database.contests)
-            ..where((c) => c.id.equals(contest.id.value)))
-          .write(companion);
+      final updated = await (_database.update(
+        _database.contests,
+      )..where((c) => c.id.equals(contest.id.value))).write(companion);
       if (updated == 0) {
         await _database.into(_database.contests).insert(companion);
       }
@@ -43,9 +43,9 @@ class ContestSqliteRepository implements ContestRepository {
 
   @override
   Future<bool> delete(Id id) async {
-    final deleted = await (_database.delete(_database.contests)
-          ..where((c) => c.id.equals(id.value)))
-        .go();
+    final deleted = await (_database.delete(
+      _database.contests,
+    )..where((c) => c.id.equals(id.value))).go();
     return deleted > 0;
   }
 
@@ -53,8 +53,8 @@ class ContestSqliteRepository implements ContestRepository {
   Future<void> close() => _database.close();
 
   static Contest _toDomain(ContestData row) => Contest(
-        id: Id.parse(row.id),
-        name: row.name,
-        startedAt: DateTime.parse(row.startedAt).toUtc(),
-      );
+    id: Id.parse(row.id),
+    name: row.name,
+    startedAt: DateTime.parse(row.startedAt).toUtc(),
+  );
 }

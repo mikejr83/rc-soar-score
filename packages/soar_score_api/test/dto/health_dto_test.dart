@@ -47,7 +47,11 @@ void main() {
     test('is equal to another instance with the same fields', () {
       final a = const HealthDto(name: 'a', displayName: 'A', version: '1.0.0');
       final b = const HealthDto(name: 'a', displayName: 'A', version: '1.0.0');
-      final other = const HealthDto(name: 'b', displayName: 'A', version: '1.0.0');
+      final other = const HealthDto(
+        name: 'b',
+        displayName: 'A',
+        version: '1.0.0',
+      );
 
       expect(a, equals(b));
       expect(a.hashCode, b.hashCode);

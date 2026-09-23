@@ -30,7 +30,11 @@ void main() {
 
     test('rejects a blank name', () {
       expect(
-        () => Contest(id: Id.create(), name: '   ', startedAt: DateTime.utc(2026)),
+        () => Contest(
+          id: Id.create(),
+          name: '   ',
+          startedAt: DateTime.utc(2026),
+        ),
         throwsArgumentError,
       );
     });
@@ -39,8 +43,16 @@ void main() {
       final id = Id.create();
       final startedAt = DateTime.utc(2026, 9, 26, 9, 30);
       final a = Contest(id: id, name: 'Classic', startedAt: startedAt);
-      final b = Contest(id: Id.parse(id.value), name: 'Classic', startedAt: startedAt);
-      final other = Contest(id: Id.create(), name: 'Classic', startedAt: startedAt);
+      final b = Contest(
+        id: Id.parse(id.value),
+        name: 'Classic',
+        startedAt: startedAt,
+      );
+      final other = Contest(
+        id: Id.create(),
+        name: 'Classic',
+        startedAt: startedAt,
+      );
 
       expect(a, equals(b));
       expect(a.hashCode, b.hashCode);
@@ -49,7 +61,11 @@ void main() {
 
     test('toString summarizes the identity and fields', () {
       final id = Id.create();
-      final contest = Contest(id: id, name: 'Classic', startedAt: DateTime.utc(2026));
+      final contest = Contest(
+        id: id,
+        name: 'Classic',
+        startedAt: DateTime.utc(2026),
+      );
 
       expect(contest.toString(), contains(id.value));
       expect(contest.toString(), contains('Classic'));

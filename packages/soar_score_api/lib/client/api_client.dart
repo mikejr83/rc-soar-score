@@ -88,7 +88,11 @@ class ApiClient {
     }
   }
 
-  T _decode<T>(http.Response response, Uri requestUri, T Function(Map<String, dynamic> json) fromJson) {
+  T _decode<T>(
+    http.Response response,
+    Uri requestUri,
+    T Function(Map<String, dynamic> json) fromJson,
+  ) {
     try {
       final decoded = jsonDecode(utf8.decode(response.bodyBytes));
       if (decoded is! Map<String, dynamic>) {

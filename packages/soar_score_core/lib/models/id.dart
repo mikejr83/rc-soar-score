@@ -31,7 +31,8 @@ class Id {
 
   static String _generate() {
     final random = Random.secure();
-    String hex(int value, int width) => value.toRadixString(16).padLeft(width, '0');
+    String hex(int value, int width) =>
+        value.toRadixString(16).padLeft(width, '0');
 
     final timestamp = DateTime.now().millisecondsSinceEpoch & 0xFFFFFFFFFFFF;
     final group1 = hex(timestamp >> 16, 8);
@@ -39,7 +40,8 @@ class Id {
     final group3 = '7${hex(random.nextInt(0x1000), 3)}';
     final group4 =
         '${(8 + random.nextInt(4)).toRadixString(16)}${hex(random.nextInt(0x1000), 3)}';
-    final group5 = '${hex(random.nextInt(0x10000), 4)}'
+    final group5 =
+        '${hex(random.nextInt(0x10000), 4)}'
         '${hex(random.nextInt(0x10000), 4)}'
         '${hex(random.nextInt(0x10000), 4)}';
     return '$group1-$group2-$group3-$group4-$group5';

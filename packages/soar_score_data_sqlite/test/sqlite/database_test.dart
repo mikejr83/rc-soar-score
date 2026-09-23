@@ -14,14 +14,17 @@ void main() {
       await database.close();
     });
 
-    test('performs a trivial query without the Flutter SQLite plugin', () async {
-      final rows = await database
-          .customSelect('SELECT 1 AS one, sqlite_version() AS version')
-          .get();
-      expect(rows, hasLength(1));
-      expect(rows.first.read<int>('one'), 1);
-      expect(rows.first.read<String>('version'), isNotEmpty);
-    });
+    test(
+      'performs a trivial query without the Flutter SQLite plugin',
+      () async {
+        final rows = await database
+            .customSelect('SELECT 1 AS one, sqlite_version() AS version')
+            .get();
+        expect(rows, hasLength(1));
+        expect(rows.first.read<int>('one'), 1);
+        expect(rows.first.read<String>('version'), isNotEmpty);
+      },
+    );
 
     test('runs the initial schema migration on open', () async {
       final versionRow = await database

@@ -60,10 +60,7 @@ class ScoreCard extends StatelessWidget {
                   ?trailing,
                 ],
               ),
-              if (child != null) ...[
-                const SizedBox(height: 12),
-                child!,
-              ],
+              if (child != null) ...[const SizedBox(height: 12), child!],
             ],
           ),
         ),

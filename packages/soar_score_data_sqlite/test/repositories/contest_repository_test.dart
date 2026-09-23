@@ -17,10 +17,10 @@ void main() {
     });
 
     Contest makeContest({String? name, DateTime? startedAt}) => Contest(
-          id: Id.create(),
-          name: name ?? 'Spring Meet',
-          startedAt: startedAt ?? DateTime.utc(2026, 4, 15, 10, 30),
-        );
+      id: Id.create(),
+      name: name ?? 'Spring Meet',
+      startedAt: startedAt ?? DateTime.utc(2026, 4, 15, 10, 30),
+    );
 
     test('save then findById round-trips the domain type', () async {
       final saved = await repository.save(makeContest());

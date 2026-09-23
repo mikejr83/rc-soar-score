@@ -4,7 +4,9 @@ import 'package:soar_score_ui/soar_score_ui.dart';
 
 void main() {
   group('ScoreCard', () {
-    testWidgets('renders title with a body and trailing widget', (tester) async {
+    testWidgets('renders title with a body and trailing widget', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -26,15 +28,20 @@ void main() {
       expect(find.text('Best of 7 flights'), findsOneWidget);
     });
 
-    testWidgets('renders title only when subtitle, trailing, and body are omitted', (tester) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(body: Center(child: ScoreCard(title: 'Pilot A'))),
-        ),
-      );
+    testWidgets(
+      'renders title only when subtitle, trailing, and body are omitted',
+      (tester) async {
+        await tester.pumpWidget(
+          const MaterialApp(
+            home: Scaffold(
+              body: Center(child: ScoreCard(title: 'Pilot A')),
+            ),
+          ),
+        );
 
-      expect(find.text('Pilot A'), findsOneWidget);
-    });
+        expect(find.text('Pilot A'), findsOneWidget);
+      },
+    );
 
     testWidgets('onTap fires when a handler is provided', (tester) async {
       var taps = 0;
@@ -55,7 +62,9 @@ void main() {
     testWidgets('onTap is inert when no handler is provided', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(body: Center(child: ScoreCard(title: 'Flight 1'))),
+          home: Scaffold(
+            body: Center(child: ScoreCard(title: 'Flight 1')),
+          ),
         ),
       );
 

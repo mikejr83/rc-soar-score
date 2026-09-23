@@ -9,15 +9,10 @@ import 'health_handler.dart';
 /// being built. It is safe to delete once the real handlers take over.
 Handler createStubApiHandler() {
   final router = Router()
-    ..get(
-      '/meta',
-      (Request request) => jsonResponse(identity().toJson()),
-    )
+    ..get('/meta', (Request request) => jsonResponse(identity().toJson()))
     ..get(
       '/ping',
-      (Request request) => jsonResponse(<String, Object>{
-            'status': 'ok',
-          }),
+      (Request request) => jsonResponse(<String, Object>{'status': 'ok'}),
     );
   return router.call;
 }

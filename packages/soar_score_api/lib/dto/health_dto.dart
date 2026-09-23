@@ -23,7 +23,8 @@ class HealthDto {
   /// Semantic version of the running server.
   final String version;
 
-  factory HealthDto.fromJson(Map<String, dynamic> json) => _$HealthDtoFromJson(json);
+  factory HealthDto.fromJson(Map<String, dynamic> json) =>
+      _$HealthDtoFromJson(json);
 
   Map<String, dynamic> toJson() => _$HealthDtoToJson(this);
 
@@ -38,5 +39,6 @@ class HealthDto {
   int get hashCode => Object.hash(name, displayName, version);
 
   @override
-  String toString() => 'HealthDto(name: $name, displayName: $displayName, version: $version)';
+  String toString() =>
+      'HealthDto(name: $name, displayName: $displayName, version: $version)';
 }

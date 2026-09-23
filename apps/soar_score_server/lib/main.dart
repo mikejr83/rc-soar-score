@@ -21,7 +21,10 @@ int _portFromEnv() {
 
 Future<void> main() async {
   final port = _portFromEnv();
-  final server =
-      await shelf_io.serve(createServerHandler(), InternetAddress.anyIPv4, port);
+  final server = await shelf_io.serve(
+    createServerHandler(),
+    InternetAddress.anyIPv4,
+    port,
+  );
   stdout.writeln('$serverName listening on http://localhost:${server.port}');
 }

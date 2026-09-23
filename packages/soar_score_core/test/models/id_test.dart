@@ -26,7 +26,10 @@ void main() {
         () => Id.parse('01957d1e-5b4a-5e58-bc31-8c5a1f9d2e40'),
         throwsArgumentError,
       );
-      expect(() => Id.parse('01957d1e5b4a7e58bc318c5a1f9d2e40'), throwsArgumentError);
+      expect(
+        () => Id.parse('01957d1e5b4a7e58bc318c5a1f9d2e40'),
+        throwsArgumentError,
+      );
       expect(() => Id.parse(''), throwsArgumentError);
     });
   });

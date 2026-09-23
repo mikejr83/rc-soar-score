@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 /// Single source of truth for theming: `MaterialApp` in `app.dart` takes its
 /// themes exclusively from this file (no inline `MaterialApp(theme:)` values).
 abstract final class AppTheme {
-    // Primary Seed Color: Deep Sky Blue
+  // Primary Seed Color: Deep Sky Blue
   static const Color _skyBlueSeed = Color(0xFF006399);
   static const Color _primaryColor = Color(0xFF006399);
   static const Color _secondaryColor = Color(0xFF2D6A4F);

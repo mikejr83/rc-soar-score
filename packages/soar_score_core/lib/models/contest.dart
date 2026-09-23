@@ -7,12 +7,9 @@ import 'id.dart';
 /// publication, and the other independent control states defined in
 /// `plan/architecture-requirements/data/contest.md` — is later work.
 class Contest {
-  Contest({
-    required this.id,
-    required String name,
-    required DateTime startedAt,
-  })  : name = name.trim(),
-        startedAt = startedAt.toUtc() {
+  Contest({required this.id, required String name, required DateTime startedAt})
+    : name = name.trim(),
+      startedAt = startedAt.toUtc() {
     if (this.name.isEmpty) {
       throw ArgumentError.value(name, 'name', 'must not be blank');
     }

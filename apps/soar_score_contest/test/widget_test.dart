@@ -4,8 +4,9 @@ import 'package:soar_score_contest/pages/contests_page.dart';
 import 'package:soar_score_contest/pages/home_page.dart';
 
 void main() {
-  testWidgets('renders the home route and navigates to the contests route',
-      (WidgetTester tester) async {
+  testWidgets('renders the home route and navigates to the contests route', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const SoarScoreContestApp());
     await tester.pumpAndSettle();
 
@@ -24,8 +25,9 @@ void main() {
     expect(find.text('Home placeholder'), findsOneWidget);
   });
 
-  testWidgets('renders the theme and both placeholder routes',
-      (WidgetTester tester) async {
+  testWidgets('renders the theme and both placeholder routes', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const SoarScoreContestApp());
     await tester.pumpAndSettle();
 
