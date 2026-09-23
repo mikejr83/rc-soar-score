@@ -1,22 +1,23 @@
 import 'package:shelf/shelf.dart';
-import 'package:shelf_router/shelf_router.dart';
+import 'package:soar_score_api_handlers/soar_score_api_handlers.dart';
+import 'package:soar_score_data_postgres/soar_score_data_postgres.dart';
 
-import 'health_handler.dart';
-import 'stub_handler.dart';
+const String serverName = 'soar_score_server';
+const String serverDisplayName = 'Soar Score API Server';
+const String serverVersion = '0.1.0';
 
-/// Builds the application's top-level [Handler].
+/// Builds the top-level [Handler] for the deployed API server.
 ///
-/// Each endpoint group lives in its own file and returns a self-contained
-/// [Handler]; this is where they are composed. New endpoint groups can be
-/// added by creating a handler file and mounting it here.
-///
-/// Served routes:
-/// - `GET /health` — public health payload.
-/// - `GET /api/v1/meta` — placeholder identifying the API.
-/// - `GET /api/v1/ping` — placeholder liveness probe.
-Handler createServerHandler() {
-  final app = Router()
-    ..mount('/', createHealthHandler())
-    ..mount('/api/v1', createStubApiHandler());
-  return app.call;
+/// Wires the shared routing from `soar_score_api_handlers` to the
+/// PostgreSQL-backed [ContestRepository] (schema migrations run lazily on
+/// the first query) and reports the server's identity for the `/health`
+/// and `/api/v1/meta` payloads.
+Handler createServerHandler(PostgresConfig config) {
+  final database = ContestDatabase.open(config);
+  return buildApiHandler(
+    name: serverName,
+    displayName: serverDisplayName,
+    version: serverVersion,
+    contests: ContestPostgresRepository(database),
+  );
 }

@@ -1,60 +1,49 @@
 import 'dart:convert';
 
 import 'package:shelf/shelf.dart';
+import 'package:soar_score_data_postgres/soar_score_data_postgres.dart';
 import 'package:soar_score_server/handler.dart';
 import 'package:test/test.dart';
 
+/// Wiring-level tests for the deployed server after the routing was
+/// extracted to `soar_score_api_handlers` (ticket 017).
+///
+/// These exercise that `createServerHandler` wires the PostgreSQL database
+/// into the shared factory and serves the expected response. Because the
+/// deployed server is Postgres-backed, this suite skips when no instance is
+/// configured (`POSTGRES_PASSWORD` unset), matching the skip convention of
+/// `soar_score_data_postgres`'s integration tests. Route behavior itself
+/// (payloads, 404s, the auth seam) is covered in-process by
+/// `soar_score_api_handlers`' own test suite.
 void main() {
-  late Handler handler;
+  final config = PostgresConfig.fromEnvironment();
 
-  setUp(() {
-    handler = createServerHandler();
-  });
+  group(
+    'createServerHandler wiring',
+    () {
+      late Handler handler;
 
-  Future<Response> get(String path) async {
-    return handler(Request('GET', Uri.parse('http://localhost$path')));
-  }
-
-  Future<Map<String, Object?>> readJson(Response response) async {
-    expect(response.headers['content-type'], contains('application/json'));
-    return jsonDecode(await response.readAsString()) as Map<String, Object?>;
-  }
-
-  group('/health', () {
-    test('returns 200 JSON with name, displayName and version', () async {
-      final response = await get('/health');
-
-      expect(response.statusCode, 200);
-      expect(await readJson(response), {
-        'name': 'soar_score_server',
-        'displayName': 'Soar Score API Server',
-        'version': '0.1.0',
+      setUp(() {
+        handler = createServerHandler(config!);
       });
-    });
-  });
 
-  group('/api/v1', () {
-    test('GET /api/v1/meta returns the identity placeholder', () async {
-      final response = await get('/api/v1/meta');
+      test('serves the /health payload through the extracted handler '
+          'and PostgreSQL-backed repository', () async {
+        final response = await handler(
+          Request('GET', Uri.parse('http://localhost/health')),
+        );
 
-      expect(response.statusCode, 200);
-      expect(await readJson(response), {
-        'name': 'soar_score_server',
-        'displayName': 'Soar Score API Server',
-        'version': '0.1.0',
+        expect(response.statusCode, 200);
+        expect(response.headers['content-type'], contains('application/json'));
+        expect(jsonDecode(await response.readAsString()), {
+          'name': 'soar_score_server',
+          'displayName': 'Soar Score API Server',
+          'version': '0.1.0',
+        });
       });
-    });
-
-    test('GET /api/v1/ping returns ok', () async {
-      final response = await get('/api/v1/ping');
-
-      expect(response.statusCode, 200);
-      expect(await readJson(response), {'status': 'ok'});
-    });
-
-    test('unknown routes return 404', () async {
-      expect((await get('/api/v1/nope')).statusCode, 404);
-      expect((await get('/nope')).statusCode, 404);
-    });
-  });
+    },
+    skip: config == null
+        ? 'no PostgreSQL instance configured (set POSTGRES_PASSWORD; see the test file doc comments in soar_score_data_postgres for local setup)'
+        : null,
+  );
 }

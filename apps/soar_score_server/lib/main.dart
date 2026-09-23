@@ -1,9 +1,9 @@
 import 'dart:io';
 
 import 'package:shelf/shelf_io.dart' as shelf_io;
+import 'package:soar_score_data_postgres/soar_score_data_postgres.dart';
 
 import 'handler.dart';
-import 'health_handler.dart';
 
 int _portFromEnv() {
   const envKey = 'PORT';
@@ -21,8 +21,17 @@ int _portFromEnv() {
 
 Future<void> main() async {
   final port = _portFromEnv();
+  final config = PostgresConfig.fromEnvironment();
+  if (config == null) {
+    stderr.writeln(
+      'POSTGRES_PASSWORD is not set; the API cannot open its database. '
+      'Configure the PostgreSQL connection environment variables (see '
+      'soar_score_data_postgres) and retry.',
+    );
+    exit(1);
+  }
   final server = await shelf_io.serve(
-    createServerHandler(),
+    createServerHandler(config),
     InternetAddress.anyIPv4,
     port,
   );
