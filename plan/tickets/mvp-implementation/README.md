@@ -19,7 +19,7 @@ Tickets for getting the repository basics in place: toolchain, Melos workspace, 
 | [004](004-scaffold-contest-flutter-app.md) | Scaffold `soar_score_contest` (Flutter web) | High | In-Review |
 | [005](005-scaffold-public-flutter-app.md) | Scaffold `soar_score_public` (Flutter web) | High | Open |
 | [006](006-scaffold-core-package.md) | Scaffold `soar_score_core` Package | High | In-Review |
-| [007](007-scaffold-data-package.md) | Scaffold `soar_score_data` Package | High | Open |
+| [007](007-scaffold-data-package.md) | Scaffold `soar_score_data_sqlite` Package | High | In-Review |
 | [008](008-scaffold-api-package.md) | Scaffold `soar_score_api` Package | High | Open |
 | [009](009-scaffold-ui-package.md) | Scaffold `soar_score_ui` Package | High | Open |
 | [010](010-setup-auth0-identity.md) | Auth0 Identity Setup | High | Open |
@@ -28,6 +28,8 @@ Tickets for getting the repository basics in place: toolchain, Melos workspace, 
 | [013](013-agentic-coding-rules.md) | Agentic Coding Rules (Per-Project AGENTS.md) | Medium | Open |
 | [014](014-setup-melos-workspace.md) | Melos Workspace at Repository Root | High | Open |
 | [015](015-scaffold-contest-windows-target.md) | Add Windows target to `soar_score_contest` | High | In-Review |
+| [016](016-scaffold-data-postres-package.md) | Scaffold `soar_score_data_postgres` Package | High | In-Review |
+| [017](017-sqlite-sync-schema.md) | SQLite Sync Schema (Offline Synchronization Fields) | Medium | Open |
 
 ## Suggested execution order
 
