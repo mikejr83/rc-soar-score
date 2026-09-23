@@ -105,6 +105,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.2.0"
+  http:
+    dependency: transitive
+    description:
+      name: http
+      sha256: "87721a4a50b19c7f1d49001e51409bddc46303966ce89a65af4f4e6004896412"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.6.0"
   http_methods:
     dependency: transitive
     description:
@@ -265,6 +273,20 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.0"
+  soar_score_api:
+    dependency: "direct main"
+    description:
+      path: "../../packages/soar_score_api"
+      relative: true
+    source: path
+    version: "0.1.0"
+  soar_score_core:
+    dependency: transitive
+    description:
+      path: "../../packages/soar_score_core"
+      relative: true
+    source: path
+    version: "0.1.0"
   source_map_stack_trace:
     dependency: transitive
     description:

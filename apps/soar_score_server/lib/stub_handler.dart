@@ -11,7 +11,7 @@ Handler createStubApiHandler() {
   final router = Router()
     ..get(
       '/meta',
-      (Request request) => jsonResponse(identityPayload()),
+      (Request request) => jsonResponse(identity().toJson()),
     )
     ..get(
       '/ping',

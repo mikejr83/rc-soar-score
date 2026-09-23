@@ -72,6 +72,7 @@
 - Ticket 017 extracts the shelf handler logic out of `soar_score_server` into a shared package, so it can be hosted both by the real server and embedded elsewhere.
 - Ticket 018 embeds that handler (with `soar_score_data_sqlite`, 007) inside the Windows build of `soar_score_contest`, and constructs this package's `ApiClient` with a local `baseUrl` there instead of the deployed one.
 - Wire this package into the Melos workspace and its bulk commands (ticket 014).
+- Done (2026-09-23, during this ticket's review window): `soar_score_server`'s `/health` and `/api/v1/meta` handlers now serialize through the shared `HealthDto`, so the server and client cannot drift apart (per ticket 013's planned "DTO placement in `soar_score_api`" rule). The server app gained a path dependency on `soar_score_api`; its in-process handler tests still pass unchanged because `HealthDto.toJson()` produces the same payload shape.
 - Ticket 010 will supply real tokens through this `TokenProvider` seam (Flutter Auth0 PKCE); no client-side changes are anticipated — the header is already sent whenever a non-null token is provided.
 - Add a per-package AGENTS.md with ticket 013's per-project rules (DTOs use `json_annotation`, no Flutter, token handling injected, errors typed in `errors/`).
 
