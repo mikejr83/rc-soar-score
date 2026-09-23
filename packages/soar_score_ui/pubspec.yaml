@@ -1,0 +1,19 @@
+name: soar_score_ui
+description: "Soar Score shared UI package: reusable Flutter widgets, composite components, and shared theme tokens for the contest and public apps."
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ">=3.13.0 <4.0.0"
+  flutter: ">=3.47.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  soar_score_core:
+    path: ../soar_score_core
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
