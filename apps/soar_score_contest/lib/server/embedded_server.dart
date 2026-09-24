@@ -49,11 +49,13 @@ Future<EmbeddedServer> startEmbeddedServer({
   // first query so startup fails fast on an unusable path and the schema
   // migrations have provably run before the server answers requests.
   await database.customSelect('SELECT 1').get();
+  final schemaVersion = await database.getSchemaVersion();
   final repository = ContestSqliteRepository(database);
   final handler = buildApiHandler(
     name: embeddedServerName,
     displayName: embeddedServerDisplayName,
     version: embeddedServerVersion,
+    schemaRevision: schemaVersion,
     contests: repository,
   );
   final server = await shelf_io.serve(handler, 'localhost', 0);

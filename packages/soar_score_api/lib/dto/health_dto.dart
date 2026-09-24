@@ -12,6 +12,7 @@ class HealthDto {
     required this.name,
     required this.displayName,
     required this.version,
+    this.schemaRevision,
   });
 
   /// Machine-oriented server name (e.g. `soar_score_server`).
@@ -23,6 +24,9 @@ class HealthDto {
   /// Semantic version of the running server.
   final String version;
 
+  /// Last-applied database schema revision (drift-managed).
+  final int? schemaRevision;
+
   factory HealthDto.fromJson(Map<String, dynamic> json) =>
       _$HealthDtoFromJson(json);
 
@@ -33,12 +37,14 @@ class HealthDto {
       other is HealthDto &&
       other.name == name &&
       other.displayName == displayName &&
-      other.version == version;
+      other.version == version &&
+      other.schemaRevision == schemaRevision;
 
   @override
-  int get hashCode => Object.hash(name, displayName, version);
+  int get hashCode =>
+      Object.hash(name, displayName, version, schemaRevision);
 
   @override
   String toString() =>
-      'HealthDto(name: $name, displayName: $displayName, version: $version)';
+      'HealthDto(name: $name, displayName: $displayName, version: $version, schemaRevision: $schemaRevision)';
 }

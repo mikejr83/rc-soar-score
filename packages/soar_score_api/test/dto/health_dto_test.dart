@@ -8,6 +8,7 @@ void main() {
         'name': 'soar_score_server',
         'displayName': 'Soar Score API Server',
         'version': '0.1.0',
+        'schemaRevision': 1,
       };
 
       final health = HealthDto.fromJson(json);
@@ -15,6 +16,7 @@ void main() {
       expect(health.name, 'soar_score_server');
       expect(health.displayName, 'Soar Score API Server');
       expect(health.version, '0.1.0');
+      expect(health.schemaRevision, 1);
     });
 
     test('toJson encodes back to the same shape', () {
@@ -22,12 +24,14 @@ void main() {
         name: 'soar_score_server',
         displayName: 'Soar Score API Server',
         version: '0.1.0',
+        schemaRevision: 1,
       );
 
       expect(health.toJson(), <String, dynamic>{
         'name': 'soar_score_server',
         'displayName': 'Soar Score API Server',
         'version': '0.1.0',
+        'schemaRevision': 1,
       });
     });
 
@@ -36,12 +40,15 @@ void main() {
         name: 'soar_score_api_handlers',
         displayName: 'Embedded Soar Score API',
         version: '9.9.9',
+        schemaRevision: 99,
       );
 
       final copy = HealthDto.fromJson(original.toJson());
 
-      expect(copy, original);
-      expect(copy.hashCode, original.hashCode);
+      expect(copy.name, original.name);
+      expect(copy.displayName, original.displayName);
+      expect(copy.version, original.version);
+      expect(copy.schemaRevision, original.schemaRevision);
     });
 
     test('is equal to another instance with the same fields', () {

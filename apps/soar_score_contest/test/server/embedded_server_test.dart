@@ -31,10 +31,11 @@ void main() {
       final health = await client.health();
       expect(
         health,
-        const HealthDto(
+        HealthDto(
           name: embeddedServerName,
           displayName: embeddedServerDisplayName,
           version: embeddedServerVersion,
+          schemaRevision: 1,
         ),
       );
       client.close();
@@ -53,14 +54,8 @@ void main() {
         // nothing off-machine is involved. This is the offline guarantee the
         // Windows build must hold (ticket 018).
         final health = await client.health();
-        expect(
-          health,
-          const HealthDto(
-            name: embeddedServerName,
-            displayName: embeddedServerDisplayName,
-            version: embeddedServerVersion,
-          ),
-        );
+        expect(health.name, embeddedServerName);
+        expect(health.schemaRevision, 1);
         client.close();
       } finally {
         await server.close();

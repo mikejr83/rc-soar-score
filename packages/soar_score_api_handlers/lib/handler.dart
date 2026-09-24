@@ -38,6 +38,7 @@ Handler buildApiHandler({
   required String name,
   required String displayName,
   required String version,
+  int? schemaRevision,
   required ContestRepository contests,
   AuthMiddleware? authMiddleware,
 }) {
@@ -45,6 +46,7 @@ Handler buildApiHandler({
     name: name,
     displayName: displayName,
     version: version,
+    schemaRevision: schemaRevision,
   );
   Handler api = createStubApiHandler(identity);
   if (authMiddleware != null) {

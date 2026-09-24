@@ -1,10 +1,13 @@
 import 'dart:io';
 
 import 'package:dotenv/dotenv.dart';
+import 'package:logging/logging.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:soar_score_data_postgres/soar_score_data_postgres.dart';
 
 import 'handler.dart';
+
+final _logger = Logger('Main');
 
 int _portFromEnv(DotEnv env) {
   const envKey = 'PORT';
@@ -21,6 +24,13 @@ int _portFromEnv(DotEnv env) {
 }
 
 Future<void> main() async {
+  Logger.root.level = Level.ALL;
+  Logger.root.onRecord.listen((record) {
+    print('${record.level.name}: ${record.time}: ${record.loggerName}: ${record.message}');
+    if (record.error != null) print(record.error);
+    if (record.stackTrace != null) print(record.stackTrace);
+  });
+
   final env = DotEnv(includePlatformEnvironment: true)..load();
 
   final port = _portFromEnv(env);
@@ -29,6 +39,12 @@ Future<void> main() async {
   if (config == null && env['POSTGRES_PASSWORD'] != null) {
     final password = env['POSTGRES_PASSWORD'];
     // You can use the password here to create a new PostgresConfig if needed
+
+    if (password?.isEmpty ?? true) {
+      _logger.warning('POSTGRES_PASSWORD is empty; using it to create PostgresConfig anyway.');
+    } else {
+      _logger.info('Using POSTGRES_PASSWORD from environment to create PostgresConfig.');
+    }
 
     config = PostgresConfig(
       database: 'soar_score',

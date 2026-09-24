@@ -24,10 +24,14 @@ class ContestDatabase extends _$ContestDatabase {
   /// Used by unit tests and other tooling that must not write to disk.
   ContestDatabase.inMemory() : super(NativeDatabase.memory());
 
-  /// Current schema version; bump this when the schema changes and add a
-  /// migration step for the new version.
   @override
   int get schemaVersion => 1;
+
+  /// Returns the SQLite version that has been applied to this database.
+  Future<int> getSchemaVersion() async {
+    final row = (await customSelect('PRAGMA user_version').get()).single;
+    return row.read<int>('user_version');
+  }
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
