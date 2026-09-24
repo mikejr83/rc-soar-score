@@ -2,7 +2,7 @@
 
 - **Category:** Scaffold
 - **Priority:** High
-- **Status:** Open
+- **Status:** In-Review
 
 ## Context
 
@@ -10,17 +10,17 @@ The self-scoring application allows pilots to report scores from their flights. 
 
 ## Work Items
 
-- [ ] Create `apps/soar_score_self_score` via `flutter create` (web platform, project name per `plan/implementation-plan.md`), keep the generated test scaffolding (generated `test/widget_test.dart`, re-aimed at the real app rather than the stock counter).
-- [ ] Add a minimal routing skeleton (e.g. go_router) with two placeholder routes: a home/registration route and a second placeholder (e.g. score-entry page), demonstrating the navigation construct.
-- [ ] Establish the Material 3 `ThemeData` baseline in a dedicated theme file (seed color, scheme, light/dark), with attention to smaller-screen legibility.
-- [ ] Add `analysis_options.yaml` including `package:flutter_lints/flutter.yaml`.
-- [ ] Add one example widget test and one example unit test, both passing (widget test in `test/widget_test.dart`; unit test in `test/app_theme_test.dart`).
+- [x] Create `apps/soar_score_self_score` via `flutter create` (web platform, project name per `plan/implementation-plan.md`), keep the generated test scaffolding (generated `test/widget_test.dart`, re-aimed at the real app rather than the stock counter).
+- [x] Add a minimal routing skeleton (e.g. go_router) with two placeholder routes: a home/registration route and a second placeholder (e.g. score-entry page), demonstrating the navigation construct.
+- [x] Establish the Material 3 `ThemeData` baseline in a dedicated theme file (seed color, scheme, light/dark), with attention to smaller-screen legibility.
+- [x] Add `analysis_options.yaml` including `package:flutter_lints/flutter.yaml`.
+- [x] Add one example widget test and one example unit test, both passing (widget test in `test/widget_test.dart`; unit test in `test/app_theme_test.dart`).
 
 ## Acceptance Criteria
 
-- [ ] `flutter run -d chrome` launches the app and renders the theme and both placeholder routes.
-- [ ] `flutter test` and `flutter analyze` pass against `soar_score_self_score` (no analyzer warnings, tests green).
-- [ ] Theme is defined in a single file; no inline `MaterialApp(theme:)` values outside that file (`lib/theme/app_theme.dart` only; `lib/app.dart` references `AppTheme.*`).
+- [x] `flutter run -d chrome` launches the app and renders the theme and both placeholder routes. (Verified on http://localhost:53009)
+- [x] `flutter test` and `flutter analyze` pass against `soar_score_self_score` (no analyzer warnings, tests green).
+- [x] Theme is defined in a single file; no inline `MaterialApp(theme:)` values outside that file (`lib/theme/app_theme.dart` only; `lib/app.dart` references `AppTheme.*`).
 
 ## Files changed
 

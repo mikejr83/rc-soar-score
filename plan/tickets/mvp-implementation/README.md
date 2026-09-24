@@ -17,7 +17,7 @@ Tickets for getting the repository basics in place: toolchain, Melos workspace, 
 | [002](002-scaffold-nx-workspace.md) | ~~NX Workspace at Repository Root~~ (replaced by 014) | High | Rejected |
 | [003](003-scaffold-dart-api-app.md) | Scaffold `soar_score_server` (Dart/shelf) | High | Done |
 | [004](004-scaffold-contest-flutter-app.md) | Scaffold `soar_score_contest` (Flutter web) | High | In-Review |
-| [019](019-scaffold-self-score-flutter-app.md) | Scaffold `soar_score_self_score` (Flutter web) | High | Open |
+| [019](019-scaffold-self-score-flutter-app.md) | Scaffold `soar_score_self_score` (Flutter web) | High | In-Review |
 | [005](005-scaffold-public-flutter-app.md) | Scaffold `soar_score_public` (Flutter web) | High | Open |
 | [006](006-scaffold-core-package.md) | Scaffold `soar_score_core` Package | High | In-Review |
 | [007](007-scaffold-data-package.md) | Scaffold `soar_score_data_sqlite` Package | High | In-Review |
