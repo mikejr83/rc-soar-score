@@ -17,6 +17,7 @@ Tickets for getting the repository basics in place: toolchain, Melos workspace, 
 | [002](002-scaffold-nx-workspace.md) | ~~NX Workspace at Repository Root~~ (replaced by 014) | High | Rejected |
 | [003](003-scaffold-dart-api-app.md) | Scaffold `soar_score_server` (Dart/shelf) | High | Done |
 | [004](004-scaffold-contest-flutter-app.md) | Scaffold `soar_score_contest` (Flutter web) | High | In-Review |
+| [019](019-scaffold-self-score-flutter-app.md) | Scaffold `soar_score_self_score` (Flutter web) | High | Open |
 | [005](005-scaffold-public-flutter-app.md) | Scaffold `soar_score_public` (Flutter web) | High | Open |
 | [006](006-scaffold-core-package.md) | Scaffold `soar_score_core` Package | High | In-Review |
 | [007](007-scaffold-data-package.md) | Scaffold `soar_score_data_sqlite` Package | High | In-Review |
@@ -38,7 +39,7 @@ Tickets for getting the repository basics in place: toolchain, Melos workspace, 
 2. **006** — `soar_score_core` (everything else depends on its types).
 3. **007 → 008** — `soar_score_data`, then `soar_score_api` (both build on core).
 4. **003** — `soar_score_server` (its `/health` is the contract `soar_score_api`'s example DTO targets).
-5. **004, 005** — the two Flutter apps (theme baselines).
+5. **004, 005, 019** — the Flutter apps (contest, public, self-score): theme baselines and routing skeletons.
 5a. **015** — Windows platform for `soar_score_contest` (reuses 004's app; its CI job lands with 011).
 5b. **017** — extract `soar_score_api_handlers` out of `soar_score_server` (its routing table becomes a shared `buildApiHandler` factory; also needs 016's Postgres repository to wire the deployed server).
 5c. **018** — embed `soar_score_api_handlers` in the Windows target of `soar_score_contest` (needs 007, 008, 015, and 017; the in-process `localhost` server behind the offline build).
