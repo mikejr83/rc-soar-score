@@ -1,13 +1,14 @@
 import 'dart:io';
 
+import 'package:dotenv/dotenv.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:soar_score_data_postgres/soar_score_data_postgres.dart';
 
 import 'handler.dart';
 
-int _portFromEnv() {
+int _portFromEnv(DotEnv env) {
   const envKey = 'PORT';
-  final value = Platform.environment[envKey];
+  final value = env[envKey];
   if (value == null || value.isEmpty) {
     return 8080;
   }
@@ -20,8 +21,24 @@ int _portFromEnv() {
 }
 
 Future<void> main() async {
-  final port = _portFromEnv();
-  final config = PostgresConfig.fromEnvironment();
+  final env = DotEnv(includePlatformEnvironment: true)..load();
+
+  final port = _portFromEnv(env);
+  var config = PostgresConfig.fromEnvironment();
+
+  if (config == null && env['POSTGRES_PASSWORD'] != null) {
+    final password = env['POSTGRES_PASSWORD'];
+    // You can use the password here to create a new PostgresConfig if needed
+
+    config = PostgresConfig(
+      database: 'soar_score',
+      host: "localhost",
+      port: 5432,
+      user: 'postgres',
+      password: password!,
+    );
+  }
+
   if (config == null) {
     stderr.writeln(
       'POSTGRES_PASSWORD is not set; the API cannot open its database. '

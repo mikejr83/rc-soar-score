@@ -27,3 +27,5 @@ coverage/
 *.iml
 melos_*.xml
 melos.iml
+
+/.kilo/plans

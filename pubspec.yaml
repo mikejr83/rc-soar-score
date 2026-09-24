@@ -5,9 +5,13 @@ publish_to: none
 environment:
   sdk: ^3.13.3
 
+# Note: patterns are deliberately first-level only. The Flutter tool symlinks
+# platform plugins into apps/<app>/windows/flutter/ephemeral/.plugin_symlinks
+# (each a pub package), and a broader glob would pull those into the
+# workspace, where they fail resolution (they lack `resolution: workspace`).
 workspace:
-  - apps/**
-  - packages/**
+  - apps/*
+  - packages/*
 
 dev_dependencies:
   melos: ^8.9.0

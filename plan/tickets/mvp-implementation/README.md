@@ -29,8 +29,8 @@ Tickets for getting the repository basics in place: toolchain, Melos workspace, 
 | [014](014-setup-melos-workspace.md) | Melos Workspace at Repository Root | High | Done |
 | [015](015-scaffold-contest-windows-target.md) | Add Windows target to `soar_score_contest` | High | In-Review |
 | [016](016-scaffold-data-postres-package.md) | Scaffold `soar_score_data_postgres` Package | High | In-Review |
-| [017](017-sqlite-sync-schema.md) | SQLite Sync Schema (Offline Synchronization Fields) | High | Open |
-| [017](018-embed-soar_score_api_handlers.md) | Embed soar_score_api_handlers in the Windows Target of soar_score_contest | High | Open |
+| [017](017-sqlite-sync-schema.md) | Extract `soar_score_api_handlers` from `soar_score_server` (file name is stale; the original sync-schema spec it carried is orphaned — see its Follow-ups) | High | In-Review |
+| [018](018-embed-soar_score_api_handlers.md) | Embed `soar_score_api_handlers` in the Windows Target of `soar_score_contest` | High | In-Review |
 
 ## Suggested execution order
 
@@ -40,6 +40,8 @@ Tickets for getting the repository basics in place: toolchain, Melos workspace, 
 4. **003** — `soar_score_server` (its `/health` is the contract `soar_score_api`'s example DTO targets).
 5. **004, 005** — the two Flutter apps (theme baselines).
 5a. **015** — Windows platform for `soar_score_contest` (reuses 004's app; its CI job lands with 011).
+5b. **017** — extract `soar_score_api_handlers` out of `soar_score_server` (its routing table becomes a shared `buildApiHandler` factory; also needs 016's Postgres repository to wire the deployed server).
+5c. **018** — embed `soar_score_api_handlers` in the Windows target of `soar_score_contest` (needs 007, 008, 015, and 017; the in-process `localhost` server behind the offline build).
 6. **009** — `soar_score_ui` (needs both theme baselines to reference).
 7. **014** — Melos workspace at repository root (handled after the Dart workspace and projects exist; links projects 003–009 and wires the bulk commands; naming comes from `plan/implementation-plan.md`). ~~002 (NX) is rejected.~~
 8. **010** — Auth0 tenant + JWT middleware + Flutter PKCE login.

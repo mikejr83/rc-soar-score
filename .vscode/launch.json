@@ -13,7 +13,7 @@
     },
     {
       "name": "soar_score_contest (Web)",
-      "type": "flutter",
+      "type": "dart",
       "request": "launch",
       "program": "lib/main.dart",
       "cwd": "apps/soar_score_contest",
@@ -23,13 +23,15 @@
         "--web-port",
         "8091",
         "--web-hostname",
-        "127.0.0.1"
+        "127.0.0.1",
+        "--dart-define",
+        "SOAR_SCORE_API_BASE_URL=http://127.0.0.1:8080"
       ],
-      "console": "integratedTerminal"
+      "console": "debugConsole"
     },
     {
       "name": "soar_score_contest (Windows)",
-      "type": "flutter",
+      "type": "dart",
       "request": "launch",
       "program": "lib/main.dart",
       "cwd": "apps/soar_score_contest",
@@ -37,11 +39,11 @@
         "-d",
         "windows"
       ],
-      "console": "integratedTerminal"
+      "console": "debugConsole"
     },
     {
       "name": "soar_score_public (Web)",
-      "type": "flutter",
+      "type": "dart",
       "request": "launch",
       "program": "lib/main.dart",
       "cwd": "apps/soar_score_public",
@@ -53,7 +55,16 @@
         "--web-hostname",
         "127.0.0.1"
       ],
-      "console": "integratedTerminal"
+      "console": "debugConsole"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Server + Contest (Web)",
+      "configurations": [
+        "soar_score_server",
+        "soar_score_contest (Web)"
+      ]
     }
   ]
 }
