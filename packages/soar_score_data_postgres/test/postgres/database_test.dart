@@ -24,15 +24,16 @@ import 'package:test/test.dart';
 /// `tearDown`), so runs never share state.
 void main() {
   final config = PostgresConfig.fromEnvironment();
-  const db = 'soar_score_postgres_db';
+  // Name of the throwaway test database.
+  const db = 'soar_score_postgres_db_test';
 
   group(
     'ContestDatabase (PostgreSQL integration)',
     () {
-      late ContestDatabase database;
+      late SoarScoreDatabase database;
 
       setUp(() async {
-        final admin = ContestDatabase.open(config!.named('postgres'));
+        final admin = SoarScoreDatabase.open(config!.named('postgres'));
         try {
           await admin.customStatement('CREATE DATABASE "$db"');
         } on ServerException catch (e) {
@@ -41,7 +42,7 @@ void main() {
         }
         await admin.close();
 
-        database = ContestDatabase.open(config.named(db));
+        database = SoarScoreDatabase.open(config.named(db));
         // First use opens the connection and runs the initial migration.
         await database.select(database.contests).get();
       });
@@ -53,7 +54,7 @@ void main() {
           /* best effort; the admin drop below is authoritative */
         }
 
-        final admin = ContestDatabase.open(config!.named('postgres'));
+        final admin = SoarScoreDatabase.open(config!.named('postgres'));
         await admin.customStatement('DROP DATABASE IF EXISTS "$db"');
         await admin.close();
       });
@@ -89,11 +90,11 @@ void main() {
 
       test('supports raw inserts into the migrated schema', () async {
         await database.customInsert(
-          'INSERT INTO contests (id, name, started_at) VALUES (?, ?, ?)',
-          variables: const [
-            Variable('0195a123-4567-7890-abcd-ef0123456789'),
-            Variable('Raw query contest'),
-            Variable('2026-01-02T03:04:05.000Z'),
+          'INSERT INTO contests (id, name, started_at) VALUES (\$1, \$2, \$3)',
+          variables: [
+            Variable.withString('0195a123-4567-7890-abcd-ef0123456789'),
+            Variable.withString('Raw query contest'),
+            Variable.withString('2026-01-02T03:04:05.000Z'),
           ],
         );
         final rows = await database

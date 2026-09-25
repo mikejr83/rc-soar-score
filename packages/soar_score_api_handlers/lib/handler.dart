@@ -1,10 +1,8 @@
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
-import 'package:soar_score_api/soar_score_api.dart';
+import 'package:soar_score_api_handlers/handlers/handlers.dart';
 import 'package:soar_score_core/soar_score_core.dart';
-
-import 'health_handler.dart';
-import 'stub_handler.dart';
+import 'package:logging/logging.dart';
 
 /// Auth layer for the `/api/v1` subtree.
 ///
@@ -14,6 +12,8 @@ import 'stub_handler.dart';
 /// unauthenticated — the embedded offline instance (ticket 018) deliberately
 /// never adds a token requirement.
 typedef AuthMiddleware = Handler Function(Handler);
+
+final _logger = Logger('Handler');
 
 /// Builds the API's top-level shelf [Handler].
 ///
@@ -39,21 +39,24 @@ Handler buildApiHandler({
   required String displayName,
   required String version,
   int? schemaRevision,
-  required ContestRepository contests,
+  required Repository repository,
   AuthMiddleware? authMiddleware,
 }) {
-  final identity = HealthDto(
-    name: name,
-    displayName: displayName,
-    version: version,
-    schemaRevision: schemaRevision,
-  );
-  Handler api = createStubApiHandler(identity);
+  final handlers = createHandlers(name, displayName, version, repository);
+  Handler api = handlers.apiHandler;
+
   if (authMiddleware != null) {
     api = authMiddleware(api);
+    _logger.fine('Auth middleware applied to /api/v1 subtree.');
+  } else {
+    _logger.fine('No auth middleware applied to /api/v1 subtree.');
   }
+
   final app = Router()
-    ..mount('/', createHealthHandler(identity))
+    ..mount('/', handlers.healthHandler)
     ..mount('/api/v1', api);
+
+  _logger.fine('API handler built successfully.');
+
   return app.call;
 }

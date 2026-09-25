@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:soar_score_api_handlers/soar_score_api_handlers.dart';
+import 'package:soar_score_core/repositories/repository.dart';
 import 'package:soar_score_data_sqlite/soar_score_data_sqlite.dart';
 
 const String embeddedServerName = 'soar_score_contest';
@@ -56,7 +57,7 @@ Future<EmbeddedServer> startEmbeddedServer({
     displayName: embeddedServerDisplayName,
     version: embeddedServerVersion,
     schemaRevision: schemaVersion,
-    contests: repository,
+    repository: Repository(repository),
   );
   final server = await shelf_io.serve(handler, 'localhost', 0);
   return EmbeddedServer._(server, repository);

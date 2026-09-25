@@ -1,7 +1,10 @@
-import 'dart:io';
-
+import 'package:dotenv/dotenv.dart' show DotEnv;
 import 'package:postgres/postgres.dart'
     show ConnectionSettings, Endpoint, SslMode;
+
+import 'package:logging/logging.dart';
+
+final _logger = Logger('PostgresConfig');
 
 /// Connection details for a PostgreSQL instance.
 ///
@@ -23,17 +26,26 @@ class PostgresConfig {
   /// Returns `null` when `POSTGRES_PASSWORD` is not set or empty, so callers
   /// (tests, tooling) can tell "not configured" from a real configuration.
   static PostgresConfig? fromEnvironment() {
-    final env = Platform.environment;
+    final env = DotEnv(includePlatformEnvironment: true)..load();
     final password = env['POSTGRES_PASSWORD'];
-    if (password == null || password.isEmpty) {
+    if (password?.isEmpty ?? true) {
+      _logger.warning(
+        'POSTGRES_PASSWORD is empty; using it to create PostgresConfig anyway.',
+      );
+      _logger.info('Returning null config.');
       return null;
+    } else {
+      _logger.info(
+        'Using POSTGRES_PASSWORD from environment to create PostgresConfig.',
+      );
     }
+
     return PostgresConfig(
       host: env['POSTGRES_HOST'] ?? 'localhost',
       port: int.tryParse(env['POSTGRES_PORT'] ?? '') ?? 5432,
       database: env['POSTGRES_DB'] ?? 'postgres',
       user: env['POSTGRES_USER'] ?? 'postgres',
-      password: password,
+      password: password!,
       sslMode: _sslModeFromEnv(env['POSTGRES_SSLMODE']),
     );
   }

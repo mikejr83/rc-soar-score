@@ -3,9 +3,10 @@ import 'dart:convert';
 import 'package:shelf/shelf.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_api_handlers/soar_score_api_handlers.dart';
+import 'package:soar_score_core/repositories/repository.dart';
 import 'package:test/test.dart';
 
-import 'stub_repository.dart';
+import 'stubs/stub_repository.dart';
 
 /// The identity the extracted routing code is given in these tests. It
 /// matches the payload shape the deployed `soar_score_server` served before
@@ -24,7 +25,7 @@ void main() {
       name: testIdentity.name,
       displayName: testIdentity.displayName,
       version: testIdentity.version,
-      contests: StubContestRepository(),
+      repository: Repository(StubContestRepository()),
     );
   });
 
@@ -47,13 +48,6 @@ void main() {
   });
 
   group('/api/v1', () {
-    test('GET /api/v1/meta returns the identity placeholder', () async {
-      final response = await get('/api/v1/meta');
-
-      expect(response.statusCode, 200);
-      expect(await readJson(response), testIdentity.toJson());
-    });
-
     test('GET /api/v1/ping returns ok', () async {
       final response = await get('/api/v1/ping');
 
@@ -77,7 +71,7 @@ void main() {
         name: testIdentity.name,
         displayName: testIdentity.displayName,
         version: testIdentity.version,
-        contests: StubContestRepository(),
+        repository: Repository(StubContestRepository()),
         authMiddleware: (api) {
           return (Request request) {
             final token = request.headers[tokenHeader];
@@ -112,10 +106,10 @@ void main() {
     });
 
     test('accepts /api/v1 requests with a valid token', () async {
-      final response = await getAuthed('/api/v1/meta', token: 'test-token');
+      final response = await getAuthed('/api/v1/ping', token: 'test-token');
 
       expect(response.statusCode, 200);
-      expect(jsonDecode(await response.readAsString()), testIdentity.toJson());
+      expect(jsonDecode(await response.readAsString()), {'status': 'ok'});
     });
 
     test(

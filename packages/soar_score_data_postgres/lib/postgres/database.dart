@@ -14,14 +14,15 @@ part 'database.g.dart';
 /// on first use. The schema is maintained independently from
 /// `soar_score_data_sqlite`'s (see the decision recorded in ticket 016).
 @DriftDatabase(tables: [Contests])
-class ContestDatabase extends _$ContestDatabase {
+class SoarScoreDatabase extends _$ContestDatabase {
   /// Opens a connection against [config] and runs any pending schema
   /// migrations on first use.
-  ContestDatabase.open(PostgresConfig config)
+  SoarScoreDatabase.open(PostgresConfig config)
     : super(
         PgDatabase(
           endpoint: config.toEndpoint(),
           settings: config.toSettings(),
+          logStatements: true,
         ),
       );
 

@@ -25,11 +25,11 @@ void main() {
   group(
     'ContestPostgresRepository (integration)',
     () {
-      late ContestDatabase database;
+      late SoarScoreDatabase database;
       late ContestPostgresRepository repository;
 
       setUp(() async {
-        final admin = ContestDatabase.open(config!.named('postgres'));
+        final admin = SoarScoreDatabase.open(config!.named('postgres'));
         try {
           await admin.customStatement('CREATE DATABASE "$db"');
         } on ServerException catch (e) {
@@ -38,7 +38,7 @@ void main() {
         }
         await admin.close();
 
-        database = ContestDatabase.open(config.named(db));
+        database = SoarScoreDatabase.open(config.named(db));
         repository = ContestPostgresRepository(database);
         // First use opens the connection and runs the initial migration.
         await repository.getAll();
@@ -51,7 +51,7 @@ void main() {
           /* best effort; the admin drop below is authoritative */
         }
 
-        final admin = ContestDatabase.open(config!.named('postgres'));
+        final admin = SoarScoreDatabase.open(config!.named('postgres'));
         await admin.customStatement('DROP DATABASE IF EXISTS "$db"');
         await admin.close();
       });

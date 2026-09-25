@@ -23,10 +23,14 @@ int _portFromEnv(DotEnv env) {
   return port;
 }
 
+// Starts up the main api server.
+
 Future<void> main() async {
   Logger.root.level = Level.ALL;
   Logger.root.onRecord.listen((record) {
-    print('${record.level.name}: ${record.time}: ${record.loggerName}: ${record.message}');
+    print(
+      '${record.level.name}: ${record.time}: ${record.loggerName}: ${record.message}',
+    );
     if (record.error != null) print(record.error);
     if (record.stackTrace != null) print(record.stackTrace);
   });
@@ -35,25 +39,6 @@ Future<void> main() async {
 
   final port = _portFromEnv(env);
   var config = PostgresConfig.fromEnvironment();
-
-  if (config == null && env['POSTGRES_PASSWORD'] != null) {
-    final password = env['POSTGRES_PASSWORD'];
-    // You can use the password here to create a new PostgresConfig if needed
-
-    if (password?.isEmpty ?? true) {
-      _logger.warning('POSTGRES_PASSWORD is empty; using it to create PostgresConfig anyway.');
-    } else {
-      _logger.info('Using POSTGRES_PASSWORD from environment to create PostgresConfig.');
-    }
-
-    config = PostgresConfig(
-      database: 'soar_score',
-      host: "localhost",
-      port: 5432,
-      user: 'postgres',
-      password: password!,
-    );
-  }
 
   if (config == null) {
     stderr.writeln(
@@ -68,5 +53,6 @@ Future<void> main() async {
     InternetAddress.anyIPv4,
     port,
   );
-  stdout.writeln('$serverName listening on http://localhost:${server.port}');
+
+  _logger.info('Server listening on http://localhost:${server.port}');
 }

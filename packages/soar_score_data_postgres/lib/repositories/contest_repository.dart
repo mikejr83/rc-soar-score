@@ -12,7 +12,7 @@ import '../postgres/database.dart';
 class ContestPostgresRepository implements ContestRepository {
   ContestPostgresRepository(this._database);
 
-  final ContestDatabase _database;
+  final SoarScoreDatabase _database;
 
   @override
   Future<Contest?> findById(Id id) async {

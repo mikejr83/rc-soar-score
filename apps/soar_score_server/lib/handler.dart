@@ -1,4 +1,5 @@
 import 'package:shelf/shelf.dart';
+import 'package:soar_score_core/soar_score_core.dart';
 import 'package:soar_score_api_handlers/soar_score_api_handlers.dart';
 import 'package:soar_score_data_postgres/soar_score_data_postgres.dart';
 
@@ -13,11 +14,12 @@ const String serverVersion = '0.1.0';
 /// the first query) and reports the server's identity for the `/health`
 /// and `/api/v1/meta` payloads.
 Handler createServerHandler(PostgresConfig config) {
-  final database = ContestDatabase.open(config);
+  final database = SoarScoreDatabase.open(config);
+
   return buildApiHandler(
     name: serverName,
     displayName: serverDisplayName,
     version: serverVersion,
-    contests: ContestPostgresRepository(database),
+    repository: Repository(ContestPostgresRepository(database)),
   );
 }

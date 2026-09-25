@@ -41,8 +41,7 @@ class HealthDto {
       other.schemaRevision == schemaRevision;
 
   @override
-  int get hashCode =>
-      Object.hash(name, displayName, version, schemaRevision);
+  int get hashCode => Object.hash(name, displayName, version, schemaRevision);
 
   @override
   String toString() =>
