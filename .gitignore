@@ -28,4 +28,9 @@ coverage/
 melos_*.xml
 melos.iml
 
+# VS Code settings
+.vscode/settings.json
+
+# Agent items
+# Kilo agent plans
 /.kilo/plans
