@@ -1,13 +1,14 @@
 import 'package:drift/drift.dart';
-import 'package:soar_score_data_sqlite/soar_score_data_sqlite.dart';
+import 'package:drift/native.dart';
+import 'package:soar_score_data/soar_score_data.dart';
 import 'package:test/test.dart';
 
 void main() {
-  group('ContestDatabase (in-memory)', () {
-    late ContestDatabase database;
+  group('ContestDatabase (in-memory SQLite)', () {
+    late SoarScoreDatabase database;
 
     setUp(() {
-      database = ContestDatabase.inMemory();
+      database = SoarScoreDatabase(NativeDatabase.memory());
     });
 
     tearDown(() async {

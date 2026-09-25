@@ -3,9 +3,9 @@ import 'dart:convert';
 import 'package:shelf/shelf.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_api_handlers/soar_score_api_handlers.dart';
-import 'package:soar_score_core/repositories/repository.dart';
 import 'package:test/test.dart';
 
+import 'stubs/stub_contest_repository.dart';
 import 'stubs/stub_repository.dart';
 
 /// The identity the extracted routing code is given in these tests. It
@@ -25,7 +25,7 @@ void main() {
       name: testIdentity.name,
       displayName: testIdentity.displayName,
       version: testIdentity.version,
-      repository: Repository(StubContestRepository()),
+      repository: StubRepository(StubContestRepository()),
     );
   });
 
@@ -71,7 +71,7 @@ void main() {
         name: testIdentity.name,
         displayName: testIdentity.displayName,
         version: testIdentity.version,
-        repository: Repository(StubContestRepository()),
+        repository: StubRepository(StubContestRepository()),
         authMiddleware: (api) {
           return (Request request) {
             final token = request.headers[tokenHeader];

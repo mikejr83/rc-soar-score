@@ -1,16 +1,12 @@
-import 'package:dotenv/dotenv.dart' show DotEnv;
-import 'package:postgres/postgres.dart'
-    show ConnectionSettings, Endpoint, SslMode;
+import 'dart:io';
 
-import 'package:logging/logging.dart';
-
-final _logger = Logger('PostgresConfig');
+import 'package:drift_postgres/drift_postgres.dart';
+import 'package:postgres/postgres.dart';
 
 /// Connection details for a PostgreSQL instance.
 ///
 /// Loaded from environment variables by [fromEnvironment] so credentials
-/// never enter source control; consistent with how `soar_score_server` reads
-/// `PORT` from its process environment (ticket 016).
+/// never enter source control.
 class PostgresConfig {
   PostgresConfig({
     required this.host,
@@ -23,29 +19,20 @@ class PostgresConfig {
 
   /// Reads connection details from the process environment.
   ///
-  /// Returns `null` when `POSTGRES_PASSWORD` is not set or empty, so callers
+  /// Returns null when POSTGRES_PASSWORD is not set or empty, so callers
   /// (tests, tooling) can tell "not configured" from a real configuration.
   static PostgresConfig? fromEnvironment() {
-    final env = DotEnv(includePlatformEnvironment: true)..load();
+    final env = Platform.environment;
     final password = env['POSTGRES_PASSWORD'];
-    if (password?.isEmpty ?? true) {
-      _logger.warning(
-        'POSTGRES_PASSWORD is empty; using it to create PostgresConfig anyway.',
-      );
-      _logger.info('Returning null config.');
+    if (password == null || password.isEmpty) {
       return null;
-    } else {
-      _logger.info(
-        'Using POSTGRES_PASSWORD from environment to create PostgresConfig.',
-      );
     }
-
     return PostgresConfig(
       host: env['POSTGRES_HOST'] ?? 'localhost',
       port: int.tryParse(env['POSTGRES_PORT'] ?? '') ?? 5432,
-      database: env['POSTGRES_DB'] ?? 'postgres',
+      database: env['POSTGRES_DB'] ?? 'rc_soar_score',
       user: env['POSTGRES_USER'] ?? 'postgres',
-      password: password!,
+      password: password,
       sslMode: _sslModeFromEnv(env['POSTGRES_SSLMODE']),
     );
   }
@@ -70,23 +57,11 @@ class PostgresConfig {
     }
   }
 
-  /// Instance host (`POSTGRES_HOST`, default `localhost`).
   final String host;
-
-  /// Instance port (`POSTGRES_PORT`, default `5432`).
   final int port;
-
-  /// Database name (`POSTGRES_DB`, default `postgres`).
   final String database;
-
-  /// Database user (`POSTGRES_USER`, default `postgres`).
   final String user;
-
-  /// Database password (`POSTGRES_PASSWORD`).
   final String password;
-
-  /// TLS mode (`POSTGRES_SSLMODE`: `disable`/`require`/`verifyFull`;
-  /// defaults to `disable` for local/dev instances).
   final SslMode sslMode;
 
   /// A copy of this config that targets [database].
@@ -110,4 +85,21 @@ class PostgresConfig {
 
   /// Connection settings for `package:postgres`.
   ConnectionSettings toSettings() => ConnectionSettings(sslMode: sslMode);
+
+  /// Creates a PgDatabase from this config.
+  // PgDatabase toPgDatabase() => PgDatabase(
+  //   endpoint: Endpoint(host: host, port: port, database: database),
+  //   settings: ConnectionSettings(),
+  //   user: user,
+  //   password: password,
+  //   sslSettings: sslMode == SslMode.require ? null : null,
+  // );
+  PgDatabase toPgDatabase({bool logStatements = false}) => PgDatabase(
+    endpoint: this.toEndpoint(),
+    settings: this.toSettings(),
+    logStatements: logStatements,
+  );
+
+  /// The SSL mode for connection security.
+  SslMode get ssl => sslMode;
 }

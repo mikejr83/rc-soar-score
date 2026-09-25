@@ -1,7 +1,0 @@
-# Configures drift_dev schema codegen for this package (ticket 007).
-# Regenerate with: dart run build_runner build --delete-conflicting-outputs
-targets:
-  $default:
-    builders:
-      drift_dev:drift_dev:
-        enabled: true

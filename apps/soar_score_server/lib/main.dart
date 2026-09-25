@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:dotenv/dotenv.dart';
 import 'package:logging/logging.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
-import 'package:soar_score_data_postgres/soar_score_data_postgres.dart';
+import 'package:soar_score_data/soar_score_data.dart';
 
 import 'handler.dart';
 

@@ -1,9 +1,10 @@
 import 'dart:io';
 
 import 'package:shelf/shelf_io.dart' as shelf_io;
+
 import 'package:soar_score_api_handlers/soar_score_api_handlers.dart';
-import 'package:soar_score_core/repositories/repository.dart';
-import 'package:soar_score_data_sqlite/soar_score_data_sqlite.dart';
+import 'package:soar_score_core/soar_score_core.dart' as core;
+import 'package:soar_score_data/soar_score_data.dart';
 
 const String embeddedServerName = 'soar_score_contest';
 const String embeddedServerDisplayName = 'Soar Score Contest (Offline)';
@@ -16,10 +17,12 @@ const String embeddedServerVersion = '0.1.0';
 /// can never conflict; [baseUrl] is the loopback address the app's own
 /// `ApiClient` (from `soar_score_api`) is pointed at.
 class EmbeddedServer {
-  EmbeddedServer._(this._server, this._repository);
+  EmbeddedServer._(this._databasePath);
 
-  final HttpServer _server;
-  final ContestSqliteRepository _repository;
+  final String _databasePath;
+  late HttpServer _server;
+  late SoarScoreDatabase _database;
+  late core.Repository _repository;
 
   /// The OS-assigned port the local socket is bound to.
   int get port => _server.port;
@@ -27,11 +30,32 @@ class EmbeddedServer {
   /// The loopback base URL the app's `ApiClient` should target.
   Uri get baseUrl => Uri.parse('http://localhost:$port');
 
+  core.Repository get repository => _repository;
+
+  Future<void> initializeDatabase() async {
+    final dbPath = File(_databasePath);
+    await dbPath.parent.create(recursive: true);
+    _database = createLocalDatabase(dbPath);
+  }
+
+  Future<void> initialize() async {
+    _repository = Repository(ContestRepository(_database));
+
+    final handler = buildApiHandler(
+      name: embeddedServerName,
+      displayName: embeddedServerDisplayName,
+      version: embeddedServerVersion,
+      schemaRevision: _database.schemaVersion,
+      repository: _repository,
+    );
+    _server = await shelf_io.serve(handler, 'localhost', 0);
+  }
+
   /// Shuts down the HTTP server and closes the local database, releasing the
   /// port and the SQLite file handle.
   Future<void> close() async {
     await _server.close(force: true);
-    await _repository.close();
+    await _database.close();
   }
 }
 
@@ -42,23 +66,9 @@ class EmbeddedServer {
 /// The embedded instance is always unauthenticated: the shared
 /// `buildApiHandler` factory is called without an `authMiddleware`, per the
 /// decision recorded on ticket 017.
-Future<EmbeddedServer> startEmbeddedServer({
-  required String databasePath,
-}) async {
-  final database = ContestDatabase.open(databasePath);
-  // Drift opens its native executor (and creates the file) lazily; force a
-  // first query so startup fails fast on an unusable path and the schema
-  // migrations have provably run before the server answers requests.
-  await database.customSelect('SELECT 1').get();
-  final schemaVersion = await database.getSchemaVersion();
-  final repository = ContestSqliteRepository(database);
-  final handler = buildApiHandler(
-    name: embeddedServerName,
-    displayName: embeddedServerDisplayName,
-    version: embeddedServerVersion,
-    schemaRevision: schemaVersion,
-    repository: Repository(repository),
-  );
-  final server = await shelf_io.serve(handler, 'localhost', 0);
-  return EmbeddedServer._(server, repository);
+Future<EmbeddedServer> startEmbeddedServer(String databasePath) async {
+  final server = EmbeddedServer._(databasePath);
+  await server.initializeDatabase();
+  await server.initialize();
+  return server;
 }

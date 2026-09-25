@@ -267,9 +267,9 @@ class ContestsCompanion extends UpdateCompanion<ContestData> {
   }
 }
 
-abstract class _$ContestDatabase extends GeneratedDatabase {
-  _$ContestDatabase(QueryExecutor e) : super(e);
-  $ContestDatabaseManager get managers => $ContestDatabaseManager(this);
+abstract class _$SoarScoreDatabase extends GeneratedDatabase {
+  _$SoarScoreDatabase(QueryExecutor e) : super(e);
+  $SoarScoreDatabaseManager get managers => $SoarScoreDatabaseManager(this);
   late final $ContestsTable contests = $ContestsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
@@ -292,7 +292,7 @@ typedef $$ContestsTableUpdateCompanionBuilder = ContestsCompanion Function({
 });
 
 class $$ContestsTableFilterComposer
-    extends Composer<_$ContestDatabase, $ContestsTable> {
+    extends Composer<_$SoarScoreDatabase, $ContestsTable> {
   $$ContestsTableFilterComposer({
     required super.$db,
     required super.$table,
@@ -317,7 +317,7 @@ class $$ContestsTableFilterComposer
 }
 
 class $$ContestsTableOrderingComposer
-    extends Composer<_$ContestDatabase, $ContestsTable> {
+    extends Composer<_$SoarScoreDatabase, $ContestsTable> {
   $$ContestsTableOrderingComposer({
     required super.$db,
     required super.$table,
@@ -342,7 +342,7 @@ class $$ContestsTableOrderingComposer
 }
 
 class $$ContestsTableAnnotationComposer
-    extends Composer<_$ContestDatabase, $ContestsTable> {
+    extends Composer<_$SoarScoreDatabase, $ContestsTable> {
   $$ContestsTableAnnotationComposer({
     required super.$db,
     required super.$table,
@@ -363,7 +363,7 @@ class $$ContestsTableAnnotationComposer
 class $$ContestsTableTableManager
     extends
         RootTableManager<
-          _$ContestDatabase,
+          _$SoarScoreDatabase,
           $ContestsTable,
           ContestData,
           $$ContestsTableFilterComposer,
@@ -373,12 +373,12 @@ class $$ContestsTableTableManager
           $$ContestsTableUpdateCompanionBuilder,
           (
             ContestData,
-            BaseReferences<_$ContestDatabase, $ContestsTable, ContestData>,
+            BaseReferences<_$SoarScoreDatabase, $ContestsTable, ContestData>,
           ),
           ContestData,
           PrefetchHooks Function()
         > {
-  $$ContestsTableTableManager(_$ContestDatabase db, $ContestsTable table)
+  $$ContestsTableTableManager(_$SoarScoreDatabase db, $ContestsTable table)
     : super(
         TableManagerState(
           db: db,
@@ -418,7 +418,7 @@ class $$ContestsTableTableManager
                 (e) => (
                   e.readTable<$ContestsTable, ContestData>(table),
                   BaseReferences<
-                    _$ContestDatabase,
+                    _$SoarScoreDatabase,
                     $ContestsTable,
                     ContestData
                   >(db, table, e),
@@ -432,7 +432,7 @@ class $$ContestsTableTableManager
 
 typedef $$ContestsTableProcessedTableManager =
     ProcessedTableManager<
-      _$ContestDatabase,
+      _$SoarScoreDatabase,
       $ContestsTable,
       ContestData,
       $$ContestsTableFilterComposer,
@@ -442,15 +442,15 @@ typedef $$ContestsTableProcessedTableManager =
       $$ContestsTableUpdateCompanionBuilder,
       (
         ContestData,
-        BaseReferences<_$ContestDatabase, $ContestsTable, ContestData>,
+        BaseReferences<_$SoarScoreDatabase, $ContestsTable, ContestData>,
       ),
       ContestData,
       PrefetchHooks Function()
     >;
 
-class $ContestDatabaseManager {
-  final _$ContestDatabase _db;
-  $ContestDatabaseManager(this._db);
+class $SoarScoreDatabaseManager {
+  final _$SoarScoreDatabase _db;
+  $SoarScoreDatabaseManager(this._db);
   $$ContestsTableTableManager get contests =>
       $$ContestsTableTableManager(_db, _db.contests);
 }

@@ -48,7 +48,7 @@ class NativeBootstrap extends AppBootstrap {
   /// Starts the embedded API server and returns the client for it.
   static Future<AppBootstrap> start() async {
     final database = await databasePath();
-    final server = await startEmbeddedServer(databasePath: database);
+    final server = await startEmbeddedServer(database);
     debugPrint('Embedded API server listening on ${server.baseUrl}');
     return NativeBootstrap._(server);
   }

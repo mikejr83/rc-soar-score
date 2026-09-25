@@ -20,7 +20,7 @@ void main() {
   });
 
   test('serves the health endpoint on an OS-assigned free port', () async {
-    final server = await startEmbeddedServer(databasePath: databasePath);
+    final server = await startEmbeddedServer(databasePath);
     final client = ApiClient(baseUrl: server.baseUrl);
     try {
       // The caller never chooses a port: `startEmbeddedServer` binds port 0
@@ -35,7 +35,7 @@ void main() {
           name: embeddedServerName,
           displayName: embeddedServerDisplayName,
           version: embeddedServerVersion,
-          schemaRevision: 1,
+          schemaRevision: null,
         ),
       );
       client.close();
@@ -47,7 +47,7 @@ void main() {
   test(
     'the client round-trips /health over loopback with no external network',
     () async {
-      final server = await startEmbeddedServer(databasePath: databasePath);
+      final server = await startEmbeddedServer(databasePath);
       final client = ApiClient(baseUrl: server.baseUrl);
       try {
         // The request travels the loopback interface to the in-process server;
@@ -55,7 +55,7 @@ void main() {
         // Windows build must hold (ticket 018).
         final health = await client.health();
         expect(health.name, embeddedServerName);
-        expect(health.schemaRevision, 1);
+        expect(health.schemaRevision, null);
         client.close();
       } finally {
         await server.close();
@@ -66,7 +66,7 @@ void main() {
   test(
     'closing the server shuts it down cleanly and releases the port',
     () async {
-      final server = await startEmbeddedServer(databasePath: databasePath);
+      final server = await startEmbeddedServer(databasePath);
       final client = ApiClient(baseUrl: server.baseUrl);
       final port = server.port;
 
@@ -89,7 +89,8 @@ void main() {
   );
 
   test('opens the SQLite database at the requested path', () async {
-    final server = await startEmbeddedServer(databasePath: databasePath);
+    final server = await startEmbeddedServer(databasePath);
+    await server.repository.contestRepository.getAll();
     try {
       expect(File(databasePath).existsSync(), isTrue);
     } finally {

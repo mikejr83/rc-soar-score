@@ -1,28 +1,10 @@
-import 'package:soar_score_core/soar_score_core.dart';
+import 'package:soar_score_core/soar_score_core.dart' as core;
 
-/// In-memory [ContestRepository] for handler tests.
-///
-/// The extracted routes are placeholder-level and never execute queries, so
-/// this repository exists purely to satisfy the factory's required data
-/// dependency without any data package.
-class StubContestRepository implements ContestRepository {
-  final Map<Id, Contest> _contests = {};
+class StubRepository implements core.Repository {
+  StubRepository(this._contestRepository);
 
   @override
-  Future<Contest?> findById(Id id) async => _contests[id];
+  core.ContestRepository get contestRepository => _contestRepository;
 
-  @override
-  Future<List<Contest>> getAll() async => _contests.values.toList();
-
-  @override
-  Future<Contest> save(Contest contest) async {
-    _contests[contest.id] = contest;
-    return contest;
-  }
-
-  @override
-  Future<bool> delete(Id id) async => _contests.remove(id) != null;
-
-  @override
-  Future<void> close() async {}
+  final core.ContestRepository _contestRepository;
 }
