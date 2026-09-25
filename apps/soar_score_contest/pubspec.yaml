@@ -43,6 +43,8 @@ dependencies:
     path: ../../packages/soar_score_api
   soar_score_api_handlers:
     path: ../../packages/soar_score_api_handlers
+  soar_score_core:
+    path: ../../packages/soar_score_core
   soar_score_data_sqlite:
     path: ../../packages/soar_score_data_sqlite
 
