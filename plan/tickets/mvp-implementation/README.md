@@ -1,4 +1,4 @@
-# MVP Implementation — Repository Setup Tickets
+﻿# MVP Implementation — Repository Setup Tickets
 
 Tickets for getting the repository basics in place: toolchain, Melos workspace, the three apps and four shared packages, Auth0 identity, CI/CD, and agentic-coding rules. These are *implementation work* tickets (work items with checkboxes), distinct from the decision tickets in `../pre-implementation/`.
 
@@ -17,7 +17,6 @@ Tickets for getting the repository basics in place: toolchain, Melos workspace, 
 | [002](002-scaffold-nx-workspace.md) | ~~NX Workspace at Repository Root~~ (replaced by 014) | High | Rejected |
 | [003](003-scaffold-dart-api-app.md) | Scaffold `soar_score_server` (Dart/shelf) | High | Done |
 | [004](004-scaffold-contest-flutter-app.md) | Scaffold `soar_score_contest` (Flutter web) | High | In-Review |
-| [019](019-scaffold-self-score-flutter-app.md) | Scaffold `soar_score_self_score` (Flutter web) | High | In-Review |
 | [005](005-scaffold-public-flutter-app.md) | Scaffold `soar_score_public` (Flutter web) | High | Open |
 | [006](006-scaffold-core-package.md) | Scaffold `soar_score_core` Package | High | In-Review |
 | [007](007-scaffold-data-package.md) | Scaffold `soar_score_data_sqlite` Package | High | In-Review |
@@ -32,6 +31,14 @@ Tickets for getting the repository basics in place: toolchain, Melos workspace, 
 | [016](016-scaffold-data-postres-package.md) | Scaffold `soar_score_data_postgres` Package | High | In-Review |
 | [017](017-sqlite-sync-schema.md) | Extract `soar_score_api_handlers` from `soar_score_server` (file name is stale; the original sync-schema spec it carried is orphaned — see its Follow-ups) | High | In-Review |
 | [018](018-embed-soar_score_api_handlers.md) | Embed `soar_score_api_handlers` in the Windows Target of `soar_score_contest` | High | In-Review |
+| [019](019-scaffold-self-score-flutter-app.md) | Scaffold `soar_score_self_score` (Flutter web) | High | Done |
+| [020](020-contest-landing-page-route.md) | Contest administration landing page (route and shell) | High | Open |
+| [021](021-sigin-create-account-stubs.md) | Sign in and Create account stubs on landing page | High | Open |
+| [022](022-continue-offline-desktop.md) | Continue offline flow on desktop landing page | High | Open |
+| [023](023-application-status-area.md) | Persistent application status area | High | Open |
+| [024](024-landing-page-states.md) | Landing page loading, error, and unavailable states | High | Open |
+| [025](025-navigation-links-and-external-handling.md) | Navigation links and external-link UX on landing page | High | Open |
+| [026](026-accessibility-responsive-locale.md) | Accessibility, responsive layout, and locale on landing page | High | Open |
 
 ## Suggested execution order
 
@@ -49,7 +56,8 @@ Tickets for getting the repository basics in place: toolchain, Melos workspace, 
 9. **011** — base CI workflow + root README (needs all projects present and Melos bootstrap working).
 10. ~~**012** — Playwright scaffold~~ — rejected; replaced by native Flutter/Dart integration tests.
 11. **013** — per-project AGENTS.md files (last; it codifies everything the other tickets established).
+12. **020 → 026** — landing page: route and shell, then auth stubs, offline mode, status area, page states, navigation links, accessibility.
 
 ## Out of scope (tracked later)
 
-Domain models, the scoring engine, SQLite migrations beyond the in-memory example, real API endpoints/DTOs, offline sync, and all feature work remain future ticket series in this folder (numbering continues at 015+).
+Domain models, the scoring engine, SQLite migrations beyond the in-memory example, real API endpoints/DTOs, offline sync, and all feature work remain future ticket series in this folder (numbering continues after 026).
