@@ -39,7 +39,7 @@ void main() {
           'name': 'soar_score_server',
           'displayName': 'Soar Score API Server',
           'version': '0.1.0',
-          'schemaRevision': null
+          'schemaRevision': null,
         });
       });
     },

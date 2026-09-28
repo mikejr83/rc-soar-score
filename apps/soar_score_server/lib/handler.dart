@@ -14,7 +14,7 @@ const String serverVersion = '0.1.0';
 /// and `/api/v1/meta` payloads.
 Handler createServerHandler(PostgresConfig config) {
   final database = createPostgresDatabase(config);
-  
+
   return buildApiHandler(
     name: serverName,
     displayName: serverDisplayName,

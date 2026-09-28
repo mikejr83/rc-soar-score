@@ -1,43 +1,67 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_contest/app.dart';
-import 'package:soar_score_contest/pages/contests_page.dart';
-import 'package:soar_score_contest/pages/home_page.dart';
+import 'package:soar_score_contest/pages/landing_page.dart';
 
 void main() {
-  testWidgets('renders the home route and navigates to the contests route', (
+  testWidgets('renders the contest-administration landing page', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(const SoarScoreContestApp());
     await tester.pumpAndSettle();
 
-    expect(find.text(HomePage.title), findsOneWidget);
-    expect(find.text('Home placeholder'), findsOneWidget);
-
-    await tester.tap(find.text('Go to Contests'));
-    await tester.pumpAndSettle();
-
-    expect(find.text(ContestsPage.title), findsOneWidget);
-    expect(find.text('Contests placeholder'), findsOneWidget);
-
-    await tester.tap(find.text('Back to Home'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Home placeholder'), findsOneWidget);
+    expect(find.byType(LandingPage), findsOneWidget);
+    expect(find.text(LandingPage.title), findsOneWidget);
   });
 
-  testWidgets('renders the theme and both placeholder routes', (
+  testWidgets('displays the shell structure with title', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(const SoarScoreContestApp());
     await tester.pumpAndSettle();
 
-    // Home route content.
-    expect(find.byType(HomePage), findsOneWidget);
+    expect(find.text('RC Soar Score'), findsOneWidget);
+    expect(find.text('Contest Administration'), findsOneWidget);
+  });
 
-    // Navigate to the second placeholder route.
-    await tester.tap(find.text('Go to Contests'));
+  testWidgets('displays sign in button', (WidgetTester tester) async {
+    await tester.pumpWidget(const SoarScoreContestApp());
     await tester.pumpAndSettle();
 
-    expect(find.byType(ContestsPage), findsOneWidget);
+    expect(find.text('Sign in'), findsOneWidget);
+  });
+
+  testWidgets('displays create account button', (WidgetTester tester) async {
+    await tester.pumpWidget(const SoarScoreContestApp());
+    await tester.pumpAndSettle();
+
+    expect(find.text('Create account'), findsOneWidget);
+  });
+
+  testWidgets('displays continue offline button', (WidgetTester tester) async {
+    await tester.pumpWidget(const SoarScoreContestApp());
+    await tester.pumpAndSettle();
+
+    expect(find.text('Continue offline'), findsOneWidget);
+  });
+
+  testWidgets('displays help and public site links', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const SoarScoreContestApp());
+    await tester.pumpAndSettle();
+
+    expect(find.text('View help documentation'), findsOneWidget);
+    expect(find.text('Visit public contest site'), findsOneWidget);
+  });
+
+  testWidgets('renders the theme with M3 components', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const SoarScoreContestApp());
+    await tester.pumpAndSettle();
+
+    expect(find.byType(Scaffold), findsOneWidget);
+    expect(find.byType(AppBar), findsOneWidget);
   });
 }

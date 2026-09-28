@@ -8,3 +8,4 @@ export 'models/contest.dart';
 export 'models/id.dart';
 export 'repositories/contest_repository.dart';
 export 'repositories/repository.dart';
+export 'enums/enums.dart';
