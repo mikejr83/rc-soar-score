@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class ContestSelectionStubPage extends StatelessWidget {
-  const ContestSelectionStubPage({super.key});
+class HomePage extends StatelessWidget {
+  const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) => Scaffold(

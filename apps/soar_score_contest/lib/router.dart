@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
-import 'pages/contest_selection_stub_page.dart';
+import 'pages/home_page.dart';
 import 'pages/landing_page.dart';
 
 /// The contest-administration root path (the landing page).
@@ -20,7 +20,7 @@ GoRouter buildAppRouter({String initialLocation = landingPath}) {
       GoRoute(
         path: '$landingPath/home',
         name: 'home',
-        builder: (context, state) => const ContestSelectionStubPage(),
+        builder: (context, state) => const HomePage(),
       ),
     ],
   );
