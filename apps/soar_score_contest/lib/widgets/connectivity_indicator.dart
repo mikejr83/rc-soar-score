@@ -15,10 +15,7 @@ enum ConnectivityIndicatorKind { internet, api }
 /// State is communicated together by icon and text label — never by color
 /// alone (accessibility rules of `plan/ui/contest-administration/`).
 class ConnectivityIndicator extends StatelessWidget {
-  const ConnectivityIndicator._({
-    required this.kind,
-    required this.monitor,
-  });
+  const ConnectivityIndicator._({required this.kind, required this.monitor});
 
   final ConnectivityIndicatorKind kind;
   final AppConnectivity monitor;
@@ -26,29 +23,25 @@ class ConnectivityIndicator extends StatelessWidget {
   /// The internet indicator. The page hides it when the host cannot report
   /// connectivity at all (`supportsConnectivity == false`, decision D8).
   const ConnectivityIndicator.internet(AppConnectivity monitor)
-    : this._(
-        kind: ConnectivityIndicatorKind.internet,
-        monitor: monitor,
-      );
+    : this._(kind: ConnectivityIndicatorKind.internet, monitor: monitor);
 
   /// The remote API indicator.
   const ConnectivityIndicator.api(AppConnectivity monitor)
-    : this._(
-        kind: ConnectivityIndicatorKind.api,
-        monitor: monitor,
-      );
+    : this._(kind: ConnectivityIndicatorKind.api, monitor: monitor);
 
-  static IconData _icon(ConnectivityIndicatorKind kind, ConnectivityStatus status) =>
-      switch (status) {
-        ConnectivityStatus.unknown => Icons.help_outline,
-        ConnectivityStatus.checking => Icons.sync,
-        ConnectivityStatus.available => kind == ConnectivityIndicatorKind.internet
-            ? Icons.wifi
-            : Icons.cloud,
-        ConnectivityStatus.unavailable => kind == ConnectivityIndicatorKind.internet
-            ? Icons.wifi_off
-            : Icons.cloud_off,
-      };
+  static IconData _icon(
+    ConnectivityIndicatorKind kind,
+    ConnectivityStatus status,
+  ) => switch (status) {
+    ConnectivityStatus.unknown => Icons.help_outline,
+    ConnectivityStatus.checking => Icons.sync,
+    ConnectivityStatus.available =>
+      kind == ConnectivityIndicatorKind.internet ? Icons.wifi : Icons.cloud,
+    ConnectivityStatus.unavailable =>
+      kind == ConnectivityIndicatorKind.internet
+          ? Icons.wifi_off
+          : Icons.cloud_off,
+  };
 
   static String _statusLabel(ConnectivityStatus status) => switch (status) {
     ConnectivityStatus.unknown => 'Unknown',
@@ -121,10 +114,7 @@ class ConnectivityIndicator extends StatelessWidget {
 /// The dialog stays open after "Retry now" and re-reads the monitor live: the
 /// status and data lines are rebuilt on every monitor notification.
 class _ConnectivityDetailDialog extends StatelessWidget {
-  const _ConnectivityDetailDialog({
-    required this.kind,
-    required this.monitor,
-  });
+  const _ConnectivityDetailDialog({required this.kind, required this.monitor});
 
   final ConnectivityIndicatorKind kind;
   final AppConnectivity monitor;
@@ -172,9 +162,7 @@ class _ConnectivityDetailDialog extends StatelessWidget {
           lines.add(
             Text(
               'Last successful connection: '
-              '${lastSuccessful == null
-                  ? 'Never'
-                  : timeFormat.format(lastSuccessful.toLocal())}',
+              '${lastSuccessful == null ? 'Never' : timeFormat.format(lastSuccessful.toLocal())}',
               key: const ValueKey('connectivity last successful'),
             ),
           );

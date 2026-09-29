@@ -37,10 +37,10 @@ class AppConnectivity extends ChangeNotifier {
     InternetProbe? internetProbe,
     Duration apiPollInterval = _defaultApiPollInterval,
     Duration probeTimeout = _defaultProbeTimeout,
-  })  : _client = client,
-        _apiPollInterval = apiPollInterval,
-        _probeTimeout = probeTimeout,
-        _internetProbe = internetProbe ?? ConnectivityInternetProbe() {
+  }) : _client = client,
+       _apiPollInterval = apiPollInterval,
+       _probeTimeout = probeTimeout,
+       _internetProbe = internetProbe ?? ConnectivityInternetProbe() {
     _start();
   }
 
@@ -93,7 +93,11 @@ class AppConnectivity extends ChangeNotifier {
   String get apiTarget {
     final host = _client.baseUrl.host;
     final port = _client.baseUrl.port;
-    return host.isEmpty ? 'unknown host' : port == 0 ? host : '$host:$port';
+    return host.isEmpty
+        ? 'unknown host'
+        : port == 0
+        ? host
+        : '$host:$port';
   }
 
   void _start() {
@@ -117,7 +121,9 @@ class AppConnectivity extends ChangeNotifier {
     } finally {
       _internetChecking = false;
       if (!_disposed) {
-        _internetSubscription = _internetProbe.subscribe(_onConnectivityChanged);
+        _internetSubscription = _internetProbe.subscribe(
+          _onConnectivityChanged,
+        );
       }
     }
   }

@@ -126,7 +126,9 @@ void main() {
         ),
       );
 
-      await _flushUntil(() => monitor.apiStatus == ConnectivityStatus.available);
+      await _flushUntil(
+        () => monitor.apiStatus == ConnectivityStatus.available,
+      );
 
       expect(monitor.internetStatus, ConnectivityStatus.available);
       expect(monitor.internetLastObservedAt, isNotNull);
@@ -147,48 +149,49 @@ void main() {
         ),
       );
 
-      await _flushUntil(() => monitor.apiStatus == ConnectivityStatus.available);
+      await _flushUntil(
+        () => monitor.apiStatus == ConnectivityStatus.available,
+      );
 
       expect(monitor.internetStatus, ConnectivityStatus.unavailable);
       expect(monitor.internetLastObservedAt, isNotNull);
     });
 
-    test(
-      'keeps the last successful time across an HTTP failure and '
-      'recovers on the next success',
-      () async {
-        var failing = false;
-        final captured = <http.Request>[];
-        monitor = createMonitor(
-          httpClient: MockClient((request) async {
-            captured.add(request);
-            return failing
-                ? http.Response(
-                    '{"error":"boom"}',
-                    500,
-                    headers: _jsonHeaders,
-                  )
-                : http.Response(_serverPayload, 200, headers: _jsonHeaders);
-          }),
-        );
+    test('keeps the last successful time across an HTTP failure and '
+        'recovers on the next success', () async {
+      var failing = false;
+      final captured = <http.Request>[];
+      monitor = createMonitor(
+        httpClient: MockClient((request) async {
+          captured.add(request);
+          return failing
+              ? http.Response('{"error":"boom"}', 500, headers: _jsonHeaders)
+              : http.Response(_serverPayload, 200, headers: _jsonHeaders);
+        }),
+      );
 
-        await _flushUntil(() => monitor.apiStatus == ConnectivityStatus.available);
-        final firstSuccess = monitor.apiLastSuccessfulAt;
-        expect(firstSuccess, isNotNull);
+      await _flushUntil(
+        () => monitor.apiStatus == ConnectivityStatus.available,
+      );
+      final firstSuccess = monitor.apiLastSuccessfulAt;
+      expect(firstSuccess, isNotNull);
 
-        failing = true;
-        await _flushUntil(() => monitor.apiStatus == ConnectivityStatus.unavailable);
-        expect(monitor.apiLastError, 'HTTP 500');
-        expect(monitor.apiLastSuccessfulAt, firstSuccess);
+      failing = true;
+      await _flushUntil(
+        () => monitor.apiStatus == ConnectivityStatus.unavailable,
+      );
+      expect(monitor.apiLastError, 'HTTP 500');
+      expect(monitor.apiLastSuccessfulAt, firstSuccess);
 
-        failing = false;
-        await _flushUntil(() => monitor.apiStatus == ConnectivityStatus.available);
-        expect(monitor.apiLastError, isNull);
-        expect(monitor.apiLastSuccessfulAt, isNotNull);
-        expect(monitor.apiLastSuccessfulAt!.isAfter(firstSuccess!), isTrue);
-        expect(captured.length, greaterThanOrEqualTo(3));
-      },
-    );
+      failing = false;
+      await _flushUntil(
+        () => monitor.apiStatus == ConnectivityStatus.available,
+      );
+      expect(monitor.apiLastError, isNull);
+      expect(monitor.apiLastSuccessfulAt, isNotNull);
+      expect(monitor.apiLastSuccessfulAt!.isAfter(firstSuccess!), isTrue);
+      expect(captured.length, greaterThanOrEqualTo(3));
+    });
 
     test('classifies a transport failure as a network error', () async {
       monitor = createMonitor(
@@ -197,7 +200,9 @@ void main() {
         }),
       );
 
-      await _flushUntil(() => monitor.apiStatus == ConnectivityStatus.unavailable);
+      await _flushUntil(
+        () => monitor.apiStatus == ConnectivityStatus.unavailable,
+      );
 
       expect(monitor.apiLastError, 'Network error');
       expect(monitor.apiLastSuccessfulAt, isNull);
@@ -213,7 +218,9 @@ void main() {
         poll: const Duration(seconds: 30),
       );
 
-      await _flushUntil(() => monitor.apiStatus == ConnectivityStatus.unavailable);
+      await _flushUntil(
+        () => monitor.apiStatus == ConnectivityStatus.unavailable,
+      );
 
       expect(monitor.apiLastError, 'Timed out');
     });
@@ -227,7 +234,9 @@ void main() {
         ),
       );
 
-      await _flushUntil(() => monitor.apiStatus == ConnectivityStatus.unavailable);
+      await _flushUntil(
+        () => monitor.apiStatus == ConnectivityStatus.unavailable,
+      );
 
       expect(monitor.apiLastError, 'Unknown error');
     });
@@ -248,7 +257,9 @@ void main() {
         poll: const Duration(seconds: 30),
       );
 
-      await _flushUntil(() => monitor.apiStatus == ConnectivityStatus.unavailable);
+      await _flushUntil(
+        () => monitor.apiStatus == ConnectivityStatus.unavailable,
+      );
       expect(captured.length, 1);
 
       // The server recovers and a connectivity-change event arrives: it must
@@ -260,7 +271,9 @@ void main() {
       await Future<void>.delayed(const Duration(milliseconds: 50));
       probe.emit(const [ConnectivityResult.none]);
 
-      await _flushUntil(() => monitor.apiStatus == ConnectivityStatus.available);
+      await _flushUntil(
+        () => monitor.apiStatus == ConnectivityStatus.available,
+      );
 
       expect(captured.length, probesBeforeEvent + 1);
       expect(monitor.internetStatus, ConnectivityStatus.unavailable);
@@ -277,7 +290,9 @@ void main() {
         poll: const Duration(milliseconds: 100),
       );
 
-      await _flushUntil(() => monitor.apiStatus == ConnectivityStatus.available);
+      await _flushUntil(
+        () => monitor.apiStatus == ConnectivityStatus.available,
+      );
       await Future<void>.delayed(const Duration(milliseconds: 350));
 
       expect(calls, greaterThanOrEqualTo(3));
@@ -291,7 +306,9 @@ void main() {
               http.Response(_serverPayload, 200, headers: _jsonHeaders),
         ),
       );
-      await _flushUntil(() => monitor.apiStatus == ConnectivityStatus.available);
+      await _flushUntil(
+        () => monitor.apiStatus == ConnectivityStatus.available,
+      );
       expect(monitor.internetStatus, ConnectivityStatus.available);
 
       probe.results = const [ConnectivityResult.none];
@@ -315,12 +332,16 @@ void main() {
         poll: const Duration(seconds: 30),
       );
 
-      await _flushUntil(() => monitor.apiStatus == ConnectivityStatus.unavailable);
+      await _flushUntil(
+        () => monitor.apiStatus == ConnectivityStatus.unavailable,
+      );
       expect(monitor.apiLastError, 'HTTP 500');
 
       failing = false;
       monitor.retryApi();
-      await _flushUntil(() => monitor.apiStatus == ConnectivityStatus.available);
+      await _flushUntil(
+        () => monitor.apiStatus == ConnectivityStatus.available,
+      );
       expect(monitor.apiLastError, isNull);
       expect(monitor.apiLastSuccessfulAt, isNotNull);
     });
@@ -339,7 +360,9 @@ void main() {
           poll: const Duration(seconds: 30),
         );
 
-        await _flushUntil(() => monitor.apiStatus == ConnectivityStatus.available);
+        await _flushUntil(
+          () => monitor.apiStatus == ConnectivityStatus.available,
+        );
 
         expect(monitor.supportsConnectivity, isFalse);
         expect(monitor.internetStatus, ConnectivityStatus.unknown);
@@ -363,7 +386,9 @@ void main() {
         }),
         poll: const Duration(milliseconds: 100),
       );
-      await _flushUntil(() => monitor.apiStatus == ConnectivityStatus.available);
+      await _flushUntil(
+        () => monitor.apiStatus == ConnectivityStatus.available,
+      );
 
       disposeMonitor();
       final countAtDispose = captured.length;

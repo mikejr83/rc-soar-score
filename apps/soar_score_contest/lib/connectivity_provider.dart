@@ -25,7 +25,6 @@ class AppConnectivityInherited extends InheritedWidget {
 
 /// The app-wide [AppConnectivity] monitor, or `null` when no bootstrap
 /// client is provided (the landing page then renders exactly as pre-feature).
-AppConnectivity? appConnectivityOf(BuildContext context) =>
-    context
-        .dependOnInheritedWidgetOfExactType<AppConnectivityInherited>()
-        ?.monitor;
+AppConnectivity? appConnectivityOf(BuildContext context) => context
+    .dependOnInheritedWidgetOfExactType<AppConnectivityInherited>()
+    ?.monitor;

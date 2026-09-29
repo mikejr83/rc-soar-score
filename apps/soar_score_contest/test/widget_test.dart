@@ -22,8 +22,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('RC Soar Score'), findsWidgets);
-    expect(find.text('Manage and score RC sailplane soaring contests.'),
-        findsOneWidget);
+    expect(
+      find.text('Manage and score RC sailplane soaring contests.'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('displays sign in button', (WidgetTester tester) async {
@@ -45,6 +47,39 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Continue offline'), findsOneWidget);
+    expect(
+      find.text(
+        'Offline contests stay on this device unless you publish them or sign '
+        'in to enable synchronization.',
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('continue offline opens the contest selection stub', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const SoarScoreContestApp());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Continue offline'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Contest selection'), findsOneWidget);
+    expect(find.text('Contest selection is not wired up yet.'), findsOneWidget);
+  });
+
+  testWidgets('web landing page hides offline entry and messaging', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const MaterialApp(home: LandingPage(isWeb: true)));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Continue offline'), findsNothing);
+    expect(
+      find.textContaining('Offline contests stay on this device'),
+      findsNothing,
+    );
   });
 
   testWidgets('displays help and public site links', (

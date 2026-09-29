@@ -68,39 +68,40 @@ const _internetStates = <(ConnectivityStatus, IconData, String)>[
 void main() {
   group('ConnectivityIndicator chip', () {
     for (final (status, icon, label) in _internetStates) {
-      testWidgets(
-        'internet chip: ${status.name} shows icon + text label',
-        (tester) async {
-          final monitor = _FakeMonitor(internetStatus: status);
-          await tester.pumpWidget(
-            _host(indicator: ConnectivityIndicator.internet(monitor)),
-          );
+      testWidgets('internet chip: ${status.name} shows icon + text label', (
+        tester,
+      ) async {
+        final monitor = _FakeMonitor(internetStatus: status);
+        await tester.pumpWidget(
+          _host(indicator: ConnectivityIndicator.internet(monitor)),
+        );
 
-          final labelFinder = find.text(label);
-          expect(labelFinder, findsOneWidget);
-          expect(find.byIcon(icon), findsOneWidget);
-          // Icon and text are always paired (never color-only) and the text
-          // is the machine-readable status for assistive tech.
-          final chip = tester
-              .widgetList<Semantics>(
-                find.byWidgetPredicate(
-                  (w) =>
-                      w is Semantics &&
-                      w.properties.button == true &&
-                      w.properties.label != null,
-                ),
-              )
-              .single;
-          expect(chip.properties.label, 'Internet connectivity');
-          expect(chip.properties.value, label);
-          expect(tester.getSize(find.text(label)).height, greaterThan(12));
-        },
-      );
+        final labelFinder = find.text(label);
+        expect(labelFinder, findsOneWidget);
+        expect(find.byIcon(icon), findsOneWidget);
+        // Icon and text are always paired (never color-only) and the text
+        // is the machine-readable status for assistive tech.
+        final chip = tester
+            .widgetList<Semantics>(
+              find.byWidgetPredicate(
+                (w) =>
+                    w is Semantics &&
+                    w.properties.button == true &&
+                    w.properties.label != null,
+              ),
+            )
+            .single;
+        expect(chip.properties.label, 'Internet connectivity');
+        expect(chip.properties.value, label);
+        expect(tester.getSize(find.text(label)).height, greaterThan(12));
+      });
     }
 
     testWidgets('api chip: available and unavailable', (tester) async {
       final online = _FakeMonitor(apiStatus: ConnectivityStatus.available);
-      await tester.pumpWidget(_host(indicator: ConnectivityIndicator.api(online)));
+      await tester.pumpWidget(
+        _host(indicator: ConnectivityIndicator.api(online)),
+      );
       expect(find.text('Online'), findsOneWidget);
       expect(find.byIcon(Icons.cloud), findsOneWidget);
       expect(
@@ -114,7 +115,8 @@ void main() {
               ),
             )
             .single
-            .properties.label,
+            .properties
+            .label,
         'Remote API connectivity',
       );
 

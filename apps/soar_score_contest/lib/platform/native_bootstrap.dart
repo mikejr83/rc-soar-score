@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
@@ -66,3 +68,5 @@ class NativeBootstrap extends AppBootstrap {
 /// Platform entry point shared by both bootstrap branches (see
 /// `main.dart`'s conditional import).
 Future<AppBootstrap> start() => NativeBootstrap.start();
+
+void quitApplication() => exit(0);

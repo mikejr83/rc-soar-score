@@ -89,7 +89,10 @@ class ContestShell extends StatelessWidget {
           preferredSize: const Size.fromHeight(40),
           child: _Breadcrumb(
             isLanding: isLanding,
-            pathSegments: path.split('/').where((segment) => segment.isNotEmpty).toList(),
+            pathSegments: path
+                .split('/')
+                .where((segment) => segment.isNotEmpty)
+                .toList(),
           ),
         ),
       ),
@@ -156,8 +159,9 @@ class _Breadcrumb extends StatelessWidget {
   final bool isLanding;
   final List<String> pathSegments;
 
-  static String _label(String segment) =>
-      segment.length > 1 ? segment[0].toUpperCase() + segment.substring(1) : segment;
+  static String _label(String segment) => segment.length > 1
+      ? segment[0].toUpperCase() + segment.substring(1)
+      : segment;
 
   @override
   Widget build(BuildContext context) {
@@ -174,7 +178,9 @@ class _Breadcrumb extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 8),
           child: Text(
             _label(segment),
-            style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
           ),
         ),
     ];
@@ -195,7 +201,9 @@ class _Breadcrumb extends StatelessWidget {
                 }
               },
             ),
-          Expanded(child: Row(mainAxisSize: MainAxisSize.min, children: crumbs)),
+          Expanded(
+            child: Row(mainAxisSize: MainAxisSize.min, children: crumbs),
+          ),
         ],
       ),
     );

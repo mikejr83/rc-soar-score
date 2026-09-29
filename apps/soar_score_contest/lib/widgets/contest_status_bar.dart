@@ -26,7 +26,11 @@ class ContestStatusBar extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.check_circle, size: 16, color: theme.colorScheme.outline),
+            Icon(
+              Icons.check_circle,
+              size: 16,
+              color: theme.colorScheme.outline,
+            ),
             const SizedBox(width: 8),
             Text(status, style: theme.textTheme.bodySmall),
           ],

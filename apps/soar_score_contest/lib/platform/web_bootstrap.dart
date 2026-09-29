@@ -47,3 +47,5 @@ class WebBootstrap extends AppBootstrap {
 /// Platform entry point shared by both bootstrap branches (see
 /// `main.dart`'s conditional import).
 Future<AppBootstrap> start() => WebBootstrap.start();
+
+void quitApplication() {}

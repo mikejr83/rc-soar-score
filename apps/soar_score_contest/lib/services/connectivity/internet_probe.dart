@@ -28,7 +28,8 @@ class ConnectivityInternetProbe implements InternetProbe {
   StreamSubscription<List<ConnectivityResult>>? _subscription;
 
   @override
-  Future<List<ConnectivityResult>> check() => Connectivity().checkConnectivity();
+  Future<List<ConnectivityResult>> check() =>
+      Connectivity().checkConnectivity();
 
   @override
   StreamSubscription<List<ConnectivityResult>> subscribe(

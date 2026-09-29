@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 import 'package:soar_score_contest/connectivity_provider.dart';
 import 'package:soar_score_contest/services/connectivity/app_connectivity.dart';
@@ -9,7 +10,9 @@ import 'package:url_launcher/url_launcher.dart';
 import '../widgets/not_wired_up_dialog.dart';
 
 class LandingPage extends StatelessWidget {
-  const LandingPage({super.key});
+  const LandingPage({super.key, this.isWeb = kIsWeb});
+
+  final bool isWeb;
 
   static const String title = 'RC Soar Score';
 
@@ -137,6 +140,15 @@ class LandingPage extends StatelessWidget {
                 const SizedBox(height: 32),
                 _authenticationButtons(context, monitor),
                 const SizedBox(height: 32),
+                if (!isWeb) ...[
+                  Text(
+                    'Offline contests stay on this device unless you publish '
+                    'them or sign in to enable synchronization.',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                ],
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
@@ -145,11 +157,9 @@ class LandingPage extends StatelessWidget {
                     // `Continue offline` is available only in the offline
                     // (desktop) version of the app. The web build does not
                     // show it.
-                    if (!kIsWeb)
+                    if (!isWeb)
                       TextButton.icon(
-                        onPressed: () =>
-                            Navigator.of(context)
-                                .pushNamed('/contest-administration/home'),
+                        onPressed: () => context.pushNamed('home'),
                         icon: const Icon(Icons.wifi_off, size: 16),
                         label: const Text('Continue offline'),
                       ),

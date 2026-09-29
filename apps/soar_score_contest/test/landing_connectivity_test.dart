@@ -78,8 +78,9 @@ void main() {
     await tester.pumpAndSettle();
 
     final signIn = tester.widget<FilledButton>(find.byType(FilledButton));
-    final createAccount =
-        tester.widget<OutlinedButton>(find.byType(OutlinedButton));
+    final createAccount = tester.widget<OutlinedButton>(
+      find.byType(OutlinedButton),
+    );
     expect(signIn.onPressed, isNull);
     expect(createAccount.onPressed, isNull);
 
