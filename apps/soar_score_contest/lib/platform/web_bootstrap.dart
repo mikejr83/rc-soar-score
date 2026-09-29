@@ -9,7 +9,7 @@ import 'app_bootstrap.dart';
 /// The default is the local development server (`dart run lib/main.dart`
 /// binds `localhost:8080`), so an unmodified web build talks to a locally
 /// running deployed server.
-const String _defaultApiBaseUrl = 'http://localhost:8080';
+const String defaultApiBaseUrl = 'http://localhost:8080';
 
 /// Web bootstrap: no embedded server — the browser build talks to the
 /// deployed `soar_score_server` over HTTP. `close()` only releases the
@@ -25,6 +25,9 @@ class WebBootstrap extends AppBootstrap {
   ApiClient get apiClient => _client;
 
   @override
+  ApiClient get remoteApiClient => _client;
+
+  @override
   Future<void> close() async {
     if (_closed) {
       return;
@@ -36,7 +39,7 @@ class WebBootstrap extends AppBootstrap {
   /// Builds the client pointed at the deployed API.
   static Future<AppBootstrap> start() async {
     const String rawUrl = String.fromEnvironment('SOAR_SCORE_API_BASE_URL');
-    final baseUrl = Uri.parse(rawUrl.isEmpty ? _defaultApiBaseUrl : rawUrl);
+    final baseUrl = Uri.parse(rawUrl.isEmpty ? defaultApiBaseUrl : rawUrl);
     return WebBootstrap(ApiClient(baseUrl: baseUrl));
   }
 }

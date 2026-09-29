@@ -7,6 +7,7 @@ import 'app.dart';
 // web bootstrap. Both branches expose the same `start()` entry point.
 // Ticket 018.
 import 'platform/bootstrap.dart' as bootstrap;
+import 'services/connectivity/app_connectivity.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,9 +18,18 @@ Future<void> main() async {
   // server.
   final appBootstrap = await bootstrap.start();
 
+  // The connectivity monitor observes the same client the app talks through,
+  // so no API request ever bypasses `soar_score_api`, and no platform channel
+  // is needed on web (its connectivity probe resolves there). Tests that pump
+  // the app without a bootstrap simply get no monitor (D5).
+  final connectivity = AppConnectivity(client: appBootstrap.remoteApiClient);
+
   // `SoarScoreContestApp` releases the bootstrap (closing the embedded
-  // server and its port) on dispose; even in the worst case where the engine
-  // tears the process down without disposing, the in-process server cannot
-  // outlive the process and the OS reclaims its port.
-  runApp(SoarScoreContestApp(bootstrap: appBootstrap));
+  // server and its port) and disposes the monitor on dispose.
+  runApp(
+    SoarScoreContestApp(
+      bootstrap: appBootstrap,
+      connectivity: connectivity,
+    ),
+  );
 }

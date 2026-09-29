@@ -65,6 +65,13 @@
         "soar_score_server",
         "soar_score_contest (Web)"
       ]
+    },
+    {
+      "name": "Server + Contest (Windows)",
+      "configurations": [
+        "soar_score_server",
+        "soar_score_contest (Windows)"
+      ]
     }
   ]
 }

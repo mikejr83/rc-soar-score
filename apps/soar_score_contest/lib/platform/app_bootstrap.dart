@@ -15,6 +15,8 @@ abstract class AppBootstrap {
   /// The API client every part of the app talks through.
   ApiClient get apiClient;
 
+  ApiClient get remoteApiClient;
+
   /// Releases everything the bootstrap started. Idempotent — safe to call
   /// more than once (e.g. from both an app dispose and a process exit
   /// hook).

@@ -1,9 +1,12 @@
 import 'dart:convert';
 
+import 'package:logging/logging.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_core/repositories/repository.dart';
+
+final _logger = Logger('Main');
 
 /// Serializes [body] as the standard API JSON 200 response.
 Response jsonResponse(Map<String, dynamic> body) => Response(
@@ -31,6 +34,7 @@ Handler createHealthHandler(
         displayName: displayName,
         version: version,
       );
+      _logger.fine('Health check requested: ${healthInfo.toJson()}');
       return jsonResponse(healthInfo.toJson());
     });
   return router.call;

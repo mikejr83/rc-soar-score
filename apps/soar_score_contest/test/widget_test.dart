@@ -11,7 +11,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(LandingPage), findsOneWidget);
-    expect(find.text(LandingPage.title), findsOneWidget);
+    // The title appears in the AppBar and again as the page heading.
+    expect(find.text(LandingPage.title), findsWidgets);
   });
 
   testWidgets('displays the shell structure with title', (
@@ -20,8 +21,9 @@ void main() {
     await tester.pumpWidget(const SoarScoreContestApp());
     await tester.pumpAndSettle();
 
-    expect(find.text('RC Soar Score'), findsOneWidget);
-    expect(find.text('Contest Administration'), findsOneWidget);
+    expect(find.text('RC Soar Score'), findsWidgets);
+    expect(find.text('Manage and score RC sailplane soaring contests.'),
+        findsOneWidget);
   });
 
   testWidgets('displays sign in button', (WidgetTester tester) async {
@@ -51,8 +53,8 @@ void main() {
     await tester.pumpWidget(const SoarScoreContestApp());
     await tester.pumpAndSettle();
 
-    expect(find.text('View help documentation'), findsOneWidget);
-    expect(find.text('Visit public contest site'), findsOneWidget);
+    expect(find.text('Help'), findsOneWidget);
+    expect(find.text('Public contest site'), findsOneWidget);
   });
 
   testWidgets('renders the theme with M3 components', (

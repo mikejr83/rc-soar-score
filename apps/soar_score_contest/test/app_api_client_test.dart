@@ -39,6 +39,9 @@ class _TestBootstrap implements AppBootstrap {
   ApiClient get apiClient => _client;
 
   @override
+  ApiClient get remoteApiClient => _client;
+
+  @override
   Future<void> close() async {
     if (!_closed) {
       _closed = true;
@@ -96,6 +99,10 @@ class _ClosingTestBootstrap implements AppBootstrap {
 
   @override
   ApiClient get apiClient =>
+      ApiClient(baseUrl: Uri.parse('http://localhost:8080'));
+
+  @override
+  ApiClient get remoteApiClient =>
       ApiClient(baseUrl: Uri.parse('http://localhost:8080'));
 
   @override

@@ -1,7 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+import '../connectivity_provider.dart';
+import '../widgets/connectivity_indicator.dart';
 
 class LandingPage extends StatelessWidget {
   const LandingPage({super.key});
@@ -76,9 +78,18 @@ class LandingPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final actionWidgets = List<Widget>.empty(growable: true);
 
-    // if (appConnectivity.supportsConnectivity) {
-    //   actionWidgets.add(appConnectivity.connectivityIndicator!);
-    // }
+    // The indicators exist only when a bootstrap created the monitor (D5):
+    // tests that pump the page without one see the same bare AppBar as
+    // before this feature.
+    final monitor = appConnectivityOf(context);
+    if (monitor != null) {
+      // Internet first; hidden when the host cannot report connectivity at
+      // all (decision D8).
+      if (monitor.supportsConnectivity) {
+        actionWidgets.add(ConnectivityIndicator.internet(monitor));
+      }
+      actionWidgets.add(ConnectivityIndicator.api(monitor));
+    }
 
     return Scaffold(
       appBar: AppBar(

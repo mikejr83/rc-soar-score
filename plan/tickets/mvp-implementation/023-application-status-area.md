@@ -9,16 +9,16 @@ Implement the persistent status area that displays connectivity, sync, and conte
 
 ## Work Items
 - [ ] Implement status bar in persistent shell
-- [ ] Display internet connectivity status
-- [ ] Display remote API connectivity and last successful connection time
+- [x] Display internet connectivity status
+- [x] Display remote API connectivity and last successful connection time
 - [ ] Display synchronization state (last sync, unsent mutations, remote revision, conflicts)
 - [ ] Display selected contest lifecycle and participant-scoring state
 - [ ] Display round/group scoring information when relevant
 - [ ] Make status items selectable to open relevant details/actions
 
 ## Acceptance Criteria
-- [ ] Internet connectivity status is displayed
-- [ ] Remote API connectivity status and last connection time are displayed
+- [x] Internet connectivity status is displayed
+- [x] Remote API connectivity status and last connection time are displayed
 - [ ] Synchronization state (last sync, unsent mutations, remote revision, conflicts) is displayed
 - [ ] Selected contest lifecycle and participant-scoring state are displayed when active
 - [ ] Round/group scoring information is displayed when relevant

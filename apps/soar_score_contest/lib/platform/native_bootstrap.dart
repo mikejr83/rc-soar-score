@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:soar_score_api/soar_score_api.dart';
+import 'package:soar_score_contest/platform/web_bootstrap.dart';
 
 import '../server/embedded_server.dart';
 import 'app_bootstrap.dart';
@@ -17,15 +18,20 @@ import 'app_bootstrap.dart';
 /// fully disconnected offline application described in
 /// `plan/architecture-requirements/offline-usage.md` boots.
 class NativeBootstrap extends AppBootstrap {
-  NativeBootstrap._(this._server)
+  NativeBootstrap._(this._server, this._remoteClient)
     : _client = ApiClient(baseUrl: _server.baseUrl);
 
   final EmbeddedServer _server;
   final ApiClient _client;
+  final ApiClient _remoteClient;
+
   bool _closed = false;
 
   @override
   ApiClient get apiClient => _client;
+
+  @override
+  ApiClient get remoteApiClient => _remoteClient;
 
   @override
   Future<void> close() async {
@@ -34,6 +40,7 @@ class NativeBootstrap extends AppBootstrap {
     }
     _closed = true;
     await _server.close();
+    _remoteClient.close();
   }
 
   /// Local database file for the native build: `soar_score.db` inside the
@@ -47,10 +54,12 @@ class NativeBootstrap extends AppBootstrap {
 
   /// Starts the embedded API server and returns the client for it.
   static Future<AppBootstrap> start() async {
+    const String rawUrl = String.fromEnvironment('SOAR_SCORE_API_BASE_URL');
+    final baseUrl = Uri.parse(rawUrl.isEmpty ? defaultApiBaseUrl : rawUrl);
     final database = await databasePath();
     final server = await startEmbeddedServer(database);
     debugPrint('Embedded API server listening on ${server.baseUrl}');
-    return NativeBootstrap._(server);
+    return NativeBootstrap._(server, ApiClient(baseUrl: baseUrl));
   }
 }
 
