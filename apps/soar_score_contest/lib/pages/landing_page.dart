@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:soar_score_core/soar_score_core.dart';
 import 'package:soar_score_contest/connectivity_provider.dart';
+import 'package:soar_score_contest/services/connectivity/app_connectivity.dart';
 import 'package:soar_score_contest/widgets/connectivity_indicator.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -53,21 +55,57 @@ class LandingPage extends StatelessWidget {
     }
   }
 
+  Widget _authenticationButtons(
+    BuildContext context,
+    AppConnectivity? monitor,
+  ) {
+    Widget buildButtons(bool internetAvailable, bool apiAvailable) => Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        FilledButton.icon(
+          onPressed: internetAvailable && apiAvailable
+              ? () => showNotWiredUpDialog(context, 'Sign in')
+              : null,
+          icon: const Icon(Icons.login),
+          label: const Text('Sign in'),
+        ),
+        const SizedBox(height: 12),
+        OutlinedButton.icon(
+          onPressed: internetAvailable
+              ? () => showNotWiredUpDialog(context, 'Create account')
+              : null,
+          icon: const Icon(Icons.person_add_alt_1),
+          label: const Text('Create account'),
+        ),
+      ],
+    );
+
+    if (monitor == null) {
+      return buildButtons(false, false);
+    }
+
+    return ListenableBuilder(
+      listenable: monitor,
+      builder: (context, _) => buildButtons(
+        monitor.internetStatus == ConnectivityStatus.available,
+        monitor.apiStatus == ConnectivityStatus.available,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final actionWidgets = List<Widget>.empty(growable: true);
+    final monitor = appConnectivityOf(context);
 
-    if (!kIsWeb) {
+    if (!kIsWeb && monitor != null) {
       // Indicators exist only when a bootstrap created the monitor (D5).
-      final monitor = appConnectivityOf(context);
-      if (monitor != null) {
-        // Internet first; hidden when the host cannot report connectivity at
-        // all (decision D8).
-        if (monitor.supportsConnectivity) {
-          actionWidgets.add(ConnectivityIndicator.internet(monitor));
-        }
-        actionWidgets.add(ConnectivityIndicator.api(monitor));
+      // Internet first; hidden when the host cannot report connectivity at
+      // all (decision D8).
+      if (monitor.supportsConnectivity) {
+        actionWidgets.add(ConnectivityIndicator.internet(monitor));
       }
+      actionWidgets.add(ConnectivityIndicator.api(monitor));
     }
 
     return Scaffold(
@@ -97,18 +135,7 @@ class LandingPage extends StatelessWidget {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 32),
-                FilledButton.icon(
-                  onPressed: () => showNotWiredUpDialog(context, 'Sign in'),
-                  icon: const Icon(Icons.login),
-                  label: const Text('Sign in'),
-                ),
-                const SizedBox(height: 12),
-                OutlinedButton.icon(
-                  onPressed: () =>
-                      showNotWiredUpDialog(context, 'Create account'),
-                  icon: const Icon(Icons.person_add_alt_1),
-                  label: const Text('Create account'),
-                ),
+                _authenticationButtons(context, monitor),
                 const SizedBox(height: 32),
                 Wrap(
                   spacing: 8,

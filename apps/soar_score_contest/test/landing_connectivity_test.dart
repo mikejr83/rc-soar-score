@@ -63,6 +63,79 @@ class _TestBootstrap implements AppBootstrap {
 }
 
 void main() {
+  testWidgets('gates authentication buttons on live connectivity and keeps '
+      'the stub dialogs available when connected', (tester) async {
+    final client = ApiClient(baseUrl: Uri.parse('http://localhost:8080'));
+    final bootstrap = _TestBootstrap(client);
+    final monitor = _FakeMonitor()
+      ..internetStatus = ConnectivityStatus.unknown
+      ..apiStatus = ConnectivityStatus.unknown;
+    addTearDown(bootstrap.close);
+
+    await tester.pumpWidget(
+      SoarScoreContestApp(bootstrap: bootstrap, connectivity: monitor),
+    );
+    await tester.pumpAndSettle();
+
+    final signIn = tester.widget<FilledButton>(find.byType(FilledButton));
+    final createAccount =
+        tester.widget<OutlinedButton>(find.byType(OutlinedButton));
+    expect(signIn.onPressed, isNull);
+    expect(createAccount.onPressed, isNull);
+
+    monitor.internetStatus = ConnectivityStatus.available;
+    monitor.apiStatus = ConnectivityStatus.unavailable;
+    monitor.notifyListeners();
+    await tester.pump();
+
+    expect(
+      tester.widget<FilledButton>(find.byType(FilledButton)).onPressed,
+      isNull,
+    );
+    expect(
+      tester.widget<OutlinedButton>(find.byType(OutlinedButton)).onPressed,
+      isNotNull,
+    );
+
+    monitor.internetStatus = ConnectivityStatus.unavailable;
+    monitor.apiStatus = ConnectivityStatus.available;
+    monitor.notifyListeners();
+    await tester.pump();
+
+    expect(
+      tester.widget<FilledButton>(find.byType(FilledButton)).onPressed,
+      isNull,
+    );
+    expect(
+      tester.widget<OutlinedButton>(find.byType(OutlinedButton)).onPressed,
+      isNull,
+    );
+
+    monitor.internetStatus = ConnectivityStatus.available;
+    monitor.apiStatus = ConnectivityStatus.available;
+    monitor.notifyListeners();
+    await tester.pump();
+
+    expect(
+      tester.widget<FilledButton>(find.byType(FilledButton)).onPressed,
+      isNotNull,
+    );
+    expect(
+      tester.widget<OutlinedButton>(find.byType(OutlinedButton)).onPressed,
+      isNotNull,
+    );
+
+    await tester.tap(find.text('Sign in'));
+    await tester.pumpAndSettle();
+    expect(find.text('Sign in is not available yet'), findsOneWidget);
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Create account'));
+    await tester.pumpAndSettle();
+    expect(find.text('Create account is not available yet'), findsOneWidget);
+  });
+
   testWidgets('shows both connectivity chips in the AppBar when a monitor '
       'is present', (tester) async {
     final client = ApiClient(baseUrl: Uri.parse('http://localhost:8080'));

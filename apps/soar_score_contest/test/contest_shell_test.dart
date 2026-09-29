@@ -1,17 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
-import 'package:soar_score_contest/pages/landing_page.dart';
 import 'package:soar_score_contest/widgets/contest_shell.dart';
 import 'package:soar_score_contest/widgets/contest_status_bar.dart';
+
+class _LandingStub extends StatelessWidget {
+  const _LandingStub();
+
+  @override
+  Widget build(BuildContext context) =>
+      const Center(child: Text('Landing stub'));
+}
 
 /// Finds the "Landing" crumb inside the AppBar (the rail also renders a
 /// "Landing" destination label).
 Finder _landingCrumb(WidgetTester tester) =>
-    find.descendant(
-      of: find.byType(AppBar),
-      matching: find.text('Landing'),
-    );
+    find.descendant(of: find.byType(AppBar), matching: find.text('Landing'));
 
 /// Builds a shell router with the landing route plus an extra nested route
 /// (a test-local stand-in for a future ticket's page), so the breadcrumb and
@@ -21,12 +25,13 @@ GoRouter _buildShellRouter() {
     initialLocation: '/contest-administration',
     routes: [
       ShellRoute(
-        builder: (context, state, child) => ContestShell(state: state, child: child),
+        builder: (context, state, child) =>
+            ContestShell(state: state, child: child),
         routes: [
           GoRoute(
             path: '/contest-administration',
             name: 'landing',
-            builder: (context, state) => const LandingPage(),
+            builder: (context, state) => const _LandingStub(),
           ),
           GoRoute(
             path: '/contest-administration/home',
@@ -46,7 +51,10 @@ void main() {
     final router = _buildShellRouter();
 
     await tester.pumpWidget(
-      MaterialApp.router(debugShowCheckedModeBanner: false, routerConfig: router),
+      MaterialApp.router(
+        debugShowCheckedModeBanner: false,
+        routerConfig: router,
+      ),
     );
     await tester.pumpAndSettle();
 
@@ -71,10 +79,13 @@ void main() {
     final router = _buildShellRouter();
 
     await tester.pumpWidget(
-      MaterialApp.router(debugShowCheckedModeBanner: false, routerConfig: router),
+      MaterialApp.router(
+        debugShowCheckedModeBanner: false,
+        routerConfig: router,
+      ),
     );
     await tester.pumpAndSettle();
-    expect(find.byType(LandingPage), findsOneWidget);
+    expect(find.byType(_LandingStub), findsOneWidget);
 
     // Navigate to the nested route the way the landing page's "Continue
     // offline" flow does (`pushNamed`, ticket 022's flow). This creates a
@@ -99,9 +110,11 @@ void main() {
     // Tapping the back arrow returns to the landing page.
     await tester.tap(find.byKey(const ValueKey('breadcrumb-back')));
     await tester.pumpAndSettle();
-    expect(find.byType(LandingPage), findsOneWidget);
+    expect(find.byType(_LandingStub), findsOneWidget);
     expect(find.text('Home content'), findsNothing);
-    final shellAfterBack = tester.widget<ContestShell>(find.byType(ContestShell));
+    final shellAfterBack = tester.widget<ContestShell>(
+      find.byType(ContestShell),
+    );
     expect(shellAfterBack.state.uri.path, '/contest-administration');
   });
 
@@ -111,7 +124,10 @@ void main() {
     final router = _buildShellRouter();
 
     await tester.pumpWidget(
-      MaterialApp.router(debugShowCheckedModeBanner: false, routerConfig: router),
+      MaterialApp.router(
+        debugShowCheckedModeBanner: false,
+        routerConfig: router,
+      ),
     );
     await tester.pumpAndSettle();
 
@@ -132,6 +148,6 @@ void main() {
     await tester.tap(find.text('OK'));
     await tester.pumpAndSettle();
     expect(find.byType(AlertDialog), findsNothing);
-    expect(find.byType(LandingPage), findsOneWidget);
+    expect(find.byType(_LandingStub), findsOneWidget);
   });
 }
