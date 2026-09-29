@@ -19,6 +19,14 @@ This ticket establishes the landing page route and persistent shell layout for t
 - [x] Shell layout follows the structure in `plan/ui/contest-administration/landing-page.md`
 - [x] Browser back navigation works correctly
 
+## Implementation Notes
+- The navigation guard allows anonymous access to the landing page (`/contest-administration`).
+- The navigation guard is inactive for routes beyond the landing page when the user is in offline mode (`AppModeNotifier.isOfflineMode == true`).
+- When not in offline mode (and unauthenticated), attempting to access routes beyond the landing page redirects to `/contest-administration`.
+- Unknown paths fall back to the landing page so browser back never lands on a dead URL.
+- The app tracks offline mode state via `AppModeNotifier` and `AppModeInherited` in `app_mode_provider.dart`, which also notifies `GoRouter.refreshListenable` upon state transitions.
+- Offline mode and `AppModeNotifier` are native desktop features; all instantiation and router guards are guarded by `!kIsWeb` so the mode notifier is tree-shaken out when compiled for web.
+
 ## Dependencies
 - [004-scaffold-contest-flutter-app.md](004-scaffold-contest-flutter-app.md) — contest app routing
 - [009-scaffold-ui-package.md](009-scaffold-ui-package.md) — theme tokens

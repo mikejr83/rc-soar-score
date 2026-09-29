@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_contest/app.dart';
+import 'package:soar_score_contest/app_mode_provider.dart';
+import 'package:soar_score_contest/pages/home_page.dart';
 import 'package:soar_score_contest/pages/landing_page.dart';
 
 void main() {
@@ -56,18 +58,26 @@ void main() {
     );
   });
 
-  testWidgets('continue offline opens the contest selection stub', (
-    WidgetTester tester,
-  ) async {
-    await tester.pumpWidget(const SoarScoreContestApp());
-    await tester.pumpAndSettle();
+  testWidgets(
+    'continue offline enables offline mode and opens the contest selection stub',
+    (WidgetTester tester) async {
+      final appMode = AppModeNotifier();
+      expect(appMode.isOfflineMode, isFalse);
 
-    await tester.tap(find.text('Continue offline'));
-    await tester.pumpAndSettle();
+      await tester.pumpWidget(SoarScoreContestApp(appMode: appMode));
+      await tester.pumpAndSettle();
 
-    expect(find.text('Contest selection'), findsOneWidget);
-    expect(find.text('Contest selection is not wired up yet.'), findsOneWidget);
-  });
+      await tester.tap(find.text('Continue offline'));
+      await tester.pumpAndSettle();
+
+      expect(appMode.isOfflineMode, isTrue);
+      expect(find.text('Contest selection'), findsOneWidget);
+      expect(
+        find.text('Contest selection is not wired up yet.'),
+        findsOneWidget,
+      );
+    },
+  );
 
   testWidgets('web landing page hides offline entry and messaging', (
     WidgetTester tester,
@@ -111,5 +121,36 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(LandingPage), findsOneWidget);
+  });
+
+  testWidgets(
+    'redirects routes beyond landing to landing page when not in offline mode',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const SoarScoreContestApp(
+          routerInitialLocation: '/contest-administration/home',
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(LandingPage), findsOneWidget);
+      expect(find.byType(HomePage), findsNothing);
+    },
+  );
+
+  testWidgets('allows routes beyond landing when in offline mode', (
+    WidgetTester tester,
+  ) async {
+    final appMode = AppModeNotifier(isOfflineMode: true);
+    await tester.pumpWidget(
+      SoarScoreContestApp(
+        appMode: appMode,
+        routerInitialLocation: '/contest-administration/home',
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(HomePage), findsOneWidget);
+    expect(find.byType(LandingPage), findsNothing);
   });
 }

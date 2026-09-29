@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:soar_score_core/soar_score_core.dart';
+import 'package:soar_score_contest/app_mode_provider.dart';
 import 'package:soar_score_contest/connectivity_provider.dart';
 import 'package:soar_score_contest/services/connectivity/app_connectivity.dart';
 import 'package:soar_score_contest/widgets/connectivity_indicator.dart';
@@ -112,11 +113,7 @@ class LandingPage extends StatelessWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(title),
-        automaticallyImplyLeading: false,
-        actions: actionWidgets,
-      ),
+      appBar: AppBar(automaticallyImplyLeading: false, actions: actionWidgets),
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 560),
@@ -159,7 +156,12 @@ class LandingPage extends StatelessWidget {
                     // show it.
                     if (!isWeb)
                       TextButton.icon(
-                        onPressed: () => context.pushNamed('home'),
+                        onPressed: () {
+                          if (!kIsWeb) {
+                            appModeOf(context)?.enterOfflineMode();
+                          }
+                          context.pushNamed('home');
+                        },
                         icon: const Icon(Icons.wifi_off, size: 16),
                         label: const Text('Continue offline'),
                       ),
