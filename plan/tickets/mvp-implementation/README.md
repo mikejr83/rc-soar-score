@@ -32,7 +32,7 @@ Tickets for getting the repository basics in place: toolchain, Melos workspace, 
 | [017](017-sqlite-sync-schema.md) | Extract `soar_score_api_handlers` from `soar_score_server` (file name is stale; the original sync-schema spec it carried is orphaned — see its Follow-ups) | High | In-Review |
 | [018](018-embed-soar_score_api_handlers.md) | Embed `soar_score_api_handlers` in the Windows Target of `soar_score_contest` | High | In-Review |
 | [019](019-scaffold-self-score-flutter-app.md) | Scaffold `soar_score_self_score` (Flutter web) | High | Done |
-| [020](020-contest-landing-page-route.md) | Contest administration landing page (route and shell) | High | Open |
+| [020](020-contest-landing-page-route.md) | Contest administration landing page (route and shell) | High | Done |
 | [021](021-sigin-create-account-stubs.md) | Sign in and Create account stubs on landing page | High | Open |
 | [022](022-continue-offline-desktop.md) | Continue offline flow on desktop landing page | High | Open |
 | [023](023-application-status-area.md) | Persistent application status area | High | Open |

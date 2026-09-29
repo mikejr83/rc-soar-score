@@ -66,4 +66,15 @@ void main() {
     expect(find.byType(Scaffold), findsOneWidget);
     expect(find.byType(AppBar), findsOneWidget);
   });
+
+  testWidgets('redirects unknown paths to the landing page (guard)', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const SoarScoreContestApp(routerInitialLocation: '/nonexistent'),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(LandingPage), findsOneWidget);
+  });
 }

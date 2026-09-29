@@ -2,7 +2,7 @@
 
 - **Category:** UI
 - **Priority:** High
-- **Status:** In-Review
+- **Status:** Done
 
 ## Context
 This ticket establishes the landing page route and persistent shell layout for the contest administration experience. The landing page is the default entry point for both online and desktop users, providing Sign in / Create account actions, Continue offline (desktop only), and links to help and the public contest site.
@@ -11,13 +11,13 @@ This ticket establishes the landing page route and persistent shell layout for t
 - [x] Add root route `/contest-administration` for the contest-administration app
 - [x] Create persistent shell layout: title area, breadcrumb/back navigation, main navigation, content area, status bar
 - [x] Wire routing so `/contest-administration` renders the landing page content
-- [ ] Set up navigation guards for routes beyond the landing page (deferred to later tickets with real auth; seam added but guard not yet wired)
+- [x] Set up navigation guards for routes beyond the landing page (deferred to later tickets with real auth; named `navigationGuard` seam added to `GoRouter.redirect`, anonymous access currently allowed, unknown paths fall back to landing)
 
 ## Acceptance Criteria
-- [ ] The root route `/contest-administration` loads the landing page shell
-- [ ] Navigation guards allow anonymous access to the landing page
-- [ ] Shell layout follows the structure in `plan/ui/contest-administration/landing-page.md`
-- [ ] Browser back navigation works correctly
+- [x] The root route `/contest-administration` loads the landing page shell
+- [x] Navigation guards allow anonymous access to the landing page
+- [x] Shell layout follows the structure in `plan/ui/contest-administration/landing-page.md`
+- [x] Browser back navigation works correctly
 
 ## Dependencies
 - [004-scaffold-contest-flutter-app.md](004-scaffold-contest-flutter-app.md) — contest app routing

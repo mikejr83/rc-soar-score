@@ -10,7 +10,12 @@ import 'services/connectivity/app_connectivity.dart';
 import 'theme/app_theme.dart';
 
 class SoarScoreContestApp extends StatefulWidget {
-  const SoarScoreContestApp({super.key, this.bootstrap, this.connectivity});
+  const SoarScoreContestApp({
+    super.key,
+    this.bootstrap,
+    this.connectivity,
+    this.routerInitialLocation = landingPath,
+  });
 
   /// The platform bootstrap that started this app, if any. When present its
   /// `ApiClient` is exposed to the tree and its resources are released when
@@ -22,6 +27,10 @@ class SoarScoreContestApp extends StatefulWidget {
   /// internet and remote API indicators. `null` (tests without a bootstrap)
   /// renders the tree exactly as the app did before the indicators existed.
   final AppConnectivity? connectivity;
+
+  /// The location the router starts at. Defaults to the landing page; tests
+  /// override it to exercise the navigation guard's redirect.
+  final String routerInitialLocation;
 
   static const String title = 'RC Soar Score Contest Management';
 
@@ -52,7 +61,9 @@ class _SoarScoreContestAppState extends State<SoarScoreContestApp> {
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.system,
-      routerConfig: buildAppRouter(),
+      routerConfig: buildAppRouter(
+        initialLocation: widget.routerInitialLocation,
+      ),
     );
     final bootstrap = widget.bootstrap;
     if (bootstrap != null) {
