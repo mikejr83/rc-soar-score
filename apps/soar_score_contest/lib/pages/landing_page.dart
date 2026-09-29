@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:soar_score_contest/connectivity_provider.dart';
+import 'package:soar_score_contest/widgets/connectivity_indicator.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../widgets/not_wired_up_dialog.dart';
@@ -53,76 +55,99 @@ class LandingPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 560),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // const SoarLogo(size: 72),
-              const SizedBox(height: 16),
-              Text(
-                'RC Soar Score',
-                style: Theme.of(context).textTheme.headlineMedium,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Manage and score RC sailplane soaring contests.',
-                style: Theme.of(context).textTheme.bodyLarge,
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 32),
-              FilledButton.icon(
-                onPressed: () => showNotWiredUpDialog(context, 'Sign in'),
-                icon: const Icon(Icons.login),
-                label: const Text('Sign in'),
-              ),
-              const SizedBox(height: 12),
-              OutlinedButton.icon(
-                onPressed: () => showNotWiredUpDialog(context, 'Create account'),
-                icon: const Icon(Icons.person_add_alt_1),
-                label: const Text('Create account'),
-              ),
-              const SizedBox(height: 32),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                alignment: WrapAlignment.center,
-                children: [
-                  // `Continue offline` is available only in the offline
-                  // (desktop) version of the app. The web build does not
-                  // show it.
-                  if (!kIsWeb)
+    final actionWidgets = List<Widget>.empty(growable: true);
+
+    if (!kIsWeb) {
+      // Indicators exist only when a bootstrap created the monitor (D5).
+      final monitor = appConnectivityOf(context);
+      if (monitor != null) {
+        // Internet first; hidden when the host cannot report connectivity at
+        // all (decision D8).
+        if (monitor.supportsConnectivity) {
+          actionWidgets.add(ConnectivityIndicator.internet(monitor));
+        }
+        actionWidgets.add(ConnectivityIndicator.api(monitor));
+      }
+    }
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text(title),
+        automaticallyImplyLeading: false,
+        actions: actionWidgets,
+      ),
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 560),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // const SoarLogo(size: 72),
+                const SizedBox(height: 16),
+                Text(
+                  'RC Soar Score',
+                  style: Theme.of(context).textTheme.headlineMedium,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Manage and score RC sailplane soaring contests.',
+                  style: Theme.of(context).textTheme.bodyLarge,
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 32),
+                FilledButton.icon(
+                  onPressed: () => showNotWiredUpDialog(context, 'Sign in'),
+                  icon: const Icon(Icons.login),
+                  label: const Text('Sign in'),
+                ),
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  onPressed: () =>
+                      showNotWiredUpDialog(context, 'Create account'),
+                  icon: const Icon(Icons.person_add_alt_1),
+                  label: const Text('Create account'),
+                ),
+                const SizedBox(height: 32),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  alignment: WrapAlignment.center,
+                  children: [
+                    // `Continue offline` is available only in the offline
+                    // (desktop) version of the app. The web build does not
+                    // show it.
+                    if (!kIsWeb)
+                      TextButton.icon(
+                        onPressed: () =>
+                            Navigator.of(context)
+                                .pushNamed('/contest-administration/home'),
+                        icon: const Icon(Icons.wifi_off, size: 16),
+                        label: const Text('Continue offline'),
+                      ),
                     TextButton.icon(
-                      onPressed: () =>
-                          Navigator.of(context)
-                              .pushNamed('/contest-administration/home'),
-                      icon: const Icon(Icons.wifi_off, size: 16),
-                      label: const Text('Continue offline'),
+                      onPressed: () => _openExternalLink(
+                        context,
+                        'https://example.com/help',
+                        'Help',
+                      ),
+                      icon: const Icon(Icons.open_in_new, size: 16),
+                      label: const Text('Help'),
                     ),
-                  TextButton.icon(
-                    onPressed: () => _openExternalLink(
-                      context,
-                      'https://example.com/help',
-                      'Help',
+                    TextButton.icon(
+                      onPressed: () => _openExternalLink(
+                        context,
+                        'https://example.com/public',
+                        'Public contest site',
+                      ),
+                      icon: const Icon(Icons.open_in_new, size: 16),
+                      label: const Text('Public contest site'),
                     ),
-                    icon: const Icon(Icons.open_in_new, size: 16),
-                    label: const Text('Help'),
-                  ),
-                  TextButton.icon(
-                    onPressed: () => _openExternalLink(
-                      context,
-                      'https://example.com/public',
-                      'Public contest site',
-                    ),
-                    icon: const Icon(Icons.open_in_new, size: 16),
-                    label: const Text('Public contest site'),
-                  ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

@@ -2,7 +2,6 @@ import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
 import 'pages/landing_page.dart';
-import 'widgets/contest_shell.dart';
 
 /// The contest-administration root path (the landing page).
 const String landingPath = '/contest-administration';
@@ -12,15 +11,10 @@ GoRouter buildAppRouter({String initialLocation = landingPath}) {
     initialLocation: initialLocation,
     redirect: navigationGuard,
     routes: [
-      ShellRoute(
-        builder: (context, state, child) => ContestShell(state: state, child: child),
-        routes: [
-          GoRoute(
-            path: landingPath,
-            name: 'landing',
-            builder: (context, state) => const LandingPage(),
-          ),
-        ],
+      GoRoute(
+        path: landingPath,
+        name: 'landing',
+        builder: (context, state) => const LandingPage(),
       ),
     ],
   );
