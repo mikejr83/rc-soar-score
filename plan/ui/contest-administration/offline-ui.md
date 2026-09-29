@@ -22,7 +22,7 @@ For account-backed contests, show:
 * Number of conflicts or rejected mutations requiring action.
 * Active administration-installation identity.
 
-For an accountless local contest, show `Local only` and explain that no remote backup exists. Offer `Sign in` to enable synchronization where supported. Anonymous publishing is separate and must not be presented as backup synchronization.
+For an accountless local contest, show `Local only` and explain that no remote backup exists. Offer `Sign in` to enable synchronization where supported. Anonymous publishing is separate and must not be presented as backup synchronization. Self-scoring invitation links and QR code generation are disabled in the UI for 100% offline un-synced contests, with a message explaining that an initial sync is required before participants can self-score.
 
 Selecting the sync status opens a detail view. The director can inspect a mutation, its base revision, reason for rejection or conflict, local and remote values, and available actions. The UI must preserve unsent local values and audit history while resolving a conflict. A failed sync never blocks offline administration.
 

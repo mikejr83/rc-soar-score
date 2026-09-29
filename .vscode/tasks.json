@@ -1,0 +1,63 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Verify",
+      "type": "shell",
+      "command": "./scripts/verify.ps1",
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    },
+    {
+      "label": "melos: bootstrap",
+      "type": "shell",
+      "command": "melos",
+      "args": ["bootstrap"],
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    },
+    {
+      "label": "melos: analyze",
+      "type": "shell",
+      "command": "melos",
+      "args": ["analyze"],
+      "problemMatcher": ["$dart"],
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    },
+    {
+      "label": "melos: test",
+      "type": "shell",
+      "command": "melos",
+      "args": ["test"],
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    },
+    {
+      "label": "melos: build",
+      "type": "shell",
+      "command": "melos",
+      "args": ["run", "build"],
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    }
+  ]
+}
