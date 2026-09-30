@@ -59,7 +59,7 @@ erDiagram
     }
 
     CONTEST_PARTICIPATION {
-        uuid linkId "PK"
+        uuid contestParticipationId "PK"
         uuid contestId "FK"
         uuid profileId "FK"
         string cls

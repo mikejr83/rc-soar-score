@@ -2,7 +2,7 @@
 
 **Relationship to architecture-requirements:** plan/architecture-requirements/data/participants.md
 **Purpose:** Authoritative contest-specific snapshot that links a participant profile to a contest with contest-specific class, role, number, team, and model information.
-**Identifier:** `linkId` (UUIDv7)
+**Identifier:** `contestParticipationId` (UUIDv7)
 **Parent entity:** Contest
 **Child entities:** MatrixAssignment, ScorePlaceholder, Invitation, ContestModelLink
 
@@ -16,7 +16,7 @@
 ## Fields/Properties
 | Field | Type | Required | Default | Description |
 |-------|------|----------|---------|-------------|
-| linkId | UUIDv7 | Yes | — | Primary key |
+| contestParticipationId | UUIDv7 | Yes | — | Primary key |
 | contestId | UUIDv7 | Yes | — | Foreign key to Contest |
 | profileId | UUIDv7 | Yes | — | Foreign key to ParticipantProfile |
 | cls | String | Yes | — | Class designation for this contest |
