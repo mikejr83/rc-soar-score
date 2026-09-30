@@ -1,6 +1,6 @@
-# Soar Score
+# RC Soar Score
 
-**Soar Score** is an RC (radio-controlled) sailplane soaring contest scoring and management suite. It provides a comprehensive solution for contest directors, pilots, helpers, and soaring enthusiasts to organize, fly, score, and follow soaring competitions across multiple disciplines.
+**RC Soar Score** is an RC (radio-controlled) sailplane soaring contest scoring and management suite. It provides a comprehensive solution for contest directors, pilots, helpers, and soaring enthusiasts to organize, fly, score, and follow soaring competitions across multiple disciplines.
 
 The system is designed for both connected and disconnected field operations, allowing contest directors to run events completely offline when remote flying fields have no internet connectivity, while offering seamless cloud synchronization and public result publishing when a connection is available.
 
@@ -22,7 +22,6 @@ The system is designed for both connected and disconnected field operations, all
   - [Building](#building)
   - [Running Tests & Linting](#running-tests--linting)
 - [Conventions & Architecture Rules](#conventions--architecture-rules)
-- [License](#license)
 
 ---
 
@@ -40,10 +39,10 @@ The system is designed for both connected and disconnected field operations, all
 
 ## Supported Soaring Disciplines
 
-Soar Score includes a domain scoring engine capable of handling standard soaring disciplines with their unique landing tapes, target windows, flight time truncation/rounding, penalties, and flight normalization:
+RC Soar Score includes a domain scoring engine capable of handling standard soaring disciplines with their unique landing tapes, target windows, flight time truncation/rounding, penalties, and flight normalization:
 
 | Discipline | Description | Rules & Specification |
-|---|---|---|
+| --- | --- | --- |
 | **ALES** | Altitude Limited Electric Soaring | [`plan/business-requirements/disciplines/ales.md`](plan/business-requirements/disciplines/ales.md) |
 | **F5J** | Electric Motor Gliders with Altimeter Recording | [`plan/business-requirements/disciplines/f5j.md`](plan/business-requirements/disciplines/f5j.md) |
 | **F3J** | Thermal Duration Gliders (Towline launch) | [`plan/business-requirements/disciplines/f3j.md`](plan/business-requirements/disciplines/f3j.md) |
@@ -57,9 +56,9 @@ For discipline-wide scoring conventions, consult the [Discipline Scoring Archite
 
 ## Repository Architecture
 
-Soar Score is structured as a Dart/Flutter monorepo managed with [Melos](https://melos.invertase.dev/).
+RC Soar Score is structured as a Dart/Flutter monorepo managed with [Melos](https://melos.invertase.dev/).
 
-```
+```plain
 soar-score/
 ├── apps/                        # End-user applications and backend service
 │   ├── soar_score_contest/      # Contest director management app (Flutter Web / Desktop)
@@ -93,7 +92,7 @@ soar-score/
 
 ### Layer Diagram
 
-```
+```plaintext
 Flutter Apps (soar_score_contest, soar_score_public, soar_score_self_score)
          │
          ▼
@@ -158,20 +157,24 @@ dart pub global activate melos 8.9.0
 ### Repository Setup
 
 1. **Clone the repository:**
+
    ```bash
    git clone https://github.com/mikejr83/rc-soar-score.git
    cd rc-soar-score
    ```
 
 2. **Bootstrap the Melos workspace:**
+
    ```bash
    melos bootstrap
    ```
+
    This resolves all dependencies and links path-dependent packages across `apps/` and `packages/`.
 
 ### Running the Applications
 
 #### Contest Management App (Web / Desktop)
+
 ```bash
 cd apps/soar_score_contest
 flutter run -d chrome      # Run as web app
@@ -179,18 +182,21 @@ flutter run -d windows     # Run as Windows desktop shell
 ```
 
 #### Public Results Site
+
 ```bash
 cd apps/soar_score_public
 flutter run -d chrome
 ```
 
 #### Participant Self-Scoring App
+
 ```bash
 cd apps/soar_score_self_score
 flutter run -d chrome
 ```
 
 #### API Server
+
 ```bash
 cd apps/soar_score_server
 dart run bin/server.dart
@@ -222,6 +228,7 @@ melos test
 ```
 
 You can also run tests within an individual subproject:
+
 ```bash
 cd packages/soar_score_core
 dart test
