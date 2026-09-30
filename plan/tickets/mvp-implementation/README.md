@@ -39,6 +39,13 @@ Tickets for getting the repository basics in place: toolchain, Melos workspace, 
 | [024](024-landing-page-states.md) | Landing page loading, error, and unavailable states | High | Open |
 | [025](025-navigation-links-and-external-handling.md) | Navigation links and external-link UX on landing page | High | Open |
 | [026](026-accessibility-responsive-locale.md) | Accessibility, responsive layout, and locale on landing page | High | Open |
+| [027](027-contest-home-route-shell.md) | Contest administration home route and shell | High | Open |
+| [028](028-contest-list-pagination-empty-state.md) | Contest list with pagination and empty state | High | Open |
+| [029](029-contest-selection-open-actions.md) | Contest selection and open/continue/view actions | High | Open |
+| [030](030-create-contest-navigation.md) | Create new contest navigation | High | Open |
+| [031](031-contest-delete-delisting.md) | Delete and delisting contests | High | Open |
+| [032](032-contest-archive-filter.md) | Contest archive filter | Medium | Open |
+| [033](033-home-page-sync-action.md) | Sync action on home page | Medium | Open |
 
 ## Suggested execution order
 
@@ -57,6 +64,7 @@ Tickets for getting the repository basics in place: toolchain, Melos workspace, 
 10. ~~**012** — Playwright scaffold~~ — rejected; replaced by native Flutter/Dart integration tests.
 11. **013** — per-project AGENTS.md files (last; it codifies everything the other tickets established).
 12. **020 → 026** — landing page: route and shell, then auth stubs, offline mode, status area, page states, navigation links, accessibility.
+13. **027 → 033** — contest administration home: route and shell contest list, selection and opening, create contest, delete/delisting, archive filter, sync action.
 
 ## Out of scope (tracked later)
 
