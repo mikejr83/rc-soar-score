@@ -128,8 +128,16 @@ erDiagram
         uuid tableId "PK"
         text name
         int revision
-        text inputUnit
-        string entries
+        string config
+    }
+
+    LANDING_RESULT {
+        uuid resultId "PK"
+        int pointValue
+        string displayValue
+        int points
+        string note
+        uuid tableId "FK"
     }
 
     ROUND_CONFIG {
