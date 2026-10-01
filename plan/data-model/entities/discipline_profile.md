@@ -1,28 +1,27 @@
 # DisciplineProfile
 
-** NOTE - THIS DESIGN IS NOT DONE - `config_fields`, `score_entry_fields`, and other properties are not well defined.
-
 **Relationship to architecture-requirements:** [disciplines-and-configuration.md](../../architecture-requirements/data/disciplines-and-configuration.md)
-**Purpose:** Stores a versioned official scoring profile for a soaring discipline. Defines configuration fields, score-entry fields, validation, zero reasons, formulas, normalization, rounding, and calculation metadata.
+**Purpose:** Stores the identity, metadata, and lifecycle state for a versioned official scoring profile of a soaring discipline. All rules (config fields, score entry fields, formulas, validation, zero reasons, etc.) are stored in child entities keyed by `discipline_profile_id` and `version`.
 **Identifier:** `id` (UUIDv7)
 **Parent entity:** None
-**Child entities:** None
+**Child entities:** DisciplineConfigField, DisciplineScoreField, DisciplineValidation, DisciplineFormula, DisciplineRule
 
 ## Fields/Properties
 
-| Field                  | Type                                            | Required | Default | Description                                                                                      |
-| ---------------------- | ----------------------------------------------- | -------- | ------- | ------------------------------------------------------------------------------------------------ |
-| `id`                   | PK                                              | Yes      | —       | Stable identifier for the profile                                                                |
-| `type`                 | enum(ALES, ThermalDuration, F3J, F5J, F3L, F3K) | Yes      | —       | Discipline type                                                                                  |
-| `version`              | int                                             | Yes      | —       | Rules profile version                                                                            |
-| `config_fields`        | object[]                                        | Yes      | []      | Allowed top-level configuration fields (name, type, required, range, default)                    |
-| `score_entry_fields`   | object[]                                        | Yes      | []      | Per-heat score-entry fields (name, type, required, range, units)                                 |
-| `validation_rules`     | object[]                                        | No       | []      | Validation constraints for configuration and score entry                                         |
-| `zero_reasons`         | enum[]                                          | Yes      | []      | Permitted codes for manual zero results (e.g. CRASH, DNF, LATE, OVERWEIGHT, NO_SHOW, TIME_LIMIT) |
-| `formulas`             | object[]                                        | Yes      | []      | Score and penalty formulas                                                                       |
-| `normalization_rules`  | object[]                                        | No       | []      | Group scoring and normalization (matrix algorithm)                                               |
-| `rounding_rules`       | object[]                                        | Yes      | []      | Per-field rounding or truncation rules (precision, direction)                                    |
-| `calculation_metadata` | object                                          | Yes      | {}      | Metadata describing calculation steps (intermediate, final, penalties)                           |
+| Field           | Type                                            | Required | Default | Description                                                           |
+| --------------- | ----------------------------------------------- | -------- | ------- | --------------------------------------------------------------------- |
+| `id`            | PK                                              | Yes      | —       | Stable identifier for the profile                                     |
+| `type`          | enum(ALES, ThermalDuration, F3J, F5J, F3L, F3K) | Yes      | —       | Discipline type                                                       |
+| `version`       | int                                             | Yes      | —       | Rules profile version                                                 |
+| `name`          | string                                          | Yes      | —       | Human-readable name of the discipline                                 |
+| `description`   | string                                          | No       | —       | Longer description of the discipline and its rules                    |
+| `category`      | enum(duration, multiple, other)                 | Yes      | —       | Category of discipline for grouping and selection purposes            |
+| `status`        | enum(drafted, published, superseded)            | Yes      | drafted | Lifecycle status of this profile version                              |
+| `superseded_by` | string                                          | No       | —       | Type of profile that supersedes this version (when status=superseded) |
+| `created_by`    | string                                          | Yes      | —       | Author account identifier who created this profile version            |
+| `created_at`    | datetime                                        | Yes      | —       | Timestamp of profile creation                                         |
+| `updated_by`    | string                                          | No       | —       | Account identifier who last modified this profile (drafts only)       |
+| `updated_at`    | datetime                                        | No       | —       | Timestamp of last modification (drafts only)                          |
 
 ## Invariants and Constraints
 

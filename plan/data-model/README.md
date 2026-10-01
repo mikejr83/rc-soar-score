@@ -39,11 +39,16 @@ Canonical documentation for the Soar Score data model. This folder is the source
 
 ### Disciplines & Landing Tables
 
-| Entity            | File                                                             | Source Requirement                                                                                     | Purpose                                                                 | Outstanding Issues                                       |
-| ----------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------- | -------------------------------------------------------- |
-| DisciplineProfile | [entities/discipline_profile.md](entities/discipline_profile.md) | [disciplines-and-configuration.md](../architecture-requirements/data/disciplines-and-configuration.md) | Versioned official scoring profile per discipline                       | **YES** - Has array properties that are not well defined |
-| LandingTable      | [entities/landing_table.md](entities/landing_table.md)           | [disciplines-and-configuration.md](../architecture-requirements/data/disciplines-and-configuration.md) | Versioned lookup table identity (name, unit, meaning)                   |                                                          |
-| LandingResult     | [entities/landing_result.md](entities/landing_result.md)         | [disciplines-and-configuration.md](../architecture-requirements/data/disciplines-and-configuration.md) | Individual scoring row in landing table (point value → resolved points) |                                                          |
+| Entity                | File                                                                     | Source Requirement                                                                                     | Purpose                                                                                                          |
+| --------------------- | ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
+| DisciplineProfile     | [entities/discipline_profile.md](entities/discipline_profile.md)         | [disciplines-and-configuration.md](../architecture-requirements/data/disciplines-and-configuration.md) | Versioned official scoring profile identity, metadata, and lifecycle per discipline                              |
+| DisciplineConfigField | [entities/discipline_configfield.md](entities/discipline_configfield.md) | [disciplines-and-configuration.md](../architecture-requirements/data/disciplines-and-configuration.md) | Contest-scoped configuration field schemas for a discipline variant                                              |
+| DisciplineScoreField  | [entities/discipline_scorefield.md](entities/discipline_scorefield.md)   | [disciplines-and-configuration.md](../architecture-requirements/data/disciplines-and-configuration.md) | Score-entry field schemas for a discipline variant                                                               |
+| DisciplineValidation  | [entities/discipline_validation.md](entities/discipline_validation.md)   | [disciplines-and-configuration.md](../architecture-requirements/data/disciplines-and-configuration.md) | Cross-field validation constraints between score entry fields for a discipline variant                           |
+| DisciplineFormula     | [entities/discipline_formula.md](entities/discipline_formula.md)         | [disciplines-and-configuration.md](../architecture-requirements/data/disciplines-and-configuration.md) | Score and penalty calculation formulas for a discipline variant                                                  |
+| DisciplineRule        | [entities/discipline_rule.md](entities/discipline_rule.md)               | [disciplines-and-configuration.md](../architecture-requirements/data/disciplines-and-configuration.md) | Score, penalty, and zero-score rules for a discipline variant (includes display/UX metadata for zero conditions) |
+| LandingTable          | [entities/landing_table.md](entities/landing_table.md)                   | [disciplines-and-configuration.md](../architecture-requirements/data/disciplines-and-configuration.md) | Versioned lookup table identity (name, unit, meaning)                                                            |
+| LandingResult         | [entities/landing_result.md](entities/landing_result.md)                 | [disciplines-and-configuration.md](../architecture-requirements/data/disciplines-and-configuration.md) | Individual scoring row in landing table (point value → resolved points)                                          |
 
 ### Matrix, Assignments & Re-flights
 
@@ -94,6 +99,12 @@ graph TD
     SP -->|child of| SCR[ScoreCalculationResult]
     SP -->|child of| RR[ReviewRequest]
     CR -->|uses| DP[DisciplineProfile]
+    DP -->|defines| DCF[DisciplineConfigField]
+    DP -->|defines| DSF[DisciplineScoreField]
+    DP -->|defines| DV[DisciplineValidation]
+    DP -->|defines| DFL[DisciplineFormula]
+    DP -->|defines| DRL[DisciplineRule]
+
     C -->|has| IT[Invitation]
     IT -->|links to| CT[ContestParticipation]
     A -->|linked as| P[ParticipantProfile]

@@ -2,7 +2,7 @@
 
 ## Discipline profile
 
-A discipline has a stable identifier and a versioned official scoring profile. A profile defines configuration fields, score-entry fields, validation, zero reasons, formulas, normalization, rounding, and calculation metadata. Field identifiers and meanings are immutable within a rules version.
+A discipline has a stable identifier and a versioned official scoring profile. A profile defines configuration fields, score-entry fields, validation, formulas, and rules. Field identifiers and meanings are immutable within a rules version.
 
 The initial duration profiles are ALES, Thermal Duration, F3J, and F5J. F3L and F3K remain representable but are not implemented until their rules are defined.
 
@@ -15,6 +15,20 @@ An override is linked to the official profile and never mutates the shared profi
 ## Landing tables
 
 A landing table has a stable identifier, revision, input unit/meaning, and entries mapping a selected key such as distance to resolved points. A score stores both the selected key and resolved points plus the table revision used. Historical scores therefore remain reproducible if a table changes later.
+
+## Discipline rules, validation, and zero conditions
+
+A discipline's scoring rules are encoded in a single `DiciplineRule` entity per rule. The `rule_type` enum determines what the rule does:
+
+- `calc` - computation rule (e.g., calculate height penalty)
+- `penalty` - penalty rule (e.g., time over target)
+- `zero` - zero-score condition (e.g., out of bounds, motor restart)
+- `interaction` - rule describing how other fields/conditions interact
+- `other` - catch-all for rule types not covered above
+
+Validation constraints (e.g., "time cannot exceed working time", "mutually exclusive zero conditions") are stored in a separate `DisciplineValidation` entity, decoupling field validation from scoring rule computation.
+
+Score-entry fields that represent zero-score conditions (e.g., `motor_restart`, `out_of_bounds`) reference the corresponding `rule_key` of the matching `rule_type: zero` rule. This single rule entity carries both the computational logic (`condition`, `effect`) and the display/UX metadata (`display_name`, `description`, `affects_other_fields`) the scorer needs.
 
 ## Derived configuration metadata
 

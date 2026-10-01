@@ -122,7 +122,91 @@ erDiagram
         uuid id "PK"
         text type
         int version
-        string config
+        text name
+        text description
+        text category
+        text status
+        text superseded_by
+        text created_by
+        timestamp created_at
+        text updated_by
+        timestamp updated_at
+    }
+
+    DISCIPLINE_CONFIG_FIELD {
+        uuid id "PK"
+        uuid discipline_profile_id "FK"
+        int version
+        text field_key
+        text field_type
+        text name
+        text description
+        bool required
+        string default_value
+        string options
+        string validation
+        int display_order
+    }
+
+    DISCIPLINE_SCORE_FIELD {
+        uuid id "PK"
+        uuid discipline_profile_id "FK"
+        int version
+        text field_key
+        text field_type
+        text name
+        text description
+        bool required
+        string default_value
+        string options
+        string validation
+        int display_order
+        bool is_zero_reason
+        text zero_reason_code
+    }
+
+    DISCIPLINE_VALIDATION {
+        uuid id "PK"
+        uuid discipline_profile_id "FK"
+        int version
+        string field_keys
+        text constraint_type
+        text description
+        string applies_to
+        text message
+        int display_order
+    }
+
+    DISCIPLINE_FORMULA {
+        uuid id "PK"
+        uuid discipline_profile_id "FK"
+        int version
+        text formula_key
+        text formula_type
+        text description
+        text formula_text
+        string inputs
+        string outputs
+        string depends_on
+        bool is_primary
+        int display_order
+    }
+
+    DISCIPLINE_RULE {
+        uuid id "PK"
+        uuid discipline_profile_id "FK"
+        int version
+        text rule_key
+        text rule_type
+        text condition
+        text effect
+        string applies_to
+        string depends_on
+        text display_name
+        text description
+        bool auto_score_zero
+        string affects_other_fields
+        int display_order
     }
 
     LANDING_TABLE {
@@ -423,6 +507,16 @@ erDiagram
 
     DISCIPLINE_PROFILE ||--o{ CONTEST_CONFIGURATION_REVISION : "referenced by"
     DISCIPLINE_PROFILE }o--o{ CONTEST_CONFIGURATION_REVISION : "referenced by"
+    DISCIPLINE_PROFILE ||--o{ DISCIPLINE_CONFIG_FIELD : "defines"
+    DISCIPLINE_PROFILE }o--o{ DISCIPLINE_CONFIG_FIELD : "defines"
+    DISCIPLINE_PROFILE ||--o{ DISCIPLINE_SCORE_FIELD : "defines"
+    DISCIPLINE_PROFILE }o--o{ DISCIPLINE_SCORE_FIELD : "defines"
+    DISCIPLINE_PROFILE ||--o{ DISCIPLINE_VALIDATION : "defines"
+    DISCIPLINE_PROFILE }o--o{ DISCIPLINE_VALIDATION : "defines"
+    DISCIPLINE_PROFILE ||--o{ DISCIPLINE_FORMULA : "defines"
+    DISCIPLINE_PROFILE }o--o{ DISCIPLINE_FORMULA : "defines"
+    DISCIPLINE_PROFILE ||--o{ DISCIPLINE_RULE : "defines"
+    DISCIPLINE_PROFILE }o--o{ DISCIPLINE_RULE : "defines"
 
     LANDING_TABLE ||--o{ CONTEST_CONFIGURATION_REVISION : "used by"
     LANDING_TABLE }o--o{ CONTEST_CONFIGURATION_REVISION : "used by"
