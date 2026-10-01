@@ -21,7 +21,7 @@
 | `id`                       | UUIDv7  | Yes      | —       | Primary key                                |
 | `team_id`                  | UUIDv7  | Yes      | —       | Foreign key to Team                        |
 | `contest_participation_id` | UUIDv7  | Yes      | —       | Foreign key to ContestParticipation        |
-| `role`                     | Enum    | Yes      | Pilot   | Membership role: Captain, Pilot, or Helper |
+| `role_id`                  | UUIDv7  | Yes      | Pilot   | Membership role: Captain, Pilot, or Helper |
 | `revision`                 | Integer | Yes      | 0       | Revision counter for optimistic locking    |
 
 ## Invariants and Constraints

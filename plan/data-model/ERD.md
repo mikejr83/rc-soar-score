@@ -62,12 +62,9 @@ erDiagram
         uuid id "PK"
         uuid contest_id "FK"
         uuid participant_profile_id "FK"
-        string cls
-        uuid role_id "FK"
-        text role_type
-        int participant_number
-        uuid team_membership_id "FK optional"
-        uuid contest_model_link_id "FK optional"
+        string classification           "pilots only, nullable"
+        int role_type                   "enum, nullable"
+        int participant_number          "nullable"
         uuid scoring_uuid
         string participation_status
         int revision
@@ -92,10 +89,10 @@ erDiagram
     }
 
     TEAM_MEMBERSHIP {
-        uuid id "PK"
-        uuid team_id "FK"
-        uuid contest_participation_id "FK"
-        text role
+        uuid id                         "PK"
+        uuid team_id                    "FK"
+        uuid contest_participation_id   "FK"
+        uuid role_id                    "FK"
         int revision
     }
 
@@ -485,9 +482,8 @@ erDiagram
     CONTEST ||--o{ REVIEW_REQUEST : "indirect ownership"
 
     PARTICIPANT_PROFILE ||--o{ CONTEST_PARTICIPATION : "profile for"
-    PARTICIPANT_PROFILE }o--o{ CONTEST_PARTICIPATION : "profile for"
-    PARTICIPANT_PROFILE ||--o{ CONTEST_MODEL_LINK : "model snapshot"
-    PARTICIPANT_PROFILE }o--o{ CONTEST_MODEL_LINK : "model snapshot"
+    PARTICIPANT_PROFILE }o--o{ CONTEST_PARTICIPATION : "profile for"CONTEST_PARTICIPATION ||--o{ CONTEST_MODEL_LINK : "enters models"
+    MODEL_CATALOG |o--o{ CONTEST_MODEL_LINK : "catalog source"
 
     CONTEST_PARTICIPATION ||--o{ MATRIX_ASSIGNMENT : "assignment belongs to this participation"
     CONTEST_PARTICIPATION }o--o{ MATRIX_ASSIGNMENT : "assignment belongs to this participation"
@@ -505,18 +501,11 @@ erDiagram
     MATRIX_REVISION ||--o{ SCORE_ATTEMPT : "cited by"
     MATRIX_REVISION }o--o{ SCORE_ATTEMPT : "cited by"
 
-    DISCIPLINE_PROFILE ||--o{ CONTEST_CONFIGURATION_REVISION : "referenced by"
-    DISCIPLINE_PROFILE }o--o{ CONTEST_CONFIGURATION_REVISION : "referenced by"
     DISCIPLINE_PROFILE ||--o{ DISCIPLINE_CONFIG_FIELD : "defines"
-    DISCIPLINE_PROFILE }o--o{ DISCIPLINE_CONFIG_FIELD : "defines"
     DISCIPLINE_PROFILE ||--o{ DISCIPLINE_SCORE_FIELD : "defines"
-    DISCIPLINE_PROFILE }o--o{ DISCIPLINE_SCORE_FIELD : "defines"
     DISCIPLINE_PROFILE ||--o{ DISCIPLINE_VALIDATION : "defines"
-    DISCIPLINE_PROFILE }o--o{ DISCIPLINE_VALIDATION : "defines"
     DISCIPLINE_PROFILE ||--o{ DISCIPLINE_FORMULA : "defines"
-    DISCIPLINE_PROFILE }o--o{ DISCIPLINE_FORMULA : "defines"
     DISCIPLINE_PROFILE ||--o{ DISCIPLINE_RULE : "defines"
-    DISCIPLINE_PROFILE }o--o{ DISCIPLINE_RULE : "defines"
 
     LANDING_TABLE ||--o{ CONTEST_CONFIGURATION_REVISION : "used by"
     LANDING_TABLE }o--o{ CONTEST_CONFIGURATION_REVISION : "used by"
@@ -535,7 +524,6 @@ erDiagram
     CONTEST }o--o{ PUBLICATION_PROJECTION : "projected to"
 
     TEAM ||--o{ TEAM_MEMBERSHIP : "has members"
-    TEAM }o--o{ TEAM_MEMBERSHIP : "has members"
-    CONTEST_PARTICIPATION }o--o{ TEAM_MEMBERSHIP : "is member"
-    TEAM_MEMBERSHIP }o--o{ CONTEST_PARTICIPATION : "is member"
+    CONTEST_PARTICIPATION ||--o| TEAM_MEMBERSHIP : "is member via"
+    ROLE ||--o{ TEAM_MEMBERSHIP : "defines team role"
 ```
