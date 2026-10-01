@@ -1,5 +1,7 @@
 # MatrixRevision
 
+**NOTE - THIS ENTITY NEEDS TO HAVE `participating_participant_participations` FIGURED OUT**
+
 **Relationship to architecture-requirements:** `plan/architecture-requirements/data/matrix-and-assignments.md`
 **Purpose:** Records the draw configuration, participating pilot links, rounds, groups, lanes, random seed or reproducibility data, fairness result, creator, reason, and finalization state. A new draw never overwrites an earlier revision.
 **Identifier:** `id` (UUIDv7)
@@ -8,7 +10,8 @@
 
 ## Relationships
 
-Belongs to a Contest; parent of Round; a Round belongs to a MatrixRevision and has an ordinal round number.
+- Belongs to a Contest; parent of Round; a Round belongs to a MatrixRevision and has an ordinal round number.
+- `participating_participant_participations` is a relational property to the the linked participants.
 
 ## Fields/Properties
 

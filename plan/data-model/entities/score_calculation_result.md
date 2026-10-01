@@ -1,5 +1,7 @@
 # ScoreCalculationResult
 
+**SEEMS TO HAVE ISSUES - REVISIT REQS**
+
 **Relationship to architecture-requirements:** plan/architecture-requirements/data/scores-and-results.md
 **Purpose:** Derived result with provenance for a score component set. All results derived, versioned, and reproducible.
 **Identifier:** `id` (UUIDv7)

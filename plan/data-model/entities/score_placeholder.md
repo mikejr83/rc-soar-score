@@ -1,5 +1,7 @@
 # ScorePlaceholder
 
+**NOTE - THERE ARE ISSUES WITH WHAT PROPERTIES ARE SHOWN HERE. THEY SEEM CONFUSING. THIS FILE DOES NOT MATCH THE ERD DOC**
+
 **Relationship to architecture-requirements:** plan/architecture-requirements/data/scores-and-results.md
 **Purpose:** Reservation slot for the score of a pilot participating in a specific group and lane during a round's flight sequence. Exists for every pilot even before a value is entered.
 **Identifier:** `id` (UUIDv7)

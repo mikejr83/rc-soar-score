@@ -1,5 +1,7 @@
 # DisciplineProfile
 
+** NOTE - THIS DESIGN IS NOT DONE - `config_fields`, `score_entry_fields`, and other properties are not well defined.
+
 **Relationship to architecture-requirements:** [disciplines-and-configuration.md](../../architecture-requirements/data/disciplines-and-configuration.md)
 **Purpose:** Stores a versioned official scoring profile for a soaring discipline. Defines configuration fields, score-entry fields, validation, zero reasons, formulas, normalization, rounding, and calculation metadata.
 **Identifier:** `id` (UUIDv7)

@@ -69,6 +69,7 @@ erDiagram
         uuid team_membership_id "FK optional"
         uuid contest_model_link_id "FK optional"
         uuid scoring_uuid
+        string participation_status
         int revision
     }
 
@@ -128,15 +129,13 @@ erDiagram
         uuid id "PK"
         text name
         int revision
-        string config
     }
 
     LANDING_RESULT {
         uuid id "PK"
         int point_value
         string display_value
-        int points
-        string note
+        int ordinal_position
         uuid landing_table_id "FK"
     }
 
@@ -186,7 +185,10 @@ erDiagram
         uuid source_assignment_id "FK optional"
         text flight_sequence
         int assignment_revision
-        int revision
+        uuid actor_id
+        string reason
+        timestamp created_at
+        timestamp updated_at
     }
 
     RE_FLIGHT {
@@ -250,6 +252,7 @@ erDiagram
         uuid id "PK"
         uuid official_score_id "FK"
         int raw_flight_score
+        int discipline_raw_score
         int normalized_group_score
         int contest_total
         bool dropped_round
@@ -311,6 +314,8 @@ erDiagram
         uuid loser_mutation_id "FK"
         text reason
         text resolution
+        timestamp resolved_at
+        uuid resolved_by "FK"
     }
 
     TOMBSTONE {
