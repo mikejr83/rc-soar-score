@@ -16,26 +16,26 @@
 
 ## Fields/Properties
 
-| Field              | Type     | Required | Default               | Description                                      |
-| ------------------ | -------- | -------- | --------------------- | ------------------------------------------------ |
-| id                 | UUIDv7   | Yes      | Generated on creation | Primary key; stable event identifier             |
-| name               | String   | Yes      | None                  | Contest name                                     |
-| start_date_time    | DateTime | Yes      | None                  | Start date/time in contest's timezone            |
-| end_date_time      | DateTime | Yes      | None                  | End date/time in contest's timezone              |
-| timezone           | String   | Yes      | None                  | IANA timezone name; stored at creation           |
-| host               | String   | No       | None                  | Host/venue name                                  |
-| city               | String   | No       | None                  | City name                                        |
-| state              | String   | No       | None                  | State/province name                              |
-| country            | String   | No       | None                  | Country name                                     |
-| owner_account_id   | UUIDv7   | No       | None                  | FK to Account; null for anonymous/local contests |
-| lifecycle_state    | Enum     | Yes      | Created               | Created, Configuring, Ready, Running, Completed  |
-| scoring_access     | Enum     | Yes      | Closed                | Closed, Open                                     |
-| admin_lock         | Enum     | Yes      | Unlocked              | Unlocked, Locked                                 |
-| publication_status | Enum     | Yes      | Unpublished           | Unpublished, Published                           |
-| visibility         | Enum     | Yes      | Private               | Private, Hidden, Public                          |
-| local_archive      | Boolean  | Yes      | false                 | Local archive flag                               |
-| deletion_status    | Enum     | Yes      | None                  | None, PendingDelete, Restored, Deleted           |
-| revision           | Integer  | Yes      | 1                     | Current revision number                          |
+| Field                | Type     | Required | Default               | Description                                      |
+| -------------------- | -------- | -------- | --------------------- | ------------------------------------------------ |
+| `id`                 | UUIDv7   | Yes      | Generated on creation | Primary key; stable event identifier             |
+| `name`               | String   | Yes      | None                  | Contest name                                     |
+| `start_date_time`    | DateTime | Yes      | None                  | Start date/time in contest's timezone            |
+| `end_date_time`      | DateTime | Yes      | None                  | End date/time in contest's timezone              |
+| `timezone`           | String   | Yes      | None                  | IANA timezone name; stored at creation           |
+| `host`               | String   | No       | None                  | Host/venue name                                  |
+| `city`               | String   | No       | None                  | City name                                        |
+| `state`              | String   | No       | None                  | State/province name                              |
+| `country`            | String   | No       | None                  | Country name                                     |
+| `owner_account_id`   | UUIDv7   | No       | None                  | FK to Account; null for anonymous/local contests |
+| `lifecycle_state`    | Enum     | Yes      | Created               | Created, Configuring, Ready, Running, Completed  |
+| `scoring_access`     | Enum     | Yes      | Closed                | Closed, Open                                     |
+| `admin_lock`         | Enum     | Yes      | Unlocked              | Unlocked, Locked                                 |
+| `publication_status` | Enum     | Yes      | Unpublished           | Unpublished, Published                           |
+| `visibility`         | Enum     | Yes      | Private               | Private, Hidden, Public                          |
+| `local_archive`      | Boolean  | Yes      | false                 | Local archive flag                               |
+| `deletion_status`    | Enum     | Yes      | None                  | None, PendingDelete, Restored, Deleted           |
+| `revision`           | Integer  | Yes      | 1                     | Current revision number                          |
 
 ## Invariants and Constraints
 

@@ -14,22 +14,22 @@
 
 ## Fields/Properties
 
-| Field                    | Type   | Required     | Default | Description                                        |
-| ------------------------ | ------ | ------------ | ------- | -------------------------------------------------- |
-| id                       | UUIDv7 | Yes          | -       | Stable identity                                    |
-| score_placeholder_id     | UUIDv7 | Yes          | -       | FK ScorePlaceholder                                |
-| raw_components           | JSON   | Yes          | -       | Raw submitted components preserving original units |
-| cumulative_penalty       | int    | Yes          | 0       | Running total of penalties applied                 |
-| actor_id                 | UUIDv7 | Yes          | -       | Identifies person/authority who submitted          |
-| authority                | string | Yes          | -       | Organization/role of submitter                     |
-| invitation_reference     | string | No           | -       | Reference number for invitation                    |
-| source_device            | string | No           | -       | Device/browser used                                |
-| client_mutation_id       | string | Yes (unique) | -       | Client-side dedup key                              |
-| base_score_revision      | int    | Yes          | -       | Score revision this attempt was based on           |
-| config_revision          | int    | Yes          | -       | Contest configuration revision                     |
-| matrix_revision          | int    | Yes          | -       | Score matrix revision                              |
-| discipline_rules_version | string | Yes          | -       | Version of discipline rules applied                |
-| calculation_version      | string | Yes          | -       | Version of calculation logic                       |
+| Field                      | Type   | Required     | Default | Description                                        |
+| -------------------------- | ------ | ------------ | ------- | -------------------------------------------------- |
+| `id`                       | UUIDv7 | Yes          | -       | Stable identity                                    |
+| `score_placeholder_id`     | UUIDv7 | Yes          | -       | FK ScorePlaceholder                                |
+| `raw_components`           | JSON   | Yes          | -       | Raw submitted components preserving original units |
+| `cumulative_penalty`       | int    | Yes          | 0       | Running total of penalties applied                 |
+| `actor_id`                 | UUIDv7 | Yes          | -       | Identifies person/authority who submitted          |
+| `authority`                | string | Yes          | -       | Organization/role of submitter                     |
+| `invitation_reference`     | string | No           | -       | Reference number for invitation                    |
+| `source_device`            | string | No           | -       | Device/browser used                                |
+| `client_mutation_id`       | string | Yes (unique) | -       | Client-side dedup key                              |
+| `base_score_revision`      | int    | Yes          | -       | Score revision this attempt was based on           |
+| `config_revision`          | int    | Yes          | -       | Contest configuration revision                     |
+| `matrix_revision`          | int    | Yes          | -       | Score matrix revision                              |
+| `discipline_rules_version` | string | Yes          | -       | Version of discipline rules applied                |
+| `calculation_version`      | string | Yes          | -       | Version of calculation logic                       |
 
 ## Invariants and Constraints
 

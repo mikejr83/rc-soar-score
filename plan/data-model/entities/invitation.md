@@ -15,22 +15,22 @@
 
 ## Fields/Properties
 
-| Field                    | Type             | Required | Default  | Description                                                     |
-| ------------------------ | ---------------- | -------- | -------- | --------------------------------------------------------------- |
-| id                       | UUIDv7           | Yes      | -        | Primary key identifying the invitation                          |
-| contest_id               | UUIDv7           | Yes      | -        | Foreign key to the Contest                                      |
-| contest_participation_id | UUIDv7           | Yes      | -        | Foreign key to the Participation record                         |
-| type                     | Enum             | Yes      | MagicURL | Type of invitation: `MagicURL`, `QRCode`                        |
-| protected_credential     | String           | Yes      | -        | Encrypted credential; raw credential never stored in logs/audit |
-| invitation_revision      | Integer          | Yes      | 0        | Revision counter for optimistic locking                         |
-| state                    | Enum             | Yes      | Sent     | Current state: `Sent`, `Used`, `Expired`, `Revoked`             |
-| audience                 | Enum             | Yes      | Pilot    | Target audience: `Pilot`, `Helper`                              |
-| issued_at                | Timestamp        | Yes      | -        | Time invitation was issued                                      |
-| used_at                  | Timestamp        | No       | null     | Time invitation was used (non-null if state is Used)            |
-| expired_at               | Timestamp        | No       | null     | Time invitation expired (non-null if state is Expired)          |
-| revoked_at               | Timestamp        | No       | null     | Time invitation was revoked (non-null if state is Revoked)      |
-| delivery_outcomes        | Array of Objects | No       | []       | Records of delivery attempts and outcomes                       |
-| rate_limit_attempts      | Integer          | Yes      | 0        | Count of remaining allowed uses for non-pilot QR codes          |
+| Field                      | Type             | Required | Default  | Description                                                     |
+| -------------------------- | ---------------- | -------- | -------- | --------------------------------------------------------------- |
+| `id`                       | UUIDv7           | Yes      | -        | Primary key identifying the invitation                          |
+| `contest_id`               | UUIDv7           | Yes      | -        | Foreign key to the Contest                                      |
+| `contest_participation_id` | UUIDv7           | Yes      | -        | Foreign key to the Participation record                         |
+| `type`                     | Enum             | Yes      | MagicURL | Type of invitation: `MagicURL`, `QRCode`                        |
+| `protected_credential`     | String           | Yes      | -        | Encrypted credential; raw credential never stored in logs/audit |
+| `invitation_revision`      | Integer          | Yes      | 0        | Revision counter for optimistic locking                         |
+| `state`                    | Enum             | Yes      | Sent     | Current state: `Sent`, `Used`, `Expired`, `Revoked`             |
+| `audience`                 | Enum             | Yes      | Pilot    | Target audience: `Pilot`, `Helper`                              |
+| `issued_at`                | Timestamp        | Yes      | -        | Time invitation was issued                                      |
+| `used_at`                  | Timestamp        | No       | null     | Time invitation was used (non-null if state is Used)            |
+| `expired_at`               | Timestamp        | No       | null     | Time invitation expired (non-null if state is Expired)          |
+| `revoked_at`               | Timestamp        | No       | null     | Time invitation was revoked (non-null if state is Revoked)      |
+| `delivery_outcomes`        | Array of Objects | No       | []       | Records of delivery attempts and outcomes                       |
+| `rate_limit_attempts`      | Integer          | Yes      | 0        | Count of remaining allowed uses for non-pilot QR codes          |
 
 ## Invariants and Constraints
 
@@ -44,7 +44,7 @@
 
 ## Lifecycle
 
-```
+```plaintext
 Sent -> Used
 Sent -> Expired
 Sent -> Revoked

@@ -14,12 +14,12 @@
 
 ## Fields/Properties
 
-| Field                  | Type    | Required | Default | Description                             |
-| ---------------------- | ------- | -------- | ------- | --------------------------------------- |
-| id                     | UUIDv7  | Yes      | —       | Primary key for the link                |
-| participant_profile_id | UUIDv7  | Yes      | —       | Foreign key to ParticipantProfile       |
-| account_id             | UUIDv7  | Yes      | —       | Foreign key to Account                  |
-| revision               | Integer | Yes      | 0       | Revision counter for optimistic locking |
+| Field                    | Type    | Required | Default | Description                             |
+| ------------------------ | ------- | -------- | ------- | --------------------------------------- |
+| `id`                     | UUIDv7  | Yes      | —       | Primary key for the link                |
+| `participant_profile_id` | UUIDv7  | Yes      | —       | Foreign key to ParticipantProfile       |
+| `account_id`             | UUIDv7  | Yes      | —       | Foreign key to Account                  |
+| `revision`               | Integer | Yes      | 0       | Revision counter for optimistic locking |
 
 ## Invariants and Constraints
 

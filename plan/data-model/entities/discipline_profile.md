@@ -36,7 +36,7 @@
 
 Profiles follow a create-once, version-advance lifecycle:
 
-```
+```plaintext
 Drafted -> Published -> (optional) superseded by new version
 ```
 

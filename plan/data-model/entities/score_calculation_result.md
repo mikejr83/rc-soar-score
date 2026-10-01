@@ -16,20 +16,20 @@
 
 ## Fields/Properties
 
-| Field                | Type                                                                                                   | Required | Default | Description                                       |
-| -------------------- | ------------------------------------------------------------------------------------------------------ | -------- | ------- | ------------------------------------------------- |
-| id                   | UUIDv7                                                                                                 | Yes      | -       | Stable identity                                   |
-| official_score_id    | UUIDv7                                                                                                 | Yes      | -       | FK to score's official score                      |
-| calculation_stage    | enum{RawFlightScore,DdisciplineRaw,GroupRaw,ContestRaw,DroppedRounds,FinalContestScore,TeamScore,Rank} | Yes      | -       | Calculation stage                                 |
-| raw_flight_score     | float                                                                                                  | No       | -       | Raw flight score computed from components         |
-| discipline_raw_score | float                                                                                                  | No       | -       | Sum/matrix of raw flight scores within discipline |
-| group_raw_score      | float                                                                                                  | No       | -       | Sum of discipline raw scores for group            |
-| contest_raw_score    | float                                                                                                  | No       | -       | Sum of group raw scores across all disciplines    |
-| rounds_dropped_count | int                                                                                                    | No       | 0       | Number of rounds dropped in calculation           |
-| team_score           | float                                                                                                  | No       | -       | Team's cumulative score for this pilot            |
-| rank                 | int                                                                                                    | No       | -       | Overall contest ranking                           |
-| calculation_version  | string                                                                                                 | Yes      | -       | Version of calculation logic used                 |
-| computed_at          | timestamp                                                                                              | Yes      | -       | When result was computed                          |
+| Field                  | Type                                                                                                   | Required | Default | Description                                       |
+| ---------------------- | ------------------------------------------------------------------------------------------------------ | -------- | ------- | ------------------------------------------------- |
+| `id`                   | UUIDv7                                                                                                 | Yes      | -       | Stable identity                                   |
+| `official_score_id`    | UUIDv7                                                                                                 | Yes      | -       | FK to score's official score                      |
+| `calculation_stage`    | enum{RawFlightScore,DdisciplineRaw,GroupRaw,ContestRaw,DroppedRounds,FinalContestScore,TeamScore,Rank} | Yes      | -       | Calculation stage                                 |
+| `raw_flight_score`     | float                                                                                                  | No       | -       | Raw flight score computed from components         |
+| `discipline_raw_score` | float                                                                                                  | No       | -       | Sum/matrix of raw flight scores within discipline |
+| `group_raw_score`      | float                                                                                                  | No       | -       | Sum of discipline raw scores for group            |
+| `contest_raw_score`    | float                                                                                                  | No       | -       | Sum of group raw scores across all disciplines    |
+| `rounds_dropped_count` | int                                                                                                    | No       | 0       | Number of rounds dropped in calculation           |
+| `team_score`           | float                                                                                                  | No       | -       | Team's cumulative score for this pilot            |
+| rank                   | int                                                                                                    | No       | -       | Overall contest ranking                           |
+| `calculation_version`  | string                                                                                                 | Yes      | -       | Version of calculation logic used                 |
+| `computed_at`          | timestamp                                                                                              | Yes      | -       | When result was computed                          |
 
 ## Invariants and Constraints
 

@@ -14,17 +14,17 @@
 
 ## Fields/Properties
 
-| Field                       | Type    | Required | Default | Description                               |
-| --------------------------- | ------- | -------- | ------- | ----------------------------------------- |
-| id                          | UUIDv7  | Yes      | —       | Primary key                               |
-| contest_id                  | UUIDv7  | Yes      | —       | Foreign key to Contest                    |
-| contest_participation_id    | UUIDv7  | Yes      | —       | Foreign key to ContestParticipation       |
-| model_catalog_id            | UUIDv7  | No       | —       | Foreign key to ModelCatalog (optional)    |
-| model_name                  | String  | Yes      | —       | Model name for this contest entry         |
-| manufacturer                | String  | No       | —       | Model manufacturer for this contest entry |
-| model_id                    | String  | Yes      | —       | External model identifier                 |
-| contest_specific_identifier | String  | No       | —       | Contest-specific identifier for the model |
-| revision                    | Integer | Yes      | 0       | Revision counter for optimistic locking   |
+| Field                         | Type    | Required | Default | Description                               |
+| ----------------------------- | ------- | -------- | ------- | ----------------------------------------- |
+| `id`                          | UUIDv7  | Yes      | —       | Primary key                               |
+| `contest_id`                  | UUIDv7  | Yes      | —       | Foreign key to Contest                    |
+| `contest_participation_id`    | UUIDv7  | Yes      | —       | Foreign key to ContestParticipation       |
+| `model_catalog_id`            | UUIDv7  | No       | —       | Foreign key to ModelCatalog (optional)    |
+| `model_name`                  | String  | Yes      | —       | Model name for this contest entry         |
+| `manufacturer`                | String  | No       | —       | Model manufacturer for this contest entry |
+| `model_id`                    | String  | Yes      | —       | External model identifier                 |
+| `contest_specific_identifier` | String  | No       | —       | Contest-specific identifier for the model |
+| `revision`                    | Integer | Yes      | 0       | Revision counter for optimistic locking   |
 
 ## Invariants and Constraints
 

@@ -17,16 +17,16 @@
 
 ## Fields/Properties
 
-| Field                    | Type                                                                           | Required | Default    | Description                                                  |
-| ------------------------ | ------------------------------------------------------------------------------ | -------- | ---------- | ------------------------------------------------------------ |
-| id                       | UUIDv7                                                                         | Yes      | -          | Stable identity                                              |
-| assignment_id            | UUIDv7                                                                         | Yes      | -          | FK MatrixAssignment defining pilot/group/round/lane/sequence |
-| contest_participation_id | UUIDv7                                                                         | Yes      | -          | FK ContestParticipation for round                            |
-| group                    | string                                                                         | Yes      | -          | Group identifier                                             |
-| lane                     | int                                                                            | Yes      | -          | Lane of flight                                               |
-| flight_sequence          | int                                                                            | Yes      | -          | Flight sequence number; 0 = not launched                     |
-| state                    | enum{NotEntered,Draft,Submitted,InReview,Official,Retired,Zero,Locked,Dropped} | Yes      | NotEntered | Current state of placeholder                                 |
-| score_revision           | int                                                                            | Yes      | 0          | Version counter for score-related mutations                  |
+| Field                      | Type                                                                           | Required | Default    | Description                                                  |
+| -------------------------- | ------------------------------------------------------------------------------ | -------- | ---------- | ------------------------------------------------------------ |
+| `id`                       | UUIDv7                                                                         | Yes      | -          | Stable identity                                              |
+| `assignment_id`            | UUIDv7                                                                         | Yes      | -          | FK MatrixAssignment defining pilot/group/round/lane/sequence |
+| `contest_participation_id` | UUIDv7                                                                         | Yes      | -          | FK ContestParticipation for round                            |
+| `group`                    | string                                                                         | Yes      | -          | Group identifier                                             |
+| `lane`                     | int                                                                            | Yes      | -          | Lane of flight                                               |
+| `flight_sequence`          | int                                                                            | Yes      | -          | Flight sequence number; 0 = not launched                     |
+| `state`                    | enum{NotEntered,Draft,Submitted,InReview,Official,Retired,Zero,Locked,Dropped} | Yes      | NotEntered | Current state of placeholder                                 |
+| `score_revision`           | int                                                                            | Yes      | 0          | Version counter for score-related mutations                  |
 
 ## Invariants and Constraints
 

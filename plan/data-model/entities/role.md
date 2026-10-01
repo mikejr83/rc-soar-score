@@ -12,14 +12,14 @@
 
 ## Fields/Properties
 
-| Field        | Type    | Required | Default | Description                                             |
-| ------------ | ------- | -------- | ------- | ------------------------------------------------------- |
-| id           | UUIDv7  | Yes      | —       | Primary key                                             |
-| display_name | String  | Yes      | —       | Human-readable role name                                |
-| type         | Enum    | Yes      | —       | Role type: Pilot or NonFlier                            |
-| scope        | Enum    | Yes      | —       | Scope: System (built-in) or Director (contest-specific) |
-| permission   | Enum    | Yes      | —       | Permission level: Admin, Score, or Read                 |
-| revision     | Integer | Yes      | 0       | Revision counter for optimistic locking                 |
+| Field          | Type    | Required | Default | Description                                             |
+| -------------- | ------- | -------- | ------- | ------------------------------------------------------- |
+| `id`           | UUIDv7  | Yes      | —       | Primary key                                             |
+| `display_name` | String  | Yes      | —       | Human-readable role name                                |
+| `type`         | Enum    | Yes      | —       | Role type: Pilot or NonFlier                            |
+| `scope`        | Enum    | Yes      | —       | Scope: System (built-in) or Director (contest-specific) |
+| `permission`   | Enum    | Yes      | —       | Permission level: Admin, Score, or Read                 |
+| `revision`     | Integer | Yes      | 0       | Revision counter for optimistic locking                 |
 
 ## Invariants and Constraints
 

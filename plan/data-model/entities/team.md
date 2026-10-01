@@ -14,13 +14,13 @@
 
 ## Fields/Properties
 
-| Field        | Type    | Required | Default | Description                                 |
-| ------------ | ------- | -------- | ------- | ------------------------------------------- |
-| id           | UUIDv7  | Yes      | —       | Primary key                                 |
-| contest_id   | UUIDv7  | Yes      | —       | Foreign key to Contest                      |
-| name         | String  | Yes      | —       | Team name (unique within contest)           |
-| pilot_totals | Integer | No       | —       | Number of pilot totals used for team result |
-| revision     | Integer | Yes      | 0       | Revision counter for optimistic locking     |
+| Field          | Type    | Required | Default | Description                                 |
+| -------------- | ------- | -------- | ------- | ------------------------------------------- |
+| `id`           | UUIDv7  | Yes      | —       | Primary key                                 |
+| `contest_id`   | UUIDv7  | Yes      | —       | Foreign key to Contest                      |
+| `name`         | String  | Yes      | —       | Team name (unique within contest)           |
+| `pilot_totals` | Integer | No       | —       | Number of pilot totals used for team result |
+| `revision`     | Integer | Yes      | 0       | Revision counter for optimistic locking     |
 
 ## Invariants and Constraints
 

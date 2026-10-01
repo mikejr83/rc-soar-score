@@ -14,15 +14,15 @@
 
 ## Fields/Properties
 
-| Field           | Type      | Required | Default       | Description                                                                              |
-| --------------- | --------- | -------- | ------------- | ---------------------------------------------------------------------------------------- |
-| id              | UUIDv7    | Yes      | -             | Primary key identifying the tombstone record                                             |
-| entity_type     | String    | Yes      | -             | The type of entity being tombstoned (e.g., Pilot, Contest, Participation)                |
-| entity_id       | UUIDv7    | Yes      | -             | The identifier of the entity being tombstoned                                            |
-| contest_id      | UUIDv7    | No       | null          | The contest this tombstone is associated with (nullable for non-contest-scoped entities) |
-| status          | Enum      | Yes      | PendingDelete | Status of the tombstone: `PendingDelete`, `Acknowledged`                                 |
-| deleted_at      | Timestamp | Yes      | -             | The time the entity was deleted (client-local time)                                      |
-| deletion_reason | String    | No       | null          | Optional reason for deletion                                                             |
+| Field             | Type      | Required | Default       | Description                                                                              |
+| ----------------- | --------- | -------- | ------------- | ---------------------------------------------------------------------------------------- |
+| `id`              | UUIDv7    | Yes      | -             | Primary key identifying the tombstone record                                             |
+| `entity_type`     | String    | Yes      | -             | The type of entity being tombstoned (e.g., Pilot, Contest, Participation)                |
+| `entity_id`       | UUIDv7    | Yes      | -             | The identifier of the entity being tombstoned                                            |
+| `contest_id`      | UUIDv7    | No       | null          | The contest this tombstone is associated with (nullable for non-contest-scoped entities) |
+| `status`          | Enum      | Yes      | PendingDelete | Status of the tombstone: `PendingDelete`, `Acknowledged`                                 |
+| `deleted_at`      | Timestamp | Yes      | -             | The time the entity was deleted (client-local time)                                      |
+| `deletion_reason` | String    | No       | null          | Optional reason for deletion                                                             |
 
 ## Invariants and Constraints
 

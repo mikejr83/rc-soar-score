@@ -44,7 +44,7 @@
 
 ## Lifecycle
 
-```
+```plaintext
 Pending → Accepted → Active → Completed
            ↓
         Withdrawn

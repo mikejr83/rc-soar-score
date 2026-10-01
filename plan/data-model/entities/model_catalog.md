@@ -13,12 +13,12 @@
 
 ## Fields/Properties
 
-| Field        | Type    | Required | Default | Description                             |
-| ------------ | ------- | -------- | ------- | --------------------------------------- |
-| id           | UUIDv7  | Yes      | —       | Primary key                             |
-| name         | String  | Yes      | —       | Model name                              |
-| manufacturer | String  | No       | —       | Model manufacturer                      |
-| revision     | Integer | Yes      | 0       | Revision counter for optimistic locking |
+| Field          | Type    | Required | Default | Description                             |
+| -------------- | ------- | -------- | ------- | --------------------------------------- |
+| `id`           | UUIDv7  | Yes      | —       | Primary key                             |
+| `name`         | String  | Yes      | —       | Model name                              |
+| `manufacturer` | String  | No       | —       | Model manufacturer                      |
+| `revision`     | Integer | Yes      | 0       | Revision counter for optimistic locking |
 
 ## Invariants and Constraints
 

@@ -15,16 +15,16 @@
 
 ## Fields/Properties
 
-| Field                | Type      | Required | Default | Description                                                                |
-| -------------------- | --------- | -------- | ------- | -------------------------------------------------------------------------- |
-| id                   | UUIDv7    | Yes      | -       | Stable identity                                                            |
-| score_placeholder_id | UUIDv7    | Yes      | -       | FK ScorePlaceholder                                                        |
-| score_revision       | int       | Yes      | -       | Revision number of this version                                            |
-| components           | JSON      | Yes      | -       | Authoritative components: duration_sec, base_score, penalties, adjustments |
-| score_attempt_id     | UUIDv7    | Yes      | -       | FK ScoreAttempt that produced this score                                   |
-| set_at               | timestamp | Yes      | -       | When this score became official                                            |
-| set_by               | UUIDv7    | Yes      | -       | Person/authority who made it official                                      |
-| reason               | string    | Yes      | -       | Explanation for selection                                                  |
+| Field                  | Type      | Required | Default | Description                                                                |
+| ---------------------- | --------- | -------- | ------- | -------------------------------------------------------------------------- |
+| `id`                   | UUIDv7    | Yes      | -       | Stable identity                                                            |
+| `score_placeholder_id` | UUIDv7    | Yes      | -       | FK ScorePlaceholder                                                        |
+| `score_revision`       | int       | Yes      | -       | Revision number of this version                                            |
+| `components`           | JSON      | Yes      | -       | Authoritative components: duration_sec, base_score, penalties, adjustments |
+| `score_attempt_id`     | UUIDv7    | Yes      | -       | FK ScoreAttempt that produced this score                                   |
+| `set_at`               | timestamp | Yes      | -       | When this score became official                                            |
+| `set_by`               | UUIDv7    | Yes      | -       | Person/authority who made it official                                      |
+| `reason`               | string    | Yes      | -       | Explanation for selection                                                  |
 
 ## Invariants and Constraints
 

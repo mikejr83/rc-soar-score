@@ -13,13 +13,13 @@
 
 ## Fields/Properties
 
-| Field            | Type   | Required | Default               | Description                                                                                  |
-| ---------------- | ------ | -------- | --------------------- | -------------------------------------------------------------------------------------------- |
-| id               | UUIDv7 | Yes      | Generated on creation | Primary key for the account                                                                  |
-| first_name       | String | Yes      | None                  | Account holder's first name                                                                  |
-| last_name        | String | Yes      | None                  | Account holder's last name                                                                   |
-| email            | String | Yes      | None                  | Account holder's email address; used as candidate link for participant profile matching      |
-| provider_subject | String | Yes      | None                  | Stable identity-provider subject identifier; authentication key only, not exposed to clients |
+| Field              | Type   | Required | Default               | Description                                                                                  |
+| ------------------ | ------ | -------- | --------------------- | -------------------------------------------------------------------------------------------- |
+| `id`               | UUIDv7 | Yes      | Generated on creation | Primary key for the account                                                                  |
+| `first_name`       | String | Yes      | None                  | Account holder's first name                                                                  |
+| `last_name`        | String | Yes      | None                  | Account holder's last name                                                                   |
+| `email`            | String | Yes      | None                  | Account holder's email address; used as candidate link for participant profile matching      |
+| `provider_subject` | String | Yes      | None                  | Stable identity-provider subject identifier; authentication key only, not exposed to clients |
 
 ## Invariants and Constraints
 

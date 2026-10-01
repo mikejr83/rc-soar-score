@@ -13,20 +13,20 @@
 
 ## Fields/Properties
 
-| Field           | Type    | Required | Default | Description                               |
-| --------------- | ------- | -------- | ------- | ----------------------------------------- |
-| id              | UUIDv7  | Yes      | —       | Primary key for participant profile       |
-| first_name      | String  | Yes      | —       | Participant's given name                  |
-| last_name       | String  | Yes      | —       | Participant's family name                 |
-| club            | String  | No       | —       | Club affiliation                          |
-| fai_number      | String  | No       | —       | FAI identification number                 |
-| national_org_id | String  | No       | —       | National organization ID                  |
-| city            | String  | No       | —       | City                                      |
-| state           | String  | No       | —       | State/province                            |
-| country         | String  | No       | —       | Country                                   |
-| email           | String  | No       | —       | Email address (always private)            |
-| is_shared       | Boolean | Yes      | false   | Whether profile is shared across contests |
-| revision        | Integer | Yes      | 0       | Revision counter for optimistic locking   |
+| Field             | Type    | Required | Default | Description                               |
+| ----------------- | ------- | -------- | ------- | ----------------------------------------- |
+| `id`              | UUIDv7  | Yes      | —       | Primary key for participant profile       |
+| `first_name`      | String  | Yes      | —       | Participant's given name                  |
+| `last_name`       | String  | Yes      | —       | Participant's family name                 |
+| `club`            | String  | No       | —       | Club affiliation                          |
+| `fai_number`      | String  | No       | —       | FAI identification number                 |
+| `national_org_id` | String  | No       | —       | National organization ID                  |
+| `city`            | String  | No       | —       | City                                      |
+| `state`           | String  | No       | —       | State/province                            |
+| `country`         | String  | No       | —       | Country                                   |
+| `email`           | String  | No       | —       | Email address (always private)            |
+| `is_shared`       | Boolean | Yes      | false   | Whether profile is shared across contests |
+| `revision`        | Integer | Yes      | 0       | Revision counter for optimistic locking   |
 
 ## Invariants and Constraints
 

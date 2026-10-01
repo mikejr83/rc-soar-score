@@ -15,16 +15,16 @@
 
 ## Fields/Properties
 
-| Field                 | Type                           | Required | Default   | Description                                          |
-| --------------------- | ------------------------------ | -------- | --------- | ---------------------------------------------------- |
-| id                    | UUIDv7                         | yes      | -         | Stable identifier for the published-contest record   |
-| contest_id            | UUIDv7                         | yes      | -         | Identifier of the source private contest             |
-| account_id            | UUIDv7                         | yes      | -         | Current owner of the publication                     |
-| claim_status          | Enum [Unclaimed, Claimed]      | yes      | Unclaimed | Whether the publication has been claimed             |
-| verification_email    | string                         | no       | null      | Verified private email for anonymous publisher       |
-| visibility            | Enum [Private, Hidden, Public] | yes      | Private   | Current visibility of the published projection       |
-| published_at          | datetime                       | no       | null      | Timestamp of first successful publish                |
-| current_projection_id | UUIDv7                         | no       | null      | FK to the most recent complete PublicationProjection |
+| Field                   | Type                           | Required | Default   | Description                                          |
+| ----------------------- | ------------------------------ | -------- | --------- | ---------------------------------------------------- |
+| `id`                    | UUIDv7                         | yes      | -         | Stable identifier for the published-contest record   |
+| `contest_id`            | UUIDv7                         | yes      | -         | Identifier of the source private contest             |
+| `account_id`            | UUIDv7                         | yes      | -         | Current owner of the publication                     |
+| `claim_status`          | Enum [Unclaimed, Claimed]      | yes      | Unclaimed | Whether the publication has been claimed             |
+| `verification_email`    | string                         | no       | null      | Verified private email for anonymous publisher       |
+| `visibility`            | Enum [Private, Hidden, Public] | yes      | Private   | Current visibility of the published projection       |
+| `published_at`          | datetime                       | no       | null      | Timestamp of first successful publish                |
+| `current_projection_id` | UUIDv7                         | no       | null      | FK to the most recent complete PublicationProjection |
 
 ## Invariants and Constraints
 
