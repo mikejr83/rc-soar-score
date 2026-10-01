@@ -12,7 +12,6 @@
 | ----------------------- | ---------------------- | -------- | ------- | ------------------------------------------------------------------------------------------- |
 | `id`                    | PK                     | Yes      | —       | Stable identifier for the validation constraint                                             |
 | `discipline_profile_id` | FK → DisciplineProfile | Yes      | —       | Discipline profile this validation belongs to                                               |
-| `version`               | int                    | Yes      | —       | Rules profile version (redundant with profile version for efficient querying)               |
 | `field_keys`            | json                   | Yes      | —       | JSON-encoded array of field key strings that the validation applies to (at least 2)         |
 | `constraint_type`       | string                 | Yes      | —       | Type of validation (e.g., 'required_if', 'mutually_exclusive', 'less_than', 'greater_than') |
 | `description`           | string                 | No       | —       | Explanation of the constraint for developers and administrators                             |
@@ -23,7 +22,7 @@
 
 ## Invariants and Constraints
 
-- The combination (`discipline_profile_id`, `version`, `field_keys`, `constraint_type`) must be unique.
+- The combination (`discipline_profile_id`, `field_keys`, `constraint_type`) must be unique.
 - `field_keys` must contain at least two elements.
 - All field keys referenced must exist in the discipline's score fields for the same version.
 - Published profiles cannot modify existing validations; only a new version may.

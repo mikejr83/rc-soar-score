@@ -9,30 +9,35 @@
 ## Relationships
 
 - Belongs to ScorePlaceholder (one per version)
+- Belongs to Contest (denormalized `contest_id` for sync scoping and authorization)
 - Cited by ScoreCalculationResult
 - Supersedes previous OfficialScore version for same placeholder
-- Links back to the ScoreAttempt that produced it
+- Links back to the ScoreAttempt that produced it (the configuration and matrix revisions in effect at entry are reachable through that attempt)
 
 ## Fields/Properties
 
-| Field                  | Type      | Required | Default | Description                                                                |
-| ---------------------- | --------- | -------- | ------- | -------------------------------------------------------------------------- |
-| `id`                   | UUIDv7    | Yes      | -       | Stable identity                                                            |
-| `score_placeholder_id` | UUIDv7    | Yes      | -       | FK ScorePlaceholder                                                        |
-| `score_revision`       | int       | Yes      | -       | Revision number of this version                                            |
-| `components`           | JSON      | Yes      | -       | Authoritative components: duration_sec, base_score, penalties, adjustments |
-| `score_attempt_id`     | UUIDv7    | Yes      | -       | FK ScoreAttempt that produced this score                                   |
-| `set_at`               | timestamp | Yes      | -       | When this score became official                                            |
-| `set_by`               | UUIDv7    | Yes      | -       | Person/authority who made it official                                      |
-| `reason`               | string    | Yes      | -       | Explanation for selection                                                  |
+| Field                  | Type      | Required | Default | Description                                                                                                                                          |
+| ---------------------- | --------- | -------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`                   | UUIDv7    | Yes      | -       | Stable identity                                                                                                                                      |
+| `contest_id`           | UUIDv7    | Yes      | -       | FK Contest (denormalized; must match the placeholder's contest)                                                                                      |
+| `score_placeholder_id` | UUIDv7    | Yes      | -       | FK ScorePlaceholder                                                                                                                                  |
+| `score_attempt_id`     | UUIDv7    | Yes      | -       | FK ScoreAttempt that produced this score                                                                                                             |
+| `score_revision`       | int       | Yes      | -       | Revision number of this version                                                                                                                      |
+| `components`           | JSON      | Yes      | -       | Authoritative input components: duration_sec, penalties, adjustments, zero reason. Calculated values (e.g. base score) belong in calculation results |
+| `set_at`               | timestamp | Yes      | -       | When this score became official                                                                                                                      |
+| `set_by`               | UUIDv7    | Yes      | -       | FK; person/authority who made it official                                                                                                            |
+| `reason`               | string    | Yes      | -       | Explanation for selection                                                                                                                            |
 
 ## Invariants and Constraints
 
 - Represents versioned output, not raw submission
 - Multiple OfficialScore records exist per placeholder (version history)
+- (`score_placeholder_id`, `score_revision`) is unique
 - Each cites its source ScoreAttempt for traceability
 - Latest score_revision for a placeholder is the current authoritative score
 - Components normalized to standard units when appropriate
+- Components hold authoritative inputs only; values derived from the contest configuration are calculated and stored in ScoreCalculationResult, so retroactive configuration changes never leave stale values here
+- `contest_id` must equal the contest of the referenced placeholder and attempt
 
 ## Lifecycle
 

@@ -35,6 +35,16 @@ erDiagram
         int revision
     }
 
+    CONTEST_CONFIGURATION_PRESET {
+        uuid id PK
+        uuid owner_account_id FK
+        uuid discipline_profile_id FK
+        text name
+        text description
+        string overrides            "jsonb: config field_key -> value"
+        int revision
+    }
+
     %% Participants
     PARTICIPANT_PROFILE {
         uuid id "PK"
@@ -133,7 +143,6 @@ erDiagram
     DISCIPLINE_CONFIG_FIELD {
         uuid id "PK"
         uuid discipline_profile_id "FK"
-        int version
         text field_key
         text field_type
         text name
@@ -148,7 +157,6 @@ erDiagram
     DISCIPLINE_SCORE_FIELD {
         uuid id "PK"
         uuid discipline_profile_id "FK"
-        int version
         text field_key
         text field_type
         text name
@@ -165,7 +173,6 @@ erDiagram
     DISCIPLINE_VALIDATION {
         uuid id "PK"
         uuid discipline_profile_id "FK"
-        int version
         string field_keys
         text constraint_type
         text description
@@ -177,7 +184,6 @@ erDiagram
     DISCIPLINE_FORMULA {
         uuid id "PK"
         uuid discipline_profile_id "FK"
-        int version
         text formula_key
         text formula_type
         text description
@@ -192,7 +198,6 @@ erDiagram
     DISCIPLINE_RULE {
         uuid id "PK"
         uuid discipline_profile_id "FK"
-        int version
         text rule_key
         text rule_type
         text condition
@@ -230,14 +235,18 @@ erDiagram
     }
 
     CONTEST_CONFIGURATION_REVISION {
-        uuid id "PK"
-        uuid contest_id "FK"
-        uuid discipline_profile_id "FK"
-        text profile_version
-        text group_score_mode
-        text dropped_rounds_mode
-        string overrides
-        int revision
+        uuid id PK
+        uuid contest_id FK
+        int revision_number
+        uuid discipline_profile_id  "FK"
+        int profile_version
+        uuid source_preset_id       "FK, optional"
+        jsonb config
+        uuid landing_table_id       "FK, optional"
+        uuid created_by             "FK"
+        text notes
+        timestamp created_at
+        uuid replaces_revision_id   "FK optional"
     }
 
     %% Matrix / Assignments
@@ -292,8 +301,8 @@ erDiagram
     %% Scores and Results
     SCORE_PLACEHOLDER {
         uuid id "PK"
-        uuid assignment_id "FK"
-        uuid contest_participation_id "FK"
+        uuid assignment_id              "FK"
+        uuid contest_participation_id   "FK"
         int scheduled_round
         int credited_round
         int group
@@ -304,34 +313,36 @@ erDiagram
     }
 
     SCORE_ATTEMPT {
-        uuid id "PK"
-        uuid score_placeholder_id "FK"
-        string raw_components
-        int cumulative_penalty
-        text zero_reason
-        string deductions
-        uuid actor_id
+        uuid id PK
+        uuid contest_id FK
+        uuid score_placeholder_id FK
+        uuid config_revision_id FK
+        uuid matrix_revision_id FK
+        jsonb raw_components
+        uuid actor_id FK
         text authority
-        uuid invitation_reference
-        string source_device
-        string client_mutation_id
-        timestamp acceptance_time
+        uuid invitation_id FK optional
+        text source_device
+        text client_mutation_id
         int base_score_revision
-        int revision
     }
 
     OFFICIAL_SCORE {
-        uuid id "PK"
-        uuid score_placeholder_id "FK"
+        uuid id PK
+        uuid contest_id FK
+        uuid score_placeholder_id FK
+        uuid score_attempt_id FK
         int score_revision
-        string components
+        jsonb components
         timestamp set_at
-        int revision
+        uuid set_by FK
+        text reason
     }
 
     SCORE_CALCULATION_RESULT {
         uuid id "PK"
-        uuid official_score_id "FK"
+        uuid official_score_id      "FK"
+        uuid config_revision_id     "FK"
         int raw_flight_score
         int discipline_raw_score
         int normalized_group_score
@@ -341,6 +352,21 @@ erDiagram
         int team_total
         string calculation_stage
         int revision
+    }
+
+    CONTEST_PENALTY {
+        uuid id PK
+        uuid contest_id FK
+        uuid contest_participation_id FK
+        uuid score_placeholder_id FK
+        text penalty_description
+        int penalty_points
+        uuid assessed_by FK
+        text authority
+        text reason
+        timestamp assessed_at
+        uuid rescinds_penalty_id FK optional
+        text client_mutation_id
     }
 
     %% Publication
@@ -481,6 +507,9 @@ erDiagram
     CONTEST ||--o{ PUBLICATION_IDENTITY : "has"
     CONTEST ||--o{ REVIEW_REQUEST : "indirect ownership"
 
+    ACCOUNT ||--o{ CONTEST_CONFIGURATION_PRESET : "owns"
+    DISCIPLINE_PROFILE ||--o{ CONTEST_CONFIGURATION_PRESET : "based on"
+
     PARTICIPANT_PROFILE ||--o{ CONTEST_PARTICIPATION : "profile for"
     PARTICIPANT_PROFILE }o--o{ CONTEST_PARTICIPATION : "profile for"CONTEST_PARTICIPATION ||--o{ CONTEST_MODEL_LINK : "enters models"
     MODEL_CATALOG |o--o{ CONTEST_MODEL_LINK : "catalog source"
@@ -497,7 +526,6 @@ erDiagram
     MATRIX_REVISION }o--o{ RE_FLIGHT : "has"
 
     CONTEST_CONFIGURATION_REVISION ||--o{ SCORE_ATTEMPT : "cited by"
-    CONTEST_CONFIGURATION_REVISION }o--o{ SCORE_ATTEMPT : "cited by"
     MATRIX_REVISION ||--o{ SCORE_ATTEMPT : "cited by"
     MATRIX_REVISION }o--o{ SCORE_ATTEMPT : "cited by"
 
@@ -507,8 +535,7 @@ erDiagram
     DISCIPLINE_PROFILE ||--o{ DISCIPLINE_FORMULA : "defines"
     DISCIPLINE_PROFILE ||--o{ DISCIPLINE_RULE : "defines"
 
-    LANDING_TABLE ||--o{ CONTEST_CONFIGURATION_REVISION : "used by"
-    LANDING_TABLE }o--o{ CONTEST_CONFIGURATION_REVISION : "used by"
+    LANDING_TABLE |o--o{ CONTEST_CONFIGURATION_REVISION : "used by"
     LANDING_TABLE ||--o{ SCORE_ATTEMPT : "used by"
     LANDING_TABLE }o--o{ SCORE_ATTEMPT : "used by"
 
@@ -526,4 +553,13 @@ erDiagram
     TEAM ||--o{ TEAM_MEMBERSHIP : "has members"
     CONTEST_PARTICIPATION ||--o| TEAM_MEMBERSHIP : "is member via"
     ROLE ||--o{ TEAM_MEMBERSHIP : "defines team role"
+
+    CONTEST_CONFIGURATION_REVISION |o--o| CONTEST_CONFIGURATION_REVISION : "replaces"
+    ACCOUNT ||--o{ CONTEST_CONFIGURATION_REVISION : "created"
+    CONTEST_CONFIGURATION_REVISION ||--o{ OFFICIAL_SCORE : "scored under"
+    CONTEST_CONFIGURATION_REVISION ||--o{ SCORE_CALCULATION_RESULT : "scored under"
+
+    CONTEST_PARTICIPATION ||--o{ CONTEST_PENALTY : "assessed against"
+    SCORE_PLACEHOLDER ||--o{ CONTEST_PENALTY : "incurred during"
+    CONTEST_PENALTY |o--o| CONTEST_PENALTY : "rescinds"
 ```

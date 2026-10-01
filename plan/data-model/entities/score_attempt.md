@@ -9,27 +9,28 @@
 ## Relationships
 
 - Belongs to ScorePlaceholder
+- Belongs to Contest (denormalized `contest_id` for sync scoping and authorization)
+- References the ContestConfigurationRevision and MatrixRevision the client held when the entry was accepted
+- Optionally references the Invitation under which the entry was submitted
 - Captures original submission, every review proposal, superseded attempts, and current official set distinctly
 - A director correction creates a new authorized official revision that never overwrites source history
 
 ## Fields/Properties
 
-| Field                      | Type   | Required     | Default | Description                                        |
-| -------------------------- | ------ | ------------ | ------- | -------------------------------------------------- |
-| `id`                       | UUIDv7 | Yes          | -       | Stable identity                                    |
-| `score_placeholder_id`     | UUIDv7 | Yes          | -       | FK ScorePlaceholder                                |
-| `raw_components`           | JSON   | Yes          | -       | Raw submitted components preserving original units |
-| `cumulative_penalty`       | int    | Yes          | 0       | Running total of penalties applied                 |
-| `actor_id`                 | UUIDv7 | Yes          | -       | Identifies person/authority who submitted          |
-| `authority`                | string | Yes          | -       | Organization/role of submitter                     |
-| `invitation_reference`     | string | No           | -       | Reference number for invitation                    |
-| `source_device`            | string | No           | -       | Device/browser used                                |
-| `client_mutation_id`       | string | Yes (unique) | -       | Client-side dedup key                              |
-| `base_score_revision`      | int    | Yes          | -       | Score revision this attempt was based on           |
-| `config_revision`          | int    | Yes          | -       | Contest configuration revision                     |
-| `matrix_revision`          | int    | Yes          | -       | Score matrix revision                              |
-| `discipline_rules_version` | string | Yes          | -       | Version of discipline rules applied                |
-| `calculation_version`      | string | Yes          | -       | Version of calculation logic                       |
+| Field                  | Type   | Required     | Default | Description                                                                                                                                                              |
+| ---------------------- | ------ | ------------ | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `id`                   | UUIDv7 | Yes          | -       | Stable identity                                                                                                                                                          |
+| `contest_id`           | UUIDv7 | Yes          | -       | FK Contest (denormalized; must match the placeholder's contest)                                                                                                          |
+| `score_placeholder_id` | UUIDv7 | Yes          | -       | FK ScorePlaceholder                                                                                                                                                      |
+| `config_revision_id`   | UUIDv7 | Yes          | -       | FK ContestConfigurationRevision the client held when the entry was accepted ("entered under"). Informational: calculation always uses the current configuration revision |
+| `matrix_revision_id`   | UUIDv7 | Yes          | -       | FK MatrixRevision the client held when the entry was accepted                                                                                                            |
+| `raw_components`       | JSON   | Yes          | -       | Raw submitted components preserving original units                                                                                                                       |
+| `actor_id`             | UUIDv7 | Yes          | -       | FK; identifies person/authority who submitted                                                                                                                            |
+| `authority`            | string | Yes          | -       | Organization/role of submitter                                                                                                                                           |
+| `invitation_id`        | UUIDv7 | No           | -       | FK Invitation under which the entry was submitted                                                                                                                        |
+| `source_device`        | string | No           | -       | Device/browser used                                                                                                                                                      |
+| `client_mutation_id`   | string | Yes (unique) | -       | Client-side dedup key                                                                                                                                                    |
+| `base_score_revision`  | int    | Yes          | -       | Score revision this attempt was based on                                                                                                                                 |
 
 ## Invariants and Constraints
 
@@ -38,6 +39,8 @@
 - Score revision history kept at placeholder level, not per attempt
 - Drafts/queued submissions are not accepted data: don't affect lifecycle/rankings/publication
 - client_mutation_id must be unique for deduplication
+- `contest_id` must equal the contest of the referenced placeholder, configuration revision, and matrix revision
+- Contest configuration changes are retroactive: `config_revision_id` records what the client saw at entry time and does not pin how the score is later calculated
 
 ## Lifecycle
 

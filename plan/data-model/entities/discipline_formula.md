@@ -12,7 +12,6 @@
 | ----------------------- | --------------------------------------------------- | -------- | ------- | ---------------------------------------------------------------------------------------- |
 | `id`                    | PK                                                  | Yes      | —       | Stable identifier for the formula                                                        |
 | `discipline_profile_id` | FK → DisciplineProfile                              | Yes      | —       | Discipline profile this formula belongs to                                               |
-| `version`               | int                                                 | Yes      | —       | Rules profile version (redundant with profile version for efficient querying)            |
 | `formula_key`           | string                                              | Yes      | —       | Unique identifier within the profile version that clients and calculators use            |
 | `description`           | string                                              | No       | —       | Explanation of what this formula computes for documentation purposes                     |
 | `formula_text`          | string                                              | Yes      | —       | Expression text as a string (e.g., "flightPoints + landingBonus - heightPenalty")        |
@@ -26,7 +25,7 @@
 
 ## Invariants and Constraints
 
-- The combination (`discipline_profile_id`, `version`, `formula_key`) must be unique.
+- The combination (`discipline_profile_id`, and `formula_key`) must be unique.
 - Exactly one formula per profile version may have `is_primary` set to true.
 - `inputs` must be valid JSON. All input references must be resolvable to score fields or constants within the profile or calculation context.
 - `depends_on` must be valid JSON. Cycles in dependencies are not allowed.

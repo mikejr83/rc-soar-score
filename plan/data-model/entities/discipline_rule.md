@@ -23,7 +23,6 @@ For `rule_type: "zero"` rules, the entity includes display and UX metadata (`dis
 | ----------------------- | --------------------------------------------- | -------- | ------- | ------------------------------------------------------------------------------------ |
 | `id`                    | PK                                            | Yes      | —       | Stable identifier for the rule                                                       |
 | `discipline_profile_id` | FK → DisciplineProfile                        | Yes      | —       | Discipline profile this rule belongs to                                              |
-| `version`               | int                                           | Yes      | —       | Rules profile version (redundant with profile version for efficient querying)        |
 | `rule_key`              | string                                        | Yes      | —       | Unique identifier within the profile version for this rule                           |
 | `rule_type`             | enum(calc, penalty, zero, interaction, other) | Yes      | —       | What the rule does (scoring, penalty, zero condition, field interactions)            |
 | `condition`             | string                                        | No       | —       | Rule condition expression (e.g., "flight_time_over_target" for overflight penalties) |
@@ -39,7 +38,7 @@ For `rule_type: "zero"` rules, the entity includes display and UX metadata (`dis
 
 ## Invariants and Constraints
 
-- The combination (`discipline_profile_id`, `version`, `rule_key`) must be unique.
+- The combination (`discipline_profile_id` and `rule_key`) must be unique.
 - If `rule_type` is `zero`, `display_name` and `display_order` must be provided.
 - `applies_to` must be valid JSON (JSON array).
 - `depends_on` must be valid JSON (JSON array of rule keys).

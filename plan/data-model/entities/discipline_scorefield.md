@@ -12,7 +12,6 @@
 | ----------------------- | --------------------------------------------------- | -------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `id`                    | PK                                                  | Yes      | —       | Stable identifier for the score field                                                                                                                         |
 | `discipline_profile_id` | FK → DisciplineProfile                              | Yes      | —       | Discipline profile this field belongs to                                                                                                                      |
-| `version`               | int                                                 | Yes      | —       | Rules profile version (redundant with profile version for efficient querying)                                                                                 |
 | `field_key`             | string                                              | Yes      | —       | Unique identifier within the profile version that clients and calculators use                                                                                 |
 | `field_type`            | enum(string, int, float, bool, date, time, landing) | Yes      | —       | Data type of the field value. `landing` types dynamically generate their options from landing table links; the `options` property is empty for landing types. |
 | `name`                  | string                                              | Yes      | —       | Human-readable label for UI display                                                                                                                           |
@@ -28,7 +27,7 @@
 
 ## Invariants and Constraints
 
-- The combination (`discipline_profile_id`, `version`, `field_key`) must be unique.
+- The combination (`discipline_profile_id`, and `field_key`) must be unique.
 - `options` may only be present when `field_type` is `enum`.
 - `default_value` must be valid JSON matching the schema implied by `field_type`.
 - If `is_zero_reason` is true, `zero_reason_code` must be present.
