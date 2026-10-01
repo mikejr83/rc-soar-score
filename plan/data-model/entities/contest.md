@@ -2,12 +2,12 @@
 
 **Relationship to architecture-requirements:** plan/architecture-requirements/data/contest.md
 **Purpose:** The private source-of-truth aggregate for one radio-controlled soaring event. Stores identity, location, schedule, configuration state, and all derived scoring state.
-**Identifier:** `contestId` (UUIDv7)
+**Identifier:** `id` (UUIDv7)
 **Parent entity:** None (top-level aggregate)
 **Child entities:** ConfigurationRevisions (1:N), MatrixRevisions (1:N), Participants/ParticipationLinks (1:N), ScorePlaceholders (1:N), AuditEvents (1:N); has one SyncCursor; has one PublicationIdentity
 
 ## Relationships
-- Optional Account owner (0:1 from Contest.ownerAccountId to Account.accountId)
+- Optional Account owner (0:1 from Contest.owner_account_id to Account.id)
 - One SyncCursor per contest (1:1)
 - One PublicationIdentity per contest (1:1)
 - Multiple ConfigurationRevisions (1:N), MatrixRevisions (1:N)
@@ -16,23 +16,23 @@
 ## Fields/Properties
 | Field | Type | Required | Default | Description |
 |-------|------|----------|---------|-------------|
-| contestId | UUIDv7 | Yes | Generated on creation | Primary key; stable event identifier |
+| id | UUIDv7 | Yes | Generated on creation | Primary key; stable event identifier |
 | name | String | Yes | None | Contest name |
-| startDateTime | DateTime | Yes | None | Start date/time in contest's timezone |
-| endDateTime | DateTime | Yes | None | End date/time in contest's timezone |
+| start_date_time | DateTime | Yes | None | Start date/time in contest's timezone |
+| end_date_time | DateTime | Yes | None | End date/time in contest's timezone |
 | timezone | String | Yes | None | IANA timezone name; stored at creation |
 | host | String | No | None | Host/venue name |
 | city | String | No | None | City name |
 | state | String | No | None | State/province name |
 | country | String | No | None | Country name |
-| ownerAccountId | UUIDv7 | No | None | FK to Account; null for anonymous/local contests |
-| lifecycleState | Enum | Yes | Created | Created, Configuring, Ready, Running, Completed |
-| scoringAccess | Enum | Yes | Closed | Closed, Open |
-| adminLock | Enum | Yes | Unlocked | Unlocked, Locked |
-| publicationStatus | Enum | Yes | Unpublished | Unpublished, Published |
+| owner_account_id | UUIDv7 | No | None | FK to Account; null for anonymous/local contests |
+| lifecycle_state | Enum | Yes | Created | Created, Configuring, Ready, Running, Completed |
+| scoring_access | Enum | Yes | Closed | Closed, Open |
+| admin_lock | Enum | Yes | Unlocked | Unlocked, Locked |
+| publication_status | Enum | Yes | Unpublished | Unpublished, Published |
 | visibility | Enum | Yes | Private | Private, Hidden, Public |
-| localArchive | Boolean | Yes | false | Local archive flag |
-| deletionStatus | Enum | Yes | None | None, PendingDelete, Restored, Deleted |
+| local_archive | Boolean | Yes | false | Local archive flag |
+| deletion_status | Enum | Yes | None | None, PendingDelete, Restored, Deleted |
 | revision | Integer | Yes | 1 | Current revision number |
 
 ## Invariants and Constraints
@@ -45,7 +45,7 @@
 - Participant scoring access controls which participants can submit scores
 
 ## Lifecycle
-State machine for `lifecycleState`:
+State machine for `lifecycle_state`:
 - Created → Configuring → Ready → Running → Completed
 - Created: contest exists but no configuration begun
 - Configuring: active configuration in progress
@@ -58,8 +58,8 @@ Completion closes participant scoring and prevents new participation or matrix c
 ## Privacy and Scope
 - Contest identity, schedule, and location are shared across authorized installations
 - Participant data visibility is controlled by `visibility` (Private/Hidden/Public)
-- Owner identification (`ownerAccountId`) links to Account entity for ownership rules
-- Anonymous contests have no `ownerAccountId` and use anonymous verification flow
+- Owner identification (`owner_account_id`) links to Account entity for ownership rules
+- Anonymous contests have no `owner_account_id` and use anonymous verification flow
 
 ## Audit and Synchronization
 - Every state transition records: actor, authority, source installation, base revision, resulting revision, server/client timestamps

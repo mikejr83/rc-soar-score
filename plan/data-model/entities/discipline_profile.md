@@ -2,24 +2,24 @@
 
 **Relationship to architecture-requirements:** [disciplines-and-configuration.md](../../architecture-requirements/data/disciplines-and-configuration.md)
 **Purpose:** Stores a versioned official scoring profile for a soaring discipline. Defines configuration fields, score-entry fields, validation, zero reasons, formulas, normalization, rounding, and calculation metadata.
-**Identifier:** `entity_id` (UUIDv7)
+**Identifier:** `id` (UUIDv7)
 **Parent entity:** None
 **Child entities:** None
 
 ## Fields/Properties
 | Field | Type | Required | Default | Description |
 |-------|------|----------|---------|-------------|
-| `profileId` | PK | Yes | — | Stable identifier for the profile |
+| `id` | PK | Yes | — | Stable identifier for the profile |
 | `type` | enum(ALES, ThermalDuration, F3J, F5J, F3L, F3K) | Yes | — | Discipline type |
 | `version` | int | Yes | — | Rules profile version |
-| `configFields` | object[] | Yes | [] | Allowed top-level configuration fields (name, type, required, range, default) |
-| `scoreEntryFields` | object[] | Yes | [] | Per-heat score-entry fields (name, type, required, range, units) |
-| `validationRules` | object[] | No | [] | Validation constraints for configuration and score entry |
-| `zeroReasons` | enum[] | Yes | [] | Permitted codes for manual zero results (e.g. CRASH, DNF, LATE, OVERWEIGHT, NO_SHOW, TIME_LIMIT) |
+| `config_fields` | object[] | Yes | [] | Allowed top-level configuration fields (name, type, required, range, default) |
+| `score_entry_fields` | object[] | Yes | [] | Per-heat score-entry fields (name, type, required, range, units) |
+| `validation_rules` | object[] | No | [] | Validation constraints for configuration and score entry |
+| `zero_reasons` | enum[] | Yes | [] | Permitted codes for manual zero results (e.g. CRASH, DNF, LATE, OVERWEIGHT, NO_SHOW, TIME_LIMIT) |
 | `formulas` | object[] | Yes | [] | Score and penalty formulas |
-| `normalizationRules` | object[] | No | [] | Group scoring and normalization (matrix algorithm) |
-| `roundingRules` | object[] | Yes | [] | Per-field rounding or truncation rules (precision, direction) |
-| `calculationMetadata` | object | Yes | {} | Metadata describing calculation steps (intermediate, final, penalties) |
+| `normalization_rules` | object[] | No | [] | Group scoring and normalization (matrix algorithm) |
+| `rounding_rules` | object[] | Yes | [] | Per-field rounding or truncation rules (precision, direction) |
+| `calculation_metadata` | object | Yes | {} | Metadata describing calculation steps (intermediate, final, penalties) |
 
 ## Invariants and Constraints
 - The combination (`type`, `version`) must be unique.

@@ -1,81 +1,81 @@
 # RC Soar Score Entity Relationship Diagram
 
-ERD for the 30 conceptual entities. Physical design: PostgreSQL backend with IndexedDB clients, UUIDv7 identifiers, composite unique constraints on natural business keys.
+ERD for the 31 conceptual entities. Physical design: PostgreSQL backend with IndexedDB clients, UUIDv7 identifiers, composite unique constraints on natural business keys.
 
 ```mermaid
 erDiagram
     %% Accounts and Ownership
     ACCOUNT {
-        uuid accountId "PK"
-        text firstName
-        text lastName
+        uuid id "PK"
+        text first_name
+        text last_name
         text email
-        text providerSubject
+        text provider_subject
     }
 
     %% Contest
     CONTEST {
-        uuid contestId "PK"
+        uuid id "PK"
         text name
-        timestamp startDateTime
-        timestamp endDateTime
+        timestamp start_date_time
+        timestamp end_date_time
         text timezone
         text host
         text city
         text state
         text country
-        uuid ownerAccountId "FK optional"
-        text lifecycleState
-        text scoringAccess
-        text adminLock
-        text publicationStatus
+        uuid owner_account_id "FK optional"
+        text lifecycle_state
+        text scoring_access
+        text admin_lock
+        text publication_status
         text visibility
-        text deletionStatus
-        bool localArchive
+        text deletion_status
+        bool local_archive
         int revision
     }
 
     %% Participants
     PARTICIPANT_PROFILE {
-        uuid profileId "PK"
-        text firstName
-        text lastName
+        uuid id "PK"
+        text first_name
+        text last_name
         text club
-        text faiNumber
-        text nationalOrgId
+        text fai_number
+        text national_org_id
         text city
         text state
         text country
         text email
-        bool isShared
+        bool is_shared
         int revision
     }
 
     PARTICIPANT_ACCOUNT_LINK {
-        uuid linkId "PK"
-        uuid profileId "FK"
-        uuid accountId "FK"
+        uuid id "PK"
+        uuid participant_profile_id "FK"
+        uuid account_id "FK"
         int revision
     }
 
     CONTEST_PARTICIPATION {
-        uuid contestParticipationId "PK"
-        uuid contestId "FK"
-        uuid profileId "FK"
+        uuid id "PK"
+        uuid contest_id "FK"
+        uuid participant_profile_id "FK"
         string cls
-        uuid roleId "FK"
-        text roleType
-        int participantNumber
-        uuid teamLinkRef "FK optional"
-        uuid contestModelLinkRef "FK optional"
-        uuid scoringUuid
+        uuid role_id "FK"
+        text role_type
+        int participant_number
+        uuid team_membership_id "FK optional"
+        uuid contest_model_link_id "FK optional"
+        uuid scoring_uuid
         int revision
     }
 
     %% Teams, Roles, Models
     ROLE {
-        uuid roleId "PK"
-        text displayName
+        uuid id "PK"
+        text display_name
         text type
         text scope
         text permission
@@ -83,186 +83,186 @@ erDiagram
     }
 
     TEAM {
-        uuid teamId "PK"
-        uuid contestId "FK"
+        uuid id "PK"
+        uuid contest_id "FK"
         text name
-        int pilotTotals
+        int pilot_totals
         int revision
     }
 
     TEAM_MEMBERSHIP {
-        uuid membershipId "PK"
-        uuid teamId "FK"
-        uuid linkId "FK"
+        uuid id "PK"
+        uuid team_id "FK"
+        uuid contest_participation_id "FK"
         text role
         int revision
     }
 
     MODEL_CATALOG {
-        uuid catalogId "PK"
+        uuid id "PK"
         text name
         text manufacturer
         int revision
     }
 
     CONTEST_MODEL_LINK {
-        uuid linkId "PK"
-        uuid contestId "FK"
-        uuid linkId_part "FK"
-        uuid catalogId "FK optional"
-        text modelName
+        uuid id "PK"
+        uuid contest_id "FK"
+        uuid contest_participation_id "FK"
+        uuid model_catalog_id "FK optional"
+        text model_name
         text manufacturer
-        text modelId
+        text model_id
         int revision
     }
 
     %% Discipline / Config
     DISCIPLINE_PROFILE {
-        uuid profileId "PK"
+        uuid id "PK"
         text type
         int version
         string config
     }
 
     LANDING_TABLE {
-        uuid tableId "PK"
+        uuid id "PK"
         text name
         int revision
         string config
     }
 
     LANDING_RESULT {
-        uuid resultId "PK"
-        int pointValue
-        string displayValue
+        uuid id "PK"
+        int point_value
+        string display_value
         int points
         string note
-        uuid tableId "FK"
+        uuid landing_table_id "FK"
     }
 
     ROUND_CONFIG {
-        uuid configId "PK"
-        uuid contestId "FK"
+        uuid id "PK"
+        uuid contest_id "FK"
         text mode
-        int groupsPerRound
-        int groupSize
+        int groups_per_round
+        int group_size
         int revision
     }
 
     CONTEST_CONFIGURATION_REVISION {
-        uuid revisionId "PK"
-        uuid contestId "FK"
-        uuid disciplineProfileId "FK"
-        text configVersion
-        text groupScoreMode
-        text droppedRoundsMode
+        uuid id "PK"
+        uuid contest_id "FK"
+        uuid discipline_profile_id "FK"
+        text profile_version
+        text group_score_mode
+        text dropped_rounds_mode
         string overrides
         int revision
     }
 
     %% Matrix / Assignments
     MATRIX_REVISION {
-        uuid revisionId "PK"
-        uuid contestId "FK"
+        uuid id "PK"
+        uuid contest_id "FK"
         string config
         uuid seed
-        text fairnessResult
-        uuid creatorId
+        text fairness_result
+        uuid creator_id
         text reason
-        text finalizingAgent
+        text finalizing_agent
         bool finalized
         int revision
     }
 
     MATRIX_ASSIGNMENT {
-        uuid assignmentId "PK"
-        uuid matrixRevisionId "FK"
-        uuid linkId_part "FK"
-        int scheduledRound
-        int creditedRound
+        uuid id "PK"
+        uuid matrix_revision_id "FK"
+        uuid contest_participation_id "FK"
+        int scheduled_round
+        int credited_round
         int group
         int lane
-        text assignmentType
-        uuid sourceAssignmentId "FK optional"
-        text flightSequence
-        int assignmentRevision
+        text assignment_type
+        uuid source_assignment_id "FK optional"
+        text flight_sequence
+        int assignment_revision
         int revision
     }
 
     RE_FLIGHT {
-        uuid reflightId "PK"
-        uuid contestId "FK"
-        uuid creditedRound
+        uuid id "PK"
+        uuid contest_id "FK"
+        int credited_round
         string type
         int sequence
-        string lifecycleStatus
+        string lifecycle_status
         string reasons
         string awards
-        string selectedPilots
+        string selected_pilots
         string exclusion
         string responses
         string notifications
-        string directorDecision
+        string director_decision
         int revision
     }
 
     %% Scores and Results
     SCORE_PLACEHOLDER {
-        uuid placeholderId "PK"
-        uuid assignmentId "FK"
-        uuid linkId_part "FK"
-        int scheduledRound
-        int creditedRound
+        uuid id "PK"
+        uuid assignment_id "FK"
+        uuid contest_participation_id "FK"
+        int scheduled_round
+        int credited_round
         int group
-        int flightSequence
+        int flight_sequence
         text state
-        int scoreRevision
+        int score_revision
         int revision
     }
 
     SCORE_ATTEMPT {
-        uuid attemptId "PK"
-        uuid placeholderId "FK"
-        string rawComponents
-        int cumulativePenalty
-        text zeroReason
+        uuid id "PK"
+        uuid score_placeholder_id "FK"
+        string raw_components
+        int cumulative_penalty
+        text zero_reason
         string deductions
-        uuid actorId
+        uuid actor_id
         text authority
-        uuid invitationReference
-        string sourceDevice
-        string clientMutationId
-        timestamp acceptanceTime
-        int baseScoreRevision
+        uuid invitation_reference
+        string source_device
+        string client_mutation_id
+        timestamp acceptance_time
+        int base_score_revision
         int revision
     }
 
     OFFICIAL_SCORE {
-        uuid officialScoreId "PK"
-        uuid placeholderId "FK"
-        int scoreRevision
+        uuid id "PK"
+        uuid score_placeholder_id "FK"
+        int score_revision
         string components
-        timestamp setAt
+        timestamp set_at
         int revision
     }
 
     SCORE_CALCULATION_RESULT {
-        uuid resultId "PK"
-        uuid calculatedFromRevision "FK"
-        int rawFlightScore
-        int normalizedGroupScore
-        int contestTotal
-        bool droppedRound
+        uuid id "PK"
+        uuid official_score_id "FK"
+        int raw_flight_score
+        int normalized_group_score
+        int contest_total
+        bool dropped_round
         int rank
-        int teamTotal
-        string calculationStage
+        int team_total
+        string calculation_stage
         int revision
     }
 
     %% Publication
     PUBLICATION_IDENTITY {
-        uuid publicationId "PK"
-        uuid contestId "FK"
+        uuid id "PK"
+        uuid contest_id "FK"
         text owner
         text claim_status
         text visibility
@@ -270,98 +270,99 @@ erDiagram
     }
 
     PUBLICATION_PROJECTION {
-        uuid projectionId "PK"
-        uuid publicationId "FK"
-        int sourceRevision
+        uuid id "PK"
+        uuid publication_id "FK"
+        int source_revision
         string content
-        timestamp publishedAt
+        timestamp published_at
         text result
-        int projectionRevision
+        int projection_revision
         int revision
     }
 
     %% Synchronization and Audit
     SYNC_CURSOR {
-        uuid cursorId "PK"
-        uuid contestId "FK"
-        int lastSyncedSeq
-        timestamp updatedAt
+        uuid id "PK"
+        uuid contest_id "FK"
+        int last_synced_sequence
+        timestamp updated_at
     }
 
     MUTATION_RECORD {
-        uuid mutationId "PK"
+        uuid id "PK"
         uuid entity_id
-        uuid contestId "FK"
-        text entityType
-        int baseRevision
-        string clientMutationId
-        uuid actor
+        text entity_type
+        uuid contest_id "FK"
+        int base_revision
+        string client_mutation_id
+        uuid actor_id
         text authority
-        string sourceInstallation
-        timestamp clientTime
-        timestamp serverTime
+        string source_installation
+        timestamp client_time
+        timestamp server_time
         text outcome
         int revision
     }
 
     CONFLICT_RECORD {
-        uuid conflictId "PK"
+        uuid id "PK"
         uuid entity_id
-        uuid winnerMutationId "FK"
-        uuid loserMutationId "FK"
+        uuid winner_mutation_id "FK"
+        uuid loser_mutation_id "FK"
         text reason
         text resolution
     }
 
     TOMBSTONE {
-        uuid tombstoneId "PK"
+        uuid id "PK"
         uuid entity_id
-        uuid contestId "FK"
+        text entity_type
+        uuid contest_id "FK"
         text status
-        string deletionReason
+        string deletion_reason
     }
 
     INVITATION {
-        uuid invitationId "PK"
-        uuid contestId "FK"
-        uuid linkId_part "FK"
+        uuid id "PK"
+        uuid contest_id "FK"
+        uuid contest_participation_id "FK"
         string type
-        string protectedCred
-        int invitationRevision
+        string protected_credential
+        int invitation_revision
         text state
         text audience
-        timestamp issuedAt
-        timestamp usedAt
-        timestamp expiredAt
-        timestamp revokedAt
+        timestamp issued_at
+        timestamp used_at
+        timestamp expired_at
+        timestamp revoked_at
     }
 
     REVIEW_REQUEST {
-        uuid reviewId "PK"
-        uuid placeholderId "FK"
-        string proposedComponents
-        int proposedCumulativePenalty
-        string participantMessage
-        uuid requester
-        int baseScoreRevision
-        timestamp requestTime
+        uuid id "PK"
+        uuid score_placeholder_id "FK"
+        string proposed_components
+        int proposed_cumulative_penalty
+        string participant_message
+        uuid requester_id
+        int base_score_revision
+        timestamp requested_at
         text state
-        uuid decisionActor
-        timestamp decisionTime
-        string decisionMessage
+        uuid decision_actor_id
+        timestamp decision_time
+        string decision_message
     }
 
     AUDIT_EVENT {
-        uuid auditEventId "PK"
-        uuid contestId "FK"
-        text entityType
-        uuid entityId
+        uuid id "PK"
+        uuid contest_id "FK"
+        text entity_type
+        uuid entity_id
         text action
-        uuid actor
+        uuid actor_id "FK"
         text authority
         string installation
-        int baseRevision
-        int resultingRevision
+        int base_revision
+        int resulting_revision
         timestamp server
         timestamp client
         text reason
@@ -369,7 +370,6 @@ erDiagram
     }
 
     %% Relationships
-
     ACCOUNT ||--o{ CONTEST : "owns (optional)"
     ACCOUNT }o--o{ PARTICIPANT_ACCOUNT_LINK : "linked to"
     PARTICIPANT_PROFILE }o--o{ PARTICIPANT_ACCOUNT_LINK : "linked to"

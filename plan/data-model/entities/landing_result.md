@@ -2,8 +2,8 @@
 
 **Relationship to architecture-requirements:** [disciplines-and-configuration.md](../../architecture-requirements/data/disciplines-and-configuration.md)
 **Purpose:** Stores individual scoring rows for a LandingTable. Each row maps an entered value (e.g., distance in meters) to its resolved point value. Used by disciplines with landing distance/point scoring.
-**Identifier:** `result_id` (UUIDv7)
-**Parent entity:** LandingTable (via table_id FK)
+**Identifier:** `id` (UUIDv7)
+**Parent entity:** LandingTable (via landing_table_id FK)
 **Child entities:** None
 
 ## Relationships
@@ -12,14 +12,14 @@
 ## Fields/Properties
 | Field | Type | Required | Default | Description |
 |-------|------|----------|---------|-------------|
-| `result_id` | PK | Yes | — | Stable identifier for this row |
-| `table_id` | FK | Yes | — | References LandingTable.table_id |
+| `id` | PK | Yes | — | Stable identifier for this row |
+| `landing_table_id` | FK | Yes | — | References LandingTable.id |
 | `point_value` | int | Yes | — | The entered value (e.g., distance in meters) |
 | `display_value` | string | Yes | — | Human-readable display (e.g., "4.0 m", "10 pts") |
 | `ordinal_position` | int | Yes | — | The position where this value is displayed in the selection list |
 
 ## Invariants and Constraints
-- (table_id, point_value) must be unique — no duplicate point values
+- (landing_table_id, point_value) must be unique — no duplicate point values
 - point_value must be ≥ 0
 - display_value must not be empty
 
@@ -36,6 +36,6 @@ Drafted -> Published
 - Readable by all clients; mutations by table administrators only
 
 ## Audit and Synchronization
-- Score records store point_value and table_id for full reproducibility
+- Score records store point_value and landing_table_id for full reproducibility
 - Table row additions/edits do NOT invalidate existing scores — each row is immutable once published
 - Synchronization follows standard entity sync: new rows are replicated, tombstones indicate deleted rows

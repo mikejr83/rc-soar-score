@@ -2,7 +2,7 @@
 
 **Relationship to architecture-requirements:** plan/architecture-requirements/data/scores-and-results.md
 **Purpose:** Versioned authoritative score component set, selected per score placeholder. Distinct from immutable ScoreAttempt submissions.
-**Identifier:** `officialScoreId` (UUIDv7)
+**Identifier:** `id` (UUIDv7)
 **Parent entity:** ScorePlaceholder
 **Child entities:** None
 
@@ -15,20 +15,20 @@
 ## Fields/Properties
 | Field | Type | Required | Default | Description |
 |-------|------|----------|---------|-------------|
-| officialScoreId | UUIDv7 | Yes | - | Stable identity |
-| placeholderId | UUIDv7 | Yes | - | FK ScorePlaceholder |
-| scoreRevision | int | Yes | - | Revision number of this version |
-| components | JSON | Yes | - | Authoritative components: durationSec, baseScore, penalties, adjustments |
-| attemptId | UUIDv7 | Yes | - | FK ScoreAttempt that produced this score |
-| setAt | timestamp | Yes | - | When this score became official |
-| setBy | UUIDv7 | Yes | - | Person/authority who made it official |
+| id | UUIDv7 | Yes | - | Stable identity |
+| score_placeholder_id | UUIDv7 | Yes | - | FK ScorePlaceholder |
+| score_revision | int | Yes | - | Revision number of this version |
+| components | JSON | Yes | - | Authoritative components: duration_sec, base_score, penalties, adjustments |
+| score_attempt_id | UUIDv7 | Yes | - | FK ScoreAttempt that produced this score |
+| set_at | timestamp | Yes | - | When this score became official |
+| set_by | UUIDv7 | Yes | - | Person/authority who made it official |
 | reason | string | Yes | - | Explanation for selection |
 
 ## Invariants and Constraints
 - Represents versioned output, not raw submission
 - Multiple OfficialScore records exist per placeholder (version history)
 - Each cites its source ScoreAttempt for traceability
-- Latest scoreRevision for a placeholder is the current authoritative score
+- Latest score_revision for a placeholder is the current authoritative score
 - Components normalized to standard units when appropriate
 
 ## Lifecycle
@@ -42,4 +42,4 @@ Created when score made official. New version created on each officialization/sc
 - Each version immutable
 - New versions created by making score official, director corrections, or score updates
 - Mutations: creation only (append-only version history)
-- Idempotent creation guarded by scoreRevision counter
+- Idempotent creation guarded by score_revision counter

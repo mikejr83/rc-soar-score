@@ -2,27 +2,27 @@
 
 **Relationship to architecture-requirements:** plan/architecture-requirements/data/participants.md
 **Purpose:** Associates a participant profile with a user account, enabling multiple accounts to link to the same profile over time without rewriting contest history.
-**Identifier:** `linkId` (UUIDv7)
+**Identifier:** `id` (UUIDv7)
 **Parent entity:** None (join entity)
 **Child entities:** None
 
 ## Relationships
 - Join between ParticipatingProfile and Account
-- References one ParticipantProfile (profileId FK)
-- References one Account (accountId FK)
+- References one ParticipantProfile (participant_profile_id FK)
+- References one Account (account_id FK)
 
 ## Fields/Properties
 | Field | Type | Required | Default | Description |
 |-------|------|----------|---------|-------------|
-| linkId | UUIDv7 | Yes | — | Primary key for the link |
-| profileId | UUIDv7 | Yes | — | Foreign key to ParticipantProfile |
-| accountId | UUIDv7 | Yes | — | Foreign key to Account |
+| id | UUIDv7 | Yes | — | Primary key for the link |
+| participant_profile_id | UUIDv7 | Yes | — | Foreign key to ParticipantProfile |
+| account_id | UUIDv7 | Yes | — | Foreign key to Account |
 | revision | Integer | Yes | 0 | Revision counter for optimistic locking |
 
 ## Invariants and Constraints
-- (profileId, accountId) pair must be unique to prevent duplicate links
-- profileId must reference an existing ParticipantProfile
-- accountId must reference an existing Account
+- (participant_profile_id, account_id) pair must be unique to prevent duplicate links
+- participant_profile_id must reference an existing ParticipantProfile
+- account_id must reference an existing Account
 - At least one link must exist for a participant to interact through an account
 
 ## Lifecycle
@@ -34,6 +34,6 @@ Created when an account is first linked to a participant profile. Links may beco
 - Many-to-many relationship allows changed emails or replacement accounts without rewriting contest history
 
 ## Audit and Synchronization
-- Create operation is idempotent for the same (profileId, accountId) pair
+- Create operation is idempotent for the same (participant_profile_id, account_id) pair
 - Revision counter tracks link-specific mutations
 - Link deletions are soft — account associations become inactive rather than removed for audit purposes

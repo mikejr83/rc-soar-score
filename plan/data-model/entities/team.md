@@ -2,28 +2,28 @@
 
 **Relationship to architecture-requirements:** plan/architecture-requirements/data/teams-roles-models.md
 **Purpose:** Represents a team within a contest for which pilot totals are aggregated to produce team rankings.
-**Identifier:** `teamId` (UUIDv7)
+**Identifier:** `id` (UUIDv7)
 **Parent entity:** Contest
 **Child entities:** TeamMembership
 
 ## Relationships
-- Belongs to Contest via contestId foreign key
-- Parent of TeamMembership via teamId foreign key
+- Belongs to Contest via contest_id foreign key
+- Parent of TeamMembership via team_id foreign key
 - Team totals are derived from eligible pilot contest totals, never entered as source data
 
 ## Fields/Properties
 | Field | Type | Required | Default | Description |
 |-------|------|----------|---------|-------------|
-| teamId | UUIDv7 | Yes | — | Primary key |
-| contestId | UUIDv7 | Yes | — | Foreign key to Contest |
+| id | UUIDv7 | Yes | — | Primary key |
+| contest_id | UUIDv7 | Yes | — | Foreign key to Contest |
 | name | String | Yes | — | Team name (unique within contest) |
-| pilotTotals | Integer | No | — | Number of pilot totals used for team result |
+| pilot_totals | Integer | No | — | Number of pilot totals used for team result |
 | revision | Integer | Yes | 0 | Revision counter for optimistic locking |
 
 ## Invariants and Constraints
 - Team name must be unique within a contest
 - A team can only have one membership per participation link
-- pilotTotals must be within [1, team size] range
+- pilot_totals must be within [1, team size] range
 - A pilot can only be on one team per contest
 
 ## Lifecycle

@@ -2,7 +2,7 @@
 
 **Relationship to architecture-requirements:** plan/architecture-requirements/data/participants.md
 **Purpose:** Authoritative contest-specific snapshot that links a participant profile to a contest with contest-specific class, role, number, team, and model information.
-**Identifier:** `contestParticipationId` (UUIDv7)
+**Identifier:** `id` (UUIDv7)
 **Parent entity:** Contest
 **Child entities:** MatrixAssignment, ScorePlaceholder, Invitation, ContestModelLink
 
@@ -16,34 +16,34 @@
 ## Fields/Properties
 | Field | Type | Required | Default | Description |
 |-------|------|----------|---------|-------------|
-| contestParticipationId | UUIDv7 | Yes | — | Primary key |
-| contestId | UUIDv7 | Yes | — | Foreign key to Contest |
-| profileId | UUIDv7 | Yes | — | Foreign key to ParticipantProfile |
+| id | UUIDv7 | Yes | — | Primary key |
+| contest_id | UUIDv7 | Yes | — | Foreign key to Contest |
+| participant_profile_id | UUIDv7 | Yes | — | Foreign key to ParticipantProfile |
 | cls | String | Yes | — | Class designation for this contest |
-| roleId | UUIDv7 | Yes | — | Foreign key to Role definition |
-| roleType | Enum | Yes | Pilot | Role type: Pilot or NonFlier |
-| participantNumber | Integer | No | — | Participant number (allocated at first draw) |
-| teamRef | UUIDv7 | No | — | Reference to TeamMembership if on a team |
-| scoringUuid | String | Yes | — | Contest-scoped public identifier for scoring |
-| contestModelLinkRef | UUIDv7 | No | — | Reference to ContestModelLink |
-| privacyOverrides | Object | No | {} | Contest-specific privacy settings |
-| participationStatus | Enum | Yes | Pending | Status (Pending, Accepted, Active, Completed, Withdrawn) |
+| role_id | UUIDv7 | Yes | — | Foreign key to Role definition |
+| role_type | Enum | Yes | Pilot | Role type: Pilot or NonFlier |
+| participant_number | Integer | No | — | Participant number (allocated at first draw) |
+| team_membership_id | UUIDv7 | No | — | Reference to TeamMembership if on a team |
+| scoring_uuid | String | Yes | — | Contest-scoped public identifier for scoring |
+| contest_model_link_id | UUIDv7 | No | — | Reference to ContestModelLink |
+| privacy_overrides | Object | No | {} | Contest-specific privacy settings |
+| participation_status | Enum | Yes | Pending | Status (Pending, Accepted, Active, Completed, Withdrawn) |
 | revision | Integer | Yes | 0 | Revision counter for optimistic locking |
 
 ## Invariants and Constraints
 - A profile can participate in multiple contests but only once per contest
 - Participant number is allocated at first applicable entry draw and not renumbered during contest
-- scoringUuid must be unique within the contest scope
+- scoring_uuid must be unique within the contest scope
 - cls must reference a valid class defined for the contest
-- roleId must reference a valid role in the contest
-- If teamRef is set, it must reference an active TeamMembership
-- participationStatus state transitions: Pending→Accepted→Active→Completed or Withdrawn at any stage after Accepted
+- role_id must reference a valid role in the contest
+- If team_membership_id is set, it must reference an active TeamMembership
+- participation_status state transitions: Pending→Accepted→Active→Completed or Withdrawn at any stage after Accepted
 
 ## Lifecycle
 ```
 Pending → Accepted → Active → Completed
-               ↓
-            Withdrawn
+           ↓
+        Withdrawn
 ```
 - Created when director issues invitation or participant joins waiting list
 - Moves to Accepted when participant confirms
@@ -53,8 +53,8 @@ Pending → Accepted → Active → Completed
 
 ## Privacy and Scope
 - Contest-scoped data: only participants in this contest see contest-specific details
-- scoringUuid is the public identifier used in results and standings
-- privacyOverrides can restrict visibility of specific fields (e.g., hide contact info from other participants even if shared profile)
+- scoring_uuid is the public identifier used in results and standings
+- privacy_overrides can restrict visibility of specific fields (e.g., hide contact info from other participants even if shared profile)
 - Team membership is public within contest
 
 ## Audit and Synchronization

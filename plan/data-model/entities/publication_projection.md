@@ -2,7 +2,7 @@
 
 **Relationship to architecture-requirements:** plan/architecture-requirements/data/publication.md
 **Purpose:** An atomic, immutable snapshot of a contest's public data at a specific publish time, providing complete revision semantics for readers.
-**Identifier:** `projection_id` (UUIDv7)
+**Identifier:** `id` (UUIDv7)
 **Parent entity:** PublicationIdentity
 **Child entities:** None
 
@@ -14,25 +14,25 @@
 ## Fields/Properties
 | Field | Type | Required | Default | Description |
 |-------|------|----------|---------|-------------|
-| `projection_id` | UUIDv7 | yes | - | Unique identifier for this projection revision |
-| `publication_id` | UUIDv7 | yes | - | FK to the parent PublicationIdentity |
-| `source_contest_revision` | integer | yes | - | Source contest revision number at publish time |
-| `source_config_revision` | integer | yes | - | Source configuration revision number |
-| `source_matrix_revision` | integer | yes | - | Source score matrix revision number |
-| `discipline_rules_version` | string | yes | - | Version of discipline rules used |
-| `calculation_version` | string | yes | - | Version of calculation engine used |
-| `contest_identity` | object | yes | - | Snapshot of contest identity and dates for display |
-| `dates` | object | no | null | Contested period dates |
-| `host_location` | object | no | null | Host and geographic location data |
-| `participant_display_data` | array | no | null | Permitted participant display data |
-| `teams` | array | no | null | Permitted team display data when applicable |
-| `matrix_info` | object | no | null | Score matrix information |
-| `scores` | array | no | null | Computed scores |
-| `rankings` | array | no | null | Computed rankings |
-| `calculation_metadata` | object | no | null | Calculation metadata and provenance |
-| `published_at` | datetime | yes | - | Timestamp of publication |
-| `published_by` | UUIDv7 | yes | - | Identifier of the actor who published |
-| `result` | Enum [Published, Failed] | yes | Published | Outcome of the publish attempt |
+| id | UUIDv7 | yes | - | Unique identifier for this projection revision |
+| publication_id | UUIDv7 | yes | - | FK to the parent PublicationIdentity |
+| contest_revision | integer | yes | - | Source contest revision number at publish time |
+| config_revision | integer | yes | - | Source configuration revision number |
+| matrix_revision | integer | yes | - | Source score matrix revision number |
+| discipline_rules_version | string | yes | - | Version of discipline rules used |
+| calculation_version | string | yes | - | Version of calculation engine used |
+| contest_identity | object | yes | - | Snapshot of contest identity and dates for display |
+| dates | object | no | null | Contested period dates |
+| host_location | object | no | null | Host and geographic location data |
+| participant_display_data | array | no | null | Permitted participant display data |
+| teams | array | no | null | Permitted team display data when applicable |
+| matrix_info | object | no | null | Score matrix information |
+| scores | array | no | null | Computed scores |
+| rankings | array | no | null | Computed rankings |
+| calculation_metadata | object | no | null | Calculation metadata and provenance |
+| published_at | datetime | yes | - | Timestamp of publication |
+| published_by | UUIDv7 | yes | - | Identifier of the account who published |
+| result | Enum [Published, Failed] | yes | Published | Outcome of the publish attempt |
 
 ## Invariants and Constraints
 - Each projection is an atomic, immutable snapshot created at publish time

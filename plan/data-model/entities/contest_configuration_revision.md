@@ -2,7 +2,7 @@
 
 **Relationship to architecture-requirements:** [contest.md](../../architecture-requirements/data/contest.md), [disciplines-and-configuration.md](../../architecture-requirements/data/disciplines-and-configuration.md)
 **Purpose:** Revisioned contest configuration overrides linked to official discipline profile. Overrides are versioned so historical results remain reproducible when config changes.
-**Identifier:** `revision_id` (UUIDv7)
+**Identifier:** `id` (UUIDv7)
 **Parent entity:** Contest
 **Child entities:** None
 
@@ -16,15 +16,15 @@
 
 | Field | Type | Required | Default | Description |
 |-------|------|----------|---------|-------------|
-| `revision_id` | UUIDv7 | Yes | — | Primary key (surrogate) |
+| `id` | UUIDv7 | Yes | — | Primary key (surrogate) |
 | `contest_id` | UUIDv7 | Yes | — | FK → Contest |
-| `profile_id` | UUIDv7 | Yes | — | FK → DisciplineProfile |
+| `discipline_profile_id` | UUIDv7 | Yes | — | FK → DisciplineProfile |
 | `profile_version` | int | Yes | — | Version of DisciplineProfile at time of creation |
 | `config_json` | string | Yes | — | JSON blob of full config overrides |
 | `created_by` | UUIDv7 | Yes | — | Actor who created the revision |
 | `notes` | string | No | — | Free-text notes about the revision |
 | `created_at` | ISO 8601 | Yes | — | Timestamp of creation |
-| `replaces_revision` | UUIDv7 | No | — | FK → previous ContestConfigurationRevision |
+| `replaces_revision` | UUIDv7 | No | — | FK → previous contest_configuration_revision_id |
 | `current` | bool | Yes | true | Whether this is the active revision |
 
 ## Invariants and Constraints

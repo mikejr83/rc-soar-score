@@ -2,7 +2,7 @@
 
 **Relationship to architecture-requirements:** [disciplines-and-configuration.md](../../architecture-requirements/data/disciplines-and-configuration.md)
 **Purpose:** Stores the identity of a versioned lookup table used for scoring lookups. Rows in this table identify the table (name, unit, meaning); the score values themselves are stored in separate LandingResult rows.
-**Identifier:** `table_id` (UUIDv7)
+**Identifier:** `id` (UUIDv7)
 **Parent entity:** None
 **Child entities:** LandingResult (many)
 
@@ -12,14 +12,14 @@
 ## Fields/Properties
 | Field | Type | Required | Default | Description |
 |-------|------|----------|---------|-------------|
-| `table_id` | PK | Yes | — | Stable identifier for the table |
+| `id` | PK | Yes | — | Stable identifier for the table |
 | `name` | string | Yes | — | Human-readable name |
 | `revision` | int | Yes | — | Revision number (increments monotonically) |
 | `input_unit` | enum(meters, feet) | Yes | — | Unit of measurement for the input key |
 
 ## Invariants and Constraints
-- (table_id, revision) must be unique.
-- revision starts at 1 and increments monotonically per table_id.
+- (id, revision) must be unique.
+- revision starts at 1 and increments monotonically per id.
 - Once published, row data (name, unit, meaning) is immutable for that revision.
 
 ## Lifecycle
@@ -37,4 +37,4 @@ Drafted -> Published -> Superseded (by new revision)
 
 ## Synchronization
 - New revisions add rows (never modify existing rows).
-- Revision numbers must be unique per table_id.
+- Revision numbers must be unique per id.

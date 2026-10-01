@@ -2,7 +2,7 @@
 
 **Relationship to architecture-requirements:** plan/architecture-requirements/data/reviews-and-invitations.md, plan/architecture-requirements/participating-contestants-and-teams/contest.md
 **Purpose:** Controls participant access to a contest via Magic Link URLs or QR codes. Pilot invitations authorize only that pilot; non-flier invitations may be used to select only pilots on the same contest team.
-**Identifier:** `entity_id` (UUIDv7)
+**Identifier:** `id` (UUIDv7)
 **Parent entity:** Contest
 **Child entities:** None
 
@@ -15,20 +15,20 @@
 ## Fields/Properties
 | Field | Type | Required | Default | Description |
 |-------|------|----------|---------|-------------|
-| invitationId | UUIDv7 | Yes | - | Primary key identifying the invitation |
-| contestId | UUIDv7 | Yes | - | Foreign key to the Contest |
-| linkId_part | UUIDv7 | Yes | - | Foreign key to the Participation record |
+| id | UUIDv7 | Yes | - | Primary key identifying the invitation |
+| contest_id | UUIDv7 | Yes | - | Foreign key to the Contest |
+| contest_participation_id | UUIDv7 | Yes | - | Foreign key to the Participation record |
 | type | Enum | Yes | MagicURL | Type of invitation: `MagicURL`, `QRCode` |
-| protectedCredential | String | Yes | - | Encrypted credential; raw credential never stored in logs/audit |
-| invitationRevision | Integer | Yes | 0 | Revision counter for optimistic locking |
+| protected_credential | String | Yes | - | Encrypted credential; raw credential never stored in logs/audit |
+| invitation_revision | Integer | Yes | 0 | Revision counter for optimistic locking |
 | state | Enum | Yes | Sent | Current state: `Sent`, `Used`, `Expired`, `Revoked` |
 | audience | Enum | Yes | Pilot | Target audience: `Pilot`, `Helper` |
-| issuedAt | Timestamp | Yes | - | Time invitation was issued |
-| usedAt | Timestamp | No | null | Time invitation was used (non-null if state is Used) |
-| expiredAt | Timestamp | No | null | Time invitation expired (non-null if state is Expired) |
-| revokedAt | Timestamp | No | null | Time invitation was revoked (non-null if state is Revoked) |
-| deliveryOutcomes | Array of Objects | No | [] | Records of delivery attempts and outcomes |
-| rateLimitAttempts | Integer | Yes | 0 | Count of remaining allowed uses for non-pilot QR codes |
+| issued_at | Timestamp | Yes | - | Time invitation was issued |
+| used_at | Timestamp | No | null | Time invitation was used (non-null if state is Used) |
+| expired_at | Timestamp | No | null | Time invitation expired (non-null if state is Expired) |
+| revoked_at | Timestamp | No | null | Time invitation was revoked (non-null if state is Revoked) |
+| delivery_outcomes | Array of Objects | No | [] | Records of delivery attempts and outcomes |
+| rate_limit_attempts | Integer | Yes | 0 | Count of remaining allowed uses for non-pilot QR codes |
 
 ## Invariants and Constraints
 - Pilot invitation authorizes only that specific pilot; non-flier may select only pilots on same contest team
@@ -37,7 +37,7 @@
 - Invitation is single-use; once used it transitions to `Used`
 - Invitation transitions to `Expired` when expiration time passes or contest is complete and 24 hours have passed
 - Invitation transitions to `Revoked` when manually revoked
-- `rateLimitAttempts` must be > 0 for non-pilot QR codes
+- `rate_limit_attempts` must be > 0 for non-pilot QR codes
 
 ## Lifecycle
 ```
@@ -47,7 +47,7 @@ Sent -> Revoked
 ```
 
 ## Privacy and Scope
-- `protectedCredential` must be encrypted and never appear in logs, audit, or sync traffic without the decryption key
+- `protected_credential` must be encrypted and never appear in logs, audit, or sync traffic without the decryption key
 - Invitation state and timestamps are shared within the contest context
 - Delivery outcomes and rate limit attempts are visible to contest administrators
 
@@ -55,6 +55,6 @@ Sent -> Revoked
 - Invitation creation is audited as `InvitationIssued`
 - Invitation use is audited as `InvitationUsed`
 - Invitation revocation is audited as part of invitation lifecycle
-- Delivery failures are recorded in `deliveryOutcomes`
-- Mutation uses `invitationRevision` for optimistic locking
+- Delivery failures are recorded in `delivery_outcomes`
+- Mutation uses `invitation_revision` for optimistic locking
 - Invitation state transitions are atomic
