@@ -62,6 +62,19 @@ Soar Score is an RC sailplane soaring contest scoring and management suite. It c
 3. **State management**: Follow Flutter best practices for the specific app
 4. **API design**: RESTful endpoints on shelf-based server
 
+## Formatting
+
+### Markdown
+
+- All Markdown files must conform to the repo's Prettier config (`.prettierrc`). Do not hand-format against it.
+- After creating or editing any `.md` file, run `npx prettier --write <file>` and keep the result.
+- Before finishing a task, run `npx prettier --check "**/*.md"` and fix any failures.
+- Never disable or edit Prettier config or `.prettierignore` to make a check pass.
+- Use `-` for bullets, `1.` style for ordered lists, and `_emphasis_` / `**strong**`.
+- One blank line between blocks; no trailing whitespace; file ends with a single newline.
+- Tables must be column-aligned (Prettier will realign them; just run it).
+- Do not hard-wrap prose unless `proseWrap` is set in the config.
+
 ## Business and Architecture Requirements
 
 Documentation is provided in the `./plan` folder. This contains business, architecture, and ui requirements. Consult this documentation when determining the best course of action for implementing business logic.
