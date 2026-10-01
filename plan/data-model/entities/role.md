@@ -7,19 +7,22 @@
 **Child entities:** None
 
 ## Relationships
+
 - Referenced by ContestParticipation via role_id foreign key
 
 ## Fields/Properties
-| Field | Type | Required | Default | Description |
-|-------|------|----------|---------|-------------|
-| id | UUIDv7 | Yes | — | Primary key |
-| display_name | String | Yes | — | Human-readable role name |
-| type | Enum | Yes | — | Role type: Pilot or NonFlier |
-| scope | Enum | Yes | — | Scope: System (built-in) or Director (contest-specific) |
-| permission | Enum | Yes | — | Permission level: Admin, Score, or Read |
-| revision | Integer | Yes | 0 | Revision counter for optimistic locking |
+
+| Field        | Type    | Required | Default | Description                                             |
+| ------------ | ------- | -------- | ------- | ------------------------------------------------------- |
+| id           | UUIDv7  | Yes      | —       | Primary key                                             |
+| display_name | String  | Yes      | —       | Human-readable role name                                |
+| type         | Enum    | Yes      | —       | Role type: Pilot or NonFlier                            |
+| scope        | Enum    | Yes      | —       | Scope: System (built-in) or Director (contest-specific) |
+| permission   | Enum    | Yes      | —       | Permission level: Admin, Score, or Read                 |
+| revision     | Integer | Yes      | 0       | Revision counter for optimistic locking                 |
 
 ## Invariants and Constraints
+
 - System-scoped roles are shared defaults and cannot be deleted
 - Director-scoped roles are contest-specific and may be customized
 - Permission must be appropriate for the role type (e.g., Pilot roles are non-flier helpers)
@@ -27,14 +30,17 @@
 - A role's permission level determines what operations participants with that role may perform
 
 ## Lifecycle
+
 - System roles are created at application initialization and persist across all contests
 - Director roles are created when a director defines contest-specific roles
 - Roles may be updated but system roles retain stable identifiers
 
 ## Privacy and Scope
+
 - Role definitions are contest-scoped (or system-scoped for defaults)
 - Role name and permission level are visible to all participants in the contest
 
 ## Audit and Synchronization
+
 - Mutation through revision-based optimistic concurrency
 - Role updates do not retroactively affect existing participation links

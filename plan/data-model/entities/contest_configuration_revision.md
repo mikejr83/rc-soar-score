@@ -14,18 +14,18 @@
 
 ## Fields/Properties
 
-| Field | Type | Required | Default | Description |
-|-------|------|----------|---------|-------------|
-| `id` | UUIDv7 | Yes | — | Primary key (surrogate) |
-| `contest_id` | UUIDv7 | Yes | — | FK → Contest |
-| `discipline_profile_id` | UUIDv7 | Yes | — | FK → DisciplineProfile |
-| `profile_version` | int | Yes | — | Version of DisciplineProfile at time of creation |
-| `config_json` | string | Yes | — | JSON blob of full config overrides |
-| `created_by` | UUIDv7 | Yes | — | Actor who created the revision |
-| `notes` | string | No | — | Free-text notes about the revision |
-| `created_at` | ISO 8601 | Yes | — | Timestamp of creation |
-| `replaces_revision` | UUIDv7 | No | — | FK → previous contest_configuration_revision_id |
-| `current` | bool | Yes | true | Whether this is the active revision |
+| Field                   | Type     | Required | Default | Description                                      |
+| ----------------------- | -------- | -------- | ------- | ------------------------------------------------ |
+| `id`                    | UUIDv7   | Yes      | —       | Primary key (surrogate)                          |
+| `contest_id`            | UUIDv7   | Yes      | —       | FK → Contest                                     |
+| `discipline_profile_id` | UUIDv7   | Yes      | —       | FK → DisciplineProfile                           |
+| `profile_version`       | int      | Yes      | —       | Version of DisciplineProfile at time of creation |
+| `config_json`           | string   | Yes      | —       | JSON blob of full config overrides               |
+| `created_by`            | UUIDv7   | Yes      | —       | Actor who created the revision                   |
+| `notes`                 | string   | No       | —       | Free-text notes about the revision               |
+| `created_at`            | ISO 8601 | Yes      | —       | Timestamp of creation                            |
+| `replaces_revision`     | UUIDv7   | No       | —       | FK → previous contest_configuration_revision_id  |
+| `current`               | bool     | Yes      | true    | Whether this is the active revision              |
 
 ## Invariants and Constraints
 

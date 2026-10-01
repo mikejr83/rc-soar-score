@@ -7,6 +7,7 @@
 **Child entities:** MatrixAssignment, ScorePlaceholder, Invitation, ContestModelLink
 
 ## Relationships
+
 - Links ParticipantProfile to Contest
 - Parent of MatrixAssignment (flight assignments)
 - Parent of ScorePlaceholder (score records)
@@ -14,23 +15,25 @@
 - Parent of ContestModelLink (model used in contest)
 
 ## Fields/Properties
-| Field | Type | Required | Default | Description |
-|-------|------|----------|---------|-------------|
-| id | UUIDv7 | Yes | — | Primary key |
-| contest_id | UUIDv7 | Yes | — | Foreign key to Contest |
-| participant_profile_id | UUIDv7 | Yes | — | Foreign key to ParticipantProfile |
-| cls | String | Yes | — | Class designation for this contest |
-| role_id | UUIDv7 | Yes | — | Foreign key to Role definition |
-| role_type | Enum | Yes | Pilot | Role type: Pilot or NonFlier |
-| participant_number | Integer | No | — | Participant number (allocated at first draw) |
-| team_membership_id | UUIDv7 | No | — | Reference to TeamMembership if on a team |
-| scoring_uuid | String | Yes | — | Contest-scoped public identifier for scoring |
-| contest_model_link_id | UUIDv7 | No | — | Reference to ContestModelLink |
-| privacy_overrides | Object | No | {} | Contest-specific privacy settings |
-| participation_status | Enum | Yes | Pending | Status (Pending, Accepted, Active, Completed, Withdrawn) |
-| revision | Integer | Yes | 0 | Revision counter for optimistic locking |
+
+| Field                  | Type    | Required | Default | Description                                              |
+| ---------------------- | ------- | -------- | ------- | -------------------------------------------------------- |
+| id                     | UUIDv7  | Yes      | —       | Primary key                                              |
+| contest_id             | UUIDv7  | Yes      | —       | Foreign key to Contest                                   |
+| participant_profile_id | UUIDv7  | Yes      | —       | Foreign key to ParticipantProfile                        |
+| cls                    | String  | Yes      | —       | Class designation for this contest                       |
+| role_id                | UUIDv7  | Yes      | —       | Foreign key to Role definition                           |
+| role_type              | Enum    | Yes      | Pilot   | Role type: Pilot or NonFlier                             |
+| participant_number     | Integer | No       | —       | Participant number (allocated at first draw)             |
+| team_membership_id     | UUIDv7  | No       | —       | Reference to TeamMembership if on a team                 |
+| scoring_uuid           | String  | Yes      | —       | Contest-scoped public identifier for scoring             |
+| contest_model_link_id  | UUIDv7  | No       | —       | Reference to ContestModelLink                            |
+| privacy_overrides      | Object  | No       | {}      | Contest-specific privacy settings                        |
+| participation_status   | Enum    | Yes      | Pending | Status (Pending, Accepted, Active, Completed, Withdrawn) |
+| revision               | Integer | Yes      | 0       | Revision counter for optimistic locking                  |
 
 ## Invariants and Constraints
+
 - A profile can participate in multiple contests but only once per contest
 - Participant number is allocated at first applicable entry draw and not renumbered during contest
 - scoring_uuid must be unique within the contest scope
@@ -40,11 +43,13 @@
 - participation_status state transitions: Pending→Accepted→Active→Completed or Withdrawn at any stage after Accepted
 
 ## Lifecycle
+
 ```
 Pending → Accepted → Active → Completed
            ↓
         Withdrawn
 ```
+
 - Created when director issues invitation or participant joins waiting list
 - Moves to Accepted when participant confirms
 - Moves to Active when contest operations begin
@@ -52,12 +57,14 @@ Pending → Accepted → Active → Completed
 - Can move to Withdrawn from any post-Accepted state
 
 ## Privacy and Scope
+
 - Contest-scoped data: only participants in this contest see contest-specific details
 - scoring_uuid is the public identifier used in results and standings
 - privacy_overrides can restrict visibility of specific fields (e.g., hide contact info from other participants even if shared profile)
 - Team membership is public within contest
 
 ## Audit and Synchronization
+
 - Mutation through revision-based optimistic concurrency
 - Participant number allocation is idempotent once assigned
 - Contest-specific overrides do not affect global profile data
