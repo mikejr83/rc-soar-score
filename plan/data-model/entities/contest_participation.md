@@ -16,21 +16,21 @@
 
 ## Fields/Properties
 
-| Field                  | Type    | Required | Default | Description                                              |
-| ---------------------- | ------- | -------- | ------- | -------------------------------------------------------- |
-| id                     | UUIDv7  | Yes      | —       | Primary key                                              |
-| contest_id             | UUIDv7  | Yes      | —       | Foreign key to Contest                                   |
-| participant_profile_id | UUIDv7  | Yes      | —       | Foreign key to ParticipantProfile                        |
-| cls                    | String  | Yes      | —       | Class designation for this contest                       |
-| role_id                | UUIDv7  | Yes      | —       | Foreign key to Role definition                           |
-| role_type              | Enum    | Yes      | Pilot   | Role type: Pilot or NonFlier                             |
-| participant_number     | Integer | No       | —       | Participant number (allocated at first draw)             |
-| team_membership_id     | UUIDv7  | No       | —       | Reference to TeamMembership if on a team                 |
-| scoring_uuid           | String  | Yes      | —       | Contest-scoped public identifier for scoring             |
-| contest_model_link_id  | UUIDv7  | No       | —       | Reference to ContestModelLink                            |
-| privacy_overrides      | Object  | No       | {}      | Contest-specific privacy settings                        |
-| participation_status   | Enum    | Yes      | Pending | Status (Pending, Accepted, Active, Completed, Withdrawn) |
-| revision               | Integer | Yes      | 0       | Revision counter for optimistic locking                  |
+| Field                    | Type    | Required | Default | Description                                              |
+| ------------------------ | ------- | -------- | ------- | -------------------------------------------------------- |
+| `id`                     | UUIDv7  | Yes      | —       | Primary key                                              |
+| `contest_id`             | UUIDv7  | Yes      | —       | Foreign key to Contest                                   |
+| `participant_profile_id` | UUIDv7  | Yes      | —       | Foreign key to ParticipantProfile                        |
+| `cls`                    | String  | Yes      | —       | Class designation for this contest                       |
+| `role_id`                | UUIDv7  | Yes      | —       | Foreign key to Role definition                           |
+| `role_type`              | Enum    | Yes      | Pilot   | Role type: Pilot or NonFlier                             |
+| `participant_number`     | Integer | No       | —       | Participant number (allocated at first draw)             |
+| `team_membership_id`     | UUIDv7  | No       | —       | Reference to TeamMembership if on a team                 |
+| `scoring_uuid`           | UUIDv7  | Yes      | —       | Contest-scoped public identifier for scoring             |
+| `contest_model_link_id`  | UUIDv7  | No       | —       | Reference to ContestModelLink                            |
+| `privacy_overrides`      | Object  | No       | {}      | Contest-specific privacy settings                        |
+| `participation_status`   | Enum    | Yes      | Pending | Status (Pending, Accepted, Active, Completed, Withdrawn) |
+| `revision`               | Integer | Yes      | 0       | Revision counter for optimistic locking                  |
 
 ## Invariants and Constraints
 
