@@ -1,9 +1,9 @@
 # RoundConfig
 
-**Relationship to architecture-requirements:** [contest.md](../../architecture-requirements/data/contest.md)
-**Purpose:** Stores contest-scoped round setup and execution configuration. Defines how heats are organized in each round of a contest.
-**Identifier:** `id` (UUIDv7)
-**Parent entity:** Contest
+**Relationship to architecture-requirements:** [contest.md](../../architecture-requirements/data/contest.md)  
+**Purpose:** Stores contest-scoped round setup and execution configuration. Defines how heats are organized in each round of a contest.  
+**Identifier:** `id` (UUIDv7)  
+**Parent entity:** Contest  
 **Child entities:** None
 
 ## Relationships

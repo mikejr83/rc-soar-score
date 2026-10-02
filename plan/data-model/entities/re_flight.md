@@ -2,10 +2,10 @@
 
 ** NOTE - THIS ENTITY NEEDS MORE WORK **
 
-**Relationship to architecture-requirements:** `plan/architecture-requirements/data/matrix-and-assignments.md`
-**Purpose:** Records the lifecycle of a re-flight contest decision, including the credited round, awarding participants, director's final decision, and versioning of discipline/rules/calculation data at the time of the decision.
-**Identifier:** `id` (UUIDv7)
-**Parent entity:** Contest
+**Relationship to architecture-requirements:** `plan/architecture-requirements/data/matrix-and-assignments.md`  
+**Purpose:** Records the lifecycle of a re-flight contest decision, including the credited round, awarding participants, director's final decision, and versioning of discipline/rules/calculation data at the time of the decision.  
+**Identifier:** `id` (UUIDv7)  
+**Parent entity:** Contest  
 **Child entities:** None (leaf entity, references other entities only)
 
 ## Relationships

@@ -1,9 +1,9 @@
 # MatrixRevision
 
-**Relationship to architecture-requirements:** `plan/architecture-requirements/data/matrix-and-assignments.md`, `plan/architecture-requirements/data/matrix-draw.md`
-**Purpose:** Records one draw of the flight matrix: which rounds it covers, the settings and inputs the draw used, the seed and engine version needed to reproduce it, the fairness result, and who created and finalized it. A new draw never overwrites an earlier revision. A revision either extends the matrix with new rounds or replaces unscored rounds from some round to the end of the contest.
-**Identifier:** `id` (UUIDv7)
-**Parent entity:** Contest
+**Relationship to architecture-requirements:** `plan/architecture-requirements/data/matrix-and-assignments.md`, `plan/architecture-requirements/data/matrix-draw.md`  
+**Purpose:** Records one draw of the flight matrix: which rounds it covers, the settings and inputs the draw used, the seed and engine version needed to reproduce it, the fairness result, and who created and finalized it. A new draw never overwrites an earlier revision. A revision either extends the matrix with new rounds or replaces unscored rounds from some round to the end of the contest.  
+**Identifier:** `id` (UUIDv7)  
+**Parent entity:** Contest  
 **Child entities:** Round, MatrixAssignment
 
 ## Relationships

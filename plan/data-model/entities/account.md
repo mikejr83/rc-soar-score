@@ -1,9 +1,9 @@
 # Account
 
-**Relationship to architecture-requirements:** plan/architecture-requirements/data/accounts.md
-**Purpose:** Represents an authenticated person who owns contests, manages director-controlled data, and syncs authorized contests. Supports claiming anonymous publications. Stores identity information and identity-provider subject for authentication.
-**Identifier:** `id` (UUIDv7)
-**Parent entity:** None (top-level)
+**Relationship to architecture-requirements:** plan/architecture-requirements/data/accounts.md  
+**Purpose:** Represents an authenticated person who owns contests, manages director-controlled data, and syncs authorized contests. Supports claiming anonymous publications. Stores identity information and identity-provider subject for authentication.  
+**Identifier:** `id` (UUIDv7)  
+**Parent entity:** None (top-level)  
 **Child entities:** None direct; owns contests via foreign key
 
 ## Relationships

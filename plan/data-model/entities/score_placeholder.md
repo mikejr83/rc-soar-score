@@ -1,9 +1,9 @@
 # ScorePlaceholder
 
-**Relationship to architecture-requirements:** plan/architecture-requirements/data/scores-and-results.md
-**Purpose:** Reservation slot for the score of one pilot assignment. It exists before any value is entered, so every current assignment has a place for its score, attempts, reviews, and penalties. Its `state` is a denormalized summary of the score workflow; the facts live in its attempts, review requests, and official scores.
-**Identifier:** `id` (UUIDv7)
-**Parent entity:** MatrixAssignment
+**Relationship to architecture-requirements:** plan/architecture-requirements/data/scores-and-results.md  
+**Purpose:** Reservation slot for the score of one pilot assignment. It exists before any value is entered, so every current assignment has a place for its score, attempts, reviews, and penalties. Its `state` is a denormalized summary of the score workflow; the facts live in its attempts, review requests, and official scores.  
+**Identifier:** `id` (UUIDv7)  
+**Parent entity:** MatrixAssignment  
 **Child entities:** ScoreAttempt, OfficialScore, ReviewRequest, ContestPenalty
 
 ## Relationships

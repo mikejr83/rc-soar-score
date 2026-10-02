@@ -1,9 +1,9 @@
 # DisciplineScoreField
 
-**Relationship to architecture-requirements:** [disciplines-and-configuration.md](../../architecture-requirements/data/disciplines-and-configuration.md)
-**Purpose:** Defines a score-entry field for a discipline variant. Each row specifies the schema, constraints, and zero-reason semantics for one field that score recorders enter during a round.
-**Identifier:** `id` (UUIDv7)
-**Parent entity:** DisciplineProfile
+**Relationship to architecture-requirements:** [disciplines-and-configuration.md](../../architecture-requirements/data/disciplines-and-configuration.md)  
+**Purpose:** Defines a score-entry field for a discipline variant. Each row specifies the schema, constraints, and zero-reason semantics for one field that score recorders enter during a round.  
+**Identifier:** `id` (UUIDv7)  
+**Parent entity:** DisciplineProfile  
 **Child entities:** None
 
 ## Fields/Properties

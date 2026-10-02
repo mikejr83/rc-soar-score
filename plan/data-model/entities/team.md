@@ -1,9 +1,9 @@
 # Team
 
-**Relationship to architecture-requirements:** plan/architecture-requirements/data/teams-roles-models.md
-**Purpose:** Represents a team within a contest for which pilot totals are aggregated to produce team rankings.
-**Identifier:** `id` (UUIDv7)
-**Parent entity:** Contest
+**Relationship to architecture-requirements:** plan/architecture-requirements/data/teams-roles-models.md  
+**Purpose:** Represents a team within a contest for which pilot totals are aggregated to produce team rankings.  
+**Identifier:** `id` (UUIDv7)  
+**Parent entity:** Contest  
 **Child entities:** TeamMembership
 
 ## Relationships

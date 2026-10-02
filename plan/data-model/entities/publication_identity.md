@@ -1,9 +1,9 @@
 # PublicationIdentity
 
-**Relationship to architecture-requirements:** plan/architecture-requirements/data/publication.md
-**Purpose:** Persistent identity record linking a private contest to its published projection; provides stable ownership, claim status, and visibility independent of private contest data.
-**Identifier:** `id` (UUIDv7)
-**Parent entity:** None (top-level)
+**Relationship to architecture-requirements:** plan/architecture-requirements/data/publication.md  
+**Purpose:** Persistent identity record linking a private contest to its published projection; provides stable ownership, claim status, and visibility independent of private contest data.  
+**Identifier:** `id` (UUIDv7)  
+**Parent entity:** None (top-level)  
 **Child entities:** PublicationProjection
 
 ## Relationships

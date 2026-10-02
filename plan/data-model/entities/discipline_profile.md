@@ -1,9 +1,9 @@
 # DisciplineProfile
 
-**Relationship to architecture-requirements:** [disciplines-and-configuration.md](../../architecture-requirements/data/disciplines-and-configuration.md)
-**Purpose:** Stores the identity, metadata, and lifecycle state for a versioned official scoring profile of a soaring discipline. All rules (config fields, score entry fields, formulas, validation, zero reasons, etc.) are stored in child entities keyed by `discipline_profile_id` and `version`.
-**Identifier:** `id` (UUIDv7)
-**Parent entity:** None
+**Relationship to architecture-requirements:** [disciplines-and-configuration.md](../../architecture-requirements/data/disciplines-and-configuration.md)  
+**Purpose:** Stores the identity, metadata, and lifecycle state for a versioned official scoring profile of a soaring discipline. All rules (config fields, score entry fields, formulas, validation, zero reasons, etc.) are stored in child entities keyed by `discipline_profile_id` and `version`.  
+**Identifier:** `id` (UUIDv7)  
+**Parent entity:** None  
 **Child entities:** DisciplineConfigField, DisciplineScoreField, DisciplineValidation, DisciplineFormula, DisciplineRule
 
 ## Fields/Properties

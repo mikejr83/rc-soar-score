@@ -1,9 +1,9 @@
 # ReviewRequest
 
-**Relationship to architecture-requirements:** plan/architecture-requirements/data/reviews-and-invitations.md
-**Purpose:** Captures a score reviewer's proposed revised score while preserving the original score for comparison. Cannot be submitted on scores marked Official or Locked.
-**Identifier:** `id` (UUIDv7)
-**Parent entity:** Score
+**Relationship to architecture-requirements:** plan/architecture-requirements/data/reviews-and-invitations.md  
+**Purpose:** Captures a score reviewer's proposed revised score while preserving the original score for comparison. Cannot be submitted on scores marked Official or Locked.  
+**Identifier:** `id` (UUIDv7)  
+**Parent entity:** Score  
 **Child entities:** None
 
 ## Relationships

@@ -1,9 +1,9 @@
 # TeamMembership
 
-**Relationship to architecture-requirements:** plan/architecture-requirements/data/teams-roles-models.md
-**Purpose:** Joins participation links to teams, enabling score aggregation by team and specifying whether the member is a flying pilot, captain, or non-flying helper.
-**Identifier:** `id` (UUIDv7)
-**Parent entity:** Team
+**Relationship to architecture-requirements:** plan/architecture-requirements/data/teams-roles-models.md  
+**Purpose:** Joins participation links to teams, enabling score aggregation by team and specifying whether the member is a flying pilot, captain, or non-flying helper.  
+**Identifier:** `id` (UUIDv7)  
+**Parent entity:** Team  
 **Child entities:** None
 
 ## Relationships

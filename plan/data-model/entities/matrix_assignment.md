@@ -1,9 +1,9 @@
 # MatrixAssignment
 
-**Relationship to architecture-requirements:** plan/architecture-requirements/data/matrix-and-assignments.md, plan/architecture-requirements/data/matrix-draw.md
-**Purpose:** Places one pilot participation into a group and lane for a flight in a round. Assignments are append-only history: a draw creates `Original` rows, a move creates a `Moved` row that supersedes its source, and a re-flight creates a `Reflight` row. Scheduled and credited rounds are separate so a move or re-flight can receive credit for the original round without rewriting history.
-**Identifier:** `id` (UUIDv7)
-**Parent entity:** MatrixRevision
+**Relationship to architecture-requirements:** plan/architecture-requirements/data/matrix-and-assignments.md, plan/architecture-requirements/data/matrix-draw.md  
+**Purpose:** Places one pilot participation into a group and lane for a flight in a round. Assignments are append-only history: a draw creates `Original` rows, a move creates a `Moved` row that supersedes its source, and a re-flight creates a `Reflight` row. Scheduled and credited rounds are separate so a move or re-flight can receive credit for the original round without rewriting history.  
+**Identifier:** `id` (UUIDv7)  
+**Parent entity:** MatrixRevision  
 **Child entities:** ScorePlaceholder (one per finalized current assignment)
 
 ## Relationships

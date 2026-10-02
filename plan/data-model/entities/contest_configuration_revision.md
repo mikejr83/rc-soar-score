@@ -1,9 +1,9 @@
 # ContestConfigurationRevision
 
-**Relationship to architecture-requirements:** [contest.md](../../architecture-requirements/data/contest.md), [disciplines-and-configuration.md](../../architecture-requirements/data/disciplines-and-configuration.md)
-**Purpose:** Revisioned contest configuration overrides linked to official discipline profile. Overrides are versioned so historical results remain reproducible when config changes.
-**Identifier:** `id` (UUIDv7)
-**Parent entity:** Contest
+**Relationship to architecture-requirements:** [contest.md](../../architecture-requirements/data/contest.md), [disciplines-and-configuration.md](../../architecture-requirements/data/disciplines-and-configuration.md)  
+**Purpose:** Revisioned contest configuration overrides linked to official discipline profile. Overrides are versioned so historical results remain reproducible when config changes.  
+**Identifier:** `id` (UUIDv7)  
+**Parent entity:** Contest  
 **Child entities:** None
 
 ## Relationships

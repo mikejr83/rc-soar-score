@@ -1,9 +1,9 @@
 # Role
 
-**Relationship to architecture-requirements:** plan/architecture-requirements/data/teams-roles-models.md
-**Purpose:** Defines role templates (pilot vs non-flier, system vs director scope, admin/score/read permissions) that are referenced by ContestParticipation to assign participant roles.
-**Identifier:** `id` (UUIDv7)
-**Parent entity:** System or Contest (depending on scope)
+**Relationship to architecture-requirements:** plan/architecture-requirements/data/teams-roles-models.md  
+**Purpose:** Defines role templates (pilot vs non-flier, system vs director scope, admin/score/read permissions) that are referenced by ContestParticipation to assign participant roles.  
+**Identifier:** `id` (UUIDv7)  
+**Parent entity:** System or Contest (depending on scope)  
 **Child entities:** None
 
 ## Relationships

@@ -1,9 +1,9 @@
 # Audit Event
 
-**Relationship to architecture-requirements:** plan/architecture-requirements/data/synchronization-and-audit.md
-**Purpose:** Immutable change log recording every mutation, state transition, score attempt, and conflict in the system. Sensitive credentials and private message contents are excluded.
-**Identifier:** `id` (UUIDv7)
-**Parent entity:** None
+**Relationship to architecture-requirements:** plan/architecture-requirements/data/synchronization-and-audit.md  
+**Purpose:** Immutable change log recording every mutation, state transition, score attempt, and conflict in the system. Sensitive credentials and private message contents are excluded.  
+**Identifier:** `id` (UUIDv7)  
+**Parent entity:** None  
 **Child entities:** None
 
 ## Relationships

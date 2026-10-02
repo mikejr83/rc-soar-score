@@ -1,9 +1,9 @@
 # DisciplineFormula
 
-**Relationship to architecture-requirements:** [disciplines-and-configuration.md](../../architecture-requirements/data/disciplines-and-configuration.md)
-**Purpose:** Defines a score or penalty calculation formula for a discipline variant. Each row represents one step in the scoring calculation, from raw score computation to final normalization.
-**Identifier:** `id` (UUIDv7)
-**Parent entity:** DisciplineProfile
+**Relationship to architecture-requirements:** [disciplines-and-configuration.md](../../architecture-requirements/data/disciplines-and-configuration.md)  
+**Purpose:** Defines a score or penalty calculation formula for a discipline variant. Each row represents one step in the scoring calculation, from raw score computation to final normalization.  
+**Identifier:** `id` (UUIDv7)  
+**Parent entity:** DisciplineProfile  
 **Child entities:** None
 
 ## Fields/Properties

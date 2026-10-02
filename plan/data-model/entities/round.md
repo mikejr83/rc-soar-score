@@ -1,9 +1,9 @@
 # Round
 
-**Relationship to architecture-requirements:** plan/architecture-requirements/data/matrix-and-assignments.md, plan/architecture-requirements/data/matrix-draw.md
-**Purpose:** A numbered round of flights within a matrix revision. Records the round's number, its group count, and its lock status. It is the anchor for round-level locks, for the seeded-draw prerequisite ("all earlier rounds complete"), and for per-round reporting. Replaces the former RoundConfig entity.
-**Identifier:** `id` (UUIDv7)
-**Parent entity:** MatrixRevision
+**Relationship to architecture-requirements:** plan/architecture-requirements/data/matrix-and-assignments.md, plan/architecture-requirements/data/matrix-draw.md  
+**Purpose:** A numbered round of flights within a matrix revision. Records the round's number, its group count, and its lock status. It is the anchor for round-level locks, for the seeded-draw prerequisite ("all earlier rounds complete"), and for per-round reporting. Replaces the former RoundConfig entity.  
+**Identifier:** `id` (UUIDv7)  
+**Parent entity:** MatrixRevision  
 **Child entities:** MatrixAssignment (references a round through `scheduled_round_id` and `credited_round_id`)
 
 ## Relationships

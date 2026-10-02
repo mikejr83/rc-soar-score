@@ -1,9 +1,9 @@
 # ParticipantProfile
 
-**Relationship to architecture-requirements:** plan/architecture-requirements/data/participants.md
-**Purpose:** Stores reusable identity and contact data separate from contest-specific participation, enabling a participant's profile to be maintained independently across contests.
-**Identifier:** `id` (UUIDv7)
-**Parent entity:** None (top-level entity)
+**Relationship to architecture-requirements:** plan/architecture-requirements/data/participants.md  
+**Purpose:** Stores reusable identity and contact data separate from contest-specific participation, enabling a participant's profile to be maintained independently across contests.  
+**Identifier:** `id` (UUIDv7)  
+**Parent entity:** None (top-level entity)  
 **Child entities:** None
 
 ## Relationships

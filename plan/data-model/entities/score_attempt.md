@@ -1,9 +1,9 @@
 # ScoreAttempt
 
-**Relationship to architecture-requirements:** plan/architecture-requirements/data/scores-and-results.md
-**Purpose:** Immutable canonical raw submission of score data for a pilot's score placeholder.
-**Identifier:** `id` (UUIDv7)
-**Parent entity:** ScorePlaceholder
+**Relationship to architecture-requirements:** plan/architecture-requirements/data/scores-and-results.md  
+**Purpose:** Immutable canonical raw submission of score data for a pilot's score placeholder.  
+**Identifier:** `id` (UUIDv7)  
+**Parent entity:** ScorePlaceholder  
 **Child entities:** None
 
 ## Relationships

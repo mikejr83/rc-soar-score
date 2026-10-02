@@ -1,9 +1,9 @@
 # Tombstone
 
-**Relationship to architecture-requirements:** plan/architecture-requirements/data/synchronization-and-audit.md
-**Purpose:** Records deleted entities in a way that is synchronizable across installations. Local deletion creates a tombstone until the deletion is acknowledged on the server. Tombstones prevent older changes from recreating deleted records.
-**Identifier:** `id` (UUIDv7)
-**Parent entity:** None
+**Relationship to architecture-requirements:** plan/architecture-requirements/data/synchronization-and-audit.md  
+**Purpose:** Records deleted entities in a way that is synchronizable across installations. Local deletion creates a tombstone until the deletion is acknowledged on the server. Tombstones prevent older changes from recreating deleted records.  
+**Identifier:** `id` (UUIDv7)  
+**Parent entity:** None  
 **Child entities:** None
 
 ## Relationships

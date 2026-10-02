@@ -1,9 +1,9 @@
 # SyncCursor
 
-**Relationship to architecture-requirements:** plan/architecture-requirements/data/synchronization-and-audit.md
-**Purpose:** Tracks each client's synchronization position within a contest's mutation stream so the client can resume from where it last synced. This record is owned by an authorized installation and scoped to a contest.
-**Identifier:** `id` (UUIDv7)
-**Parent entity:** None
+**Relationship to architecture-requirements:** plan/architecture-requirements/data/synchronization-and-audit.md  
+**Purpose:** Tracks each client's synchronization position within a contest's mutation stream so the client can resume from where it last synced. This record is owned by an authorized installation and scoped to a contest.  
+**Identifier:** `id` (UUIDv7)  
+**Parent entity:** None  
 **Child entities:** None
 
 ## Relationships

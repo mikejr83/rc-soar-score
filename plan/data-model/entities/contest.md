@@ -1,9 +1,9 @@
 # Contest
 
-**Relationship to architecture-requirements:** plan/architecture-requirements/data/contest.md
-**Purpose:** The private source-of-truth aggregate for one radio-controlled soaring event. Stores identity, location, schedule, configuration state, and all derived scoring state.
-**Identifier:** `id` (UUIDv7)
-**Parent entity:** None (top-level aggregate)
+**Relationship to architecture-requirements:** plan/architecture-requirements/data/contest.md  
+**Purpose:** The private source-of-truth aggregate for one radio-controlled soaring event. Stores identity, location, schedule, configuration state, and all derived scoring state.  
+**Identifier:** `id` (UUIDv7)  
+**Parent entity:** None (top-level aggregate)  
 **Child entities:** ConfigurationRevisions (1:N), MatrixRevisions (1:N), Participants/ParticipationLinks (1:N), ScorePlaceholders (1:N), AuditEvents (1:N); has one SyncCursor; has one PublicationIdentity
 
 ## Relationships

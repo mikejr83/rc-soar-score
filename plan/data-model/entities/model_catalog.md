@@ -1,9 +1,9 @@
 # ModelCatalog
 
-**Relationship to architecture-requirements:** plan/architecture-requirements/data/teams-roles-models.md
-**Purpose:** Reusable registry of aircraft models (name and manufacturer) that contestants reference. Director-owned or shared across contests so pilots can select from a maintained list.
-**Identifier:** `id` (UUIDv7)
-**Parent entity:** System or Contest (depending on scope)
+**Relationship to architecture-requirements:** plan/architecture-requirements/data/teams-roles-models.md  
+**Purpose:** Reusable registry of aircraft models (name and manufacturer) that contestants reference. Director-owned or shared across contests so pilots can select from a maintained list.  
+**Identifier:** `id` (UUIDv7)  
+**Parent entity:** System or Contest (depending on scope)  
 **Child entities:** None
 
 ## Relationships

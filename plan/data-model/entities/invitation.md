@@ -1,9 +1,9 @@
 # Invitation
 
-**Relationship to architecture-requirements:** plan/architecture-requirements/data/reviews-and-invitations.md, plan/architecture-requirements/participating-contestants-and-teams/contest.md
-**Purpose:** Controls participant access to a contest via Magic Link URLs or QR codes. Pilot invitations authorize only that pilot; non-flier invitations may be used to select only pilots on the same contest team.
-**Identifier:** `id` (UUIDv7)
-**Parent entity:** Contest
+**Relationship to architecture-requirements:** plan/architecture-requirements/data/reviews-and-invitations.md, plan/architecture-requirements/participating-contestants-and-teams/contest.md  
+**Purpose:** Controls participant access to a contest via Magic Link URLs or QR codes. Pilot invitations authorize only that pilot; non-flier invitations may be used to select only pilots on the same contest team.  
+**Identifier:** `id` (UUIDv7)  
+**Parent entity:** Contest  
 **Child entities:** None
 
 ## Relationships

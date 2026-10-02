@@ -1,9 +1,9 @@
 # ParticipantAccountLink
 
-**Relationship to architecture-requirements:** plan/architecture-requirements/data/participants.md
-**Purpose:** Associates a participant profile with a user account, enabling multiple accounts to link to the same profile over time without rewriting contest history.
-**Identifier:** `id` (UUIDv7)
-**Parent entity:** None (join entity)
+**Relationship to architecture-requirements:** plan/architecture-requirements/data/participants.md  
+**Purpose:** Associates a participant profile with a user account, enabling multiple accounts to link to the same profile over time without rewriting contest history.  
+**Identifier:** `id` (UUIDv7)  
+**Parent entity:** None (join entity)  
 **Child entities:** None
 
 ## Relationships

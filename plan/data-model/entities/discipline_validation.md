@@ -1,9 +1,9 @@
 # DisciplineValidation
 
-**Relationship to architecture-requirements:** [disciplines-and-configuration.md](../../architecture-requirements/data/disciplines-and-configuration.md)
-**Purpose:** Defines a validation constraint that relates two or more score-entry fields for a discipline variant. Enables the application to enforce cross-field rules at score entry time.
-**Identifier:** `id` (UUIDv7)
-**Parent entity:** DisciplineProfile
+**Relationship to architecture-requirements:** [disciplines-and-configuration.md](../../architecture-requirements/data/disciplines-and-configuration.md)  
+**Purpose:** Defines a validation constraint that relates two or more score-entry fields for a discipline variant. Enables the application to enforce cross-field rules at score entry time.  
+**Identifier:** `id` (UUIDv7)  
+**Parent entity:** DisciplineProfile  
 **Child entities:** None
 
 ## Fields/Properties

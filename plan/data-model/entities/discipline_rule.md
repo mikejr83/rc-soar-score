@@ -1,6 +1,6 @@
 # DisciplineRule
 
-**Relationship to architecture-requirements:** [disciplines-and-configuration.md](../../architecture-requirements/data/disciplines-and-configuration.md)
+**Relationship to architecture-requirements:** [disciplines-and-configuration.md](../../architecture-requirements/data/disciplines-and-configuration.md)  
 **Purpose:** Defines a scoring, penalty, conditional logic, or zero-score rule for a discipline variant. Captures the condition, effect, computational logic, and display/UX metadata in a single entity.
 
 The `rule_type` enum determines what the rule does:
@@ -13,8 +13,8 @@ The `rule_type` enum determines what the rule does:
 
 For `rule_type: "zero"` rules, the entity includes display and UX metadata (`display_name`, `description`, `auto_score_zero`, `affects_other_fields`) so score-entry fields that represent zero conditions can reference a single source of truth.
 
-**Identifier:** `id` (UUIDv7)
-**Parent entity:** DisciplineProfile
+**Identifier:** `id` (UUIDv7)  
+**Parent entity:** DisciplineProfile  
 **Child entities:** None
 
 ## Fields/Properties

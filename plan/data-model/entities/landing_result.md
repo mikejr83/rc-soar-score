@@ -1,9 +1,9 @@
 # LandingResult
 
-**Relationship to architecture-requirements:** [disciplines-and-configuration.md](../../architecture-requirements/data/disciplines-and-configuration.md)
-**Purpose:** Stores individual scoring rows for a LandingTable. Each row maps an entered value (e.g., distance in meters) to its resolved point value. Used by disciplines with landing distance/point scoring.
-**Identifier:** `id` (UUIDv7)
-**Parent entity:** LandingTable (via landing_table_id FK)
+**Relationship to architecture-requirements:** [disciplines-and-configuration.md](../../architecture-requirements/data/disciplines-and-configuration.md)  
+**Purpose:** Stores individual scoring rows for a LandingTable. Each row maps an entered value (e.g., distance in meters) to its resolved point value. Used by disciplines with landing distance/point scoring.  
+**Identifier:** `id` (UUIDv7)  
+**Parent entity:** LandingTable (via landing_table_id FK)  
 **Child entities:** None
 
 ## Relationships

@@ -1,9 +1,9 @@
 # ContestPenalty
 
-**Relationship to architecture-requirements:** plan/architecture-requirements/data/scores-and-results.md
-**Purpose:** Append-only record of a contest-long penalty assessed against a pilot by a contest administrator. Unlike a flight penalty (e.g. F3J late landing), which is part of the round score, a contest penalty follows the pilot for the entire contest and is never removed when a round score is dropped.
-**Identifier:** `id` (UUIDv7)
-**Parent entity:** ScorePlaceholder (the flight during which the penalty was incurred)
+**Relationship to architecture-requirements:** plan/architecture-requirements/data/scores-and-results.md  
+**Purpose:** Append-only record of a contest-long penalty assessed against a pilot by a contest administrator. Unlike a flight penalty (e.g. F3J late landing), which is part of the round score, a contest penalty follows the pilot for the entire contest and is never removed when a round score is dropped.  
+**Identifier:** `id` (UUIDv7)  
+**Parent entity:** ScorePlaceholder (the flight during which the penalty was incurred)  
 **Child entities:** None
 
 ## Relationships

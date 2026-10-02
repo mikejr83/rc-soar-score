@@ -1,9 +1,9 @@
 # DisciplineConfigField
 
-**Relationship to architecture-requirements:** [disciplines-and-configuration.md](../../architecture-requirements/data/disciplines-and-configuration.md)
-**Purpose:** Defines a single configurable field for a discipline variant. Each row specifies the schema, constraints, and default value for one contest-scoped configuration setting.
-**Identifier:** `id` (UUIDv7)
-**Parent entity:** DisciplineProfile
+**Relationship to architecture-requirements:** [disciplines-and-configuration.md](../../architecture-requirements/data/disciplines-and-configuration.md)  
+**Purpose:** Defines a single configurable field for a discipline variant. Each row specifies the schema, constraints, and default value for one contest-scoped configuration setting.  
+**Identifier:** `id` (UUIDv7)  
+**Parent entity:** DisciplineProfile  
 **Child entities:** None
 
 ## Fields/Properties

@@ -1,9 +1,9 @@
 # ContestParticipation
 
-**Relationship to architecture-requirements:** plan/architecture-requirements/data/participants.md
-**Purpose:** Authoritative contest-specific snapshot that links a participant profile to a contest with contest-specific class, role, number, team, and model information.
-**Identifier:** `id` (UUIDv7)
-**Parent entity:** Contest
+**Relationship to architecture-requirements:** plan/architecture-requirements/data/participants.md  
+**Purpose:** Authoritative contest-specific snapshot that links a participant profile to a contest with contest-specific class, role, number, team, and model information.  
+**Identifier:** `id` (UUIDv7)  
+**Parent entity:** Contest  
 **Child entities:** MatrixAssignment, ScorePlaceholder, Invitation, ContestModelLink
 
 ## Relationships

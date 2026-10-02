@@ -1,9 +1,9 @@
 # MutationRecord
 
-**Relationship to architecture-requirements:** plan/architecture-requirements/data/synchronization-and-audit.md
-**Purpose:** Records each client mutation submitted to the service so that mutations can be applied at most once, rejected or accepted deterministically, and audited. Serves as the basis for conflict detection and cursor-based replication.
-**Identifier:** `id` (UUIDv7)
-**Parent entity:** None (referential only via FKs)
+**Relationship to architecture-requirements:** plan/architecture-requirements/data/synchronization-and-audit.md  
+**Purpose:** Records each client mutation submitted to the service so that mutations can be applied at most once, rejected or accepted deterministically, and audited. Serves as the basis for conflict detection and cursor-based replication.  
+**Identifier:** `id` (UUIDv7)  
+**Parent entity:** None (referential only via FKs)  
 **Child entities:** ConflictRecord (via winner/loser FKs)
 
 ## Relationships

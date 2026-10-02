@@ -1,9 +1,9 @@
 # ConflictRecord
 
-**Relationship to architecture-requirements:** plan/architecture-requirements/data/synchronization-and-audit.md
-**Purpose:** Captures conflicts that arise during synchronization where automatic resolution rules could not decide, records which party won, and preserves the losing version so that review, audit, and recalculation can proceed.
-**Identifier:** `id` (UUIDv7)
-**Parent entity:** Contested entity (entityType + entityId)
+**Relationship to architecture-requirements:** plan/architecture-requirements/data/synchronization-and-audit.md  
+**Purpose:** Captures conflicts that arise during synchronization where automatic resolution rules could not decide, records which party won, and preserves the losing version so that review, audit, and recalculation can proceed.  
+**Identifier:** `id` (UUIDv7)  
+**Parent entity:** Contested entity (entityType + entityId)  
 **Child entities:** None
 
 ## Relationships

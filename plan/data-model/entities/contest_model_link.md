@@ -1,9 +1,9 @@
 # ContestModelLink
 
-**Relationship to architecture-requirements:** plan/architecture-requirements/data/teams-roles-models.md
-**Purpose:** Contest-snapshot of the aircraft model used in a specific participation; historical scores reference this snapshot so later catalog edits do not retroactively rewrite history.
-**Identifier:** `id` (UUIDv7)
-**Parent entity:** ContestParticipation
+**Relationship to architecture-requirements:** plan/architecture-requirements/data/teams-roles-models.md  
+**Purpose:** Contest-snapshot of the aircraft model used in a specific participation; historical scores reference this snapshot so later catalog edits do not retroactively rewrite history.  
+**Identifier:** `id` (UUIDv7)  
+**Parent entity:** ContestParticipation  
 **Child entities:** None
 
 ## Relationships

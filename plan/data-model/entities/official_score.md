@@ -1,9 +1,9 @@
 # OfficialScore
 
-**Relationship to architecture-requirements:** plan/architecture-requirements/data/scores-and-results.md
-**Purpose:** Versioned authoritative score component set, selected per score placeholder. Distinct from immutable ScoreAttempt submissions.
-**Identifier:** `id` (UUIDv7)
-**Parent entity:** ScorePlaceholder
+**Relationship to architecture-requirements:** plan/architecture-requirements/data/scores-and-results.md  
+**Purpose:** Versioned authoritative score component set, selected per score placeholder. Distinct from immutable ScoreAttempt submissions.  
+**Identifier:** `id` (UUIDv7)  
+**Parent entity:** ScorePlaceholder  
 **Child entities:** None
 
 ## Relationships

@@ -1,9 +1,9 @@
 # PublicationProjection
 
-**Relationship to architecture-requirements:** plan/architecture-requirements/data/publication.md
-**Purpose:** An atomic, immutable snapshot of a contest's public data at a specific publish time, providing complete revision semantics for readers.
-**Identifier:** `id` (UUIDv7)
-**Parent entity:** PublicationIdentity
+**Relationship to architecture-requirements:** plan/architecture-requirements/data/publication.md  
+**Purpose:** An atomic, immutable snapshot of a contest's public data at a specific publish time, providing complete revision semantics for readers.  
+**Identifier:** `id` (UUIDv7)  
+**Parent entity:** PublicationIdentity  
 **Child entities:** None
 
 ## Relationships

@@ -1,9 +1,9 @@
 # LandingTable
 
-**Relationship to architecture-requirements:** [disciplines-and-configuration.md](../../architecture-requirements/data/disciplines-and-configuration.md)
-**Purpose:** Stores the identity of a versioned lookup table used for scoring lookups. Rows in this table identify the table (name, unit, meaning); the score values themselves are stored in separate LandingResult rows.
-**Identifier:** `id` (UUIDv7)
-**Parent entity:** None
+**Relationship to architecture-requirements:** [disciplines-and-configuration.md](../../architecture-requirements/data/disciplines-and-configuration.md)  
+**Purpose:** Stores the identity of a versioned lookup table used for scoring lookups. Rows in this table identify the table (name, unit, meaning); the score values themselves are stored in separate LandingResult rows.  
+**Identifier:** `id` (UUIDv7)  
+**Parent entity:** None  
 **Child entities:** LandingResult (many)
 
 ## Relationships
