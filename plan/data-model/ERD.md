@@ -311,12 +311,9 @@ erDiagram
     %% Scores and Results
     SCORE_PLACEHOLDER {
         uuid id "PK"
-        uuid assignment_id              "FK"
+        uuid contest_id                 "FK"
         uuid contest_participation_id   "FK"
-        int scheduled_round
-        int credited_round
-        int group
-        int flight_sequence
+        uuid assignment_id              "FK"
         text state
         int score_revision
         int revision
