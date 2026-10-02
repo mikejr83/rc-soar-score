@@ -8,13 +8,14 @@ plus landing bonus normalized together).
 
 ```json
 {
-  "id": "thermal-profile-v1",
-  "type": "THERMAL",
+  "id": "019a3c4b-8f2a-7b1c-9d4e-6f5a3b2c3c01",
+  "type": "ThermalDuration",
   "version": 1,
   "name": "Thermal Duration",
   "description": "Duration task with prescribed target time and precision landing. Flight score + landing bonus normalized to 1000. Default group scoring: Normalized.",
   "category": "duration",
   "status": "published",
+  "superseded_by": null,
   "created_by": "admin@example.com",
   "created_at": "2026-09-15T00:00:00Z",
   "updated_by": null,
@@ -22,27 +23,79 @@ plus landing bonus normalized together).
 }
 ```
 
+## LandingTable
+
+```json
+{
+  "id": "019a3c4b-8f2a-7b1c-9d4e-6f5a3b2c3c02",
+  "name": "Thermal Standard Landing Table",
+  "revision": 1,
+  "input_unit": "meters"
+}
+```
+
+## LandingResult
+
+```json
+[
+  {
+    "id": "019a3c4b-8f2a-7b1c-9d4e-6f5a3b2c3c03",
+    "landing_table_id": "019a3c4b-8f2a-7b1c-9d4e-6f5a3b2c3c02",
+    "point_value": 0,
+    "display_value": "Within 10 m - 20 pts",
+    "ordinal_position": 1
+  },
+  {
+    "id": "019a3c4b-8f2a-7b1c-9d4e-6f5a3b2c3c04",
+    "landing_table_id": "019a3c4b-8f2a-7b1c-9d4e-6f5a3b2c3c02",
+    "point_value": 10,
+    "display_value": "Within 25 m - 15 pts",
+    "ordinal_position": 2
+  },
+  {
+    "id": "019a3c4b-8f2a-7b1c-9d4e-6f5a3b2c3c05",
+    "landing_table_id": "019a3c4b-8f2a-7b1c-9d4e-6f5a3b2c3c02",
+    "point_value": 25,
+    "display_value": "Within 50 m - 10 pts",
+    "ordinal_position": 3
+  },
+  {
+    "id": "019a3c4b-8f2a-7b1c-9d4e-6f5a3b2c3c06",
+    "landing_table_id": "019a3c4b-8f2a-7b1c-9d4e-6f5a3b2c3c02",
+    "point_value": 50,
+    "display_value": "Within 75 m - 5 pts",
+    "ordinal_position": 4
+  },
+  {
+    "id": "019a3c4b-8f2a-7b1c-9d4e-6f5a3b2c3c07",
+    "landing_table_id": "019a3c4b-8f2a-7b1c-9d4e-6f5a3b2c3c02",
+    "point_value": 75,
+    "display_value": "Within 75 m - 0 pts",
+    "ordinal_position": 5
+  }
+]
+```
+
 ## DisciplineConfigField
 
 ```json
 [
   {
-    "id": "thermal-cf-001",
-    "discipline_profile_id": "thermal-profile-v1",
-    "version": 1,
+    "id": "019a3c4b-8f2a-7b1c-9d4e-6f5a3b2c3c08",
+    "discipline_profile_id": "019a3c4b-8f2a-7b1c-9d4e-6f5a3b2c3c01",
     "field_key": "target_time",
-    "field_type": "time",
+    "field_type": "int",
     "name": "Target Time",
-    "description": "Duration of the flight pilots will attempt. Format: MM:SS",
+    "description": "Duration of the flight pilots will attempt, in seconds",
     "required": true,
-    "default_value": "10:00",
+    "default_value": 600,
     "validation": { "gt": 0, "lt": 3600 },
-    "display_order": 1
+    "display_order": 1,
+    "created_at": "2026-09-15T00:00:00Z"
   },
   {
-    "id": "thermal-cf-002",
-    "discipline_profile_id": "thermal-profile-v1",
-    "version": 1,
+    "id": "019a3c4b-8f2a-7b1c-9d4e-6f5a3b2c3c09",
+    "discipline_profile_id": "019a3c4b-8f2a-7b1c-9d4e-6f5a3b2c3c01",
     "field_key": "fractional_seconds",
     "field_type": "int",
     "name": "Fractional Secs",
@@ -50,12 +103,12 @@ plus landing bonus normalized together).
     "required": true,
     "default_value": 0,
     "validation": { "gte": 0, "lte": 3 },
-    "display_order": 2
+    "display_order": 2,
+    "created_at": "2026-09-15T00:00:00Z"
   },
   {
-    "id": "thermal-cf-003",
-    "discipline_profile_id": "thermal-profile-v1",
-    "version": 1,
+    "id": "019a3c4b-8f2a-7b1c-9d4e-6f5a3b2c3c0a",
+    "discipline_profile_id": "019a3c4b-8f2a-7b1c-9d4e-6f5a3b2c3c01",
     "field_key": "points_per_second",
     "field_type": "float",
     "name": "Points Per Second",
@@ -63,21 +116,20 @@ plus landing bonus normalized together).
     "required": true,
     "default_value": 1.0,
     "validation": { "gt": 0 },
-    "display_order": 3
+    "display_order": 3,
+    "created_at": "2026-09-15T00:00:00Z"
   },
   {
-    "id": "thermal-cf-004",
-    "discipline_profile_id": "thermal-profile-v1",
-    "version": 1,
+    "id": "019a3c4b-8f2a-7b1c-9d4e-6f5a3b2c3c0b",
+    "discipline_profile_id": "019a3c4b-8f2a-7b1c-9d4e-6f5a3b2c3c01",
     "field_key": "landing_table",
-    "field_type": "enum",
+    "field_type": "landing",
     "name": "Landing Bonus Table",
-    "description": "Table mapping landing quality indicators to bonus points",
+    "description": "Table mapping landing quality indicators to bonus points. The system uses the linked LandingTable entity (Thermal Standard Landing Table, revision 1) to score landings.",
     "required": true,
-    "options": [
-      { "value": "thermal-standard", "label": "Standard Thermal Table" }
-    ],
-    "display_order": 4
+    "default_value": "019a3c4b-8f2a-7b1c-9d4e-6f5a3b2c3c02",
+    "display_order": 4,
+    "created_at": "2026-09-15T00:00:00Z"
   }
 ]
 ```
@@ -87,34 +139,32 @@ plus landing bonus normalized together).
 ```json
 [
   {
-    "id": "thermal-sf-001",
-    "discipline_profile_id": "thermal-profile-v1",
-    "version": 1,
+    "id": "019a3c4b-8f2a-7b1c-9d4e-6f5a3b2c3c0c",
+    "discipline_profile_id": "019a3c4b-8f2a-7b1c-9d4e-6f5a3b2c3c01",
     "field_key": "time_flown",
     "field_type": "time",
     "name": "Time Flown",
     "description": "Actual flight time (MM:SS format)",
     "required": true,
     "display_order": 1,
-    "is_zero_reason": false
+    "is_zero_reason": false,
+    "created_at": "2026-09-15T00:00:00Z"
   },
   {
-    "id": "thermal-sf-002",
-    "discipline_profile_id": "thermal-profile-v1",
-    "version": 1,
+    "id": "019a3c4b-8f2a-7b1c-9d4e-6f5a3b2c3c0d",
+    "discipline_profile_id": "019a3c4b-8f2a-7b1c-9d4e-6f5a3b2c3c01",
     "field_key": "landing",
     "field_type": "landing",
     "name": "Landing",
-    "description": "Landing position/quality indicator. Options are loaded from the linked landing table (thermal-standard).",
+    "description": "Landing position/quality indicator. Options are loaded dynamically from the linked landing table (Thermal Standard Landing Table, revision 1).",
     "required": false,
-    "options": [],
     "display_order": 2,
-    "is_zero_reason": false
+    "is_zero_reason": false,
+    "created_at": "2026-09-15T00:00:00Z"
   },
   {
-    "id": "thermal-sf-003",
-    "discipline_profile_id": "thermal-profile-v1",
-    "version": 1,
+    "id": "019a3c4b-8f2a-7b1c-9d4e-6f5a3b2c3c0e",
+    "discipline_profile_id": "019a3c4b-8f2a-7b1c-9d4e-6f5a3b2c3c01",
     "field_key": "out_of_bounds",
     "field_type": "bool",
     "name": "Out of Bounds",
@@ -123,12 +173,12 @@ plus landing bonus normalized together).
     "default_value": false,
     "display_order": 3,
     "is_zero_reason": true,
-    "zero_reason_code": "OUT_OF_BOUNDS"
+    "zero_reason_code": "out_of_bounds",
+    "created_at": "2026-09-15T00:00:00Z"
   },
   {
-    "id": "thermal-sf-004",
-    "discipline_profile_id": "thermal-profile-v1",
-    "version": 1,
+    "id": "019a3c4b-8f2a-7b1c-9d4e-6f5a3b2c3c0f",
+    "discipline_profile_id": "019a3c4b-8f2a-7b1c-9d4e-6f5a3b2c3c01",
     "field_key": "overflight_gt_one_min",
     "field_type": "bool",
     "name": "Overflight > 1 Min",
@@ -137,7 +187,8 @@ plus landing bonus normalized together).
     "default_value": false,
     "display_order": 4,
     "is_zero_reason": true,
-    "zero_reason_code": "OVERFLIGHT_GT_ONE_MIN"
+    "zero_reason_code": "overflight_gt_one_min",
+    "created_at": "2026-09-15T00:00:00Z"
   }
 ]
 ```
@@ -147,25 +198,29 @@ plus landing bonus normalized together).
 ```json
 [
   {
-    "id": "thermal-val-001",
-    "discipline_profile_id": "thermal-profile-v1",
-    "version": 1,
-    "field_keys": ["time_flown"],
-    "constraint_type": "greater_than_or_equal",
-    "description": "Time flown must be 0 or more",
-    "applies_to": { "field": "time_flown", "value": 0 },
-    "message": "Time flown must be 0 or more",
-    "display_order": 1
+    "id": "019a3c4b-8f2a-7b1c-9d4e-6f5a3b2c3c10",
+    "discipline_profile_id": "019a3c4b-8f2a-7b1c-9d4e-6f5a3b2c3c01",
+    "field_keys": ["time_flown", "overflight_gt_one_min"],
+    "constraint_type": "required_if",
+    "description": "Overflight > 1 Min may only be marked when time flown exceeds target time by more than 60 seconds",
+    "applies_to": {
+      "field": "time_flown",
+      "op": "gt",
+      "value": "target_time + 60"
+    },
+    "message": "Overflight > 1 Min can only be selected when Time Flown exceeds Target Time by more than 1 minute",
+    "display_order": 1,
+    "created_at": "2026-09-15T00:00:00Z"
   },
   {
-    "id": "thermal-val-002",
-    "discipline_profile_id": "thermal-profile-v1",
-    "version": 1,
+    "id": "019a3c4b-8f2a-7b1c-9d4e-6f5a3b2c3c11",
+    "discipline_profile_id": "019a3c4b-8f2a-7b1c-9d4e-6f5a3b2c3c01",
     "field_keys": ["out_of_bounds", "overflight_gt_one_min"],
-    "constraint_type": "mutually_exclusive_group",
+    "constraint_type": "mutually_exclusive",
     "description": "Only one of out_of_bounds or overflight_gt_one_min can be selected",
     "message": "Select only one: Out of Bounds or Overflight > 1 Min",
-    "display_order": 2
+    "display_order": 2,
+    "created_at": "2026-09-15T00:00:00Z"
   }
 ]
 ```
@@ -175,9 +230,8 @@ plus landing bonus normalized together).
 ```json
 [
   {
-    "id": "thermal-form-001",
-    "discipline_profile_id": "thermal-profile-v1",
-    "version": 1,
+    "id": "019a3c4b-8f2a-7b1c-9d4e-6f5a3b2c3c12",
+    "discipline_profile_id": "019a3c4b-8f2a-7b1c-9d4e-6f5a3b2c3c01",
     "formula_key": "overflight_penalty",
     "formula_type": "penalty",
     "description": "Calculate overflight penalty: if time exceeds target, penalty = (time - target) * PPS",
@@ -189,12 +243,13 @@ plus landing bonus normalized together).
     },
     "outputs": { "overflight_penalty": "calc:overflight_penalty" },
     "depends_on": [],
-    "display_order": 1
+    "is_primary": false,
+    "display_order": 1,
+    "created_at": "2026-09-15T00:00:00Z"
   },
   {
-    "id": "thermal-form-002",
-    "discipline_profile_id": "thermal-profile-v1",
-    "version": 1,
+    "id": "019a3c4b-8f2a-7b1c-9d4e-6f5a3b2c3c13",
+    "discipline_profile_id": "019a3c4b-8f2a-7b1c-9d4e-6f5a3b2c3c01",
     "formula_key": "flight_score",
     "formula_type": "intermediate",
     "description": "Calculate flight score: max(0, time * PPS - overflight penalty)",
@@ -206,12 +261,13 @@ plus landing bonus normalized together).
     },
     "outputs": { "flight_score": "calc:flight_score" },
     "depends_on": ["overflight_penalty"],
-    "display_order": 2
+    "is_primary": false,
+    "display_order": 2,
+    "created_at": "2026-09-15T00:00:00Z"
   },
   {
-    "id": "thermal-form-003",
-    "discipline_profile_id": "thermal-profile-v1",
-    "version": 1,
+    "id": "019a3c4b-8f2a-7b1c-9d4e-6f5a3b2c3c14",
+    "discipline_profile_id": "019a3c4b-8f2a-7b1c-9d4e-6f5a3b2c3c01",
     "formula_key": "raw_score",
     "formula_type": "intermediate",
     "description": "Calculate raw score: flight score + landing bonus",
@@ -222,12 +278,13 @@ plus landing bonus normalized together).
     },
     "outputs": { "raw_score": "calc:raw_score" },
     "depends_on": ["flight_score"],
-    "display_order": 3
+    "is_primary": false,
+    "display_order": 3,
+    "created_at": "2026-09-15T00:00:00Z"
   },
   {
-    "id": "thermal-form-004",
-    "discipline_profile_id": "thermal-profile-v1",
-    "version": 1,
+    "id": "019a3c4b-8f2a-7b1c-9d4e-6f5a3b2c3c15",
+    "discipline_profile_id": "019a3c4b-8f2a-7b1c-9d4e-6f5a3b2c3c01",
     "formula_key": "normalization",
     "formula_type": "final",
     "is_primary": true,
@@ -239,7 +296,8 @@ plus landing bonus normalized together).
     },
     "outputs": { "normalized": "final:normalized" },
     "depends_on": ["raw_score"],
-    "display_order": 4
+    "display_order": 4,
+    "created_at": "2026-09-15T00:00:00Z"
   }
 ]
 ```
@@ -249,30 +307,36 @@ plus landing bonus normalized together).
 ```json
 [
   {
-    "id": "thermal-rule-001",
-    "discipline_profile_id": "thermal-profile-v1",
-    "version": 1,
+    "id": "019a3c4b-8f2a-7b1c-9d4e-6f5a3b2c3c16",
+    "discipline_profile_id": "019a3c4b-8f2a-7b1c-9d4e-6f5a3b2c3c01",
     "rule_key": "out_of_bounds",
     "rule_type": "zero",
     "condition": "out_of_bounds == true",
-    "effect": "score = 0; flight_score = 0; landing = 0; time_flown = 0",
+    "effect": "score = 0",
     "applies_to": ["out_of_bounds"],
+    "depends_on": [],
     "display_name": "Out of bounds landing",
     "description": "The pilot landed more than 75m from their landing marker.",
-    "display_order": 1
+    "auto_score_zero": true,
+    "affects_other_fields": ["time_flown", "landing"],
+    "display_order": 1,
+    "created_at": "2026-09-15T00:00:00Z"
   },
   {
-    "id": "thermal-rule-002",
-    "discipline_profile_id": "thermal-profile-v1",
-    "version": 1,
+    "id": "019a3c4b-8f2a-7b1c-9d4e-6f5a3b2c3c17",
+    "discipline_profile_id": "019a3c4b-8f2a-7b1c-9d4e-6f5a3b2c3c01",
     "rule_key": "overflight_gt_one_min",
     "rule_type": "zero",
     "condition": "overflight_gt_one_min == true",
-    "effect": "score = 0; flight_score = 0; landing = 0; time_flown = 0",
+    "effect": "score = 0",
     "applies_to": ["overflight_gt_one_min"],
+    "depends_on": [],
     "display_name": "Overflight > 1 minute",
     "description": "The pilot did not land within 1 minute past target time.",
-    "display_order": 2
+    "auto_score_zero": true,
+    "affects_other_fields": ["time_flown", "landing"],
+    "display_order": 2,
+    "created_at": "2026-09-15T00:00:00Z"
   }
 ]
 ```
