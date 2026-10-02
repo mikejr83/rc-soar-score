@@ -4,7 +4,7 @@ The RC Soar Score solution is a set of applications and APIs to track, score, an
 
 All scoring disciplines have reasons for a pilot to receive a 0 score. The following are common to all disciplines:
 
-* Out of bounds landing - The pilot landed too far from their landing marker. How this is described differs in each discipline.
+- Out of bounds landing - The pilot landed too far from their landing marker. How this is described differs in each discipline.
 
 Most soaring disciplines are scored by determining the pilot flying the longest within a given window or flying a prescribed amount of time followed by completing a precision landing. This is typically referred to as a "duration".
 
@@ -16,21 +16,21 @@ For the initial implementation and release of RC Soar Score the software will fo
 
 Contest disciplines using a simple duration only:
 
-* [`ales.md`](./ales.md)
-* [`f3j.md`](./f3j.md)
-* [`f3l.md`](./f3l.md)
-* [`f5j.md`](./f5j.md)
-* [`thermal.md`](./thermal.md)
+- [`ales.md`](./ales.md)
+- [`f3j.md`](./f3j.md)
+- [`f3l.md`](./f3l.md)
+- [`f5j.md`](./f5j.md)
+- [`thermal.md`](./thermal.md)
 
 Contest disciplines using multiple types of a duration task:
 
-* [`f3k.md`](./f3k.md)
+- [`f3k.md`](./f3k.md)
 
-*These are not initially implemented by RC Soar Score. They're included for informational purposes for design considerations.*
+_These are not initially implemented by RC Soar Score. They're included for informational purposes for design considerations._
 
 Contest disciplines using multiple tasks or tasks other than duration
 
-* F3B
-* F3F
+- F3B
+- F3F
 
-*These are not initially implemented by RC Soar Score and are included here for informational purposes.*
+_These are not initially implemented by RC Soar Score and are included here for informational purposes._

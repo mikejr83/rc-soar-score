@@ -8,13 +8,13 @@ The route that the application will come to after the user has logged in will be
 
 The page provides:
 
-* A list of the ten most recently opened or created non-archived contests, ordered by most recent activity.
-* `Show all contests` when more than ten eligible contests exist, loading the next 50 records per page.
-* `Create contest`.
-* `Open`, `Continue`, or `View` for the selected contest.
-* `Delete` for an unpublished local contest, or `Request delisting` for a contest published at least once.
-* Navigation to previous participants, participant roles, and landing bonus management.
-* `Sync` when the user is authenticated and a remote connection is available.
+- A list of the ten most recently opened or created non-archived contests, ordered by most recent activity.
+- `Show all contests` when more than ten eligible contests exist, loading the next 50 records per page.
+- `Create contest`.
+- `Open`, `Continue`, or `View` for the selected contest.
+- `Delete` for an unpublished local contest, or `Request delisting` for a contest published at least once.
+- Navigation to previous participants, participant roles, and landing bonus management.
+- `Sync` when the user is authenticated and a remote connection is available.
 
 Archived contests are excluded by default and are available through an explicit archive filter. Deleted contests are not listed.
 
@@ -30,11 +30,11 @@ The user may select one of the contests from the list and "open" it. The navigat
 
 States and button indication:
 
-|States|Button indication|Navigation Result|
-|------|-----------------|-----------------|
-|`Created` or `Configuring`|Open|Contest configuration|
-|`Ready` or `Running`|Continue|Contest workspace, focused on the latest group with accepted scores|
-|`Completed`|View|Contest reports or read-only contest workspace|
+| States                     | Button indication | Navigation Result                                                   |
+| -------------------------- | ----------------- | ------------------------------------------------------------------- |
+| `Created` or `Configuring` | Open              | Contest configuration                                               |
+| `Ready` or `Running`       | Continue          | Contest workspace, focused on the latest group with accepted scores |
+| `Completed`                | View              | Contest reports or read-only contest workspace                      |
 
 `PendingDelete` opens a read-only deletion-status view. `Deleted` contests cannot be opened.
 

@@ -6,14 +6,14 @@ A move changes the pilot's assignment; it does not delete or rewrite a score tha
 
 The application will indicate the following when a move is attempted:
 
-* If the source and target groups are not within the same round. A cross-round move requires explicit director confirmation.
-* If the source or target group already has scores. The application must identify which scores are affected.
-* If the group would have a team conflict - If the contest has teams enabled.
+- If the source and target groups are not within the same round. A cross-round move requires explicit director confirmation.
+- If the source or target group already has scores. The application must identify which scores are affected.
+- If the group would have a team conflict - If the contest has teams enabled.
 
 The application will not allow the move if:
 
-* The pilot is already in the target group.
-* The move would violate a contest rule that cannot be overridden by the contest director.
+- The pilot is already in the target group.
+- The move would violate a contest rule that cannot be overridden by the contest director.
 
 When a move is accepted, the source assignment remains in the audit history and the target assignment becomes the current assignment. Any affected derived group scores must be recalculated from their immutable raw score data. The application must not silently transfer or nullify a score between groups.
 
@@ -21,8 +21,8 @@ When a move is accepted, the source assignment remains in the audit history and 
 
 A pilot with an accepted score may be moved as an ordinary assignment change, but the application must require the contest director to choose how the existing score is handled:
 
-* **Reset to non-entered:** The score is nullified for scoring purposes and the destination group receives a non-entered score placeholder. The original submitted score remains available in the audit history and is not deleted.
-* **Transfer score:** The score is reassigned to the destination group as if the pilot had flown in that group. The score must retain its original submission data while its group assignment and derived values are recalculated using the destination group's eligible normalization population.
+- **Reset to non-entered:** The score is nullified for scoring purposes and the destination group receives a non-entered score placeholder. The original submitted score remains available in the audit history and is not deleted.
+- **Transfer score:** The score is reassigned to the destination group as if the pilot had flown in that group. The score must retain its original submission data while its group assignment and derived values are recalculated using the destination group's eligible normalization population.
 
 The selected handling must be recorded with the move, including the actor, reason, time, source and destination groups, and affected score revision. The director must be warned when transferring a score changes its normalization or credited result.
 

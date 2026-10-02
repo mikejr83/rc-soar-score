@@ -14,14 +14,14 @@ A grid/list of contests should be present. By default, it should present the use
 
 The list should contain column data for the following:
 
-* Start date of the contest
-* Contest name
-* Venue or location if provided
+- Start date of the contest
+- Contest name
+- Venue or location if provided
 
 Indicators for each contest should include:
 
-* In-progress
-* Completed
+- In-progress
+- Completed
 
 ## Filtering
 
@@ -29,9 +29,9 @@ The contests shown in the list may be filtered so users may easily find a specif
 
 The following are filters that may be supplied by the user. An input that supports accepting the appropriate type of data will be displayed.
 
-* Start date
-* Name
-* Venue
+- Start date
+- Name
+- Venue
 
 A default filter will be used for contests displayed regardless of what additional filtering the user provides. The contest list should not show delisted or deleted contests. It should not show any contest that is not published or that is private.
 
@@ -41,5 +41,5 @@ Contests may be created by contest directors for future dates. These could be in
 
 Other than filtering, the other actions available on this page are:
 
-* Refreshing contests list - An eager viewer may be attempting to search for a contest before it has "gone live". A refresh button gives the user a way to refresh the list without refreshing the entire page.
-* Selecting a contest - A user may select a contest in the list and go to the contest details.
+- Refreshing contests list - An eager viewer may be attempting to search for a contest before it has "gone live". A refresh button gives the user a way to refresh the list without refreshing the entire page.
+- Selecting a contest - A user may select a contest in the list and go to the contest details.

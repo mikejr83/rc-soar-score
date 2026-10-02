@@ -2,11 +2,11 @@
 
 Publication and visibility are separate controls. A contest must be published by a contest director before its public projection can be viewed. The first publication defaults to `Private`; the director can then change the visibility of the published projection.
 
-|State|Meaning|Entry condition|Exit / next transition|
-|-----|-------|---------------|----------------------|
-|`Public`|The published contest and its progress are searchable and viewable without an account.|The contest director marks the published projection as public.|`Public -> Hidden` or `Public -> Private`|
-|`Hidden`|The published contest is not searchable or generally listed, but is available to authorized participants.|The contest director marks the published projection as hidden.|`Hidden -> Public` or `Hidden -> Private`|
-|`Private`|The published contest is not searchable or publicly viewable.|The first publication defaults to private, or the contest director marks the published projection as private.|`Private -> Hidden` or `Private -> Public`|
+| State     | Meaning                                                                                                   | Entry condition                                                                                               | Exit / next transition                     |
+| --------- | --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| `Public`  | The published contest and its progress are searchable and viewable without an account.                    | The contest director marks the published projection as public.                                                | `Public -> Hidden` or `Public -> Private`  |
+| `Hidden`  | The published contest is not searchable or generally listed, but is available to authorized participants. | The contest director marks the published projection as hidden.                                                | `Hidden -> Public` or `Hidden -> Private`  |
+| `Private` | The published contest is not searchable or publicly viewable.                                             | The first publication defaults to private, or the contest director marks the published projection as private. | `Private -> Hidden` or `Private -> Public` |
 
 ## Public
 

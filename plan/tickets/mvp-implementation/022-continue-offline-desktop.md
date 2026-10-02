@@ -5,24 +5,29 @@
 - **Status:** in-review
 
 ## Context
+
 Add the "Continue offline" element visible only in the desktop application, allowing users to enter offline mode without an account. The web application must not show this element.
 
 ## Work Items
+
 - [x] Add "Continue offline" element to desktop-only view
 - [x] Implement offline mode entry without authentication requirement
 - [x] Add messaging about local vs published/synced contests
 - [x] Hide "Continue offline" element in web application
 
 ## Acceptance Criteria
+
 - [x] "Continue offline" element is visible on the desktop landing page
 - [x] Clicking it enters the application in offline mode without authentication
 - [x] Messaging explains offline contests remain local unless published or synced
 - [x] "Continue offline" element is not shown in the web application
 
 ## Follow-ups
+
 - Implement the full contest-selection page described in `plan/ui/contest-administration/main-page.md`; this ticket adds only the offline entry stub.
 
 ## Files Changed
+
 - `apps/soar_score_contest/lib/main.dart`
 - `apps/soar_score_contest/lib/pages/bootstrap_failure_page.dart`
 - `apps/soar_score_contest/lib/pages/contest_selection_stub_page.dart`
@@ -46,7 +51,9 @@ Add the "Continue offline" element visible only in the desktop application, allo
 - `packages/soar_score_core/lib/soar_score_core.dart` (formatter-only)
 
 ## Dependencies
+
 - [020-contest-landing-page-route.md](020-contest-landing-page-route.md) — landing page route and shell
 
 ## Sources
+
 - `plan/ui/contest-administration/landing-page.md`

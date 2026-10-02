@@ -4,9 +4,9 @@
 
 Publishing makes a contest's results available through the public site. It is an explicit director action and is separate from synchronization:
 
-* Synchronization stores the director's private contest data for backup and collaboration.
-* Publishing creates or updates a public projection of the contest from an authorized private revision.
-* A contest may remain private and unpublished indefinitely.
+- Synchronization stores the director's private contest data for backup and collaboration.
+- Publishing creates or updates a public projection of the contest from an authorized private revision.
+- A contest may remain private and unpublished indefinitely.
 
 The private contest remains the source of truth. Public data must never be merged back into it.
 
@@ -32,17 +32,17 @@ The projection must retain the calculation metadata needed to explain or reprodu
 
 Publishing and visibility are independent:
 
-* **Public**: the published projection can be found and viewed by anyone without an account.
-* **Hidden**: the projection is not searchable or generally listed, but remains available to authorized participants through their contest access.
-* **Private**: the projection is not available to the public or participants through the public site.
+- **Public**: the published projection can be found and viewed by anyone without an account.
+- **Hidden**: the projection is not searchable or generally listed, but remains available to authorized participants through their contest access.
+- **Private**: the projection is not available to the public or participants through the public site.
 
 The first publish must default to **Private**. The director must explicitly change visibility to **Public** or **Hidden**. Changing visibility must not modify the private contest data.
 
 The director must be able to choose when eligible result changes are copied to the public projection:
 
-* **Automatic**: publish eligible changes as they are accepted.
-* **Round completion**: publish when a round is complete according to the contest's completion rules.
-* **Manual**: publish only after the director confirms the round or contest is ready.
+- **Automatic**: publish eligible changes as they are accepted.
+- **Round completion**: publish when a round is complete according to the contest's completion rules.
+- **Manual**: publish only after the director confirms the round or contest is ready.
 
 This policy controls public projection updates; it does not prevent private scoring, synchronization, or recalculation.
 

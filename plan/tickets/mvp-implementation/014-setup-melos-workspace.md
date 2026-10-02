@@ -41,7 +41,7 @@ This work is performed **after the Dart workspace and its projects exist** — i
 
 ## Follow-ups
 
-- VS Code integration (separate from this ticket's scope): `.vscode/tasks.json` provides the four bulk commands from the root `pubspec.yaml` Melos scripts and `melos run build` via shell tasks — the `blaugold.melos-code` extension's native `type: "melos"` tasks resolve only *defined* scripts (Melos 8: `melos run` rejects built-in names) and its task/CodeLens providers load only a standalone `melos.yaml`, which Melos 8 dropped in favor of `pubspec.yaml`; extension install is still recommended for its `Melos: Bootstrap` / `Melos: Run script` commands (its config-aware features are inert under Melos 8). `.vscode/launch.json` adds a `Server + Contest (Web)` compound. Requires `C:\Users\mikej\AppData\Local\Pub\Cache\bin` on `PATH` for bare `melos` (already set on this machine; `dart run melos` always works).
+- VS Code integration (separate from this ticket's scope): `.vscode/tasks.json` provides the four bulk commands from the root `pubspec.yaml` Melos scripts and `melos run build` via shell tasks — the `blaugold.melos-code` extension's native `type: "melos"` tasks resolve only _defined_ scripts (Melos 8: `melos run` rejects built-in names) and its task/CodeLens providers load only a standalone `melos.yaml`, which Melos 8 dropped in favor of `pubspec.yaml`; extension install is still recommended for its `Melos: Bootstrap` / `Melos: Run script` commands (its config-aware features are inert under Melos 8). `.vscode/launch.json` adds a `Server + Contest (Web)` compound. Requires `C:\Users\mikej\AppData\Local\Pub\Cache\bin` on `PATH` for bare `melos` (already set on this machine; `dart run melos` always works).
 
 ## Dependencies
 

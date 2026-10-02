@@ -5,9 +5,11 @@
 - **Status:** Open
 
 ## Context
+
 Establish the `/contest-administration/home` route and the director's contest-selection page shell. After signing in or choosing offline mode, the user lands here. This ticket wires the route, provides the page title and layout structure for the contest list and actions, and links into the shell navigation.
 
 ## Work Items
+
 - [ ] Add route `/contest-administration/home` to the app router
 - [ ] Navigate to this route after successful sign-in and offline-mode selection
 - [ ] Build the page shell with title "Contest administration"
@@ -15,6 +17,7 @@ Establish the `/contest-administration/home` route and the director's contest-se
 - [ ] Add shell navigation entry for Contest administration
 
 ## Acceptance Criteria
+
 - [ ] After sign-in or offline selection, the user lands on `/contest-administration/home`
 - [ ] Page title "Contest administration" is displayed
 - [ ] Layout provides a contest list region, action button region, and management navigation region
@@ -22,8 +25,10 @@ Establish the `/contest-administration/home` route and the director's contest-se
 - [ ] No crash on initial load; empty list region shows a placeholder or nothing
 
 ## Dependencies
+
 - [020-contest-landing-page-route.md](020-contest-landing-page-route.md)
 - [021-sigin-create-account-stubs.md](021-sigin-create-account-stubs.md)
 
 ## Sources
+
 - `plan/ui/contest-administration/main-page.md`

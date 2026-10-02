@@ -18,15 +18,15 @@ The selection of a discipline can alter contest configuration outside of just wh
 
 Initial supported disciplines:
 
-* ALES
-* F3J
-* F5J
-* Thermal Duration
+- ALES
+- F3J
+- F5J
+- Thermal Duration
 
 F3L has a placeholder document but is not initially implementable until its scoring rules are defined. The following disciplines are to be considered during design but will not be immediately implemented:
 
-* F3B
-* F3K
+- F3B
+- F3K
 
 ### Competitors and Pilots
 
@@ -34,7 +34,7 @@ Contests are attended by competitors. Not all competitors are pilots. The applic
 
 Pilots may be organized into teams. The number of team pilots for calculating the team score is necessary if teams are to be used in the contest, otherwise the option is not presented.
 
-An option for giving the participant a unique number for the contest is available. This is an integer value that enables participant to be referred to as "Participant_Type X" where Participant_Type is comes from the role they were assigned or "Pilot" by default and X is that number. The number starts at 1 and increases with the number of pilots in the contest. The number is assigned when the first draw occurs. It cannot be changed afterwards. Pilots added post draw will receive the next number in sequence. *The general use case for the unique numbering for participants is for identifying information placed on specific printed materials.*
+An option for giving the participant a unique number for the contest is available. This is an integer value that enables participant to be referred to as "Participant_Type X" where Participant_Type is comes from the role they were assigned or "Pilot" by default and X is that number. The number starts at 1 and increases with the number of pilots in the contest. The number is assigned when the first draw occurs. It cannot be changed afterwards. Pilots added post draw will receive the next number in sequence. _The general use case for the unique numbering for participants is for identifying information placed on specific printed materials._
 
 The option for pilot classes is presented. This is used to classify pilots. Generally, "expert", "advanced", "junior", etc. but can be used for any purpose. This is a reporting only feature. A report may show "the top scoring pilot in each class".
 
@@ -91,9 +91,9 @@ A common example of a seeded man on man contest:
 
 A set of options for the "Group Score" are presented:
 
-* Raw Score - Use the raw number of points for each pilot.
-* Normalized - The pilot with the most points receives 1000 points and all other pilots are normalized based on their scores.
-* Time - The pilot with the best time score receives 1000 points and all other pilots time score is normalized based on their scores. Landing bonuses are then added to the group scores.
+- Raw Score - Use the raw number of points for each pilot.
+- Normalized - The pilot with the most points receives 1000 points and all other pilots are normalized based on their scores.
+- Time - The pilot with the best time score receives 1000 points and all other pilots time score is normalized based on their scores. Landing bonuses are then added to the group scores.
 
 The default selection will be "Normalized".
 
@@ -117,13 +117,13 @@ A contest must be published for it to appear on the public site.
 
 When the contest is published several things occur:
 
-* Any participants that have been included in the contest are checked against a global participant list.
-* Participants that can be linked to the global list and have local deviations from the global list for their info are shown to the contest director.
-* The contest director can decide to update participants' local info with what was downloaded.
-* The current participant list is uploaded with all participants and their types being linked to the contest.
-* If teams are being used, team entries are created and participants linked to the teams.
-* The model information, if being tracked for the contest, is is linked to each pilot for the contest.
-* The contest defaults to private mode. It isn't shown on the public web site.
+- Any participants that have been included in the contest are checked against a global participant list.
+- Participants that can be linked to the global list and have local deviations from the global list for their info are shown to the contest director.
+- The contest director can decide to update participants' local info with what was downloaded.
+- The current participant list is uploaded with all participants and their types being linked to the contest.
+- If teams are being used, team entries are created and participants linked to the teams.
+- The model information, if being tracked for the contest, is is linked to each pilot for the contest.
+- The contest defaults to private mode. It isn't shown on the public web site.
 
 The contest director will be able to make a contest public or private. This affects if the contest can be searched for and is displayed on the public site. A participant's participation in a contest is not shown in the global site if a contest is marked private.
 
@@ -133,9 +133,9 @@ An option is presented for the contest director to allow participants to make re
 
 The contest director will have options to dictate how scores are displayed for the contest on the public site. Contest directors will use this to help control how scores and contest progression is presented. There will be the following options:
 
-* Automatic score updates
-* Updates at assumed round completion
-* Manual / Require validation before score calculation
+- Automatic score updates
+- Updates at assumed round completion
+- Manual / Require validation before score calculation
 
 The default for this selection is "Updates at assumed round completion".
 

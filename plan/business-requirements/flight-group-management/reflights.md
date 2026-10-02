@@ -6,9 +6,9 @@ Contest disciplines can define a priority for how a pilot is assigned a new grou
 
 A re-flight can occur the following ways:
 
-* The pilot(s) awarded a re-flight is(are) placed within another group within the same round.
-* A new group for the round is created with the pilot(s) requesting a re-flight. This group is flown after all other groups have flown for the round. The group's membership is determined by a random draw of pilots. The number of pilots drawn is determined by the discipline or by the contest director.
-* The original flight group is re-flown, ie re-fly the entire group.
+- The pilot(s) awarded a re-flight is(are) placed within another group within the same round.
+- A new group for the round is created with the pilot(s) requesting a re-flight. This group is flown after all other groups have flown for the round. The group's membership is determined by a random draw of pilots. The number of pilots drawn is determined by the discipline or by the contest director.
+- The original flight group is re-flown, ie re-fly the entire group.
 
 Each re-flight is a separate flight attempt linked to its source group and credited round. It must have a type, incrementing sequence number, status, reason, creating director, and audit history. A re-flight does not overwrite the original attempt.
 
@@ -58,8 +58,8 @@ Notifications should be sent to those pilots of a re-flight if the application i
 
 Notification should be performed in the following scenarios:
 
-* Random Draw Re-Flight
-* Re-Fly Entire Group
+- Random Draw Re-Flight
+- Re-Fly Entire Group
 
 Notification delivery, acknowledgement, decline, and manual director overrides must be recorded. A move-to-group re-flight does not require a participant response, but the participant-facing result must identify the resulting attempt when online. Offline operation must not block creation, scoring, or finalization; pending notifications should be delivered when connectivity returns.
 

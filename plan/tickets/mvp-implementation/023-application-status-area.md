@@ -5,9 +5,11 @@
 - **Status:** Open
 
 ## Context
+
 Implement the persistent status area that displays connectivity, sync, and contest-state information across the application shell. This is required for both online and offline contexts.
 
 ## Work Items
+
 - [ ] Implement status bar in persistent shell
 - [x] Display internet connectivity status
 - [x] Display remote API connectivity and last successful connection time
@@ -17,6 +19,7 @@ Implement the persistent status area that displays connectivity, sync, and conte
 - [ ] Make status items selectable to open relevant details/actions
 
 ## Acceptance Criteria
+
 - [x] Internet connectivity status is displayed
 - [x] Remote API connectivity status and last connection time are displayed
 - [ ] Synchronization state (last sync, unsent mutations, remote revision, conflicts) is displayed
@@ -25,8 +28,10 @@ Implement the persistent status area that displays connectivity, sync, and conte
 - [ ] Selecting a status item opens relevant details or action
 
 ## Dependencies
+
 - [020-contest-landing-page-route.md](020-contest-landing-page-route.md) — landing page route and shell
 
 ## Sources
+
 - `plan/ui/contest-administration/README.md`
 - `plan/ui/contest-administration/offline-ui.md`

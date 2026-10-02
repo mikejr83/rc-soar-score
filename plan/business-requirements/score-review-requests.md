@@ -31,9 +31,9 @@ An official score will be tracked. This is always considered to be the latest an
 
 The audit trail should then show:
 
-* The originally entered score
-* The user which entered the original score
-* The current official score
-* When the official score was updated. When the score is initially entered it will be the same as when the score is created. This value would change to reflect when a review updated and the system updated the score.
-* All score review requests with score modification
-* A status on the request showing if the review was approved or rejected.
+- The originally entered score
+- The user which entered the original score
+- The current official score
+- When the official score was updated. When the score is initially entered it will be the same as when the score is created. This value would change to reflect when a review updated and the system updated the score.
+- All score review requests with score modification
+- A status on the request showing if the review was approved or rejected.

@@ -12,10 +12,10 @@ The main mode of use for this portion of the application will be on mobile devic
 
 Participants are directed to an overview screen that summarizes their participation in the contest. The invitation link used to reach the scores must remain usable for the participant to return to this overview after closing or leaving the application. Only the most recently issued invitation link for the participant may open the score interface; an older link must direct the participant to obtain the latest invitation link from the contest director. The screen shows their name and if enabled their pilot number. It will have a table with a row for each round in the contest. The rows display the following:
 
-* The round number.
-* The group in which they fly in that round.
-* If lanes are assigned, the lane number.
-* If the contest type is F3K, the task type to be flown.
+- The round number.
+- The group in which they fly in that round.
+- If lanes are assigned, the lane number.
+- If the contest type is F3K, the task type to be flown.
 
 A selection button may be visible on the table row.
 

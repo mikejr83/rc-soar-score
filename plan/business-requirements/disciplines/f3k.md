@@ -23,7 +23,7 @@ During the working time (typically 10 minutes), the competitor has an unlimited 
 
 ### Task B (Next to last and last flight)
 
-The  competitor has an unlimited number of flights, but only the next to last and the last flight will be scored. The scores are summed. Working time is 10 minutes.
+The competitor has an unlimited number of flights, but only the next to last and the last flight will be scored. The scores are summed. Working time is 10 minutes.
 
 - **Objective:** The next-to-last and last flights are scored.
 - **Scoring:** The sum of the flight times of the two flights is measured in seconds, with a maximum of 480 seconds (240 seconds per flight).

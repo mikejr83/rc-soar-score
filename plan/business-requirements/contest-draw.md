@@ -6,8 +6,8 @@ This document will use the terms "draw" and "matrix". Generally, the term "draw"
 
 The pilots must be organized into groups within a number of rounds before the contest is started. The contest configuration contains the basic options used in the selection of pilots into groups. The goal of this process is to achieve the following:
 
-* Create a "flight matrix" that places pilots into groups for each round of the contest.
-* Create a fair distribution of opportunities for each pilot to fly against another pilot.
+- Create a "flight matrix" that places pilots into groups for each round of the contest.
+- Create a fair distribution of opportunities for each pilot to fly against another pilot.
 
 The contest director needs to provide how many rounds which will be flown in the contest. Additionally, a contest director may wish to add rounds or redraw rounds where a matrix already exists.
 

@@ -6,14 +6,14 @@ The management application will need to manage various system data for a contest
 
 A contest director will need to:
 
-* Open existing contests to either review previous contests.
-* Create new contests
-* Delete contests
-* Export contest data
-* Maintain a list of pilots that have participated in the contests by that contest director (frequent participants) *would also be considered managing the local data stored for pilots)
-* Configuring of various global configuration
-  * Landing bonuses
-  * Participant types
+- Open existing contests to either review previous contests.
+- Create new contests
+- Delete contests
+- Export contest data
+- Maintain a list of pilots that have participated in the contests by that contest director (frequent participants) *would also be considered managing the local data stored for pilots)
+- Configuring of various global configuration
+  - Landing bonuses
+  - Participant types
 
 ## Opening Contests
 
@@ -25,9 +25,9 @@ Creating new contests is a primary function. The application will take a name fo
 
 When creating a new contest a previous contest may be selected. The contest director can select the previous contest do a number of tasks when the new contest is created:
 
-* Copy the configuration along with the class and discipline
-* Copy the pilots
-* Copy the configuration, class/discipline, and a sub-set of pilots for a "fly-off" scenario.
+- Copy the configuration along with the class and discipline
+- Copy the pilots
+- Copy the configuration, class/discipline, and a sub-set of pilots for a "fly-off" scenario.
 
 ## Deleting Contests
 
@@ -45,14 +45,14 @@ Participants linked to a contest director can be managed "globally". That is, an
 
 The following data points is considered participant data for any contest.
 
-* First and Last Name
-* Club
-* FAI Number
-* National Organization ID
-* City
-* State
-* Country
-* Email - Always private
+- First and Last Name
+- Club
+- FAI Number
+- National Organization ID
+- City
+- State
+- Country
+- Email - Always private
 
 First and last name and email are required. All of the other fields are optional. The email address is used when determining if the participant in a contest directors data matches one that has already been created in the remote system.
 
@@ -66,8 +66,8 @@ When the system is syncing data to the remote site it is still within the contes
 
 The contest director may add additional information about the participant when they are added to a contest.
 
-* Class
-* Role
+- Class
+- Role
 
 The "Class" is an optional value provided by the contest director when adding a participant as a pilot to a contest. It is only necessary when the contest director indicates that classes are being used. The last Class value used for a pilot will be used but the contest director has the ability to change it when adding to the contest.
 
@@ -81,9 +81,9 @@ At the system configuration level the contest director should see these roles. T
 
 Default participant roles:
 
-* Pilot - A pilot type and the default for all participants added to a contest.
-* Helper - A non-flyer
-* Team Manager - A non-flyer.
+- Pilot - A pilot type and the default for all participants added to a contest.
+- Helper - A non-flyer
+- Team Manager - A non-flyer.
 
 ## Landing Bonuses
 

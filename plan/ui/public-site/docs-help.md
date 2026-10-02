@@ -18,15 +18,15 @@ This page is the landing page for all documentation and user help.
 
 The page will present some basic tips on getting started plus the following navigation items:
 
-* Offer to register - Send the user to register for a user account at the identity provider.
-* Link to download the offline application
-* Link to contest search
-* A "Contest Director Getting Started" link to the competition help landing page.
-* A "Help Me Enter My Score" link to the participant scoring help page.
-* A "I Need An Account?" link to the user account help page.
-* A "Finding Contests and Results" link to the public contests help page.
-* Request Support - On the landing page this can be just a navigation element to the support page.
-* A space should be reserved for the future inclusion of a FAQ section.
+- Offer to register - Send the user to register for a user account at the identity provider.
+- Link to download the offline application
+- Link to contest search
+- A "Contest Director Getting Started" link to the competition help landing page.
+- A "Help Me Enter My Score" link to the participant scoring help page.
+- A "I Need An Account?" link to the user account help page.
+- A "Finding Contests and Results" link to the public contests help page.
+- Request Support - On the landing page this can be just a navigation element to the support page.
+- A space should be reserved for the future inclusion of a FAQ section.
 
 ### Competition Help
 

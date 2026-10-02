@@ -8,10 +8,10 @@ Broadly, sailplane contests have a contest director and a number of pilots parti
 
 The following individuals participate in a contest:
 
-* Contest director - This is the organizer of the contest. They are responsible for configuring the contest, ensuring scores are entered, and that the contest runs according to the rules specific to the contest discipline.
-* Official - A term synonymous with the contest director when referring to administrative score entry or review. Another person may help perform these actions on the same device and offline installation, but the application does not treat that person as a separate official user type.
-* Pilot - This individual receives scores for flying in the contest.
-* Helper - These individuals are associated to a pilot when the contest features teams. They are tracked for cataloging and reporting. They also can enter scores on behalf of pilots on their team.
+- Contest director - This is the organizer of the contest. They are responsible for configuring the contest, ensuring scores are entered, and that the contest runs according to the rules specific to the contest discipline.
+- Official - A term synonymous with the contest director when referring to administrative score entry or review. Another person may help perform these actions on the same device and offline installation, but the application does not treat that person as a separate official user type.
+- Pilot - This individual receives scores for flying in the contest.
+- Helper - These individuals are associated to a pilot when the contest features teams. They are tracked for cataloging and reporting. They also can enter scores on behalf of pilots on their team.
 
 A contest is divided up into a number of rounds. Pilots are placed into groups within each round. Each group is flown with their pilots. A pilot receives a single overall score for the round. How this score is computed depends on different factors.
 

@@ -44,7 +44,7 @@ This feature would enable the application to configure and interface with variou
 
 The following will need to be done:
 
-* An analysis of the current timing systems utilized by contest directors must be completed. This is to determine what systems will be supported by RC Soar Score.
-* An understanding of what is necessary to configure them will need to be cataloged.
-* How the application interacts with the timers will need to be defined. This includes if the application is driving the timer functionality or if the timer is taking configuration and then providing feedback to the application.
-* The manner in which the application interfaces with these systems will need to be designed. Many of the timers require communication over USB, Bluetooth, etc.
+- An analysis of the current timing systems utilized by contest directors must be completed. This is to determine what systems will be supported by RC Soar Score.
+- An understanding of what is necessary to configure them will need to be cataloged.
+- How the application interacts with the timers will need to be defined. This includes if the application is driving the timer functionality or if the timer is taking configuration and then providing feedback to the application.
+- The manner in which the application interfaces with these systems will need to be designed. Many of the timers require communication over USB, Bluetooth, etc.

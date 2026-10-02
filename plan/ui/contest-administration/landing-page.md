@@ -2,10 +2,10 @@
 
 The online and desktop applications share the landing page structure. The page provides:
 
-* `Sign in`, which navigates to the configured identity provider and returns to the application after authentication.
-* `Create account`, which navigates to the identity provider registration flow.
-* `Continue offline` in the desktop application.
-* Links to help and the public contest site.
+- `Sign in`, which navigates to the configured identity provider and returns to the application after authentication.
+- `Create account`, which navigates to the identity provider registration flow.
+- `Continue offline` in the desktop application.
+- Links to help and the public contest site.
 
 The desktop application must allow offline continuation without an account. It must state that offline contests remain local unless the director later publishes them or signs in to enable synchronization. If the local store cannot be opened, show the reason and a recovery action rather than entering the application with partial data.
 

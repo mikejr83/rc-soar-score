@@ -10,14 +10,14 @@ This wizard page is located at the route `/contest-administration/contests/new`.
 
 Required fields:
 
-* Contest name.
-* Start date and end date.
-* Venue or host.
+- Contest name.
+- Start date and end date.
+- Venue or host.
 
 Optional fields:
 
-* City, state/province, and country.
-* Time zone, defaulting to the device or browser time zone with an explicit selection available.
+- City, state/province, and country.
+- Time zone, defaulting to the device or browser time zone with an explicit selection available.
 
 The user may choose not to copy an existing contest, copy configuration only, copy configuration and all pilots, or copy configuration and select a subset of pilots for a fly-off. Local contests are available without connectivity; public contests are searchable only when the service is available and are copied as input data, not as a new public projection. The source contest, selected copy mode, and any selected pilots are shown in the summary.
 
@@ -33,11 +33,11 @@ Changing discipline clears incompatible discipline-specific values and requires 
 
 The user selects the options that define contest-specific participant data:
 
-* Teams.
-* Contest pilot numbers.
-* Classes.
-* Contest roles.
-* Pilot models.
+- Teams.
+- Contest pilot numbers.
+- Classes.
+- Contest roles.
+- Pilot models.
 
 All options default to disabled unless copied from a source contest. If teams are enabled, the number of pilots counted for the team score is required and must be a positive integer. Team protection is available only when teams are enabled. If models are enabled, the later participant step requests model name and model ID for pilots.
 
@@ -49,9 +49,9 @@ The participant list shows selected pilots and non-flying participants. Each row
 
 An autocomplete field searches by name or email. Search order is:
 
-* Offline without connectivity: local participant data.
-* Offline with connectivity: remote participant data first, then local participant data.
-* Online: remote participant data.
+- Offline without connectivity: local participant data.
+- Offline with connectivity: remote participant data first, then local participant data.
+- Online: remote participant data.
 
 The UI identifies whether a result is local, remote, or already selected. It must not expose participant email to users who are not permitted to see it.
 
@@ -73,11 +73,11 @@ The contest requires at least two scoring pilots. Fewer than three pilots shows 
 
 The wizard displays discipline defaults for review and permits values that are explicitly allowed during initial configuration:
 
-* Group-score mode: raw, normalized, or time where supported.
-* Rounding or truncation and decimal precision from 0 through 3.
-* Dropped-round policy.
-* Participant score-review requests enabled or disabled.
-* Public update policy: automatic, round completion, or manual.
+- Group-score mode: raw, normalized, or time where supported.
+- Rounding or truncation and decimal precision from 0 through 3.
+- Dropped-round policy.
+- Participant score-review requests enabled or disabled.
+- Public update policy: automatic, round completion, or manual.
 
 The contest is created unpublished with private visibility. Publication and visibility changes are performed on the contest configuration page. This step does not send data to the public site.
 
@@ -85,12 +85,12 @@ The contest is created unpublished with private visibility. Publication and visi
 
 The step collects:
 
-* Draw mode: `Man on Man` or `Seeded Man on Man`.
-* Groups per round.
-* Preliminary number of rounds.
-* Lane mode: none or random.
-* Team protection when teams are enabled.
-* Preliminary seeded rounds when seeded mode is selected.
+- Draw mode: `Man on Man` or `Seeded Man on Man`.
+- Groups per round.
+- Preliminary number of rounds.
+- Lane mode: none or random.
+- Team protection when teams are enabled.
+- Preliminary seeded rounds when seeded mode is selected.
 
 Groups per round is a positive integer. The control displays the calculated minimum and maximum pilots per group and updates them as the value changes. It must prevent a configuration with fewer than two scoring pilots in a group. Team protection may increase the minimum groups per round and the UI must show that constraint.
 
