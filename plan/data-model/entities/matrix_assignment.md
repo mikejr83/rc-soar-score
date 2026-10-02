@@ -4,7 +4,7 @@
 **Purpose:** Places one pilot participation into a group and lane for a flight in a round. Assignments are append-only history: a draw creates `Original` rows, a move creates a `Moved` row that supersedes its source, and a re-flight creates a `Reflight` row. Scheduled and credited rounds are separate so a move or re-flight can receive credit for the original round without rewriting history.
 **Identifier:** `id` (UUIDv7)
 **Parent entity:** MatrixRevision
-**Child entities:** ScorePlaceholder (exactly one per assignment)
+**Child entities:** ScorePlaceholder (one per finalized current assignment)
 
 ## Relationships
 
@@ -14,7 +14,7 @@
 - References a Round as the scheduled round (`scheduled_round_id`) and a Round as the credited round (`credited_round_id`)
 - References a source MatrixAssignment (`source_assignment_id`) for `Moved` and `Reflight` rows
 - References the ReFlight that created it (`re_flight_id`) for `Reflight` rows
-- Owns exactly one ScorePlaceholder, which exists from creation even before a score is entered
+- Owns at most one ScorePlaceholder, which exists before any score is entered. It is created when the matrix revision is finalized (`Original` rows) or together with the row itself (`Moved` and `Reflight`); assignments in a draft revision have none
 
 ## Fields/Properties
 
@@ -50,7 +50,7 @@
 - A pilot has at most one current `Original` or `Moved` assignment per credited round: (`contest_participation_id`, `credited_round_id`) is unique among such rows where `superseded_by_assignment_id` is null
 - When team protection is enabled, no two pilots from the same team share a (`scheduled_round_id`, `group`) among current assignments; the draw guarantees this and moves must preserve it
 - Only participations with the pilot role and an active status appear in assignments
-- An assignment is current when `superseded_by_assignment_id` is null and its scheduled round is current (its `superseded_by_round_id` is null). Non-current assignments, and their placeholders, are excluded from missing-score checks, round completeness, the seeded-draw prerequisite, and standings
+- An assignment is current when `superseded_by_assignment_id` is null and its scheduled round is current (neither superseded nor `Cancelled`). Non-current assignments, and their placeholders, are excluded from missing-score checks, round completeness, the seeded-draw prerequisite, and standings
 
 ## Lifecycle
 
@@ -69,4 +69,4 @@
 - Mutations: creation, plus the single write-once supersession update
 - Every creation records an AuditEvent with the actor, authority, and reason. For a move, the source row holds the previous group, lane, and round slot
 - Offline moves that collide on a lane are resolved through the standard conflict process, since the unique constraint rejects the second write
-- Each assignment has exactly one ScorePlaceholder, created in the same transaction
+- Placeholders are created in the transaction that finalizes the matrix revision (`Original` rows) or that creates the row (`Moved`, `Reflight`), so a finalized current assignment always has exactly one

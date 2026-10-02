@@ -261,19 +261,6 @@ erDiagram
     }
 
     MATRIX_REVISION {
-        uuid id                 "PK"
-        uuid contest_id         "FK"
-        string config
-        uuid seed
-        text fairness_result
-        uuid creator_id
-        text reason
-        text finalizing_agent
-        bool finalized
-        int revision
-    }
-
-    MATRIX_REVISION {
         uuid id                     "PK"
         uuid contest_id             "FK"
         int revision_number

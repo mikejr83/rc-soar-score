@@ -4,8 +4,8 @@ Canonical documentation for the Soar Score data model. This folder is the source
 
 ## Contents
 
-- [Entity Relationship Diagram (ERD)](ERD.md) - Mermaid diagram of all 37 entities and their relationships
-- [Entity Documentation](entities/) - Per-entity specifications (37 files)
+- [Entity Relationship Diagram (ERD)](ERD.md) - Mermaid diagram of all 38 entities and their relationships
+- [Entity Documentation](entities/) - Per-entity specifications (38 files)
 
 ## Entity Catalog
 
