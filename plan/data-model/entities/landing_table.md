@@ -27,7 +27,7 @@
 
 ## Lifecycle
 
-```
+```plaintext
 Drafted -> Published -> Superseded (by new revision)
 ```
 

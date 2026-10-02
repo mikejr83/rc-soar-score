@@ -28,7 +28,7 @@
 
 ## Lifecycle
 
-```
+```plaintext
 Drafted -> Published
 ```
 

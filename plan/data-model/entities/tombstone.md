@@ -34,7 +34,7 @@
 
 ## Lifecycle
 
-```
+```plaintext
 PendingDelete -> Acknowledged
 ```
 

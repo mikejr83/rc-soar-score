@@ -33,7 +33,7 @@
 
 ## Lifecycle
 
-```
+```plaintext
 Created -> Active -> (optionally) Replaced by new config revision
 ```
 
