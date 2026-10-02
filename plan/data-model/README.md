@@ -4,8 +4,8 @@ Canonical documentation for the Soar Score data model. This folder is the source
 
 ## Contents
 
-- [Entity Relationship Diagram (ERD)](ERD.md) - Mermaid diagram of all 31 entities and their relationships
-- [Entity Documentation](entities/) - Per-entity specifications (31 files)
+- [Entity Relationship Diagram (ERD)](ERD.md) - Mermaid diagram of all 37 entities and their relationships
+- [Entity Documentation](entities/) - Per-entity specifications (37 files)
 
 ## Entity Catalog
 
@@ -57,6 +57,7 @@ Canonical documentation for the Soar Score data model. This folder is the source
 | MatrixRevision   | [entities/matrix_revision.md](entities/matrix_revision.md)     | [matrix-and-assignments.md](../architecture-requirements/data/matrix-and-assignments.md) | Revisioned draw configuration and assignment schedule      | **YES** - The property `participating_participant_participations` is defining an array of uuid values that map participants to the matrix revision. This should likely be done in a linking table. |
 | MatrixAssignment | [entities/matrix_assignment.md](entities/matrix_assignment.md) | [matrix-and-assignments.md](../architecture-requirements/data/matrix-and-assignments.md) | Individual assignment from participant to round/group/lane |                                                                                                                                                                                                    |
 | ReFlight         | [entities/re_flight.md](entities/re_flight.md)                 | [matrix-and-assignments.md](../architecture-requirements/data/matrix-and-assignments.md) | Contest-scheduled re-flight with decision records          | **YES** - The whole entity needs deeper investigation. The architecture or business requirements may be lacking.                                                                                   |
+| Round            | [entities/round.md](entities/round.md)                         | [matrix-and-assignments.md](../architecture-requirements/data/matrix-and-assignments.md) | A numbered round of flights within a matrix revision.      |                                                                                                                                                                                                    |
 
 ### Scores, Results & Reviews
 
@@ -65,6 +66,7 @@ Canonical documentation for the Soar Score data model. This folder is the source
 | ScorePlaceholder       | [entities/score_placeholder.md](entities/score_placeholder.md)               | [scores-and-results.md](../architecture-requirements/data/scores-and-results.md)           | Score state holder for every pilot assignment | **YES** - Need to re-evaluate it against the architecture and business reqs. Properties look odd    |
 | ScoreAttempt           | [entities/score_attempt.md](entities/score_attempt.md)                       | [scores-and-results.md](../architecture-requirements/data/scores-and-results.md)           | Immutable canonical raw score submission      |                                                                                                     |
 | OfficialScore          | [entities/official_score.md](entities/official_score.md)                     | [scores-and-results.md](../architecture-requirements/data/scores-and-results.md)           | Authoritative versioned score output          |                                                                                                     |
+| ContestPenalty         | [entities/contest_penalty.md](entities/contest_penalty.md)                   | [scores-and-results.md](../architecture-requirements/data/scores-and-results.md)           | Contest-long penalty assessed against a pilot |                                                                                                     |
 | ScoreCalculationResult | [entities/score_calculation_result.md](entities/score_calculation_result.md) | [scores-and-results.md](../architecture-requirements/data/scores-and-results.md)           | Derived calculated score with provenance      | **YES** - Need to revisit the reqs and make sure these are right. ERD and entity file do not match. |
 | ReviewRequest          | [entities/review_request.md](entities/review_request.md)                     | [reviews-and-invitations.md](../architecture-requirements/data/reviews-and-invitations.md) | Proposed score change for official review     |                                                                                                     |
 

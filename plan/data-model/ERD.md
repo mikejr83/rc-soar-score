@@ -1,6 +1,6 @@
 # RC Soar Score Entity Relationship Diagram
 
-ERD for the 31 conceptual entities. Physical design: PostgreSQL backend with IndexedDB clients, UUIDv7 identifiers, composite unique constraints on natural business keys.
+ERD for the 37 conceptual entities. Physical design: PostgreSQL backend with IndexedDB clients, UUIDv7 identifiers, composite unique constraints on natural business keys.
 
 ```mermaid
 erDiagram
@@ -62,16 +62,16 @@ erDiagram
     }
 
     PARTICIPANT_ACCOUNT_LINK {
-        uuid id "PK"
+        uuid id                     "PK"
         uuid participant_profile_id "FK"
-        uuid account_id "FK"
+        uuid account_id             "FK"
         int revision
     }
 
     CONTEST_PARTICIPATION {
-        uuid id "PK"
-        uuid contest_id "FK"
-        uuid participant_profile_id "FK"
+        uuid id                         "PK"
+        uuid contest_id                 "FK"
+        uuid participant_profile_id     "FK"
         string classification           "pilots only, nullable"
         int role_type                   "enum, nullable"
         int participant_number          "nullable"
@@ -91,8 +91,8 @@ erDiagram
     }
 
     TEAM {
-        uuid id "PK"
-        uuid contest_id "FK"
+        uuid id             "PK"
+        uuid contest_id     "FK"
         text name
         int pilot_totals
         int revision
@@ -225,15 +225,6 @@ erDiagram
         uuid landing_table_id "FK"
     }
 
-    ROUND_CONFIG {
-        uuid id "PK"
-        uuid contest_id "FK"
-        text mode
-        int groups_per_round
-        int group_size
-        int revision
-    }
-
     CONTEST_CONFIGURATION_REVISION {
         uuid id PK
         uuid contest_id FK
@@ -250,9 +241,28 @@ erDiagram
     }
 
     %% Matrix / Assignments
+        MATRIX_ASSIGNMENT {
+        uuid id PK
+        uuid contest_id FK
+        uuid matrix_revision_id FK
+        uuid contest_participation_id FK
+        uuid scheduled_round_id FK
+        uuid credited_round_id FK
+        int group
+        int lane
+        int flight_sequence
+        text assignment_type
+        uuid source_assignment_id FK "optional"
+        uuid re_flight_id FK "optional"
+        uuid superseded_by_assignment_id FK "optional, write-once"
+        uuid actor_id FK
+        text reason
+        timestamptz created_at
+    }
+
     MATRIX_REVISION {
-        uuid id "PK"
-        uuid contest_id "FK"
+        uuid id                 "PK"
+        uuid contest_id         "FK"
         string config
         uuid seed
         text fairness_result
@@ -263,22 +273,35 @@ erDiagram
         int revision
     }
 
-    MATRIX_ASSIGNMENT {
-        uuid id "PK"
+    MATRIX_REVISION {
+        uuid id                     "PK"
+        uuid contest_id             "FK"
+        int revision_number
+        uuid previous_revision_id   "FK optional"
+        int first_round
+        int last_round
+        text draw_mode
+        bigint random_seed
+        text algorithm_version
+        jsonb draw_config
+        jsonb seeding_snapshot
+        jsonb fairness_summary
+        text reason
+        uuid created_by FK
+        timestamptz created_at
+        uuid finalized_by           "FK optional"
+        timestamptz finalized_at    "optional"
+    }
+
+    ROUND {
+        uuid id                 "PK"
+        uuid contest_id         "FK"
         uuid matrix_revision_id "FK"
-        uuid contest_participation_id "FK"
-        int scheduled_round
-        int credited_round
-        int group
-        int lane
-        text assignment_type
-        uuid source_assignment_id "FK optional"
-        text flight_sequence
-        int assignment_revision
-        uuid actor_id
-        string reason
-        timestamp created_at
-        timestamp updated_at
+        int ordinal
+        int group_count
+        text status
+        int revision
+        uuid superseded_by_round_id "FK optional, write-once"
     }
 
     RE_FLIGHT {
@@ -313,15 +336,15 @@ erDiagram
     }
 
     SCORE_ATTEMPT {
-        uuid id PK
-        uuid contest_id FK
-        uuid score_placeholder_id FK
-        uuid config_revision_id FK
-        uuid matrix_revision_id FK
+        uuid id                     "PK"
+        uuid contest_id             "FK"
+        uuid score_placeholder_id   "FK"
+        uuid config_revision_id     "FK"
+        uuid matrix_revision_id     "FK"
         jsonb raw_components
-        uuid actor_id FK
+        uuid actor_id               "FK"
         text authority
-        uuid invitation_id FK optional
+        uuid invitation_id          "FK optional"
         text source_device
         text client_mutation_id
         int base_score_revision
@@ -355,17 +378,17 @@ erDiagram
     }
 
     CONTEST_PENALTY {
-        uuid id PK
-        uuid contest_id FK
-        uuid contest_participation_id FK
-        uuid score_placeholder_id FK
+        uuid id                         "PK"
+        uuid contest_id                 "FK"
+        uuid contest_participation_id   "FK"
+        uuid score_placeholder_id       "FK"
         text penalty_description
         int penalty_points
-        uuid assessed_by FK
+        uuid assessed_by                "FK"
         text authority
         text reason
         timestamp assessed_at
-        uuid rescinds_penalty_id FK optional
+        uuid rescinds_penalty_id        "FK optional"
         text client_mutation_id
     }
 
@@ -453,7 +476,6 @@ erDiagram
         uuid id "PK"
         uuid score_placeholder_id "FK"
         string proposed_components
-        int proposed_cumulative_penalty
         string participant_message
         uuid requester_id
         int base_score_revision
@@ -490,7 +512,6 @@ erDiagram
     CONTEST ||--o{ CONTEST_CONFIGURATION_REVISION : "has revisions"
     CONTEST ||--o{ MATRIX_REVISION : "has revisions"
     CONTEST ||--o{ SYNC_CURSOR : "has cursor"
-    CONTEST ||--o{ ROUND_CONFIG : "has"
     CONTEST ||--o{ TEAM : "has teams"
     CONTEST ||--o{ CONTEST_PARTICIPATION : "has participations"
     CONTEST ||--o{ CONTEST_MODEL_LINK : "has links"
@@ -511,7 +532,8 @@ erDiagram
     DISCIPLINE_PROFILE ||--o{ CONTEST_CONFIGURATION_PRESET : "based on"
 
     PARTICIPANT_PROFILE ||--o{ CONTEST_PARTICIPATION : "profile for"
-    PARTICIPANT_PROFILE }o--o{ CONTEST_PARTICIPATION : "profile for"CONTEST_PARTICIPATION ||--o{ CONTEST_MODEL_LINK : "enters models"
+    PARTICIPANT_PROFILE }o--o{ CONTEST_PARTICIPATION : "profile for"
+    CONTEST_PARTICIPATION ||--o{ CONTEST_MODEL_LINK : "enters models"
     MODEL_CATALOG |o--o{ CONTEST_MODEL_LINK : "catalog source"
 
     CONTEST_PARTICIPATION ||--o{ MATRIX_ASSIGNMENT : "assignment belongs to this participation"
@@ -556,10 +578,22 @@ erDiagram
 
     CONTEST_CONFIGURATION_REVISION |o--o| CONTEST_CONFIGURATION_REVISION : "replaces"
     ACCOUNT ||--o{ CONTEST_CONFIGURATION_REVISION : "created"
-    CONTEST_CONFIGURATION_REVISION ||--o{ OFFICIAL_SCORE : "scored under"
     CONTEST_CONFIGURATION_REVISION ||--o{ SCORE_CALCULATION_RESULT : "scored under"
 
     CONTEST_PARTICIPATION ||--o{ CONTEST_PENALTY : "assessed against"
     SCORE_PLACEHOLDER ||--o{ CONTEST_PENALTY : "incurred during"
     CONTEST_PENALTY |o--o| CONTEST_PENALTY : "rescinds"
+
+    CONTEST ||--o{ ROUND : "has"
+    MATRIX_REVISION ||--o{ ROUND : "contains"
+    ROUND ||--o{ MATRIX_ASSIGNMENT : "scheduled in"
+    ROUND ||--o{ MATRIX_ASSIGNMENT : "credited to"
+    ROUND |o--o| ROUND : "superseded by"
+    MATRIX_REVISION ||--o{ MATRIX_ASSIGNMENT : "contains"
+    CONTEST_PARTICIPATION ||--o{ MATRIX_ASSIGNMENT : "flies"
+    MATRIX_ASSIGNMENT |o--o{ MATRIX_ASSIGNMENT : "source of"
+    MATRIX_ASSIGNMENT |o--o| MATRIX_ASSIGNMENT : "superseded by"
+    RE_FLIGHT |o--o{ MATRIX_ASSIGNMENT : "creates"
+    MATRIX_ASSIGNMENT ||--|| SCORE_PLACEHOLDER : "scored by"
+    MATRIX_REVISION |o--o| MATRIX_REVISION : "extends"
 ```
