@@ -12,12 +12,13 @@
 
 ## Fields/Properties
 
-| Field        | Type               | Required | Default | Description                                |
-| ------------ | ------------------ | -------- | ------- | ------------------------------------------ |
-| `id`         | PK                 | Yes      | —       | Stable identifier for the table            |
-| `name`       | string             | Yes      | —       | Human-readable name                        |
-| `revision`   | int                | Yes      | —       | Revision number (increments monotonically) |
-| `input_unit` | enum(meters, feet) | Yes      | —       | Unit of measurement for the input key      |
+| Field                   | Type               | Required | Default | Description                                                     |
+| ----------------------- | ------------------ | -------- | ------- | --------------------------------------------------------------- |
+| `id`                    | PK                 | Yes      | —       | Stable identifier for the table                                 |
+| `discipline_profile_id` | UUIDv7             | No       | —       | The associated discipline which uses this landing table, if any |
+| `owner_account_id`      | UUIDv7             | No       | —       | The owner of the custom created landing table.                  |
+| `name`                  | string             | Yes      | —       | Human-readable name                                             |
+| `input_unit`            | enum(meters, feet) | Yes      | —       | Unit of measurement for the input key                           |
 
 ## Invariants and Constraints
 

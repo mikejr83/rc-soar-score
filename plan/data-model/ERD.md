@@ -213,8 +213,10 @@ erDiagram
 
     LANDING_TABLE {
         uuid id "PK"
+        uuid discipline_profile_id  "FK, optional"
+        uuid owner_account_id       "FK, optional"
         text name
-        int revision
+        string input_unit
     }
 
     LANDING_RESULT {
@@ -541,9 +543,10 @@ erDiagram
     DISCIPLINE_PROFILE ||--o{ DISCIPLINE_FORMULA : "defines"
     DISCIPLINE_PROFILE ||--o{ DISCIPLINE_RULE : "defines"
 
-    LANDING_TABLE |o--o{ CONTEST_CONFIGURATION_REVISION : "used by"
-    LANDING_TABLE ||--o{ SCORE_ATTEMPT : "used by"
-    LANDING_TABLE }o--o{ SCORE_ATTEMPT : "used by"
+    LANDING_TABLE |o--o{ CONTEST_CONFIGURATION_REVISION : "selected by"
+    LANDING_TABLE ||--o{ LANDING_RESULT : "contains"
+    LANDING_TABLE }o--|| DISCIPLINE_PROFILE : "has"
+    ACCOUNT |o--o{ LANDING_TABLE : "authored"
 
     SCORE_PLACEHOLDER ||--o{ OFFICIAL_SCORE : "has"
     SCORE_PLACEHOLDER }o--o{ OFFICIAL_SCORE : "has"
