@@ -1,6 +1,6 @@
 # RC Soar Score Entity Relationship Diagram
 
-ERD for the 43 conceptual entities (42 have an entity document; CONTEST_CONFIGURATION_PRESET does not yet). Physical design: PostgreSQL backend with IndexedDB clients, UUIDv7 identifiers, composite unique constraints on natural business keys.
+ERD for the 44 conceptual entities (43 have an entity document; CONTEST_CONFIGURATION_PRESET does not yet). Physical design: PostgreSQL backend with IndexedDB clients, UUIDv7 identifiers, composite unique constraints on natural business keys.
 
 ```mermaid
 erDiagram
@@ -398,34 +398,59 @@ erDiagram
         text      reason
     }
 
-    SCORE_CALCULATION_RESULT {
-        uuid   id                     PK
-        uuid   official_score_id      FK
-        uuid   config_revision_id     FK
-        int    raw_flight_score
-        int    discipline_raw_score
-        int    normalized_group_score
-        int    contest_total
-        bool   dropped_round
-        int    rank
-        int    team_total
-        string calculation_stage
-        int    revision
+    FLIGHT_RESULT {
+        uuid        id                       PK
+        uuid        contest_id               FK
+        uuid        score_placeholder_id     FK "unique"
+        uuid        official_score_id        FK "computed from"
+        uuid        contest_participation_id FK
+        uuid        credited_round_id        FK
+        text        outcome                     "Scored, Zero"
+        decimal     raw_points                  "discipline raw score"
+        decimal     landing_points              "optional"
+        decimal     flight_penalty_points       "optional"
+        int         cumulative_penalty          "optional; copy of the official component"
+        decimal     group_score                 "normalized round result"
+        bool        is_selected                 "supplies the round result"
+        bool        is_preliminary
+        uuid        config_revision_id       FK "calculated under"
+        uuid        matrix_revision_id       FK
+        text        calculation_version
+        timestamptz computed_at
     }
 
-    CONTEST_PENALTY {
-        uuid      id                       PK
-        uuid      contest_id               FK
-        uuid      contest_participation_id FK
-        uuid      score_placeholder_id     FK
-        text      penalty_description
-        int       penalty_points
-        uuid      assessed_by              FK
-        text      authority
-        text      reason
-        timestamp assessed_at
-        uuid      rescinds_penalty_id      FK "optional"
-        text      client_mutation_id
+    PARTICIPATION_STANDING {
+        uuid        id                       PK
+        uuid        contest_id               FK
+        uuid        contest_participation_id FK
+        int         as_of_round                 "round ordinal; not an FK"
+        int         place
+        bool        is_tied
+        decimal     raw_total                   "before drops and penalties"
+        jsonb       dropped_rounds
+        decimal     penalty_total               "sum of cumulative penalties"
+        decimal     overall_score
+        bool        is_preliminary
+        uuid        config_revision_id       FK "calculated under"
+        uuid        matrix_revision_id       FK
+        text        calculation_version
+        timestamptz computed_at
+    }
+
+    TEAM_STANDING {
+        uuid        id                     PK
+        uuid        contest_id             FK
+        uuid        team_id                FK
+        int         as_of_round               "round ordinal; not an FK"
+        int         place
+        bool        is_tied
+        decimal     team_score
+        jsonb       counted_participations    "highest score first"
+        bool        is_preliminary
+        uuid        config_revision_id     FK "calculated under"
+        uuid        matrix_revision_id     FK
+        text        calculation_version
+        timestamptz computed_at
     }
 
     %% Publication
@@ -616,7 +641,6 @@ erDiagram
     CONTEST ||--o{ SCORE_PLACEHOLDER : "denormalized contest_id"
     CONTEST ||--o{ SCORE_ATTEMPT : "denormalized contest_id"
     CONTEST ||--o{ OFFICIAL_SCORE : "denormalized contest_id"
-    CONTEST ||--o{ CONTEST_PENALTY : "denormalized contest_id"
     CONTEST |o--o| PUBLICATION_IDENTITY : "published as"
 
     PARTICIPANT_PROFILE ||--o{ CONTEST_PARTICIPATION : "profile for"
@@ -633,7 +657,6 @@ erDiagram
     ACCOUNT |o--o{ INVITATION : "redeems"
     CONTEST_PARTICIPATION ||--o{ MATRIX_ASSIGNMENT : "flies"
     CONTEST_PARTICIPATION ||--o{ SCORE_PLACEHOLDER : "has placeholders"
-    CONTEST_PARTICIPATION ||--o{ CONTEST_PENALTY : "assessed against"
 
     MATRIX_REVISION ||--o{ ROUND : "contains"
     MATRIX_REVISION ||--o{ MATRIX_ASSIGNMENT : "contains"
@@ -649,14 +672,23 @@ erDiagram
     SCORE_PLACEHOLDER ||--o{ SCORE_ATTEMPT : "has attempts"
     SCORE_PLACEHOLDER ||--o{ OFFICIAL_SCORE : "has versions"
     SCORE_PLACEHOLDER ||--o{ REVIEW_REQUEST : "has"
-    SCORE_PLACEHOLDER ||--o{ CONTEST_PENALTY : "incurred during"
     SCORE_ATTEMPT ||--o{ OFFICIAL_SCORE : "produces"
     INVITATION |o--o{ SCORE_ATTEMPT : "submitted under"
     CONTEST_CONFIGURATION_REVISION ||--o{ SCORE_ATTEMPT : "entered under"
     MATRIX_REVISION ||--o{ SCORE_ATTEMPT : "entered under"
-    OFFICIAL_SCORE ||--o{ SCORE_CALCULATION_RESULT : "derived from"
-    CONTEST_CONFIGURATION_REVISION ||--o{ SCORE_CALCULATION_RESULT : "scored under"
-    CONTEST_PENALTY |o--o| CONTEST_PENALTY : "rescinds"
+    SCORE_PLACEHOLDER ||--o| FLIGHT_RESULT : "calculated as"
+    OFFICIAL_SCORE ||--o{ FLIGHT_RESULT : "computed from"
+    CONTEST_PARTICIPATION ||--o{ PARTICIPATION_STANDING : "has"
+    TEAM ||--o{ TEAM_STANDING : "has"
+    CONTEST ||--o{ FLIGHT_RESULT : "denormalized contest_id"
+    CONTEST ||--o{ PARTICIPATION_STANDING : "denormalized contest_id"
+    CONTEST ||--o{ TEAM_STANDING : "denormalized contest_id"
+    CONTEST_CONFIGURATION_REVISION ||--o{ FLIGHT_RESULT : "calculated under"
+    CONTEST_CONFIGURATION_REVISION ||--o{ PARTICIPATION_STANDING : "calculated under"
+    CONTEST_CONFIGURATION_REVISION ||--o{ TEAM_STANDING : "calculated under"
+    MATRIX_REVISION ||--o{ FLIGHT_RESULT : "calculated under"
+    MATRIX_REVISION ||--o{ PARTICIPATION_STANDING : "calculated under"
+    MATRIX_REVISION ||--o{ TEAM_STANDING : "calculated under"
 
     DISCIPLINE_PROFILE ||--o{ CONTEST_CONFIGURATION_PRESET : "based on"
     DISCIPLINE_PROFILE ||--o{ CONTEST_CONFIGURATION_REVISION : "selected by"

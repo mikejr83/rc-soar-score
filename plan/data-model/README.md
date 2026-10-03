@@ -5,7 +5,7 @@ Canonical documentation for the Soar Score data model. This folder is the source
 ## Contents
 
 - [Entity Relationship Diagram (ERD)](ERD.md) - Mermaid diagram of all entities and their relationships
-- [Entity Documentation](entities/) - Per-entity specifications (42 files)
+- [Entity Documentation](entities/) - Per-entity specifications (43 files)
 - [Reconciliation Findings](reconciliation-findings.md) - Gaps and conflicts between this model and the architecture and business requirements
 
 ## Entity Catalog
@@ -64,14 +64,15 @@ Canonical documentation for the Soar Score data model. This folder is the source
 
 ### Scores, Results & Reviews
 
-| Entity                 | File                                                                         | Source Requirement                                                                         | Purpose                                       | Outstanding Issues                                                                                  |
-| ---------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | --------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| ScorePlaceholder       | [entities/score_placeholder.md](entities/score_placeholder.md)               | [scores-and-results.md](../architecture-requirements/data/scores-and-results.md)           | Score state holder for every pilot assignment | **YES** - Need to re-evaluate it against the architecture and business reqs. Properties look odd    |
-| ScoreAttempt           | [entities/score_attempt.md](entities/score_attempt.md)                       | [scores-and-results.md](../architecture-requirements/data/scores-and-results.md)           | Immutable canonical raw score submission      |                                                                                                     |
-| OfficialScore          | [entities/official_score.md](entities/official_score.md)                     | [scores-and-results.md](../architecture-requirements/data/scores-and-results.md)           | Authoritative versioned score output          |                                                                                                     |
-| ContestPenalty         | [entities/contest_penalty.md](entities/contest_penalty.md)                   | [scores-and-results.md](../architecture-requirements/data/scores-and-results.md)           | Contest-long penalty assessed against a pilot |                                                                                                     |
-| ScoreCalculationResult | [entities/score_calculation_result.md](entities/score_calculation_result.md) | [scores-and-results.md](../architecture-requirements/data/scores-and-results.md)           | Derived calculated score with provenance      | **YES** - Need to revisit the reqs and make sure these are right. ERD and entity file do not match. |
-| ReviewRequest          | [entities/review_request.md](entities/review_request.md)                     | [reviews-and-invitations.md](../architecture-requirements/data/reviews-and-invitations.md) | Proposed score change for official review     |                                                                                                     |
+| Entity                | File                                                                     | Source Requirement                                                                         | Purpose                                                                                                     | Outstanding Issues                                                                               |
+| --------------------- | ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| ScorePlaceholder      | [entities/score_placeholder.md](entities/score_placeholder.md)           | [scores-and-results.md](../architecture-requirements/data/scores-and-results.md)           | Score state holder for every pilot assignment                                                               | **YES** - Need to re-evaluate it against the architecture and business reqs. Properties look odd |
+| ScoreAttempt          | [entities/score_attempt.md](entities/score_attempt.md)                   | [scores-and-results.md](../architecture-requirements/data/scores-and-results.md)           | Immutable canonical raw score submission                                                                    |                                                                                                  |
+| OfficialScore         | [entities/official_score.md](entities/official_score.md)                 | [scores-and-results.md](../architecture-requirements/data/scores-and-results.md)           | Authoritative versioned score output                                                                        |                                                                                                  |
+| FlightResult          | [entities/flight_result.md](entities/flight_result.md)                   | [scores-and-results.md](../architecture-requirements/data/scores-and-results.md)           | Stored, recomputable result of one flight: raw points, landing points, penalty, and normalized round result |                                                                                                  |
+| ParticipationStanding | [entities/participation_standing.md](entities/participation_standing.md) | [scores-and-results.md](../architecture-requirements/data/scores-and-results.md)           | Stored, recomputable overall standing of a pilot as of each completed round                                 |                                                                                                  |
+| TeamStanding          | [entities/team_standing.md](entities/team_standing.md)                   | [scores-and-results.md](../architecture-requirements/data/scores-and-results.md)           | Stored, recomputable team standing as of each completed round                                               |                                                                                                  |
+| ReviewRequest         | [entities/review_request.md](entities/review_request.md)                 | [reviews-and-invitations.md](../architecture-requirements/data/reviews-and-invitations.md) | Proposed score change for official review                                                                   |                                                                                                  |
 
 ### Publication
 
@@ -145,8 +146,9 @@ graph TD
         SP[ScorePlaceholder]
         SA[ScoreAttempt]
         OS[OfficialScore]
-        CPEN[ContestPenalty]
-        SCRES[ScoreCalculationResult]
+        FR[FlightResult]
+        PS[ParticipationStanding]
+        TS[TeamStanding]
         RR[ReviewRequest]
     end
 
@@ -213,14 +215,17 @@ graph TD
     SP -->|has| SA
     SP -->|has| OS
     SP -->|has| RR
-    SP -->|incurred| CPEN
-    CP -->|assessed| CPEN
     SA -->|produces| OS
+    SP -->|calculated as| FR
+    OS -->|computed from| FR
+    FR -->|feeds| PS
+    CP -->|has| PS
+    PS -->|feeds| TS
+    TR -->|has| TS
+    CR -->|calculated under| FR
     IT -->|submitted under| SA
     CR -->|entered under| SA
     M -->|entered under| SA
-    OS -->|derives| SCRES
-    CR -->|scored under| SCRES
 
     C -->|published as| PI
     PI -->|has| PP

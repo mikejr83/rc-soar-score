@@ -32,6 +32,7 @@
 
 - Cannot be submitted on scores marked Official or Locked
 - `proposed_components` must be consistent with the score calculation rules for the flight
+- `proposed_components` must not include `cumulative_penalty`; only the director applies it
 - `decision_actor` and `decision_time` may be null while state is `Submitted`
 - If state is `Approved`, the corresponding Score is updated to reflect the proposed values
 - If an official edits or marks a score official while a review is pending, the review is superseded

@@ -4,7 +4,7 @@
 **Purpose:** Reservation slot for the score of one pilot assignment. It exists before any value is entered, so every current assignment has a place for its score, attempts, reviews, and penalties. Its `state` is a denormalized summary of the score workflow; the facts live in its attempts, review requests, and official scores.  
 **Identifier:** `id` (UUIDv7)  
 **Parent entity:** MatrixAssignment  
-**Child entities:** ScoreAttempt, OfficialScore, ReviewRequest, ContestPenalty
+**Child entities:** ScoreAttempt, OfficialScore, ReviewRequest
 
 ## Relationships
 
@@ -13,8 +13,7 @@
 - Owns many ScoreAttempt instances (immutable submissions, including review proposals and superseded attempts)
 - Owns many OfficialScore instances (versioned authoritative scores)
 - Owns many ReviewRequest instances
-- Referenced by ContestPenalty as the flight during which a contest penalty was incurred
-- ScoreCalculationResult is derived from the placeholder's current OfficialScore and does not hang off the placeholder directly
+- Has at most one FlightResult, derived from the placeholder's current OfficialScore. It does not hang off the placeholder's score facts and is never an input
 
 ## Fields/Properties
 
@@ -45,7 +44,7 @@
 - When an official score is created, the placeholder's `score_revision` is incremented and the new OfficialScore takes that value as its own `score_revision`, so (`score_placeholder_id`, `score_revision`) stays unique on OfficialScore, with gaps wherever attempts were accepted in between. An attempt's `base_score_revision` records the value the client had; a stale base is flagged for handling through the standard conflict process, never silently dropped
 - `Draft` is not a state: drafts and queued submissions are local to the client and are not accepted data
 - Zero, retired, and did-not-launch outcomes are not states. They are recorded as the official score's components (including the zero reason) and the placeholder is `Official`. A system-generated outcome (for example a no-show) enters through an attempt with system authority, so it follows the same path
-- Whether a score counts as dropped is a calculation result, not placeholder state, because the dropped-rounds rule depends on the contest configuration, which can change
+- Whether a score counts as dropped is a computed result, not placeholder state, because the dropped-rounds rule depends on the contest configuration, which can change
 - While the assignment's scheduled round is `Locked`, or the contest is locked, score entry and review changes are rejected unless the contest director overrides with a recorded reason. Group-level and assignment-level locks are not modeled
 
 ## Lifecycle

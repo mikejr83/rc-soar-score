@@ -9,7 +9,7 @@
 ## Relationships
 
 - References a DisciplineProfile (stable profile)
-- Linked from ScoreAttempt, OfficialScore, ScoreCalculationResult (for provenance)
+- Linked from ScoreAttempt (for provenance) and stamped on FlightResult, ParticipationStanding, and TeamStanding as the revision they were computed under
 - One active revision per Contest; older revisions immutable
 
 ## Fields/Properties

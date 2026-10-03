@@ -42,7 +42,7 @@
 - `role_id` must reference a system role or a role owned by the contest's director, and must not be archived when it is assigned
 - `role_type` equals the type of the referenced role at the time it was assigned
 - `role_name` and `role_type` are snapshots. Renaming, retyping, or archiving the role never changes them
-- Only participations with `role_type` `Pilot` have assignments, score placeholders, scores, and contest penalties
+- Only participations with `role_type` `Pilot` have assignments, score placeholders, and scores
 - `role_type` cannot be changed from `Pilot` once the participation has an assignment. A participation changed to `Pilot` after a draw is a late add and follows the matrix rules. Every change to `role_type` is an audited mutation
 - Team membership is held by TeamMembership, which references this participation. A participation belongs to at most one team in a contest
 - `retired_at_round` is set only on a participation with `role_type` `Pilot`, and is at least 1
