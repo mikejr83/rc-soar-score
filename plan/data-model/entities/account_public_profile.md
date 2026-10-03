@@ -9,8 +9,8 @@
 ## Relationships
 
 - Optionally belongs to an Account (`account_id`); null after the account is deleted or the profile is unlinked
-- Referenced by PublicationIdentity as the publication's owner
-- Referenced by PublicationParticipant as the link that supports a person's results over time
+- Referenced by [PublicationIdentity](publication_identity.md) as the publication's owner
+- Referenced by [PublicationParticipant](publication_participant.md) as the link that supports a person's results over time
 
 ## Fields/Properties
 

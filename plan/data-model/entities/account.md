@@ -4,7 +4,7 @@
 **Purpose:** A person's identity within the backend. An account is one of four kinds: a registered user who signs in through an identity provider, a guest created when someone redeems an invitation without having an account, the local account that owns data created offline on an installation, and the single shared deleted-user account that anonymized references point at. Accounts are a backend concern and are not synced to installations. An account is also the root for deciding what is removed when a deletion is requested.
 **Identifier:** `id` (UUIDv7)
 **Parent entity:** None (top-level)
-**Child entities:** AccountIdentity, AccountPublicProfile
+**Child entities:** [AccountIdentity](account_identity.md), [AccountPublicProfile](account_public_profile.md)
 
 ## Relationships
 

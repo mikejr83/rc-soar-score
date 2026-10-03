@@ -34,6 +34,7 @@
 - (`assignment_id`, `contest_participation_id`) must match the assignment's own id and participation (composite FK), and `contest_id` must equal the assignment's contest
 - A placeholder exists for every current assignment of a finalized matrix revision, regardless of whether a value has been entered. Assignments in a draft revision have none
 - Placeholders are created when the matrix revision is finalized (for `Original` assignments) or together with the assignment row (for `Moved` and `Reflight`)
+- A pilot with no current assignment credited to a round, for example one who joined late and was never given a make-up flight, has no placeholder for it. The calculation treats the round as not entered: a zero and a candidate to drop, the same as a round whose placeholder is `NotEntered`. Nothing is stored. A later `LateAdd` for that round creates a real placeholder that replaces the derived zero
 - Placeholders of assignments that are no longer current (moved away, in a superseded or cancelled round) are retained and stay `NotEntered`. They are excluded from missing-score checks, round completeness, and standings
 - `state` is derived from the facts, in priority order:
   1. `InReview` if any review request is open

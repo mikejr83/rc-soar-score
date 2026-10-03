@@ -48,9 +48,9 @@
 - In seeded mode after the preliminary block, each revision draws exactly one round (`first_round` equals `last_round`) and requires every earlier round to be complete: every current assignment has an official score and no review request is open
 - Group sizes are derived from the pilot count N and G; they are never stored
 - The matrix-affecting contest configuration options are team protection, draw mode, and `preliminary_rounds`. Their values are copied verbatim into `draw_config` (draw mode as `configured_draw_mode`). When the current configuration differs from the latest finalized revision's `draw_config`, the app warns the director and offers a redraw of the unscored rounds. A difference never alters existing assignments
-- The draw is reproducible: identical `draw_inputs`, `draw_config`, `random_seed`, `algorithm_version`, and prior history must produce the identical matrix on every platform. Prior history means the current assignments of earlier rounds as of `created_at`, which can be rebuilt because assignments are append-only
-- `draw_inputs` is a historical snapshot, so the participation ids it holds are not enforced as foreign keys
-- Only participations with the pilot role and an active status are included in the draw
+- The draw is reproducible: identical `seeding_snapshot`, `draw_config`, `random_seed`, `algorithm_version`, and prior history must produce the identical matrix on every platform. Prior history means the current assignments of earlier rounds as of `created_at`, which can be rebuilt because assignments are append-only
+- `seeding_snapshot` is a historical snapshot, so the participation ids it holds are not enforced as foreign keys
+- Only participations with the pilot role and no `retired_at_round` are included in the draw
 - The current matrix is the set of current rounds (those neither superseded nor cancelled) and their current assignments across finalized revisions. Draft revisions never contribute to it
 - A draft that is never finalized is simply abandoned; it has no effect on the current matrix
 

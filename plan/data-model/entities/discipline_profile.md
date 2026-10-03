@@ -8,24 +8,26 @@
 
 ## Fields/Properties
 
-| Field           | Type                                            | Required | Default | Description                                                           |
-| --------------- | ----------------------------------------------- | -------- | ------- | --------------------------------------------------------------------- |
-| `id`            | PK                                              | Yes      | —       | Stable identifier for the profile                                     |
-| `type`          | enum(ALES, ThermalDuration, F3J, F5J, F3L, F3K) | Yes      | —       | Discipline type                                                       |
-| `version`       | int                                             | Yes      | —       | Rules profile version                                                 |
-| `name`          | string                                          | Yes      | —       | Human-readable name of the discipline                                 |
-| `description`   | string                                          | No       | —       | Longer description of the discipline and its rules                    |
-| `category`      | enum(duration, multiple, other)                 | Yes      | —       | Category of discipline for grouping and selection purposes            |
-| `status`        | enum(drafted, published, superseded)            | Yes      | drafted | Lifecycle status of this profile version                              |
-| `superseded_by` | string                                          | No       | —       | Type of profile that supersedes this version (when status=superseded) |
-| `created_by`    | string                                          | Yes      | —       | Author account identifier who created this profile version            |
-| `created_at`    | datetime                                        | Yes      | —       | Timestamp of profile creation                                         |
-| `updated_by`    | string                                          | No       | —       | Account identifier who last modified this profile (drafts only)       |
-| `updated_at`    | datetime                                        | No       | —       | Timestamp of last modification (drafts only)                          |
+| Field                      | Type                                            | Required | Default | Description                                                                                                                                     |
+| -------------------------- | ----------------------------------------------- | -------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`                       | PK                                              | Yes      | —       | Stable identifier for the profile                                                                                                               |
+| `type`                     | enum(ALES, ThermalDuration, F3J, F5J, F3L, F3K) | Yes      | —       | Discipline type                                                                                                                                 |
+| `version`                  | int                                             | Yes      | —       | Rules profile version                                                                                                                           |
+| `name`                     | string                                          | Yes      | —       | Human-readable name of the discipline                                                                                                           |
+| `description`              | string                                          | No       | —       | Longer description of the discipline and its rules                                                                                              |
+| `category`                 | enum(duration, multiple, other)                 | Yes      | —       | Category of discipline for grouping and selection purposes                                                                                      |
+| `default_landing_table_id` | UUIDv7                                          | No       | -       | FK LandingTable the profile ships with and a contest uses unless its configuration selects another. Null for a discipline with no landing score |
+| `status`                   | enum(drafted, published, superseded)            | Yes      | drafted | Lifecycle status of this profile version                                                                                                        |
+| `superseded_by`            | string                                          | No       | —       | Type of profile that supersedes this version (when status=superseded)                                                                           |
+| `created_by`               | string                                          | Yes      | —       | Author account identifier who created this profile version                                                                                      |
+| `created_at`               | datetime                                        | Yes      | —       | Timestamp of profile creation                                                                                                                   |
+| `updated_by`               | string                                          | No       | —       | Account identifier who last modified this profile (drafts only)                                                                                 |
+| `updated_at`               | datetime                                        | No       | —       | Timestamp of last modification (drafts only)                                                                                                    |
 
 ## Invariants and Constraints
 
 - The combination (`type`, `version`) must be unique.
+- `default_landing_table_id` must be set when the profile has a score field of type `landing`, and must be a system table (no owner). It is the suggested default, not a restriction: the contest configuration may select any other table
 - `version` increments monotonically for each discipline type; earlier versions remain immutable.
 - Field identifiers and meanings are immutable within a given rules version.
 - F3L and F3K are representable but not implemented until their official rules are formally defined.

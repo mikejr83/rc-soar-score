@@ -36,6 +36,7 @@
 - Each cites its source ScoreAttempt for traceability
 - Latest score_revision for a placeholder is the current authoritative score
 - Components normalized to standard units when appropriate
+- A landing selection in `components` is the selected LandingResult id, which fixes the key, points, and table
 - Components hold authoritative inputs only; values derived from the contest configuration are calculated and stored in ScoreCalculationResult, so retroactive configuration changes never leave stale values here
 - `contest_id` must equal the contest of the referenced placeholder and attempt
 

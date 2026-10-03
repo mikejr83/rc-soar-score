@@ -14,24 +14,26 @@
 
 ## Fields/Properties
 
-| Field                   | Type     | Required | Default | Description                                      |
-| ----------------------- | -------- | -------- | ------- | ------------------------------------------------ |
-| `id`                    | UUIDv7   | Yes      | —       | Primary key (surrogate)                          |
-| `contest_id`            | UUIDv7   | Yes      | —       | FK → Contest                                     |
-| `discipline_profile_id` | UUIDv7   | Yes      | —       | FK → DisciplineProfile                           |
-| `profile_version`       | int      | Yes      | —       | Version of DisciplineProfile at time of creation |
-| `config_json`           | string   | Yes      | —       | JSON blob of full config overrides               |
-| `created_by`            | UUIDv7   | Yes      | —       | Actor who created the revision                   |
-| `notes`                 | string   | No       | —       | Free-text notes about the revision               |
-| `created_at`            | ISO 8601 | Yes      | —       | Timestamp of creation                            |
-| `replaces_revision`     | UUIDv7   | No       | —       | FK → previous contest_configuration_revision_id  |
-| `current`               | bool     | Yes      | true    | Whether this is the active revision              |
+| Field                   | Type     | Required | Default | Description                                                                                                                                                                                       |
+| ----------------------- | -------- | -------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`                    | UUIDv7   | Yes      | —       | Primary key (surrogate)                                                                                                                                                                           |
+| `contest_id`            | UUIDv7   | Yes      | —       | FK → Contest                                                                                                                                                                                      |
+| `discipline_profile_id` | UUIDv7   | Yes      | —       | FK → DisciplineProfile                                                                                                                                                                            |
+| `profile_version`       | int      | Yes      | —       | Version of DisciplineProfile at time of creation                                                                                                                                                  |
+| `landing_table_id`      | UUIDv7   | No       | -       | FK LandingTable the contest uses for landing scores. Starts as the profile's `default_landing_table_id` and may be set to any table the director can use. Null when the discipline has no landing |
+| `config_json`           | string   | Yes      | —       | JSON blob of full config overrides                                                                                                                                                                |
+| `created_by`            | UUIDv7   | Yes      | —       | Actor who created the revision                                                                                                                                                                    |
+| `notes`                 | string   | No       | —       | Free-text notes about the revision                                                                                                                                                                |
+| `created_at`            | ISO 8601 | Yes      | —       | Timestamp of creation                                                                                                                                                                             |
+| `replaces_revision`     | UUIDv7   | No       | —       | FK → previous contest_configuration_revision_id                                                                                                                                                   |
+| `current`               | bool     | Yes      | true    | Whether this is the active revision                                                                                                                                                               |
 
 ## Invariants and Constraints
 
 - One revision must be marked current at all times (exactly one)
 - Older revisions cannot be mutated
 - Any change to config creates a new revision; never update `config_json` in place
+- The landing table can change between revisions only while no landing score has been entered in the contest. After the first one, new revisions must keep the same `landing_table_id`
 - `profile_version` must match an existing DisciplineProfile version at time of creation
 
 ## Lifecycle

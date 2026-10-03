@@ -14,6 +14,7 @@ plus landing bonus normalized together).
   "name": "Thermal Duration",
   "description": "Duration task with prescribed target time and precision landing. Flight score + landing bonus normalized to 1000. Default group scoring: Normalized.",
   "category": "duration",
+  "default_landing_table_id": "019a3c4b-8f2a-7b1c-9d4e-6f5a3b2c3c02",
   "status": "published",
   "superseded_by": null,
   "created_by": "admin@example.com",
@@ -25,52 +26,62 @@ plus landing bonus normalized together).
 
 ## LandingTable
 
+The system table the profile names as its default. It has no owner and is never modified.
+
 ```json
 {
   "id": "019a3c4b-8f2a-7b1c-9d4e-6f5a3b2c3c02",
+  "owner_account_id": null,
   "name": "Thermal Standard Landing Table",
-  "revision": 1,
-  "input_unit": "meters"
+  "input_unit": "meters",
+  "created_at": "2026-09-15T00:00:00Z"
 }
 ```
 
 ## LandingResult
+
+Each entry maps the key the scorer selects to the points awarded. A score stores the entry `id`.
 
 ```json
 [
   {
     "id": "019a3c4b-8f2a-7b1c-9d4e-6f5a3b2c3c03",
     "landing_table_id": "019a3c4b-8f2a-7b1c-9d4e-6f5a3b2c3c02",
-    "point_value": 0,
-    "display_value": "Within 10 m - 20 pts",
+    "entry_key": "within_10m",
+    "display_value": "Within 10 m",
+    "point_value": 20,
     "ordinal_position": 1
   },
   {
     "id": "019a3c4b-8f2a-7b1c-9d4e-6f5a3b2c3c04",
     "landing_table_id": "019a3c4b-8f2a-7b1c-9d4e-6f5a3b2c3c02",
-    "point_value": 10,
-    "display_value": "Within 25 m - 15 pts",
+    "entry_key": "within_25m",
+    "display_value": "Within 25 m",
+    "point_value": 15,
     "ordinal_position": 2
   },
   {
     "id": "019a3c4b-8f2a-7b1c-9d4e-6f5a3b2c3c05",
     "landing_table_id": "019a3c4b-8f2a-7b1c-9d4e-6f5a3b2c3c02",
-    "point_value": 25,
-    "display_value": "Within 50 m - 10 pts",
+    "entry_key": "within_50m",
+    "display_value": "Within 50 m",
+    "point_value": 10,
     "ordinal_position": 3
   },
   {
     "id": "019a3c4b-8f2a-7b1c-9d4e-6f5a3b2c3c06",
     "landing_table_id": "019a3c4b-8f2a-7b1c-9d4e-6f5a3b2c3c02",
-    "point_value": 50,
-    "display_value": "Within 75 m - 5 pts",
+    "entry_key": "within_75m",
+    "display_value": "Within 75 m",
+    "point_value": 5,
     "ordinal_position": 4
   },
   {
     "id": "019a3c4b-8f2a-7b1c-9d4e-6f5a3b2c3c07",
     "landing_table_id": "019a3c4b-8f2a-7b1c-9d4e-6f5a3b2c3c02",
-    "point_value": 75,
-    "display_value": "Within 75 m - 0 pts",
+    "entry_key": "none",
+    "display_value": "No bonus",
+    "point_value": 0,
     "ordinal_position": 5
   }
 ]
@@ -125,9 +136,8 @@ plus landing bonus normalized together).
     "field_key": "landing_table",
     "field_type": "landing",
     "name": "Landing Bonus Table",
-    "description": "Table mapping landing quality indicators to bonus points. The system uses the linked LandingTable entity (Thermal Standard Landing Table, revision 1) to score landings.",
+    "description": "Table mapping landing quality indicators to bonus points. The contest selects a landing table, which defaults to the profile\'s default (Thermal Standard Landing Table).",
     "required": true,
-    "default_value": "019a3c4b-8f2a-7b1c-9d4e-6f5a3b2c3c02",
     "display_order": 4,
     "created_at": "2026-09-15T00:00:00Z"
   }
@@ -156,7 +166,7 @@ plus landing bonus normalized together).
     "field_key": "landing",
     "field_type": "landing",
     "name": "Landing",
-    "description": "Landing position/quality indicator. Options are loaded dynamically from the linked landing table (Thermal Standard Landing Table, revision 1).",
+    "description": "Landing position/quality indicator. Options are loaded dynamically from the linked landing table (Thermal Standard Landing Table).",
     "required": false,
     "display_order": 2,
     "is_zero_reason": false,

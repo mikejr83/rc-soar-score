@@ -39,6 +39,7 @@
 - Score revision history kept at placeholder level, not per attempt
 - Drafts/queued submissions are not accepted data: don't affect lifecycle/rankings/publication
 - client_mutation_id must be unique for deduplication
+- A landing selection in `raw_components` is stored as the selected LandingResult id. Landing tables never change, so the id fixes the key, the points, and the table the calculation used
 - `contest_id` must equal the contest of the referenced placeholder, configuration revision, and matrix revision
 - Contest configuration changes are retroactive: `config_revision_id` records what the client saw at entry time and does not pin how the score is later calculated
 

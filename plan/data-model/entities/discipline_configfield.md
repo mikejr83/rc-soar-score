@@ -29,7 +29,7 @@
 - `options` may only be present when `field_type` is `enum`.
 - `default_value` must be valid JSON matching the schema implied by `field_type`.
 - Published profiles cannot modify existing config fields; only a new version may.
-- When `field_type` is set to `landing` the `default_value` should contain the uuid matching the `LandingTable` entity which will be used.
+- When `field_type` is `landing`, the field marks that the contest chooses a landing table. `default_value` is not used: the default is `DisciplineProfile.default_landing_table_id`, and the contest's choice is stored in `ContestConfigurationRevision.landing_table_id`, not in the configuration JSON
 
 ## Lifecycle
 

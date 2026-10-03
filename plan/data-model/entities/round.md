@@ -37,6 +37,8 @@
 - A round with any accepted score cannot be superseded. Rounds with new ordinals may be added at any time under the contest lifecycle rules
 - `superseded_by_round_id` is set once, in the same transaction that finalizes the replacing matrix revision. The replacing round must have the same ordinal and contest
 - When a round is superseded or cancelled, all assignments scheduled in it stop being current without any per-assignment update
+- Group capacity for late additions is derived: the largest group size of the round's original draw, `ceil(N / G)` with N the count of the round's `Original` assignments. It does not change when pilots are added later
+- A pilot with no current assignment credited to a round does not affect that round's completeness. The round counts for that pilot as not entered in the calculation
 - Completeness is derived, not stored: a round is complete when every current assignment credited to it has an official score (including official zero and retired outcomes) and no review request is open
 - While `Locked`, score entry and assignment moves for the round are rejected unless the contest director overrides with a recorded reason
 - A round becomes `Cancelled` when a tail redraw shrinks the contest and leaves its ordinal uncovered, or when the director drops an unflown round. Only a round with no accepted scores can be cancelled; cancellation is terminal and audited
