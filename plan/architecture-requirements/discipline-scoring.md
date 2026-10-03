@@ -21,7 +21,7 @@ The initial implementation supports the shared duration-scoring model for ALES, 
 2. Raw components must include the required integer `Cumulative Penalty` for every discipline. This value is a contest-level penalty component and must remain distinct from discipline-specific penalties, zero-score reasons, and an administration penalty.
 3. The record must retain the current official component set separately from the original participant submission and every accepted review proposal. Recalculation must never overwrite the original raw submission or erase superseded values.
 4. A raw component must be stored in its canonical unit and precision. Display values such as `MM:ss`, landing distance, or a landing-table label must not be the source of calculation.
-5. A landing selection must retain both the selected landing-table key and the resolved point value used by the calculation. The landing table revision must be recorded with the score so that a later table change does not alter a historical calculation.
+5. A landing selection must be stored as the identifier of the selected landing-table entry. Landing tables are immutable, so the entry identifies the selected key, the resolved point value, and the table the calculation used, and a later table choice cannot alter a historical calculation. A contest's landing table cannot be changed once a landing score has been entered.
 6. Derived values must identify the exact input revision and calculation metadata that produced them. At minimum, the system must be able to reproduce the discipline raw score, group score, contest total, dropped-round decision, and team total.
 
 ## Calculation pipeline

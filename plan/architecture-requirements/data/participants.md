@@ -17,11 +17,13 @@ A participation link joins one participant profile to one contest. It is the aut
 - contest start/participant number, if enabled;
 - team reference, if teams are enabled;
 - scoring UUID used as a contest-scoped public identifier;
-- contest-specific privacy/display overrides and participation status.
+- for a pilot, the round from which they retired, if they have.
 
 The link is the parent of the participant's assignments, score placeholders, invitations, and contest model links. Scores must reference the link, not only the reusable profile.
 
-Participant numbers are allocated at the first applicable draw and are not renumbered. A participant added later receives the next available number.
+Participant numbers come from one running sequence per contest that is shared by all role types. They are allocated at the first applicable draw and are not renumbered. A participant added later receives the next available number.
+
+The link does not copy the profile's identity details. They are read from the profile, and a publication takes its own copy of the details it shows.
 
 ## Participant-account link
 

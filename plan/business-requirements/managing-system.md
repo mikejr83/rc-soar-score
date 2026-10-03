@@ -31,7 +31,9 @@ When creating a new contest a previous contest may be selected. The contest dire
 
 ## Deleting Contests
 
-Contests may be created in error or it may be desired by the contest director to remove a contest. Contests created locally can be removed after a warning and acknowledgement by the user. Contests that were pushed to the public site cannot be deleted. A request can be sent for it to be delisted.
+Contests may be created in error or it may be desired by the contest director to remove a contest. A contest can be removed after a warning and acknowledgement by the user. Removing a contest deletes the contest director's data for it.
+
+If the contest was published, the published results are not removed when the contest is deleted, and they can no longer be updated. The director is warned of this before confirming. Removing published results from the public site requires a request to have it delisted, which a system administrator decides.
 
 ## Managing Participants
 

@@ -15,7 +15,7 @@ The private contest remains the source of truth. Public data must never be merge
 1. The application must allow only the contest director, or an authenticated session authorized for that contest, to publish it.
 2. Publishing must identify the private contest revision being published. The service must reject a stale or unauthorized request without changing either the private contest or its existing public projection.
 3. The service must validate the contest data, calculation version, contest state, and privacy rules before creating or updating the public projection.
-4. The first successful publish must create a distinct published-contest record with its own identifier and revision history. It must record the source contest, source revision, publishing actor, and publication time.
+4. The first successful publish must create a distinct published-contest record with its own identifier and revision history. It must record the source contest, source revision, publishing actor, and publication time. The record outlives the private contest: deleting the contest does not delete the record.
 5. A later publish must replace the public projection with a new version derived from the selected private revision. It must be atomic: readers see either the previous complete projection or the new complete projection, never a partial update.
 6. Publishing may occur while a contest is running or after it is completed. The director must be able to publish a final update after offline administration.
 7. A failed publish must leave the private contest and the last successful public projection unchanged. The application must show the failure and allow a retry.
@@ -33,10 +33,9 @@ The projection must retain the calculation metadata needed to explain or reprodu
 Publishing and visibility are independent:
 
 - **Public**: the published projection can be found and viewed by anyone without an account.
-- **Hidden**: the projection is not searchable or generally listed, but remains available to authorized participants through their contest access.
-- **Private**: the projection is not available to the public or participants through the public site.
+- **Unlisted**: the projection is not searchable or generally listed, but remains available through its link and to participants.
 
-The first publish must default to **Private**. The director must explicitly change visibility to **Public** or **Hidden**. Changing visibility must not modify the private contest data.
+The first publish must default to **Unlisted**. The director may change visibility between **Unlisted** and **Public**. Changing visibility must not modify the private contest data.
 
 The director must be able to choose when eligible result changes are copied to the public projection:
 
@@ -45,6 +44,10 @@ The director must be able to choose when eligible result changes are copied to t
 - **Manual**: publish only after the director confirms the round or contest is ready.
 
 This policy controls public projection updates; it does not prevent private scoring, synchronization, or recalculation.
+
+## Hiding overall results
+
+The director may hide overall results, as defined in [contest-state-and-transitions.md](contest-state-and-transitions.md). Publishing continues to update the projection while results are hidden. The published record carries the hiding setting (the round through which standings are shown, and when hiding began) so the public site applies it without reading the private contest. While results are hidden the site shows overall scores and placing only through that round, and still shows round scores and flight-group positions. Hiding ends by the same rules even if the private contest has been deleted.
 
 ## Anonymous publishing
 
@@ -65,4 +68,8 @@ An anonymously published contest may be claimed by an account created with the v
 
 ## Deletion and delisting
 
-A contest published at least once must not be physically deleted through ordinary synchronization. A director's delete request must first delist the public projection and enter the pending-delete flow described by the contest lifecycle requirements. Administrative approval is required before the published record and its retained public history are removed.
+Deleting a contest does not remove its published record. See [contest-state-and-transitions.md](contest-state-and-transitions.md).
+
+A published record is public record and cannot be removed by its owner directly. The owner, or the account closure flow acting for the owner, raises a delist request, and a system administrator approves or denies it. Approval makes the record `Delisted` and removes it from public access. Denial leaves it unchanged. Permanently purging the content of a delisted record is a separate administrator action. Requests are retained as the record of the decision.
+
+Participants do not delist publications. A participant removes their own identifying details from published results through redaction, which is automatic and needs no approval.

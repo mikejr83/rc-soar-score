@@ -57,7 +57,7 @@ The architectural and schema design decisions are resolved as follows:
   - Email addresses used for director auto-completion remain private and are strictly excluded from public projections.
 
 - **Participant retirement representation**:
-  - Modeled as a **retirement overlay** (`status = Retired`, `retired_at_round = N`) on the contest participation link.
+  - Modeled as a **retirement overlay** (`retired_at_round = N`; a pilot with no value has not retired) on the contest participation link.
   - The scoring engine dynamically evaluates unflown rounds $R \ge N$ as zero with a `Retired` status without preemptively materializing future dummy score records, preserving clean matrix redraws and schedule changes. Free-text retirement reasons are not tracked.
 
 - **Tie-breaking rules and calculation pipeline**:
@@ -73,7 +73,7 @@ The architectural and schema design decisions are resolved as follows:
     3. Shared team placement if still tied.
 
 - **Publication retention, anonymous claiming, and invitation expiry**:
-  - **Publication retention**: Published contest projections are retained indefinitely as a permanent public archive. Deleting a published contest requires completing the formal delisting process requirements.
+  - **Publication retention**: Published contest projections are retained indefinitely as a permanent public archive. Deleting a contest does not remove its publication. Removing a publication from public view requires a delist request decided by a system administrator.
   - **Anonymous contest claiming**: Contests published anonymously via a verified email can be claimed at any time in the future during the director's first-time login flow when creating/registering an account with that email.
   - **Invitation expiry**: Magic URL email invitations expire 24 hours after contest completion. Field QR code tokens provide access for the entire contest duration and do not expire mid-contest unless explicitly revoked.
 

@@ -8,13 +8,13 @@ The initial duration profiles are ALES, Thermal Duration, F3J, and F5J. F3L and 
 
 ## Contest configuration
 
-A contest configuration revision stores the selected discipline identifier and rules version plus explicit overrides. It must include group-score mode (`Raw`, `Normalized`, or `Time`), final rounding/truncation and decimal precision, dropped-round policy, target or working time, points per second, landing table revision, and discipline-specific settings such as F5J height penalties and motor-restart mode.
+A contest configuration revision stores the selected discipline identifier and rules version plus explicit overrides. It must include group-score mode (`Raw`, `Normalized`, or `Time`), final rounding/truncation and decimal precision, dropped-round policy, target or working time, points per second, landing table, and discipline-specific settings such as F5J height penalties and motor-restart mode.
 
 An override is linked to the official profile and never mutates the shared profile. Any calculation-affecting change invalidates derived results and creates a new calculation revision.
 
 ## Landing tables
 
-A landing table has a stable identifier, revision, input unit/meaning, and entries mapping a selected key such as distance to resolved points. A score stores both the selected key and resolved points plus the table revision used. Historical scores therefore remain reproducible if a table changes later.
+A landing table has a stable identifier, input unit/meaning, and entries mapping a selected key such as distance or points to resolved points. A table is not tied to a discipline. Each discipline profile names the table it ships with as its default, directors can create their own tables, and the contest configuration selects the table a contest uses, which may be any table the director can see. A table never changes after it is created, so a change means a new table. A score stores the selected entry's identifier, which fixes the key, the resolved points, and the table, so historical scores remain reproducible. A contest's landing table cannot be changed once a landing score has been entered.
 
 ## Discipline rules, validation, and zero conditions
 
