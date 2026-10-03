@@ -34,6 +34,7 @@
 - Redaction deletes the details, it does not mask them: `details` is set to null, `public_profile_id` is set to null, and `redacted_at` is set. If `redacted_at` is set, `details` and `public_profile_id` are null
 - Redaction is irreversible and write-once. A redacted row is never repopulated, including by later republishing of a contest that is still running or by corrections to the source participant's data
 - Scores, ranks, and team totals in the projection are unchanged by redaction. Rendering a redacted pilot shows the fixed text "`<pilot details private>`", which is a display constant and is not stored
+- When `public_profile_id` is set, results show the profile's display name and public fields in place of `details`. `details` stay as the director-sourced fallback, and redaction clears both
 - Redaction applies to every version of the publication and everywhere the data leaves, including cached pages and exports
 - An account can redact only rows whose `public_profile_id` belongs to its own public profile. A participant with no account has no such link, and redaction for them is performed by a system administrator through the same operation
 - `public_profile_id` is set only through a verified link between the participant and an account. It is set when an unclaimed guest account is claimed, and cleared when the account is erased or unlinked

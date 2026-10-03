@@ -5,22 +5,23 @@ Canonical documentation for the Soar Score data model. This folder is the source
 ## Contents
 
 - [Entity Relationship Diagram (ERD)](ERD.md) - Mermaid diagram of all entities and their relationships
-- [Entity Documentation](entities/) - Per-entity specifications (41 files)
+- [Entity Documentation](entities/) - Per-entity specifications (42 files)
 - [Reconciliation Findings](reconciliation-findings.md) - Gaps and conflicts between this model and the architecture and business requirements
 
 ## Entity Catalog
 
 ### Identity, Participants & Access
 
-| Entity                 | File                                                                         | Source Requirement                                                                         | Purpose                                                             |
-| ---------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------- |
-| Account                | [entities/account.md](entities/account.md)                                   | [accounts.md](../architecture-requirements/data/accounts.md)                               | Authenticated user identity                                         |
-| AccountIdentity        | [entities/account_identity.md](entities/account_identity.md)                 | [accounts.md](../architecture-requirements/data/accounts.md)                               | Identity-provider login (issuer and subject) attached to an account |
-| AccountPublicProfile   | [entities/account_public_profile.md](entities/account_public_profile.md)     | [accounts.md](../architecture-requirements/data/accounts.md)                               | Public stand-in for an account referenced by publications           |
-| ParticipantProfile     | [entities/participant_profile.md](entities/participant_profile.md)           | [participants.md](../architecture-requirements/data/participants.md)                       | Reusable participant identity data                                  |
-| ParticipantAccountLink | [entities/participant_account_link.md](entities/participant_account_link.md) | [participants.md](../architecture-requirements/data/participants.md)                       | Many-to-many link between participant profiles and user accounts    |
-| ContestParticipation   | [entities/contest_participation.md](entities/contest_participation.md)       | [participants.md](../architecture-requirements/data/participants.md)                       | Contest-snapshot linking profile to contest with class/role/number  |
-| Invitation             | [entities/invitation.md](entities/invitation.md)                             | [reviews-and-invitations.md](../architecture-requirements/data/reviews-and-invitations.md) | Participant access token (QR/magic URL)                             |
+| Entity                    | File                                                                               | Source Requirement                                                                         | Purpose                                                                                       |
+| ------------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------- |
+| Account                   | [entities/account.md](entities/account.md)                                         | [accounts.md](../architecture-requirements/data/accounts.md)                               | Authenticated user identity                                                                   |
+| AccountIdentity           | [entities/account_identity.md](entities/account_identity.md)                       | [accounts.md](../architecture-requirements/data/accounts.md)                               | Identity-provider login (issuer and subject) attached to an account                           |
+| AccountPublicProfile      | [entities/account_public_profile.md](entities/account_public_profile.md)           | [accounts.md](../architecture-requirements/data/accounts.md)                               | Public stand-in for an account referenced by publications                                     |
+| ParticipantProfile        | [entities/participant_profile.md](entities/participant_profile.md)                 | [participants.md](../architecture-requirements/data/participants.md)                       | Director-owned reusable participant details, never shared with other directors                |
+| ParticipantAccountLink    | [entities/participant_account_link.md](entities/participant_account_link.md)       | [participants.md](../architecture-requirements/data/participants.md)                       | Relates a director's profile back to a participant's account (candidate, confirmed, or ended) |
+| ParticipantDirectoryEntry | [entities/participant_directory_entry.md](entities/participant_directory_entry.md) | [participants.md](../architecture-requirements/data/participants.md)                       | Basic details a person offers to directors, copied into a director's own profile              |
+| ContestParticipation      | [entities/contest_participation.md](entities/contest_participation.md)             | [participants.md](../architecture-requirements/data/participants.md)                       | Contest-snapshot linking profile to contest with class/role/number                            |
+| Invitation                | [entities/invitation.md](entities/invitation.md)                                   | [reviews-and-invitations.md](../architecture-requirements/data/reviews-and-invitations.md) | Participant access token (QR/magic URL)                                                       |
 
 ### Teams, Roles & Models
 
@@ -102,6 +103,7 @@ graph TD
         AI[AccountIdentity]
         APP[AccountPublicProfile]
         P[ParticipantProfile]
+        PDE[ParticipantDirectoryEntry]
         PAL[ParticipantAccountLink]
         CP[ContestParticipation]
         IT[Invitation]
@@ -165,6 +167,8 @@ graph TD
 
     A -->|has| AI
     A -->|has| APP
+    A -->|offers| PDE
+    A -->|owns director's| P
     A -->|owns| C
     A -->|owns| CPRE
     A -->|linked via| PAL

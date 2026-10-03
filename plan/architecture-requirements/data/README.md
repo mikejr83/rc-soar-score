@@ -51,9 +51,9 @@ The architectural and schema design decisions are resolved as follows:
   - **Keying and uniqueness**: Surrogate UUIDv7 primary keys on all tables/stores with composite unique constraint indexes matching natural business keys (e.g., `(contest_id, round_number, group_number, lane_number)` and `(contest_id, client_mutation_id)` for idempotency).
 
 - **Participant profile directory and sharing scope**:
-  - Directors maintain private/local participant directories by default.
-  - Participant account holders can opt into a shared profile directory.
-  - Contest Directors can search and auto-complete pilot profiles across the shared directory by Name, FAI/AMA/National Organization ID, and Email address.
+  - Directors maintain their own private participant profiles, which are never shared with other directors.
+  - Participant account holders can opt into a participant directory of basic details they offer to directors.
+  - Contest Directors can search listed directory entries by Name, FAI/AMA/National Organization ID, and Email address, and copy one into a profile of their own.
   - Email addresses used for director auto-completion remain private and are strictly excluded from public projections.
 
 - **Participant retirement representation**:

@@ -1,6 +1,6 @@
 # RC Soar Score Entity Relationship Diagram
 
-ERD for the 42 conceptual entities (41 have an entity document; CONTEST_CONFIGURATION_PRESET does not yet). Physical design: PostgreSQL backend with IndexedDB clients, UUIDv7 identifiers, composite unique constraints on natural business keys.
+ERD for the 43 conceptual entities (42 have an entity document; CONTEST_CONFIGURATION_PRESET does not yet). Physical design: PostgreSQL backend with IndexedDB clients, UUIDv7 identifiers, composite unique constraints on natural business keys.
 
 ```mermaid
 erDiagram
@@ -68,26 +68,50 @@ erDiagram
     }
 
     %% Participants
+    PARTICIPANT_DIRECTORY_ENTRY {
+        uuid        id                         PK
+        uuid        account_id                 FK "unique"
+        text        first_name
+        text        last_name
+        text        club                          "optional"
+        text        fai_number                    "optional"
+        text        national_org_id               "optional"
+        text        city                          "optional"
+        text        state                         "optional"
+        text        country                       "optional"
+        bool        is_listed                     "opt-in to be found by directors"
+        bool        email_visible_to_directors
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
     PARTICIPANT_PROFILE {
-        uuid id              PK
-        text first_name
-        text last_name
-        text club
-        text fai_number
-        text national_org_id
-        text city
-        text state
-        text country
-        text email
-        bool is_shared
-        int  revision
+        uuid        id               PK
+        uuid        owner_account_id FK "the owning director"
+        text        first_name
+        text        last_name
+        text        club
+        text        fai_number
+        text        national_org_id
+        text        city
+        text        state
+        text        country
+        text        email               "private"
+        timestamptz created_at
+        timestamptz updated_at
+        int         revision
     }
 
     PARTICIPANT_ACCOUNT_LINK {
-        uuid id                     PK
-        uuid participant_profile_id FK
-        uuid account_id             FK
-        int  revision
+        uuid        id                     PK
+        uuid        participant_profile_id FK
+        uuid        account_id             FK
+        text        status                    "Candidate, Confirmed, Ended"
+        text        origin                    "EmailMatch, DirectoryPull, InvitationRedemption"
+        timestamptz created_at
+        timestamptz confirmed_at              "optional"
+        timestamptz ended_at                  "optional"
+        int         revision
     }
 
     CONTEST_PARTICIPATION {
@@ -568,6 +592,8 @@ erDiagram
     ACCOUNT |o--o| ACCOUNT_PUBLIC_PROFILE : "publicly represented by"
     ACCOUNT |o--o{ CONTEST : "owns (optional)"
     ACCOUNT ||--o{ PARTICIPANT_ACCOUNT_LINK : "linked via"
+    ACCOUNT ||--o{ PARTICIPANT_PROFILE : "owns (director)"
+    ACCOUNT |o--o| PARTICIPANT_DIRECTORY_ENTRY : "offers"
     PARTICIPANT_PROFILE ||--o{ PARTICIPANT_ACCOUNT_LINK : "linked via"
     ACCOUNT ||--o{ CONTEST_CONFIGURATION_PRESET : "owns"
     ACCOUNT ||--o{ CONTEST_CONFIGURATION_REVISION : "created"

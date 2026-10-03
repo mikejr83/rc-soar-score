@@ -27,6 +27,7 @@ Additional public fields (for example club or country) are added here only as an
 
 - Created when an account's information is first needed in a publication (as a publication owner, or when a participant is linked to the account)
 - Contains only information the account has deemed public
+- It controls how the person appears in the published results of every contest they are linked to. A change shows in those results, except for rows that have been redacted
 - At most one public profile per account (unique `account_id` where not null)
 - Publications never reference the Account directly
 - Unlinking sets `account_id` to null and never changes published results

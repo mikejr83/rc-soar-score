@@ -4,12 +4,14 @@
 **Purpose:** A person's identity within the backend. An account is one of four kinds: a registered user who signs in through an identity provider, a guest created when someone redeems an invitation without having an account, the local account that owns data created offline on an installation, and the single shared deleted-user account that anonymized references point at. Accounts are a backend concern and are not synced to installations. An account is also the root for deciding what is removed when a deletion is requested.  
 **Identifier:** `id` (UUIDv7)  
 **Parent entity:** None (top-level)  
-**Child entities:** [AccountIdentity](account_identity.md), [AccountPublicProfile](account_public_profile.md)
+**Child entities:** [AccountIdentity](account_identity.md), [AccountPublicProfile](account_public_profile.md), [ParticipantDirectoryEntry](participant_directory_entry.md)
 
 ## Relationships
 
 - Has zero or more AccountIdentity records. Registered accounts have at least one. Guest, local, and deleted accounts have none until a guest or local account is claimed
 - Has zero or one AccountPublicProfile
+- Has zero or one ParticipantDirectoryEntry, the details the person offers to directors
+- Owns the director's ParticipantProfile records (`ParticipantProfile.owner_account_id`)
 - Owns zero or more Contests (`Contest.owner_account_id`)
 - Linked to participant profiles through ParticipantAccountLink (backend only)
 - Referenced as an opaque actor by records inside contests (`created_by`, `finalized_by`, `assessed_by`, `set_by`, `actor_id`, and similar)
@@ -39,7 +41,7 @@
 - An email is a candidate for matching a participant profile only when `email_verified` is true. A director-supplied email on an invitation is never verified until the invitee redeems the emailed link
 - Identity-provider identifiers are authentication keys. They live only in AccountIdentity and are never exposed to clients
 - Clients never receive Account rows, except an installation's own local account. Records inside contests carry account ids as opaque actor references, and installations do not enforce foreign keys on them. Names for display come from public profiles or from the participant record
-- Linking an account to a participant profile never copies account data into the profile
+- Linking an account to a participant profile never copies account data into the profile. Data moves only when a director pulls or refreshes a directory entry
 - Creating an account does not automatically merge or rewrite historical contest participation
 - **Claiming:** a guest or local account is claimed into a registered account by re-pointing every reference to it (ownership, actor columns, invitations, participant links) to the registered account. Claiming is one-directional and happens once per account. A registered account is never merged into another account. A guest is claimed only by someone who redeems the invitation or claim link
 
@@ -57,7 +59,7 @@ A deletion request removes data in the backend only. Data entered by a contest d
 1. AccountIdentity records are deleted.
 2. If the user asked to remove their contest data: the working data of every contest the account owns is deleted. Publications remain with their link to the contest cleared, and a delist request is raised for each (reviewed by a system administrator).
 3. If the user asked to remove their participation records: their details in published results are redacted automatically and the public profile is unlinked.
-4. ParticipantAccountLink records for the account are deleted. The director's participant profiles and participations stay.
+4. ParticipantAccountLink records for the account, and its ParticipantDirectoryEntry, are deleted. The director's participant profiles and participations stay.
 5. References to the account from other directors' contests are re-pointed to the deleted-user account.
 6. `AccountPublicProfile.account_id` is set to null.
 7. The account row is deleted.
