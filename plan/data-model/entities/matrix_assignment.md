@@ -46,13 +46,13 @@
 - **Reflight:** the source must belong to the same participation; `credited_round_id` equals the source's; `flight_sequence` is the next unused sequence for that participation and credited round; the scheduled round must be current. A re-flight does not supersede its source; which score counts for the round follows the discipline's result-selection rules
 - A scored assignment cannot be moved, silently or otherwise
 - `matrix_revision_id` and `contest_id` must match the scheduled round's matrix revision and contest (enforce with a composite FK on the round); the credited round must belong to the same contest
-- `group` is between 1 and the scheduled round's `group_count`; `lane` is between 1 and the largest group size of that round
+- `group` is between 1 and the scheduled round's `group_count`, except that a `Reflight` row flies in its ReFlight's `flown_group`, which may be a re-flight group numbered after the regular groups; `lane` is between 1 and the largest group size of that round
 - A lane in a group is occupied by at most one current assignment: (`scheduled_round_id`, `group`, `lane`) is unique among rows where `superseded_by_assignment_id` is null
 - A pilot has at most one current `Original`, `Moved`, or `LateAdd` assignment per credited round: (`contest_participation_id`, `credited_round_id`) is unique among such rows where `superseded_by_assignment_id` is null
-- **Open spot for a `LateAdd`:** a group has an open spot when its current assignments, of every type, number fewer than the round's group capacity. The capacity is the largest group size of the round's original draw, `ceil(N / G)`, where N is the number of the round's `Original` assignments and G is its `group_count`. Late adds never grow a group beyond it. The capacity is fixed by the draw and does not grow when pilots are added
+- **Open spot for a `LateAdd`:** only regular groups (numbered up to `group_count`) can take a late addition; a re-flight group never can. A group has an open spot when its current assignments, of every type, number fewer than the round's group capacity. The capacity is the largest group size of the round's original draw, `ceil(N / G)`, where N is the number of the round's `Original` assignments and G is its `group_count`. Late adds never grow a group beyond it. The capacity is fixed by the draw and does not grow when pilots are added
 - When team protection is enabled, no two pilots from the same team share a (`scheduled_round_id`, `group`) among current assignments; the draw guarantees this and moves and late adds must preserve it
 - Only participations with the pilot role and no `retired_at_round` receive new assignments
-- An assignment is current when `superseded_by_assignment_id` is null and its scheduled round is current (neither superseded nor `Cancelled`). Non-current assignments, and their placeholders, are excluded from missing-score checks, round completeness, the seeded-draw prerequisite, and standings
+- An assignment is current when `superseded_by_assignment_id` is null, its scheduled round is current (neither superseded nor `Cancelled`), and, for a `Reflight` row, its ReFlight is not `Cancelled`. Non-current assignments, and their placeholders, are excluded from missing-score checks, round completeness, the seeded-draw prerequisite, and standings
 
 ## Lifecycle
 

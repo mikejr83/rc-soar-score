@@ -5,7 +5,7 @@ Canonical documentation for the Soar Score data model. This folder is the source
 ## Contents
 
 - [Entity Relationship Diagram (ERD)](ERD.md) - Mermaid diagram of all entities and their relationships
-- [Entity Documentation](entities/) - Per-entity specifications (43 files)
+- [Entity Documentation](entities/) - Per-entity specifications (44 files)
 - [Reconciliation Findings](reconciliation-findings.md) - Gaps and conflicts between this model and the architecture and business requirements
 
 ## Entity Catalog
@@ -55,12 +55,13 @@ Canonical documentation for the Soar Score data model. This folder is the source
 
 ### Matrix, Assignments & Re-flights
 
-| Entity           | File                                                           | Source Requirement                                                                       | Purpose                                                    | Outstanding Issues                                                                                                                                                                                 |
-| ---------------- | -------------------------------------------------------------- | ---------------------------------------------------------------------------------------- | ---------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| MatrixRevision   | [entities/matrix_revision.md](entities/matrix_revision.md)     | [matrix-and-assignments.md](../architecture-requirements/data/matrix-and-assignments.md) | Revisioned draw configuration and assignment schedule      | **YES** - The property `participating_participant_participations` is defining an array of uuid values that map participants to the matrix revision. This should likely be done in a linking table. |
-| MatrixAssignment | [entities/matrix_assignment.md](entities/matrix_assignment.md) | [matrix-and-assignments.md](../architecture-requirements/data/matrix-and-assignments.md) | Individual assignment from participant to round/group/lane |                                                                                                                                                                                                    |
-| ReFlight         | [entities/re_flight.md](entities/re_flight.md)                 | [matrix-and-assignments.md](../architecture-requirements/data/matrix-and-assignments.md) | Contest-scheduled re-flight with decision records          | **YES** - The whole entity needs deeper investigation. The architecture or business requirements may be lacking.                                                                                   |
-| Round            | [entities/round.md](entities/round.md)                         | [matrix-and-assignments.md](../architecture-requirements/data/matrix-and-assignments.md) | A numbered round of flights within a matrix revision.      |                                                                                                                                                                                                    |
+| Entity              | File                                                                   | Source Requirement                                                                       | Purpose                                                                                         | Outstanding Issues                                                                                                                                                                                 |
+| ------------------- | ---------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| MatrixRevision      | [entities/matrix_revision.md](entities/matrix_revision.md)             | [matrix-and-assignments.md](../architecture-requirements/data/matrix-and-assignments.md) | Revisioned draw configuration and assignment schedule                                           | **YES** - The property `participating_participant_participations` is defining an array of uuid values that map participants to the matrix revision. This should likely be done in a linking table. |
+| MatrixAssignment    | [entities/matrix_assignment.md](entities/matrix_assignment.md)         | [matrix-and-assignments.md](../architecture-requirements/data/matrix-and-assignments.md) | Individual assignment from participant to round/group/lane                                      |                                                                                                                                                                                                    |
+| ReFlight            | [entities/re_flight.md](entities/re_flight.md)                         | [matrix-and-assignments.md](../architecture-requirements/data/matrix-and-assignments.md) | Extra chance to fly given to pilots for a round: method, group, reason, status, and draw inputs |                                                                                                                                                                                                    |
+| ReFlightParticipant | [entities/re_flight_participant.md](entities/re_flight_participant.md) | [matrix-and-assignments.md](../architecture-requirements/data/matrix-and-assignments.md) | A pilot's part in a re-flight: role, draw position, response, and notification                  |                                                                                                                                                                                                    |
+| Round               | [entities/round.md](entities/round.md)                                 | [matrix-and-assignments.md](../architecture-requirements/data/matrix-and-assignments.md) | A numbered round of flights within a matrix revision.                                           |                                                                                                                                                                                                    |
 
 ### Scores, Results & Reviews
 
@@ -140,6 +141,7 @@ graph TD
         RD[Round]
         MA[MatrixAssignment]
         RF[ReFlight]
+        RFP[ReFlightParticipant]
     end
 
     subgraph SCR[Scores, Results and Reviews]
@@ -210,6 +212,8 @@ graph TD
     CP -->|flies| MA
     C -->|has| RF
     RF -->|creates| MA
+    RF -->|involves| RFP
+    CP -->|takes part as| RFP
 
     MA -->|scored by| SP
     SP -->|has| SA

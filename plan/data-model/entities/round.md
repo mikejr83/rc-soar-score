@@ -31,7 +31,7 @@
 - (`matrix_revision_id`, `ordinal`) is unique
 - (`contest_id`, `ordinal`) is unique among rounds that are neither superseded (`superseded_by_round_id` is null) nor `Cancelled`, so each ordinal has at most one current round
 - `ordinal` falls within the matrix revision's `first_round` to `last_round` range
-- `group_count` is at least 1
+- `group_count` is at least 1 and counts only the regular groups made by the draw. Re-flight groups are extra groups numbered after them, and are recorded on the ReFlight rather than here
 - When team protection is enabled, `group_count` must be at least the largest number of pilots on any one team; the draw rejects the configuration otherwise
 - Group sizes are derived, not stored: with N pilots and G groups, exactly N mod G groups hold floor(N/G) + 1 pilots and the rest hold floor(N/G). Lane count is the size of the largest group
 - A round with any accepted score cannot be superseded. Rounds with new ordinals may be added at any time under the contest lifecycle rules

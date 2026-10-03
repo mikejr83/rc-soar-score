@@ -1,6 +1,6 @@
 # RC Soar Score Entity Relationship Diagram
 
-ERD for the 44 conceptual entities (43 have an entity document; CONTEST_CONFIGURATION_PRESET does not yet). Physical design: PostgreSQL backend with IndexedDB clients, UUIDv7 identifiers, composite unique constraints on natural business keys.
+ERD for the 45 conceptual entities (44 have an entity document; CONTEST_CONFIGURATION_PRESET does not yet). Physical design: PostgreSQL backend with IndexedDB clients, UUIDv7 identifiers, composite unique constraints on natural business keys.
 
 ```mermaid
 erDiagram
@@ -344,20 +344,53 @@ erDiagram
     }
 
     RE_FLIGHT {
-        uuid   id                PK
-        uuid   contest_id        FK
-        int    credited_round
-        string type
-        int    sequence
-        string lifecycle_status
-        string reasons
-        string awards
-        string selected_pilots
-        string exclusion
-        string responses
-        string notifications
-        string director_decision
-        int    revision
+        uuid        id                       PK
+        uuid        contest_id               FK
+        uuid        credited_round_id        FK
+        uuid        source_round_id          FK
+        int         source_group
+        text        type                        "MoveToGroup, RandomDraw, ReflyEntireGroup"
+        int         sequence                    "per source group"
+        uuid        previous_reflight_id     FK "optional"
+        text        status                      "Proposed, DrawPending, AwaitingResponses, ReadyToFly, Finalized, Cancelled"
+        text        reason
+        uuid        scheduled_round_id       FK
+        int         flown_group                 "may exceed the round group_count"
+        bool        deviation_acknowledged
+        int         requested_group_size        "optional"
+        int         achievable_max_size         "optional"
+        bool        size_exception_confirmed
+        bigint      random_seed                 "optional"
+        text        algorithm_version           "optional"
+        uuid        config_revision_id       FK "decided under"
+        uuid        created_by               FK
+        timestamptz created_at
+        uuid        group_finalized_by       FK "optional"
+        timestamptz group_finalized_at          "optional"
+        uuid        finalized_by             FK "optional"
+        timestamptz finalized_at                "optional"
+        uuid        cancelled_by             FK "optional"
+        timestamptz cancelled_at                "optional"
+        text        cancel_reason               "optional"
+        int         revision
+    }
+
+    RE_FLIGHT_PARTICIPANT {
+        uuid        id                       PK
+        uuid        contest_id               FK
+        uuid        re_flight_id             FK
+        uuid        contest_participation_id FK
+        text        role                        "Awarded, Drawn, GroupMember, Candidate, Excluded"
+        text        excluded_reason             "optional"
+        int         draw_position               "optional"
+        text        response                    "NotRequired, Pending, Accepted, Declined"
+        text        responded_by                "optional; Participant or Director"
+        timestamptz responded_at                "optional"
+        text        notification_state          "NotRequired, Pending, Delivered, Failed"
+        timestamptz notified_at                 "optional"
+        timestamptz acknowledged_at             "optional"
+        uuid        assignment_id            FK "optional"
+        int         revision
     }
 
     %% Scores and Results
@@ -667,6 +700,14 @@ erDiagram
     MATRIX_ASSIGNMENT |o--o{ MATRIX_ASSIGNMENT : "source of"
     MATRIX_ASSIGNMENT |o--o| MATRIX_ASSIGNMENT : "superseded by"
     RE_FLIGHT |o--o{ MATRIX_ASSIGNMENT : "creates"
+    RE_FLIGHT |o--o| RE_FLIGHT : "follows"
+    RE_FLIGHT ||--o{ RE_FLIGHT_PARTICIPANT : "involves"
+    CONTEST ||--o{ RE_FLIGHT_PARTICIPANT : "denormalized contest_id"
+    CONTEST_PARTICIPATION ||--o{ RE_FLIGHT_PARTICIPANT : "takes part as"
+    MATRIX_ASSIGNMENT |o--o| RE_FLIGHT_PARTICIPANT : "created for"
+    ROUND ||--o{ RE_FLIGHT : "credited to"
+    ROUND ||--o{ RE_FLIGHT : "flown in"
+    CONTEST_CONFIGURATION_REVISION ||--o{ RE_FLIGHT : "decided under"
     MATRIX_ASSIGNMENT ||--o| SCORE_PLACEHOLDER : "scored by"
 
     SCORE_PLACEHOLDER ||--o{ SCORE_ATTEMPT : "has attempts"

@@ -20,7 +20,11 @@ A group accepts a late addition only while it holds fewer pilots than the larges
 
 ## Re-flights
 
-A re-flight record belongs to a contest and credited round. It records type, sequence, lifecycle status, reason, discipline/rules/calculation versions, creating and finalizing actors, awarded pilots, draw candidates and exclusions, selected pilots, participant responses, notifications, and the director's final decision. The discipline profile defines group-size, normalization, and result-selection rules; these are not generic contest fields.
+A re-flight record belongs to a contest. It identifies the credited round and the source group the awarding flight came from, and records the method (move to a group, random draw, or re-fly the entire group), an incrementing re-flight number for the source group, the previous re-flight when one is awarded a re-flight, a status, a reason, the group and round it flies in, and the configuration revision it was decided under. The status runs from proposed to finalized or cancelled; whether the flights have been flown and scored follows from the flights themselves.
+
+Each pilot's part is recorded separately: awarded, drawn, re-flying with the group, candidate, or excluded, together with the order drawn, the response to an offer, who gave it, and the state of the notification. A random draw records its seed and draw version so that it can be reproduced, the requested and achievable group sizes, and the director's confirmation of any size exception. The discipline profile defines group-size, normalization, and result-selection rules; these are not generic contest fields.
+
+A re-flight group flies in the same round, numbered after the regular groups, and its flights are `Reflight` assignments that point at the re-flight. A re-flight never overwrites the original flight. Offers, responses, and notifications are optional in the first release.
 
 ## Invariants
 
