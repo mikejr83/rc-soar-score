@@ -78,6 +78,6 @@ The architectural and schema design decisions are resolved as follows:
   - **Invitation expiry**: Magic URL email invitations expire 24 hours after contest completion. Field QR code tokens provide access for the entire contest duration and do not expire mid-contest unless explicitly revoked.
 
 - **Synchronization cursor storage, conflict resolution, and tombstone retention**:
-  - **Sync cursor**: Monotonically increasing sequence stream per contest (`contest_mutation_seq`); clients track their last acknowledged sequence (`last_synced_seq`).
+  - **Sync cursor**: Monotonically increasing sequence stream per contest (`contest_mutation_seq`), and a separate sequence stream for a director's own data that belongs to no contest (participant profiles, roles, models, landing tables, presets). System data only comes down. Clients track their last acknowledged sequence (`last_synced_seq`) per stream.
   - **Conflict resolution**: Official Director score submissions always take precedence over participant self-scores (participant submissions are preserved as immutable attempts in review/audit history). Concurrent Director conflicts or inactive installation mutations present a side-by-side conflict diff in the UI for explicit resolution. Derived values are always recalculated deterministically.
-  - **Tombstones**: Soft-deletion tombstones are retained for **90 days** (or until contest archiving + 90 days) to prevent offline devices from resurrecting deleted records during delayed sync.
+  - **Tombstones**: Soft-deletion tombstones are retained for **90 days after the server acknowledges the deletion**, for every scope, to prevent offline devices from resurrecting deleted records during delayed sync.

@@ -5,7 +5,7 @@ Canonical documentation for the Soar Score data model. This folder is the source
 ## Contents
 
 - [Entity Relationship Diagram (ERD)](ERD.md) - Mermaid diagram of all entities and their relationships
-- [Entity Documentation](entities/) - Per-entity specifications (44 files)
+- [Entity Documentation](entities/) - Per-entity specifications (46 files)
 - [Reconciliation Findings](reconciliation-findings.md) - Gaps and conflicts between this model and the architecture and business requirements
 
 ## Entity Catalog
@@ -86,13 +86,28 @@ Canonical documentation for the Soar Score data model. This folder is the source
 
 ### Synchronization & Audit
 
-| Entity         | File                                                       | Source Requirement                                                                             | Purpose                                              |
-| -------------- | ---------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
-| SyncCursor     | [entities/sync_cursor.md](entities/sync_cursor.md)         | [synchronization-and-audit.md](../architecture-requirements/data/synchronization-and-audit.md) | Per-contest monotonic sequence for client sync       |
-| MutationRecord | [entities/mutation_record.md](entities/mutation_record.md) | [synchronization-and-audit.md](../architecture-requirements/data/synchronization-and-audit.md) | Individual client mutation request/response          |
-| ConflictRecord | [entities/conflict_record.md](entities/conflict_record.md) | [synchronization-and-audit.md](../architecture-requirements/data/synchronization-and-audit.md) | Conflict between competing mutations                 |
-| Tombstone      | [entities/tombstone.md](entities/tombstone.md)             | [synchronization-and-audit.md](../architecture-requirements/data/synchronization-and-audit.md) | Soft-deletion marker for sync-safe deletes           |
-| AuditEvent     | [entities/audit_event.md](entities/audit_event.md)         | [synchronization-and-audit.md](../architecture-requirements/data/synchronization-and-audit.md) | Immutable audit trail of all contested state changes |
+| Entity                 | File                                                                       | Source Requirement                                                                             | Purpose                                                                            |
+| ---------------------- | -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| Installation           | [entities/installation.md](entities/installation.md)                       | [synchronization-and-audit.md](../architecture-requirements/data/synchronization-and-audit.md) | A director's app instance: where changes come from and what it has synchronized    |
+| InstallationActivation | [entities/installation_activation.md](entities/installation_activation.md) | [synchronization-and-audit.md](../architecture-requirements/data/synchronization-and-audit.md) | Which installation holds administrative authority over a contest, and for how long |
+| SyncCursor             | [entities/sync_cursor.md](entities/sync_cursor.md)                         | [synchronization-and-audit.md](../architecture-requirements/data/synchronization-and-audit.md) | Per-contest monotonic sequence for client sync                                     |
+| MutationRecord         | [entities/mutation_record.md](entities/mutation_record.md)                 | [synchronization-and-audit.md](../architecture-requirements/data/synchronization-and-audit.md) | Individual client mutation request/response                                        |
+| ConflictRecord         | [entities/conflict_record.md](entities/conflict_record.md)                 | [synchronization-and-audit.md](../architecture-requirements/data/synchronization-and-audit.md) | Conflict between competing mutations                                               |
+| Tombstone              | [entities/tombstone.md](entities/tombstone.md)                             | [synchronization-and-audit.md](../architecture-requirements/data/synchronization-and-audit.md) | Soft-deletion marker for sync-safe deletes                                         |
+| AuditEvent             | [entities/audit_event.md](entities/audit_event.md)                         | [synchronization-and-audit.md](../architecture-requirements/data/synchronization-and-audit.md) | Immutable audit trail of all contested state changes                               |
+
+## Sync Scope
+
+Which stream carries each entity, and who may write it. Contest data synchronizes through a per-contest sequence. A director's own data synchronizes through a separate per-director sequence. System data only comes down.
+
+| Scope                 | Entities                                                                                                                                                                                                                                                                              | Notes                                                                                                        |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Contest data          | Contest, ContestConfigurationRevision, ContestParticipation, Team, TeamMembership, ContestModelLink, MatrixRevision, Round, MatrixAssignment, ReFlight, ReFlightParticipant, ScorePlaceholder, ScoreAttempt, OfficialScore, ReviewRequest, MutationRecord, ConflictRecord, AuditEvent | Carries `contest_id` and a revision. Changes go through the contest stream                                   |
+| Director data         | ParticipantProfile, ModelCatalog, ContestConfigurationPreset, Role and LandingTable (with their LandingResult rows) when owned by the director, and the tombstones of deleted contests                                                                                                | Carries `owner_account_id`. Changes go through the director stream                                           |
+| System data           | DisciplineProfile and its field, validation, formula, and rule rows, system Role, system LandingTable and LandingResult                                                                                                                                                               | Written on the server by administrators and synchronized down only. `Installation.system_data_seq` tracks it |
+| Issued by the service | Invitation                                                                                                                                                                                                                                                                            | Created and replaced by the service, read by installations                                                   |
+| Derived               | FlightResult, ParticipationStanding, TeamStanding                                                                                                                                                                                                                                     | Written only by the calculator, received read-only, never merged                                             |
+| Backend only          | Account, AccountIdentity, AccountPublicProfile, ParticipantAccountLink, ParticipantDirectoryEntry, PublicationIdentity, PublicationProjection, PublicationParticipant, DelistRequest, Installation, InstallationActivation, SyncCursor                                                | Never synchronized to installations                                                                          |
 
 ## Relationships
 
@@ -162,6 +177,8 @@ graph TD
     end
 
     subgraph SYN[Synchronization and Audit]
+        INS[Installation]
+        IA[InstallationActivation]
         SC[SyncCursor]
         MR[MutationRecord]
         CF[ConflictRecord]
@@ -241,6 +258,12 @@ graph TD
     PI -->|audited by| AE
 
     C -->|has| SC
+    C -->|authority history| IA
+    A -->|owns| INS
+    INS -->|holds authority via| IA
+    INS -->|tracked by| SC
+    INS -->|submits| MR
+    RR -->|resulted in| SA
     C -->|has| MR
     C -->|has| CF
     C -->|has| T

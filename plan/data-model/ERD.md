@@ -1,6 +1,6 @@
 # RC Soar Score Entity Relationship Diagram
 
-ERD for the 45 conceptual entities (44 have an entity document; CONTEST_CONFIGURATION_PRESET does not yet). Physical design: PostgreSQL backend with IndexedDB clients, UUIDv7 identifiers, composite unique constraints on natural business keys.
+ERD for the 47 conceptual entities (46 have an entity document; CONTEST_CONFIGURATION_PRESET does not yet). Physical design: PostgreSQL backend with IndexedDB clients, UUIDv7 identifiers, composite unique constraints on natural business keys.
 
 ```mermaid
 erDiagram
@@ -549,47 +549,90 @@ erDiagram
     }
 
     %% Synchronization and Audit
+    INSTALLATION {
+        uuid        id               PK
+        uuid        owner_account_id FK "the owning director"
+        text        label
+        text        platform            "Web, Windows, Other"
+        timestamptz created_at
+        timestamptz last_seen_at        "optional"
+        timestamptz last_sync_at        "optional"
+        bigint      system_data_seq     "system data applied; comes down only"
+        timestamptz revoked_at          "optional"
+    }
+
+    INSTALLATION_ACTIVATION {
+        uuid        id              PK
+        uuid        contest_id      FK
+        uuid        installation_id FK
+        uuid        activated_by    FK
+        text        kind               "Initial, Replacement, Reclaim"
+        timestamptz activated_at
+        timestamptz ended_at           "optional; one open row per contest"
+    }
+
     SYNC_CURSOR {
-        uuid      id                   PK
-        uuid      contest_id           FK
-        int       last_synced_sequence
-        timestamp updated_at
+        uuid        id                   PK
+        uuid        installation_id      FK
+        uuid        contest_id           FK "one of contest_id or owner_account_id"
+        uuid        owner_account_id     FK "director data scope"
+        bigint      last_synced_sequence
+        timestamptz last_synced_at          "optional"
+        timestamptz updated_at
     }
 
     MUTATION_RECORD {
-        uuid      id                  PK
-        uuid      entity_id
-        text      entity_type
-        uuid      contest_id          FK
-        int       base_revision
-        string    client_mutation_id
-        uuid      actor_id
-        text      authority
-        string    source_installation
-        timestamp client_time
-        timestamp server_time
-        text      outcome
-        int       revision
+        uuid        id                     PK
+        uuid        contest_id             FK "one of contest_id or owner_account_id"
+        uuid        owner_account_id       FK "director data scope"
+        bigint      sequence                  "assigned when accepted"
+        text        entity_type
+        uuid        entity_id
+        int         base_revision             "optional"
+        text        client_mutation_id        "unique per scope"
+        uuid        actor_id               FK "optional"
+        text        authority "Director, Participant, Helper, System, Administrator"
+        uuid        source_installation_id FK "optional"
+        text        source_device             "optional"
+        timestamptz client_time
+        timestamptz server_acceptance_time    "optional"
+        timestamptz server_rejection_time     "optional"
+        jsonb       payload
+        text        outcome                   "Pending, Accepted, Rejected, Conflict, Skipped"
+        text        reason_code               "optional"
+        text        error_message             "optional"
+        uuid        depends_on_mutation_id FK "optional"
     }
 
     CONFLICT_RECORD {
-        uuid      id                 PK
-        uuid      entity_id
-        uuid      winner_mutation_id FK
-        uuid      loser_mutation_id  FK
-        text      reason
-        text      resolution
-        timestamp resolved_at
-        uuid      resolved_by        FK
+        uuid        id                    PK
+        uuid        contest_id            FK "one of contest_id or owner_account_id"
+        uuid        owner_account_id      FK "director data scope"
+        text        entity_type
+        uuid        entity_id
+        uuid        accepted_mutation_id  FK "optional"
+        uuid        competing_mutation_id FK
+        text        reason_code
+        text        reason                   "optional"
+        bool        requires_action          "false for a silent record"
+        text        resolution               "Pending, Automatic, Manual"
+        text        resolution_choice        "optional"
+        timestamptz created_at
+        timestamptz resolved_at              "optional"
+        uuid        resolved_by           FK "optional"
     }
 
     TOMBSTONE {
-        uuid   id              PK
-        uuid   entity_id
-        text   entity_type
-        uuid   contest_id      FK
-        text   status
-        string deletion_reason
+        uuid        id               PK
+        uuid        contest_id       FK "one of contest_id or owner_account_id"
+        uuid        owner_account_id FK "director data scope"
+        text        entity_type
+        uuid        entity_id
+        text        status              "Pending, Acknowledged"
+        timestamptz deleted_at
+        timestamptz acknowledged_at     "optional"
+        timestamptz purge_after         "acknowledged plus 90 days"
+        text        deletion_reason     "optional"
     }
 
     INVITATION {
@@ -614,35 +657,40 @@ erDiagram
     }
 
     REVIEW_REQUEST {
-        uuid      id                   PK
-        uuid      score_placeholder_id FK
-        string    proposed_components
-        string    participant_message
-        uuid      requester_id
-        int       base_score_revision
-        timestamp requested_at
-        text      state
-        uuid      decision_actor_id
-        timestamp decision_time
-        string    decision_message
+        uuid        id                   PK
+        uuid        contest_id           FK
+        uuid        score_placeholder_id FK
+        jsonb       proposed_components
+        text        participant_message     "optional"
+        uuid        requester_id         FK
+        int         base_score_revision
+        timestamptz requested_at
+        text        state                   "Submitted, UnderReview, Approved, Rejected, Superseded"
+        uuid        decision_actor_id    FK "optional"
+        timestamptz decision_time           "optional"
+        text        decision_message        "optional"
+        uuid        resulting_attempt_id FK "optional"
+        int         revision
     }
 
     AUDIT_EVENT {
-        uuid      id                 PK
-        uuid      contest_id         FK "optional"
-        uuid      publication_id        "optional; not an FK"
-        text      entity_type
-        uuid      entity_id
-        text      action
-        uuid      actor_id           FK
-        text      authority
-        string    installation
-        int       base_revision
-        int       resulting_revision
-        timestamp server
-        timestamp client
-        text      reason
-        text      outcome
+        uuid        id                 PK
+        uuid        contest_id         FK "optional"
+        uuid        owner_account_id   FK "optional; director data scope"
+        uuid        publication_id        "optional; not an FK"
+        text        entity_type
+        uuid        entity_id
+        text        action
+        uuid        actor_id           FK "optional"
+        text        authority "Director, Participant, Helper, System, Administrator"
+        uuid        installation_id    FK "optional"
+        text        device                "optional"
+        int         base_revision         "optional"
+        int         resulting_revision    "optional"
+        timestamptz server_timestamp
+        timestamptz client_timestamp      "optional; audit only"
+        text        reason                "optional"
+        text        outcome               "Success, Rejected, Conflict"
     }
 
     %% Relationships
@@ -752,6 +800,17 @@ erDiagram
     ACCOUNT_PUBLIC_PROFILE |o--o{ PUBLICATION_IDENTITY : "owns"
     ACCOUNT ||--o{ DELIST_REQUEST : "requests"
     ACCOUNT |o--o{ DELIST_REQUEST : "decides"
-    MUTATION_RECORD |o--o{ CONFLICT_RECORD : "winner"
-    MUTATION_RECORD |o--o{ CONFLICT_RECORD : "loser"
+    MUTATION_RECORD |o--o{ CONFLICT_RECORD : "accepted"
+    MUTATION_RECORD ||--o{ CONFLICT_RECORD : "competing"
+    MUTATION_RECORD |o--o{ MUTATION_RECORD : "depends on"
+    ACCOUNT ||--o{ INSTALLATION : "owns"
+    ACCOUNT ||--o{ INSTALLATION_ACTIVATION : "activates"
+    CONTEST ||--o{ INSTALLATION_ACTIVATION : "authority history"
+    INSTALLATION ||--o{ INSTALLATION_ACTIVATION : "holds authority via"
+    INSTALLATION ||--o{ SYNC_CURSOR : "tracked by"
+    INSTALLATION |o--o{ MUTATION_RECORD : "submitted"
+    INSTALLATION |o--o{ AUDIT_EVENT : "originated"
+    ACCOUNT |o--o{ MUTATION_RECORD : "acts"
+    CONTEST ||--o{ REVIEW_REQUEST : "denormalized contest_id"
+    SCORE_ATTEMPT |o--o| REVIEW_REQUEST : "created on approval"
 ```

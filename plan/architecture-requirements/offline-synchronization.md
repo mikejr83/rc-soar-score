@@ -19,7 +19,8 @@ This document uses **score** for the discipline-specific raw components entered 
 5. Synchronization must be incremental. A full contest download and export are required recovery operations, not the normal conflict mechanism.
 6. The local application must retain unsent mutations and retry them after connectivity returns. A failed sync must not prevent offline contest administration.
 7. A local deletion must create a tombstone until the service acknowledges it. Tombstones must prevent a deleted entity from being recreated by an older change.
-8. Sync must be scoped to the contest director's authorized data. Participant email addresses and other private data must follow the privacy rules in the participant requirements.
+8. Director-owned data that belongs to no contest (participant profiles, roles, models, landing tables, presets) synchronizes through its own sequence stream. System data only comes down.
+9. Sync must be scoped to the contest director's authorized data. Participant email addresses and other private data must follow the privacy rules in the participant requirements.
 
 ## Administration Installation
 

@@ -1,38 +1,44 @@
 # SyncCursor
 
 **Relationship to architecture-requirements:** plan/architecture-requirements/data/synchronization-and-audit.md  
-**Purpose:** Tracks each client's synchronization position within a contest's mutation stream so the client can resume from where it last synced. This record is owned by an authorized installation and scoped to a contest.  
+**Purpose:** Records how far an installation has synchronized one scope, so it can resume from where it stopped. The service keeps the last position it acknowledged for each installation and scope; the installation keeps its own copy and advances it only after the changes it received are durably stored.  
 **Identifier:** `id` (UUIDv7)  
-**Parent entity:** None  
+**Parent entity:** Installation  
 **Child entities:** None
 
 ## Relationships
 
-Belongs to an authorized installation and a contest (contestId FK). References no entities it owns.
+- Belongs to an Installation (`installation_id`)
+- Scoped to a Contest (`contest_id`) or to the director's data (`owner_account_id`)
+- System data is tracked on the installation itself (`Installation.system_data_seq`), not here, because it only comes down
 
 ## Fields/Properties
 
-| Field                  | Type                  | Required | Default | Description                                                 |
-| ---------------------- | --------------------- | -------- | ------- | ----------------------------------------------------------- |
-| `id`                   | UUIDv7                | Yes      | —       | Unique identifier for this cursor record                    |
-| `contest_id`           | FK(Contest.contestId) | Yes      | —       | Scope for the cursor                                        |
-| `last_synced_sequence` | bigint                | Yes      | 0       | Highest mutation sequence acknowledged by this installation |
-| `updated_at`           | timestamp             | Yes      | now()   | Last time the cursor was advanced                           |
+| Field                  | Type        | Required    | Default | Description                                                           |
+| ---------------------- | ----------- | ----------- | ------- | --------------------------------------------------------------------- |
+| `id`                   | UUIDv7      | Yes         | -       | Unique identifier for this cursor record                              |
+| `installation_id`      | UUIDv7      | Yes         | -       | FK Installation                                                       |
+| `contest_id`           | UUIDv7      | Conditional | -       | FK Contest. Exactly one of `contest_id` and `owner_account_id` is set |
+| `owner_account_id`     | UUIDv7      | Conditional | -       | FK Account, for the director's own data stream                        |
+| `last_synced_sequence` | bigint      | Yes         | 0       | Highest sequence of the scope that the installation has acknowledged  |
+| `last_synced_at`       | timestamptz | No          | -       | When the installation last completed a synchronization of this scope  |
+| `updated_at`           | timestamptz | Yes         | now     | When the record was last advanced                                     |
 
 ## Invariants and Constraints
 
-- `last_synced_sequence` increases monotonically and is never reset.
-- There is at most one cursor per (installation, contest) scope.
-- The service advances the cursor only after local durable storage of the new position.
+- Exactly one of `contest_id` and `owner_account_id` is set
+- (`installation_id`, `contest_id`) and (`installation_id`, `owner_account_id`) are each unique: at most one cursor per installation and scope
+- `last_synced_sequence` increases monotonically and is never reset
+- The cursor is advanced only after the installation has durably stored the returned changes
 
 ## Lifecycle
 
-Created on first sync for a contest installation pair. Updated on each successful sync acknowledgement. Retained indefinitely; never manually edited after creation.
+Created the first time an installation synchronizes a scope. Updated on each successful acknowledgement. Retained indefinitely and never edited by hand.
 
 ## Privacy and Scope
 
-Visible only to the owning installation.
+Visible to the owning director and to the installation. The "last synchronized" shown to the director comes from here.
 
 ## Audit and Synchronization
 
-Mutated exclusively by the sync service when acknowledging a successful sync. Updates are idempotent when the same lastSyncedSeq is recorded.
+Written only by the service when it acknowledges a synchronization. Recording the same position again is idempotent. Not synced to other installations.
