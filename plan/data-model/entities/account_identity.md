@@ -1,9 +1,9 @@
 # AccountIdentity
 
-**Relationship to architecture-requirements:** plan/architecture-requirements/data/accounts.md
-**Purpose:** Associates an account with a login at an identity provider. It keeps the provider's identifiers out of the Account itself, so the provider can change, an account can have more than one login method, and the identifiers never reach a client.
-**Identifier:** `id` (UUIDv7)
-**Parent entity:** Account
+**Relationship to architecture-requirements:** plan/architecture-requirements/data/accounts.md  
+**Purpose:** Associates an account with a login at an identity provider. It keeps the provider's identifiers out of the Account itself, so the provider can change, an account can have more than one login method, and the identifiers never reach a client.  
+**Identifier:** `id` (UUIDv7)  
+**Parent entity:** Account  
 **Child entities:** None
 
 ## Relationships

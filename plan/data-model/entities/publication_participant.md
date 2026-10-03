@@ -1,9 +1,9 @@
 # PublicationParticipant
 
-**Relationship to architecture-requirements:** plan/architecture-requirements/data/publication.md, plan/architecture-requirements/data/accounts.md
-**Purpose:** Holds the identifying details of a pilot shown in a publication, separate from the published results themselves. Published results refer to pilots only by an opaque key, so a pilot's details can be removed without touching scores, ranks, or any earlier version of the results. It is also the link that lets a person's results be followed across contests through their public profile.
-**Identifier:** `id` (UUIDv7)
-**Parent entity:** PublicationIdentity
+**Relationship to architecture-requirements:** plan/architecture-requirements/data/publication.md, plan/architecture-requirements/data/accounts.md  
+**Purpose:** Holds the identifying details of a pilot shown in a publication, separate from the published results themselves. Published results refer to pilots only by an opaque key, so a pilot's details can be removed without touching scores, ranks, or any earlier version of the results. It is also the link that lets a person's results be followed across contests through their public profile.  
+**Identifier:** `id` (UUIDv7)  
+**Parent entity:** PublicationIdentity  
 **Child entities:** None
 
 ## Relationships

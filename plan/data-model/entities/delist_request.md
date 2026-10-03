@@ -1,9 +1,9 @@
 # DelistRequest
 
-**Relationship to architecture-requirements:** plan/architecture-requirements/data/publication.md, plan/architecture-requirements/data/accounts.md
-**Purpose:** A request to remove a published result set from public view. Published results are public record that other groups rely on, so a publication cannot be removed by its owner directly. Every attempt to remove one, whether the owner asks outright or closes their account, becomes a request that a system administrator reviews and decides using their judgement.
-**Identifier:** `id` (UUIDv7)
-**Parent entity:** PublicationIdentity
+**Relationship to architecture-requirements:** plan/architecture-requirements/data/publication.md, plan/architecture-requirements/data/accounts.md  
+**Purpose:** A request to remove a published result set from public view. Published results are public record that other groups rely on, so a publication cannot be removed by its owner directly. Every attempt to remove one, whether the owner asks outright or closes their account, becomes a request that a system administrator reviews and decides using their judgement.  
+**Identifier:** `id` (UUIDv7)  
+**Parent entity:** PublicationIdentity  
 **Child entities:** None
 
 ## Relationships

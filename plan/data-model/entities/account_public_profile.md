@@ -1,9 +1,9 @@
 # AccountPublicProfile
 
-**Relationship to architecture-requirements:** plan/architecture-requirements/data/accounts.md, plan/architecture-requirements/data/publication.md
-**Purpose:** The public stand-in for an account. Publications and result history reference this record and never the account itself, and it holds only the information the account chose to make public. Unlinking it from the account detaches the person from published data while leaving the public record intact.
-**Identifier:** `id` (UUIDv7)
-**Parent entity:** Account (optional; null once unlinked)
+**Relationship to architecture-requirements:** plan/architecture-requirements/data/accounts.md, plan/architecture-requirements/data/publication.md  
+**Purpose:** The public stand-in for an account. Publications and result history reference this record and never the account itself, and it holds only the information the account chose to make public. Unlinking it from the account detaches the person from published data while leaving the public record intact.  
+**Identifier:** `id` (UUIDv7)  
+**Parent entity:** Account (optional; null once unlinked)  
 **Child entities:** None
 
 ## Relationships

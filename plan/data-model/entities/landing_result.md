@@ -1,9 +1,9 @@
 # LandingResult
 
-**Relationship to architecture-requirements:** [disciplines-and-configuration.md](../../architecture-requirements/data/disciplines-and-configuration.md)
-**Purpose:** One selectable entry in a LandingTable. The scorer picks an entry by its key and label, and the entry resolves to the points awarded. A score stores the selected entry's identifier, so the key, the points, and the table that produced them are always recoverable.
-**Identifier:** `id` (UUIDv7)
-**Parent entity:** [LandingTable](landing_table.md) (via `landing_table_id`)
+**Relationship to architecture-requirements:** [disciplines-and-configuration.md](../../architecture-requirements/data/disciplines-and-configuration.md)  
+**Purpose:** One selectable entry in a LandingTable. The scorer picks an entry by its key and label, and the entry resolves to the points awarded. A score stores the selected entry's identifier, so the key, the points, and the table that produced them are always recoverable.  
+**Identifier:** `id` (UUIDv7)  
+**Parent entity:** [LandingTable](landing_table.md) (via `landing_table_id`)  
 **Child entities:** None
 
 ## Relationships

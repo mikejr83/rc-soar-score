@@ -1,9 +1,9 @@
 # Role
 
-**Relationship to architecture-requirements:** plan/architecture-requirements/data/teams-roles-models.md
-**Purpose:** A label that catalogs the people involved in a contest. A role is either the single `Pilot` type, which receives scores, or a `NonFlier` type such as a helper, team manager, or official, which is tracked for information and reporting only. Roles are assigned on the ContestParticipation, so every participant in a contest has one, whether or not they are on a team. A role grants no access or authority.
-**Identifier:** `id` (UUIDv7)
-**Parent entity:** Account (director-owned roles) or none (system roles)
+**Relationship to architecture-requirements:** plan/architecture-requirements/data/teams-roles-models.md  
+**Purpose:** A label that catalogs the people involved in a contest. A role is either the single `Pilot` type, which receives scores, or a `NonFlier` type such as a helper, team manager, or official, which is tracked for information and reporting only. Roles are assigned on the ContestParticipation, so every participant in a contest has one, whether or not they are on a team. A role grants no access or authority.  
+**Identifier:** `id` (UUIDv7)  
+**Parent entity:** Account (director-owned roles) or none (system roles)  
 **Child entities:** None
 
 ## Relationships

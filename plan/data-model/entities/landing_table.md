@@ -1,9 +1,9 @@
 # LandingTable
 
-**Relationship to architecture-requirements:** [disciplines-and-configuration.md](../../architecture-requirements/data/disciplines-and-configuration.md)
-**Purpose:** A lookup table that turns what a scorer selects for a landing into the points awarded. A table is not tied to a discipline: any table can be used with any discipline. Each discipline profile names the table it ships with as its default, directors can create their own tables, and the contest configuration selects the one a contest uses. A table is immutable: to change it, create a new table. Rows identify the table (name and unit of the key); the selectable entries are stored as LandingResult rows.
-**Identifier:** `id` (UUIDv7)
-**Parent entity:** None (top-level)
+**Relationship to architecture-requirements:** [disciplines-and-configuration.md](../../architecture-requirements/data/disciplines-and-configuration.md)  
+**Purpose:** A lookup table that turns what a scorer selects for a landing into the points awarded. A table is not tied to a discipline: any table can be used with any discipline. Each discipline profile names the table it ships with as its default, directors can create their own tables, and the contest configuration selects the one a contest uses. A table is immutable: to change it, create a new table. Rows identify the table (name and unit of the key); the selectable entries are stored as LandingResult rows.  
+**Identifier:** `id` (UUIDv7)  
+**Parent entity:** None (top-level)  
 **Child entities:** [LandingResult](landing_result.md) (many)
 
 ## Relationships
