@@ -73,9 +73,9 @@ The JSON sections are frozen copies. Pilots appear only as `pilot_key`.
     {
       "pilot_key": "p_7Hq2xK",
       "round": 1,
-      "group_score": 990.0,
+      "group_score": 1040.0,
       "time_flown": 585,
-      "landing_points": 15
+      "landing_points": 40
     }
   ],
   "standings": {
@@ -84,7 +84,7 @@ The JSON sections are frozen copies. Pilots appear only as `pilot_key`.
         "as_of_round": 1,
         "pilot_key": "p_7Hq2xK",
         "place": 1,
-        "overall_score": 990.0
+        "overall_score": 1040.0
       }
     ],
     "teams": [
@@ -92,7 +92,7 @@ The JSON sections are frozen copies. Pilots appear only as `pilot_key`.
         "as_of_round": 1,
         "team_key": "t_3Nw9bD",
         "place": 1,
-        "team_score": 990.0
+        "team_score": 1040.0
       }
     ]
   },

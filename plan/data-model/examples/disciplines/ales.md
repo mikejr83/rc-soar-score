@@ -40,49 +40,89 @@ The system table the profile names as its default. It has no owner and is never 
 
 ## LandingResult
 
-Each entry maps the key the scorer selects to the points awarded. A score stores the entry `id`.
+Each entry maps the key the scorer selects to the points awarded: 50 points within 1 m, down in steps of 5 to 5 points within 10 m. Landing farther than 10 m earns no bonus, so it is simply not selected. A landing more than 75 m from the marker is out of bounds and scores zero. A score stores the entry `id`.
 
 ```json
 [
   {
-    "id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d03",
+    "id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d30",
     "landing_table_id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d02",
-    "entry_key": "within_10m",
-    "display_value": "Within 10 m",
-    "point_value": 20,
+    "entry_key": "within_1m",
+    "display_value": "Within 1 m",
+    "point_value": 50,
     "ordinal_position": 1
   },
   {
-    "id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d04",
+    "id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d31",
     "landing_table_id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d02",
-    "entry_key": "within_25m",
-    "display_value": "Within 25 m",
-    "point_value": 15,
+    "entry_key": "within_2m",
+    "display_value": "Within 2 m",
+    "point_value": 45,
     "ordinal_position": 2
   },
   {
-    "id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d05",
+    "id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d32",
     "landing_table_id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d02",
-    "entry_key": "within_50m",
-    "display_value": "Within 50 m",
-    "point_value": 10,
+    "entry_key": "within_3m",
+    "display_value": "Within 3 m",
+    "point_value": 40,
     "ordinal_position": 3
   },
   {
-    "id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d06",
+    "id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d33",
     "landing_table_id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d02",
-    "entry_key": "within_75m",
-    "display_value": "Within 75 m",
-    "point_value": 5,
+    "entry_key": "within_4m",
+    "display_value": "Within 4 m",
+    "point_value": 35,
     "ordinal_position": 4
   },
   {
-    "id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d07",
+    "id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d34",
     "landing_table_id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d02",
-    "entry_key": "none",
-    "display_value": "No bonus",
-    "point_value": 0,
+    "entry_key": "within_5m",
+    "display_value": "Within 5 m",
+    "point_value": 30,
     "ordinal_position": 5
+  },
+  {
+    "id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d35",
+    "landing_table_id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d02",
+    "entry_key": "within_6m",
+    "display_value": "Within 6 m",
+    "point_value": 25,
+    "ordinal_position": 6
+  },
+  {
+    "id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d36",
+    "landing_table_id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d02",
+    "entry_key": "within_7m",
+    "display_value": "Within 7 m",
+    "point_value": 20,
+    "ordinal_position": 7
+  },
+  {
+    "id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d37",
+    "landing_table_id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d02",
+    "entry_key": "within_8m",
+    "display_value": "Within 8 m",
+    "point_value": 15,
+    "ordinal_position": 8
+  },
+  {
+    "id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d38",
+    "landing_table_id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d02",
+    "entry_key": "within_9m",
+    "display_value": "Within 9 m",
+    "point_value": 10,
+    "ordinal_position": 9
+  },
+  {
+    "id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d39",
+    "landing_table_id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d02",
+    "entry_key": "within_10m",
+    "display_value": "Within 10 m",
+    "point_value": 5,
+    "ordinal_position": 10
   }
 ]
 ```
@@ -123,7 +163,7 @@ Each entry maps the key the scorer selects to the points awarded. A score stores
     "field_key": "landing_table",
     "field_type": "landing",
     "name": "Landing Bonus Table",
-    "description": "Table mapping landing quality indicators to bonus points. The contest selects a landing table, which defaults to the profile\'s default (ALES Standard Landing Table).",
+    "description": "Table mapping landing quality indicators to bonus points. The contest selects a landing table, which defaults to the profile's default (ALES Standard Landing Table).",
     "required": true,
     "display_order": 3,
     "created_at": "2026-09-15T00:00:00Z"

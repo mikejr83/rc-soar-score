@@ -17,17 +17,18 @@ One example row for every entity in the [data model](../../README.md), written a
 
 All files describe the same small ALES contest, so identifiers line up across files. Every identifier has the form `019c0000-0000-7000-8000-0000000000NN` (illustrative UUIDv7 values), except `scoring_uuid`, which is a UUIDv4.
 
-| Thing                  | Value                                                                     |
-| ---------------------- | ------------------------------------------------------------------------- |
-| Director               | Dana Whitfield, account `…0001`, profile owner and contest owner          |
-| Pilots                 | Sam Ortega (participation `…0040`), Alex Chen (participation `…0041`)     |
-| Timekeeper             | Jo Park (participation `…0042`), a `NonFlier`                             |
-| Contest                | "Front Range ALES Open", `…0010`, 17-18 October 2026, America/Denver      |
-| Discipline             | The ALES profile and landing table from [ales.md](../disciplines/ales.md) |
-| Configuration revision | `…0070`                                                                   |
-| Matrix revision        | `…0080`, round 1 `…0081`, round 2 `…0082`                                 |
-| Sam's round 1 flight   | assignment `…0084`, placeholder `…00a0`                                   |
-| Publication            | `…00b0`                                                                   |
+| Thing                  | Value                                                                                                           |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------- |
+| Director               | Dana Whitfield, account `…0001`, profile owner and contest owner                                                |
+| Pilots                 | Sam Ortega (participation `…0040`), Alex Chen (participation `…0041`)                                           |
+| Timekeeper             | Jo Park (participation `…0042`), a `NonFlier`                                                                   |
+| Contest                | "Front Range ALES Open", `…0010`, 17-18 October 2026, America/Denver                                            |
+| Discipline             | The ALES profile and the 1 m to 10 m landing table (50 down to 5 points) from [ales.md](../disciplines/ales.md) |
+| Configuration revision | `…0070`                                                                                                         |
+| Matrix revision        | `…0080`, round 1 `…0081`, round 2 `…0082`                                                                       |
+| Sam's round 1 flight   | assignment `…0084`, placeholder `…00a0`, landing within 3 m (40 points)                                         |
+| Alex's zero flights    | round 1 motor restart (`…00a7`), round 2 out of bounds (`…00ab`)                                                |
+| Publication            | `…00b0`                                                                                                         |
 
 ## Conventions
 

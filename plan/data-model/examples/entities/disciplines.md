@@ -149,11 +149,11 @@ A score stores this entry's `id`, which fixes the key, the points, and the table
 
 ```json
 {
-  "id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d04",
+  "id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d32",
   "landing_table_id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d02",
-  "entry_key": "within_25m",
-  "display_value": "Within 25 m",
-  "point_value": 15,
-  "ordinal_position": 2
+  "entry_key": "within_3m",
+  "display_value": "Within 3 m",
+  "point_value": 40,
+  "ordinal_position": 3
 }
 ```

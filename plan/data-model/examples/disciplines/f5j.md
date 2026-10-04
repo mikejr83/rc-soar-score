@@ -135,7 +135,7 @@ Each entry maps the key the scorer selects to the points awarded. A score stores
     "field_key": "landing_table",
     "field_type": "landing",
     "name": "Landing Bonus Table",
-    "description": "Table mapping landing quality indicators to bonus points. The contest selects a landing table, which defaults to the profile\'s default (F5J Standard Landing Table).",
+    "description": "Table mapping landing quality indicators to bonus points. The contest selects a landing table, which defaults to the profile's default (F5J Standard Landing Table).",
     "required": true,
     "display_order": 4,
     "created_at": "2026-09-15T00:00:00Z"

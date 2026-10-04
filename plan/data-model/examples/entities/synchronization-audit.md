@@ -69,7 +69,7 @@ Entity specifications: [Installation](../../entities/installation.md), [Installa
     "score_placeholder_id": "019c0000-0000-7000-8000-0000000000a0",
     "raw_components": {
       "time_flown": 585,
-      "landing": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d04"
+      "landing": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d32"
     }
   },
   "outcome": "Accepted",

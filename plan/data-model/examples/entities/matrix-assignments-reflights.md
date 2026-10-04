@@ -17,7 +17,7 @@ Entity specifications: [MatrixRevision](../../entities/matrix_revision.md), [Rou
   "algorithm_version": "1.0.0",
   "draw_config": {
     "schema_version": 1,
-    "groups_per_round": 2,
+    "groups_per_round": 1,
     "team_protection": true,
     "lane_mode": "None",
     "configured_draw_mode": "StandardManOnMan"
@@ -35,11 +35,11 @@ Entity specifications: [MatrixRevision](../../entities/matrix_revision.md), [Rou
     ]
   },
   "fairness_summary": {
-    "max_duplicate_matchups": 2,
-    "matchup_histogram": { "0": 3, "1": 9, "2": 4 },
+    "max_duplicate_matchups": 8,
+    "matchup_histogram": { "8": 1 },
     "unmet_opponent_count": 0,
     "lane_uniformity_index": null,
-    "overall_fairness_score": 0.94
+    "overall_fairness_score": 1.0
   },
   "reason": "Initial draw",
   "created_by": "019c0000-0000-7000-8000-000000000001",
@@ -57,7 +57,7 @@ Entity specifications: [MatrixRevision](../../entities/matrix_revision.md), [Rou
   "contest_id": "019c0000-0000-7000-8000-000000000010",
   "matrix_revision_id": "019c0000-0000-7000-8000-000000000080",
   "ordinal": 1,
-  "group_count": 2,
+  "group_count": 1,
   "status": "Open",
   "superseded_by_round_id": null,
   "revision": 1
@@ -106,6 +106,53 @@ An original assignment from the draw:
 }
 ```
 
+Alex Chen's original assignments for round 1 and round 2, which carry the zero-score flights in [Scores, Results and Reviews](scores-results-reviews.md#zero-score-flights):
+
+```json
+[
+  {
+    "id": "019c0000-0000-7000-8000-000000000085",
+    "contest_id": "019c0000-0000-7000-8000-000000000010",
+    "matrix_revision_id": "019c0000-0000-7000-8000-000000000080",
+    "contest_participation_id": "019c0000-0000-7000-8000-000000000041",
+    "scheduled_round_id": "019c0000-0000-7000-8000-000000000081",
+    "credited_round_id": "019c0000-0000-7000-8000-000000000081",
+    "group": 1,
+    "lane": null,
+    "flight_sequence": 1,
+    "assignment_type": "Original",
+    "source_assignment_id": null,
+    "re_flight_id": null,
+    "superseded_by_assignment_id": null,
+    "actor_id": "019c0000-0000-7000-8000-000000000001",
+    "reason": null,
+    "existing_score_handling": "None",
+    "reset_score_revision": null,
+    "created_at": "2026-10-16T20:05:00Z"
+  },
+  {
+    "id": "019c0000-0000-7000-8000-000000000086",
+    "contest_id": "019c0000-0000-7000-8000-000000000010",
+    "matrix_revision_id": "019c0000-0000-7000-8000-000000000080",
+    "contest_participation_id": "019c0000-0000-7000-8000-000000000041",
+    "scheduled_round_id": "019c0000-0000-7000-8000-000000000082",
+    "credited_round_id": "019c0000-0000-7000-8000-000000000082",
+    "group": 1,
+    "lane": null,
+    "flight_sequence": 1,
+    "assignment_type": "Original",
+    "source_assignment_id": null,
+    "re_flight_id": null,
+    "superseded_by_assignment_id": null,
+    "actor_id": "019c0000-0000-7000-8000-000000000001",
+    "reason": null,
+    "existing_score_handling": "None",
+    "reset_score_revision": null,
+    "created_at": "2026-10-16T20:05:00Z"
+  }
+]
+```
+
 A re-flight assignment created when the re-flight group was finalized:
 
 ```json
@@ -116,7 +163,7 @@ A re-flight assignment created when the re-flight group was finalized:
   "contest_participation_id": "019c0000-0000-7000-8000-000000000040",
   "scheduled_round_id": "019c0000-0000-7000-8000-000000000082",
   "credited_round_id": "019c0000-0000-7000-8000-000000000081",
-  "group": 3,
+  "group": 2,
   "lane": null,
   "flight_sequence": 2,
   "assignment_type": "Reflight",
@@ -140,19 +187,19 @@ A re-flight assignment created when the re-flight group was finalized:
   "credited_round_id": "019c0000-0000-7000-8000-000000000081",
   "source_round_id": "019c0000-0000-7000-8000-000000000081",
   "source_group": 1,
-  "type": "RandomDraw",
+  "type": "ReflyEntireGroup",
   "sequence": 1,
   "previous_reflight_id": null,
   "status": "Finalized",
   "reason": "Landing area obstructed by a spectator",
   "scheduled_round_id": "019c0000-0000-7000-8000-000000000082",
-  "flown_group": 3,
+  "flown_group": 2,
   "deviation_acknowledged": false,
-  "requested_group_size": 4,
-  "achievable_max_size": 5,
+  "requested_group_size": null,
+  "achievable_max_size": null,
   "size_exception_confirmed": false,
-  "random_seed": 1182736450,
-  "algorithm_version": "1.0.0",
+  "random_seed": null,
+  "algorithm_version": null,
   "config_revision_id": "019c0000-0000-7000-8000-000000000070",
   "created_by": "019c0000-0000-7000-8000-000000000001",
   "created_at": "2026-10-17T16:50:00Z",
