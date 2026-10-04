@@ -13,4 +13,8 @@ DateTime parseUtcTimestamp(String raw) {
 final RegExp _utcSuffix = RegExp(r'(Z|[+-]00(:?00)?)$', caseSensitive: false);
 
 /// Formats [value] as a UTC ISO 8601 string, converting first if needed.
-String formatUtcTimestamp(DateTime value) => value.toUtc().toIso8601String();
+///
+/// Whole seconds are written without a fraction (`2026-10-17T15:10:00Z`), as
+/// in the entity documents.
+String formatUtcTimestamp(DateTime value) =>
+    value.toUtc().toIso8601String().replaceFirst(RegExp(r'\.0+Z$'), 'Z');
