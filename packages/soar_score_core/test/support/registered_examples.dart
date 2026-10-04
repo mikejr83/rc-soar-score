@@ -17,6 +17,29 @@ ExampleRegistry buildExampleRegistry() => ExampleRegistry()
     'ContestConfigurationRevision',
     (json) => ContestConfigurationRevision.fromJson(json).toJson(),
   )
+  ..register(
+    'DisciplineConfigField',
+    (json) => DisciplineConfigField.fromJson(json).toJson(),
+  )
+  ..register(
+    'DisciplineFormula',
+    (json) => DisciplineFormula.fromJson(json).toJson(),
+  )
+  ..register(
+    'DisciplineProfile',
+    (json) => DisciplineProfile.fromJson(json).toJson(),
+  )
+  ..register('DisciplineRule', (json) => DisciplineRule.fromJson(json).toJson())
+  ..register(
+    'DisciplineScoreField',
+    (json) => DisciplineScoreField.fromJson(json).toJson(),
+  )
+  ..register(
+    'DisciplineValidation',
+    (json) => DisciplineValidation.fromJson(json).toJson(),
+  )
+  ..register('LandingResult', (json) => LandingResult.fromJson(json).toJson())
+  ..register('LandingTable', (json) => LandingTable.fromJson(json).toJson())
   ..register('Installation', (json) => Installation.fromJson(json).toJson())
   ..register(
     'InstallationActivation',
