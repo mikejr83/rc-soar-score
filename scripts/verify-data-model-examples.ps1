@@ -57,20 +57,28 @@ foreach ($name in ($entities.Keys | Sort-Object)) {
     }
     foreach ($example in $examples[$name]) {
         try {
-            $obj = $example.Json | ConvertFrom-Json
+            # -NoEnumerate keeps a JSON array as one value; the wrapping
+            # comma then makes a single object a one-element list too.
+            $parsed = $example.Json | ConvertFrom-Json -NoEnumerate
         } catch {
             Write-Host "INVALID JSON     $name in $($example.File): $($_.Exception.Message)"
             $problems++
             continue
         }
-        $keys = @($obj.PSObject.Properties.Name)
-        $missing = @($entity.Fields | Where-Object { $_ -notin $keys })
-        $extra = @($keys | Where-Object { $_ -notin $entity.Fields })
-        if ($missing.Count -or $extra.Count) {
-            Write-Host "FIELD MISMATCH   $name ($($example.File))"
-            if ($missing.Count) { Write-Host "    in entity doc, not in example: $($missing -join ', ')" }
-            if ($extra.Count) { Write-Host "    in example, not in entity doc: $($extra -join ', ')" }
-            $problems++
+        # An example is one row or an array of rows; every row is checked.
+        $rows = if ($parsed -is [System.Array]) { @($parsed) } else { @(, $parsed) }
+        $index = 0
+        foreach ($obj in $rows) {
+            $index++
+            $keys = @($obj.PSObject.Properties.Name)
+            $missing = @($entity.Fields | Where-Object { $_ -notin $keys })
+            $extra = @($keys | Where-Object { $_ -notin $entity.Fields })
+            if ($missing.Count -or $extra.Count) {
+                Write-Host "FIELD MISMATCH   $name row $index ($($example.File))"
+                if ($missing.Count) { Write-Host "    in entity doc, not in example: $($missing -join ', ')" }
+                if ($extra.Count) { Write-Host "    in example, not in entity doc: $($extra -join ', ')" }
+                $problems++
+            }
         }
     }
 }
