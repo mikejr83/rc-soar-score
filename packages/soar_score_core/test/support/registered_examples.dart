@@ -68,6 +68,14 @@ ExampleRegistry buildExampleRegistry() => ExampleRegistry()
   )
   ..register('Round', (json) => Round.fromJson(json).toJson())
   ..register('RoundGroup', (json) => RoundGroup.fromJson(json).toJson())
+  ..register('OfficialScore', (json) => OfficialScore.fromJson(json).toJson())
+  ..register('ReviewRequest', (json) => ReviewRequest.fromJson(json).toJson())
+  ..register('ScoreAttempt', (json) => ScoreAttempt.fromJson(json).toJson())
+  ..register(
+    'ScorePlaceholder',
+    (json) => ScorePlaceholder.fromJson(json).toJson(),
+  )
+  ..register('Invitation', (json) => Invitation.fromJson(json).toSyncJson())
   ..register('Installation', (json) => Installation.fromJson(json).toJson())
   ..register(
     'InstallationActivation',

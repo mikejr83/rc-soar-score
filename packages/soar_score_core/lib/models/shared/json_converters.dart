@@ -1,6 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 
 import '../id.dart';
+import 'protected_credential.dart';
 import 'scoring_uuid.dart';
 import 'utc_timestamp.dart';
 
@@ -13,6 +14,18 @@ class IdConverter implements JsonConverter<Id, String> {
 
   @override
   String toJson(Id object) => object.value;
+}
+
+/// Serializes a [ProtectedCredential] as its protected string.
+class ProtectedCredentialConverter
+    implements JsonConverter<ProtectedCredential, String> {
+  const ProtectedCredentialConverter();
+
+  @override
+  ProtectedCredential fromJson(String json) => ProtectedCredential(json);
+
+  @override
+  String toJson(ProtectedCredential object) => object.value;
 }
 
 /// Serializes a [ScoringUuid] as its canonical string.
