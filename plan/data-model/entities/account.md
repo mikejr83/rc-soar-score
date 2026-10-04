@@ -12,6 +12,7 @@
 - Has zero or one AccountPublicProfile
 - Has zero or one ParticipantDirectoryEntry, the details the person offers to directors
 - Owns the director's ParticipantProfile records (`ParticipantProfile.owner_account_id`)
+- Owns the director's ModelCatalog entries (`ModelCatalog.owner_account_id`)
 - Owns zero or more Contests (`Contest.owner_account_id`)
 - Linked to participant profiles through ParticipantAccountLink (backend only)
 - Referenced as an opaque actor by records inside contests (`created_by`, `finalized_by`, `assessed_by`, `set_by`, `actor_id`, and similar)
