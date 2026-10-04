@@ -165,13 +165,14 @@ erDiagram
     }
 
     CONTEST_MODEL_LINK {
-        uuid id                       PK
-        uuid contest_id               FK
-        uuid contest_participation_id FK
-        uuid model_catalog_id         FK "optional"
+        uuid id                          PK
+        uuid contest_id                  FK
+        uuid contest_participation_id    FK
+        uuid model_catalog_id            FK "optional"
         text model_name
         text manufacturer
         text model_id
+        text contest_specific_identifier    "optional"
         int  revision
     }
 
@@ -194,74 +195,79 @@ erDiagram
     }
 
     DISCIPLINE_CONFIG_FIELD {
-        uuid   id                    PK
-        uuid   discipline_profile_id FK
-        text   field_key
-        text   field_type
-        text   name
-        text   description
-        bool   required
-        string default_value
-        string options
-        string validation
-        int    display_order
+        uuid        id                    PK
+        uuid        discipline_profile_id FK
+        text        field_key
+        text        field_type
+        text        name
+        text        description
+        bool        required
+        string      default_value
+        string      options
+        string      validation
+        int         display_order
+        timestamptz created_at
     }
 
     DISCIPLINE_SCORE_FIELD {
-        uuid   id                    PK
-        uuid   discipline_profile_id FK
-        text   field_key
-        text   field_type
-        text   name
-        text   description
-        bool   required
-        string default_value
-        string options
-        string validation
-        int    display_order
-        bool   is_zero_reason
-        text   zero_reason_code
+        uuid        id                    PK
+        uuid        discipline_profile_id FK
+        text        field_key
+        text        field_type
+        text        name
+        text        description
+        bool        required
+        string      default_value
+        string      options
+        string      validation
+        int         display_order
+        bool        is_zero_reason
+        text        zero_reason_code
+        timestamptz created_at
     }
 
     DISCIPLINE_VALIDATION {
-        uuid   id                    PK
-        uuid   discipline_profile_id FK
-        string field_keys
-        text   constraint_type
-        text   description
-        string applies_to
-        text   message
-        int    display_order
+        uuid        id                    PK
+        uuid        discipline_profile_id FK
+        string      field_keys
+        text        constraint_type
+        text        description
+        string      applies_to
+        text        message
+        int         display_order
+        timestamptz created_at
     }
 
     DISCIPLINE_FORMULA {
-        uuid   id                    PK
-        uuid   discipline_profile_id FK
-        text   formula_key
-        text   formula_type
-        text   description
-        text   formula_text
-        string inputs
-        string outputs
-        string depends_on
-        bool   is_primary
-        int    display_order
+        uuid        id                    PK
+        uuid        discipline_profile_id FK
+        text        formula_key
+        text        formula_type
+        text        description
+        text        formula_text
+        string      inputs
+        string      outputs
+        string      depends_on
+        bool        is_primary
+        int         display_order
+        timestamptz created_at
     }
 
     DISCIPLINE_RULE {
-        uuid   id                    PK
-        uuid   discipline_profile_id FK
-        text   rule_key
-        text   rule_type
-        text   condition
-        text   effect
-        string applies_to
-        string depends_on
-        text   display_name
-        text   description
-        bool   auto_score_zero
-        string affects_other_fields
-        int    display_order
+        uuid        id                    PK
+        uuid        discipline_profile_id FK
+        text        rule_key
+        text        rule_type
+        text        condition
+        text        effect
+        string      applies_to
+        string      depends_on
+        text        display_name
+        text        description
+        bool        auto_score_zero
+        string      affects_other_fields
+        int         display_order
+        timestamptz created_at
     }
 
     LANDING_TABLE {

@@ -29,6 +29,7 @@
 | `current_projection_id`        | UUIDv7                            | no          | null      | FK to the most recent complete PublicationProjection                                                                                                                     |
 | `results_hidden_through_round` | Integer                           | No          | null      | Copy of the contest's results-hiding setting. Null when results are not hidden. Otherwise overall scores and placing are shown only through this round                   |
 | `results_hidden_at`            | timestamptz                       | No          | null      | When hiding was turned on. Hiding expires 24 hours after this time. Non-null exactly when `results_hidden_through_round` is non-null                                     |
+| `revision`                     | Integer                           | Yes         | 0         | Row-level counter for optimistic locking, incremented on every change                                                                                                    |
 
 ## Invariants and Constraints
 
