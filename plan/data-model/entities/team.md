@@ -19,7 +19,7 @@
 | `id`         | UUIDv7  | Yes      | —       | Primary key                             |
 | `contest_id` | UUIDv7  | Yes      | —       | Foreign key to Contest                  |
 | `name`       | String  | Yes      | —       | Team name (unique within contest)       |
-| `revision`   | Integer | Yes      | 0       | Revision counter for optimistic locking |
+| `revision`   | Integer | Yes      | 1       | Revision counter for optimistic locking |
 
 ## Invariants and Constraints
 
