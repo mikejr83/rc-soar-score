@@ -26,25 +26,16 @@ foreach ($file in Get-ChildItem -LiteralPath $entityDir -Filter '*.md') {
         if (-not $inFields) { continue }
         if ($line -match '^\|\s*`([^`]+)`\s*\|') { $fields.Add($Matches[1]); $inTable = $true }
     }
-    $entities[($title -replace '\s', '')] = [pscustomobject]@{ File = $file.Name; Fields = $fields }
+    $entities[($title -replace '\s', '').ToLowerInvariant()] = [pscustomobject]@{ File = $file.Name; Fields = $fields }
 }
 
-# Entity name -> example JSON text(s): a "## Name" heading followed by a
-# ```json block.
+# Entity name -> example JSON text: one <entity>.json file per entity, holding
+# a single row or an array of rows. The file name matches the entity title
+# once underscores and case are ignored (model_catalog.json = ModelCatalog).
 $examples = @{}
-foreach ($file in Get-ChildItem -LiteralPath $exampleDir -Filter '*.md') {
-    $text = [System.IO.File]::ReadAllText($file.FullName)
-    # Each "## Name" section may hold prose and several ```json blocks
-    # (variants of the same entity); every block is checked.
-    foreach ($section in [regex]::Split($text, '(?m)^## ')) {
-        $nl = $section.IndexOf("`n")
-        if ($nl -lt 0) { continue }
-        $name = $section.Substring(0, $nl).Trim()
-        foreach ($m in [regex]::Matches($section, '(?s)```json\r?\n(?<json>.*?)\r?\n```')) {
-            if (-not $examples.ContainsKey($name)) { $examples[$name] = @() }
-            $examples[$name] += [pscustomobject]@{ File = $file.Name; Json = $m.Groups['json'].Value }
-        }
-    }
+foreach ($file in Get-ChildItem -LiteralPath $exampleDir -Filter '*.json') {
+    $name = ([System.IO.Path]::GetFileNameWithoutExtension($file.Name) -replace '_', '').ToLowerInvariant()
+    $examples[$name] = @([pscustomobject]@{ File = $file.Name; Json = [System.IO.File]::ReadAllText($file.FullName) })
 }
 
 $problems = 0
@@ -84,11 +75,11 @@ foreach ($name in ($entities.Keys | Sort-Object)) {
 }
 foreach ($name in ($examples.Keys | Sort-Object)) {
     if (-not $entities.ContainsKey($name)) {
-        Write-Host "NO ENTITY DOC    example heading '$name' matches no entity title"
+        Write-Host "NO ENTITY DOC    example file for ${name} matches no entity title"
         $problems++
     }
 }
 
-Write-Host "$($entities.Count) entities, $($examples.Count) example headings, $problems problem(s)."
+Write-Host "$($entities.Count) entities, $($examples.Count) example files, $problems problem(s)."
 if ($problems -gt 0) { exit 1 }
 exit 0
