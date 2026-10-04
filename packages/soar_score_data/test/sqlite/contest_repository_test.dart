@@ -9,7 +9,10 @@ void main() {
     late core.ContestRepository repo;
 
     setUp(() {
-      db = SoarScoreDatabase(NativeDatabase.memory());
+      db = SoarScoreDatabase(
+        NativeDatabase.memory(),
+        profile: DatabaseProfile.native,
+      );
       repo = ContestRepository(db);
     });
 

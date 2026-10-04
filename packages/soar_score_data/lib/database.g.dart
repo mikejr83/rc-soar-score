@@ -117,6 +117,7 @@ class $ContestsTable extends Contests
     'lifecycle_state',
     aliasedName,
     false,
+    check: () => lifecycleState.isIn(lifecycleStateValues),
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
@@ -128,6 +129,7 @@ class $ContestsTable extends Contests
     'scoring_access',
     aliasedName,
     false,
+    check: () => scoringAccess.isIn(scoringAccessValues),
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
@@ -139,6 +141,7 @@ class $ContestsTable extends Contests
     'admin_lock',
     aliasedName,
     false,
+    check: () => adminLock.isIn(adminLockValues),
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );

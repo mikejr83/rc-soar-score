@@ -31,6 +31,13 @@ All 48 entities, grouped by the [Sync Scope](../../data-model/README.md#sync-sco
 
 A local accountless contest has no remote account, so native tables that reference an account must tolerate the local account kind defined in the account documents. The native installation also keeps its own copy of its sync position (it advances the cursor only after durably storing the returned changes), while `SyncCursor` itself is server-only. Decide whether that local position is a client-only table or a local variant of `SyncCursor`, and record the decision. Check each foreign key from a contest or director table into the backend-only group and decide whether it is enforced on the server only or stored as a plain identifier on the native side. Record each decision in this ticket.
 
+## Decisions
+
+- **Timestamps:** UTC ISO 8601 text with a `Z` suffix on both backends (the contests table already does this). The data-model README previously said "timestamps with a time zone"; it now matches.
+- **Enumerations:** text with a check constraint listing the exact values. The lists live in `packages/soar_score_data/lib/schema/enum_values.dart`, and a test compares each with the `@JsonValue` texts of the core enum.
+- **Table groups:** every table has a group in `tableGroupByName`. A `DatabaseProfile` (`native` or `server`) chooses which groups the database creates; a test fails for any table without a group.
+- **Local sync position:** a client-only table, not a local copy of `SyncCursor`, which stays server-only. It arrives with the sync tables.
+
 ## Design Requirements
 
 - Keep the schema and repositories in `packages/soar_score_data`. Register tables on `SoarScoreDatabase` by group, and support both configured executors.
