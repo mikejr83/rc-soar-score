@@ -13,6 +13,7 @@ export 'discipline_type.dart';
 export 'draw_mode.dart';
 export 'excluded_reason.dart';
 export 'existing_score_handling.dart';
+export 'flight_outcome.dart';
 export 'formula_type.dart';
 export 'group_score_mode.dart';
 export 'group_status.dart';

@@ -76,6 +76,12 @@ ExampleRegistry buildExampleRegistry() => ExampleRegistry()
     (json) => ScorePlaceholder.fromJson(json).toJson(),
   )
   ..register('Invitation', (json) => Invitation.fromJson(json).toSyncJson())
+  ..register('FlightResult', (json) => FlightResult.fromJson(json).toJson())
+  ..register(
+    'ParticipationStanding',
+    (json) => ParticipationStanding.fromJson(json).toJson(),
+  )
+  ..register('TeamStanding', (json) => TeamStanding.fromJson(json).toJson())
   ..register('Installation', (json) => Installation.fromJson(json).toJson())
   ..register(
     'InstallationActivation',

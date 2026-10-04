@@ -10,6 +10,7 @@ export 'models/id.dart';
 export 'models/landing/landing.dart';
 export 'models/matrix/matrix.dart';
 export 'models/participants/participants.dart';
+export 'models/results/results.dart';
 export 'models/scores/scores.dart';
 export 'models/shared/shared.dart';
 export 'models/sync/sync.dart';
