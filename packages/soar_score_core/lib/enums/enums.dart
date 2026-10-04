@@ -1,1 +1,10 @@
+export 'activation_kind.dart';
+export 'audit_action.dart';
+export 'audit_outcome.dart';
+export 'authority.dart';
+export 'conflict_resolution.dart';
+export 'conflict_resolution_choice.dart';
 export 'connectivity_status.dart';
+export 'mutation_outcome.dart';
+export 'platform.dart';
+export 'tombstone_status.dart';

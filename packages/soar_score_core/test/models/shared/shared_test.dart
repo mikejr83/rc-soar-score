@@ -35,11 +35,19 @@ void main() {
       expect(() => parseUtcTimestamp('nope'), throwsFormatException);
     });
 
-    test('formats in UTC', () {
+    test('formats whole seconds without a fraction', () {
       expect(
         formatUtcTimestamp(DateTime.utc(2026, 4, 15, 10, 30)),
-        '2026-04-15T10:30:00.000Z',
+        '2026-04-15T10:30:00Z',
       );
+    });
+
+    test('keeps a fractional second and converts local times to UTC', () {
+      expect(
+        formatUtcTimestamp(DateTime.utc(2026, 4, 15, 10, 30, 0, 250)),
+        '2026-04-15T10:30:00.250Z',
+      );
+      expect(formatUtcTimestamp(DateTime.utc(2026).toLocal()), endsWith('Z'));
     });
   });
 

@@ -1,13 +1,16 @@
-import 'sync_scope.dart';
+import '../id.dart';
+import 'sync_scoped.dart';
 
 /// An entity that travels through synchronization and carries a revision.
-abstract interface class Synchronizable {
-  /// The stream that carries this entity.
-  ///
-  /// Constant for most types; computed per instance for `Role`,
-  /// `LandingTable` and `LandingResult`, which are director data when owned
-  /// and system data otherwise.
-  SyncScope get syncScope;
+///
+/// The unit of work needs [id] and [entityType] to store the entity and write
+/// its `MutationRecord` or `Tombstone`.
+abstract interface class Synchronizable implements SyncScoped {
+  /// Primary key.
+  Id get id;
+
+  /// Stable name of the entity type, as written in `MutationRecord.entity_type`.
+  String get entityType;
 
   /// Revision counter used for optimistic locking.
   ///
