@@ -1,0 +1,13 @@
+[
+  {
+    "id": "019c0000-0000-7000-8000-0000000000d0",
+    "participant_profile_id": "019c0000-0000-7000-8000-000000000020",
+    "account_id": "019c0000-0000-7000-8000-000000000002",
+    "status": "Confirmed",
+    "origin": "EmailMatch",
+    "created_at": "2026-09-02T12:00:00Z",
+    "confirmed_at": "2026-09-02T12:30:00Z",
+    "ended_at": null,
+    "revision": 2
+  }
+]

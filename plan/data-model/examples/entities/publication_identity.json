@@ -1,0 +1,15 @@
+[
+  {
+    "id": "019c0000-0000-7000-8000-0000000000b0",
+    "contest_id": "019c0000-0000-7000-8000-000000000010",
+    "owner_public_profile_id": "019c0000-0000-7000-8000-000000000005",
+    "claim_status": "Claimed",
+    "verification_email": null,
+    "visibility": "Public",
+    "published_at": "2026-10-17T16:00:00Z",
+    "current_projection_id": "019c0000-0000-7000-8000-0000000000b1",
+    "results_hidden_through_round": null,
+    "results_hidden_at": null,
+    "revision": 4
+  }
+]

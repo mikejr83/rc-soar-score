@@ -1,0 +1,54 @@
+[
+  {
+    "id": "019c0000-0000-7000-8000-0000000000d2",
+    "contest_id": "019c0000-0000-7000-8000-000000000010",
+    "contest_participation_id": "019c0000-0000-7000-8000-000000000040",
+    "type": "QRCode",
+    "protected_credential": "pbkdf2-sha256$600000$c2FsdA$Zm9vYmFyYmF6cXV4",
+    "invitation_revision": 1,
+    "state": "Active",
+    "audience": "Pilot",
+    "issued_by": "019c0000-0000-7000-8000-000000000001",
+    "issued_at": "2026-10-16T14:00:00Z",
+    "expires_at": null,
+    "first_used_at": "2026-10-17T14:02:11Z",
+    "last_used_at": "2026-10-17T16:40:05Z",
+    "revoked_at": null,
+    "replaces_invitation_id": null,
+    "redeemed_by_account_id": "019c0000-0000-7000-8000-000000000002",
+    "delivery_outcomes": [
+      {
+        "channel": "print",
+        "requested_at": "2026-10-16T14:00:00Z",
+        "result": "printed"
+      }
+    ],
+    "client_mutation_id": "01J9ZK3Q8V7N2M4R6T8W0Y1A3C"
+  },
+  {
+    "id": "019c0000-0000-7000-8000-0000000000d3",
+    "contest_id": "019c0000-0000-7000-8000-000000000010",
+    "contest_participation_id": "019c0000-0000-7000-8000-000000000045",
+    "type": "MagicURL",
+    "protected_credential": "pbkdf2-sha256$600000$cGVwcGVy$cXV4YmF6YmFyZm9v",
+    "invitation_revision": 1,
+    "state": "Active",
+    "audience": "Pilot",
+    "issued_by": "019c0000-0000-7000-8000-000000000001",
+    "issued_at": "2026-10-17T14:10:00Z",
+    "expires_at": "2026-10-18T14:10:00Z",
+    "first_used_at": "2026-10-17T14:20:00Z",
+    "last_used_at": "2026-10-17T15:14:00Z",
+    "revoked_at": null,
+    "replaces_invitation_id": null,
+    "redeemed_by_account_id": "019c0000-0000-7000-8000-000000000006",
+    "delivery_outcomes": [
+      {
+        "channel": "email",
+        "requested_at": "2026-10-17T14:10:00Z",
+        "result": "delivered"
+      }
+    ],
+    "client_mutation_id": "01J9ZK3Q8V7N2M4R6T8W0Y1A3D"
+  }
+]

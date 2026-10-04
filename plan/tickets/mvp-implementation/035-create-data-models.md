@@ -98,7 +98,7 @@ Recorded as the models land. See [035-implementation-plan.md](035-implementation
 
 | Area                 | Finding                                                                                  | Resolution                                                                                                              |
 | -------------------- | ---------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| Example format       | The examples are Markdown files with fenced `json` blocks, not JSON files.               | The round-trip test parses the fenced blocks. Ticket wording updated.                                                   |
+| Example format       | The examples were Markdown files with fenced `json` blocks, not JSON files.              | The examples are now one pure JSON file per entity (an array of rows) with a README, so the ticket wording stands.      |
 | Entity count         | `reconciliation-findings.md` said 47 entities; the ERD, catalog and `entities/` have 48. | Fixed to 48.                                                                                                            |
 | Score representation | The spec says `Decimal`; the ticket forbade floating point.                              | Owner relaxed the rule (D2): scores use Dart `double`. Revisit if scores disagree across devices or exact ties matter.  |
 | Equality             | 48 classes need value equality.                                                          | `equatable` added as a runtime dependency (D1); core `AGENTS.md` updated.                                               |

@@ -1,0 +1,21 @@
+[
+  {
+    "id": "019c0000-0000-7000-8000-000000000801",
+    "contest_id": "019c0000-0000-7000-8000-000000000010",
+    "score_placeholder_id": "019c0000-0000-7000-8000-000000000305",
+    "proposed_components": {
+      "time_flown": 550,
+      "landing": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d35"
+    },
+    "participant_message": "My own timer shows 9:10, not 9:00.",
+    "requester_id": "019c0000-0000-7000-8000-000000000006",
+    "base_score_revision": 1,
+    "requested_at": "2026-10-17T15:14:00Z",
+    "state": "Rejected",
+    "decision_actor_id": "019c0000-0000-7000-8000-000000000001",
+    "decision_time": "2026-10-17T15:25:00Z",
+    "decision_message": "The official timer's reading stands.",
+    "resulting_attempt_id": null,
+    "revision": 3
+  }
+]

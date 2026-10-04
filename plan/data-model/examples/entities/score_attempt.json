@@ -1,0 +1,116 @@
+[
+  {
+    "id": "019c0000-0000-7000-8000-000000000401",
+    "contest_id": "019c0000-0000-7000-8000-000000000010",
+    "score_placeholder_id": "019c0000-0000-7000-8000-000000000301",
+    "config_revision_id": "019c0000-0000-7000-8000-000000000070",
+    "matrix_revision_id": "019c0000-0000-7000-8000-000000000080",
+    "raw_components": {
+      "time_flown": 585,
+      "landing": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d32",
+      "flight_penalty": null
+    },
+    "actor_id": "019c0000-0000-7000-8000-000000000001",
+    "authority": "Director",
+    "invitation_id": null,
+    "source_device": "field-laptop",
+    "client_mutation_id": "01J9ZM5B2E4G6H8K0N2Q4S6U8W",
+    "base_score_revision": 0
+  },
+  {
+    "id": "019c0000-0000-7000-8000-000000000402",
+    "contest_id": "019c0000-0000-7000-8000-000000000010",
+    "score_placeholder_id": "019c0000-0000-7000-8000-000000000303",
+    "config_revision_id": "019c0000-0000-7000-8000-000000000070",
+    "matrix_revision_id": "019c0000-0000-7000-8000-000000000080",
+    "raw_components": {
+      "time_flown": 570,
+      "landing": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d30",
+      "flight_penalty": null
+    },
+    "actor_id": "019c0000-0000-7000-8000-000000000001",
+    "authority": "Director",
+    "invitation_id": null,
+    "source_device": "field-laptop",
+    "client_mutation_id": "01J9ZM5B2E4G6H8K0N2Q4S6U9X",
+    "base_score_revision": 0
+  },
+  {
+    "id": "019c0000-0000-7000-8000-000000000403",
+    "contest_id": "019c0000-0000-7000-8000-000000000010",
+    "score_placeholder_id": "019c0000-0000-7000-8000-000000000305",
+    "config_revision_id": "019c0000-0000-7000-8000-000000000070",
+    "matrix_revision_id": "019c0000-0000-7000-8000-000000000080",
+    "raw_components": {
+      "time_flown": 540,
+      "landing": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d35",
+      "flight_penalty": null
+    },
+    "actor_id": "019c0000-0000-7000-8000-000000000001",
+    "authority": "Director",
+    "invitation_id": null,
+    "source_device": "field-laptop",
+    "client_mutation_id": "01J9ZM5B2E4G6H8K0N2Q4S6UAY",
+    "base_score_revision": 0
+  },
+  {
+    "id": "019c0000-0000-7000-8000-000000000404",
+    "contest_id": "019c0000-0000-7000-8000-000000000010",
+    "score_placeholder_id": "019c0000-0000-7000-8000-000000000304",
+    "config_revision_id": "019c0000-0000-7000-8000-000000000070",
+    "matrix_revision_id": "019c0000-0000-7000-8000-000000000080",
+    "raw_components": {
+      "time_flown": 597,
+      "landing": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d31",
+      "flight_penalty": null
+    },
+    "actor_id": "019c0000-0000-7000-8000-000000000001",
+    "authority": "Director",
+    "invitation_id": null,
+    "source_device": "field-laptop",
+    "client_mutation_id": "01J9ZM5B2E4G6H8K0N2Q4S6UBZ",
+    "base_score_revision": 0
+  },
+  {
+    "id": "019c0000-0000-7000-8000-000000000405",
+    "contest_id": "019c0000-0000-7000-8000-000000000010",
+    "score_placeholder_id": "019c0000-0000-7000-8000-000000000302",
+    "config_revision_id": "019c0000-0000-7000-8000-000000000070",
+    "matrix_revision_id": "019c0000-0000-7000-8000-000000000080",
+    "raw_components": {
+      "time_flown": 0,
+      "landing": null,
+      "motor_restart": true,
+      "out_of_bounds": false,
+      "overflight_gt_one_min": false,
+      "flight_penalty": null
+    },
+    "actor_id": "019c0000-0000-7000-8000-000000000001",
+    "authority": "Director",
+    "invitation_id": null,
+    "source_device": "field-laptop",
+    "client_mutation_id": "01J9ZM5B2E4G6H8K0N2Q4S6UC0",
+    "base_score_revision": 0
+  },
+  {
+    "id": "019c0000-0000-7000-8000-000000000406",
+    "contest_id": "019c0000-0000-7000-8000-000000000010",
+    "score_placeholder_id": "019c0000-0000-7000-8000-000000000311",
+    "config_revision_id": "019c0000-0000-7000-8000-000000000070",
+    "matrix_revision_id": "019c0000-0000-7000-8000-000000000080",
+    "raw_components": {
+      "time_flown": 0,
+      "landing": null,
+      "motor_restart": false,
+      "out_of_bounds": true,
+      "overflight_gt_one_min": false,
+      "flight_penalty": null
+    },
+    "actor_id": "019c0000-0000-7000-8000-000000000001",
+    "authority": "Director",
+    "invitation_id": null,
+    "source_device": "field-laptop",
+    "client_mutation_id": "01J9ZM5B2E4G6H8K0N2Q4S6UD1",
+    "base_score_revision": 0
+  }
+]

@@ -1,0 +1,19 @@
+[
+  {
+    "id": "019c0000-0000-7000-8000-0000000000c4",
+    "contest_id": "019c0000-0000-7000-8000-000000000010",
+    "owner_account_id": null,
+    "entity_type": "ScorePlaceholder",
+    "entity_id": "019c0000-0000-7000-8000-000000000301",
+    "accepted_mutation_id": "019c0000-0000-7000-8000-0000000000c3",
+    "competing_mutation_id": "019c0000-0000-7000-8000-0000000000c7",
+    "reason_code": "stale_base",
+    "reason": "A second device entered a score from an older score revision",
+    "requires_action": true,
+    "resolution": "Pending",
+    "resolution_choice": null,
+    "created_at": "2026-10-17T15:12:00Z",
+    "resolved_at": null,
+    "resolved_by": null
+  }
+]

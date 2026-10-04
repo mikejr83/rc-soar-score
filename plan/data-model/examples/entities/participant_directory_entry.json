@@ -1,0 +1,18 @@
+[
+  {
+    "id": "019c0000-0000-7000-8000-0000000000d1",
+    "account_id": "019c0000-0000-7000-8000-000000000002",
+    "first_name": "Sam",
+    "last_name": "Ortega",
+    "club": "Front Range Soaring Society",
+    "fai_number": "USA-12345",
+    "national_org_id": "AMA-987654",
+    "city": "Boulder",
+    "state": "CO",
+    "country": "USA",
+    "is_listed": true,
+    "email_visible_to_directors": false,
+    "created_at": "2026-09-02T12:00:00Z",
+    "updated_at": "2026-09-02T12:00:00Z"
+  }
+]

@@ -1,0 +1,57 @@
+[
+  {
+    "id": "019c0000-0000-7000-8000-000000000061",
+    "contest_id": "019c0000-0000-7000-8000-000000000010",
+    "contest_participation_id": "019c0000-0000-7000-8000-000000000040",
+    "model_catalog_id": "019c0000-0000-7000-8000-000000000060",
+    "model_name": "Supra",
+    "manufacturer": "Vladimir's Model",
+    "model_id": "SUPRA-2024-001",
+    "contest_specific_identifier": "S1",
+    "revision": 1
+  },
+  {
+    "id": "019c0000-0000-7000-8000-000000000063",
+    "contest_id": "019c0000-0000-7000-8000-000000000010",
+    "contest_participation_id": "019c0000-0000-7000-8000-000000000041",
+    "model_catalog_id": "019c0000-0000-7000-8000-000000000060",
+    "model_name": "Supra",
+    "manufacturer": "Vladimir's Model",
+    "model_id": "SUPRA-2025-014",
+    "contest_specific_identifier": "A1",
+    "revision": 1
+  },
+  {
+    "id": "019c0000-0000-7000-8000-000000000064",
+    "contest_id": "019c0000-0000-7000-8000-000000000010",
+    "contest_participation_id": "019c0000-0000-7000-8000-000000000043",
+    "model_catalog_id": "019c0000-0000-7000-8000-000000000060",
+    "model_name": "Supra",
+    "manufacturer": "Vladimir's Model",
+    "model_id": "SUPRA-2023-077",
+    "contest_specific_identifier": "R1",
+    "revision": 1
+  },
+  {
+    "id": "019c0000-0000-7000-8000-000000000065",
+    "contest_id": "019c0000-0000-7000-8000-000000000010",
+    "contest_participation_id": "019c0000-0000-7000-8000-000000000044",
+    "model_catalog_id": "019c0000-0000-7000-8000-000000000062",
+    "model_name": "Estrella",
+    "manufacturer": "Sky Dancer Models",
+    "model_id": "EST-2025-003",
+    "contest_specific_identifier": "M1",
+    "revision": 1
+  },
+  {
+    "id": "019c0000-0000-7000-8000-000000000066",
+    "contest_id": "019c0000-0000-7000-8000-000000000010",
+    "contest_participation_id": "019c0000-0000-7000-8000-000000000045",
+    "model_catalog_id": null,
+    "model_name": "Home-built 3.4 m",
+    "manufacturer": null,
+    "model_id": "TB-001",
+    "contest_specific_identifier": "T1",
+    "revision": 1
+  }
+]

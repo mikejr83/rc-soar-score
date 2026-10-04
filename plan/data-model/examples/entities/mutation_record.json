@@ -1,0 +1,30 @@
+[
+  {
+    "id": "019c0000-0000-7000-8000-0000000000c3",
+    "contest_id": "019c0000-0000-7000-8000-000000000010",
+    "owner_account_id": null,
+    "sequence": 405,
+    "entity_type": "ScoreAttempt",
+    "entity_id": "019c0000-0000-7000-8000-000000000401",
+    "base_revision": null,
+    "client_mutation_id": "01J9ZM5B2E4G6H8K0N2Q4S6U8W",
+    "actor_id": "019c0000-0000-7000-8000-000000000001",
+    "authority": "Director",
+    "source_installation_id": "019c0000-0000-7000-8000-0000000000c0",
+    "source_device": "field-laptop",
+    "client_time": "2026-10-17T15:09:58Z",
+    "server_acceptance_time": "2026-10-17T15:10:00Z",
+    "server_rejection_time": null,
+    "payload": {
+      "score_placeholder_id": "019c0000-0000-7000-8000-000000000301",
+      "raw_components": {
+        "time_flown": 585,
+        "landing": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d32"
+      }
+    },
+    "outcome": "Accepted",
+    "reason_code": null,
+    "error_message": null,
+    "depends_on_mutation_id": null
+  }
+]
