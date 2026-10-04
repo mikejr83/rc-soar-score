@@ -1,6 +1,6 @@
 # RC Soar Score Entity Relationship Diagram
 
-ERD for the 47 conceptual entities. Physical design: PostgreSQL backend with IndexedDB clients, UUIDv7 identifiers, composite unique constraints on natural business keys.
+ERD for the 48 conceptual entities. Physical design: PostgreSQL backend with IndexedDB clients, UUIDv7 identifiers, composite unique constraints on natural business keys.
 
 ```mermaid
 erDiagram
@@ -351,6 +351,17 @@ erDiagram
         uuid superseded_by_round_id FK "optional, write-once"
     }
 
+    ROUND_GROUP {
+        uuid        id           PK
+        uuid        contest_id   FK
+        uuid        round_id     FK
+        int         group_number
+        text        status          "Open, Locked"
+        uuid        locked_by    FK "optional"
+        timestamptz locked_at       "optional"
+        int         revision
+    }
+
     RE_FLIGHT {
         uuid        id                       PK
         uuid        contest_id               FK
@@ -403,13 +414,15 @@ erDiagram
 
     %% Scores and Results
     SCORE_PLACEHOLDER {
-        uuid id                       PK
-        uuid contest_id               FK
-        uuid contest_participation_id FK
-        uuid assignment_id            FK
-        text state
-        int  score_revision
-        int  revision
+        uuid        id                       PK
+        uuid        contest_id               FK
+        uuid        contest_participation_id FK
+        uuid        assignment_id            FK
+        text        state
+        int         score_revision
+        uuid        locked_by                FK "optional"
+        timestamptz locked_at                   "optional"
+        int         revision
     }
 
     SCORE_ATTEMPT {
@@ -753,6 +766,11 @@ erDiagram
     ROUND ||--o{ MATRIX_ASSIGNMENT : "scheduled in"
     ROUND ||--o{ MATRIX_ASSIGNMENT : "credited to"
     ROUND |o--o| ROUND : "superseded by"
+    ROUND ||--o{ ROUND_GROUP : "contains"
+    CONTEST ||--o{ ROUND_GROUP : "denormalized contest_id"
+    ROUND_GROUP ||--o{ MATRIX_ASSIGNMENT : "flown in"
+    ACCOUNT |o--o{ ROUND_GROUP : "locks"
+    ACCOUNT |o--o{ SCORE_PLACEHOLDER : "locks"
     MATRIX_ASSIGNMENT |o--o{ MATRIX_ASSIGNMENT : "source of"
     MATRIX_ASSIGNMENT |o--o| MATRIX_ASSIGNMENT : "superseded by"
     RE_FLIGHT |o--o{ MATRIX_ASSIGNMENT : "creates"

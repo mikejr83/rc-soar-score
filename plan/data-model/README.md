@@ -6,7 +6,7 @@ Canonical documentation for the Soar Score data model. This folder is the source
 
 - [Entity Relationship Diagram (ERD)](ERD.md) - Mermaid diagram of all entities and their relationships
 - [Contest Options](contest-options.md) - Every setting a director can make, where it is stored, its defaults, and when it can change
-- [Entity Documentation](entities/) - Per-entity specifications (47 files)
+- [Entity Documentation](entities/) - Per-entity specifications (48 files)
 - [Reconciliation Status](reconciliation-findings.md) - What was reconciled with the architecture and business requirements, and what is still open
 
 ## Entity Catalog
@@ -64,6 +64,7 @@ Canonical documentation for the Soar Score data model. This folder is the source
 | ReFlight            | [entities/re_flight.md](entities/re_flight.md)                         | [matrix-and-assignments.md](../architecture-requirements/data/matrix-and-assignments.md) | Extra chance to fly given to pilots for a round: method, group, reason, status, and draw inputs |                                                                                                                                                                                                    |
 | ReFlightParticipant | [entities/re_flight_participant.md](entities/re_flight_participant.md) | [matrix-and-assignments.md](../architecture-requirements/data/matrix-and-assignments.md) | A pilot's part in a re-flight: role, draw position, response, and notification                  |                                                                                                                                                                                                    |
 | Round               | [entities/round.md](entities/round.md)                                 | [matrix-and-assignments.md](../architecture-requirements/data/matrix-and-assignments.md) | A numbered round of flights within a matrix revision.                                           |                                                                                                                                                                                                    |
+| RoundGroup          | [entities/round_group.md](entities/round_group.md)                     | [matrix-and-assignments.md](../architecture-requirements/data/matrix-and-assignments.md) | A group within a round, which can be locked                                                     |                                                                                                                                                                                                    |
 
 ### Scores, Results & Reviews
 
@@ -102,14 +103,14 @@ Canonical documentation for the Soar Score data model. This folder is the source
 
 Which stream carries each entity, and who may write it. Contest data synchronizes through a per-contest sequence. A director's own data synchronizes through a separate per-director sequence. System data only comes down.
 
-| Scope                 | Entities                                                                                                                                                                                                                                                                              | Notes                                                                                                        |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| Contest data          | Contest, ContestConfigurationRevision, ContestParticipation, Team, TeamMembership, ContestModelLink, MatrixRevision, Round, MatrixAssignment, ReFlight, ReFlightParticipant, ScorePlaceholder, ScoreAttempt, OfficialScore, ReviewRequest, MutationRecord, ConflictRecord, AuditEvent | Carries `contest_id` and a revision. Changes go through the contest stream                                   |
-| Director data         | ParticipantProfile, ModelCatalog, ContestConfigurationPreset, Role and LandingTable (with their LandingResult rows) when owned by the director, and the tombstones of deleted contests                                                                                                | Carries `owner_account_id`. Changes go through the director stream                                           |
-| System data           | DisciplineProfile and its field, validation, formula, and rule rows, system Role, system LandingTable and LandingResult                                                                                                                                                               | Written on the server by administrators and synchronized down only. `Installation.system_data_seq` tracks it |
-| Issued by the service | Invitation                                                                                                                                                                                                                                                                            | Created and replaced by the service, read by installations                                                   |
-| Derived               | FlightResult, ParticipationStanding, TeamStanding                                                                                                                                                                                                                                     | Written only by the calculator, received read-only, never merged                                             |
-| Backend only          | Account, AccountIdentity, AccountPublicProfile, ParticipantAccountLink, ParticipantDirectoryEntry, PublicationIdentity, PublicationProjection, PublicationParticipant, DelistRequest, Installation, InstallationActivation, SyncCursor                                                | Never synchronized to installations                                                                          |
+| Scope                 | Entities                                                                                                                                                                                                                                                                                          | Notes                                                                                                        |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Contest data          | Contest, ContestConfigurationRevision, ContestParticipation, Team, TeamMembership, ContestModelLink, MatrixRevision, Round, RoundGroup, MatrixAssignment, ReFlight, ReFlightParticipant, ScorePlaceholder, ScoreAttempt, OfficialScore, ReviewRequest, MutationRecord, ConflictRecord, AuditEvent | Carries `contest_id` and a revision. Changes go through the contest stream                                   |
+| Director data         | ParticipantProfile, ModelCatalog, ContestConfigurationPreset, Role and LandingTable (with their LandingResult rows) when owned by the director, and the tombstones of deleted contests                                                                                                            | Carries `owner_account_id`. Changes go through the director stream                                           |
+| System data           | DisciplineProfile and its field, validation, formula, and rule rows, system Role, system LandingTable and LandingResult                                                                                                                                                                           | Written on the server by administrators and synchronized down only. `Installation.system_data_seq` tracks it |
+| Issued by the service | Invitation                                                                                                                                                                                                                                                                                        | Created and replaced by the service, read by installations                                                   |
+| Derived               | FlightResult, ParticipationStanding, TeamStanding                                                                                                                                                                                                                                                 | Written only by the calculator, received read-only, never merged                                             |
+| Backend only          | Account, AccountIdentity, AccountPublicProfile, ParticipantAccountLink, ParticipantDirectoryEntry, PublicationIdentity, PublicationProjection, PublicationParticipant, DelistRequest, Installation, InstallationActivation, SyncCursor                                                            | Never synchronized to installations                                                                          |
 
 ## Relationships
 
@@ -156,6 +157,7 @@ graph TD
     subgraph MTX[Matrix, Assignments and Re-flights]
         M[MatrixRevision]
         RD[Round]
+        RG[RoundGroup]
         MA[MatrixAssignment]
         RF[ReFlight]
         RFP[ReFlightParticipant]
@@ -226,6 +228,8 @@ graph TD
 
     C -->|has| M
     M -->|contains| RD
+    RD -->|contains| RG
+    RG -->|flown in| MA
     M -->|contains| MA
     RD -->|scheduled and credited in| MA
     CP -->|flies| MA

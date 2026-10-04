@@ -66,7 +66,7 @@
   - A drawn pilot may decline. The draw repeats until the group is filled. If it cannot be filled, this re-flight is cancelled and the director moves on to the next method.
   - A draw is not final until the director finalizes the group.
 - **`ReflyEntireGroup`:** the whole source group flies again as a copy that retains its original membership and scores as history. There is no opt-out and no draw
-- `flown_group` for a regular group is at most the scheduled round's `group_count`. A re-flight group is numbered after the regular groups, and a re-flight group is never available to a late addition
+- `flown_group` for a regular group is at most the scheduled round's `group_count`. A re-flight group is numbered after the regular groups, and a re-flight group is never available to a late addition. Its RoundGroup row is created when the group is finalized, so it can be locked like any other group
 - The discipline profile defines the group size, the normalization population, and how the result is selected. The selection rule reads each pilot's role in the re-flight. These are not generic contest fields
 - **Statuses:** `Flown` and `Scored` are not stored. They follow from the score state of the re-flight's flights
   - `MoveToGroup` and `ReflyEntireGroup` go from `Proposed` straight to `ReadyToFly`

@@ -34,7 +34,7 @@
 
 ## Invariants and Constraints
 
-- Cannot be submitted on a score marked Official or Locked
+- Cannot be submitted on a score marked Official or locked at the score, group, round, or contest level
 - At most one review request is open (`Submitted` or `UnderReview`) per score placeholder
 - `proposed_components` must be consistent with the score calculation rules for the flight
 - `proposed_components` must not include `cumulative_penalty`; only the director applies it

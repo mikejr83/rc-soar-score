@@ -4,7 +4,7 @@
 **Purpose:** A numbered round of flights within a matrix revision. Records the round's number, its group count, and its lock status. It is the anchor for round-level locks, for the seeded-draw prerequisite ("all earlier rounds complete"), and for per-round reporting. Replaces the former RoundConfig entity.  
 **Identifier:** `id` (UUIDv7)  
 **Parent entity:** MatrixRevision  
-**Child entities:** MatrixAssignment (references a round through `scheduled_round_id` and `credited_round_id`)
+**Child entities:** RoundGroup, MatrixAssignment (references a round through `scheduled_round_id` and `credited_round_id`)
 
 ## Relationships
 
@@ -40,7 +40,7 @@
 - Group capacity for late additions is derived: the largest group size of the round's original draw, `ceil(N / G)` with N the count of the round's `Original` assignments. It does not change when pilots are added later
 - A pilot with no current assignment credited to a round does not affect that round's completeness. The round counts for that pilot as not entered in the calculation
 - Completeness is derived, not stored: a round is complete when every current assignment credited to it has an official score (including official zero and retired outcomes) and no review request is open
-- While `Locked`, score entry and assignment moves for the round are rejected unless the contest director overrides with a recorded reason
+- While `Locked`, score entry and assignment moves for the round are rejected unless the contest director overrides with a recorded reason. Creating an assignment credited to a locked round is rejected too. The round's groups are locked or unlocked individually through RoundGroup; a score is locked if its own lock, its group, this round, or the contest is locked
 - A round becomes `Cancelled` when a tail redraw shrinks the contest and leaves its ordinal uncovered, or when the director drops an unflown round. Only a round with no accepted scores can be cancelled; cancellation is terminal and audited
 - A cancelled round is not current: its assignments and their placeholders are excluded from missing-score checks, round completeness, the seeded-draw prerequisite, and standings
 - `contest_id` must equal the contest of the referenced matrix revision
