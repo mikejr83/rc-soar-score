@@ -57,7 +57,7 @@ A local accountless contest has no remote account, so native tables that referen
 - [ ] Expand `Contests` to the full domain shape while keeping the current repository behaviour compatible with ticket 035.
 - [ ] Register table groups so that the server executor registers all groups and the native executor omits the backend-only group. Cover both with tests.
 - [ ] Advance `SoarScoreDatabase.schemaVersion` from 1 to 2 and implement a v1-to-v2 migration that preserves existing contest rows and supplies defaults for newly required columns. Fresh databases create the latest schema directly.
-- [ ] Implement the unit of work and the replicated-change path in the data layer.
+- [ ] Implement the unit of work and the replicated-change path in the data layer, and implement the `SyncStore` contract from ticket 035 on top of them so `soar_score_sync` (ticket 037) never touches drift directly.
 - [ ] Add repositories and mappers for the entities needed by the current core contracts, in families matching ticket 035. Keep database access in this package and enforce multi-row invariants transactionally.
 - [ ] Regenerate checked-in Drift code with `build_runner`.
 - [ ] Add schema and constraint tests, and CRUD and round-trip tests, for every table group. Include v1 upgrade and fresh-database cases.

@@ -15,6 +15,10 @@ The [Soar Score](https://soar-score.ai) RC sailplane soaring contest scoring sui
 
 - `soar_score_data` — Single data access package built on `drift`. The native offline application opens it against a local SQLite file (Dart FFI bindings to `sqlite3`); the server opens it against PostgreSQL via `drift_postgres`. The executor is chosen at database construction, so the schema, migrations and repositories are shared. Web applications do not use this package; they reach all data through the API.
 
+## Sync Layer
+
+- `soar_score_sync` — Client synchronization engine for the native offline application: outbox, pull-first sync, write-through, cursor handling and status. Depends only on `soar_score_core` (including its `SyncStore` contract) and `soar_score_api`, never on `soar_score_data`. Used only by `soar_score_contest`, and only in its native bootstrap. The server-side acceptor lives in `soar_score_core` and `soar_score_data`, with routes in `soar_score_api_handlers`. Planned in ticket 037; not yet created.
+
 ## UI Layer
 
 - [`soar_score_ui`](./soar_score_ui/README.md) — Shared Flutter UI package with reusable widgets and shared theme tokens. Used by both `soar_score_contest` and `soar_score_public` apps. No data access.
@@ -33,6 +37,8 @@ soar_score_api_handlers (shelf routing table)
 soar_score_core (domain models + business logic)
          ↓
 soar_score_data (SQLite in the native app, PostgreSQL on the server)
+
+soar_score_sync (native app only): soar_score_core + soar_score_api, storage via the SyncStore contract
 ```
 
 The core package defines repository interfaces (`ContestRepository`). `soar_score_data` implements these interfaces once, using the same domain types, over either a SQLite or a PostgreSQL executor. The API handlers layer is injected with the appropriate repository implementation, enabling the server to use PostgreSQL and the Windows embedded instance to use SQLite.

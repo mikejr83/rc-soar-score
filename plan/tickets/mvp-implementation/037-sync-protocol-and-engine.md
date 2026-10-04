@@ -58,7 +58,7 @@ The acceptor is domain logic and belongs in core behind a repository contract. T
 
 ### 3. Client sync engine (native contest application)
 
-Package placement is a decision for this ticket. Recommended: a new pure Dart package `soar_score_sync` that depends on `soar_score_core`, `soar_score_api` and `soar_score_data`, so the engine is testable without Flutter. The contest app wires it to the existing `remoteApiClient`. The embedded server (`apps/soar_score_contest/lib/server/embedded_server.dart`) stays unauthenticated and serves only the local UI; the engine, not the embedded API, talks to the remote service.
+**Package: `packages/soar_score_sync` (decided).** A new pure Dart package (no Flutter, no `dart:io` requirement beyond what `soar_score_api` already uses) that depends only on `soar_score_core` and `soar_score_api`. It does **not** depend on `soar_score_data`: the engine reaches local storage through a `SyncStore` contract defined in `soar_score_core` (outbox reads, outcome updates, cursor reads and writes, replicated-change apply, conflict and status queries), which `soar_score_data` implements over SQLite. Reasons: the engine stays testable with an in-memory fake store; drift, `sqlite3` and `drift_postgres` never enter its dependency closure; and the same contract is what the server-side acceptor uses against PostgreSQL. Only `apps/soar_score_contest` depends on the package, and only its native bootstrap imports it. `soar_score_server`, `soar_score_api_handlers`, `soar_score_ui` and the other apps must not depend on it. The shared protocol vocabulary (reason codes, outcomes, protocol version) is domain, so it lives in `soar_score_core`; `soar_score_api` holds the DTOs that carry it. The package has its own `AGENTS.md` recording these boundaries.
 
 - **Initial sync and mandatory pull-first.** On connect, pull everything after the stored cursors before pushing. Pulled changes are applied through the replicated-change path and never create new pending mutations.
 - **Outbox.** Read `Pending` mutations in dependency order (matrix revision before the scores that use it) and push per scope. Update each mutation's outcome from the response. Acknowledged items are cleared, rejected items stay with their reason, and `Skipped` items are retried after their dependency is accepted.
@@ -85,7 +85,8 @@ Package placement is a decision for this ticket. Recommended: a new pure Dart pa
 - [ ] Add the DTOs, typed errors and client methods to `soar_score_api` with tests against a mock HTTP client.
 - [ ] Add the server acceptor contract and implementation, with the full authority and conflict matrix, in core and data, and the routes in `soar_score_api_handlers`. Tests run in process with no socket, as the handler package requires.
 - [ ] Add installation registration, revocation and administration activation, including the single-open-activation rule.
-- [ ] Create the client engine package and wire it into `NativeBootstrap`. Leave `WebBootstrap` unchanged.
+- [ ] Define the `SyncStore` contract and the protocol vocabulary (reason codes, outcomes, versions) in `soar_score_core`, and implement `SyncStore` in `soar_score_data` (ticket 036 provides the unit of work and the replicated-change path it wraps).
+- [ ] Scaffold `packages/soar_score_sync` (pubspec depending only on `soar_score_core` and `soar_score_api`, `analysis_options.yaml`, `AGENTS.md` with the boundaries above, README) and confirm Melos picks it up through the `packages/*` workspace glob. Wire it into `NativeBootstrap`. Leave `WebBootstrap` unchanged.
 - [ ] Implement the outbox, pull-first sync, write-through scheduling, cursor handling and the status stream.
 - [ ] Implement full download, export and import with identifier preservation.
 - [ ] Implement protocol and schema version negotiation, including a forced-update response for old installations.
@@ -124,6 +125,7 @@ Package placement is a decision for this ticket. Recommended: a new pure Dart pa
 ## Dependencies
 
 - [035-create-data-models.md](035-create-data-models.md) and [036-create-drift-schema.md](036-create-drift-schema.md) — models, unit of work, replicated-change path and storage.
+- [006-scaffold-core-package.md](006-scaffold-core-package.md) and [014-setup-melos-workspace.md](014-setup-melos-workspace.md) — core package and the workspace that picks up the new package.
 - [008-scaffold-api-package.md](008-scaffold-api-package.md), [017-sqlite-sync-schema.md](017-sqlite-sync-schema.md) (handlers extraction) and [018-embed-soar_score_api_handlers.md](018-embed-soar_score_api_handlers.md) — API client, shared routing and the embedded server.
 - [010-setup-auth0-identity.md](010-setup-auth0-identity.md) — tokens for the remote API and JWT validation on the server.
 - Pre-implementation decisions [013](../pre-implementation/013-sync-score-edit-conflict.md) to [016](../pre-implementation/016-sync-config-contention.md); if any is reopened, update the affected section here first.
