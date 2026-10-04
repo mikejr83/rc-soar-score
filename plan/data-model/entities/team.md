@@ -14,19 +14,18 @@
 
 ## Fields/Properties
 
-| Field          | Type    | Required | Default | Description                                 |
-| -------------- | ------- | -------- | ------- | ------------------------------------------- |
-| `id`           | UUIDv7  | Yes      | —       | Primary key                                 |
-| `contest_id`   | UUIDv7  | Yes      | —       | Foreign key to Contest                      |
-| `name`         | String  | Yes      | —       | Team name (unique within contest)           |
-| `pilot_totals` | Integer | No       | —       | Number of pilot totals used for team result |
-| `revision`     | Integer | Yes      | 0       | Revision counter for optimistic locking     |
+| Field        | Type    | Required | Default | Description                             |
+| ------------ | ------- | -------- | ------- | --------------------------------------- |
+| `id`         | UUIDv7  | Yes      | —       | Primary key                             |
+| `contest_id` | UUIDv7  | Yes      | —       | Foreign key to Contest                  |
+| `name`       | String  | Yes      | —       | Team name (unique within contest)       |
+| `revision`   | Integer | Yes      | 0       | Revision counter for optimistic locking |
 
 ## Invariants and Constraints
 
 - Team name must be unique within a contest
 - A team can only have one membership per participation link
-- pilot_totals must be within [1, team size] range
+- The number of pilot totals counted for the team result is the contest option `team_pilot_count`, not a field of the team. A team with fewer pilots counts all of them
 - A pilot can only be on one team per contest
 
 ## Lifecycle

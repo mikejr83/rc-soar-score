@@ -142,10 +142,9 @@ erDiagram
     }
 
     TEAM {
-        uuid id           PK
-        uuid contest_id   FK
+        uuid id         PK
+        uuid contest_id FK
         text name
-        int  pilot_totals
         int  revision
     }
 
@@ -187,10 +186,10 @@ erDiagram
         uuid      default_landing_table_id FK "optional"
         jsonb     default_options             "optional; core option defaults"
         text      status
-        text      superseded_by
-        text      created_by
+        uuid      superseded_by            FK "optional"
+        uuid      created_by               FK
         timestamp created_at
-        text      updated_by
+        uuid      updated_by               FK "optional"
         timestamp updated_at
     }
 
@@ -201,6 +200,7 @@ erDiagram
         text        field_type
         text        name
         text        description
+        text        unit                     "optional"
         bool        required
         string      default_value
         string      options
@@ -216,6 +216,9 @@ erDiagram
         text        field_type
         text        name
         text        description
+        text        field_kind               "input, status_flag, derived"
+        text        unit                     "optional"
+        int         precision                "optional"
         bool        required
         string      default_value
         string      options
@@ -811,6 +814,8 @@ erDiagram
     DISCIPLINE_PROFILE ||--o{ CONTEST_CONFIGURATION_REVISION : "selected by"
     CONTEST_CONFIGURATION_PRESET |o--o{ CONTEST_CONFIGURATION_REVISION : "source preset"
     LANDING_TABLE |o--o{ CONTEST_CONFIGURATION_PRESET : "selected by"
+    DISCIPLINE_PROFILE |o--o| DISCIPLINE_PROFILE : "superseded by"
+    ACCOUNT ||--o{ DISCIPLINE_PROFILE : "authored"
     DISCIPLINE_PROFILE ||--o{ DISCIPLINE_CONFIG_FIELD : "defines"
     DISCIPLINE_PROFILE ||--o{ DISCIPLINE_SCORE_FIELD : "defines"
     DISCIPLINE_PROFILE ||--o{ DISCIPLINE_VALIDATION : "defines"

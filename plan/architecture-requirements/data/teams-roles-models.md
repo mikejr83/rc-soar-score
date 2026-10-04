@@ -10,7 +10,7 @@ Role assignment is stored on the contest participation link. The display name ma
 
 A team belongs to a contest and has a unique contest-scoped name. Team membership joins participation links to teams. Pilot membership is fixed for a matrix revision and changes require a new draw or explicit matrix revision. Non-flier membership may change without redrawing and controls which pilots the helper may score for.
 
-The team configuration stores the number of pilot totals used for the team result. Team totals are derived from eligible pilot contest totals, ordered according to the contest's configured rules; they are never entered as source data.
+The number of pilot totals used for the team result is a contest option, the same for every team. Team totals are derived from eligible pilot contest totals, ordered according to the contest's configured rules; they are never entered as source data.
 
 ## Models
 

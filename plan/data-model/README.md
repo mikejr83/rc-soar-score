@@ -29,7 +29,7 @@ Canonical documentation for the Soar Score data model. This folder is the source
 | Entity           | File                                                             | Source Requirement                                                               | Purpose                                                                 |
 | ---------------- | ---------------------------------------------------------------- | -------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
 | Role             | [entities/role.md](entities/role.md)                             | [teams-roles-models.md](../architecture-requirements/data/teams-roles-models.md) | Per-participant role (Pilot vs NonFlier) with system and contest scopes |
-| Team             | [entities/team.md](entities/team.md)                             | [teams-roles-models.md](../architecture-requirements/data/teams-roles-models.md) | Contest-scoped team with pilot-total configuration                      |
+| Team             | [entities/team.md](entities/team.md)                             | [teams-roles-models.md](../architecture-requirements/data/teams-roles-models.md) | Contest-scoped team: a name and its members                             |
 | TeamMembership   | [entities/team_membership.md](entities/team_membership.md)       | [teams-roles-models.md](../architecture-requirements/data/teams-roles-models.md) | Link between team and participation with team role                      |
 | ModelCatalog     | [entities/model_catalog.md](entities/model_catalog.md)           | [teams-roles-models.md](../architecture-requirements/data/teams-roles-models.md) | Reusable model name/manufacturer catalog                                |
 | ContestModelLink | [entities/contest_model_link.md](entities/contest_model_link.md) | [teams-roles-models.md](../architecture-requirements/data/teams-roles-models.md) | Contest-snapshot link from participation to model                       |
@@ -289,6 +289,6 @@ Based on the architecture requirements, this data model is implemented as:
 - **Storage backend (clients):** IndexedDB (PWA) or embedded database (desktop)
 - **Identifiers:** UUIDv7 (time-ordered, collision-resistant). The one exception is `ContestParticipation.scoring_uuid`, a random UUIDv4, because it must not be sequential
 - **Keys:** Surrogate UUIDv7 primary keys with composite unique constraints on natural business keys and idempotency keys
-- **Timestamps:** All stored in UTC
-- **Strings:** ISO 8601 timestamps stored as strings
-- **Enumerated types:** PostgreSQL `ENUM` with explicit name and values
+- **Timestamps:** Stored in UTC as timestamps with a time zone, and written as ISO 8601 strings in JSON and on the wire. A contest also keeps its IANA `timezone` for display
+- **Schema portability:** The server schema is kept to portable relational features so it does not depend on one database product, as the architecture requires. PostgreSQL is the server target
+- **Enumerated types:** Stored as text constrained to the listed values (check constraints), so the same values work on the server and in the embedded SQLite and IndexedDB stores

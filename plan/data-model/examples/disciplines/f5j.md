@@ -16,7 +16,7 @@ working time, perform a precision landing, and incur launch height penalties.
   "default_landing_table_id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2b02",
   "status": "published",
   "superseded_by": null,
-  "created_by": "admin@example.com",
+  "created_by": "019a3c40-0000-7000-8000-000000000001",
   "created_at": "2026-09-15T00:00:00Z",
   "updated_by": null,
   "updated_at": null
