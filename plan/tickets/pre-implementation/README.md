@@ -43,21 +43,21 @@ Outstanding questions that need to be answered before implementation begins. Eac
 
 ### Access / Permissions
 
-| Ticket                                            | Title                                                  | Priority |
-| ------------------------------------------------- | ------------------------------------------------------ | -------- |
-| [017](017-access-helper-role-capabilities.md)     | Helper Role Capabilities (Ready)                       | High     |
-| [018](018-access-pilot-helper-score-conflict.md)  | Pilot Self-Scoring vs. Helper Scoring Conflict (Ready) | Medium   |
-| [019](019-access-public-site-draft-visibility.md) | Public Site Visibility of In-Progress Scores           | Medium   |
-| [020](020-access-director-penalty-authority.md)   | Director Penalty and Disqualification Authority        | Low      |
+| Ticket                                            | Title                                                     | Priority |
+| ------------------------------------------------- | --------------------------------------------------------- | -------- |
+| [017](017-access-helper-role-capabilities.md)     | Helper Role Capabilities (Ready)                          | High     |
+| [018](018-access-pilot-helper-score-conflict.md)  | Pilot Self-Scoring vs. Helper Scoring Conflict (Ready)    | Medium   |
+| [019](019-access-public-site-draft-visibility.md) | Public Site Visibility of In-Progress Scores              | Medium   |
+| [020](020-access-director-penalty-authority.md)   | Director Penalty and Disqualification Authority (Decided) | Low      |
 
 ### Contest State Machine
 
-| Ticket                                       | Title                                 | Priority |
-| -------------------------------------------- | ------------------------------------- | -------- |
-| [021](021-state-mid-contest-redraw.md)       | Mid-Contest Draw Regeneration (Ready) | High     |
-| [022](022-state-publish-unpublish-rules.md)  | Publish/Unpublish Rules for Results   | Medium   |
-| [023](023-state-contest-ended-reversible.md) | Is "Contest Ended" Reversible?        | Low      |
-| [024](024-state-round-completion-gate.md)    | Round Completion Gate                 | Medium   |
+| Ticket                                       | Title                                         | Priority |
+| -------------------------------------------- | --------------------------------------------- | -------- |
+| [021](021-state-mid-contest-redraw.md)       | Mid-Contest Draw Regeneration (Ready)         | High     |
+| [022](022-state-publish-unpublish-rules.md)  | Publish/Unpublish Rules for Results (Decided) | Medium   |
+| [023](023-state-contest-ended-reversible.md) | Is "Contest Ended" Reversible? (Decided)      | Low      |
+| [024](024-state-round-completion-gate.md)    | Round Completion Gate (Decided)               | Medium   |
 
 ### Matrix / Draw
 
@@ -67,7 +67,7 @@ Outstanding questions that need to be answered before implementation begins. Eac
 | [026](026-matrix-seeded-round-order.md)          | Seeded Round Order (Leaders First vs. Last) (Ready) | High     |
 | [027](027-matrix-seeded-team-protection.md)      | Seeded + Team Protection                            | Medium   |
 | [028](028-matrix-back-to-back-constraint.md)     | Back-to-Back Constraint                             | Low      |
-| [029](029-matrix-lane-count-source.md)           | Lane Count (Configured vs. Derived)                 | Low      |
+| [029](029-matrix-lane-count-source.md)           | Lane Count (Configured vs. Derived) (Decided)       | Low      |
 | [030](030-matrix-fairness-score-scale.md)        | Fairness Score 0–100% Scale Anchor                  | Low      |
 
 ### UI / UX
@@ -82,7 +82,7 @@ Outstanding questions that need to be answered before implementation begins. Eac
 
 | Ticket                                            | Title                                                          | Priority |
 | ------------------------------------------------- | -------------------------------------------------------------- | -------- |
-| [034](034-business-reflight-decline-limits.md)    | Re-Flight Decline Limits                                       | Medium   |
+| [034](034-business-reflight-decline-limits.md)    | Re-Flight Decline Limits (Decided)                             | Medium   |
 | [035](035-business-reflight-better-of-scoring.md) | Re-Flight "Better Of" Scoring                                  | Medium   |
 | [036](036-business-out-of-bounds-measurement.md)  | Out-of-Bounds Landing Distance Measurement (Ready)             | Low      |
 | [037](037-business-no-altitude-recorded.md)       | F5J "No Altitude Recorded" — Purpose and Drop Behavior (Ready) | Low      |

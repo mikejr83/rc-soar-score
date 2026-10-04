@@ -1,28 +1,28 @@
 # Open Pre-Implementation Tickets — Triage Against the Data Model
 
-This triage covers the 13 pre-implementation tickets still marked `Open`. It asks one question of each: does it block the domain models (mvp 035) or the Drift schema (mvp 036), or can it be settled later? It also records where the data model and architecture documents already answer the ticket.
+This triage covers the 13 pre-implementation tickets that were `Open`. It asks one question of each: does it block the domain models (mvp 035) or the Drift schema (mvp 036), or can it be settled later? It also records where the data model and architecture documents already answer the ticket.
 
-These are recommendations. No ticket status has been changed. Moving a ticket to `Decided` needs the owner's call.
+These started as recommendations. The owner has since moved tickets 020, 022, 023, 024, 029 and 034 to `Decided`, each with its answers recorded in the ticket. The rest stay `Open`.
 
 ## Summary
 
-| Ticket                                            | Blocks 035/036? | Recommendation                                                                                  |
-| ------------------------------------------------- | --------------- | ----------------------------------------------------------------------------------------------- |
-| [019](019-access-public-site-draft-visibility.md) | No              | Close Q1 to Q3 from the model; keep Q4 (in-progress group display) as a UI decision             |
-| [020](020-access-director-penalty-authority.md)   | **Possibly**    | Needs one decision: is disqualification a feature? It would add an outcome value                |
-| [022](022-state-publish-unpublish-rules.md)       | No              | Close as answered: there is no unpublish                                                        |
-| [023](023-state-contest-ended-reversible.md)      | No              | Close as answered: not reversible in the first release                                          |
-| [024](024-state-round-completion-gate.md)         | No              | Close as answered: completeness is derived, the director locks rounds                           |
-| [027](027-matrix-seeded-team-protection.md)       | No              | Draw-engine decision; defer to the draw work                                                    |
-| [028](028-matrix-back-to-back-constraint.md)      | No              | Draw-engine decision; defer. Would add a contest option only if adopted                         |
-| [029](029-matrix-lane-count-source.md)            | No              | Close as answered: lane count is derived from group size                                        |
-| [030](030-matrix-fairness-score-scale.md)         | No              | Draw-engine decision; defer                                                                     |
-| [032](032-ui-offline-capable-pages.md)            | No              | UI decision; ticket 037 and the status area (023) need it later                                 |
-| [033](033-ui-score-entry-responsive.md)           | No              | UI decision; defer                                                                              |
-| [034](034-business-reflight-decline-limits.md)    | No              | Answered by the re-flight model: the draw repeats until filled, then the re-flight is cancelled |
-| [035](035-business-reflight-better-of-scoring.md) | No              | Business-rule question; the model was left alone by choice                                      |
+| Ticket                                            | Blocks 035/036? | Recommendation                                                                            |
+| ------------------------------------------------- | --------------- | ----------------------------------------------------------------------------------------- |
+| [019](019-access-public-site-draft-visibility.md) | No              | Close Q1 to Q3 from the model; keep Q4 (in-progress group display) as a UI decision       |
+| [020](020-access-director-penalty-authority.md)   | No (decided)    | **Decided:** disqualification is not a first-release feature (Option A). No schema impact |
+| [022](022-state-publish-unpublish-rules.md)       | No              | **Decided** (see the ticket)                                                              |
+| [023](023-state-contest-ended-reversible.md)      | No              | **Decided** (see the ticket)                                                              |
+| [024](024-state-round-completion-gate.md)         | No              | **Decided** (see the ticket)                                                              |
+| [027](027-matrix-seeded-team-protection.md)       | No              | Draw-engine decision; defer to the draw work                                              |
+| [028](028-matrix-back-to-back-constraint.md)      | No              | Draw-engine decision; defer. Would add a contest option only if adopted                   |
+| [029](029-matrix-lane-count-source.md)            | No              | **Decided** (see the ticket)                                                              |
+| [030](030-matrix-fairness-score-scale.md)         | No              | Draw-engine decision; defer                                                               |
+| [032](032-ui-offline-capable-pages.md)            | No              | UI decision; ticket 037 and the status area (023) need it later                           |
+| [033](033-ui-score-entry-responsive.md)           | No              | UI decision; defer                                                                        |
+| [034](034-business-reflight-decline-limits.md)    | No              | **Decided** (see the ticket)                                                              |
+| [035](035-business-reflight-better-of-scoring.md) | No              | Business-rule question; the model was left alone by choice                                |
 
-Only 020 can affect a stored field, and only if disqualification is added. Everything else can proceed in parallel with 035 and 036.
+No open ticket now affects a stored field. Ticket 020 was the only candidate and was decided without a schema change. Everything else can proceed in parallel with 035 and 036.
 
 ## Detail
 
@@ -36,9 +36,8 @@ Only 020 can affect a stored field, and only if disqualification is added. Every
 ### 020 — Director penalty and disqualification authority
 
 - **Answered.** [scores-and-results.md](../../architecture-requirements/data/scores-and-results.md): the cumulative penalty is set only by the contest director or a local operator acting under the director's authority. Participants and helpers see it read-only, and the service rejects a participant submission or review proposal that sets it. It is unilateral, with no approval workflow. It can be applied through an official revision, so it can follow a pilot's confirmation. The audit trail records it. The flight penalty is a separate score component entered with the score.
-- **Not answered.** No requirement or entity mentions disqualification. Ticket 012 decided the outcome values (`NOT_ENTERED`, `ZERO`, `RETIRED`) with no disqualified value.
-- **Decision needed before 035 reaches the scores family.** Either disqualification is represented as an official zero with an audited reason, which needs no schema change, or it is a distinct outcome, which does.
-- **Also open.** Whether the pilot is notified of a penalty. The model records it in the score breakdown and audit events and says nothing about notification. This is a UI and notification question.
+- **Disqualification.** No requirement or entity mentioned it, and ticket 012 gave the outcome values no disqualified value. **Decided (Option A, 2026-10-04): not a first-release feature.** A voided flight is an official zero with a recorded reason. No schema change. See the ticket for the later-revisit options.
+- **Still open (not blocking).** Whether the pilot is notified of a penalty. The model records it in the score breakdown and audit events and says nothing about notification. This is a UI and notification question.
 
 ### 022 — Publish and unpublish rules
 
@@ -74,7 +73,7 @@ Only 020 can affect a stored field, and only if disqualification is added. Every
 
 ## Suggested next steps
 
-1. Owner decides ticket 020's disqualification question.
-2. Mark 022, 023, 024 and 029 as decided, using the summaries above. Mark 034 as decided too if the cancel-when-exhausted rule is acceptable.
+1. ~~Owner decides ticket 020 disqualification question.~~ Done: Option A.
+2. ~~Mark 022, 023, 024, 029 and 034 as decided.~~ Done.
 3. Leave 027, 028, 030, 032, 033 and 035 open for the draw, UI and business-rule work.
 4. Resolve 019 Q4 when the publishing work starts.
