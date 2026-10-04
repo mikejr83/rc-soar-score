@@ -10,4 +10,7 @@ export 'database.dart';
 export 'migrate.dart';
 export 'postgres_config.dart';
 export 'repositories/repository.dart';
+export 'schema/database_profile.dart';
+export 'schema/table_group.dart';
+export 'schema/table_groups.dart';
 export 'repositories/contest_repository.dart';

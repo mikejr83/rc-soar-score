@@ -1,5 +1,7 @@
 import 'package:drift/drift.dart';
 
+import 'schema/enum_values.dart';
+
 /// Contest entity table.
 ///
 /// One column per field of `soar_score_core`'s `Contest`, so a saved contest
@@ -35,13 +37,15 @@ class Contests extends Table {
   TextColumn get ownerAccountId => text().nullable()();
 
   /// `Created`, `Configuring`, `Ready`, `Running` or `Completed`.
-  TextColumn get lifecycleState => text()();
+  TextColumn get lifecycleState =>
+      text().check(lifecycleState.isIn(lifecycleStateValues))();
 
   /// `Closed` or `Open`.
-  TextColumn get scoringAccess => text()();
+  TextColumn get scoringAccess =>
+      text().check(scoringAccess.isIn(scoringAccessValues))();
 
   /// `Unlocked` or `Locked`.
-  TextColumn get adminLock => text()();
+  TextColumn get adminLock => text().check(adminLock.isIn(adminLockValues))();
 
   IntColumn get resultsHiddenThroughRound => integer().nullable()();
   TextColumn get resultsHiddenAt => text().nullable()();

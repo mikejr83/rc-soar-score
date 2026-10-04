@@ -8,7 +8,10 @@ void main() {
     late SoarScoreDatabase database;
 
     setUp(() {
-      database = SoarScoreDatabase(NativeDatabase.memory());
+      database = SoarScoreDatabase(
+        NativeDatabase.memory(),
+        profile: DatabaseProfile.native,
+      );
     });
 
     tearDown(() async {
