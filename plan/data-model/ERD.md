@@ -11,8 +11,8 @@ erDiagram
         text        last_name
         text        email              "nullable, lowercase"
         bool        email_verified
-        text        kind               "registered, guest, local, deleted"
-        text        status             "active, archived"
+        text        kind               "enum, registered, guest, local, deleted"
+        text        status             "enum, active, archived"
         timestamptz archived_at        "optional"
         bool        is_system_admin
         timestamptz created_at
@@ -46,9 +46,9 @@ erDiagram
         text        state
         text        country
         uuid        owner_account_id             FK "optional"
-        text        lifecycle_state
-        text        scoring_access
-        text        admin_lock
+        text        lifecycle_state    "enum"
+        text        scoring_access    "enum"
+        text        admin_lock    "enum"
         bool        local_archive
         int         revision
         int         results_hidden_through_round    "optional"
@@ -109,8 +109,8 @@ erDiagram
         uuid        id                     PK
         uuid        participant_profile_id FK
         uuid        account_id             FK
-        text        status                    "Candidate, Confirmed, Ended"
-        text        origin                    "EmailMatch, DirectoryPull, InvitationRedemption"
+        text        status                    "enum, Candidate, Confirmed, Ended"
+        text        origin                    "enum, EmailMatch, DirectoryPull, InvitationRedemption"
         timestamptz created_at
         timestamptz confirmed_at              "optional"
         timestamptz ended_at                  "optional"
@@ -124,7 +124,7 @@ erDiagram
         string classification            "pilots only, nullable"
         uuid   role_id                FK
         text   role_name                 "snapshot at assignment"
-        text   role_type                 "Pilot, NonFlier"
+        text   role_type                 "enum, Pilot, NonFlier"
         int    participant_number        "one sequence for all roles; nullable until the first draw"
         uuid   scoring_uuid              "random UUIDv4"
         int    retired_at_round          "optional; pilots only"
@@ -136,7 +136,7 @@ erDiagram
         uuid        id               PK
         uuid        owner_account_id FK "optional; null for a system role"
         text        display_name
-        text        type                "Pilot, NonFlier"
+        text        type                "enum, Pilot, NonFlier"
         timestamptz archived_at         "optional"
         int         revision
     }
@@ -178,14 +178,14 @@ erDiagram
     %% Discipline / Config
     DISCIPLINE_PROFILE {
         uuid      id                       PK
-        text      type
+        text      type    "enum"
         int       version
         text      name
         text      description
-        text      category
+        text      category    "enum"
         uuid      default_landing_table_id FK "optional"
         jsonb     default_options             "optional; core option defaults"
-        text      status
+        text      status    "enum"
         uuid      superseded_by            FK "optional"
         uuid      created_by               FK
         timestamp created_at
@@ -197,7 +197,7 @@ erDiagram
         uuid        id                    PK
         uuid        discipline_profile_id FK
         text        field_key
-        text        field_type
+        text        field_type    "enum"
         text        name
         text        description
         text        unit                     "optional"
@@ -213,10 +213,10 @@ erDiagram
         uuid        id                    PK
         uuid        discipline_profile_id FK
         text        field_key
-        text        field_type
+        text        field_type    "enum"
         text        name
         text        description
-        text        field_kind               "input, status_flag, derived"
+        text        field_kind               "enum, input, status_flag, derived"
         text        unit                     "optional"
         int         precision                "optional"
         bool        required
@@ -245,7 +245,7 @@ erDiagram
         uuid        id                    PK
         uuid        discipline_profile_id FK
         text        formula_key
-        text        formula_type
+        text        formula_type    "enum"
         text        description
         text        formula_text
         string      inputs
@@ -260,7 +260,7 @@ erDiagram
         uuid        id                    PK
         uuid        discipline_profile_id FK
         text        rule_key
-        text        rule_type
+        text        rule_type    "enum"
         text        condition
         text        effect
         string      applies_to
@@ -277,7 +277,7 @@ erDiagram
         uuid        id                    PK
         uuid        owner_account_id      FK "optional; null for a system table"
         text        name
-        text        input_unit               "meters, feet, points"
+        text        input_unit               "enum, meters, feet, points"
         timestamptz created_at
     }
 
@@ -314,13 +314,13 @@ erDiagram
         int         group
         int         lane                           "optional; null when lane mode is None"
         int         flight_sequence
-        text        assignment_type                "Original, Moved, Reflight, LateAdd"
+        text        assignment_type                "enum, Original, Moved, Reflight, LateAdd"
         uuid        source_assignment_id        FK "optional"
         uuid        re_flight_id                FK "optional"
         uuid        superseded_by_assignment_id FK "optional, write-once"
         uuid        actor_id                    FK
         text        reason
-        text        existing_score_handling        "None, Reset"
+        text        existing_score_handling        "enum, None, Reset"
         int         reset_score_revision           "optional"
         timestamptz created_at
     }
@@ -332,7 +332,7 @@ erDiagram
         uuid        previous_revision_id FK "optional"
         int         first_round
         int         last_round
-        text        draw_mode
+        text        draw_mode    "enum"
         bigint      random_seed
         text        algorithm_version
         jsonb       draw_config
@@ -351,7 +351,7 @@ erDiagram
         uuid matrix_revision_id     FK
         int  ordinal
         int  group_count
-        text status
+        text status    "enum"
         int  revision
         uuid superseded_by_round_id FK "optional, write-once"
     }
@@ -361,7 +361,7 @@ erDiagram
         uuid        contest_id   FK
         uuid        round_id     FK
         int         group_number
-        text        status          "Open, Locked"
+        text        status          "enum, Open, Locked"
         uuid        locked_by    FK "optional"
         timestamptz locked_at       "optional"
         int         revision
@@ -373,10 +373,10 @@ erDiagram
         uuid        credited_round_id        FK
         uuid        source_round_id          FK
         int         source_group
-        text        type                        "MoveToGroup, RandomDraw, ReflyEntireGroup"
+        text        type                        "enum, MoveToGroup, RandomDraw, ReflyEntireGroup"
         int         sequence                    "per source group"
         uuid        previous_reflight_id     FK "optional"
-        text        status                      "Proposed, DrawPending, AwaitingResponses, ReadyToFly, Finalized, Cancelled"
+        text        status                      "enum, Proposed, DrawPending, AwaitingResponses, ReadyToFly, Finalized, Cancelled"
         text        reason
         uuid        scheduled_round_id       FK
         int         flown_group                 "may exceed the round group_count"
@@ -404,13 +404,13 @@ erDiagram
         uuid        contest_id               FK
         uuid        re_flight_id             FK
         uuid        contest_participation_id FK
-        text        role                        "Awarded, Drawn, GroupMember, Candidate, Excluded"
-        text        excluded_reason             "optional"
+        text        role                        "enum, Awarded, Drawn, GroupMember, Candidate, Excluded"
+        text        excluded_reason             "enum, optional"
         int         draw_position               "optional"
-        text        response                    "NotRequired, Pending, Accepted, Declined"
-        text        responded_by                "optional; Participant or Director"
+        text        response                    "enum, NotRequired, Pending, Accepted, Declined"
+        text        responded_by                "enum, optional; Participant or Director"
         timestamptz responded_at                "optional"
-        text        notification_state          "NotRequired, Pending, Delivered, Failed"
+        text        notification_state          "enum, NotRequired, Pending, Delivered, Failed"
         timestamptz notified_at                 "optional"
         timestamptz acknowledged_at             "optional"
         uuid        assignment_id            FK "optional"
@@ -423,7 +423,7 @@ erDiagram
         uuid        contest_id               FK
         uuid        contest_participation_id FK
         uuid        assignment_id            FK
-        text        state
+        text        state    "enum"
         int         score_revision
         uuid        locked_by                FK "optional"
         timestamptz locked_at                   "optional"
@@ -438,7 +438,7 @@ erDiagram
         uuid  matrix_revision_id   FK
         jsonb raw_components
         uuid  actor_id             FK
-        text  authority
+        text  authority    "enum"
         uuid  invitation_id        FK "optional"
         text  source_device
         text  client_mutation_id
@@ -464,7 +464,7 @@ erDiagram
         uuid        official_score_id        FK "computed from"
         uuid        contest_participation_id FK
         uuid        credited_round_id        FK
-        text        outcome                     "Scored, Zero"
+        text        outcome                     "enum, Scored, Zero"
         decimal     raw_points                  "discipline raw score"
         decimal     landing_points              "optional"
         decimal     flight_penalty_points       "optional; discipline plus entered flight penalty"
@@ -529,10 +529,10 @@ erDiagram
         uuid        id             PK
         uuid        publication_id FK
         uuid        requested_by   FK
-        text        trigger           "owner_request, account_closure"
+        text        trigger           "enum, owner_request, account_closure"
         text        reason            "optional"
         timestamptz requested_at
-        text        state             "pending, approved, denied, withdrawn"
+        text        state             "enum, pending, approved, denied, withdrawn"
         uuid        decided_by     FK "optional"
         timestamptz decided_at        "optional"
         text        decision_note     "optional"
@@ -542,9 +542,9 @@ erDiagram
         uuid        id                           PK
         uuid        contest_id                   FK "optional; null once the contest is deleted"
         uuid        owner_public_profile_id      FK "optional; null while unclaimed"
-        text        claim_status                    "Unclaimed, Claimed"
+        text        claim_status                    "enum, Unclaimed, Claimed"
         text        verification_email              "optional"
-        text        visibility                      "Unlisted, Public, Delisted"
+        text        visibility                      "enum, Unlisted, Public, Delisted"
         timestamptz published_at                    "optional"
         uuid        current_projection_id        FK "optional"
         int         results_hidden_through_round    "optional"
@@ -559,7 +559,7 @@ erDiagram
         int         contest_revision            "source number; not an FK"
         int         config_revision             "source number; not an FK"
         int         matrix_revision             "source number; not an FK"
-        text        discipline_type
+        text        discipline_type    "enum"
         int         discipline_rules_version
         text        calculation_version
         jsonb       contest_identity
@@ -579,7 +579,7 @@ erDiagram
         uuid        id               PK
         uuid        owner_account_id FK "the owning director"
         text        label
-        text        platform            "Web, Windows, Other"
+        text        platform            "enum, Web, Windows, Other"
         timestamptz created_at
         timestamptz last_seen_at        "optional"
         timestamptz last_sync_at        "optional"
@@ -592,7 +592,7 @@ erDiagram
         uuid        contest_id      FK
         uuid        installation_id FK
         uuid        activated_by    FK
-        text        kind               "Initial, Replacement, Reclaim"
+        text        kind               "enum, Initial, Replacement, Reclaim"
         timestamptz activated_at
         timestamptz ended_at           "optional; one open row per contest"
     }
@@ -617,14 +617,14 @@ erDiagram
         int         base_revision             "optional"
         text        client_mutation_id        "unique per scope"
         uuid        actor_id               FK "optional"
-        text        authority "Director, Participant, Helper, System, Administrator"
+        text        authority "enum, Director, Participant, Helper, System, Administrator"
         uuid        source_installation_id FK "optional"
         text        source_device             "optional"
         timestamptz client_time
         timestamptz server_acceptance_time    "optional"
         timestamptz server_rejection_time     "optional"
         jsonb       payload
-        text        outcome                   "Pending, Accepted, Rejected, Conflict, Skipped"
+        text        outcome                   "enum, Pending, Accepted, Rejected, Conflict, Skipped"
         text        reason_code               "optional"
         text        error_message             "optional"
         uuid        depends_on_mutation_id FK "optional"
@@ -641,8 +641,8 @@ erDiagram
         text        reason_code
         text        reason                   "optional"
         bool        requires_action          "false for a silent record"
-        text        resolution               "Pending, Automatic, Manual"
-        text        resolution_choice        "optional"
+        text        resolution               "enum, Pending, Automatic, Manual"
+        text        resolution_choice        "enum, optional"
         timestamptz created_at
         timestamptz resolved_at              "optional"
         uuid        resolved_by           FK "optional"
@@ -654,7 +654,7 @@ erDiagram
         uuid        owner_account_id FK "director data scope"
         text        entity_type
         uuid        entity_id
-        text        status              "Pending, Acknowledged"
+        text        status              "enum, Pending, Acknowledged"
         timestamptz deleted_at
         timestamptz acknowledged_at     "optional"
         timestamptz purge_after         "acknowledged plus 90 days"
@@ -665,11 +665,11 @@ erDiagram
         uuid        id                       PK
         uuid        contest_id               FK
         uuid        contest_participation_id FK
-        text        type                        "MagicURL, QRCode"
+        text        type                        "enum, MagicURL, QRCode"
         text        protected_credential
         int         invitation_revision         "increases per participation"
-        text        state                       "Active, Replaced, Revoked, Expired"
-        text        audience                    "Pilot, Helper"
+        text        state                       "enum, Active, Replaced, Revoked, Expired"
+        text        audience                    "enum, Pilot, Helper"
         uuid        issued_by                FK
         timestamptz issued_at
         timestamptz expires_at                  "optional; null for QR tokens"
@@ -691,7 +691,7 @@ erDiagram
         uuid        requester_id         FK
         int         base_score_revision
         timestamptz requested_at
-        text        state                   "Submitted, UnderReview, Approved, Rejected, Superseded"
+        text        state                   "enum, Submitted, UnderReview, Approved, Rejected, Superseded"
         uuid        decision_actor_id    FK "optional"
         timestamptz decision_time           "optional"
         text        decision_message        "optional"
@@ -706,9 +706,9 @@ erDiagram
         uuid        publication_id        "optional; not an FK"
         text        entity_type
         uuid        entity_id
-        text        action
+        text        action    "enum"
         uuid        actor_id           FK "optional"
-        text        authority "Director, Participant, Helper, System, Administrator"
+        text        authority "enum, Director, Participant, Helper, System, Administrator"
         uuid        installation_id    FK "optional"
         text        device                "optional"
         int         base_revision         "optional"
@@ -716,7 +716,7 @@ erDiagram
         timestamptz server_timestamp
         timestamptz client_timestamp      "optional; audit only"
         text        reason                "optional"
-        text        outcome               "Success, Rejected, Conflict"
+        text        outcome               "enum, Success, Rejected, Conflict"
     }
 
     %% Relationships
