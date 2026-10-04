@@ -26,7 +26,7 @@
 | `matrix_revision_id`   | UUIDv7 | Yes          | -       | FK MatrixRevision the client held when the entry was accepted                                                                                                            |
 | `raw_components`       | JSON   | Yes          | -       | Raw submitted components preserving original units                                                                                                                       |
 | `actor_id`             | UUIDv7 | Yes          | -       | FK; identifies person/authority who submitted                                                                                                                            |
-| `authority`            | string | Yes          | -       | Organization/role of submitter                                                                                                                                           |
+| `authority`            | enum   | Yes          | -       | `Director`, `Participant`, `Helper`, `System`, or `Administrator`. A local operator acts as `Director`                                                                   |
 | `invitation_id`        | UUIDv7 | No           | -       | FK Invitation under which the entry was submitted                                                                                                                        |
 | `source_device`        | string | No           | -       | Device/browser used                                                                                                                                                      |
 | `client_mutation_id`   | string | Yes (unique) | -       | Client-side dedup key                                                                                                                                                    |
@@ -39,6 +39,9 @@
 - Score revision history kept at placeholder level, not per attempt
 - Drafts/queued submissions are not accepted data: don't affect lifecycle/rankings/publication
 - client_mutation_id must be unique for deduplication
+- `raw_components` may include `flight_penalty`, a nullable non-negative integer, on an attempt from any authority. It is deducted from the discipline raw score before the group score
+- `raw_components` may include `cumulative_penalty` only on an attempt made under director authority (the director or a local operator). The service rejects a participant-authority attempt that includes it
+- A landing selection in `raw_components` is stored as the selected LandingResult id. Landing tables never change, so the id fixes the key, the points, and the table the calculation used
 - `contest_id` must equal the contest of the referenced placeholder, configuration revision, and matrix revision
 - Contest configuration changes are retroactive: `config_revision_id` records what the client saw at entry time and does not pin how the score is later calculated
 

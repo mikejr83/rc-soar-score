@@ -51,13 +51,13 @@ The architectural and schema design decisions are resolved as follows:
   - **Keying and uniqueness**: Surrogate UUIDv7 primary keys on all tables/stores with composite unique constraint indexes matching natural business keys (e.g., `(contest_id, round_number, group_number, lane_number)` and `(contest_id, client_mutation_id)` for idempotency).
 
 - **Participant profile directory and sharing scope**:
-  - Directors maintain private/local participant directories by default.
-  - Participant account holders can opt into a shared profile directory.
-  - Contest Directors can search and auto-complete pilot profiles across the shared directory by Name, FAI/AMA/National Organization ID, and Email address.
+  - Directors maintain their own private participant profiles, which are never shared with other directors.
+  - Participant account holders can opt into a participant directory of basic details they offer to directors.
+  - Contest Directors can search listed directory entries by Name, FAI/AMA/National Organization ID, and Email address, and copy one into a profile of their own.
   - Email addresses used for director auto-completion remain private and are strictly excluded from public projections.
 
 - **Participant retirement representation**:
-  - Modeled as a **retirement overlay** (`status = Retired`, `retired_at_round = N`) on the contest participation link.
+  - Modeled as a **retirement overlay** (`retired_at_round = N`; a pilot with no value has not retired) on the contest participation link.
   - The scoring engine dynamically evaluates unflown rounds $R \ge N$ as zero with a `Retired` status without preemptively materializing future dummy score records, preserving clean matrix redraws and schedule changes. Free-text retirement reasons are not tracked.
 
 - **Tie-breaking rules and calculation pipeline**:
@@ -73,11 +73,11 @@ The architectural and schema design decisions are resolved as follows:
     3. Shared team placement if still tied.
 
 - **Publication retention, anonymous claiming, and invitation expiry**:
-  - **Publication retention**: Published contest projections are retained indefinitely as a permanent public archive. Deleting a published contest requires completing the formal delisting process requirements.
+  - **Publication retention**: Published contest projections are retained indefinitely as a permanent public archive. Deleting a contest does not remove its publication. Removing a publication from public view requires a delist request decided by a system administrator.
   - **Anonymous contest claiming**: Contests published anonymously via a verified email can be claimed at any time in the future during the director's first-time login flow when creating/registering an account with that email.
   - **Invitation expiry**: Magic URL email invitations expire 24 hours after contest completion. Field QR code tokens provide access for the entire contest duration and do not expire mid-contest unless explicitly revoked.
 
 - **Synchronization cursor storage, conflict resolution, and tombstone retention**:
-  - **Sync cursor**: Monotonically increasing sequence stream per contest (`contest_mutation_seq`); clients track their last acknowledged sequence (`last_synced_seq`).
+  - **Sync cursor**: Monotonically increasing sequence stream per contest (`contest_mutation_seq`), and a separate sequence stream for a director's own data that belongs to no contest (participant profiles, roles, models, landing tables, presets). System data only comes down. Clients track their last acknowledged sequence (`last_synced_seq`) per stream.
   - **Conflict resolution**: Official Director score submissions always take precedence over participant self-scores (participant submissions are preserved as immutable attempts in review/audit history). Concurrent Director conflicts or inactive installation mutations present a side-by-side conflict diff in the UI for explicit resolution. Derived values are always recalculated deterministically.
-  - **Tombstones**: Soft-deletion tombstones are retained for **90 days** (or until contest archiving + 90 days) to prevent offline devices from resurrecting deleted records during delayed sync.
+  - **Tombstones**: Soft-deletion tombstones are retained for **90 days after the server acknowledges the deletion**, for every scope, to prevent offline devices from resurrecting deleted records during delayed sync.

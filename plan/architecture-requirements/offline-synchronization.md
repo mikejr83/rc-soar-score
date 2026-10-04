@@ -19,7 +19,8 @@ This document uses **score** for the discipline-specific raw components entered 
 5. Synchronization must be incremental. A full contest download and export are required recovery operations, not the normal conflict mechanism.
 6. The local application must retain unsent mutations and retry them after connectivity returns. A failed sync must not prevent offline contest administration.
 7. A local deletion must create a tombstone until the service acknowledges it. Tombstones must prevent a deleted entity from being recreated by an older change.
-8. Sync must be scoped to the contest director's authorized data. Participant email addresses and other private data must follow the privacy rules in the participant requirements.
+8. Director-owned data that belongs to no contest (participant profiles, roles, models, landing tables, presets) synchronizes through its own sequence stream. System data only comes down.
+9. Sync must be scoped to the contest director's authorized data. Participant email addresses and other private data must follow the privacy rules in the participant requirements.
 
 ## Administration Installation
 
@@ -72,8 +73,8 @@ The service must evaluate a mutation against its base revision. If the base revi
 ## Deletion and Publication
 
 1. Deletions synchronize as tombstones and require authorization. An offline deletion must be shown to the director before it removes remote data. Tombstones, rejected submissions, conflict records, and score audit history are retained for the lifetime of the contest.
-2. A contest published at least once cannot be physically deleted by ordinary synchronization. It follows the pending-delete and administrator-resolution flow.
-3. If a contest is physically deleted after the applicable deletion approval, its contest data, tombstones, rejected submissions, conflict records, and score audit history are deleted as well.
+2. Deleting a contest that was published at least once deletes only the director's data. The published record remains, loses only its link to the contest, and can no longer be updated. Removing it from public view requires a delist request that a system administrator decides.
+3. If a contest is deleted, its contest data, tombstones, rejected submissions, conflict records, and score audit history are deleted as well.
 4. Publishing is an explicit operation separate from backup synchronization. A publish request identifies the private contest revision being published and creates a versioned public projection.
 5. A later publish updates the public projection only after the service validates the contest revision, state, visibility, and privacy rules. A failed publish must not alter the private contest.
 6. Anonymous publishing does not create remote backup data. Claiming the contest with the verified publishing email may establish an account owner according to the account requirements.

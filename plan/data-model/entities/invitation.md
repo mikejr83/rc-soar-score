@@ -1,66 +1,82 @@
 # Invitation
 
-**Relationship to architecture-requirements:** plan/architecture-requirements/data/reviews-and-invitations.md, plan/architecture-requirements/participating-contestants-and-teams/contest.md  
-**Purpose:** Controls participant access to a contest via Magic Link URLs or QR codes. Pilot invitations authorize only that pilot; non-flier invitations may be used to select only pilots on the same contest team.  
+**Relationship to architecture-requirements:** plan/architecture-requirements/data/reviews-and-invitations.md, plan/architecture-requirements/self-scoring-invites.md  
+**Purpose:** Controls participant access to a contest via Magic Link URLs or QR codes. A pilot invitation authorizes only that pilot; a non-flier invitation may select only pilots on the same contest team. An invitation link stays usable so the participant can return to their score overview; replacing or revoking it is what ends access.  
 **Identifier:** `id` (UUIDv7)  
-**Parent entity:** Contest  
+**Parent entity:** ContestParticipation (also denormalized to Contest)  
 **Child entities:** None
 
 ## Relationships
 
-- Belongs to a Contest (foreign key `contestId`)
-- References a Participation record via `linkId_part` (foreign key)
-- One-to-one: Each pilot may have one valid pilot-type invitation; multiple crew-type invitations per pilot
-- Invitation is single-use and expires when used, expired, or revoked
+- Belongs to a Contest (`contest_id`, denormalized for sync scoping and authorization)
+- Targets one ContestParticipation (`contest_participation_id`). The participation's `scoring_uuid` is the access identifier in the link
+- A participation has a sequence of invitations, numbered by `invitation_revision`. At most one is `Active`; earlier ones are `Replaced` or `Revoked`
+- May reference the invitation it replaces (`replaces_invitation_id`)
+- Issued by an Account (`issued_by`)
+- Redeemed by an Account (`redeemed_by_account_id`): the guest account created when an invitee without an account first redeems the invitation, or the invitee's own account
+- Referenced by ScoreAttempt (`invitation_id`) as the access under which a score was submitted
 
 ## Fields/Properties
 
-| Field                      | Type             | Required | Default  | Description                                                     |
-| -------------------------- | ---------------- | -------- | -------- | --------------------------------------------------------------- |
-| `id`                       | UUIDv7           | Yes      | -        | Primary key identifying the invitation                          |
-| `contest_id`               | UUIDv7           | Yes      | -        | Foreign key to the Contest                                      |
-| `contest_participation_id` | UUIDv7           | Yes      | -        | Foreign key to the Participation record                         |
-| `type`                     | Enum             | Yes      | MagicURL | Type of invitation: `MagicURL`, `QRCode`                        |
-| `protected_credential`     | String           | Yes      | -        | Encrypted credential; raw credential never stored in logs/audit |
-| `invitation_revision`      | Integer          | Yes      | 0        | Revision counter for optimistic locking                         |
-| `state`                    | Enum             | Yes      | Sent     | Current state: `Sent`, `Used`, `Expired`, `Revoked`             |
-| `audience`                 | Enum             | Yes      | Pilot    | Target audience: `Pilot`, `Helper`                              |
-| `issued_at`                | Timestamp        | Yes      | -        | Time invitation was issued                                      |
-| `used_at`                  | Timestamp        | No       | null     | Time invitation was used (non-null if state is Used)            |
-| `expired_at`               | Timestamp        | No       | null     | Time invitation expired (non-null if state is Expired)          |
-| `revoked_at`               | Timestamp        | No       | null     | Time invitation was revoked (non-null if state is Revoked)      |
-| `delivery_outcomes`        | Array of Objects | No       | []       | Records of delivery attempts and outcomes                       |
-| `rate_limit_attempts`      | Integer          | Yes      | 0        | Count of remaining allowed uses for non-pilot QR codes          |
+| Field                      | Type             | Required | Default  | Description                                                                                                                                  |
+| -------------------------- | ---------------- | -------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`                       | UUIDv7           | Yes      | -        | Primary key identifying the invitation                                                                                                       |
+| `contest_id`               | UUIDv7           | Yes      | -        | FK Contest (denormalized; must match the participation's contest)                                                                            |
+| `contest_participation_id` | UUIDv7           | Yes      | -        | FK ContestParticipation the invitation authorizes                                                                                            |
+| `type`                     | Enum             | Yes      | MagicURL | How the link was issued: `MagicURL` (emailed link) or `QRCode` (field token)                                                                 |
+| `protected_credential`     | String           | Yes      | -        | Protected representation of a high-entropy credential. The raw credential is never stored and never appears in logs or audit records         |
+| `invitation_revision`      | Integer          | Yes      | 1        | Monotonically increasing per participation. Only the latest non-revoked revision authorizes access                                           |
+| `state`                    | Enum             | Yes      | Active   | `Active`, `Replaced`, `Revoked`, or `Expired`                                                                                                |
+| `audience`                 | Enum             | Yes      | Pilot    | Target audience, taken from the participation's role type: `Pilot` or `Helper`                                                               |
+| `issued_by`                | UUIDv7           | Yes      | -        | FK Account of the director (or acting authority) who issued it                                                                               |
+| `issued_at`                | timestamptz      | Yes      | -        | Time the invitation was issued                                                                                                               |
+| `expires_at`               | timestamptz      | No       | null     | When access ends. Null for field QR tokens, which last the whole contest. For `MagicURL`, set to 24 hours after contest completion           |
+| `first_used_at`            | timestamptz      | No       | null     | When the link was first opened successfully                                                                                                  |
+| `last_used_at`             | timestamptz      | No       | null     | When the link was last opened successfully. Informational; does not end access                                                               |
+| `revoked_at`               | timestamptz      | No       | null     | When the director revoked the invitation (non-null if state is Revoked)                                                                      |
+| `replaces_invitation_id`   | UUIDv7           | No       | null     | FK Invitation that this one replaced                                                                                                         |
+| `redeemed_by_account_id`   | UUIDv7           | No       | null     | FK Account that first redeemed the invitation. A guest account is created when the invitee has none. Null until first redemption             |
+| `delivery_outcomes`        | Array of Objects | No       | []       | Delivery requests and their outcomes (channel, requested time, result). Issuance and delivery are separate: delivery is not proof of receipt |
+| `client_mutation_id`       | String           | Yes      | -        | Idempotency key. A retry with the same value must not create a second credential or duplicate delivery. Unique within the contest            |
 
 ## Invariants and Constraints
 
-- Pilot invitation authorizes only that specific pilot; non-flier may select only pilots on same contest team
-- Magic URL email invitations expire 24 hours after contest completion
-- Field QR tokens do not expire during an active contest (per ticket 021)
-- Invitation is single-use; once used it transitions to `Used`
-- Invitation transitions to `Expired` when expiration time passes or contest is complete and 24 hours have passed
-- Invitation transitions to `Revoked` when manually revoked
-- `rate_limit_attempts` must be > 0 for non-pilot QR codes
+- (`contest_participation_id`, `invitation_revision`) is unique, and the revision of a new invitation is one higher than the participation's latest
+- At most one `Active` invitation exists per participation (partial unique index on `contest_participation_id` where `state` is `Active`)
+- Issuing a replacement sets the previous `Active` invitation to `Replaced` in the same transaction. An earlier link never regains access, even from a cached page, a retained session, or a delayed request
+- Using a link does not consume it: `state` stays `Active` across uses, and the participant can return through the same link to their overview
+- A pilot invitation authorizes only that pilot. A non-flier invitation targets the non-flier's own participation and may select and enter scores only for pilots on the same contest team. The service enforces this and does not trust the client-selected pilot
+- A valid invitation is not permission by itself. Every read and mutation still checks lifecycle, scoring access, locks, retirement, assignment, and score state
+- Issuance is allowed only while the contest is `Configuring`, `Ready`, or `Running`, and never for `Created`, `Completed`, or deletion states
+- An invitation moves to `Expired` when `expires_at` passes. Magic URL invitations expire 24 hours after contest completion. Field QR tokens do not expire during the contest unless revoked
+- Revoking or replacing an invitation does not invalidate scores already accepted under it
+- `client_mutation_id` is unique per contest, so issuance and revocation requests are safe to retry
+- `redeemed_by_account_id` is set once, at first redemption, and later re-pointed only by claiming a guest account
 
 ## Lifecycle
 
 ```plaintext
-Sent -> Used
-Sent -> Expired
-Sent -> Revoked
+Active -> Replaced
+Active -> Revoked
+Active -> Expired
 ```
+
+- Created `Active` when the director issues an invitation for a participation
+- Becomes `Replaced` when a newer invitation is issued for the same participation
+- Becomes `Revoked` when the director revokes it, or `Expired` when `expires_at` passes
+- Invitations are never deleted. They remain as the access history for the scores submitted under them
+- A contest that is entirely offline cannot issue invitations. They are issued only after the contest and its matrix revision have been synchronized with the remote service
 
 ## Privacy and Scope
 
-- `protected_credential` must be encrypted and never appear in logs, audit, or sync traffic without the decryption key
+- `protected_credential` must be protected and never appears in logs, audit, or sync traffic
 - Invitation state and timestamps are shared within the contest context
-- Delivery outcomes and rate limit attempts are visible to contest administrators
+- Delivery outcomes are visible to contest administrators. They record delivery requests, not message contents
+- Errors for an invalid, expired, revoked, or unauthorized credential must not reveal whether a contest, participant, or credential exists
 
 ## Audit and Synchronization
 
-- Invitation creation is audited as `InvitationIssued`
-- Invitation use is audited as `InvitationUsed`
-- Invitation revocation is audited as part of invitation lifecycle
-- Delivery failures are recorded in `delivery_outcomes`
-- Mutation uses `invitation_revision` for optimistic locking
-- Invitation state transitions are atomic
+- Issuance, replacement, revocation, access, failed access attempts subject to rate limits, and delivery requests are each audited (`InvitationIssued`, `InvitationReplaced`, `InvitationRevoked`, `InvitationAccessed`, `InvitationAccessFailed`, `InvitationDeliveryRequested`) with the contest, participation, actor, source, time, and resulting invitation revision
+- Credentials and message contents are never recorded in the audit trail
+- State transitions are atomic
+- Issuance and revocation are idempotent by `client_mutation_id`

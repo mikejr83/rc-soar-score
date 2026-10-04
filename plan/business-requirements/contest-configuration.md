@@ -34,7 +34,7 @@ Contests are attended by competitors. Not all competitors are pilots. The applic
 
 Pilots may be organized into teams. The number of team pilots for calculating the team score is necessary if teams are to be used in the contest, otherwise the option is not presented.
 
-An option for giving the participant a unique number for the contest is available. This is an integer value that enables participant to be referred to as "Participant_Type X" where Participant_Type is comes from the role they were assigned or "Pilot" by default and X is that number. The number starts at 1 and increases with the number of pilots in the contest. The number is assigned when the first draw occurs. It cannot be changed afterwards. Pilots added post draw will receive the next number in sequence. _The general use case for the unique numbering for participants is for identifying information placed on specific printed materials._
+An option for giving the participant a unique number for the contest is available. This is an integer value that enables participant to be referred to as "Participant_Type X" where Participant_Type is comes from the role they were assigned or "Pilot" by default and X is that number. The number starts at 1 and increases with each participant in the contest, whatever their role, so every participant has a different number. The number is assigned when the first draw occurs. It cannot be changed afterwards. Pilots added post draw will receive the next number in sequence. _The general use case for the unique numbering for participants is for identifying information placed on specific printed materials._
 
 The option for pilot classes is presented. This is used to classify pilots. Generally, "expert", "advanced", "junior", etc. but can be used for any purpose. This is a reporting only feature. A report may show "the top scoring pilot in each class".
 
@@ -113,7 +113,13 @@ Scoring for the contest involves pilots, their helpers, or the contest director 
 
 Contests can be run by a contest director strictly offline. The desktop version of the application is used, participants are manually entered, and the contest has scores entered into the system by an official. This can vary slightly, where the contest director performs all those functions offline except they wish to publish the finalized scores after the completion of the contest. Finally, a contest director may desire to have the contest run such that they pull participant information from the service API, have participants enter their scores, those scores update on the public site as they change, and they perform the role of validating those scores.
 
-A contest must be published for it to appear on the public site.
+### Private Contests
+
+A contest is private until the contest director publishes it. A private contest is visible only to its contest director. It does not appear on the public site, and nobody's participation in it is shown there. A contest may remain private for its whole life.
+
+### Publishing
+
+A contest must be published for it to appear on the public site. Publishing is a separate action from synchronizing the director's data and from running the contest. A contest may be published while it is running or after it is completed, and the director may publish again as the contest progresses.
 
 When the contest is published several things occur:
 
@@ -122,14 +128,39 @@ When the contest is published several things occur:
 - The contest director can decide to update participants' local info with what was downloaded.
 - The current participant list is uploaded with all participants and their types being linked to the contest.
 - If teams are being used, team entries are created and participants linked to the teams.
-- The model information, if being tracked for the contest, is is linked to each pilot for the contest.
-- The contest defaults to private mode. It isn't shown on the public web site.
+- The model information, if being tracked for the contest, is linked to each pilot for the contest.
+- The published contest is not searchable until the contest director makes it public.
 
-The contest director will be able to make a contest public or private. This affects if the contest can be searched for and is displayed on the public site. A participant's participation in a contest is not shown in the global site if a contest is marked private.
+A published contest keeps updating from the contest as it changes. Hiding the overall results (below) never stops those updates.
+
+### Visibility
+
+The contest director chooses who can find and open a published contest:
+
+- Public - The contest can be searched for and viewed by anyone without an account.
+- Unlisted - The contest is not searchable or listed, but can be opened by someone who has its link and by its participants.
+
+The first time a contest is published it is Unlisted. The contest director can change the visibility at any time. Changing visibility does not change the contest.
+
+### Hiding Overall Results
+
+A contest director may hide the overall results while a contest is underway, for example to preserve the final outcome until an awards ceremony. Hiding withholds the overall scores and the placing of pilots and teams. It does not hide anything else: round scores and each pilot's position within their flight group remain visible.
+
+- The director turns hiding on at any time. If it is turned on during a round, the standings shown are those as of the end of that round. Standings do not change after that while results are hidden, so pilots can see where they stood going into the next round but not how they place after it.
+- Hiding applies to the public site and to the results shown to pilots and helpers in their scoring pages.
+- Scores keep being entered, calculated, and published while results are hidden. The hidden results are up to date and are shown as soon as hiding ends.
+- Hiding ends when the contest director turns it off, when the contest is marked completed, or 24 hours after it was turned on, whichever comes first.
+- Hiding is separate from locking scoring, from the contest being published, and from its visibility. A contest can be hidden and still be open to score entry, and a locked contest can have its results shown.
+
+### Locking Scoring
 
 The contest director will have the option to lock scoring. Participants cannot enter scores when this is enabled.
 
+### Review Requests
+
 An option is presented for the contest director to allow participants to make review requests for previously entered scores.
+
+### Score Updates On The Public Site
 
 The contest director will have options to dictate how scores are displayed for the contest on the public site. Contest directors will use this to help control how scores and contest progression is presented. There will be the following options:
 
@@ -144,3 +175,7 @@ Automatic score updates will update as soon as the participants enter the data. 
 When the "Updates at assumed round completion" is selected the scores update on the public site will show when all scores have been entered by participants for the round.
 
 The "Manual" setting requires the contest director to mark the round as completed or have all the scores marked as official.
+
+### Removing A Published Contest
+
+A published contest is public record. The contest director cannot remove it from the public site directly. They send a request to have it delisted, and a system administrator decides. This is different from hiding results, which the director controls and can undo. Deleting the contest's own data is covered in `managing-system.md` and does not remove what was published.

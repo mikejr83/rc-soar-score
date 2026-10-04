@@ -13,9 +13,10 @@ working time, perform a precision landing, and incur launch height penalties.
   "name": "FAI Free-Flight (F5J)",
   "description": "Precision duration discipline with working time, mandatory launch height penalties, and precision landing bonus. Score = flight points + landing bonus - height penalty.",
   "category": "duration",
+  "default_landing_table_id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2b02",
   "status": "published",
   "superseded_by": null,
-  "created_by": "admin@example.com",
+  "created_by": "019a3c40-0000-7000-8000-000000000001",
   "created_at": "2026-09-15T00:00:00Z",
   "updated_by": null,
   "updated_at": null
@@ -24,52 +25,62 @@ working time, perform a precision landing, and incur launch height penalties.
 
 ## LandingTable
 
+The system table the profile names as its default. It has no owner and is never modified.
+
 ```json
 {
   "id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2b02",
+  "owner_account_id": null,
   "name": "F5J Standard Landing Table",
-  "revision": 1,
-  "input_unit": "meters"
+  "input_unit": "meters",
+  "created_at": "2026-09-15T00:00:00Z"
 }
 ```
 
 ## LandingResult
+
+Each entry maps the key the scorer selects to the points awarded. A score stores the entry `id`.
 
 ```json
 [
   {
     "id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2b03",
     "landing_table_id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2b02",
-    "point_value": 0,
-    "display_value": "Within 10 m - 20 pts",
+    "entry_key": "within_10m",
+    "display_value": "Within 10 m",
+    "point_value": 20,
     "ordinal_position": 1
   },
   {
     "id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2b04",
     "landing_table_id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2b02",
-    "point_value": 10,
-    "display_value": "Within 25 m - 15 pts",
+    "entry_key": "within_25m",
+    "display_value": "Within 25 m",
+    "point_value": 15,
     "ordinal_position": 2
   },
   {
     "id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2b05",
     "landing_table_id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2b02",
-    "point_value": 25,
-    "display_value": "Within 50 m - 10 pts",
+    "entry_key": "within_50m",
+    "display_value": "Within 50 m",
+    "point_value": 10,
     "ordinal_position": 3
   },
   {
     "id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2b06",
     "landing_table_id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2b02",
-    "point_value": 50,
-    "display_value": "Within 75 m - 5 pts",
+    "entry_key": "within_75m",
+    "display_value": "Within 75 m",
+    "point_value": 5,
     "ordinal_position": 4
   },
   {
     "id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2b07",
     "landing_table_id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2b02",
-    "point_value": 75,
-    "display_value": "Within 75 m - 0 pts",
+    "entry_key": "none",
+    "display_value": "No bonus",
+    "point_value": 0,
     "ordinal_position": 5
   }
 ]
@@ -124,9 +135,8 @@ working time, perform a precision landing, and incur launch height penalties.
     "field_key": "landing_table",
     "field_type": "landing",
     "name": "Landing Bonus Table",
-    "description": "Table mapping landing quality indicators to bonus points. The system uses the linked LandingTable entity (F5J Standard Landing Table, revision 1) to score landings.",
+    "description": "Table mapping landing quality indicators to bonus points. The contest selects a landing table, which defaults to the profile\'s default (F5J Standard Landing Table).",
     "required": true,
-    "default_value": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2b02",
     "display_order": 4,
     "created_at": "2026-09-15T00:00:00Z"
   },
@@ -223,7 +233,7 @@ working time, perform a precision landing, and incur launch height penalties.
     "field_key": "landing",
     "field_type": "landing",
     "name": "Landing",
-    "description": "Landing position/quality indicator. Options are loaded dynamically from the linked landing table (F5J Standard Landing Table, revision 1).",
+    "description": "Landing position/quality indicator. Options are loaded dynamically from the linked landing table (F5J Standard Landing Table).",
     "required": false,
     "display_order": 3,
     "is_zero_reason": false,

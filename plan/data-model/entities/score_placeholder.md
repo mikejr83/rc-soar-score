@@ -4,7 +4,7 @@
 **Purpose:** Reservation slot for the score of one pilot assignment. It exists before any value is entered, so every current assignment has a place for its score, attempts, reviews, and penalties. Its `state` is a denormalized summary of the score workflow; the facts live in its attempts, review requests, and official scores.  
 **Identifier:** `id` (UUIDv7)  
 **Parent entity:** MatrixAssignment  
-**Child entities:** ScoreAttempt, OfficialScore, ReviewRequest, ContestPenalty
+**Child entities:** ScoreAttempt, OfficialScore, ReviewRequest
 
 ## Relationships
 
@@ -13,20 +13,21 @@
 - Owns many ScoreAttempt instances (immutable submissions, including review proposals and superseded attempts)
 - Owns many OfficialScore instances (versioned authoritative scores)
 - Owns many ReviewRequest instances
-- Referenced by ContestPenalty as the flight during which a contest penalty was incurred
-- ScoreCalculationResult is derived from the placeholder's current OfficialScore and does not hang off the placeholder directly
+- Has at most one FlightResult, derived from the placeholder's current OfficialScore. It does not hang off the placeholder's score facts and is never an input
 
 ## Fields/Properties
 
-| Field                      | Type   | Required | Default    | Description                                                                                                               |
-| -------------------------- | ------ | -------- | ---------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `id`                       | UUIDv7 | Yes      | -          | Stable identity                                                                                                           |
-| `contest_id`               | UUIDv7 | Yes      | -          | FK Contest (denormalized; must match the assignment's contest)                                                            |
-| `contest_participation_id` | UUIDv7 | Yes      | -          | FK ContestParticipation; must match the assignment's participation                                                        |
-| `assignment_id`            | UUIDv7 | Yes      | -          | FK MatrixAssignment this placeholder scores. Never changes after creation                                                 |
-| `state`                    | enum   | Yes      | NotEntered | Summary of the score workflow: `NotEntered`, `Submitted`, `InReview`, or `Official`                                       |
-| `score_revision`           | int    | Yes      | 0          | Counter of accepted score mutations: incremented each time an attempt is accepted or an official score version is created |
-| `revision`                 | int    | Yes      | 0          | Row-level sync counter, incremented on any change to the row, including state changes that are not score mutations        |
+| Field                      | Type        | Required | Default    | Description                                                                                                               |
+| -------------------------- | ----------- | -------- | ---------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `id`                       | UUIDv7      | Yes      | -          | Stable identity                                                                                                           |
+| `contest_id`               | UUIDv7      | Yes      | -          | FK Contest (denormalized; must match the assignment's contest)                                                            |
+| `contest_participation_id` | UUIDv7      | Yes      | -          | FK ContestParticipation; must match the assignment's participation                                                        |
+| `assignment_id`            | UUIDv7      | Yes      | -          | FK MatrixAssignment this placeholder scores. Never changes after creation                                                 |
+| `state`                    | enum        | Yes      | NotEntered | Summary of the score workflow: `NotEntered`, `Submitted`, `InReview`, or `Official`                                       |
+| `score_revision`           | int         | Yes      | 0          | Counter of accepted score mutations: incremented each time an attempt is accepted or an official score version is created |
+| `locked_by`                | UUIDv7      | No       | -          | FK Account that locked this score. Null while it is not locked individually                                               |
+| `locked_at`                | timestamptz | No       | -          | When this score was locked. Set exactly when `locked_by` is set                                                           |
+| `revision`                 | int         | Yes      | 0          | Row-level sync counter, incremented on any change to the row, including state changes that are not score mutations        |
 
 ## Invariants and Constraints
 
@@ -34,7 +35,8 @@
 - (`assignment_id`, `contest_participation_id`) must match the assignment's own id and participation (composite FK), and `contest_id` must equal the assignment's contest
 - A placeholder exists for every current assignment of a finalized matrix revision, regardless of whether a value has been entered. Assignments in a draft revision have none
 - Placeholders are created when the matrix revision is finalized (for `Original` assignments) or together with the assignment row (for `Moved` and `Reflight`)
-- Placeholders of assignments that are no longer current (moved away, in a superseded or cancelled round) are retained and stay `NotEntered`. They are excluded from missing-score checks, round completeness, and standings
+- A pilot with no current assignment credited to a round, for example one who joined late and was never given a make-up flight, has no placeholder for it. The calculation treats the round as not entered: a zero and a candidate to drop, the same as a round whose placeholder is `NotEntered`. Nothing is stored. A later `LateAdd` for that round creates a real placeholder that replaces the derived zero
+- Placeholders of assignments that are no longer current (moved away, in a superseded or cancelled round) are retained. A moved-away placeholder keeps its attempts and official scores as history. They are excluded from missing-score checks, round completeness, standings, and the penalty total
 - `state` is derived from the facts, in priority order:
   1. `InReview` if any review request is open
   2. `Official` if an official score exists
@@ -44,8 +46,8 @@
 - When an official score is created, the placeholder's `score_revision` is incremented and the new OfficialScore takes that value as its own `score_revision`, so (`score_placeholder_id`, `score_revision`) stays unique on OfficialScore, with gaps wherever attempts were accepted in between. An attempt's `base_score_revision` records the value the client had; a stale base is flagged for handling through the standard conflict process, never silently dropped
 - `Draft` is not a state: drafts and queued submissions are local to the client and are not accepted data
 - Zero, retired, and did-not-launch outcomes are not states. They are recorded as the official score's components (including the zero reason) and the placeholder is `Official`. A system-generated outcome (for example a no-show) enters through an attempt with system authority, so it follows the same path
-- Whether a score counts as dropped is a calculation result, not placeholder state, because the dropped-rounds rule depends on the contest configuration, which can change
-- While the assignment's scheduled round is `Locked`, or the contest is locked, score entry and review changes are rejected unless the contest director overrides with a recorded reason. Group-level and assignment-level locks are not modeled
+- Whether a score counts as dropped is a computed result, not placeholder state, because the dropped-rounds rule depends on the contest configuration, which can change
+- **Locks:** a score is locked if its own lock (`locked_at`), its RoundGroup, its scheduled round, or the contest is locked, evaluated hierarchically (`Contest.Locked > Round.Locked > Group.Locked > Score.Locked`). A placeholder belongs to exactly one assignment, so the assignment lock and the score lock are the same lock. While a score is locked, score entry and review changes are rejected, and participants cannot change or review it, unless the contest director overrides with a recorded reason. Review requests cannot be submitted on a locked score. Locking and unlocking are audited state changes that increment `revision`, and never change the contest's lifecycle
 
 ## Lifecycle
 

@@ -6,6 +6,8 @@
 **Parent entity:** DisciplineProfile  
 **Child entities:** None
 
+The core options that every contest has regardless of discipline are defined in [contest-options.md](../contest-options.md). A config field defines only a setting that is specific to this discipline.
+
 ## Fields/Properties
 
 | Field                   | Type                                          | Required | Default | Description                                                                                                                                                                             |
@@ -16,6 +18,7 @@
 | `field_type`            | enum(string, int, float, bool, enum, landing) | Yes      | —       | Data type of the field value. `landing` types reference a linked `LandingTable` entity; the `options` property is empty for landing types and the link is specified in `default_value`. |
 | `name`                  | string                                        | Yes      | —       | Human-readable label for UI display                                                                                                                                                     |
 | `description`           | string                                        | No       | —       | Longer explanation of what this field controls                                                                                                                                          |
+| `unit`                  | string                                        | No       | —       | Unit of the value, for example `seconds`, `meters`, or `points per second`                                                                                                              |
 | `required`              | bool                                          | No       | false   | If the contest must set this field                                                                                                                                                      |
 | `default_value`         | json                                          | No       | —       | JSON-encoded default value (string, number, bool, or enum value)                                                                                                                        |
 | `options`               | json                                          | No       | —       | JSON-encoded array of allowed values for enum fields (each option may have value, label, etc.)                                                                                          |
@@ -29,7 +32,7 @@
 - `options` may only be present when `field_type` is `enum`.
 - `default_value` must be valid JSON matching the schema implied by `field_type`.
 - Published profiles cannot modify existing config fields; only a new version may.
-- When `field_type` is set to `landing` the `default_value` should contain the uuid matching the `LandingTable` entity which will be used.
+- When `field_type` is `landing`, the field marks that the contest chooses a landing table. `default_value` is not used: the default is `DisciplineProfile.default_landing_table_id`, and the contest's choice is stored in `ContestConfigurationRevision.landing_table_id`, not in the configuration JSON
 
 ## Lifecycle
 

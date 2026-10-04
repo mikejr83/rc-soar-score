@@ -1,7 +1,7 @@
 # TeamMembership
 
 **Relationship to architecture-requirements:** plan/architecture-requirements/data/teams-roles-models.md  
-**Purpose:** Joins participation links to teams, enabling score aggregation by team and specifying whether the member is a flying pilot, captain, or non-flying helper.  
+**Purpose:** Joins participation links to teams, enabling score aggregation by team. Whether the member flies or not comes from the participation's role.  
 **Identifier:** `id` (UUIDv7)  
 **Parent entity:** Team  
 **Child entities:** None
@@ -11,18 +11,18 @@
 - Belongs to Team via team_id foreign key
 - Belongs to ContestParticipation via contest_participation_id foreign key
 - Pilot membership is fixed for the duration of the matrix revision
-- Non-flier membership (Captains, Helpers) may change during the contest without redrawing the flight matrix
+- Non-flier membership (helpers, team managers) may change during the contest without redrawing the flight matrix
 - Controls which pilots a helper may score for
 
 ## Fields/Properties
 
-| Field                      | Type    | Required | Default | Description                                |
-| -------------------------- | ------- | -------- | ------- | ------------------------------------------ |
-| `id`                       | UUIDv7  | Yes      | —       | Primary key                                |
-| `team_id`                  | UUIDv7  | Yes      | —       | Foreign key to Team                        |
-| `contest_participation_id` | UUIDv7  | Yes      | —       | Foreign key to ContestParticipation        |
-| `role_id`                  | UUIDv7  | Yes      | Pilot   | Membership role: Captain, Pilot, or Helper |
-| `revision`                 | Integer | Yes      | 0       | Revision counter for optimistic locking    |
+| Field                      | Type    | Required | Default | Description                                                                                                   |
+| -------------------------- | ------- | -------- | ------- | ------------------------------------------------------------------------------------------------------------- |
+| `id`                       | UUIDv7  | Yes      | —       | Primary key                                                                                                   |
+| `team_id`                  | UUIDv7  | Yes      | —       | Foreign key to Team                                                                                           |
+| `contest_participation_id` | UUIDv7  | Yes      | —       | Foreign key to ContestParticipation                                                                           |
+| `contest_id`               | UUIDv7  | Yes      | —       | Foreign key to Contest (denormalized for sync scoping; must match the team's and the participation's contest) |
+| `revision`                 | Integer | Yes      | 0       | Revision counter for optimistic locking                                                                       |
 
 ## Invariants and Constraints
 
@@ -40,7 +40,7 @@
 ## Privacy and Scope
 
 - Team membership is visible to all participants in the contest
-- The role (Captain/Pilot/Helper) is visible to all participants
+- The member's role, taken from the participation, is visible to all participants
 
 ## Audit and Synchronization
 

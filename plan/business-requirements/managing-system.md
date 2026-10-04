@@ -31,7 +31,9 @@ When creating a new contest a previous contest may be selected. The contest dire
 
 ## Deleting Contests
 
-Contests may be created in error or it may be desired by the contest director to remove a contest. Contests created locally can be removed after a warning and acknowledgement by the user. Contests that were pushed to the public site cannot be deleted. A request can be sent for it to be delisted.
+Contests may be created in error or it may be desired by the contest director to remove a contest. A contest can be removed after a warning and acknowledgement by the user. Removing a contest deletes the contest director's data for it.
+
+If the contest was published, the published results are not removed when the contest is deleted, and they can no longer be updated. The director is warned of this before confirming. Removing published results from the public site requires a request to have it delisted, which a system administrator decides.
 
 ## Managing Participants
 
@@ -54,13 +56,13 @@ The following data points is considered participant data for any contest.
 - Country
 - Email - Always private
 
-First and last name and email are required. All of the other fields are optional. The email address is used when determining if the participant in a contest directors data matches one that has already been created in the remote system.
+First and last name are required. All of the other fields, including email, are optional. When an email address is provided it is used, along with the FAI number and national organization ID, to determine whether the participant in a contest director's data matches a person who already has an account in the remote system.
 
 ### Privacy and Data Syncing
 
 The system will not require participants to register and maintain a user account. The FAI Number, National Organization ID, city, state, and country can be tracked by the contest director. The contest director may enter just the required or all the available data. When the contest is published for public viewing along the first and last name and the country of the participant will be shown.
 
-When the system is syncing data to the remote site it is still within the contest director's data. It is not shared with any other contest director. However, if a participant creates a user account and wishes to allow their data to be shared their participant record will become open for all contest directors to utilize. All the participant data will become read-only from the contest director's point of view. The user will have the ability to hide or show their email to the contest director. If the user has decided to hide their email the contest director will show that it is available to the system.
+When the system is syncing data to the remote site it is still within the contest director's data. It is not shared with any other contest director. A participant who creates a user account can offer their details so that other contest directors can find them. A director who finds them copies their details into the director's own participant records, which remain private to that director, and can refresh the copy later. The participant chooses whether to be found and whether directors can see their email. If they hide it, the director is only told that an email is available to the system. A participant with an account also controls the name shown for them in published results, so they can appear as "Dave" and not "Dave from TN".
 
 ### Contest Specific Participant Data
 
