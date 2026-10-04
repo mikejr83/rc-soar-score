@@ -46,7 +46,7 @@ melos:
     build:dart:
       description: Build the pure-Dart CLI apps.
       exec:
-        command: dart compile exe lib/main.dart -o build/cli/$MELOS_PACKAGE_NAME.exe
+        command: mkdir build/cli && dart compile exe lib/main.dart -o build/cli/$MELOS_PACKAGE_NAME.exe
       packageFilters:
         category: apps
         flutter: false
