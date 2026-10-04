@@ -3,11 +3,13 @@
 This document is the primary source of truth for the Soar Score codebase. It is supplemented by per-project `AGENTS.md` files located in each `apps/` and `packages/` directory (e.g., `apps/soar_score_server/AGENTS.md`, `packages/soar_score_core/AGENTS.md`). When a convention in this root file conflicts with a per-project file, **this root file wins**.
 
 Per-project files should be read for:
+
 - Package-specific boundary constraints (what must NOT be imported or depended on)
 - Folder layout and naming conventions unique to that subproject
 - Targeted test and build commands
 
 Per-project files should NOT override:
+
 - Shared code style or linting rules (use root `analysis_options.yaml`)
 - Business requirement references (always consult `./plan`)
 - Version or toolchain pins (see root CI section)
@@ -45,7 +47,7 @@ Soar Score is an RC sailplane soaring contest scoring and management suite. It c
 
 ## CI/CD
 
-- GitHub Actions workflow in `.github/workflows/ci.yml` (owned by ticket 011; not yet created)
+- GitHub Actions workflow in `.github/workflows/ci.yml` (owned by ticket 011)
 - Runs on push/PR to `main` and `develop` branches
 - Steps: install deps → analyze → test → build
 
