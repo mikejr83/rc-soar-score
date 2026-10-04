@@ -1,0 +1,53 @@
+[
+  {
+    "id": "019c0000-0000-7000-8000-000000000911",
+    "contest_id": "019c0000-0000-7000-8000-000000000010",
+    "re_flight_id": "019c0000-0000-7000-8000-000000000901",
+    "contest_participation_id": "019c0000-0000-7000-8000-000000000040",
+    "role": "Awarded",
+    "excluded_reason": null,
+    "draw_position": null,
+    "response": "NotRequired",
+    "responded_by": null,
+    "responded_at": null,
+    "notification_state": "Delivered",
+    "notified_at": "2026-10-17T15:52:00Z",
+    "acknowledged_at": "2026-10-17T15:53:30Z",
+    "assignment_id": "019c0000-0000-7000-8000-000000000121",
+    "revision": 2
+  },
+  {
+    "id": "019c0000-0000-7000-8000-000000000912",
+    "contest_id": "019c0000-0000-7000-8000-000000000010",
+    "re_flight_id": "019c0000-0000-7000-8000-000000000901",
+    "contest_participation_id": "019c0000-0000-7000-8000-000000000043",
+    "role": "GroupMember",
+    "excluded_reason": null,
+    "draw_position": null,
+    "response": "NotRequired",
+    "responded_by": null,
+    "responded_at": null,
+    "notification_state": "Delivered",
+    "notified_at": "2026-10-17T15:52:00Z",
+    "acknowledged_at": "2026-10-17T15:55:00Z",
+    "assignment_id": "019c0000-0000-7000-8000-000000000122",
+    "revision": 2
+  },
+  {
+    "id": "019c0000-0000-7000-8000-000000000913",
+    "contest_id": "019c0000-0000-7000-8000-000000000010",
+    "re_flight_id": "019c0000-0000-7000-8000-000000000901",
+    "contest_participation_id": "019c0000-0000-7000-8000-000000000045",
+    "role": "GroupMember",
+    "excluded_reason": null,
+    "draw_position": null,
+    "response": "NotRequired",
+    "responded_by": null,
+    "responded_at": null,
+    "notification_state": "Delivered",
+    "notified_at": "2026-10-17T15:52:00Z",
+    "acknowledged_at": null,
+    "assignment_id": "019c0000-0000-7000-8000-000000000123",
+    "revision": 2
+  }
+]

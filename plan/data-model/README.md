@@ -9,7 +9,7 @@ Canonical documentation for the Soar Score data model. This folder is the source
 - [Contest Options](contest-options.md) - Every setting a director can make, where it is stored, its defaults, and when it can change
 - [Enumerations](enumerations.md) - Every enumeration field and its allowed values, generated from the entity documents (enumeration columns are also marked `enum` in the ERD)
 - [Entity Documentation](entities/) - Per-entity specifications (48 files)
-- [Entity JSON Examples](examples/entities/README.md) - One JSON example for every entity, built on a shared scenario
+- [Entity JSON Examples](examples/entities/README.md) - One JSON file of example rows per entity, built on a shared scenario
 - [Reconciliation Status](reconciliation-findings.md) - What was reconciled with the architecture and business requirements, and what is still open
 
 ## Entity Catalog

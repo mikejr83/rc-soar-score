@@ -1,0 +1,14 @@
+[
+  {
+    "id": "019c0000-0000-7000-8000-0000000000b4",
+    "publication_id": "019c0000-0000-7000-8000-0000000000b0",
+    "requested_by": "019c0000-0000-7000-8000-000000000001",
+    "trigger": "owner_request",
+    "reason": "Published under the wrong contest name",
+    "requested_at": "2026-10-19T14:00:00Z",
+    "state": "approved",
+    "decided_by": "019c0000-0000-7000-8000-000000000003",
+    "decided_at": "2026-10-19T18:30:00Z",
+    "decision_note": "Confirmed with the owner"
+  }
+]

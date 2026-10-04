@@ -1,0 +1,59 @@
+[
+  {
+    "id": "019c0000-0000-7000-8000-000000000080",
+    "contest_id": "019c0000-0000-7000-8000-000000000010",
+    "revision_number": 1,
+    "previous_revision_id": null,
+    "first_round": 1,
+    "last_round": 8,
+    "draw_mode": "StandardManOnMan",
+    "random_seed": 2918374651,
+    "algorithm_version": "1.0.0",
+    "draw_config": {
+      "schema_version": 1,
+      "groups_per_round": 2,
+      "team_protection": true,
+      "lane_mode": "None",
+      "configured_draw_mode": "StandardManOnMan"
+    },
+    "seeding_snapshot": {
+      "pilots": [
+        {
+          "contest_participation_id": "019c0000-0000-7000-8000-000000000040",
+          "team_id": "019c0000-0000-7000-8000-000000000050"
+        },
+        {
+          "contest_participation_id": "019c0000-0000-7000-8000-000000000041",
+          "team_id": "019c0000-0000-7000-8000-000000000050"
+        },
+        {
+          "contest_participation_id": "019c0000-0000-7000-8000-000000000043",
+          "team_id": "019c0000-0000-7000-8000-000000000056"
+        },
+        {
+          "contest_participation_id": "019c0000-0000-7000-8000-000000000044",
+          "team_id": "019c0000-0000-7000-8000-000000000056"
+        },
+        {
+          "contest_participation_id": "019c0000-0000-7000-8000-000000000045",
+          "team_id": null
+        }
+      ]
+    },
+    "fairness_summary": {
+      "max_duplicate_matchups": 4,
+      "matchup_histogram": {
+        "0": 2,
+        "4": 8
+      },
+      "unmet_opponent_count": 0,
+      "lane_uniformity_index": null,
+      "overall_fairness_score": 0.97
+    },
+    "reason": "Initial draw",
+    "created_by": "019c0000-0000-7000-8000-000000000001",
+    "created_at": "2026-10-16T20:00:00Z",
+    "finalized_by": "019c0000-0000-7000-8000-000000000001",
+    "finalized_at": "2026-10-16T20:05:00Z"
+  }
+]

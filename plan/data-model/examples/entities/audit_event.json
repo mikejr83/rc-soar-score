@@ -1,0 +1,21 @@
+[
+  {
+    "id": "019c0000-0000-7000-8000-0000000000c6",
+    "entity_type": "ScoreAttempt",
+    "entity_id": "019c0000-0000-7000-8000-000000000401",
+    "contest_id": "019c0000-0000-7000-8000-000000000010",
+    "owner_account_id": null,
+    "publication_id": null,
+    "action": "ScoreAttempt",
+    "actor_id": "019c0000-0000-7000-8000-000000000001",
+    "authority": "Director",
+    "installation_id": "019c0000-0000-7000-8000-0000000000c0",
+    "device": "field-laptop",
+    "base_revision": 0,
+    "resulting_revision": 1,
+    "server_timestamp": "2026-10-17T15:10:00Z",
+    "client_timestamp": "2026-10-17T15:09:58Z",
+    "reason": null,
+    "outcome": "Success"
+  }
+]

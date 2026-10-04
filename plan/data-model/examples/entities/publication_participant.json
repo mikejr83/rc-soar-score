@@ -1,0 +1,77 @@
+[
+  {
+    "id": "019c0000-0000-7000-8000-000000000b20",
+    "publication_id": "019c0000-0000-7000-8000-0000000000b0",
+    "pilot_key": "p_7Hq2xK",
+    "source_participation_id": "019c0000-0000-7000-8000-000000000040",
+    "details": {
+      "name": "Sam Ortega",
+      "club": "Front Range Soaring Society",
+      "country": "USA"
+    },
+    "public_profile_id": null,
+    "redacted_at": null,
+    "created_at": "2026-10-17T16:00:00Z",
+    "updated_at": "2026-10-17T16:00:00Z"
+  },
+  {
+    "id": "019c0000-0000-7000-8000-000000000b21",
+    "publication_id": "019c0000-0000-7000-8000-0000000000b0",
+    "pilot_key": "p_Bd4Wm9",
+    "source_participation_id": "019c0000-0000-7000-8000-000000000041",
+    "details": {
+      "name": "Alex Chen",
+      "club": "Front Range Soaring Society",
+      "country": "USA"
+    },
+    "public_profile_id": null,
+    "redacted_at": null,
+    "created_at": "2026-10-17T16:00:00Z",
+    "updated_at": "2026-10-17T16:00:00Z"
+  },
+  {
+    "id": "019c0000-0000-7000-8000-000000000b22",
+    "publication_id": "019c0000-0000-7000-8000-0000000000b0",
+    "pilot_key": "p_Kc8Zt2",
+    "source_participation_id": "019c0000-0000-7000-8000-000000000043",
+    "details": {
+      "name": "Riley Nakamura",
+      "club": "Longmont Lofters RC Club",
+      "country": "USA"
+    },
+    "public_profile_id": null,
+    "redacted_at": null,
+    "created_at": "2026-10-17T16:00:00Z",
+    "updated_at": "2026-10-17T16:00:00Z"
+  },
+  {
+    "id": "019c0000-0000-7000-8000-000000000b23",
+    "publication_id": "019c0000-0000-7000-8000-0000000000b0",
+    "pilot_key": "p_Fs5Ny3",
+    "source_participation_id": "019c0000-0000-7000-8000-000000000044",
+    "details": {
+      "name": "Morgan Reyes",
+      "club": "Longmont Lofters RC Club",
+      "country": "USA"
+    },
+    "public_profile_id": null,
+    "redacted_at": null,
+    "created_at": "2026-10-17T16:00:00Z",
+    "updated_at": "2026-10-17T16:00:00Z"
+  },
+  {
+    "id": "019c0000-0000-7000-8000-000000000b24",
+    "publication_id": "019c0000-0000-7000-8000-0000000000b0",
+    "pilot_key": "p_Xe6Ra1",
+    "source_participation_id": "019c0000-0000-7000-8000-000000000045",
+    "details": {
+      "name": "Taylor Brooks",
+      "club": null,
+      "country": "USA"
+    },
+    "public_profile_id": null,
+    "redacted_at": null,
+    "created_at": "2026-10-17T16:00:00Z",
+    "updated_at": "2026-10-17T16:00:00Z"
+  }
+]

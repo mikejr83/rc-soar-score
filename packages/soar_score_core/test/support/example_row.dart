@@ -7,13 +7,13 @@ class ExampleRow {
     required this.json,
   });
 
-  /// The entity name from the `## EntityName` heading above the block.
+  /// The entity name from the catalog.
   final String entity;
 
-  /// The Markdown file the row came from.
+  /// The JSON file the row came from.
   final String file;
 
-  /// Zero-based position among the rows under the same heading.
+  /// Zero-based position within the file.
   final int index;
 
   /// The row exactly as written.

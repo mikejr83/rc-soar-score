@@ -1,0 +1,22 @@
+[
+  {
+    "id": "019c0000-0000-7000-8000-000000000081",
+    "contest_id": "019c0000-0000-7000-8000-000000000010",
+    "matrix_revision_id": "019c0000-0000-7000-8000-000000000080",
+    "ordinal": 1,
+    "group_count": 2,
+    "status": "Locked",
+    "superseded_by_round_id": null,
+    "revision": 2
+  },
+  {
+    "id": "019c0000-0000-7000-8000-000000000082",
+    "contest_id": "019c0000-0000-7000-8000-000000000010",
+    "matrix_revision_id": "019c0000-0000-7000-8000-000000000080",
+    "ordinal": 2,
+    "group_count": 2,
+    "status": "Open",
+    "superseded_by_round_id": null,
+    "revision": 1
+  }
+]
