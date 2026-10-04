@@ -33,7 +33,10 @@ melos:
   scripts:
     build:
       description: Build every project (flutter build web for the Flutter apps, dart compile exe for the Dart server).
-      run: melos build:web && melos build:dart
+      # `where findstr` is true only under cmd.exe; under sh it fails, so the
+      # nix script runs. Both branches stay valid in both shells because only
+      # && / || / () are used.
+      run: melos build:web && (where findstr && melos run build:dart:win || melos run build:dart:nix)
 
     build:web:
       description: Build the Flutter web apps.
@@ -43,10 +46,18 @@ melos:
         category: apps
         flutter: true
 
-    build:dart:
-      description: Build the pure-Dart CLI apps.
+    build:dart:win:
+      description: Build the pure-Dart CLI apps (Windows; cmd.exe has no mkdir -p, so use plain mkdir).
       exec:
-        command: mkdir build/cli && dart compile exe lib/main.dart -o build/cli/$MELOS_PACKAGE_NAME.exe
+        command: mkdir build\cli && dart compile exe lib/main.dart -o build/cli/$MELOS_PACKAGE_NAME.exe
+      packageFilters:
+        category: apps
+        flutter: false
+
+    build:dart:nix:
+      description: Build the pure-Dart CLI apps (Linux/macOS; mkdir -p is idempotent).
+      exec:
+        command: mkdir -p build/cli && dart compile exe lib/main.dart -o build/cli/$MELOS_PACKAGE_NAME.exe
       packageFilters:
         category: apps
         flutter: false
