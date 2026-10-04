@@ -40,6 +40,22 @@ ExampleRegistry buildExampleRegistry() => ExampleRegistry()
   )
   ..register('LandingResult', (json) => LandingResult.fromJson(json).toJson())
   ..register('LandingTable', (json) => LandingTable.fromJson(json).toJson())
+  ..register(
+    'ContestModelLink',
+    (json) => ContestModelLink.fromJson(json).toJson(),
+  )
+  ..register(
+    'ContestParticipation',
+    (json) => ContestParticipation.fromJson(json).toJson(),
+  )
+  ..register('ModelCatalog', (json) => ModelCatalog.fromJson(json).toJson())
+  ..register(
+    'ParticipantProfile',
+    (json) => ParticipantProfile.fromJson(json).toJson(),
+  )
+  ..register('Role', (json) => Role.fromJson(json).toJson())
+  ..register('Team', (json) => Team.fromJson(json).toJson())
+  ..register('TeamMembership', (json) => TeamMembership.fromJson(json).toJson())
   ..register('Installation', (json) => Installation.fromJson(json).toJson())
   ..register(
     'InstallationActivation',
