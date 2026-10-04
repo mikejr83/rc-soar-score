@@ -15,20 +15,23 @@ One example row for every entity in the [data model](../../README.md), written a
 
 ## The shared scenario
 
-All files describe the same small ALES contest, so identifiers line up across files. Every identifier has the form `019c0000-0000-7000-8000-0000000000NN` (illustrative UUIDv7 values), except `scoring_uuid`, which is a UUIDv4.
+All files describe the same ALES contest, so identifiers line up across files. Every identifier has the form `019c0000-0000-7000-8000-0000000000NN` (illustrative UUIDv7 values), except `scoring_uuid`, which is a UUIDv4.
 
-| Thing                  | Value                                                                                                           |
-| ---------------------- | --------------------------------------------------------------------------------------------------------------- |
-| Director               | Dana Whitfield, account `…0001`, profile owner and contest owner                                                |
-| Pilots                 | Sam Ortega (participation `…0040`), Alex Chen (participation `…0041`)                                           |
-| Timekeeper             | Jo Park (participation `…0042`), a `NonFlier`                                                                   |
-| Contest                | "Front Range ALES Open", `…0010`, 17-18 October 2026, America/Denver                                            |
-| Discipline             | The ALES profile and the 1 m to 10 m landing table (50 down to 5 points) from [ales.md](../disciplines/ales.md) |
-| Configuration revision | `…0070`                                                                                                         |
-| Matrix revision        | `…0080`, round 1 `…0081`, round 2 `…0082`                                                                       |
-| Sam's round 1 flight   | assignment `…0084`, placeholder `…00a0`, landing within 3 m (40 points)                                         |
-| Alex's zero flights    | round 1 motor restart (`…00a7`), round 2 out of bounds (`…00ab`)                                                |
-| Publication            | `…00b0`                                                                                                         |
+| Thing                   | Value                                                                                                           |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------- |
+| Director                | Dana Whitfield, account `…0001`, owner of the contest and of all profiles                                       |
+| Pilots                  | Sam Ortega, Alex Chen, Riley Nakamura, Morgan Reyes, and Taylor Brooks (a guest)                                |
+| Timekeeper              | Jo Park, a `NonFlier`                                                                                           |
+| Teams                   | Boulder Thermals (Sam, Alex) and Longmont Lofters (Riley, Morgan). Taylor flies without a team                  |
+| Contest                 | "Front Range ALES Open", `…0010`, 17-18 October 2026, America/Denver, `Running`                                 |
+| Discipline              | The ALES profile and the 1 m to 10 m landing table (50 down to 5 points) from [ales.md](../disciplines/ales.md) |
+| Configuration revision  | `…0070`, `Time` group scoring, 600 s target                                                                     |
+| Matrix                  | Revision `…0080`, 8 rounds, 2 groups per round (3 + 2 pilots), team protection on                               |
+| Round 1                 | Finished and locked. Group 1: Sam, Riley, Taylor. Group 2: Alex, Morgan                                         |
+| Round 2                 | In progress. Group 1: Alex, Morgan, Taylor. Group 2: Sam, Riley. Group 3 is a re-flight of round 1 group 1      |
+| Notable flights         | Alex's motor restart in round 1 and out of bounds landing in round 2. Taylor's rejected review request          |
+| Standings after round 1 | Morgan 1045.0, Sam 1040.0, Riley 1024.4, Taylor 948.1, Alex 0.0. Longmont Lofters lead the teams                |
+| Publication             | `…00b0`, published after round 1                                                                                |
 
 ## Conventions
 

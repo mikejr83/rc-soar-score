@@ -55,7 +55,7 @@ Entity specifications: [Installation](../../entities/installation.md), [Installa
   "owner_account_id": null,
   "sequence": 405,
   "entity_type": "ScoreAttempt",
-  "entity_id": "019c0000-0000-7000-8000-0000000000a1",
+  "entity_id": "019c0000-0000-7000-8000-000000000401",
   "base_revision": null,
   "client_mutation_id": "01J9ZM5B2E4G6H8K0N2Q4S6U8W",
   "actor_id": "019c0000-0000-7000-8000-000000000001",
@@ -66,7 +66,7 @@ Entity specifications: [Installation](../../entities/installation.md), [Installa
   "server_acceptance_time": "2026-10-17T15:10:00Z",
   "server_rejection_time": null,
   "payload": {
-    "score_placeholder_id": "019c0000-0000-7000-8000-0000000000a0",
+    "score_placeholder_id": "019c0000-0000-7000-8000-000000000301",
     "raw_components": {
       "time_flown": 585,
       "landing": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d32"
@@ -87,7 +87,7 @@ Entity specifications: [Installation](../../entities/installation.md), [Installa
   "contest_id": "019c0000-0000-7000-8000-000000000010",
   "owner_account_id": null,
   "entity_type": "ScorePlaceholder",
-  "entity_id": "019c0000-0000-7000-8000-0000000000a0",
+  "entity_id": "019c0000-0000-7000-8000-000000000301",
   "accepted_mutation_id": "019c0000-0000-7000-8000-0000000000c3",
   "competing_mutation_id": "019c0000-0000-7000-8000-0000000000c7",
   "reason_code": "stale_base",
@@ -124,7 +124,7 @@ Entity specifications: [Installation](../../entities/installation.md), [Installa
 {
   "id": "019c0000-0000-7000-8000-0000000000c6",
   "entity_type": "ScoreAttempt",
-  "entity_id": "019c0000-0000-7000-8000-0000000000a1",
+  "entity_id": "019c0000-0000-7000-8000-000000000401",
   "contest_id": "019c0000-0000-7000-8000-000000000010",
   "owner_account_id": null,
   "publication_id": null,
