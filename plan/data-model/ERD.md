@@ -157,7 +157,8 @@ erDiagram
     }
 
     MODEL_CATALOG {
-        uuid id           PK
+        uuid id                PK
+        uuid owner_account_id  FK
         text name
         text manufacturer
         int  revision
@@ -725,6 +726,7 @@ erDiagram
     ACCOUNT |o--o{ CONTEST : "owns (optional)"
     ACCOUNT ||--o{ PARTICIPANT_ACCOUNT_LINK : "linked via"
     ACCOUNT ||--o{ PARTICIPANT_PROFILE : "owns (director)"
+    ACCOUNT ||--o{ MODEL_CATALOG : "owns (director)"
     ACCOUNT |o--o| PARTICIPANT_DIRECTORY_ENTRY : "offers"
     PARTICIPANT_PROFILE ||--o{ PARTICIPANT_ACCOUNT_LINK : "linked via"
     ACCOUNT ||--o{ CONTEST_CONFIGURATION_PRESET : "owns"

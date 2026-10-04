@@ -34,7 +34,7 @@ Canonical documentation for the Soar Score data model. This folder is the source
 | Role             | [entities/role.md](entities/role.md)                             | [teams-roles-models.md](../architecture-requirements/data/teams-roles-models.md) | Per-participant role (Pilot vs NonFlier) with system and contest scopes |
 | Team             | [entities/team.md](entities/team.md)                             | [teams-roles-models.md](../architecture-requirements/data/teams-roles-models.md) | Contest-scoped team: a name and its members                             |
 | TeamMembership   | [entities/team_membership.md](entities/team_membership.md)       | [teams-roles-models.md](../architecture-requirements/data/teams-roles-models.md) | Link between team and participation with team role                      |
-| ModelCatalog     | [entities/model_catalog.md](entities/model_catalog.md)           | [teams-roles-models.md](../architecture-requirements/data/teams-roles-models.md) | Reusable model name/manufacturer catalog                                |
+| ModelCatalog     | [entities/model_catalog.md](entities/model_catalog.md)           | [teams-roles-models.md](../architecture-requirements/data/teams-roles-models.md) | A director's reusable model name/manufacturer catalog                   |
 | ContestModelLink | [entities/contest_model_link.md](entities/contest_model_link.md) | [teams-roles-models.md](../architecture-requirements/data/teams-roles-models.md) | Contest-snapshot link from participation to model                       |
 
 ### Contest & Contest Configuration
@@ -197,6 +197,7 @@ graph TD
     A -->|has| APP
     A -->|offers| PDE
     A -->|owns director's| P
+    A -->|owns| MC
     A -->|owns| C
     A -->|owns| CPRE
     A -->|linked via| PAL
