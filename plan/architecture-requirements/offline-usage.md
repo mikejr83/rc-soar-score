@@ -1,6 +1,6 @@
 # RC Soar Score Architecture - Offline Usage
 
-The RC Soar Score application has the ability to be run via the internet or as a local application wrapped in a desktop shell (like Electron). The offline usage of the application is provided to users where they wish to have the complete ability to run a contest without the need to be connected to the internet. There are many reasons for this. Chief among them is that many soaring contests take place in locations with limited mobile data connections. This means that contest directors will need to create, configure, and score contests without any participants providing scoring data.
+The RC Soar Score application has the ability to be run via the internet or as a native Flutter desktop application. The offline usage of the application is provided to users where they wish to have the complete ability to run a contest without the need to be connected to the internet. There are many reasons for this. Chief among them is that many soaring contests take place in locations with limited mobile data connections. This means that contest directors will need to create, configure, and score contests without any participants providing scoring data.
 
 ## Goals
 
@@ -8,11 +8,20 @@ The following sections details the goals and requirements for the offline usage 
 
 ### Front-End Parity
 
-The online and offline versions of RC Soar Score should effectively be the same. This means that the online web application should be reused with the offline version.
+The online and offline versions of RC Soar Score should effectively be the same. Both are built from the same Flutter code base: the web build is the online application and the native desktop build is the offline application. The same API layer and domain logic serve both, so the two behave identically.
 
-The initial thought for this parity is to use a front-end technology such as Angular to build the main application for contest directors. It can be built using PWA standards. Further, it can be wrapped with a technology like Electron. The desktop wrapping layer can host the API which the UI interacts with. The API layer will store all data locally.
+- **Web application.** The web application stores no contest data in the browser. All contest data is read and written through the API. The browser may use IndexedDB (or similar browser storage) for user preferences and specific front-end client functionality, but never for the data defined in the [data model](data.md).
+- **Native application.** The native application hosts the same API layer in-process and stores all contest data locally. The application's UI talks to that local API exactly as the web application talks to the remote one.
 
-Flutter should also be considered. It will enable the production of web, Windows, iOS, and Android artifacts. This could be coupled with Dart for the server API language.
+### Connected Operation
+
+The native application is not designed to operate solely offline. When it has an internet connection and can reach the remote API, it behaves as follows:
+
+1. **Initial sync.** The application synchronizes first, so that the local data and the remote data are in the same state. This follows the [synchronization requirements](offline-synchronization.md).
+2. **Write-through.** From that point forward, a change is applied to the local data first and then immediately sent to the remote API. The change is recorded as a pending mutation until the service acknowledges it.
+3. **Disconnection.** If the connection is lost or the remote API cannot be reached, the application continues to operate on local data. Pending mutations are retained and sent on the next successful connection, which begins with another synchronization.
+
+Local-first means the director never waits on the network to enter or change data.
 
 ### Publishing Results
 

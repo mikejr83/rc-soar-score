@@ -1,6 +1,6 @@
 # RC Soar Score Entity Relationship Diagram
 
-ERD for the 48 conceptual entities. Physical design: PostgreSQL backend with IndexedDB clients, UUIDv7 identifiers, composite unique constraints on natural business keys.
+ERD for the 48 conceptual entities. Physical design: PostgreSQL backend and SQLite in the native offline application (web clients hold no contest data and use the API), UUIDv7 identifiers, composite unique constraints on natural business keys.
 
 ```mermaid
 erDiagram

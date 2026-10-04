@@ -41,7 +41,7 @@ Pilots will also interact with the web site during the contest. Participants are
 
 ### Offline Contest Application
 
-Often contests are run where there is no internet access. Therefore, the application should also be packaged in a desktop shell such as Electron. This will enable contest directors to download an offline copy of the application before running their contest.
+Often contests are run where there is no internet access. Therefore, the application should also be available as a native Flutter desktop application. This will enable contest directors to download an offline copy of the application before running their contest.
 
 The contest director should be able to use the offline application to pull and push data to the API layer. A common use case is a contest director creating the contest when there is an internet connection, making the contest public, and opening the scoring. The contest proceeds where the only connection available is via mobile connections on pilot's mobile devices. They enter their scores via the web site. At the end of the contest contest director may use a hotspot to pull the latest data down to the application.
 

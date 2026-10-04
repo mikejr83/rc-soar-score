@@ -12,7 +12,7 @@ Thin executable that wires dependencies, starts the shelf_io server, and exposes
 ## Boundaries
 
 - **Must NOT contain business logic**. All routing and handler logic lives in `soar_score_api_handlers`; this app only wires and serves.
-- Depends on: `soar_score_api`, `soar_score_data_postgres`, `soar_score_api_handlers`
+- Depends on: `soar_score_api`, `soar_score_data` (PostgreSQL executor), `soar_score_api_handlers`
 - No Flutter dependencies. Pure Dart CLI executable.
 
 ## Authentication and Authorization
@@ -22,7 +22,7 @@ Auth0 JWT middleware validates every `/api/v1/*` request (except `/health`). Tok
 ## Testing
 
 - In-process only. Tests spin up the shelf handler in memory and issue synthetic HTTP requests; no socket/port binding in tests.
-- Tests mock repositories from `soar_score_data_postgres`. No real Postgres needed for handler tests.
+- Tests mock repositories from the `soar_score_core` interfaces. No real Postgres needed for handler tests.
 - Run: `dart test`
 
 ## Auth0 Config

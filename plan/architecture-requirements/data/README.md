@@ -46,7 +46,8 @@ The architectural and schema design decisions are resolved as follows:
 
 - **Database technology, identifier format, and indexing**:
   - **Backend**: Relational database (hosting platform-agnostic standard SQL schema).
-  - **Client / Web**: IndexedDB for local offline web and PWA client persistence.
+  - **Native (offline) client**: An embedded relational database (SQLite) holds the full local copy of the contest data.
+  - **Web client**: Stores no contest data. All data is read and written through the API. Browser storage such as IndexedDB may be used only for user preferences and front-end client functionality, never for the entities in this data model.
   - **Identifier format**: UUIDv7 (128-bit time-ordered, collision-resistant UUIDs generated offline or online).
   - **Keying and uniqueness**: Surrogate UUIDv7 primary keys on all tables/stores with composite unique constraint indexes matching natural business keys (e.g., `(contest_id, round_number, group_number, lane_number)` and `(contest_id, client_mutation_id)` for idempotency).
 
