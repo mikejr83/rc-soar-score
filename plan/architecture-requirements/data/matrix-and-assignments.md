@@ -29,6 +29,6 @@ A re-flight group flies in the same round, numbered after the regular groups, an
 ## Invariants
 
 - A score placeholder exists for every pilot assignment, even before a value is entered.
-- A scored assignment cannot be silently moved or reinterpreted.
+- A scored assignment cannot be silently moved or reinterpreted. It can be moved only by an explicit director action that resets its score: the old score stays in the history and stops counting, and the pilot enters the score again for the new assignment.
 - Future unscored rounds may be added or revised only under the contest lifecycle and explicit matrix revision rules.
 - Seeded draw mode may create later matrix revisions incrementally after prerequisite rounds are complete.

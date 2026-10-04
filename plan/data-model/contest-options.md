@@ -57,7 +57,7 @@ A configuration revision holds the **full resolved settings**, not only the dire
 ### Not options
 
 - The completion reminder after 48 hours without a score is a fixed platform value. It is advisory, and the director accepts completion.
-- A pilot's cumulative penalty is not a contest option. The director applies it to a flight on the official score.
+- The flight penalty and the cumulative penalty are score components, not contest options. The flight penalty is entered with each score and is part of the round score. The cumulative penalty is not a contest option either. The director applies it to a flight on the official score.
 - Scoring access, the administration lock, and the hiding of overall results are contest controls and not configuration.
 
 ### Dependencies the service enforces

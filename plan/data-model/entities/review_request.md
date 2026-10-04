@@ -37,7 +37,7 @@
 - Cannot be submitted on a score marked Official or locked at the score, group, round, or contest level
 - At most one review request is open (`Submitted` or `UnderReview`) per score placeholder
 - `proposed_components` must be consistent with the score calculation rules for the flight
-- `proposed_components` must not include `cumulative_penalty`; only the director applies it
+- `proposed_components` may include `flight_penalty` but must not include `cumulative_penalty`; only the director applies that
 - `decision_actor_id`, `decision_time`, and `resulting_attempt_id` are null while the state is `Submitted`
 - Approval creates a ScoreAttempt under director authority that carries the proposed components, and a new OfficialScore version that cites it. The original submission is never changed
 - If an official edits or marks a score official while a review is pending, the review is superseded. Superseded reviews are not processed and stay `Superseded`

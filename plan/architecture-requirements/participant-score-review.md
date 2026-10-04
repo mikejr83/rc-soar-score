@@ -8,7 +8,7 @@ This document defines participant-requested score reviews and participant retire
 
 1. A review request may be created only for a preliminary (`Submitted`) participant score when review requests are enabled for the contest, the score has not been marked `Official`, the score is not locked (at the score, group, round, or contest level), and no other review request for that flight assignment is currently pending.
 2. A review request is prohibited on any score that has been marked `Official` or `Locked`. Once marked `Official` or `Locked`, corrections can only be made by the contest director or authorized official through administrative score correction.
-3. A review request must preserve the current submitted score, the participant's proposed raw components (which may not include a `Cumulative Penalty`), optional explanation message, actor, base score revision, and request time. It must not mutate the original participant submission in place.
+3. A review request must preserve the current submitted score, the participant's proposed raw components (which may include a `Flight Penalty` but not a `Cumulative Penalty`), optional explanation message, actor, base score revision, and request time. It must not mutate the original participant submission in place.
 4. If an official edits or marks the score official while a review request is pending, the review request is superseded. The service must not apply a stale proposal automatically.
 
 ## Retirement

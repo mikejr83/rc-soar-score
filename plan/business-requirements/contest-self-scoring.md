@@ -33,7 +33,7 @@ A form with inputs for each of the scoring parameters is presented to the user w
 
 The contest discipline dictates what inputs or scoring parameters are shown on the form or view. These are outlined in each document for that soaring discipline.
 
-Participants do not enter penalties. The contest director may apply a "Cumulative Penalty" to a flight as a judgement call, and the participant sees it read-only once it has been applied. See `contest-official-scoring.md`.
+Every discipline has a generic numeric "Flight Penalty" input. A participant, helper, or the contest director may enter a whole number of points for an infraction on that flight, for example flying outside the assigned group. It is part of the round score: it is deducted from the flight's raw score before the group score is calculated, and it is dropped with the round if the round is dropped. It is separate from the penalties a discipline applies on its own, such as the F3J late-landing penalty. The contest director alone may also apply a "Cumulative Penalty" to a flight, which is never dropped (see `contest-official-scoring.md`). The participant sees the cumulative penalty read-only once it has been applied.
 
 The form will have submission, navigation, and optional operations. These are enabled under different conditions.
 

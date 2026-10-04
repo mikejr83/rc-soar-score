@@ -36,6 +36,7 @@
 - Each cites its source ScoreAttempt for traceability
 - Latest score_revision for a placeholder is the current authoritative score
 - Components normalized to standard units when appropriate
+- `components` may include `flight_penalty`, a nullable non-negative integer deducted from the discipline raw score before the group score, so a dropped round drops it. Changing it is an official revision with a reason
 - `components` may include `cumulative_penalty`, a nullable non-negative integer set only under director authority. Absent means no penalty was ever applied, a positive value is the points deducted, and zero means a penalty was applied and later removed. Changing it is an official revision with a reason, and earlier versions are kept
 - A landing selection in `components` is the selected LandingResult id, which fixes the key, points, and table
 - Components hold authoritative inputs only; values derived from the contest configuration are calculated and stored in FlightResult, so retroactive configuration changes never leave stale values here

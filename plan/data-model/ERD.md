@@ -317,6 +317,8 @@ erDiagram
         uuid        superseded_by_assignment_id FK "optional, write-once"
         uuid        actor_id                    FK
         text        reason
+        text        existing_score_handling        "None, Reset"
+        int         reset_score_revision           "optional"
         timestamptz created_at
     }
 
@@ -462,7 +464,7 @@ erDiagram
         text        outcome                     "Scored, Zero"
         decimal     raw_points                  "discipline raw score"
         decimal     landing_points              "optional"
-        decimal     flight_penalty_points       "optional"
+        decimal     flight_penalty_points       "optional; discipline plus entered flight penalty"
         int         cumulative_penalty          "optional; copy of the official component"
         decimal     group_score                 "normalized round result"
         bool        is_selected                 "supplies the round result"
