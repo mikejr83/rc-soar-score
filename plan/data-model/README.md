@@ -7,7 +7,7 @@ Canonical documentation for the Soar Score data model. This folder is the source
 - [Entity Relationship Diagram (ERD)](ERD.md) - Mermaid diagram of all entities and their relationships
 - [Contest Options](contest-options.md) - Every setting a director can make, where it is stored, its defaults, and when it can change
 - [Entity Documentation](entities/) - Per-entity specifications (47 files)
-- [Reconciliation Findings](reconciliation-findings.md) - Gaps and conflicts between this model and the architecture and business requirements
+- [Reconciliation Status](reconciliation-findings.md) - What was reconciled with the architecture and business requirements, and what is still open
 
 ## Entity Catalog
 
