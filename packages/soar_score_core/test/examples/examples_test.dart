@@ -30,6 +30,16 @@ void main() {
     }
   });
 
+  test('every catalog entity has a registered model', () {
+    expect(
+      catalog
+          .map((e) => e.entity)
+          .toSet()
+          .difference(registry.entities.toSet()),
+      isEmpty,
+    );
+  });
+
   test('every registered entity is a catalog entity', () {
     expect(
       registry.entities.toSet().difference(

@@ -1,5 +1,6 @@
 export 'backend_only.dart';
 export 'json_converters.dart';
+export 'private_data.dart';
 export 'protected_credential.dart';
 export 'scope_ids.dart';
 export 'scoring_uuid.dart';

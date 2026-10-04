@@ -2,7 +2,7 @@
 
 - **Category:** Domain / Core
 - **Priority:** High
-- **Status:** Open
+- **Status:** In-Review
 
 ## Context
 
@@ -53,25 +53,25 @@ The scoring engine, the draw engine, and the sync protocol are not part of this 
 
 ## Work Items
 
-- [ ] Check the field inventory of all 48 files under `plan/data-model/entities/` against `plan/data-model/examples/` and the controlling architecture documents. Record discrepancies and their resolution in a short section at the end of this ticket.
-- [ ] Add the shared building blocks first: revision, sync-scope marker, UTC timestamp handling, `scoring_uuid` type, versioned payload envelope, and the enum barrel.
-- [ ] Implement the families in the order above, one family per PR where practical. Keep one class per file and group files by family under `lib/models/`.
-- [ ] Expand `Contest` without losing its existing UUIDv7, UTC, validation, equality and repository behaviour.
-- [ ] Add JSON serialization with the repository's `json_annotation` / `json_serializable` convention, with no I/O or backend dependencies. Regenerate checked-in code.
-- [ ] Define repository contracts in `soar_score_core` for the entities that need them. Include the contract that makes sync possible: a write goes through one unit of work that stores the entity, bumps its revision and records the `MutationRecord` (and `Tombstone` for deletes) together, plus a separate "apply replicated change" operation used only when pulling from the server. Also define the `SyncStore` contract used by the sync engine and the server acceptor (see ticket 037): outbox reads and outcome updates, cursor reads and writes, replicated-change apply, and conflict and status queries. Contracts only; implementations belong to ticket 036.
-- [ ] Export the supported public models and enums from `soar_score_core.dart`.
-- [ ] Add focused tests, split by family, for construction, validation, equality, serialization round-trips, independent state dimensions, and representative relationship and provenance fields.
-- [ ] Add a round-trip test that loads every JSON file in `plan/data-model/examples/entities/` into its model and back, so the documented examples stay valid.
+- [x] Check the field inventory of all 48 files under `plan/data-model/entities/` against `plan/data-model/examples/` and the controlling architecture documents. Record discrepancies and their resolution in a short section at the end of this ticket.
+- [x] Add the shared building blocks first: revision, sync-scope marker, UTC timestamp handling, `scoring_uuid` type, versioned payload envelope, and the enum barrel.
+- [x] Implement the families in the order above, one family per PR where practical. Keep one class per file and group files by family under `lib/models/`.
+- [x] Expand `Contest` without losing its existing UUIDv7, UTC, validation, equality and repository behaviour.
+- [x] Add JSON serialization with the repository's `json_annotation` / `json_serializable` convention, with no I/O or backend dependencies. Regenerate checked-in code.
+- [x] Define repository contracts in `soar_score_core` for the entities that need them. Include the contract that makes sync possible: a write goes through one unit of work that stores the entity, bumps its revision and records the `MutationRecord` (and `Tombstone` for deletes) together, plus a separate "apply replicated change" operation used only when pulling from the server. Also define the `SyncStore` contract used by the sync engine and the server acceptor (see ticket 037): outbox reads and outcome updates, cursor reads and writes, replicated-change apply, and conflict and status queries. Contracts only; implementations belong to ticket 036.
+- [x] Export the supported public models and enums from `soar_score_core.dart`.
+- [x] Add focused tests, split by family, for construction, validation, equality, serialization round-trips, independent state dimensions, and representative relationship and provenance fields.
+- [x] Add a round-trip test that loads every JSON file in `plan/data-model/examples/entities/` into its model and back, so the documented examples stay valid.
 
 ## Acceptance Criteria
 
-- [ ] Every one of the 48 entities has a domain representation, or a documented architecture-driven resolution explains its alternative representation.
-- [ ] Identifiers and references use `Id`; models are immutable and do not embed persistence concerns.
-- [ ] State, revision, provenance, privacy, idempotency and sync-scope distinctions from the architecture documents are represented.
-- [ ] The repository contracts express the single-unit-of-work write and the separate replicated-change write.
-- [ ] Core remains usable without Flutter, database, network or platform APIs.
-- [ ] `dart analyze` and `dart test` pass in `packages/soar_score_core`.
-- [ ] All JSON examples under `plan/data-model/examples/entities/` round-trip through the models.
+- [x] Every one of the 48 entities has a domain representation, or a documented architecture-driven resolution explains its alternative representation.
+- [x] Identifiers and references use `Id`; models are immutable and do not embed persistence concerns.
+- [x] State, revision, provenance, privacy, idempotency and sync-scope distinctions from the architecture documents are represented.
+- [x] The repository contracts express the single-unit-of-work write and the separate replicated-change write.
+- [x] Core remains usable without Flutter, database, network or platform APIs.
+- [x] `dart analyze` and `dart test` pass in `packages/soar_score_core`.
+- [x] All JSON examples under `plan/data-model/examples/entities/` round-trip through the models.
 
 ## Dependencies
 
@@ -128,3 +128,10 @@ Recorded as the models land. See [035-implementation-plan.md](035-implementation
 | Derived entities | The three results have no row `revision` and are written only by the calculator. | They implement `SyncScoped` with the `derived` scope, so the replicated-change applier can tell them apart. The `entityType` getter is not needed, since the unit of work never saves them. |
 | Provenance stamps | Each result carries a configuration revision, a matrix revision and a calculation version, and is stale when any differs from the current one. | A shared `isStaleResult` check backs an `isStale` method on each class. The calculator decides what is current. |
 | Derived rules not checked | One selected flight per round, one standing per pilot per round, and ranking order span rows and need the calculator. | Left to the calculator and repositories. The classes check only single-row rules such as positive places and non-negative points. |
+| Backend-only revisions | `ParticipantAccountLink` and `PublicationIdentity` have a row `revision`; the other seven backend-only entities do not. Backend-only entities never synchronize. | `BackendOnly` is a marker with no members, so the two keep a `revision` field (default 0) without implementing `Synchronizable`. |
+| Account rules | The `Account` page restricts email, verification and admin by `kind`. | Enforced per instance: email is stored lowercase, a guest is never verified, local and deleted accounts have no email, the deleted-user account is never archived, only a registered account is a system admin, and `archived_at` is set exactly when archived. Uniqueness across accounts is left to the backend. |
+| Publication rules | The pages say an unclaimed publication is found by its verification email and that redaction deletes details. | A claimed publication has an owner profile and an unclaimed one a verification email. A redacted `PublicationParticipant` holds neither details nor a public profile. A `DelistRequest` decision records who, when and why together. |
+| Privacy marker and test | The plan lists `ParticipantProfile`, `AccountIdentity`, `Invitation` and the director-only parts of `AuditEvent` as private. `AuditEvent` is one row type, not split. | `PrivateData` marks all four, with the whole of `AuditEvent` marked. A test keeps hand-written field lists for `PublicationProjection` and `PublicationParticipant` and fails when a field is added or a private field name appears. |
+| Scope table and export audit | The plan calls for a single test of all 48 expected scopes. | `scope_table_test.dart` decodes the first example row of every entity through the public barrel, checks its scope against the README table (computed scopes allow each possible value), and checks that synchronizable types name themselves. `LandingResult` is the one entity with no scope. |
+| Library boundaries | The plan asks for a check that `lib/` imports only a short list of libraries. | `library_boundaries_test.dart` allows `dart:core`, `dart:convert`, `dart:math`, `equatable`, `json_annotation`, `logging` and the package itself, and rejects `dart:io`, `dart:html`, `dart:ffi` and `dart:isolate`. `dart:math` is used by `Id`. |
+| Ticket close-out | All 48 entities are modeled. Nothing is skipped by the example harness. | Status set to In-Review, work items and acceptance criteria ticked, and `plan/INDEX.md` gets a Data Model section. Ticket 036 can start. |
