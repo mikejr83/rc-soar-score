@@ -12,15 +12,16 @@ The `plan/` folder will remain to be a stable source of truth for the applicatio
 
 All Dart projects use snake_case names per the Dart package naming standard; a project's directory name is its name. Applications live in `apps/`, shared packages in `packages/`. The "Project Name" in the table is used to communicate a Dart appropriate project name for the project. The "Name" column is intended to be the front facing name that is used in any display areas (title bars, headers, etc.) that are shown to users or in areas of documentation for clarification.
 
-| Project | Name | Kind | Description |
-| ------- | ---- | ---- | ----------- |
-| `soar_score_server` | Soar Score API Server | App (Dart/shelf) | The backend API layer. Serves all client applications and the public site, and performs authn/authz by validating Auth0 JWTs (OIDC Authorization Code + PKCE on the client side). |
-| `soar_score_contest` | RC Soar Score Contest Management | App (Flutter web) | The contest management application for contest directors: configuring contests, selecting pilots, entering and modifying scores, admin tasks, and offline sync. Runs on laptops/tablets as a maximized window; the same Flutter code base underpins the stand-alone offline desktop shell. |
-| `soar_score_public` | RC Soar Score | App (Flutter web) | The public web site: project landing page, documentation and help, plus dense, tabular viewing of ongoing and completed contest results. Departures from strict Material 3 are permitted where report-like layouts require it. |
-| `soar_score_core` | Soar Score Core | Package (pure Dart) | Domain models, business logic, and the scoring engine. Pure Dart (no Flutter) so the same scoring rules run in the server and in every client, and stay unit-testable. |
-| `soar_score_data` | Soar Score Data | Package (pure Dart) | Data access layer: local SQLite persistence for offline use plus HTTP repositories for talking to the server. |
-| `soar_score_api` | Soar Score API | Package (pure Dart) | Shared API client used by the Flutter apps: HTTP transport, JSON DTOs, and typed API errors, with injectable token handling. |
-| `soar_score_ui` | Soar Score UI | Package (Flutter) | Shared UI components and theme tokens used by both Flutter apps, which share navigation constructs. |
+| Project              | Name                             | Kind                | Description                                                                                                                                                                                                                                                                                               |
+| -------------------- | -------------------------------- | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `soar_score_server`  | Soar Score API Server            | App (Dart/shelf)    | The backend API layer. Serves all client applications and the public site, and performs authn/authz by validating Auth0 JWTs (OIDC Authorization Code + PKCE on the client side).                                                                                                                         |
+| `soar_score_contest` | RC Soar Score Contest Management | App (Flutter web)   | The contest management application for contest directors: configuring contests, selecting pilots, entering and modifying scores, admin tasks, and offline sync. Runs on laptops/tablets as a maximized window; the same Flutter code base underpins the stand-alone offline desktop shell.                |
+| `soar_score_public`  | RC Soar Score                    | App (Flutter web)   | The public web site: project landing page, documentation and help, plus dense, tabular viewing of ongoing and completed contest results. Departures from strict Material 3 are permitted where report-like layouts require it.                                                                            |
+| `soar_score_core`    | Soar Score Core                  | Package (pure Dart) | Domain models, business logic, and the scoring engine. Pure Dart (no Flutter) so the same scoring rules run in the server and in every client, and stay unit-testable.                                                                                                                                    |
+| `soar_score_data`    | Soar Score Data                  | Package (pure Dart) | Data access layer: local SQLite persistence for offline use plus HTTP repositories for talking to the server.                                                                                                                                                                                             |
+| `soar_score_api`     | Soar Score API                   | Package (pure Dart) | Shared API client used by the Flutter apps: HTTP transport, JSON DTOs, and typed API errors, with injectable token handling.                                                                                                                                                                              |
+| `soar_score_sync`    | Soar Score Sync                  | Package (pure Dart) | Client synchronization engine for the native offline application: outbox, pull-first sync, write-through, cursor handling and status. Depends only on `soar_score_core` and `soar_score_api`; reaches local storage through core's `SyncStore` contract. Used only by `soar_score_contest` native builds. |
+| `soar_score_ui`      | Soar Score UI                    | Package (Flutter)   | Shared UI components and theme tokens used by both Flutter apps, which share navigation constructs.                                                                                                                                                                                                       |
 
 Future projects (e.g. the self-scoring web application and the offline desktop shell described in `plan/application-plan.md`) follow the same naming convention.
 
@@ -30,11 +31,11 @@ Future projects (e.g. the self-scoring web application and the offline desktop s
 
 Version lines (not patch versions) form the toolchain baseline; consumers install the latest patch within the recorded line. Ticket `001-setup-toolchain-baseline.md` is the single source of truth for these pins and must be updated first if a line goes stale.
 
-| Tool | Pinned line |
-| ---- | ----------- |
-| Flutter | 3.47.x (stable channel) |
-| Dart | Bundled with Flutter (no independent pin) |
-| Melos | 8.x |
+| Tool    | Pinned line                               |
+| ------- | ----------------------------------------- |
+| Flutter | 3.47.x (stable channel)                   |
+| Dart    | Bundled with Flutter (no independent pin) |
+| Melos   | 8.x                                       |
 
 Node/NX and Playwright lines are no longer part of the toolchain (tickets 002 and 012 rejected).
 
@@ -54,12 +55,12 @@ The public web site, the site for the RC Soar Score project and the contest resu
 
 The goal for the initial release is to present the complete offline application, its web counterpart, the self-scoring web application, and the public site. This includes the following:
 
-* All defined participant options should be implemented
-* All scoring options should be implemented
-* ALES, Thermal Duration, F3J, and F5J disciplines should be implemented.
-* Offline sync
-* Participant registration and syncing to local contest director data.
-* Contest results view
+- All defined participant options should be implemented
+- All scoring options should be implemented
+- ALES, Thermal Duration, F3J, and F5J disciplines should be implemented.
+- Offline sync
+- Participant registration and syncing to local contest director data.
+- Contest results view
 
 ### API Layer
 

@@ -46,15 +46,15 @@ Rounds and groups fly sequentially. Scores should be entered sequentially, howev
 
 A contest can be completed/finished in a number of conceptual ways:
 
-* If all the groups for all the rounds in the matrix have a score (or indication that a zero score is recorded) for each pilot that has not retired.
-* No score has been entered in 48 hours.
-* The contest director has marked the contest as completed.
+- If all the groups for all the rounds in the matrix have a score (or indication that a zero score is recorded) for each pilot that has not retired.
+- No score has been entered in 48 hours.
+- The contest director has marked the contest as completed.
 
 Often contest directors will configure a contest with a matrix for more rounds than they intend to fly. This is done out of optimism. The contest will continue until some point without all the rounds being completed. A pilot may drop out, retire, and thus have for some number of rounds while other pilots still fly. Thus it is difficult to objectively look at the data and declare the contest over. The points above give a solid indication of the contest being completed.
 
 An assumption can be made that the contest is completed with the following conditions:
 
-* All rounds where any pilot has a score also has a score for all other pilots
-* All rounds where any pilot has a score are only missing scores for pilots that have retired.
+- All rounds where any pilot has a score also has a score for all other pilots
+- All rounds where any pilot has a score are only missing scores for pilots that have retired.
 
 It is only an assumption because the contest director may be instructing the pilots to actively complete their scoring before the next round starts. Thus, if the assumption was made in round 7 of a 9 round contest, the contest may not be over, but the contest director is making sure that everyone is aware of their placing before entering the last two rounds.

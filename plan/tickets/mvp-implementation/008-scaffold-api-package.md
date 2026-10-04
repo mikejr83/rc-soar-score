@@ -4,7 +4,7 @@
 - **Priority:** High
 - **Status:** In-Review
 
-> **Amendment (architecture):** `soar_score_contest`'s Windows build (015) is intended to run fully offline by hosting the API in-process rather than reaching a deployed server (see 017/018). For that to work, this package's `ApiClient` must never assume a fixed server location — `baseUrl` has to be a required, caller-supplied value, so the *same* client code serves the web build (pointed at the deployed `soar_score_server`) and the Windows build (pointed at a local embedded instance) without any client-side branching. Work items and acceptance criteria below reflect this.
+> **Amendment (architecture):** `soar_score_contest`'s Windows build (015) is intended to run fully offline by hosting the API in-process rather than reaching a deployed server (see 017/018). For that to work, this package's `ApiClient` must never assume a fixed server location — `baseUrl` has to be a required, caller-supplied value, so the _same_ client code serves the web build (pointed at the deployed `soar_score_server`) and the Windows build (pointed at a local embedded instance) without any client-side branching. Work items and acceptance criteria below reflect this.
 
 ## Context
 

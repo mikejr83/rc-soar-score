@@ -6,8 +6,8 @@ This document will use the terms "draw" and "matrix". Generally, the term "draw"
 
 The pilots must be organized into groups within a number of rounds before the contest is started. The contest configuration contains the basic options used in the selection of pilots into groups. The goal of this process is to achieve the following:
 
-* Create a "flight matrix" that places pilots into groups for each round of the contest.
-* Create a fair distribution of opportunities for each pilot to fly against another pilot.
+- Create a "flight matrix" that places pilots into groups for each round of the contest.
+- Create a fair distribution of opportunities for each pilot to fly against another pilot.
 
 The contest director needs to provide how many rounds which will be flown in the contest. Additionally, a contest director may wish to add rounds or redraw rounds where a matrix already exists.
 
@@ -22,3 +22,5 @@ Contest directors are generally optimistic about how many rounds may be flown in
 A contest director may change certain contest configuration options after a draw is performed (the discipline cannot be changed once set). The application should warn the contest director of any changes which would affect the the matrix. The contest director should then have the option to perform a re-draw to create a new matrix.
 
 If a pilot was added after a draw was made it should be alerted to the contest director that the pilot was randomly added to the existing groups over the rounds. A new draw is advisable.
+
+Once scores have been entered the draw is locked. A pilot who arrives late can still be added by the contest director. The pilot flies in groups that have not yet flown, in the current or later rounds, and may fly more than once to make up rounds they missed. This is at the contest director's discretion. Any round the pilot does not make up counts as a zero. A pilot can be added only if groups in the remaining rounds have space for them, up to the largest group size of the original draw. If there is no space, the application tells the contest director that no group is available for the pilot. It may offer to redraw the later rounds, but that is the contest director's decision, because pilots' printed matrix cards for the redrawn rounds would have to be reprinted. Cards for rounds that are not redrawn stay valid.

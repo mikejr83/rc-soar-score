@@ -24,7 +24,7 @@
 
 ## Context
 
-A mid-contest re-draw regenerates part of the flight matrix after the contest has started. A pilot **retiring** is explicitly *not* a trigger for this — the retired pilot remains in the matrix and is scored zero for unflown rounds (see Decisions). The re-draw is initiated by the director; the spec did not previously define how it interacts with existing matrix revisions, scores, and the draw engine.
+A mid-contest re-draw regenerates part of the flight matrix after the contest has started. A pilot **retiring** is explicitly _not_ a trigger for this — the retired pilot remains in the matrix and is scored zero for unflown rounds (see Decisions). The re-draw is initiated by the director; the spec did not previously define how it interacts with existing matrix revisions, scores, and the draw engine.
 
 ## Questions
 

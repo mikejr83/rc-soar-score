@@ -28,7 +28,7 @@ When an offline client reconnects, it pushes a batch of mutations (e.g. dozens o
   - Acknowledged mutations are marked as synced and purged/archived from the pending outbox.
   - Rejected mutations are flagged in the local database with their server error code/reason, surfacing in the offline UI's "Conflicts / Items Requiring Action" view.
   - The client cursor advances to the server's latest acknowledged change token. Subsequent sync attempts transmit only remaining pending mutations. (2026-09-21)
-- **Provisional Derived Recalculations & Public Decoupling (Decision 3):** 
+- **Provisional Derived Recalculations & Public Decoupling (Decision 3):**
   - Upon committing each valid score, the server recalculates provisional group normalization and cumulative standings within the private contest domain model immediately (per ticket 010).
   - Background synchronization is strictly a private data-backup mechanism; it never automatically updates the public site projection or emits public notifications until an explicit publication snapshot is triggered or a round-completion publication rule is met. (2026-09-21)
 

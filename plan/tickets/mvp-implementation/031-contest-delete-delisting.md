@@ -5,9 +5,11 @@
 - **Status:** Open
 
 ## Context
+
 Implement delete and delisting actions for selected contests. Unpublished local contests can be deleted with confirmation. Published contests use "Request delisting" which starts a pending-delete workflow. Show appropriate confirmations and handle server responses including rejection reasons.
 
 ## Work Items
+
 - [ ] Add delete/delisting action button, enabled only when contest is selected and deletion rules allow it
 - [ ] Show "Delete" for unpublished local contests
 - [ ] Show "Request delisting" for contests published at least once
@@ -20,6 +22,7 @@ Implement delete and delisting actions for selected contests. Unpublished local 
 - [ ] Block editing, scoring, publishing for PendingDelete contests
 
 ## Acceptance Criteria
+
 - [ ] Delete/delisting button is only enabled with an eligible contest selected
 - [ ] "Delete" appears for unpublished contests, "Request delisting" for published
 - [ ] Delete confirmation dialog warns about permanent local data loss
@@ -30,7 +33,9 @@ Implement delete and delisting actions for selected contests. Unpublished local 
 - [ ] PendingDelete contests block editing and scoring operations
 
 ## Dependencies
+
 - [029-contest-selection-open-actions.md](029-contest-selection-open-actions.md)
 
 ## Sources
+
 - `plan/ui/contest-administration/main-page.md`

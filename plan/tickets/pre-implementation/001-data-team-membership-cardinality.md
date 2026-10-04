@@ -37,4 +37,3 @@ Pilot→team membership cardinality is not stated in the data model. `participan
 - `plan/architecture-requirements/data/contest.md`
 - `plan/architecture-requirements/data/disciplines-and-configuration.md`
 - `plan/business-requirements/disciplines/f5j.md` (Re-Flights)
-

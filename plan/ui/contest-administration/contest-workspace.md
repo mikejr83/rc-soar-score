@@ -16,20 +16,20 @@ After a successful draw, show the matrix revision, minimum and maximum group siz
 
 Actions are explicit and state-driven:
 
-* Open or close participant scoring access independently of lifecycle.
-* Lock or unlock administration with a confirmation that identifies blocked mutations.
-* Complete a running contest after showing missing scores and unflown rounds; completion closes participant scoring.
-* Publish or update the public projection through the publication flow.
-* Archive or unarchive local contest data without deleting it.
+- Open or close participant scoring access independently of lifecycle.
+- Lock or unlock administration with a confirmation that identifies blocked mutations.
+- Complete a running contest after showing missing scores and unflown rounds; completion closes participant scoring.
+- Publish or update the public projection through the publication flow.
+- Archive or unarchive local contest data without deleting it.
 
 Every transition shows the current value, requested value, affected scope, and result. A stale revision or rejected transition leaves the workspace unchanged and provides retry or refresh.
 
 ## Navigation summary
 
-* `Scoring` opens official score entry at the latest relevant round and group.
-* `Reports` opens current or completed results and export actions.
-* `Publication` shows publication history, visibility, public update policy, and publish/delist actions.
-* `Participants` opens contest-specific participant data without changing reusable profiles.
-* `Matrix` opens round/group assignments, lane positions, moves, and re-flight actions where permitted.
+- `Scoring` opens official score entry at the latest relevant round and group.
+- `Reports` opens current or completed results and export actions.
+- `Publication` shows publication history, visibility, public update policy, and publish/delist actions.
+- `Participants` opens contest-specific participant data without changing reusable profiles.
+- `Matrix` opens round/group assignments, lane positions, moves, and re-flight actions where permitted.
 
 Completed contests use a read-only workspace except for authorized score correction and publication actions. Pending deletion is read-only and hides mutation actions.

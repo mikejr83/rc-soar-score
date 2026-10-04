@@ -12,10 +12,10 @@ The main mode of use for this portion of the application will be on mobile devic
 
 Participants are directed to an overview screen that summarizes their participation in the contest. The invitation link used to reach the scores must remain usable for the participant to return to this overview after closing or leaving the application. Only the most recently issued invitation link for the participant may open the score interface; an older link must direct the participant to obtain the latest invitation link from the contest director. The screen shows their name and if enabled their pilot number. It will have a table with a row for each round in the contest. The rows display the following:
 
-* The round number.
-* The group in which they fly in that round.
-* If lanes are assigned, the lane number.
-* If the contest type is F3K, the task type to be flown.
+- The round number.
+- The group in which they fly in that round.
+- If lanes are assigned, the lane number.
+- If the contest type is F3K, the task type to be flown.
 
 A selection button may be visible on the table row.
 
@@ -33,7 +33,7 @@ A form with inputs for each of the scoring parameters is presented to the user w
 
 The contest discipline dictates what inputs or scoring parameters are shown on the form or view. These are outlined in each document for that soaring discipline.
 
-One input is required for every discipline. An input must take an integer value for "Cumulative Penalty". This is input is to store a penalty incurred by the pilot during their flight that must be deducted from their total score at the end of the contest.
+Every discipline has a generic numeric "Flight Penalty" input. A participant, helper, or the contest director may enter a whole number of points for an infraction on that flight, for example flying outside the assigned group. It is part of the round score: it is deducted from the flight's raw score before the group score is calculated, and it is dropped with the round if the round is dropped. It is separate from the penalties a discipline applies on its own, such as the F3J late-landing penalty. The contest director alone may also apply a "Cumulative Penalty" to a flight, which is never dropped (see `contest-official-scoring.md`). The participant sees the cumulative penalty read-only once it has been applied.
 
 The form will have submission, navigation, and optional operations. These are enabled under different conditions.
 
@@ -63,7 +63,7 @@ A section will appear under the pilots scoring details shows all pilots that par
 
 An indicator will be shown for the row if that pilot has a pending review request. The scores for the pilot will be those that were initially entered and will only updated once the review request process ends.
 
-A section will appear under the group's scores that shows the pilot's current placement in the contest. This will be the 3 pilots currently ahead and behind them in the overall ranking as of the round that is currently being viewed. For rounds that do not have all scores entered, the scores should be extrapolated for those pilots without a score. Those pilots should be indicated as having no score entered for the current round and as such the score placing them ahead or behind the current pilot have been estimated. Additionally, if a pilot has a pending review request for the currently viewed round or any previous round it should be indicated in the table.
+A section will appear under the group's scores that shows the pilot's current placement in the contest. While the contest director is hiding overall results (see `contest-configuration.md`), this section shows the placement as of the round at which results were hidden, and it does not change until hiding ends. This will be the 3 pilots currently ahead and behind them in the overall ranking as of the round that is currently being viewed. For rounds that do not have all scores entered, the scores should be extrapolated for those pilots without a score. Those pilots should be indicated as having no score entered for the current round and as such the score placing them ahead or behind the current pilot have been estimated. Additionally, if a pilot has a pending review request for the currently viewed round or any previous round it should be indicated in the table.
 
 ## Retirement
 

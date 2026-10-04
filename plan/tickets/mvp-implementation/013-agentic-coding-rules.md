@@ -50,9 +50,11 @@ The repo root `AGENTS.md` is the single source of truth and is already solid (sc
 **Status Change:** Open → In-Review
 
 **Decisions:**
+
 - Created 9 AGENTS.md files (not 7 as originally in scope) to match the evolved codebase (soar_score_data split into sqlite/postgres packages; soar_score_api_handlers extracted). Each is under 40 lines with an explicit boundary.
 
 **Files Changed:**
+
 - `AGENTS.md` — added "Per-Project Agent Guides" section with root-wins rule
 - `apps/soar_score_server/AGENTS.md` — new
 - `apps/soar_score_contest/AGENTS.md` — new
@@ -65,4 +67,5 @@ The repo root `AGENTS.md` is the single source of truth and is already solid (sc
 - `packages/soar_score_ui/AGENTS.md` — new
 
 **Verification:**
+
 - `scripts/verify.ps1`: PASSED (bootstrap, format, analyze, test, build all passed)

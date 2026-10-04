@@ -4,5 +4,4 @@ The document in this folder defines the mobile-first participant score-entry and
 
 ## Documents
 
-* [`participant-scoring.md`](participant-scoring.md) - Invitation-based participant score entry and review.
-
+- [`participant-scoring.md`](participant-scoring.md) - Invitation-based participant score entry and review.

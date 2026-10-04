@@ -6,9 +6,9 @@ The desktop shell reuses the contest-management application and adds local statu
 
 The frame shows separate indicators for:
 
-* Internet connectivity.
-* Remote API connectivity.
-* Local application storage availability.
+- Internet connectivity.
+- Remote API connectivity.
+- Local application storage availability.
 
 Each indicator has a text label and a detail view with the last observed time and a retry action. Internet connectivity does not imply remote API connectivity.
 
@@ -16,11 +16,11 @@ Each indicator has a text label and a detail view with the last observed time an
 
 For account-backed contests, show:
 
-* Last successful synchronization time.
-* Remote contest revision and local contest revision.
-* Number of queued mutations.
-* Number of conflicts or rejected mutations requiring action.
-* Active administration-installation identity.
+- Last successful synchronization time.
+- Remote contest revision and local contest revision.
+- Number of queued mutations.
+- Number of conflicts or rejected mutations requiring action.
+- Active administration-installation identity.
 
 For an accountless local contest, show `Local only` and explain that no remote backup exists. Offer `Sign in` to enable synchronization where supported. Anonymous publishing is separate and must not be presented as backup synchronization. Self-scoring invitation links and QR code generation are disabled in the UI for 100% offline un-synced contests, with a message explaining that an initial sync is required before participants can self-score.
 

@@ -4,10 +4,10 @@ The public site shows only the published contest projection and only when the co
 
 The page will show the contest information:
 
-* Name
-* Dates
-* Venue
-* Current status: In-Progress or Completed
+- Name
+- Dates
+- Venue
+- Current status: In-Progress or Completed
 
 ## Route
 
@@ -37,11 +37,11 @@ The user may navigate to the contest page or its sub-routes through a saved link
 
 A message explaining that this is a contest director action should be placed on the page. It should offer the following rational reasons why a contest is made private:
 
-* The contest has not started and the director does not wish it visible before it actually starts.
-* There is a major discrepancy in entered scores and the director is working to resolve them.
-* Winners are being announced and the director does not wish to spoil the surprise.
+- The contest has not started and the director does not wish it visible before it actually starts.
+- There is a major discrepancy in entered scores and the director is working to resolve them.
+- Winners are being announced and the director does not wish to spoil the surprise.
 
- A suggestion to check back at a later time is made. The page should indicate that it will attempt to check after an interval (15 minutes) to see if the contest has become public.
+A suggestion to check back at a later time is made. The page should indicate that it will attempt to check after an interval (15 minutes) to see if the contest has become public.
 
 ### Overall Individual Results
 
@@ -49,23 +49,23 @@ When the user navigates to the contest's view page they should be presented with
 
 The table should have the following columns:
 
-* Place
-* Name
-* Country
-* Score
-* Percentage of Winning Score
-* Raw Score
-* A column for each round score up to and including the currently selected round.
-* Cumulative Penalty
+- Place
+- Name
+- Country
+- Score
+- Percentage of Winning Score
+- Raw Score
+- A column for each round score up to and including the currently selected round.
+- Cumulative Penalty
 
 The ranking of individuals in the table is always by their overall score as of the selected round. The service providing the data will prepare the places for each of the pilots. The service maintains the responsibility for looking at the contest's discipline and applying any tie-breaking rules. This data will, however, indicate any unresolvable ties. These ties should be shown as in the same numerical place and are ordered alphabetically by last name. An indicator that those pilots are tied should be shown.
 
-|Place|Name|Country|Score|Percentage|Raw Score|Round 1|Round 2|Round 3|Penalty|
-|-----|----|-------|-----|----------|---------|-------|-------|-------|-------|
-|1|John Smith|USA|3000|100%|3000|1000|1000|1000|-|
-|2|Mike Gardner|USA|2994|99.8%|2994|998|998|998|-|
-|3|Dave Johnston|USA|2880|96%|2880|900|990|990|-|
-|3|Chuck Waters|USA|2798|93.3%|2798|990|950|858|-|
+| Place | Name          | Country | Score | Percentage | Raw Score | Round 1 | Round 2 | Round 3 | Penalty |
+| ----- | ------------- | ------- | ----- | ---------- | --------- | ------- | ------- | ------- | ------- |
+| 1     | John Smith    | USA     | 3000  | 100%       | 3000      | 1000    | 1000    | 1000    | -       |
+| 2     | Mike Gardner  | USA     | 2994  | 99.8%      | 2994      | 998     | 998     | 998     | -       |
+| 3     | Dave Johnston | USA     | 2880  | 96%        | 2880      | 900     | 990     | 990     | -       |
+| 3     | Chuck Waters  | USA     | 2798  | 93.3%      | 2798      | 990     | 950     | 858     | -       |
 
 This view will use the same route as the root of the contest view.
 
@@ -75,25 +75,25 @@ When the user selects team scores the view should show the tabular data for team
 
 The table should have the following columns:
 
-* Team Place
-* Team - The name or team number
-* Team Score - Calculated per the contest configuration
-* Percentage of winning team's score
-* Pilot's Name
-* Country
-* Score
-* Raw Score
-* A column for each round score up to and including the currently selected round.
-* Cumulative Penalty
+- Team Place
+- Team - The name or team number
+- Team Score - Calculated per the contest configuration
+- Percentage of winning team's score
+- Pilot's Name
+- Country
+- Score
+- Raw Score
+- A column for each round score up to and including the currently selected round.
+- Cumulative Penalty
 
 An example of the table structure is given below:
 
-|Place|Team|Team Score|Percentage|Name|Country|Score|Raw Score|Round 1|Round 2|Round 3|Penalty|
-|-----|----|----------|----------|----|-------|-----|---------|-------|-------|-------|-------|
-|1|2|5,880|100%|John Smith|USA|3000|3000|1000|1000|1000|-|
-|||||Dave Johnston|USA|2880|2880|900|990|990|-|
-|2|1|5,792|98.5%|Mike Gardner|USA|2994|2994|998|998|998|-|
-|||||Chuck Waters|USA|2798|2798|990|950|858|-|
+| Place | Team | Team Score | Percentage | Name          | Country | Score | Raw Score | Round 1 | Round 2 | Round 3 | Penalty |
+| ----- | ---- | ---------- | ---------- | ------------- | ------- | ----- | --------- | ------- | ------- | ------- | ------- |
+| 1     | 2    | 5,880      | 100%       | John Smith    | USA     | 3000  | 3000      | 1000    | 1000    | 1000    | -       |
+|       |      |            |            | Dave Johnston | USA     | 2880  | 2880      | 900     | 990     | 990     | -       |
+| 2     | 1    | 5,792      | 98.5%      | Mike Gardner  | USA     | 2994  | 2994      | 998     | 998     | 998     | -       |
+|       |      |            |            | Chuck Waters  | USA     | 2798  | 2798      | 990     | 950     | 858     | -       |
 
 This view will use the route `/results/contests/:contestId/teams/results` as its root when the latest contest round is selected or no round has been selected. The route `/results/contests/:contestId/teams/results/rounds/:roundNumber` is used if a round other than the latest is selected.
 
@@ -107,14 +107,14 @@ For each group in the round a section is generated. It is headed by the group nu
 
 A table will appear for the flight group showing the following information as columns:
 
-* Name - The pilot's name
-* Country - The pilot's country
-* Time
-* Landing score - This is the number of points awarded for the landing. Some disciplines may not have a landing bonus. For those contests this column is not shown.
-* Discipline specific scoring details
-* Points - The raw points earned by the pilot
-* Score - The total points given to the pilot after normalization.
-* Penalty - Any penalty incurred on the flight
+- Name - The pilot's name
+- Country - The pilot's country
+- Time
+- Landing score - This is the number of points awarded for the landing. Some disciplines may not have a landing bonus. For those contests this column is not shown.
+- Discipline specific scoring details
+- Points - The raw points earned by the pilot
+- Score - The total points given to the pilot after normalization.
+- Penalty - Any penalty incurred on the flight
 
 This view will use the route `/results/contests/:id/rounds/:roundNumber/flight-groups`. This page is always specific to a round.
 

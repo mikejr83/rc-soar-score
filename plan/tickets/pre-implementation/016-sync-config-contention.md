@@ -23,9 +23,9 @@ A contest has a single owning director account. When the director uses multiple 
 
 ## Decisions
 
-- **Single Active Installation & Device B Warning (Decision 1):** 
+- **Single Active Installation & Device B Warning (Decision 1):**
   - A contest has one active administration installation. Multi-device access can only occur if the director logs in with the same owning account on a second device.
-  - When opening a contest on Device B, if Device A is currently the active installation, Device B displays a confirmation warning: *"Contest is currently active on [Device A]. Activating this device will transfer offline authority here. If [Device A] has unsynchronized offline changes, it will need to reconcile before pushing again."* (2026-09-21)
+  - When opening a contest on Device B, if Device A is currently the active installation, Device B displays a confirmation warning: _"Contest is currently active on [Device A]. Activating this device will transfer offline authority here. If [Device A] has unsynchronized offline changes, it will need to reconcile before pushing again."_ (2026-09-21)
 - **Device A Reconnect, Pull-First & Reclaim Protocol (Decision 2):**
   - If Device A has offline mutations and attempts to sync after Device B has been activated, the server returns an `inactive_installation` response with the server's current revision.
   - Device A does **not** discard or strand local mutations. Instead, Device A initiates a mandatory **Pull** of all remote changes committed by Device B.

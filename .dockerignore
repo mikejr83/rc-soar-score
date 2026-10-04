@@ -1,0 +1,31 @@
+# Ignore all build output and pub generated files across root and all sub-packages
+**/.dart_tool/
+**/build/
+**/test/
+**/.pub/
+**/.pub-cache/
+
+# IDE and Editor directories everywhere
+**/.idea/
+**/.vscode/
+**/.kilo/
+**/.widget_preview/
+
+# Version control & metadata
+.git/
+**/.git/
+.gitignore
+
+# Package manager lock files / dependencies if generated outside Dart
+**/node_modules/
+
+# Documentation, planning, and scripts
+*.md
+**/*.md
+plan/
+research/
+scripts/
+
+# Docker files
+#**/Dockerfile*
+#.dockerignore

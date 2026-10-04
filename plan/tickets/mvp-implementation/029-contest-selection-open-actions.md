@@ -5,9 +5,11 @@
 - **Status:** Open
 
 ## Context
+
 Enable contest selection and state-dependent actions. Selecting a row activates it and enables actions. The primary action button changes based on contest state: "Open" for Created/Configuring, "Continue" for Ready/Running, "View" for Completed. PendingDelete opens a read-only deletion-status view; Deleted cannot be opened. Double-click and keyboard equivalents must work.
 
 ## Work Items
+
 - [ ] Make contest rows selectable (click selects, enables actions)
 - [ ] Implement state-dependent action button: Open / Continue / View
 - [ ] Open navigation: Created/Configuring → contest configuration
@@ -20,6 +22,7 @@ Enable contest selection and state-dependent actions. Selecting a row activates 
 - [ ] Loading more contests retains selection if contest remains in result set
 
 ## Acceptance Criteria
+
 - [ ] Row selection works and enables action buttons
 - [ ] Button text changes based on contest state per spec table
 - [ ] Open button navigates to contest configuration for new/configuring contests
@@ -32,7 +35,9 @@ Enable contest selection and state-dependent actions. Selecting a row activates 
 - [ ] Selection persists when more contests are loaded
 
 ## Dependencies
+
 - [028-contest-list-pagination-empty-state.md](028-contest-list-pagination-empty-state.md)
 
 ## Sources
+
 - `plan/ui/contest-administration/main-page.md`

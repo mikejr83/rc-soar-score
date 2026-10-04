@@ -1,0 +1,23 @@
+# Dart/Flutter build output and tooling
+build/
+.dart_tool/
+.pub-cache/
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# Generated code
+**/*.g.dart
+**/*.freezed.dart
+**/generated/
+
+# Platform folders (generated or vendor-managed)
+android/
+ios/
+macos/
+windows/
+linux/
+web/
+
+# Dependencies and lockfiles
+node_modules/
+pubspec.lock

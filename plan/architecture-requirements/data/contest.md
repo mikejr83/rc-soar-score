@@ -23,10 +23,10 @@ Store these independent controls; do not combine them into one status field:
 - Execution lifecycle: `Created`, `Configuring`, `Ready`, `Running`, `Completed`.
 - Participant scoring access: `Closed` or `Open`.
 - Administration lock: `Unlocked` or `Locked`.
-- Publication: `Unpublished` or `Published`.
-- Published visibility: `Private`, `Hidden`, or `Public`.
-- Local archive flag.
-- Deletion status: `None`, `PendingDelete`, `Restored`, or `Deleted`.
+- Results hiding: off, or hidden with the round through which standings are shown and the time hiding began.
+- Local archive flag, local to the installation and not synchronized.
+
+Publication state, visibility, and delisting belong to the published-contest record described in [publication.md](publication.md), not to the contest. A contest that has never been published has no such record and is visible only to its director. A contest has no deletion status: deleting it removes the director's working data and leaves any published record in place.
 
 Every accepted state transition records actor, authority, source installation, base revision, resulting revision, and server/client timestamps. Completion closes participant scoring and prevents new participation or matrix changes; authorized score corrections remain possible as new revisions.
 
@@ -39,4 +39,4 @@ The model must accommodate discipline, classes, roles, teams, pilot numbers, mod
 - The first accepted score atomically changes `Ready` to `Running`.
 - A stale or unauthorized transition changes nothing.
 - Publishing, synchronization, archiving, and visibility do not change execution lifecycle.
-- A published contest is delisted before an approved deletion and is not physically deleted by ordinary synchronization.
+- Deleting a published contest removes only the director's working data. Its published record remains and loses only its link to the contest.

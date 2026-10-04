@@ -1,0 +1,61 @@
+# DisciplineProfile
+
+**Relationship to architecture-requirements:** [disciplines-and-configuration.md](../../architecture-requirements/data/disciplines-and-configuration.md)  
+**Purpose:** Stores the identity, metadata, and lifecycle state for a versioned official scoring profile of a soaring discipline. All rules (config fields, score entry fields, formulas, validation, zero reasons, etc.) are stored in child entities keyed by `discipline_profile_id` (the version is on the profile row).  
+**Identifier:** `id` (UUIDv7)  
+**Parent entity:** None  
+**Child entities:** DisciplineConfigField, DisciplineScoreField, DisciplineValidation, DisciplineFormula, DisciplineRule
+
+## Fields/Properties
+
+| Field                      | Type                                            | Required | Default | Description                                                                                                                                                                                                                                                                                          |
+| -------------------------- | ----------------------------------------------- | -------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`                       | PK                                              | Yes      | —       | Stable identifier for the profile                                                                                                                                                                                                                                                                    |
+| `type`                     | enum(ALES, ThermalDuration, F3J, F5J, F3L, F3K) | Yes      | —       | Discipline type                                                                                                                                                                                                                                                                                      |
+| `version`                  | int                                             | Yes      | —       | Rules profile version                                                                                                                                                                                                                                                                                |
+| `name`                     | string                                          | Yes      | —       | Human-readable name of the discipline                                                                                                                                                                                                                                                                |
+| `description`              | string                                          | No       | —       | Longer description of the discipline and its rules                                                                                                                                                                                                                                                   |
+| `category`                 | enum(duration, multiple, other)                 | Yes      | —       | Category of discipline for grouping and selection purposes                                                                                                                                                                                                                                           |
+| `default_landing_table_id` | UUIDv7                                          | No       | -       | FK LandingTable the profile ships with and a contest uses unless its configuration selects another. Null for a discipline with no landing score                                                                                                                                                      |
+| `default_options`          | json                                            | No       | -       | The core contest options whose default for this discipline differs from the platform default, for example `{"group_score_mode": "Time"}` for ALES. Keys and values are validated against [contest-options.md](../contest-options.md). A profile can only suggest a default, never redefine an option |
+| `status`                   | enum(drafted, published, superseded)            | Yes      | drafted | Lifecycle status of this profile version                                                                                                                                                                                                                                                             |
+| `superseded_by`            | UUIDv7                                          | No       | —       | FK DisciplineProfile: the later version that supersedes this one (when status=superseded)                                                                                                                                                                                                            |
+| `created_by`               | UUIDv7                                          | Yes      | —       | FK Account of the author who created this profile version                                                                                                                                                                                                                                            |
+| `created_at`               | datetime                                        | Yes      | —       | Timestamp of profile creation                                                                                                                                                                                                                                                                        |
+| `updated_by`               | UUIDv7                                          | No       | —       | FK Account that last modified this profile (drafts only)                                                                                                                                                                                                                                             |
+| `updated_at`               | datetime                                        | No       | —       | Timestamp of last modification (drafts only)                                                                                                                                                                                                                                                         |
+
+## Invariants and Constraints
+
+- The combination (`type`, `version`) must be unique.
+- `default_landing_table_id` must be set when the profile has a score field of type `landing`, and must be a system table (no owner). It is the suggested default, not a restriction: the contest configuration may select any other table
+- `version` increments monotonically for each discipline type; earlier versions remain immutable.
+- Field identifiers and meanings are immutable within a given rules version.
+- F3L and F3K are representable but not implemented until their official rules are formally defined.
+- At least one formula must be specified for the primary score.
+
+## Lifecycle
+
+Profiles follow a create-once, version-advance lifecycle:
+
+```plaintext
+Drafted -> Published -> (optional) superseded by new version
+```
+
+- Drafted profiles may be modified arbitrarily.
+- Published profiles are immutable; only a new version may supersede.
+- Superseded versions remain queryable for historical score reproduction.
+- No deletion lifecycle; profiles are retained indefinitely.
+
+## Privacy and Scope
+
+- Shared across all contests using a given discipline and rules version.
+- No per-contest privacy settings (public reference document).
+- Readable by all clients; mutations by profile administrators only.
+
+## Audit and Synchronization
+
+- Profiles are mutated only by profile administrators via the service.
+- Published profiles are immutable; no mutation idempotency concerns.
+- A new version creates a new profile entity; old versions are unchanged.
+- All profile transitions (Published, superseded) record profile type, version, author, and server timestamp.

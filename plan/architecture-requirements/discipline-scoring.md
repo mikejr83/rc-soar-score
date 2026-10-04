@@ -18,10 +18,10 @@ The initial implementation supports the shared duration-scoring model for ALES, 
 ## Stored scoring data
 
 1. A group-score record must retain the immutable submitted raw components, the actor and authority that submitted them, the source device, client mutation identifier, score revision, contest configuration revision, matrix revision, discipline rules version, calculation version, and server acceptance time.
-2. Raw components must include the required integer `Cumulative Penalty` for every discipline. This value is a contest-level penalty component and must remain distinct from discipline-specific penalties, zero-score reasons, and an administration penalty.
+2. A score's component set may carry two contest-level penalty components, distinct from each other and from the discipline-specific penalties the profile computes, such as the late-landing and launch-height penalties. The `Flight Penalty` is a nullable non-negative integer entered with the score by the pilot, a helper, or the director. The `Cumulative Penalty` is a nullable non-negative integer applied only by the contest director (see scores-and-results.md).
 3. The record must retain the current official component set separately from the original participant submission and every accepted review proposal. Recalculation must never overwrite the original raw submission or erase superseded values.
 4. A raw component must be stored in its canonical unit and precision. Display values such as `MM:ss`, landing distance, or a landing-table label must not be the source of calculation.
-5. A landing selection must retain both the selected landing-table key and the resolved point value used by the calculation. The landing table revision must be recorded with the score so that a later table change does not alter a historical calculation.
+5. A landing selection must be stored as the identifier of the selected landing-table entry. Landing tables are immutable, so the entry identifies the selected key, the resolved point value, and the table the calculation used, and a later table choice cannot alter a historical calculation. A contest's landing table cannot be changed once a landing score has been entered.
 6. Derived values must identify the exact input revision and calculation metadata that produced them. At minimum, the system must be able to reproduce the discipline raw score, group score, contest total, dropped-round decision, and team total.
 
 ## Calculation pipeline
@@ -30,10 +30,10 @@ The service must calculate scores in the following logical order. Each stage mus
 
 1. Resolve the contest configuration, applicable overrides, matrix assignment, discipline profile, and rules/calculation versions.
 2. Validate and canonicalize the raw components using the profile. Reject invalid combinations rather than silently repairing them, except where the profile explicitly defines a forced zero representation.
-3. Apply profile-specific status rules and compute the discipline raw score. A zero condition must produce a zero raw score and retain its reason flags for reporting.
+3. Apply profile-specific status rules and compute the discipline raw score. A zero condition must produce a zero raw score and retain its reason flags for reporting. Deduct any `Flight Penalty` from the discipline raw score, which never goes below zero, before the group score is computed. A dropped round therefore drops its flight penalty.
 4. Compute the group score using the contest's `Raw Score`, `Normalized`, or `Time` option. Normalization is based only on the eligible pilots and the appropriate profile-defined source score.
 5. Apply the configured final group-score rounding or truncation once, after normalization and other group-score arithmetic. No intermediate raw, penalty, or normalization value may be rounded or truncated.
-6. Apply cumulative penalties at the contest total stage. A dropped round may remove the eligible round score, but a `Penalty Not Discarded` value must continue to affect the pilot's contest total as defined by contest configuration.
+6. Apply cumulative penalties at the contest total stage, after dropped rounds are selected. A cumulative penalty is not droppable: it continues to affect the pilot's contest total even when its round's score is dropped, and even when the flight was re-flown. An absent penalty counts as zero.
 7. Select dropped rounds only after the applicable round scores and penalty metadata are available. A profile may mark a zero as non-droppable, as F5J does for a motor restart under the `Non-Droppable 0` option.
 8. Calculate team totals from the resulting pilot contest totals according to the contest's configured number of pilots, ordering eligible pilot totals from highest to lowest.
 9. Store or return the resulting values with their input revisions and calculation version. Recalculation from the same inputs and versions must produce the same values on every supported client and service instance.
@@ -91,10 +91,10 @@ The service must calculate scores in the following logical order. Each stage mus
 
 ## Recalculation and change management
 
-1. Any change to a calculation-affecting contest option, discipline override, landing table, matrix assignment, or rules/calculation version must mark affected derived values stale and recalculate them from immutable raw data.
-2. Recalculation must preserve score state, review history, source metadata, audit records, and superseded calculated values. It may create a new derived-score revision.
-3. Changes to discipline, scoring rules, or group-score options are prohibited once the contest reaches `Running`, except for changes already permitted by contest-state requirements. A permitted derived-score option change must trigger a complete affected-scope recalculation.
-4. Public projections, participant results, rankings, and team totals must be updated only from the current successful calculation revision. A stale or incomplete calculation must be marked preliminary and must not be presented as official.
+1. Any change to a calculation-affecting contest option, discipline override, landing table, matrix assignment, or rules/calculation version marks the affected stored results stale until they are recomputed from the immutable raw data. Stored results carry the revisions they were computed under so staleness can be detected.
+2. Recalculation must preserve score state, review history, source metadata, and audit records. Superseded computed values are not kept; the published projections are the record of what was shown.
+3. Changes to the discipline and to the values of its scoring rules are prohibited once the contest reaches `Running`, except for changes already permitted by contest-state requirements. Derived-score options, such as the group-score mode, rounding, decimal places, dropped rounds, the tie-breaker, and the team pilot count, may change until the contest is completed. Such a change must trigger a complete affected-scope recalculation.
+4. Public projections, participant results, rankings, and team totals use only results computed from the current official component sets under the current configuration, matrix, and calculation version. A stale or incomplete result, such as one with missing scores or open reviews, must be marked preliminary and must not be presented as official.
 
 ## Verification requirements
 

@@ -20,23 +20,23 @@ This document is broken down into sections. Each round is a major division. A he
 
 The grid should contain the following columns:
 
-* Lane number / Pilot Number / Ordinal Position - The first column will be a numeric number. What is displayed depends on the contest configuration. If the configuration has specified assigned lane numbers it should appear. Next, if pilot numbers have been specified, it should show. Otherwise the first column will be an integer starting from one and incrementing with each pilot present in the round.
-* Pilot Name
-* A column for all required scoring details.
-* Penalty
-* Re-flight Requested
-* Original Round
+- Lane number / Pilot Number / Ordinal Position - The first column will be a numeric number. What is displayed depends on the contest configuration. If the configuration has specified assigned lane numbers it should appear. Next, if pilot numbers have been specified, it should show. Otherwise the first column will be an integer starting from one and incrementing with each pilot present in the round.
+- Pilot Name
+- A column for all required scoring details.
+- Penalty
+- Re-flight Requested
+- Original Round
 
 The contest director may specify the following optional fields:
 
-* Country - The participants country
-* Class - The participant's class. Available only if classes are enabled for the contest.
+- Country - The participants country
+- Class - The participant's class. Available only if classes are enabled for the contest.
 
 The document should indicate the basic contest information at the top of each page. This information includes:
 
-* The contest name
-* The contest dates
-* The contest venue
+- The contest name
+- The contest dates
+- The contest venue
 
 ## Score Cards
 
@@ -48,24 +48,24 @@ Per-round score cards are used to record a single flight. The actual document co
 
 When printed on a single sheet of paper these cards appear as outlined areas that may be cut out to make actual cards. The card presents the following information:
 
-* Header
-* Pilot Information
-* Round and Group
-* Scoring table
-* Penalty
-* Signature block
+- Header
+- Pilot Information
+- Round and Group
+- Scoring table
+- Penalty
+- Signature block
 
 The header should contain the contest information:
 
-* Name
-* Dates
-* Venu
+- Name
+- Dates
+- Venu
 
 The pilot information should include:
 
-* Team - If enabled
-* Pilot Name
-* Pilot number - If enabled
+- Team - If enabled
+- Pilot Name
+- Pilot number - If enabled
 
 The scoring table is used to collect the flight details based on the contest discipline. The table should have a row for each detail to be recorded. The first column is used as a title for the item to be recorded. The second column is for the recording of the primary scores. A final column is presented to allow for the recording of a re-flight score.
 
@@ -79,9 +79,9 @@ This is the most common document to be printed by a contest director. It present
 
 The card will have the contest information:
 
-* Name
-* Date
-* Venue
+- Name
+- Date
+- Venue
 
 The pilot's name should appear as a large title line.
 
@@ -89,8 +89,8 @@ The card should display a QR code that will enable the pilot or their helper to 
 
 The grid for tracking scoring should appear with the following columns:
 
-* Round
-* Group
-* Scoring Details
-* Penalty
-* Timer
+- Round
+- Group
+- Scoring Details
+- Penalty
+- Timer

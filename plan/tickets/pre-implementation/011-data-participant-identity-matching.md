@@ -34,6 +34,7 @@ Both resolved — see **Decisions** and **Acceptance criteria** below.
   3. Else normalized national organization ID.
 
   Name is **never** an automatic key. Name similarity is used only for non-blocking "possible match" suggestions (Q2).
+
 - **Scopes:** Dedup runs at exactly two scopes:
   - **Intra-director:** always. The director's own local and synced profiles are matched by tiered keys; this powers the "frequent participants" list and the copy-pilots-from-previous-contest wizard flow.
   - **Cross-director:** only against the **shared directory** (profiles owned by participant accounts that opted into sharing). A director-owned profile of another director is never visible or matchable. All directors can link to the same shared profile.
