@@ -35,20 +35,32 @@ void main() {
   });
 
   group('ModelCatalog', () {
-    test('round trips and is system data', () {
+    test('round trips and is director data', () {
       final m = ModelCatalog(
         id: exampleId(1),
+        ownerAccountId: exampleId(5),
         name: 'Supra',
         manufacturer: "Vladimir's Model",
       );
       expect(ModelCatalog.fromJson(m.toJson()), m);
-      expect(m.syncScope, SyncScope.system);
+      expect(m.syncScope, SyncScope.director);
     });
 
     test('manufacturer is optional, name is not', () {
-      expect(ModelCatalog(id: exampleId(1), name: 'Supra').manufacturer, null);
       expect(
-        () => ModelCatalog(id: exampleId(1), name: ''),
+        ModelCatalog(
+          id: exampleId(1),
+          ownerAccountId: exampleId(5),
+          name: 'Supra',
+        ).manufacturer,
+        null,
+      );
+      expect(
+        () => ModelCatalog(
+          id: exampleId(1),
+          ownerAccountId: exampleId(5),
+          name: '',
+        ),
         throwsArgumentError,
       );
     });

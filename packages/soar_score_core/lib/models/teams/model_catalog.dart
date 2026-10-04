@@ -6,7 +6,9 @@ import '../shared/shared.dart';
 
 part 'model_catalog.g.dart';
 
-/// A reusable model name and manufacturer, shared across contests.
+/// A director's own reusable model name and manufacturer.
+///
+/// Private to the owning director.
 ///
 /// See `plan/data-model/entities/model_catalog.md`.
 @JsonSerializable(fieldRename: FieldRename.snake, includeIfNull: true)
@@ -15,6 +17,7 @@ part 'model_catalog.g.dart';
 class ModelCatalog extends Equatable implements Synchronizable {
   ModelCatalog({
     required this.id,
+    required this.ownerAccountId,
     required String name,
     this.manufacturer,
     this.revision = 0,
@@ -27,6 +30,10 @@ class ModelCatalog extends Equatable implements Synchronizable {
 
   @override
   final Id id;
+
+  /// The director who owns and maintains this entry.
+  final Id ownerAccountId;
+
   final String name;
   final String? manufacturer;
 
@@ -37,10 +44,10 @@ class ModelCatalog extends Equatable implements Synchronizable {
   String get entityType => 'ModelCatalog';
 
   @override
-  SyncScope get syncScope => SyncScope.system;
+  SyncScope get syncScope => SyncScope.director;
 
   Map<String, Object?> toJson() => _$ModelCatalogToJson(this);
 
   @override
-  List<Object?> get props => [id, name, manufacturer, revision];
+  List<Object?> get props => [id, ownerAccountId, name, manufacturer, revision];
 }
