@@ -1,4 +1,4 @@
-import '../models/contest.dart';
+import '../models/contest/contest.dart';
 import '../models/id.dart';
 
 /// Abstract persistence contract for [Contest] entities.

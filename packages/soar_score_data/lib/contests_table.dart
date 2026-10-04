@@ -1,12 +1,11 @@
 import 'package:drift/drift.dart';
 
-/// Contest entity table (minimal scaffold schema).
+/// Contest entity table.
 ///
-/// Only the fields carried by `soar_score_core`'s example `Contest` model are
-/// persisted here. Revisioned configuration, matrix, participation, scoring
-/// and audit columns are added by later tickets; sync-related fields (pending
-/// mutation logs, tombstones, `contest_mutation_seq`) are deferred per the
-/// decision recorded in ticket 007. Dates are stored as UTC text.
+/// One column per field of `soar_score_core`'s `Contest`, so a saved contest
+/// reads back unchanged. Enumerations are stored as the text in the entity
+/// document and timestamps as UTC ISO-8601 text. The other entities' tables,
+/// revision bumping and the sync outbox belong to ticket 036.
 ///
 /// The generated row class is named `ContestData` (via [DataClassName]) to
 /// avoid clashing with `soar_score_core`'s domain `Contest` class.
@@ -18,8 +17,41 @@ class Contests extends Table {
   /// Contest display name.
   TextColumn get name => text()();
 
-  /// Contest start time (UTC, ISO-8601).
-  TextColumn get startedAt => text()();
+  /// Start (UTC, ISO-8601).
+  TextColumn get startDateTime => text()();
+
+  /// End (UTC, ISO-8601).
+  TextColumn get endDateTime => text()();
+
+  /// IANA timezone name.
+  TextColumn get timezone => text()();
+
+  TextColumn get host => text().nullable()();
+  TextColumn get city => text().nullable()();
+  TextColumn get state => text().nullable()();
+  TextColumn get country => text().nullable()();
+
+  /// Owning account; null for anonymous or local contests.
+  TextColumn get ownerAccountId => text().nullable()();
+
+  /// `Created`, `Configuring`, `Ready`, `Running` or `Completed`.
+  TextColumn get lifecycleState => text()();
+
+  /// `Closed` or `Open`.
+  TextColumn get scoringAccess => text()();
+
+  /// `Unlocked` or `Locked`.
+  TextColumn get adminLock => text()();
+
+  IntColumn get resultsHiddenThroughRound => integer().nullable()();
+  TextColumn get resultsHiddenAt => text().nullable()();
+
+  BoolColumn get localArchive => boolean().withDefault(const Constant(false))();
+
+  TextColumn get createdAt => text()();
+  TextColumn get updatedAt => text()();
+
+  IntColumn get revision => integer().withDefault(const Constant(0))();
 
   @override
   Set<Column> get primaryKey => {id};
