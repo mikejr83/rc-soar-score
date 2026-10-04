@@ -39,6 +39,8 @@ Rule used: architecture requirements win over the data model, and business requi
 
 ## Follow-up outside this branch
 
+The detailed, file-by-file list is in [follow-ups.md](follow-ups.md).
+
 - **UI documents:** `plan/ui/contest-administration` and the participant and public views still describe `PendingDelete`, `Private`/`Hidden`, and a participant-entered cumulative penalty (the participant form now needs a generic flight penalty input, and the cumulative penalty is director-only).
 - **Tickets:** 011 (shared-profile and merge decisions no longer apply), 022 and 031 (the old deletion and visibility flow), 035 and 036 (the entity inventory and the Drift schema). Tickets 034 and 035 on re-flights are left alone by choice.
 - **Mid-contest corrections:** A mistake in the discipline field values or landing table after scoring starts has no fix in the first release (see contest-options.md).
