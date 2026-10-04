@@ -4,7 +4,7 @@
 /// only `package:soar_score_core/soar_score_core.dart`.
 library;
 
-export 'models/contest.dart';
+export 'models/contest/contest_models.dart';
 export 'models/id.dart';
 export 'models/shared/shared.dart';
 export 'models/sync/sync.dart';

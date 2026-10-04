@@ -45,11 +45,20 @@ void main() {
 
     test('supports raw inserts into the migrated schema', () async {
       await database.customInsert(
-        'INSERT INTO contests (id, name, started_at) VALUES (?, ?, ?)',
+        'INSERT INTO contests (id, name, start_date_time, end_date_time, '
+        'timezone, lifecycle_state, scoring_access, admin_lock, created_at, '
+        'updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
         variables: const [
           Variable('0195a123-4567-7890-abcd-ef0123456789'),
           Variable('Raw query contest'),
-          Variable('2026-01-02T03:04:05.000Z'),
+          Variable('2026-01-02T03:04:05Z'),
+          Variable('2026-01-03T03:04:05Z'),
+          Variable('UTC'),
+          Variable('Created'),
+          Variable('Closed'),
+          Variable('Unlocked'),
+          Variable('2026-01-01T00:00:00Z'),
+          Variable('2026-01-01T00:00:00Z'),
         ],
       );
       final rows = await database

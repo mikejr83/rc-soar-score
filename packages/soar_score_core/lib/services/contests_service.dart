@@ -1,4 +1,4 @@
-import 'package:soar_score_core/models/contest.dart';
+import 'package:soar_score_core/models/contest/contest.dart';
 import 'package:soar_score_core/repositories/repository.dart';
 import 'package:logging/logging.dart';
 

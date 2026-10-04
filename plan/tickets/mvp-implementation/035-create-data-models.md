@@ -7,7 +7,6 @@
 ## Context
 
 The canonical domain requirements are in [`plan/architecture-requirements/data/`](../../architecture-requirements/data/README.md). The 48-entity inventory is in [`plan/data-model/`](../../data-model/README.md) with one document per entity under [`entities/`](../../data-model/entities/) and one JSON example per entity under [`examples/entities/`](../../data-model/examples/entities/README.md). Architecture requirements take precedence over the ERD and entity pages when they conflict.
-
 `packages/soar_score_core` currently contains only a placeholder `Contest`, a UUIDv7 `Id`, and contest repository contracts. This ticket completes the core domain types so that ticket 036 can persist them. Core remains pure Dart: no Flutter, database, filesystem, HTTP, or platform-specific dependencies.
 
 ### How the model is used
@@ -17,29 +16,25 @@ The same domain code runs in two places, and the model must support both:
 - **Server** (`soar_score_server`, PostgreSQL): the sole authority. It assigns mutation sequences, enforces installation authority, classifies stale changes, and owns accounts, publication and invitations.
 - **Native offline application** (embedded API over SQLite): applies changes locally first, records them as pending mutations, and sends them to the server immediately when connected. It never needs the backend-only entities.
 - **Web applications** hold no contest data. They reach everything through the API, so they use API DTOs (`soar_score_api`), never the persistence layer.
-
-Entities therefore fall into the groups in the [Sync Scope](../../data-model/README.md#sync-scope) table (contest, director, system, issued by the service, derived, backend only). Core models all of them, but the group is part of each model's contract, because it decides who may write the entity and whether it ever reaches an offline installation.
+  Entities therefore fall into the groups in the [Sync Scope](../../data-model/README.md#sync-scope) table (contest, director, system, issued by the service, derived, backend only). Core models all of them, but the group is part of each model's contract, because it decides who may write the entity and whether it ever reaches an offline installation.
 
 ## Scope
 
 Implement domain models for all 48 entities, using the per-entity documents for fields, invariants and relationships. Families, in suggested delivery order:
-
-| Family                     | Entities                                                                                                                            |
+| Family | Entities |
 | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| Sync and audit (first)     | `MutationRecord`, `ConflictRecord`, `Tombstone`, `AuditEvent`, `Installation`, `InstallationActivation`, `SyncCursor`               |
-| Contest and configuration  | `Contest`, `ContestConfigurationRevision`, `ContestConfigurationPreset`                                                             |
-| Discipline (system data)   | `DisciplineProfile`, `DisciplineConfigField`, `DisciplineScoreField`, `DisciplineValidation`, `DisciplineFormula`, `DisciplineRule` |
-| Landing tables             | `LandingTable`, `LandingResult`                                                                                                     |
-| Participants and roles     | `ParticipantProfile`, `ContestParticipation`, `Role`, `ParticipantAccountLink`, `ParticipantDirectoryEntry`                         |
-| Teams and models           | `Team`, `TeamMembership`, `ModelCatalog`, `ContestModelLink`                                                                        |
-| Matrix                     | `MatrixRevision`, `Round`, `RoundGroup`, `MatrixAssignment`, `ReFlight`, `ReFlightParticipant`                                      |
-| Scores and reviews         | `ScorePlaceholder`, `ScoreAttempt`, `OfficialScore`, `ReviewRequest`, `Invitation`                                                  |
-| Derived results            | `FlightResult`, `ParticipationStanding`, `TeamStanding`                                                                             |
-| Accounts (backend only)    | `Account`, `AccountIdentity`, `AccountPublicProfile`                                                                                |
-| Publication (backend only) | `PublicationIdentity`, `PublicationProjection`, `PublicationParticipant`, `DelistRequest`                                           |
-
+| Sync and audit (first) | `MutationRecord`, `ConflictRecord`, `Tombstone`, `AuditEvent`, `Installation`, `InstallationActivation`, `SyncCursor` |
+| Contest and configuration | `Contest`, `ContestConfigurationRevision`, `ContestConfigurationPreset` |
+| Discipline (system data) | `DisciplineProfile`, `DisciplineConfigField`, `DisciplineScoreField`, `DisciplineValidation`, `DisciplineFormula`, `DisciplineRule` |
+| Landing tables | `LandingTable`, `LandingResult` |
+| Participants and roles | `ParticipantProfile`, `ContestParticipation`, `Role`, `ParticipantAccountLink`, `ParticipantDirectoryEntry` |
+| Teams and models | `Team`, `TeamMembership`, `ModelCatalog`, `ContestModelLink` |
+| Matrix | `MatrixRevision`, `Round`, `RoundGroup`, `MatrixAssignment`, `ReFlight`, `ReFlightParticipant` |
+| Scores and reviews | `ScorePlaceholder`, `ScoreAttempt`, `OfficialScore`, `ReviewRequest`, `Invitation` |
+| Derived results | `FlightResult`, `ParticipationStanding`, `TeamStanding` |
+| Accounts (backend only) | `Account`, `AccountIdentity`, `AccountPublicProfile` |
+| Publication (backend only) | `PublicationIdentity`, `PublicationProjection`, `PublicationParticipant`, `DelistRequest` |
 Implement enums and value types for the states and options required by those entities and by [contest-options.md](../../data-model/contest-options.md). Do not add persistence-only or UI-only types to the domain layer.
-
 The scoring engine, the draw engine, and the sync protocol are not part of this ticket. This ticket defines the types they consume.
 
 ## Design Requirements
@@ -95,17 +90,18 @@ The scoring engine, the draw engine, and the sync protocol are not part of this 
 ## Discrepancies and decisions
 
 Recorded as the models land. See [035-implementation-plan.md](035-implementation-plan.md) for the full list.
-
-| Area                       | Finding                                                                                                                                                                                    | Resolution                                                                                                                                                                  |
+| Area | Finding | Resolution |
 | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Example format             | The examples were Markdown files with fenced `json` blocks, not JSON files.                                                                                                                | The examples are now one pure JSON file per entity (an array of rows) with a README, so the ticket wording stands.                                                          |
-| Entity count               | `reconciliation-findings.md` said 47 entities; the ERD, catalog and `entities/` have 48.                                                                                                   | Fixed to 48.                                                                                                                                                                |
-| Score representation       | The spec says `Decimal`; the ticket forbade floating point.                                                                                                                                | Owner relaxed the rule (D2): scores use Dart `double`. Revisit if scores disagree across devices or exact ties matter.                                                      |
-| Equality                   | 48 classes need value equality.                                                                                                                                                            | `equatable` added as a runtime dependency (D1); core `AGENTS.md` updated.                                                                                                   |
-| Initial revision           | `Contest.revision` defaulted to 1 while every other entity defaulted to 0.                                                                                                                 | Owner: every `revision` starts at 0. `Contest` and `Team` specs updated. `Synchronizable.revision` stays a plain `int`.                                                     |
-| `Contest.startedAt`        | The placeholder field has no counterpart in the entity.                                                                                                                                    | Removed when `Contest` is expanded (D3, plan PR 4), together with the data package fix-up.                                                                                  |
-| Sync records and revision  | `data-model/README.md` said MutationRecord, ConflictRecord and AuditEvent carry a revision, but their pages have no `revision` column.                                                     | Owner: the README was imprecise and these three need no revision. README corrected. They implement `SyncScoped` (scope only), not `Synchronizable`, which keeps `revision`. |
+| Example format | The examples were Markdown files with fenced `json` blocks, not JSON files. | The examples are now one pure JSON file per entity (an array of rows) with a README, so the ticket wording stands. |
+| Entity count | `reconciliation-findings.md` said 47 entities; the ERD, catalog and `entities/` have 48. | Fixed to 48. |
+| Score representation | The spec says `Decimal`; the ticket forbade floating point. | Owner relaxed the rule (D2): scores use Dart `double`. Revisit if scores disagree across devices or exact ties matter. |
+| Equality | 48 classes need value equality. | `equatable` added as a runtime dependency (D1); core `AGENTS.md` updated. |
+| Initial revision | `Contest.revision` defaulted to 1 while every other entity defaulted to 0. | Owner: every `revision` starts at 0. `Contest` and `Team` specs updated. `Synchronizable.revision` stays a plain `int`. |
+| `Contest.startedAt` | The placeholder field has no counterpart in the entity. | Removed (D3): `Contest` now has `start_date_time` and `end_date_time`. The data package's `contests` table has a column for every `Contest` field; the other tables stay with ticket 036. |
+| Sync records and revision | `data-model/README.md` said MutationRecord, ConflictRecord and AuditEvent carry a revision, but their pages have no `revision` column. | Owner: the README was imprecise and these three need no revision. README corrected. They implement `SyncScoped` (scope only), not `Synchronizable`, which keeps `revision`. |
 | Sync scope of sync records | MutationRecord, ConflictRecord and Tombstone each belong to either a contest or a director's data; AuditEvent also has a publication-only form. The README lists them under single scopes. | Scope is computed per instance: `contest_id` gives contest, `owner_account_id` gives director. A publication-only AuditEvent is `backendOnly`. Confirm the AuditEvent rule. |
-| Payload version            | The plan gave `MutationRecord` a `schemaVersion`, but the entity page has only `payload`.                                                                                                  | The page wins: `payload` is a plain map. `VersionedPayload` stays available for when a payload version is specified.                                                        |
-| Entity type                | The plan suggested an enum of entity names for `MutationRecord.entity_type`; the page says text.                                                                                           | Kept as text. An enum can be added where a decoder is chosen.                                                                                                               |
-| Timestamp format           | Examples write whole seconds as `2026-10-17T15:10:00Z`; Dart's `toIso8601String` adds `.000`.                                                                                              | `formatUtcTimestamp` drops an all-zero fraction so rows round-trip exactly.                                                                                                 |
+| Payload version | The plan gave `MutationRecord` a `schemaVersion`, but the entity page has only `payload`. | The page wins: `payload` is a plain map. `VersionedPayload` stays available for when a payload version is specified. |
+| Entity type | The plan suggested an enum of entity names for `MutationRecord.entity_type`; the page says text. | Kept as text. An enum can be added where a decoder is chosen. |
+| Timestamp format | Examples write whole seconds as `2026-10-17T15:10:00Z`; Dart's `toIso8601String` adds `.000`. | `formatUtcTimestamp` drops an all-zero fraction so rows round-trip exactly. |
+| Configuration `config` | `ContestConfigurationPreset`'s example `config.core` lacks several options (such as `tiebreaker_enabled`) although a preset holds the "full resolved settings". | `ContestConfig` keeps the maps exactly as written, so both examples round-trip. `CoreOptions` resolves missing options to platform defaults. The preset example could list every option. |
+| Row revision on entities | Besides the sync records, ContestConfigurationRevision, MatrixRevision, MatrixAssignment, ScoreAttempt and OfficialScore have no `revision` column. The README Sync Scope note is corrected to list them. | `ContestConfigurationRevision` implements `SyncScoped`. Confirm in the matrix PR that `MatrixAssignment` needs no revision, since assignments can move. |

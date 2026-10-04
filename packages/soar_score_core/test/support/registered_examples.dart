@@ -8,6 +8,15 @@ import 'example_registry.dart';
 ExampleRegistry buildExampleRegistry() => ExampleRegistry()
   ..register('AuditEvent', (json) => AuditEvent.fromJson(json).toJson())
   ..register('ConflictRecord', (json) => ConflictRecord.fromJson(json).toJson())
+  ..register('Contest', (json) => Contest.fromJson(json).toJson())
+  ..register(
+    'ContestConfigurationPreset',
+    (json) => ContestConfigurationPreset.fromJson(json).toJson(),
+  )
+  ..register(
+    'ContestConfigurationRevision',
+    (json) => ContestConfigurationRevision.fromJson(json).toJson(),
+  )
   ..register('Installation', (json) => Installation.fromJson(json).toJson())
   ..register(
     'InstallationActivation',
