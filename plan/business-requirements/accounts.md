@@ -6,7 +6,7 @@ The RC Soar Score solution is a set of applications and APIs to track, score, an
 
 A contest director using the offline capabilities of the application will not need any account. The data is stored locally. The contest director is the owner and can modify the data such as the scoring. If the director later creates an account or signs in, the data created offline becomes theirs on the remote system.
 
-Participants can be invited to enter scores online. These users are not required to create an account. The application should generate a special URL that is sent to the participant. Behind the scenes the system gives such a participant a temporary guest identity so that their entries can be attributed. If they later create an account, what they did can be attached to it.
+Participants can be invited to enter scores online. These users are not required to create an account. The application should generate a special URL that is sent to the participant. Behind the scenes the system gives such a participant a temporary guest identity so that their entries can be attributed. If they later create an account, what they did can be attached to it. A guest identity that is never claimed is removed 90 days after the contest is marked completed or 90 days after its scheduled end date, whichever comes first.
 
 Users viewing the public contests do not need an account.
 

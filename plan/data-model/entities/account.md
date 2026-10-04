@@ -48,7 +48,7 @@
 ## Lifecycle
 
 - **Registered:** created at first sign-in or registration together with its identity. `active`, then `archived` when the user closes the account. Archiving retains all data.
-- **Guest:** created when an invitation is redeemed. Either claimed into a registered account, or purged after a retention period following the contest. When purged, the records that reference it are re-pointed to the deleted-user account.
+- **Guest:** created when an invitation is redeemed. Either claimed into a registered account, or purged 90 days after the contest it was invited to is marked completed or 90 days after that contest's scheduled end date, whichever comes first (for the latest such contest, if it was invited to several). When purged, the records that reference it are re-pointed to the deleted-user account.
 - **Local:** exists on a single installation and owns data created offline. Claimed into a registered account when the user registers or signs in.
 - **Deletion request:** the user chooses what to remove (see Deletion below). The identity records and the account row are then erased.
 

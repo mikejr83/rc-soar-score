@@ -7,7 +7,7 @@ An account represents a person within the backend. It can own contests, manage d
 An account is one of four kinds:
 
 - **Registered:** a person who signs in through an identity provider. Only registered accounts can sign in. Email is unique among registered accounts that have one.
-- **Guest:** created when someone redeems an invitation without having an account, so that their submissions have an actor. A guest cannot sign in and its email is never treated as verified.
+- **Guest:** created when someone redeems an invitation without having an account, so that their submissions have an actor. A guest cannot sign in and its email is never treated as verified. An unclaimed guest account is purged 90 days after the contest it was invited to is marked completed or 90 days after that contest's scheduled end date, whichever comes first. If it was invited to several contests, the latest such date applies. The records that referenced it are re-pointed to the deleted-user account.
 - **Local:** the account that owns data created offline on an installation. It is claimed into a registered account when the user registers or signs in.
 - **Deleted:** a single shared account, created by the system, that references point at after the person they belonged to has been erased.
 
