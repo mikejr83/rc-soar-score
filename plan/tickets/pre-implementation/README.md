@@ -104,4 +104,4 @@ Outstanding questions that need to be answered before implementation begins. Eac
 
 ### Remaining
 
-(None)
+(None listed here, but several tickets are still `Open`. See [data-model-triage.md](data-model-triage.md) for which of them affect the data model.)
