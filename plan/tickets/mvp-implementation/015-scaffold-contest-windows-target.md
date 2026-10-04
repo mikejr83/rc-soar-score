@@ -17,7 +17,7 @@
 - [x] Verify `flutter build windows --release` succeeds and produces the release executable under `build/windows/x64/runner/Release/`.
 - [x] Verify `flutter test` (4/4) and `flutter analyze` remain green after adding the platform, and `flutter build web --no-pub` still succeeds (web behavior unchanged).
 - [x] Confirm `git status` shows only the generated `windows/` source files as new (no `build/` or runner artifacts).
-- [ ] Amend ticket 011 (`011-ci-workflow-and-docs.md`) work items to add a second workflow job: `windows-latest` runner that installs the pinned Flutter from ticket 001, runs `melos bootstrap`, then builds the contest app only (`flutter build windows --no-pub` from its directory); `analyze`/`test` stay on the existing `ubuntu-latest` job. If `.github/workflows/ci.yml` does not exist yet (011 not landed), apply the job when 011 executes and tick this work item then.
+- [x] Amend ticket 011 (`011-ci-workflow-and-docs.md`) work items to add a second workflow job: `windows-latest` runner that installs the pinned Flutter from ticket 001, runs `melos bootstrap`, then builds the contest app only (`flutter build windows --no-pub` from its directory); `analyze`/`test` stay on the existing `ubuntu-latest` job. If `.github/workflows/ci.yml` does not exist yet (011 not landed), apply the job when 011 executes and tick this work item then.
 - [x] Update `README.md` in this folder: index row for 015 and execution-order placement (after step 5, "004, 005"; CI-job portion lands with 011).
 - [x] Add a one-line follow-up to ticket 004's Follow-ups: Windows target added by 015.
 

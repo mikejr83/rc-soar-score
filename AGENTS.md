@@ -47,7 +47,7 @@ Soar Score is an RC sailplane soaring contest scoring and management suite. It c
 
 ## CI/CD
 
-- GitHub Actions workflow in `.github/workflows/ci.yml` (owned by ticket 011; not yet created)
+- GitHub Actions workflow in `.github/workflows/ci.yml` (owned by ticket 011)
 - Runs on push/PR to `main` and `develop` branches
 - Steps: install deps → analyze → test → build
 
