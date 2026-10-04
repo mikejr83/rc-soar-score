@@ -36,7 +36,7 @@
 | `local_archive`                | Boolean  | Yes      | false                 | Local archive flag. Local to the installation and never synchronized                                                                                                                          |
 | `created_at`                   | DateTime | Yes      | now                   | When the contest was created (UTC)                                                                                                                                                            |
 | `updated_at`                   | DateTime | Yes      | now                   | When the contest was last modified (UTC)                                                                                                                                                      |
-| `revision`                     | Integer  | Yes      | 1                     | Current revision number                                                                                                                                                                       |
+| `revision`                     | Integer  | Yes      | 0                     | Current revision number                                                                                                                                                                       |
 
 ## Invariants and Constraints
 

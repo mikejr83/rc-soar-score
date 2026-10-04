@@ -1,0 +1,14 @@
+[
+  {
+    "id": "019c0000-0000-7000-8000-0000000000c5",
+    "contest_id": "019c0000-0000-7000-8000-000000000010",
+    "owner_account_id": null,
+    "entity_type": "Team",
+    "entity_id": "019c0000-0000-7000-8000-0000000000e0",
+    "status": "Acknowledged",
+    "deleted_at": "2026-10-10T19:00:00Z",
+    "acknowledged_at": "2026-10-10T19:01:00Z",
+    "purge_after": "2027-01-08T19:01:00Z",
+    "deletion_reason": "Duplicate team"
+  }
+]

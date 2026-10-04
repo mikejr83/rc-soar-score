@@ -1,0 +1,13 @@
+[
+  {
+    "id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d11",
+    "discipline_profile_id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d01",
+    "field_keys": ["motor_restart", "out_of_bounds", "overflight_gt_one_min"],
+    "constraint_type": "mutually_exclusive",
+    "description": "Only one of the zero reasons can be selected",
+    "applies_to": null,
+    "message": "Select only one: Motor Restart, Out of Bounds, or Overflight > 1 Min",
+    "display_order": 2,
+    "created_at": "2026-09-15T00:00:00Z"
+  }
+]

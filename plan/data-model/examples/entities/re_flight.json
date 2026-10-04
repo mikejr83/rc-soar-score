@@ -1,0 +1,33 @@
+[
+  {
+    "id": "019c0000-0000-7000-8000-000000000901",
+    "contest_id": "019c0000-0000-7000-8000-000000000010",
+    "credited_round_id": "019c0000-0000-7000-8000-000000000081",
+    "source_round_id": "019c0000-0000-7000-8000-000000000081",
+    "source_group": 1,
+    "type": "ReflyEntireGroup",
+    "sequence": 1,
+    "previous_reflight_id": null,
+    "status": "ReadyToFly",
+    "reason": "Landing area obstructed by a spectator",
+    "scheduled_round_id": "019c0000-0000-7000-8000-000000000082",
+    "flown_group": 3,
+    "deviation_acknowledged": false,
+    "requested_group_size": null,
+    "achievable_max_size": null,
+    "size_exception_confirmed": false,
+    "random_seed": null,
+    "algorithm_version": null,
+    "config_revision_id": "019c0000-0000-7000-8000-000000000070",
+    "created_by": "019c0000-0000-7000-8000-000000000001",
+    "created_at": "2026-10-17T15:40:00Z",
+    "group_finalized_by": "019c0000-0000-7000-8000-000000000001",
+    "group_finalized_at": "2026-10-17T15:50:00Z",
+    "finalized_by": null,
+    "finalized_at": null,
+    "cancelled_by": null,
+    "cancelled_at": null,
+    "cancel_reason": null,
+    "revision": 3
+  }
+]

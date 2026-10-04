@@ -1,0 +1,100 @@
+[
+  {
+    "id": "019c0000-0000-7000-8000-000000000501",
+    "contest_id": "019c0000-0000-7000-8000-000000000010",
+    "score_placeholder_id": "019c0000-0000-7000-8000-000000000301",
+    "score_attempt_id": "019c0000-0000-7000-8000-000000000401",
+    "score_revision": 1,
+    "components": {
+      "time_flown": 585,
+      "landing": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d32",
+      "flight_penalty": null,
+      "cumulative_penalty": null
+    },
+    "set_at": "2026-10-17T15:10:00Z",
+    "set_by": "019c0000-0000-7000-8000-000000000001",
+    "reason": "Accepted director entry"
+  },
+  {
+    "id": "019c0000-0000-7000-8000-000000000502",
+    "contest_id": "019c0000-0000-7000-8000-000000000010",
+    "score_placeholder_id": "019c0000-0000-7000-8000-000000000303",
+    "score_attempt_id": "019c0000-0000-7000-8000-000000000402",
+    "score_revision": 1,
+    "components": {
+      "time_flown": 570,
+      "landing": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d30",
+      "flight_penalty": null,
+      "cumulative_penalty": null
+    },
+    "set_at": "2026-10-17T15:11:00Z",
+    "set_by": "019c0000-0000-7000-8000-000000000001",
+    "reason": "Accepted director entry"
+  },
+  {
+    "id": "019c0000-0000-7000-8000-000000000503",
+    "contest_id": "019c0000-0000-7000-8000-000000000010",
+    "score_placeholder_id": "019c0000-0000-7000-8000-000000000305",
+    "score_attempt_id": "019c0000-0000-7000-8000-000000000403",
+    "score_revision": 1,
+    "components": {
+      "time_flown": 540,
+      "landing": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d35",
+      "flight_penalty": null,
+      "cumulative_penalty": null
+    },
+    "set_at": "2026-10-17T15:12:00Z",
+    "set_by": "019c0000-0000-7000-8000-000000000001",
+    "reason": "Accepted director entry"
+  },
+  {
+    "id": "019c0000-0000-7000-8000-000000000504",
+    "contest_id": "019c0000-0000-7000-8000-000000000010",
+    "score_placeholder_id": "019c0000-0000-7000-8000-000000000304",
+    "score_attempt_id": "019c0000-0000-7000-8000-000000000404",
+    "score_revision": 1,
+    "components": {
+      "time_flown": 597,
+      "landing": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d31",
+      "flight_penalty": null,
+      "cumulative_penalty": null
+    },
+    "set_at": "2026-10-17T15:20:00Z",
+    "set_by": "019c0000-0000-7000-8000-000000000001",
+    "reason": "Accepted director entry"
+  },
+  {
+    "id": "019c0000-0000-7000-8000-000000000505",
+    "contest_id": "019c0000-0000-7000-8000-000000000010",
+    "score_placeholder_id": "019c0000-0000-7000-8000-000000000302",
+    "score_attempt_id": "019c0000-0000-7000-8000-000000000405",
+    "score_revision": 1,
+    "components": {
+      "time_flown": 0,
+      "landing": null,
+      "flight_penalty": null,
+      "cumulative_penalty": null,
+      "zero_reason": "motor_restart"
+    },
+    "set_at": "2026-10-17T15:21:00Z",
+    "set_by": "019c0000-0000-7000-8000-000000000001",
+    "reason": "Accepted director entry"
+  },
+  {
+    "id": "019c0000-0000-7000-8000-000000000506",
+    "contest_id": "019c0000-0000-7000-8000-000000000010",
+    "score_placeholder_id": "019c0000-0000-7000-8000-000000000311",
+    "score_attempt_id": "019c0000-0000-7000-8000-000000000406",
+    "score_revision": 1,
+    "components": {
+      "time_flown": 0,
+      "landing": null,
+      "flight_penalty": null,
+      "cumulative_penalty": null,
+      "zero_reason": "out_of_bounds"
+    },
+    "set_at": "2026-10-17T17:05:00Z",
+    "set_by": "019c0000-0000-7000-8000-000000000001",
+    "reason": "Accepted director entry"
+  }
+]

@@ -74,7 +74,7 @@ T reaches T_min after **ln(50/0.001) / −ln(0.992) ≈ 1,347 iterations**. The 
 hill-climbing.
 
 - Verify: `python -c "import math; print(math.log(50000)/-math.log(0.992))"` → `1347.0`
-- **Ambiguity:** the spec lists T_min alongside max iterations without saying whether reaching it *ends*
+- **Ambiguity:** the spec lists T_min alongside max iterations without saying whether reaching it _ends_
   the run. If it does, the whole optimizer runs 1,347 iterations — §4 shows that reading is dramatically
   worse. State explicitly that T_min is a floor.
 - A schedule matched to the budget is α = (T_min/T₀)^(1/iterations) — ≈ 0.99964 for 30k.
@@ -85,19 +85,19 @@ hill-climbing.
 ### 2.2 §3 / §7 — Teammate pairs distort the targets and reported metrics
 
 Pairs that the hard constraint forbids from ever meeting always have c = 0. In J they contribute a constant,
-so **the optimum is unchanged** — but every *reported* number and target built on all-pairs statistics is
+so **the optimum is unchanged** — but every _reported_ number and target built on all-pairs statistics is
 skewed:
 
-- μ is too low: all meetings must be absorbed by the pairs that *can* meet, so their true mean is higher.
+- μ is too low: all meetings must be absorbed by the pairs that _can_ meet, so their true mean is higher.
 - "Unmet Opponent Count" counts teammates who were never allowed to meet.
 - "Max Duplicate Matchups ≤ ⌈μ⌉ + 1" uses the wrong mean.
 
 Demonstration on a stored draw from GliderScore's sample data (30 pilots, 16 rounds, team protection):
 
-| Definition | Mean meetings | Pairs that never met |
-|---|---|---|
-| All pairs (spec §3) | 3.639 | 40 |
-| Pairs that can meet | 4.008 | **0** |
+| Definition          | Mean meetings | Pairs that never met |
+| ------------------- | ------------- | -------------------- |
+| All pairs (spec §3) | 3.639         | 40                   |
+| Pairs that can meet | 4.008         | **0**                |
 
 All 40 "unmet" pairs are teammates. **Recommendation:** exclude pairs that can never meet from every
 reported metric, and compute the target from the feasible-pair mean m = (total meetings) / (feasible pairs).
@@ -139,7 +139,7 @@ the leaders see the conditions everyone else got), but it's worth deciding delib
 ### 2.6 §6.3 step 4 — Seeded + team protection needs a fallback
 
 GliderScore forbids team protection in seeded mode. The spec allows it via a minimal rank-displacement swap
-into an *adjacent* group, but adjacent-only search can fail. Example: G = 3 and all three members of one team
+into an _adjacent_ group, but adjacent-only search can fail. Example: G = 3 and all three members of one team
 rank into Group 1. The first extra teammate swaps into Group 2; the second can't also go to Group 2, and
 Group 3 isn't adjacent to Group 1. Either forbid the combination or define the fallback (widen the search
 radius).
@@ -217,37 +217,37 @@ group size).
 
 **c10 — 23 pilots, 3 groups, 6 rounds, no teams** (MAD floor 0.287)
 
-| Algorithm | MAD | J | Max meets | Unmet pairs |
-|---|---|---|---|---|
-| GliderScore *(recorded)* | **0.677** | 205.6 | 5 | 10 |
-| Spec SA — T_min ends run (1,348 iterations) | 0.685 | 197.7 | 4 | 9 |
-| Spec SA — 30k, clamped at T_min | 0.684 | **193.5** | 4 | 13 |
-| Spec SA — 30k, α = 0.99964 | 0.681 | **193.5** | 4 | 12 |
-| Spec SA — 300k, α matched | 0.696 | **193.5** | 4 | 13 |
+| Algorithm                                   | MAD       | J         | Max meets | Unmet pairs |
+| ------------------------------------------- | --------- | --------- | --------- | ----------- |
+| GliderScore _(recorded)_                    | **0.677** | 205.6     | 5         | 10          |
+| Spec SA — T_min ends run (1,348 iterations) | 0.685     | 197.7     | 4         | 9           |
+| Spec SA — 30k, clamped at T_min             | 0.684     | **193.5** | 4         | 13          |
+| Spec SA — 30k, α = 0.99964                  | 0.681     | **193.5** | 4         | 12          |
+| Spec SA — 300k, α matched                   | 0.696     | **193.5** | 4         | 13          |
 
 **c1 — 30 pilots, 5 groups, 16 rounds, 8 teams of 3–4, team protection** (MAD floor 0.101)
 
-| Algorithm | MAD | J | Max meets | Unmet pairs |
-|---|---|---|---|---|
-| GliderScore *(recorded)* | 0.445 | 534.7 | 5 | 0 |
-| Spec SA — T_min ends run (1,348 iterations) | 0.832 | 871.9 | 7 | 2 |
-| Spec SA — 30k, clamped at T_min | 0.512 | 564.3 | 5 | 0 |
-| Spec SA — 30k, α = 0.99964 | 0.522 | 569.7 | 5 | 0 |
-| Spec SA — **300k**, α matched | **0.444** | **529.7** | 5 | 0 |
+| Algorithm                                   | MAD       | J         | Max meets | Unmet pairs |
+| ------------------------------------------- | --------- | --------- | --------- | ----------- |
+| GliderScore _(recorded)_                    | 0.445     | 534.7     | 5         | 0           |
+| Spec SA — T_min ends run (1,348 iterations) | 0.832     | 871.9     | 7         | 2           |
+| Spec SA — 30k, clamped at T_min             | 0.512     | 564.3     | 5         | 0           |
+| Spec SA — 30k, α = 0.99964                  | 0.522     | 569.7     | 5         | 0           |
+| Spec SA — **300k**, α matched               | **0.444** | **529.7** | 5         | 0           |
 
 **c4 — 63 pilots, 5 groups, 14 rounds, 14 teams of 3–5 (T_max = G), team protection** (MAD floor 0.338)
 
-| Algorithm | MAD | J | Max meets | Unmet pairs |
-|---|---|---|---|---|
-| GliderScore *(recorded)* | **0.710** | **2,291.7** | 6 | **2** |
-| Spec SA — T_min ends run (1,348 iterations) | 1.112 | 4,479.1 | 8 | 60 |
-| Spec SA — 30k, clamped at T_min | 0.824 | 2,805.8 | 6 | 13 |
-| Spec SA — 30k, α = 0.99964 | 0.832 | 2,858.1 | 7 | 13 |
-| Spec SA — **300k**, α matched | 0.726 | 2,348.6 | 6 | 5 |
+| Algorithm                                   | MAD       | J           | Max meets | Unmet pairs |
+| ------------------------------------------- | --------- | ----------- | --------- | ----------- |
+| GliderScore _(recorded)_                    | **0.710** | **2,291.7** | 6         | **2**       |
+| Spec SA — T_min ends run (1,348 iterations) | 1.112     | 4,479.1     | 8         | 60          |
+| Spec SA — 30k, clamped at T_min             | 0.824     | 2,805.8     | 6         | 13          |
+| Spec SA — 30k, α = 0.99964                  | 0.832     | 2,858.1     | 7         | 13          |
+| Spec SA — **300k**, α matched               | 0.726     | 2,348.6     | 6         | 5           |
 
 ### Findings
 
-1. **As specified, the annealer loses to GliderScore on both team-protected contests** — on MAD *and* on the
+1. **As specified, the annealer loses to GliderScore on both team-protected contests** — on MAD _and_ on the
    spec's own objective J. With no teams (c10) the two are indistinguishable.
 2. **Reading T_min as a stop condition is badly worse.** On the 63-pilot contest, 60 feasible pairs never
    meet, versus 2 for GliderScore.
@@ -272,11 +272,11 @@ group size).
 - **Conflict-directed annealing** — the spec's annealer from the round-robin deal, where half of pilot swaps
   take the pilot with the most excess meetings in its group rather than a random one. This is the
   conflict-directed move used in local search for the **Social Golfer Problem**, which is the same
-  combinatorial problem (CSPLib problem 010; Dotú & Van Hentenryck, *Scheduling Social Golfers Locally*,
+  combinatorial problem (CSPLib problem 010; Dotú & Van Hentenryck, _Scheduling Social Golfers Locally_,
   CPAIOR 2005).
 - **Greedy + conflict-directed polish** — the generic greedy construction, then the conflict-directed
   annealer starting cool (T₀ = 2) for 300k iterations. This is the combination recommended below.
-- **GliderScore + local-search polish** — *measurement only, not a recommendation.* Polishing GliderScore's
+- **GliderScore + local-search polish** — _measurement only, not a recommendation._ Polishing GliderScore's
   own output shows how much fairness its round-by-round construction leaves unclaimed.
 
 Same harness, seeds, validity checks and metrics as §4.
@@ -285,36 +285,36 @@ Same harness, seeds, validity checks and metrics as §4.
 
 **c10 — 23 pilots, no teams**
 
-| Method | MAD | J | Max meets | Unmet pairs |
-|---|---|---|---|---|
-| GliderScore *(recorded)* | 0.677 | 205.6 | 5 | **10** |
-| GliderScore + local search *(measurement only)* | 0.683 | 193.5 | 4 | 13 |
-| Generic greedy | 0.698 | 213.9 | 4 | 13 |
-| Generic greedy + local search | 0.677 | **193.5** | 4 | 11 |
-| Conflict-directed annealing | 0.676 | **193.5** | 4 | 15 |
-| Greedy + conflict-directed polish | **0.674** | **193.5** | 4 | 14 |
+| Method                                          | MAD       | J         | Max meets | Unmet pairs |
+| ----------------------------------------------- | --------- | --------- | --------- | ----------- |
+| GliderScore _(recorded)_                        | 0.677     | 205.6     | 5         | **10**      |
+| GliderScore + local search _(measurement only)_ | 0.683     | 193.5     | 4         | 13          |
+| Generic greedy                                  | 0.698     | 213.9     | 4         | 13          |
+| Generic greedy + local search                   | 0.677     | **193.5** | 4         | 11          |
+| Conflict-directed annealing                     | 0.676     | **193.5** | 4         | 15          |
+| Greedy + conflict-directed polish               | **0.674** | **193.5** | 4         | 14          |
 
 **c1 — 30 pilots, 8 teams, team protection**
 
-| Method | MAD | J | Max meets | Unmet pairs |
-|---|---|---|---|---|
-| GliderScore *(recorded)* | 0.445 | 534.7 | 5 | 0 |
-| GliderScore + local search *(measurement only)* | 0.415 | 517.7 | 5 | 0 |
-| Generic greedy | 0.522 | 766.9 | 5 | 0 |
-| Generic greedy + local search | 0.444 | 530.0 | 5 | 0 |
-| Conflict-directed annealing | 0.415 | 517.7 | 5 | 0 |
-| Greedy + conflict-directed polish | **0.410** | **513.7** | 5 | 0 |
+| Method                                          | MAD       | J         | Max meets | Unmet pairs |
+| ----------------------------------------------- | --------- | --------- | --------- | ----------- |
+| GliderScore _(recorded)_                        | 0.445     | 534.7     | 5         | 0           |
+| GliderScore + local search _(measurement only)_ | 0.415     | 517.7     | 5         | 0           |
+| Generic greedy                                  | 0.522     | 766.9     | 5         | 0           |
+| Generic greedy + local search                   | 0.444     | 530.0     | 5         | 0           |
+| Conflict-directed annealing                     | 0.415     | 517.7     | 5         | 0           |
+| Greedy + conflict-directed polish               | **0.410** | **513.7** | 5         | 0           |
 
 **c4 — 63 pilots, 14 teams, team protection**
 
-| Method | MAD | J | Max meets | Unmet pairs |
-|---|---|---|---|---|
-| GliderScore *(recorded)* | 0.710 | 2,291.7 | 6 | **2** |
-| GliderScore + local search *(measurement only)* | 0.684 | 2,177.7 | 6 | 2 |
-| Generic greedy | 0.738 | 2,722.7 | 6 | 8 |
-| Generic greedy + local search | 0.702 | 2,259.7 | **5** | 5 |
-| Conflict-directed annealing | 0.707 | 2,267.4 | 6 | 3 |
-| Greedy + conflict-directed polish | **0.687** | **2,203.4** | 6 | 3 |
+| Method                                          | MAD       | J           | Max meets | Unmet pairs |
+| ----------------------------------------------- | --------- | ----------- | --------- | ----------- |
+| GliderScore _(recorded)_                        | 0.710     | 2,291.7     | 6         | **2**       |
+| GliderScore + local search _(measurement only)_ | 0.684     | 2,177.7     | 6         | 2           |
+| Generic greedy                                  | 0.738     | 2,722.7     | 6         | 8           |
+| Generic greedy + local search                   | 0.702     | 2,259.7     | **5**     | 5           |
+| Conflict-directed annealing                     | 0.707     | 2,267.4     | 6         | 3           |
+| Greedy + conflict-directed polish               | **0.687** | **2,203.4** | 6         | 3           |
 
 ### Findings
 
@@ -346,27 +346,27 @@ Same harness, seeds, validity checks and metrics as §4.
 
 ### Recommendations for `matrix-draw.md` §4
 
-In priority order. *Measured* means supported by the results above; *untested* means reasoned but not run.
+In priority order. _Measured_ means supported by the results above; _untested_ means reasoned but not run.
 
 1. **Construct, then improve over all rounds.** Build a valid draw with a simple greedy construction, then run
    conflict-directed local search across every round, starting cool. It had the best MAD and J of every
-   recommended method on all three contests. *Measured.*
+   recommended method on all three contests. _Measured._
 2. **Scale the budget with problem size** (pilots × rounds). 300k iterations for 480–882 placements was enough
    to match or beat GliderScore; 30k was not. Treat T_min as a floor, and start polish cool (T₀ ≈ 2) when
-   beginning from a greedy draw. *Measured.*
+   beginning from a greedy draw. _Measured._
 3. **Run several seeds and keep the best**, storing the winning seed on the matrix revision. It keeps the
-   spec's reproducibility and matches the "re-run the draw" behaviour CDs already expect. *Measured (per-seed
-   spread).*
+   spec's reproducibility and matches the "re-run the draw" behaviour CDs already expect. _Measured (per-seed
+   spread)._
 4. **Penalise pairs that never meet**, either with an added weight or a lexicographic objective: never-met
-   pairs first, then max repeats, then variance. *Untested.*
+   pairs first, then max repeats, then variance. _Untested._
 5. **Keep lane co-optimization.** The annealers produced more even lanes than GliderScore's post-hoc
    assignment once given an adequate budget (lane-count std. dev. 0.35 vs 0.37 at 63 pilots, 0.47 vs 0.56 at
-   30). *Measured.*
+   30). _Measured._
 6. **History-aware late pilots:** place a late entry in the compatible group that minimises their meetings,
-   then run a short local-search pass over rounds not yet flown. *Untested.*
+   then run a short local-search pass over rounds not yet flown. _Untested._
 7. **Seeded rounds with meeting avoidance:** after ranking into tiers, allow swaps between adjacent-rank pilots
    across tier boundaries when they reduce repeat pairings, and use the same widened swap search to support
-   team protection (§2.6). *Untested.*
+   team protection (§2.6). _Untested._
 8. **Report what pilots notice:** show never-met pairs and max repeats alongside MAD in the fairness report.
 
 ### Caveats

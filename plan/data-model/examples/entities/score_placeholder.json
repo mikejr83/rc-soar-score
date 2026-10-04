@@ -1,0 +1,79 @@
+[
+  {
+    "id": "019c0000-0000-7000-8000-000000000301",
+    "contest_id": "019c0000-0000-7000-8000-000000000010",
+    "contest_participation_id": "019c0000-0000-7000-8000-000000000040",
+    "assignment_id": "019c0000-0000-7000-8000-000000000101",
+    "state": "Official",
+    "score_revision": 1,
+    "locked_by": null,
+    "locked_at": null,
+    "revision": 3
+  },
+  {
+    "id": "019c0000-0000-7000-8000-000000000303",
+    "contest_id": "019c0000-0000-7000-8000-000000000010",
+    "contest_participation_id": "019c0000-0000-7000-8000-000000000043",
+    "assignment_id": "019c0000-0000-7000-8000-000000000103",
+    "state": "Official",
+    "score_revision": 1,
+    "locked_by": null,
+    "locked_at": null,
+    "revision": 3
+  },
+  {
+    "id": "019c0000-0000-7000-8000-000000000305",
+    "contest_id": "019c0000-0000-7000-8000-000000000010",
+    "contest_participation_id": "019c0000-0000-7000-8000-000000000045",
+    "assignment_id": "019c0000-0000-7000-8000-000000000105",
+    "state": "Official",
+    "score_revision": 1,
+    "locked_by": null,
+    "locked_at": null,
+    "revision": 3
+  },
+  {
+    "id": "019c0000-0000-7000-8000-000000000304",
+    "contest_id": "019c0000-0000-7000-8000-000000000010",
+    "contest_participation_id": "019c0000-0000-7000-8000-000000000044",
+    "assignment_id": "019c0000-0000-7000-8000-000000000104",
+    "state": "Official",
+    "score_revision": 1,
+    "locked_by": null,
+    "locked_at": null,
+    "revision": 3
+  },
+  {
+    "id": "019c0000-0000-7000-8000-000000000302",
+    "contest_id": "019c0000-0000-7000-8000-000000000010",
+    "contest_participation_id": "019c0000-0000-7000-8000-000000000041",
+    "assignment_id": "019c0000-0000-7000-8000-000000000102",
+    "state": "Official",
+    "score_revision": 1,
+    "locked_by": null,
+    "locked_at": null,
+    "revision": 3
+  },
+  {
+    "id": "019c0000-0000-7000-8000-000000000311",
+    "contest_id": "019c0000-0000-7000-8000-000000000010",
+    "contest_participation_id": "019c0000-0000-7000-8000-000000000041",
+    "assignment_id": "019c0000-0000-7000-8000-000000000111",
+    "state": "Official",
+    "score_revision": 1,
+    "locked_by": null,
+    "locked_at": null,
+    "revision": 3
+  },
+  {
+    "id": "019c0000-0000-7000-8000-000000000312",
+    "contest_id": "019c0000-0000-7000-8000-000000000010",
+    "contest_participation_id": "019c0000-0000-7000-8000-000000000044",
+    "assignment_id": "019c0000-0000-7000-8000-000000000112",
+    "state": "NotEntered",
+    "score_revision": 0,
+    "locked_by": null,
+    "locked_at": null,
+    "revision": 1
+  }
+]

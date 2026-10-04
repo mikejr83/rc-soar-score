@@ -1,0 +1,22 @@
+[
+  {
+    "id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d13",
+    "discipline_profile_id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d01",
+    "formula_key": "flight_score",
+    "formula_type": "intermediate",
+    "description": "Flight score: max(0, time * PPS - overflight penalty)",
+    "formula_text": "max(0, (time_flown * points_per_second) - overflight_penalty)",
+    "inputs": {
+      "time_flown": "score:time_flown",
+      "points_per_second": "config:points_per_second",
+      "overflight_penalty": "calc:overflight_penalty"
+    },
+    "outputs": {
+      "flight_score": "calc:flight_score"
+    },
+    "depends_on": ["overflight_penalty"],
+    "is_primary": false,
+    "display_order": 2,
+    "created_at": "2026-09-15T00:00:00Z"
+  }
+]
