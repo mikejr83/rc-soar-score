@@ -6,7 +6,7 @@ Rule used: architecture requirements win over the data model, and business requi
 
 ## Summary
 
-- 47 entities in the ERD, all documented, and a new [contest-options.md](contest-options.md) that defines every setting a director can make.
+- 48 entities in the ERD, all documented, and a new [contest-options.md](contest-options.md) that defines every setting a director can make.
 - The ERD, the entity documents, and the README agree field by field. Both Mermaid diagrams render.
 - Everything that blocked writing models and repositories is resolved. The remaining items are in the next section. None of them changes the shape of a core table.
 

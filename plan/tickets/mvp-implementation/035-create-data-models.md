@@ -91,3 +91,16 @@ The scoring engine, the draw engine, and the sync protocol are not part of this 
 - [Offline synchronization](../../architecture-requirements/offline-synchronization.md) and [offline usage](../../architecture-requirements/offline-usage.md)
 - [Core package guide](../../../packages/soar_score_core/AGENTS.md)
 - Existing `packages/soar_score_core/lib/models/id.dart`, `models/contest.dart` and repository contracts
+
+## Discrepancies and decisions
+
+Recorded as the models land. See [035-implementation-plan.md](035-implementation-plan.md) for the full list.
+
+| Area                 | Finding                                                                                  | Resolution                                                                                                                                 |
+| -------------------- | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| Example format       | The examples are Markdown files with fenced `json` blocks, not JSON files.               | The round-trip test parses the fenced blocks. Ticket wording updated.                                                                      |
+| Entity count         | `reconciliation-findings.md` said 47 entities; the ERD, catalog and `entities/` have 48. | Fixed to 48.                                                                                                                               |
+| Score representation | The spec says `Decimal`; the ticket forbade floating point.                              | Owner relaxed the rule (D2): scores use Dart `double`. Revisit if scores disagree across devices or exact ties matter.                     |
+| Equality             | 48 classes need value equality.                                                          | `equatable` added as a runtime dependency (D1); core `AGENTS.md` updated.                                                                  |
+| Initial revision     | `Contest.revision` defaults to 1 but `Team.revision` defaults to 0.                      | Open: confirm the intended starting value. No `Revision` type was added; `Synchronizable.revision` is a plain `int` until this is settled. |
+| `Contest.startedAt`  | The placeholder field has no counterpart in the entity.                                  | Removed when `Contest` is expanded (D3, plan PR 4), together with the data package fix-up.                                                 |
