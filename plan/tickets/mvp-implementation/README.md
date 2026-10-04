@@ -46,7 +46,7 @@ Tickets for getting the repository basics in place: toolchain, Melos workspace, 
 | [031](031-contest-delete-delisting.md)               | Delete and delisting contests                                                                                                                              | High     | Open      |
 | [032](032-contest-archive-filter.md)                 | Contest archive filter                                                                                                                                     | Medium   | Open      |
 | [033](033-home-page-sync-action.md)                  | Sync action on home page                                                                                                                                   | Medium   | Open      |
-| [035](035-create-data-models.md)                     | Implement canonical domain models (48 entities)                                                                                                            |
+| [035](035-create-data-models.md)                     | Implement canonical domain models (48 entities)                                                                                                            | High     | In-Review |
 | [036](036-create-drift-schema.md)                    | Implement the Drift schema for the 48-entity model                                                                                                         |
 | [037](037-sync-protocol-and-engine.md)               | Synchronization protocol, server service and client engine                                                                                                 |
 

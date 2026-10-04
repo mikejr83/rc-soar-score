@@ -16,7 +16,7 @@ part 'audit_event.g.dart';
 @JsonSerializable(fieldRename: FieldRename.snake, includeIfNull: true)
 @IdConverter()
 @UtcTimestampConverter()
-class AuditEvent extends Equatable implements SyncScoped {
+class AuditEvent extends Equatable implements SyncScoped, PrivateData {
   AuditEvent({
     required this.id,
     required String entityType,

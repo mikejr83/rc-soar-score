@@ -8,7 +8,7 @@
 
 `packages/soar_score_data` is one Drift schema and repository layer. The native offline application opens it against SQLite, and the server opens it against PostgreSQL through `drift_postgres`. The executor is chosen at database construction, so tables, migrations and repositories are shared.
 
-The current database is schema version 1 and contains only `Contests(id, name, started_at)`. `onUpgrade` currently rejects upgrades. This ticket persists the 48 entities in [`plan/data-model/`](../../data-model/README.md), using the domain contracts from ticket 035. Architecture requirements are authoritative over the ERD and entity documents when they conflict.
+The current database is schema version 1 and contains only the `contests` table, whose columns already match the full `Contest` model. That table was changed in place (PR 58) with no upgrade path, because nothing had been released; `onUpgrade` still rejects upgrades. This ticket persists the 48 entities in [`plan/data-model/`](../../data-model/README.md), using the domain contracts from ticket 035. Architecture requirements are authoritative over the ERD and entity documents when they conflict.
 
 ### Storage rules
 
@@ -40,11 +40,12 @@ A local accountless contest has no remote account, so native tables that referen
   - Enumerations as text with check constraints using the exact values in the entity documents.
   - JSON-shaped content (`payload`, resolved configuration, delivery outcomes) as text holding JSON.
   - `bigint` sequences as integers. SQLite integers are 64-bit, which is sufficient.
-  - Decimals with a declared precision, stored so that scoring results are identical on both backends (for example, scaled integers or text). Do not use floating point for scores.
+  - Scores and derived points as double-precision reals (SQLite `REAL`, PostgreSQL `double precision`), matching the plain Dart `double` in the core models (decision D2, ticket 035). Identical results on both backends must be shown by the shared test suite; if that fails, revisit the decision with the note in the implementation plan.
 - Document any dialect-specific features. Partial unique indexes, such as "one open `InstallationActivation` per contest", need hand-written SQL in the migration; keep them in one place and test them on both backends.
 - Define foreign keys, indexes, natural and composite uniqueness, and idempotency constraints from the entity and architecture invariants, including `(contest_id, client_mutation_id)` and `(owner_account_id, client_mutation_id)` on `MutationRecord`. Avoid blanket cascade deletes: preserve immutable score, publication, synchronization and audit history as required. A contest deletion removes the director's contest data and leaves any publication in place.
 - `ModelCatalog` is director-owned: `owner_account_id` is required and uniqueness is (`owner_account_id`, `name`, `manufacturer`), so two directors can keep the same model. It belongs to the director data group and syncs through the director stream.
 - **Unit of work:** implement the write path defined in ticket 035. One transaction stores the entity, increments its `revision`, writes the `MutationRecord` as `Pending` on a client, and writes a `Tombstone` on delete. Repositories must not write contest or director data any other way.
+  - `MatrixAssignment` has no `revision`. Moving an assignment adds a new `Moved` row and writes `superseded_by_assignment_id` on the old row exactly once; design how the unit of work performs that single update (it is not a general update path) and records its `MutationRecord`.
 - **Replicated writes:** implement the separate "apply replicated change" path used when a client pulls from the server. It preserves the server revision and sequence, does not create a new pending mutation, and is rejected for derived data, which is recomputed instead.
 - Keep private identity data, invitation credentials and director-only audit data out of public projections by construction of the persistence and read boundaries.
 - Preserve append-only score attempts and revisioned official, calculation and publication history. Derived results retain their input and configuration provenance.
@@ -55,13 +56,13 @@ A local accountless contest has no remote account, so native tables that referen
 
 - [ ] Reconcile every entity's fields and relationships with the architecture documents. Document the portable type mapping, the foreign keys that cross into the backend-only group, and any required model or ERD corrections. Update `plan/data-model/README.md` Physical Design Decisions to match.
 - [ ] Add Drift tables, foreign keys, indexes and unique constraints per table group in `packages/soar_score_data/lib/`, one table per file, grouped by folder.
-- [ ] Expand `Contests` to the full domain shape while keeping the current repository behaviour compatible with ticket 035.
+- [ ] Keep `Contests` as it is (already the full `Contest` shape) and keep the current repository behaviour compatible with ticket 035.
 - [ ] Register table groups so that the server executor registers all groups and the native executor omits the backend-only group. Cover both with tests.
-- [ ] Advance `SoarScoreDatabase.schemaVersion` from 1 to 2 and implement a v1-to-v2 migration that preserves existing contest rows and supplies defaults for newly required columns. Fresh databases create the latest schema directly.
+- [ ] Create the new tables in schema version 1 while the app is unreleased, with no upgrade path (as for `contests`). Once a version ships, advance `schemaVersion` and write in-sequence migrations. Fresh databases create the latest schema directly.
 - [ ] Implement the unit of work and the replicated-change path in the data layer, and implement the `SyncStore` contract from ticket 035 on top of them so `soar_score_sync` (ticket 037) never touches drift directly.
 - [ ] Add repositories and mappers for the entities needed by the current core contracts, in families matching ticket 035. Keep database access in this package and enforce multi-row invariants transactionally.
 - [ ] Regenerate checked-in Drift code with `build_runner`.
-- [ ] Add schema and constraint tests, and CRUD and round-trip tests, for every table group. Include v1 upgrade and fresh-database cases.
+- [ ] Add schema and constraint tests, and CRUD and round-trip tests, for every table group. Include fresh-database creation; add upgrade cases once a version ships.
 - [ ] Run the same test suite against SQLite and against a configured PostgreSQL database. Report PostgreSQL as unverified if no database is available; skipped tests are not a pass.
 - [ ] Load each JSON example under `plan/data-model/examples/entities/` through the repositories on both backends to confirm they persist and read back unchanged.
 
@@ -71,7 +72,7 @@ A local accountless contest has no remote account, so native tables that referen
 - [ ] The native executor creates no backend-only tables. The server creates all groups.
 - [ ] SQLite and PostgreSQL give equivalent identifier, timestamp, decimal, enumeration, uniqueness, relationship and revision behaviour, shown by the shared test suite.
 - [ ] Every contest or director write produces exactly one revision bump and one `MutationRecord` or `Tombstone` in the same transaction. A replicated write produces none.
-- [ ] Migration from v1 preserves existing contest data, and creation of the latest schema works on a fresh database.
+- [ ] Creation of the latest schema works on a fresh database. Upgrade migrations are required only after a version ships.
 - [ ] Foreign keys, uniqueness and indexes enforce the documented invariants without deleting required immutable history.
 - [ ] `dart run build_runner build`, `dart analyze` and `dart test` pass in `packages/soar_score_data`.
 - [ ] SQLite tests pass; PostgreSQL tests pass when run against a configured instance.

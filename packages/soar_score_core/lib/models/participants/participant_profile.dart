@@ -13,7 +13,8 @@ part 'participant_profile.g.dart';
 @JsonSerializable(fieldRename: FieldRename.snake, includeIfNull: true)
 @IdConverter()
 @UtcTimestampConverter()
-class ParticipantProfile extends Equatable implements Synchronizable {
+class ParticipantProfile extends Equatable
+    implements Synchronizable, PrivateData {
   ParticipantProfile({
     required this.id,
     required this.ownerAccountId,

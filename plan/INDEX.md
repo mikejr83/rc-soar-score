@@ -55,6 +55,17 @@ Documents in the `ui` sub-folder define the user experience and page-level requi
 - [`participant-scoring/README.md`](ui/participant-scoring/README.md) - Participant score-entry and review UI requirements.
 - [`public-site/README.md`](ui/public-site/README.md) - Public contest site UI requirements.
 
+## Data Model
+
+Documents in the sub-folder `data-model` describe the 48-entity domain model that the code implements.
+
+- [`data-model/README.md`](data-model/README.md) - Entity catalog, sync scope table and relationships.
+- [`data-model/ERD.md`](data-model/ERD.md) - Every entity column and foreign key.
+- [`data-model/enumerations.md`](data-model/enumerations.md) - The exact text of every enumeration value.
+- [`data-model/contest-options.md`](data-model/contest-options.md) - Contest configuration options and defaults.
+- [`data-model/examples/entities/README.md`](data-model/examples/entities/README.md) - One JSON example file per entity, used as a test base.
+- [`tickets/mvp-implementation/035-implementation-plan.md`](tickets/mvp-implementation/035-implementation-plan.md) - How the domain models are built, one family per pull request.
+
 ## Application Plans
 
 These documents describe the overall solution and the minimum viable product.

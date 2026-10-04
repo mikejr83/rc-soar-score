@@ -18,7 +18,7 @@ part 'invitation.g.dart';
 @IdConverter()
 @UtcTimestampConverter()
 @ProtectedCredentialConverter()
-class Invitation extends Equatable implements SyncScoped {
+class Invitation extends Equatable implements SyncScoped, PrivateData {
   Invitation({
     required this.id,
     required this.contestId,

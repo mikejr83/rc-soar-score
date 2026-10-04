@@ -82,6 +82,36 @@ ExampleRegistry buildExampleRegistry() => ExampleRegistry()
     (json) => ParticipationStanding.fromJson(json).toJson(),
   )
   ..register('TeamStanding', (json) => TeamStanding.fromJson(json).toJson())
+  ..register('Account', (json) => Account.fromJson(json).toJson())
+  ..register(
+    'AccountIdentity',
+    (json) => AccountIdentity.fromJson(json).toJson(),
+  )
+  ..register(
+    'AccountPublicProfile',
+    (json) => AccountPublicProfile.fromJson(json).toJson(),
+  )
+  ..register('DelistRequest', (json) => DelistRequest.fromJson(json).toJson())
+  ..register(
+    'ParticipantAccountLink',
+    (json) => ParticipantAccountLink.fromJson(json).toJson(),
+  )
+  ..register(
+    'ParticipantDirectoryEntry',
+    (json) => ParticipantDirectoryEntry.fromJson(json).toJson(),
+  )
+  ..register(
+    'PublicationIdentity',
+    (json) => PublicationIdentity.fromJson(json).toJson(),
+  )
+  ..register(
+    'PublicationParticipant',
+    (json) => PublicationParticipant.fromJson(json).toJson(),
+  )
+  ..register(
+    'PublicationProjection',
+    (json) => PublicationProjection.fromJson(json).toJson(),
+  )
   ..register('Installation', (json) => Installation.fromJson(json).toJson())
   ..register(
     'InstallationActivation',

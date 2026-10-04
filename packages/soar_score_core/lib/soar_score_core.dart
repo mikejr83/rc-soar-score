@@ -4,12 +4,14 @@
 /// only `package:soar_score_core/soar_score_core.dart`.
 library;
 
+export 'models/accounts/accounts.dart';
 export 'models/contest/contest_models.dart';
 export 'models/discipline/discipline.dart';
 export 'models/id.dart';
 export 'models/landing/landing.dart';
 export 'models/matrix/matrix.dart';
 export 'models/participants/participants.dart';
+export 'models/publication/publication.dart';
 export 'models/results/results.dart';
 export 'models/scores/scores.dart';
 export 'models/shared/shared.dart';
