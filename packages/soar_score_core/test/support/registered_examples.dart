@@ -56,6 +56,18 @@ ExampleRegistry buildExampleRegistry() => ExampleRegistry()
   ..register('Role', (json) => Role.fromJson(json).toJson())
   ..register('Team', (json) => Team.fromJson(json).toJson())
   ..register('TeamMembership', (json) => TeamMembership.fromJson(json).toJson())
+  ..register(
+    'MatrixAssignment',
+    (json) => MatrixAssignment.fromJson(json).toJson(),
+  )
+  ..register('MatrixRevision', (json) => MatrixRevision.fromJson(json).toJson())
+  ..register('ReFlight', (json) => ReFlight.fromJson(json).toJson())
+  ..register(
+    'ReFlightParticipant',
+    (json) => ReFlightParticipant.fromJson(json).toJson(),
+  )
+  ..register('Round', (json) => Round.fromJson(json).toJson())
+  ..register('RoundGroup', (json) => RoundGroup.fromJson(json).toJson())
   ..register('Installation', (json) => Installation.fromJson(json).toJson())
   ..register(
     'InstallationActivation',

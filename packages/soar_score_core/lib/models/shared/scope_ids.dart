@@ -27,3 +27,19 @@ int requireNonNegative(int value, String name) {
   }
   return value;
 }
+
+/// Throws [ArgumentError] when [value] is below 1.
+int requirePositive(int value, String name) {
+  if (value < 1) {
+    throw ArgumentError.value(value, name, 'must be at least 1');
+  }
+  return value;
+}
+
+/// Throws [ArgumentError] unless [value] fits an unsigned 32-bit seed.
+int requireSeed(int value, String name) {
+  if (value < 0 || value > 0xFFFFFFFF) {
+    throw ArgumentError.value(value, name, 'must fit an unsigned 32-bit seed');
+  }
+  return value;
+}
