@@ -6,6 +6,8 @@
 **Parent entity:** DisciplineProfile  
 **Child entities:** None
 
+The core options that every contest has regardless of discipline are defined in [contest-options.md](../contest-options.md). A config field defines only a setting that is specific to this discipline.
+
 ## Fields/Properties
 
 | Field                   | Type                                          | Required | Default | Description                                                                                                                                                                             |

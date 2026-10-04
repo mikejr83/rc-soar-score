@@ -1,6 +1,6 @@
 # RC Soar Score Entity Relationship Diagram
 
-ERD for the 47 conceptual entities (46 have an entity document; CONTEST_CONFIGURATION_PRESET does not yet). Physical design: PostgreSQL backend with IndexedDB clients, UUIDv7 identifiers, composite unique constraints on natural business keys.
+ERD for the 47 conceptual entities. Physical design: PostgreSQL backend with IndexedDB clients, UUIDv7 identifiers, composite unique constraints on natural business keys.
 
 ```mermaid
 erDiagram
@@ -58,13 +58,16 @@ erDiagram
     }
 
     CONTEST_CONFIGURATION_PRESET {
-        uuid   id                    PK
-        uuid   owner_account_id      FK
-        uuid   discipline_profile_id FK
-        text   name
-        text   description
-        string overrides                "jsonb: config field_key -> value"
-        int    revision
+        uuid        id                    PK
+        uuid        owner_account_id      FK
+        uuid        discipline_profile_id FK
+        text        name
+        text        description              "optional"
+        jsonb       config                   "core and discipline; full resolved"
+        uuid        landing_table_id      FK "optional"
+        timestamptz created_at
+        timestamptz updated_at
+        int         revision
     }
 
     %% Participants
@@ -181,6 +184,7 @@ erDiagram
         text      description
         text      category
         uuid      default_landing_table_id FK "optional"
+        jsonb     default_options             "optional; core option defaults"
         text      status
         text      superseded_by
         text      created_by
@@ -280,16 +284,14 @@ erDiagram
     CONTEST_CONFIGURATION_REVISION {
         uuid      id                    PK
         uuid      contest_id            FK
-        int       revision_number
+        int       revision_number          "highest is current"
         uuid      discipline_profile_id FK
-        int       profile_version
-        uuid      source_preset_id      FK "optional"
-        jsonb     config
+        uuid      source_preset_id      FK "optional; provenance only"
+        jsonb     config                   "core and discipline; full resolved"
         uuid      landing_table_id      FK "optional"
         uuid      created_by            FK
-        text      notes
+        text      notes                    "optional"
         timestamp created_at
-        uuid      replaces_revision_id  FK "optional"
     }
 
     %% Matrix / Assignments
@@ -301,7 +303,7 @@ erDiagram
         uuid        scheduled_round_id          FK
         uuid        credited_round_id           FK
         int         group
-        int         lane
+        int         lane                           "optional; null when lane mode is None"
         int         flight_sequence
         text        assignment_type                "Original, Moved, Reflight, LateAdd"
         uuid        source_assignment_id        FK "optional"
@@ -782,7 +784,7 @@ erDiagram
     DISCIPLINE_PROFILE ||--o{ CONTEST_CONFIGURATION_PRESET : "based on"
     DISCIPLINE_PROFILE ||--o{ CONTEST_CONFIGURATION_REVISION : "selected by"
     CONTEST_CONFIGURATION_PRESET |o--o{ CONTEST_CONFIGURATION_REVISION : "source preset"
-    CONTEST_CONFIGURATION_REVISION |o--o| CONTEST_CONFIGURATION_REVISION : "replaces"
+    LANDING_TABLE |o--o{ CONTEST_CONFIGURATION_PRESET : "selected by"
     DISCIPLINE_PROFILE ||--o{ DISCIPLINE_CONFIG_FIELD : "defines"
     DISCIPLINE_PROFILE ||--o{ DISCIPLINE_SCORE_FIELD : "defines"
     DISCIPLINE_PROFILE ||--o{ DISCIPLINE_VALIDATION : "defines"

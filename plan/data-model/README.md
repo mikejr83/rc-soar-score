@@ -5,7 +5,8 @@ Canonical documentation for the Soar Score data model. This folder is the source
 ## Contents
 
 - [Entity Relationship Diagram (ERD)](ERD.md) - Mermaid diagram of all entities and their relationships
-- [Entity Documentation](entities/) - Per-entity specifications (46 files)
+- [Contest Options](contest-options.md) - Every setting a director can make, where it is stored, its defaults, and when it can change
+- [Entity Documentation](entities/) - Per-entity specifications (47 files)
 - [Reconciliation Findings](reconciliation-findings.md) - Gaps and conflicts between this model and the architecture and business requirements
 
 ## Entity Catalog
@@ -39,6 +40,7 @@ Canonical documentation for the Soar Score data model. This folder is the source
 | ---------------------------- | ---------------------------------------------------------------------------------------- | ---------------------------------------------------------- | -------------------------------------------------------------------------------- |
 | Contest                      | [entities/contest.md](entities/contest.md)                                               | [contest.md](../architecture-requirements/data/contest.md) | Private source-of-truth event aggregate root with lifecycle and revisioned state |
 | ContestConfigurationRevision | [entities/contest_configuration_revision.md](entities/contest_configuration_revision.md) | [contest.md](../architecture-requirements/data/contest.md) | Revisioned contest-scoped overrides of discipline config                         |
+| ContestConfigurationPreset   | [entities/contest_configuration_preset.md](entities/contest_configuration_preset.md)     | [contest.md](../architecture-requirements/data/contest.md) | A director's saved, named set of contest settings to start a new contest from    |
 
 ### Disciplines & Landing Tables
 

@@ -93,7 +93,7 @@ The service must calculate scores in the following logical order. Each stage mus
 
 1. Any change to a calculation-affecting contest option, discipline override, landing table, matrix assignment, or rules/calculation version marks the affected stored results stale until they are recomputed from the immutable raw data. Stored results carry the revisions they were computed under so staleness can be detected.
 2. Recalculation must preserve score state, review history, source metadata, and audit records. Superseded computed values are not kept; the published projections are the record of what was shown.
-3. Changes to discipline, scoring rules, or group-score options are prohibited once the contest reaches `Running`, except for changes already permitted by contest-state requirements. A permitted derived-score option change must trigger a complete affected-scope recalculation.
+3. Changes to the discipline and to the values of its scoring rules are prohibited once the contest reaches `Running`, except for changes already permitted by contest-state requirements. Derived-score options, such as the group-score mode, rounding, decimal places, dropped rounds, the tie-breaker, and the team pilot count, may change until the contest is completed. Such a change must trigger a complete affected-scope recalculation.
 4. Public projections, participant results, rankings, and team totals use only results computed from the current official component sets under the current configuration, matrix, and calculation version. A stale or incomplete result, such as one with missing scores or open reviews, must be marked preliminary and must not be presented as official.
 
 ## Verification requirements
