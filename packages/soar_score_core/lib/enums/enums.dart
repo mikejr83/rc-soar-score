@@ -19,6 +19,7 @@ export 'mutation_outcome.dart';
 export 'platform.dart';
 export 'profile_status.dart';
 export 'public_update_mode.dart';
+export 'role_type.dart';
 export 'rounding_mode.dart';
 export 'rule_type.dart';
 export 'score_field_kind.dart';
