@@ -18,7 +18,7 @@ The documents in this folder define the contest director's administration experi
 
 The application should be built to Material 3 standards.
 
-<!-- The applications use Angular, Angular Material, Material 3, and Sass. Use Angular Material components and theme tokens before adding custom styles. Any custom values must be Sass or CSS variables defined at the application root so the theme can be adjusted centrally. -->
+<!-- The applications use Flutter and Material 3. Use Material 3 components and theme tokens before adding custom styles. Any custom values must be defined as theme tokens at the application root so the theme can be adjusted centrally. -->
 
 Administrative screens target tablet and larger screens. They must remain usable with browser text zoom and larger configured fonts; dense tables must provide a responsive alternative such as horizontal scrolling or a stacked row view. Participant self-scoring is mobile-first and must use large, high-contrast controls suitable for outdoor use. Do not communicate state by color alone. Every status has text, an icon or shape, and an accessible label.
 

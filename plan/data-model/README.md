@@ -288,9 +288,9 @@ This documentation derives from the canonical architectural requirements in [arc
 Based on the architecture requirements, this data model is implemented as:
 
 - **Storage backend (server):** PostgreSQL relational database
-- **Storage backend (clients):** IndexedDB (PWA) or embedded database (desktop)
+- **Storage backend (clients):** Embedded SQLite database in the native application. Web applications store no contest data and access everything through the API; browser storage such as IndexedDB is limited to user preferences and front-end functionality
 - **Identifiers:** UUIDv7 (time-ordered, collision-resistant). The one exception is `ContestParticipation.scoring_uuid`, a random UUIDv4, because it must not be sequential
 - **Keys:** Surrogate UUIDv7 primary keys with composite unique constraints on natural business keys and idempotency keys
 - **Timestamps:** Stored in UTC as timestamps with a time zone, and written as ISO 8601 strings in JSON and on the wire. A contest also keeps its IANA `timezone` for display
 - **Schema portability:** The server schema is kept to portable relational features so it does not depend on one database product, as the architecture requires. PostgreSQL is the server target
-- **Enumerated types:** Stored as text constrained to the listed values (check constraints), so the same values work on the server and in the embedded SQLite and IndexedDB stores
+- **Enumerated types:** Stored as text constrained to the listed values (check constraints), so the same values work on the server and in the embedded SQLite store
