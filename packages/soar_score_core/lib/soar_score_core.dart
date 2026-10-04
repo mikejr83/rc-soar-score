@@ -5,7 +5,9 @@
 library;
 
 export 'models/contest/contest_models.dart';
+export 'models/discipline/discipline.dart';
 export 'models/id.dart';
+export 'models/landing/landing.dart';
 export 'models/shared/shared.dart';
 export 'models/sync/sync.dart';
 export 'repositories/contest_repository.dart';
