@@ -58,6 +58,17 @@
         "reveal": "always",
         "panel": "new"
       }
+    },
+    {
+      "label": "prettier: format plan docs",
+      "type": "shell",
+      "command": "npx prettier",
+      "args": ["--write", "plan/**/*.md"],
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
     }
   ]
 }
