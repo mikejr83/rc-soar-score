@@ -1,5 +1,7 @@
 # RC Soar Score
 
+![CI](https://github.com/mikejr83/rc-soar-score/actions/workflows/ci.yml/badge.svg)
+
 **RC Soar Score** is an RC (radio-controlled) sailplane soaring contest scoring and management suite. It provides a comprehensive solution for contest directors, pilots, helpers, and soaring enthusiasts to organize, fly, score, and follow soaring competitions across multiple disciplines.
 
 The system is designed for both connected and disconnected field operations, allowing contest directors to run events completely offline when remote flying fields have no internet connectivity, while offering seamless cloud synchronization and public result publishing when a connection is available.
