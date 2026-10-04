@@ -30,8 +30,8 @@ The system is designed for both connected and disconnected field operations, all
 - **Offline-First & Cloud-Synced**: Full offline capability for contest directors at remote fields with SQLite persistence, paired with cloud synchronization to PostgreSQL when connectivity is established.
 - **Flight Matrix Generator**: Automated round-and-group draw generator featuring simulated annealing optimization, team protection (preventing teammates from flying in the same group), and fairness distribution metrics.
 - **Multiple Scoring Modes**:
-  - *Official Scoring*: Fast, keyboard-friendly administrative entry and review by the contest director or local officials.
-  - *Self-Scoring*: Mobile-first score entry portal for pilots and team helpers on their smartphones.
+  - _Official Scoring_: Fast, keyboard-friendly administrative entry and review by the contest director or local officials.
+  - _Self-Scoring_: Mobile-first score entry portal for pilots and team helpers on their smartphones.
 - **Public Results & Live Projections**: Dedicated public site for real-time leaderboards, round-by-round breakdown, landing stats, and contest archives.
 - **Score Review & Dispute Workflow**: Structured audit trail for contested scores, reflights, penalties, and director score overrides.
 
@@ -41,14 +41,14 @@ The system is designed for both connected and disconnected field operations, all
 
 RC Soar Score includes a domain scoring engine capable of handling standard soaring disciplines with their unique landing tapes, target windows, flight time truncation/rounding, penalties, and flight normalization:
 
-| Discipline | Description | Rules & Specification |
-| --- | --- | --- |
-| **ALES** | Altitude Limited Electric Soaring | [`plan/business-requirements/disciplines/ales.md`](plan/business-requirements/disciplines/ales.md) |
-| **F5J** | Electric Motor Gliders with Altimeter Recording | [`plan/business-requirements/disciplines/f5j.md`](plan/business-requirements/disciplines/f5j.md) |
-| **F3J** | Thermal Duration Gliders (Towline launch) | [`plan/business-requirements/disciplines/f3j.md`](plan/business-requirements/disciplines/f3j.md) |
-| **Thermal** | Traditional Thermal Duration | [`plan/business-requirements/disciplines/thermal.md`](plan/business-requirements/disciplines/thermal.md) |
-| **F3K** | Hand-Launch Gliders (multi-task discipline) | [`plan/business-requirements/disciplines/f3k.md`](plan/business-requirements/disciplines/f3k.md) |
-| **F3L** | RES (Rudder, Elevator, Spoiler) 2m Gliders | [`plan/business-requirements/disciplines/f3l.md`](plan/business-requirements/disciplines/f3l.md) |
+| Discipline  | Description                                     | Rules & Specification                                                                                    |
+| ----------- | ----------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| **ALES**    | Altitude Limited Electric Soaring               | [`plan/business-requirements/disciplines/ales.md`](plan/business-requirements/disciplines/ales.md)       |
+| **F5J**     | Electric Motor Gliders with Altimeter Recording | [`plan/business-requirements/disciplines/f5j.md`](plan/business-requirements/disciplines/f5j.md)         |
+| **F3J**     | Thermal Duration Gliders (Towline launch)       | [`plan/business-requirements/disciplines/f3j.md`](plan/business-requirements/disciplines/f3j.md)         |
+| **Thermal** | Traditional Thermal Duration                    | [`plan/business-requirements/disciplines/thermal.md`](plan/business-requirements/disciplines/thermal.md) |
+| **F3K**     | Hand-Launch Gliders (multi-task discipline)     | [`plan/business-requirements/disciplines/f3k.md`](plan/business-requirements/disciplines/f3k.md)         |
+| **F3L**     | RES (Rudder, Elevator, Spoiler) 2m Gliders      | [`plan/business-requirements/disciplines/f3l.md`](plan/business-requirements/disciplines/f3l.md)         |
 
 For discipline-wide scoring conventions, consult the [Discipline Scoring Architecture Guide](plan/architecture-requirements/discipline-scoring.md).
 
@@ -143,6 +143,8 @@ The repository enforces pinned toolchain baselines defined in `plan/tickets/mvp-
 - **Flutter**: `3.47.x` (stable channel)
 - **Dart**: Bundled with Flutter (`^3.13.3` SDK constraint)
 - **Melos**: `^8.9.0` (Dart monorepo tool)
+
+For the full walkthrough (Flutter, Melos, PostgreSQL, environment variables, running and verifying), see [`docs/environment-setup.md`](docs/environment-setup.md).
 
 To install Melos globally:
 
