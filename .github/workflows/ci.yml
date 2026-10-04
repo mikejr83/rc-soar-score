@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+# Toolchain pins: plan/tickets/mvp-implementation/001-setup-toolchain-baseline.md
+# is the source of truth. Update that ticket first, then these values.
+env:
+  FLUTTER_VERSION: 3.47.x
+  MELOS_VERSION: ^8.9.0
+
+jobs:
+  analyze-test-build:
+    name: Analyze, test, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: Install Melos
+        run: dart pub global activate melos "$MELOS_VERSION"
+
+      - name: Bootstrap
+        run: melos bootstrap
+
+      - name: Analyze
+        run: melos analyze
+
+      - name: Test
+        run: melos test
+
+      - name: Build
+        run: melos run build
+
+  build-windows:
+    name: Build contest app (Windows)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: Install Melos
+        run: dart pub global activate melos "$env:MELOS_VERSION"
+
+      - name: Bootstrap
+        run: melos bootstrap
+
+      - name: Build Windows
+        working-directory: apps/soar_score_contest
+        run: flutter build windows --no-pub

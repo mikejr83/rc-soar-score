@@ -2,7 +2,7 @@
 
 - **Category:** CI/CD
 - **Priority:** High
-- **Status:** Open
+- **Status:** In-Review
 
 ## Context
 
@@ -10,12 +10,12 @@
 
 ## Work Items
 
-- [ ] Create `.github/workflows/ci.yml`:
+- [x] Create `.github/workflows/ci.yml`:
   - Triggers: push and pull_request to `main` and `develop`.
   - Runner: `ubuntu-latest`, single job for analyze/test/build (splitting into per-project jobs is an optimization, not a requirement). Plus a second `windows-latest` job (per [015](015-scaffold-contest-windows-target.md)): install the exact Flutter pin from ticket 001 → `melos bootstrap` → `flutter build windows --no-pub` for `apps/soar_score_contest` only (`flutter build windows` cannot run on Linux runners; analyze/test remain on the `ubuntu-latest` job).
   - Steps: check out → install exact Flutter pin from ticket 001 (`subosito/flutter-action` or equivalent, cache on) → install/dart pub global activate Melos (pinned from ticket 001) → `melos bootstrap` → `melos analyze` → `melos test` → per-project build (`flutter build web --no-pub` for the two Flutter apps, `dart compile` for the API, per ticket 014).
   - Fail the run on any analyze or test failure.
-- [ ] Add a root `README.md` covering: project overview, prerequisites (Flutter/Dart and Melos versions from ticket 001), install/serve/test/lint commands (mirroring `AGENTS.md`'s script table, i.e. `melos bootstrap`, `melos analyze`, `melos test`), and a pointer to `plan/INDEX.md`.
+- [x] Add a root `README.md` covering: project overview, prerequisites (Flutter/Dart and Melos versions from ticket 001), install/serve/test/lint commands (mirroring `AGENTS.md`'s script table, i.e. `melos bootstrap`, `melos analyze`, `melos test`), and a pointer to `plan/INDEX.md`.
 - [ ] Verify the workflow runs green end-to-end on an initial commit after the scaffold tickets land.
 
 ## Acceptance Criteria
