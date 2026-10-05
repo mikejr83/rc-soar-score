@@ -15,3 +15,6 @@ Pure-Dart scoring engine. It depends on no data layer.
   zero), cumulative penalties applied after drops, and the preliminary flag.
 - `standings/` holds the pilot places (shared places, optional tie-breaker) and
   the team totals with the team fallback tie-breakers.
+- `recalculation/` holds the change classifier (which option changes force a
+  full recalculation, and which the contest lifecycle forbids) and the
+  calculation version stamped on stored results.
