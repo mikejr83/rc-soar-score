@@ -60,4 +60,8 @@ class EntityStore<T extends Object> {
   Future<void> upsertJson(Map<String, Object?> json) => _mapper.upsert(json);
 
   Future<bool> remove(core.Id id) => _mapper.remove(id);
+
+  /// Removes every entity whose [column] equals [value]; returns how many.
+  Future<int> removeWhereId(String column, core.Id value) =>
+      _mapper.removeWhere(column, value);
 }
