@@ -6,7 +6,7 @@ import 'table_mapper.dart';
 ///
 /// The unit of work and the replicated-change applier find the store by
 /// entity type, so a new entity type needs only its store registered.
-class EntityStore<T extends core.SyncScoped> {
+class EntityStore<T extends Object> {
   EntityStore({
     required this.entityType,
     required TableMapper mapper,

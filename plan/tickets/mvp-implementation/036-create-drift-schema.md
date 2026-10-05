@@ -41,6 +41,10 @@ A local accountless contest has no remote account, so native tables that referen
 - **Entity rows as JSON:** columns are named like the JSON keys, so one `TableMapper` reads and writes any entity table through the model's own `toJson` and `fromJson`. A new entity type needs a table and one registered `EntityStore`.
 - **Mutation payload:** a `VersionedPayload` (version 1) whose data is `{operation: save, entity: {...}}` or `{operation: delete}`. Ticket 037 owns the wire format and may extend it.
 - **Revision on save:** a new entity keeps the revision it was built with (0 by default). A stored entity must be saved at its stored revision, or the unit of work throws `StaleRevisionError`, and the stored revision goes up by one.
+- **Foreign keys:** a table references its parent by a real foreign key, parents created first. Only `contest_id` cascades on delete, so deleting a contest removes the director's contest data in one statement, with no tombstone for each child (the contest's own tombstone and mutation tell other installations to do the same). Every other key is a plain `NO ACTION`: a parent with children cannot be deleted. SQLite is opened with `PRAGMA foreign_keys = ON` so both backends enforce them.
+- **Keys into the backend-only group:** `owner_account_id`, `created_by` and `updated_by` are plain identifiers with no foreign key, because accounts are never on an installation. Rows keep working with the local account kind.
+- **Expression and partial indexes:** the case-insensitive and "only one" rules (role names, the single Pilot role, preset names, model names without a manufacturer, one primary formula per profile) are unique indexes in `lib/schema/custom_indexes.dart`, created by the migration and tested.
+- **Shared tables:** `Role`, `LandingTable` and `LandingResult` keep system and director rows in one table, told apart by `owner_account_id`.
 - **Repository contract:** `ContestRepository.save` and `delete` take `MutationMetadata` and run through the unit of work, so every write names who made it.
 
 ## Design Requirements
