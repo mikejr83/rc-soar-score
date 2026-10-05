@@ -20,4 +20,6 @@ Pure-Dart scoring engine. It depends on no data layer.
   the team totals with the team fallback tie-breakers.
 - `recalculation/` holds the change classifier (which option changes force a
   full recalculation, and which the contest lifecycle forbids) and the
-  calculation version stamped on stored results.
+  calculation version stamped on stored results, the recalculation scope
+  (everything, or from a round onward) and the deterministic F5J recompute from
+  official data to flights, group scores, totals and places.
