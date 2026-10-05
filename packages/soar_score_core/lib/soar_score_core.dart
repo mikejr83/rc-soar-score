@@ -4,6 +4,8 @@
 /// only `package:soar_score_core/soar_score_core.dart`.
 library;
 
+export 'errors/scoring_validation_error.dart';
+export 'errors/unknown_scoring_profile_error.dart';
 export 'models/accounts/accounts.dart';
 export 'models/contest/contest_models.dart';
 export 'models/discipline/discipline.dart';
@@ -36,3 +38,4 @@ export 'repositories/team_repository.dart';
 export 'repositories/unit_of_work.dart';
 export 'repositories/write_context.dart';
 export 'enums/enums.dart';
+export 'scoring/scoring.dart';
