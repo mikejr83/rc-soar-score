@@ -14,3 +14,5 @@ Pure-Dart scoring engine. It depends on no data layer.
   target-time rules in `duration/`.
 - `totals/` holds the contest total: dropped rounds (never a non-droppable
   zero), cumulative penalties applied after drops, and the preliminary flag.
+- `standings/` holds the pilot places (shared places, optional tie-breaker) and
+  the team totals with the team fallback tie-breakers.
