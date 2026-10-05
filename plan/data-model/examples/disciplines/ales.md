@@ -285,8 +285,8 @@ Each entry maps the key the scorer selects to the points awarded: 50 points with
     "discipline_profile_id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d01",
     "formula_key": "overflight_penalty",
     "formula_type": "penalty",
-    "description": "Calculate overflight penalty: if time exceeds target, penalty = (time - target) * PPS",
-    "formula_text": "time_flown <= target_time ? 0 : (time_flown - target_time) * points_per_second",
+    "description": "Calculate overflight penalty: if time exceeds target, penalty = 2 * (time - target) * PPS, so flying over the target scores like flying the same time under it",
+    "formula_text": "time_flown <= target_time ? 0 : 2 * (time_flown - target_time) * points_per_second",
     "inputs": {
       "time_flown": "score:time_flown",
       "target_time": "config:target_time",
