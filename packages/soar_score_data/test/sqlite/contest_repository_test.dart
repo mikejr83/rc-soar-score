@@ -20,6 +20,16 @@ void main() {
       await repo.close();
     });
 
+    var mutations = 0;
+    core.MutationMetadata meta() => core.MutationMetadata(
+      clientMutationId: 'request-${mutations++}',
+      authority: core.Authority.director,
+      clientTime: DateTime.utc(2026, 4, 1),
+    );
+    Future<core.Contest> save(core.Contest contest) =>
+        repo.save(contest, metadata: meta());
+    Future<bool> delete(core.Id id) => repo.delete(id, metadata: meta());
+
     core.Contest makeContest({
       String? name,
       DateTime? startDateTime,
@@ -36,7 +46,7 @@ void main() {
     );
 
     test('save then findById round-trips the domain type', () async {
-      final saved = await repo.save(makeContest());
+      final saved = await save(makeContest());
       final loaded = await repo.findById(saved.id);
       expect(loaded, isNotNull);
       expect(loaded, saved);
@@ -47,14 +57,14 @@ void main() {
     });
 
     test('getAll returns every stored contest', () async {
-      final first = await repo.save(makeContest(name: 'First'));
-      final second = await repo.save(makeContest(name: 'Second'));
+      final first = await save(makeContest(name: 'First'));
+      final second = await save(makeContest(name: 'Second'));
       expect(await repo.getAll(), unorderedEquals([first, second]));
     });
 
     test('save updates the existing row for the same id', () async {
       final original = makeContest();
-      await repo.save(original);
+      await save(original);
       final updated = core.Contest(
         id: original.id,
         name: 'Renamed',
@@ -64,14 +74,15 @@ void main() {
         createdAt: original.createdAt,
         updatedAt: original.updatedAt,
       );
-      await repo.save(updated);
-      expect(await repo.getAll(), [updated]);
+      final stored = await save(updated);
+      expect(stored.revision, 1);
+      expect(await repo.getAll(), [stored]);
       expect((await repo.findById(updated.id))?.name, 'Renamed');
     });
 
     test('startDateTime is stored and read back in UTC', () async {
       final localStart = DateTime(2026, 4, 15, 10, 30);
-      final saved = await repo.save(makeContest(startDateTime: localStart));
+      final saved = await save(makeContest(startDateTime: localStart));
       final loaded = await repo.findById(saved.id);
       expect(loaded?.startDateTime, saved.startDateTime.toUtc());
       expect(loaded?.startDateTime.isUtc, isTrue);
@@ -99,14 +110,14 @@ void main() {
         updatedAt: DateTime.utc(2026, 10, 17, 15, 10),
         revision: 7,
       );
-      await repo.save(full);
+      await save(full);
       expect(await repo.findById(full.id), full);
     });
 
     test('delete removes the row and reports accordingly', () async {
-      final saved = await repo.save(makeContest());
-      expect(await repo.delete(saved.id), isTrue);
-      expect(await repo.delete(saved.id), isFalse);
+      final saved = await save(makeContest());
+      expect(await delete(saved.id), isTrue);
+      expect(await delete(saved.id), isFalse);
       expect(await repo.findById(saved.id), isNull);
     });
   });

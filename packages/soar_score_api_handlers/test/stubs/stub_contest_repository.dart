@@ -15,13 +15,17 @@ class StubContestRepository implements ContestRepository {
   Future<List<Contest>> getAll() async => _contests.values.toList();
 
   @override
-  Future<Contest> save(Contest contest) async {
+  Future<Contest> save(
+    Contest contest, {
+    required MutationMetadata metadata,
+  }) async {
     _contests[contest.id] = contest;
     return contest;
   }
 
   @override
-  Future<bool> delete(Id id) async => _contests.remove(id) != null;
+  Future<bool> delete(Id id, {required MutationMetadata metadata}) async =>
+      _contests.remove(id) != null;
 
   @override
   Future<void> close() async {}

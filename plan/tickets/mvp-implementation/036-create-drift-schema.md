@@ -36,7 +36,12 @@ A local accountless contest has no remote account, so native tables that referen
 - **Timestamps:** UTC ISO 8601 text with a `Z` suffix on both backends (the contests table already does this). The data-model README previously said "timestamps with a time zone"; it now matches.
 - **Enumerations:** text with a check constraint listing the exact values. The lists live in `packages/soar_score_data/lib/schema/enum_values.dart`, and a test compares each with the `@JsonValue` texts of the core enum.
 - **Table groups:** every table has a group in `tableGroupByName`. A `DatabaseProfile` (`native` or `server`) chooses which groups the database creates; a test fails for any table without a group.
-- **Local sync position:** a client-only table, not a local copy of `SyncCursor`, which stays server-only. It arrives with the sync tables.
+- **Local sync position:** the client-only table `local_sync_positions`, not a local copy of `SyncCursor`, which stays server-only. It sits in a new `clientOnly` table group that the native profile creates and the server does not.
+- **History tables:** `mutation_records`, `conflict_records`, `tombstones` and `audit_events` have no foreign keys, because a record must outlive the entity and contest it names. A mutation record has exactly one of `contest_id` and `owner_account_id`, its client mutation id is unique within that scope, and a sequence belongs only to an accepted mutation.
+- **Entity rows as JSON:** columns are named like the JSON keys, so one `TableMapper` reads and writes any entity table through the model's own `toJson` and `fromJson`. A new entity type needs a table and one registered `EntityStore`.
+- **Mutation payload:** a `VersionedPayload` (version 1) whose data is `{operation: save, entity: {...}}` or `{operation: delete}`. Ticket 037 owns the wire format and may extend it.
+- **Revision on save:** a new entity keeps the revision it was built with (0 by default). A stored entity must be saved at its stored revision, or the unit of work throws `StaleRevisionError`, and the stored revision goes up by one.
+- **Repository contract:** `ContestRepository.save` and `delete` take `MutationMetadata` and run through the unit of work, so every write names who made it.
 
 ## Design Requirements
 

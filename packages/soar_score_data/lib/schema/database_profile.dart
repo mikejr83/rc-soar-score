@@ -9,10 +9,18 @@ enum DatabaseProfile {
     TableGroup.system,
     TableGroup.issued,
     TableGroup.derived,
+    TableGroup.clientOnly,
   }),
 
-  /// The service: every group.
-  server({...TableGroup.values});
+  /// The service: every group except the client-only one.
+  server({
+    TableGroup.contest,
+    TableGroup.director,
+    TableGroup.system,
+    TableGroup.issued,
+    TableGroup.derived,
+    TableGroup.backendOnly,
+  });
 
   const DatabaseProfile(this.groups);
 

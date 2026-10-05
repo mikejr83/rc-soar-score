@@ -8,6 +8,11 @@ import 'contests_table.dart';
 import 'migrate.dart';
 import 'schema/database_profile.dart';
 import 'schema/enum_values.dart';
+import 'schema/tables/audit_events_table.dart';
+import 'schema/tables/conflict_records_table.dart';
+import 'schema/tables/local_sync_positions_table.dart';
+import 'schema/tables/mutation_records_table.dart';
+import 'schema/tables/tombstones_table.dart';
 import 'schema/table_groups.dart';
 
 part 'database.g.dart';
@@ -17,7 +22,16 @@ part 'database.g.dart';
 /// Opens a file-backed or in-memory SQLite database via `package:drift`'s
 /// native `dart:ffi` executor and runs the versioned schema migrations. The
 /// [profile] decides which table groups are created.
-@DriftDatabase(tables: [Contests])
+@DriftDatabase(
+  tables: [
+    Contests,
+    MutationRecords,
+    ConflictRecords,
+    Tombstones,
+    AuditEvents,
+    LocalSyncPositions,
+  ],
+)
 class SoarScoreDatabase extends _$SoarScoreDatabase {
   /// Opens the database against [executor], creating the groups of [profile].
   SoarScoreDatabase(QueryExecutor executor, {required this.profile})
