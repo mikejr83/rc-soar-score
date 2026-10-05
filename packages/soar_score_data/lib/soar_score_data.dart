@@ -12,6 +12,8 @@ export 'postgres_config.dart';
 export 'schema/database_profile.dart';
 export 'schema/table_group.dart';
 export 'schema/table_groups.dart';
+export 'seeding/system_data_seeder.dart';
+export 'seeding/system_seed_outcome.dart';
 export 'sync/drift_replicated_change_applier.dart';
 export 'sync/drift_sync_store.dart';
 export 'sync/drift_unit_of_work.dart';

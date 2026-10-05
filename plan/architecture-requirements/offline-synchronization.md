@@ -20,6 +20,7 @@ This document uses **score** for the discipline-specific raw components entered 
 6. The local application must retain unsent mutations and retry them after connectivity returns. A failed sync must not prevent offline contest administration.
 7. A local deletion must create a tombstone until the service acknowledges it. Tombstones must prevent a deleted entity from being recreated by an older change.
 8. Director-owned data that belongs to no contest (participant profiles, roles, models, landing tables, presets) synchronizes through its own sequence stream. System data only comes down.
+   System data ships with the app and is installed at startup, before any synchronization, so an installation that has never synchronized can create and score contests offline. The installation keeps the system-data sequence it holds as its own sync position. A later launch never rewrites system data, and data synchronized from the service is never overwritten by the shipped copy.
 9. Sync must be scoped to the contest director's authorized data. Participant email addresses and other private data must follow the privacy rules in the participant requirements.
 
 ## Administration Installation

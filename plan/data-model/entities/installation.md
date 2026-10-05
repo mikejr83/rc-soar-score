@@ -29,6 +29,7 @@
 
 - An installation is registered while connected, by an authenticated session of its owning account
 - `system_data_seq` only increases
+- System data ships with the app and is installed at startup, so an installation that has never connected holds it. A native installation with no account has no `Installation` row (an installation is registered while connected), so it keeps the system-data sequence it holds as its own sync position, under the `System` scope of `local_sync_positions`. The app's shipped sequence is `SystemSeed.sequence`, raised whenever shipped system data changes. The server seeds the same shipped rows under the same ids when it opens its database, and system data an administrator publishes later continues the sequence from the shipped one
 - A revoked installation is rejected on every later synchronization and can no longer hold authority over a contest
 - Revoking an installation does not delete changes it already submitted
 - Participants do not register installations. Their submissions carry an opaque device identifier

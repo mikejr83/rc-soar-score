@@ -22,6 +22,7 @@ class DriftSyncStore implements core.SyncStore {
   Future<List<core.MutationRecord>> pendingMutations(
     core.SyncScopeKey scope,
   ) async {
+    if (scope is core.SystemScopeKey) return const [];
     final (column, id) = _scopeColumn(scope);
     final rows = await _mutations.where("outcome = 'Pending' AND $column = ?", [
       Variable<String>(id),
@@ -118,6 +119,7 @@ class DriftSyncStore implements core.SyncStore {
   Future<List<core.ConflictRecord>> conflictsNeedingAction(
     core.SyncScopeKey scope,
   ) async {
+    if (scope is core.SystemScopeKey) return const [];
     final (column, id) = _scopeColumn(scope);
     final rows = await _conflicts.where(
       "requires_action = ? AND resolution = 'Pending' AND $column = ?",
@@ -153,6 +155,7 @@ class DriftSyncStore implements core.SyncStore {
       'Director',
       ownerAccountId.value,
     ),
+    core.SystemScopeKey() => ('System', 'system'),
   };
 
   (String, String) _scopeColumn(core.SyncScopeKey scope) => switch (scope) {
@@ -160,6 +163,11 @@ class DriftSyncStore implements core.SyncStore {
     core.DirectorScopeKey(:final ownerAccountId) => (
       'owner_account_id',
       ownerAccountId.value,
+    ),
+    core.SystemScopeKey() => throw ArgumentError.value(
+      scope,
+      'scope',
+      'system data has no mutations or conflicts',
     ),
   };
 }

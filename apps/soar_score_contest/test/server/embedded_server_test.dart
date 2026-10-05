@@ -2,6 +2,12 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_api/soar_score_api.dart';
+import 'package:soar_score_core/soar_score_core.dart'
+    show
+        DisciplineType,
+        SystemDisciplineProfiles,
+        SystemLandingTables,
+        SystemRoles;
 import 'package:soar_score_contest/server/embedded_server.dart';
 
 void main() {
@@ -95,6 +101,50 @@ void main() {
       expect(File(databasePath).existsSync(), isTrue);
     } finally {
       await server.close();
+    }
+  });
+
+  test(
+    'lists the four discipline profiles straight after first start',
+    () async {
+      final server = await startEmbeddedServer(databasePath);
+      try {
+        final profiles = await server.repository.disciplineProfileRepository
+            .listPublished();
+
+        expect(profiles.map((p) => p.profile.type), [
+          DisciplineType.ales,
+          DisciplineType.f3j,
+          DisciplineType.f5j,
+          DisciplineType.thermalDuration,
+        ]);
+        expect(profiles, unorderedEquals(SystemDisciplineProfiles.all));
+        expect(
+          await server.repository.roleRepository.listVisibleTo(),
+          unorderedEquals(SystemRoles.all),
+        );
+      } finally {
+        await server.close();
+      }
+    },
+  );
+
+  test('a later launch keeps the same system data', () async {
+    final first = await startEmbeddedServer(databasePath);
+    await first.close();
+
+    final second = await startEmbeddedServer(databasePath);
+    try {
+      expect(
+        await second.repository.landingTableRepository.listVisibleTo(),
+        unorderedEquals(SystemLandingTables.all),
+      );
+      expect(
+        await second.repository.disciplineProfileRepository.listPublished(),
+        hasLength(4),
+      );
+    } finally {
+      await second.close();
     }
   });
 }

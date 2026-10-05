@@ -7,11 +7,12 @@ import 'package:drift/drift.dart';
 /// changes it covers are stored.
 @DataClassName('LocalSyncPositionData')
 class LocalSyncPositions extends Table {
-  /// `Contest` or `Director`.
+  /// `Contest`, `Director` or `System`.
   TextColumn get scopeKind =>
-      text().check(scopeKind.isIn(const ['Contest', 'Director']))();
+      text().check(scopeKind.isIn(const ['Contest', 'Director', 'System']))();
 
-  /// The contest id or the director's account id.
+  /// The contest id, the director's account id, or `system` for the one
+  /// system-data stream.
   TextColumn get scopeId => text()();
 
   IntColumn get lastSyncedSequence =>

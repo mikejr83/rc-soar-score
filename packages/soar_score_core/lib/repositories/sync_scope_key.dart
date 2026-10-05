@@ -2,10 +2,13 @@ import 'package:equatable/equatable.dart';
 
 import '../models/id.dart';
 
-/// Names one synchronization stream: a contest's, or a director's own data.
+/// Names one synchronization stream: a contest's, a director's own data, or
+/// the system data.
 ///
-/// System data is not a key, because it only comes down and is tracked by
-/// `Installation.systemDataSeq`.
+/// An installation with no account has no `Installation` row to hold the
+/// system-data position, so the client keeps it under [SystemScopeKey] like
+/// any other position. System data only comes down: it has no mutations and
+/// no conflicts.
 sealed class SyncScopeKey extends Equatable {
   const SyncScopeKey();
 }
@@ -29,4 +32,13 @@ final class DirectorScopeKey extends SyncScopeKey {
 
   @override
   List<Object?> get props => [ownerAccountId];
+}
+
+/// The stream of system data (discipline profiles, system roles and system
+/// landing tables). There is one, so every key is equal.
+final class SystemScopeKey extends SyncScopeKey {
+  const SystemScopeKey();
+
+  @override
+  List<Object?> get props => const [];
 }
