@@ -1,0 +1,173 @@
+import 'package:soar_score_core/soar_score_core.dart' as core;
+import 'package:soar_score_data/soar_score_data.dart';
+import 'package:test/test.dart';
+
+import '../support/backends.dart';
+import '../support/example_entities.dart';
+import '../support/example_rows.dart';
+import '../support/fixtures.dart';
+
+void main() {
+  forEachBackend(_tests);
+  _drawTests();
+}
+
+void _tests(Backend backend) {
+  group('MatrixRevisionRepository', () {
+    late Installation inst;
+    late Repository repository;
+    late core.MatrixRevisionRepository repo;
+
+    setUp(() async {
+      inst = await Installation.open(backend, profile: DatabaseProfile.server);
+      await loadExamples(inst);
+      repository = Repository(inst.db);
+      repo = repository.matrixRevisionRepository;
+    });
+    tearDown(() => inst.close());
+
+    final example = core.MatrixRevision.fromJson(
+      exampleRows('matrix_revision').single,
+    );
+
+    /// A second revision with one new round, group and assignment.
+    core.MatrixDraw newDraw({String? assignmentId}) {
+      final revision = core.MatrixRevision.fromJson({
+        ...exampleRows('matrix_revision').single,
+        'id': core.Id.create().value,
+        'revision_number': 2,
+        'previous_revision_id': example.id.value,
+        'first_round': 3,
+        'last_round': 3,
+        'finalized_by': null,
+        'finalized_at': null,
+      });
+      final round = core.Round.fromJson({
+        ...exampleRows('round').first,
+        'id': core.Id.create().value,
+        'matrix_revision_id': revision.id.value,
+        'ordinal': 3,
+        'revision': 0,
+      });
+      final group = core.RoundGroup.fromJson({
+        ...exampleRows('round_group').first,
+        'id': core.Id.create().value,
+        'round_id': round.id.value,
+        'revision': 0,
+      });
+      final entry = core.MatrixAssignment.fromJson({
+        ...exampleRows('matrix_assignment').first,
+        'id': assignmentId ?? core.Id.create().value,
+        'matrix_revision_id': revision.id.value,
+        'scheduled_round_id': round.id.value,
+        'credited_round_id': round.id.value,
+      });
+      return core.MatrixDraw(
+        revision: revision,
+        rounds: [round],
+        groups: [group],
+        assignments: [entry],
+      );
+    }
+
+    test('reads back the example revision unchanged', () async {
+      expect(await repo.findById(example.id), example);
+      expect(await repo.findById(core.Id.create()), isNull);
+    });
+
+    test('appendDraw stores the whole draw, one mutation per row', () async {
+      final before = await inst.count('mutation_records');
+      final draw = newDraw();
+
+      await repo.appendDraw(draw, metadata: metadata());
+
+      expect(await repo.findById(draw.revision.id), draw.revision);
+      expect(
+        await repository.roundRepository.listForRevision(draw.revision.id),
+        draw.rounds,
+      );
+      expect(
+        await repository.roundGroupRepository.listForRound(
+          draw.rounds.single.id,
+        ),
+        draw.groups,
+      );
+      expect(
+        await repository.matrixAssignmentRepository.listForRevision(
+          draw.revision.id,
+        ),
+        draw.assignments,
+      );
+      expect(await inst.count('mutation_records'), before + 4);
+    });
+
+    test('appendDraw stores nothing when one row is refused', () async {
+      final draw = newDraw(
+        assignmentId: exampleRows('matrix_assignment').first['id'] as String,
+      );
+
+      await expectLater(
+        repo.appendDraw(draw, metadata: metadata()),
+        throwsA(anything),
+      );
+
+      expect(await repo.findById(draw.revision.id), isNull);
+      expect(
+        await repository.roundRepository.listForRevision(draw.revision.id),
+        isEmpty,
+      );
+    });
+
+    test('listForContest and latestForContest order by number', () async {
+      final draw = newDraw();
+      await repo.appendDraw(draw, metadata: metadata());
+
+      expect(await repo.listForContest(example.contestId), [
+        example,
+        draw.revision,
+      ]);
+      expect(await repo.latestForContest(example.contestId), draw.revision);
+      expect(await repo.latestForContest(core.Id.create()), isNull);
+    });
+  });
+}
+
+void _drawTests() {
+  group('MatrixDraw', () {
+    final revision = core.MatrixRevision.fromJson(
+      exampleRows('matrix_revision').single,
+    );
+    final round = core.Round.fromJson(exampleRows('round').first);
+
+    test('refuses a round of another revision', () {
+      final other = core.Round.fromJson({
+        ...round.toJson(),
+        'matrix_revision_id': core.Id.create().value,
+      });
+
+      expect(
+        () => core.MatrixDraw(
+          revision: revision,
+          rounds: [other],
+          groups: const [],
+          assignments: const [],
+        ),
+        throwsArgumentError,
+      );
+    });
+
+    test('refuses a group of a round that is not in the draw', () {
+      final group = core.RoundGroup.fromJson(exampleRows('round_group').last);
+
+      expect(
+        () => core.MatrixDraw(
+          revision: revision,
+          rounds: [round],
+          groups: [group],
+          assignments: const [],
+        ),
+        throwsArgumentError,
+      );
+    });
+  });
+}

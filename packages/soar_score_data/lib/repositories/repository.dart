@@ -22,6 +22,16 @@ class Repository implements core.Repository {
       teamMembershipRepository = TeamMembershipRepository(
         database,
         stores: stores,
+      ),
+      matrixRevisionRepository = MatrixRevisionRepository(
+        database,
+        stores: stores,
+      ),
+      roundRepository = RoundRepository(database, stores: stores),
+      roundGroupRepository = RoundGroupRepository(database, stores: stores),
+      matrixAssignmentRepository = MatrixAssignmentRepository(
+        database,
+        stores: stores,
       );
 
   @override
@@ -42,6 +52,18 @@ class Repository implements core.Repository {
 
   @override
   final core.TeamMembershipRepository teamMembershipRepository;
+
+  @override
+  final core.MatrixRevisionRepository matrixRevisionRepository;
+
+  @override
+  final core.RoundRepository roundRepository;
+
+  @override
+  final core.RoundGroupRepository roundGroupRepository;
+
+  @override
+  final core.MatrixAssignmentRepository matrixAssignmentRepository;
 }
 
 Repository createRepository(SoarScoreDatabase database) => Repository(database);

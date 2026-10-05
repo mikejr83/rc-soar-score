@@ -1,7 +1,11 @@
 import 'contest_configuration_revision_repository.dart';
 import 'contest_participation_repository.dart';
 import 'contest_repository.dart';
+import 'matrix_assignment_repository.dart';
+import 'matrix_revision_repository.dart';
 import 'participant_profile_repository.dart';
+import 'round_group_repository.dart';
+import 'round_repository.dart';
 import 'team_membership_repository.dart';
 import 'team_repository.dart';
 
@@ -21,4 +25,12 @@ abstract interface class Repository {
   TeamRepository get teamRepository;
 
   TeamMembershipRepository get teamMembershipRepository;
+
+  MatrixRevisionRepository get matrixRevisionRepository;
+
+  RoundRepository get roundRepository;
+
+  RoundGroupRepository get roundGroupRepository;
+
+  MatrixAssignmentRepository get matrixAssignmentRepository;
 }
