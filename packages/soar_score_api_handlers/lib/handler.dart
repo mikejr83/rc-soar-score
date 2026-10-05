@@ -1,6 +1,7 @@
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:soar_score_api_handlers/handlers/handlers.dart';
+import 'package:soar_score_api_handlers/middleware/middleware.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 import 'package:logging/logging.dart';
 
@@ -16,6 +17,9 @@ typedef AuthMiddleware = Handler Function(Handler);
 final _logger = Logger('Handler');
 
 /// Builds the API's top-level shelf [Handler].
+///
+/// Every route runs inside the common middleware (request id, request
+/// logging, JSON error mapping), see `middleware/middleware.dart`.
 ///
 /// Served routes:
 /// - `GET /health` — public health payload.
@@ -58,5 +62,5 @@ Handler buildApiHandler({
 
   _logger.fine('API handler built successfully.');
 
-  return app.call;
+  return withCommonMiddleware(app.call);
 }

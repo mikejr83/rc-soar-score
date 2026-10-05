@@ -24,7 +24,7 @@ void main() {
       late Handler handler;
 
       setUp(() {
-        handler = createServerHandler(config!);
+        handler = createServerHandler(createPostgresDatabase(config!));
       });
 
       test('serves the /health payload through the extracted handler '

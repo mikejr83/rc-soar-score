@@ -6,3 +6,4 @@
 library;
 
 export 'handler.dart';
+export 'middleware/middleware.dart';
