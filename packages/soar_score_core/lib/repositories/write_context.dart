@@ -1,3 +1,4 @@
+import '../models/landing/landing_table_with_results.dart';
 import '../models/matrix/matrix_assignment.dart';
 import '../models/shared/append_only.dart';
 import '../models/shared/synchronizable.dart';
@@ -24,6 +25,17 @@ abstract interface class WriteContext {
   /// Throws an `AlreadyStoredError` if an entity with the same id is stored.
   Future<T> append<T extends AppendOnly>(
     T entity, {
+    required MutationMetadata metadata,
+  });
+
+  /// Stores a new director-owned landing [table] with its entries and records
+  /// one `MutationRecord` whose payload carries the entries too.
+  ///
+  /// Throws an `AlreadyStoredError` if the table id is stored, and an
+  /// `ArgumentError` if the table has no owner, because system tables are
+  /// seeded, not written locally.
+  Future<LandingTableWithResults> appendLandingTable(
+    LandingTableWithResults table, {
     required MutationMetadata metadata,
   });
 

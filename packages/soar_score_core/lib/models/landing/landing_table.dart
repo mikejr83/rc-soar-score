@@ -14,7 +14,7 @@ part 'landing_table.g.dart';
 @JsonSerializable(fieldRename: FieldRename.snake, includeIfNull: true)
 @IdConverter()
 @UtcTimestampConverter()
-class LandingTable extends Equatable implements SyncScoped {
+class LandingTable extends Equatable implements AppendOnly {
   LandingTable({
     required this.id,
     this.ownerAccountId,
@@ -27,6 +27,7 @@ class LandingTable extends Equatable implements SyncScoped {
   factory LandingTable.fromJson(Map<String, Object?> json) =>
       _$LandingTableFromJson(json);
 
+  @override
   final Id id;
 
   /// The director who created it; null for a table shipped by the system.
@@ -40,6 +41,9 @@ class LandingTable extends Equatable implements SyncScoped {
   final DateTime createdAt;
 
   bool get isSystem => ownerAccountId == null;
+
+  @override
+  String get entityType => 'LandingTable';
 
   @override
   SyncScope get syncScope => isSystem ? SyncScope.system : SyncScope.director;

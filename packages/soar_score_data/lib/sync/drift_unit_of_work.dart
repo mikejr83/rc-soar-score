@@ -124,6 +124,37 @@ class _Context implements core.WriteContext {
   }
 
   @override
+  Future<core.LandingTableWithResults> appendLandingTable(
+    core.LandingTableWithResults table, {
+    required core.MutationMetadata metadata,
+  }) async {
+    if (table.table.isSystem) {
+      throw ArgumentError.value(
+        table.table.id.value,
+        'table',
+        'must have an owner; system tables are seeded',
+      );
+    }
+    final tableJson = await _insertNew(table.table);
+    final results = _uow._stores.of('LandingResult');
+    final resultJson = [
+      for (final result in table.results) results.encode(result),
+    ];
+    for (final json in resultJson) {
+      await results.upsertJson(json);
+    }
+    await _recordMutation(
+      entityType: table.table.entityType,
+      entityId: table.table.id,
+      scope: _scopeOf(table.table, tableJson),
+      baseRevision: null,
+      metadata: metadata,
+      payload: landingTablePayload(tableJson, resultJson),
+    );
+    return table;
+  }
+
+  @override
   Future<core.MatrixAssignment> moveAssignment(
     core.MatrixAssignment moved, {
     required core.MutationMetadata metadata,
