@@ -6,6 +6,7 @@ import 'package:logging/logging.dart';
 
 import 'config/config_exception.dart';
 import 'config/server_config.dart';
+import 'healthcheck.dart';
 import 'logging/log_setup.dart';
 import 'server.dart';
 
@@ -13,7 +14,14 @@ final _logger = Logger('Main');
 
 /// Starts the API server: reads the environment, opens the database and
 /// serves until SIGINT or SIGTERM.
-Future<void> main() async {
+///
+/// With `--healthcheck` it only probes a running server's `/health` and exits
+/// 0 (healthy) or 1, for the container health check.
+Future<void> main(List<String> args) async {
+  if (args.contains('--healthcheck')) {
+    exit(await checkHealth(healthcheckPort(Platform.environment)) ? 0 : 1);
+  }
+
   final env = DotEnv(includePlatformEnvironment: true)..load();
 
   final ServerConfig config;

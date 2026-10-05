@@ -202,10 +202,34 @@ flutter run -d chrome
 
 #### API Server
 
+The server reads its settings from environment variables and needs a
+PostgreSQL database:
+
+| Variable                                                                             | Meaning                        | Default                                           |
+| ------------------------------------------------------------------------------------ | ------------------------------ | ------------------------------------------------- |
+| `POSTGRES_PASSWORD`                                                                  | database password              | required                                          |
+| `POSTGRES_HOST`, `POSTGRES_PORT`, `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_SSLMODE` | database connection            | localhost, 5432, rc_soar_score, postgres, disable |
+| `PORT`                                                                               | listening port                 | 8080                                              |
+| `LOG_LEVEL`                                                                          | a `package:logging` level name | INFO                                              |
+| `LOG_FORMAT`                                                                         | `json` or `text`               | json                                              |
+
 ```bash
 cd apps/soar_score_server
-dart run bin/server.dart
+POSTGRES_PASSWORD=... dart run lib/main.dart
 ```
+
+To run the server and a PostgreSQL database in containers (local development
+only; the compose file uses a throwaway password unless you set
+`POSTGRES_PASSWORD`):
+
+```bash
+docker compose up --build
+curl http://localhost:8080/health
+```
+
+The image runs as a non-root user, holds no secrets, and checks its own
+`/health` (`server --healthcheck`). CI builds it on every pull request and
+pushes it to GitHub Container Registry from `master`.
 
 ### Building
 

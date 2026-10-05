@@ -1,0 +1,44 @@
+# Local development: the API server and a PostgreSQL database.
+#
+#   docker compose up --build
+#   curl http://localhost:8080/health
+#
+# The password below is a throwaway for local use. Override it with
+# POSTGRES_PASSWORD in your shell or a .env file (git-ignored); never reuse it
+# anywhere real.
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: rc_soar_score
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-soar-dev-only}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d rc_soar_score"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  server:
+    build:
+      context: .
+      dockerfile: apps/soar_score_server/Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PORT: "8080"
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      LOG_FORMAT: ${LOG_FORMAT:-text}
+      POSTGRES_HOST: db
+      POSTGRES_PORT: "5432"
+      POSTGRES_DB: rc_soar_score
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-soar-dev-only}
+    ports:
+      - "8080:8080"
+
+volumes:
+  db-data:
