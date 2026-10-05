@@ -1,3 +1,6 @@
 # scoring
 
-Discipline profiles and the scoring engine will live here (later workstream).
+Pure-Dart scoring engine. It depends on no data layer.
+
+- `profile/` holds the profile framework: field definitions, validation, the
+  profile registry and contest option overrides.
