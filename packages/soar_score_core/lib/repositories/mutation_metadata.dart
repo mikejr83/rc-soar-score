@@ -37,6 +37,22 @@ class MutationMetadata extends Equatable {
   /// A mutation that must be accepted first.
   final Id? dependsOnMutationId;
 
+  /// The metadata for one more mutation of the same request.
+  ///
+  /// A request that changes several entities writes one mutation each, and a
+  /// mutation id is unique, so each further mutation takes the request id
+  /// plus a [part] such as the id of its entity. The same request always
+  /// derives the same ids, so a retry stays idempotent.
+  MutationMetadata forPart(String part) => MutationMetadata(
+    clientMutationId: '$clientMutationId/$part',
+    authority: authority,
+    clientTime: clientTime,
+    actorId: actorId,
+    sourceInstallationId: sourceInstallationId,
+    sourceDevice: sourceDevice,
+    dependsOnMutationId: dependsOnMutationId,
+  );
+
   @override
   List<Object?> get props => [
     clientMutationId,

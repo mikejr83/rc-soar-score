@@ -39,7 +39,7 @@ class EmbeddedServer {
   }
 
   Future<void> initialize() async {
-    _repository = Repository(ContestRepository(_database));
+    _repository = Repository(_database);
 
     final handler = buildApiHandler(
       name: embeddedServerName,

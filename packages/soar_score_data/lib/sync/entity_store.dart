@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart' show Variable;
 import 'package:soar_score_core/soar_score_core.dart' as core;
 
 import 'table_mapper.dart';
@@ -40,6 +41,20 @@ class EntityStore<T extends Object> {
 
   Future<List<T>> all({String? orderBy}) async => [
     for (final json in await _mapper.all(orderBy: orderBy)) _decode(json),
+  ];
+
+  /// The entities whose [column] equals [value], in [orderBy] order.
+  ///
+  /// [column] is a column name from the schema, never user input.
+  Future<List<T>> whereId(
+    String column,
+    core.Id value, {
+    String? orderBy,
+  }) async => [
+    for (final json in await _mapper.where('$column = ?', [
+      Variable<String>(value.value),
+    ], orderBy: orderBy))
+      _decode(json),
   ];
 
   Future<void> upsertJson(Map<String, Object?> json) => _mapper.upsert(json);
