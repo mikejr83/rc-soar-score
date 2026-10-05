@@ -1,6 +1,6 @@
 # RC Soar Score User Interface - Official Scoring
 
-Official scoring is optimized for a tablet or larger screen and displays one complete group for one round at a time. The route identifies the contest, matrix revision, round, and group.
+Official scoring is optimized for a tablet or larger screen and displays one complete group for one round at a time. Phone support is a stretch goal: the page uses the standard Material 3 window size classes, and compact widths show a stacked card per pilot instead of the grid. See [ADR 0002](../../../docs/adr/0002-score-entry-layout.md). The route identifies the contest, matrix revision, round, and group.
 
 The scoring is performed with the following route scheme: `/contest-administration/contests/:id/scoring/rounds/:round/groups/:group`.
 
@@ -10,7 +10,7 @@ The page provides round navigation to first, previous, current, next, and last a
 
 The grid includes configured pilot or lane number, team, pilot name, discipline-specific raw inputs, raw points, group points, penalty, participant-submission indicator, review-request indicator, and official status. Non-flying participants are not score rows.
 
-Time inputs accept compact locale-aware values: `630` means 6:30 and `630.4` means 6:30.4. The field displays the parsed time and rejects impossible values without losing the original input until corrected.
+Time inputs accept compact locale-aware values: `630` means 6:30 and `630.4` means 6:30.4. The field displays the parsed time and rejects impossible values without losing the original input until corrected. Time and whole-number fields request a numeric keypad.
 
 ## Score actions
 
