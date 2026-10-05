@@ -1,13 +1,14 @@
 import 'package:soar_score_core/soar_score_core.dart' as core;
 import 'package:test/test.dart';
 
+import '../support/backends.dart';
 import '../support/example_rows.dart';
 import '../support/fixtures.dart';
 
 void main() {
   late Installation inst;
-  setUp(() => inst = Installation.open());
-  tearDown(() => inst.db.close());
+  setUp(() async => inst = await Installation.open(Backend.sqlite));
+  tearDown(() => inst.close());
 
   Future<void> put(String entity, Map<String, Object?> row) =>
       inst.stores.of(entity).upsertJson(row);

@@ -45,6 +45,9 @@ A local accountless contest has no remote account, so native tables that referen
 - **Keys into the backend-only group:** `owner_account_id`, `created_by` and `updated_by` are plain identifiers with no foreign key, because accounts are never on an installation. Rows keep working with the local account kind.
 - **Expression and partial indexes:** the case-insensitive and "only one" rules (role names, the single Pilot role, preset names, model names without a manufacturer, one primary formula per profile) are unique indexes in `lib/schema/custom_indexes.dart`, created by the migration and tested.
 - **Shared tables:** `Role`, `LandingTable` and `LandingResult` keep system and director rows in one table, told apart by `owner_account_id`.
+- **Both dialects:** `packages/soar_score_data/build.yaml` generates SQL for SQLite and PostgreSQL. Without it Drift wrote SQLite-only column checks (`CHECK (flag IN (0, 1))` on a boolean) that PostgreSQL rejects, so the schema could not be created on the server at all.
+- **Placeholders:** hand-written SQL uses `?` and goes through `portableSql`, which rewrites it to `$1`, `$2` for PostgreSQL.
+- **Shared test suite:** `test/support/backends.dart` runs each suite on SQLite and, when `POSTGRES_PASSWORD` is set, on PostgreSQL in a database created and dropped per test. Without a server the PostgreSQL group is reported as skipped, which is not a pass. The sync position tests are SQLite only, because that table is client only.
 - **Repository contract:** `ContestRepository.save` and `delete` take `MutationMetadata` and run through the unit of work, so every write names who made it.
 
 ## Design Requirements

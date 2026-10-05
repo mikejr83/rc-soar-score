@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:drift/drift.dart';
 import 'package:soar_score_core/soar_score_core.dart' as core;
 
+import 'sql_placeholders.dart';
+
 /// Reads and writes the rows of one table as the JSON the model classes use.
 ///
 /// Every column is named like its JSON key (snake_case), so one mapper serves
@@ -35,7 +37,7 @@ class TableMapper {
     final order = orderBy == null ? '' : ' ORDER BY $orderBy';
     final rows = await _db
         .customSelect(
-          'SELECT * FROM $_name WHERE $whereSql$order',
+          portableSql(_db, 'SELECT * FROM $_name WHERE $whereSql$order'),
           variables: variables,
           readsFrom: {_table},
         )
@@ -67,9 +69,12 @@ class TableMapper {
         ? 'DO NOTHING'
         : 'DO UPDATE SET ${updates.join(', ')}';
     await _db.customInsert(
-      'INSERT INTO $_name (${columns.map((c) => '"$c"').join(', ')}) '
-      'VALUES (${List.filled(columns.length, '?').join(', ')}) '
-      'ON CONFLICT (${keys.map((k) => '"$k"').join(', ')}) $conflict',
+      portableSql(
+        _db,
+        'INSERT INTO $_name (${columns.map((c) => '"$c"').join(', ')}) '
+        'VALUES (${List.filled(columns.length, '?').join(', ')}) '
+        'ON CONFLICT (${keys.map((k) => '"$k"').join(', ')}) $conflict',
+      ),
       variables: _toVariables(json, columns),
       updates: {_table},
     );
@@ -78,7 +83,7 @@ class TableMapper {
   /// Removes the row with [id]; returns whether one existed.
   Future<bool> remove(core.Id id) async {
     final count = await _db.customUpdate(
-      'DELETE FROM $_name WHERE id = ?',
+      portableSql(_db, 'DELETE FROM $_name WHERE id = ?'),
       variables: [Variable<String>(id.value)],
       updates: {_table},
     );

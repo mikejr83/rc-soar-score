@@ -177,9 +177,10 @@ class $ContestsTable extends Contests
     false,
     type: DriftSqlType.bool,
     requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("local_archive" IN (0, 1))',
-    ),
+    defaultConstraints: GeneratedColumn.constraintsDependsOnDialect({
+      SqlDialect.sqlite: 'CHECK ("local_archive" IN (0, 1))',
+      SqlDialect.postgres: '',
+    }),
     defaultValue: const Constant(false),
   );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
@@ -13023,9 +13024,10 @@ class $ConflictRecordsTable extends ConflictRecords
     false,
     type: DriftSqlType.bool,
     requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("requires_action" IN (0, 1))',
-    ),
+    defaultConstraints: GeneratedColumn.constraintsDependsOnDialect({
+      SqlDialect.sqlite: 'CHECK ("requires_action" IN (0, 1))',
+      SqlDialect.postgres: '',
+    }),
     defaultValue: const Constant(true),
   );
   static const VerificationMeta _resolutionMeta = const VerificationMeta(

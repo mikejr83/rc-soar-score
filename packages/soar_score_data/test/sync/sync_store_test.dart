@@ -1,13 +1,17 @@
 import 'package:drift/drift.dart' show Variable;
 import 'package:soar_score_core/soar_score_core.dart' as core;
+import 'package:soar_score_data/soar_score_data.dart' show portableSql;
 import 'package:test/test.dart';
 
+import '../support/backends.dart';
 import '../support/fixtures.dart';
 
-void main() {
+void main() => forEachBackend(_tests);
+
+void _tests(Backend backend) {
   late Installation inst;
-  setUp(() => inst = Installation.open());
-  tearDown(() => inst.db.close());
+  setUp(() async => inst = await Installation.open(backend));
+  tearDown(() => inst.close());
 
   late core.Contest a;
   late core.Contest b;
@@ -47,7 +51,6 @@ void main() {
         serverAcceptanceTime: DateTime.utc(2026, 5, 1, 13),
       );
       expect(await inst.syncStore.pendingMutations(scope), isEmpty);
-      expect((await inst.syncStore.status(scope)).pendingMutations, 0);
     });
 
     test('an accepted outcome needs a sequence', () async {
@@ -99,7 +102,7 @@ void main() {
     });
   });
 
-  group('cursor', () {
+  group('cursor', skip: _clientOnly(backend), () {
     test('starts at zero and keeps what was written', () async {
       final scope = core.ContestScopeKey(a.id);
       expect(await inst.syncStore.readCursor(scope), 0);
@@ -132,7 +135,7 @@ void main() {
     });
   });
 
-  group('status', () {
+  group('status', skip: _clientOnly(backend), () {
     test('counts the outbox, conflicts and the position', () async {
       final scope = core.ContestScopeKey(a.id);
       await inst.syncStore.writeCursor(
@@ -166,9 +169,12 @@ Future<void> _conflict(
   core.Id competing, {
   required bool requiresAction,
 }) => inst.db.customInsert(
-  'INSERT INTO conflict_records (id, contest_id, entity_type, entity_id, '
-  'competing_mutation_id, reason_code, requires_action, resolution, created_at) '
-  "VALUES (?, ?, 'Contest', ?, ?, 'stale', ?, ?, '2026-05-01T10:00:00Z')",
+  portableSql(
+    inst.db,
+    'INSERT INTO conflict_records (id, contest_id, entity_type, entity_id, '
+    'competing_mutation_id, reason_code, requires_action, resolution, created_at) '
+    "VALUES (?, ?, 'Contest', ?, ?, 'stale', ?, ?, '2026-05-01T10:00:00Z')",
+  ),
   variables: [
     Variable(core.Id.create().value),
     Variable(contestId.value),
@@ -178,3 +184,9 @@ Future<void> _conflict(
     Variable(requiresAction ? 'Pending' : 'Automatic'),
   ],
 );
+
+/// The sync position table exists only on an installation; the server keeps a
+/// `SyncCursor` per installation instead.
+Object _clientOnly(Backend backend) => backend == Backend.postgres
+    ? 'client-only table, not on the server'
+    : false;

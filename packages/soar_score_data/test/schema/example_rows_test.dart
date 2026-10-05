@@ -1,6 +1,7 @@
 import 'package:soar_score_core/soar_score_core.dart' as core;
 import 'package:test/test.dart';
 
+import '../support/backends.dart';
 import '../support/example_rows.dart';
 import '../support/fixtures.dart';
 
@@ -33,8 +34,8 @@ const _entities = <(String entity, String file)>[
 
 void main() {
   late Installation inst;
-  setUp(() => inst = Installation.open());
-  tearDown(() => inst.db.close());
+  setUp(() async => inst = await Installation.open(Backend.sqlite));
+  tearDown(() => inst.close());
 
   test('every example row persists and reads back as written', () async {
     for (final (entity, file) in _entities) {
