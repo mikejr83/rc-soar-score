@@ -23,6 +23,7 @@ The system is designed for both connected and disconnected field operations, all
   - [Running the Applications](#running-the-applications)
   - [Building](#building)
   - [Running Tests & Linting](#running-tests--linting)
+  - [Testing Against PostgreSQL](#testing-against-postgresql)
 - [Conventions & Architecture Rules](#conventions--architecture-rules)
 
 ---
@@ -240,6 +241,35 @@ dart test
 cd apps/soar_score_contest
 flutter test
 ```
+
+### Testing Against PostgreSQL
+
+The data package (`packages/soar_score_data`) runs the same tests on SQLite and on PostgreSQL. SQLite is in memory and always runs. The PostgreSQL group runs only when a server is configured; otherwise it is reported as skipped. A skipped run is not a PostgreSQL pass.
+
+1. Start a throwaway PostgreSQL server, for example with Docker:
+
+   ```bash
+   docker run --name soar-pg -e POSTGRES_PASSWORD=dev -p 5432:5432 -d postgres:17
+   ```
+
+2. Tell the tests where it is. `POSTGRES_PASSWORD` turns the PostgreSQL group on; the rest are optional:
+
+   | Variable            | Default      |
+   | ------------------- | ------------ |
+   | `POSTGRES_PASSWORD` | _(required)_ |
+   | `POSTGRES_HOST`     | `localhost`  |
+   | `POSTGRES_PORT`     | `5432`       |
+   | `POSTGRES_USER`     | `postgres`   |
+   | `POSTGRES_SSLMODE`  | `disable`    |
+
+3. Run the data package tests:
+
+   ```bash
+   cd packages/soar_score_data
+   POSTGRES_PASSWORD=dev dart test
+   ```
+
+Each test creates its own database (named `soar_test_...`) on the server and drops it afterwards, so the server's existing databases are untouched and the tests do not need a clean server. The connecting user needs permission to create and drop databases. Stop the server with `docker rm -f soar-pg`.
 
 ---
 

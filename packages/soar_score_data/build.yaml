@@ -1,0 +1,12 @@
+# Generate dialect-aware SQL for both executors. Without this, Drift writes
+# SQLite-only column definitions (for example `CHECK (flag IN (0, 1))` on a
+# boolean) that PostgreSQL rejects.
+targets:
+  $default:
+    builders:
+      drift_dev:
+        options:
+          sql:
+            dialects:
+              - sqlite
+              - postgres

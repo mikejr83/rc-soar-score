@@ -3,6 +3,9 @@ import 'package:drift/native.dart';
 import 'package:soar_score_data/soar_score_data.dart';
 import 'package:test/test.dart';
 
+import '../support/backends.dart';
+import '../support/fixtures.dart';
+
 Future<Set<String>> _tableNames(SoarScoreDatabase db) async {
   final rows = await db
       .customSelect("SELECT name FROM sqlite_master WHERE type = 'table'")
@@ -11,6 +14,8 @@ Future<Set<String>> _tableNames(SoarScoreDatabase db) async {
 }
 
 void main() {
+  registerBackendTests();
+
   group('DatabaseProfile', () {
     test('native has every group except backend only', () {
       expect(
@@ -123,3 +128,18 @@ void main() {
     });
   });
 }
+
+void _backendTests(Backend backend) {
+  test('the database creates exactly the tables of its profile', () async {
+    final inst = await Installation.open(backend);
+    addTearDown(inst.close);
+
+    final expected = {for (final t in inst.db.profileTables) t.actualTableName};
+    final created = (await inst.tableNames()).where(
+      (n) => !n.startsWith('sqlite_') && n != '__schema',
+    );
+    expect(created.toSet(), expected);
+  });
+}
+
+void registerBackendTests() => forEachBackend(_backendTests);

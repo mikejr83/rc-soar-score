@@ -18,5 +18,6 @@ export 'sync/drift_sync_store.dart';
 export 'sync/drift_unit_of_work.dart';
 export 'sync/entity_store.dart';
 export 'sync/entity_stores.dart';
+export 'sync/sql_placeholders.dart';
 export 'sync/table_mapper.dart';
 export 'repositories/contest_repository.dart';

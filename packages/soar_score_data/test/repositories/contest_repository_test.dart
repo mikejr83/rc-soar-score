@@ -1,24 +1,23 @@
-import 'package:drift/native.dart';
 import 'package:soar_score_core/soar_score_core.dart' as core;
 import 'package:soar_score_data/soar_score_data.dart';
 import 'package:test/test.dart';
 
-void main() {
-  group('SoarScoreDatabase (SQLite repository)', () {
-    late SoarScoreDatabase db;
+import '../support/backends.dart';
+import '../support/fixtures.dart';
+
+void main() => forEachBackend(_tests);
+
+void _tests(Backend backend) {
+  group('ContestRepository', () {
+    late Installation inst;
     late core.ContestRepository repo;
 
-    setUp(() {
-      db = SoarScoreDatabase(
-        NativeDatabase.memory(),
-        profile: DatabaseProfile.native,
-      );
-      repo = ContestRepository(db);
+    setUp(() async {
+      inst = await Installation.open(backend);
+      repo = ContestRepository(inst.db);
     });
 
-    tearDown(() async {
-      await repo.close();
-    });
+    tearDown(() => inst.close());
 
     var mutations = 0;
     core.MutationMetadata meta() => core.MutationMetadata(
