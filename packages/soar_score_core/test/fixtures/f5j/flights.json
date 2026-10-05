@@ -1,0 +1,590 @@
+[
+  {
+    "name": "below_reference_height",
+    "components": {
+      "time_flown": 500,
+      "launch_height": 100
+    },
+    "landing_bonus": 50,
+    "note": "penalty 100*0.5=50",
+    "expected": {
+      "outcome": "scored",
+      "zero_reasons": [],
+      "late_landing": false,
+      "flight_points": 500.0,
+      "landing_bonus": 50.0,
+      "height_penalty": 50.0,
+      "flight_penalty": 0.0,
+      "raw_score": 500.0,
+      "non_droppable": false,
+      "motor_restart_mode": "allowed"
+    }
+  },
+  {
+    "name": "exactly_at_reference_height",
+    "components": {
+      "time_flown": 500,
+      "launch_height": 200
+    },
+    "landing_bonus": 50,
+    "note": "minor rate applies at the reference",
+    "expected": {
+      "outcome": "scored",
+      "zero_reasons": [],
+      "late_landing": false,
+      "flight_points": 500.0,
+      "landing_bonus": 50.0,
+      "height_penalty": 100.0,
+      "flight_penalty": 0.0,
+      "raw_score": 450.0,
+      "non_droppable": false,
+      "motor_restart_mode": "allowed"
+    }
+  },
+  {
+    "name": "one_meter_above_reference",
+    "components": {
+      "time_flown": 500,
+      "launch_height": 201
+    },
+    "landing_bonus": 50,
+    "expected": {
+      "outcome": "scored",
+      "zero_reasons": [],
+      "late_landing": false,
+      "flight_points": 500.0,
+      "landing_bonus": 50.0,
+      "height_penalty": 103.0,
+      "flight_penalty": 0.0,
+      "raw_score": 447.0,
+      "non_droppable": false,
+      "motor_restart_mode": "allowed"
+    }
+  },
+  {
+    "name": "well_above_reference",
+    "components": {
+      "time_flown": 580,
+      "launch_height": 300
+    },
+    "landing_bonus": 30,
+    "note": "200*0.5 + 100*3",
+    "expected": {
+      "outcome": "scored",
+      "zero_reasons": [],
+      "late_landing": false,
+      "flight_points": 580.0,
+      "landing_bonus": 30.0,
+      "height_penalty": 400.0,
+      "flight_penalty": 0.0,
+      "raw_score": 210.0,
+      "non_droppable": false,
+      "motor_restart_mode": "allowed"
+    }
+  },
+  {
+    "name": "penalty_exceeds_points_clamps_to_zero",
+    "components": {
+      "time_flown": 100,
+      "launch_height": 300
+    },
+    "landing_bonus": 20,
+    "expected": {
+      "outcome": "scored",
+      "zero_reasons": [],
+      "late_landing": false,
+      "flight_points": 100.0,
+      "landing_bonus": 20.0,
+      "height_penalty": 400.0,
+      "flight_penalty": 0.0,
+      "raw_score": 0.0,
+      "non_droppable": false,
+      "motor_restart_mode": "allowed"
+    }
+  },
+  {
+    "name": "penalty_exactly_equals_points",
+    "components": {
+      "time_flown": 50,
+      "launch_height": 100
+    },
+    "expected": {
+      "outcome": "scored",
+      "zero_reasons": [],
+      "late_landing": false,
+      "flight_points": 50.0,
+      "landing_bonus": 0.0,
+      "height_penalty": 50.0,
+      "flight_penalty": 0.0,
+      "raw_score": 0.0,
+      "non_droppable": false,
+      "motor_restart_mode": "allowed"
+    }
+  },
+  {
+    "name": "zero_time_is_a_scored_flight",
+    "components": {
+      "time_flown": 0,
+      "launch_height": 50
+    },
+    "expected": {
+      "outcome": "scored",
+      "zero_reasons": [],
+      "late_landing": false,
+      "flight_points": 0.0,
+      "landing_bonus": 0.0,
+      "height_penalty": 25.0,
+      "flight_penalty": 0.0,
+      "raw_score": 0.0,
+      "non_droppable": false,
+      "motor_restart_mode": "allowed"
+    }
+  },
+  {
+    "name": "late_landing_loses_the_bonus",
+    "components": {
+      "time_flown": 599,
+      "launch_height": 100,
+      "late_landing": true
+    },
+    "landing_bonus": 40,
+    "expected": {
+      "outcome": "scored",
+      "zero_reasons": [],
+      "late_landing": true,
+      "flight_points": 599.0,
+      "landing_bonus": 0.0,
+      "height_penalty": 50.0,
+      "flight_penalty": 0.0,
+      "raw_score": 549.0,
+      "non_droppable": false,
+      "motor_restart_mode": "allowed"
+    }
+  },
+  {
+    "name": "late_landing_largest_time_with_three_decimals",
+    "components": {
+      "time_flown": 599.999,
+      "launch_height": 100,
+      "late_landing": true
+    },
+    "options": {
+      "fractional_seconds": 3
+    },
+    "landing_bonus": 40,
+    "expected": {
+      "outcome": "scored",
+      "zero_reasons": [],
+      "late_landing": true,
+      "flight_points": 599.999,
+      "landing_bonus": 0.0,
+      "height_penalty": 50.0,
+      "flight_penalty": 0.0,
+      "raw_score": 549.999,
+      "non_droppable": false,
+      "motor_restart_mode": "allowed"
+    }
+  },
+  {
+    "name": "fractional_seconds_and_points_per_second",
+    "components": {
+      "time_flown": 123.45,
+      "launch_height": 150
+    },
+    "options": {
+      "fractional_seconds": 2,
+      "points_per_second": 1.5
+    },
+    "landing_bonus": 25,
+    "expected": {
+      "outcome": "scored",
+      "zero_reasons": [],
+      "late_landing": false,
+      "flight_points": 185.175,
+      "landing_bonus": 25.0,
+      "height_penalty": 75.0,
+      "flight_penalty": 0.0,
+      "raw_score": 135.175,
+      "non_droppable": false,
+      "motor_restart_mode": "allowed"
+    }
+  },
+  {
+    "name": "overridden_height_penalty_rates",
+    "components": {
+      "time_flown": 300,
+      "launch_height": 150
+    },
+    "options": {
+      "reference_launch_height": 100,
+      "minor_penalty_per_meter": 1.0,
+      "major_penalty_per_meter": 5.0
+    },
+    "landing_bonus": 10,
+    "expected": {
+      "outcome": "scored",
+      "zero_reasons": [],
+      "late_landing": false,
+      "flight_points": 300.0,
+      "landing_bonus": 10.0,
+      "height_penalty": 350.0,
+      "flight_penalty": 0.0,
+      "raw_score": 0.0,
+      "non_droppable": false,
+      "motor_restart_mode": "allowed"
+    }
+  },
+  {
+    "name": "overridden_working_time",
+    "components": {
+      "time_flown": 800,
+      "launch_height": 100
+    },
+    "options": {
+      "working_time": 900
+    },
+    "landing_bonus": 20,
+    "expected": {
+      "outcome": "scored",
+      "zero_reasons": [],
+      "late_landing": false,
+      "flight_points": 800.0,
+      "landing_bonus": 20.0,
+      "height_penalty": 50.0,
+      "flight_penalty": 0.0,
+      "raw_score": 770.0,
+      "non_droppable": false,
+      "motor_restart_mode": "allowed"
+    }
+  },
+  {
+    "name": "flight_penalty_is_deducted",
+    "components": {
+      "time_flown": 500,
+      "launch_height": 100,
+      "flight_penalty": 30
+    },
+    "landing_bonus": 50,
+    "expected": {
+      "outcome": "scored",
+      "zero_reasons": [],
+      "late_landing": false,
+      "flight_points": 500.0,
+      "landing_bonus": 50.0,
+      "height_penalty": 50.0,
+      "flight_penalty": 30.0,
+      "raw_score": 470.0,
+      "non_droppable": false,
+      "motor_restart_mode": "allowed"
+    }
+  },
+  {
+    "name": "flight_penalty_clamps_to_zero",
+    "components": {
+      "time_flown": 500,
+      "launch_height": 100,
+      "flight_penalty": 900
+    },
+    "landing_bonus": 50,
+    "expected": {
+      "outcome": "scored",
+      "zero_reasons": [],
+      "late_landing": false,
+      "flight_points": 500.0,
+      "landing_bonus": 50.0,
+      "height_penalty": 50.0,
+      "flight_penalty": 900.0,
+      "raw_score": 0.0,
+      "non_droppable": false,
+      "motor_restart_mode": "allowed"
+    }
+  },
+  {
+    "name": "motor_restart_is_a_droppable_zero",
+    "components": {
+      "motor_restart": true
+    },
+    "expected": {
+      "outcome": "zero",
+      "zero_reasons": [
+        "motor_restart"
+      ],
+      "late_landing": false,
+      "flight_points": 0,
+      "landing_bonus": 0,
+      "height_penalty": 0,
+      "flight_penalty": 0.0,
+      "raw_score": 0,
+      "non_droppable": false,
+      "motor_restart_mode": "allowed"
+    }
+  },
+  {
+    "name": "motor_restart_ignores_the_other_values",
+    "components": {
+      "motor_restart": true,
+      "time_flown": 500,
+      "launch_height": 100
+    },
+    "landing_bonus": 50,
+    "expected": {
+      "outcome": "zero",
+      "zero_reasons": [
+        "motor_restart"
+      ],
+      "late_landing": false,
+      "flight_points": 0,
+      "landing_bonus": 0,
+      "height_penalty": 0,
+      "flight_penalty": 0.0,
+      "raw_score": 0,
+      "non_droppable": false,
+      "motor_restart_mode": "allowed"
+    }
+  },
+  {
+    "name": "motor_restart_non_droppable",
+    "components": {
+      "motor_restart": true
+    },
+    "options": {
+      "motor_restart_mode": "non_droppable"
+    },
+    "expected": {
+      "outcome": "zero",
+      "zero_reasons": [
+        "motor_restart"
+      ],
+      "late_landing": false,
+      "flight_points": 0,
+      "landing_bonus": 0,
+      "height_penalty": 0,
+      "flight_penalty": 0.0,
+      "raw_score": 0,
+      "non_droppable": true,
+      "motor_restart_mode": "non_droppable"
+    }
+  },
+  {
+    "name": "out_of_bounds_zero_stays_droppable",
+    "components": {
+      "out_of_bounds": true
+    },
+    "options": {
+      "motor_restart_mode": "non_droppable"
+    },
+    "expected": {
+      "outcome": "zero",
+      "zero_reasons": [
+        "out_of_bounds"
+      ],
+      "late_landing": false,
+      "flight_points": 0,
+      "landing_bonus": 0,
+      "height_penalty": 0,
+      "flight_penalty": 0.0,
+      "raw_score": 0,
+      "non_droppable": false,
+      "motor_restart_mode": "non_droppable"
+    }
+  },
+  {
+    "name": "no_altitude_recorded_zero",
+    "components": {
+      "no_altitude_recorded": true,
+      "time_flown": 500
+    },
+    "expected": {
+      "outcome": "zero",
+      "zero_reasons": [
+        "no_altitude_recorded"
+      ],
+      "late_landing": false,
+      "flight_points": 0,
+      "landing_bonus": 0,
+      "height_penalty": 0,
+      "flight_penalty": 0.0,
+      "raw_score": 0,
+      "non_droppable": false,
+      "motor_restart_mode": "allowed"
+    }
+  },
+  {
+    "name": "blank_entry_is_an_ordinary_zero",
+    "components": {},
+    "expected": {
+      "outcome": "zero",
+      "zero_reasons": [],
+      "late_landing": false,
+      "flight_points": 0,
+      "landing_bonus": 0,
+      "height_penalty": 0,
+      "flight_penalty": 0.0,
+      "raw_score": 0,
+      "non_droppable": false,
+      "motor_restart_mode": "allowed"
+    }
+  },
+  {
+    "name": "time_at_working_time_is_rejected",
+    "components": {
+      "time_flown": 600,
+      "launch_height": 100
+    },
+    "expected_error": [
+      "out_of_range"
+    ]
+  },
+  {
+    "name": "time_above_working_time_is_rejected",
+    "components": {
+      "time_flown": 700,
+      "launch_height": 100
+    },
+    "expected_error": [
+      "out_of_range"
+    ]
+  },
+  {
+    "name": "negative_time_is_rejected",
+    "components": {
+      "time_flown": -1,
+      "launch_height": 100
+    },
+    "expected_error": [
+      "out_of_range"
+    ]
+  },
+  {
+    "name": "too_many_decimals_is_rejected",
+    "components": {
+      "time_flown": 100.25,
+      "launch_height": 100
+    },
+    "expected_error": [
+      "too_precise"
+    ]
+  },
+  {
+    "name": "four_decimals_is_never_allowed",
+    "components": {
+      "time_flown": 100.0001,
+      "launch_height": 100
+    },
+    "options": {
+      "fractional_seconds": 3
+    },
+    "expected_error": [
+      "too_precise"
+    ]
+  },
+  {
+    "name": "altitude_zero_is_rejected",
+    "components": {
+      "time_flown": 100,
+      "launch_height": 0
+    },
+    "expected_error": [
+      "out_of_range"
+    ]
+  },
+  {
+    "name": "time_without_launch_height_is_rejected",
+    "components": {
+      "time_flown": 100
+    },
+    "expected_error": [
+      "required"
+    ]
+  },
+  {
+    "name": "launch_height_without_time_is_rejected",
+    "components": {
+      "launch_height": 100
+    },
+    "expected_error": [
+      "required"
+    ]
+  },
+  {
+    "name": "motor_restart_with_out_of_bounds_is_rejected",
+    "components": {
+      "motor_restart": true,
+      "out_of_bounds": true
+    },
+    "expected_error": [
+      "exclusive_status"
+    ]
+  },
+  {
+    "name": "motor_restart_with_no_altitude_is_rejected",
+    "components": {
+      "motor_restart": true,
+      "no_altitude_recorded": true
+    },
+    "expected_error": [
+      "exclusive_status"
+    ]
+  },
+  {
+    "name": "out_of_bounds_with_no_altitude_is_rejected",
+    "components": {
+      "out_of_bounds": true,
+      "no_altitude_recorded": true
+    },
+    "expected_error": [
+      "exclusive_status"
+    ]
+  },
+  {
+    "name": "no_altitude_with_late_landing_is_rejected",
+    "components": {
+      "no_altitude_recorded": true,
+      "late_landing": true
+    },
+    "expected_error": [
+      "exclusive_status"
+    ]
+  },
+  {
+    "name": "motor_restart_when_not_allowed_is_rejected",
+    "components": {
+      "motor_restart": true
+    },
+    "options": {
+      "motor_restart_mode": "not_allowed"
+    },
+    "expected_error": [
+      "not_allowed"
+    ]
+  },
+  {
+    "name": "negative_flight_penalty_is_rejected",
+    "components": {
+      "time_flown": 100,
+      "launch_height": 100,
+      "flight_penalty": -1
+    },
+    "expected_error": [
+      "out_of_range"
+    ]
+  },
+  {
+    "name": "unknown_field_is_rejected",
+    "components": {
+      "speed": 3
+    },
+    "expected_error": [
+      "unknown_field"
+    ]
+  },
+  {
+    "name": "derived_field_is_rejected",
+    "components": {
+      "raw_score": 3
+    },
+    "expected_error": [
+      "derived_field"
+    ]
+  }
+]

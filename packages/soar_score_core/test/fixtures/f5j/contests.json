@@ -1,0 +1,1969 @@
+[
+  {
+    "name": "no_drops_sum_the_rounds",
+    "options": {
+      "drop_after_rounds": [],
+      "tie_breaker_enabled": false
+    },
+    "as_of_round": 3,
+    "pilots": [
+      {
+        "id": "a",
+        "rounds": [
+          {
+            "round": 1,
+            "group_score": 1000,
+            "raw_score": 1000
+          },
+          {
+            "round": 2,
+            "group_score": 800.5,
+            "raw_score": 800.5
+          },
+          {
+            "round": 3,
+            "group_score": 950.2,
+            "raw_score": 950.2
+          }
+        ]
+      },
+      {
+        "id": "b",
+        "rounds": [
+          {
+            "round": 1,
+            "group_score": 900,
+            "raw_score": 900
+          },
+          {
+            "round": 2,
+            "group_score": 900,
+            "raw_score": 900
+          },
+          {
+            "round": 3,
+            "group_score": 900,
+            "raw_score": 900
+          }
+        ]
+      }
+    ],
+    "expected": {
+      "totals": [
+        {
+          "id": "a",
+          "raw_total": 2750.7,
+          "dropped_rounds": [],
+          "skipped_drops": 0,
+          "penalty_total": 0.0,
+          "overall_score": 2750.7,
+          "is_preliminary": false
+        },
+        {
+          "id": "b",
+          "raw_total": 2700.0,
+          "dropped_rounds": [],
+          "skipped_drops": 0,
+          "penalty_total": 0.0,
+          "overall_score": 2700.0,
+          "is_preliminary": false
+        }
+      ],
+      "places": [
+        {
+          "id": "a",
+          "place": 1,
+          "is_tied": false
+        },
+        {
+          "id": "b",
+          "place": 2,
+          "is_tied": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "lowest_round_is_dropped_after_round_4",
+    "options": {
+      "drop_after_rounds": [
+        4
+      ],
+      "tie_breaker_enabled": false
+    },
+    "as_of_round": 4,
+    "pilots": [
+      {
+        "id": "a",
+        "rounds": [
+          {
+            "round": 1,
+            "group_score": 900,
+            "raw_score": 900
+          },
+          {
+            "round": 2,
+            "group_score": 400,
+            "raw_score": 400
+          },
+          {
+            "round": 3,
+            "group_score": 950,
+            "raw_score": 950
+          },
+          {
+            "round": 4,
+            "group_score": 700,
+            "raw_score": 700
+          }
+        ]
+      },
+      {
+        "id": "b",
+        "rounds": [
+          {
+            "round": 1,
+            "group_score": 800,
+            "raw_score": 800
+          },
+          {
+            "round": 2,
+            "group_score": 800,
+            "raw_score": 800
+          },
+          {
+            "round": 3,
+            "group_score": 800,
+            "raw_score": 800
+          },
+          {
+            "round": 4,
+            "group_score": 800,
+            "raw_score": 800
+          }
+        ]
+      }
+    ],
+    "expected": {
+      "totals": [
+        {
+          "id": "a",
+          "raw_total": 2950.0,
+          "dropped_rounds": [
+            2
+          ],
+          "skipped_drops": 0,
+          "penalty_total": 0.0,
+          "overall_score": 2550.0,
+          "is_preliminary": false
+        },
+        {
+          "id": "b",
+          "raw_total": 3200.0,
+          "dropped_rounds": [
+            1
+          ],
+          "skipped_drops": 0,
+          "penalty_total": 0.0,
+          "overall_score": 2400.0,
+          "is_preliminary": false
+        }
+      ],
+      "places": [
+        {
+          "id": "a",
+          "place": 1,
+          "is_tied": false
+        },
+        {
+          "id": "b",
+          "place": 2,
+          "is_tied": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "drop_not_yet_due",
+    "options": {
+      "drop_after_rounds": [
+        4
+      ],
+      "tie_breaker_enabled": false
+    },
+    "as_of_round": 3,
+    "pilots": [
+      {
+        "id": "a",
+        "rounds": [
+          {
+            "round": 1,
+            "group_score": 900,
+            "raw_score": 900
+          },
+          {
+            "round": 2,
+            "group_score": 400,
+            "raw_score": 400
+          },
+          {
+            "round": 3,
+            "group_score": 950,
+            "raw_score": 950
+          }
+        ]
+      }
+    ],
+    "expected": {
+      "totals": [
+        {
+          "id": "a",
+          "raw_total": 2250.0,
+          "dropped_rounds": [],
+          "skipped_drops": 0,
+          "penalty_total": 0.0,
+          "overall_score": 2250.0,
+          "is_preliminary": false
+        }
+      ],
+      "places": [
+        {
+          "id": "a",
+          "place": 1,
+          "is_tied": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "two_drops",
+    "options": {
+      "drop_after_rounds": [
+        4,
+        8
+      ],
+      "tie_breaker_enabled": false
+    },
+    "as_of_round": 8,
+    "pilots": [
+      {
+        "id": "a",
+        "rounds": [
+          {
+            "round": 1,
+            "group_score": 900,
+            "raw_score": 900
+          },
+          {
+            "round": 2,
+            "group_score": 400,
+            "raw_score": 400
+          },
+          {
+            "round": 3,
+            "group_score": 950,
+            "raw_score": 950
+          },
+          {
+            "round": 4,
+            "group_score": 700,
+            "raw_score": 700
+          },
+          {
+            "round": 5,
+            "group_score": 1000,
+            "raw_score": 1000
+          },
+          {
+            "round": 6,
+            "group_score": 650,
+            "raw_score": 650
+          },
+          {
+            "round": 7,
+            "group_score": 980,
+            "raw_score": 980
+          },
+          {
+            "round": 8,
+            "group_score": 300,
+            "raw_score": 300
+          }
+        ]
+      }
+    ],
+    "expected": {
+      "totals": [
+        {
+          "id": "a",
+          "raw_total": 5880.0,
+          "dropped_rounds": [
+            2,
+            8
+          ],
+          "skipped_drops": 0,
+          "penalty_total": 0.0,
+          "overall_score": 5180.0,
+          "is_preliminary": false
+        }
+      ],
+      "places": [
+        {
+          "id": "a",
+          "place": 1,
+          "is_tied": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "equal_lowest_drops_the_earliest",
+    "options": {
+      "drop_after_rounds": [
+        4
+      ],
+      "tie_breaker_enabled": false
+    },
+    "as_of_round": 4,
+    "pilots": [
+      {
+        "id": "a",
+        "rounds": [
+          {
+            "round": 1,
+            "group_score": 500,
+            "raw_score": 500
+          },
+          {
+            "round": 2,
+            "group_score": 300,
+            "raw_score": 300
+          },
+          {
+            "round": 3,
+            "group_score": 300,
+            "raw_score": 300
+          },
+          {
+            "round": 4,
+            "group_score": 900,
+            "raw_score": 900
+          }
+        ]
+      }
+    ],
+    "expected": {
+      "totals": [
+        {
+          "id": "a",
+          "raw_total": 2000.0,
+          "dropped_rounds": [
+            2
+          ],
+          "skipped_drops": 0,
+          "penalty_total": 0.0,
+          "overall_score": 1700.0,
+          "is_preliminary": false
+        }
+      ],
+      "places": [
+        {
+          "id": "a",
+          "place": 1,
+          "is_tied": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "non_droppable_zero_is_kept_next_lowest_drops",
+    "options": {
+      "drop_after_rounds": [
+        4
+      ],
+      "tie_breaker_enabled": false
+    },
+    "as_of_round": 4,
+    "pilots": [
+      {
+        "id": "a",
+        "rounds": [
+          {
+            "round": 1,
+            "group_score": 0,
+            "raw_score": 0,
+            "non_droppable": true
+          },
+          {
+            "round": 2,
+            "group_score": 300,
+            "raw_score": 300
+          },
+          {
+            "round": 3,
+            "group_score": 500,
+            "raw_score": 500
+          },
+          {
+            "round": 4,
+            "group_score": 900,
+            "raw_score": 900
+          }
+        ]
+      }
+    ],
+    "expected": {
+      "totals": [
+        {
+          "id": "a",
+          "raw_total": 1700.0,
+          "dropped_rounds": [
+            2
+          ],
+          "skipped_drops": 0,
+          "penalty_total": 0.0,
+          "overall_score": 1400.0,
+          "is_preliminary": false
+        }
+      ],
+      "places": [
+        {
+          "id": "a",
+          "place": 1,
+          "is_tied": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "all_non_droppable_zeros_skip_the_drop",
+    "options": {
+      "drop_after_rounds": [
+        4
+      ],
+      "tie_breaker_enabled": false
+    },
+    "as_of_round": 4,
+    "pilots": [
+      {
+        "id": "a",
+        "rounds": [
+          {
+            "round": 1,
+            "group_score": 0,
+            "raw_score": 0,
+            "non_droppable": true
+          },
+          {
+            "round": 2,
+            "group_score": 0,
+            "raw_score": 0,
+            "non_droppable": true
+          },
+          {
+            "round": 3,
+            "group_score": 0,
+            "raw_score": 0,
+            "non_droppable": true
+          },
+          {
+            "round": 4,
+            "group_score": 0,
+            "raw_score": 0,
+            "non_droppable": true
+          }
+        ]
+      }
+    ],
+    "expected": {
+      "totals": [
+        {
+          "id": "a",
+          "raw_total": 0.0,
+          "dropped_rounds": [],
+          "skipped_drops": 1,
+          "penalty_total": 0.0,
+          "overall_score": 0.0,
+          "is_preliminary": false
+        }
+      ],
+      "places": [
+        {
+          "id": "a",
+          "place": 1,
+          "is_tied": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "second_drop_skipped_when_only_non_droppable_remain",
+    "options": {
+      "drop_after_rounds": [
+        1,
+        3
+      ],
+      "tie_breaker_enabled": false
+    },
+    "as_of_round": 3,
+    "pilots": [
+      {
+        "id": "a",
+        "rounds": [
+          {
+            "round": 1,
+            "group_score": 0,
+            "raw_score": 0,
+            "non_droppable": true
+          },
+          {
+            "round": 2,
+            "group_score": 0,
+            "raw_score": 0,
+            "non_droppable": true
+          },
+          {
+            "round": 3,
+            "group_score": 800,
+            "raw_score": 800
+          }
+        ]
+      }
+    ],
+    "expected": {
+      "totals": [
+        {
+          "id": "a",
+          "raw_total": 800.0,
+          "dropped_rounds": [
+            3
+          ],
+          "skipped_drops": 1,
+          "penalty_total": 0.0,
+          "overall_score": 0.0,
+          "is_preliminary": false
+        }
+      ],
+      "places": [
+        {
+          "id": "a",
+          "place": 1,
+          "is_tied": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "droppable_zero_beside_a_non_droppable_one",
+    "options": {
+      "drop_after_rounds": [
+        4
+      ],
+      "tie_breaker_enabled": false
+    },
+    "as_of_round": 4,
+    "pilots": [
+      {
+        "id": "a",
+        "rounds": [
+          {
+            "round": 1,
+            "group_score": 0,
+            "raw_score": 0,
+            "non_droppable": true
+          },
+          {
+            "round": 2,
+            "group_score": 0,
+            "raw_score": 0
+          },
+          {
+            "round": 3,
+            "group_score": 400,
+            "raw_score": 400
+          },
+          {
+            "round": 4,
+            "group_score": 600,
+            "raw_score": 600
+          }
+        ]
+      }
+    ],
+    "expected": {
+      "totals": [
+        {
+          "id": "a",
+          "raw_total": 1000.0,
+          "dropped_rounds": [
+            2
+          ],
+          "skipped_drops": 0,
+          "penalty_total": 0.0,
+          "overall_score": 1000.0,
+          "is_preliminary": false
+        }
+      ],
+      "places": [
+        {
+          "id": "a",
+          "place": 1,
+          "is_tied": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "penalty_of_a_dropped_round_still_counts",
+    "options": {
+      "drop_after_rounds": [
+        4
+      ],
+      "tie_breaker_enabled": false
+    },
+    "as_of_round": 4,
+    "pilots": [
+      {
+        "id": "a",
+        "rounds": [
+          {
+            "round": 1,
+            "group_score": 900,
+            "raw_score": 900
+          },
+          {
+            "round": 2,
+            "group_score": 400,
+            "raw_score": 400,
+            "cumulative_penalty": 100
+          },
+          {
+            "round": 3,
+            "group_score": 950,
+            "raw_score": 950
+          },
+          {
+            "round": 4,
+            "group_score": 700,
+            "raw_score": 700
+          }
+        ]
+      }
+    ],
+    "expected": {
+      "totals": [
+        {
+          "id": "a",
+          "raw_total": 2950.0,
+          "dropped_rounds": [
+            2
+          ],
+          "skipped_drops": 0,
+          "penalty_total": 100.0,
+          "overall_score": 2450.0,
+          "is_preliminary": false
+        }
+      ],
+      "places": [
+        {
+          "id": "a",
+          "place": 1,
+          "is_tied": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "penalties_apply_after_drops",
+    "options": {
+      "drop_after_rounds": [
+        4
+      ],
+      "tie_breaker_enabled": false
+    },
+    "as_of_round": 4,
+    "pilots": [
+      {
+        "id": "a",
+        "rounds": [
+          {
+            "round": 1,
+            "group_score": 900,
+            "raw_score": 900,
+            "cumulative_penalty": 50
+          },
+          {
+            "round": 2,
+            "group_score": 400,
+            "raw_score": 400
+          },
+          {
+            "round": 3,
+            "group_score": 950,
+            "raw_score": 950,
+            "cumulative_penalty": 25
+          },
+          {
+            "round": 4,
+            "group_score": 700,
+            "raw_score": 700
+          }
+        ]
+      }
+    ],
+    "expected": {
+      "totals": [
+        {
+          "id": "a",
+          "raw_total": 2950.0,
+          "dropped_rounds": [
+            2
+          ],
+          "skipped_drops": 0,
+          "penalty_total": 75.0,
+          "overall_score": 2475.0,
+          "is_preliminary": false
+        }
+      ],
+      "places": [
+        {
+          "id": "a",
+          "place": 1,
+          "is_tied": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "missing_round_is_a_preliminary_zero",
+    "options": {
+      "drop_after_rounds": [],
+      "tie_breaker_enabled": false
+    },
+    "as_of_round": 3,
+    "pilots": [
+      {
+        "id": "a",
+        "rounds": [
+          {
+            "round": 1,
+            "group_score": 900,
+            "raw_score": 900
+          },
+          {
+            "round": 2,
+            "group_score": 800,
+            "raw_score": 800
+          }
+        ]
+      }
+    ],
+    "expected": {
+      "totals": [
+        {
+          "id": "a",
+          "raw_total": 1700.0,
+          "dropped_rounds": [],
+          "skipped_drops": 0,
+          "penalty_total": 0.0,
+          "overall_score": 1700.0,
+          "is_preliminary": true
+        }
+      ],
+      "places": [
+        {
+          "id": "a",
+          "place": 1,
+          "is_tied": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "retirement_zeros_are_not_preliminary",
+    "options": {
+      "drop_after_rounds": [],
+      "tie_breaker_enabled": false
+    },
+    "as_of_round": 5,
+    "pilots": [
+      {
+        "id": "a",
+        "rounds": [
+          {
+            "round": 1,
+            "group_score": 900,
+            "raw_score": 900
+          },
+          {
+            "round": 2,
+            "group_score": 800,
+            "raw_score": 800
+          }
+        ],
+        "retired_at_round": 3
+      },
+      {
+        "id": "b",
+        "rounds": [
+          {
+            "round": 1,
+            "group_score": 500,
+            "raw_score": 500
+          },
+          {
+            "round": 2,
+            "group_score": 500,
+            "raw_score": 500
+          },
+          {
+            "round": 3,
+            "group_score": 500,
+            "raw_score": 500
+          },
+          {
+            "round": 4,
+            "group_score": 500,
+            "raw_score": 500
+          },
+          {
+            "round": 5,
+            "group_score": 500,
+            "raw_score": 500
+          }
+        ]
+      }
+    ],
+    "expected": {
+      "totals": [
+        {
+          "id": "a",
+          "raw_total": 1700.0,
+          "dropped_rounds": [],
+          "skipped_drops": 0,
+          "penalty_total": 0.0,
+          "overall_score": 1700.0,
+          "is_preliminary": false
+        },
+        {
+          "id": "b",
+          "raw_total": 2500.0,
+          "dropped_rounds": [],
+          "skipped_drops": 0,
+          "penalty_total": 0.0,
+          "overall_score": 2500.0,
+          "is_preliminary": false
+        }
+      ],
+      "places": [
+        {
+          "id": "b",
+          "place": 1,
+          "is_tied": false
+        },
+        {
+          "id": "a",
+          "place": 2,
+          "is_tied": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "open_review_makes_the_total_preliminary",
+    "options": {
+      "drop_after_rounds": [],
+      "tie_breaker_enabled": false
+    },
+    "as_of_round": 2,
+    "pilots": [
+      {
+        "id": "a",
+        "rounds": [
+          {
+            "round": 1,
+            "group_score": 900,
+            "raw_score": 900
+          },
+          {
+            "round": 2,
+            "group_score": 800,
+            "raw_score": 800,
+            "under_review": true
+          }
+        ]
+      }
+    ],
+    "expected": {
+      "totals": [
+        {
+          "id": "a",
+          "raw_total": 1700.0,
+          "dropped_rounds": [],
+          "skipped_drops": 0,
+          "penalty_total": 0.0,
+          "overall_score": 1700.0,
+          "is_preliminary": true
+        }
+      ],
+      "places": [
+        {
+          "id": "a",
+          "place": 1,
+          "is_tied": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "equal_totals_share_a_place",
+    "options": {
+      "drop_after_rounds": [],
+      "tie_breaker_enabled": false
+    },
+    "as_of_round": 2,
+    "pilots": [
+      {
+        "id": "a",
+        "rounds": [
+          {
+            "round": 1,
+            "group_score": 1000,
+            "raw_score": 1000
+          },
+          {
+            "round": 2,
+            "group_score": 500,
+            "raw_score": 500
+          }
+        ]
+      },
+      {
+        "id": "b",
+        "rounds": [
+          {
+            "round": 1,
+            "group_score": 500,
+            "raw_score": 500
+          },
+          {
+            "round": 2,
+            "group_score": 1000,
+            "raw_score": 1000
+          }
+        ]
+      },
+      {
+        "id": "c",
+        "rounds": [
+          {
+            "round": 1,
+            "group_score": 100,
+            "raw_score": 100
+          },
+          {
+            "round": 2,
+            "group_score": 100,
+            "raw_score": 100
+          }
+        ]
+      }
+    ],
+    "expected": {
+      "totals": [
+        {
+          "id": "a",
+          "raw_total": 1500.0,
+          "dropped_rounds": [],
+          "skipped_drops": 0,
+          "penalty_total": 0.0,
+          "overall_score": 1500.0,
+          "is_preliminary": false
+        },
+        {
+          "id": "b",
+          "raw_total": 1500.0,
+          "dropped_rounds": [],
+          "skipped_drops": 0,
+          "penalty_total": 0.0,
+          "overall_score": 1500.0,
+          "is_preliminary": false
+        },
+        {
+          "id": "c",
+          "raw_total": 200.0,
+          "dropped_rounds": [],
+          "skipped_drops": 0,
+          "penalty_total": 0.0,
+          "overall_score": 200.0,
+          "is_preliminary": false
+        }
+      ],
+      "places": [
+        {
+          "id": "a",
+          "place": 1,
+          "is_tied": true
+        },
+        {
+          "id": "b",
+          "place": 1,
+          "is_tied": true
+        },
+        {
+          "id": "c",
+          "place": 3,
+          "is_tied": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "tie_breaker_uses_the_dropped_round_score",
+    "options": {
+      "drop_after_rounds": [
+        3
+      ],
+      "tie_breaker_enabled": true
+    },
+    "as_of_round": 3,
+    "pilots": [
+      {
+        "id": "a",
+        "rounds": [
+          {
+            "round": 1,
+            "group_score": 900,
+            "raw_score": 900
+          },
+          {
+            "round": 2,
+            "group_score": 500,
+            "raw_score": 500
+          },
+          {
+            "round": 3,
+            "group_score": 600,
+            "raw_score": 600
+          }
+        ]
+      },
+      {
+        "id": "b",
+        "rounds": [
+          {
+            "round": 1,
+            "group_score": 700,
+            "raw_score": 700
+          },
+          {
+            "round": 2,
+            "group_score": 300,
+            "raw_score": 300
+          },
+          {
+            "round": 3,
+            "group_score": 800,
+            "raw_score": 800
+          }
+        ]
+      },
+      {
+        "id": "c",
+        "rounds": [
+          {
+            "round": 1,
+            "group_score": 100,
+            "raw_score": 100
+          },
+          {
+            "round": 2,
+            "group_score": 100,
+            "raw_score": 100
+          },
+          {
+            "round": 3,
+            "group_score": 100,
+            "raw_score": 100
+          }
+        ]
+      }
+    ],
+    "expected": {
+      "totals": [
+        {
+          "id": "a",
+          "raw_total": 2000.0,
+          "dropped_rounds": [
+            2
+          ],
+          "skipped_drops": 0,
+          "penalty_total": 0.0,
+          "overall_score": 1500.0,
+          "is_preliminary": false
+        },
+        {
+          "id": "b",
+          "raw_total": 1800.0,
+          "dropped_rounds": [
+            2
+          ],
+          "skipped_drops": 0,
+          "penalty_total": 0.0,
+          "overall_score": 1500.0,
+          "is_preliminary": false
+        },
+        {
+          "id": "c",
+          "raw_total": 300.0,
+          "dropped_rounds": [
+            1
+          ],
+          "skipped_drops": 0,
+          "penalty_total": 0.0,
+          "overall_score": 200.0,
+          "is_preliminary": false
+        }
+      ],
+      "places": [
+        {
+          "id": "a",
+          "place": 1,
+          "is_tied": false
+        },
+        {
+          "id": "b",
+          "place": 2,
+          "is_tied": false
+        },
+        {
+          "id": "c",
+          "place": 3,
+          "is_tied": false
+        }
+      ]
+    },
+    "note": "a and b both keep 1500; a dropped 500 and b dropped 300"
+  },
+  {
+    "name": "tie_breaker_falls_back_to_raw_flight_points",
+    "options": {
+      "drop_after_rounds": [],
+      "tie_breaker_enabled": true
+    },
+    "as_of_round": 2,
+    "pilots": [
+      {
+        "id": "a",
+        "rounds": [
+          {
+            "round": 1,
+            "group_score": 1000,
+            "raw_score": 900
+          },
+          {
+            "round": 2,
+            "group_score": 500,
+            "raw_score": 450
+          }
+        ]
+      },
+      {
+        "id": "b",
+        "rounds": [
+          {
+            "round": 1,
+            "group_score": 1000,
+            "raw_score": 950
+          },
+          {
+            "round": 2,
+            "group_score": 500,
+            "raw_score": 450
+          }
+        ]
+      }
+    ],
+    "expected": {
+      "totals": [
+        {
+          "id": "a",
+          "raw_total": 1500.0,
+          "dropped_rounds": [],
+          "skipped_drops": 0,
+          "penalty_total": 0.0,
+          "overall_score": 1500.0,
+          "is_preliminary": false
+        },
+        {
+          "id": "b",
+          "raw_total": 1500.0,
+          "dropped_rounds": [],
+          "skipped_drops": 0,
+          "penalty_total": 0.0,
+          "overall_score": 1500.0,
+          "is_preliminary": false
+        }
+      ],
+      "places": [
+        {
+          "id": "b",
+          "place": 1,
+          "is_tied": false
+        },
+        {
+          "id": "a",
+          "place": 2,
+          "is_tied": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "tie_breaker_off_leaves_the_tie",
+    "options": {
+      "drop_after_rounds": [],
+      "tie_breaker_enabled": false
+    },
+    "as_of_round": 2,
+    "pilots": [
+      {
+        "id": "a",
+        "rounds": [
+          {
+            "round": 1,
+            "group_score": 1000,
+            "raw_score": 900
+          },
+          {
+            "round": 2,
+            "group_score": 500,
+            "raw_score": 450
+          }
+        ]
+      },
+      {
+        "id": "b",
+        "rounds": [
+          {
+            "round": 1,
+            "group_score": 1000,
+            "raw_score": 950
+          },
+          {
+            "round": 2,
+            "group_score": 500,
+            "raw_score": 450
+          }
+        ]
+      }
+    ],
+    "expected": {
+      "totals": [
+        {
+          "id": "a",
+          "raw_total": 1500.0,
+          "dropped_rounds": [],
+          "skipped_drops": 0,
+          "penalty_total": 0.0,
+          "overall_score": 1500.0,
+          "is_preliminary": false
+        },
+        {
+          "id": "b",
+          "raw_total": 1500.0,
+          "dropped_rounds": [],
+          "skipped_drops": 0,
+          "penalty_total": 0.0,
+          "overall_score": 1500.0,
+          "is_preliminary": false
+        }
+      ],
+      "places": [
+        {
+          "id": "a",
+          "place": 1,
+          "is_tied": true
+        },
+        {
+          "id": "b",
+          "place": 1,
+          "is_tied": true
+        }
+      ]
+    }
+  },
+  {
+    "name": "tie_still_level_after_the_tie_breaker",
+    "options": {
+      "drop_after_rounds": [],
+      "tie_breaker_enabled": true
+    },
+    "as_of_round": 2,
+    "pilots": [
+      {
+        "id": "a",
+        "rounds": [
+          {
+            "round": 1,
+            "group_score": 1000,
+            "raw_score": 900
+          },
+          {
+            "round": 2,
+            "group_score": 500,
+            "raw_score": 500
+          }
+        ]
+      },
+      {
+        "id": "b",
+        "rounds": [
+          {
+            "round": 1,
+            "group_score": 1000,
+            "raw_score": 900
+          },
+          {
+            "round": 2,
+            "group_score": 500,
+            "raw_score": 500
+          }
+        ]
+      }
+    ],
+    "expected": {
+      "totals": [
+        {
+          "id": "a",
+          "raw_total": 1500.0,
+          "dropped_rounds": [],
+          "skipped_drops": 0,
+          "penalty_total": 0.0,
+          "overall_score": 1500.0,
+          "is_preliminary": false
+        },
+        {
+          "id": "b",
+          "raw_total": 1500.0,
+          "dropped_rounds": [],
+          "skipped_drops": 0,
+          "penalty_total": 0.0,
+          "overall_score": 1500.0,
+          "is_preliminary": false
+        }
+      ],
+      "places": [
+        {
+          "id": "a",
+          "place": 1,
+          "is_tied": true
+        },
+        {
+          "id": "b",
+          "place": 1,
+          "is_tied": true
+        }
+      ]
+    }
+  },
+  {
+    "name": "team_totals_use_the_best_pilots",
+    "options": {
+      "drop_after_rounds": [],
+      "tie_breaker_enabled": false
+    },
+    "as_of_round": 1,
+    "pilots": [
+      {
+        "id": "p1",
+        "rounds": [
+          {
+            "round": 1,
+            "group_score": 1000,
+            "raw_score": 1000
+          }
+        ]
+      },
+      {
+        "id": "p2",
+        "rounds": [
+          {
+            "round": 1,
+            "group_score": 900,
+            "raw_score": 900
+          }
+        ]
+      },
+      {
+        "id": "p3",
+        "rounds": [
+          {
+            "round": 1,
+            "group_score": 800,
+            "raw_score": 800
+          }
+        ]
+      },
+      {
+        "id": "p4",
+        "rounds": [
+          {
+            "round": 1,
+            "group_score": 700,
+            "raw_score": 700
+          }
+        ]
+      }
+    ],
+    "expected": {
+      "totals": [
+        {
+          "id": "p1",
+          "raw_total": 1000.0,
+          "dropped_rounds": [],
+          "skipped_drops": 0,
+          "penalty_total": 0.0,
+          "overall_score": 1000.0,
+          "is_preliminary": false
+        },
+        {
+          "id": "p2",
+          "raw_total": 900.0,
+          "dropped_rounds": [],
+          "skipped_drops": 0,
+          "penalty_total": 0.0,
+          "overall_score": 900.0,
+          "is_preliminary": false
+        },
+        {
+          "id": "p3",
+          "raw_total": 800.0,
+          "dropped_rounds": [],
+          "skipped_drops": 0,
+          "penalty_total": 0.0,
+          "overall_score": 800.0,
+          "is_preliminary": false
+        },
+        {
+          "id": "p4",
+          "raw_total": 700.0,
+          "dropped_rounds": [],
+          "skipped_drops": 0,
+          "penalty_total": 0.0,
+          "overall_score": 700.0,
+          "is_preliminary": false
+        }
+      ],
+      "places": [
+        {
+          "id": "p1",
+          "place": 1,
+          "is_tied": false
+        },
+        {
+          "id": "p2",
+          "place": 2,
+          "is_tied": false
+        },
+        {
+          "id": "p3",
+          "place": 3,
+          "is_tied": false
+        },
+        {
+          "id": "p4",
+          "place": 4,
+          "is_tied": false
+        }
+      ],
+      "teams": [
+        {
+          "id": "red",
+          "place": 1,
+          "is_tied": false,
+          "total": 1900.0,
+          "counted_pilots": [
+            "p1",
+            "p2"
+          ],
+          "is_preliminary": false
+        },
+        {
+          "id": "blue",
+          "place": 2,
+          "is_tied": false,
+          "total": 700.0,
+          "counted_pilots": [
+            "p4"
+          ],
+          "is_preliminary": false
+        }
+      ]
+    },
+    "team_pilot_count": 2,
+    "teams": [
+      {
+        "id": "red",
+        "pilots": [
+          "p1",
+          "p3",
+          "p2"
+        ]
+      },
+      {
+        "id": "blue",
+        "pilots": [
+          "p4"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "team_tie_broken_by_place_sum",
+    "options": {
+      "drop_after_rounds": [],
+      "tie_breaker_enabled": false
+    },
+    "as_of_round": 1,
+    "pilots": [
+      {
+        "id": "a1",
+        "rounds": [
+          {
+            "round": 1,
+            "group_score": 500,
+            "raw_score": 500
+          }
+        ]
+      },
+      {
+        "id": "a2",
+        "rounds": [
+          {
+            "round": 1,
+            "group_score": 500,
+            "raw_score": 500
+          }
+        ]
+      },
+      {
+        "id": "b1",
+        "rounds": [
+          {
+            "round": 1,
+            "group_score": 900,
+            "raw_score": 900
+          }
+        ]
+      },
+      {
+        "id": "b2",
+        "rounds": [
+          {
+            "round": 1,
+            "group_score": 100,
+            "raw_score": 100
+          }
+        ]
+      }
+    ],
+    "expected": {
+      "totals": [
+        {
+          "id": "a1",
+          "raw_total": 500.0,
+          "dropped_rounds": [],
+          "skipped_drops": 0,
+          "penalty_total": 0.0,
+          "overall_score": 500.0,
+          "is_preliminary": false
+        },
+        {
+          "id": "a2",
+          "raw_total": 500.0,
+          "dropped_rounds": [],
+          "skipped_drops": 0,
+          "penalty_total": 0.0,
+          "overall_score": 500.0,
+          "is_preliminary": false
+        },
+        {
+          "id": "b1",
+          "raw_total": 900.0,
+          "dropped_rounds": [],
+          "skipped_drops": 0,
+          "penalty_total": 0.0,
+          "overall_score": 900.0,
+          "is_preliminary": false
+        },
+        {
+          "id": "b2",
+          "raw_total": 100.0,
+          "dropped_rounds": [],
+          "skipped_drops": 0,
+          "penalty_total": 0.0,
+          "overall_score": 100.0,
+          "is_preliminary": false
+        }
+      ],
+      "places": [
+        {
+          "id": "b1",
+          "place": 1,
+          "is_tied": false
+        },
+        {
+          "id": "a1",
+          "place": 2,
+          "is_tied": true
+        },
+        {
+          "id": "a2",
+          "place": 2,
+          "is_tied": true
+        },
+        {
+          "id": "b2",
+          "place": 4,
+          "is_tied": false
+        }
+      ],
+      "teams": [
+        {
+          "id": "a",
+          "place": 1,
+          "is_tied": false,
+          "total": 1000.0,
+          "counted_pilots": [
+            "a1",
+            "a2"
+          ],
+          "is_preliminary": false
+        },
+        {
+          "id": "b",
+          "place": 2,
+          "is_tied": false,
+          "total": 1000.0,
+          "counted_pilots": [
+            "b1",
+            "b2"
+          ],
+          "is_preliminary": false
+        }
+      ]
+    },
+    "team_pilot_count": 2,
+    "teams": [
+      {
+        "id": "b",
+        "pilots": [
+          "b1",
+          "b2"
+        ]
+      },
+      {
+        "id": "a",
+        "pilots": [
+          "a1",
+          "a2"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "team_tie_broken_by_best_individual_place",
+    "options": {
+      "drop_after_rounds": [],
+      "tie_breaker_enabled": false
+    },
+    "as_of_round": 1,
+    "pilots": [
+      {
+        "id": "a1",
+        "rounds": [
+          {
+            "round": 1,
+            "group_score": 1000,
+            "raw_score": 1000
+          }
+        ]
+      },
+      {
+        "id": "a2",
+        "rounds": [
+          {
+            "round": 1,
+            "group_score": 100,
+            "raw_score": 100
+          }
+        ]
+      },
+      {
+        "id": "b1",
+        "rounds": [
+          {
+            "round": 1,
+            "group_score": 600,
+            "raw_score": 600
+          }
+        ]
+      },
+      {
+        "id": "b2",
+        "rounds": [
+          {
+            "round": 1,
+            "group_score": 500,
+            "raw_score": 500
+          }
+        ]
+      }
+    ],
+    "expected": {
+      "totals": [
+        {
+          "id": "a1",
+          "raw_total": 1000.0,
+          "dropped_rounds": [],
+          "skipped_drops": 0,
+          "penalty_total": 0.0,
+          "overall_score": 1000.0,
+          "is_preliminary": false
+        },
+        {
+          "id": "a2",
+          "raw_total": 100.0,
+          "dropped_rounds": [],
+          "skipped_drops": 0,
+          "penalty_total": 0.0,
+          "overall_score": 100.0,
+          "is_preliminary": false
+        },
+        {
+          "id": "b1",
+          "raw_total": 600.0,
+          "dropped_rounds": [],
+          "skipped_drops": 0,
+          "penalty_total": 0.0,
+          "overall_score": 600.0,
+          "is_preliminary": false
+        },
+        {
+          "id": "b2",
+          "raw_total": 500.0,
+          "dropped_rounds": [],
+          "skipped_drops": 0,
+          "penalty_total": 0.0,
+          "overall_score": 500.0,
+          "is_preliminary": false
+        }
+      ],
+      "places": [
+        {
+          "id": "a1",
+          "place": 1,
+          "is_tied": false
+        },
+        {
+          "id": "b1",
+          "place": 2,
+          "is_tied": false
+        },
+        {
+          "id": "b2",
+          "place": 3,
+          "is_tied": false
+        },
+        {
+          "id": "a2",
+          "place": 4,
+          "is_tied": false
+        }
+      ],
+      "teams": [
+        {
+          "id": "a",
+          "place": 1,
+          "is_tied": false,
+          "total": 1100.0,
+          "counted_pilots": [
+            "a1",
+            "a2"
+          ],
+          "is_preliminary": false
+        },
+        {
+          "id": "b",
+          "place": 2,
+          "is_tied": false,
+          "total": 1100.0,
+          "counted_pilots": [
+            "b1",
+            "b2"
+          ],
+          "is_preliminary": false
+        }
+      ]
+    },
+    "team_pilot_count": 2,
+    "teams": [
+      {
+        "id": "b",
+        "pilots": [
+          "b1",
+          "b2"
+        ]
+      },
+      {
+        "id": "a",
+        "pilots": [
+          "a1",
+          "a2"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "teams_level_on_every_key_share_a_place",
+    "options": {
+      "drop_after_rounds": [],
+      "tie_breaker_enabled": false
+    },
+    "as_of_round": 1,
+    "pilots": [
+      {
+        "id": "a1",
+        "rounds": [
+          {
+            "round": 1,
+            "group_score": 800,
+            "raw_score": 800
+          }
+        ]
+      },
+      {
+        "id": "b1",
+        "rounds": [
+          {
+            "round": 1,
+            "group_score": 800,
+            "raw_score": 800
+          }
+        ]
+      },
+      {
+        "id": "c1",
+        "rounds": [
+          {
+            "round": 1,
+            "group_score": 100,
+            "raw_score": 100
+          }
+        ]
+      }
+    ],
+    "expected": {
+      "totals": [
+        {
+          "id": "a1",
+          "raw_total": 800.0,
+          "dropped_rounds": [],
+          "skipped_drops": 0,
+          "penalty_total": 0.0,
+          "overall_score": 800.0,
+          "is_preliminary": false
+        },
+        {
+          "id": "b1",
+          "raw_total": 800.0,
+          "dropped_rounds": [],
+          "skipped_drops": 0,
+          "penalty_total": 0.0,
+          "overall_score": 800.0,
+          "is_preliminary": false
+        },
+        {
+          "id": "c1",
+          "raw_total": 100.0,
+          "dropped_rounds": [],
+          "skipped_drops": 0,
+          "penalty_total": 0.0,
+          "overall_score": 100.0,
+          "is_preliminary": false
+        }
+      ],
+      "places": [
+        {
+          "id": "a1",
+          "place": 1,
+          "is_tied": true
+        },
+        {
+          "id": "b1",
+          "place": 1,
+          "is_tied": true
+        },
+        {
+          "id": "c1",
+          "place": 3,
+          "is_tied": false
+        }
+      ],
+      "teams": [
+        {
+          "id": "a",
+          "place": 1,
+          "is_tied": true,
+          "total": 800.0,
+          "counted_pilots": [
+            "a1"
+          ],
+          "is_preliminary": false
+        },
+        {
+          "id": "b",
+          "place": 1,
+          "is_tied": true,
+          "total": 800.0,
+          "counted_pilots": [
+            "b1"
+          ],
+          "is_preliminary": false
+        },
+        {
+          "id": "c",
+          "place": 3,
+          "is_tied": false,
+          "total": 100.0,
+          "counted_pilots": [
+            "c1"
+          ],
+          "is_preliminary": false
+        }
+      ]
+    },
+    "team_pilot_count": 1,
+    "teams": [
+      {
+        "id": "a",
+        "pilots": [
+          "a1"
+        ]
+      },
+      {
+        "id": "b",
+        "pilots": [
+          "b1"
+        ]
+      },
+      {
+        "id": "c",
+        "pilots": [
+          "c1"
+        ]
+      }
+    ]
+  }
+]
