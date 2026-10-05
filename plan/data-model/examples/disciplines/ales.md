@@ -33,96 +33,104 @@ The system table the profile names as its default. It has no owner and is never 
   "id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d02",
   "owner_account_id": null,
   "name": "ALES Standard Landing Table",
-  "input_unit": "meters",
+  "input_unit": "points",
   "created_at": "2026-09-15T00:00:00Z"
 }
 ```
 
 ## LandingResult
 
-Each entry maps the key the scorer selects to the points awarded: 50 points within 1 m, down in steps of 5 to 5 points within 10 m. Landing farther than 10 m earns no bonus, so it is simply not selected. A landing more than 75 m from the marker is out of bounds and scores zero. A score stores the entry `id`.
+Each entry maps the key the scorer selects to the points awarded: the scorer selects the points directly, from 50 down to 0 in steps of 5, like the F5J Standard Landing Table. A landing more than 75 m from the marker is out of bounds and scores zero through the out-of-bounds indicator, not a table entry. A score stores the entry `id`.
 
 ```json
 [
   {
-    "id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d30",
+    "id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1e01",
     "landing_table_id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d02",
-    "entry_key": "within_1m",
-    "display_value": "Within 1 m",
+    "entry_key": "points_50",
+    "display_value": "50 pts",
     "point_value": 50,
     "ordinal_position": 1
   },
   {
-    "id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d31",
+    "id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1e02",
     "landing_table_id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d02",
-    "entry_key": "within_2m",
-    "display_value": "Within 2 m",
+    "entry_key": "points_45",
+    "display_value": "45 pts",
     "point_value": 45,
     "ordinal_position": 2
   },
   {
-    "id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d32",
+    "id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1e03",
     "landing_table_id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d02",
-    "entry_key": "within_3m",
-    "display_value": "Within 3 m",
+    "entry_key": "points_40",
+    "display_value": "40 pts",
     "point_value": 40,
     "ordinal_position": 3
   },
   {
-    "id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d33",
+    "id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1e04",
     "landing_table_id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d02",
-    "entry_key": "within_4m",
-    "display_value": "Within 4 m",
+    "entry_key": "points_35",
+    "display_value": "35 pts",
     "point_value": 35,
     "ordinal_position": 4
   },
   {
-    "id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d34",
+    "id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1e05",
     "landing_table_id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d02",
-    "entry_key": "within_5m",
-    "display_value": "Within 5 m",
+    "entry_key": "points_30",
+    "display_value": "30 pts",
     "point_value": 30,
     "ordinal_position": 5
   },
   {
-    "id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d35",
+    "id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1e06",
     "landing_table_id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d02",
-    "entry_key": "within_6m",
-    "display_value": "Within 6 m",
+    "entry_key": "points_25",
+    "display_value": "25 pts",
     "point_value": 25,
     "ordinal_position": 6
   },
   {
-    "id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d36",
+    "id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1e07",
     "landing_table_id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d02",
-    "entry_key": "within_7m",
-    "display_value": "Within 7 m",
+    "entry_key": "points_20",
+    "display_value": "20 pts",
     "point_value": 20,
     "ordinal_position": 7
   },
   {
-    "id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d37",
+    "id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1e08",
     "landing_table_id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d02",
-    "entry_key": "within_8m",
-    "display_value": "Within 8 m",
+    "entry_key": "points_15",
+    "display_value": "15 pts",
     "point_value": 15,
     "ordinal_position": 8
   },
   {
-    "id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d38",
+    "id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1e09",
     "landing_table_id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d02",
-    "entry_key": "within_9m",
-    "display_value": "Within 9 m",
+    "entry_key": "points_10",
+    "display_value": "10 pts",
     "point_value": 10,
     "ordinal_position": 9
   },
   {
-    "id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d39",
+    "id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1e0a",
     "landing_table_id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d02",
-    "entry_key": "within_10m",
-    "display_value": "Within 10 m",
+    "entry_key": "points_5",
+    "display_value": "5 pts",
     "point_value": 5,
     "ordinal_position": 10
+  },
+  {
+    "id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1e0b",
+    "landing_table_id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d02",
+    "entry_key": "points_0",
+    "display_value": "0 pts",
+    "point_value": 0,
+    "ordinal_position": 11
   }
 ]
 ```

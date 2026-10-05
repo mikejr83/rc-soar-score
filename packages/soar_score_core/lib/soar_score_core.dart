@@ -35,6 +35,7 @@ export 'repositories/participation_standing_repository.dart';
 export 'repositories/replicated_change.dart';
 export 'repositories/replicated_change_applier.dart';
 export 'repositories/repository.dart';
+export 'repositories/role_repository.dart';
 export 'repositories/round_group_repository.dart';
 export 'repositories/round_repository.dart';
 export 'repositories/score_attempt_repository.dart';

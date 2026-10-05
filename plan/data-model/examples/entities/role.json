@@ -8,6 +8,22 @@
     "revision": 1
   },
   {
+    "id": "019c0000-0000-7000-8000-000000000032",
+    "owner_account_id": null,
+    "display_name": "Helper",
+    "type": "NonFlier",
+    "archived_at": null,
+    "revision": 1
+  },
+  {
+    "id": "019c0000-0000-7000-8000-000000000033",
+    "owner_account_id": null,
+    "display_name": "Team Manager",
+    "type": "NonFlier",
+    "archived_at": null,
+    "revision": 1
+  },
+  {
     "id": "019c0000-0000-7000-8000-000000000031",
     "owner_account_id": "019c0000-0000-7000-8000-000000000001",
     "display_name": "Timekeeper",

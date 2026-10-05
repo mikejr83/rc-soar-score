@@ -24,7 +24,7 @@ The Thermal Duration discipline is a duration task. The pilot is attempting to f
 The following rules are used when calculating the score and are not configurable or presented to the contest director.
 
 - An out of bounds landing receives a 0 score.
-- Over-flying of the target time - A point is awarded for each second of flight. If the pilot flies over the the target time they start accruing negative points. If the target time of 600 seconds, 10 minutes, is given and the pilot flies 602 seconds, at 1 point per second they would receive 598 points. This is 600 points for the target time plus negative 2 points for the 2 seconds flown over the target time. If fractional seconds are being use it works in the same manner. If the target time is 600 seconds and a pilot flies 1.2 seconds past the target time that pilot would lose 1.2 * points per second on their score.
+- Over-flying of the target time - A point is awarded for each second of flight. If the pilot flies over the the target time they start accruing negative points. If the target time of 600 seconds, 10 minutes, is given and the pilot flies 602 seconds, at 1 point per second they would receive 598 points. This is 600 points for the target time plus negative 2 points for the 2 seconds flown over the target time. If fractional seconds are being use it works in the same manner. If the target time is 600 seconds and a pilot flies 1.2 seconds past the target time that pilot would lose 1.2 \* points per second on their score.
 - Over-flying of the target time by 1 minute - The scoring in ALES does not allow for flight times to exceed 1 minute beyond the target time. The application will not judge this based on a time entered by the participant. The scoring screen will show a selection for over-flying the target time.
 
 ### Out of Bounds Landing
@@ -55,6 +55,8 @@ The screen should disable and 0 all fields if the pilot indicates an over-flight
 Time should never be a negative number.
 
 The landing bonus is displayed to the user a selection option from the landing table configured for the contest. The purpose of this selection is to provide a UI construct to help a user enter a valid landing bonus. Some contest use distance from the landing marker as how the points are store vs. other contest directors having the displayed values be the actual points awarded.
+
+The system default landing table for Thermal Duration models a 100 inch landing tape: the pilot lands within a number of inches of the marker and each inch is worth one point. The scorer selects the points awarded directly, from 100 down to 0. Landing within an inch of the marker is worth 100 points, and landing more than 100 inches away is worth 0.
 
 The user pressing submit on the form with no fields filled out should receive a warning that they are entering a zero score for the round. If they acknowledge the zero score is kept.
 

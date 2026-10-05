@@ -109,6 +109,106 @@ void main() {
       );
     });
 
+    test('the ALES default selects points from 50 down to 0 in fives', () {
+      final ales = SystemLandingTables.alesStandard;
+
+      expect(ales.table.id, SystemLandingTables.alesStandardId);
+      expect(ales.table.inputUnit, LandingInputUnit.points);
+      expect(
+        [for (final r in ales.results) r.pointValue],
+        [50, 45, 40, 35, 30, 25, 20, 15, 10, 5, 0],
+      );
+    });
+
+    test('the Thermal default is a 100 inch tape of points 100 to 0', () {
+      final thermal = SystemLandingTables.thermalStandard;
+
+      expect(thermal.table.id, SystemLandingTables.thermalStandardId);
+      expect(thermal.table.inputUnit, LandingInputUnit.points);
+      expect(thermal.results, hasLength(101));
+      expect(
+        [for (final r in thermal.results) r.pointValue],
+        [for (var points = 100; points >= 0; points--) points],
+      );
+      expect(thermal.results.first.displayValue, '100 pts');
+      expect(thermal.results.last.entryKey, 'points_0');
+    });
+
+    test('the F3J default selects the points the official table awards', () {
+      final f3j = SystemLandingTables.f3jStandard;
+
+      expect(f3j.table.id, SystemLandingTables.f3jStandardId);
+      expect(f3j.table.inputUnit, LandingInputUnit.points);
+      expect(
+        [for (final r in f3j.results) r.pointValue],
+        [
+          ...[for (var p = 100; p >= 90; p--) p],
+          ...[for (var p = 85; p >= 30; p -= 5) p],
+          0,
+        ],
+      );
+    });
+
+    test('the F3J distance table is the official table', () {
+      final distance = SystemLandingTables.f3jDistance;
+
+      expect(distance.table.id, SystemLandingTables.f3jDistanceId);
+      expect(distance.table.inputUnit, LandingInputUnit.meters);
+      expect(distance.results, hasLength(24));
+      expect(
+        [for (final r in distance.results) r.displayValue],
+        [
+          '0.2m', '0.4m', '0.6m', '0.8m', '1m', '1.2m', '1.4m', '1.6m', //
+          '1.8m', '2m', '3m', '4m', '5m', '6m', '7m', '8m', '9m', '10m', //
+          '11m', '12m', '13m', '14m', '15m', 'Over 15m',
+        ],
+      );
+      expect(
+        [for (final r in distance.results) r.pointValue],
+        [
+          ...[for (var p = 100; p >= 90; p--) p],
+          ...[for (var p = 85; p >= 30; p -= 5) p],
+          0,
+        ],
+      );
+      expect(distance.results.first.entryKey, 'within_0_2m');
+      expect(distance.results.last.entryKey, 'over_15m');
+    });
+
+    test('the shipped entry keys, ids and positions are unique per table', () {
+      for (final shipped in SystemLandingTables.all) {
+        final results = shipped.results;
+        final name = shipped.table.name;
+
+        expect(
+          results.map((r) => r.entryKey).toSet(),
+          hasLength(results.length),
+          reason: name,
+        );
+        expect(
+          results.map((r) => r.id).toSet(),
+          hasLength(results.length),
+          reason: name,
+        );
+        expect(
+          results.map((r) => r.ordinalPosition).toSet(),
+          hasLength(results.length),
+          reason: name,
+        );
+      }
+    });
+
+    test('the shipped tables are the ones the discipline documents name', () {
+      expect(SystemLandingTables.all.map((t) => t.table.id.value), [
+        '019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2b02',
+        '019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2c00',
+        '019a3c4f-8f2a-7b1c-9d4e-6f5a3b2c1a02',
+        '019a3c4f-8f2a-7b1c-9d4e-6f5a3b2c1c00',
+        '019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d02',
+        '019a3c4b-8f2a-7b1c-9d4e-6f5a3b2c3c02',
+      ]);
+    });
+
     test('table and entry ids are unique across the shipped tables', () {
       final ids = [
         for (final t in SystemLandingTables.all) ...[
