@@ -1,10 +1,26 @@
 name: CI
 
 on:
+  # Documentation-only changes skip the whole workflow. A push or PR runs
+  # unless every changed file matches these patterns.
   push:
     branches: [master]
+    paths-ignore:
+      - "plan/**"
+      - "docs/**"
+      - "**/*.md"
+      - "LICENSE"
+      - ".prettierrc"
+      - ".prettierignore"
   pull_request:
     branches: [master]
+    paths-ignore:
+      - "plan/**"
+      - "docs/**"
+      - "**/*.md"
+      - "LICENSE"
+      - ".prettierrc"
+      - ".prettierignore"
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
@@ -20,6 +36,28 @@ env:
   MELOS_VERSION: ^8.9.0
 
 jobs:
+  changes:
+    name: Detect changed areas
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      windows: ${{ steps.filter.outputs.windows }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            windows:
+              - "apps/soar_score_contest/**"
+              - "packages/**"
+              - "pubspec.yaml"
+              - "pubspec.lock"
+              - ".github/workflows/ci.yml"
+
   analyze-test-build:
     name: Analyze, test, build
     runs-on: ubuntu-latest
@@ -57,6 +95,10 @@ jobs:
 
   build-windows:
     name: Build contest app (Windows)
+    # The contest app only depends on itself and the shared packages, so
+    # skip the (expensive) Windows runner for server-only and similar changes.
+    needs: changes
+    if: needs.changes.outputs.windows == 'true'
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
