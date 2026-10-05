@@ -8,13 +8,10 @@ const String serverVersion = '0.1.0';
 
 /// Builds the top-level [Handler] for the deployed API server.
 ///
-/// Wires the shared routing from `soar_score_api_handlers` to the
-/// PostgreSQL-backed [ContestRepository] (schema migrations run lazily on
-/// the first query) and reports the server's identity for the `/health`
-/// and `/api/v1/meta` payloads.
-Handler createServerHandler(PostgresConfig config) {
-  final database = createPostgresDatabase(config);
-
+/// Wires the shared routing and middleware from `soar_score_api_handlers` to
+/// the repositories of [database] and reports the server's identity for the
+/// `/health` payload.
+Handler createServerHandler(SoarScoreDatabase database) {
   return buildApiHandler(
     name: serverName,
     displayName: serverDisplayName,

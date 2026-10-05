@@ -1,0 +1,87 @@
+import 'package:logging/logging.dart';
+import 'package:soar_score_server/config/config_exception.dart';
+import 'package:soar_score_server/config/log_format.dart';
+import 'package:soar_score_server/config/server_config.dart';
+import 'package:test/test.dart';
+
+void main() {
+  const secret = 's3cret-pw';
+  const minimal = {'POSTGRES_PASSWORD': secret};
+
+  group('ServerConfig.parse', () {
+    test('uses defaults when only the password is set', () {
+      final config = ServerConfig.parse(minimal);
+
+      expect(config.port, 8080);
+      expect(config.logLevel, Level.INFO);
+      expect(config.logFormat, LogFormat.json);
+      expect(config.postgres.host, 'localhost');
+      expect(config.postgres.password, secret);
+    });
+
+    test('reads every setting', () {
+      final config = ServerConfig.parse({
+        ...minimal,
+        'PORT': '9000',
+        'LOG_LEVEL': 'fine',
+        'LOG_FORMAT': 'TEXT',
+        'POSTGRES_HOST': 'db',
+        'POSTGRES_PORT': '5433',
+        'POSTGRES_DB': 'soar',
+        'POSTGRES_USER': 'app',
+        'POSTGRES_SSLMODE': 'require',
+      });
+
+      expect(config.port, 9000);
+      expect(config.logLevel, Level.FINE);
+      expect(config.logFormat, LogFormat.text);
+      expect(config.postgres.host, 'db');
+      expect(config.postgres.port, 5433);
+      expect(config.postgres.database, 'soar');
+      expect(config.postgres.user, 'app');
+    });
+
+    test('treats empty values as unset', () {
+      final config = ServerConfig.parse({...minimal, 'PORT': ''});
+      expect(config.port, 8080);
+    });
+
+    test('reports every problem at once', () {
+      try {
+        ServerConfig.parse({
+          'PORT': '70000',
+          'LOG_LEVEL': 'loud',
+          'LOG_FORMAT': 'xml',
+          'POSTGRES_PORT': 'abc',
+          'POSTGRES_SSLMODE': 'maybe',
+        });
+        fail('expected a ConfigException');
+      } on ConfigException catch (e) {
+        expect(e.problems, hasLength(6));
+        expect(
+          e.problems.join('\n'),
+          allOf(
+            contains('PORT'),
+            contains('LOG_LEVEL'),
+            contains('LOG_FORMAT'),
+            contains('POSTGRES_PASSWORD'),
+            contains('POSTGRES_PORT'),
+            contains('POSTGRES_SSLMODE'),
+          ),
+        );
+      }
+    });
+
+    test('never prints the password', () {
+      final config = ServerConfig.parse(minimal);
+      expect(config.describe(), isNot(contains(secret)));
+
+      try {
+        ServerConfig.parse({...minimal, 'PORT': 'x'});
+        fail('expected a ConfigException');
+      } on ConfigException catch (e) {
+        expect('$e', isNot(contains(secret)));
+      }
+    });
+  });
+}

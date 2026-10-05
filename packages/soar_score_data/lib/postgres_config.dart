@@ -17,12 +17,13 @@ class PostgresConfig {
     this.sslMode = SslMode.disable,
   });
 
-  /// Reads connection details from the process environment.
+  /// Reads connection details from [environment], or from the process
+  /// environment when none is given.
   ///
   /// Returns null when POSTGRES_PASSWORD is not set or empty, so callers
   /// (tests, tooling) can tell "not configured" from a real configuration.
-  static PostgresConfig? fromEnvironment() {
-    final env = Platform.environment;
+  static PostgresConfig? fromEnvironment([Map<String, String>? environment]) {
+    final env = environment ?? Platform.environment;
     final password = env['POSTGRES_PASSWORD'];
     if (password == null || password.isEmpty) {
       return null;
