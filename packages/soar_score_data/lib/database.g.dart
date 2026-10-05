@@ -35565,7 +35565,7 @@ class $LocalSyncPositionsTable extends LocalSyncPositions
     'scope_kind',
     aliasedName,
     false,
-    check: () => scopeKind.isIn(const ['Contest', 'Director']),
+    check: () => scopeKind.isIn(const ['Contest', 'Director', 'System']),
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
@@ -35691,10 +35691,11 @@ class $LocalSyncPositionsTable extends LocalSyncPositions
 
 class LocalSyncPositionData extends DataClass
     implements Insertable<LocalSyncPositionData> {
-  /// `Contest` or `Director`.
+  /// `Contest`, `Director` or `System`.
   final String scopeKind;
 
-  /// The contest id or the director's account id.
+  /// The contest id, the director's account id, or `system` for the one
+  /// system-data stream.
   final String scopeId;
   final int lastSyncedSequence;
   final String? lastSyncedAt;

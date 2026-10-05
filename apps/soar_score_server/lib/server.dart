@@ -40,6 +40,15 @@ class RunningServer {
   }
 }
 
+/// Installs the shipped system data (landing tables, discipline profiles and
+/// roles) into [database]; pass it as `onDatabaseOpen` to [startServer].
+///
+/// A failure stops startup, so the server never serves partial system data.
+Future<void> seedSystemData(SoarScoreDatabase database) async {
+  final outcome = await SystemDataSeeder(database).seed();
+  _logger.info('System data ${outcome.name}.');
+}
+
 /// Opens the database, migrates it, and starts serving.
 ///
 /// The database is [database] when given (tests), otherwise PostgreSQL from

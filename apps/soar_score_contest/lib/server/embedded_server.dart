@@ -36,6 +36,16 @@ class EmbeddedServer {
     final dbPath = File(_databasePath);
     await dbPath.parent.create(recursive: true);
     _database = createLocalDatabase(dbPath);
+    // First launch installs the shipped system data so a director who has
+    // never synchronized can create and score contests offline. A failure
+    // closes the database and reaches the startup failure page, so the app
+    // never starts with partial data.
+    try {
+      await SystemDataSeeder(_database).seed();
+    } catch (_) {
+      await _database.close();
+      rethrow;
+    }
   }
 
   Future<void> initialize() async {

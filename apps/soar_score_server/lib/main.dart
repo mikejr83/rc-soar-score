@@ -32,7 +32,7 @@ Future<void> main() async {
 
   final RunningServer server;
   try {
-    server = await startServer(config);
+    server = await startServer(config, onDatabaseOpen: seedSystemData);
   } catch (e, stack) {
     _logger.severe('Could not start the server.', e, stack);
     exit(1);

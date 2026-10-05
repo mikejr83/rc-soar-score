@@ -127,6 +127,18 @@ void _tests(Backend backend) {
       expect(await inst.syncStore.readCursor(scope), 9);
     });
 
+    test('keeps the system data position apart from every other', () async {
+      const system = core.SystemScopeKey();
+      expect(await inst.syncStore.readCursor(system), 0);
+      await inst.syncStore.writeCursor(system, 2);
+
+      expect(await inst.syncStore.readCursor(system), 2);
+      expect(await inst.syncStore.readCursor(core.ContestScopeKey(a.id)), 0);
+      expect(await inst.syncStore.pendingMutations(system), isEmpty);
+      expect(await inst.syncStore.conflictsNeedingAction(system), isEmpty);
+      expect((await inst.syncStore.status(system)).pendingMutations, 0);
+    });
+
     test('keeps a director scope apart from a contest scope', () async {
       final director = core.DirectorScopeKey(core.Id.create());
       await inst.syncStore.writeCursor(director, 3);

@@ -10,7 +10,7 @@
 
 - Belongs to an Installation (`installation_id`)
 - Scoped to a Contest (`contest_id`) or to the director's data (`owner_account_id`)
-- System data is tracked on the installation itself (`Installation.system_data_seq`), not here, because it only comes down
+- System data is tracked on the installation itself (`Installation.system_data_seq`), not here, because it only comes down. A native installation keeps its own copy under the `System` scope of its local sync positions
 
 ## Fields/Properties
 

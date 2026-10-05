@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:soar_score_core/soar_score_core.dart' as core;
 import 'package:soar_score_data/soar_score_data.dart';
 import 'package:soar_score_server/config/server_config.dart';
 import 'package:soar_score_server/server.dart';
@@ -86,6 +87,27 @@ void main() {
     addTearDown(server.close);
 
     expect(tableCount, greaterThan(0));
+  });
+
+  test('seedSystemData installs the shipped data before serving', () async {
+    late SoarScoreDatabase opened;
+    final server = await start(
+      onDatabaseOpen: (db) async {
+        opened = db;
+        await seedSystemData(db);
+      },
+    );
+    addTearDown(server.close);
+
+    final repository = Repository(opened);
+    expect(
+      await repository.disciplineProfileRepository.listPublished(),
+      unorderedEquals(core.SystemDisciplineProfiles.all),
+    );
+    expect(
+      await repository.roleRepository.listVisibleTo(),
+      unorderedEquals(core.SystemRoles.all),
+    );
   });
 
   test('a failing onDatabaseOpen stops startup', () async {

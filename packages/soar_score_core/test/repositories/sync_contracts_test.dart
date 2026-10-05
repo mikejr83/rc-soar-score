@@ -32,6 +32,7 @@ void main() {
       String name(SyncScopeKey key) => switch (key) {
         ContestScopeKey() => 'contest',
         DirectorScopeKey() => 'director',
+        SystemScopeKey() => 'system',
       };
       expect(name(ContestScopeKey(exampleId(1))), 'contest');
       expect(name(DirectorScopeKey(exampleId(1))), 'director');
