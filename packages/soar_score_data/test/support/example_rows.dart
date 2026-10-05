@@ -16,3 +16,10 @@ Directory _examples() {
 List<Map<String, Object?>> exampleRows(String file) => (jsonDecode(
   File('${_examples().path}/$file.json').readAsStringSync(),
 ) as List).cast<Map<String, Object?>>();
+
+/// The names (without `.json`) of every example file.
+List<String> exampleFileNames() => [
+  for (final file in _examples().listSync().whereType<File>())
+    if (file.path.endsWith('.json'))
+      file.uri.pathSegments.last.replaceAll('.json', ''),
+]..sort();

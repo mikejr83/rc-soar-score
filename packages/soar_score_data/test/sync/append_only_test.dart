@@ -1,6 +1,8 @@
 import 'package:soar_score_core/soar_score_core.dart' as core;
 import 'package:test/test.dart';
 
+import 'package:soar_score_data/soar_score_data.dart';
+
 import '../support/backends.dart';
 import '../support/example_entities.dart';
 import '../support/example_rows.dart';
@@ -11,7 +13,7 @@ void main() => forEachBackend(_tests);
 void _tests(Backend backend) {
   late Installation inst;
   setUp(() async {
-    inst = await Installation.open(backend);
+    inst = await Installation.open(backend, profile: DatabaseProfile.server);
     await loadExamples(inst);
   });
   tearDown(() => inst.close());
@@ -93,6 +95,23 @@ void _tests(Backend backend) {
       );
 
       expect(await inst.stores.of('OfficialScore').find(official.id), official);
+    });
+
+    test('stores a contest configuration revision', () async {
+      final revision = core.ContestConfigurationRevision.fromJson({
+        ...exampleRows('contest_configuration_revision').first,
+        'id': core.Id.create().value,
+        'revision_number': 99,
+      });
+
+      await inst.unitOfWork.run(
+        (c) => c.append(revision, metadata: metadata()),
+      );
+
+      expect(
+        await inst.stores.of('ContestConfigurationRevision').find(revision.id),
+        revision,
+      );
     });
   });
 }

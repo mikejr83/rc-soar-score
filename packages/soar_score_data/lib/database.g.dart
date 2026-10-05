@@ -11725,6 +11725,8614 @@ class ContestModelLinksCompanion extends UpdateCompanion<ContestModelLinkData> {
   }
 }
 
+class $AccountsTable extends Accounts
+    with TableInfo<$AccountsTable, AccountData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $AccountsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _firstNameMeta = const VerificationMeta(
+    'firstName',
+  );
+  @override
+  late final GeneratedColumn<String> firstName = GeneratedColumn<String>(
+    'first_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _lastNameMeta = const VerificationMeta(
+    'lastName',
+  );
+  @override
+  late final GeneratedColumn<String> lastName = GeneratedColumn<String>(
+    'last_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _emailMeta = const VerificationMeta('email');
+  @override
+  late final GeneratedColumn<String> email = GeneratedColumn<String>(
+    'email',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _emailVerifiedMeta = const VerificationMeta(
+    'emailVerified',
+  );
+  @override
+  late final GeneratedColumn<bool> emailVerified = GeneratedColumn<bool>(
+    'email_verified',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintsDependsOnDialect({
+      SqlDialect.sqlite: 'CHECK ("email_verified" IN (0, 1))',
+      SqlDialect.postgres: '',
+    }),
+  );
+  static const VerificationMeta _kindMeta = const VerificationMeta('kind');
+  @override
+  late final GeneratedColumn<String> kind = GeneratedColumn<String>(
+    'kind',
+    aliasedName,
+    false,
+    check: () => kind.isIn(accountKindValues),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    check: () => status.isIn(accountStatusValues),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _archivedAtMeta = const VerificationMeta(
+    'archivedAt',
+  );
+  @override
+  late final GeneratedColumn<String> archivedAt = GeneratedColumn<String>(
+    'archived_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _isSystemAdminMeta = const VerificationMeta(
+    'isSystemAdmin',
+  );
+  @override
+  late final GeneratedColumn<bool> isSystemAdmin = GeneratedColumn<bool>(
+    'is_system_admin',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintsDependsOnDialect({
+      SqlDialect.sqlite: 'CHECK ("is_system_admin" IN (0, 1))',
+      SqlDialect.postgres: '',
+    }),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<String> createdAt = GeneratedColumn<String>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<String> updatedAt = GeneratedColumn<String>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    firstName,
+    lastName,
+    email,
+    emailVerified,
+    kind,
+    status,
+    archivedAt,
+    isSystemAdmin,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'accounts';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<AccountData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('first_name')) {
+      context.handle(
+        _firstNameMeta,
+        firstName.isAcceptableOrUnknown(data['first_name']!, _firstNameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_firstNameMeta);
+    }
+    if (data.containsKey('last_name')) {
+      context.handle(
+        _lastNameMeta,
+        lastName.isAcceptableOrUnknown(data['last_name']!, _lastNameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_lastNameMeta);
+    }
+    if (data.containsKey('email')) {
+      context.handle(
+        _emailMeta,
+        email.isAcceptableOrUnknown(data['email']!, _emailMeta),
+      );
+    }
+    if (data.containsKey('email_verified')) {
+      context.handle(
+        _emailVerifiedMeta,
+        emailVerified.isAcceptableOrUnknown(
+          data['email_verified']!,
+          _emailVerifiedMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_emailVerifiedMeta);
+    }
+    if (data.containsKey('kind')) {
+      context.handle(
+        _kindMeta,
+        kind.isAcceptableOrUnknown(data['kind']!, _kindMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_kindMeta);
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_statusMeta);
+    }
+    if (data.containsKey('archived_at')) {
+      context.handle(
+        _archivedAtMeta,
+        archivedAt.isAcceptableOrUnknown(data['archived_at']!, _archivedAtMeta),
+      );
+    }
+    if (data.containsKey('is_system_admin')) {
+      context.handle(
+        _isSystemAdminMeta,
+        isSystemAdmin.isAcceptableOrUnknown(
+          data['is_system_admin']!,
+          _isSystemAdminMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_isSystemAdminMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {email},
+  ];
+  @override
+  AccountData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return AccountData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      firstName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}first_name'],
+      )!,
+      lastName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}last_name'],
+      )!,
+      email: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}email'],
+      ),
+      emailVerified: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}email_verified'],
+      )!,
+      kind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}kind'],
+      )!,
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      archivedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}archived_at'],
+      ),
+      isSystemAdmin: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_system_admin'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $AccountsTable createAlias(String alias) {
+    return $AccountsTable(attachedDatabase, alias);
+  }
+}
+
+class AccountData extends DataClass implements Insertable<AccountData> {
+  final String id;
+  final String firstName;
+  final String lastName;
+  final String? email;
+  final bool emailVerified;
+  final String kind;
+  final String status;
+  final String? archivedAt;
+  final bool isSystemAdmin;
+  final String createdAt;
+  final String updatedAt;
+  const AccountData({
+    required this.id,
+    required this.firstName,
+    required this.lastName,
+    this.email,
+    required this.emailVerified,
+    required this.kind,
+    required this.status,
+    this.archivedAt,
+    required this.isSystemAdmin,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['first_name'] = Variable<String>(firstName);
+    map['last_name'] = Variable<String>(lastName);
+    if (!nullToAbsent || email != null) {
+      map['email'] = Variable<String>(email);
+    }
+    map['email_verified'] = Variable<bool>(emailVerified);
+    map['kind'] = Variable<String>(kind);
+    map['status'] = Variable<String>(status);
+    if (!nullToAbsent || archivedAt != null) {
+      map['archived_at'] = Variable<String>(archivedAt);
+    }
+    map['is_system_admin'] = Variable<bool>(isSystemAdmin);
+    map['created_at'] = Variable<String>(createdAt);
+    map['updated_at'] = Variable<String>(updatedAt);
+    return map;
+  }
+
+  AccountsCompanion toCompanion(bool nullToAbsent) {
+    return AccountsCompanion(
+      id: Value(id),
+      firstName: Value(firstName),
+      lastName: Value(lastName),
+      email: email == null && nullToAbsent
+          ? const Value.absent()
+          : Value(email),
+      emailVerified: Value(emailVerified),
+      kind: Value(kind),
+      status: Value(status),
+      archivedAt: archivedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(archivedAt),
+      isSystemAdmin: Value(isSystemAdmin),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory AccountData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return AccountData(
+      id: serializer.fromJson<String>(json['id']),
+      firstName: serializer.fromJson<String>(json['firstName']),
+      lastName: serializer.fromJson<String>(json['lastName']),
+      email: serializer.fromJson<String?>(json['email']),
+      emailVerified: serializer.fromJson<bool>(json['emailVerified']),
+      kind: serializer.fromJson<String>(json['kind']),
+      status: serializer.fromJson<String>(json['status']),
+      archivedAt: serializer.fromJson<String?>(json['archivedAt']),
+      isSystemAdmin: serializer.fromJson<bool>(json['isSystemAdmin']),
+      createdAt: serializer.fromJson<String>(json['createdAt']),
+      updatedAt: serializer.fromJson<String>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'firstName': serializer.toJson<String>(firstName),
+      'lastName': serializer.toJson<String>(lastName),
+      'email': serializer.toJson<String?>(email),
+      'emailVerified': serializer.toJson<bool>(emailVerified),
+      'kind': serializer.toJson<String>(kind),
+      'status': serializer.toJson<String>(status),
+      'archivedAt': serializer.toJson<String?>(archivedAt),
+      'isSystemAdmin': serializer.toJson<bool>(isSystemAdmin),
+      'createdAt': serializer.toJson<String>(createdAt),
+      'updatedAt': serializer.toJson<String>(updatedAt),
+    };
+  }
+
+  AccountData copyWith({
+    String? id,
+    String? firstName,
+    String? lastName,
+    Value<String?> email = const Value.absent(),
+    bool? emailVerified,
+    String? kind,
+    String? status,
+    Value<String?> archivedAt = const Value.absent(),
+    bool? isSystemAdmin,
+    String? createdAt,
+    String? updatedAt,
+  }) => AccountData(
+    id: id ?? this.id,
+    firstName: firstName ?? this.firstName,
+    lastName: lastName ?? this.lastName,
+    email: email.present ? email.value : this.email,
+    emailVerified: emailVerified ?? this.emailVerified,
+    kind: kind ?? this.kind,
+    status: status ?? this.status,
+    archivedAt: archivedAt.present ? archivedAt.value : this.archivedAt,
+    isSystemAdmin: isSystemAdmin ?? this.isSystemAdmin,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  AccountData copyWithCompanion(AccountsCompanion data) {
+    return AccountData(
+      id: data.id.present ? data.id.value : this.id,
+      firstName: data.firstName.present ? data.firstName.value : this.firstName,
+      lastName: data.lastName.present ? data.lastName.value : this.lastName,
+      email: data.email.present ? data.email.value : this.email,
+      emailVerified: data.emailVerified.present
+          ? data.emailVerified.value
+          : this.emailVerified,
+      kind: data.kind.present ? data.kind.value : this.kind,
+      status: data.status.present ? data.status.value : this.status,
+      archivedAt: data.archivedAt.present
+          ? data.archivedAt.value
+          : this.archivedAt,
+      isSystemAdmin: data.isSystemAdmin.present
+          ? data.isSystemAdmin.value
+          : this.isSystemAdmin,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AccountData(')
+          ..write('id: $id, ')
+          ..write('firstName: $firstName, ')
+          ..write('lastName: $lastName, ')
+          ..write('email: $email, ')
+          ..write('emailVerified: $emailVerified, ')
+          ..write('kind: $kind, ')
+          ..write('status: $status, ')
+          ..write('archivedAt: $archivedAt, ')
+          ..write('isSystemAdmin: $isSystemAdmin, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    firstName,
+    lastName,
+    email,
+    emailVerified,
+    kind,
+    status,
+    archivedAt,
+    isSystemAdmin,
+    createdAt,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is AccountData &&
+          other.id == this.id &&
+          other.firstName == this.firstName &&
+          other.lastName == this.lastName &&
+          other.email == this.email &&
+          other.emailVerified == this.emailVerified &&
+          other.kind == this.kind &&
+          other.status == this.status &&
+          other.archivedAt == this.archivedAt &&
+          other.isSystemAdmin == this.isSystemAdmin &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class AccountsCompanion extends UpdateCompanion<AccountData> {
+  final Value<String> id;
+  final Value<String> firstName;
+  final Value<String> lastName;
+  final Value<String?> email;
+  final Value<bool> emailVerified;
+  final Value<String> kind;
+  final Value<String> status;
+  final Value<String?> archivedAt;
+  final Value<bool> isSystemAdmin;
+  final Value<String> createdAt;
+  final Value<String> updatedAt;
+  final Value<int> rowid;
+  const AccountsCompanion({
+    this.id = const Value.absent(),
+    this.firstName = const Value.absent(),
+    this.lastName = const Value.absent(),
+    this.email = const Value.absent(),
+    this.emailVerified = const Value.absent(),
+    this.kind = const Value.absent(),
+    this.status = const Value.absent(),
+    this.archivedAt = const Value.absent(),
+    this.isSystemAdmin = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  AccountsCompanion.insert({
+    required String id,
+    required String firstName,
+    required String lastName,
+    this.email = const Value.absent(),
+    required bool emailVerified,
+    required String kind,
+    required String status,
+    this.archivedAt = const Value.absent(),
+    required bool isSystemAdmin,
+    required String createdAt,
+    required String updatedAt,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       firstName = Value(firstName),
+       lastName = Value(lastName),
+       emailVerified = Value(emailVerified),
+       kind = Value(kind),
+       status = Value(status),
+       isSystemAdmin = Value(isSystemAdmin),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt);
+  static Insertable<AccountData> custom({
+    Expression<String>? id,
+    Expression<String>? firstName,
+    Expression<String>? lastName,
+    Expression<String>? email,
+    Expression<bool>? emailVerified,
+    Expression<String>? kind,
+    Expression<String>? status,
+    Expression<String>? archivedAt,
+    Expression<bool>? isSystemAdmin,
+    Expression<String>? createdAt,
+    Expression<String>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (firstName != null) 'first_name': firstName,
+      if (lastName != null) 'last_name': lastName,
+      if (email != null) 'email': email,
+      if (emailVerified != null) 'email_verified': emailVerified,
+      if (kind != null) 'kind': kind,
+      if (status != null) 'status': status,
+      if (archivedAt != null) 'archived_at': archivedAt,
+      if (isSystemAdmin != null) 'is_system_admin': isSystemAdmin,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  AccountsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? firstName,
+    Value<String>? lastName,
+    Value<String?>? email,
+    Value<bool>? emailVerified,
+    Value<String>? kind,
+    Value<String>? status,
+    Value<String?>? archivedAt,
+    Value<bool>? isSystemAdmin,
+    Value<String>? createdAt,
+    Value<String>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return AccountsCompanion(
+      id: id ?? this.id,
+      firstName: firstName ?? this.firstName,
+      lastName: lastName ?? this.lastName,
+      email: email ?? this.email,
+      emailVerified: emailVerified ?? this.emailVerified,
+      kind: kind ?? this.kind,
+      status: status ?? this.status,
+      archivedAt: archivedAt ?? this.archivedAt,
+      isSystemAdmin: isSystemAdmin ?? this.isSystemAdmin,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (firstName.present) {
+      map['first_name'] = Variable<String>(firstName.value);
+    }
+    if (lastName.present) {
+      map['last_name'] = Variable<String>(lastName.value);
+    }
+    if (email.present) {
+      map['email'] = Variable<String>(email.value);
+    }
+    if (emailVerified.present) {
+      map['email_verified'] = Variable<bool>(emailVerified.value);
+    }
+    if (kind.present) {
+      map['kind'] = Variable<String>(kind.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (archivedAt.present) {
+      map['archived_at'] = Variable<String>(archivedAt.value);
+    }
+    if (isSystemAdmin.present) {
+      map['is_system_admin'] = Variable<bool>(isSystemAdmin.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<String>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<String>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AccountsCompanion(')
+          ..write('id: $id, ')
+          ..write('firstName: $firstName, ')
+          ..write('lastName: $lastName, ')
+          ..write('email: $email, ')
+          ..write('emailVerified: $emailVerified, ')
+          ..write('kind: $kind, ')
+          ..write('status: $status, ')
+          ..write('archivedAt: $archivedAt, ')
+          ..write('isSystemAdmin: $isSystemAdmin, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $AccountIdentitiesTable extends AccountIdentities
+    with TableInfo<$AccountIdentitiesTable, AccountIdentityData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $AccountIdentitiesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _accountIdMeta = const VerificationMeta(
+    'accountId',
+  );
+  @override
+  late final GeneratedColumn<String> accountId = GeneratedColumn<String>(
+    'account_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES accounts (id)',
+    ),
+  );
+  static const VerificationMeta _issuerMeta = const VerificationMeta('issuer');
+  @override
+  late final GeneratedColumn<String> issuer = GeneratedColumn<String>(
+    'issuer',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _subjectMeta = const VerificationMeta(
+    'subject',
+  );
+  @override
+  late final GeneratedColumn<String> subject = GeneratedColumn<String>(
+    'subject',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<String> createdAt = GeneratedColumn<String>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    accountId,
+    issuer,
+    subject,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'account_identities';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<AccountIdentityData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('account_id')) {
+      context.handle(
+        _accountIdMeta,
+        accountId.isAcceptableOrUnknown(data['account_id']!, _accountIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_accountIdMeta);
+    }
+    if (data.containsKey('issuer')) {
+      context.handle(
+        _issuerMeta,
+        issuer.isAcceptableOrUnknown(data['issuer']!, _issuerMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_issuerMeta);
+    }
+    if (data.containsKey('subject')) {
+      context.handle(
+        _subjectMeta,
+        subject.isAcceptableOrUnknown(data['subject']!, _subjectMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_subjectMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {issuer, subject},
+  ];
+  @override
+  AccountIdentityData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return AccountIdentityData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      accountId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}account_id'],
+      )!,
+      issuer: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}issuer'],
+      )!,
+      subject: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}subject'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $AccountIdentitiesTable createAlias(String alias) {
+    return $AccountIdentitiesTable(attachedDatabase, alias);
+  }
+}
+
+class AccountIdentityData extends DataClass
+    implements Insertable<AccountIdentityData> {
+  final String id;
+  final String accountId;
+  final String issuer;
+  final String subject;
+  final String createdAt;
+  const AccountIdentityData({
+    required this.id,
+    required this.accountId,
+    required this.issuer,
+    required this.subject,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['account_id'] = Variable<String>(accountId);
+    map['issuer'] = Variable<String>(issuer);
+    map['subject'] = Variable<String>(subject);
+    map['created_at'] = Variable<String>(createdAt);
+    return map;
+  }
+
+  AccountIdentitiesCompanion toCompanion(bool nullToAbsent) {
+    return AccountIdentitiesCompanion(
+      id: Value(id),
+      accountId: Value(accountId),
+      issuer: Value(issuer),
+      subject: Value(subject),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory AccountIdentityData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return AccountIdentityData(
+      id: serializer.fromJson<String>(json['id']),
+      accountId: serializer.fromJson<String>(json['accountId']),
+      issuer: serializer.fromJson<String>(json['issuer']),
+      subject: serializer.fromJson<String>(json['subject']),
+      createdAt: serializer.fromJson<String>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'accountId': serializer.toJson<String>(accountId),
+      'issuer': serializer.toJson<String>(issuer),
+      'subject': serializer.toJson<String>(subject),
+      'createdAt': serializer.toJson<String>(createdAt),
+    };
+  }
+
+  AccountIdentityData copyWith({
+    String? id,
+    String? accountId,
+    String? issuer,
+    String? subject,
+    String? createdAt,
+  }) => AccountIdentityData(
+    id: id ?? this.id,
+    accountId: accountId ?? this.accountId,
+    issuer: issuer ?? this.issuer,
+    subject: subject ?? this.subject,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  AccountIdentityData copyWithCompanion(AccountIdentitiesCompanion data) {
+    return AccountIdentityData(
+      id: data.id.present ? data.id.value : this.id,
+      accountId: data.accountId.present ? data.accountId.value : this.accountId,
+      issuer: data.issuer.present ? data.issuer.value : this.issuer,
+      subject: data.subject.present ? data.subject.value : this.subject,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AccountIdentityData(')
+          ..write('id: $id, ')
+          ..write('accountId: $accountId, ')
+          ..write('issuer: $issuer, ')
+          ..write('subject: $subject, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, accountId, issuer, subject, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is AccountIdentityData &&
+          other.id == this.id &&
+          other.accountId == this.accountId &&
+          other.issuer == this.issuer &&
+          other.subject == this.subject &&
+          other.createdAt == this.createdAt);
+}
+
+class AccountIdentitiesCompanion extends UpdateCompanion<AccountIdentityData> {
+  final Value<String> id;
+  final Value<String> accountId;
+  final Value<String> issuer;
+  final Value<String> subject;
+  final Value<String> createdAt;
+  final Value<int> rowid;
+  const AccountIdentitiesCompanion({
+    this.id = const Value.absent(),
+    this.accountId = const Value.absent(),
+    this.issuer = const Value.absent(),
+    this.subject = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  AccountIdentitiesCompanion.insert({
+    required String id,
+    required String accountId,
+    required String issuer,
+    required String subject,
+    required String createdAt,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       accountId = Value(accountId),
+       issuer = Value(issuer),
+       subject = Value(subject),
+       createdAt = Value(createdAt);
+  static Insertable<AccountIdentityData> custom({
+    Expression<String>? id,
+    Expression<String>? accountId,
+    Expression<String>? issuer,
+    Expression<String>? subject,
+    Expression<String>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (accountId != null) 'account_id': accountId,
+      if (issuer != null) 'issuer': issuer,
+      if (subject != null) 'subject': subject,
+      if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  AccountIdentitiesCompanion copyWith({
+    Value<String>? id,
+    Value<String>? accountId,
+    Value<String>? issuer,
+    Value<String>? subject,
+    Value<String>? createdAt,
+    Value<int>? rowid,
+  }) {
+    return AccountIdentitiesCompanion(
+      id: id ?? this.id,
+      accountId: accountId ?? this.accountId,
+      issuer: issuer ?? this.issuer,
+      subject: subject ?? this.subject,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (accountId.present) {
+      map['account_id'] = Variable<String>(accountId.value);
+    }
+    if (issuer.present) {
+      map['issuer'] = Variable<String>(issuer.value);
+    }
+    if (subject.present) {
+      map['subject'] = Variable<String>(subject.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<String>(createdAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AccountIdentitiesCompanion(')
+          ..write('id: $id, ')
+          ..write('accountId: $accountId, ')
+          ..write('issuer: $issuer, ')
+          ..write('subject: $subject, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $AccountPublicProfilesTable extends AccountPublicProfiles
+    with TableInfo<$AccountPublicProfilesTable, AccountPublicProfileData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $AccountPublicProfilesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _accountIdMeta = const VerificationMeta(
+    'accountId',
+  );
+  @override
+  late final GeneratedColumn<String> accountId = GeneratedColumn<String>(
+    'account_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES accounts (id)',
+    ),
+  );
+  static const VerificationMeta _displayNameMeta = const VerificationMeta(
+    'displayName',
+  );
+  @override
+  late final GeneratedColumn<String> displayName = GeneratedColumn<String>(
+    'display_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<String> createdAt = GeneratedColumn<String>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, accountId, displayName, createdAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'account_public_profiles';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<AccountPublicProfileData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('account_id')) {
+      context.handle(
+        _accountIdMeta,
+        accountId.isAcceptableOrUnknown(data['account_id']!, _accountIdMeta),
+      );
+    }
+    if (data.containsKey('display_name')) {
+      context.handle(
+        _displayNameMeta,
+        displayName.isAcceptableOrUnknown(
+          data['display_name']!,
+          _displayNameMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_displayNameMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {accountId},
+  ];
+  @override
+  AccountPublicProfileData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return AccountPublicProfileData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      accountId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}account_id'],
+      ),
+      displayName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}display_name'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $AccountPublicProfilesTable createAlias(String alias) {
+    return $AccountPublicProfilesTable(attachedDatabase, alias);
+  }
+}
+
+class AccountPublicProfileData extends DataClass
+    implements Insertable<AccountPublicProfileData> {
+  final String id;
+  final String? accountId;
+  final String displayName;
+  final String createdAt;
+  const AccountPublicProfileData({
+    required this.id,
+    this.accountId,
+    required this.displayName,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    if (!nullToAbsent || accountId != null) {
+      map['account_id'] = Variable<String>(accountId);
+    }
+    map['display_name'] = Variable<String>(displayName);
+    map['created_at'] = Variable<String>(createdAt);
+    return map;
+  }
+
+  AccountPublicProfilesCompanion toCompanion(bool nullToAbsent) {
+    return AccountPublicProfilesCompanion(
+      id: Value(id),
+      accountId: accountId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(accountId),
+      displayName: Value(displayName),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory AccountPublicProfileData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return AccountPublicProfileData(
+      id: serializer.fromJson<String>(json['id']),
+      accountId: serializer.fromJson<String?>(json['accountId']),
+      displayName: serializer.fromJson<String>(json['displayName']),
+      createdAt: serializer.fromJson<String>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'accountId': serializer.toJson<String?>(accountId),
+      'displayName': serializer.toJson<String>(displayName),
+      'createdAt': serializer.toJson<String>(createdAt),
+    };
+  }
+
+  AccountPublicProfileData copyWith({
+    String? id,
+    Value<String?> accountId = const Value.absent(),
+    String? displayName,
+    String? createdAt,
+  }) => AccountPublicProfileData(
+    id: id ?? this.id,
+    accountId: accountId.present ? accountId.value : this.accountId,
+    displayName: displayName ?? this.displayName,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  AccountPublicProfileData copyWithCompanion(
+    AccountPublicProfilesCompanion data,
+  ) {
+    return AccountPublicProfileData(
+      id: data.id.present ? data.id.value : this.id,
+      accountId: data.accountId.present ? data.accountId.value : this.accountId,
+      displayName: data.displayName.present
+          ? data.displayName.value
+          : this.displayName,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AccountPublicProfileData(')
+          ..write('id: $id, ')
+          ..write('accountId: $accountId, ')
+          ..write('displayName: $displayName, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, accountId, displayName, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is AccountPublicProfileData &&
+          other.id == this.id &&
+          other.accountId == this.accountId &&
+          other.displayName == this.displayName &&
+          other.createdAt == this.createdAt);
+}
+
+class AccountPublicProfilesCompanion
+    extends UpdateCompanion<AccountPublicProfileData> {
+  final Value<String> id;
+  final Value<String?> accountId;
+  final Value<String> displayName;
+  final Value<String> createdAt;
+  final Value<int> rowid;
+  const AccountPublicProfilesCompanion({
+    this.id = const Value.absent(),
+    this.accountId = const Value.absent(),
+    this.displayName = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  AccountPublicProfilesCompanion.insert({
+    required String id,
+    this.accountId = const Value.absent(),
+    required String displayName,
+    required String createdAt,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       displayName = Value(displayName),
+       createdAt = Value(createdAt);
+  static Insertable<AccountPublicProfileData> custom({
+    Expression<String>? id,
+    Expression<String>? accountId,
+    Expression<String>? displayName,
+    Expression<String>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (accountId != null) 'account_id': accountId,
+      if (displayName != null) 'display_name': displayName,
+      if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  AccountPublicProfilesCompanion copyWith({
+    Value<String>? id,
+    Value<String?>? accountId,
+    Value<String>? displayName,
+    Value<String>? createdAt,
+    Value<int>? rowid,
+  }) {
+    return AccountPublicProfilesCompanion(
+      id: id ?? this.id,
+      accountId: accountId ?? this.accountId,
+      displayName: displayName ?? this.displayName,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (accountId.present) {
+      map['account_id'] = Variable<String>(accountId.value);
+    }
+    if (displayName.present) {
+      map['display_name'] = Variable<String>(displayName.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<String>(createdAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AccountPublicProfilesCompanion(')
+          ..write('id: $id, ')
+          ..write('accountId: $accountId, ')
+          ..write('displayName: $displayName, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ParticipantAccountLinksTable extends ParticipantAccountLinks
+    with TableInfo<$ParticipantAccountLinksTable, ParticipantAccountLinkData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ParticipantAccountLinksTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _participantProfileIdMeta =
+      const VerificationMeta('participantProfileId');
+  @override
+  late final GeneratedColumn<String> participantProfileId =
+      GeneratedColumn<String>(
+        'participant_profile_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      );
+  static const VerificationMeta _accountIdMeta = const VerificationMeta(
+    'accountId',
+  );
+  @override
+  late final GeneratedColumn<String> accountId = GeneratedColumn<String>(
+    'account_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES accounts (id)',
+    ),
+  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    check: () => status.isIn(participantLinkStatusValues),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _originMeta = const VerificationMeta('origin');
+  @override
+  late final GeneratedColumn<String> origin = GeneratedColumn<String>(
+    'origin',
+    aliasedName,
+    false,
+    check: () => origin.isIn(participantLinkOriginValues),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<String> createdAt = GeneratedColumn<String>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _confirmedAtMeta = const VerificationMeta(
+    'confirmedAt',
+  );
+  @override
+  late final GeneratedColumn<String> confirmedAt = GeneratedColumn<String>(
+    'confirmed_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _endedAtMeta = const VerificationMeta(
+    'endedAt',
+  );
+  @override
+  late final GeneratedColumn<String> endedAt = GeneratedColumn<String>(
+    'ended_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _revisionMeta = const VerificationMeta(
+    'revision',
+  );
+  @override
+  late final GeneratedColumn<int> revision = GeneratedColumn<int>(
+    'revision',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    participantProfileId,
+    accountId,
+    status,
+    origin,
+    createdAt,
+    confirmedAt,
+    endedAt,
+    revision,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'participant_account_links';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ParticipantAccountLinkData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('participant_profile_id')) {
+      context.handle(
+        _participantProfileIdMeta,
+        participantProfileId.isAcceptableOrUnknown(
+          data['participant_profile_id']!,
+          _participantProfileIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_participantProfileIdMeta);
+    }
+    if (data.containsKey('account_id')) {
+      context.handle(
+        _accountIdMeta,
+        accountId.isAcceptableOrUnknown(data['account_id']!, _accountIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_accountIdMeta);
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_statusMeta);
+    }
+    if (data.containsKey('origin')) {
+      context.handle(
+        _originMeta,
+        origin.isAcceptableOrUnknown(data['origin']!, _originMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_originMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('confirmed_at')) {
+      context.handle(
+        _confirmedAtMeta,
+        confirmedAt.isAcceptableOrUnknown(
+          data['confirmed_at']!,
+          _confirmedAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('ended_at')) {
+      context.handle(
+        _endedAtMeta,
+        endedAt.isAcceptableOrUnknown(data['ended_at']!, _endedAtMeta),
+      );
+    }
+    if (data.containsKey('revision')) {
+      context.handle(
+        _revisionMeta,
+        revision.isAcceptableOrUnknown(data['revision']!, _revisionMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {participantProfileId, accountId},
+  ];
+  @override
+  ParticipantAccountLinkData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ParticipantAccountLinkData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      participantProfileId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}participant_profile_id'],
+      )!,
+      accountId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}account_id'],
+      )!,
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      origin: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}origin'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_at'],
+      )!,
+      confirmedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}confirmed_at'],
+      ),
+      endedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}ended_at'],
+      ),
+      revision: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}revision'],
+      )!,
+    );
+  }
+
+  @override
+  $ParticipantAccountLinksTable createAlias(String alias) {
+    return $ParticipantAccountLinksTable(attachedDatabase, alias);
+  }
+}
+
+class ParticipantAccountLinkData extends DataClass
+    implements Insertable<ParticipantAccountLinkData> {
+  final String id;
+  final String participantProfileId;
+  final String accountId;
+  final String status;
+  final String origin;
+  final String createdAt;
+  final String? confirmedAt;
+  final String? endedAt;
+  final int revision;
+  const ParticipantAccountLinkData({
+    required this.id,
+    required this.participantProfileId,
+    required this.accountId,
+    required this.status,
+    required this.origin,
+    required this.createdAt,
+    this.confirmedAt,
+    this.endedAt,
+    required this.revision,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['participant_profile_id'] = Variable<String>(participantProfileId);
+    map['account_id'] = Variable<String>(accountId);
+    map['status'] = Variable<String>(status);
+    map['origin'] = Variable<String>(origin);
+    map['created_at'] = Variable<String>(createdAt);
+    if (!nullToAbsent || confirmedAt != null) {
+      map['confirmed_at'] = Variable<String>(confirmedAt);
+    }
+    if (!nullToAbsent || endedAt != null) {
+      map['ended_at'] = Variable<String>(endedAt);
+    }
+    map['revision'] = Variable<int>(revision);
+    return map;
+  }
+
+  ParticipantAccountLinksCompanion toCompanion(bool nullToAbsent) {
+    return ParticipantAccountLinksCompanion(
+      id: Value(id),
+      participantProfileId: Value(participantProfileId),
+      accountId: Value(accountId),
+      status: Value(status),
+      origin: Value(origin),
+      createdAt: Value(createdAt),
+      confirmedAt: confirmedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(confirmedAt),
+      endedAt: endedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(endedAt),
+      revision: Value(revision),
+    );
+  }
+
+  factory ParticipantAccountLinkData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ParticipantAccountLinkData(
+      id: serializer.fromJson<String>(json['id']),
+      participantProfileId: serializer.fromJson<String>(
+        json['participantProfileId'],
+      ),
+      accountId: serializer.fromJson<String>(json['accountId']),
+      status: serializer.fromJson<String>(json['status']),
+      origin: serializer.fromJson<String>(json['origin']),
+      createdAt: serializer.fromJson<String>(json['createdAt']),
+      confirmedAt: serializer.fromJson<String?>(json['confirmedAt']),
+      endedAt: serializer.fromJson<String?>(json['endedAt']),
+      revision: serializer.fromJson<int>(json['revision']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'participantProfileId': serializer.toJson<String>(participantProfileId),
+      'accountId': serializer.toJson<String>(accountId),
+      'status': serializer.toJson<String>(status),
+      'origin': serializer.toJson<String>(origin),
+      'createdAt': serializer.toJson<String>(createdAt),
+      'confirmedAt': serializer.toJson<String?>(confirmedAt),
+      'endedAt': serializer.toJson<String?>(endedAt),
+      'revision': serializer.toJson<int>(revision),
+    };
+  }
+
+  ParticipantAccountLinkData copyWith({
+    String? id,
+    String? participantProfileId,
+    String? accountId,
+    String? status,
+    String? origin,
+    String? createdAt,
+    Value<String?> confirmedAt = const Value.absent(),
+    Value<String?> endedAt = const Value.absent(),
+    int? revision,
+  }) => ParticipantAccountLinkData(
+    id: id ?? this.id,
+    participantProfileId: participantProfileId ?? this.participantProfileId,
+    accountId: accountId ?? this.accountId,
+    status: status ?? this.status,
+    origin: origin ?? this.origin,
+    createdAt: createdAt ?? this.createdAt,
+    confirmedAt: confirmedAt.present ? confirmedAt.value : this.confirmedAt,
+    endedAt: endedAt.present ? endedAt.value : this.endedAt,
+    revision: revision ?? this.revision,
+  );
+  ParticipantAccountLinkData copyWithCompanion(
+    ParticipantAccountLinksCompanion data,
+  ) {
+    return ParticipantAccountLinkData(
+      id: data.id.present ? data.id.value : this.id,
+      participantProfileId: data.participantProfileId.present
+          ? data.participantProfileId.value
+          : this.participantProfileId,
+      accountId: data.accountId.present ? data.accountId.value : this.accountId,
+      status: data.status.present ? data.status.value : this.status,
+      origin: data.origin.present ? data.origin.value : this.origin,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      confirmedAt: data.confirmedAt.present
+          ? data.confirmedAt.value
+          : this.confirmedAt,
+      endedAt: data.endedAt.present ? data.endedAt.value : this.endedAt,
+      revision: data.revision.present ? data.revision.value : this.revision,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ParticipantAccountLinkData(')
+          ..write('id: $id, ')
+          ..write('participantProfileId: $participantProfileId, ')
+          ..write('accountId: $accountId, ')
+          ..write('status: $status, ')
+          ..write('origin: $origin, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('confirmedAt: $confirmedAt, ')
+          ..write('endedAt: $endedAt, ')
+          ..write('revision: $revision')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    participantProfileId,
+    accountId,
+    status,
+    origin,
+    createdAt,
+    confirmedAt,
+    endedAt,
+    revision,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ParticipantAccountLinkData &&
+          other.id == this.id &&
+          other.participantProfileId == this.participantProfileId &&
+          other.accountId == this.accountId &&
+          other.status == this.status &&
+          other.origin == this.origin &&
+          other.createdAt == this.createdAt &&
+          other.confirmedAt == this.confirmedAt &&
+          other.endedAt == this.endedAt &&
+          other.revision == this.revision);
+}
+
+class ParticipantAccountLinksCompanion
+    extends UpdateCompanion<ParticipantAccountLinkData> {
+  final Value<String> id;
+  final Value<String> participantProfileId;
+  final Value<String> accountId;
+  final Value<String> status;
+  final Value<String> origin;
+  final Value<String> createdAt;
+  final Value<String?> confirmedAt;
+  final Value<String?> endedAt;
+  final Value<int> revision;
+  final Value<int> rowid;
+  const ParticipantAccountLinksCompanion({
+    this.id = const Value.absent(),
+    this.participantProfileId = const Value.absent(),
+    this.accountId = const Value.absent(),
+    this.status = const Value.absent(),
+    this.origin = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.confirmedAt = const Value.absent(),
+    this.endedAt = const Value.absent(),
+    this.revision = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ParticipantAccountLinksCompanion.insert({
+    required String id,
+    required String participantProfileId,
+    required String accountId,
+    required String status,
+    required String origin,
+    required String createdAt,
+    this.confirmedAt = const Value.absent(),
+    this.endedAt = const Value.absent(),
+    this.revision = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       participantProfileId = Value(participantProfileId),
+       accountId = Value(accountId),
+       status = Value(status),
+       origin = Value(origin),
+       createdAt = Value(createdAt);
+  static Insertable<ParticipantAccountLinkData> custom({
+    Expression<String>? id,
+    Expression<String>? participantProfileId,
+    Expression<String>? accountId,
+    Expression<String>? status,
+    Expression<String>? origin,
+    Expression<String>? createdAt,
+    Expression<String>? confirmedAt,
+    Expression<String>? endedAt,
+    Expression<int>? revision,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (participantProfileId != null)
+        'participant_profile_id': participantProfileId,
+      if (accountId != null) 'account_id': accountId,
+      if (status != null) 'status': status,
+      if (origin != null) 'origin': origin,
+      if (createdAt != null) 'created_at': createdAt,
+      if (confirmedAt != null) 'confirmed_at': confirmedAt,
+      if (endedAt != null) 'ended_at': endedAt,
+      if (revision != null) 'revision': revision,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ParticipantAccountLinksCompanion copyWith({
+    Value<String>? id,
+    Value<String>? participantProfileId,
+    Value<String>? accountId,
+    Value<String>? status,
+    Value<String>? origin,
+    Value<String>? createdAt,
+    Value<String?>? confirmedAt,
+    Value<String?>? endedAt,
+    Value<int>? revision,
+    Value<int>? rowid,
+  }) {
+    return ParticipantAccountLinksCompanion(
+      id: id ?? this.id,
+      participantProfileId: participantProfileId ?? this.participantProfileId,
+      accountId: accountId ?? this.accountId,
+      status: status ?? this.status,
+      origin: origin ?? this.origin,
+      createdAt: createdAt ?? this.createdAt,
+      confirmedAt: confirmedAt ?? this.confirmedAt,
+      endedAt: endedAt ?? this.endedAt,
+      revision: revision ?? this.revision,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (participantProfileId.present) {
+      map['participant_profile_id'] = Variable<String>(
+        participantProfileId.value,
+      );
+    }
+    if (accountId.present) {
+      map['account_id'] = Variable<String>(accountId.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (origin.present) {
+      map['origin'] = Variable<String>(origin.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<String>(createdAt.value);
+    }
+    if (confirmedAt.present) {
+      map['confirmed_at'] = Variable<String>(confirmedAt.value);
+    }
+    if (endedAt.present) {
+      map['ended_at'] = Variable<String>(endedAt.value);
+    }
+    if (revision.present) {
+      map['revision'] = Variable<int>(revision.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ParticipantAccountLinksCompanion(')
+          ..write('id: $id, ')
+          ..write('participantProfileId: $participantProfileId, ')
+          ..write('accountId: $accountId, ')
+          ..write('status: $status, ')
+          ..write('origin: $origin, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('confirmedAt: $confirmedAt, ')
+          ..write('endedAt: $endedAt, ')
+          ..write('revision: $revision, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ParticipantDirectoryEntriesTable extends ParticipantDirectoryEntries
+    with
+        TableInfo<
+          $ParticipantDirectoryEntriesTable,
+          ParticipantDirectoryEntryData
+        > {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ParticipantDirectoryEntriesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _accountIdMeta = const VerificationMeta(
+    'accountId',
+  );
+  @override
+  late final GeneratedColumn<String> accountId = GeneratedColumn<String>(
+    'account_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES accounts (id)',
+    ),
+  );
+  static const VerificationMeta _firstNameMeta = const VerificationMeta(
+    'firstName',
+  );
+  @override
+  late final GeneratedColumn<String> firstName = GeneratedColumn<String>(
+    'first_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _lastNameMeta = const VerificationMeta(
+    'lastName',
+  );
+  @override
+  late final GeneratedColumn<String> lastName = GeneratedColumn<String>(
+    'last_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _clubMeta = const VerificationMeta('club');
+  @override
+  late final GeneratedColumn<String> club = GeneratedColumn<String>(
+    'club',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _faiNumberMeta = const VerificationMeta(
+    'faiNumber',
+  );
+  @override
+  late final GeneratedColumn<String> faiNumber = GeneratedColumn<String>(
+    'fai_number',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _nationalOrgIdMeta = const VerificationMeta(
+    'nationalOrgId',
+  );
+  @override
+  late final GeneratedColumn<String> nationalOrgId = GeneratedColumn<String>(
+    'national_org_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _cityMeta = const VerificationMeta('city');
+  @override
+  late final GeneratedColumn<String> city = GeneratedColumn<String>(
+    'city',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _stateMeta = const VerificationMeta('state');
+  @override
+  late final GeneratedColumn<String> state = GeneratedColumn<String>(
+    'state',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _countryMeta = const VerificationMeta(
+    'country',
+  );
+  @override
+  late final GeneratedColumn<String> country = GeneratedColumn<String>(
+    'country',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _isListedMeta = const VerificationMeta(
+    'isListed',
+  );
+  @override
+  late final GeneratedColumn<bool> isListed = GeneratedColumn<bool>(
+    'is_listed',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintsDependsOnDialect({
+      SqlDialect.sqlite: 'CHECK ("is_listed" IN (0, 1))',
+      SqlDialect.postgres: '',
+    }),
+  );
+  static const VerificationMeta _emailVisibleToDirectorsMeta =
+      const VerificationMeta('emailVisibleToDirectors');
+  @override
+  late final GeneratedColumn<bool> emailVisibleToDirectors =
+      GeneratedColumn<bool>(
+        'email_visible_to_directors',
+        aliasedName,
+        false,
+        type: DriftSqlType.bool,
+        requiredDuringInsert: true,
+        defaultConstraints: GeneratedColumn.constraintsDependsOnDialect({
+          SqlDialect.sqlite: 'CHECK ("email_visible_to_directors" IN (0, 1))',
+          SqlDialect.postgres: '',
+        }),
+      );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<String> createdAt = GeneratedColumn<String>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<String> updatedAt = GeneratedColumn<String>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    accountId,
+    firstName,
+    lastName,
+    club,
+    faiNumber,
+    nationalOrgId,
+    city,
+    state,
+    country,
+    isListed,
+    emailVisibleToDirectors,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'participant_directory_entries';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ParticipantDirectoryEntryData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('account_id')) {
+      context.handle(
+        _accountIdMeta,
+        accountId.isAcceptableOrUnknown(data['account_id']!, _accountIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_accountIdMeta);
+    }
+    if (data.containsKey('first_name')) {
+      context.handle(
+        _firstNameMeta,
+        firstName.isAcceptableOrUnknown(data['first_name']!, _firstNameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_firstNameMeta);
+    }
+    if (data.containsKey('last_name')) {
+      context.handle(
+        _lastNameMeta,
+        lastName.isAcceptableOrUnknown(data['last_name']!, _lastNameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_lastNameMeta);
+    }
+    if (data.containsKey('club')) {
+      context.handle(
+        _clubMeta,
+        club.isAcceptableOrUnknown(data['club']!, _clubMeta),
+      );
+    }
+    if (data.containsKey('fai_number')) {
+      context.handle(
+        _faiNumberMeta,
+        faiNumber.isAcceptableOrUnknown(data['fai_number']!, _faiNumberMeta),
+      );
+    }
+    if (data.containsKey('national_org_id')) {
+      context.handle(
+        _nationalOrgIdMeta,
+        nationalOrgId.isAcceptableOrUnknown(
+          data['national_org_id']!,
+          _nationalOrgIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('city')) {
+      context.handle(
+        _cityMeta,
+        city.isAcceptableOrUnknown(data['city']!, _cityMeta),
+      );
+    }
+    if (data.containsKey('state')) {
+      context.handle(
+        _stateMeta,
+        state.isAcceptableOrUnknown(data['state']!, _stateMeta),
+      );
+    }
+    if (data.containsKey('country')) {
+      context.handle(
+        _countryMeta,
+        country.isAcceptableOrUnknown(data['country']!, _countryMeta),
+      );
+    }
+    if (data.containsKey('is_listed')) {
+      context.handle(
+        _isListedMeta,
+        isListed.isAcceptableOrUnknown(data['is_listed']!, _isListedMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_isListedMeta);
+    }
+    if (data.containsKey('email_visible_to_directors')) {
+      context.handle(
+        _emailVisibleToDirectorsMeta,
+        emailVisibleToDirectors.isAcceptableOrUnknown(
+          data['email_visible_to_directors']!,
+          _emailVisibleToDirectorsMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_emailVisibleToDirectorsMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {accountId},
+  ];
+  @override
+  ParticipantDirectoryEntryData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ParticipantDirectoryEntryData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      accountId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}account_id'],
+      )!,
+      firstName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}first_name'],
+      )!,
+      lastName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}last_name'],
+      )!,
+      club: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}club'],
+      ),
+      faiNumber: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}fai_number'],
+      ),
+      nationalOrgId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}national_org_id'],
+      ),
+      city: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}city'],
+      ),
+      state: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}state'],
+      ),
+      country: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}country'],
+      ),
+      isListed: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_listed'],
+      )!,
+      emailVisibleToDirectors: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}email_visible_to_directors'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $ParticipantDirectoryEntriesTable createAlias(String alias) {
+    return $ParticipantDirectoryEntriesTable(attachedDatabase, alias);
+  }
+}
+
+class ParticipantDirectoryEntryData extends DataClass
+    implements Insertable<ParticipantDirectoryEntryData> {
+  final String id;
+  final String accountId;
+  final String firstName;
+  final String lastName;
+  final String? club;
+  final String? faiNumber;
+  final String? nationalOrgId;
+  final String? city;
+  final String? state;
+  final String? country;
+  final bool isListed;
+  final bool emailVisibleToDirectors;
+  final String createdAt;
+  final String updatedAt;
+  const ParticipantDirectoryEntryData({
+    required this.id,
+    required this.accountId,
+    required this.firstName,
+    required this.lastName,
+    this.club,
+    this.faiNumber,
+    this.nationalOrgId,
+    this.city,
+    this.state,
+    this.country,
+    required this.isListed,
+    required this.emailVisibleToDirectors,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['account_id'] = Variable<String>(accountId);
+    map['first_name'] = Variable<String>(firstName);
+    map['last_name'] = Variable<String>(lastName);
+    if (!nullToAbsent || club != null) {
+      map['club'] = Variable<String>(club);
+    }
+    if (!nullToAbsent || faiNumber != null) {
+      map['fai_number'] = Variable<String>(faiNumber);
+    }
+    if (!nullToAbsent || nationalOrgId != null) {
+      map['national_org_id'] = Variable<String>(nationalOrgId);
+    }
+    if (!nullToAbsent || city != null) {
+      map['city'] = Variable<String>(city);
+    }
+    if (!nullToAbsent || state != null) {
+      map['state'] = Variable<String>(state);
+    }
+    if (!nullToAbsent || country != null) {
+      map['country'] = Variable<String>(country);
+    }
+    map['is_listed'] = Variable<bool>(isListed);
+    map['email_visible_to_directors'] = Variable<bool>(emailVisibleToDirectors);
+    map['created_at'] = Variable<String>(createdAt);
+    map['updated_at'] = Variable<String>(updatedAt);
+    return map;
+  }
+
+  ParticipantDirectoryEntriesCompanion toCompanion(bool nullToAbsent) {
+    return ParticipantDirectoryEntriesCompanion(
+      id: Value(id),
+      accountId: Value(accountId),
+      firstName: Value(firstName),
+      lastName: Value(lastName),
+      club: club == null && nullToAbsent ? const Value.absent() : Value(club),
+      faiNumber: faiNumber == null && nullToAbsent
+          ? const Value.absent()
+          : Value(faiNumber),
+      nationalOrgId: nationalOrgId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(nationalOrgId),
+      city: city == null && nullToAbsent ? const Value.absent() : Value(city),
+      state: state == null && nullToAbsent
+          ? const Value.absent()
+          : Value(state),
+      country: country == null && nullToAbsent
+          ? const Value.absent()
+          : Value(country),
+      isListed: Value(isListed),
+      emailVisibleToDirectors: Value(emailVisibleToDirectors),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory ParticipantDirectoryEntryData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ParticipantDirectoryEntryData(
+      id: serializer.fromJson<String>(json['id']),
+      accountId: serializer.fromJson<String>(json['accountId']),
+      firstName: serializer.fromJson<String>(json['firstName']),
+      lastName: serializer.fromJson<String>(json['lastName']),
+      club: serializer.fromJson<String?>(json['club']),
+      faiNumber: serializer.fromJson<String?>(json['faiNumber']),
+      nationalOrgId: serializer.fromJson<String?>(json['nationalOrgId']),
+      city: serializer.fromJson<String?>(json['city']),
+      state: serializer.fromJson<String?>(json['state']),
+      country: serializer.fromJson<String?>(json['country']),
+      isListed: serializer.fromJson<bool>(json['isListed']),
+      emailVisibleToDirectors: serializer.fromJson<bool>(
+        json['emailVisibleToDirectors'],
+      ),
+      createdAt: serializer.fromJson<String>(json['createdAt']),
+      updatedAt: serializer.fromJson<String>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'accountId': serializer.toJson<String>(accountId),
+      'firstName': serializer.toJson<String>(firstName),
+      'lastName': serializer.toJson<String>(lastName),
+      'club': serializer.toJson<String?>(club),
+      'faiNumber': serializer.toJson<String?>(faiNumber),
+      'nationalOrgId': serializer.toJson<String?>(nationalOrgId),
+      'city': serializer.toJson<String?>(city),
+      'state': serializer.toJson<String?>(state),
+      'country': serializer.toJson<String?>(country),
+      'isListed': serializer.toJson<bool>(isListed),
+      'emailVisibleToDirectors': serializer.toJson<bool>(
+        emailVisibleToDirectors,
+      ),
+      'createdAt': serializer.toJson<String>(createdAt),
+      'updatedAt': serializer.toJson<String>(updatedAt),
+    };
+  }
+
+  ParticipantDirectoryEntryData copyWith({
+    String? id,
+    String? accountId,
+    String? firstName,
+    String? lastName,
+    Value<String?> club = const Value.absent(),
+    Value<String?> faiNumber = const Value.absent(),
+    Value<String?> nationalOrgId = const Value.absent(),
+    Value<String?> city = const Value.absent(),
+    Value<String?> state = const Value.absent(),
+    Value<String?> country = const Value.absent(),
+    bool? isListed,
+    bool? emailVisibleToDirectors,
+    String? createdAt,
+    String? updatedAt,
+  }) => ParticipantDirectoryEntryData(
+    id: id ?? this.id,
+    accountId: accountId ?? this.accountId,
+    firstName: firstName ?? this.firstName,
+    lastName: lastName ?? this.lastName,
+    club: club.present ? club.value : this.club,
+    faiNumber: faiNumber.present ? faiNumber.value : this.faiNumber,
+    nationalOrgId: nationalOrgId.present
+        ? nationalOrgId.value
+        : this.nationalOrgId,
+    city: city.present ? city.value : this.city,
+    state: state.present ? state.value : this.state,
+    country: country.present ? country.value : this.country,
+    isListed: isListed ?? this.isListed,
+    emailVisibleToDirectors:
+        emailVisibleToDirectors ?? this.emailVisibleToDirectors,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  ParticipantDirectoryEntryData copyWithCompanion(
+    ParticipantDirectoryEntriesCompanion data,
+  ) {
+    return ParticipantDirectoryEntryData(
+      id: data.id.present ? data.id.value : this.id,
+      accountId: data.accountId.present ? data.accountId.value : this.accountId,
+      firstName: data.firstName.present ? data.firstName.value : this.firstName,
+      lastName: data.lastName.present ? data.lastName.value : this.lastName,
+      club: data.club.present ? data.club.value : this.club,
+      faiNumber: data.faiNumber.present ? data.faiNumber.value : this.faiNumber,
+      nationalOrgId: data.nationalOrgId.present
+          ? data.nationalOrgId.value
+          : this.nationalOrgId,
+      city: data.city.present ? data.city.value : this.city,
+      state: data.state.present ? data.state.value : this.state,
+      country: data.country.present ? data.country.value : this.country,
+      isListed: data.isListed.present ? data.isListed.value : this.isListed,
+      emailVisibleToDirectors: data.emailVisibleToDirectors.present
+          ? data.emailVisibleToDirectors.value
+          : this.emailVisibleToDirectors,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ParticipantDirectoryEntryData(')
+          ..write('id: $id, ')
+          ..write('accountId: $accountId, ')
+          ..write('firstName: $firstName, ')
+          ..write('lastName: $lastName, ')
+          ..write('club: $club, ')
+          ..write('faiNumber: $faiNumber, ')
+          ..write('nationalOrgId: $nationalOrgId, ')
+          ..write('city: $city, ')
+          ..write('state: $state, ')
+          ..write('country: $country, ')
+          ..write('isListed: $isListed, ')
+          ..write('emailVisibleToDirectors: $emailVisibleToDirectors, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    accountId,
+    firstName,
+    lastName,
+    club,
+    faiNumber,
+    nationalOrgId,
+    city,
+    state,
+    country,
+    isListed,
+    emailVisibleToDirectors,
+    createdAt,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ParticipantDirectoryEntryData &&
+          other.id == this.id &&
+          other.accountId == this.accountId &&
+          other.firstName == this.firstName &&
+          other.lastName == this.lastName &&
+          other.club == this.club &&
+          other.faiNumber == this.faiNumber &&
+          other.nationalOrgId == this.nationalOrgId &&
+          other.city == this.city &&
+          other.state == this.state &&
+          other.country == this.country &&
+          other.isListed == this.isListed &&
+          other.emailVisibleToDirectors == this.emailVisibleToDirectors &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class ParticipantDirectoryEntriesCompanion
+    extends UpdateCompanion<ParticipantDirectoryEntryData> {
+  final Value<String> id;
+  final Value<String> accountId;
+  final Value<String> firstName;
+  final Value<String> lastName;
+  final Value<String?> club;
+  final Value<String?> faiNumber;
+  final Value<String?> nationalOrgId;
+  final Value<String?> city;
+  final Value<String?> state;
+  final Value<String?> country;
+  final Value<bool> isListed;
+  final Value<bool> emailVisibleToDirectors;
+  final Value<String> createdAt;
+  final Value<String> updatedAt;
+  final Value<int> rowid;
+  const ParticipantDirectoryEntriesCompanion({
+    this.id = const Value.absent(),
+    this.accountId = const Value.absent(),
+    this.firstName = const Value.absent(),
+    this.lastName = const Value.absent(),
+    this.club = const Value.absent(),
+    this.faiNumber = const Value.absent(),
+    this.nationalOrgId = const Value.absent(),
+    this.city = const Value.absent(),
+    this.state = const Value.absent(),
+    this.country = const Value.absent(),
+    this.isListed = const Value.absent(),
+    this.emailVisibleToDirectors = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ParticipantDirectoryEntriesCompanion.insert({
+    required String id,
+    required String accountId,
+    required String firstName,
+    required String lastName,
+    this.club = const Value.absent(),
+    this.faiNumber = const Value.absent(),
+    this.nationalOrgId = const Value.absent(),
+    this.city = const Value.absent(),
+    this.state = const Value.absent(),
+    this.country = const Value.absent(),
+    required bool isListed,
+    required bool emailVisibleToDirectors,
+    required String createdAt,
+    required String updatedAt,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       accountId = Value(accountId),
+       firstName = Value(firstName),
+       lastName = Value(lastName),
+       isListed = Value(isListed),
+       emailVisibleToDirectors = Value(emailVisibleToDirectors),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt);
+  static Insertable<ParticipantDirectoryEntryData> custom({
+    Expression<String>? id,
+    Expression<String>? accountId,
+    Expression<String>? firstName,
+    Expression<String>? lastName,
+    Expression<String>? club,
+    Expression<String>? faiNumber,
+    Expression<String>? nationalOrgId,
+    Expression<String>? city,
+    Expression<String>? state,
+    Expression<String>? country,
+    Expression<bool>? isListed,
+    Expression<bool>? emailVisibleToDirectors,
+    Expression<String>? createdAt,
+    Expression<String>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (accountId != null) 'account_id': accountId,
+      if (firstName != null) 'first_name': firstName,
+      if (lastName != null) 'last_name': lastName,
+      if (club != null) 'club': club,
+      if (faiNumber != null) 'fai_number': faiNumber,
+      if (nationalOrgId != null) 'national_org_id': nationalOrgId,
+      if (city != null) 'city': city,
+      if (state != null) 'state': state,
+      if (country != null) 'country': country,
+      if (isListed != null) 'is_listed': isListed,
+      if (emailVisibleToDirectors != null)
+        'email_visible_to_directors': emailVisibleToDirectors,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ParticipantDirectoryEntriesCompanion copyWith({
+    Value<String>? id,
+    Value<String>? accountId,
+    Value<String>? firstName,
+    Value<String>? lastName,
+    Value<String?>? club,
+    Value<String?>? faiNumber,
+    Value<String?>? nationalOrgId,
+    Value<String?>? city,
+    Value<String?>? state,
+    Value<String?>? country,
+    Value<bool>? isListed,
+    Value<bool>? emailVisibleToDirectors,
+    Value<String>? createdAt,
+    Value<String>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return ParticipantDirectoryEntriesCompanion(
+      id: id ?? this.id,
+      accountId: accountId ?? this.accountId,
+      firstName: firstName ?? this.firstName,
+      lastName: lastName ?? this.lastName,
+      club: club ?? this.club,
+      faiNumber: faiNumber ?? this.faiNumber,
+      nationalOrgId: nationalOrgId ?? this.nationalOrgId,
+      city: city ?? this.city,
+      state: state ?? this.state,
+      country: country ?? this.country,
+      isListed: isListed ?? this.isListed,
+      emailVisibleToDirectors:
+          emailVisibleToDirectors ?? this.emailVisibleToDirectors,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (accountId.present) {
+      map['account_id'] = Variable<String>(accountId.value);
+    }
+    if (firstName.present) {
+      map['first_name'] = Variable<String>(firstName.value);
+    }
+    if (lastName.present) {
+      map['last_name'] = Variable<String>(lastName.value);
+    }
+    if (club.present) {
+      map['club'] = Variable<String>(club.value);
+    }
+    if (faiNumber.present) {
+      map['fai_number'] = Variable<String>(faiNumber.value);
+    }
+    if (nationalOrgId.present) {
+      map['national_org_id'] = Variable<String>(nationalOrgId.value);
+    }
+    if (city.present) {
+      map['city'] = Variable<String>(city.value);
+    }
+    if (state.present) {
+      map['state'] = Variable<String>(state.value);
+    }
+    if (country.present) {
+      map['country'] = Variable<String>(country.value);
+    }
+    if (isListed.present) {
+      map['is_listed'] = Variable<bool>(isListed.value);
+    }
+    if (emailVisibleToDirectors.present) {
+      map['email_visible_to_directors'] = Variable<bool>(
+        emailVisibleToDirectors.value,
+      );
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<String>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<String>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ParticipantDirectoryEntriesCompanion(')
+          ..write('id: $id, ')
+          ..write('accountId: $accountId, ')
+          ..write('firstName: $firstName, ')
+          ..write('lastName: $lastName, ')
+          ..write('club: $club, ')
+          ..write('faiNumber: $faiNumber, ')
+          ..write('nationalOrgId: $nationalOrgId, ')
+          ..write('city: $city, ')
+          ..write('state: $state, ')
+          ..write('country: $country, ')
+          ..write('isListed: $isListed, ')
+          ..write('emailVisibleToDirectors: $emailVisibleToDirectors, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $InstallationsTable extends Installations
+    with TableInfo<$InstallationsTable, InstallationData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $InstallationsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _ownerAccountIdMeta = const VerificationMeta(
+    'ownerAccountId',
+  );
+  @override
+  late final GeneratedColumn<String> ownerAccountId = GeneratedColumn<String>(
+    'owner_account_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES accounts (id)',
+    ),
+  );
+  static const VerificationMeta _labelMeta = const VerificationMeta('label');
+  @override
+  late final GeneratedColumn<String> label = GeneratedColumn<String>(
+    'label',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _platformMeta = const VerificationMeta(
+    'platform',
+  );
+  @override
+  late final GeneratedColumn<String> platform = GeneratedColumn<String>(
+    'platform',
+    aliasedName,
+    false,
+    check: () => platform.isIn(platformValues),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<String> createdAt = GeneratedColumn<String>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _lastSeenAtMeta = const VerificationMeta(
+    'lastSeenAt',
+  );
+  @override
+  late final GeneratedColumn<String> lastSeenAt = GeneratedColumn<String>(
+    'last_seen_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _lastSyncAtMeta = const VerificationMeta(
+    'lastSyncAt',
+  );
+  @override
+  late final GeneratedColumn<String> lastSyncAt = GeneratedColumn<String>(
+    'last_sync_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _systemDataSeqMeta = const VerificationMeta(
+    'systemDataSeq',
+  );
+  @override
+  late final GeneratedColumn<int> systemDataSeq = GeneratedColumn<int>(
+    'system_data_seq',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _revokedAtMeta = const VerificationMeta(
+    'revokedAt',
+  );
+  @override
+  late final GeneratedColumn<String> revokedAt = GeneratedColumn<String>(
+    'revoked_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    ownerAccountId,
+    label,
+    platform,
+    createdAt,
+    lastSeenAt,
+    lastSyncAt,
+    systemDataSeq,
+    revokedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'installations';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<InstallationData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('owner_account_id')) {
+      context.handle(
+        _ownerAccountIdMeta,
+        ownerAccountId.isAcceptableOrUnknown(
+          data['owner_account_id']!,
+          _ownerAccountIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_ownerAccountIdMeta);
+    }
+    if (data.containsKey('label')) {
+      context.handle(
+        _labelMeta,
+        label.isAcceptableOrUnknown(data['label']!, _labelMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_labelMeta);
+    }
+    if (data.containsKey('platform')) {
+      context.handle(
+        _platformMeta,
+        platform.isAcceptableOrUnknown(data['platform']!, _platformMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_platformMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('last_seen_at')) {
+      context.handle(
+        _lastSeenAtMeta,
+        lastSeenAt.isAcceptableOrUnknown(
+          data['last_seen_at']!,
+          _lastSeenAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('last_sync_at')) {
+      context.handle(
+        _lastSyncAtMeta,
+        lastSyncAt.isAcceptableOrUnknown(
+          data['last_sync_at']!,
+          _lastSyncAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('system_data_seq')) {
+      context.handle(
+        _systemDataSeqMeta,
+        systemDataSeq.isAcceptableOrUnknown(
+          data['system_data_seq']!,
+          _systemDataSeqMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_systemDataSeqMeta);
+    }
+    if (data.containsKey('revoked_at')) {
+      context.handle(
+        _revokedAtMeta,
+        revokedAt.isAcceptableOrUnknown(data['revoked_at']!, _revokedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  InstallationData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return InstallationData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      ownerAccountId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}owner_account_id'],
+      )!,
+      label: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}label'],
+      )!,
+      platform: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}platform'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_at'],
+      )!,
+      lastSeenAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}last_seen_at'],
+      ),
+      lastSyncAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}last_sync_at'],
+      ),
+      systemDataSeq: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}system_data_seq'],
+      )!,
+      revokedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}revoked_at'],
+      ),
+    );
+  }
+
+  @override
+  $InstallationsTable createAlias(String alias) {
+    return $InstallationsTable(attachedDatabase, alias);
+  }
+}
+
+class InstallationData extends DataClass
+    implements Insertable<InstallationData> {
+  final String id;
+  final String ownerAccountId;
+  final String label;
+  final String platform;
+  final String createdAt;
+  final String? lastSeenAt;
+  final String? lastSyncAt;
+  final int systemDataSeq;
+  final String? revokedAt;
+  const InstallationData({
+    required this.id,
+    required this.ownerAccountId,
+    required this.label,
+    required this.platform,
+    required this.createdAt,
+    this.lastSeenAt,
+    this.lastSyncAt,
+    required this.systemDataSeq,
+    this.revokedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['owner_account_id'] = Variable<String>(ownerAccountId);
+    map['label'] = Variable<String>(label);
+    map['platform'] = Variable<String>(platform);
+    map['created_at'] = Variable<String>(createdAt);
+    if (!nullToAbsent || lastSeenAt != null) {
+      map['last_seen_at'] = Variable<String>(lastSeenAt);
+    }
+    if (!nullToAbsent || lastSyncAt != null) {
+      map['last_sync_at'] = Variable<String>(lastSyncAt);
+    }
+    map['system_data_seq'] = Variable<int>(systemDataSeq);
+    if (!nullToAbsent || revokedAt != null) {
+      map['revoked_at'] = Variable<String>(revokedAt);
+    }
+    return map;
+  }
+
+  InstallationsCompanion toCompanion(bool nullToAbsent) {
+    return InstallationsCompanion(
+      id: Value(id),
+      ownerAccountId: Value(ownerAccountId),
+      label: Value(label),
+      platform: Value(platform),
+      createdAt: Value(createdAt),
+      lastSeenAt: lastSeenAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastSeenAt),
+      lastSyncAt: lastSyncAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastSyncAt),
+      systemDataSeq: Value(systemDataSeq),
+      revokedAt: revokedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(revokedAt),
+    );
+  }
+
+  factory InstallationData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return InstallationData(
+      id: serializer.fromJson<String>(json['id']),
+      ownerAccountId: serializer.fromJson<String>(json['ownerAccountId']),
+      label: serializer.fromJson<String>(json['label']),
+      platform: serializer.fromJson<String>(json['platform']),
+      createdAt: serializer.fromJson<String>(json['createdAt']),
+      lastSeenAt: serializer.fromJson<String?>(json['lastSeenAt']),
+      lastSyncAt: serializer.fromJson<String?>(json['lastSyncAt']),
+      systemDataSeq: serializer.fromJson<int>(json['systemDataSeq']),
+      revokedAt: serializer.fromJson<String?>(json['revokedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'ownerAccountId': serializer.toJson<String>(ownerAccountId),
+      'label': serializer.toJson<String>(label),
+      'platform': serializer.toJson<String>(platform),
+      'createdAt': serializer.toJson<String>(createdAt),
+      'lastSeenAt': serializer.toJson<String?>(lastSeenAt),
+      'lastSyncAt': serializer.toJson<String?>(lastSyncAt),
+      'systemDataSeq': serializer.toJson<int>(systemDataSeq),
+      'revokedAt': serializer.toJson<String?>(revokedAt),
+    };
+  }
+
+  InstallationData copyWith({
+    String? id,
+    String? ownerAccountId,
+    String? label,
+    String? platform,
+    String? createdAt,
+    Value<String?> lastSeenAt = const Value.absent(),
+    Value<String?> lastSyncAt = const Value.absent(),
+    int? systemDataSeq,
+    Value<String?> revokedAt = const Value.absent(),
+  }) => InstallationData(
+    id: id ?? this.id,
+    ownerAccountId: ownerAccountId ?? this.ownerAccountId,
+    label: label ?? this.label,
+    platform: platform ?? this.platform,
+    createdAt: createdAt ?? this.createdAt,
+    lastSeenAt: lastSeenAt.present ? lastSeenAt.value : this.lastSeenAt,
+    lastSyncAt: lastSyncAt.present ? lastSyncAt.value : this.lastSyncAt,
+    systemDataSeq: systemDataSeq ?? this.systemDataSeq,
+    revokedAt: revokedAt.present ? revokedAt.value : this.revokedAt,
+  );
+  InstallationData copyWithCompanion(InstallationsCompanion data) {
+    return InstallationData(
+      id: data.id.present ? data.id.value : this.id,
+      ownerAccountId: data.ownerAccountId.present
+          ? data.ownerAccountId.value
+          : this.ownerAccountId,
+      label: data.label.present ? data.label.value : this.label,
+      platform: data.platform.present ? data.platform.value : this.platform,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      lastSeenAt: data.lastSeenAt.present
+          ? data.lastSeenAt.value
+          : this.lastSeenAt,
+      lastSyncAt: data.lastSyncAt.present
+          ? data.lastSyncAt.value
+          : this.lastSyncAt,
+      systemDataSeq: data.systemDataSeq.present
+          ? data.systemDataSeq.value
+          : this.systemDataSeq,
+      revokedAt: data.revokedAt.present ? data.revokedAt.value : this.revokedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('InstallationData(')
+          ..write('id: $id, ')
+          ..write('ownerAccountId: $ownerAccountId, ')
+          ..write('label: $label, ')
+          ..write('platform: $platform, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('lastSeenAt: $lastSeenAt, ')
+          ..write('lastSyncAt: $lastSyncAt, ')
+          ..write('systemDataSeq: $systemDataSeq, ')
+          ..write('revokedAt: $revokedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    ownerAccountId,
+    label,
+    platform,
+    createdAt,
+    lastSeenAt,
+    lastSyncAt,
+    systemDataSeq,
+    revokedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is InstallationData &&
+          other.id == this.id &&
+          other.ownerAccountId == this.ownerAccountId &&
+          other.label == this.label &&
+          other.platform == this.platform &&
+          other.createdAt == this.createdAt &&
+          other.lastSeenAt == this.lastSeenAt &&
+          other.lastSyncAt == this.lastSyncAt &&
+          other.systemDataSeq == this.systemDataSeq &&
+          other.revokedAt == this.revokedAt);
+}
+
+class InstallationsCompanion extends UpdateCompanion<InstallationData> {
+  final Value<String> id;
+  final Value<String> ownerAccountId;
+  final Value<String> label;
+  final Value<String> platform;
+  final Value<String> createdAt;
+  final Value<String?> lastSeenAt;
+  final Value<String?> lastSyncAt;
+  final Value<int> systemDataSeq;
+  final Value<String?> revokedAt;
+  final Value<int> rowid;
+  const InstallationsCompanion({
+    this.id = const Value.absent(),
+    this.ownerAccountId = const Value.absent(),
+    this.label = const Value.absent(),
+    this.platform = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.lastSeenAt = const Value.absent(),
+    this.lastSyncAt = const Value.absent(),
+    this.systemDataSeq = const Value.absent(),
+    this.revokedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  InstallationsCompanion.insert({
+    required String id,
+    required String ownerAccountId,
+    required String label,
+    required String platform,
+    required String createdAt,
+    this.lastSeenAt = const Value.absent(),
+    this.lastSyncAt = const Value.absent(),
+    required int systemDataSeq,
+    this.revokedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       ownerAccountId = Value(ownerAccountId),
+       label = Value(label),
+       platform = Value(platform),
+       createdAt = Value(createdAt),
+       systemDataSeq = Value(systemDataSeq);
+  static Insertable<InstallationData> custom({
+    Expression<String>? id,
+    Expression<String>? ownerAccountId,
+    Expression<String>? label,
+    Expression<String>? platform,
+    Expression<String>? createdAt,
+    Expression<String>? lastSeenAt,
+    Expression<String>? lastSyncAt,
+    Expression<int>? systemDataSeq,
+    Expression<String>? revokedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (ownerAccountId != null) 'owner_account_id': ownerAccountId,
+      if (label != null) 'label': label,
+      if (platform != null) 'platform': platform,
+      if (createdAt != null) 'created_at': createdAt,
+      if (lastSeenAt != null) 'last_seen_at': lastSeenAt,
+      if (lastSyncAt != null) 'last_sync_at': lastSyncAt,
+      if (systemDataSeq != null) 'system_data_seq': systemDataSeq,
+      if (revokedAt != null) 'revoked_at': revokedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  InstallationsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? ownerAccountId,
+    Value<String>? label,
+    Value<String>? platform,
+    Value<String>? createdAt,
+    Value<String?>? lastSeenAt,
+    Value<String?>? lastSyncAt,
+    Value<int>? systemDataSeq,
+    Value<String?>? revokedAt,
+    Value<int>? rowid,
+  }) {
+    return InstallationsCompanion(
+      id: id ?? this.id,
+      ownerAccountId: ownerAccountId ?? this.ownerAccountId,
+      label: label ?? this.label,
+      platform: platform ?? this.platform,
+      createdAt: createdAt ?? this.createdAt,
+      lastSeenAt: lastSeenAt ?? this.lastSeenAt,
+      lastSyncAt: lastSyncAt ?? this.lastSyncAt,
+      systemDataSeq: systemDataSeq ?? this.systemDataSeq,
+      revokedAt: revokedAt ?? this.revokedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (ownerAccountId.present) {
+      map['owner_account_id'] = Variable<String>(ownerAccountId.value);
+    }
+    if (label.present) {
+      map['label'] = Variable<String>(label.value);
+    }
+    if (platform.present) {
+      map['platform'] = Variable<String>(platform.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<String>(createdAt.value);
+    }
+    if (lastSeenAt.present) {
+      map['last_seen_at'] = Variable<String>(lastSeenAt.value);
+    }
+    if (lastSyncAt.present) {
+      map['last_sync_at'] = Variable<String>(lastSyncAt.value);
+    }
+    if (systemDataSeq.present) {
+      map['system_data_seq'] = Variable<int>(systemDataSeq.value);
+    }
+    if (revokedAt.present) {
+      map['revoked_at'] = Variable<String>(revokedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('InstallationsCompanion(')
+          ..write('id: $id, ')
+          ..write('ownerAccountId: $ownerAccountId, ')
+          ..write('label: $label, ')
+          ..write('platform: $platform, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('lastSeenAt: $lastSeenAt, ')
+          ..write('lastSyncAt: $lastSyncAt, ')
+          ..write('systemDataSeq: $systemDataSeq, ')
+          ..write('revokedAt: $revokedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $InstallationActivationsTable extends InstallationActivations
+    with TableInfo<$InstallationActivationsTable, InstallationActivationData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $InstallationActivationsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _contestIdMeta = const VerificationMeta(
+    'contestId',
+  );
+  @override
+  late final GeneratedColumn<String> contestId = GeneratedColumn<String>(
+    'contest_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _installationIdMeta = const VerificationMeta(
+    'installationId',
+  );
+  @override
+  late final GeneratedColumn<String> installationId = GeneratedColumn<String>(
+    'installation_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES installations (id)',
+    ),
+  );
+  static const VerificationMeta _activatedByMeta = const VerificationMeta(
+    'activatedBy',
+  );
+  @override
+  late final GeneratedColumn<String> activatedBy = GeneratedColumn<String>(
+    'activated_by',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES accounts (id)',
+    ),
+  );
+  static const VerificationMeta _kindMeta = const VerificationMeta('kind');
+  @override
+  late final GeneratedColumn<String> kind = GeneratedColumn<String>(
+    'kind',
+    aliasedName,
+    false,
+    check: () => kind.isIn(activationKindValues),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _activatedAtMeta = const VerificationMeta(
+    'activatedAt',
+  );
+  @override
+  late final GeneratedColumn<String> activatedAt = GeneratedColumn<String>(
+    'activated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _endedAtMeta = const VerificationMeta(
+    'endedAt',
+  );
+  @override
+  late final GeneratedColumn<String> endedAt = GeneratedColumn<String>(
+    'ended_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    contestId,
+    installationId,
+    activatedBy,
+    kind,
+    activatedAt,
+    endedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'installation_activations';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<InstallationActivationData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('contest_id')) {
+      context.handle(
+        _contestIdMeta,
+        contestId.isAcceptableOrUnknown(data['contest_id']!, _contestIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_contestIdMeta);
+    }
+    if (data.containsKey('installation_id')) {
+      context.handle(
+        _installationIdMeta,
+        installationId.isAcceptableOrUnknown(
+          data['installation_id']!,
+          _installationIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_installationIdMeta);
+    }
+    if (data.containsKey('activated_by')) {
+      context.handle(
+        _activatedByMeta,
+        activatedBy.isAcceptableOrUnknown(
+          data['activated_by']!,
+          _activatedByMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_activatedByMeta);
+    }
+    if (data.containsKey('kind')) {
+      context.handle(
+        _kindMeta,
+        kind.isAcceptableOrUnknown(data['kind']!, _kindMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_kindMeta);
+    }
+    if (data.containsKey('activated_at')) {
+      context.handle(
+        _activatedAtMeta,
+        activatedAt.isAcceptableOrUnknown(
+          data['activated_at']!,
+          _activatedAtMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_activatedAtMeta);
+    }
+    if (data.containsKey('ended_at')) {
+      context.handle(
+        _endedAtMeta,
+        endedAt.isAcceptableOrUnknown(data['ended_at']!, _endedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  InstallationActivationData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return InstallationActivationData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      contestId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}contest_id'],
+      )!,
+      installationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}installation_id'],
+      )!,
+      activatedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}activated_by'],
+      )!,
+      kind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}kind'],
+      )!,
+      activatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}activated_at'],
+      )!,
+      endedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}ended_at'],
+      ),
+    );
+  }
+
+  @override
+  $InstallationActivationsTable createAlias(String alias) {
+    return $InstallationActivationsTable(attachedDatabase, alias);
+  }
+}
+
+class InstallationActivationData extends DataClass
+    implements Insertable<InstallationActivationData> {
+  final String id;
+  final String contestId;
+  final String installationId;
+  final String activatedBy;
+  final String kind;
+  final String activatedAt;
+  final String? endedAt;
+  const InstallationActivationData({
+    required this.id,
+    required this.contestId,
+    required this.installationId,
+    required this.activatedBy,
+    required this.kind,
+    required this.activatedAt,
+    this.endedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['contest_id'] = Variable<String>(contestId);
+    map['installation_id'] = Variable<String>(installationId);
+    map['activated_by'] = Variable<String>(activatedBy);
+    map['kind'] = Variable<String>(kind);
+    map['activated_at'] = Variable<String>(activatedAt);
+    if (!nullToAbsent || endedAt != null) {
+      map['ended_at'] = Variable<String>(endedAt);
+    }
+    return map;
+  }
+
+  InstallationActivationsCompanion toCompanion(bool nullToAbsent) {
+    return InstallationActivationsCompanion(
+      id: Value(id),
+      contestId: Value(contestId),
+      installationId: Value(installationId),
+      activatedBy: Value(activatedBy),
+      kind: Value(kind),
+      activatedAt: Value(activatedAt),
+      endedAt: endedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(endedAt),
+    );
+  }
+
+  factory InstallationActivationData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return InstallationActivationData(
+      id: serializer.fromJson<String>(json['id']),
+      contestId: serializer.fromJson<String>(json['contestId']),
+      installationId: serializer.fromJson<String>(json['installationId']),
+      activatedBy: serializer.fromJson<String>(json['activatedBy']),
+      kind: serializer.fromJson<String>(json['kind']),
+      activatedAt: serializer.fromJson<String>(json['activatedAt']),
+      endedAt: serializer.fromJson<String?>(json['endedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'contestId': serializer.toJson<String>(contestId),
+      'installationId': serializer.toJson<String>(installationId),
+      'activatedBy': serializer.toJson<String>(activatedBy),
+      'kind': serializer.toJson<String>(kind),
+      'activatedAt': serializer.toJson<String>(activatedAt),
+      'endedAt': serializer.toJson<String?>(endedAt),
+    };
+  }
+
+  InstallationActivationData copyWith({
+    String? id,
+    String? contestId,
+    String? installationId,
+    String? activatedBy,
+    String? kind,
+    String? activatedAt,
+    Value<String?> endedAt = const Value.absent(),
+  }) => InstallationActivationData(
+    id: id ?? this.id,
+    contestId: contestId ?? this.contestId,
+    installationId: installationId ?? this.installationId,
+    activatedBy: activatedBy ?? this.activatedBy,
+    kind: kind ?? this.kind,
+    activatedAt: activatedAt ?? this.activatedAt,
+    endedAt: endedAt.present ? endedAt.value : this.endedAt,
+  );
+  InstallationActivationData copyWithCompanion(
+    InstallationActivationsCompanion data,
+  ) {
+    return InstallationActivationData(
+      id: data.id.present ? data.id.value : this.id,
+      contestId: data.contestId.present ? data.contestId.value : this.contestId,
+      installationId: data.installationId.present
+          ? data.installationId.value
+          : this.installationId,
+      activatedBy: data.activatedBy.present
+          ? data.activatedBy.value
+          : this.activatedBy,
+      kind: data.kind.present ? data.kind.value : this.kind,
+      activatedAt: data.activatedAt.present
+          ? data.activatedAt.value
+          : this.activatedAt,
+      endedAt: data.endedAt.present ? data.endedAt.value : this.endedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('InstallationActivationData(')
+          ..write('id: $id, ')
+          ..write('contestId: $contestId, ')
+          ..write('installationId: $installationId, ')
+          ..write('activatedBy: $activatedBy, ')
+          ..write('kind: $kind, ')
+          ..write('activatedAt: $activatedAt, ')
+          ..write('endedAt: $endedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    contestId,
+    installationId,
+    activatedBy,
+    kind,
+    activatedAt,
+    endedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is InstallationActivationData &&
+          other.id == this.id &&
+          other.contestId == this.contestId &&
+          other.installationId == this.installationId &&
+          other.activatedBy == this.activatedBy &&
+          other.kind == this.kind &&
+          other.activatedAt == this.activatedAt &&
+          other.endedAt == this.endedAt);
+}
+
+class InstallationActivationsCompanion
+    extends UpdateCompanion<InstallationActivationData> {
+  final Value<String> id;
+  final Value<String> contestId;
+  final Value<String> installationId;
+  final Value<String> activatedBy;
+  final Value<String> kind;
+  final Value<String> activatedAt;
+  final Value<String?> endedAt;
+  final Value<int> rowid;
+  const InstallationActivationsCompanion({
+    this.id = const Value.absent(),
+    this.contestId = const Value.absent(),
+    this.installationId = const Value.absent(),
+    this.activatedBy = const Value.absent(),
+    this.kind = const Value.absent(),
+    this.activatedAt = const Value.absent(),
+    this.endedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  InstallationActivationsCompanion.insert({
+    required String id,
+    required String contestId,
+    required String installationId,
+    required String activatedBy,
+    required String kind,
+    required String activatedAt,
+    this.endedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       contestId = Value(contestId),
+       installationId = Value(installationId),
+       activatedBy = Value(activatedBy),
+       kind = Value(kind),
+       activatedAt = Value(activatedAt);
+  static Insertable<InstallationActivationData> custom({
+    Expression<String>? id,
+    Expression<String>? contestId,
+    Expression<String>? installationId,
+    Expression<String>? activatedBy,
+    Expression<String>? kind,
+    Expression<String>? activatedAt,
+    Expression<String>? endedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (contestId != null) 'contest_id': contestId,
+      if (installationId != null) 'installation_id': installationId,
+      if (activatedBy != null) 'activated_by': activatedBy,
+      if (kind != null) 'kind': kind,
+      if (activatedAt != null) 'activated_at': activatedAt,
+      if (endedAt != null) 'ended_at': endedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  InstallationActivationsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? contestId,
+    Value<String>? installationId,
+    Value<String>? activatedBy,
+    Value<String>? kind,
+    Value<String>? activatedAt,
+    Value<String?>? endedAt,
+    Value<int>? rowid,
+  }) {
+    return InstallationActivationsCompanion(
+      id: id ?? this.id,
+      contestId: contestId ?? this.contestId,
+      installationId: installationId ?? this.installationId,
+      activatedBy: activatedBy ?? this.activatedBy,
+      kind: kind ?? this.kind,
+      activatedAt: activatedAt ?? this.activatedAt,
+      endedAt: endedAt ?? this.endedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (contestId.present) {
+      map['contest_id'] = Variable<String>(contestId.value);
+    }
+    if (installationId.present) {
+      map['installation_id'] = Variable<String>(installationId.value);
+    }
+    if (activatedBy.present) {
+      map['activated_by'] = Variable<String>(activatedBy.value);
+    }
+    if (kind.present) {
+      map['kind'] = Variable<String>(kind.value);
+    }
+    if (activatedAt.present) {
+      map['activated_at'] = Variable<String>(activatedAt.value);
+    }
+    if (endedAt.present) {
+      map['ended_at'] = Variable<String>(endedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('InstallationActivationsCompanion(')
+          ..write('id: $id, ')
+          ..write('contestId: $contestId, ')
+          ..write('installationId: $installationId, ')
+          ..write('activatedBy: $activatedBy, ')
+          ..write('kind: $kind, ')
+          ..write('activatedAt: $activatedAt, ')
+          ..write('endedAt: $endedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $SyncCursorsTable extends SyncCursors
+    with TableInfo<$SyncCursorsTable, SyncCursorData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SyncCursorsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _installationIdMeta = const VerificationMeta(
+    'installationId',
+  );
+  @override
+  late final GeneratedColumn<String> installationId = GeneratedColumn<String>(
+    'installation_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES installations (id)',
+    ),
+  );
+  static const VerificationMeta _contestIdMeta = const VerificationMeta(
+    'contestId',
+  );
+  @override
+  late final GeneratedColumn<String> contestId = GeneratedColumn<String>(
+    'contest_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _ownerAccountIdMeta = const VerificationMeta(
+    'ownerAccountId',
+  );
+  @override
+  late final GeneratedColumn<String> ownerAccountId = GeneratedColumn<String>(
+    'owner_account_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES accounts (id)',
+    ),
+  );
+  static const VerificationMeta _lastSyncedSequenceMeta =
+      const VerificationMeta('lastSyncedSequence');
+  @override
+  late final GeneratedColumn<int> lastSyncedSequence = GeneratedColumn<int>(
+    'last_synced_sequence',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _lastSyncedAtMeta = const VerificationMeta(
+    'lastSyncedAt',
+  );
+  @override
+  late final GeneratedColumn<String> lastSyncedAt = GeneratedColumn<String>(
+    'last_synced_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<String> updatedAt = GeneratedColumn<String>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    installationId,
+    contestId,
+    ownerAccountId,
+    lastSyncedSequence,
+    lastSyncedAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'sync_cursors';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SyncCursorData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('installation_id')) {
+      context.handle(
+        _installationIdMeta,
+        installationId.isAcceptableOrUnknown(
+          data['installation_id']!,
+          _installationIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_installationIdMeta);
+    }
+    if (data.containsKey('contest_id')) {
+      context.handle(
+        _contestIdMeta,
+        contestId.isAcceptableOrUnknown(data['contest_id']!, _contestIdMeta),
+      );
+    }
+    if (data.containsKey('owner_account_id')) {
+      context.handle(
+        _ownerAccountIdMeta,
+        ownerAccountId.isAcceptableOrUnknown(
+          data['owner_account_id']!,
+          _ownerAccountIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('last_synced_sequence')) {
+      context.handle(
+        _lastSyncedSequenceMeta,
+        lastSyncedSequence.isAcceptableOrUnknown(
+          data['last_synced_sequence']!,
+          _lastSyncedSequenceMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_lastSyncedSequenceMeta);
+    }
+    if (data.containsKey('last_synced_at')) {
+      context.handle(
+        _lastSyncedAtMeta,
+        lastSyncedAt.isAcceptableOrUnknown(
+          data['last_synced_at']!,
+          _lastSyncedAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {installationId, contestId},
+    {installationId, ownerAccountId},
+  ];
+  @override
+  SyncCursorData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SyncCursorData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      installationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}installation_id'],
+      )!,
+      contestId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}contest_id'],
+      ),
+      ownerAccountId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}owner_account_id'],
+      ),
+      lastSyncedSequence: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}last_synced_sequence'],
+      )!,
+      lastSyncedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}last_synced_at'],
+      ),
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $SyncCursorsTable createAlias(String alias) {
+    return $SyncCursorsTable(attachedDatabase, alias);
+  }
+}
+
+class SyncCursorData extends DataClass implements Insertable<SyncCursorData> {
+  final String id;
+  final String installationId;
+  final String? contestId;
+  final String? ownerAccountId;
+  final int lastSyncedSequence;
+  final String? lastSyncedAt;
+  final String updatedAt;
+  const SyncCursorData({
+    required this.id,
+    required this.installationId,
+    this.contestId,
+    this.ownerAccountId,
+    required this.lastSyncedSequence,
+    this.lastSyncedAt,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['installation_id'] = Variable<String>(installationId);
+    if (!nullToAbsent || contestId != null) {
+      map['contest_id'] = Variable<String>(contestId);
+    }
+    if (!nullToAbsent || ownerAccountId != null) {
+      map['owner_account_id'] = Variable<String>(ownerAccountId);
+    }
+    map['last_synced_sequence'] = Variable<int>(lastSyncedSequence);
+    if (!nullToAbsent || lastSyncedAt != null) {
+      map['last_synced_at'] = Variable<String>(lastSyncedAt);
+    }
+    map['updated_at'] = Variable<String>(updatedAt);
+    return map;
+  }
+
+  SyncCursorsCompanion toCompanion(bool nullToAbsent) {
+    return SyncCursorsCompanion(
+      id: Value(id),
+      installationId: Value(installationId),
+      contestId: contestId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(contestId),
+      ownerAccountId: ownerAccountId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(ownerAccountId),
+      lastSyncedSequence: Value(lastSyncedSequence),
+      lastSyncedAt: lastSyncedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastSyncedAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory SyncCursorData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SyncCursorData(
+      id: serializer.fromJson<String>(json['id']),
+      installationId: serializer.fromJson<String>(json['installationId']),
+      contestId: serializer.fromJson<String?>(json['contestId']),
+      ownerAccountId: serializer.fromJson<String?>(json['ownerAccountId']),
+      lastSyncedSequence: serializer.fromJson<int>(json['lastSyncedSequence']),
+      lastSyncedAt: serializer.fromJson<String?>(json['lastSyncedAt']),
+      updatedAt: serializer.fromJson<String>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'installationId': serializer.toJson<String>(installationId),
+      'contestId': serializer.toJson<String?>(contestId),
+      'ownerAccountId': serializer.toJson<String?>(ownerAccountId),
+      'lastSyncedSequence': serializer.toJson<int>(lastSyncedSequence),
+      'lastSyncedAt': serializer.toJson<String?>(lastSyncedAt),
+      'updatedAt': serializer.toJson<String>(updatedAt),
+    };
+  }
+
+  SyncCursorData copyWith({
+    String? id,
+    String? installationId,
+    Value<String?> contestId = const Value.absent(),
+    Value<String?> ownerAccountId = const Value.absent(),
+    int? lastSyncedSequence,
+    Value<String?> lastSyncedAt = const Value.absent(),
+    String? updatedAt,
+  }) => SyncCursorData(
+    id: id ?? this.id,
+    installationId: installationId ?? this.installationId,
+    contestId: contestId.present ? contestId.value : this.contestId,
+    ownerAccountId: ownerAccountId.present
+        ? ownerAccountId.value
+        : this.ownerAccountId,
+    lastSyncedSequence: lastSyncedSequence ?? this.lastSyncedSequence,
+    lastSyncedAt: lastSyncedAt.present ? lastSyncedAt.value : this.lastSyncedAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  SyncCursorData copyWithCompanion(SyncCursorsCompanion data) {
+    return SyncCursorData(
+      id: data.id.present ? data.id.value : this.id,
+      installationId: data.installationId.present
+          ? data.installationId.value
+          : this.installationId,
+      contestId: data.contestId.present ? data.contestId.value : this.contestId,
+      ownerAccountId: data.ownerAccountId.present
+          ? data.ownerAccountId.value
+          : this.ownerAccountId,
+      lastSyncedSequence: data.lastSyncedSequence.present
+          ? data.lastSyncedSequence.value
+          : this.lastSyncedSequence,
+      lastSyncedAt: data.lastSyncedAt.present
+          ? data.lastSyncedAt.value
+          : this.lastSyncedAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SyncCursorData(')
+          ..write('id: $id, ')
+          ..write('installationId: $installationId, ')
+          ..write('contestId: $contestId, ')
+          ..write('ownerAccountId: $ownerAccountId, ')
+          ..write('lastSyncedSequence: $lastSyncedSequence, ')
+          ..write('lastSyncedAt: $lastSyncedAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    installationId,
+    contestId,
+    ownerAccountId,
+    lastSyncedSequence,
+    lastSyncedAt,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SyncCursorData &&
+          other.id == this.id &&
+          other.installationId == this.installationId &&
+          other.contestId == this.contestId &&
+          other.ownerAccountId == this.ownerAccountId &&
+          other.lastSyncedSequence == this.lastSyncedSequence &&
+          other.lastSyncedAt == this.lastSyncedAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class SyncCursorsCompanion extends UpdateCompanion<SyncCursorData> {
+  final Value<String> id;
+  final Value<String> installationId;
+  final Value<String?> contestId;
+  final Value<String?> ownerAccountId;
+  final Value<int> lastSyncedSequence;
+  final Value<String?> lastSyncedAt;
+  final Value<String> updatedAt;
+  final Value<int> rowid;
+  const SyncCursorsCompanion({
+    this.id = const Value.absent(),
+    this.installationId = const Value.absent(),
+    this.contestId = const Value.absent(),
+    this.ownerAccountId = const Value.absent(),
+    this.lastSyncedSequence = const Value.absent(),
+    this.lastSyncedAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  SyncCursorsCompanion.insert({
+    required String id,
+    required String installationId,
+    this.contestId = const Value.absent(),
+    this.ownerAccountId = const Value.absent(),
+    required int lastSyncedSequence,
+    this.lastSyncedAt = const Value.absent(),
+    required String updatedAt,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       installationId = Value(installationId),
+       lastSyncedSequence = Value(lastSyncedSequence),
+       updatedAt = Value(updatedAt);
+  static Insertable<SyncCursorData> custom({
+    Expression<String>? id,
+    Expression<String>? installationId,
+    Expression<String>? contestId,
+    Expression<String>? ownerAccountId,
+    Expression<int>? lastSyncedSequence,
+    Expression<String>? lastSyncedAt,
+    Expression<String>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (installationId != null) 'installation_id': installationId,
+      if (contestId != null) 'contest_id': contestId,
+      if (ownerAccountId != null) 'owner_account_id': ownerAccountId,
+      if (lastSyncedSequence != null)
+        'last_synced_sequence': lastSyncedSequence,
+      if (lastSyncedAt != null) 'last_synced_at': lastSyncedAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  SyncCursorsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? installationId,
+    Value<String?>? contestId,
+    Value<String?>? ownerAccountId,
+    Value<int>? lastSyncedSequence,
+    Value<String?>? lastSyncedAt,
+    Value<String>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return SyncCursorsCompanion(
+      id: id ?? this.id,
+      installationId: installationId ?? this.installationId,
+      contestId: contestId ?? this.contestId,
+      ownerAccountId: ownerAccountId ?? this.ownerAccountId,
+      lastSyncedSequence: lastSyncedSequence ?? this.lastSyncedSequence,
+      lastSyncedAt: lastSyncedAt ?? this.lastSyncedAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (installationId.present) {
+      map['installation_id'] = Variable<String>(installationId.value);
+    }
+    if (contestId.present) {
+      map['contest_id'] = Variable<String>(contestId.value);
+    }
+    if (ownerAccountId.present) {
+      map['owner_account_id'] = Variable<String>(ownerAccountId.value);
+    }
+    if (lastSyncedSequence.present) {
+      map['last_synced_sequence'] = Variable<int>(lastSyncedSequence.value);
+    }
+    if (lastSyncedAt.present) {
+      map['last_synced_at'] = Variable<String>(lastSyncedAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<String>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SyncCursorsCompanion(')
+          ..write('id: $id, ')
+          ..write('installationId: $installationId, ')
+          ..write('contestId: $contestId, ')
+          ..write('ownerAccountId: $ownerAccountId, ')
+          ..write('lastSyncedSequence: $lastSyncedSequence, ')
+          ..write('lastSyncedAt: $lastSyncedAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $PublicationIdentitiesTable extends PublicationIdentities
+    with TableInfo<$PublicationIdentitiesTable, PublicationIdentityData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PublicationIdentitiesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _contestIdMeta = const VerificationMeta(
+    'contestId',
+  );
+  @override
+  late final GeneratedColumn<String> contestId = GeneratedColumn<String>(
+    'contest_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES contests (id) ON DELETE SET NULL',
+    ),
+  );
+  static const VerificationMeta _ownerPublicProfileIdMeta =
+      const VerificationMeta('ownerPublicProfileId');
+  @override
+  late final GeneratedColumn<String> ownerPublicProfileId =
+      GeneratedColumn<String>(
+        'owner_public_profile_id',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES account_public_profiles (id)',
+        ),
+      );
+  static const VerificationMeta _claimStatusMeta = const VerificationMeta(
+    'claimStatus',
+  );
+  @override
+  late final GeneratedColumn<String> claimStatus = GeneratedColumn<String>(
+    'claim_status',
+    aliasedName,
+    false,
+    check: () => claimStatus.isIn(claimStatusValues),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _verificationEmailMeta = const VerificationMeta(
+    'verificationEmail',
+  );
+  @override
+  late final GeneratedColumn<String> verificationEmail =
+      GeneratedColumn<String>(
+        'verification_email',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _visibilityMeta = const VerificationMeta(
+    'visibility',
+  );
+  @override
+  late final GeneratedColumn<String> visibility = GeneratedColumn<String>(
+    'visibility',
+    aliasedName,
+    false,
+    check: () => visibility.isIn(publicationVisibilityValues),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _publishedAtMeta = const VerificationMeta(
+    'publishedAt',
+  );
+  @override
+  late final GeneratedColumn<String> publishedAt = GeneratedColumn<String>(
+    'published_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _currentProjectionIdMeta =
+      const VerificationMeta('currentProjectionId');
+  @override
+  late final GeneratedColumn<String> currentProjectionId =
+      GeneratedColumn<String>(
+        'current_projection_id',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _resultsHiddenThroughRoundMeta =
+      const VerificationMeta('resultsHiddenThroughRound');
+  @override
+  late final GeneratedColumn<int> resultsHiddenThroughRound =
+      GeneratedColumn<int>(
+        'results_hidden_through_round',
+        aliasedName,
+        true,
+        type: DriftSqlType.int,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _resultsHiddenAtMeta = const VerificationMeta(
+    'resultsHiddenAt',
+  );
+  @override
+  late final GeneratedColumn<String> resultsHiddenAt = GeneratedColumn<String>(
+    'results_hidden_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _revisionMeta = const VerificationMeta(
+    'revision',
+  );
+  @override
+  late final GeneratedColumn<int> revision = GeneratedColumn<int>(
+    'revision',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    contestId,
+    ownerPublicProfileId,
+    claimStatus,
+    verificationEmail,
+    visibility,
+    publishedAt,
+    currentProjectionId,
+    resultsHiddenThroughRound,
+    resultsHiddenAt,
+    revision,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'publication_identities';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<PublicationIdentityData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('contest_id')) {
+      context.handle(
+        _contestIdMeta,
+        contestId.isAcceptableOrUnknown(data['contest_id']!, _contestIdMeta),
+      );
+    }
+    if (data.containsKey('owner_public_profile_id')) {
+      context.handle(
+        _ownerPublicProfileIdMeta,
+        ownerPublicProfileId.isAcceptableOrUnknown(
+          data['owner_public_profile_id']!,
+          _ownerPublicProfileIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('claim_status')) {
+      context.handle(
+        _claimStatusMeta,
+        claimStatus.isAcceptableOrUnknown(
+          data['claim_status']!,
+          _claimStatusMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_claimStatusMeta);
+    }
+    if (data.containsKey('verification_email')) {
+      context.handle(
+        _verificationEmailMeta,
+        verificationEmail.isAcceptableOrUnknown(
+          data['verification_email']!,
+          _verificationEmailMeta,
+        ),
+      );
+    }
+    if (data.containsKey('visibility')) {
+      context.handle(
+        _visibilityMeta,
+        visibility.isAcceptableOrUnknown(data['visibility']!, _visibilityMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_visibilityMeta);
+    }
+    if (data.containsKey('published_at')) {
+      context.handle(
+        _publishedAtMeta,
+        publishedAt.isAcceptableOrUnknown(
+          data['published_at']!,
+          _publishedAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('current_projection_id')) {
+      context.handle(
+        _currentProjectionIdMeta,
+        currentProjectionId.isAcceptableOrUnknown(
+          data['current_projection_id']!,
+          _currentProjectionIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('results_hidden_through_round')) {
+      context.handle(
+        _resultsHiddenThroughRoundMeta,
+        resultsHiddenThroughRound.isAcceptableOrUnknown(
+          data['results_hidden_through_round']!,
+          _resultsHiddenThroughRoundMeta,
+        ),
+      );
+    }
+    if (data.containsKey('results_hidden_at')) {
+      context.handle(
+        _resultsHiddenAtMeta,
+        resultsHiddenAt.isAcceptableOrUnknown(
+          data['results_hidden_at']!,
+          _resultsHiddenAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('revision')) {
+      context.handle(
+        _revisionMeta,
+        revision.isAcceptableOrUnknown(data['revision']!, _revisionMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  PublicationIdentityData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PublicationIdentityData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      contestId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}contest_id'],
+      ),
+      ownerPublicProfileId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}owner_public_profile_id'],
+      ),
+      claimStatus: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}claim_status'],
+      )!,
+      verificationEmail: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}verification_email'],
+      ),
+      visibility: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}visibility'],
+      )!,
+      publishedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}published_at'],
+      ),
+      currentProjectionId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}current_projection_id'],
+      ),
+      resultsHiddenThroughRound: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}results_hidden_through_round'],
+      ),
+      resultsHiddenAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}results_hidden_at'],
+      ),
+      revision: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}revision'],
+      )!,
+    );
+  }
+
+  @override
+  $PublicationIdentitiesTable createAlias(String alias) {
+    return $PublicationIdentitiesTable(attachedDatabase, alias);
+  }
+}
+
+class PublicationIdentityData extends DataClass
+    implements Insertable<PublicationIdentityData> {
+  final String id;
+  final String? contestId;
+  final String? ownerPublicProfileId;
+  final String claimStatus;
+  final String? verificationEmail;
+  final String visibility;
+  final String? publishedAt;
+  final String? currentProjectionId;
+  final int? resultsHiddenThroughRound;
+  final String? resultsHiddenAt;
+  final int revision;
+  const PublicationIdentityData({
+    required this.id,
+    this.contestId,
+    this.ownerPublicProfileId,
+    required this.claimStatus,
+    this.verificationEmail,
+    required this.visibility,
+    this.publishedAt,
+    this.currentProjectionId,
+    this.resultsHiddenThroughRound,
+    this.resultsHiddenAt,
+    required this.revision,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    if (!nullToAbsent || contestId != null) {
+      map['contest_id'] = Variable<String>(contestId);
+    }
+    if (!nullToAbsent || ownerPublicProfileId != null) {
+      map['owner_public_profile_id'] = Variable<String>(ownerPublicProfileId);
+    }
+    map['claim_status'] = Variable<String>(claimStatus);
+    if (!nullToAbsent || verificationEmail != null) {
+      map['verification_email'] = Variable<String>(verificationEmail);
+    }
+    map['visibility'] = Variable<String>(visibility);
+    if (!nullToAbsent || publishedAt != null) {
+      map['published_at'] = Variable<String>(publishedAt);
+    }
+    if (!nullToAbsent || currentProjectionId != null) {
+      map['current_projection_id'] = Variable<String>(currentProjectionId);
+    }
+    if (!nullToAbsent || resultsHiddenThroughRound != null) {
+      map['results_hidden_through_round'] = Variable<int>(
+        resultsHiddenThroughRound,
+      );
+    }
+    if (!nullToAbsent || resultsHiddenAt != null) {
+      map['results_hidden_at'] = Variable<String>(resultsHiddenAt);
+    }
+    map['revision'] = Variable<int>(revision);
+    return map;
+  }
+
+  PublicationIdentitiesCompanion toCompanion(bool nullToAbsent) {
+    return PublicationIdentitiesCompanion(
+      id: Value(id),
+      contestId: contestId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(contestId),
+      ownerPublicProfileId: ownerPublicProfileId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(ownerPublicProfileId),
+      claimStatus: Value(claimStatus),
+      verificationEmail: verificationEmail == null && nullToAbsent
+          ? const Value.absent()
+          : Value(verificationEmail),
+      visibility: Value(visibility),
+      publishedAt: publishedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(publishedAt),
+      currentProjectionId: currentProjectionId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(currentProjectionId),
+      resultsHiddenThroughRound:
+          resultsHiddenThroughRound == null && nullToAbsent
+          ? const Value.absent()
+          : Value(resultsHiddenThroughRound),
+      resultsHiddenAt: resultsHiddenAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(resultsHiddenAt),
+      revision: Value(revision),
+    );
+  }
+
+  factory PublicationIdentityData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PublicationIdentityData(
+      id: serializer.fromJson<String>(json['id']),
+      contestId: serializer.fromJson<String?>(json['contestId']),
+      ownerPublicProfileId: serializer.fromJson<String?>(
+        json['ownerPublicProfileId'],
+      ),
+      claimStatus: serializer.fromJson<String>(json['claimStatus']),
+      verificationEmail: serializer.fromJson<String?>(
+        json['verificationEmail'],
+      ),
+      visibility: serializer.fromJson<String>(json['visibility']),
+      publishedAt: serializer.fromJson<String?>(json['publishedAt']),
+      currentProjectionId: serializer.fromJson<String?>(
+        json['currentProjectionId'],
+      ),
+      resultsHiddenThroughRound: serializer.fromJson<int?>(
+        json['resultsHiddenThroughRound'],
+      ),
+      resultsHiddenAt: serializer.fromJson<String?>(json['resultsHiddenAt']),
+      revision: serializer.fromJson<int>(json['revision']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'contestId': serializer.toJson<String?>(contestId),
+      'ownerPublicProfileId': serializer.toJson<String?>(ownerPublicProfileId),
+      'claimStatus': serializer.toJson<String>(claimStatus),
+      'verificationEmail': serializer.toJson<String?>(verificationEmail),
+      'visibility': serializer.toJson<String>(visibility),
+      'publishedAt': serializer.toJson<String?>(publishedAt),
+      'currentProjectionId': serializer.toJson<String?>(currentProjectionId),
+      'resultsHiddenThroughRound': serializer.toJson<int?>(
+        resultsHiddenThroughRound,
+      ),
+      'resultsHiddenAt': serializer.toJson<String?>(resultsHiddenAt),
+      'revision': serializer.toJson<int>(revision),
+    };
+  }
+
+  PublicationIdentityData copyWith({
+    String? id,
+    Value<String?> contestId = const Value.absent(),
+    Value<String?> ownerPublicProfileId = const Value.absent(),
+    String? claimStatus,
+    Value<String?> verificationEmail = const Value.absent(),
+    String? visibility,
+    Value<String?> publishedAt = const Value.absent(),
+    Value<String?> currentProjectionId = const Value.absent(),
+    Value<int?> resultsHiddenThroughRound = const Value.absent(),
+    Value<String?> resultsHiddenAt = const Value.absent(),
+    int? revision,
+  }) => PublicationIdentityData(
+    id: id ?? this.id,
+    contestId: contestId.present ? contestId.value : this.contestId,
+    ownerPublicProfileId: ownerPublicProfileId.present
+        ? ownerPublicProfileId.value
+        : this.ownerPublicProfileId,
+    claimStatus: claimStatus ?? this.claimStatus,
+    verificationEmail: verificationEmail.present
+        ? verificationEmail.value
+        : this.verificationEmail,
+    visibility: visibility ?? this.visibility,
+    publishedAt: publishedAt.present ? publishedAt.value : this.publishedAt,
+    currentProjectionId: currentProjectionId.present
+        ? currentProjectionId.value
+        : this.currentProjectionId,
+    resultsHiddenThroughRound: resultsHiddenThroughRound.present
+        ? resultsHiddenThroughRound.value
+        : this.resultsHiddenThroughRound,
+    resultsHiddenAt: resultsHiddenAt.present
+        ? resultsHiddenAt.value
+        : this.resultsHiddenAt,
+    revision: revision ?? this.revision,
+  );
+  PublicationIdentityData copyWithCompanion(
+    PublicationIdentitiesCompanion data,
+  ) {
+    return PublicationIdentityData(
+      id: data.id.present ? data.id.value : this.id,
+      contestId: data.contestId.present ? data.contestId.value : this.contestId,
+      ownerPublicProfileId: data.ownerPublicProfileId.present
+          ? data.ownerPublicProfileId.value
+          : this.ownerPublicProfileId,
+      claimStatus: data.claimStatus.present
+          ? data.claimStatus.value
+          : this.claimStatus,
+      verificationEmail: data.verificationEmail.present
+          ? data.verificationEmail.value
+          : this.verificationEmail,
+      visibility: data.visibility.present
+          ? data.visibility.value
+          : this.visibility,
+      publishedAt: data.publishedAt.present
+          ? data.publishedAt.value
+          : this.publishedAt,
+      currentProjectionId: data.currentProjectionId.present
+          ? data.currentProjectionId.value
+          : this.currentProjectionId,
+      resultsHiddenThroughRound: data.resultsHiddenThroughRound.present
+          ? data.resultsHiddenThroughRound.value
+          : this.resultsHiddenThroughRound,
+      resultsHiddenAt: data.resultsHiddenAt.present
+          ? data.resultsHiddenAt.value
+          : this.resultsHiddenAt,
+      revision: data.revision.present ? data.revision.value : this.revision,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PublicationIdentityData(')
+          ..write('id: $id, ')
+          ..write('contestId: $contestId, ')
+          ..write('ownerPublicProfileId: $ownerPublicProfileId, ')
+          ..write('claimStatus: $claimStatus, ')
+          ..write('verificationEmail: $verificationEmail, ')
+          ..write('visibility: $visibility, ')
+          ..write('publishedAt: $publishedAt, ')
+          ..write('currentProjectionId: $currentProjectionId, ')
+          ..write('resultsHiddenThroughRound: $resultsHiddenThroughRound, ')
+          ..write('resultsHiddenAt: $resultsHiddenAt, ')
+          ..write('revision: $revision')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    contestId,
+    ownerPublicProfileId,
+    claimStatus,
+    verificationEmail,
+    visibility,
+    publishedAt,
+    currentProjectionId,
+    resultsHiddenThroughRound,
+    resultsHiddenAt,
+    revision,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PublicationIdentityData &&
+          other.id == this.id &&
+          other.contestId == this.contestId &&
+          other.ownerPublicProfileId == this.ownerPublicProfileId &&
+          other.claimStatus == this.claimStatus &&
+          other.verificationEmail == this.verificationEmail &&
+          other.visibility == this.visibility &&
+          other.publishedAt == this.publishedAt &&
+          other.currentProjectionId == this.currentProjectionId &&
+          other.resultsHiddenThroughRound == this.resultsHiddenThroughRound &&
+          other.resultsHiddenAt == this.resultsHiddenAt &&
+          other.revision == this.revision);
+}
+
+class PublicationIdentitiesCompanion
+    extends UpdateCompanion<PublicationIdentityData> {
+  final Value<String> id;
+  final Value<String?> contestId;
+  final Value<String?> ownerPublicProfileId;
+  final Value<String> claimStatus;
+  final Value<String?> verificationEmail;
+  final Value<String> visibility;
+  final Value<String?> publishedAt;
+  final Value<String?> currentProjectionId;
+  final Value<int?> resultsHiddenThroughRound;
+  final Value<String?> resultsHiddenAt;
+  final Value<int> revision;
+  final Value<int> rowid;
+  const PublicationIdentitiesCompanion({
+    this.id = const Value.absent(),
+    this.contestId = const Value.absent(),
+    this.ownerPublicProfileId = const Value.absent(),
+    this.claimStatus = const Value.absent(),
+    this.verificationEmail = const Value.absent(),
+    this.visibility = const Value.absent(),
+    this.publishedAt = const Value.absent(),
+    this.currentProjectionId = const Value.absent(),
+    this.resultsHiddenThroughRound = const Value.absent(),
+    this.resultsHiddenAt = const Value.absent(),
+    this.revision = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  PublicationIdentitiesCompanion.insert({
+    required String id,
+    this.contestId = const Value.absent(),
+    this.ownerPublicProfileId = const Value.absent(),
+    required String claimStatus,
+    this.verificationEmail = const Value.absent(),
+    required String visibility,
+    this.publishedAt = const Value.absent(),
+    this.currentProjectionId = const Value.absent(),
+    this.resultsHiddenThroughRound = const Value.absent(),
+    this.resultsHiddenAt = const Value.absent(),
+    this.revision = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       claimStatus = Value(claimStatus),
+       visibility = Value(visibility);
+  static Insertable<PublicationIdentityData> custom({
+    Expression<String>? id,
+    Expression<String>? contestId,
+    Expression<String>? ownerPublicProfileId,
+    Expression<String>? claimStatus,
+    Expression<String>? verificationEmail,
+    Expression<String>? visibility,
+    Expression<String>? publishedAt,
+    Expression<String>? currentProjectionId,
+    Expression<int>? resultsHiddenThroughRound,
+    Expression<String>? resultsHiddenAt,
+    Expression<int>? revision,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (contestId != null) 'contest_id': contestId,
+      if (ownerPublicProfileId != null)
+        'owner_public_profile_id': ownerPublicProfileId,
+      if (claimStatus != null) 'claim_status': claimStatus,
+      if (verificationEmail != null) 'verification_email': verificationEmail,
+      if (visibility != null) 'visibility': visibility,
+      if (publishedAt != null) 'published_at': publishedAt,
+      if (currentProjectionId != null)
+        'current_projection_id': currentProjectionId,
+      if (resultsHiddenThroughRound != null)
+        'results_hidden_through_round': resultsHiddenThroughRound,
+      if (resultsHiddenAt != null) 'results_hidden_at': resultsHiddenAt,
+      if (revision != null) 'revision': revision,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  PublicationIdentitiesCompanion copyWith({
+    Value<String>? id,
+    Value<String?>? contestId,
+    Value<String?>? ownerPublicProfileId,
+    Value<String>? claimStatus,
+    Value<String?>? verificationEmail,
+    Value<String>? visibility,
+    Value<String?>? publishedAt,
+    Value<String?>? currentProjectionId,
+    Value<int?>? resultsHiddenThroughRound,
+    Value<String?>? resultsHiddenAt,
+    Value<int>? revision,
+    Value<int>? rowid,
+  }) {
+    return PublicationIdentitiesCompanion(
+      id: id ?? this.id,
+      contestId: contestId ?? this.contestId,
+      ownerPublicProfileId: ownerPublicProfileId ?? this.ownerPublicProfileId,
+      claimStatus: claimStatus ?? this.claimStatus,
+      verificationEmail: verificationEmail ?? this.verificationEmail,
+      visibility: visibility ?? this.visibility,
+      publishedAt: publishedAt ?? this.publishedAt,
+      currentProjectionId: currentProjectionId ?? this.currentProjectionId,
+      resultsHiddenThroughRound:
+          resultsHiddenThroughRound ?? this.resultsHiddenThroughRound,
+      resultsHiddenAt: resultsHiddenAt ?? this.resultsHiddenAt,
+      revision: revision ?? this.revision,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (contestId.present) {
+      map['contest_id'] = Variable<String>(contestId.value);
+    }
+    if (ownerPublicProfileId.present) {
+      map['owner_public_profile_id'] = Variable<String>(
+        ownerPublicProfileId.value,
+      );
+    }
+    if (claimStatus.present) {
+      map['claim_status'] = Variable<String>(claimStatus.value);
+    }
+    if (verificationEmail.present) {
+      map['verification_email'] = Variable<String>(verificationEmail.value);
+    }
+    if (visibility.present) {
+      map['visibility'] = Variable<String>(visibility.value);
+    }
+    if (publishedAt.present) {
+      map['published_at'] = Variable<String>(publishedAt.value);
+    }
+    if (currentProjectionId.present) {
+      map['current_projection_id'] = Variable<String>(
+        currentProjectionId.value,
+      );
+    }
+    if (resultsHiddenThroughRound.present) {
+      map['results_hidden_through_round'] = Variable<int>(
+        resultsHiddenThroughRound.value,
+      );
+    }
+    if (resultsHiddenAt.present) {
+      map['results_hidden_at'] = Variable<String>(resultsHiddenAt.value);
+    }
+    if (revision.present) {
+      map['revision'] = Variable<int>(revision.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PublicationIdentitiesCompanion(')
+          ..write('id: $id, ')
+          ..write('contestId: $contestId, ')
+          ..write('ownerPublicProfileId: $ownerPublicProfileId, ')
+          ..write('claimStatus: $claimStatus, ')
+          ..write('verificationEmail: $verificationEmail, ')
+          ..write('visibility: $visibility, ')
+          ..write('publishedAt: $publishedAt, ')
+          ..write('currentProjectionId: $currentProjectionId, ')
+          ..write('resultsHiddenThroughRound: $resultsHiddenThroughRound, ')
+          ..write('resultsHiddenAt: $resultsHiddenAt, ')
+          ..write('revision: $revision, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $PublicationProjectionsTable extends PublicationProjections
+    with TableInfo<$PublicationProjectionsTable, PublicationProjectionData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PublicationProjectionsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _publicationIdMeta = const VerificationMeta(
+    'publicationId',
+  );
+  @override
+  late final GeneratedColumn<String> publicationId = GeneratedColumn<String>(
+    'publication_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES publication_identities (id)',
+    ),
+  );
+  static const VerificationMeta _projectionRevisionMeta =
+      const VerificationMeta('projectionRevision');
+  @override
+  late final GeneratedColumn<int> projectionRevision = GeneratedColumn<int>(
+    'projection_revision',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _contestRevisionMeta = const VerificationMeta(
+    'contestRevision',
+  );
+  @override
+  late final GeneratedColumn<int> contestRevision = GeneratedColumn<int>(
+    'contest_revision',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _configRevisionMeta = const VerificationMeta(
+    'configRevision',
+  );
+  @override
+  late final GeneratedColumn<int> configRevision = GeneratedColumn<int>(
+    'config_revision',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _matrixRevisionMeta = const VerificationMeta(
+    'matrixRevision',
+  );
+  @override
+  late final GeneratedColumn<int> matrixRevision = GeneratedColumn<int>(
+    'matrix_revision',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _disciplineTypeMeta = const VerificationMeta(
+    'disciplineType',
+  );
+  @override
+  late final GeneratedColumn<String> disciplineType = GeneratedColumn<String>(
+    'discipline_type',
+    aliasedName,
+    false,
+    check: () => disciplineType.isIn(disciplineTypeValues),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _disciplineRulesVersionMeta =
+      const VerificationMeta('disciplineRulesVersion');
+  @override
+  late final GeneratedColumn<int> disciplineRulesVersion = GeneratedColumn<int>(
+    'discipline_rules_version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _calculationVersionMeta =
+      const VerificationMeta('calculationVersion');
+  @override
+  late final GeneratedColumn<String> calculationVersion =
+      GeneratedColumn<String>(
+        'calculation_version',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      );
+  static const VerificationMeta _contestIdentityMeta = const VerificationMeta(
+    'contestIdentity',
+  );
+  @override
+  late final GeneratedColumn<String> contestIdentity = GeneratedColumn<String>(
+    'contest_identity',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _participantsMeta = const VerificationMeta(
+    'participants',
+  );
+  @override
+  late final GeneratedColumn<String> participants = GeneratedColumn<String>(
+    'participants',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _teamsMeta = const VerificationMeta('teams');
+  @override
+  late final GeneratedColumn<String> teams = GeneratedColumn<String>(
+    'teams',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _matrixInfoMeta = const VerificationMeta(
+    'matrixInfo',
+  );
+  @override
+  late final GeneratedColumn<String> matrixInfo = GeneratedColumn<String>(
+    'matrix_info',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _scoresMeta = const VerificationMeta('scores');
+  @override
+  late final GeneratedColumn<String> scores = GeneratedColumn<String>(
+    'scores',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _standingsMeta = const VerificationMeta(
+    'standings',
+  );
+  @override
+  late final GeneratedColumn<String> standings = GeneratedColumn<String>(
+    'standings',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _calculationMetadataMeta =
+      const VerificationMeta('calculationMetadata');
+  @override
+  late final GeneratedColumn<String> calculationMetadata =
+      GeneratedColumn<String>(
+        'calculation_metadata',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _publishedAtMeta = const VerificationMeta(
+    'publishedAt',
+  );
+  @override
+  late final GeneratedColumn<String> publishedAt = GeneratedColumn<String>(
+    'published_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _publishedByMeta = const VerificationMeta(
+    'publishedBy',
+  );
+  @override
+  late final GeneratedColumn<String> publishedBy = GeneratedColumn<String>(
+    'published_by',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES accounts (id)',
+    ),
+  );
+  static const VerificationMeta _clientMutationIdMeta = const VerificationMeta(
+    'clientMutationId',
+  );
+  @override
+  late final GeneratedColumn<String> clientMutationId = GeneratedColumn<String>(
+    'client_mutation_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    publicationId,
+    projectionRevision,
+    contestRevision,
+    configRevision,
+    matrixRevision,
+    disciplineType,
+    disciplineRulesVersion,
+    calculationVersion,
+    contestIdentity,
+    participants,
+    teams,
+    matrixInfo,
+    scores,
+    standings,
+    calculationMetadata,
+    publishedAt,
+    publishedBy,
+    clientMutationId,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'publication_projections';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<PublicationProjectionData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('publication_id')) {
+      context.handle(
+        _publicationIdMeta,
+        publicationId.isAcceptableOrUnknown(
+          data['publication_id']!,
+          _publicationIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_publicationIdMeta);
+    }
+    if (data.containsKey('projection_revision')) {
+      context.handle(
+        _projectionRevisionMeta,
+        projectionRevision.isAcceptableOrUnknown(
+          data['projection_revision']!,
+          _projectionRevisionMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_projectionRevisionMeta);
+    }
+    if (data.containsKey('contest_revision')) {
+      context.handle(
+        _contestRevisionMeta,
+        contestRevision.isAcceptableOrUnknown(
+          data['contest_revision']!,
+          _contestRevisionMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_contestRevisionMeta);
+    }
+    if (data.containsKey('config_revision')) {
+      context.handle(
+        _configRevisionMeta,
+        configRevision.isAcceptableOrUnknown(
+          data['config_revision']!,
+          _configRevisionMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_configRevisionMeta);
+    }
+    if (data.containsKey('matrix_revision')) {
+      context.handle(
+        _matrixRevisionMeta,
+        matrixRevision.isAcceptableOrUnknown(
+          data['matrix_revision']!,
+          _matrixRevisionMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_matrixRevisionMeta);
+    }
+    if (data.containsKey('discipline_type')) {
+      context.handle(
+        _disciplineTypeMeta,
+        disciplineType.isAcceptableOrUnknown(
+          data['discipline_type']!,
+          _disciplineTypeMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_disciplineTypeMeta);
+    }
+    if (data.containsKey('discipline_rules_version')) {
+      context.handle(
+        _disciplineRulesVersionMeta,
+        disciplineRulesVersion.isAcceptableOrUnknown(
+          data['discipline_rules_version']!,
+          _disciplineRulesVersionMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_disciplineRulesVersionMeta);
+    }
+    if (data.containsKey('calculation_version')) {
+      context.handle(
+        _calculationVersionMeta,
+        calculationVersion.isAcceptableOrUnknown(
+          data['calculation_version']!,
+          _calculationVersionMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_calculationVersionMeta);
+    }
+    if (data.containsKey('contest_identity')) {
+      context.handle(
+        _contestIdentityMeta,
+        contestIdentity.isAcceptableOrUnknown(
+          data['contest_identity']!,
+          _contestIdentityMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_contestIdentityMeta);
+    }
+    if (data.containsKey('participants')) {
+      context.handle(
+        _participantsMeta,
+        participants.isAcceptableOrUnknown(
+          data['participants']!,
+          _participantsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('teams')) {
+      context.handle(
+        _teamsMeta,
+        teams.isAcceptableOrUnknown(data['teams']!, _teamsMeta),
+      );
+    }
+    if (data.containsKey('matrix_info')) {
+      context.handle(
+        _matrixInfoMeta,
+        matrixInfo.isAcceptableOrUnknown(data['matrix_info']!, _matrixInfoMeta),
+      );
+    }
+    if (data.containsKey('scores')) {
+      context.handle(
+        _scoresMeta,
+        scores.isAcceptableOrUnknown(data['scores']!, _scoresMeta),
+      );
+    }
+    if (data.containsKey('standings')) {
+      context.handle(
+        _standingsMeta,
+        standings.isAcceptableOrUnknown(data['standings']!, _standingsMeta),
+      );
+    }
+    if (data.containsKey('calculation_metadata')) {
+      context.handle(
+        _calculationMetadataMeta,
+        calculationMetadata.isAcceptableOrUnknown(
+          data['calculation_metadata']!,
+          _calculationMetadataMeta,
+        ),
+      );
+    }
+    if (data.containsKey('published_at')) {
+      context.handle(
+        _publishedAtMeta,
+        publishedAt.isAcceptableOrUnknown(
+          data['published_at']!,
+          _publishedAtMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_publishedAtMeta);
+    }
+    if (data.containsKey('published_by')) {
+      context.handle(
+        _publishedByMeta,
+        publishedBy.isAcceptableOrUnknown(
+          data['published_by']!,
+          _publishedByMeta,
+        ),
+      );
+    }
+    if (data.containsKey('client_mutation_id')) {
+      context.handle(
+        _clientMutationIdMeta,
+        clientMutationId.isAcceptableOrUnknown(
+          data['client_mutation_id']!,
+          _clientMutationIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_clientMutationIdMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {publicationId, projectionRevision},
+    {publicationId, clientMutationId},
+  ];
+  @override
+  PublicationProjectionData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PublicationProjectionData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      publicationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}publication_id'],
+      )!,
+      projectionRevision: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}projection_revision'],
+      )!,
+      contestRevision: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}contest_revision'],
+      )!,
+      configRevision: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}config_revision'],
+      )!,
+      matrixRevision: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}matrix_revision'],
+      )!,
+      disciplineType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}discipline_type'],
+      )!,
+      disciplineRulesVersion: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}discipline_rules_version'],
+      )!,
+      calculationVersion: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}calculation_version'],
+      )!,
+      contestIdentity: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}contest_identity'],
+      )!,
+      participants: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}participants'],
+      ),
+      teams: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}teams'],
+      ),
+      matrixInfo: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}matrix_info'],
+      ),
+      scores: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}scores'],
+      ),
+      standings: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}standings'],
+      ),
+      calculationMetadata: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}calculation_metadata'],
+      ),
+      publishedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}published_at'],
+      )!,
+      publishedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}published_by'],
+      ),
+      clientMutationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}client_mutation_id'],
+      )!,
+    );
+  }
+
+  @override
+  $PublicationProjectionsTable createAlias(String alias) {
+    return $PublicationProjectionsTable(attachedDatabase, alias);
+  }
+}
+
+class PublicationProjectionData extends DataClass
+    implements Insertable<PublicationProjectionData> {
+  final String id;
+  final String publicationId;
+  final int projectionRevision;
+  final int contestRevision;
+  final int configRevision;
+  final int matrixRevision;
+  final String disciplineType;
+  final int disciplineRulesVersion;
+  final String calculationVersion;
+  final String contestIdentity;
+  final String? participants;
+  final String? teams;
+  final String? matrixInfo;
+  final String? scores;
+  final String? standings;
+  final String? calculationMetadata;
+  final String publishedAt;
+  final String? publishedBy;
+  final String clientMutationId;
+  const PublicationProjectionData({
+    required this.id,
+    required this.publicationId,
+    required this.projectionRevision,
+    required this.contestRevision,
+    required this.configRevision,
+    required this.matrixRevision,
+    required this.disciplineType,
+    required this.disciplineRulesVersion,
+    required this.calculationVersion,
+    required this.contestIdentity,
+    this.participants,
+    this.teams,
+    this.matrixInfo,
+    this.scores,
+    this.standings,
+    this.calculationMetadata,
+    required this.publishedAt,
+    this.publishedBy,
+    required this.clientMutationId,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['publication_id'] = Variable<String>(publicationId);
+    map['projection_revision'] = Variable<int>(projectionRevision);
+    map['contest_revision'] = Variable<int>(contestRevision);
+    map['config_revision'] = Variable<int>(configRevision);
+    map['matrix_revision'] = Variable<int>(matrixRevision);
+    map['discipline_type'] = Variable<String>(disciplineType);
+    map['discipline_rules_version'] = Variable<int>(disciplineRulesVersion);
+    map['calculation_version'] = Variable<String>(calculationVersion);
+    map['contest_identity'] = Variable<String>(contestIdentity);
+    if (!nullToAbsent || participants != null) {
+      map['participants'] = Variable<String>(participants);
+    }
+    if (!nullToAbsent || teams != null) {
+      map['teams'] = Variable<String>(teams);
+    }
+    if (!nullToAbsent || matrixInfo != null) {
+      map['matrix_info'] = Variable<String>(matrixInfo);
+    }
+    if (!nullToAbsent || scores != null) {
+      map['scores'] = Variable<String>(scores);
+    }
+    if (!nullToAbsent || standings != null) {
+      map['standings'] = Variable<String>(standings);
+    }
+    if (!nullToAbsent || calculationMetadata != null) {
+      map['calculation_metadata'] = Variable<String>(calculationMetadata);
+    }
+    map['published_at'] = Variable<String>(publishedAt);
+    if (!nullToAbsent || publishedBy != null) {
+      map['published_by'] = Variable<String>(publishedBy);
+    }
+    map['client_mutation_id'] = Variable<String>(clientMutationId);
+    return map;
+  }
+
+  PublicationProjectionsCompanion toCompanion(bool nullToAbsent) {
+    return PublicationProjectionsCompanion(
+      id: Value(id),
+      publicationId: Value(publicationId),
+      projectionRevision: Value(projectionRevision),
+      contestRevision: Value(contestRevision),
+      configRevision: Value(configRevision),
+      matrixRevision: Value(matrixRevision),
+      disciplineType: Value(disciplineType),
+      disciplineRulesVersion: Value(disciplineRulesVersion),
+      calculationVersion: Value(calculationVersion),
+      contestIdentity: Value(contestIdentity),
+      participants: participants == null && nullToAbsent
+          ? const Value.absent()
+          : Value(participants),
+      teams: teams == null && nullToAbsent
+          ? const Value.absent()
+          : Value(teams),
+      matrixInfo: matrixInfo == null && nullToAbsent
+          ? const Value.absent()
+          : Value(matrixInfo),
+      scores: scores == null && nullToAbsent
+          ? const Value.absent()
+          : Value(scores),
+      standings: standings == null && nullToAbsent
+          ? const Value.absent()
+          : Value(standings),
+      calculationMetadata: calculationMetadata == null && nullToAbsent
+          ? const Value.absent()
+          : Value(calculationMetadata),
+      publishedAt: Value(publishedAt),
+      publishedBy: publishedBy == null && nullToAbsent
+          ? const Value.absent()
+          : Value(publishedBy),
+      clientMutationId: Value(clientMutationId),
+    );
+  }
+
+  factory PublicationProjectionData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PublicationProjectionData(
+      id: serializer.fromJson<String>(json['id']),
+      publicationId: serializer.fromJson<String>(json['publicationId']),
+      projectionRevision: serializer.fromJson<int>(json['projectionRevision']),
+      contestRevision: serializer.fromJson<int>(json['contestRevision']),
+      configRevision: serializer.fromJson<int>(json['configRevision']),
+      matrixRevision: serializer.fromJson<int>(json['matrixRevision']),
+      disciplineType: serializer.fromJson<String>(json['disciplineType']),
+      disciplineRulesVersion: serializer.fromJson<int>(
+        json['disciplineRulesVersion'],
+      ),
+      calculationVersion: serializer.fromJson<String>(
+        json['calculationVersion'],
+      ),
+      contestIdentity: serializer.fromJson<String>(json['contestIdentity']),
+      participants: serializer.fromJson<String?>(json['participants']),
+      teams: serializer.fromJson<String?>(json['teams']),
+      matrixInfo: serializer.fromJson<String?>(json['matrixInfo']),
+      scores: serializer.fromJson<String?>(json['scores']),
+      standings: serializer.fromJson<String?>(json['standings']),
+      calculationMetadata: serializer.fromJson<String?>(
+        json['calculationMetadata'],
+      ),
+      publishedAt: serializer.fromJson<String>(json['publishedAt']),
+      publishedBy: serializer.fromJson<String?>(json['publishedBy']),
+      clientMutationId: serializer.fromJson<String>(json['clientMutationId']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'publicationId': serializer.toJson<String>(publicationId),
+      'projectionRevision': serializer.toJson<int>(projectionRevision),
+      'contestRevision': serializer.toJson<int>(contestRevision),
+      'configRevision': serializer.toJson<int>(configRevision),
+      'matrixRevision': serializer.toJson<int>(matrixRevision),
+      'disciplineType': serializer.toJson<String>(disciplineType),
+      'disciplineRulesVersion': serializer.toJson<int>(disciplineRulesVersion),
+      'calculationVersion': serializer.toJson<String>(calculationVersion),
+      'contestIdentity': serializer.toJson<String>(contestIdentity),
+      'participants': serializer.toJson<String?>(participants),
+      'teams': serializer.toJson<String?>(teams),
+      'matrixInfo': serializer.toJson<String?>(matrixInfo),
+      'scores': serializer.toJson<String?>(scores),
+      'standings': serializer.toJson<String?>(standings),
+      'calculationMetadata': serializer.toJson<String?>(calculationMetadata),
+      'publishedAt': serializer.toJson<String>(publishedAt),
+      'publishedBy': serializer.toJson<String?>(publishedBy),
+      'clientMutationId': serializer.toJson<String>(clientMutationId),
+    };
+  }
+
+  PublicationProjectionData copyWith({
+    String? id,
+    String? publicationId,
+    int? projectionRevision,
+    int? contestRevision,
+    int? configRevision,
+    int? matrixRevision,
+    String? disciplineType,
+    int? disciplineRulesVersion,
+    String? calculationVersion,
+    String? contestIdentity,
+    Value<String?> participants = const Value.absent(),
+    Value<String?> teams = const Value.absent(),
+    Value<String?> matrixInfo = const Value.absent(),
+    Value<String?> scores = const Value.absent(),
+    Value<String?> standings = const Value.absent(),
+    Value<String?> calculationMetadata = const Value.absent(),
+    String? publishedAt,
+    Value<String?> publishedBy = const Value.absent(),
+    String? clientMutationId,
+  }) => PublicationProjectionData(
+    id: id ?? this.id,
+    publicationId: publicationId ?? this.publicationId,
+    projectionRevision: projectionRevision ?? this.projectionRevision,
+    contestRevision: contestRevision ?? this.contestRevision,
+    configRevision: configRevision ?? this.configRevision,
+    matrixRevision: matrixRevision ?? this.matrixRevision,
+    disciplineType: disciplineType ?? this.disciplineType,
+    disciplineRulesVersion:
+        disciplineRulesVersion ?? this.disciplineRulesVersion,
+    calculationVersion: calculationVersion ?? this.calculationVersion,
+    contestIdentity: contestIdentity ?? this.contestIdentity,
+    participants: participants.present ? participants.value : this.participants,
+    teams: teams.present ? teams.value : this.teams,
+    matrixInfo: matrixInfo.present ? matrixInfo.value : this.matrixInfo,
+    scores: scores.present ? scores.value : this.scores,
+    standings: standings.present ? standings.value : this.standings,
+    calculationMetadata: calculationMetadata.present
+        ? calculationMetadata.value
+        : this.calculationMetadata,
+    publishedAt: publishedAt ?? this.publishedAt,
+    publishedBy: publishedBy.present ? publishedBy.value : this.publishedBy,
+    clientMutationId: clientMutationId ?? this.clientMutationId,
+  );
+  PublicationProjectionData copyWithCompanion(
+    PublicationProjectionsCompanion data,
+  ) {
+    return PublicationProjectionData(
+      id: data.id.present ? data.id.value : this.id,
+      publicationId: data.publicationId.present
+          ? data.publicationId.value
+          : this.publicationId,
+      projectionRevision: data.projectionRevision.present
+          ? data.projectionRevision.value
+          : this.projectionRevision,
+      contestRevision: data.contestRevision.present
+          ? data.contestRevision.value
+          : this.contestRevision,
+      configRevision: data.configRevision.present
+          ? data.configRevision.value
+          : this.configRevision,
+      matrixRevision: data.matrixRevision.present
+          ? data.matrixRevision.value
+          : this.matrixRevision,
+      disciplineType: data.disciplineType.present
+          ? data.disciplineType.value
+          : this.disciplineType,
+      disciplineRulesVersion: data.disciplineRulesVersion.present
+          ? data.disciplineRulesVersion.value
+          : this.disciplineRulesVersion,
+      calculationVersion: data.calculationVersion.present
+          ? data.calculationVersion.value
+          : this.calculationVersion,
+      contestIdentity: data.contestIdentity.present
+          ? data.contestIdentity.value
+          : this.contestIdentity,
+      participants: data.participants.present
+          ? data.participants.value
+          : this.participants,
+      teams: data.teams.present ? data.teams.value : this.teams,
+      matrixInfo: data.matrixInfo.present
+          ? data.matrixInfo.value
+          : this.matrixInfo,
+      scores: data.scores.present ? data.scores.value : this.scores,
+      standings: data.standings.present ? data.standings.value : this.standings,
+      calculationMetadata: data.calculationMetadata.present
+          ? data.calculationMetadata.value
+          : this.calculationMetadata,
+      publishedAt: data.publishedAt.present
+          ? data.publishedAt.value
+          : this.publishedAt,
+      publishedBy: data.publishedBy.present
+          ? data.publishedBy.value
+          : this.publishedBy,
+      clientMutationId: data.clientMutationId.present
+          ? data.clientMutationId.value
+          : this.clientMutationId,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PublicationProjectionData(')
+          ..write('id: $id, ')
+          ..write('publicationId: $publicationId, ')
+          ..write('projectionRevision: $projectionRevision, ')
+          ..write('contestRevision: $contestRevision, ')
+          ..write('configRevision: $configRevision, ')
+          ..write('matrixRevision: $matrixRevision, ')
+          ..write('disciplineType: $disciplineType, ')
+          ..write('disciplineRulesVersion: $disciplineRulesVersion, ')
+          ..write('calculationVersion: $calculationVersion, ')
+          ..write('contestIdentity: $contestIdentity, ')
+          ..write('participants: $participants, ')
+          ..write('teams: $teams, ')
+          ..write('matrixInfo: $matrixInfo, ')
+          ..write('scores: $scores, ')
+          ..write('standings: $standings, ')
+          ..write('calculationMetadata: $calculationMetadata, ')
+          ..write('publishedAt: $publishedAt, ')
+          ..write('publishedBy: $publishedBy, ')
+          ..write('clientMutationId: $clientMutationId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    publicationId,
+    projectionRevision,
+    contestRevision,
+    configRevision,
+    matrixRevision,
+    disciplineType,
+    disciplineRulesVersion,
+    calculationVersion,
+    contestIdentity,
+    participants,
+    teams,
+    matrixInfo,
+    scores,
+    standings,
+    calculationMetadata,
+    publishedAt,
+    publishedBy,
+    clientMutationId,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PublicationProjectionData &&
+          other.id == this.id &&
+          other.publicationId == this.publicationId &&
+          other.projectionRevision == this.projectionRevision &&
+          other.contestRevision == this.contestRevision &&
+          other.configRevision == this.configRevision &&
+          other.matrixRevision == this.matrixRevision &&
+          other.disciplineType == this.disciplineType &&
+          other.disciplineRulesVersion == this.disciplineRulesVersion &&
+          other.calculationVersion == this.calculationVersion &&
+          other.contestIdentity == this.contestIdentity &&
+          other.participants == this.participants &&
+          other.teams == this.teams &&
+          other.matrixInfo == this.matrixInfo &&
+          other.scores == this.scores &&
+          other.standings == this.standings &&
+          other.calculationMetadata == this.calculationMetadata &&
+          other.publishedAt == this.publishedAt &&
+          other.publishedBy == this.publishedBy &&
+          other.clientMutationId == this.clientMutationId);
+}
+
+class PublicationProjectionsCompanion
+    extends UpdateCompanion<PublicationProjectionData> {
+  final Value<String> id;
+  final Value<String> publicationId;
+  final Value<int> projectionRevision;
+  final Value<int> contestRevision;
+  final Value<int> configRevision;
+  final Value<int> matrixRevision;
+  final Value<String> disciplineType;
+  final Value<int> disciplineRulesVersion;
+  final Value<String> calculationVersion;
+  final Value<String> contestIdentity;
+  final Value<String?> participants;
+  final Value<String?> teams;
+  final Value<String?> matrixInfo;
+  final Value<String?> scores;
+  final Value<String?> standings;
+  final Value<String?> calculationMetadata;
+  final Value<String> publishedAt;
+  final Value<String?> publishedBy;
+  final Value<String> clientMutationId;
+  final Value<int> rowid;
+  const PublicationProjectionsCompanion({
+    this.id = const Value.absent(),
+    this.publicationId = const Value.absent(),
+    this.projectionRevision = const Value.absent(),
+    this.contestRevision = const Value.absent(),
+    this.configRevision = const Value.absent(),
+    this.matrixRevision = const Value.absent(),
+    this.disciplineType = const Value.absent(),
+    this.disciplineRulesVersion = const Value.absent(),
+    this.calculationVersion = const Value.absent(),
+    this.contestIdentity = const Value.absent(),
+    this.participants = const Value.absent(),
+    this.teams = const Value.absent(),
+    this.matrixInfo = const Value.absent(),
+    this.scores = const Value.absent(),
+    this.standings = const Value.absent(),
+    this.calculationMetadata = const Value.absent(),
+    this.publishedAt = const Value.absent(),
+    this.publishedBy = const Value.absent(),
+    this.clientMutationId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  PublicationProjectionsCompanion.insert({
+    required String id,
+    required String publicationId,
+    required int projectionRevision,
+    required int contestRevision,
+    required int configRevision,
+    required int matrixRevision,
+    required String disciplineType,
+    required int disciplineRulesVersion,
+    required String calculationVersion,
+    required String contestIdentity,
+    this.participants = const Value.absent(),
+    this.teams = const Value.absent(),
+    this.matrixInfo = const Value.absent(),
+    this.scores = const Value.absent(),
+    this.standings = const Value.absent(),
+    this.calculationMetadata = const Value.absent(),
+    required String publishedAt,
+    this.publishedBy = const Value.absent(),
+    required String clientMutationId,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       publicationId = Value(publicationId),
+       projectionRevision = Value(projectionRevision),
+       contestRevision = Value(contestRevision),
+       configRevision = Value(configRevision),
+       matrixRevision = Value(matrixRevision),
+       disciplineType = Value(disciplineType),
+       disciplineRulesVersion = Value(disciplineRulesVersion),
+       calculationVersion = Value(calculationVersion),
+       contestIdentity = Value(contestIdentity),
+       publishedAt = Value(publishedAt),
+       clientMutationId = Value(clientMutationId);
+  static Insertable<PublicationProjectionData> custom({
+    Expression<String>? id,
+    Expression<String>? publicationId,
+    Expression<int>? projectionRevision,
+    Expression<int>? contestRevision,
+    Expression<int>? configRevision,
+    Expression<int>? matrixRevision,
+    Expression<String>? disciplineType,
+    Expression<int>? disciplineRulesVersion,
+    Expression<String>? calculationVersion,
+    Expression<String>? contestIdentity,
+    Expression<String>? participants,
+    Expression<String>? teams,
+    Expression<String>? matrixInfo,
+    Expression<String>? scores,
+    Expression<String>? standings,
+    Expression<String>? calculationMetadata,
+    Expression<String>? publishedAt,
+    Expression<String>? publishedBy,
+    Expression<String>? clientMutationId,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (publicationId != null) 'publication_id': publicationId,
+      if (projectionRevision != null) 'projection_revision': projectionRevision,
+      if (contestRevision != null) 'contest_revision': contestRevision,
+      if (configRevision != null) 'config_revision': configRevision,
+      if (matrixRevision != null) 'matrix_revision': matrixRevision,
+      if (disciplineType != null) 'discipline_type': disciplineType,
+      if (disciplineRulesVersion != null)
+        'discipline_rules_version': disciplineRulesVersion,
+      if (calculationVersion != null) 'calculation_version': calculationVersion,
+      if (contestIdentity != null) 'contest_identity': contestIdentity,
+      if (participants != null) 'participants': participants,
+      if (teams != null) 'teams': teams,
+      if (matrixInfo != null) 'matrix_info': matrixInfo,
+      if (scores != null) 'scores': scores,
+      if (standings != null) 'standings': standings,
+      if (calculationMetadata != null)
+        'calculation_metadata': calculationMetadata,
+      if (publishedAt != null) 'published_at': publishedAt,
+      if (publishedBy != null) 'published_by': publishedBy,
+      if (clientMutationId != null) 'client_mutation_id': clientMutationId,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  PublicationProjectionsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? publicationId,
+    Value<int>? projectionRevision,
+    Value<int>? contestRevision,
+    Value<int>? configRevision,
+    Value<int>? matrixRevision,
+    Value<String>? disciplineType,
+    Value<int>? disciplineRulesVersion,
+    Value<String>? calculationVersion,
+    Value<String>? contestIdentity,
+    Value<String?>? participants,
+    Value<String?>? teams,
+    Value<String?>? matrixInfo,
+    Value<String?>? scores,
+    Value<String?>? standings,
+    Value<String?>? calculationMetadata,
+    Value<String>? publishedAt,
+    Value<String?>? publishedBy,
+    Value<String>? clientMutationId,
+    Value<int>? rowid,
+  }) {
+    return PublicationProjectionsCompanion(
+      id: id ?? this.id,
+      publicationId: publicationId ?? this.publicationId,
+      projectionRevision: projectionRevision ?? this.projectionRevision,
+      contestRevision: contestRevision ?? this.contestRevision,
+      configRevision: configRevision ?? this.configRevision,
+      matrixRevision: matrixRevision ?? this.matrixRevision,
+      disciplineType: disciplineType ?? this.disciplineType,
+      disciplineRulesVersion:
+          disciplineRulesVersion ?? this.disciplineRulesVersion,
+      calculationVersion: calculationVersion ?? this.calculationVersion,
+      contestIdentity: contestIdentity ?? this.contestIdentity,
+      participants: participants ?? this.participants,
+      teams: teams ?? this.teams,
+      matrixInfo: matrixInfo ?? this.matrixInfo,
+      scores: scores ?? this.scores,
+      standings: standings ?? this.standings,
+      calculationMetadata: calculationMetadata ?? this.calculationMetadata,
+      publishedAt: publishedAt ?? this.publishedAt,
+      publishedBy: publishedBy ?? this.publishedBy,
+      clientMutationId: clientMutationId ?? this.clientMutationId,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (publicationId.present) {
+      map['publication_id'] = Variable<String>(publicationId.value);
+    }
+    if (projectionRevision.present) {
+      map['projection_revision'] = Variable<int>(projectionRevision.value);
+    }
+    if (contestRevision.present) {
+      map['contest_revision'] = Variable<int>(contestRevision.value);
+    }
+    if (configRevision.present) {
+      map['config_revision'] = Variable<int>(configRevision.value);
+    }
+    if (matrixRevision.present) {
+      map['matrix_revision'] = Variable<int>(matrixRevision.value);
+    }
+    if (disciplineType.present) {
+      map['discipline_type'] = Variable<String>(disciplineType.value);
+    }
+    if (disciplineRulesVersion.present) {
+      map['discipline_rules_version'] = Variable<int>(
+        disciplineRulesVersion.value,
+      );
+    }
+    if (calculationVersion.present) {
+      map['calculation_version'] = Variable<String>(calculationVersion.value);
+    }
+    if (contestIdentity.present) {
+      map['contest_identity'] = Variable<String>(contestIdentity.value);
+    }
+    if (participants.present) {
+      map['participants'] = Variable<String>(participants.value);
+    }
+    if (teams.present) {
+      map['teams'] = Variable<String>(teams.value);
+    }
+    if (matrixInfo.present) {
+      map['matrix_info'] = Variable<String>(matrixInfo.value);
+    }
+    if (scores.present) {
+      map['scores'] = Variable<String>(scores.value);
+    }
+    if (standings.present) {
+      map['standings'] = Variable<String>(standings.value);
+    }
+    if (calculationMetadata.present) {
+      map['calculation_metadata'] = Variable<String>(calculationMetadata.value);
+    }
+    if (publishedAt.present) {
+      map['published_at'] = Variable<String>(publishedAt.value);
+    }
+    if (publishedBy.present) {
+      map['published_by'] = Variable<String>(publishedBy.value);
+    }
+    if (clientMutationId.present) {
+      map['client_mutation_id'] = Variable<String>(clientMutationId.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PublicationProjectionsCompanion(')
+          ..write('id: $id, ')
+          ..write('publicationId: $publicationId, ')
+          ..write('projectionRevision: $projectionRevision, ')
+          ..write('contestRevision: $contestRevision, ')
+          ..write('configRevision: $configRevision, ')
+          ..write('matrixRevision: $matrixRevision, ')
+          ..write('disciplineType: $disciplineType, ')
+          ..write('disciplineRulesVersion: $disciplineRulesVersion, ')
+          ..write('calculationVersion: $calculationVersion, ')
+          ..write('contestIdentity: $contestIdentity, ')
+          ..write('participants: $participants, ')
+          ..write('teams: $teams, ')
+          ..write('matrixInfo: $matrixInfo, ')
+          ..write('scores: $scores, ')
+          ..write('standings: $standings, ')
+          ..write('calculationMetadata: $calculationMetadata, ')
+          ..write('publishedAt: $publishedAt, ')
+          ..write('publishedBy: $publishedBy, ')
+          ..write('clientMutationId: $clientMutationId, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $PublicationParticipantsTable extends PublicationParticipants
+    with TableInfo<$PublicationParticipantsTable, PublicationParticipantData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PublicationParticipantsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _publicationIdMeta = const VerificationMeta(
+    'publicationId',
+  );
+  @override
+  late final GeneratedColumn<String> publicationId = GeneratedColumn<String>(
+    'publication_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES publication_identities (id)',
+    ),
+  );
+  static const VerificationMeta _pilotKeyMeta = const VerificationMeta(
+    'pilotKey',
+  );
+  @override
+  late final GeneratedColumn<String> pilotKey = GeneratedColumn<String>(
+    'pilot_key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sourceParticipationIdMeta =
+      const VerificationMeta('sourceParticipationId');
+  @override
+  late final GeneratedColumn<String> sourceParticipationId =
+      GeneratedColumn<String>(
+        'source_participation_id',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _detailsMeta = const VerificationMeta(
+    'details',
+  );
+  @override
+  late final GeneratedColumn<String> details = GeneratedColumn<String>(
+    'details',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _publicProfileIdMeta = const VerificationMeta(
+    'publicProfileId',
+  );
+  @override
+  late final GeneratedColumn<String> publicProfileId = GeneratedColumn<String>(
+    'public_profile_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES account_public_profiles (id)',
+    ),
+  );
+  static const VerificationMeta _redactedAtMeta = const VerificationMeta(
+    'redactedAt',
+  );
+  @override
+  late final GeneratedColumn<String> redactedAt = GeneratedColumn<String>(
+    'redacted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<String> createdAt = GeneratedColumn<String>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<String> updatedAt = GeneratedColumn<String>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    publicationId,
+    pilotKey,
+    sourceParticipationId,
+    details,
+    publicProfileId,
+    redactedAt,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'publication_participants';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<PublicationParticipantData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('publication_id')) {
+      context.handle(
+        _publicationIdMeta,
+        publicationId.isAcceptableOrUnknown(
+          data['publication_id']!,
+          _publicationIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_publicationIdMeta);
+    }
+    if (data.containsKey('pilot_key')) {
+      context.handle(
+        _pilotKeyMeta,
+        pilotKey.isAcceptableOrUnknown(data['pilot_key']!, _pilotKeyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_pilotKeyMeta);
+    }
+    if (data.containsKey('source_participation_id')) {
+      context.handle(
+        _sourceParticipationIdMeta,
+        sourceParticipationId.isAcceptableOrUnknown(
+          data['source_participation_id']!,
+          _sourceParticipationIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('details')) {
+      context.handle(
+        _detailsMeta,
+        details.isAcceptableOrUnknown(data['details']!, _detailsMeta),
+      );
+    }
+    if (data.containsKey('public_profile_id')) {
+      context.handle(
+        _publicProfileIdMeta,
+        publicProfileId.isAcceptableOrUnknown(
+          data['public_profile_id']!,
+          _publicProfileIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('redacted_at')) {
+      context.handle(
+        _redactedAtMeta,
+        redactedAt.isAcceptableOrUnknown(data['redacted_at']!, _redactedAtMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {publicationId, pilotKey},
+  ];
+  @override
+  PublicationParticipantData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PublicationParticipantData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      publicationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}publication_id'],
+      )!,
+      pilotKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}pilot_key'],
+      )!,
+      sourceParticipationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source_participation_id'],
+      ),
+      details: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}details'],
+      ),
+      publicProfileId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}public_profile_id'],
+      ),
+      redactedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}redacted_at'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $PublicationParticipantsTable createAlias(String alias) {
+    return $PublicationParticipantsTable(attachedDatabase, alias);
+  }
+}
+
+class PublicationParticipantData extends DataClass
+    implements Insertable<PublicationParticipantData> {
+  final String id;
+  final String publicationId;
+  final String pilotKey;
+  final String? sourceParticipationId;
+  final String? details;
+  final String? publicProfileId;
+  final String? redactedAt;
+  final String createdAt;
+  final String updatedAt;
+  const PublicationParticipantData({
+    required this.id,
+    required this.publicationId,
+    required this.pilotKey,
+    this.sourceParticipationId,
+    this.details,
+    this.publicProfileId,
+    this.redactedAt,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['publication_id'] = Variable<String>(publicationId);
+    map['pilot_key'] = Variable<String>(pilotKey);
+    if (!nullToAbsent || sourceParticipationId != null) {
+      map['source_participation_id'] = Variable<String>(sourceParticipationId);
+    }
+    if (!nullToAbsent || details != null) {
+      map['details'] = Variable<String>(details);
+    }
+    if (!nullToAbsent || publicProfileId != null) {
+      map['public_profile_id'] = Variable<String>(publicProfileId);
+    }
+    if (!nullToAbsent || redactedAt != null) {
+      map['redacted_at'] = Variable<String>(redactedAt);
+    }
+    map['created_at'] = Variable<String>(createdAt);
+    map['updated_at'] = Variable<String>(updatedAt);
+    return map;
+  }
+
+  PublicationParticipantsCompanion toCompanion(bool nullToAbsent) {
+    return PublicationParticipantsCompanion(
+      id: Value(id),
+      publicationId: Value(publicationId),
+      pilotKey: Value(pilotKey),
+      sourceParticipationId: sourceParticipationId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sourceParticipationId),
+      details: details == null && nullToAbsent
+          ? const Value.absent()
+          : Value(details),
+      publicProfileId: publicProfileId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(publicProfileId),
+      redactedAt: redactedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(redactedAt),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory PublicationParticipantData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PublicationParticipantData(
+      id: serializer.fromJson<String>(json['id']),
+      publicationId: serializer.fromJson<String>(json['publicationId']),
+      pilotKey: serializer.fromJson<String>(json['pilotKey']),
+      sourceParticipationId: serializer.fromJson<String?>(
+        json['sourceParticipationId'],
+      ),
+      details: serializer.fromJson<String?>(json['details']),
+      publicProfileId: serializer.fromJson<String?>(json['publicProfileId']),
+      redactedAt: serializer.fromJson<String?>(json['redactedAt']),
+      createdAt: serializer.fromJson<String>(json['createdAt']),
+      updatedAt: serializer.fromJson<String>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'publicationId': serializer.toJson<String>(publicationId),
+      'pilotKey': serializer.toJson<String>(pilotKey),
+      'sourceParticipationId': serializer.toJson<String?>(
+        sourceParticipationId,
+      ),
+      'details': serializer.toJson<String?>(details),
+      'publicProfileId': serializer.toJson<String?>(publicProfileId),
+      'redactedAt': serializer.toJson<String?>(redactedAt),
+      'createdAt': serializer.toJson<String>(createdAt),
+      'updatedAt': serializer.toJson<String>(updatedAt),
+    };
+  }
+
+  PublicationParticipantData copyWith({
+    String? id,
+    String? publicationId,
+    String? pilotKey,
+    Value<String?> sourceParticipationId = const Value.absent(),
+    Value<String?> details = const Value.absent(),
+    Value<String?> publicProfileId = const Value.absent(),
+    Value<String?> redactedAt = const Value.absent(),
+    String? createdAt,
+    String? updatedAt,
+  }) => PublicationParticipantData(
+    id: id ?? this.id,
+    publicationId: publicationId ?? this.publicationId,
+    pilotKey: pilotKey ?? this.pilotKey,
+    sourceParticipationId: sourceParticipationId.present
+        ? sourceParticipationId.value
+        : this.sourceParticipationId,
+    details: details.present ? details.value : this.details,
+    publicProfileId: publicProfileId.present
+        ? publicProfileId.value
+        : this.publicProfileId,
+    redactedAt: redactedAt.present ? redactedAt.value : this.redactedAt,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  PublicationParticipantData copyWithCompanion(
+    PublicationParticipantsCompanion data,
+  ) {
+    return PublicationParticipantData(
+      id: data.id.present ? data.id.value : this.id,
+      publicationId: data.publicationId.present
+          ? data.publicationId.value
+          : this.publicationId,
+      pilotKey: data.pilotKey.present ? data.pilotKey.value : this.pilotKey,
+      sourceParticipationId: data.sourceParticipationId.present
+          ? data.sourceParticipationId.value
+          : this.sourceParticipationId,
+      details: data.details.present ? data.details.value : this.details,
+      publicProfileId: data.publicProfileId.present
+          ? data.publicProfileId.value
+          : this.publicProfileId,
+      redactedAt: data.redactedAt.present
+          ? data.redactedAt.value
+          : this.redactedAt,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PublicationParticipantData(')
+          ..write('id: $id, ')
+          ..write('publicationId: $publicationId, ')
+          ..write('pilotKey: $pilotKey, ')
+          ..write('sourceParticipationId: $sourceParticipationId, ')
+          ..write('details: $details, ')
+          ..write('publicProfileId: $publicProfileId, ')
+          ..write('redactedAt: $redactedAt, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    publicationId,
+    pilotKey,
+    sourceParticipationId,
+    details,
+    publicProfileId,
+    redactedAt,
+    createdAt,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PublicationParticipantData &&
+          other.id == this.id &&
+          other.publicationId == this.publicationId &&
+          other.pilotKey == this.pilotKey &&
+          other.sourceParticipationId == this.sourceParticipationId &&
+          other.details == this.details &&
+          other.publicProfileId == this.publicProfileId &&
+          other.redactedAt == this.redactedAt &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class PublicationParticipantsCompanion
+    extends UpdateCompanion<PublicationParticipantData> {
+  final Value<String> id;
+  final Value<String> publicationId;
+  final Value<String> pilotKey;
+  final Value<String?> sourceParticipationId;
+  final Value<String?> details;
+  final Value<String?> publicProfileId;
+  final Value<String?> redactedAt;
+  final Value<String> createdAt;
+  final Value<String> updatedAt;
+  final Value<int> rowid;
+  const PublicationParticipantsCompanion({
+    this.id = const Value.absent(),
+    this.publicationId = const Value.absent(),
+    this.pilotKey = const Value.absent(),
+    this.sourceParticipationId = const Value.absent(),
+    this.details = const Value.absent(),
+    this.publicProfileId = const Value.absent(),
+    this.redactedAt = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  PublicationParticipantsCompanion.insert({
+    required String id,
+    required String publicationId,
+    required String pilotKey,
+    this.sourceParticipationId = const Value.absent(),
+    this.details = const Value.absent(),
+    this.publicProfileId = const Value.absent(),
+    this.redactedAt = const Value.absent(),
+    required String createdAt,
+    required String updatedAt,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       publicationId = Value(publicationId),
+       pilotKey = Value(pilotKey),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt);
+  static Insertable<PublicationParticipantData> custom({
+    Expression<String>? id,
+    Expression<String>? publicationId,
+    Expression<String>? pilotKey,
+    Expression<String>? sourceParticipationId,
+    Expression<String>? details,
+    Expression<String>? publicProfileId,
+    Expression<String>? redactedAt,
+    Expression<String>? createdAt,
+    Expression<String>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (publicationId != null) 'publication_id': publicationId,
+      if (pilotKey != null) 'pilot_key': pilotKey,
+      if (sourceParticipationId != null)
+        'source_participation_id': sourceParticipationId,
+      if (details != null) 'details': details,
+      if (publicProfileId != null) 'public_profile_id': publicProfileId,
+      if (redactedAt != null) 'redacted_at': redactedAt,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  PublicationParticipantsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? publicationId,
+    Value<String>? pilotKey,
+    Value<String?>? sourceParticipationId,
+    Value<String?>? details,
+    Value<String?>? publicProfileId,
+    Value<String?>? redactedAt,
+    Value<String>? createdAt,
+    Value<String>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return PublicationParticipantsCompanion(
+      id: id ?? this.id,
+      publicationId: publicationId ?? this.publicationId,
+      pilotKey: pilotKey ?? this.pilotKey,
+      sourceParticipationId:
+          sourceParticipationId ?? this.sourceParticipationId,
+      details: details ?? this.details,
+      publicProfileId: publicProfileId ?? this.publicProfileId,
+      redactedAt: redactedAt ?? this.redactedAt,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (publicationId.present) {
+      map['publication_id'] = Variable<String>(publicationId.value);
+    }
+    if (pilotKey.present) {
+      map['pilot_key'] = Variable<String>(pilotKey.value);
+    }
+    if (sourceParticipationId.present) {
+      map['source_participation_id'] = Variable<String>(
+        sourceParticipationId.value,
+      );
+    }
+    if (details.present) {
+      map['details'] = Variable<String>(details.value);
+    }
+    if (publicProfileId.present) {
+      map['public_profile_id'] = Variable<String>(publicProfileId.value);
+    }
+    if (redactedAt.present) {
+      map['redacted_at'] = Variable<String>(redactedAt.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<String>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<String>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PublicationParticipantsCompanion(')
+          ..write('id: $id, ')
+          ..write('publicationId: $publicationId, ')
+          ..write('pilotKey: $pilotKey, ')
+          ..write('sourceParticipationId: $sourceParticipationId, ')
+          ..write('details: $details, ')
+          ..write('publicProfileId: $publicProfileId, ')
+          ..write('redactedAt: $redactedAt, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $DelistRequestsTable extends DelistRequests
+    with TableInfo<$DelistRequestsTable, DelistRequestData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $DelistRequestsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _publicationIdMeta = const VerificationMeta(
+    'publicationId',
+  );
+  @override
+  late final GeneratedColumn<String> publicationId = GeneratedColumn<String>(
+    'publication_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES publication_identities (id)',
+    ),
+  );
+  static const VerificationMeta _requestedByMeta = const VerificationMeta(
+    'requestedBy',
+  );
+  @override
+  late final GeneratedColumn<String> requestedBy = GeneratedColumn<String>(
+    'requested_by',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES accounts (id)',
+    ),
+  );
+  static const VerificationMeta _triggerMeta = const VerificationMeta(
+    'trigger',
+  );
+  @override
+  late final GeneratedColumn<String> trigger = GeneratedColumn<String>(
+    'trigger',
+    aliasedName,
+    false,
+    check: () => trigger.isIn(delistTriggerValues),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _reasonMeta = const VerificationMeta('reason');
+  @override
+  late final GeneratedColumn<String> reason = GeneratedColumn<String>(
+    'reason',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _requestedAtMeta = const VerificationMeta(
+    'requestedAt',
+  );
+  @override
+  late final GeneratedColumn<String> requestedAt = GeneratedColumn<String>(
+    'requested_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _stateMeta = const VerificationMeta('state');
+  @override
+  late final GeneratedColumn<String> state = GeneratedColumn<String>(
+    'state',
+    aliasedName,
+    false,
+    check: () => state.isIn(delistStateValues),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _decidedByMeta = const VerificationMeta(
+    'decidedBy',
+  );
+  @override
+  late final GeneratedColumn<String> decidedBy = GeneratedColumn<String>(
+    'decided_by',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES accounts (id)',
+    ),
+  );
+  static const VerificationMeta _decidedAtMeta = const VerificationMeta(
+    'decidedAt',
+  );
+  @override
+  late final GeneratedColumn<String> decidedAt = GeneratedColumn<String>(
+    'decided_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _decisionNoteMeta = const VerificationMeta(
+    'decisionNote',
+  );
+  @override
+  late final GeneratedColumn<String> decisionNote = GeneratedColumn<String>(
+    'decision_note',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    publicationId,
+    requestedBy,
+    trigger,
+    reason,
+    requestedAt,
+    state,
+    decidedBy,
+    decidedAt,
+    decisionNote,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'delist_requests';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<DelistRequestData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('publication_id')) {
+      context.handle(
+        _publicationIdMeta,
+        publicationId.isAcceptableOrUnknown(
+          data['publication_id']!,
+          _publicationIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_publicationIdMeta);
+    }
+    if (data.containsKey('requested_by')) {
+      context.handle(
+        _requestedByMeta,
+        requestedBy.isAcceptableOrUnknown(
+          data['requested_by']!,
+          _requestedByMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_requestedByMeta);
+    }
+    if (data.containsKey('trigger')) {
+      context.handle(
+        _triggerMeta,
+        trigger.isAcceptableOrUnknown(data['trigger']!, _triggerMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_triggerMeta);
+    }
+    if (data.containsKey('reason')) {
+      context.handle(
+        _reasonMeta,
+        reason.isAcceptableOrUnknown(data['reason']!, _reasonMeta),
+      );
+    }
+    if (data.containsKey('requested_at')) {
+      context.handle(
+        _requestedAtMeta,
+        requestedAt.isAcceptableOrUnknown(
+          data['requested_at']!,
+          _requestedAtMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_requestedAtMeta);
+    }
+    if (data.containsKey('state')) {
+      context.handle(
+        _stateMeta,
+        state.isAcceptableOrUnknown(data['state']!, _stateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_stateMeta);
+    }
+    if (data.containsKey('decided_by')) {
+      context.handle(
+        _decidedByMeta,
+        decidedBy.isAcceptableOrUnknown(data['decided_by']!, _decidedByMeta),
+      );
+    }
+    if (data.containsKey('decided_at')) {
+      context.handle(
+        _decidedAtMeta,
+        decidedAt.isAcceptableOrUnknown(data['decided_at']!, _decidedAtMeta),
+      );
+    }
+    if (data.containsKey('decision_note')) {
+      context.handle(
+        _decisionNoteMeta,
+        decisionNote.isAcceptableOrUnknown(
+          data['decision_note']!,
+          _decisionNoteMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  DelistRequestData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return DelistRequestData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      publicationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}publication_id'],
+      )!,
+      requestedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}requested_by'],
+      )!,
+      trigger: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}trigger'],
+      )!,
+      reason: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reason'],
+      ),
+      requestedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}requested_at'],
+      )!,
+      state: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}state'],
+      )!,
+      decidedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}decided_by'],
+      ),
+      decidedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}decided_at'],
+      ),
+      decisionNote: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}decision_note'],
+      ),
+    );
+  }
+
+  @override
+  $DelistRequestsTable createAlias(String alias) {
+    return $DelistRequestsTable(attachedDatabase, alias);
+  }
+}
+
+class DelistRequestData extends DataClass
+    implements Insertable<DelistRequestData> {
+  final String id;
+  final String publicationId;
+  final String requestedBy;
+  final String trigger;
+  final String? reason;
+  final String requestedAt;
+  final String state;
+  final String? decidedBy;
+  final String? decidedAt;
+  final String? decisionNote;
+  const DelistRequestData({
+    required this.id,
+    required this.publicationId,
+    required this.requestedBy,
+    required this.trigger,
+    this.reason,
+    required this.requestedAt,
+    required this.state,
+    this.decidedBy,
+    this.decidedAt,
+    this.decisionNote,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['publication_id'] = Variable<String>(publicationId);
+    map['requested_by'] = Variable<String>(requestedBy);
+    map['trigger'] = Variable<String>(trigger);
+    if (!nullToAbsent || reason != null) {
+      map['reason'] = Variable<String>(reason);
+    }
+    map['requested_at'] = Variable<String>(requestedAt);
+    map['state'] = Variable<String>(state);
+    if (!nullToAbsent || decidedBy != null) {
+      map['decided_by'] = Variable<String>(decidedBy);
+    }
+    if (!nullToAbsent || decidedAt != null) {
+      map['decided_at'] = Variable<String>(decidedAt);
+    }
+    if (!nullToAbsent || decisionNote != null) {
+      map['decision_note'] = Variable<String>(decisionNote);
+    }
+    return map;
+  }
+
+  DelistRequestsCompanion toCompanion(bool nullToAbsent) {
+    return DelistRequestsCompanion(
+      id: Value(id),
+      publicationId: Value(publicationId),
+      requestedBy: Value(requestedBy),
+      trigger: Value(trigger),
+      reason: reason == null && nullToAbsent
+          ? const Value.absent()
+          : Value(reason),
+      requestedAt: Value(requestedAt),
+      state: Value(state),
+      decidedBy: decidedBy == null && nullToAbsent
+          ? const Value.absent()
+          : Value(decidedBy),
+      decidedAt: decidedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(decidedAt),
+      decisionNote: decisionNote == null && nullToAbsent
+          ? const Value.absent()
+          : Value(decisionNote),
+    );
+  }
+
+  factory DelistRequestData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return DelistRequestData(
+      id: serializer.fromJson<String>(json['id']),
+      publicationId: serializer.fromJson<String>(json['publicationId']),
+      requestedBy: serializer.fromJson<String>(json['requestedBy']),
+      trigger: serializer.fromJson<String>(json['trigger']),
+      reason: serializer.fromJson<String?>(json['reason']),
+      requestedAt: serializer.fromJson<String>(json['requestedAt']),
+      state: serializer.fromJson<String>(json['state']),
+      decidedBy: serializer.fromJson<String?>(json['decidedBy']),
+      decidedAt: serializer.fromJson<String?>(json['decidedAt']),
+      decisionNote: serializer.fromJson<String?>(json['decisionNote']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'publicationId': serializer.toJson<String>(publicationId),
+      'requestedBy': serializer.toJson<String>(requestedBy),
+      'trigger': serializer.toJson<String>(trigger),
+      'reason': serializer.toJson<String?>(reason),
+      'requestedAt': serializer.toJson<String>(requestedAt),
+      'state': serializer.toJson<String>(state),
+      'decidedBy': serializer.toJson<String?>(decidedBy),
+      'decidedAt': serializer.toJson<String?>(decidedAt),
+      'decisionNote': serializer.toJson<String?>(decisionNote),
+    };
+  }
+
+  DelistRequestData copyWith({
+    String? id,
+    String? publicationId,
+    String? requestedBy,
+    String? trigger,
+    Value<String?> reason = const Value.absent(),
+    String? requestedAt,
+    String? state,
+    Value<String?> decidedBy = const Value.absent(),
+    Value<String?> decidedAt = const Value.absent(),
+    Value<String?> decisionNote = const Value.absent(),
+  }) => DelistRequestData(
+    id: id ?? this.id,
+    publicationId: publicationId ?? this.publicationId,
+    requestedBy: requestedBy ?? this.requestedBy,
+    trigger: trigger ?? this.trigger,
+    reason: reason.present ? reason.value : this.reason,
+    requestedAt: requestedAt ?? this.requestedAt,
+    state: state ?? this.state,
+    decidedBy: decidedBy.present ? decidedBy.value : this.decidedBy,
+    decidedAt: decidedAt.present ? decidedAt.value : this.decidedAt,
+    decisionNote: decisionNote.present ? decisionNote.value : this.decisionNote,
+  );
+  DelistRequestData copyWithCompanion(DelistRequestsCompanion data) {
+    return DelistRequestData(
+      id: data.id.present ? data.id.value : this.id,
+      publicationId: data.publicationId.present
+          ? data.publicationId.value
+          : this.publicationId,
+      requestedBy: data.requestedBy.present
+          ? data.requestedBy.value
+          : this.requestedBy,
+      trigger: data.trigger.present ? data.trigger.value : this.trigger,
+      reason: data.reason.present ? data.reason.value : this.reason,
+      requestedAt: data.requestedAt.present
+          ? data.requestedAt.value
+          : this.requestedAt,
+      state: data.state.present ? data.state.value : this.state,
+      decidedBy: data.decidedBy.present ? data.decidedBy.value : this.decidedBy,
+      decidedAt: data.decidedAt.present ? data.decidedAt.value : this.decidedAt,
+      decisionNote: data.decisionNote.present
+          ? data.decisionNote.value
+          : this.decisionNote,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DelistRequestData(')
+          ..write('id: $id, ')
+          ..write('publicationId: $publicationId, ')
+          ..write('requestedBy: $requestedBy, ')
+          ..write('trigger: $trigger, ')
+          ..write('reason: $reason, ')
+          ..write('requestedAt: $requestedAt, ')
+          ..write('state: $state, ')
+          ..write('decidedBy: $decidedBy, ')
+          ..write('decidedAt: $decidedAt, ')
+          ..write('decisionNote: $decisionNote')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    publicationId,
+    requestedBy,
+    trigger,
+    reason,
+    requestedAt,
+    state,
+    decidedBy,
+    decidedAt,
+    decisionNote,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is DelistRequestData &&
+          other.id == this.id &&
+          other.publicationId == this.publicationId &&
+          other.requestedBy == this.requestedBy &&
+          other.trigger == this.trigger &&
+          other.reason == this.reason &&
+          other.requestedAt == this.requestedAt &&
+          other.state == this.state &&
+          other.decidedBy == this.decidedBy &&
+          other.decidedAt == this.decidedAt &&
+          other.decisionNote == this.decisionNote);
+}
+
+class DelistRequestsCompanion extends UpdateCompanion<DelistRequestData> {
+  final Value<String> id;
+  final Value<String> publicationId;
+  final Value<String> requestedBy;
+  final Value<String> trigger;
+  final Value<String?> reason;
+  final Value<String> requestedAt;
+  final Value<String> state;
+  final Value<String?> decidedBy;
+  final Value<String?> decidedAt;
+  final Value<String?> decisionNote;
+  final Value<int> rowid;
+  const DelistRequestsCompanion({
+    this.id = const Value.absent(),
+    this.publicationId = const Value.absent(),
+    this.requestedBy = const Value.absent(),
+    this.trigger = const Value.absent(),
+    this.reason = const Value.absent(),
+    this.requestedAt = const Value.absent(),
+    this.state = const Value.absent(),
+    this.decidedBy = const Value.absent(),
+    this.decidedAt = const Value.absent(),
+    this.decisionNote = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  DelistRequestsCompanion.insert({
+    required String id,
+    required String publicationId,
+    required String requestedBy,
+    required String trigger,
+    this.reason = const Value.absent(),
+    required String requestedAt,
+    required String state,
+    this.decidedBy = const Value.absent(),
+    this.decidedAt = const Value.absent(),
+    this.decisionNote = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       publicationId = Value(publicationId),
+       requestedBy = Value(requestedBy),
+       trigger = Value(trigger),
+       requestedAt = Value(requestedAt),
+       state = Value(state);
+  static Insertable<DelistRequestData> custom({
+    Expression<String>? id,
+    Expression<String>? publicationId,
+    Expression<String>? requestedBy,
+    Expression<String>? trigger,
+    Expression<String>? reason,
+    Expression<String>? requestedAt,
+    Expression<String>? state,
+    Expression<String>? decidedBy,
+    Expression<String>? decidedAt,
+    Expression<String>? decisionNote,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (publicationId != null) 'publication_id': publicationId,
+      if (requestedBy != null) 'requested_by': requestedBy,
+      if (trigger != null) 'trigger': trigger,
+      if (reason != null) 'reason': reason,
+      if (requestedAt != null) 'requested_at': requestedAt,
+      if (state != null) 'state': state,
+      if (decidedBy != null) 'decided_by': decidedBy,
+      if (decidedAt != null) 'decided_at': decidedAt,
+      if (decisionNote != null) 'decision_note': decisionNote,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  DelistRequestsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? publicationId,
+    Value<String>? requestedBy,
+    Value<String>? trigger,
+    Value<String?>? reason,
+    Value<String>? requestedAt,
+    Value<String>? state,
+    Value<String?>? decidedBy,
+    Value<String?>? decidedAt,
+    Value<String?>? decisionNote,
+    Value<int>? rowid,
+  }) {
+    return DelistRequestsCompanion(
+      id: id ?? this.id,
+      publicationId: publicationId ?? this.publicationId,
+      requestedBy: requestedBy ?? this.requestedBy,
+      trigger: trigger ?? this.trigger,
+      reason: reason ?? this.reason,
+      requestedAt: requestedAt ?? this.requestedAt,
+      state: state ?? this.state,
+      decidedBy: decidedBy ?? this.decidedBy,
+      decidedAt: decidedAt ?? this.decidedAt,
+      decisionNote: decisionNote ?? this.decisionNote,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (publicationId.present) {
+      map['publication_id'] = Variable<String>(publicationId.value);
+    }
+    if (requestedBy.present) {
+      map['requested_by'] = Variable<String>(requestedBy.value);
+    }
+    if (trigger.present) {
+      map['trigger'] = Variable<String>(trigger.value);
+    }
+    if (reason.present) {
+      map['reason'] = Variable<String>(reason.value);
+    }
+    if (requestedAt.present) {
+      map['requested_at'] = Variable<String>(requestedAt.value);
+    }
+    if (state.present) {
+      map['state'] = Variable<String>(state.value);
+    }
+    if (decidedBy.present) {
+      map['decided_by'] = Variable<String>(decidedBy.value);
+    }
+    if (decidedAt.present) {
+      map['decided_at'] = Variable<String>(decidedAt.value);
+    }
+    if (decisionNote.present) {
+      map['decision_note'] = Variable<String>(decisionNote.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DelistRequestsCompanion(')
+          ..write('id: $id, ')
+          ..write('publicationId: $publicationId, ')
+          ..write('requestedBy: $requestedBy, ')
+          ..write('trigger: $trigger, ')
+          ..write('reason: $reason, ')
+          ..write('requestedAt: $requestedAt, ')
+          ..write('state: $state, ')
+          ..write('decidedBy: $decidedBy, ')
+          ..write('decidedAt: $decidedAt, ')
+          ..write('decisionNote: $decisionNote, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $InvitationsTable extends Invitations
+    with TableInfo<$InvitationsTable, InvitationData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $InvitationsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _contestIdMeta = const VerificationMeta(
+    'contestId',
+  );
+  @override
+  late final GeneratedColumn<String> contestId = GeneratedColumn<String>(
+    'contest_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES contests (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _contestParticipationIdMeta =
+      const VerificationMeta('contestParticipationId');
+  @override
+  late final GeneratedColumn<String> contestParticipationId =
+      GeneratedColumn<String>(
+        'contest_participation_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+        defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES contest_participations (id)',
+        ),
+      );
+  static const VerificationMeta _typeMeta = const VerificationMeta('type');
+  @override
+  late final GeneratedColumn<String> type = GeneratedColumn<String>(
+    'type',
+    aliasedName,
+    false,
+    check: () => type.isIn(invitationTypeValues),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _protectedCredentialMeta =
+      const VerificationMeta('protectedCredential');
+  @override
+  late final GeneratedColumn<String> protectedCredential =
+      GeneratedColumn<String>(
+        'protected_credential',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      );
+  static const VerificationMeta _invitationRevisionMeta =
+      const VerificationMeta('invitationRevision');
+  @override
+  late final GeneratedColumn<int> invitationRevision = GeneratedColumn<int>(
+    'invitation_revision',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _stateMeta = const VerificationMeta('state');
+  @override
+  late final GeneratedColumn<String> state = GeneratedColumn<String>(
+    'state',
+    aliasedName,
+    false,
+    check: () => state.isIn(invitationStateValues),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _audienceMeta = const VerificationMeta(
+    'audience',
+  );
+  @override
+  late final GeneratedColumn<String> audience = GeneratedColumn<String>(
+    'audience',
+    aliasedName,
+    false,
+    check: () => audience.isIn(invitationAudienceValues),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _issuedByMeta = const VerificationMeta(
+    'issuedBy',
+  );
+  @override
+  late final GeneratedColumn<String> issuedBy = GeneratedColumn<String>(
+    'issued_by',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _issuedAtMeta = const VerificationMeta(
+    'issuedAt',
+  );
+  @override
+  late final GeneratedColumn<String> issuedAt = GeneratedColumn<String>(
+    'issued_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _expiresAtMeta = const VerificationMeta(
+    'expiresAt',
+  );
+  @override
+  late final GeneratedColumn<String> expiresAt = GeneratedColumn<String>(
+    'expires_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _firstUsedAtMeta = const VerificationMeta(
+    'firstUsedAt',
+  );
+  @override
+  late final GeneratedColumn<String> firstUsedAt = GeneratedColumn<String>(
+    'first_used_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _lastUsedAtMeta = const VerificationMeta(
+    'lastUsedAt',
+  );
+  @override
+  late final GeneratedColumn<String> lastUsedAt = GeneratedColumn<String>(
+    'last_used_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _revokedAtMeta = const VerificationMeta(
+    'revokedAt',
+  );
+  @override
+  late final GeneratedColumn<String> revokedAt = GeneratedColumn<String>(
+    'revoked_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _replacesInvitationIdMeta =
+      const VerificationMeta('replacesInvitationId');
+  @override
+  late final GeneratedColumn<String> replacesInvitationId =
+      GeneratedColumn<String>(
+        'replaces_invitation_id',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES invitations (id)',
+        ),
+      );
+  static const VerificationMeta _redeemedByAccountIdMeta =
+      const VerificationMeta('redeemedByAccountId');
+  @override
+  late final GeneratedColumn<String> redeemedByAccountId =
+      GeneratedColumn<String>(
+        'redeemed_by_account_id',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _deliveryOutcomesMeta = const VerificationMeta(
+    'deliveryOutcomes',
+  );
+  @override
+  late final GeneratedColumn<String> deliveryOutcomes = GeneratedColumn<String>(
+    'delivery_outcomes',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _clientMutationIdMeta = const VerificationMeta(
+    'clientMutationId',
+  );
+  @override
+  late final GeneratedColumn<String> clientMutationId = GeneratedColumn<String>(
+    'client_mutation_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    contestId,
+    contestParticipationId,
+    type,
+    protectedCredential,
+    invitationRevision,
+    state,
+    audience,
+    issuedBy,
+    issuedAt,
+    expiresAt,
+    firstUsedAt,
+    lastUsedAt,
+    revokedAt,
+    replacesInvitationId,
+    redeemedByAccountId,
+    deliveryOutcomes,
+    clientMutationId,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'invitations';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<InvitationData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('contest_id')) {
+      context.handle(
+        _contestIdMeta,
+        contestId.isAcceptableOrUnknown(data['contest_id']!, _contestIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_contestIdMeta);
+    }
+    if (data.containsKey('contest_participation_id')) {
+      context.handle(
+        _contestParticipationIdMeta,
+        contestParticipationId.isAcceptableOrUnknown(
+          data['contest_participation_id']!,
+          _contestParticipationIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_contestParticipationIdMeta);
+    }
+    if (data.containsKey('type')) {
+      context.handle(
+        _typeMeta,
+        type.isAcceptableOrUnknown(data['type']!, _typeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_typeMeta);
+    }
+    if (data.containsKey('protected_credential')) {
+      context.handle(
+        _protectedCredentialMeta,
+        protectedCredential.isAcceptableOrUnknown(
+          data['protected_credential']!,
+          _protectedCredentialMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_protectedCredentialMeta);
+    }
+    if (data.containsKey('invitation_revision')) {
+      context.handle(
+        _invitationRevisionMeta,
+        invitationRevision.isAcceptableOrUnknown(
+          data['invitation_revision']!,
+          _invitationRevisionMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_invitationRevisionMeta);
+    }
+    if (data.containsKey('state')) {
+      context.handle(
+        _stateMeta,
+        state.isAcceptableOrUnknown(data['state']!, _stateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_stateMeta);
+    }
+    if (data.containsKey('audience')) {
+      context.handle(
+        _audienceMeta,
+        audience.isAcceptableOrUnknown(data['audience']!, _audienceMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_audienceMeta);
+    }
+    if (data.containsKey('issued_by')) {
+      context.handle(
+        _issuedByMeta,
+        issuedBy.isAcceptableOrUnknown(data['issued_by']!, _issuedByMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_issuedByMeta);
+    }
+    if (data.containsKey('issued_at')) {
+      context.handle(
+        _issuedAtMeta,
+        issuedAt.isAcceptableOrUnknown(data['issued_at']!, _issuedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_issuedAtMeta);
+    }
+    if (data.containsKey('expires_at')) {
+      context.handle(
+        _expiresAtMeta,
+        expiresAt.isAcceptableOrUnknown(data['expires_at']!, _expiresAtMeta),
+      );
+    }
+    if (data.containsKey('first_used_at')) {
+      context.handle(
+        _firstUsedAtMeta,
+        firstUsedAt.isAcceptableOrUnknown(
+          data['first_used_at']!,
+          _firstUsedAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('last_used_at')) {
+      context.handle(
+        _lastUsedAtMeta,
+        lastUsedAt.isAcceptableOrUnknown(
+          data['last_used_at']!,
+          _lastUsedAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('revoked_at')) {
+      context.handle(
+        _revokedAtMeta,
+        revokedAt.isAcceptableOrUnknown(data['revoked_at']!, _revokedAtMeta),
+      );
+    }
+    if (data.containsKey('replaces_invitation_id')) {
+      context.handle(
+        _replacesInvitationIdMeta,
+        replacesInvitationId.isAcceptableOrUnknown(
+          data['replaces_invitation_id']!,
+          _replacesInvitationIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('redeemed_by_account_id')) {
+      context.handle(
+        _redeemedByAccountIdMeta,
+        redeemedByAccountId.isAcceptableOrUnknown(
+          data['redeemed_by_account_id']!,
+          _redeemedByAccountIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('delivery_outcomes')) {
+      context.handle(
+        _deliveryOutcomesMeta,
+        deliveryOutcomes.isAcceptableOrUnknown(
+          data['delivery_outcomes']!,
+          _deliveryOutcomesMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_deliveryOutcomesMeta);
+    }
+    if (data.containsKey('client_mutation_id')) {
+      context.handle(
+        _clientMutationIdMeta,
+        clientMutationId.isAcceptableOrUnknown(
+          data['client_mutation_id']!,
+          _clientMutationIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_clientMutationIdMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {contestParticipationId, invitationRevision},
+    {contestId, clientMutationId},
+  ];
+  @override
+  InvitationData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return InvitationData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      contestId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}contest_id'],
+      )!,
+      contestParticipationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}contest_participation_id'],
+      )!,
+      type: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}type'],
+      )!,
+      protectedCredential: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}protected_credential'],
+      )!,
+      invitationRevision: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}invitation_revision'],
+      )!,
+      state: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}state'],
+      )!,
+      audience: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}audience'],
+      )!,
+      issuedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}issued_by'],
+      )!,
+      issuedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}issued_at'],
+      )!,
+      expiresAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}expires_at'],
+      ),
+      firstUsedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}first_used_at'],
+      ),
+      lastUsedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}last_used_at'],
+      ),
+      revokedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}revoked_at'],
+      ),
+      replacesInvitationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}replaces_invitation_id'],
+      ),
+      redeemedByAccountId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}redeemed_by_account_id'],
+      ),
+      deliveryOutcomes: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}delivery_outcomes'],
+      )!,
+      clientMutationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}client_mutation_id'],
+      )!,
+    );
+  }
+
+  @override
+  $InvitationsTable createAlias(String alias) {
+    return $InvitationsTable(attachedDatabase, alias);
+  }
+}
+
+class InvitationData extends DataClass implements Insertable<InvitationData> {
+  final String id;
+  final String contestId;
+  final String contestParticipationId;
+  final String type;
+  final String protectedCredential;
+  final int invitationRevision;
+  final String state;
+  final String audience;
+  final String issuedBy;
+  final String issuedAt;
+  final String? expiresAt;
+  final String? firstUsedAt;
+  final String? lastUsedAt;
+  final String? revokedAt;
+  final String? replacesInvitationId;
+  final String? redeemedByAccountId;
+  final String deliveryOutcomes;
+  final String clientMutationId;
+  const InvitationData({
+    required this.id,
+    required this.contestId,
+    required this.contestParticipationId,
+    required this.type,
+    required this.protectedCredential,
+    required this.invitationRevision,
+    required this.state,
+    required this.audience,
+    required this.issuedBy,
+    required this.issuedAt,
+    this.expiresAt,
+    this.firstUsedAt,
+    this.lastUsedAt,
+    this.revokedAt,
+    this.replacesInvitationId,
+    this.redeemedByAccountId,
+    required this.deliveryOutcomes,
+    required this.clientMutationId,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['contest_id'] = Variable<String>(contestId);
+    map['contest_participation_id'] = Variable<String>(contestParticipationId);
+    map['type'] = Variable<String>(type);
+    map['protected_credential'] = Variable<String>(protectedCredential);
+    map['invitation_revision'] = Variable<int>(invitationRevision);
+    map['state'] = Variable<String>(state);
+    map['audience'] = Variable<String>(audience);
+    map['issued_by'] = Variable<String>(issuedBy);
+    map['issued_at'] = Variable<String>(issuedAt);
+    if (!nullToAbsent || expiresAt != null) {
+      map['expires_at'] = Variable<String>(expiresAt);
+    }
+    if (!nullToAbsent || firstUsedAt != null) {
+      map['first_used_at'] = Variable<String>(firstUsedAt);
+    }
+    if (!nullToAbsent || lastUsedAt != null) {
+      map['last_used_at'] = Variable<String>(lastUsedAt);
+    }
+    if (!nullToAbsent || revokedAt != null) {
+      map['revoked_at'] = Variable<String>(revokedAt);
+    }
+    if (!nullToAbsent || replacesInvitationId != null) {
+      map['replaces_invitation_id'] = Variable<String>(replacesInvitationId);
+    }
+    if (!nullToAbsent || redeemedByAccountId != null) {
+      map['redeemed_by_account_id'] = Variable<String>(redeemedByAccountId);
+    }
+    map['delivery_outcomes'] = Variable<String>(deliveryOutcomes);
+    map['client_mutation_id'] = Variable<String>(clientMutationId);
+    return map;
+  }
+
+  InvitationsCompanion toCompanion(bool nullToAbsent) {
+    return InvitationsCompanion(
+      id: Value(id),
+      contestId: Value(contestId),
+      contestParticipationId: Value(contestParticipationId),
+      type: Value(type),
+      protectedCredential: Value(protectedCredential),
+      invitationRevision: Value(invitationRevision),
+      state: Value(state),
+      audience: Value(audience),
+      issuedBy: Value(issuedBy),
+      issuedAt: Value(issuedAt),
+      expiresAt: expiresAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(expiresAt),
+      firstUsedAt: firstUsedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(firstUsedAt),
+      lastUsedAt: lastUsedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastUsedAt),
+      revokedAt: revokedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(revokedAt),
+      replacesInvitationId: replacesInvitationId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(replacesInvitationId),
+      redeemedByAccountId: redeemedByAccountId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(redeemedByAccountId),
+      deliveryOutcomes: Value(deliveryOutcomes),
+      clientMutationId: Value(clientMutationId),
+    );
+  }
+
+  factory InvitationData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return InvitationData(
+      id: serializer.fromJson<String>(json['id']),
+      contestId: serializer.fromJson<String>(json['contestId']),
+      contestParticipationId: serializer.fromJson<String>(
+        json['contestParticipationId'],
+      ),
+      type: serializer.fromJson<String>(json['type']),
+      protectedCredential: serializer.fromJson<String>(
+        json['protectedCredential'],
+      ),
+      invitationRevision: serializer.fromJson<int>(json['invitationRevision']),
+      state: serializer.fromJson<String>(json['state']),
+      audience: serializer.fromJson<String>(json['audience']),
+      issuedBy: serializer.fromJson<String>(json['issuedBy']),
+      issuedAt: serializer.fromJson<String>(json['issuedAt']),
+      expiresAt: serializer.fromJson<String?>(json['expiresAt']),
+      firstUsedAt: serializer.fromJson<String?>(json['firstUsedAt']),
+      lastUsedAt: serializer.fromJson<String?>(json['lastUsedAt']),
+      revokedAt: serializer.fromJson<String?>(json['revokedAt']),
+      replacesInvitationId: serializer.fromJson<String?>(
+        json['replacesInvitationId'],
+      ),
+      redeemedByAccountId: serializer.fromJson<String?>(
+        json['redeemedByAccountId'],
+      ),
+      deliveryOutcomes: serializer.fromJson<String>(json['deliveryOutcomes']),
+      clientMutationId: serializer.fromJson<String>(json['clientMutationId']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'contestId': serializer.toJson<String>(contestId),
+      'contestParticipationId': serializer.toJson<String>(
+        contestParticipationId,
+      ),
+      'type': serializer.toJson<String>(type),
+      'protectedCredential': serializer.toJson<String>(protectedCredential),
+      'invitationRevision': serializer.toJson<int>(invitationRevision),
+      'state': serializer.toJson<String>(state),
+      'audience': serializer.toJson<String>(audience),
+      'issuedBy': serializer.toJson<String>(issuedBy),
+      'issuedAt': serializer.toJson<String>(issuedAt),
+      'expiresAt': serializer.toJson<String?>(expiresAt),
+      'firstUsedAt': serializer.toJson<String?>(firstUsedAt),
+      'lastUsedAt': serializer.toJson<String?>(lastUsedAt),
+      'revokedAt': serializer.toJson<String?>(revokedAt),
+      'replacesInvitationId': serializer.toJson<String?>(replacesInvitationId),
+      'redeemedByAccountId': serializer.toJson<String?>(redeemedByAccountId),
+      'deliveryOutcomes': serializer.toJson<String>(deliveryOutcomes),
+      'clientMutationId': serializer.toJson<String>(clientMutationId),
+    };
+  }
+
+  InvitationData copyWith({
+    String? id,
+    String? contestId,
+    String? contestParticipationId,
+    String? type,
+    String? protectedCredential,
+    int? invitationRevision,
+    String? state,
+    String? audience,
+    String? issuedBy,
+    String? issuedAt,
+    Value<String?> expiresAt = const Value.absent(),
+    Value<String?> firstUsedAt = const Value.absent(),
+    Value<String?> lastUsedAt = const Value.absent(),
+    Value<String?> revokedAt = const Value.absent(),
+    Value<String?> replacesInvitationId = const Value.absent(),
+    Value<String?> redeemedByAccountId = const Value.absent(),
+    String? deliveryOutcomes,
+    String? clientMutationId,
+  }) => InvitationData(
+    id: id ?? this.id,
+    contestId: contestId ?? this.contestId,
+    contestParticipationId:
+        contestParticipationId ?? this.contestParticipationId,
+    type: type ?? this.type,
+    protectedCredential: protectedCredential ?? this.protectedCredential,
+    invitationRevision: invitationRevision ?? this.invitationRevision,
+    state: state ?? this.state,
+    audience: audience ?? this.audience,
+    issuedBy: issuedBy ?? this.issuedBy,
+    issuedAt: issuedAt ?? this.issuedAt,
+    expiresAt: expiresAt.present ? expiresAt.value : this.expiresAt,
+    firstUsedAt: firstUsedAt.present ? firstUsedAt.value : this.firstUsedAt,
+    lastUsedAt: lastUsedAt.present ? lastUsedAt.value : this.lastUsedAt,
+    revokedAt: revokedAt.present ? revokedAt.value : this.revokedAt,
+    replacesInvitationId: replacesInvitationId.present
+        ? replacesInvitationId.value
+        : this.replacesInvitationId,
+    redeemedByAccountId: redeemedByAccountId.present
+        ? redeemedByAccountId.value
+        : this.redeemedByAccountId,
+    deliveryOutcomes: deliveryOutcomes ?? this.deliveryOutcomes,
+    clientMutationId: clientMutationId ?? this.clientMutationId,
+  );
+  InvitationData copyWithCompanion(InvitationsCompanion data) {
+    return InvitationData(
+      id: data.id.present ? data.id.value : this.id,
+      contestId: data.contestId.present ? data.contestId.value : this.contestId,
+      contestParticipationId: data.contestParticipationId.present
+          ? data.contestParticipationId.value
+          : this.contestParticipationId,
+      type: data.type.present ? data.type.value : this.type,
+      protectedCredential: data.protectedCredential.present
+          ? data.protectedCredential.value
+          : this.protectedCredential,
+      invitationRevision: data.invitationRevision.present
+          ? data.invitationRevision.value
+          : this.invitationRevision,
+      state: data.state.present ? data.state.value : this.state,
+      audience: data.audience.present ? data.audience.value : this.audience,
+      issuedBy: data.issuedBy.present ? data.issuedBy.value : this.issuedBy,
+      issuedAt: data.issuedAt.present ? data.issuedAt.value : this.issuedAt,
+      expiresAt: data.expiresAt.present ? data.expiresAt.value : this.expiresAt,
+      firstUsedAt: data.firstUsedAt.present
+          ? data.firstUsedAt.value
+          : this.firstUsedAt,
+      lastUsedAt: data.lastUsedAt.present
+          ? data.lastUsedAt.value
+          : this.lastUsedAt,
+      revokedAt: data.revokedAt.present ? data.revokedAt.value : this.revokedAt,
+      replacesInvitationId: data.replacesInvitationId.present
+          ? data.replacesInvitationId.value
+          : this.replacesInvitationId,
+      redeemedByAccountId: data.redeemedByAccountId.present
+          ? data.redeemedByAccountId.value
+          : this.redeemedByAccountId,
+      deliveryOutcomes: data.deliveryOutcomes.present
+          ? data.deliveryOutcomes.value
+          : this.deliveryOutcomes,
+      clientMutationId: data.clientMutationId.present
+          ? data.clientMutationId.value
+          : this.clientMutationId,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('InvitationData(')
+          ..write('id: $id, ')
+          ..write('contestId: $contestId, ')
+          ..write('contestParticipationId: $contestParticipationId, ')
+          ..write('type: $type, ')
+          ..write('protectedCredential: $protectedCredential, ')
+          ..write('invitationRevision: $invitationRevision, ')
+          ..write('state: $state, ')
+          ..write('audience: $audience, ')
+          ..write('issuedBy: $issuedBy, ')
+          ..write('issuedAt: $issuedAt, ')
+          ..write('expiresAt: $expiresAt, ')
+          ..write('firstUsedAt: $firstUsedAt, ')
+          ..write('lastUsedAt: $lastUsedAt, ')
+          ..write('revokedAt: $revokedAt, ')
+          ..write('replacesInvitationId: $replacesInvitationId, ')
+          ..write('redeemedByAccountId: $redeemedByAccountId, ')
+          ..write('deliveryOutcomes: $deliveryOutcomes, ')
+          ..write('clientMutationId: $clientMutationId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    contestId,
+    contestParticipationId,
+    type,
+    protectedCredential,
+    invitationRevision,
+    state,
+    audience,
+    issuedBy,
+    issuedAt,
+    expiresAt,
+    firstUsedAt,
+    lastUsedAt,
+    revokedAt,
+    replacesInvitationId,
+    redeemedByAccountId,
+    deliveryOutcomes,
+    clientMutationId,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is InvitationData &&
+          other.id == this.id &&
+          other.contestId == this.contestId &&
+          other.contestParticipationId == this.contestParticipationId &&
+          other.type == this.type &&
+          other.protectedCredential == this.protectedCredential &&
+          other.invitationRevision == this.invitationRevision &&
+          other.state == this.state &&
+          other.audience == this.audience &&
+          other.issuedBy == this.issuedBy &&
+          other.issuedAt == this.issuedAt &&
+          other.expiresAt == this.expiresAt &&
+          other.firstUsedAt == this.firstUsedAt &&
+          other.lastUsedAt == this.lastUsedAt &&
+          other.revokedAt == this.revokedAt &&
+          other.replacesInvitationId == this.replacesInvitationId &&
+          other.redeemedByAccountId == this.redeemedByAccountId &&
+          other.deliveryOutcomes == this.deliveryOutcomes &&
+          other.clientMutationId == this.clientMutationId);
+}
+
+class InvitationsCompanion extends UpdateCompanion<InvitationData> {
+  final Value<String> id;
+  final Value<String> contestId;
+  final Value<String> contestParticipationId;
+  final Value<String> type;
+  final Value<String> protectedCredential;
+  final Value<int> invitationRevision;
+  final Value<String> state;
+  final Value<String> audience;
+  final Value<String> issuedBy;
+  final Value<String> issuedAt;
+  final Value<String?> expiresAt;
+  final Value<String?> firstUsedAt;
+  final Value<String?> lastUsedAt;
+  final Value<String?> revokedAt;
+  final Value<String?> replacesInvitationId;
+  final Value<String?> redeemedByAccountId;
+  final Value<String> deliveryOutcomes;
+  final Value<String> clientMutationId;
+  final Value<int> rowid;
+  const InvitationsCompanion({
+    this.id = const Value.absent(),
+    this.contestId = const Value.absent(),
+    this.contestParticipationId = const Value.absent(),
+    this.type = const Value.absent(),
+    this.protectedCredential = const Value.absent(),
+    this.invitationRevision = const Value.absent(),
+    this.state = const Value.absent(),
+    this.audience = const Value.absent(),
+    this.issuedBy = const Value.absent(),
+    this.issuedAt = const Value.absent(),
+    this.expiresAt = const Value.absent(),
+    this.firstUsedAt = const Value.absent(),
+    this.lastUsedAt = const Value.absent(),
+    this.revokedAt = const Value.absent(),
+    this.replacesInvitationId = const Value.absent(),
+    this.redeemedByAccountId = const Value.absent(),
+    this.deliveryOutcomes = const Value.absent(),
+    this.clientMutationId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  InvitationsCompanion.insert({
+    required String id,
+    required String contestId,
+    required String contestParticipationId,
+    required String type,
+    required String protectedCredential,
+    required int invitationRevision,
+    required String state,
+    required String audience,
+    required String issuedBy,
+    required String issuedAt,
+    this.expiresAt = const Value.absent(),
+    this.firstUsedAt = const Value.absent(),
+    this.lastUsedAt = const Value.absent(),
+    this.revokedAt = const Value.absent(),
+    this.replacesInvitationId = const Value.absent(),
+    this.redeemedByAccountId = const Value.absent(),
+    required String deliveryOutcomes,
+    required String clientMutationId,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       contestId = Value(contestId),
+       contestParticipationId = Value(contestParticipationId),
+       type = Value(type),
+       protectedCredential = Value(protectedCredential),
+       invitationRevision = Value(invitationRevision),
+       state = Value(state),
+       audience = Value(audience),
+       issuedBy = Value(issuedBy),
+       issuedAt = Value(issuedAt),
+       deliveryOutcomes = Value(deliveryOutcomes),
+       clientMutationId = Value(clientMutationId);
+  static Insertable<InvitationData> custom({
+    Expression<String>? id,
+    Expression<String>? contestId,
+    Expression<String>? contestParticipationId,
+    Expression<String>? type,
+    Expression<String>? protectedCredential,
+    Expression<int>? invitationRevision,
+    Expression<String>? state,
+    Expression<String>? audience,
+    Expression<String>? issuedBy,
+    Expression<String>? issuedAt,
+    Expression<String>? expiresAt,
+    Expression<String>? firstUsedAt,
+    Expression<String>? lastUsedAt,
+    Expression<String>? revokedAt,
+    Expression<String>? replacesInvitationId,
+    Expression<String>? redeemedByAccountId,
+    Expression<String>? deliveryOutcomes,
+    Expression<String>? clientMutationId,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (contestId != null) 'contest_id': contestId,
+      if (contestParticipationId != null)
+        'contest_participation_id': contestParticipationId,
+      if (type != null) 'type': type,
+      if (protectedCredential != null)
+        'protected_credential': protectedCredential,
+      if (invitationRevision != null) 'invitation_revision': invitationRevision,
+      if (state != null) 'state': state,
+      if (audience != null) 'audience': audience,
+      if (issuedBy != null) 'issued_by': issuedBy,
+      if (issuedAt != null) 'issued_at': issuedAt,
+      if (expiresAt != null) 'expires_at': expiresAt,
+      if (firstUsedAt != null) 'first_used_at': firstUsedAt,
+      if (lastUsedAt != null) 'last_used_at': lastUsedAt,
+      if (revokedAt != null) 'revoked_at': revokedAt,
+      if (replacesInvitationId != null)
+        'replaces_invitation_id': replacesInvitationId,
+      if (redeemedByAccountId != null)
+        'redeemed_by_account_id': redeemedByAccountId,
+      if (deliveryOutcomes != null) 'delivery_outcomes': deliveryOutcomes,
+      if (clientMutationId != null) 'client_mutation_id': clientMutationId,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  InvitationsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? contestId,
+    Value<String>? contestParticipationId,
+    Value<String>? type,
+    Value<String>? protectedCredential,
+    Value<int>? invitationRevision,
+    Value<String>? state,
+    Value<String>? audience,
+    Value<String>? issuedBy,
+    Value<String>? issuedAt,
+    Value<String?>? expiresAt,
+    Value<String?>? firstUsedAt,
+    Value<String?>? lastUsedAt,
+    Value<String?>? revokedAt,
+    Value<String?>? replacesInvitationId,
+    Value<String?>? redeemedByAccountId,
+    Value<String>? deliveryOutcomes,
+    Value<String>? clientMutationId,
+    Value<int>? rowid,
+  }) {
+    return InvitationsCompanion(
+      id: id ?? this.id,
+      contestId: contestId ?? this.contestId,
+      contestParticipationId:
+          contestParticipationId ?? this.contestParticipationId,
+      type: type ?? this.type,
+      protectedCredential: protectedCredential ?? this.protectedCredential,
+      invitationRevision: invitationRevision ?? this.invitationRevision,
+      state: state ?? this.state,
+      audience: audience ?? this.audience,
+      issuedBy: issuedBy ?? this.issuedBy,
+      issuedAt: issuedAt ?? this.issuedAt,
+      expiresAt: expiresAt ?? this.expiresAt,
+      firstUsedAt: firstUsedAt ?? this.firstUsedAt,
+      lastUsedAt: lastUsedAt ?? this.lastUsedAt,
+      revokedAt: revokedAt ?? this.revokedAt,
+      replacesInvitationId: replacesInvitationId ?? this.replacesInvitationId,
+      redeemedByAccountId: redeemedByAccountId ?? this.redeemedByAccountId,
+      deliveryOutcomes: deliveryOutcomes ?? this.deliveryOutcomes,
+      clientMutationId: clientMutationId ?? this.clientMutationId,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (contestId.present) {
+      map['contest_id'] = Variable<String>(contestId.value);
+    }
+    if (contestParticipationId.present) {
+      map['contest_participation_id'] = Variable<String>(
+        contestParticipationId.value,
+      );
+    }
+    if (type.present) {
+      map['type'] = Variable<String>(type.value);
+    }
+    if (protectedCredential.present) {
+      map['protected_credential'] = Variable<String>(protectedCredential.value);
+    }
+    if (invitationRevision.present) {
+      map['invitation_revision'] = Variable<int>(invitationRevision.value);
+    }
+    if (state.present) {
+      map['state'] = Variable<String>(state.value);
+    }
+    if (audience.present) {
+      map['audience'] = Variable<String>(audience.value);
+    }
+    if (issuedBy.present) {
+      map['issued_by'] = Variable<String>(issuedBy.value);
+    }
+    if (issuedAt.present) {
+      map['issued_at'] = Variable<String>(issuedAt.value);
+    }
+    if (expiresAt.present) {
+      map['expires_at'] = Variable<String>(expiresAt.value);
+    }
+    if (firstUsedAt.present) {
+      map['first_used_at'] = Variable<String>(firstUsedAt.value);
+    }
+    if (lastUsedAt.present) {
+      map['last_used_at'] = Variable<String>(lastUsedAt.value);
+    }
+    if (revokedAt.present) {
+      map['revoked_at'] = Variable<String>(revokedAt.value);
+    }
+    if (replacesInvitationId.present) {
+      map['replaces_invitation_id'] = Variable<String>(
+        replacesInvitationId.value,
+      );
+    }
+    if (redeemedByAccountId.present) {
+      map['redeemed_by_account_id'] = Variable<String>(
+        redeemedByAccountId.value,
+      );
+    }
+    if (deliveryOutcomes.present) {
+      map['delivery_outcomes'] = Variable<String>(deliveryOutcomes.value);
+    }
+    if (clientMutationId.present) {
+      map['client_mutation_id'] = Variable<String>(clientMutationId.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('InvitationsCompanion(')
+          ..write('id: $id, ')
+          ..write('contestId: $contestId, ')
+          ..write('contestParticipationId: $contestParticipationId, ')
+          ..write('type: $type, ')
+          ..write('protectedCredential: $protectedCredential, ')
+          ..write('invitationRevision: $invitationRevision, ')
+          ..write('state: $state, ')
+          ..write('audience: $audience, ')
+          ..write('issuedBy: $issuedBy, ')
+          ..write('issuedAt: $issuedAt, ')
+          ..write('expiresAt: $expiresAt, ')
+          ..write('firstUsedAt: $firstUsedAt, ')
+          ..write('lastUsedAt: $lastUsedAt, ')
+          ..write('revokedAt: $revokedAt, ')
+          ..write('replacesInvitationId: $replacesInvitationId, ')
+          ..write('redeemedByAccountId: $redeemedByAccountId, ')
+          ..write('deliveryOutcomes: $deliveryOutcomes, ')
+          ..write('clientMutationId: $clientMutationId, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $MatrixRevisionsTable extends MatrixRevisions
     with TableInfo<$MatrixRevisionsTable, MatrixRevisionData> {
   @override
@@ -27314,6 +35922,27 @@ abstract class _$SoarScoreDatabase extends GeneratedDatabase {
   late final $ModelCatalogsTable modelCatalogs = $ModelCatalogsTable(this);
   late final $ContestModelLinksTable contestModelLinks =
       $ContestModelLinksTable(this);
+  late final $AccountsTable accounts = $AccountsTable(this);
+  late final $AccountIdentitiesTable accountIdentities =
+      $AccountIdentitiesTable(this);
+  late final $AccountPublicProfilesTable accountPublicProfiles =
+      $AccountPublicProfilesTable(this);
+  late final $ParticipantAccountLinksTable participantAccountLinks =
+      $ParticipantAccountLinksTable(this);
+  late final $ParticipantDirectoryEntriesTable participantDirectoryEntries =
+      $ParticipantDirectoryEntriesTable(this);
+  late final $InstallationsTable installations = $InstallationsTable(this);
+  late final $InstallationActivationsTable installationActivations =
+      $InstallationActivationsTable(this);
+  late final $SyncCursorsTable syncCursors = $SyncCursorsTable(this);
+  late final $PublicationIdentitiesTable publicationIdentities =
+      $PublicationIdentitiesTable(this);
+  late final $PublicationProjectionsTable publicationProjections =
+      $PublicationProjectionsTable(this);
+  late final $PublicationParticipantsTable publicationParticipants =
+      $PublicationParticipantsTable(this);
+  late final $DelistRequestsTable delistRequests = $DelistRequestsTable(this);
+  late final $InvitationsTable invitations = $InvitationsTable(this);
   late final $MatrixRevisionsTable matrixRevisions = $MatrixRevisionsTable(
     this,
   );
@@ -27366,6 +35995,19 @@ abstract class _$SoarScoreDatabase extends GeneratedDatabase {
     teamMemberships,
     modelCatalogs,
     contestModelLinks,
+    accounts,
+    accountIdentities,
+    accountPublicProfiles,
+    participantAccountLinks,
+    participantDirectoryEntries,
+    installations,
+    installationActivations,
+    syncCursors,
+    publicationIdentities,
+    publicationProjections,
+    publicationParticipants,
+    delistRequests,
+    invitations,
     matrixRevisions,
     rounds,
     roundGroups,
@@ -27423,6 +36065,20 @@ abstract class _$SoarScoreDatabase extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('contest_model_links', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'contests',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('publication_identities', kind: UpdateKind.update)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'contests',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('invitations', kind: UpdateKind.delete)],
     ),
     WritePropagation(
       on: TableUpdateQuery.onTableName(
@@ -27676,6 +36332,50 @@ final class $$ContestsTableReferences
     final cache = $_typedResult.readTableOrNull(
       _contestModelLinksRefsTable($_db),
     );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $PublicationIdentitiesTable,
+    List<PublicationIdentityData>
+  >
+  _publicationIdentitiesRefsTable(_$SoarScoreDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.publicationIdentities,
+        aliasName: 'contests__id__publication_identities__contest_id',
+      );
+
+  $$PublicationIdentitiesTableProcessedTableManager
+  get publicationIdentitiesRefs {
+    final manager = $$PublicationIdentitiesTableTableManager(
+      $_db,
+      $_db.publicationIdentities,
+    ).filter((f) => f.contestId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _publicationIdentitiesRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$InvitationsTable, List<InvitationData>>
+  _invitationsRefsTable(_$SoarScoreDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.invitations,
+        aliasName: 'contests__id__invitations__contest_id',
+      );
+
+  $$InvitationsTableProcessedTableManager get invitationsRefs {
+    final manager = $$InvitationsTableTableManager(
+      $_db,
+      $_db.invitations,
+    ).filter((f) => f.contestId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_invitationsRefsTable($_db));
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
     );
@@ -28177,6 +36877,57 @@ class $$ContestsTableFilterComposer
           }) => $$ContestModelLinksTableFilterComposer(
             $db: $db,
             $table: $db.contestModelLinks,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> publicationIdentitiesRefs(
+    Expression<bool> Function($$PublicationIdentitiesTableFilterComposer f) f,
+  ) {
+    final $$PublicationIdentitiesTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.publicationIdentities,
+          getReferencedColumn: (t) => t.contestId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$PublicationIdentitiesTableFilterComposer(
+                $db: $db,
+                $table: $db.publicationIdentities,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<bool> invitationsRefs(
+    Expression<bool> Function($$InvitationsTableFilterComposer f) f,
+  ) {
+    final $$InvitationsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.invitations,
+      getReferencedColumn: (t) => t.contestId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$InvitationsTableFilterComposer(
+            $db: $db,
+            $table: $db.invitations,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -28831,6 +37582,57 @@ class $$ContestsTableAnnotationComposer
     return f(composer);
   }
 
+  Expression<T> publicationIdentitiesRefs<T extends Object>(
+    Expression<T> Function($$PublicationIdentitiesTableAnnotationComposer a) f,
+  ) {
+    final $$PublicationIdentitiesTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.publicationIdentities,
+          getReferencedColumn: (t) => t.contestId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$PublicationIdentitiesTableAnnotationComposer(
+                $db: $db,
+                $table: $db.publicationIdentities,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<T> invitationsRefs<T extends Object>(
+    Expression<T> Function($$InvitationsTableAnnotationComposer a) f,
+  ) {
+    final $$InvitationsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.invitations,
+      getReferencedColumn: (t) => t.contestId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$InvitationsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.invitations,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
   Expression<T> matrixRevisionsRefs<T extends Object>(
     Expression<T> Function($$MatrixRevisionsTableAnnotationComposer a) f,
   ) {
@@ -29180,6 +37982,8 @@ class $$ContestsTableTableManager
             bool teamsRefs,
             bool teamMembershipsRefs,
             bool contestModelLinksRefs,
+            bool publicationIdentitiesRefs,
+            bool invitationsRefs,
             bool matrixRevisionsRefs,
             bool roundsRefs,
             bool roundGroupsRefs,
@@ -29309,6 +38113,8 @@ class $$ContestsTableTableManager
                 teamsRefs = false,
                 teamMembershipsRefs = false,
                 contestModelLinksRefs = false,
+                publicationIdentitiesRefs = false,
+                invitationsRefs = false,
                 matrixRevisionsRefs = false,
                 roundsRefs = false,
                 roundGroupsRefs = false,
@@ -29332,6 +38138,8 @@ class $$ContestsTableTableManager
                     if (teamsRefs) db.teams,
                     if (teamMembershipsRefs) db.teamMemberships,
                     if (contestModelLinksRefs) db.contestModelLinks,
+                    if (publicationIdentitiesRefs) db.publicationIdentities,
+                    if (invitationsRefs) db.invitations,
                     if (matrixRevisionsRefs) db.matrixRevisions,
                     if (roundsRefs) db.rounds,
                     if (roundGroupsRefs) db.roundGroups,
@@ -29448,6 +38256,48 @@ class $$ContestsTableTableManager
                                 table,
                                 p0,
                               ).contestModelLinksRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.contestId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (publicationIdentitiesRefs)
+                        await $_getPrefetchedData<
+                          ContestData,
+                          $ContestsTable,
+                          PublicationIdentityData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$ContestsTableReferences
+                              ._publicationIdentitiesRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$ContestsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).publicationIdentitiesRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.contestId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (invitationsRefs)
+                        await $_getPrefetchedData<
+                          ContestData,
+                          $ContestsTable,
+                          InvitationData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$ContestsTableReferences
+                              ._invitationsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$ContestsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).invitationsRefs,
                           referencedItemsForCurrentItem:
                               (item, referencedItems) => referencedItems.where(
                                 (e) => e.contestId == item.id,
@@ -29753,6 +38603,8 @@ typedef $$ContestsTableProcessedTableManager =
         bool teamsRefs,
         bool teamMembershipsRefs,
         bool contestModelLinksRefs,
+        bool publicationIdentitiesRefs,
+        bool invitationsRefs,
         bool matrixRevisionsRefs,
         bool roundsRefs,
         bool roundGroupsRefs,
@@ -37505,6 +46357,28 @@ final class $$ContestParticipationsTableReferences
     );
   }
 
+  static MultiTypedResultKey<$InvitationsTable, List<InvitationData>>
+  _invitationsRefsTable(_$SoarScoreDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.invitations,
+        aliasName:
+            'contest_participations__id__invitations__contest_participation_id',
+      );
+
+  $$InvitationsTableProcessedTableManager get invitationsRefs {
+    final manager = $$InvitationsTableTableManager($_db, $_db.invitations)
+        .filter(
+          (f) => f.contestParticipationId.id.sqlEquals(
+            $_itemColumn<String>('id')!,
+          ),
+        );
+
+    final cache = $_typedResult.readTableOrNull(_invitationsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
   static MultiTypedResultKey<
     $MatrixAssignmentsTable,
     List<MatrixAssignmentData>
@@ -37806,6 +46680,31 @@ class $$ContestParticipationsTableFilterComposer
           }) => $$ContestModelLinksTableFilterComposer(
             $db: $db,
             $table: $db.contestModelLinks,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> invitationsRefs(
+    Expression<bool> Function($$InvitationsTableFilterComposer f) f,
+  ) {
+    final $$InvitationsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.invitations,
+      getReferencedColumn: (t) => t.contestParticipationId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$InvitationsTableFilterComposer(
+            $db: $db,
+            $table: $db.invitations,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -38224,6 +47123,31 @@ class $$ContestParticipationsTableAnnotationComposer
     return f(composer);
   }
 
+  Expression<T> invitationsRefs<T extends Object>(
+    Expression<T> Function($$InvitationsTableAnnotationComposer a) f,
+  ) {
+    final $$InvitationsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.invitations,
+      getReferencedColumn: (t) => t.contestParticipationId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$InvitationsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.invitations,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
   Expression<T> matrixAssignmentsRefs<T extends Object>(
     Expression<T> Function($$MatrixAssignmentsTableAnnotationComposer a) f,
   ) {
@@ -38373,6 +47297,7 @@ class $$ContestParticipationsTableTableManager
             bool roleId,
             bool teamMembershipsRefs,
             bool contestModelLinksRefs,
+            bool invitationsRefs,
             bool matrixAssignmentsRefs,
             bool reFlightParticipantsRefs,
             bool scorePlaceholdersRefs,
@@ -38476,6 +47401,7 @@ class $$ContestParticipationsTableTableManager
                 roleId = false,
                 teamMembershipsRefs = false,
                 contestModelLinksRefs = false,
+                invitationsRefs = false,
                 matrixAssignmentsRefs = false,
                 reFlightParticipantsRefs = false,
                 scorePlaceholdersRefs = false,
@@ -38487,6 +47413,7 @@ class $$ContestParticipationsTableTableManager
                   explicitlyWatchedTables: [
                     if (teamMembershipsRefs) db.teamMemberships,
                     if (contestModelLinksRefs) db.contestModelLinks,
+                    if (invitationsRefs) db.invitations,
                     if (matrixAssignmentsRefs) db.matrixAssignments,
                     if (reFlightParticipantsRefs) db.reFlightParticipants,
                     if (scorePlaceholdersRefs) db.scorePlaceholders,
@@ -38591,6 +47518,28 @@ class $$ContestParticipationsTableTableManager
                                 table,
                                 p0,
                               ).contestModelLinksRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.contestParticipationId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (invitationsRefs)
+                        await $_getPrefetchedData<
+                          ContestParticipationData,
+                          $ContestParticipationsTable,
+                          InvitationData
+                        >(
+                          currentTable: table,
+                          referencedTable:
+                              $$ContestParticipationsTableReferences
+                                  ._invitationsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$ContestParticipationsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).invitationsRefs,
                           referencedItemsForCurrentItem:
                               (item, referencedItems) => referencedItems.where(
                                 (e) => e.contestParticipationId == item.id,
@@ -38733,6 +47682,7 @@ typedef $$ContestParticipationsTableProcessedTableManager =
         bool roleId,
         bool teamMembershipsRefs,
         bool contestModelLinksRefs,
+        bool invitationsRefs,
         bool matrixAssignmentsRefs,
         bool reFlightParticipantsRefs,
         bool scorePlaceholdersRefs,
@@ -40674,6 +49624,8013 @@ typedef $$ContestModelLinksTableProcessedTableManager =
         bool contestId,
         bool contestParticipationId,
         bool modelCatalogId,
+      })
+    >;
+typedef $$AccountsTableCreateCompanionBuilder = AccountsCompanion Function({
+  required String id,
+  required String firstName,
+  required String lastName,
+  Value<String?> email,
+  required bool emailVerified,
+  required String kind,
+  required String status,
+  Value<String?> archivedAt,
+  required bool isSystemAdmin,
+  required String createdAt,
+  required String updatedAt,
+  Value<int> rowid,
+});
+typedef $$AccountsTableUpdateCompanionBuilder = AccountsCompanion Function({
+  Value<String> id,
+  Value<String> firstName,
+  Value<String> lastName,
+  Value<String?> email,
+  Value<bool> emailVerified,
+  Value<String> kind,
+  Value<String> status,
+  Value<String?> archivedAt,
+  Value<bool> isSystemAdmin,
+  Value<String> createdAt,
+  Value<String> updatedAt,
+  Value<int> rowid,
+});
+
+final class $$AccountsTableReferences
+    extends BaseReferences<_$SoarScoreDatabase, $AccountsTable, AccountData> {
+  $$AccountsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$AccountIdentitiesTable, List<AccountIdentityData>>
+  _accountIdentitiesRefsTable(_$SoarScoreDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.accountIdentities,
+        aliasName: 'accounts__id__account_identities__account_id',
+      );
+
+  $$AccountIdentitiesTableProcessedTableManager get accountIdentitiesRefs {
+    final manager = $$AccountIdentitiesTableTableManager(
+      $_db,
+      $_db.accountIdentities,
+    ).filter((f) => f.accountId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _accountIdentitiesRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $AccountPublicProfilesTable,
+    List<AccountPublicProfileData>
+  >
+  _accountPublicProfilesRefsTable(_$SoarScoreDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.accountPublicProfiles,
+        aliasName: 'accounts__id__account_public_profiles__account_id',
+      );
+
+  $$AccountPublicProfilesTableProcessedTableManager
+  get accountPublicProfilesRefs {
+    final manager = $$AccountPublicProfilesTableTableManager(
+      $_db,
+      $_db.accountPublicProfiles,
+    ).filter((f) => f.accountId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _accountPublicProfilesRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $ParticipantAccountLinksTable,
+    List<ParticipantAccountLinkData>
+  >
+  _participantAccountLinksRefsTable(_$SoarScoreDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.participantAccountLinks,
+        aliasName: 'accounts__id__participant_account_links__account_id',
+      );
+
+  $$ParticipantAccountLinksTableProcessedTableManager
+  get participantAccountLinksRefs {
+    final manager = $$ParticipantAccountLinksTableTableManager(
+      $_db,
+      $_db.participantAccountLinks,
+    ).filter((f) => f.accountId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _participantAccountLinksRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $ParticipantDirectoryEntriesTable,
+    List<ParticipantDirectoryEntryData>
+  >
+  _participantDirectoryEntriesRefsTable(_$SoarScoreDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.participantDirectoryEntries,
+        aliasName: 'accounts__id__participant_directory_entries__account_id',
+      );
+
+  $$ParticipantDirectoryEntriesTableProcessedTableManager
+  get participantDirectoryEntriesRefs {
+    final manager = $$ParticipantDirectoryEntriesTableTableManager(
+      $_db,
+      $_db.participantDirectoryEntries,
+    ).filter((f) => f.accountId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _participantDirectoryEntriesRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$InstallationsTable, List<InstallationData>>
+  _installationsRefsTable(_$SoarScoreDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.installations,
+        aliasName: 'accounts__id__installations__owner_account_id',
+      );
+
+  $$InstallationsTableProcessedTableManager get installationsRefs {
+    final manager = $$InstallationsTableTableManager(
+      $_db,
+      $_db.installations,
+    ).filter((f) => f.ownerAccountId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_installationsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $InstallationActivationsTable,
+    List<InstallationActivationData>
+  >
+  _installationActivationsRefsTable(_$SoarScoreDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.installationActivations,
+        aliasName: 'accounts__id__installation_activations__activated_by',
+      );
+
+  $$InstallationActivationsTableProcessedTableManager
+  get installationActivationsRefs {
+    final manager = $$InstallationActivationsTableTableManager(
+      $_db,
+      $_db.installationActivations,
+    ).filter((f) => f.activatedBy.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _installationActivationsRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$SyncCursorsTable, List<SyncCursorData>>
+  _syncCursorsRefsTable(_$SoarScoreDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.syncCursors,
+        aliasName: 'accounts__id__sync_cursors__owner_account_id',
+      );
+
+  $$SyncCursorsTableProcessedTableManager get syncCursorsRefs {
+    final manager = $$SyncCursorsTableTableManager(
+      $_db,
+      $_db.syncCursors,
+    ).filter((f) => f.ownerAccountId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_syncCursorsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $PublicationProjectionsTable,
+    List<PublicationProjectionData>
+  >
+  _publicationProjectionsRefsTable(_$SoarScoreDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.publicationProjections,
+        aliasName: 'accounts__id__publication_projections__published_by',
+      );
+
+  $$PublicationProjectionsTableProcessedTableManager
+  get publicationProjectionsRefs {
+    final manager = $$PublicationProjectionsTableTableManager(
+      $_db,
+      $_db.publicationProjections,
+    ).filter((f) => f.publishedBy.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _publicationProjectionsRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$AccountsTableFilterComposer
+    extends Composer<_$SoarScoreDatabase, $AccountsTable> {
+  $$AccountsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get firstName => $composableBuilder(
+    column: $table.firstName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get lastName => $composableBuilder(
+    column: $table.lastName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get email => $composableBuilder(
+    column: $table.email,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get emailVerified => $composableBuilder(
+    column: $table.emailVerified,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get archivedAt => $composableBuilder(
+    column: $table.archivedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isSystemAdmin => $composableBuilder(
+    column: $table.isSystemAdmin,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  Expression<bool> accountIdentitiesRefs(
+    Expression<bool> Function($$AccountIdentitiesTableFilterComposer f) f,
+  ) {
+    final $$AccountIdentitiesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.accountIdentities,
+      getReferencedColumn: (t) => t.accountId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AccountIdentitiesTableFilterComposer(
+            $db: $db,
+            $table: $db.accountIdentities,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> accountPublicProfilesRefs(
+    Expression<bool> Function($$AccountPublicProfilesTableFilterComposer f) f,
+  ) {
+    final $$AccountPublicProfilesTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.accountPublicProfiles,
+          getReferencedColumn: (t) => t.accountId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$AccountPublicProfilesTableFilterComposer(
+                $db: $db,
+                $table: $db.accountPublicProfiles,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<bool> participantAccountLinksRefs(
+    Expression<bool> Function($$ParticipantAccountLinksTableFilterComposer f) f,
+  ) {
+    final $$ParticipantAccountLinksTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.participantAccountLinks,
+          getReferencedColumn: (t) => t.accountId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ParticipantAccountLinksTableFilterComposer(
+                $db: $db,
+                $table: $db.participantAccountLinks,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<bool> participantDirectoryEntriesRefs(
+    Expression<bool> Function(
+      $$ParticipantDirectoryEntriesTableFilterComposer f,
+    )
+    f,
+  ) {
+    final $$ParticipantDirectoryEntriesTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.participantDirectoryEntries,
+          getReferencedColumn: (t) => t.accountId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ParticipantDirectoryEntriesTableFilterComposer(
+                $db: $db,
+                $table: $db.participantDirectoryEntries,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<bool> installationsRefs(
+    Expression<bool> Function($$InstallationsTableFilterComposer f) f,
+  ) {
+    final $$InstallationsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.installations,
+      getReferencedColumn: (t) => t.ownerAccountId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$InstallationsTableFilterComposer(
+            $db: $db,
+            $table: $db.installations,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> installationActivationsRefs(
+    Expression<bool> Function($$InstallationActivationsTableFilterComposer f) f,
+  ) {
+    final $$InstallationActivationsTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.installationActivations,
+          getReferencedColumn: (t) => t.activatedBy,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$InstallationActivationsTableFilterComposer(
+                $db: $db,
+                $table: $db.installationActivations,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<bool> syncCursorsRefs(
+    Expression<bool> Function($$SyncCursorsTableFilterComposer f) f,
+  ) {
+    final $$SyncCursorsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.syncCursors,
+      getReferencedColumn: (t) => t.ownerAccountId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SyncCursorsTableFilterComposer(
+            $db: $db,
+            $table: $db.syncCursors,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> publicationProjectionsRefs(
+    Expression<bool> Function($$PublicationProjectionsTableFilterComposer f) f,
+  ) {
+    final $$PublicationProjectionsTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.publicationProjections,
+          getReferencedColumn: (t) => t.publishedBy,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$PublicationProjectionsTableFilterComposer(
+                $db: $db,
+                $table: $db.publicationProjections,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+}
+
+class $$AccountsTableOrderingComposer
+    extends Composer<_$SoarScoreDatabase, $AccountsTable> {
+  $$AccountsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get firstName => $composableBuilder(
+    column: $table.firstName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get lastName => $composableBuilder(
+    column: $table.lastName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get email => $composableBuilder(
+    column: $table.email,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get emailVerified => $composableBuilder(
+    column: $table.emailVerified,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get archivedAt => $composableBuilder(
+    column: $table.archivedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isSystemAdmin => $composableBuilder(
+    column: $table.isSystemAdmin,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$AccountsTableAnnotationComposer
+    extends Composer<_$SoarScoreDatabase, $AccountsTable> {
+  $$AccountsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get firstName =>
+      $composableBuilder(column: $table.firstName, builder: (column) => column);
+
+  GeneratedColumn<String> get lastName =>
+      $composableBuilder(column: $table.lastName, builder: (column) => column);
+
+  GeneratedColumn<String> get email =>
+      $composableBuilder(column: $table.email, builder: (column) => column);
+
+  GeneratedColumn<bool> get emailVerified => $composableBuilder(
+    column: $table.emailVerified,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get kind =>
+      $composableBuilder(column: $table.kind, builder: (column) => column);
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<String> get archivedAt => $composableBuilder(
+    column: $table.archivedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get isSystemAdmin => $composableBuilder(
+    column: $table.isSystemAdmin,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  Expression<T> accountIdentitiesRefs<T extends Object>(
+    Expression<T> Function($$AccountIdentitiesTableAnnotationComposer a) f,
+  ) {
+    final $$AccountIdentitiesTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.accountIdentities,
+          getReferencedColumn: (t) => t.accountId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$AccountIdentitiesTableAnnotationComposer(
+                $db: $db,
+                $table: $db.accountIdentities,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<T> accountPublicProfilesRefs<T extends Object>(
+    Expression<T> Function($$AccountPublicProfilesTableAnnotationComposer a) f,
+  ) {
+    final $$AccountPublicProfilesTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.accountPublicProfiles,
+          getReferencedColumn: (t) => t.accountId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$AccountPublicProfilesTableAnnotationComposer(
+                $db: $db,
+                $table: $db.accountPublicProfiles,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<T> participantAccountLinksRefs<T extends Object>(
+    Expression<T> Function($$ParticipantAccountLinksTableAnnotationComposer a)
+    f,
+  ) {
+    final $$ParticipantAccountLinksTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.participantAccountLinks,
+          getReferencedColumn: (t) => t.accountId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ParticipantAccountLinksTableAnnotationComposer(
+                $db: $db,
+                $table: $db.participantAccountLinks,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<T> participantDirectoryEntriesRefs<T extends Object>(
+    Expression<T> Function(
+      $$ParticipantDirectoryEntriesTableAnnotationComposer a,
+    )
+    f,
+  ) {
+    final $$ParticipantDirectoryEntriesTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.participantDirectoryEntries,
+          getReferencedColumn: (t) => t.accountId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ParticipantDirectoryEntriesTableAnnotationComposer(
+                $db: $db,
+                $table: $db.participantDirectoryEntries,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<T> installationsRefs<T extends Object>(
+    Expression<T> Function($$InstallationsTableAnnotationComposer a) f,
+  ) {
+    final $$InstallationsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.installations,
+      getReferencedColumn: (t) => t.ownerAccountId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$InstallationsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.installations,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<T> installationActivationsRefs<T extends Object>(
+    Expression<T> Function($$InstallationActivationsTableAnnotationComposer a)
+    f,
+  ) {
+    final $$InstallationActivationsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.installationActivations,
+          getReferencedColumn: (t) => t.activatedBy,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$InstallationActivationsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.installationActivations,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<T> syncCursorsRefs<T extends Object>(
+    Expression<T> Function($$SyncCursorsTableAnnotationComposer a) f,
+  ) {
+    final $$SyncCursorsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.syncCursors,
+      getReferencedColumn: (t) => t.ownerAccountId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SyncCursorsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.syncCursors,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<T> publicationProjectionsRefs<T extends Object>(
+    Expression<T> Function($$PublicationProjectionsTableAnnotationComposer a) f,
+  ) {
+    final $$PublicationProjectionsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.publicationProjections,
+          getReferencedColumn: (t) => t.publishedBy,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$PublicationProjectionsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.publicationProjections,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+}
+
+class $$AccountsTableTableManager
+    extends
+        RootTableManager<
+          _$SoarScoreDatabase,
+          $AccountsTable,
+          AccountData,
+          $$AccountsTableFilterComposer,
+          $$AccountsTableOrderingComposer,
+          $$AccountsTableAnnotationComposer,
+          $$AccountsTableCreateCompanionBuilder,
+          $$AccountsTableUpdateCompanionBuilder,
+          (AccountData, $$AccountsTableReferences),
+          AccountData,
+          PrefetchHooks Function({
+            bool accountIdentitiesRefs,
+            bool accountPublicProfilesRefs,
+            bool participantAccountLinksRefs,
+            bool participantDirectoryEntriesRefs,
+            bool installationsRefs,
+            bool installationActivationsRefs,
+            bool syncCursorsRefs,
+            bool publicationProjectionsRefs,
+          })
+        > {
+  $$AccountsTableTableManager(_$SoarScoreDatabase db, $AccountsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$AccountsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$AccountsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$AccountsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> firstName = const Value.absent(),
+                Value<String> lastName = const Value.absent(),
+                Value<String?> email = const Value.absent(),
+                Value<bool> emailVerified = const Value.absent(),
+                Value<String> kind = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<String?> archivedAt = const Value.absent(),
+                Value<bool> isSystemAdmin = const Value.absent(),
+                Value<String> createdAt = const Value.absent(),
+                Value<String> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => AccountsCompanion(
+                id: id,
+                firstName: firstName,
+                lastName: lastName,
+                email: email,
+                emailVerified: emailVerified,
+                kind: kind,
+                status: status,
+                archivedAt: archivedAt,
+                isSystemAdmin: isSystemAdmin,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String firstName,
+                required String lastName,
+                Value<String?> email = const Value.absent(),
+                required bool emailVerified,
+                required String kind,
+                required String status,
+                Value<String?> archivedAt = const Value.absent(),
+                required bool isSystemAdmin,
+                required String createdAt,
+                required String updatedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => AccountsCompanion.insert(
+                id: id,
+                firstName: firstName,
+                lastName: lastName,
+                email: email,
+                emailVerified: emailVerified,
+                kind: kind,
+                status: status,
+                archivedAt: archivedAt,
+                isSystemAdmin: isSystemAdmin,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$AccountsTable, AccountData>(table),
+                  $$AccountsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback:
+              ({
+                accountIdentitiesRefs = false,
+                accountPublicProfilesRefs = false,
+                participantAccountLinksRefs = false,
+                participantDirectoryEntriesRefs = false,
+                installationsRefs = false,
+                installationActivationsRefs = false,
+                syncCursorsRefs = false,
+                publicationProjectionsRefs = false,
+              }) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (accountIdentitiesRefs) db.accountIdentities,
+                    if (accountPublicProfilesRefs) db.accountPublicProfiles,
+                    if (participantAccountLinksRefs) db.participantAccountLinks,
+                    if (participantDirectoryEntriesRefs)
+                      db.participantDirectoryEntries,
+                    if (installationsRefs) db.installations,
+                    if (installationActivationsRefs) db.installationActivations,
+                    if (syncCursorsRefs) db.syncCursors,
+                    if (publicationProjectionsRefs) db.publicationProjections,
+                  ],
+                  addJoins: null,
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (accountIdentitiesRefs)
+                        await $_getPrefetchedData<
+                          AccountData,
+                          $AccountsTable,
+                          AccountIdentityData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$AccountsTableReferences
+                              ._accountIdentitiesRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$AccountsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).accountIdentitiesRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.accountId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (accountPublicProfilesRefs)
+                        await $_getPrefetchedData<
+                          AccountData,
+                          $AccountsTable,
+                          AccountPublicProfileData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$AccountsTableReferences
+                              ._accountPublicProfilesRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$AccountsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).accountPublicProfilesRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.accountId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (participantAccountLinksRefs)
+                        await $_getPrefetchedData<
+                          AccountData,
+                          $AccountsTable,
+                          ParticipantAccountLinkData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$AccountsTableReferences
+                              ._participantAccountLinksRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$AccountsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).participantAccountLinksRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.accountId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (participantDirectoryEntriesRefs)
+                        await $_getPrefetchedData<
+                          AccountData,
+                          $AccountsTable,
+                          ParticipantDirectoryEntryData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$AccountsTableReferences
+                              ._participantDirectoryEntriesRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$AccountsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).participantDirectoryEntriesRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.accountId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (installationsRefs)
+                        await $_getPrefetchedData<
+                          AccountData,
+                          $AccountsTable,
+                          InstallationData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$AccountsTableReferences
+                              ._installationsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$AccountsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).installationsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.ownerAccountId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (installationActivationsRefs)
+                        await $_getPrefetchedData<
+                          AccountData,
+                          $AccountsTable,
+                          InstallationActivationData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$AccountsTableReferences
+                              ._installationActivationsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$AccountsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).installationActivationsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.activatedBy == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (syncCursorsRefs)
+                        await $_getPrefetchedData<
+                          AccountData,
+                          $AccountsTable,
+                          SyncCursorData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$AccountsTableReferences
+                              ._syncCursorsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$AccountsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).syncCursorsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.ownerAccountId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (publicationProjectionsRefs)
+                        await $_getPrefetchedData<
+                          AccountData,
+                          $AccountsTable,
+                          PublicationProjectionData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$AccountsTableReferences
+                              ._publicationProjectionsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$AccountsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).publicationProjectionsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.publishedBy == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$AccountsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$SoarScoreDatabase,
+      $AccountsTable,
+      AccountData,
+      $$AccountsTableFilterComposer,
+      $$AccountsTableOrderingComposer,
+      $$AccountsTableAnnotationComposer,
+      $$AccountsTableCreateCompanionBuilder,
+      $$AccountsTableUpdateCompanionBuilder,
+      (AccountData, $$AccountsTableReferences),
+      AccountData,
+      PrefetchHooks Function({
+        bool accountIdentitiesRefs,
+        bool accountPublicProfilesRefs,
+        bool participantAccountLinksRefs,
+        bool participantDirectoryEntriesRefs,
+        bool installationsRefs,
+        bool installationActivationsRefs,
+        bool syncCursorsRefs,
+        bool publicationProjectionsRefs,
+      })
+    >;
+typedef $$AccountIdentitiesTableCreateCompanionBuilder =
+    AccountIdentitiesCompanion Function({
+      required String id,
+      required String accountId,
+      required String issuer,
+      required String subject,
+      required String createdAt,
+      Value<int> rowid,
+    });
+typedef $$AccountIdentitiesTableUpdateCompanionBuilder =
+    AccountIdentitiesCompanion Function({
+      Value<String> id,
+      Value<String> accountId,
+      Value<String> issuer,
+      Value<String> subject,
+      Value<String> createdAt,
+      Value<int> rowid,
+    });
+
+final class $$AccountIdentitiesTableReferences
+    extends
+        BaseReferences<
+          _$SoarScoreDatabase,
+          $AccountIdentitiesTable,
+          AccountIdentityData
+        > {
+  $$AccountIdentitiesTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $AccountsTable _accountIdTable(_$SoarScoreDatabase db) =>
+      db.accounts.createAlias('account_identities__account_id__accounts__id');
+
+  $$AccountsTableProcessedTableManager get accountId {
+    final $_column = $_itemColumn<String>('account_id')!;
+
+    final manager = $$AccountsTableTableManager(
+      $_db,
+      $_db.accounts,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_accountIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$AccountIdentitiesTableFilterComposer
+    extends Composer<_$SoarScoreDatabase, $AccountIdentitiesTable> {
+  $$AccountIdentitiesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get issuer => $composableBuilder(
+    column: $table.issuer,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get subject => $composableBuilder(
+    column: $table.subject,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$AccountsTableFilterComposer get accountId {
+    final $$AccountsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.accountId,
+      referencedTable: $db.accounts,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AccountsTableFilterComposer(
+            $db: $db,
+            $table: $db.accounts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$AccountIdentitiesTableOrderingComposer
+    extends Composer<_$SoarScoreDatabase, $AccountIdentitiesTable> {
+  $$AccountIdentitiesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get issuer => $composableBuilder(
+    column: $table.issuer,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get subject => $composableBuilder(
+    column: $table.subject,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$AccountsTableOrderingComposer get accountId {
+    final $$AccountsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.accountId,
+      referencedTable: $db.accounts,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AccountsTableOrderingComposer(
+            $db: $db,
+            $table: $db.accounts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$AccountIdentitiesTableAnnotationComposer
+    extends Composer<_$SoarScoreDatabase, $AccountIdentitiesTable> {
+  $$AccountIdentitiesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get issuer =>
+      $composableBuilder(column: $table.issuer, builder: (column) => column);
+
+  GeneratedColumn<String> get subject =>
+      $composableBuilder(column: $table.subject, builder: (column) => column);
+
+  GeneratedColumn<String> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  $$AccountsTableAnnotationComposer get accountId {
+    final $$AccountsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.accountId,
+      referencedTable: $db.accounts,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AccountsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.accounts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$AccountIdentitiesTableTableManager
+    extends
+        RootTableManager<
+          _$SoarScoreDatabase,
+          $AccountIdentitiesTable,
+          AccountIdentityData,
+          $$AccountIdentitiesTableFilterComposer,
+          $$AccountIdentitiesTableOrderingComposer,
+          $$AccountIdentitiesTableAnnotationComposer,
+          $$AccountIdentitiesTableCreateCompanionBuilder,
+          $$AccountIdentitiesTableUpdateCompanionBuilder,
+          (AccountIdentityData, $$AccountIdentitiesTableReferences),
+          AccountIdentityData,
+          PrefetchHooks Function({bool accountId})
+        > {
+  $$AccountIdentitiesTableTableManager(
+    _$SoarScoreDatabase db,
+    $AccountIdentitiesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$AccountIdentitiesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$AccountIdentitiesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$AccountIdentitiesTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> accountId = const Value.absent(),
+                Value<String> issuer = const Value.absent(),
+                Value<String> subject = const Value.absent(),
+                Value<String> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => AccountIdentitiesCompanion(
+                id: id,
+                accountId: accountId,
+                issuer: issuer,
+                subject: subject,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String accountId,
+                required String issuer,
+                required String subject,
+                required String createdAt,
+                Value<int> rowid = const Value.absent(),
+              }) => AccountIdentitiesCompanion.insert(
+                id: id,
+                accountId: accountId,
+                issuer: issuer,
+                subject: subject,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$AccountIdentitiesTable, AccountIdentityData>(
+                    table,
+                  ),
+                  $$AccountIdentitiesTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({accountId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (accountId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.accountId,
+                        referencedTable: $$AccountIdentitiesTableReferences
+                            ._accountIdTable(db),
+                        referencedColumn: $$AccountIdentitiesTableReferences
+                            ._accountIdTable(db)
+                            .id,
+                      ) as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$AccountIdentitiesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$SoarScoreDatabase,
+      $AccountIdentitiesTable,
+      AccountIdentityData,
+      $$AccountIdentitiesTableFilterComposer,
+      $$AccountIdentitiesTableOrderingComposer,
+      $$AccountIdentitiesTableAnnotationComposer,
+      $$AccountIdentitiesTableCreateCompanionBuilder,
+      $$AccountIdentitiesTableUpdateCompanionBuilder,
+      (AccountIdentityData, $$AccountIdentitiesTableReferences),
+      AccountIdentityData,
+      PrefetchHooks Function({bool accountId})
+    >;
+typedef $$AccountPublicProfilesTableCreateCompanionBuilder =
+    AccountPublicProfilesCompanion Function({
+      required String id,
+      Value<String?> accountId,
+      required String displayName,
+      required String createdAt,
+      Value<int> rowid,
+    });
+typedef $$AccountPublicProfilesTableUpdateCompanionBuilder =
+    AccountPublicProfilesCompanion Function({
+      Value<String> id,
+      Value<String?> accountId,
+      Value<String> displayName,
+      Value<String> createdAt,
+      Value<int> rowid,
+    });
+
+final class $$AccountPublicProfilesTableReferences
+    extends
+        BaseReferences<
+          _$SoarScoreDatabase,
+          $AccountPublicProfilesTable,
+          AccountPublicProfileData
+        > {
+  $$AccountPublicProfilesTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $AccountsTable _accountIdTable(_$SoarScoreDatabase db) => db.accounts
+      .createAlias('account_public_profiles__account_id__accounts__id');
+
+  $$AccountsTableProcessedTableManager? get accountId {
+    final $_column = $_itemColumn<String>('account_id');
+    if ($_column == null) return null;
+    final manager = $$AccountsTableTableManager(
+      $_db,
+      $_db.accounts,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_accountIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $PublicationIdentitiesTable,
+    List<PublicationIdentityData>
+  >
+  _publicationIdentitiesRefsTable(_$SoarScoreDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.publicationIdentities,
+        aliasName: 'account_public_profiles__id__publication_identities__owner_public_profile_id',
+      );
+
+  $$PublicationIdentitiesTableProcessedTableManager
+  get publicationIdentitiesRefs {
+    final manager =
+        $$PublicationIdentitiesTableTableManager(
+          $_db,
+          $_db.publicationIdentities,
+        ).filter(
+          (f) =>
+              f.ownerPublicProfileId.id.sqlEquals($_itemColumn<String>('id')!),
+        );
+
+    final cache = $_typedResult.readTableOrNull(
+      _publicationIdentitiesRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $PublicationParticipantsTable,
+    List<PublicationParticipantData>
+  >
+  _publicationParticipantsRefsTable(_$SoarScoreDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.publicationParticipants,
+        aliasName: 'account_public_profiles__id__publication_participants__public_profile_id',
+      );
+
+  $$PublicationParticipantsTableProcessedTableManager
+  get publicationParticipantsRefs {
+    final manager =
+        $$PublicationParticipantsTableTableManager(
+          $_db,
+          $_db.publicationParticipants,
+        ).filter(
+          (f) => f.publicProfileId.id.sqlEquals($_itemColumn<String>('id')!),
+        );
+
+    final cache = $_typedResult.readTableOrNull(
+      _publicationParticipantsRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$AccountPublicProfilesTableFilterComposer
+    extends Composer<_$SoarScoreDatabase, $AccountPublicProfilesTable> {
+  $$AccountPublicProfilesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get displayName => $composableBuilder(
+    column: $table.displayName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$AccountsTableFilterComposer get accountId {
+    final $$AccountsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.accountId,
+      referencedTable: $db.accounts,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AccountsTableFilterComposer(
+            $db: $db,
+            $table: $db.accounts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<bool> publicationIdentitiesRefs(
+    Expression<bool> Function($$PublicationIdentitiesTableFilterComposer f) f,
+  ) {
+    final $$PublicationIdentitiesTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.publicationIdentities,
+          getReferencedColumn: (t) => t.ownerPublicProfileId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$PublicationIdentitiesTableFilterComposer(
+                $db: $db,
+                $table: $db.publicationIdentities,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<bool> publicationParticipantsRefs(
+    Expression<bool> Function($$PublicationParticipantsTableFilterComposer f) f,
+  ) {
+    final $$PublicationParticipantsTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.publicationParticipants,
+          getReferencedColumn: (t) => t.publicProfileId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$PublicationParticipantsTableFilterComposer(
+                $db: $db,
+                $table: $db.publicationParticipants,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+}
+
+class $$AccountPublicProfilesTableOrderingComposer
+    extends Composer<_$SoarScoreDatabase, $AccountPublicProfilesTable> {
+  $$AccountPublicProfilesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get displayName => $composableBuilder(
+    column: $table.displayName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$AccountsTableOrderingComposer get accountId {
+    final $$AccountsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.accountId,
+      referencedTable: $db.accounts,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AccountsTableOrderingComposer(
+            $db: $db,
+            $table: $db.accounts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$AccountPublicProfilesTableAnnotationComposer
+    extends Composer<_$SoarScoreDatabase, $AccountPublicProfilesTable> {
+  $$AccountPublicProfilesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get displayName => $composableBuilder(
+    column: $table.displayName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  $$AccountsTableAnnotationComposer get accountId {
+    final $$AccountsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.accountId,
+      referencedTable: $db.accounts,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AccountsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.accounts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<T> publicationIdentitiesRefs<T extends Object>(
+    Expression<T> Function($$PublicationIdentitiesTableAnnotationComposer a) f,
+  ) {
+    final $$PublicationIdentitiesTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.publicationIdentities,
+          getReferencedColumn: (t) => t.ownerPublicProfileId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$PublicationIdentitiesTableAnnotationComposer(
+                $db: $db,
+                $table: $db.publicationIdentities,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<T> publicationParticipantsRefs<T extends Object>(
+    Expression<T> Function($$PublicationParticipantsTableAnnotationComposer a)
+    f,
+  ) {
+    final $$PublicationParticipantsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.publicationParticipants,
+          getReferencedColumn: (t) => t.publicProfileId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$PublicationParticipantsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.publicationParticipants,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+}
+
+class $$AccountPublicProfilesTableTableManager
+    extends
+        RootTableManager<
+          _$SoarScoreDatabase,
+          $AccountPublicProfilesTable,
+          AccountPublicProfileData,
+          $$AccountPublicProfilesTableFilterComposer,
+          $$AccountPublicProfilesTableOrderingComposer,
+          $$AccountPublicProfilesTableAnnotationComposer,
+          $$AccountPublicProfilesTableCreateCompanionBuilder,
+          $$AccountPublicProfilesTableUpdateCompanionBuilder,
+          (AccountPublicProfileData, $$AccountPublicProfilesTableReferences),
+          AccountPublicProfileData,
+          PrefetchHooks Function({
+            bool accountId,
+            bool publicationIdentitiesRefs,
+            bool publicationParticipantsRefs,
+          })
+        > {
+  $$AccountPublicProfilesTableTableManager(
+    _$SoarScoreDatabase db,
+    $AccountPublicProfilesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$AccountPublicProfilesTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$AccountPublicProfilesTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$AccountPublicProfilesTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String?> accountId = const Value.absent(),
+                Value<String> displayName = const Value.absent(),
+                Value<String> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => AccountPublicProfilesCompanion(
+                id: id,
+                accountId: accountId,
+                displayName: displayName,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                Value<String?> accountId = const Value.absent(),
+                required String displayName,
+                required String createdAt,
+                Value<int> rowid = const Value.absent(),
+              }) => AccountPublicProfilesCompanion.insert(
+                id: id,
+                accountId: accountId,
+                displayName: displayName,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<
+                    $AccountPublicProfilesTable,
+                    AccountPublicProfileData
+                  >(table),
+                  $$AccountPublicProfilesTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback:
+              ({
+                accountId = false,
+                publicationIdentitiesRefs = false,
+                publicationParticipantsRefs = false,
+              }) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (publicationIdentitiesRefs) db.publicationIdentities,
+                    if (publicationParticipantsRefs) db.publicationParticipants,
+                  ],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (accountId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.accountId,
+                            referencedTable:
+                                $$AccountPublicProfilesTableReferences
+                                    ._accountIdTable(db),
+                            referencedColumn:
+                                $$AccountPublicProfilesTableReferences
+                                    ._accountIdTable(db)
+                                    .id,
+                          ) as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (publicationIdentitiesRefs)
+                        await $_getPrefetchedData<
+                          AccountPublicProfileData,
+                          $AccountPublicProfilesTable,
+                          PublicationIdentityData
+                        >(
+                          currentTable: table,
+                          referencedTable:
+                              $$AccountPublicProfilesTableReferences
+                                  ._publicationIdentitiesRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$AccountPublicProfilesTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).publicationIdentitiesRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.ownerPublicProfileId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (publicationParticipantsRefs)
+                        await $_getPrefetchedData<
+                          AccountPublicProfileData,
+                          $AccountPublicProfilesTable,
+                          PublicationParticipantData
+                        >(
+                          currentTable: table,
+                          referencedTable:
+                              $$AccountPublicProfilesTableReferences
+                                  ._publicationParticipantsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$AccountPublicProfilesTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).publicationParticipantsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.publicProfileId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$AccountPublicProfilesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$SoarScoreDatabase,
+      $AccountPublicProfilesTable,
+      AccountPublicProfileData,
+      $$AccountPublicProfilesTableFilterComposer,
+      $$AccountPublicProfilesTableOrderingComposer,
+      $$AccountPublicProfilesTableAnnotationComposer,
+      $$AccountPublicProfilesTableCreateCompanionBuilder,
+      $$AccountPublicProfilesTableUpdateCompanionBuilder,
+      (AccountPublicProfileData, $$AccountPublicProfilesTableReferences),
+      AccountPublicProfileData,
+      PrefetchHooks Function({
+        bool accountId,
+        bool publicationIdentitiesRefs,
+        bool publicationParticipantsRefs,
+      })
+    >;
+typedef $$ParticipantAccountLinksTableCreateCompanionBuilder =
+    ParticipantAccountLinksCompanion Function({
+      required String id,
+      required String participantProfileId,
+      required String accountId,
+      required String status,
+      required String origin,
+      required String createdAt,
+      Value<String?> confirmedAt,
+      Value<String?> endedAt,
+      Value<int> revision,
+      Value<int> rowid,
+    });
+typedef $$ParticipantAccountLinksTableUpdateCompanionBuilder =
+    ParticipantAccountLinksCompanion Function({
+      Value<String> id,
+      Value<String> participantProfileId,
+      Value<String> accountId,
+      Value<String> status,
+      Value<String> origin,
+      Value<String> createdAt,
+      Value<String?> confirmedAt,
+      Value<String?> endedAt,
+      Value<int> revision,
+      Value<int> rowid,
+    });
+
+final class $$ParticipantAccountLinksTableReferences
+    extends
+        BaseReferences<
+          _$SoarScoreDatabase,
+          $ParticipantAccountLinksTable,
+          ParticipantAccountLinkData
+        > {
+  $$ParticipantAccountLinksTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $AccountsTable _accountIdTable(_$SoarScoreDatabase db) => db.accounts
+      .createAlias('participant_account_links__account_id__accounts__id');
+
+  $$AccountsTableProcessedTableManager get accountId {
+    final $_column = $_itemColumn<String>('account_id')!;
+
+    final manager = $$AccountsTableTableManager(
+      $_db,
+      $_db.accounts,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_accountIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$ParticipantAccountLinksTableFilterComposer
+    extends Composer<_$SoarScoreDatabase, $ParticipantAccountLinksTable> {
+  $$ParticipantAccountLinksTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get participantProfileId => $composableBuilder(
+    column: $table.participantProfileId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get origin => $composableBuilder(
+    column: $table.origin,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get confirmedAt => $composableBuilder(
+    column: $table.confirmedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get endedAt => $composableBuilder(
+    column: $table.endedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get revision => $composableBuilder(
+    column: $table.revision,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$AccountsTableFilterComposer get accountId {
+    final $$AccountsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.accountId,
+      referencedTable: $db.accounts,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AccountsTableFilterComposer(
+            $db: $db,
+            $table: $db.accounts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ParticipantAccountLinksTableOrderingComposer
+    extends Composer<_$SoarScoreDatabase, $ParticipantAccountLinksTable> {
+  $$ParticipantAccountLinksTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get participantProfileId => $composableBuilder(
+    column: $table.participantProfileId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get origin => $composableBuilder(
+    column: $table.origin,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get confirmedAt => $composableBuilder(
+    column: $table.confirmedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get endedAt => $composableBuilder(
+    column: $table.endedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get revision => $composableBuilder(
+    column: $table.revision,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$AccountsTableOrderingComposer get accountId {
+    final $$AccountsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.accountId,
+      referencedTable: $db.accounts,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AccountsTableOrderingComposer(
+            $db: $db,
+            $table: $db.accounts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ParticipantAccountLinksTableAnnotationComposer
+    extends Composer<_$SoarScoreDatabase, $ParticipantAccountLinksTable> {
+  $$ParticipantAccountLinksTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get participantProfileId => $composableBuilder(
+    column: $table.participantProfileId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<String> get origin =>
+      $composableBuilder(column: $table.origin, builder: (column) => column);
+
+  GeneratedColumn<String> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get confirmedAt => $composableBuilder(
+    column: $table.confirmedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get endedAt =>
+      $composableBuilder(column: $table.endedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get revision =>
+      $composableBuilder(column: $table.revision, builder: (column) => column);
+
+  $$AccountsTableAnnotationComposer get accountId {
+    final $$AccountsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.accountId,
+      referencedTable: $db.accounts,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AccountsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.accounts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ParticipantAccountLinksTableTableManager
+    extends
+        RootTableManager<
+          _$SoarScoreDatabase,
+          $ParticipantAccountLinksTable,
+          ParticipantAccountLinkData,
+          $$ParticipantAccountLinksTableFilterComposer,
+          $$ParticipantAccountLinksTableOrderingComposer,
+          $$ParticipantAccountLinksTableAnnotationComposer,
+          $$ParticipantAccountLinksTableCreateCompanionBuilder,
+          $$ParticipantAccountLinksTableUpdateCompanionBuilder,
+          (
+            ParticipantAccountLinkData,
+            $$ParticipantAccountLinksTableReferences,
+          ),
+          ParticipantAccountLinkData,
+          PrefetchHooks Function({bool accountId})
+        > {
+  $$ParticipantAccountLinksTableTableManager(
+    _$SoarScoreDatabase db,
+    $ParticipantAccountLinksTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ParticipantAccountLinksTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$ParticipantAccountLinksTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$ParticipantAccountLinksTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> participantProfileId = const Value.absent(),
+                Value<String> accountId = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<String> origin = const Value.absent(),
+                Value<String> createdAt = const Value.absent(),
+                Value<String?> confirmedAt = const Value.absent(),
+                Value<String?> endedAt = const Value.absent(),
+                Value<int> revision = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ParticipantAccountLinksCompanion(
+                id: id,
+                participantProfileId: participantProfileId,
+                accountId: accountId,
+                status: status,
+                origin: origin,
+                createdAt: createdAt,
+                confirmedAt: confirmedAt,
+                endedAt: endedAt,
+                revision: revision,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String participantProfileId,
+                required String accountId,
+                required String status,
+                required String origin,
+                required String createdAt,
+                Value<String?> confirmedAt = const Value.absent(),
+                Value<String?> endedAt = const Value.absent(),
+                Value<int> revision = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ParticipantAccountLinksCompanion.insert(
+                id: id,
+                participantProfileId: participantProfileId,
+                accountId: accountId,
+                status: status,
+                origin: origin,
+                createdAt: createdAt,
+                confirmedAt: confirmedAt,
+                endedAt: endedAt,
+                revision: revision,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<
+                    $ParticipantAccountLinksTable,
+                    ParticipantAccountLinkData
+                  >(table),
+                  $$ParticipantAccountLinksTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({accountId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (accountId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.accountId,
+                        referencedTable:
+                            $$ParticipantAccountLinksTableReferences
+                                ._accountIdTable(db),
+                        referencedColumn:
+                            $$ParticipantAccountLinksTableReferences
+                                ._accountIdTable(db)
+                                .id,
+                      ) as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$ParticipantAccountLinksTableProcessedTableManager =
+    ProcessedTableManager<
+      _$SoarScoreDatabase,
+      $ParticipantAccountLinksTable,
+      ParticipantAccountLinkData,
+      $$ParticipantAccountLinksTableFilterComposer,
+      $$ParticipantAccountLinksTableOrderingComposer,
+      $$ParticipantAccountLinksTableAnnotationComposer,
+      $$ParticipantAccountLinksTableCreateCompanionBuilder,
+      $$ParticipantAccountLinksTableUpdateCompanionBuilder,
+      (ParticipantAccountLinkData, $$ParticipantAccountLinksTableReferences),
+      ParticipantAccountLinkData,
+      PrefetchHooks Function({bool accountId})
+    >;
+typedef $$ParticipantDirectoryEntriesTableCreateCompanionBuilder =
+    ParticipantDirectoryEntriesCompanion Function({
+      required String id,
+      required String accountId,
+      required String firstName,
+      required String lastName,
+      Value<String?> club,
+      Value<String?> faiNumber,
+      Value<String?> nationalOrgId,
+      Value<String?> city,
+      Value<String?> state,
+      Value<String?> country,
+      required bool isListed,
+      required bool emailVisibleToDirectors,
+      required String createdAt,
+      required String updatedAt,
+      Value<int> rowid,
+    });
+typedef $$ParticipantDirectoryEntriesTableUpdateCompanionBuilder =
+    ParticipantDirectoryEntriesCompanion Function({
+      Value<String> id,
+      Value<String> accountId,
+      Value<String> firstName,
+      Value<String> lastName,
+      Value<String?> club,
+      Value<String?> faiNumber,
+      Value<String?> nationalOrgId,
+      Value<String?> city,
+      Value<String?> state,
+      Value<String?> country,
+      Value<bool> isListed,
+      Value<bool> emailVisibleToDirectors,
+      Value<String> createdAt,
+      Value<String> updatedAt,
+      Value<int> rowid,
+    });
+
+final class $$ParticipantDirectoryEntriesTableReferences
+    extends
+        BaseReferences<
+          _$SoarScoreDatabase,
+          $ParticipantDirectoryEntriesTable,
+          ParticipantDirectoryEntryData
+        > {
+  $$ParticipantDirectoryEntriesTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $AccountsTable _accountIdTable(_$SoarScoreDatabase db) => db.accounts
+      .createAlias('participant_directory_entries__account_id__accounts__id');
+
+  $$AccountsTableProcessedTableManager get accountId {
+    final $_column = $_itemColumn<String>('account_id')!;
+
+    final manager = $$AccountsTableTableManager(
+      $_db,
+      $_db.accounts,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_accountIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$ParticipantDirectoryEntriesTableFilterComposer
+    extends Composer<_$SoarScoreDatabase, $ParticipantDirectoryEntriesTable> {
+  $$ParticipantDirectoryEntriesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get firstName => $composableBuilder(
+    column: $table.firstName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get lastName => $composableBuilder(
+    column: $table.lastName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get club => $composableBuilder(
+    column: $table.club,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get faiNumber => $composableBuilder(
+    column: $table.faiNumber,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get nationalOrgId => $composableBuilder(
+    column: $table.nationalOrgId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get city => $composableBuilder(
+    column: $table.city,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get state => $composableBuilder(
+    column: $table.state,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get country => $composableBuilder(
+    column: $table.country,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isListed => $composableBuilder(
+    column: $table.isListed,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get emailVisibleToDirectors => $composableBuilder(
+    column: $table.emailVisibleToDirectors,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$AccountsTableFilterComposer get accountId {
+    final $$AccountsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.accountId,
+      referencedTable: $db.accounts,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AccountsTableFilterComposer(
+            $db: $db,
+            $table: $db.accounts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ParticipantDirectoryEntriesTableOrderingComposer
+    extends Composer<_$SoarScoreDatabase, $ParticipantDirectoryEntriesTable> {
+  $$ParticipantDirectoryEntriesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get firstName => $composableBuilder(
+    column: $table.firstName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get lastName => $composableBuilder(
+    column: $table.lastName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get club => $composableBuilder(
+    column: $table.club,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get faiNumber => $composableBuilder(
+    column: $table.faiNumber,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get nationalOrgId => $composableBuilder(
+    column: $table.nationalOrgId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get city => $composableBuilder(
+    column: $table.city,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get state => $composableBuilder(
+    column: $table.state,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get country => $composableBuilder(
+    column: $table.country,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isListed => $composableBuilder(
+    column: $table.isListed,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get emailVisibleToDirectors => $composableBuilder(
+    column: $table.emailVisibleToDirectors,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$AccountsTableOrderingComposer get accountId {
+    final $$AccountsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.accountId,
+      referencedTable: $db.accounts,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AccountsTableOrderingComposer(
+            $db: $db,
+            $table: $db.accounts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ParticipantDirectoryEntriesTableAnnotationComposer
+    extends Composer<_$SoarScoreDatabase, $ParticipantDirectoryEntriesTable> {
+  $$ParticipantDirectoryEntriesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get firstName =>
+      $composableBuilder(column: $table.firstName, builder: (column) => column);
+
+  GeneratedColumn<String> get lastName =>
+      $composableBuilder(column: $table.lastName, builder: (column) => column);
+
+  GeneratedColumn<String> get club =>
+      $composableBuilder(column: $table.club, builder: (column) => column);
+
+  GeneratedColumn<String> get faiNumber =>
+      $composableBuilder(column: $table.faiNumber, builder: (column) => column);
+
+  GeneratedColumn<String> get nationalOrgId => $composableBuilder(
+    column: $table.nationalOrgId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get city =>
+      $composableBuilder(column: $table.city, builder: (column) => column);
+
+  GeneratedColumn<String> get state =>
+      $composableBuilder(column: $table.state, builder: (column) => column);
+
+  GeneratedColumn<String> get country =>
+      $composableBuilder(column: $table.country, builder: (column) => column);
+
+  GeneratedColumn<bool> get isListed =>
+      $composableBuilder(column: $table.isListed, builder: (column) => column);
+
+  GeneratedColumn<bool> get emailVisibleToDirectors => $composableBuilder(
+    column: $table.emailVisibleToDirectors,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  $$AccountsTableAnnotationComposer get accountId {
+    final $$AccountsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.accountId,
+      referencedTable: $db.accounts,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AccountsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.accounts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ParticipantDirectoryEntriesTableTableManager
+    extends
+        RootTableManager<
+          _$SoarScoreDatabase,
+          $ParticipantDirectoryEntriesTable,
+          ParticipantDirectoryEntryData,
+          $$ParticipantDirectoryEntriesTableFilterComposer,
+          $$ParticipantDirectoryEntriesTableOrderingComposer,
+          $$ParticipantDirectoryEntriesTableAnnotationComposer,
+          $$ParticipantDirectoryEntriesTableCreateCompanionBuilder,
+          $$ParticipantDirectoryEntriesTableUpdateCompanionBuilder,
+          (
+            ParticipantDirectoryEntryData,
+            $$ParticipantDirectoryEntriesTableReferences,
+          ),
+          ParticipantDirectoryEntryData,
+          PrefetchHooks Function({bool accountId})
+        > {
+  $$ParticipantDirectoryEntriesTableTableManager(
+    _$SoarScoreDatabase db,
+    $ParticipantDirectoryEntriesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ParticipantDirectoryEntriesTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$ParticipantDirectoryEntriesTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$ParticipantDirectoryEntriesTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> accountId = const Value.absent(),
+                Value<String> firstName = const Value.absent(),
+                Value<String> lastName = const Value.absent(),
+                Value<String?> club = const Value.absent(),
+                Value<String?> faiNumber = const Value.absent(),
+                Value<String?> nationalOrgId = const Value.absent(),
+                Value<String?> city = const Value.absent(),
+                Value<String?> state = const Value.absent(),
+                Value<String?> country = const Value.absent(),
+                Value<bool> isListed = const Value.absent(),
+                Value<bool> emailVisibleToDirectors = const Value.absent(),
+                Value<String> createdAt = const Value.absent(),
+                Value<String> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ParticipantDirectoryEntriesCompanion(
+                id: id,
+                accountId: accountId,
+                firstName: firstName,
+                lastName: lastName,
+                club: club,
+                faiNumber: faiNumber,
+                nationalOrgId: nationalOrgId,
+                city: city,
+                state: state,
+                country: country,
+                isListed: isListed,
+                emailVisibleToDirectors: emailVisibleToDirectors,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String accountId,
+                required String firstName,
+                required String lastName,
+                Value<String?> club = const Value.absent(),
+                Value<String?> faiNumber = const Value.absent(),
+                Value<String?> nationalOrgId = const Value.absent(),
+                Value<String?> city = const Value.absent(),
+                Value<String?> state = const Value.absent(),
+                Value<String?> country = const Value.absent(),
+                required bool isListed,
+                required bool emailVisibleToDirectors,
+                required String createdAt,
+                required String updatedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => ParticipantDirectoryEntriesCompanion.insert(
+                id: id,
+                accountId: accountId,
+                firstName: firstName,
+                lastName: lastName,
+                club: club,
+                faiNumber: faiNumber,
+                nationalOrgId: nationalOrgId,
+                city: city,
+                state: state,
+                country: country,
+                isListed: isListed,
+                emailVisibleToDirectors: emailVisibleToDirectors,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<
+                    $ParticipantDirectoryEntriesTable,
+                    ParticipantDirectoryEntryData
+                  >(table),
+                  $$ParticipantDirectoryEntriesTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({accountId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (accountId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.accountId,
+                        referencedTable:
+                            $$ParticipantDirectoryEntriesTableReferences
+                                ._accountIdTable(db),
+                        referencedColumn:
+                            $$ParticipantDirectoryEntriesTableReferences
+                                ._accountIdTable(db)
+                                .id,
+                      ) as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$ParticipantDirectoryEntriesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$SoarScoreDatabase,
+      $ParticipantDirectoryEntriesTable,
+      ParticipantDirectoryEntryData,
+      $$ParticipantDirectoryEntriesTableFilterComposer,
+      $$ParticipantDirectoryEntriesTableOrderingComposer,
+      $$ParticipantDirectoryEntriesTableAnnotationComposer,
+      $$ParticipantDirectoryEntriesTableCreateCompanionBuilder,
+      $$ParticipantDirectoryEntriesTableUpdateCompanionBuilder,
+      (
+        ParticipantDirectoryEntryData,
+        $$ParticipantDirectoryEntriesTableReferences,
+      ),
+      ParticipantDirectoryEntryData,
+      PrefetchHooks Function({bool accountId})
+    >;
+typedef $$InstallationsTableCreateCompanionBuilder =
+    InstallationsCompanion Function({
+      required String id,
+      required String ownerAccountId,
+      required String label,
+      required String platform,
+      required String createdAt,
+      Value<String?> lastSeenAt,
+      Value<String?> lastSyncAt,
+      required int systemDataSeq,
+      Value<String?> revokedAt,
+      Value<int> rowid,
+    });
+typedef $$InstallationsTableUpdateCompanionBuilder =
+    InstallationsCompanion Function({
+      Value<String> id,
+      Value<String> ownerAccountId,
+      Value<String> label,
+      Value<String> platform,
+      Value<String> createdAt,
+      Value<String?> lastSeenAt,
+      Value<String?> lastSyncAt,
+      Value<int> systemDataSeq,
+      Value<String?> revokedAt,
+      Value<int> rowid,
+    });
+
+final class $$InstallationsTableReferences
+    extends
+        BaseReferences<
+          _$SoarScoreDatabase,
+          $InstallationsTable,
+          InstallationData
+        > {
+  $$InstallationsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $AccountsTable _ownerAccountIdTable(_$SoarScoreDatabase db) =>
+      db.accounts.createAlias('installations__owner_account_id__accounts__id');
+
+  $$AccountsTableProcessedTableManager get ownerAccountId {
+    final $_column = $_itemColumn<String>('owner_account_id')!;
+
+    final manager = $$AccountsTableTableManager(
+      $_db,
+      $_db.accounts,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_ownerAccountIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $InstallationActivationsTable,
+    List<InstallationActivationData>
+  >
+  _installationActivationsRefsTable(_$SoarScoreDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.installationActivations,
+        aliasName:
+            'installations__id__installation_activations__installation_id',
+      );
+
+  $$InstallationActivationsTableProcessedTableManager
+  get installationActivationsRefs {
+    final manager = $$InstallationActivationsTableTableManager(
+      $_db,
+      $_db.installationActivations,
+    ).filter((f) => f.installationId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _installationActivationsRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$SyncCursorsTable, List<SyncCursorData>>
+  _syncCursorsRefsTable(_$SoarScoreDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.syncCursors,
+        aliasName: 'installations__id__sync_cursors__installation_id',
+      );
+
+  $$SyncCursorsTableProcessedTableManager get syncCursorsRefs {
+    final manager = $$SyncCursorsTableTableManager(
+      $_db,
+      $_db.syncCursors,
+    ).filter((f) => f.installationId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_syncCursorsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$InstallationsTableFilterComposer
+    extends Composer<_$SoarScoreDatabase, $InstallationsTable> {
+  $$InstallationsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get label => $composableBuilder(
+    column: $table.label,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get platform => $composableBuilder(
+    column: $table.platform,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get lastSeenAt => $composableBuilder(
+    column: $table.lastSeenAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get lastSyncAt => $composableBuilder(
+    column: $table.lastSyncAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get systemDataSeq => $composableBuilder(
+    column: $table.systemDataSeq,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get revokedAt => $composableBuilder(
+    column: $table.revokedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$AccountsTableFilterComposer get ownerAccountId {
+    final $$AccountsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.ownerAccountId,
+      referencedTable: $db.accounts,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AccountsTableFilterComposer(
+            $db: $db,
+            $table: $db.accounts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<bool> installationActivationsRefs(
+    Expression<bool> Function($$InstallationActivationsTableFilterComposer f) f,
+  ) {
+    final $$InstallationActivationsTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.installationActivations,
+          getReferencedColumn: (t) => t.installationId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$InstallationActivationsTableFilterComposer(
+                $db: $db,
+                $table: $db.installationActivations,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<bool> syncCursorsRefs(
+    Expression<bool> Function($$SyncCursorsTableFilterComposer f) f,
+  ) {
+    final $$SyncCursorsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.syncCursors,
+      getReferencedColumn: (t) => t.installationId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SyncCursorsTableFilterComposer(
+            $db: $db,
+            $table: $db.syncCursors,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$InstallationsTableOrderingComposer
+    extends Composer<_$SoarScoreDatabase, $InstallationsTable> {
+  $$InstallationsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get label => $composableBuilder(
+    column: $table.label,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get platform => $composableBuilder(
+    column: $table.platform,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get lastSeenAt => $composableBuilder(
+    column: $table.lastSeenAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get lastSyncAt => $composableBuilder(
+    column: $table.lastSyncAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get systemDataSeq => $composableBuilder(
+    column: $table.systemDataSeq,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get revokedAt => $composableBuilder(
+    column: $table.revokedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$AccountsTableOrderingComposer get ownerAccountId {
+    final $$AccountsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.ownerAccountId,
+      referencedTable: $db.accounts,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AccountsTableOrderingComposer(
+            $db: $db,
+            $table: $db.accounts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$InstallationsTableAnnotationComposer
+    extends Composer<_$SoarScoreDatabase, $InstallationsTable> {
+  $$InstallationsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get label =>
+      $composableBuilder(column: $table.label, builder: (column) => column);
+
+  GeneratedColumn<String> get platform =>
+      $composableBuilder(column: $table.platform, builder: (column) => column);
+
+  GeneratedColumn<String> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get lastSeenAt => $composableBuilder(
+    column: $table.lastSeenAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get lastSyncAt => $composableBuilder(
+    column: $table.lastSyncAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get systemDataSeq => $composableBuilder(
+    column: $table.systemDataSeq,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get revokedAt =>
+      $composableBuilder(column: $table.revokedAt, builder: (column) => column);
+
+  $$AccountsTableAnnotationComposer get ownerAccountId {
+    final $$AccountsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.ownerAccountId,
+      referencedTable: $db.accounts,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AccountsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.accounts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<T> installationActivationsRefs<T extends Object>(
+    Expression<T> Function($$InstallationActivationsTableAnnotationComposer a)
+    f,
+  ) {
+    final $$InstallationActivationsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.installationActivations,
+          getReferencedColumn: (t) => t.installationId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$InstallationActivationsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.installationActivations,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<T> syncCursorsRefs<T extends Object>(
+    Expression<T> Function($$SyncCursorsTableAnnotationComposer a) f,
+  ) {
+    final $$SyncCursorsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.syncCursors,
+      getReferencedColumn: (t) => t.installationId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SyncCursorsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.syncCursors,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$InstallationsTableTableManager
+    extends
+        RootTableManager<
+          _$SoarScoreDatabase,
+          $InstallationsTable,
+          InstallationData,
+          $$InstallationsTableFilterComposer,
+          $$InstallationsTableOrderingComposer,
+          $$InstallationsTableAnnotationComposer,
+          $$InstallationsTableCreateCompanionBuilder,
+          $$InstallationsTableUpdateCompanionBuilder,
+          (InstallationData, $$InstallationsTableReferences),
+          InstallationData,
+          PrefetchHooks Function({
+            bool ownerAccountId,
+            bool installationActivationsRefs,
+            bool syncCursorsRefs,
+          })
+        > {
+  $$InstallationsTableTableManager(
+    _$SoarScoreDatabase db,
+    $InstallationsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$InstallationsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$InstallationsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$InstallationsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> ownerAccountId = const Value.absent(),
+                Value<String> label = const Value.absent(),
+                Value<String> platform = const Value.absent(),
+                Value<String> createdAt = const Value.absent(),
+                Value<String?> lastSeenAt = const Value.absent(),
+                Value<String?> lastSyncAt = const Value.absent(),
+                Value<int> systemDataSeq = const Value.absent(),
+                Value<String?> revokedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => InstallationsCompanion(
+                id: id,
+                ownerAccountId: ownerAccountId,
+                label: label,
+                platform: platform,
+                createdAt: createdAt,
+                lastSeenAt: lastSeenAt,
+                lastSyncAt: lastSyncAt,
+                systemDataSeq: systemDataSeq,
+                revokedAt: revokedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String ownerAccountId,
+                required String label,
+                required String platform,
+                required String createdAt,
+                Value<String?> lastSeenAt = const Value.absent(),
+                Value<String?> lastSyncAt = const Value.absent(),
+                required int systemDataSeq,
+                Value<String?> revokedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => InstallationsCompanion.insert(
+                id: id,
+                ownerAccountId: ownerAccountId,
+                label: label,
+                platform: platform,
+                createdAt: createdAt,
+                lastSeenAt: lastSeenAt,
+                lastSyncAt: lastSyncAt,
+                systemDataSeq: systemDataSeq,
+                revokedAt: revokedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$InstallationsTable, InstallationData>(table),
+                  $$InstallationsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback:
+              ({
+                ownerAccountId = false,
+                installationActivationsRefs = false,
+                syncCursorsRefs = false,
+              }) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (installationActivationsRefs) db.installationActivations,
+                    if (syncCursorsRefs) db.syncCursors,
+                  ],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (ownerAccountId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.ownerAccountId,
+                            referencedTable: $$InstallationsTableReferences
+                                ._ownerAccountIdTable(db),
+                            referencedColumn: $$InstallationsTableReferences
+                                ._ownerAccountIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (installationActivationsRefs)
+                        await $_getPrefetchedData<
+                          InstallationData,
+                          $InstallationsTable,
+                          InstallationActivationData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$InstallationsTableReferences
+                              ._installationActivationsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$InstallationsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).installationActivationsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.installationId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (syncCursorsRefs)
+                        await $_getPrefetchedData<
+                          InstallationData,
+                          $InstallationsTable,
+                          SyncCursorData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$InstallationsTableReferences
+                              ._syncCursorsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$InstallationsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).syncCursorsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.installationId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$InstallationsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$SoarScoreDatabase,
+      $InstallationsTable,
+      InstallationData,
+      $$InstallationsTableFilterComposer,
+      $$InstallationsTableOrderingComposer,
+      $$InstallationsTableAnnotationComposer,
+      $$InstallationsTableCreateCompanionBuilder,
+      $$InstallationsTableUpdateCompanionBuilder,
+      (InstallationData, $$InstallationsTableReferences),
+      InstallationData,
+      PrefetchHooks Function({
+        bool ownerAccountId,
+        bool installationActivationsRefs,
+        bool syncCursorsRefs,
+      })
+    >;
+typedef $$InstallationActivationsTableCreateCompanionBuilder =
+    InstallationActivationsCompanion Function({
+      required String id,
+      required String contestId,
+      required String installationId,
+      required String activatedBy,
+      required String kind,
+      required String activatedAt,
+      Value<String?> endedAt,
+      Value<int> rowid,
+    });
+typedef $$InstallationActivationsTableUpdateCompanionBuilder =
+    InstallationActivationsCompanion Function({
+      Value<String> id,
+      Value<String> contestId,
+      Value<String> installationId,
+      Value<String> activatedBy,
+      Value<String> kind,
+      Value<String> activatedAt,
+      Value<String?> endedAt,
+      Value<int> rowid,
+    });
+
+final class $$InstallationActivationsTableReferences
+    extends
+        BaseReferences<
+          _$SoarScoreDatabase,
+          $InstallationActivationsTable,
+          InstallationActivationData
+        > {
+  $$InstallationActivationsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $InstallationsTable _installationIdTable(_$SoarScoreDatabase db) =>
+      db.installations.createAlias(
+        'installation_activations__installation_id__installations__id',
+      );
+
+  $$InstallationsTableProcessedTableManager get installationId {
+    final $_column = $_itemColumn<String>('installation_id')!;
+
+    final manager = $$InstallationsTableTableManager(
+      $_db,
+      $_db.installations,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_installationIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $AccountsTable _activatedByTable(_$SoarScoreDatabase db) => db.accounts
+      .createAlias('installation_activations__activated_by__accounts__id');
+
+  $$AccountsTableProcessedTableManager get activatedBy {
+    final $_column = $_itemColumn<String>('activated_by')!;
+
+    final manager = $$AccountsTableTableManager(
+      $_db,
+      $_db.accounts,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_activatedByTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$InstallationActivationsTableFilterComposer
+    extends Composer<_$SoarScoreDatabase, $InstallationActivationsTable> {
+  $$InstallationActivationsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get contestId => $composableBuilder(
+    column: $table.contestId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get activatedAt => $composableBuilder(
+    column: $table.activatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get endedAt => $composableBuilder(
+    column: $table.endedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$InstallationsTableFilterComposer get installationId {
+    final $$InstallationsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.installationId,
+      referencedTable: $db.installations,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$InstallationsTableFilterComposer(
+            $db: $db,
+            $table: $db.installations,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$AccountsTableFilterComposer get activatedBy {
+    final $$AccountsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.activatedBy,
+      referencedTable: $db.accounts,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AccountsTableFilterComposer(
+            $db: $db,
+            $table: $db.accounts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$InstallationActivationsTableOrderingComposer
+    extends Composer<_$SoarScoreDatabase, $InstallationActivationsTable> {
+  $$InstallationActivationsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get contestId => $composableBuilder(
+    column: $table.contestId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get activatedAt => $composableBuilder(
+    column: $table.activatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get endedAt => $composableBuilder(
+    column: $table.endedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$InstallationsTableOrderingComposer get installationId {
+    final $$InstallationsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.installationId,
+      referencedTable: $db.installations,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$InstallationsTableOrderingComposer(
+            $db: $db,
+            $table: $db.installations,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$AccountsTableOrderingComposer get activatedBy {
+    final $$AccountsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.activatedBy,
+      referencedTable: $db.accounts,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AccountsTableOrderingComposer(
+            $db: $db,
+            $table: $db.accounts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$InstallationActivationsTableAnnotationComposer
+    extends Composer<_$SoarScoreDatabase, $InstallationActivationsTable> {
+  $$InstallationActivationsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get contestId =>
+      $composableBuilder(column: $table.contestId, builder: (column) => column);
+
+  GeneratedColumn<String> get kind =>
+      $composableBuilder(column: $table.kind, builder: (column) => column);
+
+  GeneratedColumn<String> get activatedAt => $composableBuilder(
+    column: $table.activatedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get endedAt =>
+      $composableBuilder(column: $table.endedAt, builder: (column) => column);
+
+  $$InstallationsTableAnnotationComposer get installationId {
+    final $$InstallationsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.installationId,
+      referencedTable: $db.installations,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$InstallationsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.installations,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$AccountsTableAnnotationComposer get activatedBy {
+    final $$AccountsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.activatedBy,
+      referencedTable: $db.accounts,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AccountsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.accounts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$InstallationActivationsTableTableManager
+    extends
+        RootTableManager<
+          _$SoarScoreDatabase,
+          $InstallationActivationsTable,
+          InstallationActivationData,
+          $$InstallationActivationsTableFilterComposer,
+          $$InstallationActivationsTableOrderingComposer,
+          $$InstallationActivationsTableAnnotationComposer,
+          $$InstallationActivationsTableCreateCompanionBuilder,
+          $$InstallationActivationsTableUpdateCompanionBuilder,
+          (
+            InstallationActivationData,
+            $$InstallationActivationsTableReferences,
+          ),
+          InstallationActivationData,
+          PrefetchHooks Function({bool installationId, bool activatedBy})
+        > {
+  $$InstallationActivationsTableTableManager(
+    _$SoarScoreDatabase db,
+    $InstallationActivationsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$InstallationActivationsTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$InstallationActivationsTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$InstallationActivationsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> contestId = const Value.absent(),
+                Value<String> installationId = const Value.absent(),
+                Value<String> activatedBy = const Value.absent(),
+                Value<String> kind = const Value.absent(),
+                Value<String> activatedAt = const Value.absent(),
+                Value<String?> endedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => InstallationActivationsCompanion(
+                id: id,
+                contestId: contestId,
+                installationId: installationId,
+                activatedBy: activatedBy,
+                kind: kind,
+                activatedAt: activatedAt,
+                endedAt: endedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String contestId,
+                required String installationId,
+                required String activatedBy,
+                required String kind,
+                required String activatedAt,
+                Value<String?> endedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => InstallationActivationsCompanion.insert(
+                id: id,
+                contestId: contestId,
+                installationId: installationId,
+                activatedBy: activatedBy,
+                kind: kind,
+                activatedAt: activatedAt,
+                endedAt: endedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<
+                    $InstallationActivationsTable,
+                    InstallationActivationData
+                  >(table),
+                  $$InstallationActivationsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback:
+              ({installationId = false, activatedBy = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (installationId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.installationId,
+                            referencedTable:
+                                $$InstallationActivationsTableReferences
+                                    ._installationIdTable(db),
+                            referencedColumn:
+                                $$InstallationActivationsTableReferences
+                                    ._installationIdTable(db)
+                                    .id,
+                          ) as T;
+                        }
+                        if (activatedBy) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.activatedBy,
+                            referencedTable:
+                                $$InstallationActivationsTableReferences
+                                    ._activatedByTable(db),
+                            referencedColumn:
+                                $$InstallationActivationsTableReferences
+                                    ._activatedByTable(db)
+                                    .id,
+                          ) as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$InstallationActivationsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$SoarScoreDatabase,
+      $InstallationActivationsTable,
+      InstallationActivationData,
+      $$InstallationActivationsTableFilterComposer,
+      $$InstallationActivationsTableOrderingComposer,
+      $$InstallationActivationsTableAnnotationComposer,
+      $$InstallationActivationsTableCreateCompanionBuilder,
+      $$InstallationActivationsTableUpdateCompanionBuilder,
+      (InstallationActivationData, $$InstallationActivationsTableReferences),
+      InstallationActivationData,
+      PrefetchHooks Function({bool installationId, bool activatedBy})
+    >;
+typedef $$SyncCursorsTableCreateCompanionBuilder =
+    SyncCursorsCompanion Function({
+      required String id,
+      required String installationId,
+      Value<String?> contestId,
+      Value<String?> ownerAccountId,
+      required int lastSyncedSequence,
+      Value<String?> lastSyncedAt,
+      required String updatedAt,
+      Value<int> rowid,
+    });
+typedef $$SyncCursorsTableUpdateCompanionBuilder =
+    SyncCursorsCompanion Function({
+      Value<String> id,
+      Value<String> installationId,
+      Value<String?> contestId,
+      Value<String?> ownerAccountId,
+      Value<int> lastSyncedSequence,
+      Value<String?> lastSyncedAt,
+      Value<String> updatedAt,
+      Value<int> rowid,
+    });
+
+final class $$SyncCursorsTableReferences
+    extends
+        BaseReferences<_$SoarScoreDatabase, $SyncCursorsTable, SyncCursorData> {
+  $$SyncCursorsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $InstallationsTable _installationIdTable(_$SoarScoreDatabase db) => db
+      .installations
+      .createAlias('sync_cursors__installation_id__installations__id');
+
+  $$InstallationsTableProcessedTableManager get installationId {
+    final $_column = $_itemColumn<String>('installation_id')!;
+
+    final manager = $$InstallationsTableTableManager(
+      $_db,
+      $_db.installations,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_installationIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $AccountsTable _ownerAccountIdTable(_$SoarScoreDatabase db) =>
+      db.accounts.createAlias('sync_cursors__owner_account_id__accounts__id');
+
+  $$AccountsTableProcessedTableManager? get ownerAccountId {
+    final $_column = $_itemColumn<String>('owner_account_id');
+    if ($_column == null) return null;
+    final manager = $$AccountsTableTableManager(
+      $_db,
+      $_db.accounts,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_ownerAccountIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$SyncCursorsTableFilterComposer
+    extends Composer<_$SoarScoreDatabase, $SyncCursorsTable> {
+  $$SyncCursorsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get contestId => $composableBuilder(
+    column: $table.contestId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get lastSyncedSequence => $composableBuilder(
+    column: $table.lastSyncedSequence,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get lastSyncedAt => $composableBuilder(
+    column: $table.lastSyncedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$InstallationsTableFilterComposer get installationId {
+    final $$InstallationsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.installationId,
+      referencedTable: $db.installations,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$InstallationsTableFilterComposer(
+            $db: $db,
+            $table: $db.installations,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$AccountsTableFilterComposer get ownerAccountId {
+    final $$AccountsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.ownerAccountId,
+      referencedTable: $db.accounts,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AccountsTableFilterComposer(
+            $db: $db,
+            $table: $db.accounts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$SyncCursorsTableOrderingComposer
+    extends Composer<_$SoarScoreDatabase, $SyncCursorsTable> {
+  $$SyncCursorsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get contestId => $composableBuilder(
+    column: $table.contestId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get lastSyncedSequence => $composableBuilder(
+    column: $table.lastSyncedSequence,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get lastSyncedAt => $composableBuilder(
+    column: $table.lastSyncedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$InstallationsTableOrderingComposer get installationId {
+    final $$InstallationsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.installationId,
+      referencedTable: $db.installations,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$InstallationsTableOrderingComposer(
+            $db: $db,
+            $table: $db.installations,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$AccountsTableOrderingComposer get ownerAccountId {
+    final $$AccountsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.ownerAccountId,
+      referencedTable: $db.accounts,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AccountsTableOrderingComposer(
+            $db: $db,
+            $table: $db.accounts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$SyncCursorsTableAnnotationComposer
+    extends Composer<_$SoarScoreDatabase, $SyncCursorsTable> {
+  $$SyncCursorsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get contestId =>
+      $composableBuilder(column: $table.contestId, builder: (column) => column);
+
+  GeneratedColumn<int> get lastSyncedSequence => $composableBuilder(
+    column: $table.lastSyncedSequence,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get lastSyncedAt => $composableBuilder(
+    column: $table.lastSyncedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  $$InstallationsTableAnnotationComposer get installationId {
+    final $$InstallationsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.installationId,
+      referencedTable: $db.installations,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$InstallationsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.installations,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$AccountsTableAnnotationComposer get ownerAccountId {
+    final $$AccountsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.ownerAccountId,
+      referencedTable: $db.accounts,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AccountsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.accounts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$SyncCursorsTableTableManager
+    extends
+        RootTableManager<
+          _$SoarScoreDatabase,
+          $SyncCursorsTable,
+          SyncCursorData,
+          $$SyncCursorsTableFilterComposer,
+          $$SyncCursorsTableOrderingComposer,
+          $$SyncCursorsTableAnnotationComposer,
+          $$SyncCursorsTableCreateCompanionBuilder,
+          $$SyncCursorsTableUpdateCompanionBuilder,
+          (SyncCursorData, $$SyncCursorsTableReferences),
+          SyncCursorData,
+          PrefetchHooks Function({bool installationId, bool ownerAccountId})
+        > {
+  $$SyncCursorsTableTableManager(
+    _$SoarScoreDatabase db,
+    $SyncCursorsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SyncCursorsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SyncCursorsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SyncCursorsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> installationId = const Value.absent(),
+                Value<String?> contestId = const Value.absent(),
+                Value<String?> ownerAccountId = const Value.absent(),
+                Value<int> lastSyncedSequence = const Value.absent(),
+                Value<String?> lastSyncedAt = const Value.absent(),
+                Value<String> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SyncCursorsCompanion(
+                id: id,
+                installationId: installationId,
+                contestId: contestId,
+                ownerAccountId: ownerAccountId,
+                lastSyncedSequence: lastSyncedSequence,
+                lastSyncedAt: lastSyncedAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String installationId,
+                Value<String?> contestId = const Value.absent(),
+                Value<String?> ownerAccountId = const Value.absent(),
+                required int lastSyncedSequence,
+                Value<String?> lastSyncedAt = const Value.absent(),
+                required String updatedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => SyncCursorsCompanion.insert(
+                id: id,
+                installationId: installationId,
+                contestId: contestId,
+                ownerAccountId: ownerAccountId,
+                lastSyncedSequence: lastSyncedSequence,
+                lastSyncedAt: lastSyncedAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$SyncCursorsTable, SyncCursorData>(table),
+                  $$SyncCursorsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback:
+              ({installationId = false, ownerAccountId = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (installationId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.installationId,
+                            referencedTable: $$SyncCursorsTableReferences
+                                ._installationIdTable(db),
+                            referencedColumn: $$SyncCursorsTableReferences
+                                ._installationIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+                        if (ownerAccountId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.ownerAccountId,
+                            referencedTable: $$SyncCursorsTableReferences
+                                ._ownerAccountIdTable(db),
+                            referencedColumn: $$SyncCursorsTableReferences
+                                ._ownerAccountIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$SyncCursorsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$SoarScoreDatabase,
+      $SyncCursorsTable,
+      SyncCursorData,
+      $$SyncCursorsTableFilterComposer,
+      $$SyncCursorsTableOrderingComposer,
+      $$SyncCursorsTableAnnotationComposer,
+      $$SyncCursorsTableCreateCompanionBuilder,
+      $$SyncCursorsTableUpdateCompanionBuilder,
+      (SyncCursorData, $$SyncCursorsTableReferences),
+      SyncCursorData,
+      PrefetchHooks Function({bool installationId, bool ownerAccountId})
+    >;
+typedef $$PublicationIdentitiesTableCreateCompanionBuilder =
+    PublicationIdentitiesCompanion Function({
+      required String id,
+      Value<String?> contestId,
+      Value<String?> ownerPublicProfileId,
+      required String claimStatus,
+      Value<String?> verificationEmail,
+      required String visibility,
+      Value<String?> publishedAt,
+      Value<String?> currentProjectionId,
+      Value<int?> resultsHiddenThroughRound,
+      Value<String?> resultsHiddenAt,
+      Value<int> revision,
+      Value<int> rowid,
+    });
+typedef $$PublicationIdentitiesTableUpdateCompanionBuilder =
+    PublicationIdentitiesCompanion Function({
+      Value<String> id,
+      Value<String?> contestId,
+      Value<String?> ownerPublicProfileId,
+      Value<String> claimStatus,
+      Value<String?> verificationEmail,
+      Value<String> visibility,
+      Value<String?> publishedAt,
+      Value<String?> currentProjectionId,
+      Value<int?> resultsHiddenThroughRound,
+      Value<String?> resultsHiddenAt,
+      Value<int> revision,
+      Value<int> rowid,
+    });
+
+final class $$PublicationIdentitiesTableReferences
+    extends
+        BaseReferences<
+          _$SoarScoreDatabase,
+          $PublicationIdentitiesTable,
+          PublicationIdentityData
+        > {
+  $$PublicationIdentitiesTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $ContestsTable _contestIdTable(_$SoarScoreDatabase db) => db.contests
+      .createAlias('publication_identities__contest_id__contests__id');
+
+  $$ContestsTableProcessedTableManager? get contestId {
+    final $_column = $_itemColumn<String>('contest_id');
+    if ($_column == null) return null;
+    final manager = $$ContestsTableTableManager(
+      $_db,
+      $_db.contests,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_contestIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $AccountPublicProfilesTable _ownerPublicProfileIdTable(
+    _$SoarScoreDatabase db,
+  ) => db.accountPublicProfiles.createAlias(
+    'publication_identities__owner_public_profile_id__account_public_profiles__id',
+  );
+
+  $$AccountPublicProfilesTableProcessedTableManager? get ownerPublicProfileId {
+    final $_column = $_itemColumn<String>('owner_public_profile_id');
+    if ($_column == null) return null;
+    final manager = $$AccountPublicProfilesTableTableManager(
+      $_db,
+      $_db.accountPublicProfiles,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(
+      _ownerPublicProfileIdTable($_db),
+    );
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $PublicationProjectionsTable,
+    List<PublicationProjectionData>
+  >
+  _publicationProjectionsRefsTable(
+    _$SoarScoreDatabase db,
+  ) => MultiTypedResultKey.fromTable(
+    db.publicationProjections,
+    aliasName:
+        'publication_identities__id__publication_projections__publication_id',
+  );
+
+  $$PublicationProjectionsTableProcessedTableManager
+  get publicationProjectionsRefs {
+    final manager = $$PublicationProjectionsTableTableManager(
+      $_db,
+      $_db.publicationProjections,
+    ).filter((f) => f.publicationId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _publicationProjectionsRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $PublicationParticipantsTable,
+    List<PublicationParticipantData>
+  >
+  _publicationParticipantsRefsTable(
+    _$SoarScoreDatabase db,
+  ) => MultiTypedResultKey.fromTable(
+    db.publicationParticipants,
+    aliasName:
+        'publication_identities__id__publication_participants__publication_id',
+  );
+
+  $$PublicationParticipantsTableProcessedTableManager
+  get publicationParticipantsRefs {
+    final manager = $$PublicationParticipantsTableTableManager(
+      $_db,
+      $_db.publicationParticipants,
+    ).filter((f) => f.publicationId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _publicationParticipantsRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$DelistRequestsTable, List<DelistRequestData>>
+  _delistRequestsRefsTable(_$SoarScoreDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.delistRequests,
+        aliasName:
+            'publication_identities__id__delist_requests__publication_id',
+      );
+
+  $$DelistRequestsTableProcessedTableManager get delistRequestsRefs {
+    final manager = $$DelistRequestsTableTableManager(
+      $_db,
+      $_db.delistRequests,
+    ).filter((f) => f.publicationId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_delistRequestsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$PublicationIdentitiesTableFilterComposer
+    extends Composer<_$SoarScoreDatabase, $PublicationIdentitiesTable> {
+  $$PublicationIdentitiesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get claimStatus => $composableBuilder(
+    column: $table.claimStatus,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get verificationEmail => $composableBuilder(
+    column: $table.verificationEmail,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get visibility => $composableBuilder(
+    column: $table.visibility,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get publishedAt => $composableBuilder(
+    column: $table.publishedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get currentProjectionId => $composableBuilder(
+    column: $table.currentProjectionId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get resultsHiddenThroughRound => $composableBuilder(
+    column: $table.resultsHiddenThroughRound,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get resultsHiddenAt => $composableBuilder(
+    column: $table.resultsHiddenAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get revision => $composableBuilder(
+    column: $table.revision,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$ContestsTableFilterComposer get contestId {
+    final $$ContestsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contestId,
+      referencedTable: $db.contests,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContestsTableFilterComposer(
+            $db: $db,
+            $table: $db.contests,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$AccountPublicProfilesTableFilterComposer get ownerPublicProfileId {
+    final $$AccountPublicProfilesTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.ownerPublicProfileId,
+          referencedTable: $db.accountPublicProfiles,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$AccountPublicProfilesTableFilterComposer(
+                $db: $db,
+                $table: $db.accountPublicProfiles,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  Expression<bool> publicationProjectionsRefs(
+    Expression<bool> Function($$PublicationProjectionsTableFilterComposer f) f,
+  ) {
+    final $$PublicationProjectionsTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.publicationProjections,
+          getReferencedColumn: (t) => t.publicationId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$PublicationProjectionsTableFilterComposer(
+                $db: $db,
+                $table: $db.publicationProjections,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<bool> publicationParticipantsRefs(
+    Expression<bool> Function($$PublicationParticipantsTableFilterComposer f) f,
+  ) {
+    final $$PublicationParticipantsTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.publicationParticipants,
+          getReferencedColumn: (t) => t.publicationId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$PublicationParticipantsTableFilterComposer(
+                $db: $db,
+                $table: $db.publicationParticipants,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<bool> delistRequestsRefs(
+    Expression<bool> Function($$DelistRequestsTableFilterComposer f) f,
+  ) {
+    final $$DelistRequestsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.delistRequests,
+      getReferencedColumn: (t) => t.publicationId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DelistRequestsTableFilterComposer(
+            $db: $db,
+            $table: $db.delistRequests,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$PublicationIdentitiesTableOrderingComposer
+    extends Composer<_$SoarScoreDatabase, $PublicationIdentitiesTable> {
+  $$PublicationIdentitiesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get claimStatus => $composableBuilder(
+    column: $table.claimStatus,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get verificationEmail => $composableBuilder(
+    column: $table.verificationEmail,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get visibility => $composableBuilder(
+    column: $table.visibility,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get publishedAt => $composableBuilder(
+    column: $table.publishedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get currentProjectionId => $composableBuilder(
+    column: $table.currentProjectionId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get resultsHiddenThroughRound => $composableBuilder(
+    column: $table.resultsHiddenThroughRound,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get resultsHiddenAt => $composableBuilder(
+    column: $table.resultsHiddenAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get revision => $composableBuilder(
+    column: $table.revision,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$ContestsTableOrderingComposer get contestId {
+    final $$ContestsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contestId,
+      referencedTable: $db.contests,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContestsTableOrderingComposer(
+            $db: $db,
+            $table: $db.contests,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$AccountPublicProfilesTableOrderingComposer get ownerPublicProfileId {
+    final $$AccountPublicProfilesTableOrderingComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.ownerPublicProfileId,
+          referencedTable: $db.accountPublicProfiles,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$AccountPublicProfilesTableOrderingComposer(
+                $db: $db,
+                $table: $db.accountPublicProfiles,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+}
+
+class $$PublicationIdentitiesTableAnnotationComposer
+    extends Composer<_$SoarScoreDatabase, $PublicationIdentitiesTable> {
+  $$PublicationIdentitiesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get claimStatus => $composableBuilder(
+    column: $table.claimStatus,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get verificationEmail => $composableBuilder(
+    column: $table.verificationEmail,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get visibility => $composableBuilder(
+    column: $table.visibility,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get publishedAt => $composableBuilder(
+    column: $table.publishedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get currentProjectionId => $composableBuilder(
+    column: $table.currentProjectionId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get resultsHiddenThroughRound => $composableBuilder(
+    column: $table.resultsHiddenThroughRound,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get resultsHiddenAt => $composableBuilder(
+    column: $table.resultsHiddenAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get revision =>
+      $composableBuilder(column: $table.revision, builder: (column) => column);
+
+  $$ContestsTableAnnotationComposer get contestId {
+    final $$ContestsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contestId,
+      referencedTable: $db.contests,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContestsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.contests,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$AccountPublicProfilesTableAnnotationComposer get ownerPublicProfileId {
+    final $$AccountPublicProfilesTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.ownerPublicProfileId,
+          referencedTable: $db.accountPublicProfiles,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$AccountPublicProfilesTableAnnotationComposer(
+                $db: $db,
+                $table: $db.accountPublicProfiles,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  Expression<T> publicationProjectionsRefs<T extends Object>(
+    Expression<T> Function($$PublicationProjectionsTableAnnotationComposer a) f,
+  ) {
+    final $$PublicationProjectionsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.publicationProjections,
+          getReferencedColumn: (t) => t.publicationId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$PublicationProjectionsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.publicationProjections,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<T> publicationParticipantsRefs<T extends Object>(
+    Expression<T> Function($$PublicationParticipantsTableAnnotationComposer a)
+    f,
+  ) {
+    final $$PublicationParticipantsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.publicationParticipants,
+          getReferencedColumn: (t) => t.publicationId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$PublicationParticipantsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.publicationParticipants,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<T> delistRequestsRefs<T extends Object>(
+    Expression<T> Function($$DelistRequestsTableAnnotationComposer a) f,
+  ) {
+    final $$DelistRequestsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.delistRequests,
+      getReferencedColumn: (t) => t.publicationId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DelistRequestsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.delistRequests,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$PublicationIdentitiesTableTableManager
+    extends
+        RootTableManager<
+          _$SoarScoreDatabase,
+          $PublicationIdentitiesTable,
+          PublicationIdentityData,
+          $$PublicationIdentitiesTableFilterComposer,
+          $$PublicationIdentitiesTableOrderingComposer,
+          $$PublicationIdentitiesTableAnnotationComposer,
+          $$PublicationIdentitiesTableCreateCompanionBuilder,
+          $$PublicationIdentitiesTableUpdateCompanionBuilder,
+          (PublicationIdentityData, $$PublicationIdentitiesTableReferences),
+          PublicationIdentityData,
+          PrefetchHooks Function({
+            bool contestId,
+            bool ownerPublicProfileId,
+            bool publicationProjectionsRefs,
+            bool publicationParticipantsRefs,
+            bool delistRequestsRefs,
+          })
+        > {
+  $$PublicationIdentitiesTableTableManager(
+    _$SoarScoreDatabase db,
+    $PublicationIdentitiesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PublicationIdentitiesTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$PublicationIdentitiesTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$PublicationIdentitiesTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String?> contestId = const Value.absent(),
+                Value<String?> ownerPublicProfileId = const Value.absent(),
+                Value<String> claimStatus = const Value.absent(),
+                Value<String?> verificationEmail = const Value.absent(),
+                Value<String> visibility = const Value.absent(),
+                Value<String?> publishedAt = const Value.absent(),
+                Value<String?> currentProjectionId = const Value.absent(),
+                Value<int?> resultsHiddenThroughRound = const Value.absent(),
+                Value<String?> resultsHiddenAt = const Value.absent(),
+                Value<int> revision = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PublicationIdentitiesCompanion(
+                id: id,
+                contestId: contestId,
+                ownerPublicProfileId: ownerPublicProfileId,
+                claimStatus: claimStatus,
+                verificationEmail: verificationEmail,
+                visibility: visibility,
+                publishedAt: publishedAt,
+                currentProjectionId: currentProjectionId,
+                resultsHiddenThroughRound: resultsHiddenThroughRound,
+                resultsHiddenAt: resultsHiddenAt,
+                revision: revision,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                Value<String?> contestId = const Value.absent(),
+                Value<String?> ownerPublicProfileId = const Value.absent(),
+                required String claimStatus,
+                Value<String?> verificationEmail = const Value.absent(),
+                required String visibility,
+                Value<String?> publishedAt = const Value.absent(),
+                Value<String?> currentProjectionId = const Value.absent(),
+                Value<int?> resultsHiddenThroughRound = const Value.absent(),
+                Value<String?> resultsHiddenAt = const Value.absent(),
+                Value<int> revision = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PublicationIdentitiesCompanion.insert(
+                id: id,
+                contestId: contestId,
+                ownerPublicProfileId: ownerPublicProfileId,
+                claimStatus: claimStatus,
+                verificationEmail: verificationEmail,
+                visibility: visibility,
+                publishedAt: publishedAt,
+                currentProjectionId: currentProjectionId,
+                resultsHiddenThroughRound: resultsHiddenThroughRound,
+                resultsHiddenAt: resultsHiddenAt,
+                revision: revision,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<
+                    $PublicationIdentitiesTable,
+                    PublicationIdentityData
+                  >(table),
+                  $$PublicationIdentitiesTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback:
+              ({
+                contestId = false,
+                ownerPublicProfileId = false,
+                publicationProjectionsRefs = false,
+                publicationParticipantsRefs = false,
+                delistRequestsRefs = false,
+              }) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (publicationProjectionsRefs) db.publicationProjections,
+                    if (publicationParticipantsRefs) db.publicationParticipants,
+                    if (delistRequestsRefs) db.delistRequests,
+                  ],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (contestId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.contestId,
+                            referencedTable:
+                                $$PublicationIdentitiesTableReferences
+                                    ._contestIdTable(db),
+                            referencedColumn:
+                                $$PublicationIdentitiesTableReferences
+                                    ._contestIdTable(db)
+                                    .id,
+                          ) as T;
+                        }
+                        if (ownerPublicProfileId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.ownerPublicProfileId,
+                            referencedTable:
+                                $$PublicationIdentitiesTableReferences
+                                    ._ownerPublicProfileIdTable(db),
+                            referencedColumn:
+                                $$PublicationIdentitiesTableReferences
+                                    ._ownerPublicProfileIdTable(db)
+                                    .id,
+                          ) as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (publicationProjectionsRefs)
+                        await $_getPrefetchedData<
+                          PublicationIdentityData,
+                          $PublicationIdentitiesTable,
+                          PublicationProjectionData
+                        >(
+                          currentTable: table,
+                          referencedTable:
+                              $$PublicationIdentitiesTableReferences
+                                  ._publicationProjectionsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$PublicationIdentitiesTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).publicationProjectionsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.publicationId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (publicationParticipantsRefs)
+                        await $_getPrefetchedData<
+                          PublicationIdentityData,
+                          $PublicationIdentitiesTable,
+                          PublicationParticipantData
+                        >(
+                          currentTable: table,
+                          referencedTable:
+                              $$PublicationIdentitiesTableReferences
+                                  ._publicationParticipantsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$PublicationIdentitiesTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).publicationParticipantsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.publicationId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (delistRequestsRefs)
+                        await $_getPrefetchedData<
+                          PublicationIdentityData,
+                          $PublicationIdentitiesTable,
+                          DelistRequestData
+                        >(
+                          currentTable: table,
+                          referencedTable:
+                              $$PublicationIdentitiesTableReferences
+                                  ._delistRequestsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$PublicationIdentitiesTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).delistRequestsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.publicationId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$PublicationIdentitiesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$SoarScoreDatabase,
+      $PublicationIdentitiesTable,
+      PublicationIdentityData,
+      $$PublicationIdentitiesTableFilterComposer,
+      $$PublicationIdentitiesTableOrderingComposer,
+      $$PublicationIdentitiesTableAnnotationComposer,
+      $$PublicationIdentitiesTableCreateCompanionBuilder,
+      $$PublicationIdentitiesTableUpdateCompanionBuilder,
+      (PublicationIdentityData, $$PublicationIdentitiesTableReferences),
+      PublicationIdentityData,
+      PrefetchHooks Function({
+        bool contestId,
+        bool ownerPublicProfileId,
+        bool publicationProjectionsRefs,
+        bool publicationParticipantsRefs,
+        bool delistRequestsRefs,
+      })
+    >;
+typedef $$PublicationProjectionsTableCreateCompanionBuilder =
+    PublicationProjectionsCompanion Function({
+      required String id,
+      required String publicationId,
+      required int projectionRevision,
+      required int contestRevision,
+      required int configRevision,
+      required int matrixRevision,
+      required String disciplineType,
+      required int disciplineRulesVersion,
+      required String calculationVersion,
+      required String contestIdentity,
+      Value<String?> participants,
+      Value<String?> teams,
+      Value<String?> matrixInfo,
+      Value<String?> scores,
+      Value<String?> standings,
+      Value<String?> calculationMetadata,
+      required String publishedAt,
+      Value<String?> publishedBy,
+      required String clientMutationId,
+      Value<int> rowid,
+    });
+typedef $$PublicationProjectionsTableUpdateCompanionBuilder =
+    PublicationProjectionsCompanion Function({
+      Value<String> id,
+      Value<String> publicationId,
+      Value<int> projectionRevision,
+      Value<int> contestRevision,
+      Value<int> configRevision,
+      Value<int> matrixRevision,
+      Value<String> disciplineType,
+      Value<int> disciplineRulesVersion,
+      Value<String> calculationVersion,
+      Value<String> contestIdentity,
+      Value<String?> participants,
+      Value<String?> teams,
+      Value<String?> matrixInfo,
+      Value<String?> scores,
+      Value<String?> standings,
+      Value<String?> calculationMetadata,
+      Value<String> publishedAt,
+      Value<String?> publishedBy,
+      Value<String> clientMutationId,
+      Value<int> rowid,
+    });
+
+final class $$PublicationProjectionsTableReferences
+    extends
+        BaseReferences<
+          _$SoarScoreDatabase,
+          $PublicationProjectionsTable,
+          PublicationProjectionData
+        > {
+  $$PublicationProjectionsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $PublicationIdentitiesTable _publicationIdTable(
+    _$SoarScoreDatabase db,
+  ) => db.publicationIdentities.createAlias(
+    'publication_projections__publication_id__publication_identities__id',
+  );
+
+  $$PublicationIdentitiesTableProcessedTableManager get publicationId {
+    final $_column = $_itemColumn<String>('publication_id')!;
+
+    final manager = $$PublicationIdentitiesTableTableManager(
+      $_db,
+      $_db.publicationIdentities,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_publicationIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $AccountsTable _publishedByTable(_$SoarScoreDatabase db) => db.accounts
+      .createAlias('publication_projections__published_by__accounts__id');
+
+  $$AccountsTableProcessedTableManager? get publishedBy {
+    final $_column = $_itemColumn<String>('published_by');
+    if ($_column == null) return null;
+    final manager = $$AccountsTableTableManager(
+      $_db,
+      $_db.accounts,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_publishedByTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$PublicationProjectionsTableFilterComposer
+    extends Composer<_$SoarScoreDatabase, $PublicationProjectionsTable> {
+  $$PublicationProjectionsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get projectionRevision => $composableBuilder(
+    column: $table.projectionRevision,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get contestRevision => $composableBuilder(
+    column: $table.contestRevision,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get configRevision => $composableBuilder(
+    column: $table.configRevision,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get matrixRevision => $composableBuilder(
+    column: $table.matrixRevision,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get disciplineType => $composableBuilder(
+    column: $table.disciplineType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get disciplineRulesVersion => $composableBuilder(
+    column: $table.disciplineRulesVersion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get calculationVersion => $composableBuilder(
+    column: $table.calculationVersion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get contestIdentity => $composableBuilder(
+    column: $table.contestIdentity,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get participants => $composableBuilder(
+    column: $table.participants,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get teams => $composableBuilder(
+    column: $table.teams,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get matrixInfo => $composableBuilder(
+    column: $table.matrixInfo,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get scores => $composableBuilder(
+    column: $table.scores,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get standings => $composableBuilder(
+    column: $table.standings,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get calculationMetadata => $composableBuilder(
+    column: $table.calculationMetadata,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get publishedAt => $composableBuilder(
+    column: $table.publishedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get clientMutationId => $composableBuilder(
+    column: $table.clientMutationId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$PublicationIdentitiesTableFilterComposer get publicationId {
+    final $$PublicationIdentitiesTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.publicationId,
+          referencedTable: $db.publicationIdentities,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$PublicationIdentitiesTableFilterComposer(
+                $db: $db,
+                $table: $db.publicationIdentities,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$AccountsTableFilterComposer get publishedBy {
+    final $$AccountsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.publishedBy,
+      referencedTable: $db.accounts,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AccountsTableFilterComposer(
+            $db: $db,
+            $table: $db.accounts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$PublicationProjectionsTableOrderingComposer
+    extends Composer<_$SoarScoreDatabase, $PublicationProjectionsTable> {
+  $$PublicationProjectionsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get projectionRevision => $composableBuilder(
+    column: $table.projectionRevision,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get contestRevision => $composableBuilder(
+    column: $table.contestRevision,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get configRevision => $composableBuilder(
+    column: $table.configRevision,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get matrixRevision => $composableBuilder(
+    column: $table.matrixRevision,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get disciplineType => $composableBuilder(
+    column: $table.disciplineType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get disciplineRulesVersion => $composableBuilder(
+    column: $table.disciplineRulesVersion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get calculationVersion => $composableBuilder(
+    column: $table.calculationVersion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get contestIdentity => $composableBuilder(
+    column: $table.contestIdentity,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get participants => $composableBuilder(
+    column: $table.participants,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get teams => $composableBuilder(
+    column: $table.teams,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get matrixInfo => $composableBuilder(
+    column: $table.matrixInfo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get scores => $composableBuilder(
+    column: $table.scores,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get standings => $composableBuilder(
+    column: $table.standings,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get calculationMetadata => $composableBuilder(
+    column: $table.calculationMetadata,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get publishedAt => $composableBuilder(
+    column: $table.publishedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get clientMutationId => $composableBuilder(
+    column: $table.clientMutationId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$PublicationIdentitiesTableOrderingComposer get publicationId {
+    final $$PublicationIdentitiesTableOrderingComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.publicationId,
+          referencedTable: $db.publicationIdentities,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$PublicationIdentitiesTableOrderingComposer(
+                $db: $db,
+                $table: $db.publicationIdentities,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$AccountsTableOrderingComposer get publishedBy {
+    final $$AccountsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.publishedBy,
+      referencedTable: $db.accounts,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AccountsTableOrderingComposer(
+            $db: $db,
+            $table: $db.accounts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$PublicationProjectionsTableAnnotationComposer
+    extends Composer<_$SoarScoreDatabase, $PublicationProjectionsTable> {
+  $$PublicationProjectionsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get projectionRevision => $composableBuilder(
+    column: $table.projectionRevision,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get contestRevision => $composableBuilder(
+    column: $table.contestRevision,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get configRevision => $composableBuilder(
+    column: $table.configRevision,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get matrixRevision => $composableBuilder(
+    column: $table.matrixRevision,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get disciplineType => $composableBuilder(
+    column: $table.disciplineType,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get disciplineRulesVersion => $composableBuilder(
+    column: $table.disciplineRulesVersion,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get calculationVersion => $composableBuilder(
+    column: $table.calculationVersion,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get contestIdentity => $composableBuilder(
+    column: $table.contestIdentity,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get participants => $composableBuilder(
+    column: $table.participants,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get teams =>
+      $composableBuilder(column: $table.teams, builder: (column) => column);
+
+  GeneratedColumn<String> get matrixInfo => $composableBuilder(
+    column: $table.matrixInfo,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get scores =>
+      $composableBuilder(column: $table.scores, builder: (column) => column);
+
+  GeneratedColumn<String> get standings =>
+      $composableBuilder(column: $table.standings, builder: (column) => column);
+
+  GeneratedColumn<String> get calculationMetadata => $composableBuilder(
+    column: $table.calculationMetadata,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get publishedAt => $composableBuilder(
+    column: $table.publishedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get clientMutationId => $composableBuilder(
+    column: $table.clientMutationId,
+    builder: (column) => column,
+  );
+
+  $$PublicationIdentitiesTableAnnotationComposer get publicationId {
+    final $$PublicationIdentitiesTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.publicationId,
+          referencedTable: $db.publicationIdentities,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$PublicationIdentitiesTableAnnotationComposer(
+                $db: $db,
+                $table: $db.publicationIdentities,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$AccountsTableAnnotationComposer get publishedBy {
+    final $$AccountsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.publishedBy,
+      referencedTable: $db.accounts,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AccountsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.accounts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$PublicationProjectionsTableTableManager
+    extends
+        RootTableManager<
+          _$SoarScoreDatabase,
+          $PublicationProjectionsTable,
+          PublicationProjectionData,
+          $$PublicationProjectionsTableFilterComposer,
+          $$PublicationProjectionsTableOrderingComposer,
+          $$PublicationProjectionsTableAnnotationComposer,
+          $$PublicationProjectionsTableCreateCompanionBuilder,
+          $$PublicationProjectionsTableUpdateCompanionBuilder,
+          (PublicationProjectionData, $$PublicationProjectionsTableReferences),
+          PublicationProjectionData,
+          PrefetchHooks Function({bool publicationId, bool publishedBy})
+        > {
+  $$PublicationProjectionsTableTableManager(
+    _$SoarScoreDatabase db,
+    $PublicationProjectionsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PublicationProjectionsTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$PublicationProjectionsTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$PublicationProjectionsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> publicationId = const Value.absent(),
+                Value<int> projectionRevision = const Value.absent(),
+                Value<int> contestRevision = const Value.absent(),
+                Value<int> configRevision = const Value.absent(),
+                Value<int> matrixRevision = const Value.absent(),
+                Value<String> disciplineType = const Value.absent(),
+                Value<int> disciplineRulesVersion = const Value.absent(),
+                Value<String> calculationVersion = const Value.absent(),
+                Value<String> contestIdentity = const Value.absent(),
+                Value<String?> participants = const Value.absent(),
+                Value<String?> teams = const Value.absent(),
+                Value<String?> matrixInfo = const Value.absent(),
+                Value<String?> scores = const Value.absent(),
+                Value<String?> standings = const Value.absent(),
+                Value<String?> calculationMetadata = const Value.absent(),
+                Value<String> publishedAt = const Value.absent(),
+                Value<String?> publishedBy = const Value.absent(),
+                Value<String> clientMutationId = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PublicationProjectionsCompanion(
+                id: id,
+                publicationId: publicationId,
+                projectionRevision: projectionRevision,
+                contestRevision: contestRevision,
+                configRevision: configRevision,
+                matrixRevision: matrixRevision,
+                disciplineType: disciplineType,
+                disciplineRulesVersion: disciplineRulesVersion,
+                calculationVersion: calculationVersion,
+                contestIdentity: contestIdentity,
+                participants: participants,
+                teams: teams,
+                matrixInfo: matrixInfo,
+                scores: scores,
+                standings: standings,
+                calculationMetadata: calculationMetadata,
+                publishedAt: publishedAt,
+                publishedBy: publishedBy,
+                clientMutationId: clientMutationId,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String publicationId,
+                required int projectionRevision,
+                required int contestRevision,
+                required int configRevision,
+                required int matrixRevision,
+                required String disciplineType,
+                required int disciplineRulesVersion,
+                required String calculationVersion,
+                required String contestIdentity,
+                Value<String?> participants = const Value.absent(),
+                Value<String?> teams = const Value.absent(),
+                Value<String?> matrixInfo = const Value.absent(),
+                Value<String?> scores = const Value.absent(),
+                Value<String?> standings = const Value.absent(),
+                Value<String?> calculationMetadata = const Value.absent(),
+                required String publishedAt,
+                Value<String?> publishedBy = const Value.absent(),
+                required String clientMutationId,
+                Value<int> rowid = const Value.absent(),
+              }) => PublicationProjectionsCompanion.insert(
+                id: id,
+                publicationId: publicationId,
+                projectionRevision: projectionRevision,
+                contestRevision: contestRevision,
+                configRevision: configRevision,
+                matrixRevision: matrixRevision,
+                disciplineType: disciplineType,
+                disciplineRulesVersion: disciplineRulesVersion,
+                calculationVersion: calculationVersion,
+                contestIdentity: contestIdentity,
+                participants: participants,
+                teams: teams,
+                matrixInfo: matrixInfo,
+                scores: scores,
+                standings: standings,
+                calculationMetadata: calculationMetadata,
+                publishedAt: publishedAt,
+                publishedBy: publishedBy,
+                clientMutationId: clientMutationId,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<
+                    $PublicationProjectionsTable,
+                    PublicationProjectionData
+                  >(table),
+                  $$PublicationProjectionsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback:
+              ({publicationId = false, publishedBy = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (publicationId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.publicationId,
+                            referencedTable:
+                                $$PublicationProjectionsTableReferences
+                                    ._publicationIdTable(db),
+                            referencedColumn:
+                                $$PublicationProjectionsTableReferences
+                                    ._publicationIdTable(db)
+                                    .id,
+                          ) as T;
+                        }
+                        if (publishedBy) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.publishedBy,
+                            referencedTable:
+                                $$PublicationProjectionsTableReferences
+                                    ._publishedByTable(db),
+                            referencedColumn:
+                                $$PublicationProjectionsTableReferences
+                                    ._publishedByTable(db)
+                                    .id,
+                          ) as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$PublicationProjectionsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$SoarScoreDatabase,
+      $PublicationProjectionsTable,
+      PublicationProjectionData,
+      $$PublicationProjectionsTableFilterComposer,
+      $$PublicationProjectionsTableOrderingComposer,
+      $$PublicationProjectionsTableAnnotationComposer,
+      $$PublicationProjectionsTableCreateCompanionBuilder,
+      $$PublicationProjectionsTableUpdateCompanionBuilder,
+      (PublicationProjectionData, $$PublicationProjectionsTableReferences),
+      PublicationProjectionData,
+      PrefetchHooks Function({bool publicationId, bool publishedBy})
+    >;
+typedef $$PublicationParticipantsTableCreateCompanionBuilder =
+    PublicationParticipantsCompanion Function({
+      required String id,
+      required String publicationId,
+      required String pilotKey,
+      Value<String?> sourceParticipationId,
+      Value<String?> details,
+      Value<String?> publicProfileId,
+      Value<String?> redactedAt,
+      required String createdAt,
+      required String updatedAt,
+      Value<int> rowid,
+    });
+typedef $$PublicationParticipantsTableUpdateCompanionBuilder =
+    PublicationParticipantsCompanion Function({
+      Value<String> id,
+      Value<String> publicationId,
+      Value<String> pilotKey,
+      Value<String?> sourceParticipationId,
+      Value<String?> details,
+      Value<String?> publicProfileId,
+      Value<String?> redactedAt,
+      Value<String> createdAt,
+      Value<String> updatedAt,
+      Value<int> rowid,
+    });
+
+final class $$PublicationParticipantsTableReferences
+    extends
+        BaseReferences<
+          _$SoarScoreDatabase,
+          $PublicationParticipantsTable,
+          PublicationParticipantData
+        > {
+  $$PublicationParticipantsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $PublicationIdentitiesTable _publicationIdTable(
+    _$SoarScoreDatabase db,
+  ) => db.publicationIdentities.createAlias(
+    'publication_participants__publication_id__publication_identities__id',
+  );
+
+  $$PublicationIdentitiesTableProcessedTableManager get publicationId {
+    final $_column = $_itemColumn<String>('publication_id')!;
+
+    final manager = $$PublicationIdentitiesTableTableManager(
+      $_db,
+      $_db.publicationIdentities,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_publicationIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $AccountPublicProfilesTable _publicProfileIdTable(
+    _$SoarScoreDatabase db,
+  ) => db.accountPublicProfiles.createAlias(
+    'publication_participants__public_profile_id__account_public_profiles__id',
+  );
+
+  $$AccountPublicProfilesTableProcessedTableManager? get publicProfileId {
+    final $_column = $_itemColumn<String>('public_profile_id');
+    if ($_column == null) return null;
+    final manager = $$AccountPublicProfilesTableTableManager(
+      $_db,
+      $_db.accountPublicProfiles,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_publicProfileIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$PublicationParticipantsTableFilterComposer
+    extends Composer<_$SoarScoreDatabase, $PublicationParticipantsTable> {
+  $$PublicationParticipantsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get pilotKey => $composableBuilder(
+    column: $table.pilotKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sourceParticipationId => $composableBuilder(
+    column: $table.sourceParticipationId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get details => $composableBuilder(
+    column: $table.details,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get redactedAt => $composableBuilder(
+    column: $table.redactedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$PublicationIdentitiesTableFilterComposer get publicationId {
+    final $$PublicationIdentitiesTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.publicationId,
+          referencedTable: $db.publicationIdentities,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$PublicationIdentitiesTableFilterComposer(
+                $db: $db,
+                $table: $db.publicationIdentities,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$AccountPublicProfilesTableFilterComposer get publicProfileId {
+    final $$AccountPublicProfilesTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.publicProfileId,
+          referencedTable: $db.accountPublicProfiles,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$AccountPublicProfilesTableFilterComposer(
+                $db: $db,
+                $table: $db.accountPublicProfiles,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+}
+
+class $$PublicationParticipantsTableOrderingComposer
+    extends Composer<_$SoarScoreDatabase, $PublicationParticipantsTable> {
+  $$PublicationParticipantsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get pilotKey => $composableBuilder(
+    column: $table.pilotKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sourceParticipationId => $composableBuilder(
+    column: $table.sourceParticipationId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get details => $composableBuilder(
+    column: $table.details,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get redactedAt => $composableBuilder(
+    column: $table.redactedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$PublicationIdentitiesTableOrderingComposer get publicationId {
+    final $$PublicationIdentitiesTableOrderingComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.publicationId,
+          referencedTable: $db.publicationIdentities,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$PublicationIdentitiesTableOrderingComposer(
+                $db: $db,
+                $table: $db.publicationIdentities,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$AccountPublicProfilesTableOrderingComposer get publicProfileId {
+    final $$AccountPublicProfilesTableOrderingComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.publicProfileId,
+          referencedTable: $db.accountPublicProfiles,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$AccountPublicProfilesTableOrderingComposer(
+                $db: $db,
+                $table: $db.accountPublicProfiles,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+}
+
+class $$PublicationParticipantsTableAnnotationComposer
+    extends Composer<_$SoarScoreDatabase, $PublicationParticipantsTable> {
+  $$PublicationParticipantsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get pilotKey =>
+      $composableBuilder(column: $table.pilotKey, builder: (column) => column);
+
+  GeneratedColumn<String> get sourceParticipationId => $composableBuilder(
+    column: $table.sourceParticipationId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get details =>
+      $composableBuilder(column: $table.details, builder: (column) => column);
+
+  GeneratedColumn<String> get redactedAt => $composableBuilder(
+    column: $table.redactedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  $$PublicationIdentitiesTableAnnotationComposer get publicationId {
+    final $$PublicationIdentitiesTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.publicationId,
+          referencedTable: $db.publicationIdentities,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$PublicationIdentitiesTableAnnotationComposer(
+                $db: $db,
+                $table: $db.publicationIdentities,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$AccountPublicProfilesTableAnnotationComposer get publicProfileId {
+    final $$AccountPublicProfilesTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.publicProfileId,
+          referencedTable: $db.accountPublicProfiles,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$AccountPublicProfilesTableAnnotationComposer(
+                $db: $db,
+                $table: $db.accountPublicProfiles,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+}
+
+class $$PublicationParticipantsTableTableManager
+    extends
+        RootTableManager<
+          _$SoarScoreDatabase,
+          $PublicationParticipantsTable,
+          PublicationParticipantData,
+          $$PublicationParticipantsTableFilterComposer,
+          $$PublicationParticipantsTableOrderingComposer,
+          $$PublicationParticipantsTableAnnotationComposer,
+          $$PublicationParticipantsTableCreateCompanionBuilder,
+          $$PublicationParticipantsTableUpdateCompanionBuilder,
+          (
+            PublicationParticipantData,
+            $$PublicationParticipantsTableReferences,
+          ),
+          PublicationParticipantData,
+          PrefetchHooks Function({bool publicationId, bool publicProfileId})
+        > {
+  $$PublicationParticipantsTableTableManager(
+    _$SoarScoreDatabase db,
+    $PublicationParticipantsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PublicationParticipantsTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$PublicationParticipantsTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$PublicationParticipantsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> publicationId = const Value.absent(),
+                Value<String> pilotKey = const Value.absent(),
+                Value<String?> sourceParticipationId = const Value.absent(),
+                Value<String?> details = const Value.absent(),
+                Value<String?> publicProfileId = const Value.absent(),
+                Value<String?> redactedAt = const Value.absent(),
+                Value<String> createdAt = const Value.absent(),
+                Value<String> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PublicationParticipantsCompanion(
+                id: id,
+                publicationId: publicationId,
+                pilotKey: pilotKey,
+                sourceParticipationId: sourceParticipationId,
+                details: details,
+                publicProfileId: publicProfileId,
+                redactedAt: redactedAt,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String publicationId,
+                required String pilotKey,
+                Value<String?> sourceParticipationId = const Value.absent(),
+                Value<String?> details = const Value.absent(),
+                Value<String?> publicProfileId = const Value.absent(),
+                Value<String?> redactedAt = const Value.absent(),
+                required String createdAt,
+                required String updatedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => PublicationParticipantsCompanion.insert(
+                id: id,
+                publicationId: publicationId,
+                pilotKey: pilotKey,
+                sourceParticipationId: sourceParticipationId,
+                details: details,
+                publicProfileId: publicProfileId,
+                redactedAt: redactedAt,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<
+                    $PublicationParticipantsTable,
+                    PublicationParticipantData
+                  >(table),
+                  $$PublicationParticipantsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback:
+              ({publicationId = false, publicProfileId = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (publicationId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.publicationId,
+                            referencedTable:
+                                $$PublicationParticipantsTableReferences
+                                    ._publicationIdTable(db),
+                            referencedColumn:
+                                $$PublicationParticipantsTableReferences
+                                    ._publicationIdTable(db)
+                                    .id,
+                          ) as T;
+                        }
+                        if (publicProfileId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.publicProfileId,
+                            referencedTable:
+                                $$PublicationParticipantsTableReferences
+                                    ._publicProfileIdTable(db),
+                            referencedColumn:
+                                $$PublicationParticipantsTableReferences
+                                    ._publicProfileIdTable(db)
+                                    .id,
+                          ) as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$PublicationParticipantsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$SoarScoreDatabase,
+      $PublicationParticipantsTable,
+      PublicationParticipantData,
+      $$PublicationParticipantsTableFilterComposer,
+      $$PublicationParticipantsTableOrderingComposer,
+      $$PublicationParticipantsTableAnnotationComposer,
+      $$PublicationParticipantsTableCreateCompanionBuilder,
+      $$PublicationParticipantsTableUpdateCompanionBuilder,
+      (PublicationParticipantData, $$PublicationParticipantsTableReferences),
+      PublicationParticipantData,
+      PrefetchHooks Function({bool publicationId, bool publicProfileId})
+    >;
+typedef $$DelistRequestsTableCreateCompanionBuilder =
+    DelistRequestsCompanion Function({
+      required String id,
+      required String publicationId,
+      required String requestedBy,
+      required String trigger,
+      Value<String?> reason,
+      required String requestedAt,
+      required String state,
+      Value<String?> decidedBy,
+      Value<String?> decidedAt,
+      Value<String?> decisionNote,
+      Value<int> rowid,
+    });
+typedef $$DelistRequestsTableUpdateCompanionBuilder =
+    DelistRequestsCompanion Function({
+      Value<String> id,
+      Value<String> publicationId,
+      Value<String> requestedBy,
+      Value<String> trigger,
+      Value<String?> reason,
+      Value<String> requestedAt,
+      Value<String> state,
+      Value<String?> decidedBy,
+      Value<String?> decidedAt,
+      Value<String?> decisionNote,
+      Value<int> rowid,
+    });
+
+final class $$DelistRequestsTableReferences
+    extends
+        BaseReferences<
+          _$SoarScoreDatabase,
+          $DelistRequestsTable,
+          DelistRequestData
+        > {
+  $$DelistRequestsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $PublicationIdentitiesTable _publicationIdTable(
+    _$SoarScoreDatabase db,
+  ) => db.publicationIdentities.createAlias(
+    'delist_requests__publication_id__publication_identities__id',
+  );
+
+  $$PublicationIdentitiesTableProcessedTableManager get publicationId {
+    final $_column = $_itemColumn<String>('publication_id')!;
+
+    final manager = $$PublicationIdentitiesTableTableManager(
+      $_db,
+      $_db.publicationIdentities,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_publicationIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $AccountsTable _requestedByTable(_$SoarScoreDatabase db) =>
+      db.accounts.createAlias('delist_requests__requested_by__accounts__id');
+
+  $$AccountsTableProcessedTableManager get requestedBy {
+    final $_column = $_itemColumn<String>('requested_by')!;
+
+    final manager = $$AccountsTableTableManager(
+      $_db,
+      $_db.accounts,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_requestedByTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $AccountsTable _decidedByTable(_$SoarScoreDatabase db) =>
+      db.accounts.createAlias('delist_requests__decided_by__accounts__id');
+
+  $$AccountsTableProcessedTableManager? get decidedBy {
+    final $_column = $_itemColumn<String>('decided_by');
+    if ($_column == null) return null;
+    final manager = $$AccountsTableTableManager(
+      $_db,
+      $_db.accounts,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_decidedByTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$DelistRequestsTableFilterComposer
+    extends Composer<_$SoarScoreDatabase, $DelistRequestsTable> {
+  $$DelistRequestsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get trigger => $composableBuilder(
+    column: $table.trigger,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reason => $composableBuilder(
+    column: $table.reason,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get requestedAt => $composableBuilder(
+    column: $table.requestedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get state => $composableBuilder(
+    column: $table.state,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get decidedAt => $composableBuilder(
+    column: $table.decidedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get decisionNote => $composableBuilder(
+    column: $table.decisionNote,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$PublicationIdentitiesTableFilterComposer get publicationId {
+    final $$PublicationIdentitiesTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.publicationId,
+          referencedTable: $db.publicationIdentities,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$PublicationIdentitiesTableFilterComposer(
+                $db: $db,
+                $table: $db.publicationIdentities,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$AccountsTableFilterComposer get requestedBy {
+    final $$AccountsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.requestedBy,
+      referencedTable: $db.accounts,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AccountsTableFilterComposer(
+            $db: $db,
+            $table: $db.accounts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$AccountsTableFilterComposer get decidedBy {
+    final $$AccountsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.decidedBy,
+      referencedTable: $db.accounts,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AccountsTableFilterComposer(
+            $db: $db,
+            $table: $db.accounts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$DelistRequestsTableOrderingComposer
+    extends Composer<_$SoarScoreDatabase, $DelistRequestsTable> {
+  $$DelistRequestsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get trigger => $composableBuilder(
+    column: $table.trigger,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reason => $composableBuilder(
+    column: $table.reason,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get requestedAt => $composableBuilder(
+    column: $table.requestedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get state => $composableBuilder(
+    column: $table.state,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get decidedAt => $composableBuilder(
+    column: $table.decidedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get decisionNote => $composableBuilder(
+    column: $table.decisionNote,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$PublicationIdentitiesTableOrderingComposer get publicationId {
+    final $$PublicationIdentitiesTableOrderingComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.publicationId,
+          referencedTable: $db.publicationIdentities,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$PublicationIdentitiesTableOrderingComposer(
+                $db: $db,
+                $table: $db.publicationIdentities,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$AccountsTableOrderingComposer get requestedBy {
+    final $$AccountsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.requestedBy,
+      referencedTable: $db.accounts,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AccountsTableOrderingComposer(
+            $db: $db,
+            $table: $db.accounts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$AccountsTableOrderingComposer get decidedBy {
+    final $$AccountsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.decidedBy,
+      referencedTable: $db.accounts,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AccountsTableOrderingComposer(
+            $db: $db,
+            $table: $db.accounts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$DelistRequestsTableAnnotationComposer
+    extends Composer<_$SoarScoreDatabase, $DelistRequestsTable> {
+  $$DelistRequestsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get trigger =>
+      $composableBuilder(column: $table.trigger, builder: (column) => column);
+
+  GeneratedColumn<String> get reason =>
+      $composableBuilder(column: $table.reason, builder: (column) => column);
+
+  GeneratedColumn<String> get requestedAt => $composableBuilder(
+    column: $table.requestedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get state =>
+      $composableBuilder(column: $table.state, builder: (column) => column);
+
+  GeneratedColumn<String> get decidedAt =>
+      $composableBuilder(column: $table.decidedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get decisionNote => $composableBuilder(
+    column: $table.decisionNote,
+    builder: (column) => column,
+  );
+
+  $$PublicationIdentitiesTableAnnotationComposer get publicationId {
+    final $$PublicationIdentitiesTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.publicationId,
+          referencedTable: $db.publicationIdentities,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$PublicationIdentitiesTableAnnotationComposer(
+                $db: $db,
+                $table: $db.publicationIdentities,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$AccountsTableAnnotationComposer get requestedBy {
+    final $$AccountsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.requestedBy,
+      referencedTable: $db.accounts,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AccountsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.accounts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$AccountsTableAnnotationComposer get decidedBy {
+    final $$AccountsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.decidedBy,
+      referencedTable: $db.accounts,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AccountsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.accounts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$DelistRequestsTableTableManager
+    extends
+        RootTableManager<
+          _$SoarScoreDatabase,
+          $DelistRequestsTable,
+          DelistRequestData,
+          $$DelistRequestsTableFilterComposer,
+          $$DelistRequestsTableOrderingComposer,
+          $$DelistRequestsTableAnnotationComposer,
+          $$DelistRequestsTableCreateCompanionBuilder,
+          $$DelistRequestsTableUpdateCompanionBuilder,
+          (DelistRequestData, $$DelistRequestsTableReferences),
+          DelistRequestData,
+          PrefetchHooks Function({
+            bool publicationId,
+            bool requestedBy,
+            bool decidedBy,
+          })
+        > {
+  $$DelistRequestsTableTableManager(
+    _$SoarScoreDatabase db,
+    $DelistRequestsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$DelistRequestsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$DelistRequestsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$DelistRequestsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> publicationId = const Value.absent(),
+                Value<String> requestedBy = const Value.absent(),
+                Value<String> trigger = const Value.absent(),
+                Value<String?> reason = const Value.absent(),
+                Value<String> requestedAt = const Value.absent(),
+                Value<String> state = const Value.absent(),
+                Value<String?> decidedBy = const Value.absent(),
+                Value<String?> decidedAt = const Value.absent(),
+                Value<String?> decisionNote = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => DelistRequestsCompanion(
+                id: id,
+                publicationId: publicationId,
+                requestedBy: requestedBy,
+                trigger: trigger,
+                reason: reason,
+                requestedAt: requestedAt,
+                state: state,
+                decidedBy: decidedBy,
+                decidedAt: decidedAt,
+                decisionNote: decisionNote,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String publicationId,
+                required String requestedBy,
+                required String trigger,
+                Value<String?> reason = const Value.absent(),
+                required String requestedAt,
+                required String state,
+                Value<String?> decidedBy = const Value.absent(),
+                Value<String?> decidedAt = const Value.absent(),
+                Value<String?> decisionNote = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => DelistRequestsCompanion.insert(
+                id: id,
+                publicationId: publicationId,
+                requestedBy: requestedBy,
+                trigger: trigger,
+                reason: reason,
+                requestedAt: requestedAt,
+                state: state,
+                decidedBy: decidedBy,
+                decidedAt: decidedAt,
+                decisionNote: decisionNote,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$DelistRequestsTable, DelistRequestData>(table),
+                  $$DelistRequestsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback:
+              ({
+                publicationId = false,
+                requestedBy = false,
+                decidedBy = false,
+              }) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (publicationId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.publicationId,
+                            referencedTable: $$DelistRequestsTableReferences
+                                ._publicationIdTable(db),
+                            referencedColumn: $$DelistRequestsTableReferences
+                                ._publicationIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+                        if (requestedBy) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.requestedBy,
+                            referencedTable: $$DelistRequestsTableReferences
+                                ._requestedByTable(db),
+                            referencedColumn: $$DelistRequestsTableReferences
+                                ._requestedByTable(db)
+                                .id,
+                          ) as T;
+                        }
+                        if (decidedBy) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.decidedBy,
+                            referencedTable: $$DelistRequestsTableReferences
+                                ._decidedByTable(db),
+                            referencedColumn: $$DelistRequestsTableReferences
+                                ._decidedByTable(db)
+                                .id,
+                          ) as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$DelistRequestsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$SoarScoreDatabase,
+      $DelistRequestsTable,
+      DelistRequestData,
+      $$DelistRequestsTableFilterComposer,
+      $$DelistRequestsTableOrderingComposer,
+      $$DelistRequestsTableAnnotationComposer,
+      $$DelistRequestsTableCreateCompanionBuilder,
+      $$DelistRequestsTableUpdateCompanionBuilder,
+      (DelistRequestData, $$DelistRequestsTableReferences),
+      DelistRequestData,
+      PrefetchHooks Function({
+        bool publicationId,
+        bool requestedBy,
+        bool decidedBy,
+      })
+    >;
+typedef $$InvitationsTableCreateCompanionBuilder =
+    InvitationsCompanion Function({
+      required String id,
+      required String contestId,
+      required String contestParticipationId,
+      required String type,
+      required String protectedCredential,
+      required int invitationRevision,
+      required String state,
+      required String audience,
+      required String issuedBy,
+      required String issuedAt,
+      Value<String?> expiresAt,
+      Value<String?> firstUsedAt,
+      Value<String?> lastUsedAt,
+      Value<String?> revokedAt,
+      Value<String?> replacesInvitationId,
+      Value<String?> redeemedByAccountId,
+      required String deliveryOutcomes,
+      required String clientMutationId,
+      Value<int> rowid,
+    });
+typedef $$InvitationsTableUpdateCompanionBuilder =
+    InvitationsCompanion Function({
+      Value<String> id,
+      Value<String> contestId,
+      Value<String> contestParticipationId,
+      Value<String> type,
+      Value<String> protectedCredential,
+      Value<int> invitationRevision,
+      Value<String> state,
+      Value<String> audience,
+      Value<String> issuedBy,
+      Value<String> issuedAt,
+      Value<String?> expiresAt,
+      Value<String?> firstUsedAt,
+      Value<String?> lastUsedAt,
+      Value<String?> revokedAt,
+      Value<String?> replacesInvitationId,
+      Value<String?> redeemedByAccountId,
+      Value<String> deliveryOutcomes,
+      Value<String> clientMutationId,
+      Value<int> rowid,
+    });
+
+final class $$InvitationsTableReferences
+    extends
+        BaseReferences<_$SoarScoreDatabase, $InvitationsTable, InvitationData> {
+  $$InvitationsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $ContestsTable _contestIdTable(_$SoarScoreDatabase db) =>
+      db.contests.createAlias('invitations__contest_id__contests__id');
+
+  $$ContestsTableProcessedTableManager get contestId {
+    final $_column = $_itemColumn<String>('contest_id')!;
+
+    final manager = $$ContestsTableTableManager(
+      $_db,
+      $_db.contests,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_contestIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $ContestParticipationsTable _contestParticipationIdTable(
+    _$SoarScoreDatabase db,
+  ) => db.contestParticipations.createAlias(
+    'invitations__contest_participation_id__contest_participations__id',
+  );
+
+  $$ContestParticipationsTableProcessedTableManager get contestParticipationId {
+    final $_column = $_itemColumn<String>('contest_participation_id')!;
+
+    final manager = $$ContestParticipationsTableTableManager(
+      $_db,
+      $_db.contestParticipations,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(
+      _contestParticipationIdTable($_db),
+    );
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $InvitationsTable _replacesInvitationIdTable(_$SoarScoreDatabase db) =>
+      db.invitations.createAlias(
+        'invitations__replaces_invitation_id__invitations__id',
+      );
+
+  $$InvitationsTableProcessedTableManager? get replacesInvitationId {
+    final $_column = $_itemColumn<String>('replaces_invitation_id');
+    if ($_column == null) return null;
+    final manager = $$InvitationsTableTableManager(
+      $_db,
+      $_db.invitations,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(
+      _replacesInvitationIdTable($_db),
+    );
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$InvitationsTableFilterComposer
+    extends Composer<_$SoarScoreDatabase, $InvitationsTable> {
+  $$InvitationsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get type => $composableBuilder(
+    column: $table.type,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get protectedCredential => $composableBuilder(
+    column: $table.protectedCredential,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get invitationRevision => $composableBuilder(
+    column: $table.invitationRevision,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get state => $composableBuilder(
+    column: $table.state,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get audience => $composableBuilder(
+    column: $table.audience,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get issuedBy => $composableBuilder(
+    column: $table.issuedBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get issuedAt => $composableBuilder(
+    column: $table.issuedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get expiresAt => $composableBuilder(
+    column: $table.expiresAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get firstUsedAt => $composableBuilder(
+    column: $table.firstUsedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get lastUsedAt => $composableBuilder(
+    column: $table.lastUsedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get revokedAt => $composableBuilder(
+    column: $table.revokedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get redeemedByAccountId => $composableBuilder(
+    column: $table.redeemedByAccountId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get deliveryOutcomes => $composableBuilder(
+    column: $table.deliveryOutcomes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get clientMutationId => $composableBuilder(
+    column: $table.clientMutationId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$ContestsTableFilterComposer get contestId {
+    final $$ContestsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contestId,
+      referencedTable: $db.contests,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContestsTableFilterComposer(
+            $db: $db,
+            $table: $db.contests,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ContestParticipationsTableFilterComposer get contestParticipationId {
+    final $$ContestParticipationsTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.contestParticipationId,
+          referencedTable: $db.contestParticipations,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ContestParticipationsTableFilterComposer(
+                $db: $db,
+                $table: $db.contestParticipations,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$InvitationsTableFilterComposer get replacesInvitationId {
+    final $$InvitationsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.replacesInvitationId,
+      referencedTable: $db.invitations,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$InvitationsTableFilterComposer(
+            $db: $db,
+            $table: $db.invitations,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$InvitationsTableOrderingComposer
+    extends Composer<_$SoarScoreDatabase, $InvitationsTable> {
+  $$InvitationsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get type => $composableBuilder(
+    column: $table.type,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get protectedCredential => $composableBuilder(
+    column: $table.protectedCredential,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get invitationRevision => $composableBuilder(
+    column: $table.invitationRevision,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get state => $composableBuilder(
+    column: $table.state,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get audience => $composableBuilder(
+    column: $table.audience,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get issuedBy => $composableBuilder(
+    column: $table.issuedBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get issuedAt => $composableBuilder(
+    column: $table.issuedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get expiresAt => $composableBuilder(
+    column: $table.expiresAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get firstUsedAt => $composableBuilder(
+    column: $table.firstUsedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get lastUsedAt => $composableBuilder(
+    column: $table.lastUsedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get revokedAt => $composableBuilder(
+    column: $table.revokedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get redeemedByAccountId => $composableBuilder(
+    column: $table.redeemedByAccountId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get deliveryOutcomes => $composableBuilder(
+    column: $table.deliveryOutcomes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get clientMutationId => $composableBuilder(
+    column: $table.clientMutationId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$ContestsTableOrderingComposer get contestId {
+    final $$ContestsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contestId,
+      referencedTable: $db.contests,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContestsTableOrderingComposer(
+            $db: $db,
+            $table: $db.contests,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ContestParticipationsTableOrderingComposer get contestParticipationId {
+    final $$ContestParticipationsTableOrderingComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.contestParticipationId,
+          referencedTable: $db.contestParticipations,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ContestParticipationsTableOrderingComposer(
+                $db: $db,
+                $table: $db.contestParticipations,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$InvitationsTableOrderingComposer get replacesInvitationId {
+    final $$InvitationsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.replacesInvitationId,
+      referencedTable: $db.invitations,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$InvitationsTableOrderingComposer(
+            $db: $db,
+            $table: $db.invitations,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$InvitationsTableAnnotationComposer
+    extends Composer<_$SoarScoreDatabase, $InvitationsTable> {
+  $$InvitationsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get type =>
+      $composableBuilder(column: $table.type, builder: (column) => column);
+
+  GeneratedColumn<String> get protectedCredential => $composableBuilder(
+    column: $table.protectedCredential,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get invitationRevision => $composableBuilder(
+    column: $table.invitationRevision,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get state =>
+      $composableBuilder(column: $table.state, builder: (column) => column);
+
+  GeneratedColumn<String> get audience =>
+      $composableBuilder(column: $table.audience, builder: (column) => column);
+
+  GeneratedColumn<String> get issuedBy =>
+      $composableBuilder(column: $table.issuedBy, builder: (column) => column);
+
+  GeneratedColumn<String> get issuedAt =>
+      $composableBuilder(column: $table.issuedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get expiresAt =>
+      $composableBuilder(column: $table.expiresAt, builder: (column) => column);
+
+  GeneratedColumn<String> get firstUsedAt => $composableBuilder(
+    column: $table.firstUsedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get lastUsedAt => $composableBuilder(
+    column: $table.lastUsedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get revokedAt =>
+      $composableBuilder(column: $table.revokedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get redeemedByAccountId => $composableBuilder(
+    column: $table.redeemedByAccountId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get deliveryOutcomes => $composableBuilder(
+    column: $table.deliveryOutcomes,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get clientMutationId => $composableBuilder(
+    column: $table.clientMutationId,
+    builder: (column) => column,
+  );
+
+  $$ContestsTableAnnotationComposer get contestId {
+    final $$ContestsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contestId,
+      referencedTable: $db.contests,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContestsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.contests,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ContestParticipationsTableAnnotationComposer get contestParticipationId {
+    final $$ContestParticipationsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.contestParticipationId,
+          referencedTable: $db.contestParticipations,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ContestParticipationsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.contestParticipations,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$InvitationsTableAnnotationComposer get replacesInvitationId {
+    final $$InvitationsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.replacesInvitationId,
+      referencedTable: $db.invitations,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$InvitationsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.invitations,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$InvitationsTableTableManager
+    extends
+        RootTableManager<
+          _$SoarScoreDatabase,
+          $InvitationsTable,
+          InvitationData,
+          $$InvitationsTableFilterComposer,
+          $$InvitationsTableOrderingComposer,
+          $$InvitationsTableAnnotationComposer,
+          $$InvitationsTableCreateCompanionBuilder,
+          $$InvitationsTableUpdateCompanionBuilder,
+          (InvitationData, $$InvitationsTableReferences),
+          InvitationData,
+          PrefetchHooks Function({
+            bool contestId,
+            bool contestParticipationId,
+            bool replacesInvitationId,
+          })
+        > {
+  $$InvitationsTableTableManager(
+    _$SoarScoreDatabase db,
+    $InvitationsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$InvitationsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$InvitationsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$InvitationsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> contestId = const Value.absent(),
+                Value<String> contestParticipationId = const Value.absent(),
+                Value<String> type = const Value.absent(),
+                Value<String> protectedCredential = const Value.absent(),
+                Value<int> invitationRevision = const Value.absent(),
+                Value<String> state = const Value.absent(),
+                Value<String> audience = const Value.absent(),
+                Value<String> issuedBy = const Value.absent(),
+                Value<String> issuedAt = const Value.absent(),
+                Value<String?> expiresAt = const Value.absent(),
+                Value<String?> firstUsedAt = const Value.absent(),
+                Value<String?> lastUsedAt = const Value.absent(),
+                Value<String?> revokedAt = const Value.absent(),
+                Value<String?> replacesInvitationId = const Value.absent(),
+                Value<String?> redeemedByAccountId = const Value.absent(),
+                Value<String> deliveryOutcomes = const Value.absent(),
+                Value<String> clientMutationId = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => InvitationsCompanion(
+                id: id,
+                contestId: contestId,
+                contestParticipationId: contestParticipationId,
+                type: type,
+                protectedCredential: protectedCredential,
+                invitationRevision: invitationRevision,
+                state: state,
+                audience: audience,
+                issuedBy: issuedBy,
+                issuedAt: issuedAt,
+                expiresAt: expiresAt,
+                firstUsedAt: firstUsedAt,
+                lastUsedAt: lastUsedAt,
+                revokedAt: revokedAt,
+                replacesInvitationId: replacesInvitationId,
+                redeemedByAccountId: redeemedByAccountId,
+                deliveryOutcomes: deliveryOutcomes,
+                clientMutationId: clientMutationId,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String contestId,
+                required String contestParticipationId,
+                required String type,
+                required String protectedCredential,
+                required int invitationRevision,
+                required String state,
+                required String audience,
+                required String issuedBy,
+                required String issuedAt,
+                Value<String?> expiresAt = const Value.absent(),
+                Value<String?> firstUsedAt = const Value.absent(),
+                Value<String?> lastUsedAt = const Value.absent(),
+                Value<String?> revokedAt = const Value.absent(),
+                Value<String?> replacesInvitationId = const Value.absent(),
+                Value<String?> redeemedByAccountId = const Value.absent(),
+                required String deliveryOutcomes,
+                required String clientMutationId,
+                Value<int> rowid = const Value.absent(),
+              }) => InvitationsCompanion.insert(
+                id: id,
+                contestId: contestId,
+                contestParticipationId: contestParticipationId,
+                type: type,
+                protectedCredential: protectedCredential,
+                invitationRevision: invitationRevision,
+                state: state,
+                audience: audience,
+                issuedBy: issuedBy,
+                issuedAt: issuedAt,
+                expiresAt: expiresAt,
+                firstUsedAt: firstUsedAt,
+                lastUsedAt: lastUsedAt,
+                revokedAt: revokedAt,
+                replacesInvitationId: replacesInvitationId,
+                redeemedByAccountId: redeemedByAccountId,
+                deliveryOutcomes: deliveryOutcomes,
+                clientMutationId: clientMutationId,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$InvitationsTable, InvitationData>(table),
+                  $$InvitationsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback:
+              ({
+                contestId = false,
+                contestParticipationId = false,
+                replacesInvitationId = false,
+              }) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (contestId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.contestId,
+                            referencedTable: $$InvitationsTableReferences
+                                ._contestIdTable(db),
+                            referencedColumn: $$InvitationsTableReferences
+                                ._contestIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+                        if (contestParticipationId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.contestParticipationId,
+                            referencedTable: $$InvitationsTableReferences
+                                ._contestParticipationIdTable(db),
+                            referencedColumn: $$InvitationsTableReferences
+                                ._contestParticipationIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+                        if (replacesInvitationId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.replacesInvitationId,
+                            referencedTable: $$InvitationsTableReferences
+                                ._replacesInvitationIdTable(db),
+                            referencedColumn: $$InvitationsTableReferences
+                                ._replacesInvitationIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$InvitationsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$SoarScoreDatabase,
+      $InvitationsTable,
+      InvitationData,
+      $$InvitationsTableFilterComposer,
+      $$InvitationsTableOrderingComposer,
+      $$InvitationsTableAnnotationComposer,
+      $$InvitationsTableCreateCompanionBuilder,
+      $$InvitationsTableUpdateCompanionBuilder,
+      (InvitationData, $$InvitationsTableReferences),
+      InvitationData,
+      PrefetchHooks Function({
+        bool contestId,
+        bool contestParticipationId,
+        bool replacesInvitationId,
       })
     >;
 typedef $$MatrixRevisionsTableCreateCompanionBuilder =
@@ -54885,6 +71842,48 @@ class $SoarScoreDatabaseManager {
       $$ModelCatalogsTableTableManager(_db, _db.modelCatalogs);
   $$ContestModelLinksTableTableManager get contestModelLinks =>
       $$ContestModelLinksTableTableManager(_db, _db.contestModelLinks);
+  $$AccountsTableTableManager get accounts =>
+      $$AccountsTableTableManager(_db, _db.accounts);
+  $$AccountIdentitiesTableTableManager get accountIdentities =>
+      $$AccountIdentitiesTableTableManager(_db, _db.accountIdentities);
+  $$AccountPublicProfilesTableTableManager get accountPublicProfiles =>
+      $$AccountPublicProfilesTableTableManager(_db, _db.accountPublicProfiles);
+  $$ParticipantAccountLinksTableTableManager get participantAccountLinks =>
+      $$ParticipantAccountLinksTableTableManager(
+        _db,
+        _db.participantAccountLinks,
+      );
+  $$ParticipantDirectoryEntriesTableTableManager
+  get participantDirectoryEntries =>
+      $$ParticipantDirectoryEntriesTableTableManager(
+        _db,
+        _db.participantDirectoryEntries,
+      );
+  $$InstallationsTableTableManager get installations =>
+      $$InstallationsTableTableManager(_db, _db.installations);
+  $$InstallationActivationsTableTableManager get installationActivations =>
+      $$InstallationActivationsTableTableManager(
+        _db,
+        _db.installationActivations,
+      );
+  $$SyncCursorsTableTableManager get syncCursors =>
+      $$SyncCursorsTableTableManager(_db, _db.syncCursors);
+  $$PublicationIdentitiesTableTableManager get publicationIdentities =>
+      $$PublicationIdentitiesTableTableManager(_db, _db.publicationIdentities);
+  $$PublicationProjectionsTableTableManager get publicationProjections =>
+      $$PublicationProjectionsTableTableManager(
+        _db,
+        _db.publicationProjections,
+      );
+  $$PublicationParticipantsTableTableManager get publicationParticipants =>
+      $$PublicationParticipantsTableTableManager(
+        _db,
+        _db.publicationParticipants,
+      );
+  $$DelistRequestsTableTableManager get delistRequests =>
+      $$DelistRequestsTableTableManager(_db, _db.delistRequests);
+  $$InvitationsTableTableManager get invitations =>
+      $$InvitationsTableTableManager(_db, _db.invitations);
   $$MatrixRevisionsTableTableManager get matrixRevisions =>
       $$MatrixRevisionsTableTableManager(_db, _db.matrixRevisions);
   $$RoundsTableTableManager get rounds =>
