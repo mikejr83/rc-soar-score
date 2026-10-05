@@ -34,6 +34,7 @@ ContestTotal calculateContestTotal(
   final scores = <int, int>{}; // round -> thousandths
   final nonDroppable = <int>{};
   var penalty = 0;
+  var rawFlightPoints = 0.0;
   var preliminary = false;
   for (var round = 1; round <= asOfRound; round++) {
     final entry = byRound[round];
@@ -48,6 +49,7 @@ ContestTotal calculateContestTotal(
       'cumulativePenalty',
       round,
     );
+    rawFlightPoints += entry.rawScore;
     if (entry.nonDroppable) nonDroppable.add(round);
     if (entry.underReview) preliminary = true;
   }
@@ -77,6 +79,8 @@ ContestTotal calculateContestTotal(
     rawTotal: raw / 1000,
     droppedRounds: dropped,
     skippedDrops: skipped,
+    droppedScoreTotal: droppedSum / 1000,
+    rawFlightPoints: rawFlightPoints,
     penaltyTotal: penalty / 1000,
     overallScore: (raw - droppedSum - penalty) / 1000,
     isPreliminary: preliminary,

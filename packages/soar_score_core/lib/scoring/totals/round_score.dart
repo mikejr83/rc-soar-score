@@ -5,6 +5,7 @@ class RoundScore extends Equatable {
   RoundScore({
     required this.round,
     required this.groupScore,
+    required this.rawScore,
     this.nonDroppable = false,
     this.cumulativePenalty = 0,
     this.underReview = false,
@@ -18,6 +19,9 @@ class RoundScore extends Equatable {
         'groupScore',
         'must not be negative',
       );
+    }
+    if (!rawScore.isFinite || rawScore < 0) {
+      throw ArgumentError.value(rawScore, 'rawScore', 'must not be negative');
     }
     if (!cumulativePenalty.isFinite || cumulativePenalty < 0) {
       throw ArgumentError.value(
@@ -33,6 +37,10 @@ class RoundScore extends Equatable {
 
   /// The group score of the selected flight, already rounded.
   final double groupScore;
+
+  /// The discipline raw score of the selected flight, before the group score.
+  /// Its total across rounds is the second tie-breaker.
+  final double rawScore;
 
   /// A zero that may never be dropped, such as an F5J motor restart under
   /// `Non-Droppable 0`.
@@ -50,6 +58,7 @@ class RoundScore extends Equatable {
   List<Object?> get props => [
     round,
     groupScore,
+    rawScore,
     nonDroppable,
     cumulativePenalty,
     underReview,
