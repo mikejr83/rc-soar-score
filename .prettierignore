@@ -5,6 +5,10 @@ build/
 .flutter-plugins
 .flutter-plugins-dependencies
 
+# Agents
+.claude/
+.kilo/
+
 # Generated code
 **/*.g.dart
 **/*.freezed.dart
