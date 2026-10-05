@@ -90,6 +90,15 @@ class TableMapper {
     return count > 0;
   }
 
+  /// Removes every row whose [column] equals [value]; returns how many.
+  ///
+  /// [column] is a column name from the schema, never user input.
+  Future<int> removeWhere(String column, core.Id value) => _db.customUpdate(
+    portableSql(_db, 'DELETE FROM $_name WHERE $column = ?'),
+    variables: [Variable<String>(value.value)],
+    updates: {_table},
+  );
+
   Map<String, Object?> _fromRow(Map<String, Object?> data) {
     final json = <String, Object?>{};
     for (final column in _table.$columns) {

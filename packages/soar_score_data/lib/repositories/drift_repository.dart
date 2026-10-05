@@ -22,4 +22,29 @@ abstract class DriftRepository {
   /// The store of [entityType], as the entity class [T].
   EntityStore<T> store<T extends Object>(String entityType) =>
       stores.of(entityType) as EntityStore<T>;
+
+  /// Replaces every row of [contestId] in [store] with [rows], in one
+  /// transaction, for derived data that is recomputed and never mutated.
+  ///
+  /// Throws an [ArgumentError] before changing anything if a row belongs to
+  /// another contest.
+  Future<void> replaceRows<T extends Object>(
+    EntityStore<T> store,
+    core.Id contestId,
+    Iterable<T> rows,
+    core.Id Function(T row) contestOf,
+  ) {
+    final list = rows.toList();
+    for (final row in list) {
+      if (contestOf(row) != contestId) {
+        throw ArgumentError('a ${store.entityType} belongs to another contest');
+      }
+    }
+    return db.transaction(() async {
+      await store.removeWhereId('contest_id', contestId);
+      for (final row in list) {
+        await store.upsertJson(store.encode(row));
+      }
+    });
+  }
 }

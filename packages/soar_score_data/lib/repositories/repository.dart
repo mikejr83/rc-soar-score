@@ -41,7 +41,13 @@ class Repository implements core.Repository {
       officialScoreRepository = OfficialScoreRepository(
         database,
         stores: stores,
-      );
+      ),
+      flightResultRepository = FlightResultRepository(database, stores: stores),
+      participationStandingRepository = ParticipationStandingRepository(
+        database,
+        stores: stores,
+      ),
+      teamStandingRepository = TeamStandingRepository(database, stores: stores);
 
   @override
   final core.ContestRepository contestRepository;
@@ -82,6 +88,15 @@ class Repository implements core.Repository {
 
   @override
   final core.OfficialScoreRepository officialScoreRepository;
+
+  @override
+  final core.FlightResultRepository flightResultRepository;
+
+  @override
+  final core.ParticipationStandingRepository participationStandingRepository;
+
+  @override
+  final core.TeamStandingRepository teamStandingRepository;
 }
 
 Repository createRepository(SoarScoreDatabase database) => Repository(database);
