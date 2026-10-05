@@ -3,11 +3,9 @@ import 'package:equatable/equatable.dart';
 import '../../enums/group_score_mode.dart';
 import '../../enums/rounding_mode.dart';
 import '../../errors/scoring_validation_error.dart';
+import '../duration/target_time_rules.dart';
 import '../group/group_score_options.dart';
 import '../profile/scoring_issue.dart';
-
-/// Seconds past the target time that an over-flight stays scorable.
-const alesOverflightWindowSeconds = 60;
 
 /// The resolved ALES contest options, parsed and checked.
 ///
@@ -15,12 +13,7 @@ const alesOverflightWindowSeconds = 60;
 /// `plan/data-model/contest-options.md`. Motor restart is always allowed in
 /// ALES, so there is no option for it.
 class AlesOptions extends Equatable {
-  const AlesOptions._({
-    required this.targetTimeSeconds,
-    required this.pointsPerSecond,
-    required this.timeDecimals,
-    required this.groupScore,
-  });
+  const AlesOptions._({required this.targetTime, required this.groupScore});
 
   /// Parses [options]; throws [ScoringValidationError] for bad values.
   factory AlesOptions.fromMap(Map<String, Object?> options) {
@@ -81,9 +74,11 @@ class AlesOptions extends Equatable {
 
     if (issues.isNotEmpty) throw ScoringValidationError(issues);
     return AlesOptions._(
-      targetTimeSeconds: target!.toDouble(),
-      pointsPerSecond: pointsPerSecond!.toDouble(),
-      timeDecimals: fractionalSeconds!,
+      targetTime: TargetTimeRules(
+        pointsPerSecond: pointsPerSecond!.toDouble(),
+        targetTimeSeconds: target!.toDouble(),
+        timeDecimals: fractionalSeconds!,
+      ),
       groupScore: GroupScoreOptions(
         mode: mode!,
         roundingMode: rounding!,
@@ -92,23 +87,10 @@ class AlesOptions extends Equatable {
     );
   }
 
-  final double targetTimeSeconds;
-  final double pointsPerSecond;
-
-  /// Decimal places kept for a flown time, 0 to 3.
-  final int timeDecimals;
+  /// Target-time scoring; the over-flight limit is the default one minute.
+  final TargetTimeRules targetTime;
   final GroupScoreOptions groupScore;
 
-  /// The latest flown time that is still scorable without the over-flight
-  /// status: the target time plus one minute.
-  double get latestScorableSeconds =>
-      targetTimeSeconds + alesOverflightWindowSeconds;
-
   @override
-  List<Object?> get props => [
-    targetTimeSeconds,
-    pointsPerSecond,
-    timeDecimals,
-    groupScore,
-  ];
+  List<Object?> get props => [targetTime, groupScore];
 }

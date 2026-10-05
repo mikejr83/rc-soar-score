@@ -13,12 +13,12 @@ void main() {
       expect(ales.discipline, DisciplineType.ales);
       expect(ales.rulesVersion, 1);
       final options = ales.options();
-      expect(options.targetTimeSeconds, 600);
-      expect(options.pointsPerSecond, 1);
+      expect(options.targetTime.targetTimeSeconds, 600);
+      expect(options.targetTime.pointsPerSecond, 1);
       expect(options.groupScore.mode, GroupScoreMode.time);
       expect(options.groupScore.roundingMode, RoundingMode.round);
       expect(options.groupScore.decimalPlaces, 1);
-      expect(options.latestScorableSeconds, 660);
+      expect(options.targetTime.overflightLimitSeconds, 60);
     });
 
     test('have no motor restart option', () {
@@ -35,7 +35,7 @@ void main() {
         'group_score_mode': 'Normalized',
         'decimal_places': 0,
       });
-      expect(options.targetTimeSeconds, 480);
+      expect(options.targetTime.targetTimeSeconds, 480);
       expect(options.groupScore.mode, GroupScoreMode.normalized);
       expect(options.groupScore.decimalPlaces, 0);
     });

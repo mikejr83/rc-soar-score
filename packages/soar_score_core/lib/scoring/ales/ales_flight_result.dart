@@ -11,6 +11,7 @@ class AlesFlightResult extends Equatable {
     List<AlesZeroReason> zeroReasons = const [],
     this.flightPoints = 0,
     this.landingBonus = 0,
+    this.overflightSeconds = 0,
   }) : zeroReasons = List.unmodifiable(zeroReasons);
 
   /// `zero` for a forced zero or a blank score, otherwise `scored`.
@@ -25,6 +26,9 @@ class AlesFlightResult extends Equatable {
   /// The landing bonus awarded; zero after a forced zero.
   final double landingBonus;
 
+  /// Seconds flown past the target time, kept for audit; zero at or under it.
+  final double overflightSeconds;
+
   /// Flight points plus landing bonus.
   double get rawScore => flightPoints + landingBonus;
 
@@ -37,5 +41,11 @@ class AlesFlightResult extends Equatable {
   );
 
   @override
-  List<Object?> get props => [outcome, zeroReasons, flightPoints, landingBonus];
+  List<Object?> get props => [
+    outcome,
+    zeroReasons,
+    flightPoints,
+    landingBonus,
+    overflightSeconds,
+  ];
 }
