@@ -1,3 +1,5 @@
+import '../models/matrix/matrix_assignment.dart';
+import '../models/shared/append_only.dart';
 import '../models/shared/synchronizable.dart';
 import 'mutation_metadata.dart';
 
@@ -14,6 +16,27 @@ abstract interface class WriteContext {
   /// surrounding transaction.
   Future<void> delete(
     Synchronizable entity, {
+    required MutationMetadata metadata,
+  });
+
+  /// Stores a new append-only [entity] and records a `MutationRecord`.
+  ///
+  /// Throws an `AlreadyStoredError` if an entity with the same id is stored.
+  Future<T> append<T extends AppendOnly>(
+    T entity, {
+    required MutationMetadata metadata,
+  });
+
+  /// Stores [moved], an assignment of type `Moved`, and sets
+  /// `superseded_by_assignment_id` on the assignment it moves from, which is
+  /// its `sourceAssignmentId`. One `MutationRecord` covers both.
+  ///
+  /// This is the only update an assignment ever gets. It throws an
+  /// `AlreadySupersededError` if the source was already moved, and an
+  /// `ArgumentError` if [moved] is not a `Moved` assignment or its source is
+  /// not stored.
+  Future<MatrixAssignment> moveAssignment(
+    MatrixAssignment moved, {
     required MutationMetadata metadata,
   });
 }

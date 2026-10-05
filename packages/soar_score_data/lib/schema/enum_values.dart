@@ -135,6 +135,91 @@ const ruleTypeValues = ['calc', 'penalty', 'zero', 'interaction', 'other'];
 /// `RoleType`.
 const roleTypeValues = ['Pilot', 'NonFlier'];
 
+/// `AssignmentType`.
+const assignmentTypeValues = ['Original', 'Moved', 'Reflight', 'LateAdd'];
+
+/// `DrawMode`.
+const drawModeValues = ['StandardManOnMan', 'SeededManOnMan'];
+
+/// `ExcludedReason`.
+const excludedReasonValues = [
+  'SameTeam',
+  'Retired',
+  'NotEligible',
+  'DirectorExcluded',
+  'Declined',
+];
+
+/// `ExistingScoreHandling`.
+const existingScoreHandlingValues = ['None', 'Reset'];
+
+/// `FlightOutcome`.
+const flightOutcomeValues = ['Scored', 'Zero'];
+
+/// `GroupStatus`.
+const groupStatusValues = ['Open', 'Locked'];
+
+/// `NotificationState`.
+const notificationStateValues = [
+  'NotRequired',
+  'Pending',
+  'Delivered',
+  'Failed',
+];
+
+/// `ReFlightParticipantRole`.
+const reFlightParticipantRoleValues = [
+  'Awarded',
+  'Drawn',
+  'GroupMember',
+  'Candidate',
+  'Excluded',
+];
+
+/// `ReFlightResponse`.
+const reFlightResponseValues = [
+  'NotRequired',
+  'Pending',
+  'Accepted',
+  'Declined',
+];
+
+/// `ReFlightStatus`.
+const reFlightStatusValues = [
+  'Proposed',
+  'DrawPending',
+  'AwaitingResponses',
+  'ReadyToFly',
+  'Finalized',
+  'Cancelled',
+];
+
+/// `ReFlightType`.
+const reFlightTypeValues = ['MoveToGroup', 'RandomDraw', 'ReflyEntireGroup'];
+
+/// `ResponseActor`.
+const responseActorValues = ['Participant', 'Director'];
+
+/// `ReviewRequestState`.
+const reviewRequestStateValues = [
+  'Submitted',
+  'UnderReview',
+  'Approved',
+  'Rejected',
+  'Superseded',
+];
+
+/// `RoundStatus`.
+const roundStatusValues = ['Open', 'Locked', 'Cancelled'];
+
+/// `ScorePlaceholderState`.
+const scorePlaceholderStateValues = [
+  'NotEntered',
+  'Submitted',
+  'InReview',
+  'Official',
+];
+
 /// Core enum name to the list above, for the comparison test.
 const enumValueLists = {
   'LifecycleState': lifecycleStateValues,
@@ -157,4 +242,19 @@ const enumValueLists = {
   'FormulaType': formulaTypeValues,
   'RuleType': ruleTypeValues,
   'RoleType': roleTypeValues,
+  'AssignmentType': assignmentTypeValues,
+  'DrawMode': drawModeValues,
+  'ExcludedReason': excludedReasonValues,
+  'ExistingScoreHandling': existingScoreHandlingValues,
+  'FlightOutcome': flightOutcomeValues,
+  'GroupStatus': groupStatusValues,
+  'NotificationState': notificationStateValues,
+  'ReFlightParticipantRole': reFlightParticipantRoleValues,
+  'ReFlightResponse': reFlightResponseValues,
+  'ReFlightStatus': reFlightStatusValues,
+  'ReFlightType': reFlightTypeValues,
+  'ResponseActor': responseActorValues,
+  'ReviewRequestState': reviewRequestStateValues,
+  'RoundStatus': roundStatusValues,
+  'ScorePlaceholderState': scorePlaceholderStateValues,
 };

@@ -16,7 +16,7 @@ part 'matrix_assignment.g.dart';
 @JsonSerializable(fieldRename: FieldRename.snake, includeIfNull: true)
 @IdConverter()
 @UtcTimestampConverter()
-class MatrixAssignment extends Equatable implements SyncScoped {
+class MatrixAssignment extends Equatable implements AppendOnly {
   MatrixAssignment({
     required this.id,
     required this.contestId,
@@ -95,6 +95,7 @@ class MatrixAssignment extends Equatable implements SyncScoped {
     }
   }
 
+  @override
   final Id id;
   final Id contestId;
 
@@ -140,6 +141,9 @@ class MatrixAssignment extends Equatable implements SyncScoped {
   final DateTime createdAt;
 
   bool get isSuperseded => supersededByAssignmentId != null;
+
+  @override
+  String get entityType => 'MatrixAssignment';
 
   @override
   SyncScope get syncScope => SyncScope.contest;

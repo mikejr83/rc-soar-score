@@ -1,3 +1,4 @@
+export 'append_only.dart';
 export 'backend_only.dart';
 export 'json_converters.dart';
 export 'private_data.dart';

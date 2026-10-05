@@ -15,3 +15,13 @@ Map<String, Object?> deletePayload() => core.VersionedPayload(
   version: mutationPayloadVersion,
   data: const {'operation': 'delete'},
 ).toJson();
+
+/// `MutationRecord.payload` for moving an assignment: the new `Moved` row, and
+/// the id of the assignment it supersedes, which the receiver marks too.
+Map<String, Object?> moveAssignmentPayload(
+  Map<String, Object?> entity,
+  String supersedes,
+) => core.VersionedPayload(
+  version: mutationPayloadVersion,
+  data: {'operation': 'save', 'entity': entity, 'supersedes': supersedes},
+).toJson();

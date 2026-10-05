@@ -14,12 +14,20 @@ Map<String, List<String>> _coreEnumTexts() {
   final enums = Directory('${dir.path}/packages/soar_score_core/lib/enums');
   final name = RegExp(r'^enum (\w+)', multiLine: true);
   final value = RegExp(r"@JsonValue\('([^']*)'\)");
+  // Enums declared with `@JsonEnum(valueField: 'json')` carry the text in the
+  // constant itself: `standardManOnMan('StandardManOnMan'),`.
+  final constant = RegExp(r"^  \w+\('([^']*)'\)[,;]", multiLine: true);
   return {
     for (final file in enums.listSync().whereType<File>())
       if (file.path.endsWith('.dart'))
         for (final text in [file.readAsStringSync()])
           if (name.firstMatch(text) case final m?)
-            m[1]!: [for (final v in value.allMatches(text)) v[1]!],
+            m[1]!: [
+              for (final v
+                  in (text.contains('valueField') ? constant : value)
+                      .allMatches(text))
+                v[1]!,
+            ],
   };
 }
 

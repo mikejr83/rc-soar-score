@@ -14,7 +14,7 @@ part 'official_score.g.dart';
 @JsonSerializable(fieldRename: FieldRename.snake, includeIfNull: true)
 @IdConverter()
 @UtcTimestampConverter()
-class OfficialScore extends Equatable implements SyncScoped {
+class OfficialScore extends Equatable implements AppendOnly {
   OfficialScore({
     required this.id,
     required this.contestId,
@@ -35,6 +35,7 @@ class OfficialScore extends Equatable implements SyncScoped {
   factory OfficialScore.fromJson(Map<String, Object?> json) =>
       _$OfficialScoreFromJson(json);
 
+  @override
   final Id id;
   final Id contestId;
   final Id scorePlaceholderId;
@@ -51,6 +52,9 @@ class OfficialScore extends Equatable implements SyncScoped {
   final DateTime setAt;
   final Id setBy;
   final String reason;
+
+  @override
+  String get entityType => 'OfficialScore';
 
   @override
   SyncScope get syncScope => SyncScope.contest;
