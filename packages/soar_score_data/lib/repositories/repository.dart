@@ -18,6 +18,7 @@ class Repository implements core.Repository {
         database,
         stores: stores,
       ),
+      roleRepository = RoleRepository(database, stores: stores),
       teamRepository = TeamRepository(database, stores: stores),
       teamMembershipRepository = TeamMembershipRepository(
         database,
@@ -62,6 +63,9 @@ class Repository implements core.Repository {
 
   @override
   final core.ContestParticipationRepository contestParticipationRepository;
+
+  @override
+  final core.RoleRepository roleRepository;
 
   @override
   final core.TeamRepository teamRepository;

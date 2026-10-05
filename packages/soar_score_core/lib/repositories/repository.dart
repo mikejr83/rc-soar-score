@@ -8,6 +8,7 @@ import 'matrix_revision_repository.dart';
 import 'official_score_repository.dart';
 import 'participant_profile_repository.dart';
 import 'participation_standing_repository.dart';
+import 'role_repository.dart';
 import 'round_group_repository.dart';
 import 'round_repository.dart';
 import 'score_attempt_repository.dart';
@@ -28,6 +29,8 @@ abstract interface class Repository {
   ParticipantProfileRepository get participantProfileRepository;
 
   ContestParticipationRepository get contestParticipationRepository;
+
+  RoleRepository get roleRepository;
 
   TeamRepository get teamRepository;
 

@@ -191,15 +191,14 @@ void _tests(Backend backend) {
           .map((t) => t.table.name);
       final anonymous = (await repo.listVisibleTo()).map((t) => t.table.name);
 
-      expect(names, [
+      const shipped = [
+        'ALES Standard Landing Table',
+        'F3J Standard Landing Table',
         'F5J Landing Distance Table',
         'F5J Standard Landing Table',
-        'Mine',
-      ]);
-      expect(anonymous, [
-        'F5J Landing Distance Table',
-        'F5J Standard Landing Table',
-      ]);
+      ];
+      expect(names, [...shipped, 'Mine', 'Thermal Standard Landing Table']);
+      expect(anonymous, [...shipped, 'Thermal Standard Landing Table']);
     });
   });
 }
