@@ -246,6 +246,15 @@ flutter test
 
 The data package (`packages/soar_score_data`) runs the same tests on SQLite and on PostgreSQL. SQLite is in memory and always runs. The PostgreSQL group runs only when a server is configured; otherwise it is reported as skipped. A skipped run is not a PostgreSQL pass.
 
+To do it all in one step (needs Docker), run the script. It starts a throwaway container on `127.0.0.1:54329`, runs the data package tests against it, and removes the container even if the tests fail. Extra arguments after `--` go to `dart test`, and `-Port` changes the host port:
+
+```bash
+./scripts/test-postgres.ps1
+./scripts/test-postgres.ps1 -- -n "unit of work"
+```
+
+To manage the server yourself instead:
+
 1. Start a throwaway PostgreSQL server, for example with Docker:
 
    ```bash
