@@ -22,6 +22,7 @@ export 'sync/table_mapper.dart';
 export 'repositories/contest_repository.dart';
 export 'repositories/contest_configuration_revision_repository.dart';
 export 'repositories/contest_participation_repository.dart';
+export 'repositories/discipline_profile_repository.dart';
 export 'repositories/drift_repository.dart';
 export 'repositories/flight_result_repository.dart';
 export 'repositories/landing_table_repository.dart';
