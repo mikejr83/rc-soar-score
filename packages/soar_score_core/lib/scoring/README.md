@@ -7,3 +7,5 @@ Pure-Dart scoring engine. It depends on no data layer.
 - `duration/` holds the time-to-points rules shared by duration disciplines.
 - `group/` holds the group score modes (`Raw`, `Normalized`, `Time`) and the
   single final rounding or truncation step.
+- `f5j/` holds the official F5J profile: field definitions, option parsing, the
+  height penalty, zero reasons and the flight calculation.
