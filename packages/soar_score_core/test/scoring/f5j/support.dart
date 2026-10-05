@@ -2,7 +2,7 @@ import 'package:soar_score_core/soar_score_core.dart';
 
 final f5j = F5jProfile();
 
-/// Calculates a flight with the official defaults: working time 900 s, 1 point
+/// Calculates a flight with the official defaults: working time 600 s, 1 point
 /// per second, reference height 200 m, 0.5 and 3 points per meter.
 F5jFlightResult flight(
   Map<String, Object?> components, {

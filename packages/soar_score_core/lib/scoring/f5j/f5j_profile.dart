@@ -27,7 +27,7 @@ class F5jProfile extends ScoringProfile {
 
   @override
   Map<String, Object?> get defaultOptions => const {
-    'working_time': 900,
+    'working_time': 600,
     'points_per_second': 1.0,
     'fractional_seconds': 0,
     'motor_restart_mode': 'allowed',
@@ -105,34 +105,47 @@ class F5jProfile extends ScoringProfile {
     ),
   ]);
 
+  static const _zeroStatusIds = [
+    'motor_restart',
+    'out_of_bounds',
+    'no_altitude_recorded',
+  ];
+
   static bool _flag(Map<String, Object?> components, String id) =>
       components[id] == true;
 
-  /// A motor restart together with out of bounds is allowed and records both
-  /// reasons. No altitude recorded excludes every other status.
+  /// Motor restart, out of bounds and no altitude recorded are mutually
+  /// exclusive; each one alone forces a zero. No altitude recorded also
+  /// excludes a late landing.
   @override
   List<ScoringIssue> validateCombination(Map<String, Object?> components) {
-    final noAltitude = _flag(components, 'no_altitude_recorded');
+    final selected = [
+      for (final id in _zeroStatusIds)
+        if (_flag(components, id)) id,
+    ];
     final issues = <ScoringIssue>[];
-    if (noAltitude &&
-        (_flag(components, 'motor_restart') ||
-            _flag(components, 'out_of_bounds') ||
-            _flag(components, 'late_landing'))) {
+    if (selected.length > 1) {
       issues.add(
         const ScoringIssue(
           code: 'exclusive_status',
-          fieldId: 'no_altitude_recorded',
           message:
-              'No altitude recorded cannot be combined with a motor restart, '
-              'out of bounds, or a late landing.',
+              'Select only one of motor restart, out of bounds, or no '
+              'altitude recorded.',
         ),
       );
     }
-    final forcedZero =
-        noAltitude ||
-        _flag(components, 'motor_restart') ||
-        _flag(components, 'out_of_bounds');
-    if (!forcedZero) {
+    if (_flag(components, 'no_altitude_recorded') &&
+        _flag(components, 'late_landing')) {
+      issues.add(
+        const ScoringIssue(
+          code: 'exclusive_status',
+          fieldId: 'late_landing',
+          message:
+              'A late landing cannot be combined with no altitude recorded.',
+        ),
+      );
+    }
+    if (selected.isEmpty) {
       final hasTime = components['time_flown'] != null;
       final hasHeight = components['launch_height'] != null;
       if (hasTime && !hasHeight) {

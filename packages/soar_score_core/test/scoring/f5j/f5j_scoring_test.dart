@@ -29,25 +29,25 @@ void main() {
   group('scored flights', () {
     test('flight points plus bonus less the height penalty', () {
       final result = flight({
-        'time_flown': 600,
+        'time_flown': 500,
         'launch_height': 100,
       }, landingBonus: 50);
 
       expect(result.outcome, FlightOutcome.scored);
-      expect(result.flightPoints, 600);
+      expect(result.flightPoints, 500);
       expect(result.heightPenalty, 50);
       expect(result.landingBonus, 50);
-      expect(result.rawScore, 600);
+      expect(result.rawScore, 500);
     });
 
     test('above the reference height', () {
       final result = flight({
-        'time_flown': 800,
+        'time_flown': 500,
         'launch_height': 250,
       }, landingBonus: 30);
 
       expect(result.heightPenalty, 250);
-      expect(result.rawScore, 800 + 30 - 250);
+      expect(result.rawScore, 500 + 30 - 250);
     });
 
     test('uses points per second', () {
@@ -103,15 +103,15 @@ void main() {
   group('late landing', () {
     test('keeps the flight points and loses the landing bonus', () {
       final result = flight({
-        'time_flown': 899,
+        'time_flown': 599,
         'launch_height': 100,
         'late_landing': true,
       }, landingBonus: 50);
 
       expect(result.lateLanding, isTrue);
-      expect(result.flightPoints, 899);
+      expect(result.flightPoints, 599);
       expect(result.landingBonus, 0);
-      expect(result.rawScore, 899 - 50);
+      expect(result.rawScore, 599 - 50);
     });
   });
 
@@ -157,19 +157,6 @@ void main() {
       expect(result.zeroReasons, [F5jZeroReason.noAltitudeRecorded]);
     });
 
-    test('a restart and out of bounds record both reasons', () {
-      final result = flight(
-        {'motor_restart': true, 'out_of_bounds': true},
-        overrides: {'motor_restart_mode': 'non_droppable'},
-      );
-
-      expect(result.zeroReasons, [
-        F5jZeroReason.motorRestart,
-        F5jZeroReason.outOfBounds,
-      ]);
-      expect(result.nonDroppable, isTrue);
-    });
-
     test('a blank score is an ordinary zero without a reason', () {
       final result = flight({});
 
@@ -183,7 +170,7 @@ void main() {
     test('a group of F5J flights normalizes to 1000 and rounds once', () {
       final flights = {
         'a': flight({
-          'time_flown': 600,
+          'time_flown': 500,
           'launch_height': 100,
         }, landingBonus: 50),
         'b': flight({'time_flown': 400, 'launch_height': 200}),
@@ -194,8 +181,8 @@ void main() {
         for (final e in flights.entries) e.value.toPilotRound(e.key),
       ], f5j.options().groupScore);
 
-      expect(scores.map((e) => e.rawScore), [600, 300, 0]);
-      expect(scores.map((e) => e.groupScore), [1000, 500, 0]);
+      expect(scores.map((e) => e.rawScore), [500, 300, 0]);
+      expect(scores.map((e) => e.groupScore), [1000, 600, 0]);
     });
 
     test('a group where every pilot scored zero gives zero', () {

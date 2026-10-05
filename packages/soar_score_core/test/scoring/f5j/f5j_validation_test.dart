@@ -14,7 +14,7 @@ void main() {
     test('has the F5J defaults', () {
       final options = f5j.options();
 
-      expect(options.duration.workingTimeSeconds, 900);
+      expect(options.duration.workingTimeSeconds, 600);
       expect(options.duration.pointsPerSecond, 1);
       expect(options.duration.timeDecimals, 0);
       expect(options.referenceLaunchHeight, 200);
@@ -36,18 +36,18 @@ void main() {
   group('invalid submissions', () {
     test('time at the working time is rejected', () {
       expect(
-        issueCodes(() => flight({'time_flown': 900, 'launch_height': 100})),
+        issueCodes(() => flight({'time_flown': 600, 'launch_height': 100})),
         ['out_of_range'],
       );
     });
 
     test('the largest time below the working time is accepted', () {
       final result = flight(
-        {'time_flown': 899.999, 'launch_height': 100, 'late_landing': true},
+        {'time_flown': 599.999, 'launch_height': 100, 'late_landing': true},
         overrides: {'fractional_seconds': 3},
       );
 
-      expect(result.flightPoints, closeTo(899.999, 1e-9));
+      expect(result.flightPoints, closeTo(599.999, 1e-9));
     });
 
     test('a negative time is rejected', () {
@@ -72,14 +72,45 @@ void main() {
       expect(issueCodes(() => flight({'launch_height': 100})), ['required']);
     });
 
-    test('no altitude recorded excludes the other statuses', () {
-      for (final other in ['motor_restart', 'out_of_bounds', 'late_landing']) {
+    test('the zero statuses are mutually exclusive', () {
+      const statuses = [
+        'motor_restart',
+        'out_of_bounds',
+        'no_altitude_recorded',
+      ];
+      for (final a in statuses) {
+        for (final b in statuses.where((b) => b != a)) {
+          expect(issueCodes(() => flight({a: true, b: true})), [
+            'exclusive_status',
+          ], reason: '$a with $b');
+        }
+      }
+      expect(issueCodes(() => flight({for (final s in statuses) s: true})), [
+        'exclusive_status',
+      ]);
+    });
+
+    test('each zero status alone is accepted', () {
+      for (final status in [
+        'motor_restart',
+        'out_of_bounds',
+        'no_altitude_recorded',
+      ]) {
         expect(
-          issueCodes(() => flight({'no_altitude_recorded': true, other: true})),
-          ['exclusive_status'],
-          reason: other,
+          flight({status: true}).zeroReasons,
+          hasLength(1),
+          reason: status,
         );
       }
+    });
+
+    test('no altitude recorded excludes a late landing', () {
+      expect(
+        issueCodes(
+          () => flight({'no_altitude_recorded': true, 'late_landing': true}),
+        ),
+        ['exclusive_status'],
+      );
     });
 
     test('a motor restart is rejected when the mode is Not Allowed', () {
