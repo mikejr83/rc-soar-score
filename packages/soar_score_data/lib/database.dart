@@ -10,8 +10,25 @@ import 'schema/database_profile.dart';
 import 'schema/enum_values.dart';
 import 'schema/tables/audit_events_table.dart';
 import 'schema/tables/conflict_records_table.dart';
+import 'schema/tables/contest_configuration_presets_table.dart';
+import 'schema/tables/contest_configuration_revisions_table.dart';
+import 'schema/tables/contest_model_links_table.dart';
+import 'schema/tables/contest_participations_table.dart';
+import 'schema/tables/discipline_config_fields_table.dart';
+import 'schema/tables/discipline_formulas_table.dart';
+import 'schema/tables/discipline_profiles_table.dart';
+import 'schema/tables/discipline_rules_table.dart';
+import 'schema/tables/discipline_score_fields_table.dart';
+import 'schema/tables/discipline_validations_table.dart';
+import 'schema/tables/landing_results_table.dart';
+import 'schema/tables/landing_tables_table.dart';
 import 'schema/tables/local_sync_positions_table.dart';
+import 'schema/tables/model_catalogs_table.dart';
 import 'schema/tables/mutation_records_table.dart';
+import 'schema/tables/participant_profiles_table.dart';
+import 'schema/tables/roles_table.dart';
+import 'schema/tables/team_memberships_table.dart';
+import 'schema/tables/teams_table.dart';
 import 'schema/tables/tombstones_table.dart';
 import 'schema/table_groups.dart';
 
@@ -25,6 +42,23 @@ part 'database.g.dart';
 @DriftDatabase(
   tables: [
     Contests,
+    LandingTables,
+    LandingResults,
+    DisciplineProfiles,
+    DisciplineConfigFields,
+    DisciplineScoreFields,
+    DisciplineValidations,
+    DisciplineFormulas,
+    DisciplineRules,
+    ContestConfigurationPresets,
+    ContestConfigurationRevisions,
+    ParticipantProfiles,
+    Roles,
+    ContestParticipations,
+    Teams,
+    TeamMemberships,
+    ModelCatalogs,
+    ContestModelLinks,
     MutationRecords,
     ConflictRecords,
     Tombstones,
@@ -49,6 +83,12 @@ class SoarScoreDatabase extends _$SoarScoreDatabase {
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (m) => migrateToVersion1(m, profileTables),
+    beforeOpen: (details) async {
+      // SQLite ignores foreign keys unless asked; PostgreSQL always checks.
+      if (executor.dialect == SqlDialect.sqlite) {
+        await customStatement('PRAGMA foreign_keys = ON');
+      }
+    },
     onUpgrade: (m, from, to) {
       throw UnsupportedError(
         'Schema upgrade from $from to $to is not implemented yet: '

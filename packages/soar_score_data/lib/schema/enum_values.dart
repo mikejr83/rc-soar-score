@@ -76,6 +76,65 @@ const auditActionValues = [
 /// `AuditOutcome`.
 const auditOutcomeValues = ['Success', 'Rejected', 'Conflict'];
 
+/// `LandingInputUnit`.
+const landingInputUnitValues = ['meters', 'feet', 'points'];
+
+/// `DisciplineType`.
+const disciplineTypeValues = [
+  'ALES',
+  'ThermalDuration',
+  'F3J',
+  'F5J',
+  'F3L',
+  'F3K',
+];
+
+/// `DisciplineCategory`.
+const disciplineCategoryValues = ['duration', 'multiple', 'other'];
+
+/// `ProfileStatus`.
+const profileStatusValues = ['drafted', 'published', 'superseded'];
+
+/// `ConfigFieldType`.
+const configFieldTypeValues = [
+  'string',
+  'int',
+  'float',
+  'bool',
+  'enum',
+  'landing',
+];
+
+/// `ScoreFieldType`.
+const scoreFieldTypeValues = [
+  'string',
+  'int',
+  'float',
+  'bool',
+  'enum',
+  'date',
+  'time',
+  'landing',
+];
+
+/// `ScoreFieldKind`.
+const scoreFieldKindValues = ['input', 'status_flag', 'derived'];
+
+/// `FormulaType`.
+const formulaTypeValues = [
+  'raw',
+  'intermediate',
+  'penalty',
+  'final',
+  'normalized',
+];
+
+/// `RuleType`.
+const ruleTypeValues = ['calc', 'penalty', 'zero', 'interaction', 'other'];
+
+/// `RoleType`.
+const roleTypeValues = ['Pilot', 'NonFlier'];
+
 /// Core enum name to the list above, for the comparison test.
 const enumValueLists = {
   'LifecycleState': lifecycleStateValues,
@@ -88,4 +147,14 @@ const enumValueLists = {
   'ConflictResolutionChoice': conflictResolutionChoiceValues,
   'AuditAction': auditActionValues,
   'AuditOutcome': auditOutcomeValues,
+  'LandingInputUnit': landingInputUnitValues,
+  'DisciplineType': disciplineTypeValues,
+  'DisciplineCategory': disciplineCategoryValues,
+  'ProfileStatus': profileStatusValues,
+  'ConfigFieldType': configFieldTypeValues,
+  'ScoreFieldType': scoreFieldTypeValues,
+  'ScoreFieldKind': scoreFieldKindValues,
+  'FormulaType': formulaTypeValues,
+  'RuleType': ruleTypeValues,
+  'RoleType': roleTypeValues,
 };
