@@ -180,7 +180,7 @@ void main() {
     test('a missing round before the retirement round is preliminary', () {
       final p = PilotRounds(
         pilotId: 'a',
-        scores: [RoundScore(round: 1, groupScore: 900)],
+        scores: [RoundScore(round: 1, groupScore: 900, rawScore: 900)],
         retiredAtRound: 3,
       );
 
@@ -210,12 +210,23 @@ void main() {
     });
 
     test('rejects negative scores, penalties and rounds', () {
-      expect(() => RoundScore(round: 1, groupScore: -1), throwsArgumentError);
       expect(
-        () => RoundScore(round: 1, groupScore: 1, cumulativePenalty: -1),
+        () => RoundScore(round: 1, groupScore: -1, rawScore: 0),
         throwsArgumentError,
       );
-      expect(() => RoundScore(round: 0, groupScore: 1), throwsArgumentError);
+      expect(
+        () => RoundScore(
+          round: 1,
+          groupScore: 1,
+          rawScore: 1,
+          cumulativePenalty: -1,
+        ),
+        throwsArgumentError,
+      );
+      expect(
+        () => RoundScore(round: 0, groupScore: 1, rawScore: 1),
+        throwsArgumentError,
+      );
     });
 
     test('rejects a round that appears twice', () {
@@ -223,8 +234,8 @@ void main() {
         () => PilotRounds(
           pilotId: 'a',
           scores: [
-            RoundScore(round: 1, groupScore: 1),
-            RoundScore(round: 1, groupScore: 2),
+            RoundScore(round: 1, groupScore: 1, rawScore: 1),
+            RoundScore(round: 1, groupScore: 2, rawScore: 2),
           ],
         ),
         throwsArgumentError,
@@ -264,10 +275,15 @@ void main() {
             RoundScore(
               round: 1,
               groupScore: 0,
+              rawScore: 0,
               nonDroppable: restart.nonDroppable,
             ),
-            RoundScore(round: 2, groupScore: low.rawScore),
-            RoundScore(round: 3, groupScore: 600),
+            RoundScore(
+              round: 2,
+              groupScore: low.rawScore,
+              rawScore: low.rawScore,
+            ),
+            RoundScore(round: 3, groupScore: 600, rawScore: 600),
           ],
         );
 
