@@ -9,3 +9,5 @@ Pure-Dart scoring engine. It depends on no data layer.
   single final rounding or truncation step.
 - `f5j/` holds the official F5J profile: field definitions, option parsing, the
   height penalty, zero reasons and the flight calculation.
+- `totals/` holds the contest total: dropped rounds (never a non-droppable
+  zero), cumulative penalties applied after drops, and the preliminary flag.
