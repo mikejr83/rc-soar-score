@@ -193,6 +193,7 @@ void _tests(Backend backend) {
 
       const shipped = [
         'ALES Standard Landing Table',
+        'F3J Landing Distance Table',
         'F3J Standard Landing Table',
         'F5J Landing Distance Table',
         'F5J Standard Landing Table',

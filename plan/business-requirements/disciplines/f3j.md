@@ -22,6 +22,8 @@ The F3J discipline changes the wording for a typical duration task. The concept 
 - Points Per Second - How many raw points are awarded to the pilot based on their flight time. Defaults to 1.
 - Landing Bonus - The selection of a landing bonus table. Should default to the system default for F3J contests or the last one used by the contest director for an F3J contest.
 
+The system default landing table for F3J selects the points awarded directly, from 100 down to 0 using the points the official F3J landing table awards. The system also ships the official table by distance from the landing spot as an alternative: up to 0.2 m is 100 points, falling 1 point for each further 0.2 m to 2 m (91), then 90 points up to 3 m, then 85 points up to 4 m, falling 5 points for each further metre to 30 points up to 15 m. Farther than 15 m is 0.
+
 ### Out of Bounds Landing
 
 For the purposes of score entering the following needs to be indicated for an out of bounds landing:

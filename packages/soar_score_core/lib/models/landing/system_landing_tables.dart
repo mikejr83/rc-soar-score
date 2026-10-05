@@ -16,8 +16,11 @@ abstract final class SystemLandingTables {
   /// The common alternative: the scorer selects a distance in meters.
   static final f5jDistanceId = Id.parse('019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2c00');
 
-  /// The F3J default: bonus bands by distance from the landing marker.
+  /// The F3J default: the scorer selects the points directly.
   static final f3jStandardId = Id.parse('019a3c4f-8f2a-7b1c-9d4e-6f5a3b2c1a02');
+
+  /// The official F3J table: the scorer selects a distance in meters.
+  static final f3jDistanceId = Id.parse('019a3c4f-8f2a-7b1c-9d4e-6f5a3b2c1c00');
 
   /// The ALES default: the scorer selects the points directly.
   static final alesStandardId = Id.parse(
@@ -35,6 +38,7 @@ abstract final class SystemLandingTables {
     f5jStandard,
     f5jDistance,
     f3jStandard,
+    f3jDistance,
     alesStandard,
     thermalStandard,
   ];
@@ -66,17 +70,58 @@ abstract final class SystemLandingTables {
   static final f3jStandard = _table(
     id: f3jStandardId,
     name: 'F3J Standard Landing Table',
-    inputUnit: LandingInputUnit.meters,
-    idPrefix: '019a3c4f-8f2a-7b1c-9d4e-6f5a3b2c1a',
-    firstEntry: 3,
+    inputUnit: LandingInputUnit.points,
+    idPrefix: '019a3c4f-8f2a-7b1c-9d4e-6f5a3b2c1b',
     entries: [
-      (key: 'within_10m', label: 'Within 10 m', points: 20),
-      (key: 'within_25m', label: 'Within 25 m', points: 15),
-      (key: 'within_50m', label: 'Within 50 m', points: 10),
-      (key: 'within_75m', label: 'Within 75 m', points: 5),
-      (key: 'none', label: 'No bonus', points: 0),
+      for (final (_, points) in _f3jDistances)
+        (key: 'points_$points', label: '$points pts', points: points),
+      (key: 'points_0', label: '0 pts', points: 0),
     ],
   );
+
+  static final f3jDistance = _table(
+    id: f3jDistanceId,
+    name: 'F3J Landing Distance Table',
+    inputUnit: LandingInputUnit.meters,
+    idPrefix: '019a3c4f-8f2a-7b1c-9d4e-6f5a3b2c1d',
+    entries: [
+      for (final (meters, points) in _f3jDistances)
+        (
+          key: 'within_${meters.replaceAll('.', '_')}m',
+          label: '${meters}m',
+          points: points,
+        ),
+      (key: 'over_15m', label: 'Over 15m', points: 0),
+    ],
+  );
+
+  /// The official F3J landing table: the distance from the spot, up to which
+  /// the points are awarded. Farther than 15 m earns 0.
+  static const _f3jDistances = <(String, int)>[
+    ('0.2', 100),
+    ('0.4', 99),
+    ('0.6', 98),
+    ('0.8', 97),
+    ('1', 96),
+    ('1.2', 95),
+    ('1.4', 94),
+    ('1.6', 93),
+    ('1.8', 92),
+    ('2', 91),
+    ('3', 90),
+    ('4', 85),
+    ('5', 80),
+    ('6', 75),
+    ('7', 70),
+    ('8', 65),
+    ('9', 60),
+    ('10', 55),
+    ('11', 50),
+    ('12', 45),
+    ('13', 40),
+    ('14', 35),
+    ('15', 30),
+  ];
 
   static final alesStandard = _table(
     id: alesStandardId,
