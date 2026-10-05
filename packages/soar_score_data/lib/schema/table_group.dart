@@ -17,4 +17,7 @@ enum TableGroup {
 
   /// Accounts, publication and installation tables; never on an installation.
   backendOnly,
+
+  /// Tables only an installation keeps, such as its own sync position.
+  clientOnly,
 }

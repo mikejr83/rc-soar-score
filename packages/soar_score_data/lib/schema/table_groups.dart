@@ -7,7 +7,14 @@ import 'table_group.dart';
 ///
 /// A table that is not listed cannot be created, and a test fails if one is
 /// missing, so no table can silently reach the wrong executor.
-const tableGroupByName = <String, TableGroup>{'contests': TableGroup.contest};
+const tableGroupByName = <String, TableGroup>{
+  'contests': TableGroup.contest,
+  'mutation_records': TableGroup.contest,
+  'conflict_records': TableGroup.contest,
+  'audit_events': TableGroup.contest,
+  'tombstones': TableGroup.director,
+  'local_sync_positions': TableGroup.clientOnly,
+};
 
 /// The tables of [all] that [profile] creates, using [groups] (by default
 /// [tableGroupByName]) to find each table's group.

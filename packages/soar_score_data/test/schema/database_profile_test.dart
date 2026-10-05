@@ -19,8 +19,11 @@ void main() {
       );
     });
 
-    test('server has every group', () {
-      expect(DatabaseProfile.server.groups, equals(TableGroup.values.toSet()));
+    test('server has every group except client only', () {
+      expect(
+        DatabaseProfile.server.groups,
+        equals(TableGroup.values.toSet()..remove(TableGroup.clientOnly)),
+      );
     });
   });
 
@@ -74,6 +77,10 @@ void main() {
         };
         expect(created.where((n) => !n.startsWith('sqlite_')), expected);
         expect(created, contains('contests'));
+        expect(
+          created.contains('local_sync_positions'),
+          profile == DatabaseProfile.native,
+        );
       });
     }
   });

@@ -22,6 +22,7 @@ export 'repositories/mutation_metadata.dart';
 export 'repositories/replicated_change.dart';
 export 'repositories/replicated_change_applier.dart';
 export 'repositories/repository.dart';
+export 'repositories/stale_revision_error.dart';
 export 'repositories/sync_scope_key.dart';
 export 'repositories/sync_status.dart';
 export 'repositories/sync_store.dart';
