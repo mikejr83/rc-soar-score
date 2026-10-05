@@ -45,6 +45,13 @@ jobs:
       - name: Test
         run: melos test
 
+      - name: Data package tests against PostgreSQL
+        # Spin up a throwaway postgres:17 container, run the data package
+        # suite against it (SQLite + PostgreSQL groups), then remove the
+        # container even when the tests fail. Without POSTGRES_PASSWORD the
+        # PostgreSQL group is skipped, which is not a pass.
+        run: bash scripts/test-postgres.sh
+
       - name: Build
         run: melos run build
 
