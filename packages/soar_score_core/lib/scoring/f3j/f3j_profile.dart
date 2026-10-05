@@ -64,6 +64,12 @@ class F3jProfile extends ScoringProfile {
       kind: ScoreFieldKind.statusFlag,
     ),
     ScoringFieldDefinition(
+      id: 'flight_penalty',
+      label: 'Flight Penalty',
+      type: ScoreFieldType.int,
+      min: 0,
+    ),
+    ScoringFieldDefinition(
       id: 'raw_score',
       label: 'Raw Score',
       type: ScoreFieldType.float,
@@ -93,14 +99,23 @@ class F3jProfile extends ScoringProfile {
     final options = this.options(overrides);
     validateOrThrow(components);
 
+    final flightPenalty = (components['flight_penalty'] as int? ?? 0)
+        .toDouble();
+
     if (components['out_of_bounds'] == true) {
       return F3jFlightResult(
         outcome: FlightOutcome.zero,
         zeroReasons: const [F3jZeroReason.outOfBounds],
+        flightPenalty: flightPenalty,
       );
     }
     final time = components['time_flown'] as num?;
-    if (time == null) return F3jFlightResult(outcome: FlightOutcome.zero);
+    if (time == null) {
+      return F3jFlightResult(
+        outcome: FlightOutcome.zero,
+        flightPenalty: flightPenalty,
+      );
+    }
 
     final late = components['late_landing'] == true;
     return F3jFlightResult(
@@ -109,6 +124,7 @@ class F3jProfile extends ScoringProfile {
       flightPoints: options.duration.flightPoints(time.toDouble()),
       landingBonus: late ? 0 : landingBonus,
       latePenalty: late ? latePenaltyPoints : 0,
+      flightPenalty: flightPenalty,
     );
   }
 

@@ -66,6 +66,12 @@ class ThermalProfile extends ScoringProfile {
       dependsOn: ['time_flown', 'out_of_bounds'],
     ),
     ScoringFieldDefinition(
+      id: 'flight_penalty',
+      label: 'Flight Penalty',
+      type: ScoreFieldType.int,
+      min: 0,
+    ),
+    ScoringFieldDefinition(
       id: 'raw_score',
       label: 'Raw Score',
       type: ScoreFieldType.float,
@@ -147,6 +153,9 @@ class ThermalProfile extends ScoringProfile {
       }
     }
 
+    final flightPenalty = (components['flight_penalty'] as int? ?? 0)
+        .toDouble();
+
     final reasons = [
       if (outOfBounds) ThermalZeroReason.outOfBounds,
       if (overflight) ThermalZeroReason.overflightOverOneMinute,
@@ -155,15 +164,22 @@ class ThermalProfile extends ScoringProfile {
       return ThermalFlightResult(
         outcome: FlightOutcome.zero,
         zeroReasons: reasons,
+        flightPenalty: flightPenalty,
       );
     }
-    if (time == null) return ThermalFlightResult(outcome: FlightOutcome.zero);
+    if (time == null) {
+      return ThermalFlightResult(
+        outcome: FlightOutcome.zero,
+        flightPenalty: flightPenalty,
+      );
+    }
 
     return ThermalFlightResult(
       outcome: FlightOutcome.scored,
       flightPoints: rules.flightPoints(time),
       landingBonus: landingBonus,
       overflightSeconds: rules.overflightSeconds(time),
+      flightPenalty: flightPenalty,
     );
   }
 

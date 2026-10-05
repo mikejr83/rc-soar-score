@@ -226,6 +226,20 @@ final systemF5jProfile = DisciplineProfileWithRules(
       'zero_reason_code': 'no_altitude_recorded',
       'created_at': '2026-09-15T00:00:00Z',
     }),
+    DisciplineScoreField.fromJson(const {
+      'id': '019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2b17',
+      'discipline_profile_id': '019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2b01',
+      'field_key': 'flight_penalty',
+      'field_type': 'int',
+      'name': 'Flight Penalty',
+      'description': 'Points deducted from the flight, entered with the score by anyone who enters it. The director\'s cumulative penalty is applied separately on the official score.',
+      'required': false,
+      'default_value': 0,
+      'validation': {'gte': 0},
+      'display_order': 8,
+      'is_zero_reason': false,
+      'created_at': '2026-09-15T00:00:00Z',
+    }),
   ],
   validations: [
     DisciplineValidation.fromJson(const {
@@ -292,12 +306,14 @@ final systemF5jProfile = DisciplineProfileWithRules(
       'discipline_profile_id': '019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2b01',
       'formula_key': 'flight_score',
       'formula_type': 'intermediate',
-      'description': 'Calculate flight score: time flown * points per second - height penalty',
-      'formula_text': 'points_per_second * time_seconds - height_penalty',
+      'description': 'Calculate flight score: time flown * points per second - height penalty - entered flight penalty',
+      'formula_text':
+          'points_per_second * time_seconds - height_penalty - flight_penalty',
       'inputs': {
         'points_per_second': 'config:points_per_second',
         'time_seconds': 'score:time_flown',
         'height_penalty': 'calc:height_penalty',
+        'flight_penalty': 'score:flight_penalty',
       },
       'outputs': {'flight_score': 'calc:flight_score'},
       'depends_on': ['height_penalty'],

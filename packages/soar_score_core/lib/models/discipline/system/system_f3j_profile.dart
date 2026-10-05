@@ -131,6 +131,20 @@ final systemF3jProfile = DisciplineProfileWithRules(
       'zero_reason_code': 'out_of_bounds',
       'created_at': '2026-09-15T00:00:00Z',
     }),
+    DisciplineScoreField.fromJson(const {
+      'id': '019a3c4f-8f2a-7b1c-9d4e-6f5a3b2c1a11',
+      'discipline_profile_id': '019a3c4f-8f2a-7b1c-9d4e-6f5a3b2c1a01',
+      'field_key': 'flight_penalty',
+      'field_type': 'int',
+      'name': 'Flight Penalty',
+      'description': 'Points deducted from the flight, entered with the score by anyone who enters it. The director\'s cumulative penalty is applied separately on the official score.',
+      'required': false,
+      'default_value': 0,
+      'validation': {'gte': 0},
+      'display_order': 5,
+      'is_zero_reason': false,
+      'created_at': '2026-09-15T00:00:00Z',
+    }),
   ],
   validations: [
     DisciplineValidation.fromJson(const {
@@ -174,13 +188,14 @@ final systemF3jProfile = DisciplineProfileWithRules(
       'formula_key': 'raw_score',
       'formula_type': 'final',
       'is_primary': true,
-      'description':
-          'Calculate raw score: flight score + landing bonus (if not late)',
-      'formula_text': 'flight_score + (late_landing ? 0 : landing_bonus)',
+      'description': 'Calculate raw score: flight score + landing bonus (if not late) - entered flight penalty',
+      'formula_text':
+          'flight_score + (late_landing ? 0 : landing_bonus) - flight_penalty',
       'inputs': {
         'flight_score': 'calc:flight_score',
         'late_landing': 'score:late_landing',
         'landing_bonus': 'lookup:landing_table(landing)',
+        'flight_penalty': 'score:flight_penalty',
       },
       'outputs': {'raw_score': 'final:raw_score'},
       'depends_on': ['flight_score'],

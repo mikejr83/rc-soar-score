@@ -69,6 +69,12 @@ class AlesProfile extends ScoringProfile {
       kind: ScoreFieldKind.statusFlag,
     ),
     ScoringFieldDefinition(
+      id: 'flight_penalty',
+      label: 'Flight Penalty',
+      type: ScoreFieldType.int,
+      min: 0,
+    ),
+    ScoringFieldDefinition(
       id: 'raw_score',
       label: 'Raw Score',
       type: ScoreFieldType.float,
@@ -148,6 +154,9 @@ class AlesProfile extends ScoringProfile {
       }
     }
 
+    final flightPenalty = (components['flight_penalty'] as int? ?? 0)
+        .toDouble();
+
     final reasons = [
       if (restart) AlesZeroReason.motorRestart,
       if (outOfBounds) AlesZeroReason.outOfBounds,
@@ -157,15 +166,22 @@ class AlesProfile extends ScoringProfile {
       return AlesFlightResult(
         outcome: FlightOutcome.zero,
         zeroReasons: reasons,
+        flightPenalty: flightPenalty,
       );
     }
-    if (time == null) return AlesFlightResult(outcome: FlightOutcome.zero);
+    if (time == null) {
+      return AlesFlightResult(
+        outcome: FlightOutcome.zero,
+        flightPenalty: flightPenalty,
+      );
+    }
 
     return AlesFlightResult(
       outcome: FlightOutcome.scored,
       flightPoints: rules.flightPoints(time),
       landingBonus: landingBonus,
       overflightSeconds: rules.overflightSeconds(time),
+      flightPenalty: flightPenalty,
     );
   }
 
