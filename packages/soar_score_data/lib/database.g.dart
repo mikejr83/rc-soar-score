@@ -11725,6 +11725,11485 @@ class ContestModelLinksCompanion extends UpdateCompanion<ContestModelLinkData> {
   }
 }
 
+class $MatrixRevisionsTable extends MatrixRevisions
+    with TableInfo<$MatrixRevisionsTable, MatrixRevisionData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $MatrixRevisionsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _contestIdMeta = const VerificationMeta(
+    'contestId',
+  );
+  @override
+  late final GeneratedColumn<String> contestId = GeneratedColumn<String>(
+    'contest_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES contests (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _revisionNumberMeta = const VerificationMeta(
+    'revisionNumber',
+  );
+  @override
+  late final GeneratedColumn<int> revisionNumber = GeneratedColumn<int>(
+    'revision_number',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _previousRevisionIdMeta =
+      const VerificationMeta('previousRevisionId');
+  @override
+  late final GeneratedColumn<String> previousRevisionId =
+      GeneratedColumn<String>(
+        'previous_revision_id',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES matrix_revisions (id)',
+        ),
+      );
+  static const VerificationMeta _firstRoundMeta = const VerificationMeta(
+    'firstRound',
+  );
+  @override
+  late final GeneratedColumn<int> firstRound = GeneratedColumn<int>(
+    'first_round',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _lastRoundMeta = const VerificationMeta(
+    'lastRound',
+  );
+  @override
+  late final GeneratedColumn<int> lastRound = GeneratedColumn<int>(
+    'last_round',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _drawModeMeta = const VerificationMeta(
+    'drawMode',
+  );
+  @override
+  late final GeneratedColumn<String> drawMode = GeneratedColumn<String>(
+    'draw_mode',
+    aliasedName,
+    false,
+    check: () => drawMode.isIn(drawModeValues),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _randomSeedMeta = const VerificationMeta(
+    'randomSeed',
+  );
+  @override
+  late final GeneratedColumn<int> randomSeed = GeneratedColumn<int>(
+    'random_seed',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _algorithmVersionMeta = const VerificationMeta(
+    'algorithmVersion',
+  );
+  @override
+  late final GeneratedColumn<String> algorithmVersion = GeneratedColumn<String>(
+    'algorithm_version',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _drawConfigMeta = const VerificationMeta(
+    'drawConfig',
+  );
+  @override
+  late final GeneratedColumn<String> drawConfig = GeneratedColumn<String>(
+    'draw_config',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _seedingSnapshotMeta = const VerificationMeta(
+    'seedingSnapshot',
+  );
+  @override
+  late final GeneratedColumn<String> seedingSnapshot = GeneratedColumn<String>(
+    'seeding_snapshot',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _fairnessSummaryMeta = const VerificationMeta(
+    'fairnessSummary',
+  );
+  @override
+  late final GeneratedColumn<String> fairnessSummary = GeneratedColumn<String>(
+    'fairness_summary',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _reasonMeta = const VerificationMeta('reason');
+  @override
+  late final GeneratedColumn<String> reason = GeneratedColumn<String>(
+    'reason',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdByMeta = const VerificationMeta(
+    'createdBy',
+  );
+  @override
+  late final GeneratedColumn<String> createdBy = GeneratedColumn<String>(
+    'created_by',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<String> createdAt = GeneratedColumn<String>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _finalizedByMeta = const VerificationMeta(
+    'finalizedBy',
+  );
+  @override
+  late final GeneratedColumn<String> finalizedBy = GeneratedColumn<String>(
+    'finalized_by',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _finalizedAtMeta = const VerificationMeta(
+    'finalizedAt',
+  );
+  @override
+  late final GeneratedColumn<String> finalizedAt = GeneratedColumn<String>(
+    'finalized_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    contestId,
+    revisionNumber,
+    previousRevisionId,
+    firstRound,
+    lastRound,
+    drawMode,
+    randomSeed,
+    algorithmVersion,
+    drawConfig,
+    seedingSnapshot,
+    fairnessSummary,
+    reason,
+    createdBy,
+    createdAt,
+    finalizedBy,
+    finalizedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'matrix_revisions';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<MatrixRevisionData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('contest_id')) {
+      context.handle(
+        _contestIdMeta,
+        contestId.isAcceptableOrUnknown(data['contest_id']!, _contestIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_contestIdMeta);
+    }
+    if (data.containsKey('revision_number')) {
+      context.handle(
+        _revisionNumberMeta,
+        revisionNumber.isAcceptableOrUnknown(
+          data['revision_number']!,
+          _revisionNumberMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_revisionNumberMeta);
+    }
+    if (data.containsKey('previous_revision_id')) {
+      context.handle(
+        _previousRevisionIdMeta,
+        previousRevisionId.isAcceptableOrUnknown(
+          data['previous_revision_id']!,
+          _previousRevisionIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('first_round')) {
+      context.handle(
+        _firstRoundMeta,
+        firstRound.isAcceptableOrUnknown(data['first_round']!, _firstRoundMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_firstRoundMeta);
+    }
+    if (data.containsKey('last_round')) {
+      context.handle(
+        _lastRoundMeta,
+        lastRound.isAcceptableOrUnknown(data['last_round']!, _lastRoundMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_lastRoundMeta);
+    }
+    if (data.containsKey('draw_mode')) {
+      context.handle(
+        _drawModeMeta,
+        drawMode.isAcceptableOrUnknown(data['draw_mode']!, _drawModeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_drawModeMeta);
+    }
+    if (data.containsKey('random_seed')) {
+      context.handle(
+        _randomSeedMeta,
+        randomSeed.isAcceptableOrUnknown(data['random_seed']!, _randomSeedMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_randomSeedMeta);
+    }
+    if (data.containsKey('algorithm_version')) {
+      context.handle(
+        _algorithmVersionMeta,
+        algorithmVersion.isAcceptableOrUnknown(
+          data['algorithm_version']!,
+          _algorithmVersionMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_algorithmVersionMeta);
+    }
+    if (data.containsKey('draw_config')) {
+      context.handle(
+        _drawConfigMeta,
+        drawConfig.isAcceptableOrUnknown(data['draw_config']!, _drawConfigMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_drawConfigMeta);
+    }
+    if (data.containsKey('seeding_snapshot')) {
+      context.handle(
+        _seedingSnapshotMeta,
+        seedingSnapshot.isAcceptableOrUnknown(
+          data['seeding_snapshot']!,
+          _seedingSnapshotMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_seedingSnapshotMeta);
+    }
+    if (data.containsKey('fairness_summary')) {
+      context.handle(
+        _fairnessSummaryMeta,
+        fairnessSummary.isAcceptableOrUnknown(
+          data['fairness_summary']!,
+          _fairnessSummaryMeta,
+        ),
+      );
+    }
+    if (data.containsKey('reason')) {
+      context.handle(
+        _reasonMeta,
+        reason.isAcceptableOrUnknown(data['reason']!, _reasonMeta),
+      );
+    }
+    if (data.containsKey('created_by')) {
+      context.handle(
+        _createdByMeta,
+        createdBy.isAcceptableOrUnknown(data['created_by']!, _createdByMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdByMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('finalized_by')) {
+      context.handle(
+        _finalizedByMeta,
+        finalizedBy.isAcceptableOrUnknown(
+          data['finalized_by']!,
+          _finalizedByMeta,
+        ),
+      );
+    }
+    if (data.containsKey('finalized_at')) {
+      context.handle(
+        _finalizedAtMeta,
+        finalizedAt.isAcceptableOrUnknown(
+          data['finalized_at']!,
+          _finalizedAtMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {contestId, revisionNumber},
+  ];
+  @override
+  MatrixRevisionData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return MatrixRevisionData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      contestId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}contest_id'],
+      )!,
+      revisionNumber: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}revision_number'],
+      )!,
+      previousRevisionId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}previous_revision_id'],
+      ),
+      firstRound: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}first_round'],
+      )!,
+      lastRound: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}last_round'],
+      )!,
+      drawMode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}draw_mode'],
+      )!,
+      randomSeed: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}random_seed'],
+      )!,
+      algorithmVersion: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}algorithm_version'],
+      )!,
+      drawConfig: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}draw_config'],
+      )!,
+      seedingSnapshot: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}seeding_snapshot'],
+      )!,
+      fairnessSummary: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}fairness_summary'],
+      ),
+      reason: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reason'],
+      ),
+      createdBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_by'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_at'],
+      )!,
+      finalizedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}finalized_by'],
+      ),
+      finalizedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}finalized_at'],
+      ),
+    );
+  }
+
+  @override
+  $MatrixRevisionsTable createAlias(String alias) {
+    return $MatrixRevisionsTable(attachedDatabase, alias);
+  }
+}
+
+class MatrixRevisionData extends DataClass
+    implements Insertable<MatrixRevisionData> {
+  final String id;
+  final String contestId;
+  final int revisionNumber;
+  final String? previousRevisionId;
+  final int firstRound;
+  final int lastRound;
+  final String drawMode;
+  final int randomSeed;
+  final String algorithmVersion;
+  final String drawConfig;
+  final String seedingSnapshot;
+  final String? fairnessSummary;
+  final String? reason;
+  final String createdBy;
+  final String createdAt;
+  final String? finalizedBy;
+  final String? finalizedAt;
+  const MatrixRevisionData({
+    required this.id,
+    required this.contestId,
+    required this.revisionNumber,
+    this.previousRevisionId,
+    required this.firstRound,
+    required this.lastRound,
+    required this.drawMode,
+    required this.randomSeed,
+    required this.algorithmVersion,
+    required this.drawConfig,
+    required this.seedingSnapshot,
+    this.fairnessSummary,
+    this.reason,
+    required this.createdBy,
+    required this.createdAt,
+    this.finalizedBy,
+    this.finalizedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['contest_id'] = Variable<String>(contestId);
+    map['revision_number'] = Variable<int>(revisionNumber);
+    if (!nullToAbsent || previousRevisionId != null) {
+      map['previous_revision_id'] = Variable<String>(previousRevisionId);
+    }
+    map['first_round'] = Variable<int>(firstRound);
+    map['last_round'] = Variable<int>(lastRound);
+    map['draw_mode'] = Variable<String>(drawMode);
+    map['random_seed'] = Variable<int>(randomSeed);
+    map['algorithm_version'] = Variable<String>(algorithmVersion);
+    map['draw_config'] = Variable<String>(drawConfig);
+    map['seeding_snapshot'] = Variable<String>(seedingSnapshot);
+    if (!nullToAbsent || fairnessSummary != null) {
+      map['fairness_summary'] = Variable<String>(fairnessSummary);
+    }
+    if (!nullToAbsent || reason != null) {
+      map['reason'] = Variable<String>(reason);
+    }
+    map['created_by'] = Variable<String>(createdBy);
+    map['created_at'] = Variable<String>(createdAt);
+    if (!nullToAbsent || finalizedBy != null) {
+      map['finalized_by'] = Variable<String>(finalizedBy);
+    }
+    if (!nullToAbsent || finalizedAt != null) {
+      map['finalized_at'] = Variable<String>(finalizedAt);
+    }
+    return map;
+  }
+
+  MatrixRevisionsCompanion toCompanion(bool nullToAbsent) {
+    return MatrixRevisionsCompanion(
+      id: Value(id),
+      contestId: Value(contestId),
+      revisionNumber: Value(revisionNumber),
+      previousRevisionId: previousRevisionId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(previousRevisionId),
+      firstRound: Value(firstRound),
+      lastRound: Value(lastRound),
+      drawMode: Value(drawMode),
+      randomSeed: Value(randomSeed),
+      algorithmVersion: Value(algorithmVersion),
+      drawConfig: Value(drawConfig),
+      seedingSnapshot: Value(seedingSnapshot),
+      fairnessSummary: fairnessSummary == null && nullToAbsent
+          ? const Value.absent()
+          : Value(fairnessSummary),
+      reason: reason == null && nullToAbsent
+          ? const Value.absent()
+          : Value(reason),
+      createdBy: Value(createdBy),
+      createdAt: Value(createdAt),
+      finalizedBy: finalizedBy == null && nullToAbsent
+          ? const Value.absent()
+          : Value(finalizedBy),
+      finalizedAt: finalizedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(finalizedAt),
+    );
+  }
+
+  factory MatrixRevisionData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return MatrixRevisionData(
+      id: serializer.fromJson<String>(json['id']),
+      contestId: serializer.fromJson<String>(json['contestId']),
+      revisionNumber: serializer.fromJson<int>(json['revisionNumber']),
+      previousRevisionId: serializer.fromJson<String?>(
+        json['previousRevisionId'],
+      ),
+      firstRound: serializer.fromJson<int>(json['firstRound']),
+      lastRound: serializer.fromJson<int>(json['lastRound']),
+      drawMode: serializer.fromJson<String>(json['drawMode']),
+      randomSeed: serializer.fromJson<int>(json['randomSeed']),
+      algorithmVersion: serializer.fromJson<String>(json['algorithmVersion']),
+      drawConfig: serializer.fromJson<String>(json['drawConfig']),
+      seedingSnapshot: serializer.fromJson<String>(json['seedingSnapshot']),
+      fairnessSummary: serializer.fromJson<String?>(json['fairnessSummary']),
+      reason: serializer.fromJson<String?>(json['reason']),
+      createdBy: serializer.fromJson<String>(json['createdBy']),
+      createdAt: serializer.fromJson<String>(json['createdAt']),
+      finalizedBy: serializer.fromJson<String?>(json['finalizedBy']),
+      finalizedAt: serializer.fromJson<String?>(json['finalizedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'contestId': serializer.toJson<String>(contestId),
+      'revisionNumber': serializer.toJson<int>(revisionNumber),
+      'previousRevisionId': serializer.toJson<String?>(previousRevisionId),
+      'firstRound': serializer.toJson<int>(firstRound),
+      'lastRound': serializer.toJson<int>(lastRound),
+      'drawMode': serializer.toJson<String>(drawMode),
+      'randomSeed': serializer.toJson<int>(randomSeed),
+      'algorithmVersion': serializer.toJson<String>(algorithmVersion),
+      'drawConfig': serializer.toJson<String>(drawConfig),
+      'seedingSnapshot': serializer.toJson<String>(seedingSnapshot),
+      'fairnessSummary': serializer.toJson<String?>(fairnessSummary),
+      'reason': serializer.toJson<String?>(reason),
+      'createdBy': serializer.toJson<String>(createdBy),
+      'createdAt': serializer.toJson<String>(createdAt),
+      'finalizedBy': serializer.toJson<String?>(finalizedBy),
+      'finalizedAt': serializer.toJson<String?>(finalizedAt),
+    };
+  }
+
+  MatrixRevisionData copyWith({
+    String? id,
+    String? contestId,
+    int? revisionNumber,
+    Value<String?> previousRevisionId = const Value.absent(),
+    int? firstRound,
+    int? lastRound,
+    String? drawMode,
+    int? randomSeed,
+    String? algorithmVersion,
+    String? drawConfig,
+    String? seedingSnapshot,
+    Value<String?> fairnessSummary = const Value.absent(),
+    Value<String?> reason = const Value.absent(),
+    String? createdBy,
+    String? createdAt,
+    Value<String?> finalizedBy = const Value.absent(),
+    Value<String?> finalizedAt = const Value.absent(),
+  }) => MatrixRevisionData(
+    id: id ?? this.id,
+    contestId: contestId ?? this.contestId,
+    revisionNumber: revisionNumber ?? this.revisionNumber,
+    previousRevisionId: previousRevisionId.present
+        ? previousRevisionId.value
+        : this.previousRevisionId,
+    firstRound: firstRound ?? this.firstRound,
+    lastRound: lastRound ?? this.lastRound,
+    drawMode: drawMode ?? this.drawMode,
+    randomSeed: randomSeed ?? this.randomSeed,
+    algorithmVersion: algorithmVersion ?? this.algorithmVersion,
+    drawConfig: drawConfig ?? this.drawConfig,
+    seedingSnapshot: seedingSnapshot ?? this.seedingSnapshot,
+    fairnessSummary: fairnessSummary.present
+        ? fairnessSummary.value
+        : this.fairnessSummary,
+    reason: reason.present ? reason.value : this.reason,
+    createdBy: createdBy ?? this.createdBy,
+    createdAt: createdAt ?? this.createdAt,
+    finalizedBy: finalizedBy.present ? finalizedBy.value : this.finalizedBy,
+    finalizedAt: finalizedAt.present ? finalizedAt.value : this.finalizedAt,
+  );
+  MatrixRevisionData copyWithCompanion(MatrixRevisionsCompanion data) {
+    return MatrixRevisionData(
+      id: data.id.present ? data.id.value : this.id,
+      contestId: data.contestId.present ? data.contestId.value : this.contestId,
+      revisionNumber: data.revisionNumber.present
+          ? data.revisionNumber.value
+          : this.revisionNumber,
+      previousRevisionId: data.previousRevisionId.present
+          ? data.previousRevisionId.value
+          : this.previousRevisionId,
+      firstRound: data.firstRound.present
+          ? data.firstRound.value
+          : this.firstRound,
+      lastRound: data.lastRound.present ? data.lastRound.value : this.lastRound,
+      drawMode: data.drawMode.present ? data.drawMode.value : this.drawMode,
+      randomSeed: data.randomSeed.present
+          ? data.randomSeed.value
+          : this.randomSeed,
+      algorithmVersion: data.algorithmVersion.present
+          ? data.algorithmVersion.value
+          : this.algorithmVersion,
+      drawConfig: data.drawConfig.present
+          ? data.drawConfig.value
+          : this.drawConfig,
+      seedingSnapshot: data.seedingSnapshot.present
+          ? data.seedingSnapshot.value
+          : this.seedingSnapshot,
+      fairnessSummary: data.fairnessSummary.present
+          ? data.fairnessSummary.value
+          : this.fairnessSummary,
+      reason: data.reason.present ? data.reason.value : this.reason,
+      createdBy: data.createdBy.present ? data.createdBy.value : this.createdBy,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      finalizedBy: data.finalizedBy.present
+          ? data.finalizedBy.value
+          : this.finalizedBy,
+      finalizedAt: data.finalizedAt.present
+          ? data.finalizedAt.value
+          : this.finalizedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MatrixRevisionData(')
+          ..write('id: $id, ')
+          ..write('contestId: $contestId, ')
+          ..write('revisionNumber: $revisionNumber, ')
+          ..write('previousRevisionId: $previousRevisionId, ')
+          ..write('firstRound: $firstRound, ')
+          ..write('lastRound: $lastRound, ')
+          ..write('drawMode: $drawMode, ')
+          ..write('randomSeed: $randomSeed, ')
+          ..write('algorithmVersion: $algorithmVersion, ')
+          ..write('drawConfig: $drawConfig, ')
+          ..write('seedingSnapshot: $seedingSnapshot, ')
+          ..write('fairnessSummary: $fairnessSummary, ')
+          ..write('reason: $reason, ')
+          ..write('createdBy: $createdBy, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('finalizedBy: $finalizedBy, ')
+          ..write('finalizedAt: $finalizedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    contestId,
+    revisionNumber,
+    previousRevisionId,
+    firstRound,
+    lastRound,
+    drawMode,
+    randomSeed,
+    algorithmVersion,
+    drawConfig,
+    seedingSnapshot,
+    fairnessSummary,
+    reason,
+    createdBy,
+    createdAt,
+    finalizedBy,
+    finalizedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is MatrixRevisionData &&
+          other.id == this.id &&
+          other.contestId == this.contestId &&
+          other.revisionNumber == this.revisionNumber &&
+          other.previousRevisionId == this.previousRevisionId &&
+          other.firstRound == this.firstRound &&
+          other.lastRound == this.lastRound &&
+          other.drawMode == this.drawMode &&
+          other.randomSeed == this.randomSeed &&
+          other.algorithmVersion == this.algorithmVersion &&
+          other.drawConfig == this.drawConfig &&
+          other.seedingSnapshot == this.seedingSnapshot &&
+          other.fairnessSummary == this.fairnessSummary &&
+          other.reason == this.reason &&
+          other.createdBy == this.createdBy &&
+          other.createdAt == this.createdAt &&
+          other.finalizedBy == this.finalizedBy &&
+          other.finalizedAt == this.finalizedAt);
+}
+
+class MatrixRevisionsCompanion extends UpdateCompanion<MatrixRevisionData> {
+  final Value<String> id;
+  final Value<String> contestId;
+  final Value<int> revisionNumber;
+  final Value<String?> previousRevisionId;
+  final Value<int> firstRound;
+  final Value<int> lastRound;
+  final Value<String> drawMode;
+  final Value<int> randomSeed;
+  final Value<String> algorithmVersion;
+  final Value<String> drawConfig;
+  final Value<String> seedingSnapshot;
+  final Value<String?> fairnessSummary;
+  final Value<String?> reason;
+  final Value<String> createdBy;
+  final Value<String> createdAt;
+  final Value<String?> finalizedBy;
+  final Value<String?> finalizedAt;
+  final Value<int> rowid;
+  const MatrixRevisionsCompanion({
+    this.id = const Value.absent(),
+    this.contestId = const Value.absent(),
+    this.revisionNumber = const Value.absent(),
+    this.previousRevisionId = const Value.absent(),
+    this.firstRound = const Value.absent(),
+    this.lastRound = const Value.absent(),
+    this.drawMode = const Value.absent(),
+    this.randomSeed = const Value.absent(),
+    this.algorithmVersion = const Value.absent(),
+    this.drawConfig = const Value.absent(),
+    this.seedingSnapshot = const Value.absent(),
+    this.fairnessSummary = const Value.absent(),
+    this.reason = const Value.absent(),
+    this.createdBy = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.finalizedBy = const Value.absent(),
+    this.finalizedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  MatrixRevisionsCompanion.insert({
+    required String id,
+    required String contestId,
+    required int revisionNumber,
+    this.previousRevisionId = const Value.absent(),
+    required int firstRound,
+    required int lastRound,
+    required String drawMode,
+    required int randomSeed,
+    required String algorithmVersion,
+    required String drawConfig,
+    required String seedingSnapshot,
+    this.fairnessSummary = const Value.absent(),
+    this.reason = const Value.absent(),
+    required String createdBy,
+    required String createdAt,
+    this.finalizedBy = const Value.absent(),
+    this.finalizedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       contestId = Value(contestId),
+       revisionNumber = Value(revisionNumber),
+       firstRound = Value(firstRound),
+       lastRound = Value(lastRound),
+       drawMode = Value(drawMode),
+       randomSeed = Value(randomSeed),
+       algorithmVersion = Value(algorithmVersion),
+       drawConfig = Value(drawConfig),
+       seedingSnapshot = Value(seedingSnapshot),
+       createdBy = Value(createdBy),
+       createdAt = Value(createdAt);
+  static Insertable<MatrixRevisionData> custom({
+    Expression<String>? id,
+    Expression<String>? contestId,
+    Expression<int>? revisionNumber,
+    Expression<String>? previousRevisionId,
+    Expression<int>? firstRound,
+    Expression<int>? lastRound,
+    Expression<String>? drawMode,
+    Expression<int>? randomSeed,
+    Expression<String>? algorithmVersion,
+    Expression<String>? drawConfig,
+    Expression<String>? seedingSnapshot,
+    Expression<String>? fairnessSummary,
+    Expression<String>? reason,
+    Expression<String>? createdBy,
+    Expression<String>? createdAt,
+    Expression<String>? finalizedBy,
+    Expression<String>? finalizedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (contestId != null) 'contest_id': contestId,
+      if (revisionNumber != null) 'revision_number': revisionNumber,
+      if (previousRevisionId != null)
+        'previous_revision_id': previousRevisionId,
+      if (firstRound != null) 'first_round': firstRound,
+      if (lastRound != null) 'last_round': lastRound,
+      if (drawMode != null) 'draw_mode': drawMode,
+      if (randomSeed != null) 'random_seed': randomSeed,
+      if (algorithmVersion != null) 'algorithm_version': algorithmVersion,
+      if (drawConfig != null) 'draw_config': drawConfig,
+      if (seedingSnapshot != null) 'seeding_snapshot': seedingSnapshot,
+      if (fairnessSummary != null) 'fairness_summary': fairnessSummary,
+      if (reason != null) 'reason': reason,
+      if (createdBy != null) 'created_by': createdBy,
+      if (createdAt != null) 'created_at': createdAt,
+      if (finalizedBy != null) 'finalized_by': finalizedBy,
+      if (finalizedAt != null) 'finalized_at': finalizedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  MatrixRevisionsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? contestId,
+    Value<int>? revisionNumber,
+    Value<String?>? previousRevisionId,
+    Value<int>? firstRound,
+    Value<int>? lastRound,
+    Value<String>? drawMode,
+    Value<int>? randomSeed,
+    Value<String>? algorithmVersion,
+    Value<String>? drawConfig,
+    Value<String>? seedingSnapshot,
+    Value<String?>? fairnessSummary,
+    Value<String?>? reason,
+    Value<String>? createdBy,
+    Value<String>? createdAt,
+    Value<String?>? finalizedBy,
+    Value<String?>? finalizedAt,
+    Value<int>? rowid,
+  }) {
+    return MatrixRevisionsCompanion(
+      id: id ?? this.id,
+      contestId: contestId ?? this.contestId,
+      revisionNumber: revisionNumber ?? this.revisionNumber,
+      previousRevisionId: previousRevisionId ?? this.previousRevisionId,
+      firstRound: firstRound ?? this.firstRound,
+      lastRound: lastRound ?? this.lastRound,
+      drawMode: drawMode ?? this.drawMode,
+      randomSeed: randomSeed ?? this.randomSeed,
+      algorithmVersion: algorithmVersion ?? this.algorithmVersion,
+      drawConfig: drawConfig ?? this.drawConfig,
+      seedingSnapshot: seedingSnapshot ?? this.seedingSnapshot,
+      fairnessSummary: fairnessSummary ?? this.fairnessSummary,
+      reason: reason ?? this.reason,
+      createdBy: createdBy ?? this.createdBy,
+      createdAt: createdAt ?? this.createdAt,
+      finalizedBy: finalizedBy ?? this.finalizedBy,
+      finalizedAt: finalizedAt ?? this.finalizedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (contestId.present) {
+      map['contest_id'] = Variable<String>(contestId.value);
+    }
+    if (revisionNumber.present) {
+      map['revision_number'] = Variable<int>(revisionNumber.value);
+    }
+    if (previousRevisionId.present) {
+      map['previous_revision_id'] = Variable<String>(previousRevisionId.value);
+    }
+    if (firstRound.present) {
+      map['first_round'] = Variable<int>(firstRound.value);
+    }
+    if (lastRound.present) {
+      map['last_round'] = Variable<int>(lastRound.value);
+    }
+    if (drawMode.present) {
+      map['draw_mode'] = Variable<String>(drawMode.value);
+    }
+    if (randomSeed.present) {
+      map['random_seed'] = Variable<int>(randomSeed.value);
+    }
+    if (algorithmVersion.present) {
+      map['algorithm_version'] = Variable<String>(algorithmVersion.value);
+    }
+    if (drawConfig.present) {
+      map['draw_config'] = Variable<String>(drawConfig.value);
+    }
+    if (seedingSnapshot.present) {
+      map['seeding_snapshot'] = Variable<String>(seedingSnapshot.value);
+    }
+    if (fairnessSummary.present) {
+      map['fairness_summary'] = Variable<String>(fairnessSummary.value);
+    }
+    if (reason.present) {
+      map['reason'] = Variable<String>(reason.value);
+    }
+    if (createdBy.present) {
+      map['created_by'] = Variable<String>(createdBy.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<String>(createdAt.value);
+    }
+    if (finalizedBy.present) {
+      map['finalized_by'] = Variable<String>(finalizedBy.value);
+    }
+    if (finalizedAt.present) {
+      map['finalized_at'] = Variable<String>(finalizedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MatrixRevisionsCompanion(')
+          ..write('id: $id, ')
+          ..write('contestId: $contestId, ')
+          ..write('revisionNumber: $revisionNumber, ')
+          ..write('previousRevisionId: $previousRevisionId, ')
+          ..write('firstRound: $firstRound, ')
+          ..write('lastRound: $lastRound, ')
+          ..write('drawMode: $drawMode, ')
+          ..write('randomSeed: $randomSeed, ')
+          ..write('algorithmVersion: $algorithmVersion, ')
+          ..write('drawConfig: $drawConfig, ')
+          ..write('seedingSnapshot: $seedingSnapshot, ')
+          ..write('fairnessSummary: $fairnessSummary, ')
+          ..write('reason: $reason, ')
+          ..write('createdBy: $createdBy, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('finalizedBy: $finalizedBy, ')
+          ..write('finalizedAt: $finalizedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $RoundsTable extends Rounds with TableInfo<$RoundsTable, RoundData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $RoundsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _contestIdMeta = const VerificationMeta(
+    'contestId',
+  );
+  @override
+  late final GeneratedColumn<String> contestId = GeneratedColumn<String>(
+    'contest_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES contests (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _matrixRevisionIdMeta = const VerificationMeta(
+    'matrixRevisionId',
+  );
+  @override
+  late final GeneratedColumn<String> matrixRevisionId = GeneratedColumn<String>(
+    'matrix_revision_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES matrix_revisions (id)',
+    ),
+  );
+  static const VerificationMeta _ordinalMeta = const VerificationMeta(
+    'ordinal',
+  );
+  @override
+  late final GeneratedColumn<int> ordinal = GeneratedColumn<int>(
+    'ordinal',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _groupCountMeta = const VerificationMeta(
+    'groupCount',
+  );
+  @override
+  late final GeneratedColumn<int> groupCount = GeneratedColumn<int>(
+    'group_count',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    check: () => status.isIn(roundStatusValues),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _supersededByRoundIdMeta =
+      const VerificationMeta('supersededByRoundId');
+  @override
+  late final GeneratedColumn<String> supersededByRoundId =
+      GeneratedColumn<String>(
+        'superseded_by_round_id',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES rounds (id)',
+        ),
+      );
+  static const VerificationMeta _revisionMeta = const VerificationMeta(
+    'revision',
+  );
+  @override
+  late final GeneratedColumn<int> revision = GeneratedColumn<int>(
+    'revision',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    contestId,
+    matrixRevisionId,
+    ordinal,
+    groupCount,
+    status,
+    supersededByRoundId,
+    revision,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'rounds';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<RoundData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('contest_id')) {
+      context.handle(
+        _contestIdMeta,
+        contestId.isAcceptableOrUnknown(data['contest_id']!, _contestIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_contestIdMeta);
+    }
+    if (data.containsKey('matrix_revision_id')) {
+      context.handle(
+        _matrixRevisionIdMeta,
+        matrixRevisionId.isAcceptableOrUnknown(
+          data['matrix_revision_id']!,
+          _matrixRevisionIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_matrixRevisionIdMeta);
+    }
+    if (data.containsKey('ordinal')) {
+      context.handle(
+        _ordinalMeta,
+        ordinal.isAcceptableOrUnknown(data['ordinal']!, _ordinalMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_ordinalMeta);
+    }
+    if (data.containsKey('group_count')) {
+      context.handle(
+        _groupCountMeta,
+        groupCount.isAcceptableOrUnknown(data['group_count']!, _groupCountMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_groupCountMeta);
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_statusMeta);
+    }
+    if (data.containsKey('superseded_by_round_id')) {
+      context.handle(
+        _supersededByRoundIdMeta,
+        supersededByRoundId.isAcceptableOrUnknown(
+          data['superseded_by_round_id']!,
+          _supersededByRoundIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('revision')) {
+      context.handle(
+        _revisionMeta,
+        revision.isAcceptableOrUnknown(data['revision']!, _revisionMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {matrixRevisionId, ordinal},
+  ];
+  @override
+  RoundData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return RoundData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      contestId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}contest_id'],
+      )!,
+      matrixRevisionId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}matrix_revision_id'],
+      )!,
+      ordinal: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}ordinal'],
+      )!,
+      groupCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}group_count'],
+      )!,
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      supersededByRoundId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}superseded_by_round_id'],
+      ),
+      revision: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}revision'],
+      )!,
+    );
+  }
+
+  @override
+  $RoundsTable createAlias(String alias) {
+    return $RoundsTable(attachedDatabase, alias);
+  }
+}
+
+class RoundData extends DataClass implements Insertable<RoundData> {
+  final String id;
+  final String contestId;
+  final String matrixRevisionId;
+  final int ordinal;
+  final int groupCount;
+  final String status;
+  final String? supersededByRoundId;
+  final int revision;
+  const RoundData({
+    required this.id,
+    required this.contestId,
+    required this.matrixRevisionId,
+    required this.ordinal,
+    required this.groupCount,
+    required this.status,
+    this.supersededByRoundId,
+    required this.revision,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['contest_id'] = Variable<String>(contestId);
+    map['matrix_revision_id'] = Variable<String>(matrixRevisionId);
+    map['ordinal'] = Variable<int>(ordinal);
+    map['group_count'] = Variable<int>(groupCount);
+    map['status'] = Variable<String>(status);
+    if (!nullToAbsent || supersededByRoundId != null) {
+      map['superseded_by_round_id'] = Variable<String>(supersededByRoundId);
+    }
+    map['revision'] = Variable<int>(revision);
+    return map;
+  }
+
+  RoundsCompanion toCompanion(bool nullToAbsent) {
+    return RoundsCompanion(
+      id: Value(id),
+      contestId: Value(contestId),
+      matrixRevisionId: Value(matrixRevisionId),
+      ordinal: Value(ordinal),
+      groupCount: Value(groupCount),
+      status: Value(status),
+      supersededByRoundId: supersededByRoundId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(supersededByRoundId),
+      revision: Value(revision),
+    );
+  }
+
+  factory RoundData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return RoundData(
+      id: serializer.fromJson<String>(json['id']),
+      contestId: serializer.fromJson<String>(json['contestId']),
+      matrixRevisionId: serializer.fromJson<String>(json['matrixRevisionId']),
+      ordinal: serializer.fromJson<int>(json['ordinal']),
+      groupCount: serializer.fromJson<int>(json['groupCount']),
+      status: serializer.fromJson<String>(json['status']),
+      supersededByRoundId: serializer.fromJson<String?>(
+        json['supersededByRoundId'],
+      ),
+      revision: serializer.fromJson<int>(json['revision']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'contestId': serializer.toJson<String>(contestId),
+      'matrixRevisionId': serializer.toJson<String>(matrixRevisionId),
+      'ordinal': serializer.toJson<int>(ordinal),
+      'groupCount': serializer.toJson<int>(groupCount),
+      'status': serializer.toJson<String>(status),
+      'supersededByRoundId': serializer.toJson<String?>(supersededByRoundId),
+      'revision': serializer.toJson<int>(revision),
+    };
+  }
+
+  RoundData copyWith({
+    String? id,
+    String? contestId,
+    String? matrixRevisionId,
+    int? ordinal,
+    int? groupCount,
+    String? status,
+    Value<String?> supersededByRoundId = const Value.absent(),
+    int? revision,
+  }) => RoundData(
+    id: id ?? this.id,
+    contestId: contestId ?? this.contestId,
+    matrixRevisionId: matrixRevisionId ?? this.matrixRevisionId,
+    ordinal: ordinal ?? this.ordinal,
+    groupCount: groupCount ?? this.groupCount,
+    status: status ?? this.status,
+    supersededByRoundId: supersededByRoundId.present
+        ? supersededByRoundId.value
+        : this.supersededByRoundId,
+    revision: revision ?? this.revision,
+  );
+  RoundData copyWithCompanion(RoundsCompanion data) {
+    return RoundData(
+      id: data.id.present ? data.id.value : this.id,
+      contestId: data.contestId.present ? data.contestId.value : this.contestId,
+      matrixRevisionId: data.matrixRevisionId.present
+          ? data.matrixRevisionId.value
+          : this.matrixRevisionId,
+      ordinal: data.ordinal.present ? data.ordinal.value : this.ordinal,
+      groupCount: data.groupCount.present
+          ? data.groupCount.value
+          : this.groupCount,
+      status: data.status.present ? data.status.value : this.status,
+      supersededByRoundId: data.supersededByRoundId.present
+          ? data.supersededByRoundId.value
+          : this.supersededByRoundId,
+      revision: data.revision.present ? data.revision.value : this.revision,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RoundData(')
+          ..write('id: $id, ')
+          ..write('contestId: $contestId, ')
+          ..write('matrixRevisionId: $matrixRevisionId, ')
+          ..write('ordinal: $ordinal, ')
+          ..write('groupCount: $groupCount, ')
+          ..write('status: $status, ')
+          ..write('supersededByRoundId: $supersededByRoundId, ')
+          ..write('revision: $revision')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    contestId,
+    matrixRevisionId,
+    ordinal,
+    groupCount,
+    status,
+    supersededByRoundId,
+    revision,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is RoundData &&
+          other.id == this.id &&
+          other.contestId == this.contestId &&
+          other.matrixRevisionId == this.matrixRevisionId &&
+          other.ordinal == this.ordinal &&
+          other.groupCount == this.groupCount &&
+          other.status == this.status &&
+          other.supersededByRoundId == this.supersededByRoundId &&
+          other.revision == this.revision);
+}
+
+class RoundsCompanion extends UpdateCompanion<RoundData> {
+  final Value<String> id;
+  final Value<String> contestId;
+  final Value<String> matrixRevisionId;
+  final Value<int> ordinal;
+  final Value<int> groupCount;
+  final Value<String> status;
+  final Value<String?> supersededByRoundId;
+  final Value<int> revision;
+  final Value<int> rowid;
+  const RoundsCompanion({
+    this.id = const Value.absent(),
+    this.contestId = const Value.absent(),
+    this.matrixRevisionId = const Value.absent(),
+    this.ordinal = const Value.absent(),
+    this.groupCount = const Value.absent(),
+    this.status = const Value.absent(),
+    this.supersededByRoundId = const Value.absent(),
+    this.revision = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  RoundsCompanion.insert({
+    required String id,
+    required String contestId,
+    required String matrixRevisionId,
+    required int ordinal,
+    required int groupCount,
+    required String status,
+    this.supersededByRoundId = const Value.absent(),
+    this.revision = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       contestId = Value(contestId),
+       matrixRevisionId = Value(matrixRevisionId),
+       ordinal = Value(ordinal),
+       groupCount = Value(groupCount),
+       status = Value(status);
+  static Insertable<RoundData> custom({
+    Expression<String>? id,
+    Expression<String>? contestId,
+    Expression<String>? matrixRevisionId,
+    Expression<int>? ordinal,
+    Expression<int>? groupCount,
+    Expression<String>? status,
+    Expression<String>? supersededByRoundId,
+    Expression<int>? revision,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (contestId != null) 'contest_id': contestId,
+      if (matrixRevisionId != null) 'matrix_revision_id': matrixRevisionId,
+      if (ordinal != null) 'ordinal': ordinal,
+      if (groupCount != null) 'group_count': groupCount,
+      if (status != null) 'status': status,
+      if (supersededByRoundId != null)
+        'superseded_by_round_id': supersededByRoundId,
+      if (revision != null) 'revision': revision,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  RoundsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? contestId,
+    Value<String>? matrixRevisionId,
+    Value<int>? ordinal,
+    Value<int>? groupCount,
+    Value<String>? status,
+    Value<String?>? supersededByRoundId,
+    Value<int>? revision,
+    Value<int>? rowid,
+  }) {
+    return RoundsCompanion(
+      id: id ?? this.id,
+      contestId: contestId ?? this.contestId,
+      matrixRevisionId: matrixRevisionId ?? this.matrixRevisionId,
+      ordinal: ordinal ?? this.ordinal,
+      groupCount: groupCount ?? this.groupCount,
+      status: status ?? this.status,
+      supersededByRoundId: supersededByRoundId ?? this.supersededByRoundId,
+      revision: revision ?? this.revision,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (contestId.present) {
+      map['contest_id'] = Variable<String>(contestId.value);
+    }
+    if (matrixRevisionId.present) {
+      map['matrix_revision_id'] = Variable<String>(matrixRevisionId.value);
+    }
+    if (ordinal.present) {
+      map['ordinal'] = Variable<int>(ordinal.value);
+    }
+    if (groupCount.present) {
+      map['group_count'] = Variable<int>(groupCount.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (supersededByRoundId.present) {
+      map['superseded_by_round_id'] = Variable<String>(
+        supersededByRoundId.value,
+      );
+    }
+    if (revision.present) {
+      map['revision'] = Variable<int>(revision.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RoundsCompanion(')
+          ..write('id: $id, ')
+          ..write('contestId: $contestId, ')
+          ..write('matrixRevisionId: $matrixRevisionId, ')
+          ..write('ordinal: $ordinal, ')
+          ..write('groupCount: $groupCount, ')
+          ..write('status: $status, ')
+          ..write('supersededByRoundId: $supersededByRoundId, ')
+          ..write('revision: $revision, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $RoundGroupsTable extends RoundGroups
+    with TableInfo<$RoundGroupsTable, RoundGroupData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $RoundGroupsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _contestIdMeta = const VerificationMeta(
+    'contestId',
+  );
+  @override
+  late final GeneratedColumn<String> contestId = GeneratedColumn<String>(
+    'contest_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES contests (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _roundIdMeta = const VerificationMeta(
+    'roundId',
+  );
+  @override
+  late final GeneratedColumn<String> roundId = GeneratedColumn<String>(
+    'round_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES rounds (id)',
+    ),
+  );
+  static const VerificationMeta _groupNumberMeta = const VerificationMeta(
+    'groupNumber',
+  );
+  @override
+  late final GeneratedColumn<int> groupNumber = GeneratedColumn<int>(
+    'group_number',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    check: () => status.isIn(groupStatusValues),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _lockedByMeta = const VerificationMeta(
+    'lockedBy',
+  );
+  @override
+  late final GeneratedColumn<String> lockedBy = GeneratedColumn<String>(
+    'locked_by',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _lockedAtMeta = const VerificationMeta(
+    'lockedAt',
+  );
+  @override
+  late final GeneratedColumn<String> lockedAt = GeneratedColumn<String>(
+    'locked_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _revisionMeta = const VerificationMeta(
+    'revision',
+  );
+  @override
+  late final GeneratedColumn<int> revision = GeneratedColumn<int>(
+    'revision',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    contestId,
+    roundId,
+    groupNumber,
+    status,
+    lockedBy,
+    lockedAt,
+    revision,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'round_groups';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<RoundGroupData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('contest_id')) {
+      context.handle(
+        _contestIdMeta,
+        contestId.isAcceptableOrUnknown(data['contest_id']!, _contestIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_contestIdMeta);
+    }
+    if (data.containsKey('round_id')) {
+      context.handle(
+        _roundIdMeta,
+        roundId.isAcceptableOrUnknown(data['round_id']!, _roundIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_roundIdMeta);
+    }
+    if (data.containsKey('group_number')) {
+      context.handle(
+        _groupNumberMeta,
+        groupNumber.isAcceptableOrUnknown(
+          data['group_number']!,
+          _groupNumberMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_groupNumberMeta);
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_statusMeta);
+    }
+    if (data.containsKey('locked_by')) {
+      context.handle(
+        _lockedByMeta,
+        lockedBy.isAcceptableOrUnknown(data['locked_by']!, _lockedByMeta),
+      );
+    }
+    if (data.containsKey('locked_at')) {
+      context.handle(
+        _lockedAtMeta,
+        lockedAt.isAcceptableOrUnknown(data['locked_at']!, _lockedAtMeta),
+      );
+    }
+    if (data.containsKey('revision')) {
+      context.handle(
+        _revisionMeta,
+        revision.isAcceptableOrUnknown(data['revision']!, _revisionMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {roundId, groupNumber},
+  ];
+  @override
+  RoundGroupData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return RoundGroupData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      contestId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}contest_id'],
+      )!,
+      roundId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}round_id'],
+      )!,
+      groupNumber: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}group_number'],
+      )!,
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      lockedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}locked_by'],
+      ),
+      lockedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}locked_at'],
+      ),
+      revision: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}revision'],
+      )!,
+    );
+  }
+
+  @override
+  $RoundGroupsTable createAlias(String alias) {
+    return $RoundGroupsTable(attachedDatabase, alias);
+  }
+}
+
+class RoundGroupData extends DataClass implements Insertable<RoundGroupData> {
+  final String id;
+  final String contestId;
+  final String roundId;
+  final int groupNumber;
+  final String status;
+  final String? lockedBy;
+  final String? lockedAt;
+  final int revision;
+  const RoundGroupData({
+    required this.id,
+    required this.contestId,
+    required this.roundId,
+    required this.groupNumber,
+    required this.status,
+    this.lockedBy,
+    this.lockedAt,
+    required this.revision,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['contest_id'] = Variable<String>(contestId);
+    map['round_id'] = Variable<String>(roundId);
+    map['group_number'] = Variable<int>(groupNumber);
+    map['status'] = Variable<String>(status);
+    if (!nullToAbsent || lockedBy != null) {
+      map['locked_by'] = Variable<String>(lockedBy);
+    }
+    if (!nullToAbsent || lockedAt != null) {
+      map['locked_at'] = Variable<String>(lockedAt);
+    }
+    map['revision'] = Variable<int>(revision);
+    return map;
+  }
+
+  RoundGroupsCompanion toCompanion(bool nullToAbsent) {
+    return RoundGroupsCompanion(
+      id: Value(id),
+      contestId: Value(contestId),
+      roundId: Value(roundId),
+      groupNumber: Value(groupNumber),
+      status: Value(status),
+      lockedBy: lockedBy == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lockedBy),
+      lockedAt: lockedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lockedAt),
+      revision: Value(revision),
+    );
+  }
+
+  factory RoundGroupData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return RoundGroupData(
+      id: serializer.fromJson<String>(json['id']),
+      contestId: serializer.fromJson<String>(json['contestId']),
+      roundId: serializer.fromJson<String>(json['roundId']),
+      groupNumber: serializer.fromJson<int>(json['groupNumber']),
+      status: serializer.fromJson<String>(json['status']),
+      lockedBy: serializer.fromJson<String?>(json['lockedBy']),
+      lockedAt: serializer.fromJson<String?>(json['lockedAt']),
+      revision: serializer.fromJson<int>(json['revision']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'contestId': serializer.toJson<String>(contestId),
+      'roundId': serializer.toJson<String>(roundId),
+      'groupNumber': serializer.toJson<int>(groupNumber),
+      'status': serializer.toJson<String>(status),
+      'lockedBy': serializer.toJson<String?>(lockedBy),
+      'lockedAt': serializer.toJson<String?>(lockedAt),
+      'revision': serializer.toJson<int>(revision),
+    };
+  }
+
+  RoundGroupData copyWith({
+    String? id,
+    String? contestId,
+    String? roundId,
+    int? groupNumber,
+    String? status,
+    Value<String?> lockedBy = const Value.absent(),
+    Value<String?> lockedAt = const Value.absent(),
+    int? revision,
+  }) => RoundGroupData(
+    id: id ?? this.id,
+    contestId: contestId ?? this.contestId,
+    roundId: roundId ?? this.roundId,
+    groupNumber: groupNumber ?? this.groupNumber,
+    status: status ?? this.status,
+    lockedBy: lockedBy.present ? lockedBy.value : this.lockedBy,
+    lockedAt: lockedAt.present ? lockedAt.value : this.lockedAt,
+    revision: revision ?? this.revision,
+  );
+  RoundGroupData copyWithCompanion(RoundGroupsCompanion data) {
+    return RoundGroupData(
+      id: data.id.present ? data.id.value : this.id,
+      contestId: data.contestId.present ? data.contestId.value : this.contestId,
+      roundId: data.roundId.present ? data.roundId.value : this.roundId,
+      groupNumber: data.groupNumber.present
+          ? data.groupNumber.value
+          : this.groupNumber,
+      status: data.status.present ? data.status.value : this.status,
+      lockedBy: data.lockedBy.present ? data.lockedBy.value : this.lockedBy,
+      lockedAt: data.lockedAt.present ? data.lockedAt.value : this.lockedAt,
+      revision: data.revision.present ? data.revision.value : this.revision,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RoundGroupData(')
+          ..write('id: $id, ')
+          ..write('contestId: $contestId, ')
+          ..write('roundId: $roundId, ')
+          ..write('groupNumber: $groupNumber, ')
+          ..write('status: $status, ')
+          ..write('lockedBy: $lockedBy, ')
+          ..write('lockedAt: $lockedAt, ')
+          ..write('revision: $revision')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    contestId,
+    roundId,
+    groupNumber,
+    status,
+    lockedBy,
+    lockedAt,
+    revision,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is RoundGroupData &&
+          other.id == this.id &&
+          other.contestId == this.contestId &&
+          other.roundId == this.roundId &&
+          other.groupNumber == this.groupNumber &&
+          other.status == this.status &&
+          other.lockedBy == this.lockedBy &&
+          other.lockedAt == this.lockedAt &&
+          other.revision == this.revision);
+}
+
+class RoundGroupsCompanion extends UpdateCompanion<RoundGroupData> {
+  final Value<String> id;
+  final Value<String> contestId;
+  final Value<String> roundId;
+  final Value<int> groupNumber;
+  final Value<String> status;
+  final Value<String?> lockedBy;
+  final Value<String?> lockedAt;
+  final Value<int> revision;
+  final Value<int> rowid;
+  const RoundGroupsCompanion({
+    this.id = const Value.absent(),
+    this.contestId = const Value.absent(),
+    this.roundId = const Value.absent(),
+    this.groupNumber = const Value.absent(),
+    this.status = const Value.absent(),
+    this.lockedBy = const Value.absent(),
+    this.lockedAt = const Value.absent(),
+    this.revision = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  RoundGroupsCompanion.insert({
+    required String id,
+    required String contestId,
+    required String roundId,
+    required int groupNumber,
+    required String status,
+    this.lockedBy = const Value.absent(),
+    this.lockedAt = const Value.absent(),
+    this.revision = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       contestId = Value(contestId),
+       roundId = Value(roundId),
+       groupNumber = Value(groupNumber),
+       status = Value(status);
+  static Insertable<RoundGroupData> custom({
+    Expression<String>? id,
+    Expression<String>? contestId,
+    Expression<String>? roundId,
+    Expression<int>? groupNumber,
+    Expression<String>? status,
+    Expression<String>? lockedBy,
+    Expression<String>? lockedAt,
+    Expression<int>? revision,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (contestId != null) 'contest_id': contestId,
+      if (roundId != null) 'round_id': roundId,
+      if (groupNumber != null) 'group_number': groupNumber,
+      if (status != null) 'status': status,
+      if (lockedBy != null) 'locked_by': lockedBy,
+      if (lockedAt != null) 'locked_at': lockedAt,
+      if (revision != null) 'revision': revision,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  RoundGroupsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? contestId,
+    Value<String>? roundId,
+    Value<int>? groupNumber,
+    Value<String>? status,
+    Value<String?>? lockedBy,
+    Value<String?>? lockedAt,
+    Value<int>? revision,
+    Value<int>? rowid,
+  }) {
+    return RoundGroupsCompanion(
+      id: id ?? this.id,
+      contestId: contestId ?? this.contestId,
+      roundId: roundId ?? this.roundId,
+      groupNumber: groupNumber ?? this.groupNumber,
+      status: status ?? this.status,
+      lockedBy: lockedBy ?? this.lockedBy,
+      lockedAt: lockedAt ?? this.lockedAt,
+      revision: revision ?? this.revision,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (contestId.present) {
+      map['contest_id'] = Variable<String>(contestId.value);
+    }
+    if (roundId.present) {
+      map['round_id'] = Variable<String>(roundId.value);
+    }
+    if (groupNumber.present) {
+      map['group_number'] = Variable<int>(groupNumber.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (lockedBy.present) {
+      map['locked_by'] = Variable<String>(lockedBy.value);
+    }
+    if (lockedAt.present) {
+      map['locked_at'] = Variable<String>(lockedAt.value);
+    }
+    if (revision.present) {
+      map['revision'] = Variable<int>(revision.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RoundGroupsCompanion(')
+          ..write('id: $id, ')
+          ..write('contestId: $contestId, ')
+          ..write('roundId: $roundId, ')
+          ..write('groupNumber: $groupNumber, ')
+          ..write('status: $status, ')
+          ..write('lockedBy: $lockedBy, ')
+          ..write('lockedAt: $lockedAt, ')
+          ..write('revision: $revision, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ReFlightsTable extends ReFlights
+    with TableInfo<$ReFlightsTable, ReFlightData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ReFlightsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _contestIdMeta = const VerificationMeta(
+    'contestId',
+  );
+  @override
+  late final GeneratedColumn<String> contestId = GeneratedColumn<String>(
+    'contest_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES contests (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _creditedRoundIdMeta = const VerificationMeta(
+    'creditedRoundId',
+  );
+  @override
+  late final GeneratedColumn<String> creditedRoundId = GeneratedColumn<String>(
+    'credited_round_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES rounds (id)',
+    ),
+  );
+  static const VerificationMeta _sourceRoundIdMeta = const VerificationMeta(
+    'sourceRoundId',
+  );
+  @override
+  late final GeneratedColumn<String> sourceRoundId = GeneratedColumn<String>(
+    'source_round_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES rounds (id)',
+    ),
+  );
+  static const VerificationMeta _sourceGroupMeta = const VerificationMeta(
+    'sourceGroup',
+  );
+  @override
+  late final GeneratedColumn<int> sourceGroup = GeneratedColumn<int>(
+    'source_group',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _typeMeta = const VerificationMeta('type');
+  @override
+  late final GeneratedColumn<String> type = GeneratedColumn<String>(
+    'type',
+    aliasedName,
+    false,
+    check: () => type.isIn(reFlightTypeValues),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sequenceMeta = const VerificationMeta(
+    'sequence',
+  );
+  @override
+  late final GeneratedColumn<int> sequence = GeneratedColumn<int>(
+    'sequence',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _previousReflightIdMeta =
+      const VerificationMeta('previousReflightId');
+  @override
+  late final GeneratedColumn<String> previousReflightId =
+      GeneratedColumn<String>(
+        'previous_reflight_id',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES re_flights (id)',
+        ),
+      );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    check: () => status.isIn(reFlightStatusValues),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _reasonMeta = const VerificationMeta('reason');
+  @override
+  late final GeneratedColumn<String> reason = GeneratedColumn<String>(
+    'reason',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _scheduledRoundIdMeta = const VerificationMeta(
+    'scheduledRoundId',
+  );
+  @override
+  late final GeneratedColumn<String> scheduledRoundId = GeneratedColumn<String>(
+    'scheduled_round_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES rounds (id)',
+    ),
+  );
+  static const VerificationMeta _flownGroupMeta = const VerificationMeta(
+    'flownGroup',
+  );
+  @override
+  late final GeneratedColumn<int> flownGroup = GeneratedColumn<int>(
+    'flown_group',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deviationAcknowledgedMeta =
+      const VerificationMeta('deviationAcknowledged');
+  @override
+  late final GeneratedColumn<bool> deviationAcknowledged =
+      GeneratedColumn<bool>(
+        'deviation_acknowledged',
+        aliasedName,
+        false,
+        type: DriftSqlType.bool,
+        requiredDuringInsert: true,
+        defaultConstraints: GeneratedColumn.constraintsDependsOnDialect({
+          SqlDialect.sqlite: 'CHECK ("deviation_acknowledged" IN (0, 1))',
+          SqlDialect.postgres: '',
+        }),
+      );
+  static const VerificationMeta _requestedGroupSizeMeta =
+      const VerificationMeta('requestedGroupSize');
+  @override
+  late final GeneratedColumn<int> requestedGroupSize = GeneratedColumn<int>(
+    'requested_group_size',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _achievableMaxSizeMeta = const VerificationMeta(
+    'achievableMaxSize',
+  );
+  @override
+  late final GeneratedColumn<int> achievableMaxSize = GeneratedColumn<int>(
+    'achievable_max_size',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _sizeExceptionConfirmedMeta =
+      const VerificationMeta('sizeExceptionConfirmed');
+  @override
+  late final GeneratedColumn<bool> sizeExceptionConfirmed =
+      GeneratedColumn<bool>(
+        'size_exception_confirmed',
+        aliasedName,
+        false,
+        type: DriftSqlType.bool,
+        requiredDuringInsert: true,
+        defaultConstraints: GeneratedColumn.constraintsDependsOnDialect({
+          SqlDialect.sqlite: 'CHECK ("size_exception_confirmed" IN (0, 1))',
+          SqlDialect.postgres: '',
+        }),
+      );
+  static const VerificationMeta _randomSeedMeta = const VerificationMeta(
+    'randomSeed',
+  );
+  @override
+  late final GeneratedColumn<int> randomSeed = GeneratedColumn<int>(
+    'random_seed',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _algorithmVersionMeta = const VerificationMeta(
+    'algorithmVersion',
+  );
+  @override
+  late final GeneratedColumn<String> algorithmVersion = GeneratedColumn<String>(
+    'algorithm_version',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _configRevisionIdMeta = const VerificationMeta(
+    'configRevisionId',
+  );
+  @override
+  late final GeneratedColumn<String> configRevisionId = GeneratedColumn<String>(
+    'config_revision_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES contest_configuration_revisions (id)',
+    ),
+  );
+  static const VerificationMeta _createdByMeta = const VerificationMeta(
+    'createdBy',
+  );
+  @override
+  late final GeneratedColumn<String> createdBy = GeneratedColumn<String>(
+    'created_by',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<String> createdAt = GeneratedColumn<String>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _groupFinalizedByMeta = const VerificationMeta(
+    'groupFinalizedBy',
+  );
+  @override
+  late final GeneratedColumn<String> groupFinalizedBy = GeneratedColumn<String>(
+    'group_finalized_by',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _groupFinalizedAtMeta = const VerificationMeta(
+    'groupFinalizedAt',
+  );
+  @override
+  late final GeneratedColumn<String> groupFinalizedAt = GeneratedColumn<String>(
+    'group_finalized_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _finalizedByMeta = const VerificationMeta(
+    'finalizedBy',
+  );
+  @override
+  late final GeneratedColumn<String> finalizedBy = GeneratedColumn<String>(
+    'finalized_by',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _finalizedAtMeta = const VerificationMeta(
+    'finalizedAt',
+  );
+  @override
+  late final GeneratedColumn<String> finalizedAt = GeneratedColumn<String>(
+    'finalized_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _cancelledByMeta = const VerificationMeta(
+    'cancelledBy',
+  );
+  @override
+  late final GeneratedColumn<String> cancelledBy = GeneratedColumn<String>(
+    'cancelled_by',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _cancelledAtMeta = const VerificationMeta(
+    'cancelledAt',
+  );
+  @override
+  late final GeneratedColumn<String> cancelledAt = GeneratedColumn<String>(
+    'cancelled_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _cancelReasonMeta = const VerificationMeta(
+    'cancelReason',
+  );
+  @override
+  late final GeneratedColumn<String> cancelReason = GeneratedColumn<String>(
+    'cancel_reason',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _revisionMeta = const VerificationMeta(
+    'revision',
+  );
+  @override
+  late final GeneratedColumn<int> revision = GeneratedColumn<int>(
+    'revision',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    contestId,
+    creditedRoundId,
+    sourceRoundId,
+    sourceGroup,
+    type,
+    sequence,
+    previousReflightId,
+    status,
+    reason,
+    scheduledRoundId,
+    flownGroup,
+    deviationAcknowledged,
+    requestedGroupSize,
+    achievableMaxSize,
+    sizeExceptionConfirmed,
+    randomSeed,
+    algorithmVersion,
+    configRevisionId,
+    createdBy,
+    createdAt,
+    groupFinalizedBy,
+    groupFinalizedAt,
+    finalizedBy,
+    finalizedAt,
+    cancelledBy,
+    cancelledAt,
+    cancelReason,
+    revision,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 're_flights';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ReFlightData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('contest_id')) {
+      context.handle(
+        _contestIdMeta,
+        contestId.isAcceptableOrUnknown(data['contest_id']!, _contestIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_contestIdMeta);
+    }
+    if (data.containsKey('credited_round_id')) {
+      context.handle(
+        _creditedRoundIdMeta,
+        creditedRoundId.isAcceptableOrUnknown(
+          data['credited_round_id']!,
+          _creditedRoundIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_creditedRoundIdMeta);
+    }
+    if (data.containsKey('source_round_id')) {
+      context.handle(
+        _sourceRoundIdMeta,
+        sourceRoundId.isAcceptableOrUnknown(
+          data['source_round_id']!,
+          _sourceRoundIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_sourceRoundIdMeta);
+    }
+    if (data.containsKey('source_group')) {
+      context.handle(
+        _sourceGroupMeta,
+        sourceGroup.isAcceptableOrUnknown(
+          data['source_group']!,
+          _sourceGroupMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_sourceGroupMeta);
+    }
+    if (data.containsKey('type')) {
+      context.handle(
+        _typeMeta,
+        type.isAcceptableOrUnknown(data['type']!, _typeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_typeMeta);
+    }
+    if (data.containsKey('sequence')) {
+      context.handle(
+        _sequenceMeta,
+        sequence.isAcceptableOrUnknown(data['sequence']!, _sequenceMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_sequenceMeta);
+    }
+    if (data.containsKey('previous_reflight_id')) {
+      context.handle(
+        _previousReflightIdMeta,
+        previousReflightId.isAcceptableOrUnknown(
+          data['previous_reflight_id']!,
+          _previousReflightIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_statusMeta);
+    }
+    if (data.containsKey('reason')) {
+      context.handle(
+        _reasonMeta,
+        reason.isAcceptableOrUnknown(data['reason']!, _reasonMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_reasonMeta);
+    }
+    if (data.containsKey('scheduled_round_id')) {
+      context.handle(
+        _scheduledRoundIdMeta,
+        scheduledRoundId.isAcceptableOrUnknown(
+          data['scheduled_round_id']!,
+          _scheduledRoundIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_scheduledRoundIdMeta);
+    }
+    if (data.containsKey('flown_group')) {
+      context.handle(
+        _flownGroupMeta,
+        flownGroup.isAcceptableOrUnknown(data['flown_group']!, _flownGroupMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_flownGroupMeta);
+    }
+    if (data.containsKey('deviation_acknowledged')) {
+      context.handle(
+        _deviationAcknowledgedMeta,
+        deviationAcknowledged.isAcceptableOrUnknown(
+          data['deviation_acknowledged']!,
+          _deviationAcknowledgedMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_deviationAcknowledgedMeta);
+    }
+    if (data.containsKey('requested_group_size')) {
+      context.handle(
+        _requestedGroupSizeMeta,
+        requestedGroupSize.isAcceptableOrUnknown(
+          data['requested_group_size']!,
+          _requestedGroupSizeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('achievable_max_size')) {
+      context.handle(
+        _achievableMaxSizeMeta,
+        achievableMaxSize.isAcceptableOrUnknown(
+          data['achievable_max_size']!,
+          _achievableMaxSizeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('size_exception_confirmed')) {
+      context.handle(
+        _sizeExceptionConfirmedMeta,
+        sizeExceptionConfirmed.isAcceptableOrUnknown(
+          data['size_exception_confirmed']!,
+          _sizeExceptionConfirmedMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_sizeExceptionConfirmedMeta);
+    }
+    if (data.containsKey('random_seed')) {
+      context.handle(
+        _randomSeedMeta,
+        randomSeed.isAcceptableOrUnknown(data['random_seed']!, _randomSeedMeta),
+      );
+    }
+    if (data.containsKey('algorithm_version')) {
+      context.handle(
+        _algorithmVersionMeta,
+        algorithmVersion.isAcceptableOrUnknown(
+          data['algorithm_version']!,
+          _algorithmVersionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('config_revision_id')) {
+      context.handle(
+        _configRevisionIdMeta,
+        configRevisionId.isAcceptableOrUnknown(
+          data['config_revision_id']!,
+          _configRevisionIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_configRevisionIdMeta);
+    }
+    if (data.containsKey('created_by')) {
+      context.handle(
+        _createdByMeta,
+        createdBy.isAcceptableOrUnknown(data['created_by']!, _createdByMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdByMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('group_finalized_by')) {
+      context.handle(
+        _groupFinalizedByMeta,
+        groupFinalizedBy.isAcceptableOrUnknown(
+          data['group_finalized_by']!,
+          _groupFinalizedByMeta,
+        ),
+      );
+    }
+    if (data.containsKey('group_finalized_at')) {
+      context.handle(
+        _groupFinalizedAtMeta,
+        groupFinalizedAt.isAcceptableOrUnknown(
+          data['group_finalized_at']!,
+          _groupFinalizedAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('finalized_by')) {
+      context.handle(
+        _finalizedByMeta,
+        finalizedBy.isAcceptableOrUnknown(
+          data['finalized_by']!,
+          _finalizedByMeta,
+        ),
+      );
+    }
+    if (data.containsKey('finalized_at')) {
+      context.handle(
+        _finalizedAtMeta,
+        finalizedAt.isAcceptableOrUnknown(
+          data['finalized_at']!,
+          _finalizedAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('cancelled_by')) {
+      context.handle(
+        _cancelledByMeta,
+        cancelledBy.isAcceptableOrUnknown(
+          data['cancelled_by']!,
+          _cancelledByMeta,
+        ),
+      );
+    }
+    if (data.containsKey('cancelled_at')) {
+      context.handle(
+        _cancelledAtMeta,
+        cancelledAt.isAcceptableOrUnknown(
+          data['cancelled_at']!,
+          _cancelledAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('cancel_reason')) {
+      context.handle(
+        _cancelReasonMeta,
+        cancelReason.isAcceptableOrUnknown(
+          data['cancel_reason']!,
+          _cancelReasonMeta,
+        ),
+      );
+    }
+    if (data.containsKey('revision')) {
+      context.handle(
+        _revisionMeta,
+        revision.isAcceptableOrUnknown(data['revision']!, _revisionMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {sourceRoundId, sourceGroup, sequence},
+  ];
+  @override
+  ReFlightData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ReFlightData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      contestId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}contest_id'],
+      )!,
+      creditedRoundId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}credited_round_id'],
+      )!,
+      sourceRoundId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source_round_id'],
+      )!,
+      sourceGroup: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}source_group'],
+      )!,
+      type: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}type'],
+      )!,
+      sequence: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sequence'],
+      )!,
+      previousReflightId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}previous_reflight_id'],
+      ),
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      reason: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reason'],
+      )!,
+      scheduledRoundId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}scheduled_round_id'],
+      )!,
+      flownGroup: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}flown_group'],
+      )!,
+      deviationAcknowledged: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}deviation_acknowledged'],
+      )!,
+      requestedGroupSize: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}requested_group_size'],
+      ),
+      achievableMaxSize: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}achievable_max_size'],
+      ),
+      sizeExceptionConfirmed: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}size_exception_confirmed'],
+      )!,
+      randomSeed: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}random_seed'],
+      ),
+      algorithmVersion: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}algorithm_version'],
+      ),
+      configRevisionId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}config_revision_id'],
+      )!,
+      createdBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_by'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_at'],
+      )!,
+      groupFinalizedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}group_finalized_by'],
+      ),
+      groupFinalizedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}group_finalized_at'],
+      ),
+      finalizedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}finalized_by'],
+      ),
+      finalizedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}finalized_at'],
+      ),
+      cancelledBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}cancelled_by'],
+      ),
+      cancelledAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}cancelled_at'],
+      ),
+      cancelReason: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}cancel_reason'],
+      ),
+      revision: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}revision'],
+      )!,
+    );
+  }
+
+  @override
+  $ReFlightsTable createAlias(String alias) {
+    return $ReFlightsTable(attachedDatabase, alias);
+  }
+}
+
+class ReFlightData extends DataClass implements Insertable<ReFlightData> {
+  final String id;
+  final String contestId;
+  final String creditedRoundId;
+  final String sourceRoundId;
+  final int sourceGroup;
+  final String type;
+  final int sequence;
+  final String? previousReflightId;
+  final String status;
+  final String reason;
+  final String scheduledRoundId;
+  final int flownGroup;
+  final bool deviationAcknowledged;
+  final int? requestedGroupSize;
+  final int? achievableMaxSize;
+  final bool sizeExceptionConfirmed;
+  final int? randomSeed;
+  final String? algorithmVersion;
+  final String configRevisionId;
+  final String createdBy;
+  final String createdAt;
+  final String? groupFinalizedBy;
+  final String? groupFinalizedAt;
+  final String? finalizedBy;
+  final String? finalizedAt;
+  final String? cancelledBy;
+  final String? cancelledAt;
+  final String? cancelReason;
+  final int revision;
+  const ReFlightData({
+    required this.id,
+    required this.contestId,
+    required this.creditedRoundId,
+    required this.sourceRoundId,
+    required this.sourceGroup,
+    required this.type,
+    required this.sequence,
+    this.previousReflightId,
+    required this.status,
+    required this.reason,
+    required this.scheduledRoundId,
+    required this.flownGroup,
+    required this.deviationAcknowledged,
+    this.requestedGroupSize,
+    this.achievableMaxSize,
+    required this.sizeExceptionConfirmed,
+    this.randomSeed,
+    this.algorithmVersion,
+    required this.configRevisionId,
+    required this.createdBy,
+    required this.createdAt,
+    this.groupFinalizedBy,
+    this.groupFinalizedAt,
+    this.finalizedBy,
+    this.finalizedAt,
+    this.cancelledBy,
+    this.cancelledAt,
+    this.cancelReason,
+    required this.revision,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['contest_id'] = Variable<String>(contestId);
+    map['credited_round_id'] = Variable<String>(creditedRoundId);
+    map['source_round_id'] = Variable<String>(sourceRoundId);
+    map['source_group'] = Variable<int>(sourceGroup);
+    map['type'] = Variable<String>(type);
+    map['sequence'] = Variable<int>(sequence);
+    if (!nullToAbsent || previousReflightId != null) {
+      map['previous_reflight_id'] = Variable<String>(previousReflightId);
+    }
+    map['status'] = Variable<String>(status);
+    map['reason'] = Variable<String>(reason);
+    map['scheduled_round_id'] = Variable<String>(scheduledRoundId);
+    map['flown_group'] = Variable<int>(flownGroup);
+    map['deviation_acknowledged'] = Variable<bool>(deviationAcknowledged);
+    if (!nullToAbsent || requestedGroupSize != null) {
+      map['requested_group_size'] = Variable<int>(requestedGroupSize);
+    }
+    if (!nullToAbsent || achievableMaxSize != null) {
+      map['achievable_max_size'] = Variable<int>(achievableMaxSize);
+    }
+    map['size_exception_confirmed'] = Variable<bool>(sizeExceptionConfirmed);
+    if (!nullToAbsent || randomSeed != null) {
+      map['random_seed'] = Variable<int>(randomSeed);
+    }
+    if (!nullToAbsent || algorithmVersion != null) {
+      map['algorithm_version'] = Variable<String>(algorithmVersion);
+    }
+    map['config_revision_id'] = Variable<String>(configRevisionId);
+    map['created_by'] = Variable<String>(createdBy);
+    map['created_at'] = Variable<String>(createdAt);
+    if (!nullToAbsent || groupFinalizedBy != null) {
+      map['group_finalized_by'] = Variable<String>(groupFinalizedBy);
+    }
+    if (!nullToAbsent || groupFinalizedAt != null) {
+      map['group_finalized_at'] = Variable<String>(groupFinalizedAt);
+    }
+    if (!nullToAbsent || finalizedBy != null) {
+      map['finalized_by'] = Variable<String>(finalizedBy);
+    }
+    if (!nullToAbsent || finalizedAt != null) {
+      map['finalized_at'] = Variable<String>(finalizedAt);
+    }
+    if (!nullToAbsent || cancelledBy != null) {
+      map['cancelled_by'] = Variable<String>(cancelledBy);
+    }
+    if (!nullToAbsent || cancelledAt != null) {
+      map['cancelled_at'] = Variable<String>(cancelledAt);
+    }
+    if (!nullToAbsent || cancelReason != null) {
+      map['cancel_reason'] = Variable<String>(cancelReason);
+    }
+    map['revision'] = Variable<int>(revision);
+    return map;
+  }
+
+  ReFlightsCompanion toCompanion(bool nullToAbsent) {
+    return ReFlightsCompanion(
+      id: Value(id),
+      contestId: Value(contestId),
+      creditedRoundId: Value(creditedRoundId),
+      sourceRoundId: Value(sourceRoundId),
+      sourceGroup: Value(sourceGroup),
+      type: Value(type),
+      sequence: Value(sequence),
+      previousReflightId: previousReflightId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(previousReflightId),
+      status: Value(status),
+      reason: Value(reason),
+      scheduledRoundId: Value(scheduledRoundId),
+      flownGroup: Value(flownGroup),
+      deviationAcknowledged: Value(deviationAcknowledged),
+      requestedGroupSize: requestedGroupSize == null && nullToAbsent
+          ? const Value.absent()
+          : Value(requestedGroupSize),
+      achievableMaxSize: achievableMaxSize == null && nullToAbsent
+          ? const Value.absent()
+          : Value(achievableMaxSize),
+      sizeExceptionConfirmed: Value(sizeExceptionConfirmed),
+      randomSeed: randomSeed == null && nullToAbsent
+          ? const Value.absent()
+          : Value(randomSeed),
+      algorithmVersion: algorithmVersion == null && nullToAbsent
+          ? const Value.absent()
+          : Value(algorithmVersion),
+      configRevisionId: Value(configRevisionId),
+      createdBy: Value(createdBy),
+      createdAt: Value(createdAt),
+      groupFinalizedBy: groupFinalizedBy == null && nullToAbsent
+          ? const Value.absent()
+          : Value(groupFinalizedBy),
+      groupFinalizedAt: groupFinalizedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(groupFinalizedAt),
+      finalizedBy: finalizedBy == null && nullToAbsent
+          ? const Value.absent()
+          : Value(finalizedBy),
+      finalizedAt: finalizedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(finalizedAt),
+      cancelledBy: cancelledBy == null && nullToAbsent
+          ? const Value.absent()
+          : Value(cancelledBy),
+      cancelledAt: cancelledAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(cancelledAt),
+      cancelReason: cancelReason == null && nullToAbsent
+          ? const Value.absent()
+          : Value(cancelReason),
+      revision: Value(revision),
+    );
+  }
+
+  factory ReFlightData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ReFlightData(
+      id: serializer.fromJson<String>(json['id']),
+      contestId: serializer.fromJson<String>(json['contestId']),
+      creditedRoundId: serializer.fromJson<String>(json['creditedRoundId']),
+      sourceRoundId: serializer.fromJson<String>(json['sourceRoundId']),
+      sourceGroup: serializer.fromJson<int>(json['sourceGroup']),
+      type: serializer.fromJson<String>(json['type']),
+      sequence: serializer.fromJson<int>(json['sequence']),
+      previousReflightId: serializer.fromJson<String?>(
+        json['previousReflightId'],
+      ),
+      status: serializer.fromJson<String>(json['status']),
+      reason: serializer.fromJson<String>(json['reason']),
+      scheduledRoundId: serializer.fromJson<String>(json['scheduledRoundId']),
+      flownGroup: serializer.fromJson<int>(json['flownGroup']),
+      deviationAcknowledged: serializer.fromJson<bool>(
+        json['deviationAcknowledged'],
+      ),
+      requestedGroupSize: serializer.fromJson<int?>(json['requestedGroupSize']),
+      achievableMaxSize: serializer.fromJson<int?>(json['achievableMaxSize']),
+      sizeExceptionConfirmed: serializer.fromJson<bool>(
+        json['sizeExceptionConfirmed'],
+      ),
+      randomSeed: serializer.fromJson<int?>(json['randomSeed']),
+      algorithmVersion: serializer.fromJson<String?>(json['algorithmVersion']),
+      configRevisionId: serializer.fromJson<String>(json['configRevisionId']),
+      createdBy: serializer.fromJson<String>(json['createdBy']),
+      createdAt: serializer.fromJson<String>(json['createdAt']),
+      groupFinalizedBy: serializer.fromJson<String?>(json['groupFinalizedBy']),
+      groupFinalizedAt: serializer.fromJson<String?>(json['groupFinalizedAt']),
+      finalizedBy: serializer.fromJson<String?>(json['finalizedBy']),
+      finalizedAt: serializer.fromJson<String?>(json['finalizedAt']),
+      cancelledBy: serializer.fromJson<String?>(json['cancelledBy']),
+      cancelledAt: serializer.fromJson<String?>(json['cancelledAt']),
+      cancelReason: serializer.fromJson<String?>(json['cancelReason']),
+      revision: serializer.fromJson<int>(json['revision']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'contestId': serializer.toJson<String>(contestId),
+      'creditedRoundId': serializer.toJson<String>(creditedRoundId),
+      'sourceRoundId': serializer.toJson<String>(sourceRoundId),
+      'sourceGroup': serializer.toJson<int>(sourceGroup),
+      'type': serializer.toJson<String>(type),
+      'sequence': serializer.toJson<int>(sequence),
+      'previousReflightId': serializer.toJson<String?>(previousReflightId),
+      'status': serializer.toJson<String>(status),
+      'reason': serializer.toJson<String>(reason),
+      'scheduledRoundId': serializer.toJson<String>(scheduledRoundId),
+      'flownGroup': serializer.toJson<int>(flownGroup),
+      'deviationAcknowledged': serializer.toJson<bool>(deviationAcknowledged),
+      'requestedGroupSize': serializer.toJson<int?>(requestedGroupSize),
+      'achievableMaxSize': serializer.toJson<int?>(achievableMaxSize),
+      'sizeExceptionConfirmed': serializer.toJson<bool>(sizeExceptionConfirmed),
+      'randomSeed': serializer.toJson<int?>(randomSeed),
+      'algorithmVersion': serializer.toJson<String?>(algorithmVersion),
+      'configRevisionId': serializer.toJson<String>(configRevisionId),
+      'createdBy': serializer.toJson<String>(createdBy),
+      'createdAt': serializer.toJson<String>(createdAt),
+      'groupFinalizedBy': serializer.toJson<String?>(groupFinalizedBy),
+      'groupFinalizedAt': serializer.toJson<String?>(groupFinalizedAt),
+      'finalizedBy': serializer.toJson<String?>(finalizedBy),
+      'finalizedAt': serializer.toJson<String?>(finalizedAt),
+      'cancelledBy': serializer.toJson<String?>(cancelledBy),
+      'cancelledAt': serializer.toJson<String?>(cancelledAt),
+      'cancelReason': serializer.toJson<String?>(cancelReason),
+      'revision': serializer.toJson<int>(revision),
+    };
+  }
+
+  ReFlightData copyWith({
+    String? id,
+    String? contestId,
+    String? creditedRoundId,
+    String? sourceRoundId,
+    int? sourceGroup,
+    String? type,
+    int? sequence,
+    Value<String?> previousReflightId = const Value.absent(),
+    String? status,
+    String? reason,
+    String? scheduledRoundId,
+    int? flownGroup,
+    bool? deviationAcknowledged,
+    Value<int?> requestedGroupSize = const Value.absent(),
+    Value<int?> achievableMaxSize = const Value.absent(),
+    bool? sizeExceptionConfirmed,
+    Value<int?> randomSeed = const Value.absent(),
+    Value<String?> algorithmVersion = const Value.absent(),
+    String? configRevisionId,
+    String? createdBy,
+    String? createdAt,
+    Value<String?> groupFinalizedBy = const Value.absent(),
+    Value<String?> groupFinalizedAt = const Value.absent(),
+    Value<String?> finalizedBy = const Value.absent(),
+    Value<String?> finalizedAt = const Value.absent(),
+    Value<String?> cancelledBy = const Value.absent(),
+    Value<String?> cancelledAt = const Value.absent(),
+    Value<String?> cancelReason = const Value.absent(),
+    int? revision,
+  }) => ReFlightData(
+    id: id ?? this.id,
+    contestId: contestId ?? this.contestId,
+    creditedRoundId: creditedRoundId ?? this.creditedRoundId,
+    sourceRoundId: sourceRoundId ?? this.sourceRoundId,
+    sourceGroup: sourceGroup ?? this.sourceGroup,
+    type: type ?? this.type,
+    sequence: sequence ?? this.sequence,
+    previousReflightId: previousReflightId.present
+        ? previousReflightId.value
+        : this.previousReflightId,
+    status: status ?? this.status,
+    reason: reason ?? this.reason,
+    scheduledRoundId: scheduledRoundId ?? this.scheduledRoundId,
+    flownGroup: flownGroup ?? this.flownGroup,
+    deviationAcknowledged: deviationAcknowledged ?? this.deviationAcknowledged,
+    requestedGroupSize: requestedGroupSize.present
+        ? requestedGroupSize.value
+        : this.requestedGroupSize,
+    achievableMaxSize: achievableMaxSize.present
+        ? achievableMaxSize.value
+        : this.achievableMaxSize,
+    sizeExceptionConfirmed:
+        sizeExceptionConfirmed ?? this.sizeExceptionConfirmed,
+    randomSeed: randomSeed.present ? randomSeed.value : this.randomSeed,
+    algorithmVersion: algorithmVersion.present
+        ? algorithmVersion.value
+        : this.algorithmVersion,
+    configRevisionId: configRevisionId ?? this.configRevisionId,
+    createdBy: createdBy ?? this.createdBy,
+    createdAt: createdAt ?? this.createdAt,
+    groupFinalizedBy: groupFinalizedBy.present
+        ? groupFinalizedBy.value
+        : this.groupFinalizedBy,
+    groupFinalizedAt: groupFinalizedAt.present
+        ? groupFinalizedAt.value
+        : this.groupFinalizedAt,
+    finalizedBy: finalizedBy.present ? finalizedBy.value : this.finalizedBy,
+    finalizedAt: finalizedAt.present ? finalizedAt.value : this.finalizedAt,
+    cancelledBy: cancelledBy.present ? cancelledBy.value : this.cancelledBy,
+    cancelledAt: cancelledAt.present ? cancelledAt.value : this.cancelledAt,
+    cancelReason: cancelReason.present ? cancelReason.value : this.cancelReason,
+    revision: revision ?? this.revision,
+  );
+  ReFlightData copyWithCompanion(ReFlightsCompanion data) {
+    return ReFlightData(
+      id: data.id.present ? data.id.value : this.id,
+      contestId: data.contestId.present ? data.contestId.value : this.contestId,
+      creditedRoundId: data.creditedRoundId.present
+          ? data.creditedRoundId.value
+          : this.creditedRoundId,
+      sourceRoundId: data.sourceRoundId.present
+          ? data.sourceRoundId.value
+          : this.sourceRoundId,
+      sourceGroup: data.sourceGroup.present
+          ? data.sourceGroup.value
+          : this.sourceGroup,
+      type: data.type.present ? data.type.value : this.type,
+      sequence: data.sequence.present ? data.sequence.value : this.sequence,
+      previousReflightId: data.previousReflightId.present
+          ? data.previousReflightId.value
+          : this.previousReflightId,
+      status: data.status.present ? data.status.value : this.status,
+      reason: data.reason.present ? data.reason.value : this.reason,
+      scheduledRoundId: data.scheduledRoundId.present
+          ? data.scheduledRoundId.value
+          : this.scheduledRoundId,
+      flownGroup: data.flownGroup.present
+          ? data.flownGroup.value
+          : this.flownGroup,
+      deviationAcknowledged: data.deviationAcknowledged.present
+          ? data.deviationAcknowledged.value
+          : this.deviationAcknowledged,
+      requestedGroupSize: data.requestedGroupSize.present
+          ? data.requestedGroupSize.value
+          : this.requestedGroupSize,
+      achievableMaxSize: data.achievableMaxSize.present
+          ? data.achievableMaxSize.value
+          : this.achievableMaxSize,
+      sizeExceptionConfirmed: data.sizeExceptionConfirmed.present
+          ? data.sizeExceptionConfirmed.value
+          : this.sizeExceptionConfirmed,
+      randomSeed: data.randomSeed.present
+          ? data.randomSeed.value
+          : this.randomSeed,
+      algorithmVersion: data.algorithmVersion.present
+          ? data.algorithmVersion.value
+          : this.algorithmVersion,
+      configRevisionId: data.configRevisionId.present
+          ? data.configRevisionId.value
+          : this.configRevisionId,
+      createdBy: data.createdBy.present ? data.createdBy.value : this.createdBy,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      groupFinalizedBy: data.groupFinalizedBy.present
+          ? data.groupFinalizedBy.value
+          : this.groupFinalizedBy,
+      groupFinalizedAt: data.groupFinalizedAt.present
+          ? data.groupFinalizedAt.value
+          : this.groupFinalizedAt,
+      finalizedBy: data.finalizedBy.present
+          ? data.finalizedBy.value
+          : this.finalizedBy,
+      finalizedAt: data.finalizedAt.present
+          ? data.finalizedAt.value
+          : this.finalizedAt,
+      cancelledBy: data.cancelledBy.present
+          ? data.cancelledBy.value
+          : this.cancelledBy,
+      cancelledAt: data.cancelledAt.present
+          ? data.cancelledAt.value
+          : this.cancelledAt,
+      cancelReason: data.cancelReason.present
+          ? data.cancelReason.value
+          : this.cancelReason,
+      revision: data.revision.present ? data.revision.value : this.revision,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ReFlightData(')
+          ..write('id: $id, ')
+          ..write('contestId: $contestId, ')
+          ..write('creditedRoundId: $creditedRoundId, ')
+          ..write('sourceRoundId: $sourceRoundId, ')
+          ..write('sourceGroup: $sourceGroup, ')
+          ..write('type: $type, ')
+          ..write('sequence: $sequence, ')
+          ..write('previousReflightId: $previousReflightId, ')
+          ..write('status: $status, ')
+          ..write('reason: $reason, ')
+          ..write('scheduledRoundId: $scheduledRoundId, ')
+          ..write('flownGroup: $flownGroup, ')
+          ..write('deviationAcknowledged: $deviationAcknowledged, ')
+          ..write('requestedGroupSize: $requestedGroupSize, ')
+          ..write('achievableMaxSize: $achievableMaxSize, ')
+          ..write('sizeExceptionConfirmed: $sizeExceptionConfirmed, ')
+          ..write('randomSeed: $randomSeed, ')
+          ..write('algorithmVersion: $algorithmVersion, ')
+          ..write('configRevisionId: $configRevisionId, ')
+          ..write('createdBy: $createdBy, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('groupFinalizedBy: $groupFinalizedBy, ')
+          ..write('groupFinalizedAt: $groupFinalizedAt, ')
+          ..write('finalizedBy: $finalizedBy, ')
+          ..write('finalizedAt: $finalizedAt, ')
+          ..write('cancelledBy: $cancelledBy, ')
+          ..write('cancelledAt: $cancelledAt, ')
+          ..write('cancelReason: $cancelReason, ')
+          ..write('revision: $revision')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hashAll([
+    id,
+    contestId,
+    creditedRoundId,
+    sourceRoundId,
+    sourceGroup,
+    type,
+    sequence,
+    previousReflightId,
+    status,
+    reason,
+    scheduledRoundId,
+    flownGroup,
+    deviationAcknowledged,
+    requestedGroupSize,
+    achievableMaxSize,
+    sizeExceptionConfirmed,
+    randomSeed,
+    algorithmVersion,
+    configRevisionId,
+    createdBy,
+    createdAt,
+    groupFinalizedBy,
+    groupFinalizedAt,
+    finalizedBy,
+    finalizedAt,
+    cancelledBy,
+    cancelledAt,
+    cancelReason,
+    revision,
+  ]);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ReFlightData &&
+          other.id == this.id &&
+          other.contestId == this.contestId &&
+          other.creditedRoundId == this.creditedRoundId &&
+          other.sourceRoundId == this.sourceRoundId &&
+          other.sourceGroup == this.sourceGroup &&
+          other.type == this.type &&
+          other.sequence == this.sequence &&
+          other.previousReflightId == this.previousReflightId &&
+          other.status == this.status &&
+          other.reason == this.reason &&
+          other.scheduledRoundId == this.scheduledRoundId &&
+          other.flownGroup == this.flownGroup &&
+          other.deviationAcknowledged == this.deviationAcknowledged &&
+          other.requestedGroupSize == this.requestedGroupSize &&
+          other.achievableMaxSize == this.achievableMaxSize &&
+          other.sizeExceptionConfirmed == this.sizeExceptionConfirmed &&
+          other.randomSeed == this.randomSeed &&
+          other.algorithmVersion == this.algorithmVersion &&
+          other.configRevisionId == this.configRevisionId &&
+          other.createdBy == this.createdBy &&
+          other.createdAt == this.createdAt &&
+          other.groupFinalizedBy == this.groupFinalizedBy &&
+          other.groupFinalizedAt == this.groupFinalizedAt &&
+          other.finalizedBy == this.finalizedBy &&
+          other.finalizedAt == this.finalizedAt &&
+          other.cancelledBy == this.cancelledBy &&
+          other.cancelledAt == this.cancelledAt &&
+          other.cancelReason == this.cancelReason &&
+          other.revision == this.revision);
+}
+
+class ReFlightsCompanion extends UpdateCompanion<ReFlightData> {
+  final Value<String> id;
+  final Value<String> contestId;
+  final Value<String> creditedRoundId;
+  final Value<String> sourceRoundId;
+  final Value<int> sourceGroup;
+  final Value<String> type;
+  final Value<int> sequence;
+  final Value<String?> previousReflightId;
+  final Value<String> status;
+  final Value<String> reason;
+  final Value<String> scheduledRoundId;
+  final Value<int> flownGroup;
+  final Value<bool> deviationAcknowledged;
+  final Value<int?> requestedGroupSize;
+  final Value<int?> achievableMaxSize;
+  final Value<bool> sizeExceptionConfirmed;
+  final Value<int?> randomSeed;
+  final Value<String?> algorithmVersion;
+  final Value<String> configRevisionId;
+  final Value<String> createdBy;
+  final Value<String> createdAt;
+  final Value<String?> groupFinalizedBy;
+  final Value<String?> groupFinalizedAt;
+  final Value<String?> finalizedBy;
+  final Value<String?> finalizedAt;
+  final Value<String?> cancelledBy;
+  final Value<String?> cancelledAt;
+  final Value<String?> cancelReason;
+  final Value<int> revision;
+  final Value<int> rowid;
+  const ReFlightsCompanion({
+    this.id = const Value.absent(),
+    this.contestId = const Value.absent(),
+    this.creditedRoundId = const Value.absent(),
+    this.sourceRoundId = const Value.absent(),
+    this.sourceGroup = const Value.absent(),
+    this.type = const Value.absent(),
+    this.sequence = const Value.absent(),
+    this.previousReflightId = const Value.absent(),
+    this.status = const Value.absent(),
+    this.reason = const Value.absent(),
+    this.scheduledRoundId = const Value.absent(),
+    this.flownGroup = const Value.absent(),
+    this.deviationAcknowledged = const Value.absent(),
+    this.requestedGroupSize = const Value.absent(),
+    this.achievableMaxSize = const Value.absent(),
+    this.sizeExceptionConfirmed = const Value.absent(),
+    this.randomSeed = const Value.absent(),
+    this.algorithmVersion = const Value.absent(),
+    this.configRevisionId = const Value.absent(),
+    this.createdBy = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.groupFinalizedBy = const Value.absent(),
+    this.groupFinalizedAt = const Value.absent(),
+    this.finalizedBy = const Value.absent(),
+    this.finalizedAt = const Value.absent(),
+    this.cancelledBy = const Value.absent(),
+    this.cancelledAt = const Value.absent(),
+    this.cancelReason = const Value.absent(),
+    this.revision = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ReFlightsCompanion.insert({
+    required String id,
+    required String contestId,
+    required String creditedRoundId,
+    required String sourceRoundId,
+    required int sourceGroup,
+    required String type,
+    required int sequence,
+    this.previousReflightId = const Value.absent(),
+    required String status,
+    required String reason,
+    required String scheduledRoundId,
+    required int flownGroup,
+    required bool deviationAcknowledged,
+    this.requestedGroupSize = const Value.absent(),
+    this.achievableMaxSize = const Value.absent(),
+    required bool sizeExceptionConfirmed,
+    this.randomSeed = const Value.absent(),
+    this.algorithmVersion = const Value.absent(),
+    required String configRevisionId,
+    required String createdBy,
+    required String createdAt,
+    this.groupFinalizedBy = const Value.absent(),
+    this.groupFinalizedAt = const Value.absent(),
+    this.finalizedBy = const Value.absent(),
+    this.finalizedAt = const Value.absent(),
+    this.cancelledBy = const Value.absent(),
+    this.cancelledAt = const Value.absent(),
+    this.cancelReason = const Value.absent(),
+    this.revision = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       contestId = Value(contestId),
+       creditedRoundId = Value(creditedRoundId),
+       sourceRoundId = Value(sourceRoundId),
+       sourceGroup = Value(sourceGroup),
+       type = Value(type),
+       sequence = Value(sequence),
+       status = Value(status),
+       reason = Value(reason),
+       scheduledRoundId = Value(scheduledRoundId),
+       flownGroup = Value(flownGroup),
+       deviationAcknowledged = Value(deviationAcknowledged),
+       sizeExceptionConfirmed = Value(sizeExceptionConfirmed),
+       configRevisionId = Value(configRevisionId),
+       createdBy = Value(createdBy),
+       createdAt = Value(createdAt);
+  static Insertable<ReFlightData> custom({
+    Expression<String>? id,
+    Expression<String>? contestId,
+    Expression<String>? creditedRoundId,
+    Expression<String>? sourceRoundId,
+    Expression<int>? sourceGroup,
+    Expression<String>? type,
+    Expression<int>? sequence,
+    Expression<String>? previousReflightId,
+    Expression<String>? status,
+    Expression<String>? reason,
+    Expression<String>? scheduledRoundId,
+    Expression<int>? flownGroup,
+    Expression<bool>? deviationAcknowledged,
+    Expression<int>? requestedGroupSize,
+    Expression<int>? achievableMaxSize,
+    Expression<bool>? sizeExceptionConfirmed,
+    Expression<int>? randomSeed,
+    Expression<String>? algorithmVersion,
+    Expression<String>? configRevisionId,
+    Expression<String>? createdBy,
+    Expression<String>? createdAt,
+    Expression<String>? groupFinalizedBy,
+    Expression<String>? groupFinalizedAt,
+    Expression<String>? finalizedBy,
+    Expression<String>? finalizedAt,
+    Expression<String>? cancelledBy,
+    Expression<String>? cancelledAt,
+    Expression<String>? cancelReason,
+    Expression<int>? revision,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (contestId != null) 'contest_id': contestId,
+      if (creditedRoundId != null) 'credited_round_id': creditedRoundId,
+      if (sourceRoundId != null) 'source_round_id': sourceRoundId,
+      if (sourceGroup != null) 'source_group': sourceGroup,
+      if (type != null) 'type': type,
+      if (sequence != null) 'sequence': sequence,
+      if (previousReflightId != null)
+        'previous_reflight_id': previousReflightId,
+      if (status != null) 'status': status,
+      if (reason != null) 'reason': reason,
+      if (scheduledRoundId != null) 'scheduled_round_id': scheduledRoundId,
+      if (flownGroup != null) 'flown_group': flownGroup,
+      if (deviationAcknowledged != null)
+        'deviation_acknowledged': deviationAcknowledged,
+      if (requestedGroupSize != null)
+        'requested_group_size': requestedGroupSize,
+      if (achievableMaxSize != null) 'achievable_max_size': achievableMaxSize,
+      if (sizeExceptionConfirmed != null)
+        'size_exception_confirmed': sizeExceptionConfirmed,
+      if (randomSeed != null) 'random_seed': randomSeed,
+      if (algorithmVersion != null) 'algorithm_version': algorithmVersion,
+      if (configRevisionId != null) 'config_revision_id': configRevisionId,
+      if (createdBy != null) 'created_by': createdBy,
+      if (createdAt != null) 'created_at': createdAt,
+      if (groupFinalizedBy != null) 'group_finalized_by': groupFinalizedBy,
+      if (groupFinalizedAt != null) 'group_finalized_at': groupFinalizedAt,
+      if (finalizedBy != null) 'finalized_by': finalizedBy,
+      if (finalizedAt != null) 'finalized_at': finalizedAt,
+      if (cancelledBy != null) 'cancelled_by': cancelledBy,
+      if (cancelledAt != null) 'cancelled_at': cancelledAt,
+      if (cancelReason != null) 'cancel_reason': cancelReason,
+      if (revision != null) 'revision': revision,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ReFlightsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? contestId,
+    Value<String>? creditedRoundId,
+    Value<String>? sourceRoundId,
+    Value<int>? sourceGroup,
+    Value<String>? type,
+    Value<int>? sequence,
+    Value<String?>? previousReflightId,
+    Value<String>? status,
+    Value<String>? reason,
+    Value<String>? scheduledRoundId,
+    Value<int>? flownGroup,
+    Value<bool>? deviationAcknowledged,
+    Value<int?>? requestedGroupSize,
+    Value<int?>? achievableMaxSize,
+    Value<bool>? sizeExceptionConfirmed,
+    Value<int?>? randomSeed,
+    Value<String?>? algorithmVersion,
+    Value<String>? configRevisionId,
+    Value<String>? createdBy,
+    Value<String>? createdAt,
+    Value<String?>? groupFinalizedBy,
+    Value<String?>? groupFinalizedAt,
+    Value<String?>? finalizedBy,
+    Value<String?>? finalizedAt,
+    Value<String?>? cancelledBy,
+    Value<String?>? cancelledAt,
+    Value<String?>? cancelReason,
+    Value<int>? revision,
+    Value<int>? rowid,
+  }) {
+    return ReFlightsCompanion(
+      id: id ?? this.id,
+      contestId: contestId ?? this.contestId,
+      creditedRoundId: creditedRoundId ?? this.creditedRoundId,
+      sourceRoundId: sourceRoundId ?? this.sourceRoundId,
+      sourceGroup: sourceGroup ?? this.sourceGroup,
+      type: type ?? this.type,
+      sequence: sequence ?? this.sequence,
+      previousReflightId: previousReflightId ?? this.previousReflightId,
+      status: status ?? this.status,
+      reason: reason ?? this.reason,
+      scheduledRoundId: scheduledRoundId ?? this.scheduledRoundId,
+      flownGroup: flownGroup ?? this.flownGroup,
+      deviationAcknowledged:
+          deviationAcknowledged ?? this.deviationAcknowledged,
+      requestedGroupSize: requestedGroupSize ?? this.requestedGroupSize,
+      achievableMaxSize: achievableMaxSize ?? this.achievableMaxSize,
+      sizeExceptionConfirmed:
+          sizeExceptionConfirmed ?? this.sizeExceptionConfirmed,
+      randomSeed: randomSeed ?? this.randomSeed,
+      algorithmVersion: algorithmVersion ?? this.algorithmVersion,
+      configRevisionId: configRevisionId ?? this.configRevisionId,
+      createdBy: createdBy ?? this.createdBy,
+      createdAt: createdAt ?? this.createdAt,
+      groupFinalizedBy: groupFinalizedBy ?? this.groupFinalizedBy,
+      groupFinalizedAt: groupFinalizedAt ?? this.groupFinalizedAt,
+      finalizedBy: finalizedBy ?? this.finalizedBy,
+      finalizedAt: finalizedAt ?? this.finalizedAt,
+      cancelledBy: cancelledBy ?? this.cancelledBy,
+      cancelledAt: cancelledAt ?? this.cancelledAt,
+      cancelReason: cancelReason ?? this.cancelReason,
+      revision: revision ?? this.revision,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (contestId.present) {
+      map['contest_id'] = Variable<String>(contestId.value);
+    }
+    if (creditedRoundId.present) {
+      map['credited_round_id'] = Variable<String>(creditedRoundId.value);
+    }
+    if (sourceRoundId.present) {
+      map['source_round_id'] = Variable<String>(sourceRoundId.value);
+    }
+    if (sourceGroup.present) {
+      map['source_group'] = Variable<int>(sourceGroup.value);
+    }
+    if (type.present) {
+      map['type'] = Variable<String>(type.value);
+    }
+    if (sequence.present) {
+      map['sequence'] = Variable<int>(sequence.value);
+    }
+    if (previousReflightId.present) {
+      map['previous_reflight_id'] = Variable<String>(previousReflightId.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (reason.present) {
+      map['reason'] = Variable<String>(reason.value);
+    }
+    if (scheduledRoundId.present) {
+      map['scheduled_round_id'] = Variable<String>(scheduledRoundId.value);
+    }
+    if (flownGroup.present) {
+      map['flown_group'] = Variable<int>(flownGroup.value);
+    }
+    if (deviationAcknowledged.present) {
+      map['deviation_acknowledged'] = Variable<bool>(
+        deviationAcknowledged.value,
+      );
+    }
+    if (requestedGroupSize.present) {
+      map['requested_group_size'] = Variable<int>(requestedGroupSize.value);
+    }
+    if (achievableMaxSize.present) {
+      map['achievable_max_size'] = Variable<int>(achievableMaxSize.value);
+    }
+    if (sizeExceptionConfirmed.present) {
+      map['size_exception_confirmed'] = Variable<bool>(
+        sizeExceptionConfirmed.value,
+      );
+    }
+    if (randomSeed.present) {
+      map['random_seed'] = Variable<int>(randomSeed.value);
+    }
+    if (algorithmVersion.present) {
+      map['algorithm_version'] = Variable<String>(algorithmVersion.value);
+    }
+    if (configRevisionId.present) {
+      map['config_revision_id'] = Variable<String>(configRevisionId.value);
+    }
+    if (createdBy.present) {
+      map['created_by'] = Variable<String>(createdBy.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<String>(createdAt.value);
+    }
+    if (groupFinalizedBy.present) {
+      map['group_finalized_by'] = Variable<String>(groupFinalizedBy.value);
+    }
+    if (groupFinalizedAt.present) {
+      map['group_finalized_at'] = Variable<String>(groupFinalizedAt.value);
+    }
+    if (finalizedBy.present) {
+      map['finalized_by'] = Variable<String>(finalizedBy.value);
+    }
+    if (finalizedAt.present) {
+      map['finalized_at'] = Variable<String>(finalizedAt.value);
+    }
+    if (cancelledBy.present) {
+      map['cancelled_by'] = Variable<String>(cancelledBy.value);
+    }
+    if (cancelledAt.present) {
+      map['cancelled_at'] = Variable<String>(cancelledAt.value);
+    }
+    if (cancelReason.present) {
+      map['cancel_reason'] = Variable<String>(cancelReason.value);
+    }
+    if (revision.present) {
+      map['revision'] = Variable<int>(revision.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ReFlightsCompanion(')
+          ..write('id: $id, ')
+          ..write('contestId: $contestId, ')
+          ..write('creditedRoundId: $creditedRoundId, ')
+          ..write('sourceRoundId: $sourceRoundId, ')
+          ..write('sourceGroup: $sourceGroup, ')
+          ..write('type: $type, ')
+          ..write('sequence: $sequence, ')
+          ..write('previousReflightId: $previousReflightId, ')
+          ..write('status: $status, ')
+          ..write('reason: $reason, ')
+          ..write('scheduledRoundId: $scheduledRoundId, ')
+          ..write('flownGroup: $flownGroup, ')
+          ..write('deviationAcknowledged: $deviationAcknowledged, ')
+          ..write('requestedGroupSize: $requestedGroupSize, ')
+          ..write('achievableMaxSize: $achievableMaxSize, ')
+          ..write('sizeExceptionConfirmed: $sizeExceptionConfirmed, ')
+          ..write('randomSeed: $randomSeed, ')
+          ..write('algorithmVersion: $algorithmVersion, ')
+          ..write('configRevisionId: $configRevisionId, ')
+          ..write('createdBy: $createdBy, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('groupFinalizedBy: $groupFinalizedBy, ')
+          ..write('groupFinalizedAt: $groupFinalizedAt, ')
+          ..write('finalizedBy: $finalizedBy, ')
+          ..write('finalizedAt: $finalizedAt, ')
+          ..write('cancelledBy: $cancelledBy, ')
+          ..write('cancelledAt: $cancelledAt, ')
+          ..write('cancelReason: $cancelReason, ')
+          ..write('revision: $revision, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $MatrixAssignmentsTable extends MatrixAssignments
+    with TableInfo<$MatrixAssignmentsTable, MatrixAssignmentData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $MatrixAssignmentsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _contestIdMeta = const VerificationMeta(
+    'contestId',
+  );
+  @override
+  late final GeneratedColumn<String> contestId = GeneratedColumn<String>(
+    'contest_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES contests (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _matrixRevisionIdMeta = const VerificationMeta(
+    'matrixRevisionId',
+  );
+  @override
+  late final GeneratedColumn<String> matrixRevisionId = GeneratedColumn<String>(
+    'matrix_revision_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES matrix_revisions (id)',
+    ),
+  );
+  static const VerificationMeta _contestParticipationIdMeta =
+      const VerificationMeta('contestParticipationId');
+  @override
+  late final GeneratedColumn<String> contestParticipationId =
+      GeneratedColumn<String>(
+        'contest_participation_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+        defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES contest_participations (id)',
+        ),
+      );
+  static const VerificationMeta _scheduledRoundIdMeta = const VerificationMeta(
+    'scheduledRoundId',
+  );
+  @override
+  late final GeneratedColumn<String> scheduledRoundId = GeneratedColumn<String>(
+    'scheduled_round_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES rounds (id)',
+    ),
+  );
+  static const VerificationMeta _creditedRoundIdMeta = const VerificationMeta(
+    'creditedRoundId',
+  );
+  @override
+  late final GeneratedColumn<String> creditedRoundId = GeneratedColumn<String>(
+    'credited_round_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES rounds (id)',
+    ),
+  );
+  static const VerificationMeta _groupMeta = const VerificationMeta('group');
+  @override
+  late final GeneratedColumn<int> group = GeneratedColumn<int>(
+    'group',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _laneMeta = const VerificationMeta('lane');
+  @override
+  late final GeneratedColumn<int> lane = GeneratedColumn<int>(
+    'lane',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _flightSequenceMeta = const VerificationMeta(
+    'flightSequence',
+  );
+  @override
+  late final GeneratedColumn<int> flightSequence = GeneratedColumn<int>(
+    'flight_sequence',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _assignmentTypeMeta = const VerificationMeta(
+    'assignmentType',
+  );
+  @override
+  late final GeneratedColumn<String> assignmentType = GeneratedColumn<String>(
+    'assignment_type',
+    aliasedName,
+    false,
+    check: () => assignmentType.isIn(assignmentTypeValues),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sourceAssignmentIdMeta =
+      const VerificationMeta('sourceAssignmentId');
+  @override
+  late final GeneratedColumn<String> sourceAssignmentId =
+      GeneratedColumn<String>(
+        'source_assignment_id',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES matrix_assignments (id)',
+        ),
+      );
+  static const VerificationMeta _reFlightIdMeta = const VerificationMeta(
+    'reFlightId',
+  );
+  @override
+  late final GeneratedColumn<String> reFlightId = GeneratedColumn<String>(
+    're_flight_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES re_flights (id)',
+    ),
+  );
+  static const VerificationMeta _supersededByAssignmentIdMeta =
+      const VerificationMeta('supersededByAssignmentId');
+  @override
+  late final GeneratedColumn<String>
+  supersededByAssignmentId = GeneratedColumn<String>(
+    'superseded_by_assignment_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    $customConstraints:
+        'NULL REFERENCES matrix_assignments (id) DEFERRABLE INITIALLY DEFERRED',
+  );
+  static const VerificationMeta _actorIdMeta = const VerificationMeta(
+    'actorId',
+  );
+  @override
+  late final GeneratedColumn<String> actorId = GeneratedColumn<String>(
+    'actor_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _reasonMeta = const VerificationMeta('reason');
+  @override
+  late final GeneratedColumn<String> reason = GeneratedColumn<String>(
+    'reason',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _existingScoreHandlingMeta =
+      const VerificationMeta('existingScoreHandling');
+  @override
+  late final GeneratedColumn<String> existingScoreHandling =
+      GeneratedColumn<String>(
+        'existing_score_handling',
+        aliasedName,
+        false,
+        check: () => existingScoreHandling.isIn(existingScoreHandlingValues),
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      );
+  static const VerificationMeta _resetScoreRevisionMeta =
+      const VerificationMeta('resetScoreRevision');
+  @override
+  late final GeneratedColumn<int> resetScoreRevision = GeneratedColumn<int>(
+    'reset_score_revision',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<String> createdAt = GeneratedColumn<String>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    contestId,
+    matrixRevisionId,
+    contestParticipationId,
+    scheduledRoundId,
+    creditedRoundId,
+    group,
+    lane,
+    flightSequence,
+    assignmentType,
+    sourceAssignmentId,
+    reFlightId,
+    supersededByAssignmentId,
+    actorId,
+    reason,
+    existingScoreHandling,
+    resetScoreRevision,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'matrix_assignments';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<MatrixAssignmentData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('contest_id')) {
+      context.handle(
+        _contestIdMeta,
+        contestId.isAcceptableOrUnknown(data['contest_id']!, _contestIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_contestIdMeta);
+    }
+    if (data.containsKey('matrix_revision_id')) {
+      context.handle(
+        _matrixRevisionIdMeta,
+        matrixRevisionId.isAcceptableOrUnknown(
+          data['matrix_revision_id']!,
+          _matrixRevisionIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_matrixRevisionIdMeta);
+    }
+    if (data.containsKey('contest_participation_id')) {
+      context.handle(
+        _contestParticipationIdMeta,
+        contestParticipationId.isAcceptableOrUnknown(
+          data['contest_participation_id']!,
+          _contestParticipationIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_contestParticipationIdMeta);
+    }
+    if (data.containsKey('scheduled_round_id')) {
+      context.handle(
+        _scheduledRoundIdMeta,
+        scheduledRoundId.isAcceptableOrUnknown(
+          data['scheduled_round_id']!,
+          _scheduledRoundIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_scheduledRoundIdMeta);
+    }
+    if (data.containsKey('credited_round_id')) {
+      context.handle(
+        _creditedRoundIdMeta,
+        creditedRoundId.isAcceptableOrUnknown(
+          data['credited_round_id']!,
+          _creditedRoundIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_creditedRoundIdMeta);
+    }
+    if (data.containsKey('group')) {
+      context.handle(
+        _groupMeta,
+        group.isAcceptableOrUnknown(data['group']!, _groupMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_groupMeta);
+    }
+    if (data.containsKey('lane')) {
+      context.handle(
+        _laneMeta,
+        lane.isAcceptableOrUnknown(data['lane']!, _laneMeta),
+      );
+    }
+    if (data.containsKey('flight_sequence')) {
+      context.handle(
+        _flightSequenceMeta,
+        flightSequence.isAcceptableOrUnknown(
+          data['flight_sequence']!,
+          _flightSequenceMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_flightSequenceMeta);
+    }
+    if (data.containsKey('assignment_type')) {
+      context.handle(
+        _assignmentTypeMeta,
+        assignmentType.isAcceptableOrUnknown(
+          data['assignment_type']!,
+          _assignmentTypeMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_assignmentTypeMeta);
+    }
+    if (data.containsKey('source_assignment_id')) {
+      context.handle(
+        _sourceAssignmentIdMeta,
+        sourceAssignmentId.isAcceptableOrUnknown(
+          data['source_assignment_id']!,
+          _sourceAssignmentIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('re_flight_id')) {
+      context.handle(
+        _reFlightIdMeta,
+        reFlightId.isAcceptableOrUnknown(
+          data['re_flight_id']!,
+          _reFlightIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('superseded_by_assignment_id')) {
+      context.handle(
+        _supersededByAssignmentIdMeta,
+        supersededByAssignmentId.isAcceptableOrUnknown(
+          data['superseded_by_assignment_id']!,
+          _supersededByAssignmentIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('actor_id')) {
+      context.handle(
+        _actorIdMeta,
+        actorId.isAcceptableOrUnknown(data['actor_id']!, _actorIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_actorIdMeta);
+    }
+    if (data.containsKey('reason')) {
+      context.handle(
+        _reasonMeta,
+        reason.isAcceptableOrUnknown(data['reason']!, _reasonMeta),
+      );
+    }
+    if (data.containsKey('existing_score_handling')) {
+      context.handle(
+        _existingScoreHandlingMeta,
+        existingScoreHandling.isAcceptableOrUnknown(
+          data['existing_score_handling']!,
+          _existingScoreHandlingMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_existingScoreHandlingMeta);
+    }
+    if (data.containsKey('reset_score_revision')) {
+      context.handle(
+        _resetScoreRevisionMeta,
+        resetScoreRevision.isAcceptableOrUnknown(
+          data['reset_score_revision']!,
+          _resetScoreRevisionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  MatrixAssignmentData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return MatrixAssignmentData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      contestId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}contest_id'],
+      )!,
+      matrixRevisionId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}matrix_revision_id'],
+      )!,
+      contestParticipationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}contest_participation_id'],
+      )!,
+      scheduledRoundId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}scheduled_round_id'],
+      )!,
+      creditedRoundId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}credited_round_id'],
+      )!,
+      group: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}group'],
+      )!,
+      lane: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}lane'],
+      ),
+      flightSequence: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}flight_sequence'],
+      )!,
+      assignmentType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}assignment_type'],
+      )!,
+      sourceAssignmentId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source_assignment_id'],
+      ),
+      reFlightId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}re_flight_id'],
+      ),
+      supersededByAssignmentId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}superseded_by_assignment_id'],
+      ),
+      actorId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}actor_id'],
+      )!,
+      reason: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reason'],
+      ),
+      existingScoreHandling: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}existing_score_handling'],
+      )!,
+      resetScoreRevision: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}reset_score_revision'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $MatrixAssignmentsTable createAlias(String alias) {
+    return $MatrixAssignmentsTable(attachedDatabase, alias);
+  }
+}
+
+class MatrixAssignmentData extends DataClass
+    implements Insertable<MatrixAssignmentData> {
+  final String id;
+  final String contestId;
+  final String matrixRevisionId;
+  final String contestParticipationId;
+  final String scheduledRoundId;
+  final String creditedRoundId;
+  final int group;
+  final int? lane;
+  final int flightSequence;
+  final String assignmentType;
+  final String? sourceAssignmentId;
+  final String? reFlightId;
+  final String? supersededByAssignmentId;
+  final String actorId;
+  final String? reason;
+  final String existingScoreHandling;
+  final int? resetScoreRevision;
+  final String createdAt;
+  const MatrixAssignmentData({
+    required this.id,
+    required this.contestId,
+    required this.matrixRevisionId,
+    required this.contestParticipationId,
+    required this.scheduledRoundId,
+    required this.creditedRoundId,
+    required this.group,
+    this.lane,
+    required this.flightSequence,
+    required this.assignmentType,
+    this.sourceAssignmentId,
+    this.reFlightId,
+    this.supersededByAssignmentId,
+    required this.actorId,
+    this.reason,
+    required this.existingScoreHandling,
+    this.resetScoreRevision,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['contest_id'] = Variable<String>(contestId);
+    map['matrix_revision_id'] = Variable<String>(matrixRevisionId);
+    map['contest_participation_id'] = Variable<String>(contestParticipationId);
+    map['scheduled_round_id'] = Variable<String>(scheduledRoundId);
+    map['credited_round_id'] = Variable<String>(creditedRoundId);
+    map['group'] = Variable<int>(group);
+    if (!nullToAbsent || lane != null) {
+      map['lane'] = Variable<int>(lane);
+    }
+    map['flight_sequence'] = Variable<int>(flightSequence);
+    map['assignment_type'] = Variable<String>(assignmentType);
+    if (!nullToAbsent || sourceAssignmentId != null) {
+      map['source_assignment_id'] = Variable<String>(sourceAssignmentId);
+    }
+    if (!nullToAbsent || reFlightId != null) {
+      map['re_flight_id'] = Variable<String>(reFlightId);
+    }
+    if (!nullToAbsent || supersededByAssignmentId != null) {
+      map['superseded_by_assignment_id'] = Variable<String>(
+        supersededByAssignmentId,
+      );
+    }
+    map['actor_id'] = Variable<String>(actorId);
+    if (!nullToAbsent || reason != null) {
+      map['reason'] = Variable<String>(reason);
+    }
+    map['existing_score_handling'] = Variable<String>(existingScoreHandling);
+    if (!nullToAbsent || resetScoreRevision != null) {
+      map['reset_score_revision'] = Variable<int>(resetScoreRevision);
+    }
+    map['created_at'] = Variable<String>(createdAt);
+    return map;
+  }
+
+  MatrixAssignmentsCompanion toCompanion(bool nullToAbsent) {
+    return MatrixAssignmentsCompanion(
+      id: Value(id),
+      contestId: Value(contestId),
+      matrixRevisionId: Value(matrixRevisionId),
+      contestParticipationId: Value(contestParticipationId),
+      scheduledRoundId: Value(scheduledRoundId),
+      creditedRoundId: Value(creditedRoundId),
+      group: Value(group),
+      lane: lane == null && nullToAbsent ? const Value.absent() : Value(lane),
+      flightSequence: Value(flightSequence),
+      assignmentType: Value(assignmentType),
+      sourceAssignmentId: sourceAssignmentId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sourceAssignmentId),
+      reFlightId: reFlightId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(reFlightId),
+      supersededByAssignmentId: supersededByAssignmentId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(supersededByAssignmentId),
+      actorId: Value(actorId),
+      reason: reason == null && nullToAbsent
+          ? const Value.absent()
+          : Value(reason),
+      existingScoreHandling: Value(existingScoreHandling),
+      resetScoreRevision: resetScoreRevision == null && nullToAbsent
+          ? const Value.absent()
+          : Value(resetScoreRevision),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory MatrixAssignmentData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return MatrixAssignmentData(
+      id: serializer.fromJson<String>(json['id']),
+      contestId: serializer.fromJson<String>(json['contestId']),
+      matrixRevisionId: serializer.fromJson<String>(json['matrixRevisionId']),
+      contestParticipationId: serializer.fromJson<String>(
+        json['contestParticipationId'],
+      ),
+      scheduledRoundId: serializer.fromJson<String>(json['scheduledRoundId']),
+      creditedRoundId: serializer.fromJson<String>(json['creditedRoundId']),
+      group: serializer.fromJson<int>(json['group']),
+      lane: serializer.fromJson<int?>(json['lane']),
+      flightSequence: serializer.fromJson<int>(json['flightSequence']),
+      assignmentType: serializer.fromJson<String>(json['assignmentType']),
+      sourceAssignmentId: serializer.fromJson<String?>(
+        json['sourceAssignmentId'],
+      ),
+      reFlightId: serializer.fromJson<String?>(json['reFlightId']),
+      supersededByAssignmentId: serializer.fromJson<String?>(
+        json['supersededByAssignmentId'],
+      ),
+      actorId: serializer.fromJson<String>(json['actorId']),
+      reason: serializer.fromJson<String?>(json['reason']),
+      existingScoreHandling: serializer.fromJson<String>(
+        json['existingScoreHandling'],
+      ),
+      resetScoreRevision: serializer.fromJson<int?>(json['resetScoreRevision']),
+      createdAt: serializer.fromJson<String>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'contestId': serializer.toJson<String>(contestId),
+      'matrixRevisionId': serializer.toJson<String>(matrixRevisionId),
+      'contestParticipationId': serializer.toJson<String>(
+        contestParticipationId,
+      ),
+      'scheduledRoundId': serializer.toJson<String>(scheduledRoundId),
+      'creditedRoundId': serializer.toJson<String>(creditedRoundId),
+      'group': serializer.toJson<int>(group),
+      'lane': serializer.toJson<int?>(lane),
+      'flightSequence': serializer.toJson<int>(flightSequence),
+      'assignmentType': serializer.toJson<String>(assignmentType),
+      'sourceAssignmentId': serializer.toJson<String?>(sourceAssignmentId),
+      'reFlightId': serializer.toJson<String?>(reFlightId),
+      'supersededByAssignmentId': serializer.toJson<String?>(
+        supersededByAssignmentId,
+      ),
+      'actorId': serializer.toJson<String>(actorId),
+      'reason': serializer.toJson<String?>(reason),
+      'existingScoreHandling': serializer.toJson<String>(existingScoreHandling),
+      'resetScoreRevision': serializer.toJson<int?>(resetScoreRevision),
+      'createdAt': serializer.toJson<String>(createdAt),
+    };
+  }
+
+  MatrixAssignmentData copyWith({
+    String? id,
+    String? contestId,
+    String? matrixRevisionId,
+    String? contestParticipationId,
+    String? scheduledRoundId,
+    String? creditedRoundId,
+    int? group,
+    Value<int?> lane = const Value.absent(),
+    int? flightSequence,
+    String? assignmentType,
+    Value<String?> sourceAssignmentId = const Value.absent(),
+    Value<String?> reFlightId = const Value.absent(),
+    Value<String?> supersededByAssignmentId = const Value.absent(),
+    String? actorId,
+    Value<String?> reason = const Value.absent(),
+    String? existingScoreHandling,
+    Value<int?> resetScoreRevision = const Value.absent(),
+    String? createdAt,
+  }) => MatrixAssignmentData(
+    id: id ?? this.id,
+    contestId: contestId ?? this.contestId,
+    matrixRevisionId: matrixRevisionId ?? this.matrixRevisionId,
+    contestParticipationId:
+        contestParticipationId ?? this.contestParticipationId,
+    scheduledRoundId: scheduledRoundId ?? this.scheduledRoundId,
+    creditedRoundId: creditedRoundId ?? this.creditedRoundId,
+    group: group ?? this.group,
+    lane: lane.present ? lane.value : this.lane,
+    flightSequence: flightSequence ?? this.flightSequence,
+    assignmentType: assignmentType ?? this.assignmentType,
+    sourceAssignmentId: sourceAssignmentId.present
+        ? sourceAssignmentId.value
+        : this.sourceAssignmentId,
+    reFlightId: reFlightId.present ? reFlightId.value : this.reFlightId,
+    supersededByAssignmentId: supersededByAssignmentId.present
+        ? supersededByAssignmentId.value
+        : this.supersededByAssignmentId,
+    actorId: actorId ?? this.actorId,
+    reason: reason.present ? reason.value : this.reason,
+    existingScoreHandling: existingScoreHandling ?? this.existingScoreHandling,
+    resetScoreRevision: resetScoreRevision.present
+        ? resetScoreRevision.value
+        : this.resetScoreRevision,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  MatrixAssignmentData copyWithCompanion(MatrixAssignmentsCompanion data) {
+    return MatrixAssignmentData(
+      id: data.id.present ? data.id.value : this.id,
+      contestId: data.contestId.present ? data.contestId.value : this.contestId,
+      matrixRevisionId: data.matrixRevisionId.present
+          ? data.matrixRevisionId.value
+          : this.matrixRevisionId,
+      contestParticipationId: data.contestParticipationId.present
+          ? data.contestParticipationId.value
+          : this.contestParticipationId,
+      scheduledRoundId: data.scheduledRoundId.present
+          ? data.scheduledRoundId.value
+          : this.scheduledRoundId,
+      creditedRoundId: data.creditedRoundId.present
+          ? data.creditedRoundId.value
+          : this.creditedRoundId,
+      group: data.group.present ? data.group.value : this.group,
+      lane: data.lane.present ? data.lane.value : this.lane,
+      flightSequence: data.flightSequence.present
+          ? data.flightSequence.value
+          : this.flightSequence,
+      assignmentType: data.assignmentType.present
+          ? data.assignmentType.value
+          : this.assignmentType,
+      sourceAssignmentId: data.sourceAssignmentId.present
+          ? data.sourceAssignmentId.value
+          : this.sourceAssignmentId,
+      reFlightId: data.reFlightId.present
+          ? data.reFlightId.value
+          : this.reFlightId,
+      supersededByAssignmentId: data.supersededByAssignmentId.present
+          ? data.supersededByAssignmentId.value
+          : this.supersededByAssignmentId,
+      actorId: data.actorId.present ? data.actorId.value : this.actorId,
+      reason: data.reason.present ? data.reason.value : this.reason,
+      existingScoreHandling: data.existingScoreHandling.present
+          ? data.existingScoreHandling.value
+          : this.existingScoreHandling,
+      resetScoreRevision: data.resetScoreRevision.present
+          ? data.resetScoreRevision.value
+          : this.resetScoreRevision,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MatrixAssignmentData(')
+          ..write('id: $id, ')
+          ..write('contestId: $contestId, ')
+          ..write('matrixRevisionId: $matrixRevisionId, ')
+          ..write('contestParticipationId: $contestParticipationId, ')
+          ..write('scheduledRoundId: $scheduledRoundId, ')
+          ..write('creditedRoundId: $creditedRoundId, ')
+          ..write('group: $group, ')
+          ..write('lane: $lane, ')
+          ..write('flightSequence: $flightSequence, ')
+          ..write('assignmentType: $assignmentType, ')
+          ..write('sourceAssignmentId: $sourceAssignmentId, ')
+          ..write('reFlightId: $reFlightId, ')
+          ..write('supersededByAssignmentId: $supersededByAssignmentId, ')
+          ..write('actorId: $actorId, ')
+          ..write('reason: $reason, ')
+          ..write('existingScoreHandling: $existingScoreHandling, ')
+          ..write('resetScoreRevision: $resetScoreRevision, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    contestId,
+    matrixRevisionId,
+    contestParticipationId,
+    scheduledRoundId,
+    creditedRoundId,
+    group,
+    lane,
+    flightSequence,
+    assignmentType,
+    sourceAssignmentId,
+    reFlightId,
+    supersededByAssignmentId,
+    actorId,
+    reason,
+    existingScoreHandling,
+    resetScoreRevision,
+    createdAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is MatrixAssignmentData &&
+          other.id == this.id &&
+          other.contestId == this.contestId &&
+          other.matrixRevisionId == this.matrixRevisionId &&
+          other.contestParticipationId == this.contestParticipationId &&
+          other.scheduledRoundId == this.scheduledRoundId &&
+          other.creditedRoundId == this.creditedRoundId &&
+          other.group == this.group &&
+          other.lane == this.lane &&
+          other.flightSequence == this.flightSequence &&
+          other.assignmentType == this.assignmentType &&
+          other.sourceAssignmentId == this.sourceAssignmentId &&
+          other.reFlightId == this.reFlightId &&
+          other.supersededByAssignmentId == this.supersededByAssignmentId &&
+          other.actorId == this.actorId &&
+          other.reason == this.reason &&
+          other.existingScoreHandling == this.existingScoreHandling &&
+          other.resetScoreRevision == this.resetScoreRevision &&
+          other.createdAt == this.createdAt);
+}
+
+class MatrixAssignmentsCompanion extends UpdateCompanion<MatrixAssignmentData> {
+  final Value<String> id;
+  final Value<String> contestId;
+  final Value<String> matrixRevisionId;
+  final Value<String> contestParticipationId;
+  final Value<String> scheduledRoundId;
+  final Value<String> creditedRoundId;
+  final Value<int> group;
+  final Value<int?> lane;
+  final Value<int> flightSequence;
+  final Value<String> assignmentType;
+  final Value<String?> sourceAssignmentId;
+  final Value<String?> reFlightId;
+  final Value<String?> supersededByAssignmentId;
+  final Value<String> actorId;
+  final Value<String?> reason;
+  final Value<String> existingScoreHandling;
+  final Value<int?> resetScoreRevision;
+  final Value<String> createdAt;
+  final Value<int> rowid;
+  const MatrixAssignmentsCompanion({
+    this.id = const Value.absent(),
+    this.contestId = const Value.absent(),
+    this.matrixRevisionId = const Value.absent(),
+    this.contestParticipationId = const Value.absent(),
+    this.scheduledRoundId = const Value.absent(),
+    this.creditedRoundId = const Value.absent(),
+    this.group = const Value.absent(),
+    this.lane = const Value.absent(),
+    this.flightSequence = const Value.absent(),
+    this.assignmentType = const Value.absent(),
+    this.sourceAssignmentId = const Value.absent(),
+    this.reFlightId = const Value.absent(),
+    this.supersededByAssignmentId = const Value.absent(),
+    this.actorId = const Value.absent(),
+    this.reason = const Value.absent(),
+    this.existingScoreHandling = const Value.absent(),
+    this.resetScoreRevision = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  MatrixAssignmentsCompanion.insert({
+    required String id,
+    required String contestId,
+    required String matrixRevisionId,
+    required String contestParticipationId,
+    required String scheduledRoundId,
+    required String creditedRoundId,
+    required int group,
+    this.lane = const Value.absent(),
+    required int flightSequence,
+    required String assignmentType,
+    this.sourceAssignmentId = const Value.absent(),
+    this.reFlightId = const Value.absent(),
+    this.supersededByAssignmentId = const Value.absent(),
+    required String actorId,
+    this.reason = const Value.absent(),
+    required String existingScoreHandling,
+    this.resetScoreRevision = const Value.absent(),
+    required String createdAt,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       contestId = Value(contestId),
+       matrixRevisionId = Value(matrixRevisionId),
+       contestParticipationId = Value(contestParticipationId),
+       scheduledRoundId = Value(scheduledRoundId),
+       creditedRoundId = Value(creditedRoundId),
+       group = Value(group),
+       flightSequence = Value(flightSequence),
+       assignmentType = Value(assignmentType),
+       actorId = Value(actorId),
+       existingScoreHandling = Value(existingScoreHandling),
+       createdAt = Value(createdAt);
+  static Insertable<MatrixAssignmentData> custom({
+    Expression<String>? id,
+    Expression<String>? contestId,
+    Expression<String>? matrixRevisionId,
+    Expression<String>? contestParticipationId,
+    Expression<String>? scheduledRoundId,
+    Expression<String>? creditedRoundId,
+    Expression<int>? group,
+    Expression<int>? lane,
+    Expression<int>? flightSequence,
+    Expression<String>? assignmentType,
+    Expression<String>? sourceAssignmentId,
+    Expression<String>? reFlightId,
+    Expression<String>? supersededByAssignmentId,
+    Expression<String>? actorId,
+    Expression<String>? reason,
+    Expression<String>? existingScoreHandling,
+    Expression<int>? resetScoreRevision,
+    Expression<String>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (contestId != null) 'contest_id': contestId,
+      if (matrixRevisionId != null) 'matrix_revision_id': matrixRevisionId,
+      if (contestParticipationId != null)
+        'contest_participation_id': contestParticipationId,
+      if (scheduledRoundId != null) 'scheduled_round_id': scheduledRoundId,
+      if (creditedRoundId != null) 'credited_round_id': creditedRoundId,
+      if (group != null) 'group': group,
+      if (lane != null) 'lane': lane,
+      if (flightSequence != null) 'flight_sequence': flightSequence,
+      if (assignmentType != null) 'assignment_type': assignmentType,
+      if (sourceAssignmentId != null)
+        'source_assignment_id': sourceAssignmentId,
+      if (reFlightId != null) 're_flight_id': reFlightId,
+      if (supersededByAssignmentId != null)
+        'superseded_by_assignment_id': supersededByAssignmentId,
+      if (actorId != null) 'actor_id': actorId,
+      if (reason != null) 'reason': reason,
+      if (existingScoreHandling != null)
+        'existing_score_handling': existingScoreHandling,
+      if (resetScoreRevision != null)
+        'reset_score_revision': resetScoreRevision,
+      if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  MatrixAssignmentsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? contestId,
+    Value<String>? matrixRevisionId,
+    Value<String>? contestParticipationId,
+    Value<String>? scheduledRoundId,
+    Value<String>? creditedRoundId,
+    Value<int>? group,
+    Value<int?>? lane,
+    Value<int>? flightSequence,
+    Value<String>? assignmentType,
+    Value<String?>? sourceAssignmentId,
+    Value<String?>? reFlightId,
+    Value<String?>? supersededByAssignmentId,
+    Value<String>? actorId,
+    Value<String?>? reason,
+    Value<String>? existingScoreHandling,
+    Value<int?>? resetScoreRevision,
+    Value<String>? createdAt,
+    Value<int>? rowid,
+  }) {
+    return MatrixAssignmentsCompanion(
+      id: id ?? this.id,
+      contestId: contestId ?? this.contestId,
+      matrixRevisionId: matrixRevisionId ?? this.matrixRevisionId,
+      contestParticipationId:
+          contestParticipationId ?? this.contestParticipationId,
+      scheduledRoundId: scheduledRoundId ?? this.scheduledRoundId,
+      creditedRoundId: creditedRoundId ?? this.creditedRoundId,
+      group: group ?? this.group,
+      lane: lane ?? this.lane,
+      flightSequence: flightSequence ?? this.flightSequence,
+      assignmentType: assignmentType ?? this.assignmentType,
+      sourceAssignmentId: sourceAssignmentId ?? this.sourceAssignmentId,
+      reFlightId: reFlightId ?? this.reFlightId,
+      supersededByAssignmentId:
+          supersededByAssignmentId ?? this.supersededByAssignmentId,
+      actorId: actorId ?? this.actorId,
+      reason: reason ?? this.reason,
+      existingScoreHandling:
+          existingScoreHandling ?? this.existingScoreHandling,
+      resetScoreRevision: resetScoreRevision ?? this.resetScoreRevision,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (contestId.present) {
+      map['contest_id'] = Variable<String>(contestId.value);
+    }
+    if (matrixRevisionId.present) {
+      map['matrix_revision_id'] = Variable<String>(matrixRevisionId.value);
+    }
+    if (contestParticipationId.present) {
+      map['contest_participation_id'] = Variable<String>(
+        contestParticipationId.value,
+      );
+    }
+    if (scheduledRoundId.present) {
+      map['scheduled_round_id'] = Variable<String>(scheduledRoundId.value);
+    }
+    if (creditedRoundId.present) {
+      map['credited_round_id'] = Variable<String>(creditedRoundId.value);
+    }
+    if (group.present) {
+      map['group'] = Variable<int>(group.value);
+    }
+    if (lane.present) {
+      map['lane'] = Variable<int>(lane.value);
+    }
+    if (flightSequence.present) {
+      map['flight_sequence'] = Variable<int>(flightSequence.value);
+    }
+    if (assignmentType.present) {
+      map['assignment_type'] = Variable<String>(assignmentType.value);
+    }
+    if (sourceAssignmentId.present) {
+      map['source_assignment_id'] = Variable<String>(sourceAssignmentId.value);
+    }
+    if (reFlightId.present) {
+      map['re_flight_id'] = Variable<String>(reFlightId.value);
+    }
+    if (supersededByAssignmentId.present) {
+      map['superseded_by_assignment_id'] = Variable<String>(
+        supersededByAssignmentId.value,
+      );
+    }
+    if (actorId.present) {
+      map['actor_id'] = Variable<String>(actorId.value);
+    }
+    if (reason.present) {
+      map['reason'] = Variable<String>(reason.value);
+    }
+    if (existingScoreHandling.present) {
+      map['existing_score_handling'] = Variable<String>(
+        existingScoreHandling.value,
+      );
+    }
+    if (resetScoreRevision.present) {
+      map['reset_score_revision'] = Variable<int>(resetScoreRevision.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<String>(createdAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MatrixAssignmentsCompanion(')
+          ..write('id: $id, ')
+          ..write('contestId: $contestId, ')
+          ..write('matrixRevisionId: $matrixRevisionId, ')
+          ..write('contestParticipationId: $contestParticipationId, ')
+          ..write('scheduledRoundId: $scheduledRoundId, ')
+          ..write('creditedRoundId: $creditedRoundId, ')
+          ..write('group: $group, ')
+          ..write('lane: $lane, ')
+          ..write('flightSequence: $flightSequence, ')
+          ..write('assignmentType: $assignmentType, ')
+          ..write('sourceAssignmentId: $sourceAssignmentId, ')
+          ..write('reFlightId: $reFlightId, ')
+          ..write('supersededByAssignmentId: $supersededByAssignmentId, ')
+          ..write('actorId: $actorId, ')
+          ..write('reason: $reason, ')
+          ..write('existingScoreHandling: $existingScoreHandling, ')
+          ..write('resetScoreRevision: $resetScoreRevision, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ReFlightParticipantsTable extends ReFlightParticipants
+    with TableInfo<$ReFlightParticipantsTable, ReFlightParticipantData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ReFlightParticipantsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _contestIdMeta = const VerificationMeta(
+    'contestId',
+  );
+  @override
+  late final GeneratedColumn<String> contestId = GeneratedColumn<String>(
+    'contest_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES contests (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _reFlightIdMeta = const VerificationMeta(
+    'reFlightId',
+  );
+  @override
+  late final GeneratedColumn<String> reFlightId = GeneratedColumn<String>(
+    're_flight_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES re_flights (id)',
+    ),
+  );
+  static const VerificationMeta _contestParticipationIdMeta =
+      const VerificationMeta('contestParticipationId');
+  @override
+  late final GeneratedColumn<String> contestParticipationId =
+      GeneratedColumn<String>(
+        'contest_participation_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+        defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES contest_participations (id)',
+        ),
+      );
+  static const VerificationMeta _roleMeta = const VerificationMeta('role');
+  @override
+  late final GeneratedColumn<String> role = GeneratedColumn<String>(
+    'role',
+    aliasedName,
+    false,
+    check: () => role.isIn(reFlightParticipantRoleValues),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _excludedReasonMeta = const VerificationMeta(
+    'excludedReason',
+  );
+  @override
+  late final GeneratedColumn<String> excludedReason = GeneratedColumn<String>(
+    'excluded_reason',
+    aliasedName,
+    true,
+    check: () => excludedReason.isIn(excludedReasonValues),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _drawPositionMeta = const VerificationMeta(
+    'drawPosition',
+  );
+  @override
+  late final GeneratedColumn<int> drawPosition = GeneratedColumn<int>(
+    'draw_position',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _responseMeta = const VerificationMeta(
+    'response',
+  );
+  @override
+  late final GeneratedColumn<String> response = GeneratedColumn<String>(
+    'response',
+    aliasedName,
+    false,
+    check: () => response.isIn(reFlightResponseValues),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _respondedByMeta = const VerificationMeta(
+    'respondedBy',
+  );
+  @override
+  late final GeneratedColumn<String> respondedBy = GeneratedColumn<String>(
+    'responded_by',
+    aliasedName,
+    true,
+    check: () => respondedBy.isIn(responseActorValues),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _respondedAtMeta = const VerificationMeta(
+    'respondedAt',
+  );
+  @override
+  late final GeneratedColumn<String> respondedAt = GeneratedColumn<String>(
+    'responded_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _notificationStateMeta = const VerificationMeta(
+    'notificationState',
+  );
+  @override
+  late final GeneratedColumn<String> notificationState =
+      GeneratedColumn<String>(
+        'notification_state',
+        aliasedName,
+        false,
+        check: () => notificationState.isIn(notificationStateValues),
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      );
+  static const VerificationMeta _notifiedAtMeta = const VerificationMeta(
+    'notifiedAt',
+  );
+  @override
+  late final GeneratedColumn<String> notifiedAt = GeneratedColumn<String>(
+    'notified_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _acknowledgedAtMeta = const VerificationMeta(
+    'acknowledgedAt',
+  );
+  @override
+  late final GeneratedColumn<String> acknowledgedAt = GeneratedColumn<String>(
+    'acknowledged_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _assignmentIdMeta = const VerificationMeta(
+    'assignmentId',
+  );
+  @override
+  late final GeneratedColumn<String> assignmentId = GeneratedColumn<String>(
+    'assignment_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES matrix_assignments (id)',
+    ),
+  );
+  static const VerificationMeta _revisionMeta = const VerificationMeta(
+    'revision',
+  );
+  @override
+  late final GeneratedColumn<int> revision = GeneratedColumn<int>(
+    'revision',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    contestId,
+    reFlightId,
+    contestParticipationId,
+    role,
+    excludedReason,
+    drawPosition,
+    response,
+    respondedBy,
+    respondedAt,
+    notificationState,
+    notifiedAt,
+    acknowledgedAt,
+    assignmentId,
+    revision,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 're_flight_participants';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ReFlightParticipantData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('contest_id')) {
+      context.handle(
+        _contestIdMeta,
+        contestId.isAcceptableOrUnknown(data['contest_id']!, _contestIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_contestIdMeta);
+    }
+    if (data.containsKey('re_flight_id')) {
+      context.handle(
+        _reFlightIdMeta,
+        reFlightId.isAcceptableOrUnknown(
+          data['re_flight_id']!,
+          _reFlightIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_reFlightIdMeta);
+    }
+    if (data.containsKey('contest_participation_id')) {
+      context.handle(
+        _contestParticipationIdMeta,
+        contestParticipationId.isAcceptableOrUnknown(
+          data['contest_participation_id']!,
+          _contestParticipationIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_contestParticipationIdMeta);
+    }
+    if (data.containsKey('role')) {
+      context.handle(
+        _roleMeta,
+        role.isAcceptableOrUnknown(data['role']!, _roleMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_roleMeta);
+    }
+    if (data.containsKey('excluded_reason')) {
+      context.handle(
+        _excludedReasonMeta,
+        excludedReason.isAcceptableOrUnknown(
+          data['excluded_reason']!,
+          _excludedReasonMeta,
+        ),
+      );
+    }
+    if (data.containsKey('draw_position')) {
+      context.handle(
+        _drawPositionMeta,
+        drawPosition.isAcceptableOrUnknown(
+          data['draw_position']!,
+          _drawPositionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('response')) {
+      context.handle(
+        _responseMeta,
+        response.isAcceptableOrUnknown(data['response']!, _responseMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_responseMeta);
+    }
+    if (data.containsKey('responded_by')) {
+      context.handle(
+        _respondedByMeta,
+        respondedBy.isAcceptableOrUnknown(
+          data['responded_by']!,
+          _respondedByMeta,
+        ),
+      );
+    }
+    if (data.containsKey('responded_at')) {
+      context.handle(
+        _respondedAtMeta,
+        respondedAt.isAcceptableOrUnknown(
+          data['responded_at']!,
+          _respondedAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('notification_state')) {
+      context.handle(
+        _notificationStateMeta,
+        notificationState.isAcceptableOrUnknown(
+          data['notification_state']!,
+          _notificationStateMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_notificationStateMeta);
+    }
+    if (data.containsKey('notified_at')) {
+      context.handle(
+        _notifiedAtMeta,
+        notifiedAt.isAcceptableOrUnknown(data['notified_at']!, _notifiedAtMeta),
+      );
+    }
+    if (data.containsKey('acknowledged_at')) {
+      context.handle(
+        _acknowledgedAtMeta,
+        acknowledgedAt.isAcceptableOrUnknown(
+          data['acknowledged_at']!,
+          _acknowledgedAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('assignment_id')) {
+      context.handle(
+        _assignmentIdMeta,
+        assignmentId.isAcceptableOrUnknown(
+          data['assignment_id']!,
+          _assignmentIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('revision')) {
+      context.handle(
+        _revisionMeta,
+        revision.isAcceptableOrUnknown(data['revision']!, _revisionMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {reFlightId, contestParticipationId},
+  ];
+  @override
+  ReFlightParticipantData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ReFlightParticipantData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      contestId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}contest_id'],
+      )!,
+      reFlightId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}re_flight_id'],
+      )!,
+      contestParticipationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}contest_participation_id'],
+      )!,
+      role: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}role'],
+      )!,
+      excludedReason: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}excluded_reason'],
+      ),
+      drawPosition: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}draw_position'],
+      ),
+      response: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}response'],
+      )!,
+      respondedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}responded_by'],
+      ),
+      respondedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}responded_at'],
+      ),
+      notificationState: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}notification_state'],
+      )!,
+      notifiedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}notified_at'],
+      ),
+      acknowledgedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}acknowledged_at'],
+      ),
+      assignmentId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}assignment_id'],
+      ),
+      revision: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}revision'],
+      )!,
+    );
+  }
+
+  @override
+  $ReFlightParticipantsTable createAlias(String alias) {
+    return $ReFlightParticipantsTable(attachedDatabase, alias);
+  }
+}
+
+class ReFlightParticipantData extends DataClass
+    implements Insertable<ReFlightParticipantData> {
+  final String id;
+  final String contestId;
+  final String reFlightId;
+  final String contestParticipationId;
+  final String role;
+  final String? excludedReason;
+  final int? drawPosition;
+  final String response;
+  final String? respondedBy;
+  final String? respondedAt;
+  final String notificationState;
+  final String? notifiedAt;
+  final String? acknowledgedAt;
+  final String? assignmentId;
+  final int revision;
+  const ReFlightParticipantData({
+    required this.id,
+    required this.contestId,
+    required this.reFlightId,
+    required this.contestParticipationId,
+    required this.role,
+    this.excludedReason,
+    this.drawPosition,
+    required this.response,
+    this.respondedBy,
+    this.respondedAt,
+    required this.notificationState,
+    this.notifiedAt,
+    this.acknowledgedAt,
+    this.assignmentId,
+    required this.revision,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['contest_id'] = Variable<String>(contestId);
+    map['re_flight_id'] = Variable<String>(reFlightId);
+    map['contest_participation_id'] = Variable<String>(contestParticipationId);
+    map['role'] = Variable<String>(role);
+    if (!nullToAbsent || excludedReason != null) {
+      map['excluded_reason'] = Variable<String>(excludedReason);
+    }
+    if (!nullToAbsent || drawPosition != null) {
+      map['draw_position'] = Variable<int>(drawPosition);
+    }
+    map['response'] = Variable<String>(response);
+    if (!nullToAbsent || respondedBy != null) {
+      map['responded_by'] = Variable<String>(respondedBy);
+    }
+    if (!nullToAbsent || respondedAt != null) {
+      map['responded_at'] = Variable<String>(respondedAt);
+    }
+    map['notification_state'] = Variable<String>(notificationState);
+    if (!nullToAbsent || notifiedAt != null) {
+      map['notified_at'] = Variable<String>(notifiedAt);
+    }
+    if (!nullToAbsent || acknowledgedAt != null) {
+      map['acknowledged_at'] = Variable<String>(acknowledgedAt);
+    }
+    if (!nullToAbsent || assignmentId != null) {
+      map['assignment_id'] = Variable<String>(assignmentId);
+    }
+    map['revision'] = Variable<int>(revision);
+    return map;
+  }
+
+  ReFlightParticipantsCompanion toCompanion(bool nullToAbsent) {
+    return ReFlightParticipantsCompanion(
+      id: Value(id),
+      contestId: Value(contestId),
+      reFlightId: Value(reFlightId),
+      contestParticipationId: Value(contestParticipationId),
+      role: Value(role),
+      excludedReason: excludedReason == null && nullToAbsent
+          ? const Value.absent()
+          : Value(excludedReason),
+      drawPosition: drawPosition == null && nullToAbsent
+          ? const Value.absent()
+          : Value(drawPosition),
+      response: Value(response),
+      respondedBy: respondedBy == null && nullToAbsent
+          ? const Value.absent()
+          : Value(respondedBy),
+      respondedAt: respondedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(respondedAt),
+      notificationState: Value(notificationState),
+      notifiedAt: notifiedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(notifiedAt),
+      acknowledgedAt: acknowledgedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(acknowledgedAt),
+      assignmentId: assignmentId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(assignmentId),
+      revision: Value(revision),
+    );
+  }
+
+  factory ReFlightParticipantData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ReFlightParticipantData(
+      id: serializer.fromJson<String>(json['id']),
+      contestId: serializer.fromJson<String>(json['contestId']),
+      reFlightId: serializer.fromJson<String>(json['reFlightId']),
+      contestParticipationId: serializer.fromJson<String>(
+        json['contestParticipationId'],
+      ),
+      role: serializer.fromJson<String>(json['role']),
+      excludedReason: serializer.fromJson<String?>(json['excludedReason']),
+      drawPosition: serializer.fromJson<int?>(json['drawPosition']),
+      response: serializer.fromJson<String>(json['response']),
+      respondedBy: serializer.fromJson<String?>(json['respondedBy']),
+      respondedAt: serializer.fromJson<String?>(json['respondedAt']),
+      notificationState: serializer.fromJson<String>(json['notificationState']),
+      notifiedAt: serializer.fromJson<String?>(json['notifiedAt']),
+      acknowledgedAt: serializer.fromJson<String?>(json['acknowledgedAt']),
+      assignmentId: serializer.fromJson<String?>(json['assignmentId']),
+      revision: serializer.fromJson<int>(json['revision']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'contestId': serializer.toJson<String>(contestId),
+      'reFlightId': serializer.toJson<String>(reFlightId),
+      'contestParticipationId': serializer.toJson<String>(
+        contestParticipationId,
+      ),
+      'role': serializer.toJson<String>(role),
+      'excludedReason': serializer.toJson<String?>(excludedReason),
+      'drawPosition': serializer.toJson<int?>(drawPosition),
+      'response': serializer.toJson<String>(response),
+      'respondedBy': serializer.toJson<String?>(respondedBy),
+      'respondedAt': serializer.toJson<String?>(respondedAt),
+      'notificationState': serializer.toJson<String>(notificationState),
+      'notifiedAt': serializer.toJson<String?>(notifiedAt),
+      'acknowledgedAt': serializer.toJson<String?>(acknowledgedAt),
+      'assignmentId': serializer.toJson<String?>(assignmentId),
+      'revision': serializer.toJson<int>(revision),
+    };
+  }
+
+  ReFlightParticipantData copyWith({
+    String? id,
+    String? contestId,
+    String? reFlightId,
+    String? contestParticipationId,
+    String? role,
+    Value<String?> excludedReason = const Value.absent(),
+    Value<int?> drawPosition = const Value.absent(),
+    String? response,
+    Value<String?> respondedBy = const Value.absent(),
+    Value<String?> respondedAt = const Value.absent(),
+    String? notificationState,
+    Value<String?> notifiedAt = const Value.absent(),
+    Value<String?> acknowledgedAt = const Value.absent(),
+    Value<String?> assignmentId = const Value.absent(),
+    int? revision,
+  }) => ReFlightParticipantData(
+    id: id ?? this.id,
+    contestId: contestId ?? this.contestId,
+    reFlightId: reFlightId ?? this.reFlightId,
+    contestParticipationId:
+        contestParticipationId ?? this.contestParticipationId,
+    role: role ?? this.role,
+    excludedReason: excludedReason.present
+        ? excludedReason.value
+        : this.excludedReason,
+    drawPosition: drawPosition.present ? drawPosition.value : this.drawPosition,
+    response: response ?? this.response,
+    respondedBy: respondedBy.present ? respondedBy.value : this.respondedBy,
+    respondedAt: respondedAt.present ? respondedAt.value : this.respondedAt,
+    notificationState: notificationState ?? this.notificationState,
+    notifiedAt: notifiedAt.present ? notifiedAt.value : this.notifiedAt,
+    acknowledgedAt: acknowledgedAt.present
+        ? acknowledgedAt.value
+        : this.acknowledgedAt,
+    assignmentId: assignmentId.present ? assignmentId.value : this.assignmentId,
+    revision: revision ?? this.revision,
+  );
+  ReFlightParticipantData copyWithCompanion(
+    ReFlightParticipantsCompanion data,
+  ) {
+    return ReFlightParticipantData(
+      id: data.id.present ? data.id.value : this.id,
+      contestId: data.contestId.present ? data.contestId.value : this.contestId,
+      reFlightId: data.reFlightId.present
+          ? data.reFlightId.value
+          : this.reFlightId,
+      contestParticipationId: data.contestParticipationId.present
+          ? data.contestParticipationId.value
+          : this.contestParticipationId,
+      role: data.role.present ? data.role.value : this.role,
+      excludedReason: data.excludedReason.present
+          ? data.excludedReason.value
+          : this.excludedReason,
+      drawPosition: data.drawPosition.present
+          ? data.drawPosition.value
+          : this.drawPosition,
+      response: data.response.present ? data.response.value : this.response,
+      respondedBy: data.respondedBy.present
+          ? data.respondedBy.value
+          : this.respondedBy,
+      respondedAt: data.respondedAt.present
+          ? data.respondedAt.value
+          : this.respondedAt,
+      notificationState: data.notificationState.present
+          ? data.notificationState.value
+          : this.notificationState,
+      notifiedAt: data.notifiedAt.present
+          ? data.notifiedAt.value
+          : this.notifiedAt,
+      acknowledgedAt: data.acknowledgedAt.present
+          ? data.acknowledgedAt.value
+          : this.acknowledgedAt,
+      assignmentId: data.assignmentId.present
+          ? data.assignmentId.value
+          : this.assignmentId,
+      revision: data.revision.present ? data.revision.value : this.revision,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ReFlightParticipantData(')
+          ..write('id: $id, ')
+          ..write('contestId: $contestId, ')
+          ..write('reFlightId: $reFlightId, ')
+          ..write('contestParticipationId: $contestParticipationId, ')
+          ..write('role: $role, ')
+          ..write('excludedReason: $excludedReason, ')
+          ..write('drawPosition: $drawPosition, ')
+          ..write('response: $response, ')
+          ..write('respondedBy: $respondedBy, ')
+          ..write('respondedAt: $respondedAt, ')
+          ..write('notificationState: $notificationState, ')
+          ..write('notifiedAt: $notifiedAt, ')
+          ..write('acknowledgedAt: $acknowledgedAt, ')
+          ..write('assignmentId: $assignmentId, ')
+          ..write('revision: $revision')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    contestId,
+    reFlightId,
+    contestParticipationId,
+    role,
+    excludedReason,
+    drawPosition,
+    response,
+    respondedBy,
+    respondedAt,
+    notificationState,
+    notifiedAt,
+    acknowledgedAt,
+    assignmentId,
+    revision,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ReFlightParticipantData &&
+          other.id == this.id &&
+          other.contestId == this.contestId &&
+          other.reFlightId == this.reFlightId &&
+          other.contestParticipationId == this.contestParticipationId &&
+          other.role == this.role &&
+          other.excludedReason == this.excludedReason &&
+          other.drawPosition == this.drawPosition &&
+          other.response == this.response &&
+          other.respondedBy == this.respondedBy &&
+          other.respondedAt == this.respondedAt &&
+          other.notificationState == this.notificationState &&
+          other.notifiedAt == this.notifiedAt &&
+          other.acknowledgedAt == this.acknowledgedAt &&
+          other.assignmentId == this.assignmentId &&
+          other.revision == this.revision);
+}
+
+class ReFlightParticipantsCompanion
+    extends UpdateCompanion<ReFlightParticipantData> {
+  final Value<String> id;
+  final Value<String> contestId;
+  final Value<String> reFlightId;
+  final Value<String> contestParticipationId;
+  final Value<String> role;
+  final Value<String?> excludedReason;
+  final Value<int?> drawPosition;
+  final Value<String> response;
+  final Value<String?> respondedBy;
+  final Value<String?> respondedAt;
+  final Value<String> notificationState;
+  final Value<String?> notifiedAt;
+  final Value<String?> acknowledgedAt;
+  final Value<String?> assignmentId;
+  final Value<int> revision;
+  final Value<int> rowid;
+  const ReFlightParticipantsCompanion({
+    this.id = const Value.absent(),
+    this.contestId = const Value.absent(),
+    this.reFlightId = const Value.absent(),
+    this.contestParticipationId = const Value.absent(),
+    this.role = const Value.absent(),
+    this.excludedReason = const Value.absent(),
+    this.drawPosition = const Value.absent(),
+    this.response = const Value.absent(),
+    this.respondedBy = const Value.absent(),
+    this.respondedAt = const Value.absent(),
+    this.notificationState = const Value.absent(),
+    this.notifiedAt = const Value.absent(),
+    this.acknowledgedAt = const Value.absent(),
+    this.assignmentId = const Value.absent(),
+    this.revision = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ReFlightParticipantsCompanion.insert({
+    required String id,
+    required String contestId,
+    required String reFlightId,
+    required String contestParticipationId,
+    required String role,
+    this.excludedReason = const Value.absent(),
+    this.drawPosition = const Value.absent(),
+    required String response,
+    this.respondedBy = const Value.absent(),
+    this.respondedAt = const Value.absent(),
+    required String notificationState,
+    this.notifiedAt = const Value.absent(),
+    this.acknowledgedAt = const Value.absent(),
+    this.assignmentId = const Value.absent(),
+    this.revision = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       contestId = Value(contestId),
+       reFlightId = Value(reFlightId),
+       contestParticipationId = Value(contestParticipationId),
+       role = Value(role),
+       response = Value(response),
+       notificationState = Value(notificationState);
+  static Insertable<ReFlightParticipantData> custom({
+    Expression<String>? id,
+    Expression<String>? contestId,
+    Expression<String>? reFlightId,
+    Expression<String>? contestParticipationId,
+    Expression<String>? role,
+    Expression<String>? excludedReason,
+    Expression<int>? drawPosition,
+    Expression<String>? response,
+    Expression<String>? respondedBy,
+    Expression<String>? respondedAt,
+    Expression<String>? notificationState,
+    Expression<String>? notifiedAt,
+    Expression<String>? acknowledgedAt,
+    Expression<String>? assignmentId,
+    Expression<int>? revision,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (contestId != null) 'contest_id': contestId,
+      if (reFlightId != null) 're_flight_id': reFlightId,
+      if (contestParticipationId != null)
+        'contest_participation_id': contestParticipationId,
+      if (role != null) 'role': role,
+      if (excludedReason != null) 'excluded_reason': excludedReason,
+      if (drawPosition != null) 'draw_position': drawPosition,
+      if (response != null) 'response': response,
+      if (respondedBy != null) 'responded_by': respondedBy,
+      if (respondedAt != null) 'responded_at': respondedAt,
+      if (notificationState != null) 'notification_state': notificationState,
+      if (notifiedAt != null) 'notified_at': notifiedAt,
+      if (acknowledgedAt != null) 'acknowledged_at': acknowledgedAt,
+      if (assignmentId != null) 'assignment_id': assignmentId,
+      if (revision != null) 'revision': revision,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ReFlightParticipantsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? contestId,
+    Value<String>? reFlightId,
+    Value<String>? contestParticipationId,
+    Value<String>? role,
+    Value<String?>? excludedReason,
+    Value<int?>? drawPosition,
+    Value<String>? response,
+    Value<String?>? respondedBy,
+    Value<String?>? respondedAt,
+    Value<String>? notificationState,
+    Value<String?>? notifiedAt,
+    Value<String?>? acknowledgedAt,
+    Value<String?>? assignmentId,
+    Value<int>? revision,
+    Value<int>? rowid,
+  }) {
+    return ReFlightParticipantsCompanion(
+      id: id ?? this.id,
+      contestId: contestId ?? this.contestId,
+      reFlightId: reFlightId ?? this.reFlightId,
+      contestParticipationId:
+          contestParticipationId ?? this.contestParticipationId,
+      role: role ?? this.role,
+      excludedReason: excludedReason ?? this.excludedReason,
+      drawPosition: drawPosition ?? this.drawPosition,
+      response: response ?? this.response,
+      respondedBy: respondedBy ?? this.respondedBy,
+      respondedAt: respondedAt ?? this.respondedAt,
+      notificationState: notificationState ?? this.notificationState,
+      notifiedAt: notifiedAt ?? this.notifiedAt,
+      acknowledgedAt: acknowledgedAt ?? this.acknowledgedAt,
+      assignmentId: assignmentId ?? this.assignmentId,
+      revision: revision ?? this.revision,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (contestId.present) {
+      map['contest_id'] = Variable<String>(contestId.value);
+    }
+    if (reFlightId.present) {
+      map['re_flight_id'] = Variable<String>(reFlightId.value);
+    }
+    if (contestParticipationId.present) {
+      map['contest_participation_id'] = Variable<String>(
+        contestParticipationId.value,
+      );
+    }
+    if (role.present) {
+      map['role'] = Variable<String>(role.value);
+    }
+    if (excludedReason.present) {
+      map['excluded_reason'] = Variable<String>(excludedReason.value);
+    }
+    if (drawPosition.present) {
+      map['draw_position'] = Variable<int>(drawPosition.value);
+    }
+    if (response.present) {
+      map['response'] = Variable<String>(response.value);
+    }
+    if (respondedBy.present) {
+      map['responded_by'] = Variable<String>(respondedBy.value);
+    }
+    if (respondedAt.present) {
+      map['responded_at'] = Variable<String>(respondedAt.value);
+    }
+    if (notificationState.present) {
+      map['notification_state'] = Variable<String>(notificationState.value);
+    }
+    if (notifiedAt.present) {
+      map['notified_at'] = Variable<String>(notifiedAt.value);
+    }
+    if (acknowledgedAt.present) {
+      map['acknowledged_at'] = Variable<String>(acknowledgedAt.value);
+    }
+    if (assignmentId.present) {
+      map['assignment_id'] = Variable<String>(assignmentId.value);
+    }
+    if (revision.present) {
+      map['revision'] = Variable<int>(revision.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ReFlightParticipantsCompanion(')
+          ..write('id: $id, ')
+          ..write('contestId: $contestId, ')
+          ..write('reFlightId: $reFlightId, ')
+          ..write('contestParticipationId: $contestParticipationId, ')
+          ..write('role: $role, ')
+          ..write('excludedReason: $excludedReason, ')
+          ..write('drawPosition: $drawPosition, ')
+          ..write('response: $response, ')
+          ..write('respondedBy: $respondedBy, ')
+          ..write('respondedAt: $respondedAt, ')
+          ..write('notificationState: $notificationState, ')
+          ..write('notifiedAt: $notifiedAt, ')
+          ..write('acknowledgedAt: $acknowledgedAt, ')
+          ..write('assignmentId: $assignmentId, ')
+          ..write('revision: $revision, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ScorePlaceholdersTable extends ScorePlaceholders
+    with TableInfo<$ScorePlaceholdersTable, ScorePlaceholderData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ScorePlaceholdersTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _contestIdMeta = const VerificationMeta(
+    'contestId',
+  );
+  @override
+  late final GeneratedColumn<String> contestId = GeneratedColumn<String>(
+    'contest_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES contests (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _contestParticipationIdMeta =
+      const VerificationMeta('contestParticipationId');
+  @override
+  late final GeneratedColumn<String> contestParticipationId =
+      GeneratedColumn<String>(
+        'contest_participation_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+        defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES contest_participations (id)',
+        ),
+      );
+  static const VerificationMeta _assignmentIdMeta = const VerificationMeta(
+    'assignmentId',
+  );
+  @override
+  late final GeneratedColumn<String> assignmentId = GeneratedColumn<String>(
+    'assignment_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES matrix_assignments (id)',
+    ),
+  );
+  static const VerificationMeta _stateMeta = const VerificationMeta('state');
+  @override
+  late final GeneratedColumn<String> state = GeneratedColumn<String>(
+    'state',
+    aliasedName,
+    false,
+    check: () => state.isIn(scorePlaceholderStateValues),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _scoreRevisionMeta = const VerificationMeta(
+    'scoreRevision',
+  );
+  @override
+  late final GeneratedColumn<int> scoreRevision = GeneratedColumn<int>(
+    'score_revision',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _lockedByMeta = const VerificationMeta(
+    'lockedBy',
+  );
+  @override
+  late final GeneratedColumn<String> lockedBy = GeneratedColumn<String>(
+    'locked_by',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _lockedAtMeta = const VerificationMeta(
+    'lockedAt',
+  );
+  @override
+  late final GeneratedColumn<String> lockedAt = GeneratedColumn<String>(
+    'locked_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _revisionMeta = const VerificationMeta(
+    'revision',
+  );
+  @override
+  late final GeneratedColumn<int> revision = GeneratedColumn<int>(
+    'revision',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    contestId,
+    contestParticipationId,
+    assignmentId,
+    state,
+    scoreRevision,
+    lockedBy,
+    lockedAt,
+    revision,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'score_placeholders';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ScorePlaceholderData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('contest_id')) {
+      context.handle(
+        _contestIdMeta,
+        contestId.isAcceptableOrUnknown(data['contest_id']!, _contestIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_contestIdMeta);
+    }
+    if (data.containsKey('contest_participation_id')) {
+      context.handle(
+        _contestParticipationIdMeta,
+        contestParticipationId.isAcceptableOrUnknown(
+          data['contest_participation_id']!,
+          _contestParticipationIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_contestParticipationIdMeta);
+    }
+    if (data.containsKey('assignment_id')) {
+      context.handle(
+        _assignmentIdMeta,
+        assignmentId.isAcceptableOrUnknown(
+          data['assignment_id']!,
+          _assignmentIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_assignmentIdMeta);
+    }
+    if (data.containsKey('state')) {
+      context.handle(
+        _stateMeta,
+        state.isAcceptableOrUnknown(data['state']!, _stateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_stateMeta);
+    }
+    if (data.containsKey('score_revision')) {
+      context.handle(
+        _scoreRevisionMeta,
+        scoreRevision.isAcceptableOrUnknown(
+          data['score_revision']!,
+          _scoreRevisionMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_scoreRevisionMeta);
+    }
+    if (data.containsKey('locked_by')) {
+      context.handle(
+        _lockedByMeta,
+        lockedBy.isAcceptableOrUnknown(data['locked_by']!, _lockedByMeta),
+      );
+    }
+    if (data.containsKey('locked_at')) {
+      context.handle(
+        _lockedAtMeta,
+        lockedAt.isAcceptableOrUnknown(data['locked_at']!, _lockedAtMeta),
+      );
+    }
+    if (data.containsKey('revision')) {
+      context.handle(
+        _revisionMeta,
+        revision.isAcceptableOrUnknown(data['revision']!, _revisionMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {assignmentId},
+  ];
+  @override
+  ScorePlaceholderData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ScorePlaceholderData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      contestId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}contest_id'],
+      )!,
+      contestParticipationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}contest_participation_id'],
+      )!,
+      assignmentId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}assignment_id'],
+      )!,
+      state: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}state'],
+      )!,
+      scoreRevision: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}score_revision'],
+      )!,
+      lockedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}locked_by'],
+      ),
+      lockedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}locked_at'],
+      ),
+      revision: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}revision'],
+      )!,
+    );
+  }
+
+  @override
+  $ScorePlaceholdersTable createAlias(String alias) {
+    return $ScorePlaceholdersTable(attachedDatabase, alias);
+  }
+}
+
+class ScorePlaceholderData extends DataClass
+    implements Insertable<ScorePlaceholderData> {
+  final String id;
+  final String contestId;
+  final String contestParticipationId;
+  final String assignmentId;
+  final String state;
+  final int scoreRevision;
+  final String? lockedBy;
+  final String? lockedAt;
+  final int revision;
+  const ScorePlaceholderData({
+    required this.id,
+    required this.contestId,
+    required this.contestParticipationId,
+    required this.assignmentId,
+    required this.state,
+    required this.scoreRevision,
+    this.lockedBy,
+    this.lockedAt,
+    required this.revision,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['contest_id'] = Variable<String>(contestId);
+    map['contest_participation_id'] = Variable<String>(contestParticipationId);
+    map['assignment_id'] = Variable<String>(assignmentId);
+    map['state'] = Variable<String>(state);
+    map['score_revision'] = Variable<int>(scoreRevision);
+    if (!nullToAbsent || lockedBy != null) {
+      map['locked_by'] = Variable<String>(lockedBy);
+    }
+    if (!nullToAbsent || lockedAt != null) {
+      map['locked_at'] = Variable<String>(lockedAt);
+    }
+    map['revision'] = Variable<int>(revision);
+    return map;
+  }
+
+  ScorePlaceholdersCompanion toCompanion(bool nullToAbsent) {
+    return ScorePlaceholdersCompanion(
+      id: Value(id),
+      contestId: Value(contestId),
+      contestParticipationId: Value(contestParticipationId),
+      assignmentId: Value(assignmentId),
+      state: Value(state),
+      scoreRevision: Value(scoreRevision),
+      lockedBy: lockedBy == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lockedBy),
+      lockedAt: lockedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lockedAt),
+      revision: Value(revision),
+    );
+  }
+
+  factory ScorePlaceholderData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ScorePlaceholderData(
+      id: serializer.fromJson<String>(json['id']),
+      contestId: serializer.fromJson<String>(json['contestId']),
+      contestParticipationId: serializer.fromJson<String>(
+        json['contestParticipationId'],
+      ),
+      assignmentId: serializer.fromJson<String>(json['assignmentId']),
+      state: serializer.fromJson<String>(json['state']),
+      scoreRevision: serializer.fromJson<int>(json['scoreRevision']),
+      lockedBy: serializer.fromJson<String?>(json['lockedBy']),
+      lockedAt: serializer.fromJson<String?>(json['lockedAt']),
+      revision: serializer.fromJson<int>(json['revision']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'contestId': serializer.toJson<String>(contestId),
+      'contestParticipationId': serializer.toJson<String>(
+        contestParticipationId,
+      ),
+      'assignmentId': serializer.toJson<String>(assignmentId),
+      'state': serializer.toJson<String>(state),
+      'scoreRevision': serializer.toJson<int>(scoreRevision),
+      'lockedBy': serializer.toJson<String?>(lockedBy),
+      'lockedAt': serializer.toJson<String?>(lockedAt),
+      'revision': serializer.toJson<int>(revision),
+    };
+  }
+
+  ScorePlaceholderData copyWith({
+    String? id,
+    String? contestId,
+    String? contestParticipationId,
+    String? assignmentId,
+    String? state,
+    int? scoreRevision,
+    Value<String?> lockedBy = const Value.absent(),
+    Value<String?> lockedAt = const Value.absent(),
+    int? revision,
+  }) => ScorePlaceholderData(
+    id: id ?? this.id,
+    contestId: contestId ?? this.contestId,
+    contestParticipationId:
+        contestParticipationId ?? this.contestParticipationId,
+    assignmentId: assignmentId ?? this.assignmentId,
+    state: state ?? this.state,
+    scoreRevision: scoreRevision ?? this.scoreRevision,
+    lockedBy: lockedBy.present ? lockedBy.value : this.lockedBy,
+    lockedAt: lockedAt.present ? lockedAt.value : this.lockedAt,
+    revision: revision ?? this.revision,
+  );
+  ScorePlaceholderData copyWithCompanion(ScorePlaceholdersCompanion data) {
+    return ScorePlaceholderData(
+      id: data.id.present ? data.id.value : this.id,
+      contestId: data.contestId.present ? data.contestId.value : this.contestId,
+      contestParticipationId: data.contestParticipationId.present
+          ? data.contestParticipationId.value
+          : this.contestParticipationId,
+      assignmentId: data.assignmentId.present
+          ? data.assignmentId.value
+          : this.assignmentId,
+      state: data.state.present ? data.state.value : this.state,
+      scoreRevision: data.scoreRevision.present
+          ? data.scoreRevision.value
+          : this.scoreRevision,
+      lockedBy: data.lockedBy.present ? data.lockedBy.value : this.lockedBy,
+      lockedAt: data.lockedAt.present ? data.lockedAt.value : this.lockedAt,
+      revision: data.revision.present ? data.revision.value : this.revision,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ScorePlaceholderData(')
+          ..write('id: $id, ')
+          ..write('contestId: $contestId, ')
+          ..write('contestParticipationId: $contestParticipationId, ')
+          ..write('assignmentId: $assignmentId, ')
+          ..write('state: $state, ')
+          ..write('scoreRevision: $scoreRevision, ')
+          ..write('lockedBy: $lockedBy, ')
+          ..write('lockedAt: $lockedAt, ')
+          ..write('revision: $revision')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    contestId,
+    contestParticipationId,
+    assignmentId,
+    state,
+    scoreRevision,
+    lockedBy,
+    lockedAt,
+    revision,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ScorePlaceholderData &&
+          other.id == this.id &&
+          other.contestId == this.contestId &&
+          other.contestParticipationId == this.contestParticipationId &&
+          other.assignmentId == this.assignmentId &&
+          other.state == this.state &&
+          other.scoreRevision == this.scoreRevision &&
+          other.lockedBy == this.lockedBy &&
+          other.lockedAt == this.lockedAt &&
+          other.revision == this.revision);
+}
+
+class ScorePlaceholdersCompanion extends UpdateCompanion<ScorePlaceholderData> {
+  final Value<String> id;
+  final Value<String> contestId;
+  final Value<String> contestParticipationId;
+  final Value<String> assignmentId;
+  final Value<String> state;
+  final Value<int> scoreRevision;
+  final Value<String?> lockedBy;
+  final Value<String?> lockedAt;
+  final Value<int> revision;
+  final Value<int> rowid;
+  const ScorePlaceholdersCompanion({
+    this.id = const Value.absent(),
+    this.contestId = const Value.absent(),
+    this.contestParticipationId = const Value.absent(),
+    this.assignmentId = const Value.absent(),
+    this.state = const Value.absent(),
+    this.scoreRevision = const Value.absent(),
+    this.lockedBy = const Value.absent(),
+    this.lockedAt = const Value.absent(),
+    this.revision = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ScorePlaceholdersCompanion.insert({
+    required String id,
+    required String contestId,
+    required String contestParticipationId,
+    required String assignmentId,
+    required String state,
+    required int scoreRevision,
+    this.lockedBy = const Value.absent(),
+    this.lockedAt = const Value.absent(),
+    this.revision = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       contestId = Value(contestId),
+       contestParticipationId = Value(contestParticipationId),
+       assignmentId = Value(assignmentId),
+       state = Value(state),
+       scoreRevision = Value(scoreRevision);
+  static Insertable<ScorePlaceholderData> custom({
+    Expression<String>? id,
+    Expression<String>? contestId,
+    Expression<String>? contestParticipationId,
+    Expression<String>? assignmentId,
+    Expression<String>? state,
+    Expression<int>? scoreRevision,
+    Expression<String>? lockedBy,
+    Expression<String>? lockedAt,
+    Expression<int>? revision,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (contestId != null) 'contest_id': contestId,
+      if (contestParticipationId != null)
+        'contest_participation_id': contestParticipationId,
+      if (assignmentId != null) 'assignment_id': assignmentId,
+      if (state != null) 'state': state,
+      if (scoreRevision != null) 'score_revision': scoreRevision,
+      if (lockedBy != null) 'locked_by': lockedBy,
+      if (lockedAt != null) 'locked_at': lockedAt,
+      if (revision != null) 'revision': revision,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ScorePlaceholdersCompanion copyWith({
+    Value<String>? id,
+    Value<String>? contestId,
+    Value<String>? contestParticipationId,
+    Value<String>? assignmentId,
+    Value<String>? state,
+    Value<int>? scoreRevision,
+    Value<String?>? lockedBy,
+    Value<String?>? lockedAt,
+    Value<int>? revision,
+    Value<int>? rowid,
+  }) {
+    return ScorePlaceholdersCompanion(
+      id: id ?? this.id,
+      contestId: contestId ?? this.contestId,
+      contestParticipationId:
+          contestParticipationId ?? this.contestParticipationId,
+      assignmentId: assignmentId ?? this.assignmentId,
+      state: state ?? this.state,
+      scoreRevision: scoreRevision ?? this.scoreRevision,
+      lockedBy: lockedBy ?? this.lockedBy,
+      lockedAt: lockedAt ?? this.lockedAt,
+      revision: revision ?? this.revision,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (contestId.present) {
+      map['contest_id'] = Variable<String>(contestId.value);
+    }
+    if (contestParticipationId.present) {
+      map['contest_participation_id'] = Variable<String>(
+        contestParticipationId.value,
+      );
+    }
+    if (assignmentId.present) {
+      map['assignment_id'] = Variable<String>(assignmentId.value);
+    }
+    if (state.present) {
+      map['state'] = Variable<String>(state.value);
+    }
+    if (scoreRevision.present) {
+      map['score_revision'] = Variable<int>(scoreRevision.value);
+    }
+    if (lockedBy.present) {
+      map['locked_by'] = Variable<String>(lockedBy.value);
+    }
+    if (lockedAt.present) {
+      map['locked_at'] = Variable<String>(lockedAt.value);
+    }
+    if (revision.present) {
+      map['revision'] = Variable<int>(revision.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ScorePlaceholdersCompanion(')
+          ..write('id: $id, ')
+          ..write('contestId: $contestId, ')
+          ..write('contestParticipationId: $contestParticipationId, ')
+          ..write('assignmentId: $assignmentId, ')
+          ..write('state: $state, ')
+          ..write('scoreRevision: $scoreRevision, ')
+          ..write('lockedBy: $lockedBy, ')
+          ..write('lockedAt: $lockedAt, ')
+          ..write('revision: $revision, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ScoreAttemptsTable extends ScoreAttempts
+    with TableInfo<$ScoreAttemptsTable, ScoreAttemptData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ScoreAttemptsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _contestIdMeta = const VerificationMeta(
+    'contestId',
+  );
+  @override
+  late final GeneratedColumn<String> contestId = GeneratedColumn<String>(
+    'contest_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES contests (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _scorePlaceholderIdMeta =
+      const VerificationMeta('scorePlaceholderId');
+  @override
+  late final GeneratedColumn<String> scorePlaceholderId =
+      GeneratedColumn<String>(
+        'score_placeholder_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+        defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES score_placeholders (id)',
+        ),
+      );
+  static const VerificationMeta _configRevisionIdMeta = const VerificationMeta(
+    'configRevisionId',
+  );
+  @override
+  late final GeneratedColumn<String> configRevisionId = GeneratedColumn<String>(
+    'config_revision_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES contest_configuration_revisions (id)',
+    ),
+  );
+  static const VerificationMeta _matrixRevisionIdMeta = const VerificationMeta(
+    'matrixRevisionId',
+  );
+  @override
+  late final GeneratedColumn<String> matrixRevisionId = GeneratedColumn<String>(
+    'matrix_revision_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES matrix_revisions (id)',
+    ),
+  );
+  static const VerificationMeta _rawComponentsMeta = const VerificationMeta(
+    'rawComponents',
+  );
+  @override
+  late final GeneratedColumn<String> rawComponents = GeneratedColumn<String>(
+    'raw_components',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _actorIdMeta = const VerificationMeta(
+    'actorId',
+  );
+  @override
+  late final GeneratedColumn<String> actorId = GeneratedColumn<String>(
+    'actor_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _authorityMeta = const VerificationMeta(
+    'authority',
+  );
+  @override
+  late final GeneratedColumn<String> authority = GeneratedColumn<String>(
+    'authority',
+    aliasedName,
+    false,
+    check: () => authority.isIn(authorityValues),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _invitationIdMeta = const VerificationMeta(
+    'invitationId',
+  );
+  @override
+  late final GeneratedColumn<String> invitationId = GeneratedColumn<String>(
+    'invitation_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _sourceDeviceMeta = const VerificationMeta(
+    'sourceDevice',
+  );
+  @override
+  late final GeneratedColumn<String> sourceDevice = GeneratedColumn<String>(
+    'source_device',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _clientMutationIdMeta = const VerificationMeta(
+    'clientMutationId',
+  );
+  @override
+  late final GeneratedColumn<String> clientMutationId = GeneratedColumn<String>(
+    'client_mutation_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _baseScoreRevisionMeta = const VerificationMeta(
+    'baseScoreRevision',
+  );
+  @override
+  late final GeneratedColumn<int> baseScoreRevision = GeneratedColumn<int>(
+    'base_score_revision',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    contestId,
+    scorePlaceholderId,
+    configRevisionId,
+    matrixRevisionId,
+    rawComponents,
+    actorId,
+    authority,
+    invitationId,
+    sourceDevice,
+    clientMutationId,
+    baseScoreRevision,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'score_attempts';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ScoreAttemptData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('contest_id')) {
+      context.handle(
+        _contestIdMeta,
+        contestId.isAcceptableOrUnknown(data['contest_id']!, _contestIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_contestIdMeta);
+    }
+    if (data.containsKey('score_placeholder_id')) {
+      context.handle(
+        _scorePlaceholderIdMeta,
+        scorePlaceholderId.isAcceptableOrUnknown(
+          data['score_placeholder_id']!,
+          _scorePlaceholderIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_scorePlaceholderIdMeta);
+    }
+    if (data.containsKey('config_revision_id')) {
+      context.handle(
+        _configRevisionIdMeta,
+        configRevisionId.isAcceptableOrUnknown(
+          data['config_revision_id']!,
+          _configRevisionIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_configRevisionIdMeta);
+    }
+    if (data.containsKey('matrix_revision_id')) {
+      context.handle(
+        _matrixRevisionIdMeta,
+        matrixRevisionId.isAcceptableOrUnknown(
+          data['matrix_revision_id']!,
+          _matrixRevisionIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_matrixRevisionIdMeta);
+    }
+    if (data.containsKey('raw_components')) {
+      context.handle(
+        _rawComponentsMeta,
+        rawComponents.isAcceptableOrUnknown(
+          data['raw_components']!,
+          _rawComponentsMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_rawComponentsMeta);
+    }
+    if (data.containsKey('actor_id')) {
+      context.handle(
+        _actorIdMeta,
+        actorId.isAcceptableOrUnknown(data['actor_id']!, _actorIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_actorIdMeta);
+    }
+    if (data.containsKey('authority')) {
+      context.handle(
+        _authorityMeta,
+        authority.isAcceptableOrUnknown(data['authority']!, _authorityMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_authorityMeta);
+    }
+    if (data.containsKey('invitation_id')) {
+      context.handle(
+        _invitationIdMeta,
+        invitationId.isAcceptableOrUnknown(
+          data['invitation_id']!,
+          _invitationIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('source_device')) {
+      context.handle(
+        _sourceDeviceMeta,
+        sourceDevice.isAcceptableOrUnknown(
+          data['source_device']!,
+          _sourceDeviceMeta,
+        ),
+      );
+    }
+    if (data.containsKey('client_mutation_id')) {
+      context.handle(
+        _clientMutationIdMeta,
+        clientMutationId.isAcceptableOrUnknown(
+          data['client_mutation_id']!,
+          _clientMutationIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_clientMutationIdMeta);
+    }
+    if (data.containsKey('base_score_revision')) {
+      context.handle(
+        _baseScoreRevisionMeta,
+        baseScoreRevision.isAcceptableOrUnknown(
+          data['base_score_revision']!,
+          _baseScoreRevisionMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_baseScoreRevisionMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {contestId, clientMutationId},
+  ];
+  @override
+  ScoreAttemptData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ScoreAttemptData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      contestId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}contest_id'],
+      )!,
+      scorePlaceholderId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}score_placeholder_id'],
+      )!,
+      configRevisionId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}config_revision_id'],
+      )!,
+      matrixRevisionId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}matrix_revision_id'],
+      )!,
+      rawComponents: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}raw_components'],
+      )!,
+      actorId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}actor_id'],
+      )!,
+      authority: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}authority'],
+      )!,
+      invitationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}invitation_id'],
+      ),
+      sourceDevice: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source_device'],
+      ),
+      clientMutationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}client_mutation_id'],
+      )!,
+      baseScoreRevision: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}base_score_revision'],
+      )!,
+    );
+  }
+
+  @override
+  $ScoreAttemptsTable createAlias(String alias) {
+    return $ScoreAttemptsTable(attachedDatabase, alias);
+  }
+}
+
+class ScoreAttemptData extends DataClass
+    implements Insertable<ScoreAttemptData> {
+  final String id;
+  final String contestId;
+  final String scorePlaceholderId;
+  final String configRevisionId;
+  final String matrixRevisionId;
+  final String rawComponents;
+  final String actorId;
+  final String authority;
+  final String? invitationId;
+  final String? sourceDevice;
+  final String clientMutationId;
+  final int baseScoreRevision;
+  const ScoreAttemptData({
+    required this.id,
+    required this.contestId,
+    required this.scorePlaceholderId,
+    required this.configRevisionId,
+    required this.matrixRevisionId,
+    required this.rawComponents,
+    required this.actorId,
+    required this.authority,
+    this.invitationId,
+    this.sourceDevice,
+    required this.clientMutationId,
+    required this.baseScoreRevision,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['contest_id'] = Variable<String>(contestId);
+    map['score_placeholder_id'] = Variable<String>(scorePlaceholderId);
+    map['config_revision_id'] = Variable<String>(configRevisionId);
+    map['matrix_revision_id'] = Variable<String>(matrixRevisionId);
+    map['raw_components'] = Variable<String>(rawComponents);
+    map['actor_id'] = Variable<String>(actorId);
+    map['authority'] = Variable<String>(authority);
+    if (!nullToAbsent || invitationId != null) {
+      map['invitation_id'] = Variable<String>(invitationId);
+    }
+    if (!nullToAbsent || sourceDevice != null) {
+      map['source_device'] = Variable<String>(sourceDevice);
+    }
+    map['client_mutation_id'] = Variable<String>(clientMutationId);
+    map['base_score_revision'] = Variable<int>(baseScoreRevision);
+    return map;
+  }
+
+  ScoreAttemptsCompanion toCompanion(bool nullToAbsent) {
+    return ScoreAttemptsCompanion(
+      id: Value(id),
+      contestId: Value(contestId),
+      scorePlaceholderId: Value(scorePlaceholderId),
+      configRevisionId: Value(configRevisionId),
+      matrixRevisionId: Value(matrixRevisionId),
+      rawComponents: Value(rawComponents),
+      actorId: Value(actorId),
+      authority: Value(authority),
+      invitationId: invitationId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(invitationId),
+      sourceDevice: sourceDevice == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sourceDevice),
+      clientMutationId: Value(clientMutationId),
+      baseScoreRevision: Value(baseScoreRevision),
+    );
+  }
+
+  factory ScoreAttemptData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ScoreAttemptData(
+      id: serializer.fromJson<String>(json['id']),
+      contestId: serializer.fromJson<String>(json['contestId']),
+      scorePlaceholderId: serializer.fromJson<String>(
+        json['scorePlaceholderId'],
+      ),
+      configRevisionId: serializer.fromJson<String>(json['configRevisionId']),
+      matrixRevisionId: serializer.fromJson<String>(json['matrixRevisionId']),
+      rawComponents: serializer.fromJson<String>(json['rawComponents']),
+      actorId: serializer.fromJson<String>(json['actorId']),
+      authority: serializer.fromJson<String>(json['authority']),
+      invitationId: serializer.fromJson<String?>(json['invitationId']),
+      sourceDevice: serializer.fromJson<String?>(json['sourceDevice']),
+      clientMutationId: serializer.fromJson<String>(json['clientMutationId']),
+      baseScoreRevision: serializer.fromJson<int>(json['baseScoreRevision']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'contestId': serializer.toJson<String>(contestId),
+      'scorePlaceholderId': serializer.toJson<String>(scorePlaceholderId),
+      'configRevisionId': serializer.toJson<String>(configRevisionId),
+      'matrixRevisionId': serializer.toJson<String>(matrixRevisionId),
+      'rawComponents': serializer.toJson<String>(rawComponents),
+      'actorId': serializer.toJson<String>(actorId),
+      'authority': serializer.toJson<String>(authority),
+      'invitationId': serializer.toJson<String?>(invitationId),
+      'sourceDevice': serializer.toJson<String?>(sourceDevice),
+      'clientMutationId': serializer.toJson<String>(clientMutationId),
+      'baseScoreRevision': serializer.toJson<int>(baseScoreRevision),
+    };
+  }
+
+  ScoreAttemptData copyWith({
+    String? id,
+    String? contestId,
+    String? scorePlaceholderId,
+    String? configRevisionId,
+    String? matrixRevisionId,
+    String? rawComponents,
+    String? actorId,
+    String? authority,
+    Value<String?> invitationId = const Value.absent(),
+    Value<String?> sourceDevice = const Value.absent(),
+    String? clientMutationId,
+    int? baseScoreRevision,
+  }) => ScoreAttemptData(
+    id: id ?? this.id,
+    contestId: contestId ?? this.contestId,
+    scorePlaceholderId: scorePlaceholderId ?? this.scorePlaceholderId,
+    configRevisionId: configRevisionId ?? this.configRevisionId,
+    matrixRevisionId: matrixRevisionId ?? this.matrixRevisionId,
+    rawComponents: rawComponents ?? this.rawComponents,
+    actorId: actorId ?? this.actorId,
+    authority: authority ?? this.authority,
+    invitationId: invitationId.present ? invitationId.value : this.invitationId,
+    sourceDevice: sourceDevice.present ? sourceDevice.value : this.sourceDevice,
+    clientMutationId: clientMutationId ?? this.clientMutationId,
+    baseScoreRevision: baseScoreRevision ?? this.baseScoreRevision,
+  );
+  ScoreAttemptData copyWithCompanion(ScoreAttemptsCompanion data) {
+    return ScoreAttemptData(
+      id: data.id.present ? data.id.value : this.id,
+      contestId: data.contestId.present ? data.contestId.value : this.contestId,
+      scorePlaceholderId: data.scorePlaceholderId.present
+          ? data.scorePlaceholderId.value
+          : this.scorePlaceholderId,
+      configRevisionId: data.configRevisionId.present
+          ? data.configRevisionId.value
+          : this.configRevisionId,
+      matrixRevisionId: data.matrixRevisionId.present
+          ? data.matrixRevisionId.value
+          : this.matrixRevisionId,
+      rawComponents: data.rawComponents.present
+          ? data.rawComponents.value
+          : this.rawComponents,
+      actorId: data.actorId.present ? data.actorId.value : this.actorId,
+      authority: data.authority.present ? data.authority.value : this.authority,
+      invitationId: data.invitationId.present
+          ? data.invitationId.value
+          : this.invitationId,
+      sourceDevice: data.sourceDevice.present
+          ? data.sourceDevice.value
+          : this.sourceDevice,
+      clientMutationId: data.clientMutationId.present
+          ? data.clientMutationId.value
+          : this.clientMutationId,
+      baseScoreRevision: data.baseScoreRevision.present
+          ? data.baseScoreRevision.value
+          : this.baseScoreRevision,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ScoreAttemptData(')
+          ..write('id: $id, ')
+          ..write('contestId: $contestId, ')
+          ..write('scorePlaceholderId: $scorePlaceholderId, ')
+          ..write('configRevisionId: $configRevisionId, ')
+          ..write('matrixRevisionId: $matrixRevisionId, ')
+          ..write('rawComponents: $rawComponents, ')
+          ..write('actorId: $actorId, ')
+          ..write('authority: $authority, ')
+          ..write('invitationId: $invitationId, ')
+          ..write('sourceDevice: $sourceDevice, ')
+          ..write('clientMutationId: $clientMutationId, ')
+          ..write('baseScoreRevision: $baseScoreRevision')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    contestId,
+    scorePlaceholderId,
+    configRevisionId,
+    matrixRevisionId,
+    rawComponents,
+    actorId,
+    authority,
+    invitationId,
+    sourceDevice,
+    clientMutationId,
+    baseScoreRevision,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ScoreAttemptData &&
+          other.id == this.id &&
+          other.contestId == this.contestId &&
+          other.scorePlaceholderId == this.scorePlaceholderId &&
+          other.configRevisionId == this.configRevisionId &&
+          other.matrixRevisionId == this.matrixRevisionId &&
+          other.rawComponents == this.rawComponents &&
+          other.actorId == this.actorId &&
+          other.authority == this.authority &&
+          other.invitationId == this.invitationId &&
+          other.sourceDevice == this.sourceDevice &&
+          other.clientMutationId == this.clientMutationId &&
+          other.baseScoreRevision == this.baseScoreRevision);
+}
+
+class ScoreAttemptsCompanion extends UpdateCompanion<ScoreAttemptData> {
+  final Value<String> id;
+  final Value<String> contestId;
+  final Value<String> scorePlaceholderId;
+  final Value<String> configRevisionId;
+  final Value<String> matrixRevisionId;
+  final Value<String> rawComponents;
+  final Value<String> actorId;
+  final Value<String> authority;
+  final Value<String?> invitationId;
+  final Value<String?> sourceDevice;
+  final Value<String> clientMutationId;
+  final Value<int> baseScoreRevision;
+  final Value<int> rowid;
+  const ScoreAttemptsCompanion({
+    this.id = const Value.absent(),
+    this.contestId = const Value.absent(),
+    this.scorePlaceholderId = const Value.absent(),
+    this.configRevisionId = const Value.absent(),
+    this.matrixRevisionId = const Value.absent(),
+    this.rawComponents = const Value.absent(),
+    this.actorId = const Value.absent(),
+    this.authority = const Value.absent(),
+    this.invitationId = const Value.absent(),
+    this.sourceDevice = const Value.absent(),
+    this.clientMutationId = const Value.absent(),
+    this.baseScoreRevision = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ScoreAttemptsCompanion.insert({
+    required String id,
+    required String contestId,
+    required String scorePlaceholderId,
+    required String configRevisionId,
+    required String matrixRevisionId,
+    required String rawComponents,
+    required String actorId,
+    required String authority,
+    this.invitationId = const Value.absent(),
+    this.sourceDevice = const Value.absent(),
+    required String clientMutationId,
+    required int baseScoreRevision,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       contestId = Value(contestId),
+       scorePlaceholderId = Value(scorePlaceholderId),
+       configRevisionId = Value(configRevisionId),
+       matrixRevisionId = Value(matrixRevisionId),
+       rawComponents = Value(rawComponents),
+       actorId = Value(actorId),
+       authority = Value(authority),
+       clientMutationId = Value(clientMutationId),
+       baseScoreRevision = Value(baseScoreRevision);
+  static Insertable<ScoreAttemptData> custom({
+    Expression<String>? id,
+    Expression<String>? contestId,
+    Expression<String>? scorePlaceholderId,
+    Expression<String>? configRevisionId,
+    Expression<String>? matrixRevisionId,
+    Expression<String>? rawComponents,
+    Expression<String>? actorId,
+    Expression<String>? authority,
+    Expression<String>? invitationId,
+    Expression<String>? sourceDevice,
+    Expression<String>? clientMutationId,
+    Expression<int>? baseScoreRevision,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (contestId != null) 'contest_id': contestId,
+      if (scorePlaceholderId != null)
+        'score_placeholder_id': scorePlaceholderId,
+      if (configRevisionId != null) 'config_revision_id': configRevisionId,
+      if (matrixRevisionId != null) 'matrix_revision_id': matrixRevisionId,
+      if (rawComponents != null) 'raw_components': rawComponents,
+      if (actorId != null) 'actor_id': actorId,
+      if (authority != null) 'authority': authority,
+      if (invitationId != null) 'invitation_id': invitationId,
+      if (sourceDevice != null) 'source_device': sourceDevice,
+      if (clientMutationId != null) 'client_mutation_id': clientMutationId,
+      if (baseScoreRevision != null) 'base_score_revision': baseScoreRevision,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ScoreAttemptsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? contestId,
+    Value<String>? scorePlaceholderId,
+    Value<String>? configRevisionId,
+    Value<String>? matrixRevisionId,
+    Value<String>? rawComponents,
+    Value<String>? actorId,
+    Value<String>? authority,
+    Value<String?>? invitationId,
+    Value<String?>? sourceDevice,
+    Value<String>? clientMutationId,
+    Value<int>? baseScoreRevision,
+    Value<int>? rowid,
+  }) {
+    return ScoreAttemptsCompanion(
+      id: id ?? this.id,
+      contestId: contestId ?? this.contestId,
+      scorePlaceholderId: scorePlaceholderId ?? this.scorePlaceholderId,
+      configRevisionId: configRevisionId ?? this.configRevisionId,
+      matrixRevisionId: matrixRevisionId ?? this.matrixRevisionId,
+      rawComponents: rawComponents ?? this.rawComponents,
+      actorId: actorId ?? this.actorId,
+      authority: authority ?? this.authority,
+      invitationId: invitationId ?? this.invitationId,
+      sourceDevice: sourceDevice ?? this.sourceDevice,
+      clientMutationId: clientMutationId ?? this.clientMutationId,
+      baseScoreRevision: baseScoreRevision ?? this.baseScoreRevision,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (contestId.present) {
+      map['contest_id'] = Variable<String>(contestId.value);
+    }
+    if (scorePlaceholderId.present) {
+      map['score_placeholder_id'] = Variable<String>(scorePlaceholderId.value);
+    }
+    if (configRevisionId.present) {
+      map['config_revision_id'] = Variable<String>(configRevisionId.value);
+    }
+    if (matrixRevisionId.present) {
+      map['matrix_revision_id'] = Variable<String>(matrixRevisionId.value);
+    }
+    if (rawComponents.present) {
+      map['raw_components'] = Variable<String>(rawComponents.value);
+    }
+    if (actorId.present) {
+      map['actor_id'] = Variable<String>(actorId.value);
+    }
+    if (authority.present) {
+      map['authority'] = Variable<String>(authority.value);
+    }
+    if (invitationId.present) {
+      map['invitation_id'] = Variable<String>(invitationId.value);
+    }
+    if (sourceDevice.present) {
+      map['source_device'] = Variable<String>(sourceDevice.value);
+    }
+    if (clientMutationId.present) {
+      map['client_mutation_id'] = Variable<String>(clientMutationId.value);
+    }
+    if (baseScoreRevision.present) {
+      map['base_score_revision'] = Variable<int>(baseScoreRevision.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ScoreAttemptsCompanion(')
+          ..write('id: $id, ')
+          ..write('contestId: $contestId, ')
+          ..write('scorePlaceholderId: $scorePlaceholderId, ')
+          ..write('configRevisionId: $configRevisionId, ')
+          ..write('matrixRevisionId: $matrixRevisionId, ')
+          ..write('rawComponents: $rawComponents, ')
+          ..write('actorId: $actorId, ')
+          ..write('authority: $authority, ')
+          ..write('invitationId: $invitationId, ')
+          ..write('sourceDevice: $sourceDevice, ')
+          ..write('clientMutationId: $clientMutationId, ')
+          ..write('baseScoreRevision: $baseScoreRevision, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $OfficialScoresTable extends OfficialScores
+    with TableInfo<$OfficialScoresTable, OfficialScoreData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $OfficialScoresTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _contestIdMeta = const VerificationMeta(
+    'contestId',
+  );
+  @override
+  late final GeneratedColumn<String> contestId = GeneratedColumn<String>(
+    'contest_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES contests (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _scorePlaceholderIdMeta =
+      const VerificationMeta('scorePlaceholderId');
+  @override
+  late final GeneratedColumn<String> scorePlaceholderId =
+      GeneratedColumn<String>(
+        'score_placeholder_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+        defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES score_placeholders (id)',
+        ),
+      );
+  static const VerificationMeta _scoreAttemptIdMeta = const VerificationMeta(
+    'scoreAttemptId',
+  );
+  @override
+  late final GeneratedColumn<String> scoreAttemptId = GeneratedColumn<String>(
+    'score_attempt_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES score_attempts (id)',
+    ),
+  );
+  static const VerificationMeta _scoreRevisionMeta = const VerificationMeta(
+    'scoreRevision',
+  );
+  @override
+  late final GeneratedColumn<int> scoreRevision = GeneratedColumn<int>(
+    'score_revision',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _componentsMeta = const VerificationMeta(
+    'components',
+  );
+  @override
+  late final GeneratedColumn<String> components = GeneratedColumn<String>(
+    'components',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _setAtMeta = const VerificationMeta('setAt');
+  @override
+  late final GeneratedColumn<String> setAt = GeneratedColumn<String>(
+    'set_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _setByMeta = const VerificationMeta('setBy');
+  @override
+  late final GeneratedColumn<String> setBy = GeneratedColumn<String>(
+    'set_by',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _reasonMeta = const VerificationMeta('reason');
+  @override
+  late final GeneratedColumn<String> reason = GeneratedColumn<String>(
+    'reason',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    contestId,
+    scorePlaceholderId,
+    scoreAttemptId,
+    scoreRevision,
+    components,
+    setAt,
+    setBy,
+    reason,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'official_scores';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<OfficialScoreData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('contest_id')) {
+      context.handle(
+        _contestIdMeta,
+        contestId.isAcceptableOrUnknown(data['contest_id']!, _contestIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_contestIdMeta);
+    }
+    if (data.containsKey('score_placeholder_id')) {
+      context.handle(
+        _scorePlaceholderIdMeta,
+        scorePlaceholderId.isAcceptableOrUnknown(
+          data['score_placeholder_id']!,
+          _scorePlaceholderIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_scorePlaceholderIdMeta);
+    }
+    if (data.containsKey('score_attempt_id')) {
+      context.handle(
+        _scoreAttemptIdMeta,
+        scoreAttemptId.isAcceptableOrUnknown(
+          data['score_attempt_id']!,
+          _scoreAttemptIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_scoreAttemptIdMeta);
+    }
+    if (data.containsKey('score_revision')) {
+      context.handle(
+        _scoreRevisionMeta,
+        scoreRevision.isAcceptableOrUnknown(
+          data['score_revision']!,
+          _scoreRevisionMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_scoreRevisionMeta);
+    }
+    if (data.containsKey('components')) {
+      context.handle(
+        _componentsMeta,
+        components.isAcceptableOrUnknown(data['components']!, _componentsMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_componentsMeta);
+    }
+    if (data.containsKey('set_at')) {
+      context.handle(
+        _setAtMeta,
+        setAt.isAcceptableOrUnknown(data['set_at']!, _setAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_setAtMeta);
+    }
+    if (data.containsKey('set_by')) {
+      context.handle(
+        _setByMeta,
+        setBy.isAcceptableOrUnknown(data['set_by']!, _setByMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_setByMeta);
+    }
+    if (data.containsKey('reason')) {
+      context.handle(
+        _reasonMeta,
+        reason.isAcceptableOrUnknown(data['reason']!, _reasonMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_reasonMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {scorePlaceholderId, scoreRevision},
+  ];
+  @override
+  OfficialScoreData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return OfficialScoreData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      contestId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}contest_id'],
+      )!,
+      scorePlaceholderId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}score_placeholder_id'],
+      )!,
+      scoreAttemptId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}score_attempt_id'],
+      )!,
+      scoreRevision: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}score_revision'],
+      )!,
+      components: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}components'],
+      )!,
+      setAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}set_at'],
+      )!,
+      setBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}set_by'],
+      )!,
+      reason: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reason'],
+      )!,
+    );
+  }
+
+  @override
+  $OfficialScoresTable createAlias(String alias) {
+    return $OfficialScoresTable(attachedDatabase, alias);
+  }
+}
+
+class OfficialScoreData extends DataClass
+    implements Insertable<OfficialScoreData> {
+  final String id;
+  final String contestId;
+  final String scorePlaceholderId;
+  final String scoreAttemptId;
+  final int scoreRevision;
+  final String components;
+  final String setAt;
+  final String setBy;
+  final String reason;
+  const OfficialScoreData({
+    required this.id,
+    required this.contestId,
+    required this.scorePlaceholderId,
+    required this.scoreAttemptId,
+    required this.scoreRevision,
+    required this.components,
+    required this.setAt,
+    required this.setBy,
+    required this.reason,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['contest_id'] = Variable<String>(contestId);
+    map['score_placeholder_id'] = Variable<String>(scorePlaceholderId);
+    map['score_attempt_id'] = Variable<String>(scoreAttemptId);
+    map['score_revision'] = Variable<int>(scoreRevision);
+    map['components'] = Variable<String>(components);
+    map['set_at'] = Variable<String>(setAt);
+    map['set_by'] = Variable<String>(setBy);
+    map['reason'] = Variable<String>(reason);
+    return map;
+  }
+
+  OfficialScoresCompanion toCompanion(bool nullToAbsent) {
+    return OfficialScoresCompanion(
+      id: Value(id),
+      contestId: Value(contestId),
+      scorePlaceholderId: Value(scorePlaceholderId),
+      scoreAttemptId: Value(scoreAttemptId),
+      scoreRevision: Value(scoreRevision),
+      components: Value(components),
+      setAt: Value(setAt),
+      setBy: Value(setBy),
+      reason: Value(reason),
+    );
+  }
+
+  factory OfficialScoreData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return OfficialScoreData(
+      id: serializer.fromJson<String>(json['id']),
+      contestId: serializer.fromJson<String>(json['contestId']),
+      scorePlaceholderId: serializer.fromJson<String>(
+        json['scorePlaceholderId'],
+      ),
+      scoreAttemptId: serializer.fromJson<String>(json['scoreAttemptId']),
+      scoreRevision: serializer.fromJson<int>(json['scoreRevision']),
+      components: serializer.fromJson<String>(json['components']),
+      setAt: serializer.fromJson<String>(json['setAt']),
+      setBy: serializer.fromJson<String>(json['setBy']),
+      reason: serializer.fromJson<String>(json['reason']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'contestId': serializer.toJson<String>(contestId),
+      'scorePlaceholderId': serializer.toJson<String>(scorePlaceholderId),
+      'scoreAttemptId': serializer.toJson<String>(scoreAttemptId),
+      'scoreRevision': serializer.toJson<int>(scoreRevision),
+      'components': serializer.toJson<String>(components),
+      'setAt': serializer.toJson<String>(setAt),
+      'setBy': serializer.toJson<String>(setBy),
+      'reason': serializer.toJson<String>(reason),
+    };
+  }
+
+  OfficialScoreData copyWith({
+    String? id,
+    String? contestId,
+    String? scorePlaceholderId,
+    String? scoreAttemptId,
+    int? scoreRevision,
+    String? components,
+    String? setAt,
+    String? setBy,
+    String? reason,
+  }) => OfficialScoreData(
+    id: id ?? this.id,
+    contestId: contestId ?? this.contestId,
+    scorePlaceholderId: scorePlaceholderId ?? this.scorePlaceholderId,
+    scoreAttemptId: scoreAttemptId ?? this.scoreAttemptId,
+    scoreRevision: scoreRevision ?? this.scoreRevision,
+    components: components ?? this.components,
+    setAt: setAt ?? this.setAt,
+    setBy: setBy ?? this.setBy,
+    reason: reason ?? this.reason,
+  );
+  OfficialScoreData copyWithCompanion(OfficialScoresCompanion data) {
+    return OfficialScoreData(
+      id: data.id.present ? data.id.value : this.id,
+      contestId: data.contestId.present ? data.contestId.value : this.contestId,
+      scorePlaceholderId: data.scorePlaceholderId.present
+          ? data.scorePlaceholderId.value
+          : this.scorePlaceholderId,
+      scoreAttemptId: data.scoreAttemptId.present
+          ? data.scoreAttemptId.value
+          : this.scoreAttemptId,
+      scoreRevision: data.scoreRevision.present
+          ? data.scoreRevision.value
+          : this.scoreRevision,
+      components: data.components.present
+          ? data.components.value
+          : this.components,
+      setAt: data.setAt.present ? data.setAt.value : this.setAt,
+      setBy: data.setBy.present ? data.setBy.value : this.setBy,
+      reason: data.reason.present ? data.reason.value : this.reason,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('OfficialScoreData(')
+          ..write('id: $id, ')
+          ..write('contestId: $contestId, ')
+          ..write('scorePlaceholderId: $scorePlaceholderId, ')
+          ..write('scoreAttemptId: $scoreAttemptId, ')
+          ..write('scoreRevision: $scoreRevision, ')
+          ..write('components: $components, ')
+          ..write('setAt: $setAt, ')
+          ..write('setBy: $setBy, ')
+          ..write('reason: $reason')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    contestId,
+    scorePlaceholderId,
+    scoreAttemptId,
+    scoreRevision,
+    components,
+    setAt,
+    setBy,
+    reason,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is OfficialScoreData &&
+          other.id == this.id &&
+          other.contestId == this.contestId &&
+          other.scorePlaceholderId == this.scorePlaceholderId &&
+          other.scoreAttemptId == this.scoreAttemptId &&
+          other.scoreRevision == this.scoreRevision &&
+          other.components == this.components &&
+          other.setAt == this.setAt &&
+          other.setBy == this.setBy &&
+          other.reason == this.reason);
+}
+
+class OfficialScoresCompanion extends UpdateCompanion<OfficialScoreData> {
+  final Value<String> id;
+  final Value<String> contestId;
+  final Value<String> scorePlaceholderId;
+  final Value<String> scoreAttemptId;
+  final Value<int> scoreRevision;
+  final Value<String> components;
+  final Value<String> setAt;
+  final Value<String> setBy;
+  final Value<String> reason;
+  final Value<int> rowid;
+  const OfficialScoresCompanion({
+    this.id = const Value.absent(),
+    this.contestId = const Value.absent(),
+    this.scorePlaceholderId = const Value.absent(),
+    this.scoreAttemptId = const Value.absent(),
+    this.scoreRevision = const Value.absent(),
+    this.components = const Value.absent(),
+    this.setAt = const Value.absent(),
+    this.setBy = const Value.absent(),
+    this.reason = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  OfficialScoresCompanion.insert({
+    required String id,
+    required String contestId,
+    required String scorePlaceholderId,
+    required String scoreAttemptId,
+    required int scoreRevision,
+    required String components,
+    required String setAt,
+    required String setBy,
+    required String reason,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       contestId = Value(contestId),
+       scorePlaceholderId = Value(scorePlaceholderId),
+       scoreAttemptId = Value(scoreAttemptId),
+       scoreRevision = Value(scoreRevision),
+       components = Value(components),
+       setAt = Value(setAt),
+       setBy = Value(setBy),
+       reason = Value(reason);
+  static Insertable<OfficialScoreData> custom({
+    Expression<String>? id,
+    Expression<String>? contestId,
+    Expression<String>? scorePlaceholderId,
+    Expression<String>? scoreAttemptId,
+    Expression<int>? scoreRevision,
+    Expression<String>? components,
+    Expression<String>? setAt,
+    Expression<String>? setBy,
+    Expression<String>? reason,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (contestId != null) 'contest_id': contestId,
+      if (scorePlaceholderId != null)
+        'score_placeholder_id': scorePlaceholderId,
+      if (scoreAttemptId != null) 'score_attempt_id': scoreAttemptId,
+      if (scoreRevision != null) 'score_revision': scoreRevision,
+      if (components != null) 'components': components,
+      if (setAt != null) 'set_at': setAt,
+      if (setBy != null) 'set_by': setBy,
+      if (reason != null) 'reason': reason,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  OfficialScoresCompanion copyWith({
+    Value<String>? id,
+    Value<String>? contestId,
+    Value<String>? scorePlaceholderId,
+    Value<String>? scoreAttemptId,
+    Value<int>? scoreRevision,
+    Value<String>? components,
+    Value<String>? setAt,
+    Value<String>? setBy,
+    Value<String>? reason,
+    Value<int>? rowid,
+  }) {
+    return OfficialScoresCompanion(
+      id: id ?? this.id,
+      contestId: contestId ?? this.contestId,
+      scorePlaceholderId: scorePlaceholderId ?? this.scorePlaceholderId,
+      scoreAttemptId: scoreAttemptId ?? this.scoreAttemptId,
+      scoreRevision: scoreRevision ?? this.scoreRevision,
+      components: components ?? this.components,
+      setAt: setAt ?? this.setAt,
+      setBy: setBy ?? this.setBy,
+      reason: reason ?? this.reason,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (contestId.present) {
+      map['contest_id'] = Variable<String>(contestId.value);
+    }
+    if (scorePlaceholderId.present) {
+      map['score_placeholder_id'] = Variable<String>(scorePlaceholderId.value);
+    }
+    if (scoreAttemptId.present) {
+      map['score_attempt_id'] = Variable<String>(scoreAttemptId.value);
+    }
+    if (scoreRevision.present) {
+      map['score_revision'] = Variable<int>(scoreRevision.value);
+    }
+    if (components.present) {
+      map['components'] = Variable<String>(components.value);
+    }
+    if (setAt.present) {
+      map['set_at'] = Variable<String>(setAt.value);
+    }
+    if (setBy.present) {
+      map['set_by'] = Variable<String>(setBy.value);
+    }
+    if (reason.present) {
+      map['reason'] = Variable<String>(reason.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('OfficialScoresCompanion(')
+          ..write('id: $id, ')
+          ..write('contestId: $contestId, ')
+          ..write('scorePlaceholderId: $scorePlaceholderId, ')
+          ..write('scoreAttemptId: $scoreAttemptId, ')
+          ..write('scoreRevision: $scoreRevision, ')
+          ..write('components: $components, ')
+          ..write('setAt: $setAt, ')
+          ..write('setBy: $setBy, ')
+          ..write('reason: $reason, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ReviewRequestsTable extends ReviewRequests
+    with TableInfo<$ReviewRequestsTable, ReviewRequestData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ReviewRequestsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _contestIdMeta = const VerificationMeta(
+    'contestId',
+  );
+  @override
+  late final GeneratedColumn<String> contestId = GeneratedColumn<String>(
+    'contest_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES contests (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _scorePlaceholderIdMeta =
+      const VerificationMeta('scorePlaceholderId');
+  @override
+  late final GeneratedColumn<String> scorePlaceholderId =
+      GeneratedColumn<String>(
+        'score_placeholder_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+        defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES score_placeholders (id)',
+        ),
+      );
+  static const VerificationMeta _proposedComponentsMeta =
+      const VerificationMeta('proposedComponents');
+  @override
+  late final GeneratedColumn<String> proposedComponents =
+      GeneratedColumn<String>(
+        'proposed_components',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      );
+  static const VerificationMeta _participantMessageMeta =
+      const VerificationMeta('participantMessage');
+  @override
+  late final GeneratedColumn<String> participantMessage =
+      GeneratedColumn<String>(
+        'participant_message',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _requesterIdMeta = const VerificationMeta(
+    'requesterId',
+  );
+  @override
+  late final GeneratedColumn<String> requesterId = GeneratedColumn<String>(
+    'requester_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _baseScoreRevisionMeta = const VerificationMeta(
+    'baseScoreRevision',
+  );
+  @override
+  late final GeneratedColumn<int> baseScoreRevision = GeneratedColumn<int>(
+    'base_score_revision',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _requestedAtMeta = const VerificationMeta(
+    'requestedAt',
+  );
+  @override
+  late final GeneratedColumn<String> requestedAt = GeneratedColumn<String>(
+    'requested_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _stateMeta = const VerificationMeta('state');
+  @override
+  late final GeneratedColumn<String> state = GeneratedColumn<String>(
+    'state',
+    aliasedName,
+    false,
+    check: () => state.isIn(reviewRequestStateValues),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _decisionActorIdMeta = const VerificationMeta(
+    'decisionActorId',
+  );
+  @override
+  late final GeneratedColumn<String> decisionActorId = GeneratedColumn<String>(
+    'decision_actor_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _decisionTimeMeta = const VerificationMeta(
+    'decisionTime',
+  );
+  @override
+  late final GeneratedColumn<String> decisionTime = GeneratedColumn<String>(
+    'decision_time',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _decisionMessageMeta = const VerificationMeta(
+    'decisionMessage',
+  );
+  @override
+  late final GeneratedColumn<String> decisionMessage = GeneratedColumn<String>(
+    'decision_message',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _resultingAttemptIdMeta =
+      const VerificationMeta('resultingAttemptId');
+  @override
+  late final GeneratedColumn<String> resultingAttemptId =
+      GeneratedColumn<String>(
+        'resulting_attempt_id',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES score_attempts (id)',
+        ),
+      );
+  static const VerificationMeta _revisionMeta = const VerificationMeta(
+    'revision',
+  );
+  @override
+  late final GeneratedColumn<int> revision = GeneratedColumn<int>(
+    'revision',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    contestId,
+    scorePlaceholderId,
+    proposedComponents,
+    participantMessage,
+    requesterId,
+    baseScoreRevision,
+    requestedAt,
+    state,
+    decisionActorId,
+    decisionTime,
+    decisionMessage,
+    resultingAttemptId,
+    revision,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'review_requests';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ReviewRequestData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('contest_id')) {
+      context.handle(
+        _contestIdMeta,
+        contestId.isAcceptableOrUnknown(data['contest_id']!, _contestIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_contestIdMeta);
+    }
+    if (data.containsKey('score_placeholder_id')) {
+      context.handle(
+        _scorePlaceholderIdMeta,
+        scorePlaceholderId.isAcceptableOrUnknown(
+          data['score_placeholder_id']!,
+          _scorePlaceholderIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_scorePlaceholderIdMeta);
+    }
+    if (data.containsKey('proposed_components')) {
+      context.handle(
+        _proposedComponentsMeta,
+        proposedComponents.isAcceptableOrUnknown(
+          data['proposed_components']!,
+          _proposedComponentsMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_proposedComponentsMeta);
+    }
+    if (data.containsKey('participant_message')) {
+      context.handle(
+        _participantMessageMeta,
+        participantMessage.isAcceptableOrUnknown(
+          data['participant_message']!,
+          _participantMessageMeta,
+        ),
+      );
+    }
+    if (data.containsKey('requester_id')) {
+      context.handle(
+        _requesterIdMeta,
+        requesterId.isAcceptableOrUnknown(
+          data['requester_id']!,
+          _requesterIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_requesterIdMeta);
+    }
+    if (data.containsKey('base_score_revision')) {
+      context.handle(
+        _baseScoreRevisionMeta,
+        baseScoreRevision.isAcceptableOrUnknown(
+          data['base_score_revision']!,
+          _baseScoreRevisionMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_baseScoreRevisionMeta);
+    }
+    if (data.containsKey('requested_at')) {
+      context.handle(
+        _requestedAtMeta,
+        requestedAt.isAcceptableOrUnknown(
+          data['requested_at']!,
+          _requestedAtMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_requestedAtMeta);
+    }
+    if (data.containsKey('state')) {
+      context.handle(
+        _stateMeta,
+        state.isAcceptableOrUnknown(data['state']!, _stateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_stateMeta);
+    }
+    if (data.containsKey('decision_actor_id')) {
+      context.handle(
+        _decisionActorIdMeta,
+        decisionActorId.isAcceptableOrUnknown(
+          data['decision_actor_id']!,
+          _decisionActorIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('decision_time')) {
+      context.handle(
+        _decisionTimeMeta,
+        decisionTime.isAcceptableOrUnknown(
+          data['decision_time']!,
+          _decisionTimeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('decision_message')) {
+      context.handle(
+        _decisionMessageMeta,
+        decisionMessage.isAcceptableOrUnknown(
+          data['decision_message']!,
+          _decisionMessageMeta,
+        ),
+      );
+    }
+    if (data.containsKey('resulting_attempt_id')) {
+      context.handle(
+        _resultingAttemptIdMeta,
+        resultingAttemptId.isAcceptableOrUnknown(
+          data['resulting_attempt_id']!,
+          _resultingAttemptIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('revision')) {
+      context.handle(
+        _revisionMeta,
+        revision.isAcceptableOrUnknown(data['revision']!, _revisionMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ReviewRequestData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ReviewRequestData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      contestId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}contest_id'],
+      )!,
+      scorePlaceholderId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}score_placeholder_id'],
+      )!,
+      proposedComponents: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}proposed_components'],
+      )!,
+      participantMessage: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}participant_message'],
+      ),
+      requesterId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}requester_id'],
+      )!,
+      baseScoreRevision: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}base_score_revision'],
+      )!,
+      requestedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}requested_at'],
+      )!,
+      state: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}state'],
+      )!,
+      decisionActorId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}decision_actor_id'],
+      ),
+      decisionTime: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}decision_time'],
+      ),
+      decisionMessage: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}decision_message'],
+      ),
+      resultingAttemptId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}resulting_attempt_id'],
+      ),
+      revision: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}revision'],
+      )!,
+    );
+  }
+
+  @override
+  $ReviewRequestsTable createAlias(String alias) {
+    return $ReviewRequestsTable(attachedDatabase, alias);
+  }
+}
+
+class ReviewRequestData extends DataClass
+    implements Insertable<ReviewRequestData> {
+  final String id;
+  final String contestId;
+  final String scorePlaceholderId;
+  final String proposedComponents;
+  final String? participantMessage;
+  final String requesterId;
+  final int baseScoreRevision;
+  final String requestedAt;
+  final String state;
+  final String? decisionActorId;
+  final String? decisionTime;
+  final String? decisionMessage;
+  final String? resultingAttemptId;
+  final int revision;
+  const ReviewRequestData({
+    required this.id,
+    required this.contestId,
+    required this.scorePlaceholderId,
+    required this.proposedComponents,
+    this.participantMessage,
+    required this.requesterId,
+    required this.baseScoreRevision,
+    required this.requestedAt,
+    required this.state,
+    this.decisionActorId,
+    this.decisionTime,
+    this.decisionMessage,
+    this.resultingAttemptId,
+    required this.revision,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['contest_id'] = Variable<String>(contestId);
+    map['score_placeholder_id'] = Variable<String>(scorePlaceholderId);
+    map['proposed_components'] = Variable<String>(proposedComponents);
+    if (!nullToAbsent || participantMessage != null) {
+      map['participant_message'] = Variable<String>(participantMessage);
+    }
+    map['requester_id'] = Variable<String>(requesterId);
+    map['base_score_revision'] = Variable<int>(baseScoreRevision);
+    map['requested_at'] = Variable<String>(requestedAt);
+    map['state'] = Variable<String>(state);
+    if (!nullToAbsent || decisionActorId != null) {
+      map['decision_actor_id'] = Variable<String>(decisionActorId);
+    }
+    if (!nullToAbsent || decisionTime != null) {
+      map['decision_time'] = Variable<String>(decisionTime);
+    }
+    if (!nullToAbsent || decisionMessage != null) {
+      map['decision_message'] = Variable<String>(decisionMessage);
+    }
+    if (!nullToAbsent || resultingAttemptId != null) {
+      map['resulting_attempt_id'] = Variable<String>(resultingAttemptId);
+    }
+    map['revision'] = Variable<int>(revision);
+    return map;
+  }
+
+  ReviewRequestsCompanion toCompanion(bool nullToAbsent) {
+    return ReviewRequestsCompanion(
+      id: Value(id),
+      contestId: Value(contestId),
+      scorePlaceholderId: Value(scorePlaceholderId),
+      proposedComponents: Value(proposedComponents),
+      participantMessage: participantMessage == null && nullToAbsent
+          ? const Value.absent()
+          : Value(participantMessage),
+      requesterId: Value(requesterId),
+      baseScoreRevision: Value(baseScoreRevision),
+      requestedAt: Value(requestedAt),
+      state: Value(state),
+      decisionActorId: decisionActorId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(decisionActorId),
+      decisionTime: decisionTime == null && nullToAbsent
+          ? const Value.absent()
+          : Value(decisionTime),
+      decisionMessage: decisionMessage == null && nullToAbsent
+          ? const Value.absent()
+          : Value(decisionMessage),
+      resultingAttemptId: resultingAttemptId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(resultingAttemptId),
+      revision: Value(revision),
+    );
+  }
+
+  factory ReviewRequestData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ReviewRequestData(
+      id: serializer.fromJson<String>(json['id']),
+      contestId: serializer.fromJson<String>(json['contestId']),
+      scorePlaceholderId: serializer.fromJson<String>(
+        json['scorePlaceholderId'],
+      ),
+      proposedComponents: serializer.fromJson<String>(
+        json['proposedComponents'],
+      ),
+      participantMessage: serializer.fromJson<String?>(
+        json['participantMessage'],
+      ),
+      requesterId: serializer.fromJson<String>(json['requesterId']),
+      baseScoreRevision: serializer.fromJson<int>(json['baseScoreRevision']),
+      requestedAt: serializer.fromJson<String>(json['requestedAt']),
+      state: serializer.fromJson<String>(json['state']),
+      decisionActorId: serializer.fromJson<String?>(json['decisionActorId']),
+      decisionTime: serializer.fromJson<String?>(json['decisionTime']),
+      decisionMessage: serializer.fromJson<String?>(json['decisionMessage']),
+      resultingAttemptId: serializer.fromJson<String?>(
+        json['resultingAttemptId'],
+      ),
+      revision: serializer.fromJson<int>(json['revision']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'contestId': serializer.toJson<String>(contestId),
+      'scorePlaceholderId': serializer.toJson<String>(scorePlaceholderId),
+      'proposedComponents': serializer.toJson<String>(proposedComponents),
+      'participantMessage': serializer.toJson<String?>(participantMessage),
+      'requesterId': serializer.toJson<String>(requesterId),
+      'baseScoreRevision': serializer.toJson<int>(baseScoreRevision),
+      'requestedAt': serializer.toJson<String>(requestedAt),
+      'state': serializer.toJson<String>(state),
+      'decisionActorId': serializer.toJson<String?>(decisionActorId),
+      'decisionTime': serializer.toJson<String?>(decisionTime),
+      'decisionMessage': serializer.toJson<String?>(decisionMessage),
+      'resultingAttemptId': serializer.toJson<String?>(resultingAttemptId),
+      'revision': serializer.toJson<int>(revision),
+    };
+  }
+
+  ReviewRequestData copyWith({
+    String? id,
+    String? contestId,
+    String? scorePlaceholderId,
+    String? proposedComponents,
+    Value<String?> participantMessage = const Value.absent(),
+    String? requesterId,
+    int? baseScoreRevision,
+    String? requestedAt,
+    String? state,
+    Value<String?> decisionActorId = const Value.absent(),
+    Value<String?> decisionTime = const Value.absent(),
+    Value<String?> decisionMessage = const Value.absent(),
+    Value<String?> resultingAttemptId = const Value.absent(),
+    int? revision,
+  }) => ReviewRequestData(
+    id: id ?? this.id,
+    contestId: contestId ?? this.contestId,
+    scorePlaceholderId: scorePlaceholderId ?? this.scorePlaceholderId,
+    proposedComponents: proposedComponents ?? this.proposedComponents,
+    participantMessage: participantMessage.present
+        ? participantMessage.value
+        : this.participantMessage,
+    requesterId: requesterId ?? this.requesterId,
+    baseScoreRevision: baseScoreRevision ?? this.baseScoreRevision,
+    requestedAt: requestedAt ?? this.requestedAt,
+    state: state ?? this.state,
+    decisionActorId: decisionActorId.present
+        ? decisionActorId.value
+        : this.decisionActorId,
+    decisionTime: decisionTime.present ? decisionTime.value : this.decisionTime,
+    decisionMessage: decisionMessage.present
+        ? decisionMessage.value
+        : this.decisionMessage,
+    resultingAttemptId: resultingAttemptId.present
+        ? resultingAttemptId.value
+        : this.resultingAttemptId,
+    revision: revision ?? this.revision,
+  );
+  ReviewRequestData copyWithCompanion(ReviewRequestsCompanion data) {
+    return ReviewRequestData(
+      id: data.id.present ? data.id.value : this.id,
+      contestId: data.contestId.present ? data.contestId.value : this.contestId,
+      scorePlaceholderId: data.scorePlaceholderId.present
+          ? data.scorePlaceholderId.value
+          : this.scorePlaceholderId,
+      proposedComponents: data.proposedComponents.present
+          ? data.proposedComponents.value
+          : this.proposedComponents,
+      participantMessage: data.participantMessage.present
+          ? data.participantMessage.value
+          : this.participantMessage,
+      requesterId: data.requesterId.present
+          ? data.requesterId.value
+          : this.requesterId,
+      baseScoreRevision: data.baseScoreRevision.present
+          ? data.baseScoreRevision.value
+          : this.baseScoreRevision,
+      requestedAt: data.requestedAt.present
+          ? data.requestedAt.value
+          : this.requestedAt,
+      state: data.state.present ? data.state.value : this.state,
+      decisionActorId: data.decisionActorId.present
+          ? data.decisionActorId.value
+          : this.decisionActorId,
+      decisionTime: data.decisionTime.present
+          ? data.decisionTime.value
+          : this.decisionTime,
+      decisionMessage: data.decisionMessage.present
+          ? data.decisionMessage.value
+          : this.decisionMessage,
+      resultingAttemptId: data.resultingAttemptId.present
+          ? data.resultingAttemptId.value
+          : this.resultingAttemptId,
+      revision: data.revision.present ? data.revision.value : this.revision,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ReviewRequestData(')
+          ..write('id: $id, ')
+          ..write('contestId: $contestId, ')
+          ..write('scorePlaceholderId: $scorePlaceholderId, ')
+          ..write('proposedComponents: $proposedComponents, ')
+          ..write('participantMessage: $participantMessage, ')
+          ..write('requesterId: $requesterId, ')
+          ..write('baseScoreRevision: $baseScoreRevision, ')
+          ..write('requestedAt: $requestedAt, ')
+          ..write('state: $state, ')
+          ..write('decisionActorId: $decisionActorId, ')
+          ..write('decisionTime: $decisionTime, ')
+          ..write('decisionMessage: $decisionMessage, ')
+          ..write('resultingAttemptId: $resultingAttemptId, ')
+          ..write('revision: $revision')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    contestId,
+    scorePlaceholderId,
+    proposedComponents,
+    participantMessage,
+    requesterId,
+    baseScoreRevision,
+    requestedAt,
+    state,
+    decisionActorId,
+    decisionTime,
+    decisionMessage,
+    resultingAttemptId,
+    revision,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ReviewRequestData &&
+          other.id == this.id &&
+          other.contestId == this.contestId &&
+          other.scorePlaceholderId == this.scorePlaceholderId &&
+          other.proposedComponents == this.proposedComponents &&
+          other.participantMessage == this.participantMessage &&
+          other.requesterId == this.requesterId &&
+          other.baseScoreRevision == this.baseScoreRevision &&
+          other.requestedAt == this.requestedAt &&
+          other.state == this.state &&
+          other.decisionActorId == this.decisionActorId &&
+          other.decisionTime == this.decisionTime &&
+          other.decisionMessage == this.decisionMessage &&
+          other.resultingAttemptId == this.resultingAttemptId &&
+          other.revision == this.revision);
+}
+
+class ReviewRequestsCompanion extends UpdateCompanion<ReviewRequestData> {
+  final Value<String> id;
+  final Value<String> contestId;
+  final Value<String> scorePlaceholderId;
+  final Value<String> proposedComponents;
+  final Value<String?> participantMessage;
+  final Value<String> requesterId;
+  final Value<int> baseScoreRevision;
+  final Value<String> requestedAt;
+  final Value<String> state;
+  final Value<String?> decisionActorId;
+  final Value<String?> decisionTime;
+  final Value<String?> decisionMessage;
+  final Value<String?> resultingAttemptId;
+  final Value<int> revision;
+  final Value<int> rowid;
+  const ReviewRequestsCompanion({
+    this.id = const Value.absent(),
+    this.contestId = const Value.absent(),
+    this.scorePlaceholderId = const Value.absent(),
+    this.proposedComponents = const Value.absent(),
+    this.participantMessage = const Value.absent(),
+    this.requesterId = const Value.absent(),
+    this.baseScoreRevision = const Value.absent(),
+    this.requestedAt = const Value.absent(),
+    this.state = const Value.absent(),
+    this.decisionActorId = const Value.absent(),
+    this.decisionTime = const Value.absent(),
+    this.decisionMessage = const Value.absent(),
+    this.resultingAttemptId = const Value.absent(),
+    this.revision = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ReviewRequestsCompanion.insert({
+    required String id,
+    required String contestId,
+    required String scorePlaceholderId,
+    required String proposedComponents,
+    this.participantMessage = const Value.absent(),
+    required String requesterId,
+    required int baseScoreRevision,
+    required String requestedAt,
+    required String state,
+    this.decisionActorId = const Value.absent(),
+    this.decisionTime = const Value.absent(),
+    this.decisionMessage = const Value.absent(),
+    this.resultingAttemptId = const Value.absent(),
+    this.revision = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       contestId = Value(contestId),
+       scorePlaceholderId = Value(scorePlaceholderId),
+       proposedComponents = Value(proposedComponents),
+       requesterId = Value(requesterId),
+       baseScoreRevision = Value(baseScoreRevision),
+       requestedAt = Value(requestedAt),
+       state = Value(state);
+  static Insertable<ReviewRequestData> custom({
+    Expression<String>? id,
+    Expression<String>? contestId,
+    Expression<String>? scorePlaceholderId,
+    Expression<String>? proposedComponents,
+    Expression<String>? participantMessage,
+    Expression<String>? requesterId,
+    Expression<int>? baseScoreRevision,
+    Expression<String>? requestedAt,
+    Expression<String>? state,
+    Expression<String>? decisionActorId,
+    Expression<String>? decisionTime,
+    Expression<String>? decisionMessage,
+    Expression<String>? resultingAttemptId,
+    Expression<int>? revision,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (contestId != null) 'contest_id': contestId,
+      if (scorePlaceholderId != null)
+        'score_placeholder_id': scorePlaceholderId,
+      if (proposedComponents != null) 'proposed_components': proposedComponents,
+      if (participantMessage != null) 'participant_message': participantMessage,
+      if (requesterId != null) 'requester_id': requesterId,
+      if (baseScoreRevision != null) 'base_score_revision': baseScoreRevision,
+      if (requestedAt != null) 'requested_at': requestedAt,
+      if (state != null) 'state': state,
+      if (decisionActorId != null) 'decision_actor_id': decisionActorId,
+      if (decisionTime != null) 'decision_time': decisionTime,
+      if (decisionMessage != null) 'decision_message': decisionMessage,
+      if (resultingAttemptId != null)
+        'resulting_attempt_id': resultingAttemptId,
+      if (revision != null) 'revision': revision,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ReviewRequestsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? contestId,
+    Value<String>? scorePlaceholderId,
+    Value<String>? proposedComponents,
+    Value<String?>? participantMessage,
+    Value<String>? requesterId,
+    Value<int>? baseScoreRevision,
+    Value<String>? requestedAt,
+    Value<String>? state,
+    Value<String?>? decisionActorId,
+    Value<String?>? decisionTime,
+    Value<String?>? decisionMessage,
+    Value<String?>? resultingAttemptId,
+    Value<int>? revision,
+    Value<int>? rowid,
+  }) {
+    return ReviewRequestsCompanion(
+      id: id ?? this.id,
+      contestId: contestId ?? this.contestId,
+      scorePlaceholderId: scorePlaceholderId ?? this.scorePlaceholderId,
+      proposedComponents: proposedComponents ?? this.proposedComponents,
+      participantMessage: participantMessage ?? this.participantMessage,
+      requesterId: requesterId ?? this.requesterId,
+      baseScoreRevision: baseScoreRevision ?? this.baseScoreRevision,
+      requestedAt: requestedAt ?? this.requestedAt,
+      state: state ?? this.state,
+      decisionActorId: decisionActorId ?? this.decisionActorId,
+      decisionTime: decisionTime ?? this.decisionTime,
+      decisionMessage: decisionMessage ?? this.decisionMessage,
+      resultingAttemptId: resultingAttemptId ?? this.resultingAttemptId,
+      revision: revision ?? this.revision,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (contestId.present) {
+      map['contest_id'] = Variable<String>(contestId.value);
+    }
+    if (scorePlaceholderId.present) {
+      map['score_placeholder_id'] = Variable<String>(scorePlaceholderId.value);
+    }
+    if (proposedComponents.present) {
+      map['proposed_components'] = Variable<String>(proposedComponents.value);
+    }
+    if (participantMessage.present) {
+      map['participant_message'] = Variable<String>(participantMessage.value);
+    }
+    if (requesterId.present) {
+      map['requester_id'] = Variable<String>(requesterId.value);
+    }
+    if (baseScoreRevision.present) {
+      map['base_score_revision'] = Variable<int>(baseScoreRevision.value);
+    }
+    if (requestedAt.present) {
+      map['requested_at'] = Variable<String>(requestedAt.value);
+    }
+    if (state.present) {
+      map['state'] = Variable<String>(state.value);
+    }
+    if (decisionActorId.present) {
+      map['decision_actor_id'] = Variable<String>(decisionActorId.value);
+    }
+    if (decisionTime.present) {
+      map['decision_time'] = Variable<String>(decisionTime.value);
+    }
+    if (decisionMessage.present) {
+      map['decision_message'] = Variable<String>(decisionMessage.value);
+    }
+    if (resultingAttemptId.present) {
+      map['resulting_attempt_id'] = Variable<String>(resultingAttemptId.value);
+    }
+    if (revision.present) {
+      map['revision'] = Variable<int>(revision.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ReviewRequestsCompanion(')
+          ..write('id: $id, ')
+          ..write('contestId: $contestId, ')
+          ..write('scorePlaceholderId: $scorePlaceholderId, ')
+          ..write('proposedComponents: $proposedComponents, ')
+          ..write('participantMessage: $participantMessage, ')
+          ..write('requesterId: $requesterId, ')
+          ..write('baseScoreRevision: $baseScoreRevision, ')
+          ..write('requestedAt: $requestedAt, ')
+          ..write('state: $state, ')
+          ..write('decisionActorId: $decisionActorId, ')
+          ..write('decisionTime: $decisionTime, ')
+          ..write('decisionMessage: $decisionMessage, ')
+          ..write('resultingAttemptId: $resultingAttemptId, ')
+          ..write('revision: $revision, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $FlightResultsTable extends FlightResults
+    with TableInfo<$FlightResultsTable, FlightResultData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $FlightResultsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _contestIdMeta = const VerificationMeta(
+    'contestId',
+  );
+  @override
+  late final GeneratedColumn<String> contestId = GeneratedColumn<String>(
+    'contest_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES contests (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _scorePlaceholderIdMeta =
+      const VerificationMeta('scorePlaceholderId');
+  @override
+  late final GeneratedColumn<String> scorePlaceholderId =
+      GeneratedColumn<String>(
+        'score_placeholder_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+        defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES score_placeholders (id)',
+        ),
+      );
+  static const VerificationMeta _officialScoreIdMeta = const VerificationMeta(
+    'officialScoreId',
+  );
+  @override
+  late final GeneratedColumn<String> officialScoreId = GeneratedColumn<String>(
+    'official_score_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES official_scores (id)',
+    ),
+  );
+  static const VerificationMeta _contestParticipationIdMeta =
+      const VerificationMeta('contestParticipationId');
+  @override
+  late final GeneratedColumn<String> contestParticipationId =
+      GeneratedColumn<String>(
+        'contest_participation_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+        defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES contest_participations (id)',
+        ),
+      );
+  static const VerificationMeta _creditedRoundIdMeta = const VerificationMeta(
+    'creditedRoundId',
+  );
+  @override
+  late final GeneratedColumn<String> creditedRoundId = GeneratedColumn<String>(
+    'credited_round_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES rounds (id)',
+    ),
+  );
+  static const VerificationMeta _outcomeMeta = const VerificationMeta(
+    'outcome',
+  );
+  @override
+  late final GeneratedColumn<String> outcome = GeneratedColumn<String>(
+    'outcome',
+    aliasedName,
+    false,
+    check: () => outcome.isIn(flightOutcomeValues),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _rawPointsMeta = const VerificationMeta(
+    'rawPoints',
+  );
+  @override
+  late final GeneratedColumn<double> rawPoints = GeneratedColumn<double>(
+    'raw_points',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _landingPointsMeta = const VerificationMeta(
+    'landingPoints',
+  );
+  @override
+  late final GeneratedColumn<double> landingPoints = GeneratedColumn<double>(
+    'landing_points',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _flightPenaltyPointsMeta =
+      const VerificationMeta('flightPenaltyPoints');
+  @override
+  late final GeneratedColumn<double> flightPenaltyPoints =
+      GeneratedColumn<double>(
+        'flight_penalty_points',
+        aliasedName,
+        true,
+        type: DriftSqlType.double,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _cumulativePenaltyMeta = const VerificationMeta(
+    'cumulativePenalty',
+  );
+  @override
+  late final GeneratedColumn<int> cumulativePenalty = GeneratedColumn<int>(
+    'cumulative_penalty',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _groupScoreMeta = const VerificationMeta(
+    'groupScore',
+  );
+  @override
+  late final GeneratedColumn<double> groupScore = GeneratedColumn<double>(
+    'group_score',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _isSelectedMeta = const VerificationMeta(
+    'isSelected',
+  );
+  @override
+  late final GeneratedColumn<bool> isSelected = GeneratedColumn<bool>(
+    'is_selected',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintsDependsOnDialect({
+      SqlDialect.sqlite: 'CHECK ("is_selected" IN (0, 1))',
+      SqlDialect.postgres: '',
+    }),
+  );
+  static const VerificationMeta _isPreliminaryMeta = const VerificationMeta(
+    'isPreliminary',
+  );
+  @override
+  late final GeneratedColumn<bool> isPreliminary = GeneratedColumn<bool>(
+    'is_preliminary',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintsDependsOnDialect({
+      SqlDialect.sqlite: 'CHECK ("is_preliminary" IN (0, 1))',
+      SqlDialect.postgres: '',
+    }),
+  );
+  static const VerificationMeta _configRevisionIdMeta = const VerificationMeta(
+    'configRevisionId',
+  );
+  @override
+  late final GeneratedColumn<String> configRevisionId = GeneratedColumn<String>(
+    'config_revision_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES contest_configuration_revisions (id)',
+    ),
+  );
+  static const VerificationMeta _matrixRevisionIdMeta = const VerificationMeta(
+    'matrixRevisionId',
+  );
+  @override
+  late final GeneratedColumn<String> matrixRevisionId = GeneratedColumn<String>(
+    'matrix_revision_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES matrix_revisions (id)',
+    ),
+  );
+  static const VerificationMeta _calculationVersionMeta =
+      const VerificationMeta('calculationVersion');
+  @override
+  late final GeneratedColumn<String> calculationVersion =
+      GeneratedColumn<String>(
+        'calculation_version',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      );
+  static const VerificationMeta _computedAtMeta = const VerificationMeta(
+    'computedAt',
+  );
+  @override
+  late final GeneratedColumn<String> computedAt = GeneratedColumn<String>(
+    'computed_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    contestId,
+    scorePlaceholderId,
+    officialScoreId,
+    contestParticipationId,
+    creditedRoundId,
+    outcome,
+    rawPoints,
+    landingPoints,
+    flightPenaltyPoints,
+    cumulativePenalty,
+    groupScore,
+    isSelected,
+    isPreliminary,
+    configRevisionId,
+    matrixRevisionId,
+    calculationVersion,
+    computedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'flight_results';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<FlightResultData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('contest_id')) {
+      context.handle(
+        _contestIdMeta,
+        contestId.isAcceptableOrUnknown(data['contest_id']!, _contestIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_contestIdMeta);
+    }
+    if (data.containsKey('score_placeholder_id')) {
+      context.handle(
+        _scorePlaceholderIdMeta,
+        scorePlaceholderId.isAcceptableOrUnknown(
+          data['score_placeholder_id']!,
+          _scorePlaceholderIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_scorePlaceholderIdMeta);
+    }
+    if (data.containsKey('official_score_id')) {
+      context.handle(
+        _officialScoreIdMeta,
+        officialScoreId.isAcceptableOrUnknown(
+          data['official_score_id']!,
+          _officialScoreIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_officialScoreIdMeta);
+    }
+    if (data.containsKey('contest_participation_id')) {
+      context.handle(
+        _contestParticipationIdMeta,
+        contestParticipationId.isAcceptableOrUnknown(
+          data['contest_participation_id']!,
+          _contestParticipationIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_contestParticipationIdMeta);
+    }
+    if (data.containsKey('credited_round_id')) {
+      context.handle(
+        _creditedRoundIdMeta,
+        creditedRoundId.isAcceptableOrUnknown(
+          data['credited_round_id']!,
+          _creditedRoundIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_creditedRoundIdMeta);
+    }
+    if (data.containsKey('outcome')) {
+      context.handle(
+        _outcomeMeta,
+        outcome.isAcceptableOrUnknown(data['outcome']!, _outcomeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_outcomeMeta);
+    }
+    if (data.containsKey('raw_points')) {
+      context.handle(
+        _rawPointsMeta,
+        rawPoints.isAcceptableOrUnknown(data['raw_points']!, _rawPointsMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_rawPointsMeta);
+    }
+    if (data.containsKey('landing_points')) {
+      context.handle(
+        _landingPointsMeta,
+        landingPoints.isAcceptableOrUnknown(
+          data['landing_points']!,
+          _landingPointsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('flight_penalty_points')) {
+      context.handle(
+        _flightPenaltyPointsMeta,
+        flightPenaltyPoints.isAcceptableOrUnknown(
+          data['flight_penalty_points']!,
+          _flightPenaltyPointsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('cumulative_penalty')) {
+      context.handle(
+        _cumulativePenaltyMeta,
+        cumulativePenalty.isAcceptableOrUnknown(
+          data['cumulative_penalty']!,
+          _cumulativePenaltyMeta,
+        ),
+      );
+    }
+    if (data.containsKey('group_score')) {
+      context.handle(
+        _groupScoreMeta,
+        groupScore.isAcceptableOrUnknown(data['group_score']!, _groupScoreMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_groupScoreMeta);
+    }
+    if (data.containsKey('is_selected')) {
+      context.handle(
+        _isSelectedMeta,
+        isSelected.isAcceptableOrUnknown(data['is_selected']!, _isSelectedMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_isSelectedMeta);
+    }
+    if (data.containsKey('is_preliminary')) {
+      context.handle(
+        _isPreliminaryMeta,
+        isPreliminary.isAcceptableOrUnknown(
+          data['is_preliminary']!,
+          _isPreliminaryMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_isPreliminaryMeta);
+    }
+    if (data.containsKey('config_revision_id')) {
+      context.handle(
+        _configRevisionIdMeta,
+        configRevisionId.isAcceptableOrUnknown(
+          data['config_revision_id']!,
+          _configRevisionIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_configRevisionIdMeta);
+    }
+    if (data.containsKey('matrix_revision_id')) {
+      context.handle(
+        _matrixRevisionIdMeta,
+        matrixRevisionId.isAcceptableOrUnknown(
+          data['matrix_revision_id']!,
+          _matrixRevisionIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_matrixRevisionIdMeta);
+    }
+    if (data.containsKey('calculation_version')) {
+      context.handle(
+        _calculationVersionMeta,
+        calculationVersion.isAcceptableOrUnknown(
+          data['calculation_version']!,
+          _calculationVersionMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_calculationVersionMeta);
+    }
+    if (data.containsKey('computed_at')) {
+      context.handle(
+        _computedAtMeta,
+        computedAt.isAcceptableOrUnknown(data['computed_at']!, _computedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_computedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {scorePlaceholderId},
+  ];
+  @override
+  FlightResultData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return FlightResultData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      contestId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}contest_id'],
+      )!,
+      scorePlaceholderId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}score_placeholder_id'],
+      )!,
+      officialScoreId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}official_score_id'],
+      )!,
+      contestParticipationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}contest_participation_id'],
+      )!,
+      creditedRoundId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}credited_round_id'],
+      )!,
+      outcome: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}outcome'],
+      )!,
+      rawPoints: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}raw_points'],
+      )!,
+      landingPoints: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}landing_points'],
+      ),
+      flightPenaltyPoints: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}flight_penalty_points'],
+      ),
+      cumulativePenalty: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}cumulative_penalty'],
+      ),
+      groupScore: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}group_score'],
+      )!,
+      isSelected: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_selected'],
+      )!,
+      isPreliminary: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_preliminary'],
+      )!,
+      configRevisionId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}config_revision_id'],
+      )!,
+      matrixRevisionId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}matrix_revision_id'],
+      )!,
+      calculationVersion: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}calculation_version'],
+      )!,
+      computedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}computed_at'],
+      )!,
+    );
+  }
+
+  @override
+  $FlightResultsTable createAlias(String alias) {
+    return $FlightResultsTable(attachedDatabase, alias);
+  }
+}
+
+class FlightResultData extends DataClass
+    implements Insertable<FlightResultData> {
+  final String id;
+  final String contestId;
+  final String scorePlaceholderId;
+  final String officialScoreId;
+  final String contestParticipationId;
+  final String creditedRoundId;
+  final String outcome;
+  final double rawPoints;
+  final double? landingPoints;
+  final double? flightPenaltyPoints;
+  final int? cumulativePenalty;
+  final double groupScore;
+  final bool isSelected;
+  final bool isPreliminary;
+  final String configRevisionId;
+  final String matrixRevisionId;
+  final String calculationVersion;
+  final String computedAt;
+  const FlightResultData({
+    required this.id,
+    required this.contestId,
+    required this.scorePlaceholderId,
+    required this.officialScoreId,
+    required this.contestParticipationId,
+    required this.creditedRoundId,
+    required this.outcome,
+    required this.rawPoints,
+    this.landingPoints,
+    this.flightPenaltyPoints,
+    this.cumulativePenalty,
+    required this.groupScore,
+    required this.isSelected,
+    required this.isPreliminary,
+    required this.configRevisionId,
+    required this.matrixRevisionId,
+    required this.calculationVersion,
+    required this.computedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['contest_id'] = Variable<String>(contestId);
+    map['score_placeholder_id'] = Variable<String>(scorePlaceholderId);
+    map['official_score_id'] = Variable<String>(officialScoreId);
+    map['contest_participation_id'] = Variable<String>(contestParticipationId);
+    map['credited_round_id'] = Variable<String>(creditedRoundId);
+    map['outcome'] = Variable<String>(outcome);
+    map['raw_points'] = Variable<double>(rawPoints);
+    if (!nullToAbsent || landingPoints != null) {
+      map['landing_points'] = Variable<double>(landingPoints);
+    }
+    if (!nullToAbsent || flightPenaltyPoints != null) {
+      map['flight_penalty_points'] = Variable<double>(flightPenaltyPoints);
+    }
+    if (!nullToAbsent || cumulativePenalty != null) {
+      map['cumulative_penalty'] = Variable<int>(cumulativePenalty);
+    }
+    map['group_score'] = Variable<double>(groupScore);
+    map['is_selected'] = Variable<bool>(isSelected);
+    map['is_preliminary'] = Variable<bool>(isPreliminary);
+    map['config_revision_id'] = Variable<String>(configRevisionId);
+    map['matrix_revision_id'] = Variable<String>(matrixRevisionId);
+    map['calculation_version'] = Variable<String>(calculationVersion);
+    map['computed_at'] = Variable<String>(computedAt);
+    return map;
+  }
+
+  FlightResultsCompanion toCompanion(bool nullToAbsent) {
+    return FlightResultsCompanion(
+      id: Value(id),
+      contestId: Value(contestId),
+      scorePlaceholderId: Value(scorePlaceholderId),
+      officialScoreId: Value(officialScoreId),
+      contestParticipationId: Value(contestParticipationId),
+      creditedRoundId: Value(creditedRoundId),
+      outcome: Value(outcome),
+      rawPoints: Value(rawPoints),
+      landingPoints: landingPoints == null && nullToAbsent
+          ? const Value.absent()
+          : Value(landingPoints),
+      flightPenaltyPoints: flightPenaltyPoints == null && nullToAbsent
+          ? const Value.absent()
+          : Value(flightPenaltyPoints),
+      cumulativePenalty: cumulativePenalty == null && nullToAbsent
+          ? const Value.absent()
+          : Value(cumulativePenalty),
+      groupScore: Value(groupScore),
+      isSelected: Value(isSelected),
+      isPreliminary: Value(isPreliminary),
+      configRevisionId: Value(configRevisionId),
+      matrixRevisionId: Value(matrixRevisionId),
+      calculationVersion: Value(calculationVersion),
+      computedAt: Value(computedAt),
+    );
+  }
+
+  factory FlightResultData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return FlightResultData(
+      id: serializer.fromJson<String>(json['id']),
+      contestId: serializer.fromJson<String>(json['contestId']),
+      scorePlaceholderId: serializer.fromJson<String>(
+        json['scorePlaceholderId'],
+      ),
+      officialScoreId: serializer.fromJson<String>(json['officialScoreId']),
+      contestParticipationId: serializer.fromJson<String>(
+        json['contestParticipationId'],
+      ),
+      creditedRoundId: serializer.fromJson<String>(json['creditedRoundId']),
+      outcome: serializer.fromJson<String>(json['outcome']),
+      rawPoints: serializer.fromJson<double>(json['rawPoints']),
+      landingPoints: serializer.fromJson<double?>(json['landingPoints']),
+      flightPenaltyPoints: serializer.fromJson<double?>(
+        json['flightPenaltyPoints'],
+      ),
+      cumulativePenalty: serializer.fromJson<int?>(json['cumulativePenalty']),
+      groupScore: serializer.fromJson<double>(json['groupScore']),
+      isSelected: serializer.fromJson<bool>(json['isSelected']),
+      isPreliminary: serializer.fromJson<bool>(json['isPreliminary']),
+      configRevisionId: serializer.fromJson<String>(json['configRevisionId']),
+      matrixRevisionId: serializer.fromJson<String>(json['matrixRevisionId']),
+      calculationVersion: serializer.fromJson<String>(
+        json['calculationVersion'],
+      ),
+      computedAt: serializer.fromJson<String>(json['computedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'contestId': serializer.toJson<String>(contestId),
+      'scorePlaceholderId': serializer.toJson<String>(scorePlaceholderId),
+      'officialScoreId': serializer.toJson<String>(officialScoreId),
+      'contestParticipationId': serializer.toJson<String>(
+        contestParticipationId,
+      ),
+      'creditedRoundId': serializer.toJson<String>(creditedRoundId),
+      'outcome': serializer.toJson<String>(outcome),
+      'rawPoints': serializer.toJson<double>(rawPoints),
+      'landingPoints': serializer.toJson<double?>(landingPoints),
+      'flightPenaltyPoints': serializer.toJson<double?>(flightPenaltyPoints),
+      'cumulativePenalty': serializer.toJson<int?>(cumulativePenalty),
+      'groupScore': serializer.toJson<double>(groupScore),
+      'isSelected': serializer.toJson<bool>(isSelected),
+      'isPreliminary': serializer.toJson<bool>(isPreliminary),
+      'configRevisionId': serializer.toJson<String>(configRevisionId),
+      'matrixRevisionId': serializer.toJson<String>(matrixRevisionId),
+      'calculationVersion': serializer.toJson<String>(calculationVersion),
+      'computedAt': serializer.toJson<String>(computedAt),
+    };
+  }
+
+  FlightResultData copyWith({
+    String? id,
+    String? contestId,
+    String? scorePlaceholderId,
+    String? officialScoreId,
+    String? contestParticipationId,
+    String? creditedRoundId,
+    String? outcome,
+    double? rawPoints,
+    Value<double?> landingPoints = const Value.absent(),
+    Value<double?> flightPenaltyPoints = const Value.absent(),
+    Value<int?> cumulativePenalty = const Value.absent(),
+    double? groupScore,
+    bool? isSelected,
+    bool? isPreliminary,
+    String? configRevisionId,
+    String? matrixRevisionId,
+    String? calculationVersion,
+    String? computedAt,
+  }) => FlightResultData(
+    id: id ?? this.id,
+    contestId: contestId ?? this.contestId,
+    scorePlaceholderId: scorePlaceholderId ?? this.scorePlaceholderId,
+    officialScoreId: officialScoreId ?? this.officialScoreId,
+    contestParticipationId:
+        contestParticipationId ?? this.contestParticipationId,
+    creditedRoundId: creditedRoundId ?? this.creditedRoundId,
+    outcome: outcome ?? this.outcome,
+    rawPoints: rawPoints ?? this.rawPoints,
+    landingPoints: landingPoints.present
+        ? landingPoints.value
+        : this.landingPoints,
+    flightPenaltyPoints: flightPenaltyPoints.present
+        ? flightPenaltyPoints.value
+        : this.flightPenaltyPoints,
+    cumulativePenalty: cumulativePenalty.present
+        ? cumulativePenalty.value
+        : this.cumulativePenalty,
+    groupScore: groupScore ?? this.groupScore,
+    isSelected: isSelected ?? this.isSelected,
+    isPreliminary: isPreliminary ?? this.isPreliminary,
+    configRevisionId: configRevisionId ?? this.configRevisionId,
+    matrixRevisionId: matrixRevisionId ?? this.matrixRevisionId,
+    calculationVersion: calculationVersion ?? this.calculationVersion,
+    computedAt: computedAt ?? this.computedAt,
+  );
+  FlightResultData copyWithCompanion(FlightResultsCompanion data) {
+    return FlightResultData(
+      id: data.id.present ? data.id.value : this.id,
+      contestId: data.contestId.present ? data.contestId.value : this.contestId,
+      scorePlaceholderId: data.scorePlaceholderId.present
+          ? data.scorePlaceholderId.value
+          : this.scorePlaceholderId,
+      officialScoreId: data.officialScoreId.present
+          ? data.officialScoreId.value
+          : this.officialScoreId,
+      contestParticipationId: data.contestParticipationId.present
+          ? data.contestParticipationId.value
+          : this.contestParticipationId,
+      creditedRoundId: data.creditedRoundId.present
+          ? data.creditedRoundId.value
+          : this.creditedRoundId,
+      outcome: data.outcome.present ? data.outcome.value : this.outcome,
+      rawPoints: data.rawPoints.present ? data.rawPoints.value : this.rawPoints,
+      landingPoints: data.landingPoints.present
+          ? data.landingPoints.value
+          : this.landingPoints,
+      flightPenaltyPoints: data.flightPenaltyPoints.present
+          ? data.flightPenaltyPoints.value
+          : this.flightPenaltyPoints,
+      cumulativePenalty: data.cumulativePenalty.present
+          ? data.cumulativePenalty.value
+          : this.cumulativePenalty,
+      groupScore: data.groupScore.present
+          ? data.groupScore.value
+          : this.groupScore,
+      isSelected: data.isSelected.present
+          ? data.isSelected.value
+          : this.isSelected,
+      isPreliminary: data.isPreliminary.present
+          ? data.isPreliminary.value
+          : this.isPreliminary,
+      configRevisionId: data.configRevisionId.present
+          ? data.configRevisionId.value
+          : this.configRevisionId,
+      matrixRevisionId: data.matrixRevisionId.present
+          ? data.matrixRevisionId.value
+          : this.matrixRevisionId,
+      calculationVersion: data.calculationVersion.present
+          ? data.calculationVersion.value
+          : this.calculationVersion,
+      computedAt: data.computedAt.present
+          ? data.computedAt.value
+          : this.computedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('FlightResultData(')
+          ..write('id: $id, ')
+          ..write('contestId: $contestId, ')
+          ..write('scorePlaceholderId: $scorePlaceholderId, ')
+          ..write('officialScoreId: $officialScoreId, ')
+          ..write('contestParticipationId: $contestParticipationId, ')
+          ..write('creditedRoundId: $creditedRoundId, ')
+          ..write('outcome: $outcome, ')
+          ..write('rawPoints: $rawPoints, ')
+          ..write('landingPoints: $landingPoints, ')
+          ..write('flightPenaltyPoints: $flightPenaltyPoints, ')
+          ..write('cumulativePenalty: $cumulativePenalty, ')
+          ..write('groupScore: $groupScore, ')
+          ..write('isSelected: $isSelected, ')
+          ..write('isPreliminary: $isPreliminary, ')
+          ..write('configRevisionId: $configRevisionId, ')
+          ..write('matrixRevisionId: $matrixRevisionId, ')
+          ..write('calculationVersion: $calculationVersion, ')
+          ..write('computedAt: $computedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    contestId,
+    scorePlaceholderId,
+    officialScoreId,
+    contestParticipationId,
+    creditedRoundId,
+    outcome,
+    rawPoints,
+    landingPoints,
+    flightPenaltyPoints,
+    cumulativePenalty,
+    groupScore,
+    isSelected,
+    isPreliminary,
+    configRevisionId,
+    matrixRevisionId,
+    calculationVersion,
+    computedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is FlightResultData &&
+          other.id == this.id &&
+          other.contestId == this.contestId &&
+          other.scorePlaceholderId == this.scorePlaceholderId &&
+          other.officialScoreId == this.officialScoreId &&
+          other.contestParticipationId == this.contestParticipationId &&
+          other.creditedRoundId == this.creditedRoundId &&
+          other.outcome == this.outcome &&
+          other.rawPoints == this.rawPoints &&
+          other.landingPoints == this.landingPoints &&
+          other.flightPenaltyPoints == this.flightPenaltyPoints &&
+          other.cumulativePenalty == this.cumulativePenalty &&
+          other.groupScore == this.groupScore &&
+          other.isSelected == this.isSelected &&
+          other.isPreliminary == this.isPreliminary &&
+          other.configRevisionId == this.configRevisionId &&
+          other.matrixRevisionId == this.matrixRevisionId &&
+          other.calculationVersion == this.calculationVersion &&
+          other.computedAt == this.computedAt);
+}
+
+class FlightResultsCompanion extends UpdateCompanion<FlightResultData> {
+  final Value<String> id;
+  final Value<String> contestId;
+  final Value<String> scorePlaceholderId;
+  final Value<String> officialScoreId;
+  final Value<String> contestParticipationId;
+  final Value<String> creditedRoundId;
+  final Value<String> outcome;
+  final Value<double> rawPoints;
+  final Value<double?> landingPoints;
+  final Value<double?> flightPenaltyPoints;
+  final Value<int?> cumulativePenalty;
+  final Value<double> groupScore;
+  final Value<bool> isSelected;
+  final Value<bool> isPreliminary;
+  final Value<String> configRevisionId;
+  final Value<String> matrixRevisionId;
+  final Value<String> calculationVersion;
+  final Value<String> computedAt;
+  final Value<int> rowid;
+  const FlightResultsCompanion({
+    this.id = const Value.absent(),
+    this.contestId = const Value.absent(),
+    this.scorePlaceholderId = const Value.absent(),
+    this.officialScoreId = const Value.absent(),
+    this.contestParticipationId = const Value.absent(),
+    this.creditedRoundId = const Value.absent(),
+    this.outcome = const Value.absent(),
+    this.rawPoints = const Value.absent(),
+    this.landingPoints = const Value.absent(),
+    this.flightPenaltyPoints = const Value.absent(),
+    this.cumulativePenalty = const Value.absent(),
+    this.groupScore = const Value.absent(),
+    this.isSelected = const Value.absent(),
+    this.isPreliminary = const Value.absent(),
+    this.configRevisionId = const Value.absent(),
+    this.matrixRevisionId = const Value.absent(),
+    this.calculationVersion = const Value.absent(),
+    this.computedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  FlightResultsCompanion.insert({
+    required String id,
+    required String contestId,
+    required String scorePlaceholderId,
+    required String officialScoreId,
+    required String contestParticipationId,
+    required String creditedRoundId,
+    required String outcome,
+    required double rawPoints,
+    this.landingPoints = const Value.absent(),
+    this.flightPenaltyPoints = const Value.absent(),
+    this.cumulativePenalty = const Value.absent(),
+    required double groupScore,
+    required bool isSelected,
+    required bool isPreliminary,
+    required String configRevisionId,
+    required String matrixRevisionId,
+    required String calculationVersion,
+    required String computedAt,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       contestId = Value(contestId),
+       scorePlaceholderId = Value(scorePlaceholderId),
+       officialScoreId = Value(officialScoreId),
+       contestParticipationId = Value(contestParticipationId),
+       creditedRoundId = Value(creditedRoundId),
+       outcome = Value(outcome),
+       rawPoints = Value(rawPoints),
+       groupScore = Value(groupScore),
+       isSelected = Value(isSelected),
+       isPreliminary = Value(isPreliminary),
+       configRevisionId = Value(configRevisionId),
+       matrixRevisionId = Value(matrixRevisionId),
+       calculationVersion = Value(calculationVersion),
+       computedAt = Value(computedAt);
+  static Insertable<FlightResultData> custom({
+    Expression<String>? id,
+    Expression<String>? contestId,
+    Expression<String>? scorePlaceholderId,
+    Expression<String>? officialScoreId,
+    Expression<String>? contestParticipationId,
+    Expression<String>? creditedRoundId,
+    Expression<String>? outcome,
+    Expression<double>? rawPoints,
+    Expression<double>? landingPoints,
+    Expression<double>? flightPenaltyPoints,
+    Expression<int>? cumulativePenalty,
+    Expression<double>? groupScore,
+    Expression<bool>? isSelected,
+    Expression<bool>? isPreliminary,
+    Expression<String>? configRevisionId,
+    Expression<String>? matrixRevisionId,
+    Expression<String>? calculationVersion,
+    Expression<String>? computedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (contestId != null) 'contest_id': contestId,
+      if (scorePlaceholderId != null)
+        'score_placeholder_id': scorePlaceholderId,
+      if (officialScoreId != null) 'official_score_id': officialScoreId,
+      if (contestParticipationId != null)
+        'contest_participation_id': contestParticipationId,
+      if (creditedRoundId != null) 'credited_round_id': creditedRoundId,
+      if (outcome != null) 'outcome': outcome,
+      if (rawPoints != null) 'raw_points': rawPoints,
+      if (landingPoints != null) 'landing_points': landingPoints,
+      if (flightPenaltyPoints != null)
+        'flight_penalty_points': flightPenaltyPoints,
+      if (cumulativePenalty != null) 'cumulative_penalty': cumulativePenalty,
+      if (groupScore != null) 'group_score': groupScore,
+      if (isSelected != null) 'is_selected': isSelected,
+      if (isPreliminary != null) 'is_preliminary': isPreliminary,
+      if (configRevisionId != null) 'config_revision_id': configRevisionId,
+      if (matrixRevisionId != null) 'matrix_revision_id': matrixRevisionId,
+      if (calculationVersion != null) 'calculation_version': calculationVersion,
+      if (computedAt != null) 'computed_at': computedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  FlightResultsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? contestId,
+    Value<String>? scorePlaceholderId,
+    Value<String>? officialScoreId,
+    Value<String>? contestParticipationId,
+    Value<String>? creditedRoundId,
+    Value<String>? outcome,
+    Value<double>? rawPoints,
+    Value<double?>? landingPoints,
+    Value<double?>? flightPenaltyPoints,
+    Value<int?>? cumulativePenalty,
+    Value<double>? groupScore,
+    Value<bool>? isSelected,
+    Value<bool>? isPreliminary,
+    Value<String>? configRevisionId,
+    Value<String>? matrixRevisionId,
+    Value<String>? calculationVersion,
+    Value<String>? computedAt,
+    Value<int>? rowid,
+  }) {
+    return FlightResultsCompanion(
+      id: id ?? this.id,
+      contestId: contestId ?? this.contestId,
+      scorePlaceholderId: scorePlaceholderId ?? this.scorePlaceholderId,
+      officialScoreId: officialScoreId ?? this.officialScoreId,
+      contestParticipationId:
+          contestParticipationId ?? this.contestParticipationId,
+      creditedRoundId: creditedRoundId ?? this.creditedRoundId,
+      outcome: outcome ?? this.outcome,
+      rawPoints: rawPoints ?? this.rawPoints,
+      landingPoints: landingPoints ?? this.landingPoints,
+      flightPenaltyPoints: flightPenaltyPoints ?? this.flightPenaltyPoints,
+      cumulativePenalty: cumulativePenalty ?? this.cumulativePenalty,
+      groupScore: groupScore ?? this.groupScore,
+      isSelected: isSelected ?? this.isSelected,
+      isPreliminary: isPreliminary ?? this.isPreliminary,
+      configRevisionId: configRevisionId ?? this.configRevisionId,
+      matrixRevisionId: matrixRevisionId ?? this.matrixRevisionId,
+      calculationVersion: calculationVersion ?? this.calculationVersion,
+      computedAt: computedAt ?? this.computedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (contestId.present) {
+      map['contest_id'] = Variable<String>(contestId.value);
+    }
+    if (scorePlaceholderId.present) {
+      map['score_placeholder_id'] = Variable<String>(scorePlaceholderId.value);
+    }
+    if (officialScoreId.present) {
+      map['official_score_id'] = Variable<String>(officialScoreId.value);
+    }
+    if (contestParticipationId.present) {
+      map['contest_participation_id'] = Variable<String>(
+        contestParticipationId.value,
+      );
+    }
+    if (creditedRoundId.present) {
+      map['credited_round_id'] = Variable<String>(creditedRoundId.value);
+    }
+    if (outcome.present) {
+      map['outcome'] = Variable<String>(outcome.value);
+    }
+    if (rawPoints.present) {
+      map['raw_points'] = Variable<double>(rawPoints.value);
+    }
+    if (landingPoints.present) {
+      map['landing_points'] = Variable<double>(landingPoints.value);
+    }
+    if (flightPenaltyPoints.present) {
+      map['flight_penalty_points'] = Variable<double>(
+        flightPenaltyPoints.value,
+      );
+    }
+    if (cumulativePenalty.present) {
+      map['cumulative_penalty'] = Variable<int>(cumulativePenalty.value);
+    }
+    if (groupScore.present) {
+      map['group_score'] = Variable<double>(groupScore.value);
+    }
+    if (isSelected.present) {
+      map['is_selected'] = Variable<bool>(isSelected.value);
+    }
+    if (isPreliminary.present) {
+      map['is_preliminary'] = Variable<bool>(isPreliminary.value);
+    }
+    if (configRevisionId.present) {
+      map['config_revision_id'] = Variable<String>(configRevisionId.value);
+    }
+    if (matrixRevisionId.present) {
+      map['matrix_revision_id'] = Variable<String>(matrixRevisionId.value);
+    }
+    if (calculationVersion.present) {
+      map['calculation_version'] = Variable<String>(calculationVersion.value);
+    }
+    if (computedAt.present) {
+      map['computed_at'] = Variable<String>(computedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('FlightResultsCompanion(')
+          ..write('id: $id, ')
+          ..write('contestId: $contestId, ')
+          ..write('scorePlaceholderId: $scorePlaceholderId, ')
+          ..write('officialScoreId: $officialScoreId, ')
+          ..write('contestParticipationId: $contestParticipationId, ')
+          ..write('creditedRoundId: $creditedRoundId, ')
+          ..write('outcome: $outcome, ')
+          ..write('rawPoints: $rawPoints, ')
+          ..write('landingPoints: $landingPoints, ')
+          ..write('flightPenaltyPoints: $flightPenaltyPoints, ')
+          ..write('cumulativePenalty: $cumulativePenalty, ')
+          ..write('groupScore: $groupScore, ')
+          ..write('isSelected: $isSelected, ')
+          ..write('isPreliminary: $isPreliminary, ')
+          ..write('configRevisionId: $configRevisionId, ')
+          ..write('matrixRevisionId: $matrixRevisionId, ')
+          ..write('calculationVersion: $calculationVersion, ')
+          ..write('computedAt: $computedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ParticipationStandingsTable extends ParticipationStandings
+    with TableInfo<$ParticipationStandingsTable, ParticipationStandingData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ParticipationStandingsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _contestIdMeta = const VerificationMeta(
+    'contestId',
+  );
+  @override
+  late final GeneratedColumn<String> contestId = GeneratedColumn<String>(
+    'contest_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES contests (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _contestParticipationIdMeta =
+      const VerificationMeta('contestParticipationId');
+  @override
+  late final GeneratedColumn<String> contestParticipationId =
+      GeneratedColumn<String>(
+        'contest_participation_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+        defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES contest_participations (id)',
+        ),
+      );
+  static const VerificationMeta _asOfRoundMeta = const VerificationMeta(
+    'asOfRound',
+  );
+  @override
+  late final GeneratedColumn<int> asOfRound = GeneratedColumn<int>(
+    'as_of_round',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _placeMeta = const VerificationMeta('place');
+  @override
+  late final GeneratedColumn<int> place = GeneratedColumn<int>(
+    'place',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _isTiedMeta = const VerificationMeta('isTied');
+  @override
+  late final GeneratedColumn<bool> isTied = GeneratedColumn<bool>(
+    'is_tied',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintsDependsOnDialect({
+      SqlDialect.sqlite: 'CHECK ("is_tied" IN (0, 1))',
+      SqlDialect.postgres: '',
+    }),
+  );
+  static const VerificationMeta _rawTotalMeta = const VerificationMeta(
+    'rawTotal',
+  );
+  @override
+  late final GeneratedColumn<double> rawTotal = GeneratedColumn<double>(
+    'raw_total',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _droppedRoundsMeta = const VerificationMeta(
+    'droppedRounds',
+  );
+  @override
+  late final GeneratedColumn<String> droppedRounds = GeneratedColumn<String>(
+    'dropped_rounds',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _penaltyTotalMeta = const VerificationMeta(
+    'penaltyTotal',
+  );
+  @override
+  late final GeneratedColumn<double> penaltyTotal = GeneratedColumn<double>(
+    'penalty_total',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _overallScoreMeta = const VerificationMeta(
+    'overallScore',
+  );
+  @override
+  late final GeneratedColumn<double> overallScore = GeneratedColumn<double>(
+    'overall_score',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _isPreliminaryMeta = const VerificationMeta(
+    'isPreliminary',
+  );
+  @override
+  late final GeneratedColumn<bool> isPreliminary = GeneratedColumn<bool>(
+    'is_preliminary',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintsDependsOnDialect({
+      SqlDialect.sqlite: 'CHECK ("is_preliminary" IN (0, 1))',
+      SqlDialect.postgres: '',
+    }),
+  );
+  static const VerificationMeta _configRevisionIdMeta = const VerificationMeta(
+    'configRevisionId',
+  );
+  @override
+  late final GeneratedColumn<String> configRevisionId = GeneratedColumn<String>(
+    'config_revision_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES contest_configuration_revisions (id)',
+    ),
+  );
+  static const VerificationMeta _matrixRevisionIdMeta = const VerificationMeta(
+    'matrixRevisionId',
+  );
+  @override
+  late final GeneratedColumn<String> matrixRevisionId = GeneratedColumn<String>(
+    'matrix_revision_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES matrix_revisions (id)',
+    ),
+  );
+  static const VerificationMeta _calculationVersionMeta =
+      const VerificationMeta('calculationVersion');
+  @override
+  late final GeneratedColumn<String> calculationVersion =
+      GeneratedColumn<String>(
+        'calculation_version',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      );
+  static const VerificationMeta _computedAtMeta = const VerificationMeta(
+    'computedAt',
+  );
+  @override
+  late final GeneratedColumn<String> computedAt = GeneratedColumn<String>(
+    'computed_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    contestId,
+    contestParticipationId,
+    asOfRound,
+    place,
+    isTied,
+    rawTotal,
+    droppedRounds,
+    penaltyTotal,
+    overallScore,
+    isPreliminary,
+    configRevisionId,
+    matrixRevisionId,
+    calculationVersion,
+    computedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'participation_standings';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ParticipationStandingData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('contest_id')) {
+      context.handle(
+        _contestIdMeta,
+        contestId.isAcceptableOrUnknown(data['contest_id']!, _contestIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_contestIdMeta);
+    }
+    if (data.containsKey('contest_participation_id')) {
+      context.handle(
+        _contestParticipationIdMeta,
+        contestParticipationId.isAcceptableOrUnknown(
+          data['contest_participation_id']!,
+          _contestParticipationIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_contestParticipationIdMeta);
+    }
+    if (data.containsKey('as_of_round')) {
+      context.handle(
+        _asOfRoundMeta,
+        asOfRound.isAcceptableOrUnknown(data['as_of_round']!, _asOfRoundMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_asOfRoundMeta);
+    }
+    if (data.containsKey('place')) {
+      context.handle(
+        _placeMeta,
+        place.isAcceptableOrUnknown(data['place']!, _placeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_placeMeta);
+    }
+    if (data.containsKey('is_tied')) {
+      context.handle(
+        _isTiedMeta,
+        isTied.isAcceptableOrUnknown(data['is_tied']!, _isTiedMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_isTiedMeta);
+    }
+    if (data.containsKey('raw_total')) {
+      context.handle(
+        _rawTotalMeta,
+        rawTotal.isAcceptableOrUnknown(data['raw_total']!, _rawTotalMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_rawTotalMeta);
+    }
+    if (data.containsKey('dropped_rounds')) {
+      context.handle(
+        _droppedRoundsMeta,
+        droppedRounds.isAcceptableOrUnknown(
+          data['dropped_rounds']!,
+          _droppedRoundsMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_droppedRoundsMeta);
+    }
+    if (data.containsKey('penalty_total')) {
+      context.handle(
+        _penaltyTotalMeta,
+        penaltyTotal.isAcceptableOrUnknown(
+          data['penalty_total']!,
+          _penaltyTotalMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_penaltyTotalMeta);
+    }
+    if (data.containsKey('overall_score')) {
+      context.handle(
+        _overallScoreMeta,
+        overallScore.isAcceptableOrUnknown(
+          data['overall_score']!,
+          _overallScoreMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_overallScoreMeta);
+    }
+    if (data.containsKey('is_preliminary')) {
+      context.handle(
+        _isPreliminaryMeta,
+        isPreliminary.isAcceptableOrUnknown(
+          data['is_preliminary']!,
+          _isPreliminaryMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_isPreliminaryMeta);
+    }
+    if (data.containsKey('config_revision_id')) {
+      context.handle(
+        _configRevisionIdMeta,
+        configRevisionId.isAcceptableOrUnknown(
+          data['config_revision_id']!,
+          _configRevisionIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_configRevisionIdMeta);
+    }
+    if (data.containsKey('matrix_revision_id')) {
+      context.handle(
+        _matrixRevisionIdMeta,
+        matrixRevisionId.isAcceptableOrUnknown(
+          data['matrix_revision_id']!,
+          _matrixRevisionIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_matrixRevisionIdMeta);
+    }
+    if (data.containsKey('calculation_version')) {
+      context.handle(
+        _calculationVersionMeta,
+        calculationVersion.isAcceptableOrUnknown(
+          data['calculation_version']!,
+          _calculationVersionMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_calculationVersionMeta);
+    }
+    if (data.containsKey('computed_at')) {
+      context.handle(
+        _computedAtMeta,
+        computedAt.isAcceptableOrUnknown(data['computed_at']!, _computedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_computedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {contestParticipationId, asOfRound},
+  ];
+  @override
+  ParticipationStandingData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ParticipationStandingData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      contestId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}contest_id'],
+      )!,
+      contestParticipationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}contest_participation_id'],
+      )!,
+      asOfRound: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}as_of_round'],
+      )!,
+      place: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}place'],
+      )!,
+      isTied: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_tied'],
+      )!,
+      rawTotal: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}raw_total'],
+      )!,
+      droppedRounds: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}dropped_rounds'],
+      )!,
+      penaltyTotal: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}penalty_total'],
+      )!,
+      overallScore: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}overall_score'],
+      )!,
+      isPreliminary: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_preliminary'],
+      )!,
+      configRevisionId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}config_revision_id'],
+      )!,
+      matrixRevisionId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}matrix_revision_id'],
+      )!,
+      calculationVersion: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}calculation_version'],
+      )!,
+      computedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}computed_at'],
+      )!,
+    );
+  }
+
+  @override
+  $ParticipationStandingsTable createAlias(String alias) {
+    return $ParticipationStandingsTable(attachedDatabase, alias);
+  }
+}
+
+class ParticipationStandingData extends DataClass
+    implements Insertable<ParticipationStandingData> {
+  final String id;
+  final String contestId;
+  final String contestParticipationId;
+  final int asOfRound;
+  final int place;
+  final bool isTied;
+  final double rawTotal;
+  final String droppedRounds;
+  final double penaltyTotal;
+  final double overallScore;
+  final bool isPreliminary;
+  final String configRevisionId;
+  final String matrixRevisionId;
+  final String calculationVersion;
+  final String computedAt;
+  const ParticipationStandingData({
+    required this.id,
+    required this.contestId,
+    required this.contestParticipationId,
+    required this.asOfRound,
+    required this.place,
+    required this.isTied,
+    required this.rawTotal,
+    required this.droppedRounds,
+    required this.penaltyTotal,
+    required this.overallScore,
+    required this.isPreliminary,
+    required this.configRevisionId,
+    required this.matrixRevisionId,
+    required this.calculationVersion,
+    required this.computedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['contest_id'] = Variable<String>(contestId);
+    map['contest_participation_id'] = Variable<String>(contestParticipationId);
+    map['as_of_round'] = Variable<int>(asOfRound);
+    map['place'] = Variable<int>(place);
+    map['is_tied'] = Variable<bool>(isTied);
+    map['raw_total'] = Variable<double>(rawTotal);
+    map['dropped_rounds'] = Variable<String>(droppedRounds);
+    map['penalty_total'] = Variable<double>(penaltyTotal);
+    map['overall_score'] = Variable<double>(overallScore);
+    map['is_preliminary'] = Variable<bool>(isPreliminary);
+    map['config_revision_id'] = Variable<String>(configRevisionId);
+    map['matrix_revision_id'] = Variable<String>(matrixRevisionId);
+    map['calculation_version'] = Variable<String>(calculationVersion);
+    map['computed_at'] = Variable<String>(computedAt);
+    return map;
+  }
+
+  ParticipationStandingsCompanion toCompanion(bool nullToAbsent) {
+    return ParticipationStandingsCompanion(
+      id: Value(id),
+      contestId: Value(contestId),
+      contestParticipationId: Value(contestParticipationId),
+      asOfRound: Value(asOfRound),
+      place: Value(place),
+      isTied: Value(isTied),
+      rawTotal: Value(rawTotal),
+      droppedRounds: Value(droppedRounds),
+      penaltyTotal: Value(penaltyTotal),
+      overallScore: Value(overallScore),
+      isPreliminary: Value(isPreliminary),
+      configRevisionId: Value(configRevisionId),
+      matrixRevisionId: Value(matrixRevisionId),
+      calculationVersion: Value(calculationVersion),
+      computedAt: Value(computedAt),
+    );
+  }
+
+  factory ParticipationStandingData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ParticipationStandingData(
+      id: serializer.fromJson<String>(json['id']),
+      contestId: serializer.fromJson<String>(json['contestId']),
+      contestParticipationId: serializer.fromJson<String>(
+        json['contestParticipationId'],
+      ),
+      asOfRound: serializer.fromJson<int>(json['asOfRound']),
+      place: serializer.fromJson<int>(json['place']),
+      isTied: serializer.fromJson<bool>(json['isTied']),
+      rawTotal: serializer.fromJson<double>(json['rawTotal']),
+      droppedRounds: serializer.fromJson<String>(json['droppedRounds']),
+      penaltyTotal: serializer.fromJson<double>(json['penaltyTotal']),
+      overallScore: serializer.fromJson<double>(json['overallScore']),
+      isPreliminary: serializer.fromJson<bool>(json['isPreliminary']),
+      configRevisionId: serializer.fromJson<String>(json['configRevisionId']),
+      matrixRevisionId: serializer.fromJson<String>(json['matrixRevisionId']),
+      calculationVersion: serializer.fromJson<String>(
+        json['calculationVersion'],
+      ),
+      computedAt: serializer.fromJson<String>(json['computedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'contestId': serializer.toJson<String>(contestId),
+      'contestParticipationId': serializer.toJson<String>(
+        contestParticipationId,
+      ),
+      'asOfRound': serializer.toJson<int>(asOfRound),
+      'place': serializer.toJson<int>(place),
+      'isTied': serializer.toJson<bool>(isTied),
+      'rawTotal': serializer.toJson<double>(rawTotal),
+      'droppedRounds': serializer.toJson<String>(droppedRounds),
+      'penaltyTotal': serializer.toJson<double>(penaltyTotal),
+      'overallScore': serializer.toJson<double>(overallScore),
+      'isPreliminary': serializer.toJson<bool>(isPreliminary),
+      'configRevisionId': serializer.toJson<String>(configRevisionId),
+      'matrixRevisionId': serializer.toJson<String>(matrixRevisionId),
+      'calculationVersion': serializer.toJson<String>(calculationVersion),
+      'computedAt': serializer.toJson<String>(computedAt),
+    };
+  }
+
+  ParticipationStandingData copyWith({
+    String? id,
+    String? contestId,
+    String? contestParticipationId,
+    int? asOfRound,
+    int? place,
+    bool? isTied,
+    double? rawTotal,
+    String? droppedRounds,
+    double? penaltyTotal,
+    double? overallScore,
+    bool? isPreliminary,
+    String? configRevisionId,
+    String? matrixRevisionId,
+    String? calculationVersion,
+    String? computedAt,
+  }) => ParticipationStandingData(
+    id: id ?? this.id,
+    contestId: contestId ?? this.contestId,
+    contestParticipationId:
+        contestParticipationId ?? this.contestParticipationId,
+    asOfRound: asOfRound ?? this.asOfRound,
+    place: place ?? this.place,
+    isTied: isTied ?? this.isTied,
+    rawTotal: rawTotal ?? this.rawTotal,
+    droppedRounds: droppedRounds ?? this.droppedRounds,
+    penaltyTotal: penaltyTotal ?? this.penaltyTotal,
+    overallScore: overallScore ?? this.overallScore,
+    isPreliminary: isPreliminary ?? this.isPreliminary,
+    configRevisionId: configRevisionId ?? this.configRevisionId,
+    matrixRevisionId: matrixRevisionId ?? this.matrixRevisionId,
+    calculationVersion: calculationVersion ?? this.calculationVersion,
+    computedAt: computedAt ?? this.computedAt,
+  );
+  ParticipationStandingData copyWithCompanion(
+    ParticipationStandingsCompanion data,
+  ) {
+    return ParticipationStandingData(
+      id: data.id.present ? data.id.value : this.id,
+      contestId: data.contestId.present ? data.contestId.value : this.contestId,
+      contestParticipationId: data.contestParticipationId.present
+          ? data.contestParticipationId.value
+          : this.contestParticipationId,
+      asOfRound: data.asOfRound.present ? data.asOfRound.value : this.asOfRound,
+      place: data.place.present ? data.place.value : this.place,
+      isTied: data.isTied.present ? data.isTied.value : this.isTied,
+      rawTotal: data.rawTotal.present ? data.rawTotal.value : this.rawTotal,
+      droppedRounds: data.droppedRounds.present
+          ? data.droppedRounds.value
+          : this.droppedRounds,
+      penaltyTotal: data.penaltyTotal.present
+          ? data.penaltyTotal.value
+          : this.penaltyTotal,
+      overallScore: data.overallScore.present
+          ? data.overallScore.value
+          : this.overallScore,
+      isPreliminary: data.isPreliminary.present
+          ? data.isPreliminary.value
+          : this.isPreliminary,
+      configRevisionId: data.configRevisionId.present
+          ? data.configRevisionId.value
+          : this.configRevisionId,
+      matrixRevisionId: data.matrixRevisionId.present
+          ? data.matrixRevisionId.value
+          : this.matrixRevisionId,
+      calculationVersion: data.calculationVersion.present
+          ? data.calculationVersion.value
+          : this.calculationVersion,
+      computedAt: data.computedAt.present
+          ? data.computedAt.value
+          : this.computedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ParticipationStandingData(')
+          ..write('id: $id, ')
+          ..write('contestId: $contestId, ')
+          ..write('contestParticipationId: $contestParticipationId, ')
+          ..write('asOfRound: $asOfRound, ')
+          ..write('place: $place, ')
+          ..write('isTied: $isTied, ')
+          ..write('rawTotal: $rawTotal, ')
+          ..write('droppedRounds: $droppedRounds, ')
+          ..write('penaltyTotal: $penaltyTotal, ')
+          ..write('overallScore: $overallScore, ')
+          ..write('isPreliminary: $isPreliminary, ')
+          ..write('configRevisionId: $configRevisionId, ')
+          ..write('matrixRevisionId: $matrixRevisionId, ')
+          ..write('calculationVersion: $calculationVersion, ')
+          ..write('computedAt: $computedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    contestId,
+    contestParticipationId,
+    asOfRound,
+    place,
+    isTied,
+    rawTotal,
+    droppedRounds,
+    penaltyTotal,
+    overallScore,
+    isPreliminary,
+    configRevisionId,
+    matrixRevisionId,
+    calculationVersion,
+    computedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ParticipationStandingData &&
+          other.id == this.id &&
+          other.contestId == this.contestId &&
+          other.contestParticipationId == this.contestParticipationId &&
+          other.asOfRound == this.asOfRound &&
+          other.place == this.place &&
+          other.isTied == this.isTied &&
+          other.rawTotal == this.rawTotal &&
+          other.droppedRounds == this.droppedRounds &&
+          other.penaltyTotal == this.penaltyTotal &&
+          other.overallScore == this.overallScore &&
+          other.isPreliminary == this.isPreliminary &&
+          other.configRevisionId == this.configRevisionId &&
+          other.matrixRevisionId == this.matrixRevisionId &&
+          other.calculationVersion == this.calculationVersion &&
+          other.computedAt == this.computedAt);
+}
+
+class ParticipationStandingsCompanion
+    extends UpdateCompanion<ParticipationStandingData> {
+  final Value<String> id;
+  final Value<String> contestId;
+  final Value<String> contestParticipationId;
+  final Value<int> asOfRound;
+  final Value<int> place;
+  final Value<bool> isTied;
+  final Value<double> rawTotal;
+  final Value<String> droppedRounds;
+  final Value<double> penaltyTotal;
+  final Value<double> overallScore;
+  final Value<bool> isPreliminary;
+  final Value<String> configRevisionId;
+  final Value<String> matrixRevisionId;
+  final Value<String> calculationVersion;
+  final Value<String> computedAt;
+  final Value<int> rowid;
+  const ParticipationStandingsCompanion({
+    this.id = const Value.absent(),
+    this.contestId = const Value.absent(),
+    this.contestParticipationId = const Value.absent(),
+    this.asOfRound = const Value.absent(),
+    this.place = const Value.absent(),
+    this.isTied = const Value.absent(),
+    this.rawTotal = const Value.absent(),
+    this.droppedRounds = const Value.absent(),
+    this.penaltyTotal = const Value.absent(),
+    this.overallScore = const Value.absent(),
+    this.isPreliminary = const Value.absent(),
+    this.configRevisionId = const Value.absent(),
+    this.matrixRevisionId = const Value.absent(),
+    this.calculationVersion = const Value.absent(),
+    this.computedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ParticipationStandingsCompanion.insert({
+    required String id,
+    required String contestId,
+    required String contestParticipationId,
+    required int asOfRound,
+    required int place,
+    required bool isTied,
+    required double rawTotal,
+    required String droppedRounds,
+    required double penaltyTotal,
+    required double overallScore,
+    required bool isPreliminary,
+    required String configRevisionId,
+    required String matrixRevisionId,
+    required String calculationVersion,
+    required String computedAt,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       contestId = Value(contestId),
+       contestParticipationId = Value(contestParticipationId),
+       asOfRound = Value(asOfRound),
+       place = Value(place),
+       isTied = Value(isTied),
+       rawTotal = Value(rawTotal),
+       droppedRounds = Value(droppedRounds),
+       penaltyTotal = Value(penaltyTotal),
+       overallScore = Value(overallScore),
+       isPreliminary = Value(isPreliminary),
+       configRevisionId = Value(configRevisionId),
+       matrixRevisionId = Value(matrixRevisionId),
+       calculationVersion = Value(calculationVersion),
+       computedAt = Value(computedAt);
+  static Insertable<ParticipationStandingData> custom({
+    Expression<String>? id,
+    Expression<String>? contestId,
+    Expression<String>? contestParticipationId,
+    Expression<int>? asOfRound,
+    Expression<int>? place,
+    Expression<bool>? isTied,
+    Expression<double>? rawTotal,
+    Expression<String>? droppedRounds,
+    Expression<double>? penaltyTotal,
+    Expression<double>? overallScore,
+    Expression<bool>? isPreliminary,
+    Expression<String>? configRevisionId,
+    Expression<String>? matrixRevisionId,
+    Expression<String>? calculationVersion,
+    Expression<String>? computedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (contestId != null) 'contest_id': contestId,
+      if (contestParticipationId != null)
+        'contest_participation_id': contestParticipationId,
+      if (asOfRound != null) 'as_of_round': asOfRound,
+      if (place != null) 'place': place,
+      if (isTied != null) 'is_tied': isTied,
+      if (rawTotal != null) 'raw_total': rawTotal,
+      if (droppedRounds != null) 'dropped_rounds': droppedRounds,
+      if (penaltyTotal != null) 'penalty_total': penaltyTotal,
+      if (overallScore != null) 'overall_score': overallScore,
+      if (isPreliminary != null) 'is_preliminary': isPreliminary,
+      if (configRevisionId != null) 'config_revision_id': configRevisionId,
+      if (matrixRevisionId != null) 'matrix_revision_id': matrixRevisionId,
+      if (calculationVersion != null) 'calculation_version': calculationVersion,
+      if (computedAt != null) 'computed_at': computedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ParticipationStandingsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? contestId,
+    Value<String>? contestParticipationId,
+    Value<int>? asOfRound,
+    Value<int>? place,
+    Value<bool>? isTied,
+    Value<double>? rawTotal,
+    Value<String>? droppedRounds,
+    Value<double>? penaltyTotal,
+    Value<double>? overallScore,
+    Value<bool>? isPreliminary,
+    Value<String>? configRevisionId,
+    Value<String>? matrixRevisionId,
+    Value<String>? calculationVersion,
+    Value<String>? computedAt,
+    Value<int>? rowid,
+  }) {
+    return ParticipationStandingsCompanion(
+      id: id ?? this.id,
+      contestId: contestId ?? this.contestId,
+      contestParticipationId:
+          contestParticipationId ?? this.contestParticipationId,
+      asOfRound: asOfRound ?? this.asOfRound,
+      place: place ?? this.place,
+      isTied: isTied ?? this.isTied,
+      rawTotal: rawTotal ?? this.rawTotal,
+      droppedRounds: droppedRounds ?? this.droppedRounds,
+      penaltyTotal: penaltyTotal ?? this.penaltyTotal,
+      overallScore: overallScore ?? this.overallScore,
+      isPreliminary: isPreliminary ?? this.isPreliminary,
+      configRevisionId: configRevisionId ?? this.configRevisionId,
+      matrixRevisionId: matrixRevisionId ?? this.matrixRevisionId,
+      calculationVersion: calculationVersion ?? this.calculationVersion,
+      computedAt: computedAt ?? this.computedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (contestId.present) {
+      map['contest_id'] = Variable<String>(contestId.value);
+    }
+    if (contestParticipationId.present) {
+      map['contest_participation_id'] = Variable<String>(
+        contestParticipationId.value,
+      );
+    }
+    if (asOfRound.present) {
+      map['as_of_round'] = Variable<int>(asOfRound.value);
+    }
+    if (place.present) {
+      map['place'] = Variable<int>(place.value);
+    }
+    if (isTied.present) {
+      map['is_tied'] = Variable<bool>(isTied.value);
+    }
+    if (rawTotal.present) {
+      map['raw_total'] = Variable<double>(rawTotal.value);
+    }
+    if (droppedRounds.present) {
+      map['dropped_rounds'] = Variable<String>(droppedRounds.value);
+    }
+    if (penaltyTotal.present) {
+      map['penalty_total'] = Variable<double>(penaltyTotal.value);
+    }
+    if (overallScore.present) {
+      map['overall_score'] = Variable<double>(overallScore.value);
+    }
+    if (isPreliminary.present) {
+      map['is_preliminary'] = Variable<bool>(isPreliminary.value);
+    }
+    if (configRevisionId.present) {
+      map['config_revision_id'] = Variable<String>(configRevisionId.value);
+    }
+    if (matrixRevisionId.present) {
+      map['matrix_revision_id'] = Variable<String>(matrixRevisionId.value);
+    }
+    if (calculationVersion.present) {
+      map['calculation_version'] = Variable<String>(calculationVersion.value);
+    }
+    if (computedAt.present) {
+      map['computed_at'] = Variable<String>(computedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ParticipationStandingsCompanion(')
+          ..write('id: $id, ')
+          ..write('contestId: $contestId, ')
+          ..write('contestParticipationId: $contestParticipationId, ')
+          ..write('asOfRound: $asOfRound, ')
+          ..write('place: $place, ')
+          ..write('isTied: $isTied, ')
+          ..write('rawTotal: $rawTotal, ')
+          ..write('droppedRounds: $droppedRounds, ')
+          ..write('penaltyTotal: $penaltyTotal, ')
+          ..write('overallScore: $overallScore, ')
+          ..write('isPreliminary: $isPreliminary, ')
+          ..write('configRevisionId: $configRevisionId, ')
+          ..write('matrixRevisionId: $matrixRevisionId, ')
+          ..write('calculationVersion: $calculationVersion, ')
+          ..write('computedAt: $computedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $TeamStandingsTable extends TeamStandings
+    with TableInfo<$TeamStandingsTable, TeamStandingData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $TeamStandingsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _contestIdMeta = const VerificationMeta(
+    'contestId',
+  );
+  @override
+  late final GeneratedColumn<String> contestId = GeneratedColumn<String>(
+    'contest_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES contests (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _teamIdMeta = const VerificationMeta('teamId');
+  @override
+  late final GeneratedColumn<String> teamId = GeneratedColumn<String>(
+    'team_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES teams (id)',
+    ),
+  );
+  static const VerificationMeta _asOfRoundMeta = const VerificationMeta(
+    'asOfRound',
+  );
+  @override
+  late final GeneratedColumn<int> asOfRound = GeneratedColumn<int>(
+    'as_of_round',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _placeMeta = const VerificationMeta('place');
+  @override
+  late final GeneratedColumn<int> place = GeneratedColumn<int>(
+    'place',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _isTiedMeta = const VerificationMeta('isTied');
+  @override
+  late final GeneratedColumn<bool> isTied = GeneratedColumn<bool>(
+    'is_tied',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintsDependsOnDialect({
+      SqlDialect.sqlite: 'CHECK ("is_tied" IN (0, 1))',
+      SqlDialect.postgres: '',
+    }),
+  );
+  static const VerificationMeta _teamScoreMeta = const VerificationMeta(
+    'teamScore',
+  );
+  @override
+  late final GeneratedColumn<double> teamScore = GeneratedColumn<double>(
+    'team_score',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _countedParticipationsMeta =
+      const VerificationMeta('countedParticipations');
+  @override
+  late final GeneratedColumn<String> countedParticipations =
+      GeneratedColumn<String>(
+        'counted_participations',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      );
+  static const VerificationMeta _isPreliminaryMeta = const VerificationMeta(
+    'isPreliminary',
+  );
+  @override
+  late final GeneratedColumn<bool> isPreliminary = GeneratedColumn<bool>(
+    'is_preliminary',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintsDependsOnDialect({
+      SqlDialect.sqlite: 'CHECK ("is_preliminary" IN (0, 1))',
+      SqlDialect.postgres: '',
+    }),
+  );
+  static const VerificationMeta _configRevisionIdMeta = const VerificationMeta(
+    'configRevisionId',
+  );
+  @override
+  late final GeneratedColumn<String> configRevisionId = GeneratedColumn<String>(
+    'config_revision_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES contest_configuration_revisions (id)',
+    ),
+  );
+  static const VerificationMeta _matrixRevisionIdMeta = const VerificationMeta(
+    'matrixRevisionId',
+  );
+  @override
+  late final GeneratedColumn<String> matrixRevisionId = GeneratedColumn<String>(
+    'matrix_revision_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES matrix_revisions (id)',
+    ),
+  );
+  static const VerificationMeta _calculationVersionMeta =
+      const VerificationMeta('calculationVersion');
+  @override
+  late final GeneratedColumn<String> calculationVersion =
+      GeneratedColumn<String>(
+        'calculation_version',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      );
+  static const VerificationMeta _computedAtMeta = const VerificationMeta(
+    'computedAt',
+  );
+  @override
+  late final GeneratedColumn<String> computedAt = GeneratedColumn<String>(
+    'computed_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    contestId,
+    teamId,
+    asOfRound,
+    place,
+    isTied,
+    teamScore,
+    countedParticipations,
+    isPreliminary,
+    configRevisionId,
+    matrixRevisionId,
+    calculationVersion,
+    computedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'team_standings';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<TeamStandingData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('contest_id')) {
+      context.handle(
+        _contestIdMeta,
+        contestId.isAcceptableOrUnknown(data['contest_id']!, _contestIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_contestIdMeta);
+    }
+    if (data.containsKey('team_id')) {
+      context.handle(
+        _teamIdMeta,
+        teamId.isAcceptableOrUnknown(data['team_id']!, _teamIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_teamIdMeta);
+    }
+    if (data.containsKey('as_of_round')) {
+      context.handle(
+        _asOfRoundMeta,
+        asOfRound.isAcceptableOrUnknown(data['as_of_round']!, _asOfRoundMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_asOfRoundMeta);
+    }
+    if (data.containsKey('place')) {
+      context.handle(
+        _placeMeta,
+        place.isAcceptableOrUnknown(data['place']!, _placeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_placeMeta);
+    }
+    if (data.containsKey('is_tied')) {
+      context.handle(
+        _isTiedMeta,
+        isTied.isAcceptableOrUnknown(data['is_tied']!, _isTiedMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_isTiedMeta);
+    }
+    if (data.containsKey('team_score')) {
+      context.handle(
+        _teamScoreMeta,
+        teamScore.isAcceptableOrUnknown(data['team_score']!, _teamScoreMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_teamScoreMeta);
+    }
+    if (data.containsKey('counted_participations')) {
+      context.handle(
+        _countedParticipationsMeta,
+        countedParticipations.isAcceptableOrUnknown(
+          data['counted_participations']!,
+          _countedParticipationsMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_countedParticipationsMeta);
+    }
+    if (data.containsKey('is_preliminary')) {
+      context.handle(
+        _isPreliminaryMeta,
+        isPreliminary.isAcceptableOrUnknown(
+          data['is_preliminary']!,
+          _isPreliminaryMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_isPreliminaryMeta);
+    }
+    if (data.containsKey('config_revision_id')) {
+      context.handle(
+        _configRevisionIdMeta,
+        configRevisionId.isAcceptableOrUnknown(
+          data['config_revision_id']!,
+          _configRevisionIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_configRevisionIdMeta);
+    }
+    if (data.containsKey('matrix_revision_id')) {
+      context.handle(
+        _matrixRevisionIdMeta,
+        matrixRevisionId.isAcceptableOrUnknown(
+          data['matrix_revision_id']!,
+          _matrixRevisionIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_matrixRevisionIdMeta);
+    }
+    if (data.containsKey('calculation_version')) {
+      context.handle(
+        _calculationVersionMeta,
+        calculationVersion.isAcceptableOrUnknown(
+          data['calculation_version']!,
+          _calculationVersionMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_calculationVersionMeta);
+    }
+    if (data.containsKey('computed_at')) {
+      context.handle(
+        _computedAtMeta,
+        computedAt.isAcceptableOrUnknown(data['computed_at']!, _computedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_computedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {teamId, asOfRound},
+  ];
+  @override
+  TeamStandingData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return TeamStandingData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      contestId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}contest_id'],
+      )!,
+      teamId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}team_id'],
+      )!,
+      asOfRound: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}as_of_round'],
+      )!,
+      place: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}place'],
+      )!,
+      isTied: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_tied'],
+      )!,
+      teamScore: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}team_score'],
+      )!,
+      countedParticipations: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}counted_participations'],
+      )!,
+      isPreliminary: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_preliminary'],
+      )!,
+      configRevisionId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}config_revision_id'],
+      )!,
+      matrixRevisionId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}matrix_revision_id'],
+      )!,
+      calculationVersion: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}calculation_version'],
+      )!,
+      computedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}computed_at'],
+      )!,
+    );
+  }
+
+  @override
+  $TeamStandingsTable createAlias(String alias) {
+    return $TeamStandingsTable(attachedDatabase, alias);
+  }
+}
+
+class TeamStandingData extends DataClass
+    implements Insertable<TeamStandingData> {
+  final String id;
+  final String contestId;
+  final String teamId;
+  final int asOfRound;
+  final int place;
+  final bool isTied;
+  final double teamScore;
+  final String countedParticipations;
+  final bool isPreliminary;
+  final String configRevisionId;
+  final String matrixRevisionId;
+  final String calculationVersion;
+  final String computedAt;
+  const TeamStandingData({
+    required this.id,
+    required this.contestId,
+    required this.teamId,
+    required this.asOfRound,
+    required this.place,
+    required this.isTied,
+    required this.teamScore,
+    required this.countedParticipations,
+    required this.isPreliminary,
+    required this.configRevisionId,
+    required this.matrixRevisionId,
+    required this.calculationVersion,
+    required this.computedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['contest_id'] = Variable<String>(contestId);
+    map['team_id'] = Variable<String>(teamId);
+    map['as_of_round'] = Variable<int>(asOfRound);
+    map['place'] = Variable<int>(place);
+    map['is_tied'] = Variable<bool>(isTied);
+    map['team_score'] = Variable<double>(teamScore);
+    map['counted_participations'] = Variable<String>(countedParticipations);
+    map['is_preliminary'] = Variable<bool>(isPreliminary);
+    map['config_revision_id'] = Variable<String>(configRevisionId);
+    map['matrix_revision_id'] = Variable<String>(matrixRevisionId);
+    map['calculation_version'] = Variable<String>(calculationVersion);
+    map['computed_at'] = Variable<String>(computedAt);
+    return map;
+  }
+
+  TeamStandingsCompanion toCompanion(bool nullToAbsent) {
+    return TeamStandingsCompanion(
+      id: Value(id),
+      contestId: Value(contestId),
+      teamId: Value(teamId),
+      asOfRound: Value(asOfRound),
+      place: Value(place),
+      isTied: Value(isTied),
+      teamScore: Value(teamScore),
+      countedParticipations: Value(countedParticipations),
+      isPreliminary: Value(isPreliminary),
+      configRevisionId: Value(configRevisionId),
+      matrixRevisionId: Value(matrixRevisionId),
+      calculationVersion: Value(calculationVersion),
+      computedAt: Value(computedAt),
+    );
+  }
+
+  factory TeamStandingData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return TeamStandingData(
+      id: serializer.fromJson<String>(json['id']),
+      contestId: serializer.fromJson<String>(json['contestId']),
+      teamId: serializer.fromJson<String>(json['teamId']),
+      asOfRound: serializer.fromJson<int>(json['asOfRound']),
+      place: serializer.fromJson<int>(json['place']),
+      isTied: serializer.fromJson<bool>(json['isTied']),
+      teamScore: serializer.fromJson<double>(json['teamScore']),
+      countedParticipations: serializer.fromJson<String>(
+        json['countedParticipations'],
+      ),
+      isPreliminary: serializer.fromJson<bool>(json['isPreliminary']),
+      configRevisionId: serializer.fromJson<String>(json['configRevisionId']),
+      matrixRevisionId: serializer.fromJson<String>(json['matrixRevisionId']),
+      calculationVersion: serializer.fromJson<String>(
+        json['calculationVersion'],
+      ),
+      computedAt: serializer.fromJson<String>(json['computedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'contestId': serializer.toJson<String>(contestId),
+      'teamId': serializer.toJson<String>(teamId),
+      'asOfRound': serializer.toJson<int>(asOfRound),
+      'place': serializer.toJson<int>(place),
+      'isTied': serializer.toJson<bool>(isTied),
+      'teamScore': serializer.toJson<double>(teamScore),
+      'countedParticipations': serializer.toJson<String>(countedParticipations),
+      'isPreliminary': serializer.toJson<bool>(isPreliminary),
+      'configRevisionId': serializer.toJson<String>(configRevisionId),
+      'matrixRevisionId': serializer.toJson<String>(matrixRevisionId),
+      'calculationVersion': serializer.toJson<String>(calculationVersion),
+      'computedAt': serializer.toJson<String>(computedAt),
+    };
+  }
+
+  TeamStandingData copyWith({
+    String? id,
+    String? contestId,
+    String? teamId,
+    int? asOfRound,
+    int? place,
+    bool? isTied,
+    double? teamScore,
+    String? countedParticipations,
+    bool? isPreliminary,
+    String? configRevisionId,
+    String? matrixRevisionId,
+    String? calculationVersion,
+    String? computedAt,
+  }) => TeamStandingData(
+    id: id ?? this.id,
+    contestId: contestId ?? this.contestId,
+    teamId: teamId ?? this.teamId,
+    asOfRound: asOfRound ?? this.asOfRound,
+    place: place ?? this.place,
+    isTied: isTied ?? this.isTied,
+    teamScore: teamScore ?? this.teamScore,
+    countedParticipations: countedParticipations ?? this.countedParticipations,
+    isPreliminary: isPreliminary ?? this.isPreliminary,
+    configRevisionId: configRevisionId ?? this.configRevisionId,
+    matrixRevisionId: matrixRevisionId ?? this.matrixRevisionId,
+    calculationVersion: calculationVersion ?? this.calculationVersion,
+    computedAt: computedAt ?? this.computedAt,
+  );
+  TeamStandingData copyWithCompanion(TeamStandingsCompanion data) {
+    return TeamStandingData(
+      id: data.id.present ? data.id.value : this.id,
+      contestId: data.contestId.present ? data.contestId.value : this.contestId,
+      teamId: data.teamId.present ? data.teamId.value : this.teamId,
+      asOfRound: data.asOfRound.present ? data.asOfRound.value : this.asOfRound,
+      place: data.place.present ? data.place.value : this.place,
+      isTied: data.isTied.present ? data.isTied.value : this.isTied,
+      teamScore: data.teamScore.present ? data.teamScore.value : this.teamScore,
+      countedParticipations: data.countedParticipations.present
+          ? data.countedParticipations.value
+          : this.countedParticipations,
+      isPreliminary: data.isPreliminary.present
+          ? data.isPreliminary.value
+          : this.isPreliminary,
+      configRevisionId: data.configRevisionId.present
+          ? data.configRevisionId.value
+          : this.configRevisionId,
+      matrixRevisionId: data.matrixRevisionId.present
+          ? data.matrixRevisionId.value
+          : this.matrixRevisionId,
+      calculationVersion: data.calculationVersion.present
+          ? data.calculationVersion.value
+          : this.calculationVersion,
+      computedAt: data.computedAt.present
+          ? data.computedAt.value
+          : this.computedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TeamStandingData(')
+          ..write('id: $id, ')
+          ..write('contestId: $contestId, ')
+          ..write('teamId: $teamId, ')
+          ..write('asOfRound: $asOfRound, ')
+          ..write('place: $place, ')
+          ..write('isTied: $isTied, ')
+          ..write('teamScore: $teamScore, ')
+          ..write('countedParticipations: $countedParticipations, ')
+          ..write('isPreliminary: $isPreliminary, ')
+          ..write('configRevisionId: $configRevisionId, ')
+          ..write('matrixRevisionId: $matrixRevisionId, ')
+          ..write('calculationVersion: $calculationVersion, ')
+          ..write('computedAt: $computedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    contestId,
+    teamId,
+    asOfRound,
+    place,
+    isTied,
+    teamScore,
+    countedParticipations,
+    isPreliminary,
+    configRevisionId,
+    matrixRevisionId,
+    calculationVersion,
+    computedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is TeamStandingData &&
+          other.id == this.id &&
+          other.contestId == this.contestId &&
+          other.teamId == this.teamId &&
+          other.asOfRound == this.asOfRound &&
+          other.place == this.place &&
+          other.isTied == this.isTied &&
+          other.teamScore == this.teamScore &&
+          other.countedParticipations == this.countedParticipations &&
+          other.isPreliminary == this.isPreliminary &&
+          other.configRevisionId == this.configRevisionId &&
+          other.matrixRevisionId == this.matrixRevisionId &&
+          other.calculationVersion == this.calculationVersion &&
+          other.computedAt == this.computedAt);
+}
+
+class TeamStandingsCompanion extends UpdateCompanion<TeamStandingData> {
+  final Value<String> id;
+  final Value<String> contestId;
+  final Value<String> teamId;
+  final Value<int> asOfRound;
+  final Value<int> place;
+  final Value<bool> isTied;
+  final Value<double> teamScore;
+  final Value<String> countedParticipations;
+  final Value<bool> isPreliminary;
+  final Value<String> configRevisionId;
+  final Value<String> matrixRevisionId;
+  final Value<String> calculationVersion;
+  final Value<String> computedAt;
+  final Value<int> rowid;
+  const TeamStandingsCompanion({
+    this.id = const Value.absent(),
+    this.contestId = const Value.absent(),
+    this.teamId = const Value.absent(),
+    this.asOfRound = const Value.absent(),
+    this.place = const Value.absent(),
+    this.isTied = const Value.absent(),
+    this.teamScore = const Value.absent(),
+    this.countedParticipations = const Value.absent(),
+    this.isPreliminary = const Value.absent(),
+    this.configRevisionId = const Value.absent(),
+    this.matrixRevisionId = const Value.absent(),
+    this.calculationVersion = const Value.absent(),
+    this.computedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  TeamStandingsCompanion.insert({
+    required String id,
+    required String contestId,
+    required String teamId,
+    required int asOfRound,
+    required int place,
+    required bool isTied,
+    required double teamScore,
+    required String countedParticipations,
+    required bool isPreliminary,
+    required String configRevisionId,
+    required String matrixRevisionId,
+    required String calculationVersion,
+    required String computedAt,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       contestId = Value(contestId),
+       teamId = Value(teamId),
+       asOfRound = Value(asOfRound),
+       place = Value(place),
+       isTied = Value(isTied),
+       teamScore = Value(teamScore),
+       countedParticipations = Value(countedParticipations),
+       isPreliminary = Value(isPreliminary),
+       configRevisionId = Value(configRevisionId),
+       matrixRevisionId = Value(matrixRevisionId),
+       calculationVersion = Value(calculationVersion),
+       computedAt = Value(computedAt);
+  static Insertable<TeamStandingData> custom({
+    Expression<String>? id,
+    Expression<String>? contestId,
+    Expression<String>? teamId,
+    Expression<int>? asOfRound,
+    Expression<int>? place,
+    Expression<bool>? isTied,
+    Expression<double>? teamScore,
+    Expression<String>? countedParticipations,
+    Expression<bool>? isPreliminary,
+    Expression<String>? configRevisionId,
+    Expression<String>? matrixRevisionId,
+    Expression<String>? calculationVersion,
+    Expression<String>? computedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (contestId != null) 'contest_id': contestId,
+      if (teamId != null) 'team_id': teamId,
+      if (asOfRound != null) 'as_of_round': asOfRound,
+      if (place != null) 'place': place,
+      if (isTied != null) 'is_tied': isTied,
+      if (teamScore != null) 'team_score': teamScore,
+      if (countedParticipations != null)
+        'counted_participations': countedParticipations,
+      if (isPreliminary != null) 'is_preliminary': isPreliminary,
+      if (configRevisionId != null) 'config_revision_id': configRevisionId,
+      if (matrixRevisionId != null) 'matrix_revision_id': matrixRevisionId,
+      if (calculationVersion != null) 'calculation_version': calculationVersion,
+      if (computedAt != null) 'computed_at': computedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  TeamStandingsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? contestId,
+    Value<String>? teamId,
+    Value<int>? asOfRound,
+    Value<int>? place,
+    Value<bool>? isTied,
+    Value<double>? teamScore,
+    Value<String>? countedParticipations,
+    Value<bool>? isPreliminary,
+    Value<String>? configRevisionId,
+    Value<String>? matrixRevisionId,
+    Value<String>? calculationVersion,
+    Value<String>? computedAt,
+    Value<int>? rowid,
+  }) {
+    return TeamStandingsCompanion(
+      id: id ?? this.id,
+      contestId: contestId ?? this.contestId,
+      teamId: teamId ?? this.teamId,
+      asOfRound: asOfRound ?? this.asOfRound,
+      place: place ?? this.place,
+      isTied: isTied ?? this.isTied,
+      teamScore: teamScore ?? this.teamScore,
+      countedParticipations:
+          countedParticipations ?? this.countedParticipations,
+      isPreliminary: isPreliminary ?? this.isPreliminary,
+      configRevisionId: configRevisionId ?? this.configRevisionId,
+      matrixRevisionId: matrixRevisionId ?? this.matrixRevisionId,
+      calculationVersion: calculationVersion ?? this.calculationVersion,
+      computedAt: computedAt ?? this.computedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (contestId.present) {
+      map['contest_id'] = Variable<String>(contestId.value);
+    }
+    if (teamId.present) {
+      map['team_id'] = Variable<String>(teamId.value);
+    }
+    if (asOfRound.present) {
+      map['as_of_round'] = Variable<int>(asOfRound.value);
+    }
+    if (place.present) {
+      map['place'] = Variable<int>(place.value);
+    }
+    if (isTied.present) {
+      map['is_tied'] = Variable<bool>(isTied.value);
+    }
+    if (teamScore.present) {
+      map['team_score'] = Variable<double>(teamScore.value);
+    }
+    if (countedParticipations.present) {
+      map['counted_participations'] = Variable<String>(
+        countedParticipations.value,
+      );
+    }
+    if (isPreliminary.present) {
+      map['is_preliminary'] = Variable<bool>(isPreliminary.value);
+    }
+    if (configRevisionId.present) {
+      map['config_revision_id'] = Variable<String>(configRevisionId.value);
+    }
+    if (matrixRevisionId.present) {
+      map['matrix_revision_id'] = Variable<String>(matrixRevisionId.value);
+    }
+    if (calculationVersion.present) {
+      map['calculation_version'] = Variable<String>(calculationVersion.value);
+    }
+    if (computedAt.present) {
+      map['computed_at'] = Variable<String>(computedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TeamStandingsCompanion(')
+          ..write('id: $id, ')
+          ..write('contestId: $contestId, ')
+          ..write('teamId: $teamId, ')
+          ..write('asOfRound: $asOfRound, ')
+          ..write('place: $place, ')
+          ..write('isTied: $isTied, ')
+          ..write('teamScore: $teamScore, ')
+          ..write('countedParticipations: $countedParticipations, ')
+          ..write('isPreliminary: $isPreliminary, ')
+          ..write('configRevisionId: $configRevisionId, ')
+          ..write('matrixRevisionId: $matrixRevisionId, ')
+          ..write('calculationVersion: $calculationVersion, ')
+          ..write('computedAt: $computedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $MutationRecordsTable extends MutationRecords
     with TableInfo<$MutationRecordsTable, MutationRecordData> {
   @override
@@ -15835,6 +27314,25 @@ abstract class _$SoarScoreDatabase extends GeneratedDatabase {
   late final $ModelCatalogsTable modelCatalogs = $ModelCatalogsTable(this);
   late final $ContestModelLinksTable contestModelLinks =
       $ContestModelLinksTable(this);
+  late final $MatrixRevisionsTable matrixRevisions = $MatrixRevisionsTable(
+    this,
+  );
+  late final $RoundsTable rounds = $RoundsTable(this);
+  late final $RoundGroupsTable roundGroups = $RoundGroupsTable(this);
+  late final $ReFlightsTable reFlights = $ReFlightsTable(this);
+  late final $MatrixAssignmentsTable matrixAssignments =
+      $MatrixAssignmentsTable(this);
+  late final $ReFlightParticipantsTable reFlightParticipants =
+      $ReFlightParticipantsTable(this);
+  late final $ScorePlaceholdersTable scorePlaceholders =
+      $ScorePlaceholdersTable(this);
+  late final $ScoreAttemptsTable scoreAttempts = $ScoreAttemptsTable(this);
+  late final $OfficialScoresTable officialScores = $OfficialScoresTable(this);
+  late final $ReviewRequestsTable reviewRequests = $ReviewRequestsTable(this);
+  late final $FlightResultsTable flightResults = $FlightResultsTable(this);
+  late final $ParticipationStandingsTable participationStandings =
+      $ParticipationStandingsTable(this);
+  late final $TeamStandingsTable teamStandings = $TeamStandingsTable(this);
   late final $MutationRecordsTable mutationRecords = $MutationRecordsTable(
     this,
   );
@@ -15868,6 +27366,19 @@ abstract class _$SoarScoreDatabase extends GeneratedDatabase {
     teamMemberships,
     modelCatalogs,
     contestModelLinks,
+    matrixRevisions,
+    rounds,
+    roundGroups,
+    reFlights,
+    matrixAssignments,
+    reFlightParticipants,
+    scorePlaceholders,
+    scoreAttempts,
+    officialScores,
+    reviewRequests,
+    flightResults,
+    participationStandings,
+    teamStandings,
     mutationRecords,
     conflictRecords,
     tombstones,
@@ -15912,6 +27423,97 @@ abstract class _$SoarScoreDatabase extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('contest_model_links', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'contests',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('matrix_revisions', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'contests',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('rounds', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'contests',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('round_groups', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'contests',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('re_flights', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'contests',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('matrix_assignments', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'contests',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('re_flight_participants', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'contests',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('score_placeholders', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'contests',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('score_attempts', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'contests',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('official_scores', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'contests',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('review_requests', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'contests',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('flight_results', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'contests',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('participation_standings', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'contests',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('team_standings', kind: UpdateKind.delete)],
     ),
   ]);
 }
@@ -16074,6 +27676,276 @@ final class $$ContestsTableReferences
     final cache = $_typedResult.readTableOrNull(
       _contestModelLinksRefsTable($_db),
     );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$MatrixRevisionsTable, List<MatrixRevisionData>>
+  _matrixRevisionsRefsTable(_$SoarScoreDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.matrixRevisions,
+        aliasName: 'contests__id__matrix_revisions__contest_id',
+      );
+
+  $$MatrixRevisionsTableProcessedTableManager get matrixRevisionsRefs {
+    final manager = $$MatrixRevisionsTableTableManager(
+      $_db,
+      $_db.matrixRevisions,
+    ).filter((f) => f.contestId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _matrixRevisionsRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$RoundsTable, List<RoundData>> _roundsRefsTable(
+    _$SoarScoreDatabase db,
+  ) => MultiTypedResultKey.fromTable(
+    db.rounds,
+    aliasName: 'contests__id__rounds__contest_id',
+  );
+
+  $$RoundsTableProcessedTableManager get roundsRefs {
+    final manager = $$RoundsTableTableManager(
+      $_db,
+      $_db.rounds,
+    ).filter((f) => f.contestId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_roundsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$RoundGroupsTable, List<RoundGroupData>>
+  _roundGroupsRefsTable(_$SoarScoreDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.roundGroups,
+        aliasName: 'contests__id__round_groups__contest_id',
+      );
+
+  $$RoundGroupsTableProcessedTableManager get roundGroupsRefs {
+    final manager = $$RoundGroupsTableTableManager(
+      $_db,
+      $_db.roundGroups,
+    ).filter((f) => f.contestId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_roundGroupsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$ReFlightsTable, List<ReFlightData>>
+  _reFlightsRefsTable(_$SoarScoreDatabase db) => MultiTypedResultKey.fromTable(
+    db.reFlights,
+    aliasName: 'contests__id__re_flights__contest_id',
+  );
+
+  $$ReFlightsTableProcessedTableManager get reFlightsRefs {
+    final manager = $$ReFlightsTableTableManager(
+      $_db,
+      $_db.reFlights,
+    ).filter((f) => f.contestId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_reFlightsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $MatrixAssignmentsTable,
+    List<MatrixAssignmentData>
+  >
+  _matrixAssignmentsRefsTable(_$SoarScoreDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.matrixAssignments,
+        aliasName: 'contests__id__matrix_assignments__contest_id',
+      );
+
+  $$MatrixAssignmentsTableProcessedTableManager get matrixAssignmentsRefs {
+    final manager = $$MatrixAssignmentsTableTableManager(
+      $_db,
+      $_db.matrixAssignments,
+    ).filter((f) => f.contestId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _matrixAssignmentsRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $ReFlightParticipantsTable,
+    List<ReFlightParticipantData>
+  >
+  _reFlightParticipantsRefsTable(_$SoarScoreDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.reFlightParticipants,
+        aliasName: 'contests__id__re_flight_participants__contest_id',
+      );
+
+  $$ReFlightParticipantsTableProcessedTableManager
+  get reFlightParticipantsRefs {
+    final manager = $$ReFlightParticipantsTableTableManager(
+      $_db,
+      $_db.reFlightParticipants,
+    ).filter((f) => f.contestId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _reFlightParticipantsRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $ScorePlaceholdersTable,
+    List<ScorePlaceholderData>
+  >
+  _scorePlaceholdersRefsTable(_$SoarScoreDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.scorePlaceholders,
+        aliasName: 'contests__id__score_placeholders__contest_id',
+      );
+
+  $$ScorePlaceholdersTableProcessedTableManager get scorePlaceholdersRefs {
+    final manager = $$ScorePlaceholdersTableTableManager(
+      $_db,
+      $_db.scorePlaceholders,
+    ).filter((f) => f.contestId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _scorePlaceholdersRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$ScoreAttemptsTable, List<ScoreAttemptData>>
+  _scoreAttemptsRefsTable(_$SoarScoreDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.scoreAttempts,
+        aliasName: 'contests__id__score_attempts__contest_id',
+      );
+
+  $$ScoreAttemptsTableProcessedTableManager get scoreAttemptsRefs {
+    final manager = $$ScoreAttemptsTableTableManager(
+      $_db,
+      $_db.scoreAttempts,
+    ).filter((f) => f.contestId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_scoreAttemptsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$OfficialScoresTable, List<OfficialScoreData>>
+  _officialScoresRefsTable(_$SoarScoreDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.officialScores,
+        aliasName: 'contests__id__official_scores__contest_id',
+      );
+
+  $$OfficialScoresTableProcessedTableManager get officialScoresRefs {
+    final manager = $$OfficialScoresTableTableManager(
+      $_db,
+      $_db.officialScores,
+    ).filter((f) => f.contestId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_officialScoresRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$ReviewRequestsTable, List<ReviewRequestData>>
+  _reviewRequestsRefsTable(_$SoarScoreDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.reviewRequests,
+        aliasName: 'contests__id__review_requests__contest_id',
+      );
+
+  $$ReviewRequestsTableProcessedTableManager get reviewRequestsRefs {
+    final manager = $$ReviewRequestsTableTableManager(
+      $_db,
+      $_db.reviewRequests,
+    ).filter((f) => f.contestId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_reviewRequestsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$FlightResultsTable, List<FlightResultData>>
+  _flightResultsRefsTable(_$SoarScoreDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.flightResults,
+        aliasName: 'contests__id__flight_results__contest_id',
+      );
+
+  $$FlightResultsTableProcessedTableManager get flightResultsRefs {
+    final manager = $$FlightResultsTableTableManager(
+      $_db,
+      $_db.flightResults,
+    ).filter((f) => f.contestId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_flightResultsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $ParticipationStandingsTable,
+    List<ParticipationStandingData>
+  >
+  _participationStandingsRefsTable(_$SoarScoreDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.participationStandings,
+        aliasName: 'contests__id__participation_standings__contest_id',
+      );
+
+  $$ParticipationStandingsTableProcessedTableManager
+  get participationStandingsRefs {
+    final manager = $$ParticipationStandingsTableTableManager(
+      $_db,
+      $_db.participationStandings,
+    ).filter((f) => f.contestId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _participationStandingsRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$TeamStandingsTable, List<TeamStandingData>>
+  _teamStandingsRefsTable(_$SoarScoreDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.teamStandings,
+        aliasName: 'contests__id__team_standings__contest_id',
+      );
+
+  $$TeamStandingsTableProcessedTableManager get teamStandingsRefs {
+    final manager = $$TeamStandingsTableTableManager(
+      $_db,
+      $_db.teamStandings,
+    ).filter((f) => f.contestId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_teamStandingsRefsTable($_db));
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
     );
@@ -16305,6 +28177,332 @@ class $$ContestsTableFilterComposer
           }) => $$ContestModelLinksTableFilterComposer(
             $db: $db,
             $table: $db.contestModelLinks,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> matrixRevisionsRefs(
+    Expression<bool> Function($$MatrixRevisionsTableFilterComposer f) f,
+  ) {
+    final $$MatrixRevisionsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.matrixRevisions,
+      getReferencedColumn: (t) => t.contestId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MatrixRevisionsTableFilterComposer(
+            $db: $db,
+            $table: $db.matrixRevisions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> roundsRefs(
+    Expression<bool> Function($$RoundsTableFilterComposer f) f,
+  ) {
+    final $$RoundsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.rounds,
+      getReferencedColumn: (t) => t.contestId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RoundsTableFilterComposer(
+            $db: $db,
+            $table: $db.rounds,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> roundGroupsRefs(
+    Expression<bool> Function($$RoundGroupsTableFilterComposer f) f,
+  ) {
+    final $$RoundGroupsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.roundGroups,
+      getReferencedColumn: (t) => t.contestId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RoundGroupsTableFilterComposer(
+            $db: $db,
+            $table: $db.roundGroups,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> reFlightsRefs(
+    Expression<bool> Function($$ReFlightsTableFilterComposer f) f,
+  ) {
+    final $$ReFlightsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.reFlights,
+      getReferencedColumn: (t) => t.contestId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ReFlightsTableFilterComposer(
+            $db: $db,
+            $table: $db.reFlights,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> matrixAssignmentsRefs(
+    Expression<bool> Function($$MatrixAssignmentsTableFilterComposer f) f,
+  ) {
+    final $$MatrixAssignmentsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.matrixAssignments,
+      getReferencedColumn: (t) => t.contestId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MatrixAssignmentsTableFilterComposer(
+            $db: $db,
+            $table: $db.matrixAssignments,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> reFlightParticipantsRefs(
+    Expression<bool> Function($$ReFlightParticipantsTableFilterComposer f) f,
+  ) {
+    final $$ReFlightParticipantsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.reFlightParticipants,
+      getReferencedColumn: (t) => t.contestId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ReFlightParticipantsTableFilterComposer(
+            $db: $db,
+            $table: $db.reFlightParticipants,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> scorePlaceholdersRefs(
+    Expression<bool> Function($$ScorePlaceholdersTableFilterComposer f) f,
+  ) {
+    final $$ScorePlaceholdersTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.scorePlaceholders,
+      getReferencedColumn: (t) => t.contestId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ScorePlaceholdersTableFilterComposer(
+            $db: $db,
+            $table: $db.scorePlaceholders,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> scoreAttemptsRefs(
+    Expression<bool> Function($$ScoreAttemptsTableFilterComposer f) f,
+  ) {
+    final $$ScoreAttemptsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.scoreAttempts,
+      getReferencedColumn: (t) => t.contestId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ScoreAttemptsTableFilterComposer(
+            $db: $db,
+            $table: $db.scoreAttempts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> officialScoresRefs(
+    Expression<bool> Function($$OfficialScoresTableFilterComposer f) f,
+  ) {
+    final $$OfficialScoresTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.officialScores,
+      getReferencedColumn: (t) => t.contestId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$OfficialScoresTableFilterComposer(
+            $db: $db,
+            $table: $db.officialScores,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> reviewRequestsRefs(
+    Expression<bool> Function($$ReviewRequestsTableFilterComposer f) f,
+  ) {
+    final $$ReviewRequestsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.reviewRequests,
+      getReferencedColumn: (t) => t.contestId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ReviewRequestsTableFilterComposer(
+            $db: $db,
+            $table: $db.reviewRequests,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> flightResultsRefs(
+    Expression<bool> Function($$FlightResultsTableFilterComposer f) f,
+  ) {
+    final $$FlightResultsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.flightResults,
+      getReferencedColumn: (t) => t.contestId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$FlightResultsTableFilterComposer(
+            $db: $db,
+            $table: $db.flightResults,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> participationStandingsRefs(
+    Expression<bool> Function($$ParticipationStandingsTableFilterComposer f) f,
+  ) {
+    final $$ParticipationStandingsTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.participationStandings,
+          getReferencedColumn: (t) => t.contestId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ParticipationStandingsTableFilterComposer(
+                $db: $db,
+                $table: $db.participationStandings,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<bool> teamStandingsRefs(
+    Expression<bool> Function($$TeamStandingsTableFilterComposer f) f,
+  ) {
+    final $$TeamStandingsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.teamStandings,
+      getReferencedColumn: (t) => t.contestId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TeamStandingsTableFilterComposer(
+            $db: $db,
+            $table: $db.teamStandings,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -16632,6 +28830,335 @@ class $$ContestsTableAnnotationComposer
         );
     return f(composer);
   }
+
+  Expression<T> matrixRevisionsRefs<T extends Object>(
+    Expression<T> Function($$MatrixRevisionsTableAnnotationComposer a) f,
+  ) {
+    final $$MatrixRevisionsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.matrixRevisions,
+      getReferencedColumn: (t) => t.contestId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MatrixRevisionsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.matrixRevisions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<T> roundsRefs<T extends Object>(
+    Expression<T> Function($$RoundsTableAnnotationComposer a) f,
+  ) {
+    final $$RoundsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.rounds,
+      getReferencedColumn: (t) => t.contestId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RoundsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.rounds,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<T> roundGroupsRefs<T extends Object>(
+    Expression<T> Function($$RoundGroupsTableAnnotationComposer a) f,
+  ) {
+    final $$RoundGroupsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.roundGroups,
+      getReferencedColumn: (t) => t.contestId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RoundGroupsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.roundGroups,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<T> reFlightsRefs<T extends Object>(
+    Expression<T> Function($$ReFlightsTableAnnotationComposer a) f,
+  ) {
+    final $$ReFlightsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.reFlights,
+      getReferencedColumn: (t) => t.contestId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ReFlightsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.reFlights,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<T> matrixAssignmentsRefs<T extends Object>(
+    Expression<T> Function($$MatrixAssignmentsTableAnnotationComposer a) f,
+  ) {
+    final $$MatrixAssignmentsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.matrixAssignments,
+          getReferencedColumn: (t) => t.contestId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$MatrixAssignmentsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.matrixAssignments,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<T> reFlightParticipantsRefs<T extends Object>(
+    Expression<T> Function($$ReFlightParticipantsTableAnnotationComposer a) f,
+  ) {
+    final $$ReFlightParticipantsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.reFlightParticipants,
+          getReferencedColumn: (t) => t.contestId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ReFlightParticipantsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.reFlightParticipants,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<T> scorePlaceholdersRefs<T extends Object>(
+    Expression<T> Function($$ScorePlaceholdersTableAnnotationComposer a) f,
+  ) {
+    final $$ScorePlaceholdersTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.scorePlaceholders,
+          getReferencedColumn: (t) => t.contestId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ScorePlaceholdersTableAnnotationComposer(
+                $db: $db,
+                $table: $db.scorePlaceholders,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<T> scoreAttemptsRefs<T extends Object>(
+    Expression<T> Function($$ScoreAttemptsTableAnnotationComposer a) f,
+  ) {
+    final $$ScoreAttemptsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.scoreAttempts,
+      getReferencedColumn: (t) => t.contestId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ScoreAttemptsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.scoreAttempts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<T> officialScoresRefs<T extends Object>(
+    Expression<T> Function($$OfficialScoresTableAnnotationComposer a) f,
+  ) {
+    final $$OfficialScoresTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.officialScores,
+      getReferencedColumn: (t) => t.contestId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$OfficialScoresTableAnnotationComposer(
+            $db: $db,
+            $table: $db.officialScores,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<T> reviewRequestsRefs<T extends Object>(
+    Expression<T> Function($$ReviewRequestsTableAnnotationComposer a) f,
+  ) {
+    final $$ReviewRequestsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.reviewRequests,
+      getReferencedColumn: (t) => t.contestId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ReviewRequestsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.reviewRequests,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<T> flightResultsRefs<T extends Object>(
+    Expression<T> Function($$FlightResultsTableAnnotationComposer a) f,
+  ) {
+    final $$FlightResultsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.flightResults,
+      getReferencedColumn: (t) => t.contestId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$FlightResultsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.flightResults,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<T> participationStandingsRefs<T extends Object>(
+    Expression<T> Function($$ParticipationStandingsTableAnnotationComposer a) f,
+  ) {
+    final $$ParticipationStandingsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.participationStandings,
+          getReferencedColumn: (t) => t.contestId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ParticipationStandingsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.participationStandings,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<T> teamStandingsRefs<T extends Object>(
+    Expression<T> Function($$TeamStandingsTableAnnotationComposer a) f,
+  ) {
+    final $$TeamStandingsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.teamStandings,
+      getReferencedColumn: (t) => t.contestId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TeamStandingsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.teamStandings,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$ContestsTableTableManager
@@ -16653,6 +29180,19 @@ class $$ContestsTableTableManager
             bool teamsRefs,
             bool teamMembershipsRefs,
             bool contestModelLinksRefs,
+            bool matrixRevisionsRefs,
+            bool roundsRefs,
+            bool roundGroupsRefs,
+            bool reFlightsRefs,
+            bool matrixAssignmentsRefs,
+            bool reFlightParticipantsRefs,
+            bool scorePlaceholdersRefs,
+            bool scoreAttemptsRefs,
+            bool officialScoresRefs,
+            bool reviewRequestsRefs,
+            bool flightResultsRefs,
+            bool participationStandingsRefs,
+            bool teamStandingsRefs,
           })
         > {
   $$ContestsTableTableManager(_$SoarScoreDatabase db, $ContestsTable table)
@@ -16769,6 +29309,19 @@ class $$ContestsTableTableManager
                 teamsRefs = false,
                 teamMembershipsRefs = false,
                 contestModelLinksRefs = false,
+                matrixRevisionsRefs = false,
+                roundsRefs = false,
+                roundGroupsRefs = false,
+                reFlightsRefs = false,
+                matrixAssignmentsRefs = false,
+                reFlightParticipantsRefs = false,
+                scorePlaceholdersRefs = false,
+                scoreAttemptsRefs = false,
+                officialScoresRefs = false,
+                reviewRequestsRefs = false,
+                flightResultsRefs = false,
+                participationStandingsRefs = false,
+                teamStandingsRefs = false,
               }) {
                 return PrefetchHooks(
                   db: db,
@@ -16779,6 +29332,19 @@ class $$ContestsTableTableManager
                     if (teamsRefs) db.teams,
                     if (teamMembershipsRefs) db.teamMemberships,
                     if (contestModelLinksRefs) db.contestModelLinks,
+                    if (matrixRevisionsRefs) db.matrixRevisions,
+                    if (roundsRefs) db.rounds,
+                    if (roundGroupsRefs) db.roundGroups,
+                    if (reFlightsRefs) db.reFlights,
+                    if (matrixAssignmentsRefs) db.matrixAssignments,
+                    if (reFlightParticipantsRefs) db.reFlightParticipants,
+                    if (scorePlaceholdersRefs) db.scorePlaceholders,
+                    if (scoreAttemptsRefs) db.scoreAttempts,
+                    if (officialScoresRefs) db.officialScores,
+                    if (reviewRequestsRefs) db.reviewRequests,
+                    if (flightResultsRefs) db.flightResults,
+                    if (participationStandingsRefs) db.participationStandings,
+                    if (teamStandingsRefs) db.teamStandings,
                   ],
                   addJoins: null,
                   getPrefetchedDataCallback: (items) async {
@@ -16888,6 +29454,279 @@ class $$ContestsTableTableManager
                               ),
                           typedResults: items,
                         ),
+                      if (matrixRevisionsRefs)
+                        await $_getPrefetchedData<
+                          ContestData,
+                          $ContestsTable,
+                          MatrixRevisionData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$ContestsTableReferences
+                              ._matrixRevisionsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$ContestsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).matrixRevisionsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.contestId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (roundsRefs)
+                        await $_getPrefetchedData<
+                          ContestData,
+                          $ContestsTable,
+                          RoundData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$ContestsTableReferences
+                              ._roundsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$ContestsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).roundsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.contestId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (roundGroupsRefs)
+                        await $_getPrefetchedData<
+                          ContestData,
+                          $ContestsTable,
+                          RoundGroupData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$ContestsTableReferences
+                              ._roundGroupsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$ContestsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).roundGroupsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.contestId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (reFlightsRefs)
+                        await $_getPrefetchedData<
+                          ContestData,
+                          $ContestsTable,
+                          ReFlightData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$ContestsTableReferences
+                              ._reFlightsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$ContestsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).reFlightsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.contestId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (matrixAssignmentsRefs)
+                        await $_getPrefetchedData<
+                          ContestData,
+                          $ContestsTable,
+                          MatrixAssignmentData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$ContestsTableReferences
+                              ._matrixAssignmentsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$ContestsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).matrixAssignmentsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.contestId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (reFlightParticipantsRefs)
+                        await $_getPrefetchedData<
+                          ContestData,
+                          $ContestsTable,
+                          ReFlightParticipantData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$ContestsTableReferences
+                              ._reFlightParticipantsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$ContestsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).reFlightParticipantsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.contestId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (scorePlaceholdersRefs)
+                        await $_getPrefetchedData<
+                          ContestData,
+                          $ContestsTable,
+                          ScorePlaceholderData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$ContestsTableReferences
+                              ._scorePlaceholdersRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$ContestsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).scorePlaceholdersRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.contestId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (scoreAttemptsRefs)
+                        await $_getPrefetchedData<
+                          ContestData,
+                          $ContestsTable,
+                          ScoreAttemptData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$ContestsTableReferences
+                              ._scoreAttemptsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$ContestsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).scoreAttemptsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.contestId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (officialScoresRefs)
+                        await $_getPrefetchedData<
+                          ContestData,
+                          $ContestsTable,
+                          OfficialScoreData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$ContestsTableReferences
+                              ._officialScoresRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$ContestsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).officialScoresRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.contestId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (reviewRequestsRefs)
+                        await $_getPrefetchedData<
+                          ContestData,
+                          $ContestsTable,
+                          ReviewRequestData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$ContestsTableReferences
+                              ._reviewRequestsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$ContestsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).reviewRequestsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.contestId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (flightResultsRefs)
+                        await $_getPrefetchedData<
+                          ContestData,
+                          $ContestsTable,
+                          FlightResultData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$ContestsTableReferences
+                              ._flightResultsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$ContestsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).flightResultsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.contestId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (participationStandingsRefs)
+                        await $_getPrefetchedData<
+                          ContestData,
+                          $ContestsTable,
+                          ParticipationStandingData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$ContestsTableReferences
+                              ._participationStandingsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$ContestsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).participationStandingsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.contestId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (teamStandingsRefs)
+                        await $_getPrefetchedData<
+                          ContestData,
+                          $ContestsTable,
+                          TeamStandingData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$ContestsTableReferences
+                              ._teamStandingsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$ContestsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).teamStandingsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.contestId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -16914,6 +29753,19 @@ typedef $$ContestsTableProcessedTableManager =
         bool teamsRefs,
         bool teamMembershipsRefs,
         bool contestModelLinksRefs,
+        bool matrixRevisionsRefs,
+        bool roundsRefs,
+        bool roundGroupsRefs,
+        bool reFlightsRefs,
+        bool matrixAssignmentsRefs,
+        bool reFlightParticipantsRefs,
+        bool scorePlaceholdersRefs,
+        bool scoreAttemptsRefs,
+        bool officialScoresRefs,
+        bool reviewRequestsRefs,
+        bool flightResultsRefs,
+        bool participationStandingsRefs,
+        bool teamStandingsRefs,
       })
     >;
 typedef $$LandingTablesTableCreateCompanionBuilder =
@@ -22555,6 +35407,109 @@ final class $$ContestConfigurationRevisionsTableReferences
       manager.$state.copyWith(prefetchedData: [item]),
     );
   }
+
+  static MultiTypedResultKey<$ReFlightsTable, List<ReFlightData>>
+  _reFlightsRefsTable(_$SoarScoreDatabase db) => MultiTypedResultKey.fromTable(
+    db.reFlights,
+    aliasName:
+        'contest_configuration_revisions__id__re_flights__config_revision_id',
+  );
+
+  $$ReFlightsTableProcessedTableManager get reFlightsRefs {
+    final manager = $$ReFlightsTableTableManager($_db, $_db.reFlights).filter(
+      (f) => f.configRevisionId.id.sqlEquals($_itemColumn<String>('id')!),
+    );
+
+    final cache = $_typedResult.readTableOrNull(_reFlightsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$ScoreAttemptsTable, List<ScoreAttemptData>>
+  _scoreAttemptsRefsTable(_$SoarScoreDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.scoreAttempts,
+        aliasName: 'contest_configuration_revisions__id__score_attempts__config_revision_id',
+      );
+
+  $$ScoreAttemptsTableProcessedTableManager get scoreAttemptsRefs {
+    final manager = $$ScoreAttemptsTableTableManager($_db, $_db.scoreAttempts)
+        .filter(
+          (f) => f.configRevisionId.id.sqlEquals($_itemColumn<String>('id')!),
+        );
+
+    final cache = $_typedResult.readTableOrNull(_scoreAttemptsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$FlightResultsTable, List<FlightResultData>>
+  _flightResultsRefsTable(_$SoarScoreDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.flightResults,
+        aliasName: 'contest_configuration_revisions__id__flight_results__config_revision_id',
+      );
+
+  $$FlightResultsTableProcessedTableManager get flightResultsRefs {
+    final manager = $$FlightResultsTableTableManager($_db, $_db.flightResults)
+        .filter(
+          (f) => f.configRevisionId.id.sqlEquals($_itemColumn<String>('id')!),
+        );
+
+    final cache = $_typedResult.readTableOrNull(_flightResultsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $ParticipationStandingsTable,
+    List<ParticipationStandingData>
+  >
+  _participationStandingsRefsTable(_$SoarScoreDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.participationStandings,
+        aliasName: 'contest_configuration_revisions__id__participation_standings__config_revision_id',
+      );
+
+  $$ParticipationStandingsTableProcessedTableManager
+  get participationStandingsRefs {
+    final manager =
+        $$ParticipationStandingsTableTableManager(
+          $_db,
+          $_db.participationStandings,
+        ).filter(
+          (f) => f.configRevisionId.id.sqlEquals($_itemColumn<String>('id')!),
+        );
+
+    final cache = $_typedResult.readTableOrNull(
+      _participationStandingsRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$TeamStandingsTable, List<TeamStandingData>>
+  _teamStandingsRefsTable(_$SoarScoreDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.teamStandings,
+        aliasName: 'contest_configuration_revisions__id__team_standings__config_revision_id',
+      );
+
+  $$TeamStandingsTableProcessedTableManager get teamStandingsRefs {
+    final manager = $$TeamStandingsTableTableManager($_db, $_db.teamStandings)
+        .filter(
+          (f) => f.configRevisionId.id.sqlEquals($_itemColumn<String>('id')!),
+        );
+
+    final cache = $_typedResult.readTableOrNull(_teamStandingsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$ContestConfigurationRevisionsTableFilterComposer
@@ -22687,6 +35642,132 @@ class $$ContestConfigurationRevisionsTableFilterComposer
           ),
     );
     return composer;
+  }
+
+  Expression<bool> reFlightsRefs(
+    Expression<bool> Function($$ReFlightsTableFilterComposer f) f,
+  ) {
+    final $$ReFlightsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.reFlights,
+      getReferencedColumn: (t) => t.configRevisionId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ReFlightsTableFilterComposer(
+            $db: $db,
+            $table: $db.reFlights,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> scoreAttemptsRefs(
+    Expression<bool> Function($$ScoreAttemptsTableFilterComposer f) f,
+  ) {
+    final $$ScoreAttemptsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.scoreAttempts,
+      getReferencedColumn: (t) => t.configRevisionId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ScoreAttemptsTableFilterComposer(
+            $db: $db,
+            $table: $db.scoreAttempts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> flightResultsRefs(
+    Expression<bool> Function($$FlightResultsTableFilterComposer f) f,
+  ) {
+    final $$FlightResultsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.flightResults,
+      getReferencedColumn: (t) => t.configRevisionId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$FlightResultsTableFilterComposer(
+            $db: $db,
+            $table: $db.flightResults,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> participationStandingsRefs(
+    Expression<bool> Function($$ParticipationStandingsTableFilterComposer f) f,
+  ) {
+    final $$ParticipationStandingsTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.participationStandings,
+          getReferencedColumn: (t) => t.configRevisionId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ParticipationStandingsTableFilterComposer(
+                $db: $db,
+                $table: $db.participationStandings,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<bool> teamStandingsRefs(
+    Expression<bool> Function($$TeamStandingsTableFilterComposer f) f,
+  ) {
+    final $$TeamStandingsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.teamStandings,
+      getReferencedColumn: (t) => t.configRevisionId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TeamStandingsTableFilterComposer(
+            $db: $db,
+            $table: $db.teamStandings,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
   }
 }
 
@@ -22945,6 +36026,132 @@ class $$ContestConfigurationRevisionsTableAnnotationComposer
     );
     return composer;
   }
+
+  Expression<T> reFlightsRefs<T extends Object>(
+    Expression<T> Function($$ReFlightsTableAnnotationComposer a) f,
+  ) {
+    final $$ReFlightsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.reFlights,
+      getReferencedColumn: (t) => t.configRevisionId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ReFlightsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.reFlights,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<T> scoreAttemptsRefs<T extends Object>(
+    Expression<T> Function($$ScoreAttemptsTableAnnotationComposer a) f,
+  ) {
+    final $$ScoreAttemptsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.scoreAttempts,
+      getReferencedColumn: (t) => t.configRevisionId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ScoreAttemptsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.scoreAttempts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<T> flightResultsRefs<T extends Object>(
+    Expression<T> Function($$FlightResultsTableAnnotationComposer a) f,
+  ) {
+    final $$FlightResultsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.flightResults,
+      getReferencedColumn: (t) => t.configRevisionId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$FlightResultsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.flightResults,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<T> participationStandingsRefs<T extends Object>(
+    Expression<T> Function($$ParticipationStandingsTableAnnotationComposer a) f,
+  ) {
+    final $$ParticipationStandingsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.participationStandings,
+          getReferencedColumn: (t) => t.configRevisionId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ParticipationStandingsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.participationStandings,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<T> teamStandingsRefs<T extends Object>(
+    Expression<T> Function($$TeamStandingsTableAnnotationComposer a) f,
+  ) {
+    final $$TeamStandingsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.teamStandings,
+      getReferencedColumn: (t) => t.configRevisionId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TeamStandingsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.teamStandings,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$ContestConfigurationRevisionsTableTableManager
@@ -22968,6 +36175,11 @@ class $$ContestConfigurationRevisionsTableTableManager
             bool disciplineProfileId,
             bool sourcePresetId,
             bool landingTableId,
+            bool reFlightsRefs,
+            bool scoreAttemptsRefs,
+            bool flightResultsRefs,
+            bool participationStandingsRefs,
+            bool teamStandingsRefs,
           })
         > {
   $$ContestConfigurationRevisionsTableTableManager(
@@ -23061,10 +36273,21 @@ class $$ContestConfigurationRevisionsTableTableManager
                 disciplineProfileId = false,
                 sourcePresetId = false,
                 landingTableId = false,
+                reFlightsRefs = false,
+                scoreAttemptsRefs = false,
+                flightResultsRefs = false,
+                participationStandingsRefs = false,
+                teamStandingsRefs = false,
               }) {
                 return PrefetchHooks(
                   db: db,
-                  explicitlyWatchedTables: [],
+                  explicitlyWatchedTables: [
+                    if (reFlightsRefs) db.reFlights,
+                    if (scoreAttemptsRefs) db.scoreAttempts,
+                    if (flightResultsRefs) db.flightResults,
+                    if (participationStandingsRefs) db.participationStandings,
+                    if (teamStandingsRefs) db.teamStandings,
+                  ],
                   addJoins:
                       <
                         T extends TableManagerState<
@@ -23137,7 +36360,118 @@ class $$ContestConfigurationRevisionsTableTableManager
                         return state;
                       },
                   getPrefetchedDataCallback: (items) async {
-                    return [];
+                    return [
+                      if (reFlightsRefs)
+                        await $_getPrefetchedData<
+                          ContestConfigurationRevisionData,
+                          $ContestConfigurationRevisionsTable,
+                          ReFlightData
+                        >(
+                          currentTable: table,
+                          referencedTable:
+                              $$ContestConfigurationRevisionsTableReferences
+                                  ._reFlightsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$ContestConfigurationRevisionsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).reFlightsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.configRevisionId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (scoreAttemptsRefs)
+                        await $_getPrefetchedData<
+                          ContestConfigurationRevisionData,
+                          $ContestConfigurationRevisionsTable,
+                          ScoreAttemptData
+                        >(
+                          currentTable: table,
+                          referencedTable:
+                              $$ContestConfigurationRevisionsTableReferences
+                                  ._scoreAttemptsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$ContestConfigurationRevisionsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).scoreAttemptsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.configRevisionId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (flightResultsRefs)
+                        await $_getPrefetchedData<
+                          ContestConfigurationRevisionData,
+                          $ContestConfigurationRevisionsTable,
+                          FlightResultData
+                        >(
+                          currentTable: table,
+                          referencedTable:
+                              $$ContestConfigurationRevisionsTableReferences
+                                  ._flightResultsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$ContestConfigurationRevisionsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).flightResultsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.configRevisionId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (participationStandingsRefs)
+                        await $_getPrefetchedData<
+                          ContestConfigurationRevisionData,
+                          $ContestConfigurationRevisionsTable,
+                          ParticipationStandingData
+                        >(
+                          currentTable: table,
+                          referencedTable:
+                              $$ContestConfigurationRevisionsTableReferences
+                                  ._participationStandingsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$ContestConfigurationRevisionsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).participationStandingsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.configRevisionId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (teamStandingsRefs)
+                        await $_getPrefetchedData<
+                          ContestConfigurationRevisionData,
+                          $ContestConfigurationRevisionsTable,
+                          TeamStandingData
+                        >(
+                          currentTable: table,
+                          referencedTable:
+                              $$ContestConfigurationRevisionsTableReferences
+                                  ._teamStandingsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$ContestConfigurationRevisionsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).teamStandingsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.configRevisionId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
                   },
                 );
               },
@@ -23165,6 +36499,11 @@ typedef $$ContestConfigurationRevisionsTableProcessedTableManager =
         bool disciplineProfileId,
         bool sourcePresetId,
         bool landingTableId,
+        bool reFlightsRefs,
+        bool scoreAttemptsRefs,
+        bool flightResultsRefs,
+        bool participationStandingsRefs,
+        bool teamStandingsRefs,
       })
     >;
 typedef $$ParticipantProfilesTableCreateCompanionBuilder =
@@ -24165,6 +37504,147 @@ final class $$ContestParticipationsTableReferences
       manager.$state.copyWith(prefetchedData: cache),
     );
   }
+
+  static MultiTypedResultKey<
+    $MatrixAssignmentsTable,
+    List<MatrixAssignmentData>
+  >
+  _matrixAssignmentsRefsTable(_$SoarScoreDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.matrixAssignments,
+        aliasName: 'contest_participations__id__matrix_assignments__contest_participation_id',
+      );
+
+  $$MatrixAssignmentsTableProcessedTableManager get matrixAssignmentsRefs {
+    final manager =
+        $$MatrixAssignmentsTableTableManager(
+          $_db,
+          $_db.matrixAssignments,
+        ).filter(
+          (f) => f.contestParticipationId.id.sqlEquals(
+            $_itemColumn<String>('id')!,
+          ),
+        );
+
+    final cache = $_typedResult.readTableOrNull(
+      _matrixAssignmentsRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $ReFlightParticipantsTable,
+    List<ReFlightParticipantData>
+  >
+  _reFlightParticipantsRefsTable(_$SoarScoreDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.reFlightParticipants,
+        aliasName: 'contest_participations__id__re_flight_participants__contest_participation_id',
+      );
+
+  $$ReFlightParticipantsTableProcessedTableManager
+  get reFlightParticipantsRefs {
+    final manager =
+        $$ReFlightParticipantsTableTableManager(
+          $_db,
+          $_db.reFlightParticipants,
+        ).filter(
+          (f) => f.contestParticipationId.id.sqlEquals(
+            $_itemColumn<String>('id')!,
+          ),
+        );
+
+    final cache = $_typedResult.readTableOrNull(
+      _reFlightParticipantsRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $ScorePlaceholdersTable,
+    List<ScorePlaceholderData>
+  >
+  _scorePlaceholdersRefsTable(_$SoarScoreDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.scorePlaceholders,
+        aliasName: 'contest_participations__id__score_placeholders__contest_participation_id',
+      );
+
+  $$ScorePlaceholdersTableProcessedTableManager get scorePlaceholdersRefs {
+    final manager =
+        $$ScorePlaceholdersTableTableManager(
+          $_db,
+          $_db.scorePlaceholders,
+        ).filter(
+          (f) => f.contestParticipationId.id.sqlEquals(
+            $_itemColumn<String>('id')!,
+          ),
+        );
+
+    final cache = $_typedResult.readTableOrNull(
+      _scorePlaceholdersRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$FlightResultsTable, List<FlightResultData>>
+  _flightResultsRefsTable(
+    _$SoarScoreDatabase db,
+  ) => MultiTypedResultKey.fromTable(
+    db.flightResults,
+    aliasName:
+        'contest_participations__id__flight_results__contest_participation_id',
+  );
+
+  $$FlightResultsTableProcessedTableManager get flightResultsRefs {
+    final manager = $$FlightResultsTableTableManager($_db, $_db.flightResults)
+        .filter(
+          (f) => f.contestParticipationId.id.sqlEquals(
+            $_itemColumn<String>('id')!,
+          ),
+        );
+
+    final cache = $_typedResult.readTableOrNull(_flightResultsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $ParticipationStandingsTable,
+    List<ParticipationStandingData>
+  >
+  _participationStandingsRefsTable(_$SoarScoreDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.participationStandings,
+        aliasName: 'contest_participations__id__participation_standings__contest_participation_id',
+      );
+
+  $$ParticipationStandingsTableProcessedTableManager
+  get participationStandingsRefs {
+    final manager =
+        $$ParticipationStandingsTableTableManager(
+          $_db,
+          $_db.participationStandings,
+        ).filter(
+          (f) => f.contestParticipationId.id.sqlEquals(
+            $_itemColumn<String>('id')!,
+          ),
+        );
+
+    final cache = $_typedResult.readTableOrNull(
+      _participationStandingsRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$ContestParticipationsTableFilterComposer
@@ -24332,6 +37812,132 @@ class $$ContestParticipationsTableFilterComposer
                 $removeJoinBuilderFromRootComposer,
           ),
     );
+    return f(composer);
+  }
+
+  Expression<bool> matrixAssignmentsRefs(
+    Expression<bool> Function($$MatrixAssignmentsTableFilterComposer f) f,
+  ) {
+    final $$MatrixAssignmentsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.matrixAssignments,
+      getReferencedColumn: (t) => t.contestParticipationId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MatrixAssignmentsTableFilterComposer(
+            $db: $db,
+            $table: $db.matrixAssignments,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> reFlightParticipantsRefs(
+    Expression<bool> Function($$ReFlightParticipantsTableFilterComposer f) f,
+  ) {
+    final $$ReFlightParticipantsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.reFlightParticipants,
+      getReferencedColumn: (t) => t.contestParticipationId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ReFlightParticipantsTableFilterComposer(
+            $db: $db,
+            $table: $db.reFlightParticipants,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> scorePlaceholdersRefs(
+    Expression<bool> Function($$ScorePlaceholdersTableFilterComposer f) f,
+  ) {
+    final $$ScorePlaceholdersTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.scorePlaceholders,
+      getReferencedColumn: (t) => t.contestParticipationId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ScorePlaceholdersTableFilterComposer(
+            $db: $db,
+            $table: $db.scorePlaceholders,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> flightResultsRefs(
+    Expression<bool> Function($$FlightResultsTableFilterComposer f) f,
+  ) {
+    final $$FlightResultsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.flightResults,
+      getReferencedColumn: (t) => t.contestParticipationId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$FlightResultsTableFilterComposer(
+            $db: $db,
+            $table: $db.flightResults,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> participationStandingsRefs(
+    Expression<bool> Function($$ParticipationStandingsTableFilterComposer f) f,
+  ) {
+    final $$ParticipationStandingsTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.participationStandings,
+          getReferencedColumn: (t) => t.contestParticipationId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ParticipationStandingsTableFilterComposer(
+                $db: $db,
+                $table: $db.participationStandings,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
     return f(composer);
   }
 }
@@ -24617,6 +38223,135 @@ class $$ContestParticipationsTableAnnotationComposer
         );
     return f(composer);
   }
+
+  Expression<T> matrixAssignmentsRefs<T extends Object>(
+    Expression<T> Function($$MatrixAssignmentsTableAnnotationComposer a) f,
+  ) {
+    final $$MatrixAssignmentsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.matrixAssignments,
+          getReferencedColumn: (t) => t.contestParticipationId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$MatrixAssignmentsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.matrixAssignments,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<T> reFlightParticipantsRefs<T extends Object>(
+    Expression<T> Function($$ReFlightParticipantsTableAnnotationComposer a) f,
+  ) {
+    final $$ReFlightParticipantsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.reFlightParticipants,
+          getReferencedColumn: (t) => t.contestParticipationId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ReFlightParticipantsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.reFlightParticipants,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<T> scorePlaceholdersRefs<T extends Object>(
+    Expression<T> Function($$ScorePlaceholdersTableAnnotationComposer a) f,
+  ) {
+    final $$ScorePlaceholdersTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.scorePlaceholders,
+          getReferencedColumn: (t) => t.contestParticipationId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ScorePlaceholdersTableAnnotationComposer(
+                $db: $db,
+                $table: $db.scorePlaceholders,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<T> flightResultsRefs<T extends Object>(
+    Expression<T> Function($$FlightResultsTableAnnotationComposer a) f,
+  ) {
+    final $$FlightResultsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.flightResults,
+      getReferencedColumn: (t) => t.contestParticipationId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$FlightResultsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.flightResults,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<T> participationStandingsRefs<T extends Object>(
+    Expression<T> Function($$ParticipationStandingsTableAnnotationComposer a) f,
+  ) {
+    final $$ParticipationStandingsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.participationStandings,
+          getReferencedColumn: (t) => t.contestParticipationId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ParticipationStandingsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.participationStandings,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
 }
 
 class $$ContestParticipationsTableTableManager
@@ -24638,6 +38373,11 @@ class $$ContestParticipationsTableTableManager
             bool roleId,
             bool teamMembershipsRefs,
             bool contestModelLinksRefs,
+            bool matrixAssignmentsRefs,
+            bool reFlightParticipantsRefs,
+            bool scorePlaceholdersRefs,
+            bool flightResultsRefs,
+            bool participationStandingsRefs,
           })
         > {
   $$ContestParticipationsTableTableManager(
@@ -24736,12 +38476,22 @@ class $$ContestParticipationsTableTableManager
                 roleId = false,
                 teamMembershipsRefs = false,
                 contestModelLinksRefs = false,
+                matrixAssignmentsRefs = false,
+                reFlightParticipantsRefs = false,
+                scorePlaceholdersRefs = false,
+                flightResultsRefs = false,
+                participationStandingsRefs = false,
               }) {
                 return PrefetchHooks(
                   db: db,
                   explicitlyWatchedTables: [
                     if (teamMembershipsRefs) db.teamMemberships,
                     if (contestModelLinksRefs) db.contestModelLinks,
+                    if (matrixAssignmentsRefs) db.matrixAssignments,
+                    if (reFlightParticipantsRefs) db.reFlightParticipants,
+                    if (scorePlaceholdersRefs) db.scorePlaceholders,
+                    if (flightResultsRefs) db.flightResults,
+                    if (participationStandingsRefs) db.participationStandings,
                   ],
                   addJoins:
                       <
@@ -24847,6 +38597,116 @@ class $$ContestParticipationsTableTableManager
                               ),
                           typedResults: items,
                         ),
+                      if (matrixAssignmentsRefs)
+                        await $_getPrefetchedData<
+                          ContestParticipationData,
+                          $ContestParticipationsTable,
+                          MatrixAssignmentData
+                        >(
+                          currentTable: table,
+                          referencedTable:
+                              $$ContestParticipationsTableReferences
+                                  ._matrixAssignmentsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$ContestParticipationsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).matrixAssignmentsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.contestParticipationId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (reFlightParticipantsRefs)
+                        await $_getPrefetchedData<
+                          ContestParticipationData,
+                          $ContestParticipationsTable,
+                          ReFlightParticipantData
+                        >(
+                          currentTable: table,
+                          referencedTable:
+                              $$ContestParticipationsTableReferences
+                                  ._reFlightParticipantsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$ContestParticipationsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).reFlightParticipantsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.contestParticipationId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (scorePlaceholdersRefs)
+                        await $_getPrefetchedData<
+                          ContestParticipationData,
+                          $ContestParticipationsTable,
+                          ScorePlaceholderData
+                        >(
+                          currentTable: table,
+                          referencedTable:
+                              $$ContestParticipationsTableReferences
+                                  ._scorePlaceholdersRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$ContestParticipationsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).scorePlaceholdersRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.contestParticipationId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (flightResultsRefs)
+                        await $_getPrefetchedData<
+                          ContestParticipationData,
+                          $ContestParticipationsTable,
+                          FlightResultData
+                        >(
+                          currentTable: table,
+                          referencedTable:
+                              $$ContestParticipationsTableReferences
+                                  ._flightResultsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$ContestParticipationsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).flightResultsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.contestParticipationId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (participationStandingsRefs)
+                        await $_getPrefetchedData<
+                          ContestParticipationData,
+                          $ContestParticipationsTable,
+                          ParticipationStandingData
+                        >(
+                          currentTable: table,
+                          referencedTable:
+                              $$ContestParticipationsTableReferences
+                                  ._participationStandingsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$ContestParticipationsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).participationStandingsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.contestParticipationId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -24873,6 +38733,11 @@ typedef $$ContestParticipationsTableProcessedTableManager =
         bool roleId,
         bool teamMembershipsRefs,
         bool contestModelLinksRefs,
+        bool matrixAssignmentsRefs,
+        bool reFlightParticipantsRefs,
+        bool scorePlaceholdersRefs,
+        bool flightResultsRefs,
+        bool participationStandingsRefs,
       })
     >;
 typedef $$TeamsTableCreateCompanionBuilder = TeamsCompanion Function({
@@ -24927,6 +38792,25 @@ final class $$TeamsTableReferences
     final cache = $_typedResult.readTableOrNull(
       _teamMembershipsRefsTable($_db),
     );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$TeamStandingsTable, List<TeamStandingData>>
+  _teamStandingsRefsTable(_$SoarScoreDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.teamStandings,
+        aliasName: 'teams__id__team_standings__team_id',
+      );
+
+  $$TeamStandingsTableProcessedTableManager get teamStandingsRefs {
+    final manager = $$TeamStandingsTableTableManager(
+      $_db,
+      $_db.teamStandings,
+    ).filter((f) => f.teamId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_teamStandingsRefsTable($_db));
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
     );
@@ -24996,6 +38880,31 @@ class $$TeamsTableFilterComposer
           }) => $$TeamMembershipsTableFilterComposer(
             $db: $db,
             $table: $db.teamMemberships,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> teamStandingsRefs(
+    Expression<bool> Function($$TeamStandingsTableFilterComposer f) f,
+  ) {
+    final $$TeamStandingsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.teamStandings,
+      getReferencedColumn: (t) => t.teamId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TeamStandingsTableFilterComposer(
+            $db: $db,
+            $table: $db.teamStandings,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -25119,6 +39028,31 @@ class $$TeamsTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> teamStandingsRefs<T extends Object>(
+    Expression<T> Function($$TeamStandingsTableAnnotationComposer a) f,
+  ) {
+    final $$TeamStandingsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.teamStandings,
+      getReferencedColumn: (t) => t.teamId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TeamStandingsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.teamStandings,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$TeamsTableTableManager
@@ -25134,7 +39068,11 @@ class $$TeamsTableTableManager
           $$TeamsTableUpdateCompanionBuilder,
           (TeamData, $$TeamsTableReferences),
           TeamData,
-          PrefetchHooks Function({bool contestId, bool teamMembershipsRefs})
+          PrefetchHooks Function({
+            bool contestId,
+            bool teamMembershipsRefs,
+            bool teamStandingsRefs,
+          })
         > {
   $$TeamsTableTableManager(_$SoarScoreDatabase db, $TeamsTable table)
     : super(
@@ -25184,11 +39122,16 @@ class $$TeamsTableTableManager
               )
               .toList(),
           prefetchHooksCallback:
-              ({contestId = false, teamMembershipsRefs = false}) {
+              ({
+                contestId = false,
+                teamMembershipsRefs = false,
+                teamStandingsRefs = false,
+              }) {
                 return PrefetchHooks(
                   db: db,
                   explicitlyWatchedTables: [
                     if (teamMembershipsRefs) db.teamMemberships,
+                    if (teamStandingsRefs) db.teamStandings,
                   ],
                   addJoins:
                       <
@@ -25243,6 +39186,27 @@ class $$TeamsTableTableManager
                               ),
                           typedResults: items,
                         ),
+                      if (teamStandingsRefs)
+                        await $_getPrefetchedData<
+                          TeamData,
+                          $TeamsTable,
+                          TeamStandingData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$TeamsTableReferences
+                              ._teamStandingsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$TeamsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).teamStandingsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.teamId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -25263,7 +39227,11 @@ typedef $$TeamsTableProcessedTableManager =
       $$TeamsTableUpdateCompanionBuilder,
       (TeamData, $$TeamsTableReferences),
       TeamData,
-      PrefetchHooks Function({bool contestId, bool teamMembershipsRefs})
+      PrefetchHooks Function({
+        bool contestId,
+        bool teamMembershipsRefs,
+        bool teamStandingsRefs,
+      })
     >;
 typedef $$TeamMembershipsTableCreateCompanionBuilder =
     TeamMembershipsCompanion Function({
@@ -26706,6 +40674,12223 @@ typedef $$ContestModelLinksTableProcessedTableManager =
         bool contestId,
         bool contestParticipationId,
         bool modelCatalogId,
+      })
+    >;
+typedef $$MatrixRevisionsTableCreateCompanionBuilder =
+    MatrixRevisionsCompanion Function({
+      required String id,
+      required String contestId,
+      required int revisionNumber,
+      Value<String?> previousRevisionId,
+      required int firstRound,
+      required int lastRound,
+      required String drawMode,
+      required int randomSeed,
+      required String algorithmVersion,
+      required String drawConfig,
+      required String seedingSnapshot,
+      Value<String?> fairnessSummary,
+      Value<String?> reason,
+      required String createdBy,
+      required String createdAt,
+      Value<String?> finalizedBy,
+      Value<String?> finalizedAt,
+      Value<int> rowid,
+    });
+typedef $$MatrixRevisionsTableUpdateCompanionBuilder =
+    MatrixRevisionsCompanion Function({
+      Value<String> id,
+      Value<String> contestId,
+      Value<int> revisionNumber,
+      Value<String?> previousRevisionId,
+      Value<int> firstRound,
+      Value<int> lastRound,
+      Value<String> drawMode,
+      Value<int> randomSeed,
+      Value<String> algorithmVersion,
+      Value<String> drawConfig,
+      Value<String> seedingSnapshot,
+      Value<String?> fairnessSummary,
+      Value<String?> reason,
+      Value<String> createdBy,
+      Value<String> createdAt,
+      Value<String?> finalizedBy,
+      Value<String?> finalizedAt,
+      Value<int> rowid,
+    });
+
+final class $$MatrixRevisionsTableReferences
+    extends
+        BaseReferences<
+          _$SoarScoreDatabase,
+          $MatrixRevisionsTable,
+          MatrixRevisionData
+        > {
+  $$MatrixRevisionsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $ContestsTable _contestIdTable(_$SoarScoreDatabase db) =>
+      db.contests.createAlias('matrix_revisions__contest_id__contests__id');
+
+  $$ContestsTableProcessedTableManager get contestId {
+    final $_column = $_itemColumn<String>('contest_id')!;
+
+    final manager = $$ContestsTableTableManager(
+      $_db,
+      $_db.contests,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_contestIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $MatrixRevisionsTable _previousRevisionIdTable(
+    _$SoarScoreDatabase db,
+  ) => db.matrixRevisions.createAlias(
+    'matrix_revisions__previous_revision_id__matrix_revisions__id',
+  );
+
+  $$MatrixRevisionsTableProcessedTableManager? get previousRevisionId {
+    final $_column = $_itemColumn<String>('previous_revision_id');
+    if ($_column == null) return null;
+    final manager = $$MatrixRevisionsTableTableManager(
+      $_db,
+      $_db.matrixRevisions,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_previousRevisionIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static MultiTypedResultKey<$RoundsTable, List<RoundData>> _roundsRefsTable(
+    _$SoarScoreDatabase db,
+  ) => MultiTypedResultKey.fromTable(
+    db.rounds,
+    aliasName: 'matrix_revisions__id__rounds__matrix_revision_id',
+  );
+
+  $$RoundsTableProcessedTableManager get roundsRefs {
+    final manager = $$RoundsTableTableManager($_db, $_db.rounds).filter(
+      (f) => f.matrixRevisionId.id.sqlEquals($_itemColumn<String>('id')!),
+    );
+
+    final cache = $_typedResult.readTableOrNull(_roundsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $MatrixAssignmentsTable,
+    List<MatrixAssignmentData>
+  >
+  _matrixAssignmentsRefsTable(_$SoarScoreDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.matrixAssignments,
+        aliasName:
+            'matrix_revisions__id__matrix_assignments__matrix_revision_id',
+      );
+
+  $$MatrixAssignmentsTableProcessedTableManager get matrixAssignmentsRefs {
+    final manager =
+        $$MatrixAssignmentsTableTableManager(
+          $_db,
+          $_db.matrixAssignments,
+        ).filter(
+          (f) => f.matrixRevisionId.id.sqlEquals($_itemColumn<String>('id')!),
+        );
+
+    final cache = $_typedResult.readTableOrNull(
+      _matrixAssignmentsRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$ScoreAttemptsTable, List<ScoreAttemptData>>
+  _scoreAttemptsRefsTable(_$SoarScoreDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.scoreAttempts,
+        aliasName: 'matrix_revisions__id__score_attempts__matrix_revision_id',
+      );
+
+  $$ScoreAttemptsTableProcessedTableManager get scoreAttemptsRefs {
+    final manager = $$ScoreAttemptsTableTableManager($_db, $_db.scoreAttempts)
+        .filter(
+          (f) => f.matrixRevisionId.id.sqlEquals($_itemColumn<String>('id')!),
+        );
+
+    final cache = $_typedResult.readTableOrNull(_scoreAttemptsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$FlightResultsTable, List<FlightResultData>>
+  _flightResultsRefsTable(_$SoarScoreDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.flightResults,
+        aliasName: 'matrix_revisions__id__flight_results__matrix_revision_id',
+      );
+
+  $$FlightResultsTableProcessedTableManager get flightResultsRefs {
+    final manager = $$FlightResultsTableTableManager($_db, $_db.flightResults)
+        .filter(
+          (f) => f.matrixRevisionId.id.sqlEquals($_itemColumn<String>('id')!),
+        );
+
+    final cache = $_typedResult.readTableOrNull(_flightResultsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $ParticipationStandingsTable,
+    List<ParticipationStandingData>
+  >
+  _participationStandingsRefsTable(_$SoarScoreDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.participationStandings,
+        aliasName:
+            'matrix_revisions__id__participation_standings__matrix_revision_id',
+      );
+
+  $$ParticipationStandingsTableProcessedTableManager
+  get participationStandingsRefs {
+    final manager =
+        $$ParticipationStandingsTableTableManager(
+          $_db,
+          $_db.participationStandings,
+        ).filter(
+          (f) => f.matrixRevisionId.id.sqlEquals($_itemColumn<String>('id')!),
+        );
+
+    final cache = $_typedResult.readTableOrNull(
+      _participationStandingsRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$TeamStandingsTable, List<TeamStandingData>>
+  _teamStandingsRefsTable(_$SoarScoreDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.teamStandings,
+        aliasName: 'matrix_revisions__id__team_standings__matrix_revision_id',
+      );
+
+  $$TeamStandingsTableProcessedTableManager get teamStandingsRefs {
+    final manager = $$TeamStandingsTableTableManager($_db, $_db.teamStandings)
+        .filter(
+          (f) => f.matrixRevisionId.id.sqlEquals($_itemColumn<String>('id')!),
+        );
+
+    final cache = $_typedResult.readTableOrNull(_teamStandingsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$MatrixRevisionsTableFilterComposer
+    extends Composer<_$SoarScoreDatabase, $MatrixRevisionsTable> {
+  $$MatrixRevisionsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get revisionNumber => $composableBuilder(
+    column: $table.revisionNumber,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get firstRound => $composableBuilder(
+    column: $table.firstRound,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get lastRound => $composableBuilder(
+    column: $table.lastRound,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get drawMode => $composableBuilder(
+    column: $table.drawMode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get randomSeed => $composableBuilder(
+    column: $table.randomSeed,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get algorithmVersion => $composableBuilder(
+    column: $table.algorithmVersion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get drawConfig => $composableBuilder(
+    column: $table.drawConfig,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get seedingSnapshot => $composableBuilder(
+    column: $table.seedingSnapshot,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get fairnessSummary => $composableBuilder(
+    column: $table.fairnessSummary,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reason => $composableBuilder(
+    column: $table.reason,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get createdBy => $composableBuilder(
+    column: $table.createdBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get finalizedBy => $composableBuilder(
+    column: $table.finalizedBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get finalizedAt => $composableBuilder(
+    column: $table.finalizedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$ContestsTableFilterComposer get contestId {
+    final $$ContestsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contestId,
+      referencedTable: $db.contests,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContestsTableFilterComposer(
+            $db: $db,
+            $table: $db.contests,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$MatrixRevisionsTableFilterComposer get previousRevisionId {
+    final $$MatrixRevisionsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.previousRevisionId,
+      referencedTable: $db.matrixRevisions,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MatrixRevisionsTableFilterComposer(
+            $db: $db,
+            $table: $db.matrixRevisions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<bool> roundsRefs(
+    Expression<bool> Function($$RoundsTableFilterComposer f) f,
+  ) {
+    final $$RoundsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.rounds,
+      getReferencedColumn: (t) => t.matrixRevisionId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RoundsTableFilterComposer(
+            $db: $db,
+            $table: $db.rounds,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> matrixAssignmentsRefs(
+    Expression<bool> Function($$MatrixAssignmentsTableFilterComposer f) f,
+  ) {
+    final $$MatrixAssignmentsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.matrixAssignments,
+      getReferencedColumn: (t) => t.matrixRevisionId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MatrixAssignmentsTableFilterComposer(
+            $db: $db,
+            $table: $db.matrixAssignments,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> scoreAttemptsRefs(
+    Expression<bool> Function($$ScoreAttemptsTableFilterComposer f) f,
+  ) {
+    final $$ScoreAttemptsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.scoreAttempts,
+      getReferencedColumn: (t) => t.matrixRevisionId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ScoreAttemptsTableFilterComposer(
+            $db: $db,
+            $table: $db.scoreAttempts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> flightResultsRefs(
+    Expression<bool> Function($$FlightResultsTableFilterComposer f) f,
+  ) {
+    final $$FlightResultsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.flightResults,
+      getReferencedColumn: (t) => t.matrixRevisionId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$FlightResultsTableFilterComposer(
+            $db: $db,
+            $table: $db.flightResults,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> participationStandingsRefs(
+    Expression<bool> Function($$ParticipationStandingsTableFilterComposer f) f,
+  ) {
+    final $$ParticipationStandingsTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.participationStandings,
+          getReferencedColumn: (t) => t.matrixRevisionId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ParticipationStandingsTableFilterComposer(
+                $db: $db,
+                $table: $db.participationStandings,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<bool> teamStandingsRefs(
+    Expression<bool> Function($$TeamStandingsTableFilterComposer f) f,
+  ) {
+    final $$TeamStandingsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.teamStandings,
+      getReferencedColumn: (t) => t.matrixRevisionId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TeamStandingsTableFilterComposer(
+            $db: $db,
+            $table: $db.teamStandings,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$MatrixRevisionsTableOrderingComposer
+    extends Composer<_$SoarScoreDatabase, $MatrixRevisionsTable> {
+  $$MatrixRevisionsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get revisionNumber => $composableBuilder(
+    column: $table.revisionNumber,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get firstRound => $composableBuilder(
+    column: $table.firstRound,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get lastRound => $composableBuilder(
+    column: $table.lastRound,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get drawMode => $composableBuilder(
+    column: $table.drawMode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get randomSeed => $composableBuilder(
+    column: $table.randomSeed,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get algorithmVersion => $composableBuilder(
+    column: $table.algorithmVersion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get drawConfig => $composableBuilder(
+    column: $table.drawConfig,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get seedingSnapshot => $composableBuilder(
+    column: $table.seedingSnapshot,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get fairnessSummary => $composableBuilder(
+    column: $table.fairnessSummary,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reason => $composableBuilder(
+    column: $table.reason,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get createdBy => $composableBuilder(
+    column: $table.createdBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get finalizedBy => $composableBuilder(
+    column: $table.finalizedBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get finalizedAt => $composableBuilder(
+    column: $table.finalizedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$ContestsTableOrderingComposer get contestId {
+    final $$ContestsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contestId,
+      referencedTable: $db.contests,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContestsTableOrderingComposer(
+            $db: $db,
+            $table: $db.contests,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$MatrixRevisionsTableOrderingComposer get previousRevisionId {
+    final $$MatrixRevisionsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.previousRevisionId,
+      referencedTable: $db.matrixRevisions,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MatrixRevisionsTableOrderingComposer(
+            $db: $db,
+            $table: $db.matrixRevisions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$MatrixRevisionsTableAnnotationComposer
+    extends Composer<_$SoarScoreDatabase, $MatrixRevisionsTable> {
+  $$MatrixRevisionsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get revisionNumber => $composableBuilder(
+    column: $table.revisionNumber,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get firstRound => $composableBuilder(
+    column: $table.firstRound,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get lastRound =>
+      $composableBuilder(column: $table.lastRound, builder: (column) => column);
+
+  GeneratedColumn<String> get drawMode =>
+      $composableBuilder(column: $table.drawMode, builder: (column) => column);
+
+  GeneratedColumn<int> get randomSeed => $composableBuilder(
+    column: $table.randomSeed,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get algorithmVersion => $composableBuilder(
+    column: $table.algorithmVersion,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get drawConfig => $composableBuilder(
+    column: $table.drawConfig,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get seedingSnapshot => $composableBuilder(
+    column: $table.seedingSnapshot,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get fairnessSummary => $composableBuilder(
+    column: $table.fairnessSummary,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get reason =>
+      $composableBuilder(column: $table.reason, builder: (column) => column);
+
+  GeneratedColumn<String> get createdBy =>
+      $composableBuilder(column: $table.createdBy, builder: (column) => column);
+
+  GeneratedColumn<String> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get finalizedBy => $composableBuilder(
+    column: $table.finalizedBy,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get finalizedAt => $composableBuilder(
+    column: $table.finalizedAt,
+    builder: (column) => column,
+  );
+
+  $$ContestsTableAnnotationComposer get contestId {
+    final $$ContestsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contestId,
+      referencedTable: $db.contests,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContestsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.contests,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$MatrixRevisionsTableAnnotationComposer get previousRevisionId {
+    final $$MatrixRevisionsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.previousRevisionId,
+      referencedTable: $db.matrixRevisions,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MatrixRevisionsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.matrixRevisions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<T> roundsRefs<T extends Object>(
+    Expression<T> Function($$RoundsTableAnnotationComposer a) f,
+  ) {
+    final $$RoundsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.rounds,
+      getReferencedColumn: (t) => t.matrixRevisionId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RoundsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.rounds,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<T> matrixAssignmentsRefs<T extends Object>(
+    Expression<T> Function($$MatrixAssignmentsTableAnnotationComposer a) f,
+  ) {
+    final $$MatrixAssignmentsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.matrixAssignments,
+          getReferencedColumn: (t) => t.matrixRevisionId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$MatrixAssignmentsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.matrixAssignments,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<T> scoreAttemptsRefs<T extends Object>(
+    Expression<T> Function($$ScoreAttemptsTableAnnotationComposer a) f,
+  ) {
+    final $$ScoreAttemptsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.scoreAttempts,
+      getReferencedColumn: (t) => t.matrixRevisionId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ScoreAttemptsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.scoreAttempts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<T> flightResultsRefs<T extends Object>(
+    Expression<T> Function($$FlightResultsTableAnnotationComposer a) f,
+  ) {
+    final $$FlightResultsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.flightResults,
+      getReferencedColumn: (t) => t.matrixRevisionId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$FlightResultsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.flightResults,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<T> participationStandingsRefs<T extends Object>(
+    Expression<T> Function($$ParticipationStandingsTableAnnotationComposer a) f,
+  ) {
+    final $$ParticipationStandingsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.participationStandings,
+          getReferencedColumn: (t) => t.matrixRevisionId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ParticipationStandingsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.participationStandings,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<T> teamStandingsRefs<T extends Object>(
+    Expression<T> Function($$TeamStandingsTableAnnotationComposer a) f,
+  ) {
+    final $$TeamStandingsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.teamStandings,
+      getReferencedColumn: (t) => t.matrixRevisionId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TeamStandingsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.teamStandings,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$MatrixRevisionsTableTableManager
+    extends
+        RootTableManager<
+          _$SoarScoreDatabase,
+          $MatrixRevisionsTable,
+          MatrixRevisionData,
+          $$MatrixRevisionsTableFilterComposer,
+          $$MatrixRevisionsTableOrderingComposer,
+          $$MatrixRevisionsTableAnnotationComposer,
+          $$MatrixRevisionsTableCreateCompanionBuilder,
+          $$MatrixRevisionsTableUpdateCompanionBuilder,
+          (MatrixRevisionData, $$MatrixRevisionsTableReferences),
+          MatrixRevisionData,
+          PrefetchHooks Function({
+            bool contestId,
+            bool previousRevisionId,
+            bool roundsRefs,
+            bool matrixAssignmentsRefs,
+            bool scoreAttemptsRefs,
+            bool flightResultsRefs,
+            bool participationStandingsRefs,
+            bool teamStandingsRefs,
+          })
+        > {
+  $$MatrixRevisionsTableTableManager(
+    _$SoarScoreDatabase db,
+    $MatrixRevisionsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$MatrixRevisionsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$MatrixRevisionsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$MatrixRevisionsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> contestId = const Value.absent(),
+                Value<int> revisionNumber = const Value.absent(),
+                Value<String?> previousRevisionId = const Value.absent(),
+                Value<int> firstRound = const Value.absent(),
+                Value<int> lastRound = const Value.absent(),
+                Value<String> drawMode = const Value.absent(),
+                Value<int> randomSeed = const Value.absent(),
+                Value<String> algorithmVersion = const Value.absent(),
+                Value<String> drawConfig = const Value.absent(),
+                Value<String> seedingSnapshot = const Value.absent(),
+                Value<String?> fairnessSummary = const Value.absent(),
+                Value<String?> reason = const Value.absent(),
+                Value<String> createdBy = const Value.absent(),
+                Value<String> createdAt = const Value.absent(),
+                Value<String?> finalizedBy = const Value.absent(),
+                Value<String?> finalizedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => MatrixRevisionsCompanion(
+                id: id,
+                contestId: contestId,
+                revisionNumber: revisionNumber,
+                previousRevisionId: previousRevisionId,
+                firstRound: firstRound,
+                lastRound: lastRound,
+                drawMode: drawMode,
+                randomSeed: randomSeed,
+                algorithmVersion: algorithmVersion,
+                drawConfig: drawConfig,
+                seedingSnapshot: seedingSnapshot,
+                fairnessSummary: fairnessSummary,
+                reason: reason,
+                createdBy: createdBy,
+                createdAt: createdAt,
+                finalizedBy: finalizedBy,
+                finalizedAt: finalizedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String contestId,
+                required int revisionNumber,
+                Value<String?> previousRevisionId = const Value.absent(),
+                required int firstRound,
+                required int lastRound,
+                required String drawMode,
+                required int randomSeed,
+                required String algorithmVersion,
+                required String drawConfig,
+                required String seedingSnapshot,
+                Value<String?> fairnessSummary = const Value.absent(),
+                Value<String?> reason = const Value.absent(),
+                required String createdBy,
+                required String createdAt,
+                Value<String?> finalizedBy = const Value.absent(),
+                Value<String?> finalizedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => MatrixRevisionsCompanion.insert(
+                id: id,
+                contestId: contestId,
+                revisionNumber: revisionNumber,
+                previousRevisionId: previousRevisionId,
+                firstRound: firstRound,
+                lastRound: lastRound,
+                drawMode: drawMode,
+                randomSeed: randomSeed,
+                algorithmVersion: algorithmVersion,
+                drawConfig: drawConfig,
+                seedingSnapshot: seedingSnapshot,
+                fairnessSummary: fairnessSummary,
+                reason: reason,
+                createdBy: createdBy,
+                createdAt: createdAt,
+                finalizedBy: finalizedBy,
+                finalizedAt: finalizedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$MatrixRevisionsTable, MatrixRevisionData>(table),
+                  $$MatrixRevisionsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback:
+              ({
+                contestId = false,
+                previousRevisionId = false,
+                roundsRefs = false,
+                matrixAssignmentsRefs = false,
+                scoreAttemptsRefs = false,
+                flightResultsRefs = false,
+                participationStandingsRefs = false,
+                teamStandingsRefs = false,
+              }) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (roundsRefs) db.rounds,
+                    if (matrixAssignmentsRefs) db.matrixAssignments,
+                    if (scoreAttemptsRefs) db.scoreAttempts,
+                    if (flightResultsRefs) db.flightResults,
+                    if (participationStandingsRefs) db.participationStandings,
+                    if (teamStandingsRefs) db.teamStandings,
+                  ],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (contestId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.contestId,
+                            referencedTable: $$MatrixRevisionsTableReferences
+                                ._contestIdTable(db),
+                            referencedColumn: $$MatrixRevisionsTableReferences
+                                ._contestIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+                        if (previousRevisionId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.previousRevisionId,
+                            referencedTable: $$MatrixRevisionsTableReferences
+                                ._previousRevisionIdTable(db),
+                            referencedColumn: $$MatrixRevisionsTableReferences
+                                ._previousRevisionIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (roundsRefs)
+                        await $_getPrefetchedData<
+                          MatrixRevisionData,
+                          $MatrixRevisionsTable,
+                          RoundData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$MatrixRevisionsTableReferences
+                              ._roundsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$MatrixRevisionsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).roundsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.matrixRevisionId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (matrixAssignmentsRefs)
+                        await $_getPrefetchedData<
+                          MatrixRevisionData,
+                          $MatrixRevisionsTable,
+                          MatrixAssignmentData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$MatrixRevisionsTableReferences
+                              ._matrixAssignmentsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$MatrixRevisionsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).matrixAssignmentsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.matrixRevisionId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (scoreAttemptsRefs)
+                        await $_getPrefetchedData<
+                          MatrixRevisionData,
+                          $MatrixRevisionsTable,
+                          ScoreAttemptData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$MatrixRevisionsTableReferences
+                              ._scoreAttemptsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$MatrixRevisionsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).scoreAttemptsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.matrixRevisionId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (flightResultsRefs)
+                        await $_getPrefetchedData<
+                          MatrixRevisionData,
+                          $MatrixRevisionsTable,
+                          FlightResultData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$MatrixRevisionsTableReferences
+                              ._flightResultsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$MatrixRevisionsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).flightResultsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.matrixRevisionId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (participationStandingsRefs)
+                        await $_getPrefetchedData<
+                          MatrixRevisionData,
+                          $MatrixRevisionsTable,
+                          ParticipationStandingData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$MatrixRevisionsTableReferences
+                              ._participationStandingsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$MatrixRevisionsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).participationStandingsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.matrixRevisionId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (teamStandingsRefs)
+                        await $_getPrefetchedData<
+                          MatrixRevisionData,
+                          $MatrixRevisionsTable,
+                          TeamStandingData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$MatrixRevisionsTableReferences
+                              ._teamStandingsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$MatrixRevisionsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).teamStandingsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.matrixRevisionId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$MatrixRevisionsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$SoarScoreDatabase,
+      $MatrixRevisionsTable,
+      MatrixRevisionData,
+      $$MatrixRevisionsTableFilterComposer,
+      $$MatrixRevisionsTableOrderingComposer,
+      $$MatrixRevisionsTableAnnotationComposer,
+      $$MatrixRevisionsTableCreateCompanionBuilder,
+      $$MatrixRevisionsTableUpdateCompanionBuilder,
+      (MatrixRevisionData, $$MatrixRevisionsTableReferences),
+      MatrixRevisionData,
+      PrefetchHooks Function({
+        bool contestId,
+        bool previousRevisionId,
+        bool roundsRefs,
+        bool matrixAssignmentsRefs,
+        bool scoreAttemptsRefs,
+        bool flightResultsRefs,
+        bool participationStandingsRefs,
+        bool teamStandingsRefs,
+      })
+    >;
+typedef $$RoundsTableCreateCompanionBuilder = RoundsCompanion Function({
+  required String id,
+  required String contestId,
+  required String matrixRevisionId,
+  required int ordinal,
+  required int groupCount,
+  required String status,
+  Value<String?> supersededByRoundId,
+  Value<int> revision,
+  Value<int> rowid,
+});
+typedef $$RoundsTableUpdateCompanionBuilder = RoundsCompanion Function({
+  Value<String> id,
+  Value<String> contestId,
+  Value<String> matrixRevisionId,
+  Value<int> ordinal,
+  Value<int> groupCount,
+  Value<String> status,
+  Value<String?> supersededByRoundId,
+  Value<int> revision,
+  Value<int> rowid,
+});
+
+final class $$RoundsTableReferences
+    extends BaseReferences<_$SoarScoreDatabase, $RoundsTable, RoundData> {
+  $$RoundsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $ContestsTable _contestIdTable(_$SoarScoreDatabase db) =>
+      db.contests.createAlias('rounds__contest_id__contests__id');
+
+  $$ContestsTableProcessedTableManager get contestId {
+    final $_column = $_itemColumn<String>('contest_id')!;
+
+    final manager = $$ContestsTableTableManager(
+      $_db,
+      $_db.contests,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_contestIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $MatrixRevisionsTable _matrixRevisionIdTable(_$SoarScoreDatabase db) =>
+      db.matrixRevisions.createAlias(
+        'rounds__matrix_revision_id__matrix_revisions__id',
+      );
+
+  $$MatrixRevisionsTableProcessedTableManager get matrixRevisionId {
+    final $_column = $_itemColumn<String>('matrix_revision_id')!;
+
+    final manager = $$MatrixRevisionsTableTableManager(
+      $_db,
+      $_db.matrixRevisions,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_matrixRevisionIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $RoundsTable _supersededByRoundIdTable(_$SoarScoreDatabase db) =>
+      db.rounds.createAlias('rounds__superseded_by_round_id__rounds__id');
+
+  $$RoundsTableProcessedTableManager? get supersededByRoundId {
+    final $_column = $_itemColumn<String>('superseded_by_round_id');
+    if ($_column == null) return null;
+    final manager = $$RoundsTableTableManager(
+      $_db,
+      $_db.rounds,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_supersededByRoundIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static MultiTypedResultKey<$RoundGroupsTable, List<RoundGroupData>>
+  _roundGroupsRefsTable(_$SoarScoreDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.roundGroups,
+        aliasName: 'rounds__id__round_groups__round_id',
+      );
+
+  $$RoundGroupsTableProcessedTableManager get roundGroupsRefs {
+    final manager = $$RoundGroupsTableTableManager(
+      $_db,
+      $_db.roundGroups,
+    ).filter((f) => f.roundId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_roundGroupsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$FlightResultsTable, List<FlightResultData>>
+  _flightResultsRefsTable(_$SoarScoreDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.flightResults,
+        aliasName: 'rounds__id__flight_results__credited_round_id',
+      );
+
+  $$FlightResultsTableProcessedTableManager get flightResultsRefs {
+    final manager = $$FlightResultsTableTableManager($_db, $_db.flightResults)
+        .filter(
+          (f) => f.creditedRoundId.id.sqlEquals($_itemColumn<String>('id')!),
+        );
+
+    final cache = $_typedResult.readTableOrNull(_flightResultsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$RoundsTableFilterComposer
+    extends Composer<_$SoarScoreDatabase, $RoundsTable> {
+  $$RoundsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get ordinal => $composableBuilder(
+    column: $table.ordinal,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get groupCount => $composableBuilder(
+    column: $table.groupCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get revision => $composableBuilder(
+    column: $table.revision,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$ContestsTableFilterComposer get contestId {
+    final $$ContestsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contestId,
+      referencedTable: $db.contests,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContestsTableFilterComposer(
+            $db: $db,
+            $table: $db.contests,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$MatrixRevisionsTableFilterComposer get matrixRevisionId {
+    final $$MatrixRevisionsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.matrixRevisionId,
+      referencedTable: $db.matrixRevisions,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MatrixRevisionsTableFilterComposer(
+            $db: $db,
+            $table: $db.matrixRevisions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$RoundsTableFilterComposer get supersededByRoundId {
+    final $$RoundsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.supersededByRoundId,
+      referencedTable: $db.rounds,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RoundsTableFilterComposer(
+            $db: $db,
+            $table: $db.rounds,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<bool> roundGroupsRefs(
+    Expression<bool> Function($$RoundGroupsTableFilterComposer f) f,
+  ) {
+    final $$RoundGroupsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.roundGroups,
+      getReferencedColumn: (t) => t.roundId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RoundGroupsTableFilterComposer(
+            $db: $db,
+            $table: $db.roundGroups,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> flightResultsRefs(
+    Expression<bool> Function($$FlightResultsTableFilterComposer f) f,
+  ) {
+    final $$FlightResultsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.flightResults,
+      getReferencedColumn: (t) => t.creditedRoundId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$FlightResultsTableFilterComposer(
+            $db: $db,
+            $table: $db.flightResults,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$RoundsTableOrderingComposer
+    extends Composer<_$SoarScoreDatabase, $RoundsTable> {
+  $$RoundsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get ordinal => $composableBuilder(
+    column: $table.ordinal,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get groupCount => $composableBuilder(
+    column: $table.groupCount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get revision => $composableBuilder(
+    column: $table.revision,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$ContestsTableOrderingComposer get contestId {
+    final $$ContestsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contestId,
+      referencedTable: $db.contests,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContestsTableOrderingComposer(
+            $db: $db,
+            $table: $db.contests,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$MatrixRevisionsTableOrderingComposer get matrixRevisionId {
+    final $$MatrixRevisionsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.matrixRevisionId,
+      referencedTable: $db.matrixRevisions,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MatrixRevisionsTableOrderingComposer(
+            $db: $db,
+            $table: $db.matrixRevisions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$RoundsTableOrderingComposer get supersededByRoundId {
+    final $$RoundsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.supersededByRoundId,
+      referencedTable: $db.rounds,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RoundsTableOrderingComposer(
+            $db: $db,
+            $table: $db.rounds,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$RoundsTableAnnotationComposer
+    extends Composer<_$SoarScoreDatabase, $RoundsTable> {
+  $$RoundsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get ordinal =>
+      $composableBuilder(column: $table.ordinal, builder: (column) => column);
+
+  GeneratedColumn<int> get groupCount => $composableBuilder(
+    column: $table.groupCount,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<int> get revision =>
+      $composableBuilder(column: $table.revision, builder: (column) => column);
+
+  $$ContestsTableAnnotationComposer get contestId {
+    final $$ContestsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contestId,
+      referencedTable: $db.contests,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContestsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.contests,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$MatrixRevisionsTableAnnotationComposer get matrixRevisionId {
+    final $$MatrixRevisionsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.matrixRevisionId,
+      referencedTable: $db.matrixRevisions,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MatrixRevisionsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.matrixRevisions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$RoundsTableAnnotationComposer get supersededByRoundId {
+    final $$RoundsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.supersededByRoundId,
+      referencedTable: $db.rounds,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RoundsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.rounds,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<T> roundGroupsRefs<T extends Object>(
+    Expression<T> Function($$RoundGroupsTableAnnotationComposer a) f,
+  ) {
+    final $$RoundGroupsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.roundGroups,
+      getReferencedColumn: (t) => t.roundId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RoundGroupsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.roundGroups,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<T> flightResultsRefs<T extends Object>(
+    Expression<T> Function($$FlightResultsTableAnnotationComposer a) f,
+  ) {
+    final $$FlightResultsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.flightResults,
+      getReferencedColumn: (t) => t.creditedRoundId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$FlightResultsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.flightResults,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$RoundsTableTableManager
+    extends
+        RootTableManager<
+          _$SoarScoreDatabase,
+          $RoundsTable,
+          RoundData,
+          $$RoundsTableFilterComposer,
+          $$RoundsTableOrderingComposer,
+          $$RoundsTableAnnotationComposer,
+          $$RoundsTableCreateCompanionBuilder,
+          $$RoundsTableUpdateCompanionBuilder,
+          (RoundData, $$RoundsTableReferences),
+          RoundData,
+          PrefetchHooks Function({
+            bool contestId,
+            bool matrixRevisionId,
+            bool supersededByRoundId,
+            bool roundGroupsRefs,
+            bool flightResultsRefs,
+          })
+        > {
+  $$RoundsTableTableManager(_$SoarScoreDatabase db, $RoundsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$RoundsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$RoundsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$RoundsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> contestId = const Value.absent(),
+                Value<String> matrixRevisionId = const Value.absent(),
+                Value<int> ordinal = const Value.absent(),
+                Value<int> groupCount = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<String?> supersededByRoundId = const Value.absent(),
+                Value<int> revision = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => RoundsCompanion(
+                id: id,
+                contestId: contestId,
+                matrixRevisionId: matrixRevisionId,
+                ordinal: ordinal,
+                groupCount: groupCount,
+                status: status,
+                supersededByRoundId: supersededByRoundId,
+                revision: revision,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String contestId,
+                required String matrixRevisionId,
+                required int ordinal,
+                required int groupCount,
+                required String status,
+                Value<String?> supersededByRoundId = const Value.absent(),
+                Value<int> revision = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => RoundsCompanion.insert(
+                id: id,
+                contestId: contestId,
+                matrixRevisionId: matrixRevisionId,
+                ordinal: ordinal,
+                groupCount: groupCount,
+                status: status,
+                supersededByRoundId: supersededByRoundId,
+                revision: revision,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$RoundsTable, RoundData>(table),
+                  $$RoundsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback:
+              ({
+                contestId = false,
+                matrixRevisionId = false,
+                supersededByRoundId = false,
+                roundGroupsRefs = false,
+                flightResultsRefs = false,
+              }) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (roundGroupsRefs) db.roundGroups,
+                    if (flightResultsRefs) db.flightResults,
+                  ],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (contestId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.contestId,
+                            referencedTable: $$RoundsTableReferences
+                                ._contestIdTable(db),
+                            referencedColumn: $$RoundsTableReferences
+                                ._contestIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+                        if (matrixRevisionId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.matrixRevisionId,
+                            referencedTable: $$RoundsTableReferences
+                                ._matrixRevisionIdTable(db),
+                            referencedColumn: $$RoundsTableReferences
+                                ._matrixRevisionIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+                        if (supersededByRoundId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.supersededByRoundId,
+                            referencedTable: $$RoundsTableReferences
+                                ._supersededByRoundIdTable(db),
+                            referencedColumn: $$RoundsTableReferences
+                                ._supersededByRoundIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (roundGroupsRefs)
+                        await $_getPrefetchedData<
+                          RoundData,
+                          $RoundsTable,
+                          RoundGroupData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$RoundsTableReferences
+                              ._roundGroupsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$RoundsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).roundGroupsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.roundId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (flightResultsRefs)
+                        await $_getPrefetchedData<
+                          RoundData,
+                          $RoundsTable,
+                          FlightResultData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$RoundsTableReferences
+                              ._flightResultsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$RoundsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).flightResultsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.creditedRoundId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$RoundsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$SoarScoreDatabase,
+      $RoundsTable,
+      RoundData,
+      $$RoundsTableFilterComposer,
+      $$RoundsTableOrderingComposer,
+      $$RoundsTableAnnotationComposer,
+      $$RoundsTableCreateCompanionBuilder,
+      $$RoundsTableUpdateCompanionBuilder,
+      (RoundData, $$RoundsTableReferences),
+      RoundData,
+      PrefetchHooks Function({
+        bool contestId,
+        bool matrixRevisionId,
+        bool supersededByRoundId,
+        bool roundGroupsRefs,
+        bool flightResultsRefs,
+      })
+    >;
+typedef $$RoundGroupsTableCreateCompanionBuilder =
+    RoundGroupsCompanion Function({
+      required String id,
+      required String contestId,
+      required String roundId,
+      required int groupNumber,
+      required String status,
+      Value<String?> lockedBy,
+      Value<String?> lockedAt,
+      Value<int> revision,
+      Value<int> rowid,
+    });
+typedef $$RoundGroupsTableUpdateCompanionBuilder =
+    RoundGroupsCompanion Function({
+      Value<String> id,
+      Value<String> contestId,
+      Value<String> roundId,
+      Value<int> groupNumber,
+      Value<String> status,
+      Value<String?> lockedBy,
+      Value<String?> lockedAt,
+      Value<int> revision,
+      Value<int> rowid,
+    });
+
+final class $$RoundGroupsTableReferences
+    extends
+        BaseReferences<_$SoarScoreDatabase, $RoundGroupsTable, RoundGroupData> {
+  $$RoundGroupsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $ContestsTable _contestIdTable(_$SoarScoreDatabase db) =>
+      db.contests.createAlias('round_groups__contest_id__contests__id');
+
+  $$ContestsTableProcessedTableManager get contestId {
+    final $_column = $_itemColumn<String>('contest_id')!;
+
+    final manager = $$ContestsTableTableManager(
+      $_db,
+      $_db.contests,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_contestIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $RoundsTable _roundIdTable(_$SoarScoreDatabase db) =>
+      db.rounds.createAlias('round_groups__round_id__rounds__id');
+
+  $$RoundsTableProcessedTableManager get roundId {
+    final $_column = $_itemColumn<String>('round_id')!;
+
+    final manager = $$RoundsTableTableManager(
+      $_db,
+      $_db.rounds,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_roundIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$RoundGroupsTableFilterComposer
+    extends Composer<_$SoarScoreDatabase, $RoundGroupsTable> {
+  $$RoundGroupsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get groupNumber => $composableBuilder(
+    column: $table.groupNumber,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get lockedBy => $composableBuilder(
+    column: $table.lockedBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get lockedAt => $composableBuilder(
+    column: $table.lockedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get revision => $composableBuilder(
+    column: $table.revision,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$ContestsTableFilterComposer get contestId {
+    final $$ContestsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contestId,
+      referencedTable: $db.contests,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContestsTableFilterComposer(
+            $db: $db,
+            $table: $db.contests,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$RoundsTableFilterComposer get roundId {
+    final $$RoundsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.roundId,
+      referencedTable: $db.rounds,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RoundsTableFilterComposer(
+            $db: $db,
+            $table: $db.rounds,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$RoundGroupsTableOrderingComposer
+    extends Composer<_$SoarScoreDatabase, $RoundGroupsTable> {
+  $$RoundGroupsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get groupNumber => $composableBuilder(
+    column: $table.groupNumber,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get lockedBy => $composableBuilder(
+    column: $table.lockedBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get lockedAt => $composableBuilder(
+    column: $table.lockedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get revision => $composableBuilder(
+    column: $table.revision,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$ContestsTableOrderingComposer get contestId {
+    final $$ContestsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contestId,
+      referencedTable: $db.contests,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContestsTableOrderingComposer(
+            $db: $db,
+            $table: $db.contests,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$RoundsTableOrderingComposer get roundId {
+    final $$RoundsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.roundId,
+      referencedTable: $db.rounds,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RoundsTableOrderingComposer(
+            $db: $db,
+            $table: $db.rounds,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$RoundGroupsTableAnnotationComposer
+    extends Composer<_$SoarScoreDatabase, $RoundGroupsTable> {
+  $$RoundGroupsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get groupNumber => $composableBuilder(
+    column: $table.groupNumber,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<String> get lockedBy =>
+      $composableBuilder(column: $table.lockedBy, builder: (column) => column);
+
+  GeneratedColumn<String> get lockedAt =>
+      $composableBuilder(column: $table.lockedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get revision =>
+      $composableBuilder(column: $table.revision, builder: (column) => column);
+
+  $$ContestsTableAnnotationComposer get contestId {
+    final $$ContestsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contestId,
+      referencedTable: $db.contests,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContestsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.contests,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$RoundsTableAnnotationComposer get roundId {
+    final $$RoundsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.roundId,
+      referencedTable: $db.rounds,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RoundsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.rounds,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$RoundGroupsTableTableManager
+    extends
+        RootTableManager<
+          _$SoarScoreDatabase,
+          $RoundGroupsTable,
+          RoundGroupData,
+          $$RoundGroupsTableFilterComposer,
+          $$RoundGroupsTableOrderingComposer,
+          $$RoundGroupsTableAnnotationComposer,
+          $$RoundGroupsTableCreateCompanionBuilder,
+          $$RoundGroupsTableUpdateCompanionBuilder,
+          (RoundGroupData, $$RoundGroupsTableReferences),
+          RoundGroupData,
+          PrefetchHooks Function({bool contestId, bool roundId})
+        > {
+  $$RoundGroupsTableTableManager(
+    _$SoarScoreDatabase db,
+    $RoundGroupsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$RoundGroupsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$RoundGroupsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$RoundGroupsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> contestId = const Value.absent(),
+                Value<String> roundId = const Value.absent(),
+                Value<int> groupNumber = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<String?> lockedBy = const Value.absent(),
+                Value<String?> lockedAt = const Value.absent(),
+                Value<int> revision = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => RoundGroupsCompanion(
+                id: id,
+                contestId: contestId,
+                roundId: roundId,
+                groupNumber: groupNumber,
+                status: status,
+                lockedBy: lockedBy,
+                lockedAt: lockedAt,
+                revision: revision,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String contestId,
+                required String roundId,
+                required int groupNumber,
+                required String status,
+                Value<String?> lockedBy = const Value.absent(),
+                Value<String?> lockedAt = const Value.absent(),
+                Value<int> revision = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => RoundGroupsCompanion.insert(
+                id: id,
+                contestId: contestId,
+                roundId: roundId,
+                groupNumber: groupNumber,
+                status: status,
+                lockedBy: lockedBy,
+                lockedAt: lockedAt,
+                revision: revision,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$RoundGroupsTable, RoundGroupData>(table),
+                  $$RoundGroupsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({contestId = false, roundId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (contestId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.contestId,
+                        referencedTable: $$RoundGroupsTableReferences
+                            ._contestIdTable(db),
+                        referencedColumn: $$RoundGroupsTableReferences
+                            ._contestIdTable(db)
+                            .id,
+                      ) as T;
+                    }
+                    if (roundId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.roundId,
+                        referencedTable: $$RoundGroupsTableReferences
+                            ._roundIdTable(db),
+                        referencedColumn: $$RoundGroupsTableReferences
+                            ._roundIdTable(db)
+                            .id,
+                      ) as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$RoundGroupsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$SoarScoreDatabase,
+      $RoundGroupsTable,
+      RoundGroupData,
+      $$RoundGroupsTableFilterComposer,
+      $$RoundGroupsTableOrderingComposer,
+      $$RoundGroupsTableAnnotationComposer,
+      $$RoundGroupsTableCreateCompanionBuilder,
+      $$RoundGroupsTableUpdateCompanionBuilder,
+      (RoundGroupData, $$RoundGroupsTableReferences),
+      RoundGroupData,
+      PrefetchHooks Function({bool contestId, bool roundId})
+    >;
+typedef $$ReFlightsTableCreateCompanionBuilder = ReFlightsCompanion Function({
+  required String id,
+  required String contestId,
+  required String creditedRoundId,
+  required String sourceRoundId,
+  required int sourceGroup,
+  required String type,
+  required int sequence,
+  Value<String?> previousReflightId,
+  required String status,
+  required String reason,
+  required String scheduledRoundId,
+  required int flownGroup,
+  required bool deviationAcknowledged,
+  Value<int?> requestedGroupSize,
+  Value<int?> achievableMaxSize,
+  required bool sizeExceptionConfirmed,
+  Value<int?> randomSeed,
+  Value<String?> algorithmVersion,
+  required String configRevisionId,
+  required String createdBy,
+  required String createdAt,
+  Value<String?> groupFinalizedBy,
+  Value<String?> groupFinalizedAt,
+  Value<String?> finalizedBy,
+  Value<String?> finalizedAt,
+  Value<String?> cancelledBy,
+  Value<String?> cancelledAt,
+  Value<String?> cancelReason,
+  Value<int> revision,
+  Value<int> rowid,
+});
+typedef $$ReFlightsTableUpdateCompanionBuilder = ReFlightsCompanion Function({
+  Value<String> id,
+  Value<String> contestId,
+  Value<String> creditedRoundId,
+  Value<String> sourceRoundId,
+  Value<int> sourceGroup,
+  Value<String> type,
+  Value<int> sequence,
+  Value<String?> previousReflightId,
+  Value<String> status,
+  Value<String> reason,
+  Value<String> scheduledRoundId,
+  Value<int> flownGroup,
+  Value<bool> deviationAcknowledged,
+  Value<int?> requestedGroupSize,
+  Value<int?> achievableMaxSize,
+  Value<bool> sizeExceptionConfirmed,
+  Value<int?> randomSeed,
+  Value<String?> algorithmVersion,
+  Value<String> configRevisionId,
+  Value<String> createdBy,
+  Value<String> createdAt,
+  Value<String?> groupFinalizedBy,
+  Value<String?> groupFinalizedAt,
+  Value<String?> finalizedBy,
+  Value<String?> finalizedAt,
+  Value<String?> cancelledBy,
+  Value<String?> cancelledAt,
+  Value<String?> cancelReason,
+  Value<int> revision,
+  Value<int> rowid,
+});
+
+final class $$ReFlightsTableReferences
+    extends BaseReferences<_$SoarScoreDatabase, $ReFlightsTable, ReFlightData> {
+  $$ReFlightsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $ContestsTable _contestIdTable(_$SoarScoreDatabase db) =>
+      db.contests.createAlias('re_flights__contest_id__contests__id');
+
+  $$ContestsTableProcessedTableManager get contestId {
+    final $_column = $_itemColumn<String>('contest_id')!;
+
+    final manager = $$ContestsTableTableManager(
+      $_db,
+      $_db.contests,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_contestIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $RoundsTable _creditedRoundIdTable(_$SoarScoreDatabase db) =>
+      db.rounds.createAlias('re_flights__credited_round_id__rounds__id');
+
+  $$RoundsTableProcessedTableManager get creditedRoundId {
+    final $_column = $_itemColumn<String>('credited_round_id')!;
+
+    final manager = $$RoundsTableTableManager(
+      $_db,
+      $_db.rounds,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_creditedRoundIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $RoundsTable _sourceRoundIdTable(_$SoarScoreDatabase db) =>
+      db.rounds.createAlias('re_flights__source_round_id__rounds__id');
+
+  $$RoundsTableProcessedTableManager get sourceRoundId {
+    final $_column = $_itemColumn<String>('source_round_id')!;
+
+    final manager = $$RoundsTableTableManager(
+      $_db,
+      $_db.rounds,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_sourceRoundIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $ReFlightsTable _previousReflightIdTable(_$SoarScoreDatabase db) => db
+      .reFlights
+      .createAlias('re_flights__previous_reflight_id__re_flights__id');
+
+  $$ReFlightsTableProcessedTableManager? get previousReflightId {
+    final $_column = $_itemColumn<String>('previous_reflight_id');
+    if ($_column == null) return null;
+    final manager = $$ReFlightsTableTableManager(
+      $_db,
+      $_db.reFlights,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_previousReflightIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $RoundsTable _scheduledRoundIdTable(_$SoarScoreDatabase db) =>
+      db.rounds.createAlias('re_flights__scheduled_round_id__rounds__id');
+
+  $$RoundsTableProcessedTableManager get scheduledRoundId {
+    final $_column = $_itemColumn<String>('scheduled_round_id')!;
+
+    final manager = $$RoundsTableTableManager(
+      $_db,
+      $_db.rounds,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_scheduledRoundIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $ContestConfigurationRevisionsTable _configRevisionIdTable(
+    _$SoarScoreDatabase db,
+  ) => db.contestConfigurationRevisions.createAlias(
+    're_flights__config_revision_id__contest_configuration_revisions__id',
+  );
+
+  $$ContestConfigurationRevisionsTableProcessedTableManager
+  get configRevisionId {
+    final $_column = $_itemColumn<String>('config_revision_id')!;
+
+    final manager = $$ContestConfigurationRevisionsTableTableManager(
+      $_db,
+      $_db.contestConfigurationRevisions,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_configRevisionIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $MatrixAssignmentsTable,
+    List<MatrixAssignmentData>
+  >
+  _matrixAssignmentsRefsTable(_$SoarScoreDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.matrixAssignments,
+        aliasName: 're_flights__id__matrix_assignments__re_flight_id',
+      );
+
+  $$MatrixAssignmentsTableProcessedTableManager get matrixAssignmentsRefs {
+    final manager = $$MatrixAssignmentsTableTableManager(
+      $_db,
+      $_db.matrixAssignments,
+    ).filter((f) => f.reFlightId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _matrixAssignmentsRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $ReFlightParticipantsTable,
+    List<ReFlightParticipantData>
+  >
+  _reFlightParticipantsRefsTable(_$SoarScoreDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.reFlightParticipants,
+        aliasName: 're_flights__id__re_flight_participants__re_flight_id',
+      );
+
+  $$ReFlightParticipantsTableProcessedTableManager
+  get reFlightParticipantsRefs {
+    final manager = $$ReFlightParticipantsTableTableManager(
+      $_db,
+      $_db.reFlightParticipants,
+    ).filter((f) => f.reFlightId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _reFlightParticipantsRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$ReFlightsTableFilterComposer
+    extends Composer<_$SoarScoreDatabase, $ReFlightsTable> {
+  $$ReFlightsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get sourceGroup => $composableBuilder(
+    column: $table.sourceGroup,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get type => $composableBuilder(
+    column: $table.type,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get sequence => $composableBuilder(
+    column: $table.sequence,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reason => $composableBuilder(
+    column: $table.reason,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get flownGroup => $composableBuilder(
+    column: $table.flownGroup,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get deviationAcknowledged => $composableBuilder(
+    column: $table.deviationAcknowledged,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get requestedGroupSize => $composableBuilder(
+    column: $table.requestedGroupSize,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get achievableMaxSize => $composableBuilder(
+    column: $table.achievableMaxSize,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get sizeExceptionConfirmed => $composableBuilder(
+    column: $table.sizeExceptionConfirmed,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get randomSeed => $composableBuilder(
+    column: $table.randomSeed,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get algorithmVersion => $composableBuilder(
+    column: $table.algorithmVersion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get createdBy => $composableBuilder(
+    column: $table.createdBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get groupFinalizedBy => $composableBuilder(
+    column: $table.groupFinalizedBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get groupFinalizedAt => $composableBuilder(
+    column: $table.groupFinalizedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get finalizedBy => $composableBuilder(
+    column: $table.finalizedBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get finalizedAt => $composableBuilder(
+    column: $table.finalizedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get cancelledBy => $composableBuilder(
+    column: $table.cancelledBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get cancelledAt => $composableBuilder(
+    column: $table.cancelledAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get cancelReason => $composableBuilder(
+    column: $table.cancelReason,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get revision => $composableBuilder(
+    column: $table.revision,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$ContestsTableFilterComposer get contestId {
+    final $$ContestsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contestId,
+      referencedTable: $db.contests,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContestsTableFilterComposer(
+            $db: $db,
+            $table: $db.contests,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$RoundsTableFilterComposer get creditedRoundId {
+    final $$RoundsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.creditedRoundId,
+      referencedTable: $db.rounds,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RoundsTableFilterComposer(
+            $db: $db,
+            $table: $db.rounds,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$RoundsTableFilterComposer get sourceRoundId {
+    final $$RoundsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.sourceRoundId,
+      referencedTable: $db.rounds,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RoundsTableFilterComposer(
+            $db: $db,
+            $table: $db.rounds,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ReFlightsTableFilterComposer get previousReflightId {
+    final $$ReFlightsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.previousReflightId,
+      referencedTable: $db.reFlights,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ReFlightsTableFilterComposer(
+            $db: $db,
+            $table: $db.reFlights,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$RoundsTableFilterComposer get scheduledRoundId {
+    final $$RoundsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.scheduledRoundId,
+      referencedTable: $db.rounds,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RoundsTableFilterComposer(
+            $db: $db,
+            $table: $db.rounds,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ContestConfigurationRevisionsTableFilterComposer get configRevisionId {
+    final $$ContestConfigurationRevisionsTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.configRevisionId,
+          referencedTable: $db.contestConfigurationRevisions,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ContestConfigurationRevisionsTableFilterComposer(
+                $db: $db,
+                $table: $db.contestConfigurationRevisions,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  Expression<bool> matrixAssignmentsRefs(
+    Expression<bool> Function($$MatrixAssignmentsTableFilterComposer f) f,
+  ) {
+    final $$MatrixAssignmentsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.matrixAssignments,
+      getReferencedColumn: (t) => t.reFlightId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MatrixAssignmentsTableFilterComposer(
+            $db: $db,
+            $table: $db.matrixAssignments,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> reFlightParticipantsRefs(
+    Expression<bool> Function($$ReFlightParticipantsTableFilterComposer f) f,
+  ) {
+    final $$ReFlightParticipantsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.reFlightParticipants,
+      getReferencedColumn: (t) => t.reFlightId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ReFlightParticipantsTableFilterComposer(
+            $db: $db,
+            $table: $db.reFlightParticipants,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$ReFlightsTableOrderingComposer
+    extends Composer<_$SoarScoreDatabase, $ReFlightsTable> {
+  $$ReFlightsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get sourceGroup => $composableBuilder(
+    column: $table.sourceGroup,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get type => $composableBuilder(
+    column: $table.type,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get sequence => $composableBuilder(
+    column: $table.sequence,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reason => $composableBuilder(
+    column: $table.reason,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get flownGroup => $composableBuilder(
+    column: $table.flownGroup,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get deviationAcknowledged => $composableBuilder(
+    column: $table.deviationAcknowledged,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get requestedGroupSize => $composableBuilder(
+    column: $table.requestedGroupSize,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get achievableMaxSize => $composableBuilder(
+    column: $table.achievableMaxSize,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get sizeExceptionConfirmed => $composableBuilder(
+    column: $table.sizeExceptionConfirmed,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get randomSeed => $composableBuilder(
+    column: $table.randomSeed,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get algorithmVersion => $composableBuilder(
+    column: $table.algorithmVersion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get createdBy => $composableBuilder(
+    column: $table.createdBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get groupFinalizedBy => $composableBuilder(
+    column: $table.groupFinalizedBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get groupFinalizedAt => $composableBuilder(
+    column: $table.groupFinalizedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get finalizedBy => $composableBuilder(
+    column: $table.finalizedBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get finalizedAt => $composableBuilder(
+    column: $table.finalizedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get cancelledBy => $composableBuilder(
+    column: $table.cancelledBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get cancelledAt => $composableBuilder(
+    column: $table.cancelledAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get cancelReason => $composableBuilder(
+    column: $table.cancelReason,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get revision => $composableBuilder(
+    column: $table.revision,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$ContestsTableOrderingComposer get contestId {
+    final $$ContestsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contestId,
+      referencedTable: $db.contests,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContestsTableOrderingComposer(
+            $db: $db,
+            $table: $db.contests,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$RoundsTableOrderingComposer get creditedRoundId {
+    final $$RoundsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.creditedRoundId,
+      referencedTable: $db.rounds,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RoundsTableOrderingComposer(
+            $db: $db,
+            $table: $db.rounds,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$RoundsTableOrderingComposer get sourceRoundId {
+    final $$RoundsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.sourceRoundId,
+      referencedTable: $db.rounds,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RoundsTableOrderingComposer(
+            $db: $db,
+            $table: $db.rounds,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ReFlightsTableOrderingComposer get previousReflightId {
+    final $$ReFlightsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.previousReflightId,
+      referencedTable: $db.reFlights,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ReFlightsTableOrderingComposer(
+            $db: $db,
+            $table: $db.reFlights,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$RoundsTableOrderingComposer get scheduledRoundId {
+    final $$RoundsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.scheduledRoundId,
+      referencedTable: $db.rounds,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RoundsTableOrderingComposer(
+            $db: $db,
+            $table: $db.rounds,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ContestConfigurationRevisionsTableOrderingComposer get configRevisionId {
+    final $$ContestConfigurationRevisionsTableOrderingComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.configRevisionId,
+          referencedTable: $db.contestConfigurationRevisions,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ContestConfigurationRevisionsTableOrderingComposer(
+                $db: $db,
+                $table: $db.contestConfigurationRevisions,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+}
+
+class $$ReFlightsTableAnnotationComposer
+    extends Composer<_$SoarScoreDatabase, $ReFlightsTable> {
+  $$ReFlightsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get sourceGroup => $composableBuilder(
+    column: $table.sourceGroup,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get type =>
+      $composableBuilder(column: $table.type, builder: (column) => column);
+
+  GeneratedColumn<int> get sequence =>
+      $composableBuilder(column: $table.sequence, builder: (column) => column);
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<String> get reason =>
+      $composableBuilder(column: $table.reason, builder: (column) => column);
+
+  GeneratedColumn<int> get flownGroup => $composableBuilder(
+    column: $table.flownGroup,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get deviationAcknowledged => $composableBuilder(
+    column: $table.deviationAcknowledged,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get requestedGroupSize => $composableBuilder(
+    column: $table.requestedGroupSize,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get achievableMaxSize => $composableBuilder(
+    column: $table.achievableMaxSize,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get sizeExceptionConfirmed => $composableBuilder(
+    column: $table.sizeExceptionConfirmed,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get randomSeed => $composableBuilder(
+    column: $table.randomSeed,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get algorithmVersion => $composableBuilder(
+    column: $table.algorithmVersion,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get createdBy =>
+      $composableBuilder(column: $table.createdBy, builder: (column) => column);
+
+  GeneratedColumn<String> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get groupFinalizedBy => $composableBuilder(
+    column: $table.groupFinalizedBy,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get groupFinalizedAt => $composableBuilder(
+    column: $table.groupFinalizedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get finalizedBy => $composableBuilder(
+    column: $table.finalizedBy,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get finalizedAt => $composableBuilder(
+    column: $table.finalizedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get cancelledBy => $composableBuilder(
+    column: $table.cancelledBy,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get cancelledAt => $composableBuilder(
+    column: $table.cancelledAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get cancelReason => $composableBuilder(
+    column: $table.cancelReason,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get revision =>
+      $composableBuilder(column: $table.revision, builder: (column) => column);
+
+  $$ContestsTableAnnotationComposer get contestId {
+    final $$ContestsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contestId,
+      referencedTable: $db.contests,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContestsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.contests,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$RoundsTableAnnotationComposer get creditedRoundId {
+    final $$RoundsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.creditedRoundId,
+      referencedTable: $db.rounds,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RoundsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.rounds,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$RoundsTableAnnotationComposer get sourceRoundId {
+    final $$RoundsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.sourceRoundId,
+      referencedTable: $db.rounds,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RoundsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.rounds,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ReFlightsTableAnnotationComposer get previousReflightId {
+    final $$ReFlightsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.previousReflightId,
+      referencedTable: $db.reFlights,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ReFlightsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.reFlights,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$RoundsTableAnnotationComposer get scheduledRoundId {
+    final $$RoundsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.scheduledRoundId,
+      referencedTable: $db.rounds,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RoundsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.rounds,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ContestConfigurationRevisionsTableAnnotationComposer get configRevisionId {
+    final $$ContestConfigurationRevisionsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.configRevisionId,
+          referencedTable: $db.contestConfigurationRevisions,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ContestConfigurationRevisionsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.contestConfigurationRevisions,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  Expression<T> matrixAssignmentsRefs<T extends Object>(
+    Expression<T> Function($$MatrixAssignmentsTableAnnotationComposer a) f,
+  ) {
+    final $$MatrixAssignmentsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.matrixAssignments,
+          getReferencedColumn: (t) => t.reFlightId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$MatrixAssignmentsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.matrixAssignments,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<T> reFlightParticipantsRefs<T extends Object>(
+    Expression<T> Function($$ReFlightParticipantsTableAnnotationComposer a) f,
+  ) {
+    final $$ReFlightParticipantsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.reFlightParticipants,
+          getReferencedColumn: (t) => t.reFlightId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ReFlightParticipantsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.reFlightParticipants,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+}
+
+class $$ReFlightsTableTableManager
+    extends
+        RootTableManager<
+          _$SoarScoreDatabase,
+          $ReFlightsTable,
+          ReFlightData,
+          $$ReFlightsTableFilterComposer,
+          $$ReFlightsTableOrderingComposer,
+          $$ReFlightsTableAnnotationComposer,
+          $$ReFlightsTableCreateCompanionBuilder,
+          $$ReFlightsTableUpdateCompanionBuilder,
+          (ReFlightData, $$ReFlightsTableReferences),
+          ReFlightData,
+          PrefetchHooks Function({
+            bool contestId,
+            bool creditedRoundId,
+            bool sourceRoundId,
+            bool previousReflightId,
+            bool scheduledRoundId,
+            bool configRevisionId,
+            bool matrixAssignmentsRefs,
+            bool reFlightParticipantsRefs,
+          })
+        > {
+  $$ReFlightsTableTableManager(_$SoarScoreDatabase db, $ReFlightsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ReFlightsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ReFlightsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ReFlightsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> contestId = const Value.absent(),
+                Value<String> creditedRoundId = const Value.absent(),
+                Value<String> sourceRoundId = const Value.absent(),
+                Value<int> sourceGroup = const Value.absent(),
+                Value<String> type = const Value.absent(),
+                Value<int> sequence = const Value.absent(),
+                Value<String?> previousReflightId = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<String> reason = const Value.absent(),
+                Value<String> scheduledRoundId = const Value.absent(),
+                Value<int> flownGroup = const Value.absent(),
+                Value<bool> deviationAcknowledged = const Value.absent(),
+                Value<int?> requestedGroupSize = const Value.absent(),
+                Value<int?> achievableMaxSize = const Value.absent(),
+                Value<bool> sizeExceptionConfirmed = const Value.absent(),
+                Value<int?> randomSeed = const Value.absent(),
+                Value<String?> algorithmVersion = const Value.absent(),
+                Value<String> configRevisionId = const Value.absent(),
+                Value<String> createdBy = const Value.absent(),
+                Value<String> createdAt = const Value.absent(),
+                Value<String?> groupFinalizedBy = const Value.absent(),
+                Value<String?> groupFinalizedAt = const Value.absent(),
+                Value<String?> finalizedBy = const Value.absent(),
+                Value<String?> finalizedAt = const Value.absent(),
+                Value<String?> cancelledBy = const Value.absent(),
+                Value<String?> cancelledAt = const Value.absent(),
+                Value<String?> cancelReason = const Value.absent(),
+                Value<int> revision = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ReFlightsCompanion(
+                id: id,
+                contestId: contestId,
+                creditedRoundId: creditedRoundId,
+                sourceRoundId: sourceRoundId,
+                sourceGroup: sourceGroup,
+                type: type,
+                sequence: sequence,
+                previousReflightId: previousReflightId,
+                status: status,
+                reason: reason,
+                scheduledRoundId: scheduledRoundId,
+                flownGroup: flownGroup,
+                deviationAcknowledged: deviationAcknowledged,
+                requestedGroupSize: requestedGroupSize,
+                achievableMaxSize: achievableMaxSize,
+                sizeExceptionConfirmed: sizeExceptionConfirmed,
+                randomSeed: randomSeed,
+                algorithmVersion: algorithmVersion,
+                configRevisionId: configRevisionId,
+                createdBy: createdBy,
+                createdAt: createdAt,
+                groupFinalizedBy: groupFinalizedBy,
+                groupFinalizedAt: groupFinalizedAt,
+                finalizedBy: finalizedBy,
+                finalizedAt: finalizedAt,
+                cancelledBy: cancelledBy,
+                cancelledAt: cancelledAt,
+                cancelReason: cancelReason,
+                revision: revision,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String contestId,
+                required String creditedRoundId,
+                required String sourceRoundId,
+                required int sourceGroup,
+                required String type,
+                required int sequence,
+                Value<String?> previousReflightId = const Value.absent(),
+                required String status,
+                required String reason,
+                required String scheduledRoundId,
+                required int flownGroup,
+                required bool deviationAcknowledged,
+                Value<int?> requestedGroupSize = const Value.absent(),
+                Value<int?> achievableMaxSize = const Value.absent(),
+                required bool sizeExceptionConfirmed,
+                Value<int?> randomSeed = const Value.absent(),
+                Value<String?> algorithmVersion = const Value.absent(),
+                required String configRevisionId,
+                required String createdBy,
+                required String createdAt,
+                Value<String?> groupFinalizedBy = const Value.absent(),
+                Value<String?> groupFinalizedAt = const Value.absent(),
+                Value<String?> finalizedBy = const Value.absent(),
+                Value<String?> finalizedAt = const Value.absent(),
+                Value<String?> cancelledBy = const Value.absent(),
+                Value<String?> cancelledAt = const Value.absent(),
+                Value<String?> cancelReason = const Value.absent(),
+                Value<int> revision = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ReFlightsCompanion.insert(
+                id: id,
+                contestId: contestId,
+                creditedRoundId: creditedRoundId,
+                sourceRoundId: sourceRoundId,
+                sourceGroup: sourceGroup,
+                type: type,
+                sequence: sequence,
+                previousReflightId: previousReflightId,
+                status: status,
+                reason: reason,
+                scheduledRoundId: scheduledRoundId,
+                flownGroup: flownGroup,
+                deviationAcknowledged: deviationAcknowledged,
+                requestedGroupSize: requestedGroupSize,
+                achievableMaxSize: achievableMaxSize,
+                sizeExceptionConfirmed: sizeExceptionConfirmed,
+                randomSeed: randomSeed,
+                algorithmVersion: algorithmVersion,
+                configRevisionId: configRevisionId,
+                createdBy: createdBy,
+                createdAt: createdAt,
+                groupFinalizedBy: groupFinalizedBy,
+                groupFinalizedAt: groupFinalizedAt,
+                finalizedBy: finalizedBy,
+                finalizedAt: finalizedAt,
+                cancelledBy: cancelledBy,
+                cancelledAt: cancelledAt,
+                cancelReason: cancelReason,
+                revision: revision,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$ReFlightsTable, ReFlightData>(table),
+                  $$ReFlightsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback:
+              ({
+                contestId = false,
+                creditedRoundId = false,
+                sourceRoundId = false,
+                previousReflightId = false,
+                scheduledRoundId = false,
+                configRevisionId = false,
+                matrixAssignmentsRefs = false,
+                reFlightParticipantsRefs = false,
+              }) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (matrixAssignmentsRefs) db.matrixAssignments,
+                    if (reFlightParticipantsRefs) db.reFlightParticipants,
+                  ],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (contestId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.contestId,
+                            referencedTable: $$ReFlightsTableReferences
+                                ._contestIdTable(db),
+                            referencedColumn: $$ReFlightsTableReferences
+                                ._contestIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+                        if (creditedRoundId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.creditedRoundId,
+                            referencedTable: $$ReFlightsTableReferences
+                                ._creditedRoundIdTable(db),
+                            referencedColumn: $$ReFlightsTableReferences
+                                ._creditedRoundIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+                        if (sourceRoundId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.sourceRoundId,
+                            referencedTable: $$ReFlightsTableReferences
+                                ._sourceRoundIdTable(db),
+                            referencedColumn: $$ReFlightsTableReferences
+                                ._sourceRoundIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+                        if (previousReflightId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.previousReflightId,
+                            referencedTable: $$ReFlightsTableReferences
+                                ._previousReflightIdTable(db),
+                            referencedColumn: $$ReFlightsTableReferences
+                                ._previousReflightIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+                        if (scheduledRoundId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.scheduledRoundId,
+                            referencedTable: $$ReFlightsTableReferences
+                                ._scheduledRoundIdTable(db),
+                            referencedColumn: $$ReFlightsTableReferences
+                                ._scheduledRoundIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+                        if (configRevisionId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.configRevisionId,
+                            referencedTable: $$ReFlightsTableReferences
+                                ._configRevisionIdTable(db),
+                            referencedColumn: $$ReFlightsTableReferences
+                                ._configRevisionIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (matrixAssignmentsRefs)
+                        await $_getPrefetchedData<
+                          ReFlightData,
+                          $ReFlightsTable,
+                          MatrixAssignmentData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$ReFlightsTableReferences
+                              ._matrixAssignmentsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$ReFlightsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).matrixAssignmentsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.reFlightId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (reFlightParticipantsRefs)
+                        await $_getPrefetchedData<
+                          ReFlightData,
+                          $ReFlightsTable,
+                          ReFlightParticipantData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$ReFlightsTableReferences
+                              ._reFlightParticipantsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$ReFlightsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).reFlightParticipantsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.reFlightId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$ReFlightsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$SoarScoreDatabase,
+      $ReFlightsTable,
+      ReFlightData,
+      $$ReFlightsTableFilterComposer,
+      $$ReFlightsTableOrderingComposer,
+      $$ReFlightsTableAnnotationComposer,
+      $$ReFlightsTableCreateCompanionBuilder,
+      $$ReFlightsTableUpdateCompanionBuilder,
+      (ReFlightData, $$ReFlightsTableReferences),
+      ReFlightData,
+      PrefetchHooks Function({
+        bool contestId,
+        bool creditedRoundId,
+        bool sourceRoundId,
+        bool previousReflightId,
+        bool scheduledRoundId,
+        bool configRevisionId,
+        bool matrixAssignmentsRefs,
+        bool reFlightParticipantsRefs,
+      })
+    >;
+typedef $$MatrixAssignmentsTableCreateCompanionBuilder =
+    MatrixAssignmentsCompanion Function({
+      required String id,
+      required String contestId,
+      required String matrixRevisionId,
+      required String contestParticipationId,
+      required String scheduledRoundId,
+      required String creditedRoundId,
+      required int group,
+      Value<int?> lane,
+      required int flightSequence,
+      required String assignmentType,
+      Value<String?> sourceAssignmentId,
+      Value<String?> reFlightId,
+      Value<String?> supersededByAssignmentId,
+      required String actorId,
+      Value<String?> reason,
+      required String existingScoreHandling,
+      Value<int?> resetScoreRevision,
+      required String createdAt,
+      Value<int> rowid,
+    });
+typedef $$MatrixAssignmentsTableUpdateCompanionBuilder =
+    MatrixAssignmentsCompanion Function({
+      Value<String> id,
+      Value<String> contestId,
+      Value<String> matrixRevisionId,
+      Value<String> contestParticipationId,
+      Value<String> scheduledRoundId,
+      Value<String> creditedRoundId,
+      Value<int> group,
+      Value<int?> lane,
+      Value<int> flightSequence,
+      Value<String> assignmentType,
+      Value<String?> sourceAssignmentId,
+      Value<String?> reFlightId,
+      Value<String?> supersededByAssignmentId,
+      Value<String> actorId,
+      Value<String?> reason,
+      Value<String> existingScoreHandling,
+      Value<int?> resetScoreRevision,
+      Value<String> createdAt,
+      Value<int> rowid,
+    });
+
+final class $$MatrixAssignmentsTableReferences
+    extends
+        BaseReferences<
+          _$SoarScoreDatabase,
+          $MatrixAssignmentsTable,
+          MatrixAssignmentData
+        > {
+  $$MatrixAssignmentsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $ContestsTable _contestIdTable(_$SoarScoreDatabase db) =>
+      db.contests.createAlias('matrix_assignments__contest_id__contests__id');
+
+  $$ContestsTableProcessedTableManager get contestId {
+    final $_column = $_itemColumn<String>('contest_id')!;
+
+    final manager = $$ContestsTableTableManager(
+      $_db,
+      $_db.contests,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_contestIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $MatrixRevisionsTable _matrixRevisionIdTable(_$SoarScoreDatabase db) =>
+      db.matrixRevisions.createAlias(
+        'matrix_assignments__matrix_revision_id__matrix_revisions__id',
+      );
+
+  $$MatrixRevisionsTableProcessedTableManager get matrixRevisionId {
+    final $_column = $_itemColumn<String>('matrix_revision_id')!;
+
+    final manager = $$MatrixRevisionsTableTableManager(
+      $_db,
+      $_db.matrixRevisions,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_matrixRevisionIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $ContestParticipationsTable _contestParticipationIdTable(
+    _$SoarScoreDatabase db,
+  ) => db.contestParticipations.createAlias(
+    'matrix_assignments__contest_participation_id__contest_participations__id',
+  );
+
+  $$ContestParticipationsTableProcessedTableManager get contestParticipationId {
+    final $_column = $_itemColumn<String>('contest_participation_id')!;
+
+    final manager = $$ContestParticipationsTableTableManager(
+      $_db,
+      $_db.contestParticipations,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(
+      _contestParticipationIdTable($_db),
+    );
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $RoundsTable _scheduledRoundIdTable(_$SoarScoreDatabase db) => db
+      .rounds
+      .createAlias('matrix_assignments__scheduled_round_id__rounds__id');
+
+  $$RoundsTableProcessedTableManager get scheduledRoundId {
+    final $_column = $_itemColumn<String>('scheduled_round_id')!;
+
+    final manager = $$RoundsTableTableManager(
+      $_db,
+      $_db.rounds,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_scheduledRoundIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $RoundsTable _creditedRoundIdTable(_$SoarScoreDatabase db) => db.rounds
+      .createAlias('matrix_assignments__credited_round_id__rounds__id');
+
+  $$RoundsTableProcessedTableManager get creditedRoundId {
+    final $_column = $_itemColumn<String>('credited_round_id')!;
+
+    final manager = $$RoundsTableTableManager(
+      $_db,
+      $_db.rounds,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_creditedRoundIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $MatrixAssignmentsTable _sourceAssignmentIdTable(
+    _$SoarScoreDatabase db,
+  ) => db.matrixAssignments.createAlias(
+    'matrix_assignments__source_assignment_id__matrix_assignments__id',
+  );
+
+  $$MatrixAssignmentsTableProcessedTableManager? get sourceAssignmentId {
+    final $_column = $_itemColumn<String>('source_assignment_id');
+    if ($_column == null) return null;
+    final manager = $$MatrixAssignmentsTableTableManager(
+      $_db,
+      $_db.matrixAssignments,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_sourceAssignmentIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $ReFlightsTable _reFlightIdTable(_$SoarScoreDatabase db) => db
+      .reFlights
+      .createAlias('matrix_assignments__re_flight_id__re_flights__id');
+
+  $$ReFlightsTableProcessedTableManager? get reFlightId {
+    final $_column = $_itemColumn<String>('re_flight_id');
+    if ($_column == null) return null;
+    final manager = $$ReFlightsTableTableManager(
+      $_db,
+      $_db.reFlights,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_reFlightIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $MatrixAssignmentsTable _supersededByAssignmentIdTable(
+    _$SoarScoreDatabase db,
+  ) => db.matrixAssignments.createAlias(
+    'matrix_assignments__superseded_by_assignment_id__matrix_assignments__id',
+  );
+
+  $$MatrixAssignmentsTableProcessedTableManager? get supersededByAssignmentId {
+    final $_column = $_itemColumn<String>('superseded_by_assignment_id');
+    if ($_column == null) return null;
+    final manager = $$MatrixAssignmentsTableTableManager(
+      $_db,
+      $_db.matrixAssignments,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(
+      _supersededByAssignmentIdTable($_db),
+    );
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $ReFlightParticipantsTable,
+    List<ReFlightParticipantData>
+  >
+  _reFlightParticipantsRefsTable(_$SoarScoreDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.reFlightParticipants,
+        aliasName:
+            'matrix_assignments__id__re_flight_participants__assignment_id',
+      );
+
+  $$ReFlightParticipantsTableProcessedTableManager
+  get reFlightParticipantsRefs {
+    final manager = $$ReFlightParticipantsTableTableManager(
+      $_db,
+      $_db.reFlightParticipants,
+    ).filter((f) => f.assignmentId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _reFlightParticipantsRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $ScorePlaceholdersTable,
+    List<ScorePlaceholderData>
+  >
+  _scorePlaceholdersRefsTable(_$SoarScoreDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.scorePlaceholders,
+        aliasName: 'matrix_assignments__id__score_placeholders__assignment_id',
+      );
+
+  $$ScorePlaceholdersTableProcessedTableManager get scorePlaceholdersRefs {
+    final manager = $$ScorePlaceholdersTableTableManager(
+      $_db,
+      $_db.scorePlaceholders,
+    ).filter((f) => f.assignmentId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _scorePlaceholdersRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$MatrixAssignmentsTableFilterComposer
+    extends Composer<_$SoarScoreDatabase, $MatrixAssignmentsTable> {
+  $$MatrixAssignmentsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get group => $composableBuilder(
+    column: $table.group,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get lane => $composableBuilder(
+    column: $table.lane,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get flightSequence => $composableBuilder(
+    column: $table.flightSequence,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get assignmentType => $composableBuilder(
+    column: $table.assignmentType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get actorId => $composableBuilder(
+    column: $table.actorId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reason => $composableBuilder(
+    column: $table.reason,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get existingScoreHandling => $composableBuilder(
+    column: $table.existingScoreHandling,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get resetScoreRevision => $composableBuilder(
+    column: $table.resetScoreRevision,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$ContestsTableFilterComposer get contestId {
+    final $$ContestsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contestId,
+      referencedTable: $db.contests,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContestsTableFilterComposer(
+            $db: $db,
+            $table: $db.contests,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$MatrixRevisionsTableFilterComposer get matrixRevisionId {
+    final $$MatrixRevisionsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.matrixRevisionId,
+      referencedTable: $db.matrixRevisions,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MatrixRevisionsTableFilterComposer(
+            $db: $db,
+            $table: $db.matrixRevisions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ContestParticipationsTableFilterComposer get contestParticipationId {
+    final $$ContestParticipationsTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.contestParticipationId,
+          referencedTable: $db.contestParticipations,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ContestParticipationsTableFilterComposer(
+                $db: $db,
+                $table: $db.contestParticipations,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$RoundsTableFilterComposer get scheduledRoundId {
+    final $$RoundsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.scheduledRoundId,
+      referencedTable: $db.rounds,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RoundsTableFilterComposer(
+            $db: $db,
+            $table: $db.rounds,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$RoundsTableFilterComposer get creditedRoundId {
+    final $$RoundsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.creditedRoundId,
+      referencedTable: $db.rounds,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RoundsTableFilterComposer(
+            $db: $db,
+            $table: $db.rounds,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$MatrixAssignmentsTableFilterComposer get sourceAssignmentId {
+    final $$MatrixAssignmentsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.sourceAssignmentId,
+      referencedTable: $db.matrixAssignments,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MatrixAssignmentsTableFilterComposer(
+            $db: $db,
+            $table: $db.matrixAssignments,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ReFlightsTableFilterComposer get reFlightId {
+    final $$ReFlightsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.reFlightId,
+      referencedTable: $db.reFlights,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ReFlightsTableFilterComposer(
+            $db: $db,
+            $table: $db.reFlights,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$MatrixAssignmentsTableFilterComposer get supersededByAssignmentId {
+    final $$MatrixAssignmentsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.supersededByAssignmentId,
+      referencedTable: $db.matrixAssignments,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MatrixAssignmentsTableFilterComposer(
+            $db: $db,
+            $table: $db.matrixAssignments,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<bool> reFlightParticipantsRefs(
+    Expression<bool> Function($$ReFlightParticipantsTableFilterComposer f) f,
+  ) {
+    final $$ReFlightParticipantsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.reFlightParticipants,
+      getReferencedColumn: (t) => t.assignmentId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ReFlightParticipantsTableFilterComposer(
+            $db: $db,
+            $table: $db.reFlightParticipants,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> scorePlaceholdersRefs(
+    Expression<bool> Function($$ScorePlaceholdersTableFilterComposer f) f,
+  ) {
+    final $$ScorePlaceholdersTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.scorePlaceholders,
+      getReferencedColumn: (t) => t.assignmentId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ScorePlaceholdersTableFilterComposer(
+            $db: $db,
+            $table: $db.scorePlaceholders,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$MatrixAssignmentsTableOrderingComposer
+    extends Composer<_$SoarScoreDatabase, $MatrixAssignmentsTable> {
+  $$MatrixAssignmentsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get group => $composableBuilder(
+    column: $table.group,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get lane => $composableBuilder(
+    column: $table.lane,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get flightSequence => $composableBuilder(
+    column: $table.flightSequence,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get assignmentType => $composableBuilder(
+    column: $table.assignmentType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get actorId => $composableBuilder(
+    column: $table.actorId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reason => $composableBuilder(
+    column: $table.reason,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get existingScoreHandling => $composableBuilder(
+    column: $table.existingScoreHandling,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get resetScoreRevision => $composableBuilder(
+    column: $table.resetScoreRevision,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$ContestsTableOrderingComposer get contestId {
+    final $$ContestsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contestId,
+      referencedTable: $db.contests,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContestsTableOrderingComposer(
+            $db: $db,
+            $table: $db.contests,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$MatrixRevisionsTableOrderingComposer get matrixRevisionId {
+    final $$MatrixRevisionsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.matrixRevisionId,
+      referencedTable: $db.matrixRevisions,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MatrixRevisionsTableOrderingComposer(
+            $db: $db,
+            $table: $db.matrixRevisions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ContestParticipationsTableOrderingComposer get contestParticipationId {
+    final $$ContestParticipationsTableOrderingComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.contestParticipationId,
+          referencedTable: $db.contestParticipations,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ContestParticipationsTableOrderingComposer(
+                $db: $db,
+                $table: $db.contestParticipations,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$RoundsTableOrderingComposer get scheduledRoundId {
+    final $$RoundsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.scheduledRoundId,
+      referencedTable: $db.rounds,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RoundsTableOrderingComposer(
+            $db: $db,
+            $table: $db.rounds,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$RoundsTableOrderingComposer get creditedRoundId {
+    final $$RoundsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.creditedRoundId,
+      referencedTable: $db.rounds,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RoundsTableOrderingComposer(
+            $db: $db,
+            $table: $db.rounds,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$MatrixAssignmentsTableOrderingComposer get sourceAssignmentId {
+    final $$MatrixAssignmentsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.sourceAssignmentId,
+      referencedTable: $db.matrixAssignments,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MatrixAssignmentsTableOrderingComposer(
+            $db: $db,
+            $table: $db.matrixAssignments,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ReFlightsTableOrderingComposer get reFlightId {
+    final $$ReFlightsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.reFlightId,
+      referencedTable: $db.reFlights,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ReFlightsTableOrderingComposer(
+            $db: $db,
+            $table: $db.reFlights,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$MatrixAssignmentsTableOrderingComposer get supersededByAssignmentId {
+    final $$MatrixAssignmentsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.supersededByAssignmentId,
+      referencedTable: $db.matrixAssignments,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MatrixAssignmentsTableOrderingComposer(
+            $db: $db,
+            $table: $db.matrixAssignments,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$MatrixAssignmentsTableAnnotationComposer
+    extends Composer<_$SoarScoreDatabase, $MatrixAssignmentsTable> {
+  $$MatrixAssignmentsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get group =>
+      $composableBuilder(column: $table.group, builder: (column) => column);
+
+  GeneratedColumn<int> get lane =>
+      $composableBuilder(column: $table.lane, builder: (column) => column);
+
+  GeneratedColumn<int> get flightSequence => $composableBuilder(
+    column: $table.flightSequence,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get assignmentType => $composableBuilder(
+    column: $table.assignmentType,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get actorId =>
+      $composableBuilder(column: $table.actorId, builder: (column) => column);
+
+  GeneratedColumn<String> get reason =>
+      $composableBuilder(column: $table.reason, builder: (column) => column);
+
+  GeneratedColumn<String> get existingScoreHandling => $composableBuilder(
+    column: $table.existingScoreHandling,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get resetScoreRevision => $composableBuilder(
+    column: $table.resetScoreRevision,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  $$ContestsTableAnnotationComposer get contestId {
+    final $$ContestsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contestId,
+      referencedTable: $db.contests,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContestsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.contests,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$MatrixRevisionsTableAnnotationComposer get matrixRevisionId {
+    final $$MatrixRevisionsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.matrixRevisionId,
+      referencedTable: $db.matrixRevisions,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MatrixRevisionsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.matrixRevisions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ContestParticipationsTableAnnotationComposer get contestParticipationId {
+    final $$ContestParticipationsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.contestParticipationId,
+          referencedTable: $db.contestParticipations,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ContestParticipationsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.contestParticipations,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$RoundsTableAnnotationComposer get scheduledRoundId {
+    final $$RoundsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.scheduledRoundId,
+      referencedTable: $db.rounds,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RoundsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.rounds,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$RoundsTableAnnotationComposer get creditedRoundId {
+    final $$RoundsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.creditedRoundId,
+      referencedTable: $db.rounds,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RoundsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.rounds,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$MatrixAssignmentsTableAnnotationComposer get sourceAssignmentId {
+    final $$MatrixAssignmentsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.sourceAssignmentId,
+          referencedTable: $db.matrixAssignments,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$MatrixAssignmentsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.matrixAssignments,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$ReFlightsTableAnnotationComposer get reFlightId {
+    final $$ReFlightsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.reFlightId,
+      referencedTable: $db.reFlights,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ReFlightsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.reFlights,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$MatrixAssignmentsTableAnnotationComposer get supersededByAssignmentId {
+    final $$MatrixAssignmentsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.supersededByAssignmentId,
+          referencedTable: $db.matrixAssignments,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$MatrixAssignmentsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.matrixAssignments,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  Expression<T> reFlightParticipantsRefs<T extends Object>(
+    Expression<T> Function($$ReFlightParticipantsTableAnnotationComposer a) f,
+  ) {
+    final $$ReFlightParticipantsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.reFlightParticipants,
+          getReferencedColumn: (t) => t.assignmentId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ReFlightParticipantsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.reFlightParticipants,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<T> scorePlaceholdersRefs<T extends Object>(
+    Expression<T> Function($$ScorePlaceholdersTableAnnotationComposer a) f,
+  ) {
+    final $$ScorePlaceholdersTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.scorePlaceholders,
+          getReferencedColumn: (t) => t.assignmentId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ScorePlaceholdersTableAnnotationComposer(
+                $db: $db,
+                $table: $db.scorePlaceholders,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+}
+
+class $$MatrixAssignmentsTableTableManager
+    extends
+        RootTableManager<
+          _$SoarScoreDatabase,
+          $MatrixAssignmentsTable,
+          MatrixAssignmentData,
+          $$MatrixAssignmentsTableFilterComposer,
+          $$MatrixAssignmentsTableOrderingComposer,
+          $$MatrixAssignmentsTableAnnotationComposer,
+          $$MatrixAssignmentsTableCreateCompanionBuilder,
+          $$MatrixAssignmentsTableUpdateCompanionBuilder,
+          (MatrixAssignmentData, $$MatrixAssignmentsTableReferences),
+          MatrixAssignmentData,
+          PrefetchHooks Function({
+            bool contestId,
+            bool matrixRevisionId,
+            bool contestParticipationId,
+            bool scheduledRoundId,
+            bool creditedRoundId,
+            bool sourceAssignmentId,
+            bool reFlightId,
+            bool supersededByAssignmentId,
+            bool reFlightParticipantsRefs,
+            bool scorePlaceholdersRefs,
+          })
+        > {
+  $$MatrixAssignmentsTableTableManager(
+    _$SoarScoreDatabase db,
+    $MatrixAssignmentsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$MatrixAssignmentsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$MatrixAssignmentsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$MatrixAssignmentsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> contestId = const Value.absent(),
+                Value<String> matrixRevisionId = const Value.absent(),
+                Value<String> contestParticipationId = const Value.absent(),
+                Value<String> scheduledRoundId = const Value.absent(),
+                Value<String> creditedRoundId = const Value.absent(),
+                Value<int> group = const Value.absent(),
+                Value<int?> lane = const Value.absent(),
+                Value<int> flightSequence = const Value.absent(),
+                Value<String> assignmentType = const Value.absent(),
+                Value<String?> sourceAssignmentId = const Value.absent(),
+                Value<String?> reFlightId = const Value.absent(),
+                Value<String?> supersededByAssignmentId = const Value.absent(),
+                Value<String> actorId = const Value.absent(),
+                Value<String?> reason = const Value.absent(),
+                Value<String> existingScoreHandling = const Value.absent(),
+                Value<int?> resetScoreRevision = const Value.absent(),
+                Value<String> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => MatrixAssignmentsCompanion(
+                id: id,
+                contestId: contestId,
+                matrixRevisionId: matrixRevisionId,
+                contestParticipationId: contestParticipationId,
+                scheduledRoundId: scheduledRoundId,
+                creditedRoundId: creditedRoundId,
+                group: group,
+                lane: lane,
+                flightSequence: flightSequence,
+                assignmentType: assignmentType,
+                sourceAssignmentId: sourceAssignmentId,
+                reFlightId: reFlightId,
+                supersededByAssignmentId: supersededByAssignmentId,
+                actorId: actorId,
+                reason: reason,
+                existingScoreHandling: existingScoreHandling,
+                resetScoreRevision: resetScoreRevision,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String contestId,
+                required String matrixRevisionId,
+                required String contestParticipationId,
+                required String scheduledRoundId,
+                required String creditedRoundId,
+                required int group,
+                Value<int?> lane = const Value.absent(),
+                required int flightSequence,
+                required String assignmentType,
+                Value<String?> sourceAssignmentId = const Value.absent(),
+                Value<String?> reFlightId = const Value.absent(),
+                Value<String?> supersededByAssignmentId = const Value.absent(),
+                required String actorId,
+                Value<String?> reason = const Value.absent(),
+                required String existingScoreHandling,
+                Value<int?> resetScoreRevision = const Value.absent(),
+                required String createdAt,
+                Value<int> rowid = const Value.absent(),
+              }) => MatrixAssignmentsCompanion.insert(
+                id: id,
+                contestId: contestId,
+                matrixRevisionId: matrixRevisionId,
+                contestParticipationId: contestParticipationId,
+                scheduledRoundId: scheduledRoundId,
+                creditedRoundId: creditedRoundId,
+                group: group,
+                lane: lane,
+                flightSequence: flightSequence,
+                assignmentType: assignmentType,
+                sourceAssignmentId: sourceAssignmentId,
+                reFlightId: reFlightId,
+                supersededByAssignmentId: supersededByAssignmentId,
+                actorId: actorId,
+                reason: reason,
+                existingScoreHandling: existingScoreHandling,
+                resetScoreRevision: resetScoreRevision,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$MatrixAssignmentsTable, MatrixAssignmentData>(
+                    table,
+                  ),
+                  $$MatrixAssignmentsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback:
+              ({
+                contestId = false,
+                matrixRevisionId = false,
+                contestParticipationId = false,
+                scheduledRoundId = false,
+                creditedRoundId = false,
+                sourceAssignmentId = false,
+                reFlightId = false,
+                supersededByAssignmentId = false,
+                reFlightParticipantsRefs = false,
+                scorePlaceholdersRefs = false,
+              }) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (reFlightParticipantsRefs) db.reFlightParticipants,
+                    if (scorePlaceholdersRefs) db.scorePlaceholders,
+                  ],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (contestId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.contestId,
+                            referencedTable: $$MatrixAssignmentsTableReferences
+                                ._contestIdTable(db),
+                            referencedColumn: $$MatrixAssignmentsTableReferences
+                                ._contestIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+                        if (matrixRevisionId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.matrixRevisionId,
+                            referencedTable: $$MatrixAssignmentsTableReferences
+                                ._matrixRevisionIdTable(db),
+                            referencedColumn: $$MatrixAssignmentsTableReferences
+                                ._matrixRevisionIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+                        if (contestParticipationId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.contestParticipationId,
+                            referencedTable: $$MatrixAssignmentsTableReferences
+                                ._contestParticipationIdTable(db),
+                            referencedColumn: $$MatrixAssignmentsTableReferences
+                                ._contestParticipationIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+                        if (scheduledRoundId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.scheduledRoundId,
+                            referencedTable: $$MatrixAssignmentsTableReferences
+                                ._scheduledRoundIdTable(db),
+                            referencedColumn: $$MatrixAssignmentsTableReferences
+                                ._scheduledRoundIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+                        if (creditedRoundId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.creditedRoundId,
+                            referencedTable: $$MatrixAssignmentsTableReferences
+                                ._creditedRoundIdTable(db),
+                            referencedColumn: $$MatrixAssignmentsTableReferences
+                                ._creditedRoundIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+                        if (sourceAssignmentId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.sourceAssignmentId,
+                            referencedTable: $$MatrixAssignmentsTableReferences
+                                ._sourceAssignmentIdTable(db),
+                            referencedColumn: $$MatrixAssignmentsTableReferences
+                                ._sourceAssignmentIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+                        if (reFlightId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.reFlightId,
+                            referencedTable: $$MatrixAssignmentsTableReferences
+                                ._reFlightIdTable(db),
+                            referencedColumn: $$MatrixAssignmentsTableReferences
+                                ._reFlightIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+                        if (supersededByAssignmentId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.supersededByAssignmentId,
+                            referencedTable: $$MatrixAssignmentsTableReferences
+                                ._supersededByAssignmentIdTable(db),
+                            referencedColumn: $$MatrixAssignmentsTableReferences
+                                ._supersededByAssignmentIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (reFlightParticipantsRefs)
+                        await $_getPrefetchedData<
+                          MatrixAssignmentData,
+                          $MatrixAssignmentsTable,
+                          ReFlightParticipantData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$MatrixAssignmentsTableReferences
+                              ._reFlightParticipantsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$MatrixAssignmentsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).reFlightParticipantsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.assignmentId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (scorePlaceholdersRefs)
+                        await $_getPrefetchedData<
+                          MatrixAssignmentData,
+                          $MatrixAssignmentsTable,
+                          ScorePlaceholderData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$MatrixAssignmentsTableReferences
+                              ._scorePlaceholdersRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$MatrixAssignmentsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).scorePlaceholdersRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.assignmentId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$MatrixAssignmentsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$SoarScoreDatabase,
+      $MatrixAssignmentsTable,
+      MatrixAssignmentData,
+      $$MatrixAssignmentsTableFilterComposer,
+      $$MatrixAssignmentsTableOrderingComposer,
+      $$MatrixAssignmentsTableAnnotationComposer,
+      $$MatrixAssignmentsTableCreateCompanionBuilder,
+      $$MatrixAssignmentsTableUpdateCompanionBuilder,
+      (MatrixAssignmentData, $$MatrixAssignmentsTableReferences),
+      MatrixAssignmentData,
+      PrefetchHooks Function({
+        bool contestId,
+        bool matrixRevisionId,
+        bool contestParticipationId,
+        bool scheduledRoundId,
+        bool creditedRoundId,
+        bool sourceAssignmentId,
+        bool reFlightId,
+        bool supersededByAssignmentId,
+        bool reFlightParticipantsRefs,
+        bool scorePlaceholdersRefs,
+      })
+    >;
+typedef $$ReFlightParticipantsTableCreateCompanionBuilder =
+    ReFlightParticipantsCompanion Function({
+      required String id,
+      required String contestId,
+      required String reFlightId,
+      required String contestParticipationId,
+      required String role,
+      Value<String?> excludedReason,
+      Value<int?> drawPosition,
+      required String response,
+      Value<String?> respondedBy,
+      Value<String?> respondedAt,
+      required String notificationState,
+      Value<String?> notifiedAt,
+      Value<String?> acknowledgedAt,
+      Value<String?> assignmentId,
+      Value<int> revision,
+      Value<int> rowid,
+    });
+typedef $$ReFlightParticipantsTableUpdateCompanionBuilder =
+    ReFlightParticipantsCompanion Function({
+      Value<String> id,
+      Value<String> contestId,
+      Value<String> reFlightId,
+      Value<String> contestParticipationId,
+      Value<String> role,
+      Value<String?> excludedReason,
+      Value<int?> drawPosition,
+      Value<String> response,
+      Value<String?> respondedBy,
+      Value<String?> respondedAt,
+      Value<String> notificationState,
+      Value<String?> notifiedAt,
+      Value<String?> acknowledgedAt,
+      Value<String?> assignmentId,
+      Value<int> revision,
+      Value<int> rowid,
+    });
+
+final class $$ReFlightParticipantsTableReferences
+    extends
+        BaseReferences<
+          _$SoarScoreDatabase,
+          $ReFlightParticipantsTable,
+          ReFlightParticipantData
+        > {
+  $$ReFlightParticipantsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $ContestsTable _contestIdTable(_$SoarScoreDatabase db) => db.contests
+      .createAlias('re_flight_participants__contest_id__contests__id');
+
+  $$ContestsTableProcessedTableManager get contestId {
+    final $_column = $_itemColumn<String>('contest_id')!;
+
+    final manager = $$ContestsTableTableManager(
+      $_db,
+      $_db.contests,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_contestIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $ReFlightsTable _reFlightIdTable(_$SoarScoreDatabase db) => db
+      .reFlights
+      .createAlias('re_flight_participants__re_flight_id__re_flights__id');
+
+  $$ReFlightsTableProcessedTableManager get reFlightId {
+    final $_column = $_itemColumn<String>('re_flight_id')!;
+
+    final manager = $$ReFlightsTableTableManager(
+      $_db,
+      $_db.reFlights,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_reFlightIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $ContestParticipationsTable _contestParticipationIdTable(
+    _$SoarScoreDatabase db,
+  ) => db.contestParticipations.createAlias(
+    're_flight_participants__contest_participation_id__contest_participations__id',
+  );
+
+  $$ContestParticipationsTableProcessedTableManager get contestParticipationId {
+    final $_column = $_itemColumn<String>('contest_participation_id')!;
+
+    final manager = $$ContestParticipationsTableTableManager(
+      $_db,
+      $_db.contestParticipations,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(
+      _contestParticipationIdTable($_db),
+    );
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $MatrixAssignmentsTable _assignmentIdTable(_$SoarScoreDatabase db) =>
+      db.matrixAssignments.createAlias(
+        're_flight_participants__assignment_id__matrix_assignments__id',
+      );
+
+  $$MatrixAssignmentsTableProcessedTableManager? get assignmentId {
+    final $_column = $_itemColumn<String>('assignment_id');
+    if ($_column == null) return null;
+    final manager = $$MatrixAssignmentsTableTableManager(
+      $_db,
+      $_db.matrixAssignments,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_assignmentIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$ReFlightParticipantsTableFilterComposer
+    extends Composer<_$SoarScoreDatabase, $ReFlightParticipantsTable> {
+  $$ReFlightParticipantsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get role => $composableBuilder(
+    column: $table.role,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get excludedReason => $composableBuilder(
+    column: $table.excludedReason,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get drawPosition => $composableBuilder(
+    column: $table.drawPosition,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get response => $composableBuilder(
+    column: $table.response,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get respondedBy => $composableBuilder(
+    column: $table.respondedBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get respondedAt => $composableBuilder(
+    column: $table.respondedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get notificationState => $composableBuilder(
+    column: $table.notificationState,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get notifiedAt => $composableBuilder(
+    column: $table.notifiedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get acknowledgedAt => $composableBuilder(
+    column: $table.acknowledgedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get revision => $composableBuilder(
+    column: $table.revision,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$ContestsTableFilterComposer get contestId {
+    final $$ContestsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contestId,
+      referencedTable: $db.contests,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContestsTableFilterComposer(
+            $db: $db,
+            $table: $db.contests,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ReFlightsTableFilterComposer get reFlightId {
+    final $$ReFlightsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.reFlightId,
+      referencedTable: $db.reFlights,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ReFlightsTableFilterComposer(
+            $db: $db,
+            $table: $db.reFlights,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ContestParticipationsTableFilterComposer get contestParticipationId {
+    final $$ContestParticipationsTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.contestParticipationId,
+          referencedTable: $db.contestParticipations,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ContestParticipationsTableFilterComposer(
+                $db: $db,
+                $table: $db.contestParticipations,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$MatrixAssignmentsTableFilterComposer get assignmentId {
+    final $$MatrixAssignmentsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.assignmentId,
+      referencedTable: $db.matrixAssignments,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MatrixAssignmentsTableFilterComposer(
+            $db: $db,
+            $table: $db.matrixAssignments,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ReFlightParticipantsTableOrderingComposer
+    extends Composer<_$SoarScoreDatabase, $ReFlightParticipantsTable> {
+  $$ReFlightParticipantsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get role => $composableBuilder(
+    column: $table.role,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get excludedReason => $composableBuilder(
+    column: $table.excludedReason,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get drawPosition => $composableBuilder(
+    column: $table.drawPosition,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get response => $composableBuilder(
+    column: $table.response,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get respondedBy => $composableBuilder(
+    column: $table.respondedBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get respondedAt => $composableBuilder(
+    column: $table.respondedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get notificationState => $composableBuilder(
+    column: $table.notificationState,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get notifiedAt => $composableBuilder(
+    column: $table.notifiedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get acknowledgedAt => $composableBuilder(
+    column: $table.acknowledgedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get revision => $composableBuilder(
+    column: $table.revision,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$ContestsTableOrderingComposer get contestId {
+    final $$ContestsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contestId,
+      referencedTable: $db.contests,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContestsTableOrderingComposer(
+            $db: $db,
+            $table: $db.contests,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ReFlightsTableOrderingComposer get reFlightId {
+    final $$ReFlightsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.reFlightId,
+      referencedTable: $db.reFlights,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ReFlightsTableOrderingComposer(
+            $db: $db,
+            $table: $db.reFlights,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ContestParticipationsTableOrderingComposer get contestParticipationId {
+    final $$ContestParticipationsTableOrderingComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.contestParticipationId,
+          referencedTable: $db.contestParticipations,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ContestParticipationsTableOrderingComposer(
+                $db: $db,
+                $table: $db.contestParticipations,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$MatrixAssignmentsTableOrderingComposer get assignmentId {
+    final $$MatrixAssignmentsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.assignmentId,
+      referencedTable: $db.matrixAssignments,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MatrixAssignmentsTableOrderingComposer(
+            $db: $db,
+            $table: $db.matrixAssignments,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ReFlightParticipantsTableAnnotationComposer
+    extends Composer<_$SoarScoreDatabase, $ReFlightParticipantsTable> {
+  $$ReFlightParticipantsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get role =>
+      $composableBuilder(column: $table.role, builder: (column) => column);
+
+  GeneratedColumn<String> get excludedReason => $composableBuilder(
+    column: $table.excludedReason,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get drawPosition => $composableBuilder(
+    column: $table.drawPosition,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get response =>
+      $composableBuilder(column: $table.response, builder: (column) => column);
+
+  GeneratedColumn<String> get respondedBy => $composableBuilder(
+    column: $table.respondedBy,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get respondedAt => $composableBuilder(
+    column: $table.respondedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get notificationState => $composableBuilder(
+    column: $table.notificationState,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get notifiedAt => $composableBuilder(
+    column: $table.notifiedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get acknowledgedAt => $composableBuilder(
+    column: $table.acknowledgedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get revision =>
+      $composableBuilder(column: $table.revision, builder: (column) => column);
+
+  $$ContestsTableAnnotationComposer get contestId {
+    final $$ContestsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contestId,
+      referencedTable: $db.contests,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContestsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.contests,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ReFlightsTableAnnotationComposer get reFlightId {
+    final $$ReFlightsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.reFlightId,
+      referencedTable: $db.reFlights,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ReFlightsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.reFlights,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ContestParticipationsTableAnnotationComposer get contestParticipationId {
+    final $$ContestParticipationsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.contestParticipationId,
+          referencedTable: $db.contestParticipations,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ContestParticipationsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.contestParticipations,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$MatrixAssignmentsTableAnnotationComposer get assignmentId {
+    final $$MatrixAssignmentsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.assignmentId,
+          referencedTable: $db.matrixAssignments,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$MatrixAssignmentsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.matrixAssignments,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+}
+
+class $$ReFlightParticipantsTableTableManager
+    extends
+        RootTableManager<
+          _$SoarScoreDatabase,
+          $ReFlightParticipantsTable,
+          ReFlightParticipantData,
+          $$ReFlightParticipantsTableFilterComposer,
+          $$ReFlightParticipantsTableOrderingComposer,
+          $$ReFlightParticipantsTableAnnotationComposer,
+          $$ReFlightParticipantsTableCreateCompanionBuilder,
+          $$ReFlightParticipantsTableUpdateCompanionBuilder,
+          (ReFlightParticipantData, $$ReFlightParticipantsTableReferences),
+          ReFlightParticipantData,
+          PrefetchHooks Function({
+            bool contestId,
+            bool reFlightId,
+            bool contestParticipationId,
+            bool assignmentId,
+          })
+        > {
+  $$ReFlightParticipantsTableTableManager(
+    _$SoarScoreDatabase db,
+    $ReFlightParticipantsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ReFlightParticipantsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ReFlightParticipantsTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$ReFlightParticipantsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> contestId = const Value.absent(),
+                Value<String> reFlightId = const Value.absent(),
+                Value<String> contestParticipationId = const Value.absent(),
+                Value<String> role = const Value.absent(),
+                Value<String?> excludedReason = const Value.absent(),
+                Value<int?> drawPosition = const Value.absent(),
+                Value<String> response = const Value.absent(),
+                Value<String?> respondedBy = const Value.absent(),
+                Value<String?> respondedAt = const Value.absent(),
+                Value<String> notificationState = const Value.absent(),
+                Value<String?> notifiedAt = const Value.absent(),
+                Value<String?> acknowledgedAt = const Value.absent(),
+                Value<String?> assignmentId = const Value.absent(),
+                Value<int> revision = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ReFlightParticipantsCompanion(
+                id: id,
+                contestId: contestId,
+                reFlightId: reFlightId,
+                contestParticipationId: contestParticipationId,
+                role: role,
+                excludedReason: excludedReason,
+                drawPosition: drawPosition,
+                response: response,
+                respondedBy: respondedBy,
+                respondedAt: respondedAt,
+                notificationState: notificationState,
+                notifiedAt: notifiedAt,
+                acknowledgedAt: acknowledgedAt,
+                assignmentId: assignmentId,
+                revision: revision,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String contestId,
+                required String reFlightId,
+                required String contestParticipationId,
+                required String role,
+                Value<String?> excludedReason = const Value.absent(),
+                Value<int?> drawPosition = const Value.absent(),
+                required String response,
+                Value<String?> respondedBy = const Value.absent(),
+                Value<String?> respondedAt = const Value.absent(),
+                required String notificationState,
+                Value<String?> notifiedAt = const Value.absent(),
+                Value<String?> acknowledgedAt = const Value.absent(),
+                Value<String?> assignmentId = const Value.absent(),
+                Value<int> revision = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ReFlightParticipantsCompanion.insert(
+                id: id,
+                contestId: contestId,
+                reFlightId: reFlightId,
+                contestParticipationId: contestParticipationId,
+                role: role,
+                excludedReason: excludedReason,
+                drawPosition: drawPosition,
+                response: response,
+                respondedBy: respondedBy,
+                respondedAt: respondedAt,
+                notificationState: notificationState,
+                notifiedAt: notifiedAt,
+                acknowledgedAt: acknowledgedAt,
+                assignmentId: assignmentId,
+                revision: revision,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<
+                    $ReFlightParticipantsTable,
+                    ReFlightParticipantData
+                  >(table),
+                  $$ReFlightParticipantsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback:
+              ({
+                contestId = false,
+                reFlightId = false,
+                contestParticipationId = false,
+                assignmentId = false,
+              }) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (contestId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.contestId,
+                            referencedTable:
+                                $$ReFlightParticipantsTableReferences
+                                    ._contestIdTable(db),
+                            referencedColumn:
+                                $$ReFlightParticipantsTableReferences
+                                    ._contestIdTable(db)
+                                    .id,
+                          ) as T;
+                        }
+                        if (reFlightId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.reFlightId,
+                            referencedTable:
+                                $$ReFlightParticipantsTableReferences
+                                    ._reFlightIdTable(db),
+                            referencedColumn:
+                                $$ReFlightParticipantsTableReferences
+                                    ._reFlightIdTable(db)
+                                    .id,
+                          ) as T;
+                        }
+                        if (contestParticipationId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.contestParticipationId,
+                            referencedTable:
+                                $$ReFlightParticipantsTableReferences
+                                    ._contestParticipationIdTable(db),
+                            referencedColumn:
+                                $$ReFlightParticipantsTableReferences
+                                    ._contestParticipationIdTable(db)
+                                    .id,
+                          ) as T;
+                        }
+                        if (assignmentId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.assignmentId,
+                            referencedTable:
+                                $$ReFlightParticipantsTableReferences
+                                    ._assignmentIdTable(db),
+                            referencedColumn:
+                                $$ReFlightParticipantsTableReferences
+                                    ._assignmentIdTable(db)
+                                    .id,
+                          ) as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$ReFlightParticipantsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$SoarScoreDatabase,
+      $ReFlightParticipantsTable,
+      ReFlightParticipantData,
+      $$ReFlightParticipantsTableFilterComposer,
+      $$ReFlightParticipantsTableOrderingComposer,
+      $$ReFlightParticipantsTableAnnotationComposer,
+      $$ReFlightParticipantsTableCreateCompanionBuilder,
+      $$ReFlightParticipantsTableUpdateCompanionBuilder,
+      (ReFlightParticipantData, $$ReFlightParticipantsTableReferences),
+      ReFlightParticipantData,
+      PrefetchHooks Function({
+        bool contestId,
+        bool reFlightId,
+        bool contestParticipationId,
+        bool assignmentId,
+      })
+    >;
+typedef $$ScorePlaceholdersTableCreateCompanionBuilder =
+    ScorePlaceholdersCompanion Function({
+      required String id,
+      required String contestId,
+      required String contestParticipationId,
+      required String assignmentId,
+      required String state,
+      required int scoreRevision,
+      Value<String?> lockedBy,
+      Value<String?> lockedAt,
+      Value<int> revision,
+      Value<int> rowid,
+    });
+typedef $$ScorePlaceholdersTableUpdateCompanionBuilder =
+    ScorePlaceholdersCompanion Function({
+      Value<String> id,
+      Value<String> contestId,
+      Value<String> contestParticipationId,
+      Value<String> assignmentId,
+      Value<String> state,
+      Value<int> scoreRevision,
+      Value<String?> lockedBy,
+      Value<String?> lockedAt,
+      Value<int> revision,
+      Value<int> rowid,
+    });
+
+final class $$ScorePlaceholdersTableReferences
+    extends
+        BaseReferences<
+          _$SoarScoreDatabase,
+          $ScorePlaceholdersTable,
+          ScorePlaceholderData
+        > {
+  $$ScorePlaceholdersTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $ContestsTable _contestIdTable(_$SoarScoreDatabase db) =>
+      db.contests.createAlias('score_placeholders__contest_id__contests__id');
+
+  $$ContestsTableProcessedTableManager get contestId {
+    final $_column = $_itemColumn<String>('contest_id')!;
+
+    final manager = $$ContestsTableTableManager(
+      $_db,
+      $_db.contests,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_contestIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $ContestParticipationsTable _contestParticipationIdTable(
+    _$SoarScoreDatabase db,
+  ) => db.contestParticipations.createAlias(
+    'score_placeholders__contest_participation_id__contest_participations__id',
+  );
+
+  $$ContestParticipationsTableProcessedTableManager get contestParticipationId {
+    final $_column = $_itemColumn<String>('contest_participation_id')!;
+
+    final manager = $$ContestParticipationsTableTableManager(
+      $_db,
+      $_db.contestParticipations,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(
+      _contestParticipationIdTable($_db),
+    );
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $MatrixAssignmentsTable _assignmentIdTable(_$SoarScoreDatabase db) =>
+      db.matrixAssignments.createAlias(
+        'score_placeholders__assignment_id__matrix_assignments__id',
+      );
+
+  $$MatrixAssignmentsTableProcessedTableManager get assignmentId {
+    final $_column = $_itemColumn<String>('assignment_id')!;
+
+    final manager = $$MatrixAssignmentsTableTableManager(
+      $_db,
+      $_db.matrixAssignments,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_assignmentIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static MultiTypedResultKey<$ScoreAttemptsTable, List<ScoreAttemptData>>
+  _scoreAttemptsRefsTable(_$SoarScoreDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.scoreAttempts,
+        aliasName:
+            'score_placeholders__id__score_attempts__score_placeholder_id',
+      );
+
+  $$ScoreAttemptsTableProcessedTableManager get scoreAttemptsRefs {
+    final manager = $$ScoreAttemptsTableTableManager($_db, $_db.scoreAttempts)
+        .filter(
+          (f) => f.scorePlaceholderId.id.sqlEquals($_itemColumn<String>('id')!),
+        );
+
+    final cache = $_typedResult.readTableOrNull(_scoreAttemptsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$OfficialScoresTable, List<OfficialScoreData>>
+  _officialScoresRefsTable(_$SoarScoreDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.officialScores,
+        aliasName:
+            'score_placeholders__id__official_scores__score_placeholder_id',
+      );
+
+  $$OfficialScoresTableProcessedTableManager get officialScoresRefs {
+    final manager = $$OfficialScoresTableTableManager($_db, $_db.officialScores)
+        .filter(
+          (f) => f.scorePlaceholderId.id.sqlEquals($_itemColumn<String>('id')!),
+        );
+
+    final cache = $_typedResult.readTableOrNull(_officialScoresRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$ReviewRequestsTable, List<ReviewRequestData>>
+  _reviewRequestsRefsTable(_$SoarScoreDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.reviewRequests,
+        aliasName:
+            'score_placeholders__id__review_requests__score_placeholder_id',
+      );
+
+  $$ReviewRequestsTableProcessedTableManager get reviewRequestsRefs {
+    final manager = $$ReviewRequestsTableTableManager($_db, $_db.reviewRequests)
+        .filter(
+          (f) => f.scorePlaceholderId.id.sqlEquals($_itemColumn<String>('id')!),
+        );
+
+    final cache = $_typedResult.readTableOrNull(_reviewRequestsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$FlightResultsTable, List<FlightResultData>>
+  _flightResultsRefsTable(_$SoarScoreDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.flightResults,
+        aliasName:
+            'score_placeholders__id__flight_results__score_placeholder_id',
+      );
+
+  $$FlightResultsTableProcessedTableManager get flightResultsRefs {
+    final manager = $$FlightResultsTableTableManager($_db, $_db.flightResults)
+        .filter(
+          (f) => f.scorePlaceholderId.id.sqlEquals($_itemColumn<String>('id')!),
+        );
+
+    final cache = $_typedResult.readTableOrNull(_flightResultsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$ScorePlaceholdersTableFilterComposer
+    extends Composer<_$SoarScoreDatabase, $ScorePlaceholdersTable> {
+  $$ScorePlaceholdersTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get state => $composableBuilder(
+    column: $table.state,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get scoreRevision => $composableBuilder(
+    column: $table.scoreRevision,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get lockedBy => $composableBuilder(
+    column: $table.lockedBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get lockedAt => $composableBuilder(
+    column: $table.lockedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get revision => $composableBuilder(
+    column: $table.revision,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$ContestsTableFilterComposer get contestId {
+    final $$ContestsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contestId,
+      referencedTable: $db.contests,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContestsTableFilterComposer(
+            $db: $db,
+            $table: $db.contests,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ContestParticipationsTableFilterComposer get contestParticipationId {
+    final $$ContestParticipationsTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.contestParticipationId,
+          referencedTable: $db.contestParticipations,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ContestParticipationsTableFilterComposer(
+                $db: $db,
+                $table: $db.contestParticipations,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$MatrixAssignmentsTableFilterComposer get assignmentId {
+    final $$MatrixAssignmentsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.assignmentId,
+      referencedTable: $db.matrixAssignments,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MatrixAssignmentsTableFilterComposer(
+            $db: $db,
+            $table: $db.matrixAssignments,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<bool> scoreAttemptsRefs(
+    Expression<bool> Function($$ScoreAttemptsTableFilterComposer f) f,
+  ) {
+    final $$ScoreAttemptsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.scoreAttempts,
+      getReferencedColumn: (t) => t.scorePlaceholderId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ScoreAttemptsTableFilterComposer(
+            $db: $db,
+            $table: $db.scoreAttempts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> officialScoresRefs(
+    Expression<bool> Function($$OfficialScoresTableFilterComposer f) f,
+  ) {
+    final $$OfficialScoresTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.officialScores,
+      getReferencedColumn: (t) => t.scorePlaceholderId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$OfficialScoresTableFilterComposer(
+            $db: $db,
+            $table: $db.officialScores,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> reviewRequestsRefs(
+    Expression<bool> Function($$ReviewRequestsTableFilterComposer f) f,
+  ) {
+    final $$ReviewRequestsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.reviewRequests,
+      getReferencedColumn: (t) => t.scorePlaceholderId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ReviewRequestsTableFilterComposer(
+            $db: $db,
+            $table: $db.reviewRequests,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> flightResultsRefs(
+    Expression<bool> Function($$FlightResultsTableFilterComposer f) f,
+  ) {
+    final $$FlightResultsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.flightResults,
+      getReferencedColumn: (t) => t.scorePlaceholderId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$FlightResultsTableFilterComposer(
+            $db: $db,
+            $table: $db.flightResults,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$ScorePlaceholdersTableOrderingComposer
+    extends Composer<_$SoarScoreDatabase, $ScorePlaceholdersTable> {
+  $$ScorePlaceholdersTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get state => $composableBuilder(
+    column: $table.state,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get scoreRevision => $composableBuilder(
+    column: $table.scoreRevision,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get lockedBy => $composableBuilder(
+    column: $table.lockedBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get lockedAt => $composableBuilder(
+    column: $table.lockedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get revision => $composableBuilder(
+    column: $table.revision,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$ContestsTableOrderingComposer get contestId {
+    final $$ContestsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contestId,
+      referencedTable: $db.contests,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContestsTableOrderingComposer(
+            $db: $db,
+            $table: $db.contests,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ContestParticipationsTableOrderingComposer get contestParticipationId {
+    final $$ContestParticipationsTableOrderingComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.contestParticipationId,
+          referencedTable: $db.contestParticipations,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ContestParticipationsTableOrderingComposer(
+                $db: $db,
+                $table: $db.contestParticipations,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$MatrixAssignmentsTableOrderingComposer get assignmentId {
+    final $$MatrixAssignmentsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.assignmentId,
+      referencedTable: $db.matrixAssignments,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MatrixAssignmentsTableOrderingComposer(
+            $db: $db,
+            $table: $db.matrixAssignments,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ScorePlaceholdersTableAnnotationComposer
+    extends Composer<_$SoarScoreDatabase, $ScorePlaceholdersTable> {
+  $$ScorePlaceholdersTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get state =>
+      $composableBuilder(column: $table.state, builder: (column) => column);
+
+  GeneratedColumn<int> get scoreRevision => $composableBuilder(
+    column: $table.scoreRevision,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get lockedBy =>
+      $composableBuilder(column: $table.lockedBy, builder: (column) => column);
+
+  GeneratedColumn<String> get lockedAt =>
+      $composableBuilder(column: $table.lockedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get revision =>
+      $composableBuilder(column: $table.revision, builder: (column) => column);
+
+  $$ContestsTableAnnotationComposer get contestId {
+    final $$ContestsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contestId,
+      referencedTable: $db.contests,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContestsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.contests,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ContestParticipationsTableAnnotationComposer get contestParticipationId {
+    final $$ContestParticipationsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.contestParticipationId,
+          referencedTable: $db.contestParticipations,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ContestParticipationsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.contestParticipations,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$MatrixAssignmentsTableAnnotationComposer get assignmentId {
+    final $$MatrixAssignmentsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.assignmentId,
+          referencedTable: $db.matrixAssignments,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$MatrixAssignmentsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.matrixAssignments,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  Expression<T> scoreAttemptsRefs<T extends Object>(
+    Expression<T> Function($$ScoreAttemptsTableAnnotationComposer a) f,
+  ) {
+    final $$ScoreAttemptsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.scoreAttempts,
+      getReferencedColumn: (t) => t.scorePlaceholderId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ScoreAttemptsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.scoreAttempts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<T> officialScoresRefs<T extends Object>(
+    Expression<T> Function($$OfficialScoresTableAnnotationComposer a) f,
+  ) {
+    final $$OfficialScoresTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.officialScores,
+      getReferencedColumn: (t) => t.scorePlaceholderId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$OfficialScoresTableAnnotationComposer(
+            $db: $db,
+            $table: $db.officialScores,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<T> reviewRequestsRefs<T extends Object>(
+    Expression<T> Function($$ReviewRequestsTableAnnotationComposer a) f,
+  ) {
+    final $$ReviewRequestsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.reviewRequests,
+      getReferencedColumn: (t) => t.scorePlaceholderId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ReviewRequestsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.reviewRequests,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<T> flightResultsRefs<T extends Object>(
+    Expression<T> Function($$FlightResultsTableAnnotationComposer a) f,
+  ) {
+    final $$FlightResultsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.flightResults,
+      getReferencedColumn: (t) => t.scorePlaceholderId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$FlightResultsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.flightResults,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$ScorePlaceholdersTableTableManager
+    extends
+        RootTableManager<
+          _$SoarScoreDatabase,
+          $ScorePlaceholdersTable,
+          ScorePlaceholderData,
+          $$ScorePlaceholdersTableFilterComposer,
+          $$ScorePlaceholdersTableOrderingComposer,
+          $$ScorePlaceholdersTableAnnotationComposer,
+          $$ScorePlaceholdersTableCreateCompanionBuilder,
+          $$ScorePlaceholdersTableUpdateCompanionBuilder,
+          (ScorePlaceholderData, $$ScorePlaceholdersTableReferences),
+          ScorePlaceholderData,
+          PrefetchHooks Function({
+            bool contestId,
+            bool contestParticipationId,
+            bool assignmentId,
+            bool scoreAttemptsRefs,
+            bool officialScoresRefs,
+            bool reviewRequestsRefs,
+            bool flightResultsRefs,
+          })
+        > {
+  $$ScorePlaceholdersTableTableManager(
+    _$SoarScoreDatabase db,
+    $ScorePlaceholdersTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ScorePlaceholdersTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ScorePlaceholdersTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ScorePlaceholdersTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> contestId = const Value.absent(),
+                Value<String> contestParticipationId = const Value.absent(),
+                Value<String> assignmentId = const Value.absent(),
+                Value<String> state = const Value.absent(),
+                Value<int> scoreRevision = const Value.absent(),
+                Value<String?> lockedBy = const Value.absent(),
+                Value<String?> lockedAt = const Value.absent(),
+                Value<int> revision = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ScorePlaceholdersCompanion(
+                id: id,
+                contestId: contestId,
+                contestParticipationId: contestParticipationId,
+                assignmentId: assignmentId,
+                state: state,
+                scoreRevision: scoreRevision,
+                lockedBy: lockedBy,
+                lockedAt: lockedAt,
+                revision: revision,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String contestId,
+                required String contestParticipationId,
+                required String assignmentId,
+                required String state,
+                required int scoreRevision,
+                Value<String?> lockedBy = const Value.absent(),
+                Value<String?> lockedAt = const Value.absent(),
+                Value<int> revision = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ScorePlaceholdersCompanion.insert(
+                id: id,
+                contestId: contestId,
+                contestParticipationId: contestParticipationId,
+                assignmentId: assignmentId,
+                state: state,
+                scoreRevision: scoreRevision,
+                lockedBy: lockedBy,
+                lockedAt: lockedAt,
+                revision: revision,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$ScorePlaceholdersTable, ScorePlaceholderData>(
+                    table,
+                  ),
+                  $$ScorePlaceholdersTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback:
+              ({
+                contestId = false,
+                contestParticipationId = false,
+                assignmentId = false,
+                scoreAttemptsRefs = false,
+                officialScoresRefs = false,
+                reviewRequestsRefs = false,
+                flightResultsRefs = false,
+              }) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (scoreAttemptsRefs) db.scoreAttempts,
+                    if (officialScoresRefs) db.officialScores,
+                    if (reviewRequestsRefs) db.reviewRequests,
+                    if (flightResultsRefs) db.flightResults,
+                  ],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (contestId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.contestId,
+                            referencedTable: $$ScorePlaceholdersTableReferences
+                                ._contestIdTable(db),
+                            referencedColumn: $$ScorePlaceholdersTableReferences
+                                ._contestIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+                        if (contestParticipationId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.contestParticipationId,
+                            referencedTable: $$ScorePlaceholdersTableReferences
+                                ._contestParticipationIdTable(db),
+                            referencedColumn: $$ScorePlaceholdersTableReferences
+                                ._contestParticipationIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+                        if (assignmentId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.assignmentId,
+                            referencedTable: $$ScorePlaceholdersTableReferences
+                                ._assignmentIdTable(db),
+                            referencedColumn: $$ScorePlaceholdersTableReferences
+                                ._assignmentIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (scoreAttemptsRefs)
+                        await $_getPrefetchedData<
+                          ScorePlaceholderData,
+                          $ScorePlaceholdersTable,
+                          ScoreAttemptData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$ScorePlaceholdersTableReferences
+                              ._scoreAttemptsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$ScorePlaceholdersTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).scoreAttemptsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.scorePlaceholderId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (officialScoresRefs)
+                        await $_getPrefetchedData<
+                          ScorePlaceholderData,
+                          $ScorePlaceholdersTable,
+                          OfficialScoreData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$ScorePlaceholdersTableReferences
+                              ._officialScoresRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$ScorePlaceholdersTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).officialScoresRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.scorePlaceholderId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (reviewRequestsRefs)
+                        await $_getPrefetchedData<
+                          ScorePlaceholderData,
+                          $ScorePlaceholdersTable,
+                          ReviewRequestData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$ScorePlaceholdersTableReferences
+                              ._reviewRequestsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$ScorePlaceholdersTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).reviewRequestsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.scorePlaceholderId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (flightResultsRefs)
+                        await $_getPrefetchedData<
+                          ScorePlaceholderData,
+                          $ScorePlaceholdersTable,
+                          FlightResultData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$ScorePlaceholdersTableReferences
+                              ._flightResultsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$ScorePlaceholdersTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).flightResultsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.scorePlaceholderId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$ScorePlaceholdersTableProcessedTableManager =
+    ProcessedTableManager<
+      _$SoarScoreDatabase,
+      $ScorePlaceholdersTable,
+      ScorePlaceholderData,
+      $$ScorePlaceholdersTableFilterComposer,
+      $$ScorePlaceholdersTableOrderingComposer,
+      $$ScorePlaceholdersTableAnnotationComposer,
+      $$ScorePlaceholdersTableCreateCompanionBuilder,
+      $$ScorePlaceholdersTableUpdateCompanionBuilder,
+      (ScorePlaceholderData, $$ScorePlaceholdersTableReferences),
+      ScorePlaceholderData,
+      PrefetchHooks Function({
+        bool contestId,
+        bool contestParticipationId,
+        bool assignmentId,
+        bool scoreAttemptsRefs,
+        bool officialScoresRefs,
+        bool reviewRequestsRefs,
+        bool flightResultsRefs,
+      })
+    >;
+typedef $$ScoreAttemptsTableCreateCompanionBuilder =
+    ScoreAttemptsCompanion Function({
+      required String id,
+      required String contestId,
+      required String scorePlaceholderId,
+      required String configRevisionId,
+      required String matrixRevisionId,
+      required String rawComponents,
+      required String actorId,
+      required String authority,
+      Value<String?> invitationId,
+      Value<String?> sourceDevice,
+      required String clientMutationId,
+      required int baseScoreRevision,
+      Value<int> rowid,
+    });
+typedef $$ScoreAttemptsTableUpdateCompanionBuilder =
+    ScoreAttemptsCompanion Function({
+      Value<String> id,
+      Value<String> contestId,
+      Value<String> scorePlaceholderId,
+      Value<String> configRevisionId,
+      Value<String> matrixRevisionId,
+      Value<String> rawComponents,
+      Value<String> actorId,
+      Value<String> authority,
+      Value<String?> invitationId,
+      Value<String?> sourceDevice,
+      Value<String> clientMutationId,
+      Value<int> baseScoreRevision,
+      Value<int> rowid,
+    });
+
+final class $$ScoreAttemptsTableReferences
+    extends
+        BaseReferences<
+          _$SoarScoreDatabase,
+          $ScoreAttemptsTable,
+          ScoreAttemptData
+        > {
+  $$ScoreAttemptsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $ContestsTable _contestIdTable(_$SoarScoreDatabase db) =>
+      db.contests.createAlias('score_attempts__contest_id__contests__id');
+
+  $$ContestsTableProcessedTableManager get contestId {
+    final $_column = $_itemColumn<String>('contest_id')!;
+
+    final manager = $$ContestsTableTableManager(
+      $_db,
+      $_db.contests,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_contestIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $ScorePlaceholdersTable _scorePlaceholderIdTable(
+    _$SoarScoreDatabase db,
+  ) => db.scorePlaceholders.createAlias(
+    'score_attempts__score_placeholder_id__score_placeholders__id',
+  );
+
+  $$ScorePlaceholdersTableProcessedTableManager get scorePlaceholderId {
+    final $_column = $_itemColumn<String>('score_placeholder_id')!;
+
+    final manager = $$ScorePlaceholdersTableTableManager(
+      $_db,
+      $_db.scorePlaceholders,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_scorePlaceholderIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $ContestConfigurationRevisionsTable _configRevisionIdTable(
+    _$SoarScoreDatabase db,
+  ) => db.contestConfigurationRevisions.createAlias(
+    'score_attempts__config_revision_id__contest_configuration_revisions__id',
+  );
+
+  $$ContestConfigurationRevisionsTableProcessedTableManager
+  get configRevisionId {
+    final $_column = $_itemColumn<String>('config_revision_id')!;
+
+    final manager = $$ContestConfigurationRevisionsTableTableManager(
+      $_db,
+      $_db.contestConfigurationRevisions,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_configRevisionIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $MatrixRevisionsTable _matrixRevisionIdTable(_$SoarScoreDatabase db) =>
+      db.matrixRevisions.createAlias(
+        'score_attempts__matrix_revision_id__matrix_revisions__id',
+      );
+
+  $$MatrixRevisionsTableProcessedTableManager get matrixRevisionId {
+    final $_column = $_itemColumn<String>('matrix_revision_id')!;
+
+    final manager = $$MatrixRevisionsTableTableManager(
+      $_db,
+      $_db.matrixRevisions,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_matrixRevisionIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static MultiTypedResultKey<$OfficialScoresTable, List<OfficialScoreData>>
+  _officialScoresRefsTable(_$SoarScoreDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.officialScores,
+        aliasName: 'score_attempts__id__official_scores__score_attempt_id',
+      );
+
+  $$OfficialScoresTableProcessedTableManager get officialScoresRefs {
+    final manager = $$OfficialScoresTableTableManager(
+      $_db,
+      $_db.officialScores,
+    ).filter((f) => f.scoreAttemptId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_officialScoresRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$ReviewRequestsTable, List<ReviewRequestData>>
+  _reviewRequestsRefsTable(_$SoarScoreDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.reviewRequests,
+        aliasName: 'score_attempts__id__review_requests__resulting_attempt_id',
+      );
+
+  $$ReviewRequestsTableProcessedTableManager get reviewRequestsRefs {
+    final manager = $$ReviewRequestsTableTableManager($_db, $_db.reviewRequests)
+        .filter(
+          (f) => f.resultingAttemptId.id.sqlEquals($_itemColumn<String>('id')!),
+        );
+
+    final cache = $_typedResult.readTableOrNull(_reviewRequestsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$ScoreAttemptsTableFilterComposer
+    extends Composer<_$SoarScoreDatabase, $ScoreAttemptsTable> {
+  $$ScoreAttemptsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get rawComponents => $composableBuilder(
+    column: $table.rawComponents,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get actorId => $composableBuilder(
+    column: $table.actorId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get authority => $composableBuilder(
+    column: $table.authority,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get invitationId => $composableBuilder(
+    column: $table.invitationId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sourceDevice => $composableBuilder(
+    column: $table.sourceDevice,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get clientMutationId => $composableBuilder(
+    column: $table.clientMutationId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get baseScoreRevision => $composableBuilder(
+    column: $table.baseScoreRevision,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$ContestsTableFilterComposer get contestId {
+    final $$ContestsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contestId,
+      referencedTable: $db.contests,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContestsTableFilterComposer(
+            $db: $db,
+            $table: $db.contests,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ScorePlaceholdersTableFilterComposer get scorePlaceholderId {
+    final $$ScorePlaceholdersTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.scorePlaceholderId,
+      referencedTable: $db.scorePlaceholders,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ScorePlaceholdersTableFilterComposer(
+            $db: $db,
+            $table: $db.scorePlaceholders,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ContestConfigurationRevisionsTableFilterComposer get configRevisionId {
+    final $$ContestConfigurationRevisionsTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.configRevisionId,
+          referencedTable: $db.contestConfigurationRevisions,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ContestConfigurationRevisionsTableFilterComposer(
+                $db: $db,
+                $table: $db.contestConfigurationRevisions,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$MatrixRevisionsTableFilterComposer get matrixRevisionId {
+    final $$MatrixRevisionsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.matrixRevisionId,
+      referencedTable: $db.matrixRevisions,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MatrixRevisionsTableFilterComposer(
+            $db: $db,
+            $table: $db.matrixRevisions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<bool> officialScoresRefs(
+    Expression<bool> Function($$OfficialScoresTableFilterComposer f) f,
+  ) {
+    final $$OfficialScoresTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.officialScores,
+      getReferencedColumn: (t) => t.scoreAttemptId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$OfficialScoresTableFilterComposer(
+            $db: $db,
+            $table: $db.officialScores,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> reviewRequestsRefs(
+    Expression<bool> Function($$ReviewRequestsTableFilterComposer f) f,
+  ) {
+    final $$ReviewRequestsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.reviewRequests,
+      getReferencedColumn: (t) => t.resultingAttemptId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ReviewRequestsTableFilterComposer(
+            $db: $db,
+            $table: $db.reviewRequests,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$ScoreAttemptsTableOrderingComposer
+    extends Composer<_$SoarScoreDatabase, $ScoreAttemptsTable> {
+  $$ScoreAttemptsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get rawComponents => $composableBuilder(
+    column: $table.rawComponents,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get actorId => $composableBuilder(
+    column: $table.actorId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get authority => $composableBuilder(
+    column: $table.authority,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get invitationId => $composableBuilder(
+    column: $table.invitationId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sourceDevice => $composableBuilder(
+    column: $table.sourceDevice,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get clientMutationId => $composableBuilder(
+    column: $table.clientMutationId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get baseScoreRevision => $composableBuilder(
+    column: $table.baseScoreRevision,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$ContestsTableOrderingComposer get contestId {
+    final $$ContestsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contestId,
+      referencedTable: $db.contests,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContestsTableOrderingComposer(
+            $db: $db,
+            $table: $db.contests,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ScorePlaceholdersTableOrderingComposer get scorePlaceholderId {
+    final $$ScorePlaceholdersTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.scorePlaceholderId,
+      referencedTable: $db.scorePlaceholders,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ScorePlaceholdersTableOrderingComposer(
+            $db: $db,
+            $table: $db.scorePlaceholders,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ContestConfigurationRevisionsTableOrderingComposer get configRevisionId {
+    final $$ContestConfigurationRevisionsTableOrderingComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.configRevisionId,
+          referencedTable: $db.contestConfigurationRevisions,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ContestConfigurationRevisionsTableOrderingComposer(
+                $db: $db,
+                $table: $db.contestConfigurationRevisions,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$MatrixRevisionsTableOrderingComposer get matrixRevisionId {
+    final $$MatrixRevisionsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.matrixRevisionId,
+      referencedTable: $db.matrixRevisions,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MatrixRevisionsTableOrderingComposer(
+            $db: $db,
+            $table: $db.matrixRevisions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ScoreAttemptsTableAnnotationComposer
+    extends Composer<_$SoarScoreDatabase, $ScoreAttemptsTable> {
+  $$ScoreAttemptsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get rawComponents => $composableBuilder(
+    column: $table.rawComponents,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get actorId =>
+      $composableBuilder(column: $table.actorId, builder: (column) => column);
+
+  GeneratedColumn<String> get authority =>
+      $composableBuilder(column: $table.authority, builder: (column) => column);
+
+  GeneratedColumn<String> get invitationId => $composableBuilder(
+    column: $table.invitationId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get sourceDevice => $composableBuilder(
+    column: $table.sourceDevice,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get clientMutationId => $composableBuilder(
+    column: $table.clientMutationId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get baseScoreRevision => $composableBuilder(
+    column: $table.baseScoreRevision,
+    builder: (column) => column,
+  );
+
+  $$ContestsTableAnnotationComposer get contestId {
+    final $$ContestsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contestId,
+      referencedTable: $db.contests,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContestsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.contests,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ScorePlaceholdersTableAnnotationComposer get scorePlaceholderId {
+    final $$ScorePlaceholdersTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.scorePlaceholderId,
+          referencedTable: $db.scorePlaceholders,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ScorePlaceholdersTableAnnotationComposer(
+                $db: $db,
+                $table: $db.scorePlaceholders,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$ContestConfigurationRevisionsTableAnnotationComposer get configRevisionId {
+    final $$ContestConfigurationRevisionsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.configRevisionId,
+          referencedTable: $db.contestConfigurationRevisions,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ContestConfigurationRevisionsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.contestConfigurationRevisions,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$MatrixRevisionsTableAnnotationComposer get matrixRevisionId {
+    final $$MatrixRevisionsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.matrixRevisionId,
+      referencedTable: $db.matrixRevisions,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MatrixRevisionsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.matrixRevisions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<T> officialScoresRefs<T extends Object>(
+    Expression<T> Function($$OfficialScoresTableAnnotationComposer a) f,
+  ) {
+    final $$OfficialScoresTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.officialScores,
+      getReferencedColumn: (t) => t.scoreAttemptId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$OfficialScoresTableAnnotationComposer(
+            $db: $db,
+            $table: $db.officialScores,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<T> reviewRequestsRefs<T extends Object>(
+    Expression<T> Function($$ReviewRequestsTableAnnotationComposer a) f,
+  ) {
+    final $$ReviewRequestsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.reviewRequests,
+      getReferencedColumn: (t) => t.resultingAttemptId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ReviewRequestsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.reviewRequests,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$ScoreAttemptsTableTableManager
+    extends
+        RootTableManager<
+          _$SoarScoreDatabase,
+          $ScoreAttemptsTable,
+          ScoreAttemptData,
+          $$ScoreAttemptsTableFilterComposer,
+          $$ScoreAttemptsTableOrderingComposer,
+          $$ScoreAttemptsTableAnnotationComposer,
+          $$ScoreAttemptsTableCreateCompanionBuilder,
+          $$ScoreAttemptsTableUpdateCompanionBuilder,
+          (ScoreAttemptData, $$ScoreAttemptsTableReferences),
+          ScoreAttemptData,
+          PrefetchHooks Function({
+            bool contestId,
+            bool scorePlaceholderId,
+            bool configRevisionId,
+            bool matrixRevisionId,
+            bool officialScoresRefs,
+            bool reviewRequestsRefs,
+          })
+        > {
+  $$ScoreAttemptsTableTableManager(
+    _$SoarScoreDatabase db,
+    $ScoreAttemptsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ScoreAttemptsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ScoreAttemptsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ScoreAttemptsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> contestId = const Value.absent(),
+                Value<String> scorePlaceholderId = const Value.absent(),
+                Value<String> configRevisionId = const Value.absent(),
+                Value<String> matrixRevisionId = const Value.absent(),
+                Value<String> rawComponents = const Value.absent(),
+                Value<String> actorId = const Value.absent(),
+                Value<String> authority = const Value.absent(),
+                Value<String?> invitationId = const Value.absent(),
+                Value<String?> sourceDevice = const Value.absent(),
+                Value<String> clientMutationId = const Value.absent(),
+                Value<int> baseScoreRevision = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ScoreAttemptsCompanion(
+                id: id,
+                contestId: contestId,
+                scorePlaceholderId: scorePlaceholderId,
+                configRevisionId: configRevisionId,
+                matrixRevisionId: matrixRevisionId,
+                rawComponents: rawComponents,
+                actorId: actorId,
+                authority: authority,
+                invitationId: invitationId,
+                sourceDevice: sourceDevice,
+                clientMutationId: clientMutationId,
+                baseScoreRevision: baseScoreRevision,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String contestId,
+                required String scorePlaceholderId,
+                required String configRevisionId,
+                required String matrixRevisionId,
+                required String rawComponents,
+                required String actorId,
+                required String authority,
+                Value<String?> invitationId = const Value.absent(),
+                Value<String?> sourceDevice = const Value.absent(),
+                required String clientMutationId,
+                required int baseScoreRevision,
+                Value<int> rowid = const Value.absent(),
+              }) => ScoreAttemptsCompanion.insert(
+                id: id,
+                contestId: contestId,
+                scorePlaceholderId: scorePlaceholderId,
+                configRevisionId: configRevisionId,
+                matrixRevisionId: matrixRevisionId,
+                rawComponents: rawComponents,
+                actorId: actorId,
+                authority: authority,
+                invitationId: invitationId,
+                sourceDevice: sourceDevice,
+                clientMutationId: clientMutationId,
+                baseScoreRevision: baseScoreRevision,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$ScoreAttemptsTable, ScoreAttemptData>(table),
+                  $$ScoreAttemptsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback:
+              ({
+                contestId = false,
+                scorePlaceholderId = false,
+                configRevisionId = false,
+                matrixRevisionId = false,
+                officialScoresRefs = false,
+                reviewRequestsRefs = false,
+              }) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (officialScoresRefs) db.officialScores,
+                    if (reviewRequestsRefs) db.reviewRequests,
+                  ],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (contestId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.contestId,
+                            referencedTable: $$ScoreAttemptsTableReferences
+                                ._contestIdTable(db),
+                            referencedColumn: $$ScoreAttemptsTableReferences
+                                ._contestIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+                        if (scorePlaceholderId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.scorePlaceholderId,
+                            referencedTable: $$ScoreAttemptsTableReferences
+                                ._scorePlaceholderIdTable(db),
+                            referencedColumn: $$ScoreAttemptsTableReferences
+                                ._scorePlaceholderIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+                        if (configRevisionId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.configRevisionId,
+                            referencedTable: $$ScoreAttemptsTableReferences
+                                ._configRevisionIdTable(db),
+                            referencedColumn: $$ScoreAttemptsTableReferences
+                                ._configRevisionIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+                        if (matrixRevisionId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.matrixRevisionId,
+                            referencedTable: $$ScoreAttemptsTableReferences
+                                ._matrixRevisionIdTable(db),
+                            referencedColumn: $$ScoreAttemptsTableReferences
+                                ._matrixRevisionIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (officialScoresRefs)
+                        await $_getPrefetchedData<
+                          ScoreAttemptData,
+                          $ScoreAttemptsTable,
+                          OfficialScoreData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$ScoreAttemptsTableReferences
+                              ._officialScoresRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$ScoreAttemptsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).officialScoresRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.scoreAttemptId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (reviewRequestsRefs)
+                        await $_getPrefetchedData<
+                          ScoreAttemptData,
+                          $ScoreAttemptsTable,
+                          ReviewRequestData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$ScoreAttemptsTableReferences
+                              ._reviewRequestsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$ScoreAttemptsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).reviewRequestsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.resultingAttemptId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$ScoreAttemptsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$SoarScoreDatabase,
+      $ScoreAttemptsTable,
+      ScoreAttemptData,
+      $$ScoreAttemptsTableFilterComposer,
+      $$ScoreAttemptsTableOrderingComposer,
+      $$ScoreAttemptsTableAnnotationComposer,
+      $$ScoreAttemptsTableCreateCompanionBuilder,
+      $$ScoreAttemptsTableUpdateCompanionBuilder,
+      (ScoreAttemptData, $$ScoreAttemptsTableReferences),
+      ScoreAttemptData,
+      PrefetchHooks Function({
+        bool contestId,
+        bool scorePlaceholderId,
+        bool configRevisionId,
+        bool matrixRevisionId,
+        bool officialScoresRefs,
+        bool reviewRequestsRefs,
+      })
+    >;
+typedef $$OfficialScoresTableCreateCompanionBuilder =
+    OfficialScoresCompanion Function({
+      required String id,
+      required String contestId,
+      required String scorePlaceholderId,
+      required String scoreAttemptId,
+      required int scoreRevision,
+      required String components,
+      required String setAt,
+      required String setBy,
+      required String reason,
+      Value<int> rowid,
+    });
+typedef $$OfficialScoresTableUpdateCompanionBuilder =
+    OfficialScoresCompanion Function({
+      Value<String> id,
+      Value<String> contestId,
+      Value<String> scorePlaceholderId,
+      Value<String> scoreAttemptId,
+      Value<int> scoreRevision,
+      Value<String> components,
+      Value<String> setAt,
+      Value<String> setBy,
+      Value<String> reason,
+      Value<int> rowid,
+    });
+
+final class $$OfficialScoresTableReferences
+    extends
+        BaseReferences<
+          _$SoarScoreDatabase,
+          $OfficialScoresTable,
+          OfficialScoreData
+        > {
+  $$OfficialScoresTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $ContestsTable _contestIdTable(_$SoarScoreDatabase db) =>
+      db.contests.createAlias('official_scores__contest_id__contests__id');
+
+  $$ContestsTableProcessedTableManager get contestId {
+    final $_column = $_itemColumn<String>('contest_id')!;
+
+    final manager = $$ContestsTableTableManager(
+      $_db,
+      $_db.contests,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_contestIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $ScorePlaceholdersTable _scorePlaceholderIdTable(
+    _$SoarScoreDatabase db,
+  ) => db.scorePlaceholders.createAlias(
+    'official_scores__score_placeholder_id__score_placeholders__id',
+  );
+
+  $$ScorePlaceholdersTableProcessedTableManager get scorePlaceholderId {
+    final $_column = $_itemColumn<String>('score_placeholder_id')!;
+
+    final manager = $$ScorePlaceholdersTableTableManager(
+      $_db,
+      $_db.scorePlaceholders,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_scorePlaceholderIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $ScoreAttemptsTable _scoreAttemptIdTable(_$SoarScoreDatabase db) => db
+      .scoreAttempts
+      .createAlias('official_scores__score_attempt_id__score_attempts__id');
+
+  $$ScoreAttemptsTableProcessedTableManager get scoreAttemptId {
+    final $_column = $_itemColumn<String>('score_attempt_id')!;
+
+    final manager = $$ScoreAttemptsTableTableManager(
+      $_db,
+      $_db.scoreAttempts,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_scoreAttemptIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static MultiTypedResultKey<$FlightResultsTable, List<FlightResultData>>
+  _flightResultsRefsTable(_$SoarScoreDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.flightResults,
+        aliasName: 'official_scores__id__flight_results__official_score_id',
+      );
+
+  $$FlightResultsTableProcessedTableManager get flightResultsRefs {
+    final manager = $$FlightResultsTableTableManager($_db, $_db.flightResults)
+        .filter(
+          (f) => f.officialScoreId.id.sqlEquals($_itemColumn<String>('id')!),
+        );
+
+    final cache = $_typedResult.readTableOrNull(_flightResultsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$OfficialScoresTableFilterComposer
+    extends Composer<_$SoarScoreDatabase, $OfficialScoresTable> {
+  $$OfficialScoresTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get scoreRevision => $composableBuilder(
+    column: $table.scoreRevision,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get components => $composableBuilder(
+    column: $table.components,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get setAt => $composableBuilder(
+    column: $table.setAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get setBy => $composableBuilder(
+    column: $table.setBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reason => $composableBuilder(
+    column: $table.reason,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$ContestsTableFilterComposer get contestId {
+    final $$ContestsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contestId,
+      referencedTable: $db.contests,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContestsTableFilterComposer(
+            $db: $db,
+            $table: $db.contests,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ScorePlaceholdersTableFilterComposer get scorePlaceholderId {
+    final $$ScorePlaceholdersTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.scorePlaceholderId,
+      referencedTable: $db.scorePlaceholders,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ScorePlaceholdersTableFilterComposer(
+            $db: $db,
+            $table: $db.scorePlaceholders,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ScoreAttemptsTableFilterComposer get scoreAttemptId {
+    final $$ScoreAttemptsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.scoreAttemptId,
+      referencedTable: $db.scoreAttempts,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ScoreAttemptsTableFilterComposer(
+            $db: $db,
+            $table: $db.scoreAttempts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<bool> flightResultsRefs(
+    Expression<bool> Function($$FlightResultsTableFilterComposer f) f,
+  ) {
+    final $$FlightResultsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.flightResults,
+      getReferencedColumn: (t) => t.officialScoreId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$FlightResultsTableFilterComposer(
+            $db: $db,
+            $table: $db.flightResults,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$OfficialScoresTableOrderingComposer
+    extends Composer<_$SoarScoreDatabase, $OfficialScoresTable> {
+  $$OfficialScoresTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get scoreRevision => $composableBuilder(
+    column: $table.scoreRevision,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get components => $composableBuilder(
+    column: $table.components,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get setAt => $composableBuilder(
+    column: $table.setAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get setBy => $composableBuilder(
+    column: $table.setBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reason => $composableBuilder(
+    column: $table.reason,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$ContestsTableOrderingComposer get contestId {
+    final $$ContestsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contestId,
+      referencedTable: $db.contests,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContestsTableOrderingComposer(
+            $db: $db,
+            $table: $db.contests,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ScorePlaceholdersTableOrderingComposer get scorePlaceholderId {
+    final $$ScorePlaceholdersTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.scorePlaceholderId,
+      referencedTable: $db.scorePlaceholders,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ScorePlaceholdersTableOrderingComposer(
+            $db: $db,
+            $table: $db.scorePlaceholders,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ScoreAttemptsTableOrderingComposer get scoreAttemptId {
+    final $$ScoreAttemptsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.scoreAttemptId,
+      referencedTable: $db.scoreAttempts,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ScoreAttemptsTableOrderingComposer(
+            $db: $db,
+            $table: $db.scoreAttempts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$OfficialScoresTableAnnotationComposer
+    extends Composer<_$SoarScoreDatabase, $OfficialScoresTable> {
+  $$OfficialScoresTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get scoreRevision => $composableBuilder(
+    column: $table.scoreRevision,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get components => $composableBuilder(
+    column: $table.components,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get setAt =>
+      $composableBuilder(column: $table.setAt, builder: (column) => column);
+
+  GeneratedColumn<String> get setBy =>
+      $composableBuilder(column: $table.setBy, builder: (column) => column);
+
+  GeneratedColumn<String> get reason =>
+      $composableBuilder(column: $table.reason, builder: (column) => column);
+
+  $$ContestsTableAnnotationComposer get contestId {
+    final $$ContestsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contestId,
+      referencedTable: $db.contests,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContestsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.contests,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ScorePlaceholdersTableAnnotationComposer get scorePlaceholderId {
+    final $$ScorePlaceholdersTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.scorePlaceholderId,
+          referencedTable: $db.scorePlaceholders,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ScorePlaceholdersTableAnnotationComposer(
+                $db: $db,
+                $table: $db.scorePlaceholders,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$ScoreAttemptsTableAnnotationComposer get scoreAttemptId {
+    final $$ScoreAttemptsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.scoreAttemptId,
+      referencedTable: $db.scoreAttempts,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ScoreAttemptsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.scoreAttempts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<T> flightResultsRefs<T extends Object>(
+    Expression<T> Function($$FlightResultsTableAnnotationComposer a) f,
+  ) {
+    final $$FlightResultsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.flightResults,
+      getReferencedColumn: (t) => t.officialScoreId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$FlightResultsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.flightResults,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$OfficialScoresTableTableManager
+    extends
+        RootTableManager<
+          _$SoarScoreDatabase,
+          $OfficialScoresTable,
+          OfficialScoreData,
+          $$OfficialScoresTableFilterComposer,
+          $$OfficialScoresTableOrderingComposer,
+          $$OfficialScoresTableAnnotationComposer,
+          $$OfficialScoresTableCreateCompanionBuilder,
+          $$OfficialScoresTableUpdateCompanionBuilder,
+          (OfficialScoreData, $$OfficialScoresTableReferences),
+          OfficialScoreData,
+          PrefetchHooks Function({
+            bool contestId,
+            bool scorePlaceholderId,
+            bool scoreAttemptId,
+            bool flightResultsRefs,
+          })
+        > {
+  $$OfficialScoresTableTableManager(
+    _$SoarScoreDatabase db,
+    $OfficialScoresTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$OfficialScoresTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$OfficialScoresTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$OfficialScoresTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> contestId = const Value.absent(),
+                Value<String> scorePlaceholderId = const Value.absent(),
+                Value<String> scoreAttemptId = const Value.absent(),
+                Value<int> scoreRevision = const Value.absent(),
+                Value<String> components = const Value.absent(),
+                Value<String> setAt = const Value.absent(),
+                Value<String> setBy = const Value.absent(),
+                Value<String> reason = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => OfficialScoresCompanion(
+                id: id,
+                contestId: contestId,
+                scorePlaceholderId: scorePlaceholderId,
+                scoreAttemptId: scoreAttemptId,
+                scoreRevision: scoreRevision,
+                components: components,
+                setAt: setAt,
+                setBy: setBy,
+                reason: reason,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String contestId,
+                required String scorePlaceholderId,
+                required String scoreAttemptId,
+                required int scoreRevision,
+                required String components,
+                required String setAt,
+                required String setBy,
+                required String reason,
+                Value<int> rowid = const Value.absent(),
+              }) => OfficialScoresCompanion.insert(
+                id: id,
+                contestId: contestId,
+                scorePlaceholderId: scorePlaceholderId,
+                scoreAttemptId: scoreAttemptId,
+                scoreRevision: scoreRevision,
+                components: components,
+                setAt: setAt,
+                setBy: setBy,
+                reason: reason,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$OfficialScoresTable, OfficialScoreData>(table),
+                  $$OfficialScoresTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback:
+              ({
+                contestId = false,
+                scorePlaceholderId = false,
+                scoreAttemptId = false,
+                flightResultsRefs = false,
+              }) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (flightResultsRefs) db.flightResults,
+                  ],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (contestId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.contestId,
+                            referencedTable: $$OfficialScoresTableReferences
+                                ._contestIdTable(db),
+                            referencedColumn: $$OfficialScoresTableReferences
+                                ._contestIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+                        if (scorePlaceholderId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.scorePlaceholderId,
+                            referencedTable: $$OfficialScoresTableReferences
+                                ._scorePlaceholderIdTable(db),
+                            referencedColumn: $$OfficialScoresTableReferences
+                                ._scorePlaceholderIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+                        if (scoreAttemptId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.scoreAttemptId,
+                            referencedTable: $$OfficialScoresTableReferences
+                                ._scoreAttemptIdTable(db),
+                            referencedColumn: $$OfficialScoresTableReferences
+                                ._scoreAttemptIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (flightResultsRefs)
+                        await $_getPrefetchedData<
+                          OfficialScoreData,
+                          $OfficialScoresTable,
+                          FlightResultData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$OfficialScoresTableReferences
+                              ._flightResultsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$OfficialScoresTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).flightResultsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.officialScoreId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$OfficialScoresTableProcessedTableManager =
+    ProcessedTableManager<
+      _$SoarScoreDatabase,
+      $OfficialScoresTable,
+      OfficialScoreData,
+      $$OfficialScoresTableFilterComposer,
+      $$OfficialScoresTableOrderingComposer,
+      $$OfficialScoresTableAnnotationComposer,
+      $$OfficialScoresTableCreateCompanionBuilder,
+      $$OfficialScoresTableUpdateCompanionBuilder,
+      (OfficialScoreData, $$OfficialScoresTableReferences),
+      OfficialScoreData,
+      PrefetchHooks Function({
+        bool contestId,
+        bool scorePlaceholderId,
+        bool scoreAttemptId,
+        bool flightResultsRefs,
+      })
+    >;
+typedef $$ReviewRequestsTableCreateCompanionBuilder =
+    ReviewRequestsCompanion Function({
+      required String id,
+      required String contestId,
+      required String scorePlaceholderId,
+      required String proposedComponents,
+      Value<String?> participantMessage,
+      required String requesterId,
+      required int baseScoreRevision,
+      required String requestedAt,
+      required String state,
+      Value<String?> decisionActorId,
+      Value<String?> decisionTime,
+      Value<String?> decisionMessage,
+      Value<String?> resultingAttemptId,
+      Value<int> revision,
+      Value<int> rowid,
+    });
+typedef $$ReviewRequestsTableUpdateCompanionBuilder =
+    ReviewRequestsCompanion Function({
+      Value<String> id,
+      Value<String> contestId,
+      Value<String> scorePlaceholderId,
+      Value<String> proposedComponents,
+      Value<String?> participantMessage,
+      Value<String> requesterId,
+      Value<int> baseScoreRevision,
+      Value<String> requestedAt,
+      Value<String> state,
+      Value<String?> decisionActorId,
+      Value<String?> decisionTime,
+      Value<String?> decisionMessage,
+      Value<String?> resultingAttemptId,
+      Value<int> revision,
+      Value<int> rowid,
+    });
+
+final class $$ReviewRequestsTableReferences
+    extends
+        BaseReferences<
+          _$SoarScoreDatabase,
+          $ReviewRequestsTable,
+          ReviewRequestData
+        > {
+  $$ReviewRequestsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $ContestsTable _contestIdTable(_$SoarScoreDatabase db) =>
+      db.contests.createAlias('review_requests__contest_id__contests__id');
+
+  $$ContestsTableProcessedTableManager get contestId {
+    final $_column = $_itemColumn<String>('contest_id')!;
+
+    final manager = $$ContestsTableTableManager(
+      $_db,
+      $_db.contests,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_contestIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $ScorePlaceholdersTable _scorePlaceholderIdTable(
+    _$SoarScoreDatabase db,
+  ) => db.scorePlaceholders.createAlias(
+    'review_requests__score_placeholder_id__score_placeholders__id',
+  );
+
+  $$ScorePlaceholdersTableProcessedTableManager get scorePlaceholderId {
+    final $_column = $_itemColumn<String>('score_placeholder_id')!;
+
+    final manager = $$ScorePlaceholdersTableTableManager(
+      $_db,
+      $_db.scorePlaceholders,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_scorePlaceholderIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $ScoreAttemptsTable _resultingAttemptIdTable(_$SoarScoreDatabase db) =>
+      db.scoreAttempts.createAlias(
+        'review_requests__resulting_attempt_id__score_attempts__id',
+      );
+
+  $$ScoreAttemptsTableProcessedTableManager? get resultingAttemptId {
+    final $_column = $_itemColumn<String>('resulting_attempt_id');
+    if ($_column == null) return null;
+    final manager = $$ScoreAttemptsTableTableManager(
+      $_db,
+      $_db.scoreAttempts,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_resultingAttemptIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$ReviewRequestsTableFilterComposer
+    extends Composer<_$SoarScoreDatabase, $ReviewRequestsTable> {
+  $$ReviewRequestsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get proposedComponents => $composableBuilder(
+    column: $table.proposedComponents,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get participantMessage => $composableBuilder(
+    column: $table.participantMessage,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get requesterId => $composableBuilder(
+    column: $table.requesterId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get baseScoreRevision => $composableBuilder(
+    column: $table.baseScoreRevision,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get requestedAt => $composableBuilder(
+    column: $table.requestedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get state => $composableBuilder(
+    column: $table.state,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get decisionActorId => $composableBuilder(
+    column: $table.decisionActorId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get decisionTime => $composableBuilder(
+    column: $table.decisionTime,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get decisionMessage => $composableBuilder(
+    column: $table.decisionMessage,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get revision => $composableBuilder(
+    column: $table.revision,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$ContestsTableFilterComposer get contestId {
+    final $$ContestsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contestId,
+      referencedTable: $db.contests,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContestsTableFilterComposer(
+            $db: $db,
+            $table: $db.contests,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ScorePlaceholdersTableFilterComposer get scorePlaceholderId {
+    final $$ScorePlaceholdersTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.scorePlaceholderId,
+      referencedTable: $db.scorePlaceholders,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ScorePlaceholdersTableFilterComposer(
+            $db: $db,
+            $table: $db.scorePlaceholders,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ScoreAttemptsTableFilterComposer get resultingAttemptId {
+    final $$ScoreAttemptsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.resultingAttemptId,
+      referencedTable: $db.scoreAttempts,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ScoreAttemptsTableFilterComposer(
+            $db: $db,
+            $table: $db.scoreAttempts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ReviewRequestsTableOrderingComposer
+    extends Composer<_$SoarScoreDatabase, $ReviewRequestsTable> {
+  $$ReviewRequestsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get proposedComponents => $composableBuilder(
+    column: $table.proposedComponents,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get participantMessage => $composableBuilder(
+    column: $table.participantMessage,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get requesterId => $composableBuilder(
+    column: $table.requesterId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get baseScoreRevision => $composableBuilder(
+    column: $table.baseScoreRevision,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get requestedAt => $composableBuilder(
+    column: $table.requestedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get state => $composableBuilder(
+    column: $table.state,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get decisionActorId => $composableBuilder(
+    column: $table.decisionActorId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get decisionTime => $composableBuilder(
+    column: $table.decisionTime,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get decisionMessage => $composableBuilder(
+    column: $table.decisionMessage,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get revision => $composableBuilder(
+    column: $table.revision,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$ContestsTableOrderingComposer get contestId {
+    final $$ContestsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contestId,
+      referencedTable: $db.contests,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContestsTableOrderingComposer(
+            $db: $db,
+            $table: $db.contests,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ScorePlaceholdersTableOrderingComposer get scorePlaceholderId {
+    final $$ScorePlaceholdersTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.scorePlaceholderId,
+      referencedTable: $db.scorePlaceholders,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ScorePlaceholdersTableOrderingComposer(
+            $db: $db,
+            $table: $db.scorePlaceholders,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ScoreAttemptsTableOrderingComposer get resultingAttemptId {
+    final $$ScoreAttemptsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.resultingAttemptId,
+      referencedTable: $db.scoreAttempts,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ScoreAttemptsTableOrderingComposer(
+            $db: $db,
+            $table: $db.scoreAttempts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ReviewRequestsTableAnnotationComposer
+    extends Composer<_$SoarScoreDatabase, $ReviewRequestsTable> {
+  $$ReviewRequestsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get proposedComponents => $composableBuilder(
+    column: $table.proposedComponents,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get participantMessage => $composableBuilder(
+    column: $table.participantMessage,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get requesterId => $composableBuilder(
+    column: $table.requesterId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get baseScoreRevision => $composableBuilder(
+    column: $table.baseScoreRevision,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get requestedAt => $composableBuilder(
+    column: $table.requestedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get state =>
+      $composableBuilder(column: $table.state, builder: (column) => column);
+
+  GeneratedColumn<String> get decisionActorId => $composableBuilder(
+    column: $table.decisionActorId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get decisionTime => $composableBuilder(
+    column: $table.decisionTime,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get decisionMessage => $composableBuilder(
+    column: $table.decisionMessage,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get revision =>
+      $composableBuilder(column: $table.revision, builder: (column) => column);
+
+  $$ContestsTableAnnotationComposer get contestId {
+    final $$ContestsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contestId,
+      referencedTable: $db.contests,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContestsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.contests,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ScorePlaceholdersTableAnnotationComposer get scorePlaceholderId {
+    final $$ScorePlaceholdersTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.scorePlaceholderId,
+          referencedTable: $db.scorePlaceholders,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ScorePlaceholdersTableAnnotationComposer(
+                $db: $db,
+                $table: $db.scorePlaceholders,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$ScoreAttemptsTableAnnotationComposer get resultingAttemptId {
+    final $$ScoreAttemptsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.resultingAttemptId,
+      referencedTable: $db.scoreAttempts,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ScoreAttemptsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.scoreAttempts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ReviewRequestsTableTableManager
+    extends
+        RootTableManager<
+          _$SoarScoreDatabase,
+          $ReviewRequestsTable,
+          ReviewRequestData,
+          $$ReviewRequestsTableFilterComposer,
+          $$ReviewRequestsTableOrderingComposer,
+          $$ReviewRequestsTableAnnotationComposer,
+          $$ReviewRequestsTableCreateCompanionBuilder,
+          $$ReviewRequestsTableUpdateCompanionBuilder,
+          (ReviewRequestData, $$ReviewRequestsTableReferences),
+          ReviewRequestData,
+          PrefetchHooks Function({
+            bool contestId,
+            bool scorePlaceholderId,
+            bool resultingAttemptId,
+          })
+        > {
+  $$ReviewRequestsTableTableManager(
+    _$SoarScoreDatabase db,
+    $ReviewRequestsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ReviewRequestsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ReviewRequestsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ReviewRequestsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> contestId = const Value.absent(),
+                Value<String> scorePlaceholderId = const Value.absent(),
+                Value<String> proposedComponents = const Value.absent(),
+                Value<String?> participantMessage = const Value.absent(),
+                Value<String> requesterId = const Value.absent(),
+                Value<int> baseScoreRevision = const Value.absent(),
+                Value<String> requestedAt = const Value.absent(),
+                Value<String> state = const Value.absent(),
+                Value<String?> decisionActorId = const Value.absent(),
+                Value<String?> decisionTime = const Value.absent(),
+                Value<String?> decisionMessage = const Value.absent(),
+                Value<String?> resultingAttemptId = const Value.absent(),
+                Value<int> revision = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ReviewRequestsCompanion(
+                id: id,
+                contestId: contestId,
+                scorePlaceholderId: scorePlaceholderId,
+                proposedComponents: proposedComponents,
+                participantMessage: participantMessage,
+                requesterId: requesterId,
+                baseScoreRevision: baseScoreRevision,
+                requestedAt: requestedAt,
+                state: state,
+                decisionActorId: decisionActorId,
+                decisionTime: decisionTime,
+                decisionMessage: decisionMessage,
+                resultingAttemptId: resultingAttemptId,
+                revision: revision,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String contestId,
+                required String scorePlaceholderId,
+                required String proposedComponents,
+                Value<String?> participantMessage = const Value.absent(),
+                required String requesterId,
+                required int baseScoreRevision,
+                required String requestedAt,
+                required String state,
+                Value<String?> decisionActorId = const Value.absent(),
+                Value<String?> decisionTime = const Value.absent(),
+                Value<String?> decisionMessage = const Value.absent(),
+                Value<String?> resultingAttemptId = const Value.absent(),
+                Value<int> revision = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ReviewRequestsCompanion.insert(
+                id: id,
+                contestId: contestId,
+                scorePlaceholderId: scorePlaceholderId,
+                proposedComponents: proposedComponents,
+                participantMessage: participantMessage,
+                requesterId: requesterId,
+                baseScoreRevision: baseScoreRevision,
+                requestedAt: requestedAt,
+                state: state,
+                decisionActorId: decisionActorId,
+                decisionTime: decisionTime,
+                decisionMessage: decisionMessage,
+                resultingAttemptId: resultingAttemptId,
+                revision: revision,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$ReviewRequestsTable, ReviewRequestData>(table),
+                  $$ReviewRequestsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback:
+              ({
+                contestId = false,
+                scorePlaceholderId = false,
+                resultingAttemptId = false,
+              }) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (contestId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.contestId,
+                            referencedTable: $$ReviewRequestsTableReferences
+                                ._contestIdTable(db),
+                            referencedColumn: $$ReviewRequestsTableReferences
+                                ._contestIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+                        if (scorePlaceholderId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.scorePlaceholderId,
+                            referencedTable: $$ReviewRequestsTableReferences
+                                ._scorePlaceholderIdTable(db),
+                            referencedColumn: $$ReviewRequestsTableReferences
+                                ._scorePlaceholderIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+                        if (resultingAttemptId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.resultingAttemptId,
+                            referencedTable: $$ReviewRequestsTableReferences
+                                ._resultingAttemptIdTable(db),
+                            referencedColumn: $$ReviewRequestsTableReferences
+                                ._resultingAttemptIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$ReviewRequestsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$SoarScoreDatabase,
+      $ReviewRequestsTable,
+      ReviewRequestData,
+      $$ReviewRequestsTableFilterComposer,
+      $$ReviewRequestsTableOrderingComposer,
+      $$ReviewRequestsTableAnnotationComposer,
+      $$ReviewRequestsTableCreateCompanionBuilder,
+      $$ReviewRequestsTableUpdateCompanionBuilder,
+      (ReviewRequestData, $$ReviewRequestsTableReferences),
+      ReviewRequestData,
+      PrefetchHooks Function({
+        bool contestId,
+        bool scorePlaceholderId,
+        bool resultingAttemptId,
+      })
+    >;
+typedef $$FlightResultsTableCreateCompanionBuilder =
+    FlightResultsCompanion Function({
+      required String id,
+      required String contestId,
+      required String scorePlaceholderId,
+      required String officialScoreId,
+      required String contestParticipationId,
+      required String creditedRoundId,
+      required String outcome,
+      required double rawPoints,
+      Value<double?> landingPoints,
+      Value<double?> flightPenaltyPoints,
+      Value<int?> cumulativePenalty,
+      required double groupScore,
+      required bool isSelected,
+      required bool isPreliminary,
+      required String configRevisionId,
+      required String matrixRevisionId,
+      required String calculationVersion,
+      required String computedAt,
+      Value<int> rowid,
+    });
+typedef $$FlightResultsTableUpdateCompanionBuilder =
+    FlightResultsCompanion Function({
+      Value<String> id,
+      Value<String> contestId,
+      Value<String> scorePlaceholderId,
+      Value<String> officialScoreId,
+      Value<String> contestParticipationId,
+      Value<String> creditedRoundId,
+      Value<String> outcome,
+      Value<double> rawPoints,
+      Value<double?> landingPoints,
+      Value<double?> flightPenaltyPoints,
+      Value<int?> cumulativePenalty,
+      Value<double> groupScore,
+      Value<bool> isSelected,
+      Value<bool> isPreliminary,
+      Value<String> configRevisionId,
+      Value<String> matrixRevisionId,
+      Value<String> calculationVersion,
+      Value<String> computedAt,
+      Value<int> rowid,
+    });
+
+final class $$FlightResultsTableReferences
+    extends
+        BaseReferences<
+          _$SoarScoreDatabase,
+          $FlightResultsTable,
+          FlightResultData
+        > {
+  $$FlightResultsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $ContestsTable _contestIdTable(_$SoarScoreDatabase db) =>
+      db.contests.createAlias('flight_results__contest_id__contests__id');
+
+  $$ContestsTableProcessedTableManager get contestId {
+    final $_column = $_itemColumn<String>('contest_id')!;
+
+    final manager = $$ContestsTableTableManager(
+      $_db,
+      $_db.contests,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_contestIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $ScorePlaceholdersTable _scorePlaceholderIdTable(
+    _$SoarScoreDatabase db,
+  ) => db.scorePlaceholders.createAlias(
+    'flight_results__score_placeholder_id__score_placeholders__id',
+  );
+
+  $$ScorePlaceholdersTableProcessedTableManager get scorePlaceholderId {
+    final $_column = $_itemColumn<String>('score_placeholder_id')!;
+
+    final manager = $$ScorePlaceholdersTableTableManager(
+      $_db,
+      $_db.scorePlaceholders,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_scorePlaceholderIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $OfficialScoresTable _officialScoreIdTable(_$SoarScoreDatabase db) =>
+      db.officialScores.createAlias(
+        'flight_results__official_score_id__official_scores__id',
+      );
+
+  $$OfficialScoresTableProcessedTableManager get officialScoreId {
+    final $_column = $_itemColumn<String>('official_score_id')!;
+
+    final manager = $$OfficialScoresTableTableManager(
+      $_db,
+      $_db.officialScores,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_officialScoreIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $ContestParticipationsTable _contestParticipationIdTable(
+    _$SoarScoreDatabase db,
+  ) => db.contestParticipations.createAlias(
+    'flight_results__contest_participation_id__contest_participations__id',
+  );
+
+  $$ContestParticipationsTableProcessedTableManager get contestParticipationId {
+    final $_column = $_itemColumn<String>('contest_participation_id')!;
+
+    final manager = $$ContestParticipationsTableTableManager(
+      $_db,
+      $_db.contestParticipations,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(
+      _contestParticipationIdTable($_db),
+    );
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $RoundsTable _creditedRoundIdTable(_$SoarScoreDatabase db) =>
+      db.rounds.createAlias('flight_results__credited_round_id__rounds__id');
+
+  $$RoundsTableProcessedTableManager get creditedRoundId {
+    final $_column = $_itemColumn<String>('credited_round_id')!;
+
+    final manager = $$RoundsTableTableManager(
+      $_db,
+      $_db.rounds,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_creditedRoundIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $ContestConfigurationRevisionsTable _configRevisionIdTable(
+    _$SoarScoreDatabase db,
+  ) => db.contestConfigurationRevisions.createAlias(
+    'flight_results__config_revision_id__contest_configuration_revisions__id',
+  );
+
+  $$ContestConfigurationRevisionsTableProcessedTableManager
+  get configRevisionId {
+    final $_column = $_itemColumn<String>('config_revision_id')!;
+
+    final manager = $$ContestConfigurationRevisionsTableTableManager(
+      $_db,
+      $_db.contestConfigurationRevisions,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_configRevisionIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $MatrixRevisionsTable _matrixRevisionIdTable(_$SoarScoreDatabase db) =>
+      db.matrixRevisions.createAlias(
+        'flight_results__matrix_revision_id__matrix_revisions__id',
+      );
+
+  $$MatrixRevisionsTableProcessedTableManager get matrixRevisionId {
+    final $_column = $_itemColumn<String>('matrix_revision_id')!;
+
+    final manager = $$MatrixRevisionsTableTableManager(
+      $_db,
+      $_db.matrixRevisions,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_matrixRevisionIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$FlightResultsTableFilterComposer
+    extends Composer<_$SoarScoreDatabase, $FlightResultsTable> {
+  $$FlightResultsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get outcome => $composableBuilder(
+    column: $table.outcome,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get rawPoints => $composableBuilder(
+    column: $table.rawPoints,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get landingPoints => $composableBuilder(
+    column: $table.landingPoints,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get flightPenaltyPoints => $composableBuilder(
+    column: $table.flightPenaltyPoints,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get cumulativePenalty => $composableBuilder(
+    column: $table.cumulativePenalty,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get groupScore => $composableBuilder(
+    column: $table.groupScore,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isSelected => $composableBuilder(
+    column: $table.isSelected,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isPreliminary => $composableBuilder(
+    column: $table.isPreliminary,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get calculationVersion => $composableBuilder(
+    column: $table.calculationVersion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get computedAt => $composableBuilder(
+    column: $table.computedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$ContestsTableFilterComposer get contestId {
+    final $$ContestsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contestId,
+      referencedTable: $db.contests,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContestsTableFilterComposer(
+            $db: $db,
+            $table: $db.contests,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ScorePlaceholdersTableFilterComposer get scorePlaceholderId {
+    final $$ScorePlaceholdersTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.scorePlaceholderId,
+      referencedTable: $db.scorePlaceholders,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ScorePlaceholdersTableFilterComposer(
+            $db: $db,
+            $table: $db.scorePlaceholders,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$OfficialScoresTableFilterComposer get officialScoreId {
+    final $$OfficialScoresTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.officialScoreId,
+      referencedTable: $db.officialScores,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$OfficialScoresTableFilterComposer(
+            $db: $db,
+            $table: $db.officialScores,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ContestParticipationsTableFilterComposer get contestParticipationId {
+    final $$ContestParticipationsTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.contestParticipationId,
+          referencedTable: $db.contestParticipations,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ContestParticipationsTableFilterComposer(
+                $db: $db,
+                $table: $db.contestParticipations,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$RoundsTableFilterComposer get creditedRoundId {
+    final $$RoundsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.creditedRoundId,
+      referencedTable: $db.rounds,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RoundsTableFilterComposer(
+            $db: $db,
+            $table: $db.rounds,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ContestConfigurationRevisionsTableFilterComposer get configRevisionId {
+    final $$ContestConfigurationRevisionsTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.configRevisionId,
+          referencedTable: $db.contestConfigurationRevisions,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ContestConfigurationRevisionsTableFilterComposer(
+                $db: $db,
+                $table: $db.contestConfigurationRevisions,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$MatrixRevisionsTableFilterComposer get matrixRevisionId {
+    final $$MatrixRevisionsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.matrixRevisionId,
+      referencedTable: $db.matrixRevisions,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MatrixRevisionsTableFilterComposer(
+            $db: $db,
+            $table: $db.matrixRevisions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$FlightResultsTableOrderingComposer
+    extends Composer<_$SoarScoreDatabase, $FlightResultsTable> {
+  $$FlightResultsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get outcome => $composableBuilder(
+    column: $table.outcome,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get rawPoints => $composableBuilder(
+    column: $table.rawPoints,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get landingPoints => $composableBuilder(
+    column: $table.landingPoints,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get flightPenaltyPoints => $composableBuilder(
+    column: $table.flightPenaltyPoints,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get cumulativePenalty => $composableBuilder(
+    column: $table.cumulativePenalty,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get groupScore => $composableBuilder(
+    column: $table.groupScore,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isSelected => $composableBuilder(
+    column: $table.isSelected,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isPreliminary => $composableBuilder(
+    column: $table.isPreliminary,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get calculationVersion => $composableBuilder(
+    column: $table.calculationVersion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get computedAt => $composableBuilder(
+    column: $table.computedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$ContestsTableOrderingComposer get contestId {
+    final $$ContestsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contestId,
+      referencedTable: $db.contests,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContestsTableOrderingComposer(
+            $db: $db,
+            $table: $db.contests,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ScorePlaceholdersTableOrderingComposer get scorePlaceholderId {
+    final $$ScorePlaceholdersTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.scorePlaceholderId,
+      referencedTable: $db.scorePlaceholders,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ScorePlaceholdersTableOrderingComposer(
+            $db: $db,
+            $table: $db.scorePlaceholders,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$OfficialScoresTableOrderingComposer get officialScoreId {
+    final $$OfficialScoresTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.officialScoreId,
+      referencedTable: $db.officialScores,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$OfficialScoresTableOrderingComposer(
+            $db: $db,
+            $table: $db.officialScores,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ContestParticipationsTableOrderingComposer get contestParticipationId {
+    final $$ContestParticipationsTableOrderingComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.contestParticipationId,
+          referencedTable: $db.contestParticipations,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ContestParticipationsTableOrderingComposer(
+                $db: $db,
+                $table: $db.contestParticipations,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$RoundsTableOrderingComposer get creditedRoundId {
+    final $$RoundsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.creditedRoundId,
+      referencedTable: $db.rounds,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RoundsTableOrderingComposer(
+            $db: $db,
+            $table: $db.rounds,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ContestConfigurationRevisionsTableOrderingComposer get configRevisionId {
+    final $$ContestConfigurationRevisionsTableOrderingComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.configRevisionId,
+          referencedTable: $db.contestConfigurationRevisions,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ContestConfigurationRevisionsTableOrderingComposer(
+                $db: $db,
+                $table: $db.contestConfigurationRevisions,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$MatrixRevisionsTableOrderingComposer get matrixRevisionId {
+    final $$MatrixRevisionsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.matrixRevisionId,
+      referencedTable: $db.matrixRevisions,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MatrixRevisionsTableOrderingComposer(
+            $db: $db,
+            $table: $db.matrixRevisions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$FlightResultsTableAnnotationComposer
+    extends Composer<_$SoarScoreDatabase, $FlightResultsTable> {
+  $$FlightResultsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get outcome =>
+      $composableBuilder(column: $table.outcome, builder: (column) => column);
+
+  GeneratedColumn<double> get rawPoints =>
+      $composableBuilder(column: $table.rawPoints, builder: (column) => column);
+
+  GeneratedColumn<double> get landingPoints => $composableBuilder(
+    column: $table.landingPoints,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get flightPenaltyPoints => $composableBuilder(
+    column: $table.flightPenaltyPoints,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get cumulativePenalty => $composableBuilder(
+    column: $table.cumulativePenalty,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get groupScore => $composableBuilder(
+    column: $table.groupScore,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get isSelected => $composableBuilder(
+    column: $table.isSelected,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get isPreliminary => $composableBuilder(
+    column: $table.isPreliminary,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get calculationVersion => $composableBuilder(
+    column: $table.calculationVersion,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get computedAt => $composableBuilder(
+    column: $table.computedAt,
+    builder: (column) => column,
+  );
+
+  $$ContestsTableAnnotationComposer get contestId {
+    final $$ContestsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contestId,
+      referencedTable: $db.contests,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContestsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.contests,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ScorePlaceholdersTableAnnotationComposer get scorePlaceholderId {
+    final $$ScorePlaceholdersTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.scorePlaceholderId,
+          referencedTable: $db.scorePlaceholders,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ScorePlaceholdersTableAnnotationComposer(
+                $db: $db,
+                $table: $db.scorePlaceholders,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$OfficialScoresTableAnnotationComposer get officialScoreId {
+    final $$OfficialScoresTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.officialScoreId,
+      referencedTable: $db.officialScores,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$OfficialScoresTableAnnotationComposer(
+            $db: $db,
+            $table: $db.officialScores,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ContestParticipationsTableAnnotationComposer get contestParticipationId {
+    final $$ContestParticipationsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.contestParticipationId,
+          referencedTable: $db.contestParticipations,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ContestParticipationsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.contestParticipations,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$RoundsTableAnnotationComposer get creditedRoundId {
+    final $$RoundsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.creditedRoundId,
+      referencedTable: $db.rounds,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RoundsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.rounds,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ContestConfigurationRevisionsTableAnnotationComposer get configRevisionId {
+    final $$ContestConfigurationRevisionsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.configRevisionId,
+          referencedTable: $db.contestConfigurationRevisions,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ContestConfigurationRevisionsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.contestConfigurationRevisions,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$MatrixRevisionsTableAnnotationComposer get matrixRevisionId {
+    final $$MatrixRevisionsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.matrixRevisionId,
+      referencedTable: $db.matrixRevisions,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MatrixRevisionsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.matrixRevisions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$FlightResultsTableTableManager
+    extends
+        RootTableManager<
+          _$SoarScoreDatabase,
+          $FlightResultsTable,
+          FlightResultData,
+          $$FlightResultsTableFilterComposer,
+          $$FlightResultsTableOrderingComposer,
+          $$FlightResultsTableAnnotationComposer,
+          $$FlightResultsTableCreateCompanionBuilder,
+          $$FlightResultsTableUpdateCompanionBuilder,
+          (FlightResultData, $$FlightResultsTableReferences),
+          FlightResultData,
+          PrefetchHooks Function({
+            bool contestId,
+            bool scorePlaceholderId,
+            bool officialScoreId,
+            bool contestParticipationId,
+            bool creditedRoundId,
+            bool configRevisionId,
+            bool matrixRevisionId,
+          })
+        > {
+  $$FlightResultsTableTableManager(
+    _$SoarScoreDatabase db,
+    $FlightResultsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$FlightResultsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$FlightResultsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$FlightResultsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> contestId = const Value.absent(),
+                Value<String> scorePlaceholderId = const Value.absent(),
+                Value<String> officialScoreId = const Value.absent(),
+                Value<String> contestParticipationId = const Value.absent(),
+                Value<String> creditedRoundId = const Value.absent(),
+                Value<String> outcome = const Value.absent(),
+                Value<double> rawPoints = const Value.absent(),
+                Value<double?> landingPoints = const Value.absent(),
+                Value<double?> flightPenaltyPoints = const Value.absent(),
+                Value<int?> cumulativePenalty = const Value.absent(),
+                Value<double> groupScore = const Value.absent(),
+                Value<bool> isSelected = const Value.absent(),
+                Value<bool> isPreliminary = const Value.absent(),
+                Value<String> configRevisionId = const Value.absent(),
+                Value<String> matrixRevisionId = const Value.absent(),
+                Value<String> calculationVersion = const Value.absent(),
+                Value<String> computedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => FlightResultsCompanion(
+                id: id,
+                contestId: contestId,
+                scorePlaceholderId: scorePlaceholderId,
+                officialScoreId: officialScoreId,
+                contestParticipationId: contestParticipationId,
+                creditedRoundId: creditedRoundId,
+                outcome: outcome,
+                rawPoints: rawPoints,
+                landingPoints: landingPoints,
+                flightPenaltyPoints: flightPenaltyPoints,
+                cumulativePenalty: cumulativePenalty,
+                groupScore: groupScore,
+                isSelected: isSelected,
+                isPreliminary: isPreliminary,
+                configRevisionId: configRevisionId,
+                matrixRevisionId: matrixRevisionId,
+                calculationVersion: calculationVersion,
+                computedAt: computedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String contestId,
+                required String scorePlaceholderId,
+                required String officialScoreId,
+                required String contestParticipationId,
+                required String creditedRoundId,
+                required String outcome,
+                required double rawPoints,
+                Value<double?> landingPoints = const Value.absent(),
+                Value<double?> flightPenaltyPoints = const Value.absent(),
+                Value<int?> cumulativePenalty = const Value.absent(),
+                required double groupScore,
+                required bool isSelected,
+                required bool isPreliminary,
+                required String configRevisionId,
+                required String matrixRevisionId,
+                required String calculationVersion,
+                required String computedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => FlightResultsCompanion.insert(
+                id: id,
+                contestId: contestId,
+                scorePlaceholderId: scorePlaceholderId,
+                officialScoreId: officialScoreId,
+                contestParticipationId: contestParticipationId,
+                creditedRoundId: creditedRoundId,
+                outcome: outcome,
+                rawPoints: rawPoints,
+                landingPoints: landingPoints,
+                flightPenaltyPoints: flightPenaltyPoints,
+                cumulativePenalty: cumulativePenalty,
+                groupScore: groupScore,
+                isSelected: isSelected,
+                isPreliminary: isPreliminary,
+                configRevisionId: configRevisionId,
+                matrixRevisionId: matrixRevisionId,
+                calculationVersion: calculationVersion,
+                computedAt: computedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$FlightResultsTable, FlightResultData>(table),
+                  $$FlightResultsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback:
+              ({
+                contestId = false,
+                scorePlaceholderId = false,
+                officialScoreId = false,
+                contestParticipationId = false,
+                creditedRoundId = false,
+                configRevisionId = false,
+                matrixRevisionId = false,
+              }) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (contestId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.contestId,
+                            referencedTable: $$FlightResultsTableReferences
+                                ._contestIdTable(db),
+                            referencedColumn: $$FlightResultsTableReferences
+                                ._contestIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+                        if (scorePlaceholderId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.scorePlaceholderId,
+                            referencedTable: $$FlightResultsTableReferences
+                                ._scorePlaceholderIdTable(db),
+                            referencedColumn: $$FlightResultsTableReferences
+                                ._scorePlaceholderIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+                        if (officialScoreId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.officialScoreId,
+                            referencedTable: $$FlightResultsTableReferences
+                                ._officialScoreIdTable(db),
+                            referencedColumn: $$FlightResultsTableReferences
+                                ._officialScoreIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+                        if (contestParticipationId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.contestParticipationId,
+                            referencedTable: $$FlightResultsTableReferences
+                                ._contestParticipationIdTable(db),
+                            referencedColumn: $$FlightResultsTableReferences
+                                ._contestParticipationIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+                        if (creditedRoundId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.creditedRoundId,
+                            referencedTable: $$FlightResultsTableReferences
+                                ._creditedRoundIdTable(db),
+                            referencedColumn: $$FlightResultsTableReferences
+                                ._creditedRoundIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+                        if (configRevisionId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.configRevisionId,
+                            referencedTable: $$FlightResultsTableReferences
+                                ._configRevisionIdTable(db),
+                            referencedColumn: $$FlightResultsTableReferences
+                                ._configRevisionIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+                        if (matrixRevisionId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.matrixRevisionId,
+                            referencedTable: $$FlightResultsTableReferences
+                                ._matrixRevisionIdTable(db),
+                            referencedColumn: $$FlightResultsTableReferences
+                                ._matrixRevisionIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$FlightResultsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$SoarScoreDatabase,
+      $FlightResultsTable,
+      FlightResultData,
+      $$FlightResultsTableFilterComposer,
+      $$FlightResultsTableOrderingComposer,
+      $$FlightResultsTableAnnotationComposer,
+      $$FlightResultsTableCreateCompanionBuilder,
+      $$FlightResultsTableUpdateCompanionBuilder,
+      (FlightResultData, $$FlightResultsTableReferences),
+      FlightResultData,
+      PrefetchHooks Function({
+        bool contestId,
+        bool scorePlaceholderId,
+        bool officialScoreId,
+        bool contestParticipationId,
+        bool creditedRoundId,
+        bool configRevisionId,
+        bool matrixRevisionId,
+      })
+    >;
+typedef $$ParticipationStandingsTableCreateCompanionBuilder =
+    ParticipationStandingsCompanion Function({
+      required String id,
+      required String contestId,
+      required String contestParticipationId,
+      required int asOfRound,
+      required int place,
+      required bool isTied,
+      required double rawTotal,
+      required String droppedRounds,
+      required double penaltyTotal,
+      required double overallScore,
+      required bool isPreliminary,
+      required String configRevisionId,
+      required String matrixRevisionId,
+      required String calculationVersion,
+      required String computedAt,
+      Value<int> rowid,
+    });
+typedef $$ParticipationStandingsTableUpdateCompanionBuilder =
+    ParticipationStandingsCompanion Function({
+      Value<String> id,
+      Value<String> contestId,
+      Value<String> contestParticipationId,
+      Value<int> asOfRound,
+      Value<int> place,
+      Value<bool> isTied,
+      Value<double> rawTotal,
+      Value<String> droppedRounds,
+      Value<double> penaltyTotal,
+      Value<double> overallScore,
+      Value<bool> isPreliminary,
+      Value<String> configRevisionId,
+      Value<String> matrixRevisionId,
+      Value<String> calculationVersion,
+      Value<String> computedAt,
+      Value<int> rowid,
+    });
+
+final class $$ParticipationStandingsTableReferences
+    extends
+        BaseReferences<
+          _$SoarScoreDatabase,
+          $ParticipationStandingsTable,
+          ParticipationStandingData
+        > {
+  $$ParticipationStandingsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $ContestsTable _contestIdTable(_$SoarScoreDatabase db) => db.contests
+      .createAlias('participation_standings__contest_id__contests__id');
+
+  $$ContestsTableProcessedTableManager get contestId {
+    final $_column = $_itemColumn<String>('contest_id')!;
+
+    final manager = $$ContestsTableTableManager(
+      $_db,
+      $_db.contests,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_contestIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $ContestParticipationsTable _contestParticipationIdTable(
+    _$SoarScoreDatabase db,
+  ) => db.contestParticipations.createAlias(
+    'participation_standings__contest_participation_id__contest_participations__id',
+  );
+
+  $$ContestParticipationsTableProcessedTableManager get contestParticipationId {
+    final $_column = $_itemColumn<String>('contest_participation_id')!;
+
+    final manager = $$ContestParticipationsTableTableManager(
+      $_db,
+      $_db.contestParticipations,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(
+      _contestParticipationIdTable($_db),
+    );
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $ContestConfigurationRevisionsTable _configRevisionIdTable(
+    _$SoarScoreDatabase db,
+  ) => db.contestConfigurationRevisions.createAlias(
+    'participation_standings__config_revision_id__contest_configuration_revisions__id',
+  );
+
+  $$ContestConfigurationRevisionsTableProcessedTableManager
+  get configRevisionId {
+    final $_column = $_itemColumn<String>('config_revision_id')!;
+
+    final manager = $$ContestConfigurationRevisionsTableTableManager(
+      $_db,
+      $_db.contestConfigurationRevisions,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_configRevisionIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $MatrixRevisionsTable _matrixRevisionIdTable(_$SoarScoreDatabase db) =>
+      db.matrixRevisions.createAlias(
+        'participation_standings__matrix_revision_id__matrix_revisions__id',
+      );
+
+  $$MatrixRevisionsTableProcessedTableManager get matrixRevisionId {
+    final $_column = $_itemColumn<String>('matrix_revision_id')!;
+
+    final manager = $$MatrixRevisionsTableTableManager(
+      $_db,
+      $_db.matrixRevisions,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_matrixRevisionIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$ParticipationStandingsTableFilterComposer
+    extends Composer<_$SoarScoreDatabase, $ParticipationStandingsTable> {
+  $$ParticipationStandingsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get asOfRound => $composableBuilder(
+    column: $table.asOfRound,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get place => $composableBuilder(
+    column: $table.place,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isTied => $composableBuilder(
+    column: $table.isTied,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get rawTotal => $composableBuilder(
+    column: $table.rawTotal,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get droppedRounds => $composableBuilder(
+    column: $table.droppedRounds,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get penaltyTotal => $composableBuilder(
+    column: $table.penaltyTotal,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get overallScore => $composableBuilder(
+    column: $table.overallScore,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isPreliminary => $composableBuilder(
+    column: $table.isPreliminary,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get calculationVersion => $composableBuilder(
+    column: $table.calculationVersion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get computedAt => $composableBuilder(
+    column: $table.computedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$ContestsTableFilterComposer get contestId {
+    final $$ContestsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contestId,
+      referencedTable: $db.contests,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContestsTableFilterComposer(
+            $db: $db,
+            $table: $db.contests,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ContestParticipationsTableFilterComposer get contestParticipationId {
+    final $$ContestParticipationsTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.contestParticipationId,
+          referencedTable: $db.contestParticipations,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ContestParticipationsTableFilterComposer(
+                $db: $db,
+                $table: $db.contestParticipations,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$ContestConfigurationRevisionsTableFilterComposer get configRevisionId {
+    final $$ContestConfigurationRevisionsTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.configRevisionId,
+          referencedTable: $db.contestConfigurationRevisions,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ContestConfigurationRevisionsTableFilterComposer(
+                $db: $db,
+                $table: $db.contestConfigurationRevisions,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$MatrixRevisionsTableFilterComposer get matrixRevisionId {
+    final $$MatrixRevisionsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.matrixRevisionId,
+      referencedTable: $db.matrixRevisions,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MatrixRevisionsTableFilterComposer(
+            $db: $db,
+            $table: $db.matrixRevisions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ParticipationStandingsTableOrderingComposer
+    extends Composer<_$SoarScoreDatabase, $ParticipationStandingsTable> {
+  $$ParticipationStandingsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get asOfRound => $composableBuilder(
+    column: $table.asOfRound,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get place => $composableBuilder(
+    column: $table.place,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isTied => $composableBuilder(
+    column: $table.isTied,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get rawTotal => $composableBuilder(
+    column: $table.rawTotal,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get droppedRounds => $composableBuilder(
+    column: $table.droppedRounds,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get penaltyTotal => $composableBuilder(
+    column: $table.penaltyTotal,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get overallScore => $composableBuilder(
+    column: $table.overallScore,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isPreliminary => $composableBuilder(
+    column: $table.isPreliminary,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get calculationVersion => $composableBuilder(
+    column: $table.calculationVersion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get computedAt => $composableBuilder(
+    column: $table.computedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$ContestsTableOrderingComposer get contestId {
+    final $$ContestsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contestId,
+      referencedTable: $db.contests,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContestsTableOrderingComposer(
+            $db: $db,
+            $table: $db.contests,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ContestParticipationsTableOrderingComposer get contestParticipationId {
+    final $$ContestParticipationsTableOrderingComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.contestParticipationId,
+          referencedTable: $db.contestParticipations,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ContestParticipationsTableOrderingComposer(
+                $db: $db,
+                $table: $db.contestParticipations,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$ContestConfigurationRevisionsTableOrderingComposer get configRevisionId {
+    final $$ContestConfigurationRevisionsTableOrderingComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.configRevisionId,
+          referencedTable: $db.contestConfigurationRevisions,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ContestConfigurationRevisionsTableOrderingComposer(
+                $db: $db,
+                $table: $db.contestConfigurationRevisions,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$MatrixRevisionsTableOrderingComposer get matrixRevisionId {
+    final $$MatrixRevisionsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.matrixRevisionId,
+      referencedTable: $db.matrixRevisions,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MatrixRevisionsTableOrderingComposer(
+            $db: $db,
+            $table: $db.matrixRevisions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ParticipationStandingsTableAnnotationComposer
+    extends Composer<_$SoarScoreDatabase, $ParticipationStandingsTable> {
+  $$ParticipationStandingsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get asOfRound =>
+      $composableBuilder(column: $table.asOfRound, builder: (column) => column);
+
+  GeneratedColumn<int> get place =>
+      $composableBuilder(column: $table.place, builder: (column) => column);
+
+  GeneratedColumn<bool> get isTied =>
+      $composableBuilder(column: $table.isTied, builder: (column) => column);
+
+  GeneratedColumn<double> get rawTotal =>
+      $composableBuilder(column: $table.rawTotal, builder: (column) => column);
+
+  GeneratedColumn<String> get droppedRounds => $composableBuilder(
+    column: $table.droppedRounds,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get penaltyTotal => $composableBuilder(
+    column: $table.penaltyTotal,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get overallScore => $composableBuilder(
+    column: $table.overallScore,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get isPreliminary => $composableBuilder(
+    column: $table.isPreliminary,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get calculationVersion => $composableBuilder(
+    column: $table.calculationVersion,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get computedAt => $composableBuilder(
+    column: $table.computedAt,
+    builder: (column) => column,
+  );
+
+  $$ContestsTableAnnotationComposer get contestId {
+    final $$ContestsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contestId,
+      referencedTable: $db.contests,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContestsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.contests,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ContestParticipationsTableAnnotationComposer get contestParticipationId {
+    final $$ContestParticipationsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.contestParticipationId,
+          referencedTable: $db.contestParticipations,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ContestParticipationsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.contestParticipations,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$ContestConfigurationRevisionsTableAnnotationComposer get configRevisionId {
+    final $$ContestConfigurationRevisionsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.configRevisionId,
+          referencedTable: $db.contestConfigurationRevisions,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ContestConfigurationRevisionsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.contestConfigurationRevisions,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$MatrixRevisionsTableAnnotationComposer get matrixRevisionId {
+    final $$MatrixRevisionsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.matrixRevisionId,
+      referencedTable: $db.matrixRevisions,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MatrixRevisionsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.matrixRevisions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ParticipationStandingsTableTableManager
+    extends
+        RootTableManager<
+          _$SoarScoreDatabase,
+          $ParticipationStandingsTable,
+          ParticipationStandingData,
+          $$ParticipationStandingsTableFilterComposer,
+          $$ParticipationStandingsTableOrderingComposer,
+          $$ParticipationStandingsTableAnnotationComposer,
+          $$ParticipationStandingsTableCreateCompanionBuilder,
+          $$ParticipationStandingsTableUpdateCompanionBuilder,
+          (ParticipationStandingData, $$ParticipationStandingsTableReferences),
+          ParticipationStandingData,
+          PrefetchHooks Function({
+            bool contestId,
+            bool contestParticipationId,
+            bool configRevisionId,
+            bool matrixRevisionId,
+          })
+        > {
+  $$ParticipationStandingsTableTableManager(
+    _$SoarScoreDatabase db,
+    $ParticipationStandingsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ParticipationStandingsTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$ParticipationStandingsTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$ParticipationStandingsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> contestId = const Value.absent(),
+                Value<String> contestParticipationId = const Value.absent(),
+                Value<int> asOfRound = const Value.absent(),
+                Value<int> place = const Value.absent(),
+                Value<bool> isTied = const Value.absent(),
+                Value<double> rawTotal = const Value.absent(),
+                Value<String> droppedRounds = const Value.absent(),
+                Value<double> penaltyTotal = const Value.absent(),
+                Value<double> overallScore = const Value.absent(),
+                Value<bool> isPreliminary = const Value.absent(),
+                Value<String> configRevisionId = const Value.absent(),
+                Value<String> matrixRevisionId = const Value.absent(),
+                Value<String> calculationVersion = const Value.absent(),
+                Value<String> computedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ParticipationStandingsCompanion(
+                id: id,
+                contestId: contestId,
+                contestParticipationId: contestParticipationId,
+                asOfRound: asOfRound,
+                place: place,
+                isTied: isTied,
+                rawTotal: rawTotal,
+                droppedRounds: droppedRounds,
+                penaltyTotal: penaltyTotal,
+                overallScore: overallScore,
+                isPreliminary: isPreliminary,
+                configRevisionId: configRevisionId,
+                matrixRevisionId: matrixRevisionId,
+                calculationVersion: calculationVersion,
+                computedAt: computedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String contestId,
+                required String contestParticipationId,
+                required int asOfRound,
+                required int place,
+                required bool isTied,
+                required double rawTotal,
+                required String droppedRounds,
+                required double penaltyTotal,
+                required double overallScore,
+                required bool isPreliminary,
+                required String configRevisionId,
+                required String matrixRevisionId,
+                required String calculationVersion,
+                required String computedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => ParticipationStandingsCompanion.insert(
+                id: id,
+                contestId: contestId,
+                contestParticipationId: contestParticipationId,
+                asOfRound: asOfRound,
+                place: place,
+                isTied: isTied,
+                rawTotal: rawTotal,
+                droppedRounds: droppedRounds,
+                penaltyTotal: penaltyTotal,
+                overallScore: overallScore,
+                isPreliminary: isPreliminary,
+                configRevisionId: configRevisionId,
+                matrixRevisionId: matrixRevisionId,
+                calculationVersion: calculationVersion,
+                computedAt: computedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<
+                    $ParticipationStandingsTable,
+                    ParticipationStandingData
+                  >(table),
+                  $$ParticipationStandingsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback:
+              ({
+                contestId = false,
+                contestParticipationId = false,
+                configRevisionId = false,
+                matrixRevisionId = false,
+              }) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (contestId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.contestId,
+                            referencedTable:
+                                $$ParticipationStandingsTableReferences
+                                    ._contestIdTable(db),
+                            referencedColumn:
+                                $$ParticipationStandingsTableReferences
+                                    ._contestIdTable(db)
+                                    .id,
+                          ) as T;
+                        }
+                        if (contestParticipationId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.contestParticipationId,
+                            referencedTable:
+                                $$ParticipationStandingsTableReferences
+                                    ._contestParticipationIdTable(db),
+                            referencedColumn:
+                                $$ParticipationStandingsTableReferences
+                                    ._contestParticipationIdTable(db)
+                                    .id,
+                          ) as T;
+                        }
+                        if (configRevisionId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.configRevisionId,
+                            referencedTable:
+                                $$ParticipationStandingsTableReferences
+                                    ._configRevisionIdTable(db),
+                            referencedColumn:
+                                $$ParticipationStandingsTableReferences
+                                    ._configRevisionIdTable(db)
+                                    .id,
+                          ) as T;
+                        }
+                        if (matrixRevisionId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.matrixRevisionId,
+                            referencedTable:
+                                $$ParticipationStandingsTableReferences
+                                    ._matrixRevisionIdTable(db),
+                            referencedColumn:
+                                $$ParticipationStandingsTableReferences
+                                    ._matrixRevisionIdTable(db)
+                                    .id,
+                          ) as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$ParticipationStandingsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$SoarScoreDatabase,
+      $ParticipationStandingsTable,
+      ParticipationStandingData,
+      $$ParticipationStandingsTableFilterComposer,
+      $$ParticipationStandingsTableOrderingComposer,
+      $$ParticipationStandingsTableAnnotationComposer,
+      $$ParticipationStandingsTableCreateCompanionBuilder,
+      $$ParticipationStandingsTableUpdateCompanionBuilder,
+      (ParticipationStandingData, $$ParticipationStandingsTableReferences),
+      ParticipationStandingData,
+      PrefetchHooks Function({
+        bool contestId,
+        bool contestParticipationId,
+        bool configRevisionId,
+        bool matrixRevisionId,
+      })
+    >;
+typedef $$TeamStandingsTableCreateCompanionBuilder =
+    TeamStandingsCompanion Function({
+      required String id,
+      required String contestId,
+      required String teamId,
+      required int asOfRound,
+      required int place,
+      required bool isTied,
+      required double teamScore,
+      required String countedParticipations,
+      required bool isPreliminary,
+      required String configRevisionId,
+      required String matrixRevisionId,
+      required String calculationVersion,
+      required String computedAt,
+      Value<int> rowid,
+    });
+typedef $$TeamStandingsTableUpdateCompanionBuilder =
+    TeamStandingsCompanion Function({
+      Value<String> id,
+      Value<String> contestId,
+      Value<String> teamId,
+      Value<int> asOfRound,
+      Value<int> place,
+      Value<bool> isTied,
+      Value<double> teamScore,
+      Value<String> countedParticipations,
+      Value<bool> isPreliminary,
+      Value<String> configRevisionId,
+      Value<String> matrixRevisionId,
+      Value<String> calculationVersion,
+      Value<String> computedAt,
+      Value<int> rowid,
+    });
+
+final class $$TeamStandingsTableReferences
+    extends
+        BaseReferences<
+          _$SoarScoreDatabase,
+          $TeamStandingsTable,
+          TeamStandingData
+        > {
+  $$TeamStandingsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $ContestsTable _contestIdTable(_$SoarScoreDatabase db) =>
+      db.contests.createAlias('team_standings__contest_id__contests__id');
+
+  $$ContestsTableProcessedTableManager get contestId {
+    final $_column = $_itemColumn<String>('contest_id')!;
+
+    final manager = $$ContestsTableTableManager(
+      $_db,
+      $_db.contests,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_contestIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $TeamsTable _teamIdTable(_$SoarScoreDatabase db) =>
+      db.teams.createAlias('team_standings__team_id__teams__id');
+
+  $$TeamsTableProcessedTableManager get teamId {
+    final $_column = $_itemColumn<String>('team_id')!;
+
+    final manager = $$TeamsTableTableManager(
+      $_db,
+      $_db.teams,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_teamIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $ContestConfigurationRevisionsTable _configRevisionIdTable(
+    _$SoarScoreDatabase db,
+  ) => db.contestConfigurationRevisions.createAlias(
+    'team_standings__config_revision_id__contest_configuration_revisions__id',
+  );
+
+  $$ContestConfigurationRevisionsTableProcessedTableManager
+  get configRevisionId {
+    final $_column = $_itemColumn<String>('config_revision_id')!;
+
+    final manager = $$ContestConfigurationRevisionsTableTableManager(
+      $_db,
+      $_db.contestConfigurationRevisions,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_configRevisionIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $MatrixRevisionsTable _matrixRevisionIdTable(_$SoarScoreDatabase db) =>
+      db.matrixRevisions.createAlias(
+        'team_standings__matrix_revision_id__matrix_revisions__id',
+      );
+
+  $$MatrixRevisionsTableProcessedTableManager get matrixRevisionId {
+    final $_column = $_itemColumn<String>('matrix_revision_id')!;
+
+    final manager = $$MatrixRevisionsTableTableManager(
+      $_db,
+      $_db.matrixRevisions,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_matrixRevisionIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$TeamStandingsTableFilterComposer
+    extends Composer<_$SoarScoreDatabase, $TeamStandingsTable> {
+  $$TeamStandingsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get asOfRound => $composableBuilder(
+    column: $table.asOfRound,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get place => $composableBuilder(
+    column: $table.place,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isTied => $composableBuilder(
+    column: $table.isTied,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get teamScore => $composableBuilder(
+    column: $table.teamScore,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get countedParticipations => $composableBuilder(
+    column: $table.countedParticipations,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isPreliminary => $composableBuilder(
+    column: $table.isPreliminary,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get calculationVersion => $composableBuilder(
+    column: $table.calculationVersion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get computedAt => $composableBuilder(
+    column: $table.computedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$ContestsTableFilterComposer get contestId {
+    final $$ContestsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contestId,
+      referencedTable: $db.contests,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContestsTableFilterComposer(
+            $db: $db,
+            $table: $db.contests,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$TeamsTableFilterComposer get teamId {
+    final $$TeamsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.teamId,
+      referencedTable: $db.teams,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TeamsTableFilterComposer(
+            $db: $db,
+            $table: $db.teams,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ContestConfigurationRevisionsTableFilterComposer get configRevisionId {
+    final $$ContestConfigurationRevisionsTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.configRevisionId,
+          referencedTable: $db.contestConfigurationRevisions,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ContestConfigurationRevisionsTableFilterComposer(
+                $db: $db,
+                $table: $db.contestConfigurationRevisions,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$MatrixRevisionsTableFilterComposer get matrixRevisionId {
+    final $$MatrixRevisionsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.matrixRevisionId,
+      referencedTable: $db.matrixRevisions,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MatrixRevisionsTableFilterComposer(
+            $db: $db,
+            $table: $db.matrixRevisions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$TeamStandingsTableOrderingComposer
+    extends Composer<_$SoarScoreDatabase, $TeamStandingsTable> {
+  $$TeamStandingsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get asOfRound => $composableBuilder(
+    column: $table.asOfRound,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get place => $composableBuilder(
+    column: $table.place,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isTied => $composableBuilder(
+    column: $table.isTied,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get teamScore => $composableBuilder(
+    column: $table.teamScore,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get countedParticipations => $composableBuilder(
+    column: $table.countedParticipations,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isPreliminary => $composableBuilder(
+    column: $table.isPreliminary,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get calculationVersion => $composableBuilder(
+    column: $table.calculationVersion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get computedAt => $composableBuilder(
+    column: $table.computedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$ContestsTableOrderingComposer get contestId {
+    final $$ContestsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contestId,
+      referencedTable: $db.contests,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContestsTableOrderingComposer(
+            $db: $db,
+            $table: $db.contests,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$TeamsTableOrderingComposer get teamId {
+    final $$TeamsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.teamId,
+      referencedTable: $db.teams,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TeamsTableOrderingComposer(
+            $db: $db,
+            $table: $db.teams,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ContestConfigurationRevisionsTableOrderingComposer get configRevisionId {
+    final $$ContestConfigurationRevisionsTableOrderingComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.configRevisionId,
+          referencedTable: $db.contestConfigurationRevisions,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ContestConfigurationRevisionsTableOrderingComposer(
+                $db: $db,
+                $table: $db.contestConfigurationRevisions,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$MatrixRevisionsTableOrderingComposer get matrixRevisionId {
+    final $$MatrixRevisionsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.matrixRevisionId,
+      referencedTable: $db.matrixRevisions,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MatrixRevisionsTableOrderingComposer(
+            $db: $db,
+            $table: $db.matrixRevisions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$TeamStandingsTableAnnotationComposer
+    extends Composer<_$SoarScoreDatabase, $TeamStandingsTable> {
+  $$TeamStandingsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get asOfRound =>
+      $composableBuilder(column: $table.asOfRound, builder: (column) => column);
+
+  GeneratedColumn<int> get place =>
+      $composableBuilder(column: $table.place, builder: (column) => column);
+
+  GeneratedColumn<bool> get isTied =>
+      $composableBuilder(column: $table.isTied, builder: (column) => column);
+
+  GeneratedColumn<double> get teamScore =>
+      $composableBuilder(column: $table.teamScore, builder: (column) => column);
+
+  GeneratedColumn<String> get countedParticipations => $composableBuilder(
+    column: $table.countedParticipations,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get isPreliminary => $composableBuilder(
+    column: $table.isPreliminary,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get calculationVersion => $composableBuilder(
+    column: $table.calculationVersion,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get computedAt => $composableBuilder(
+    column: $table.computedAt,
+    builder: (column) => column,
+  );
+
+  $$ContestsTableAnnotationComposer get contestId {
+    final $$ContestsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contestId,
+      referencedTable: $db.contests,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContestsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.contests,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$TeamsTableAnnotationComposer get teamId {
+    final $$TeamsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.teamId,
+      referencedTable: $db.teams,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TeamsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.teams,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ContestConfigurationRevisionsTableAnnotationComposer get configRevisionId {
+    final $$ContestConfigurationRevisionsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.configRevisionId,
+          referencedTable: $db.contestConfigurationRevisions,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ContestConfigurationRevisionsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.contestConfigurationRevisions,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$MatrixRevisionsTableAnnotationComposer get matrixRevisionId {
+    final $$MatrixRevisionsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.matrixRevisionId,
+      referencedTable: $db.matrixRevisions,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MatrixRevisionsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.matrixRevisions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$TeamStandingsTableTableManager
+    extends
+        RootTableManager<
+          _$SoarScoreDatabase,
+          $TeamStandingsTable,
+          TeamStandingData,
+          $$TeamStandingsTableFilterComposer,
+          $$TeamStandingsTableOrderingComposer,
+          $$TeamStandingsTableAnnotationComposer,
+          $$TeamStandingsTableCreateCompanionBuilder,
+          $$TeamStandingsTableUpdateCompanionBuilder,
+          (TeamStandingData, $$TeamStandingsTableReferences),
+          TeamStandingData,
+          PrefetchHooks Function({
+            bool contestId,
+            bool teamId,
+            bool configRevisionId,
+            bool matrixRevisionId,
+          })
+        > {
+  $$TeamStandingsTableTableManager(
+    _$SoarScoreDatabase db,
+    $TeamStandingsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$TeamStandingsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$TeamStandingsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$TeamStandingsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> contestId = const Value.absent(),
+                Value<String> teamId = const Value.absent(),
+                Value<int> asOfRound = const Value.absent(),
+                Value<int> place = const Value.absent(),
+                Value<bool> isTied = const Value.absent(),
+                Value<double> teamScore = const Value.absent(),
+                Value<String> countedParticipations = const Value.absent(),
+                Value<bool> isPreliminary = const Value.absent(),
+                Value<String> configRevisionId = const Value.absent(),
+                Value<String> matrixRevisionId = const Value.absent(),
+                Value<String> calculationVersion = const Value.absent(),
+                Value<String> computedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => TeamStandingsCompanion(
+                id: id,
+                contestId: contestId,
+                teamId: teamId,
+                asOfRound: asOfRound,
+                place: place,
+                isTied: isTied,
+                teamScore: teamScore,
+                countedParticipations: countedParticipations,
+                isPreliminary: isPreliminary,
+                configRevisionId: configRevisionId,
+                matrixRevisionId: matrixRevisionId,
+                calculationVersion: calculationVersion,
+                computedAt: computedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String contestId,
+                required String teamId,
+                required int asOfRound,
+                required int place,
+                required bool isTied,
+                required double teamScore,
+                required String countedParticipations,
+                required bool isPreliminary,
+                required String configRevisionId,
+                required String matrixRevisionId,
+                required String calculationVersion,
+                required String computedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => TeamStandingsCompanion.insert(
+                id: id,
+                contestId: contestId,
+                teamId: teamId,
+                asOfRound: asOfRound,
+                place: place,
+                isTied: isTied,
+                teamScore: teamScore,
+                countedParticipations: countedParticipations,
+                isPreliminary: isPreliminary,
+                configRevisionId: configRevisionId,
+                matrixRevisionId: matrixRevisionId,
+                calculationVersion: calculationVersion,
+                computedAt: computedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$TeamStandingsTable, TeamStandingData>(table),
+                  $$TeamStandingsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback:
+              ({
+                contestId = false,
+                teamId = false,
+                configRevisionId = false,
+                matrixRevisionId = false,
+              }) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (contestId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.contestId,
+                            referencedTable: $$TeamStandingsTableReferences
+                                ._contestIdTable(db),
+                            referencedColumn: $$TeamStandingsTableReferences
+                                ._contestIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+                        if (teamId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.teamId,
+                            referencedTable: $$TeamStandingsTableReferences
+                                ._teamIdTable(db),
+                            referencedColumn: $$TeamStandingsTableReferences
+                                ._teamIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+                        if (configRevisionId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.configRevisionId,
+                            referencedTable: $$TeamStandingsTableReferences
+                                ._configRevisionIdTable(db),
+                            referencedColumn: $$TeamStandingsTableReferences
+                                ._configRevisionIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+                        if (matrixRevisionId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.matrixRevisionId,
+                            referencedTable: $$TeamStandingsTableReferences
+                                ._matrixRevisionIdTable(db),
+                            referencedColumn: $$TeamStandingsTableReferences
+                                ._matrixRevisionIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$TeamStandingsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$SoarScoreDatabase,
+      $TeamStandingsTable,
+      TeamStandingData,
+      $$TeamStandingsTableFilterComposer,
+      $$TeamStandingsTableOrderingComposer,
+      $$TeamStandingsTableAnnotationComposer,
+      $$TeamStandingsTableCreateCompanionBuilder,
+      $$TeamStandingsTableUpdateCompanionBuilder,
+      (TeamStandingData, $$TeamStandingsTableReferences),
+      TeamStandingData,
+      PrefetchHooks Function({
+        bool contestId,
+        bool teamId,
+        bool configRevisionId,
+        bool matrixRevisionId,
       })
     >;
 typedef $$MutationRecordsTableCreateCompanionBuilder =
@@ -28700,6 +54885,35 @@ class $SoarScoreDatabaseManager {
       $$ModelCatalogsTableTableManager(_db, _db.modelCatalogs);
   $$ContestModelLinksTableTableManager get contestModelLinks =>
       $$ContestModelLinksTableTableManager(_db, _db.contestModelLinks);
+  $$MatrixRevisionsTableTableManager get matrixRevisions =>
+      $$MatrixRevisionsTableTableManager(_db, _db.matrixRevisions);
+  $$RoundsTableTableManager get rounds =>
+      $$RoundsTableTableManager(_db, _db.rounds);
+  $$RoundGroupsTableTableManager get roundGroups =>
+      $$RoundGroupsTableTableManager(_db, _db.roundGroups);
+  $$ReFlightsTableTableManager get reFlights =>
+      $$ReFlightsTableTableManager(_db, _db.reFlights);
+  $$MatrixAssignmentsTableTableManager get matrixAssignments =>
+      $$MatrixAssignmentsTableTableManager(_db, _db.matrixAssignments);
+  $$ReFlightParticipantsTableTableManager get reFlightParticipants =>
+      $$ReFlightParticipantsTableTableManager(_db, _db.reFlightParticipants);
+  $$ScorePlaceholdersTableTableManager get scorePlaceholders =>
+      $$ScorePlaceholdersTableTableManager(_db, _db.scorePlaceholders);
+  $$ScoreAttemptsTableTableManager get scoreAttempts =>
+      $$ScoreAttemptsTableTableManager(_db, _db.scoreAttempts);
+  $$OfficialScoresTableTableManager get officialScores =>
+      $$OfficialScoresTableTableManager(_db, _db.officialScores);
+  $$ReviewRequestsTableTableManager get reviewRequests =>
+      $$ReviewRequestsTableTableManager(_db, _db.reviewRequests);
+  $$FlightResultsTableTableManager get flightResults =>
+      $$FlightResultsTableTableManager(_db, _db.flightResults);
+  $$ParticipationStandingsTableTableManager get participationStandings =>
+      $$ParticipationStandingsTableTableManager(
+        _db,
+        _db.participationStandings,
+      );
+  $$TeamStandingsTableTableManager get teamStandings =>
+      $$TeamStandingsTableTableManager(_db, _db.teamStandings);
   $$MutationRecordsTableTableManager get mutationRecords =>
       $$MutationRecordsTableTableManager(_db, _db.mutationRecords);
   $$ConflictRecordsTableTableManager get conflictRecords =>

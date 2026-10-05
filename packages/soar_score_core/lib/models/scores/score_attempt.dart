@@ -15,7 +15,7 @@ part 'score_attempt.g.dart';
 @JsonSerializable(fieldRename: FieldRename.snake, includeIfNull: true)
 @IdConverter()
 @UtcTimestampConverter()
-class ScoreAttempt extends Equatable implements SyncScoped {
+class ScoreAttempt extends Equatable implements AppendOnly {
   ScoreAttempt({
     required this.id,
     required this.contestId,
@@ -41,6 +41,7 @@ class ScoreAttempt extends Equatable implements SyncScoped {
   factory ScoreAttempt.fromJson(Map<String, Object?> json) =>
       _$ScoreAttemptFromJson(json);
 
+  @override
   final Id id;
   final Id contestId;
   final Id scorePlaceholderId;
@@ -66,6 +67,9 @@ class ScoreAttempt extends Equatable implements SyncScoped {
 
   /// The score revision this attempt was based on.
   final int baseScoreRevision;
+
+  @override
+  String get entityType => 'ScoreAttempt';
 
   @override
   SyncScope get syncScope => SyncScope.contest;

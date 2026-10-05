@@ -24,6 +24,19 @@ import 'schema/tables/landing_results_table.dart';
 import 'schema/tables/landing_tables_table.dart';
 import 'schema/tables/local_sync_positions_table.dart';
 import 'schema/tables/model_catalogs_table.dart';
+import 'schema/tables/matrix_revisions_table.dart';
+import 'schema/tables/rounds_table.dart';
+import 'schema/tables/round_groups_table.dart';
+import 'schema/tables/re_flights_table.dart';
+import 'schema/tables/matrix_assignments_table.dart';
+import 'schema/tables/re_flight_participants_table.dart';
+import 'schema/tables/score_placeholders_table.dart';
+import 'schema/tables/score_attempts_table.dart';
+import 'schema/tables/official_scores_table.dart';
+import 'schema/tables/review_requests_table.dart';
+import 'schema/tables/flight_results_table.dart';
+import 'schema/tables/participation_standings_table.dart';
+import 'schema/tables/team_standings_table.dart';
 import 'schema/tables/mutation_records_table.dart';
 import 'schema/tables/participant_profiles_table.dart';
 import 'schema/tables/roles_table.dart';
@@ -59,6 +72,19 @@ part 'database.g.dart';
     TeamMemberships,
     ModelCatalogs,
     ContestModelLinks,
+    MatrixRevisions,
+    Rounds,
+    RoundGroups,
+    ReFlights,
+    MatrixAssignments,
+    ReFlightParticipants,
+    ScorePlaceholders,
+    ScoreAttempts,
+    OfficialScores,
+    ReviewRequests,
+    FlightResults,
+    ParticipationStandings,
+    TeamStandings,
     MutationRecords,
     ConflictRecords,
     Tombstones,

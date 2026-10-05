@@ -17,6 +17,8 @@ export 'models/scores/scores.dart';
 export 'models/shared/shared.dart';
 export 'models/sync/sync.dart';
 export 'models/teams/teams.dart';
+export 'repositories/already_stored_error.dart';
+export 'repositories/already_superseded_error.dart';
 export 'repositories/contest_repository.dart';
 export 'repositories/mutation_metadata.dart';
 export 'repositories/replicated_change.dart';

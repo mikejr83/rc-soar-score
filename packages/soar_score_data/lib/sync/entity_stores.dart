@@ -18,6 +18,19 @@ import '../schema/tables/teams_table.dart';
 import '../schema/tables/team_memberships_table.dart';
 import '../schema/tables/model_catalogs_table.dart';
 import '../schema/tables/contest_model_links_table.dart';
+import '../schema/tables/matrix_revisions_table.dart';
+import '../schema/tables/rounds_table.dart';
+import '../schema/tables/round_groups_table.dart';
+import '../schema/tables/re_flights_table.dart';
+import '../schema/tables/matrix_assignments_table.dart';
+import '../schema/tables/re_flight_participants_table.dart';
+import '../schema/tables/score_placeholders_table.dart';
+import '../schema/tables/score_attempts_table.dart';
+import '../schema/tables/official_scores_table.dart';
+import '../schema/tables/review_requests_table.dart';
+import '../schema/tables/flight_results_table.dart';
+import '../schema/tables/participation_standings_table.dart';
+import '../schema/tables/team_standings_table.dart';
 import 'entity_store.dart';
 import 'table_mapper.dart';
 
@@ -212,6 +225,141 @@ class EntityStores {
       decode: core.ContestModelLink.fromJson,
       encode: (entity) => entity.toJson(),
       hasRevision: true,
+    ),
+    EntityStore<core.MatrixRevision>(
+      entityType: 'MatrixRevision',
+      mapper: TableMapper(
+        db,
+        db.matrixRevisions,
+        jsonColumns: matrixRevisionsJsonColumns,
+      ),
+      decode: core.MatrixRevision.fromJson,
+      encode: (entity) => entity.toJson(),
+      hasRevision: false,
+    ),
+    EntityStore<core.Round>(
+      entityType: 'Round',
+      mapper: TableMapper(db, db.rounds, jsonColumns: roundsJsonColumns),
+      decode: core.Round.fromJson,
+      encode: (entity) => entity.toJson(),
+      hasRevision: true,
+    ),
+    EntityStore<core.RoundGroup>(
+      entityType: 'RoundGroup',
+      mapper: TableMapper(
+        db,
+        db.roundGroups,
+        jsonColumns: roundGroupsJsonColumns,
+      ),
+      decode: core.RoundGroup.fromJson,
+      encode: (entity) => entity.toJson(),
+      hasRevision: true,
+    ),
+    EntityStore<core.ReFlight>(
+      entityType: 'ReFlight',
+      mapper: TableMapper(db, db.reFlights, jsonColumns: reFlightsJsonColumns),
+      decode: core.ReFlight.fromJson,
+      encode: (entity) => entity.toJson(),
+      hasRevision: true,
+    ),
+    EntityStore<core.MatrixAssignment>(
+      entityType: 'MatrixAssignment',
+      mapper: TableMapper(
+        db,
+        db.matrixAssignments,
+        jsonColumns: matrixAssignmentsJsonColumns,
+      ),
+      decode: core.MatrixAssignment.fromJson,
+      encode: (entity) => entity.toJson(),
+      hasRevision: false,
+    ),
+    EntityStore<core.ReFlightParticipant>(
+      entityType: 'ReFlightParticipant',
+      mapper: TableMapper(
+        db,
+        db.reFlightParticipants,
+        jsonColumns: reFlightParticipantsJsonColumns,
+      ),
+      decode: core.ReFlightParticipant.fromJson,
+      encode: (entity) => entity.toJson(),
+      hasRevision: true,
+    ),
+    EntityStore<core.ScorePlaceholder>(
+      entityType: 'ScorePlaceholder',
+      mapper: TableMapper(
+        db,
+        db.scorePlaceholders,
+        jsonColumns: scorePlaceholdersJsonColumns,
+      ),
+      decode: core.ScorePlaceholder.fromJson,
+      encode: (entity) => entity.toJson(),
+      hasRevision: true,
+    ),
+    EntityStore<core.ScoreAttempt>(
+      entityType: 'ScoreAttempt',
+      mapper: TableMapper(
+        db,
+        db.scoreAttempts,
+        jsonColumns: scoreAttemptsJsonColumns,
+      ),
+      decode: core.ScoreAttempt.fromJson,
+      encode: (entity) => entity.toJson(),
+      hasRevision: false,
+    ),
+    EntityStore<core.OfficialScore>(
+      entityType: 'OfficialScore',
+      mapper: TableMapper(
+        db,
+        db.officialScores,
+        jsonColumns: officialScoresJsonColumns,
+      ),
+      decode: core.OfficialScore.fromJson,
+      encode: (entity) => entity.toJson(),
+      hasRevision: false,
+    ),
+    EntityStore<core.ReviewRequest>(
+      entityType: 'ReviewRequest',
+      mapper: TableMapper(
+        db,
+        db.reviewRequests,
+        jsonColumns: reviewRequestsJsonColumns,
+      ),
+      decode: core.ReviewRequest.fromJson,
+      encode: (entity) => entity.toJson(),
+      hasRevision: true,
+    ),
+    EntityStore<core.FlightResult>(
+      entityType: 'FlightResult',
+      mapper: TableMapper(
+        db,
+        db.flightResults,
+        jsonColumns: flightResultsJsonColumns,
+      ),
+      decode: core.FlightResult.fromJson,
+      encode: (entity) => entity.toJson(),
+      hasRevision: false,
+    ),
+    EntityStore<core.ParticipationStanding>(
+      entityType: 'ParticipationStanding',
+      mapper: TableMapper(
+        db,
+        db.participationStandings,
+        jsonColumns: participationStandingsJsonColumns,
+      ),
+      decode: core.ParticipationStanding.fromJson,
+      encode: (entity) => entity.toJson(),
+      hasRevision: false,
+    ),
+    EntityStore<core.TeamStanding>(
+      entityType: 'TeamStanding',
+      mapper: TableMapper(
+        db,
+        db.teamStandings,
+        jsonColumns: teamStandingsJsonColumns,
+      ),
+      decode: core.TeamStanding.fromJson,
+      encode: (entity) => entity.toJson(),
+      hasRevision: false,
     ),
   ]);
 

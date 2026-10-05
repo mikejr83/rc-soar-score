@@ -14,7 +14,7 @@ part 'matrix_revision.g.dart';
 @JsonSerializable(fieldRename: FieldRename.snake, includeIfNull: true)
 @IdConverter()
 @UtcTimestampConverter()
-class MatrixRevision extends Equatable implements SyncScoped {
+class MatrixRevision extends Equatable implements AppendOnly {
   MatrixRevision({
     required this.id,
     required this.contestId,
@@ -67,6 +67,7 @@ class MatrixRevision extends Equatable implements SyncScoped {
   factory MatrixRevision.fromJson(Map<String, Object?> json) =>
       _$MatrixRevisionFromJson(json);
 
+  @override
   final Id id;
   final Id contestId;
 
@@ -101,6 +102,9 @@ class MatrixRevision extends Equatable implements SyncScoped {
   final DateTime? finalizedAt;
 
   bool get isFinalized => finalizedAt != null;
+
+  @override
+  String get entityType => 'MatrixRevision';
 
   @override
   SyncScope get syncScope => SyncScope.contest;
