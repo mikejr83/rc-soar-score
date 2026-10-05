@@ -15,6 +15,7 @@ PilotRounds pilot(
       RoundScore(
         round: i + 1,
         groupScore: scores[i],
+        rawScore: scores[i],
         nonDroppable: nonDroppable.contains(i + 1),
         cumulativePenalty: penalties[i + 1] ?? 0,
         underReview: underReview.contains(i + 1),

@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 
 import '../../errors/scoring_validation_error.dart';
 import '../profile/scoring_issue.dart';
+import 'time_precision.dart';
 
 /// Time-to-points rules shared by the duration disciplines.
 class DurationRules extends Equatable {
@@ -48,7 +49,7 @@ class DurationRules extends Equatable {
           fieldId: 'time',
           message: 'Time must be less than the working time.',
         )
-      else if (!_withinPrecision(seconds))
+      else if (!hasAtMostDecimals(seconds, timeDecimals))
         ScoringIssue(
           code: 'too_precise',
           fieldId: 'time',
@@ -57,15 +58,6 @@ class DurationRules extends Equatable {
     ];
     if (issues.isNotEmpty) throw ScoringValidationError(issues);
     return pointsPerSecond * seconds;
-  }
-
-  bool _withinPrecision(double seconds) {
-    var scale = 1.0;
-    for (var i = 0; i < timeDecimals; i++) {
-      scale *= 10;
-    }
-    final scaled = seconds * scale;
-    return (scaled - scaled.roundToDouble()).abs() <= 1e-9;
   }
 
   @override

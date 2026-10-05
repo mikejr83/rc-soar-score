@@ -8,6 +8,8 @@ class ContestTotal extends Equatable {
     required this.rawTotal,
     required List<int> droppedRounds,
     required this.skippedDrops,
+    required this.droppedScoreTotal,
+    required this.rawFlightPoints,
     required this.penaltyTotal,
     required this.overallScore,
     required this.isPreliminary,
@@ -27,6 +29,14 @@ class ContestTotal extends Equatable {
   /// round was left, as when every remaining round is a non-droppable zero.
   final int skippedDrops;
 
+  /// The sum of the dropped round scores; zero with no drops. The first
+  /// tie-breaker, where a higher value ranks first.
+  final double droppedScoreTotal;
+
+  /// The sum of the discipline raw scores of every round up to the round. The
+  /// second tie-breaker, where a higher value ranks first.
+  final double rawFlightPoints;
+
   /// The cumulative penalties on every flight up to the round. A dropped round
   /// never removes its penalty.
   final double penaltyTotal;
@@ -44,6 +54,8 @@ class ContestTotal extends Equatable {
     rawTotal,
     droppedRounds,
     skippedDrops,
+    droppedScoreTotal,
+    rawFlightPoints,
     penaltyTotal,
     overallScore,
     isPreliminary,
