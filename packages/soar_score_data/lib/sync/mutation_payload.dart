@@ -25,3 +25,10 @@ Map<String, Object?> moveAssignmentPayload(
   version: mutationPayloadVersion,
   data: {'operation': 'save', 'entity': entity, 'supersedes': supersedes},
 ).toJson();
+
+/// `MutationRecord.payload` for a new landing table: the table row, with its
+/// entries under `results`, so one mutation replicates the whole table.
+Map<String, Object?> landingTablePayload(
+  Map<String, Object?> table,
+  List<Map<String, Object?>> results,
+) => savePayload({...table, 'results': results});

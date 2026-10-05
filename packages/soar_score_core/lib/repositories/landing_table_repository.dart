@@ -1,5 +1,6 @@
 import '../models/id.dart';
 import '../models/landing/landing_table_with_results.dart';
+import 'mutation_metadata.dart';
 
 /// Abstract persistence contract for landing tables and their entries.
 ///
@@ -13,6 +14,17 @@ abstract interface class LandingTableRepository {
   ///
   /// With no [ownerAccountId], only the system tables.
   Future<List<LandingTableWithResults>> listVisibleTo({Id? ownerAccountId});
+
+  /// Stores a director-owned [table] and its entries in one transaction, so
+  /// a table is complete or absent.
+  ///
+  /// A table never changes: an edit is a new table with a new id. Records one
+  /// mutation. Throws an `AlreadyStoredError` if the id is stored, and an
+  /// `ArgumentError` if [table] has no owner.
+  Future<LandingTableWithResults> create(
+    LandingTableWithResults table, {
+    required MutationMetadata metadata,
+  });
 
   /// Stores a system [table] and its entries in one transaction, so a table
   /// is complete or absent.

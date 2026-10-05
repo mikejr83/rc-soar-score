@@ -28,6 +28,14 @@ class LandingTableRepository extends DriftRepository
   }
 
   @override
+  Future<core.LandingTableWithResults> create(
+    core.LandingTableWithResults table, {
+    required core.MutationMetadata metadata,
+  }) => unitOfWork.run(
+    (context) => context.appendLandingTable(table, metadata: metadata),
+  );
+
+  @override
   Future<bool> installSystemTable(core.LandingTableWithResults table) {
     if (!table.table.isSystem) {
       throw ArgumentError.value(

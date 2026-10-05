@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:soar_score_core/soar_score_core.dart' as core;
 import 'package:soar_score_data/soar_score_data.dart';
 import 'package:test/test.dart';
@@ -42,6 +44,106 @@ void _tests(Backend backend) {
           ).toJson(),
         );
   }
+
+  group('create', () {
+    final owner = core.Id.create();
+
+    core.LandingTableWithResults owned() {
+      final id = core.Id.create();
+      return core.LandingTableWithResults(
+        table: core.LandingTable(
+          id: id,
+          ownerAccountId: owner,
+          name: 'Club table',
+          inputUnit: core.LandingInputUnit.points,
+          createdAt: DateTime.utc(2026, 10, 5),
+        ),
+        results: [
+          for (final (i, points) in [10, 5, 0].indexed)
+            core.LandingResult(
+              id: core.Id.create(),
+              landingTableId: id,
+              entryKey: 'points_$points',
+              displayValue: '$points pts',
+              pointValue: points,
+              ordinalPosition: i + 1,
+            ),
+        ],
+      );
+    }
+
+    test('stores the table with its entries and one mutation', () async {
+      final table = owned();
+      final before = await inst.count('mutation_records');
+
+      await repo.create(table, metadata: metadata());
+
+      expect(await repo.findById(table.table.id), table);
+      expect(await inst.count('mutation_records'), before + 1);
+    });
+
+    test('is visible to its owner only', () async {
+      final table = owned();
+      await repo.create(table, metadata: metadata());
+
+      expect(await repo.listVisibleTo(ownerAccountId: owner), [table]);
+      expect(await repo.listVisibleTo(), isEmpty);
+    });
+
+    test('refuses a second create of the same table', () async {
+      final table = owned();
+      await repo.create(table, metadata: metadata());
+
+      await expectLater(
+        repo.create(table, metadata: metadata(requestId: 'again')),
+        throwsA(isA<core.AlreadyStoredError>()),
+      );
+    });
+
+    test('refuses a table with no owner and stores nothing', () async {
+      await expectLater(
+        repo.create(f5j, metadata: metadata()),
+        throwsArgumentError,
+      );
+      expect(await repo.findById(f5j.table.id), isNull);
+    });
+
+    test('the mutation payload replicates the whole table', () async {
+      final table = owned();
+      await repo.create(table, metadata: metadata());
+      final row = await inst.db
+          .customSelect(
+            "SELECT payload FROM mutation_records "
+            "WHERE entity_id = '${table.table.id.value}'",
+          )
+          .getSingle();
+      final payload = core.VersionedPayload.fromJson(
+        row.data['payload'] is String
+            ? jsonDecode(row.read<String>('payload')) as Map<String, Object?>
+            : row.data['payload']! as Map<String, Object?>,
+      );
+      await inst.db.customStatement(
+        "DELETE FROM landing_results WHERE landing_table_id = "
+        "'${table.table.id.value}'",
+      );
+      await inst.db.customStatement(
+        "DELETE FROM landing_tables WHERE id = '${table.table.id.value}'",
+      );
+
+      await inst.applier.apply(
+        core.ReplicatedChange(
+          scope: core.DirectorScopeKey(owner),
+          sequence: 1,
+          entityType: 'LandingTable',
+          entityId: table.table.id,
+          revision: 0,
+          payload: payload.data['entity']! as Map<String, Object?>,
+        ),
+      );
+
+      expect(await repo.findById(table.table.id), table);
+    });
+  });
 
   group('LandingTableRepository', () {
     test('installs a system table and reads it back unchanged', () async {

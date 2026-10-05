@@ -45,6 +45,14 @@ class DriftReplicatedChangeApplier implements core.ReplicatedChangeApplier {
       final json = {...change.payload};
       if (store.hasRevision) json['revision'] = change.revision;
       await store.upsertJson(store.encode(store.decode(json)));
+      if (change.entityType == 'LandingTable') {
+        // A landing table travels with its entries in one change.
+        final results = _stores.of('LandingResult');
+        for (final entry in json['results'] as List<Object?>? ?? const []) {
+          final result = results.decode(entry! as Map<String, Object?>);
+          await results.upsertJson(results.encode(result));
+        }
+      }
     });
   }
 }
