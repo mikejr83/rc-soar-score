@@ -25,63 +25,213 @@ working time, perform a precision landing, and incur launch height penalties.
 
 ## LandingTable
 
-The system table the profile names as its default. It has no owner and is never modified.
-
-```json
-{
-  "id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2b02",
-  "owner_account_id": null,
-  "name": "F5J Standard Landing Table",
-  "input_unit": "meters",
-  "created_at": "2026-09-15T00:00:00Z"
-}
-```
-
-## LandingResult
-
-Each entry maps the key the scorer selects to the points awarded. A score stores the entry `id`.
+Two system tables. The first is the one the profile names as its default, where the scorer selects the points directly. The second is the common alternative, where the scorer selects a distance from the landing marker. Neither has an owner and neither is ever modified.
 
 ```json
 [
   {
-    "id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2b03",
+    "id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2b02",
+    "owner_account_id": null,
+    "name": "F5J Standard Landing Table",
+    "input_unit": "points",
+    "created_at": "2026-09-15T00:00:00Z"
+  },
+  {
+    "id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2c00",
+    "owner_account_id": null,
+    "name": "F5J Landing Distance Table",
+    "input_unit": "meters",
+    "created_at": "2026-09-15T00:00:00Z"
+  }
+]
+```
+
+## LandingResult
+
+Each entry maps the key the scorer selects to the points awarded. A score stores the entry `id`. Entries of the default table, then of the distance table.
+
+```json
+[
+  {
+    "id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2d01",
     "landing_table_id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2b02",
-    "entry_key": "within_10m",
-    "display_value": "Within 10 m",
-    "point_value": 20,
+    "entry_key": "points_50",
+    "display_value": "50 pts",
+    "point_value": 50,
     "ordinal_position": 1
   },
   {
-    "id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2b04",
+    "id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2d02",
     "landing_table_id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2b02",
-    "entry_key": "within_25m",
-    "display_value": "Within 25 m",
-    "point_value": 15,
+    "entry_key": "points_45",
+    "display_value": "45 pts",
+    "point_value": 45,
     "ordinal_position": 2
   },
   {
-    "id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2b05",
+    "id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2d03",
     "landing_table_id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2b02",
-    "entry_key": "within_50m",
-    "display_value": "Within 50 m",
-    "point_value": 10,
+    "entry_key": "points_40",
+    "display_value": "40 pts",
+    "point_value": 40,
     "ordinal_position": 3
   },
   {
-    "id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2b06",
+    "id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2d04",
     "landing_table_id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2b02",
-    "entry_key": "within_75m",
-    "display_value": "Within 75 m",
-    "point_value": 5,
+    "entry_key": "points_35",
+    "display_value": "35 pts",
+    "point_value": 35,
     "ordinal_position": 4
   },
   {
-    "id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2b07",
+    "id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2d05",
     "landing_table_id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2b02",
-    "entry_key": "none",
-    "display_value": "No bonus",
-    "point_value": 0,
+    "entry_key": "points_30",
+    "display_value": "30 pts",
+    "point_value": 30,
     "ordinal_position": 5
+  },
+  {
+    "id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2d06",
+    "landing_table_id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2b02",
+    "entry_key": "points_25",
+    "display_value": "25 pts",
+    "point_value": 25,
+    "ordinal_position": 6
+  },
+  {
+    "id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2d07",
+    "landing_table_id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2b02",
+    "entry_key": "points_20",
+    "display_value": "20 pts",
+    "point_value": 20,
+    "ordinal_position": 7
+  },
+  {
+    "id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2d08",
+    "landing_table_id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2b02",
+    "entry_key": "points_15",
+    "display_value": "15 pts",
+    "point_value": 15,
+    "ordinal_position": 8
+  },
+  {
+    "id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2d09",
+    "landing_table_id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2b02",
+    "entry_key": "points_10",
+    "display_value": "10 pts",
+    "point_value": 10,
+    "ordinal_position": 9
+  },
+  {
+    "id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2d0a",
+    "landing_table_id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2b02",
+    "entry_key": "points_5",
+    "display_value": "5 pts",
+    "point_value": 5,
+    "ordinal_position": 10
+  },
+  {
+    "id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2d0b",
+    "landing_table_id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2b02",
+    "entry_key": "points_0",
+    "display_value": "0 pts",
+    "point_value": 0,
+    "ordinal_position": 11
+  }
+]
+```
+
+```json
+[
+  {
+    "id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2e01",
+    "landing_table_id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2c00",
+    "entry_key": "within_1m",
+    "display_value": "1m",
+    "point_value": 50,
+    "ordinal_position": 1
+  },
+  {
+    "id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2e02",
+    "landing_table_id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2c00",
+    "entry_key": "within_2m",
+    "display_value": "2m",
+    "point_value": 45,
+    "ordinal_position": 2
+  },
+  {
+    "id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2e03",
+    "landing_table_id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2c00",
+    "entry_key": "within_3m",
+    "display_value": "3m",
+    "point_value": 40,
+    "ordinal_position": 3
+  },
+  {
+    "id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2e04",
+    "landing_table_id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2c00",
+    "entry_key": "within_4m",
+    "display_value": "4m",
+    "point_value": 35,
+    "ordinal_position": 4
+  },
+  {
+    "id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2e05",
+    "landing_table_id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2c00",
+    "entry_key": "within_5m",
+    "display_value": "5m",
+    "point_value": 30,
+    "ordinal_position": 5
+  },
+  {
+    "id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2e06",
+    "landing_table_id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2c00",
+    "entry_key": "within_6m",
+    "display_value": "6m",
+    "point_value": 25,
+    "ordinal_position": 6
+  },
+  {
+    "id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2e07",
+    "landing_table_id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2c00",
+    "entry_key": "within_7m",
+    "display_value": "7m",
+    "point_value": 20,
+    "ordinal_position": 7
+  },
+  {
+    "id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2e08",
+    "landing_table_id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2c00",
+    "entry_key": "within_8m",
+    "display_value": "8m",
+    "point_value": 15,
+    "ordinal_position": 8
+  },
+  {
+    "id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2e09",
+    "landing_table_id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2c00",
+    "entry_key": "within_9m",
+    "display_value": "9m",
+    "point_value": 10,
+    "ordinal_position": 9
+  },
+  {
+    "id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2e0a",
+    "landing_table_id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2c00",
+    "entry_key": "within_10m",
+    "display_value": "10m",
+    "point_value": 5,
+    "ordinal_position": 10
+  },
+  {
+    "id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2e0b",
+    "landing_table_id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2c00",
+    "entry_key": "over_10m",
+    "display_value": "Over 10m",
+    "point_value": 0,
+    "ordinal_position": 11
   }
 ]
 ```

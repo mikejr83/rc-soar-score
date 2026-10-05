@@ -79,7 +79,9 @@ void _tests(Backend backend) {
     test('listVisibleTo shows system tables and the director\'s own', () async {
       final mine = core.Id.create();
       final other = core.Id.create();
-      await repo.installSystemTable(f5j);
+      for (final t in core.SystemLandingTables.all) {
+        await repo.installSystemTable(t);
+      }
       await storeOwned(mine, 'Mine');
       await storeOwned(other, 'Theirs');
 
@@ -87,8 +89,15 @@ void _tests(Backend backend) {
           .map((t) => t.table.name);
       final anonymous = (await repo.listVisibleTo()).map((t) => t.table.name);
 
-      expect(names, ['F5J Standard Landing Table', 'Mine']);
-      expect(anonymous, ['F5J Standard Landing Table']);
+      expect(names, [
+        'F5J Landing Distance Table',
+        'F5J Standard Landing Table',
+        'Mine',
+      ]);
+      expect(anonymous, [
+        'F5J Landing Distance Table',
+        'F5J Standard Landing Table',
+      ]);
     });
   });
 }
