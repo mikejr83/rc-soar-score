@@ -1,0 +1,618 @@
+[
+  {
+    "name": "normalized_best_pilot_gets_1000",
+    "options": {
+      "group_score_mode": "Normalized",
+      "rounding_mode": "Round",
+      "decimal_places": 1
+    },
+    "pilots": [
+      {
+        "id": "a",
+        "components": {
+          "time_flown": 500,
+          "launch_height": 100
+        },
+        "landing_bonus": 50
+      },
+      {
+        "id": "b",
+        "components": {
+          "time_flown": 275,
+          "launch_height": 50
+        }
+      },
+      {
+        "id": "c",
+        "components": {
+          "out_of_bounds": true
+        }
+      }
+    ],
+    "expected": [
+      {
+        "id": "a",
+        "raw_score": 500.0,
+        "group_score": 1000.0
+      },
+      {
+        "id": "b",
+        "raw_score": 250.0,
+        "group_score": 500.0
+      },
+      {
+        "id": "c",
+        "raw_score": 0.0,
+        "group_score": 0.0
+      }
+    ]
+  },
+  {
+    "name": "equal_raw_scores_get_equal_group_scores",
+    "options": {
+      "group_score_mode": "Normalized",
+      "rounding_mode": "Round",
+      "decimal_places": 1
+    },
+    "pilots": [
+      {
+        "id": "a",
+        "components": {
+          "time_flown": 300,
+          "launch_height": 1
+        }
+      },
+      {
+        "id": "b",
+        "components": {
+          "time_flown": 200,
+          "launch_height": 1
+        },
+        "landing_bonus": 100.5
+      },
+      {
+        "id": "c",
+        "components": {
+          "time_flown": 100,
+          "launch_height": 1
+        }
+      }
+    ],
+    "expected": [
+      {
+        "id": "a",
+        "raw_score": 299.5,
+        "group_score": 998.3
+      },
+      {
+        "id": "b",
+        "raw_score": 300.0,
+        "group_score": 1000.0
+      },
+      {
+        "id": "c",
+        "raw_score": 99.5,
+        "group_score": 331.7
+      }
+    ]
+  },
+  {
+    "name": "zero_only_group_scores_zero",
+    "options": {
+      "group_score_mode": "Normalized",
+      "rounding_mode": "Round",
+      "decimal_places": 1
+    },
+    "pilots": [
+      {
+        "id": "a",
+        "components": {
+          "motor_restart": true
+        }
+      },
+      {
+        "id": "b",
+        "components": {
+          "out_of_bounds": true
+        }
+      },
+      {
+        "id": "c",
+        "components": {
+          "no_altitude_recorded": true
+        }
+      },
+      {
+        "id": "d",
+        "components": {}
+      }
+    ],
+    "expected": [
+      {
+        "id": "a",
+        "raw_score": 0.0,
+        "group_score": 0.0
+      },
+      {
+        "id": "b",
+        "raw_score": 0.0,
+        "group_score": 0.0
+      },
+      {
+        "id": "c",
+        "raw_score": 0.0,
+        "group_score": 0.0
+      },
+      {
+        "id": "d",
+        "raw_score": 0.0,
+        "group_score": 0.0
+      }
+    ]
+  },
+  {
+    "name": "zero_only_group_scores_zero_in_time_mode",
+    "options": {
+      "group_score_mode": "Time",
+      "rounding_mode": "Round",
+      "decimal_places": 1
+    },
+    "pilots": [
+      {
+        "id": "a",
+        "components": {
+          "motor_restart": true
+        }
+      },
+      {
+        "id": "b",
+        "components": {}
+      }
+    ],
+    "expected": [
+      {
+        "id": "a",
+        "raw_score": 0.0,
+        "group_score": 0.0
+      },
+      {
+        "id": "b",
+        "raw_score": 0.0,
+        "group_score": 0.0
+      }
+    ]
+  },
+  {
+    "name": "penalty_wipes_out_every_score",
+    "options": {
+      "group_score_mode": "Normalized",
+      "rounding_mode": "Round",
+      "decimal_places": 1
+    },
+    "pilots": [
+      {
+        "id": "a",
+        "components": {
+          "time_flown": 10,
+          "launch_height": 300
+        }
+      },
+      {
+        "id": "b",
+        "components": {
+          "time_flown": 20,
+          "launch_height": 300
+        }
+      }
+    ],
+    "expected": [
+      {
+        "id": "a",
+        "raw_score": 0.0,
+        "group_score": 0.0
+      },
+      {
+        "id": "b",
+        "raw_score": 0.0,
+        "group_score": 0.0
+      }
+    ]
+  },
+  {
+    "name": "single_pilot_group",
+    "options": {
+      "group_score_mode": "Normalized",
+      "rounding_mode": "Round",
+      "decimal_places": 1
+    },
+    "pilots": [
+      {
+        "id": "a",
+        "components": {
+          "time_flown": 500,
+          "launch_height": 100
+        },
+        "landing_bonus": 50
+      }
+    ],
+    "expected": [
+      {
+        "id": "a",
+        "raw_score": 500.0,
+        "group_score": 1000.0
+      }
+    ]
+  },
+  {
+    "name": "retired_pilot_does_not_set_the_best_score",
+    "options": {
+      "group_score_mode": "Normalized",
+      "rounding_mode": "Round",
+      "decimal_places": 1
+    },
+    "pilots": [
+      {
+        "id": "a",
+        "components": {
+          "time_flown": 300,
+          "launch_height": 1
+        }
+      },
+      {
+        "id": "r",
+        "components": {
+          "time_flown": 590,
+          "launch_height": 1
+        },
+        "retired": true
+      }
+    ],
+    "expected": [
+      {
+        "id": "a",
+        "raw_score": 299.5,
+        "group_score": 1000.0
+      },
+      {
+        "id": "r",
+        "raw_score": 589.5,
+        "group_score": 0.0
+      }
+    ]
+  },
+  {
+    "name": "raw_mode_uses_the_raw_score",
+    "options": {
+      "group_score_mode": "Raw",
+      "rounding_mode": "Round",
+      "decimal_places": 2
+    },
+    "pilots": [
+      {
+        "id": "a",
+        "components": {
+          "time_flown": 500,
+          "launch_height": 100
+        },
+        "landing_bonus": 50
+      },
+      {
+        "id": "b",
+        "components": {
+          "time_flown": 275,
+          "launch_height": 50
+        },
+        "landing_bonus": 12.25
+      }
+    ],
+    "expected": [
+      {
+        "id": "a",
+        "raw_score": 500.0,
+        "group_score": 500.0
+      },
+      {
+        "id": "b",
+        "raw_score": 262.25,
+        "group_score": 262.25
+      }
+    ]
+  },
+  {
+    "name": "time_mode_adds_the_bonus_after_normalizing",
+    "options": {
+      "group_score_mode": "Time",
+      "rounding_mode": "Round",
+      "decimal_places": 1
+    },
+    "pilots": [
+      {
+        "id": "a",
+        "components": {
+          "time_flown": 500,
+          "launch_height": 1
+        },
+        "landing_bonus": 10
+      },
+      {
+        "id": "b",
+        "components": {
+          "time_flown": 250,
+          "launch_height": 1
+        },
+        "landing_bonus": 90
+      }
+    ],
+    "expected": [
+      {
+        "id": "a",
+        "raw_score": 509.5,
+        "group_score": 1010.0
+      },
+      {
+        "id": "b",
+        "raw_score": 339.5,
+        "group_score": 589.5
+      }
+    ]
+  },
+  {
+    "name": "time_mode_best_time_without_best_raw",
+    "options": {
+      "group_score_mode": "Time",
+      "rounding_mode": "Round",
+      "decimal_places": 1
+    },
+    "pilots": [
+      {
+        "id": "a",
+        "components": {
+          "time_flown": 400,
+          "launch_height": 1
+        },
+        "landing_bonus": 100
+      },
+      {
+        "id": "b",
+        "components": {
+          "time_flown": 450,
+          "launch_height": 1
+        }
+      }
+    ],
+    "expected": [
+      {
+        "id": "a",
+        "raw_score": 499.5,
+        "group_score": 988.8
+      },
+      {
+        "id": "b",
+        "raw_score": 449.5,
+        "group_score": 1000.0
+      }
+    ]
+  },
+  {
+    "name": "time_mode_penalty_comes_off_the_time_score",
+    "options": {
+      "group_score_mode": "Time",
+      "rounding_mode": "Round",
+      "decimal_places": 1
+    },
+    "pilots": [
+      {
+        "id": "a",
+        "components": {
+          "time_flown": 500,
+          "launch_height": 100
+        },
+        "landing_bonus": 40
+      },
+      {
+        "id": "b",
+        "components": {
+          "time_flown": 300,
+          "launch_height": 1
+        },
+        "landing_bonus": 20
+      }
+    ],
+    "expected": [
+      {
+        "id": "a",
+        "raw_score": 490.0,
+        "group_score": 1040.0
+      },
+      {
+        "id": "b",
+        "raw_score": 319.5,
+        "group_score": 685.6
+      }
+    ]
+  },
+  {
+    "name": "rounding_half_goes_away_from_zero",
+    "options": {
+      "group_score_mode": "Normalized",
+      "rounding_mode": "Round",
+      "decimal_places": 0
+    },
+    "pilots": [
+      {
+        "id": "a",
+        "components": {
+          "time_flown": 17,
+          "launch_height": 2
+        }
+      },
+      {
+        "id": "b",
+        "components": {
+          "time_flown": 2,
+          "launch_height": 2
+        }
+      }
+    ],
+    "expected": [
+      {
+        "id": "a",
+        "raw_score": 16.0,
+        "group_score": 1000.0
+      },
+      {
+        "id": "b",
+        "raw_score": 1.0,
+        "group_score": 63.0
+      }
+    ],
+    "note": "second pilot is exactly 62.5"
+  },
+  {
+    "name": "truncation_drops_the_half",
+    "options": {
+      "group_score_mode": "Normalized",
+      "rounding_mode": "Truncate",
+      "decimal_places": 0
+    },
+    "pilots": [
+      {
+        "id": "a",
+        "components": {
+          "time_flown": 17,
+          "launch_height": 2
+        }
+      },
+      {
+        "id": "b",
+        "components": {
+          "time_flown": 2,
+          "launch_height": 2
+        }
+      }
+    ],
+    "expected": [
+      {
+        "id": "a",
+        "raw_score": 16.0,
+        "group_score": 1000.0
+      },
+      {
+        "id": "b",
+        "raw_score": 1.0,
+        "group_score": 62.0
+      }
+    ]
+  },
+  {
+    "name": "two_thirds_rounds_up",
+    "options": {
+      "group_score_mode": "Normalized",
+      "rounding_mode": "Round",
+      "decimal_places": 1
+    },
+    "pilots": [
+      {
+        "id": "a",
+        "components": {
+          "time_flown": 4,
+          "launch_height": 2
+        }
+      },
+      {
+        "id": "b",
+        "components": {
+          "time_flown": 3,
+          "launch_height": 2
+        }
+      }
+    ],
+    "expected": [
+      {
+        "id": "a",
+        "raw_score": 3.0,
+        "group_score": 1000.0
+      },
+      {
+        "id": "b",
+        "raw_score": 2.0,
+        "group_score": 666.7
+      }
+    ],
+    "note": "666.666... rounds to 666.7"
+  },
+  {
+    "name": "two_thirds_truncates_down",
+    "options": {
+      "group_score_mode": "Normalized",
+      "rounding_mode": "Truncate",
+      "decimal_places": 1
+    },
+    "pilots": [
+      {
+        "id": "a",
+        "components": {
+          "time_flown": 4,
+          "launch_height": 2
+        }
+      },
+      {
+        "id": "b",
+        "components": {
+          "time_flown": 3,
+          "launch_height": 2
+        }
+      }
+    ],
+    "expected": [
+      {
+        "id": "a",
+        "raw_score": 3.0,
+        "group_score": 1000.0
+      },
+      {
+        "id": "b",
+        "raw_score": 2.0,
+        "group_score": 666.6
+      }
+    ],
+    "note": "666.666... truncates to 666.6"
+  },
+  {
+    "name": "no_intermediate_rounding",
+    "options": {
+      "fractional_seconds": 1,
+      "group_score_mode": "Normalized",
+      "rounding_mode": "Round",
+      "decimal_places": 3
+    },
+    "pilots": [
+      {
+        "id": "a",
+        "components": {
+          "time_flown": 100.4,
+          "launch_height": 1
+        }
+      },
+      {
+        "id": "b",
+        "components": {
+          "time_flown": 100.3,
+          "launch_height": 1
+        }
+      }
+    ],
+    "expected": [
+      {
+        "id": "a",
+        "raw_score": 99.9,
+        "group_score": 1000.0
+      },
+      {
+        "id": "b",
+        "raw_score": 99.8,
+        "group_score": 998.999
+      }
+    ]
+  }
+]
