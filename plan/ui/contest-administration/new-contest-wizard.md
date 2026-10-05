@@ -21,7 +21,7 @@ Optional fields:
 
 The user may choose not to copy an existing contest, copy configuration only, copy configuration and all pilots, or copy configuration and select a subset of pilots for a fly-off. Local contests are available without connectivity; public contests are searchable only when the service is available and are copied as input data, not as a new public projection. The source contest, selected copy mode, and any selected pilots are shown in the summary.
 
-Copying never copies scores, matrix assignments, publication history, invitations, deletion state, or audit history. Copied values remain editable in later steps. If the source cannot be loaded, the user can remove the source and continue with a new contest.
+Copying never copies scores, matrix assignments, publication history, delist requests, invitations, results hiding, or audit history. Copied values remain editable in later steps. If the source cannot be loaded, the user can remove the source and continue with a new contest.
 
 ## Step 2: Discipline
 
@@ -34,12 +34,12 @@ Changing discipline clears incompatible discipline-specific values and requires 
 The user selects the options that define contest-specific participant data:
 
 - Teams.
-- Contest pilot numbers.
+- Participant numbers.
 - Classes.
 - Contest roles.
 - Pilot models.
 
-All options default to disabled unless copied from a source contest. If teams are enabled, the number of pilots counted for the team score is required and must be a positive integer. Team protection is available only when teams are enabled. If models are enabled, the later participant step requests model name and model ID for pilots.
+All options default to disabled unless copied from a source contest. If teams are enabled, the team pilot count (the number of pilot scores counted for the team result) is required and must be a positive integer; a team with fewer pilots counts them all. Team protection is available only when teams are enabled. If models are enabled, the later participant step requests model name and model ID for pilots.
 
 The step also displays whether the option changes participant selection requirements. Disabling an option removes only its new-contest draft values; it does not modify a source contest.
 
@@ -63,23 +63,24 @@ When teams are enabled, each pilot must have a team. Team names are case-insensi
 
 When classes are enabled, each pilot must have a class. Class names are compared case-insensitively and displayed in title case. Previously entered classes are offered as suggestions.
 
-When roles are enabled, new participants default to the immutable `Pilot` role. The role selector lists the configured roles. Non-flying roles do not receive score rows, but may be associated with a team and may enter team scores later when authorized.
+When roles are enabled, new participants default to the immutable `Pilot` role. The role selector lists the configured roles. The participant keeps the role's name as it was when assigned, so a later rename of the role does not change this contest. Non-flying roles do not receive score rows, but may be associated with a team and may enter team scores later when authorized.
 
-Pilot numbers are assigned at the first draw, not in this wizard. The wizard may preview the expected numbering but must label it as provisional.
+When participant numbers are enabled, every participant, officials included, receives one number from a single sequence at the first draw, not in this wizard. The wizard may preview the expected numbering but must label it as provisional.
 
 The contest requires at least two scoring pilots. Fewer than three pilots shows a warning that groups per round should normally be set to one; it does not by itself block continuation. The step blocks continuation when required class, team, role, model, or other configured participant data is missing.
 
 ## Step 5: Scoring and publication defaults
 
-The wizard displays discipline defaults for review and permits values that are explicitly allowed during initial configuration:
+The wizard displays the defaults for review and permits values that are explicitly allowed during initial configuration. Option names, allowed values, and defaults are defined in [contest-options.md](../../data-model/contest-options.md):
 
-- Group-score mode: raw, normalized, or time where supported.
-- Rounding or truncation and decimal precision from 0 through 3.
-- Dropped-round policy.
-- Participant score-review requests enabled or disabled.
-- Public update policy: automatic, round completion, or manual.
+- Group-score mode: raw, normalized, or time where supported. Defaults from the discipline profile.
+- Rounding or truncation, and decimal precision from 0 through 3. Both default from the discipline profile.
+- Dropped rounds: none by default. The director may enter up to two round numbers, each shown as "drop the lowest round after round N", in ascending order.
+- Tie-breaker: on or off, off by default.
+- Participant score-review requests: on by default.
+- Public update policy: automatic, round completion, or manual. Defaults to round completion.
 
-The contest is created unpublished with private visibility. Publication and visibility changes are performed on the contest configuration page. This step does not send data to the public site.
+The contest is created unpublished. An unpublished contest has no published record and therefore no visibility; it is visible only to its director. Publication and visibility are handled by the publication flow from the contest workspace after creation. This step does not send data to the public site.
 
 ## Step 6: Draw options
 
@@ -91,8 +92,9 @@ The step collects:
 - Lane mode: none or random.
 - Team protection when teams are enabled.
 - Preliminary seeded rounds when seeded mode is selected.
+- Intended total rounds when seeded mode is selected (optional). It is shown on cards and the public site, for example "Round 4 of 8", and has no effect on the draw.
 
-Groups per round is a positive integer. The control displays the calculated minimum and maximum pilots per group and updates them as the value changes. It must prevent a configuration with fewer than two scoring pilots in a group. Team protection may increase the minimum groups per round and the UI must show that constraint.
+Groups per round is a positive integer. It belongs to the draw rather than to the contest configuration: the value entered here is the starting value for the first draw, and a later extension or redraw may use a different number. The control displays the calculated minimum and maximum pilots per group and updates them as the value changes. It must prevent a configuration with fewer than two scoring pilots in a group. Team protection may increase the minimum groups per round and the UI must show that constraint.
 
 The preliminary number of rounds is a planning value. In seeded mode, the preliminary seeded-round count defaults to one and cannot be less than one. The wizard labels values that may be changed or extended after the contest starts.
 
@@ -102,6 +104,6 @@ The wizard does not draw a matrix. Matrix creation is an explicit action on cont
 
 The summary shows contest details, copy source, discipline, participant count, enabled participant options, teams and classes when enabled, scoring defaults, draw options, and the preliminary round/group calculations. Each section has an edit action that returns to its step.
 
-The primary action is `Create contest`. It is disabled while required validation fails. Creation produces a contest in `Configuring` with unpublished/private visibility, closed participant scoring, and an unlocked administration state. No matrix or score is created.
+The primary action is `Create contest`. It is disabled while required validation fails. Creation produces a contest in `Configuring` that is unpublished, with closed participant scoring, an unlocked administration state, and results hiding off. No matrix or score is created.
 
 After successful creation, navigate to contest configuration and show a confirmation that the contest exists, the matrix has not been drawn, and discipline overrides and remaining configuration can now be reviewed. If creation fails, retain the wizard values and show a retry action. A duplicate submission must not create duplicate contests.

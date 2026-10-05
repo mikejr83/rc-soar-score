@@ -38,18 +38,19 @@ The UI must handle loading, empty, unavailable, validation-error, authorization-
 
 ## Contest state presentation
 
-Execution lifecycle, participant scoring access, administration lock, publication, public visibility, local archive, and deletion status are separate values. The UI must never combine them into one status field or infer one from another.
+Execution lifecycle, participant scoring access, administration lock, results hiding, publication, public visibility, and local archive are separate values. The UI must never combine them into one status field or infer one from another. A contest has no deletion status: deleting a contest removes it, and removing a published record from public view is a separate delist request (see [contest-state-and-transitions.md](../../architecture-requirements/contest-state-and-transitions.md)).
 
 When a contest is selected, show a compact status summary with labeled values for:
 
 - Lifecycle: `Created`, `Configuring`, `Ready`, `Running`, or `Completed`.
 - Participant scoring: `Open` or `Closed`.
 - Administration: `Unlocked` or `Locked`.
+- Results hiding: `Off`, or hidden through round N.
 - Publication: `Unpublished` or `Published`.
-- Public visibility: `Private`, `Hidden`, or `Public` when published.
-- Deletion: `None`, `PendingDelete`, `Restored`, or `Deleted` when applicable.
+- Public visibility when published: `Unlisted` or `Public`. A published record removed by an administrator shows `Delisted`.
+- Local archive: shown when the contest is archived on this installation.
 
-Only controls allowed by the current state and the current user's authority are enabled. Disabled controls must have an adjacent explanation or an accessible disabled-state description. `PendingDelete` is read-only and blocks scoring and publication updates. `Completed` closes participant scoring but permits authorized score correction workflows.
+Only controls allowed by the current state and the current user's authority are enabled. Disabled controls must have an adjacent explanation or an accessible disabled-state description. `Completed` closes participant scoring but permits authorized score correction workflows.
 
 ## Application status area
 

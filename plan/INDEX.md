@@ -70,8 +70,7 @@ Documents in the sub-folder `data-model` describe the 48-entity domain model tha
 
 These documents describe the overall solution and the minimum viable product.
 
-- [`implementation-plan.md`](../implementation-plan.md) - Repository, platform, technology, and delivery plan.
+- [`implementation-plan.md`](implementation-plan.md) - Repository, platform, technology, and delivery plan.
 - [`application-plan.md`](application-plan.md) - Overall application scope, personas, and solution areas.
-- [`mvp-application.md`](mvp-application.md) - Minimum viable product scope and page requirements.
 
 The overall flow of a contest from its description, to its creation and configuration, through to participants interaction are described over the two documents `contests.md` and `contest-phases.md`. The first document provides the basics of terminology usage and purpose and the second document walks through the conceptual phases of the contest.

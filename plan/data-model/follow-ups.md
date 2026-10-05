@@ -8,6 +8,11 @@ Where to look for the new rules:
 - [reconciliation-findings.md](reconciliation-findings.md) for what was settled and what is still open
 - the entity documents under [entities](entities/) and the [ERD](ERD.md)
 
+## Status
+
+- **UI documents:** applied. Every item in the "UI documents" section below is now in `plan/ui`.
+- **New UI likely needed, Tickets, and Questions the UI will force:** still open.
+
 ## Vocabulary changes
 
 | Old                                                     | New                                                                                                                                                                             |

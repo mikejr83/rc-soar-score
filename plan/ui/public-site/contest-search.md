@@ -33,7 +33,7 @@ The following are filters that may be supplied by the user. An input that suppor
 - Name
 - Venue
 
-A default filter will be used for contests displayed regardless of what additional filtering the user provides. The contest list should not show delisted or deleted contests. It should not show any contest that is not published or that is private.
+A default filter will be used for contests displayed regardless of what additional filtering the user provides. The contest list shows only published contests whose visibility is `Public`. It never shows an `Unlisted` or `Delisted` contest, or a contest that has not been published. A published record whose private contest was deleted remains listed while it is `Public`.
 
 Contests may be created by contest directors for future dates. These could be inadvertently be published and publicly visible. Contest with future dates may only be shown when those contests are to be held through the following weekend, ie if today is Wednesday, contests starting Thursday through Sunday can be shown in the list. Contests with dates that would start the following Monday and into the future would not be shown.
 

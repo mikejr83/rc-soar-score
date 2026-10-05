@@ -2,7 +2,7 @@
 
 This page displays the documentation and help for the RC Soar Score application and public web site.
 
-The terms "documentation", "docs", and "help" are often used interchangeably within this document. The document attempts to convey that these pages are providing documentation to a user on how to perform various actions within the application and site. This appears semantically as providing "help" to the user. The UI implementation my not use the exact terminology as presented here unless specifically noted.
+The terms "documentation", "docs", and "help" are often used interchangeably within this document. The document attempts to convey that these pages are providing documentation to a user on how to perform various actions within the application and site. This appears semantically as providing "help" to the user. The UI implementation may not use the exact terminology as presented here unless specifically noted.
 
 ## Pages
 
@@ -58,11 +58,11 @@ Route: `/docs/user-accounts`
 
 ### Public Contests Help
 
-Route: `docs/contests-and-scores`
+Route: `/docs/contests-and-scores`
 
 ### Not Found
 
-Route: `docs/not-found`
+Route: `/docs/not-found`
 
 This is a specialized page for users attempting to navigate to a route beneath the `/docs` route and it not existing. This page is separated from a site-wide "not found" page because it should attempt to help the user find documentation and help specific pages.
 
