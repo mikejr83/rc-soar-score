@@ -5,4 +5,5 @@ export 'f5j/f5j.dart';
 export 'group/group.dart';
 export 'profile/profile.dart';
 export 'standings/standings.dart';
+export 'thermal/thermal.dart';
 export 'totals/totals.dart';
