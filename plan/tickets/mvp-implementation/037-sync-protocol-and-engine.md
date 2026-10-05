@@ -1,8 +1,10 @@
 # Ticket 037 — Synchronization Protocol and Engine
 
+> **This work is being implemented through GitHub issues.** The work items and acceptance criteria below are tracked in the epic [#83](https://github.com/mikejr83/rc-soar-score/issues/83) and its sub-issues [#84](https://github.com/mikejr83/rc-soar-score/issues/84) to [#92](https://github.com/mikejr83/rc-soar-score/issues/92), which replace the former single issue [#51](https://github.com/mikejr83/rc-soar-score/issues/51). The checkboxes in this file are not updated; follow progress in the issues. This document remains the specification they refer to.
+
 - **Category:** Offline Sync / API
 - **Priority:** High
-- **Status:** Open
+- **Status:** Tracked in GitHub issues (this file is the specification only)
 
 ## Context
 
