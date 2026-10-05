@@ -248,7 +248,7 @@ Each entry maps the key the scorer selects to the points awarded. A score stores
     "name": "Working Time",
     "description": "Duration the pilot must maintain flight, in seconds",
     "required": true,
-    "default_value": 900,
+    "default_value": 600,
     "validation": { "gt": 0, "lt": 3600 },
     "display_order": 1,
     "created_at": "2026-09-15T00:00:00Z"

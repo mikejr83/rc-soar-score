@@ -23,7 +23,7 @@ The following defaults are set in the scoring options section when this discipli
 
 The F5J discipline changes the wording for a typical duration task. The concept of target time is now "Working Time".
 
-- Working Time - The length of the window for the pilots to fly.
+- Working Time - The length of the window for the pilots to fly. Defaults to 600 seconds (10 minutes).
 - Points Per Second - How many raw points are awarded to the pilot based on their flight time. Defaults to 1.
 - Landing Bonus - The selection of a landing bonus table. Should default to the system default for F5J contests or the last one used by the contest director for an F5J contest.
 - Motor Restart - This is a selection of three options to determine how motor restarts affect the overall results.
@@ -180,7 +180,7 @@ Pilot C's flight score = 465 seconds of flight time \* 1 point per second - 112 
 
 Pilot C's raw score = 353 flight points + 30 landing points = 383.
 
-Normalization is performed by `pilots raw score` / `highest raw score in the group` * 1000
+Normalization is performed by `pilots raw score` / `highest raw score in the group` \* 1000
 
 | Pilot | Raw Score | Group Score |
 | ----- | --------- | ----------- |

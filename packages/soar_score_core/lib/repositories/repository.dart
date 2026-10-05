@@ -1,6 +1,7 @@
 import 'contest_configuration_revision_repository.dart';
 import 'contest_participation_repository.dart';
 import 'contest_repository.dart';
+import 'discipline_profile_repository.dart';
 import 'flight_result_repository.dart';
 import 'landing_table_repository.dart';
 import 'matrix_assignment_repository.dart';
@@ -37,6 +38,8 @@ abstract interface class Repository {
   TeamMembershipRepository get teamMembershipRepository;
 
   LandingTableRepository get landingTableRepository;
+
+  DisciplineProfileRepository get disciplineProfileRepository;
 
   MatrixRevisionRepository get matrixRevisionRepository;
 

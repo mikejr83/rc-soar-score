@@ -25,6 +25,10 @@ class Repository implements core.Repository {
         stores: stores,
       ),
       landingTableRepository = LandingTableRepository(database, stores: stores),
+      disciplineProfileRepository = DisciplineProfileRepository(
+        database,
+        stores: stores,
+      ),
       matrixRevisionRepository = MatrixRevisionRepository(
         database,
         stores: stores,
@@ -75,6 +79,9 @@ class Repository implements core.Repository {
 
   @override
   final core.LandingTableRepository landingTableRepository;
+
+  @override
+  final core.DisciplineProfileRepository disciplineProfileRepository;
 
   @override
   final core.MatrixRevisionRepository matrixRevisionRepository;

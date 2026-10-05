@@ -15,6 +15,7 @@ bonus added).
   "description": "Duration task with prescribed target time and precision landing. Flight time normalized to 1000, then landing bonus added. Default group scoring: Time.",
   "category": "duration",
   "default_landing_table_id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d02",
+  "default_options": { "group_score_mode": "Time" },
   "status": "published",
   "superseded_by": null,
   "created_by": "019a3c40-0000-7000-8000-000000000001",
@@ -153,6 +154,19 @@ Each entry maps the key the scorer selects to the points awarded: the scorer sel
     "created_at": "2026-09-15T00:00:00Z"
   },
   {
+    "id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d18",
+    "discipline_profile_id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d01",
+    "field_key": "fractional_seconds",
+    "field_type": "int",
+    "name": "Fractional Secs",
+    "description": "Number of decimal places to count (0-3)",
+    "required": true,
+    "default_value": 0,
+    "validation": { "gte": 0, "lte": 3 },
+    "display_order": 2,
+    "created_at": "2026-09-15T00:00:00Z"
+  },
+  {
     "id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d09",
     "discipline_profile_id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d01",
     "field_key": "points_per_second",
@@ -162,7 +176,7 @@ Each entry maps the key the scorer selects to the points awarded: the scorer sel
     "required": true,
     "default_value": 1.0,
     "validation": { "gt": 0 },
-    "display_order": 2,
+    "display_order": 3,
     "created_at": "2026-09-15T00:00:00Z"
   },
   {
@@ -173,7 +187,7 @@ Each entry maps the key the scorer selects to the points awarded: the scorer sel
     "name": "Landing Bonus Table",
     "description": "Table mapping landing quality indicators to bonus points. The contest selects a landing table, which defaults to the profile's default (ALES Standard Landing Table).",
     "required": true,
-    "display_order": 3,
+    "display_order": 4,
     "created_at": "2026-09-15T00:00:00Z"
   }
 ]
