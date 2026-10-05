@@ -32,9 +32,11 @@ const _entities = <(String entity, String file)>[
   ('ContestModelLink', 'contest_model_link'),
 ];
 
-void main() {
+void main() => forEachBackend(_tests);
+
+void _tests(Backend backend) {
   late Installation inst;
-  setUp(() async => inst = await Installation.open(Backend.sqlite));
+  setUp(() async => inst = await Installation.open(backend));
   tearDown(() => inst.close());
 
   test('every example row persists and reads back as written', () async {

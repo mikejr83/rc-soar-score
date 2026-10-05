@@ -2866,9 +2866,10 @@ class $DisciplineConfigFieldsTable extends DisciplineConfigFields
     false,
     type: DriftSqlType.bool,
     requiredDuringInsert: true,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("required" IN (0, 1))',
-    ),
+    defaultConstraints: GeneratedColumn.constraintsDependsOnDialect({
+      SqlDialect.sqlite: 'CHECK ("required" IN (0, 1))',
+      SqlDialect.postgres: '',
+    }),
   );
   static const VerificationMeta _defaultValueMeta = const VerificationMeta(
     'defaultValue',
@@ -3685,9 +3686,10 @@ class $DisciplineScoreFieldsTable extends DisciplineScoreFields
     false,
     type: DriftSqlType.bool,
     requiredDuringInsert: true,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("required" IN (0, 1))',
-    ),
+    defaultConstraints: GeneratedColumn.constraintsDependsOnDialect({
+      SqlDialect.sqlite: 'CHECK ("required" IN (0, 1))',
+      SqlDialect.postgres: '',
+    }),
   );
   static const VerificationMeta _defaultValueMeta = const VerificationMeta(
     'defaultValue',
@@ -3743,9 +3745,10 @@ class $DisciplineScoreFieldsTable extends DisciplineScoreFields
     false,
     type: DriftSqlType.bool,
     requiredDuringInsert: true,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("is_zero_reason" IN (0, 1))',
-    ),
+    defaultConstraints: GeneratedColumn.constraintsDependsOnDialect({
+      SqlDialect.sqlite: 'CHECK ("is_zero_reason" IN (0, 1))',
+      SqlDialect.postgres: '',
+    }),
   );
   static const VerificationMeta _zeroReasonCodeMeta = const VerificationMeta(
     'zeroReasonCode',
@@ -5294,9 +5297,10 @@ class $DisciplineFormulasTable extends DisciplineFormulas
     false,
     type: DriftSqlType.bool,
     requiredDuringInsert: true,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("is_primary" IN (0, 1))',
-    ),
+    defaultConstraints: GeneratedColumn.constraintsDependsOnDialect({
+      SqlDialect.sqlite: 'CHECK ("is_primary" IN (0, 1))',
+      SqlDialect.postgres: '',
+    }),
   );
   static const VerificationMeta _displayOrderMeta = const VerificationMeta(
     'displayOrder',
@@ -6054,9 +6058,10 @@ class $DisciplineRulesTable extends DisciplineRules
     false,
     type: DriftSqlType.bool,
     requiredDuringInsert: true,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("auto_score_zero" IN (0, 1))',
-    ),
+    defaultConstraints: GeneratedColumn.constraintsDependsOnDialect({
+      SqlDialect.sqlite: 'CHECK ("auto_score_zero" IN (0, 1))',
+      SqlDialect.postgres: '',
+    }),
   );
   static const VerificationMeta _affectsOtherFieldsMeta =
       const VerificationMeta('affectsOtherFields');

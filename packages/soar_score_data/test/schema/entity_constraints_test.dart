@@ -5,9 +5,11 @@ import '../support/backends.dart';
 import '../support/example_rows.dart';
 import '../support/fixtures.dart';
 
-void main() {
+void main() => forEachBackend(_tests);
+
+void _tests(Backend backend) {
   late Installation inst;
-  setUp(() async => inst = await Installation.open(Backend.sqlite));
+  setUp(() async => inst = await Installation.open(backend));
   tearDown(() => inst.close());
 
   Future<void> put(String entity, Map<String, Object?> row) =>
