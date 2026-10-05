@@ -23,12 +23,20 @@ class Installation {
     syncStore = DriftSyncStore(db);
   }
 
-  static Future<Installation> open(Backend backend) async {
+  /// Opens a fresh database on [backend].
+  ///
+  /// SQLite uses the native profile unless [profile] says otherwise; a test
+  /// that needs the backend-only tables passes [DatabaseProfile.server], so it
+  /// runs the same schema on SQLite as on PostgreSQL.
+  static Future<Installation> open(
+    Backend backend, {
+    DatabaseProfile? profile,
+  }) async {
     switch (backend) {
       case Backend.sqlite:
         final db = SoarScoreDatabase(
           NativeDatabase.memory(),
-          profile: DatabaseProfile.native,
+          profile: profile ?? DatabaseProfile.native,
         );
         return Installation._(backend, db, EntityStores.forDatabase(db), null);
       case Backend.postgres:

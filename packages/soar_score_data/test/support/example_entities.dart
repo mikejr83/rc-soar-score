@@ -36,6 +36,23 @@ const exampleEntities = <(String entity, String file)>[
   ('FlightResult', 'flight_result'),
   ('ParticipationStanding', 'participation_standing'),
   ('TeamStanding', 'team_standing'),
+  ('Account', 'account'),
+  ('AccountIdentity', 'account_identity'),
+  ('AccountPublicProfile', 'account_public_profile'),
+  ('ParticipantAccountLink', 'participant_account_link'),
+  ('ParticipantDirectoryEntry', 'participant_directory_entry'),
+  ('Installation', 'installation'),
+  ('InstallationActivation', 'installation_activation'),
+  ('SyncCursor', 'sync_cursor'),
+  ('PublicationIdentity', 'publication_identity'),
+  ('PublicationProjection', 'publication_projection'),
+  ('PublicationParticipant', 'publication_participant'),
+  ('DelistRequest', 'delist_request'),
+  ('Invitation', 'invitation'),
+  ('AuditEvent', 'audit_event'),
+  ('ConflictRecord', 'conflict_record'),
+  ('MutationRecord', 'mutation_record'),
+  ('Tombstone', 'tombstone'),
 ];
 
 /// Stores every example row of [entities] (all of them by default) through

@@ -16,7 +16,7 @@ part 'contest_configuration_revision.g.dart';
 @JsonSerializable(fieldRename: FieldRename.snake, includeIfNull: true)
 @IdConverter()
 @UtcTimestampConverter()
-class ContestConfigurationRevision extends Equatable implements SyncScoped {
+class ContestConfigurationRevision extends Equatable implements AppendOnly {
   ContestConfigurationRevision({
     required this.id,
     required this.contestId,
@@ -41,6 +41,7 @@ class ContestConfigurationRevision extends Equatable implements SyncScoped {
   factory ContestConfigurationRevision.fromJson(Map<String, Object?> json) =>
       _$ContestConfigurationRevisionFromJson(json);
 
+  @override
   final Id id;
   final Id contestId;
 
@@ -64,6 +65,9 @@ class ContestConfigurationRevision extends Equatable implements SyncScoped {
 
   final String? notes;
   final DateTime createdAt;
+
+  @override
+  String get entityType => 'ContestConfigurationRevision';
 
   @override
   SyncScope get syncScope => SyncScope.contest;

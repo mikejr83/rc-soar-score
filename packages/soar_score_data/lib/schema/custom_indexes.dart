@@ -3,6 +3,31 @@
 /// that SQLite and PostgreSQL both accept, kept here so there is one place to
 /// read and test them. The migration runs them after the table is created.
 const customIndexes = <String, List<String>>{
+  'accounts': [
+    // Exactly one account stands in for erased users.
+    "CREATE UNIQUE INDEX accounts_one_deleted ON accounts (kind) WHERE kind = 'deleted'",
+  ],
+  'participant_account_links': [
+    // A profile has at most one confirmed link at a time.
+    'CREATE UNIQUE INDEX participant_account_links_one_confirmed ON '
+        'participant_account_links (participant_profile_id) '
+        "WHERE status = 'Confirmed'",
+  ],
+  'installation_activations': [
+    // The first release has one administrator installation per contest.
+    'CREATE UNIQUE INDEX installation_activations_one_open ON '
+        'installation_activations (contest_id) WHERE ended_at IS NULL',
+  ],
+  'delist_requests': [
+    // At most one pending request per publication.
+    'CREATE UNIQUE INDEX delist_requests_one_pending ON delist_requests '
+        "(publication_id) WHERE state = 'pending'",
+  ],
+  'invitations': [
+    // At most one active invitation per participation.
+    'CREATE UNIQUE INDEX invitations_one_active ON invitations '
+        "(contest_participation_id) WHERE state = 'Active'",
+  ],
   'matrix_revisions': [
     // At most one finalized revision extends any given revision; the first
     // revision has no predecessor, so a missing one counts as one value.

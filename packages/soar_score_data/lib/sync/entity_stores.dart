@@ -31,6 +31,19 @@ import '../schema/tables/review_requests_table.dart';
 import '../schema/tables/flight_results_table.dart';
 import '../schema/tables/participation_standings_table.dart';
 import '../schema/tables/team_standings_table.dart';
+import '../schema/tables/accounts_table.dart';
+import '../schema/tables/account_identities_table.dart';
+import '../schema/tables/account_public_profiles_table.dart';
+import '../schema/tables/participant_account_links_table.dart';
+import '../schema/tables/participant_directory_entries_table.dart';
+import '../schema/tables/installations_table.dart';
+import '../schema/tables/installation_activations_table.dart';
+import '../schema/tables/sync_cursors_table.dart';
+import '../schema/tables/publication_identities_table.dart';
+import '../schema/tables/publication_projections_table.dart';
+import '../schema/tables/publication_participants_table.dart';
+import '../schema/tables/delist_requests_table.dart';
+import '../schema/tables/invitations_table.dart';
 import 'entity_store.dart';
 import 'table_mapper.dart';
 
@@ -358,6 +371,173 @@ class EntityStores {
         jsonColumns: teamStandingsJsonColumns,
       ),
       decode: core.TeamStanding.fromJson,
+      encode: (entity) => entity.toJson(),
+      hasRevision: false,
+    ),
+    EntityStore<core.Account>(
+      entityType: 'Account',
+      mapper: TableMapper(db, db.accounts, jsonColumns: accountsJsonColumns),
+      decode: core.Account.fromJson,
+      encode: (entity) => entity.toJson(),
+      hasRevision: false,
+    ),
+    EntityStore<core.AccountIdentity>(
+      entityType: 'AccountIdentity',
+      mapper: TableMapper(
+        db,
+        db.accountIdentities,
+        jsonColumns: accountIdentitiesJsonColumns,
+      ),
+      decode: core.AccountIdentity.fromJson,
+      encode: (entity) => entity.toJson(),
+      hasRevision: false,
+    ),
+    EntityStore<core.AccountPublicProfile>(
+      entityType: 'AccountPublicProfile',
+      mapper: TableMapper(
+        db,
+        db.accountPublicProfiles,
+        jsonColumns: accountPublicProfilesJsonColumns,
+      ),
+      decode: core.AccountPublicProfile.fromJson,
+      encode: (entity) => entity.toJson(),
+      hasRevision: false,
+    ),
+    EntityStore<core.ParticipantAccountLink>(
+      entityType: 'ParticipantAccountLink',
+      mapper: TableMapper(
+        db,
+        db.participantAccountLinks,
+        jsonColumns: participantAccountLinksJsonColumns,
+      ),
+      decode: core.ParticipantAccountLink.fromJson,
+      encode: (entity) => entity.toJson(),
+      hasRevision: true,
+    ),
+    EntityStore<core.ParticipantDirectoryEntry>(
+      entityType: 'ParticipantDirectoryEntry',
+      mapper: TableMapper(
+        db,
+        db.participantDirectoryEntries,
+        jsonColumns: participantDirectoryEntriesJsonColumns,
+      ),
+      decode: core.ParticipantDirectoryEntry.fromJson,
+      encode: (entity) => entity.toJson(),
+      hasRevision: false,
+    ),
+    EntityStore<core.Installation>(
+      entityType: 'Installation',
+      mapper: TableMapper(
+        db,
+        db.installations,
+        jsonColumns: installationsJsonColumns,
+      ),
+      decode: core.Installation.fromJson,
+      encode: (entity) => entity.toJson(),
+      hasRevision: false,
+    ),
+    EntityStore<core.InstallationActivation>(
+      entityType: 'InstallationActivation',
+      mapper: TableMapper(
+        db,
+        db.installationActivations,
+        jsonColumns: installationActivationsJsonColumns,
+      ),
+      decode: core.InstallationActivation.fromJson,
+      encode: (entity) => entity.toJson(),
+      hasRevision: false,
+    ),
+    EntityStore<core.SyncCursor>(
+      entityType: 'SyncCursor',
+      mapper: TableMapper(
+        db,
+        db.syncCursors,
+        jsonColumns: syncCursorsJsonColumns,
+      ),
+      decode: core.SyncCursor.fromJson,
+      encode: (entity) => entity.toJson(),
+      hasRevision: false,
+    ),
+    EntityStore<core.PublicationIdentity>(
+      entityType: 'PublicationIdentity',
+      mapper: TableMapper(
+        db,
+        db.publicationIdentities,
+        jsonColumns: publicationIdentitiesJsonColumns,
+      ),
+      decode: core.PublicationIdentity.fromJson,
+      encode: (entity) => entity.toJson(),
+      hasRevision: true,
+    ),
+    EntityStore<core.PublicationProjection>(
+      entityType: 'PublicationProjection',
+      mapper: TableMapper(
+        db,
+        db.publicationProjections,
+        jsonColumns: publicationProjectionsJsonColumns,
+      ),
+      decode: core.PublicationProjection.fromJson,
+      encode: (entity) => entity.toJson(),
+      hasRevision: false,
+    ),
+    EntityStore<core.PublicationParticipant>(
+      entityType: 'PublicationParticipant',
+      mapper: TableMapper(
+        db,
+        db.publicationParticipants,
+        jsonColumns: publicationParticipantsJsonColumns,
+      ),
+      decode: core.PublicationParticipant.fromJson,
+      encode: (entity) => entity.toJson(),
+      hasRevision: false,
+    ),
+    EntityStore<core.DelistRequest>(
+      entityType: 'DelistRequest',
+      mapper: TableMapper(
+        db,
+        db.delistRequests,
+        jsonColumns: delistRequestsJsonColumns,
+      ),
+      decode: core.DelistRequest.fromJson,
+      encode: (entity) => entity.toJson(),
+      hasRevision: false,
+    ),
+    EntityStore<core.Invitation>(
+      entityType: 'Invitation',
+      mapper: TableMapper(
+        db,
+        db.invitations,
+        jsonColumns: invitationsJsonColumns,
+      ),
+      decode: core.Invitation.fromJson,
+      encode: (entity) => entity.toSyncJson(),
+      hasRevision: false,
+    ),
+    EntityStore<core.AuditEvent>(
+      entityType: 'AuditEvent',
+      mapper: TableMapper(db, db.auditEvents),
+      decode: core.AuditEvent.fromJson,
+      encode: (entity) => entity.toJson(),
+      hasRevision: false,
+    ),
+    EntityStore<core.ConflictRecord>(
+      entityType: 'ConflictRecord',
+      mapper: TableMapper(db, db.conflictRecords),
+      decode: core.ConflictRecord.fromJson,
+      encode: (entity) => entity.toJson(),
+      hasRevision: false,
+    ),
+    EntityStore<core.MutationRecord>(
+      entityType: 'MutationRecord',
+      mapper: TableMapper(db, db.mutationRecords, jsonColumns: {'payload'}),
+      decode: core.MutationRecord.fromJson,
+      encode: (entity) => entity.toJson(),
+      hasRevision: false,
+    ),
+    EntityStore<core.Tombstone>(
+      entityType: 'Tombstone',
+      mapper: TableMapper(db, db.tombstones),
+      decode: core.Tombstone.fromJson,
       encode: (entity) => entity.toJson(),
       hasRevision: false,
     ),

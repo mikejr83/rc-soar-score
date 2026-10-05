@@ -220,6 +220,49 @@ const scorePlaceholderStateValues = [
   'Official',
 ];
 
+/// `AccountKind`.
+const accountKindValues = ['registered', 'guest', 'local', 'deleted'];
+
+/// `AccountStatus`.
+const accountStatusValues = ['active', 'archived'];
+
+/// `ActivationKind`.
+const activationKindValues = ['Initial', 'Replacement', 'Reclaim'];
+
+/// `ClaimStatus`.
+const claimStatusValues = ['Unclaimed', 'Claimed'];
+
+/// `DelistState`.
+const delistStateValues = ['pending', 'approved', 'denied', 'withdrawn'];
+
+/// `DelistTrigger`.
+const delistTriggerValues = ['owner_request', 'account_closure'];
+
+/// `InvitationAudience`.
+const invitationAudienceValues = ['Pilot', 'Helper'];
+
+/// `InvitationState`.
+const invitationStateValues = ['Active', 'Replaced', 'Revoked', 'Expired'];
+
+/// `InvitationType`.
+const invitationTypeValues = ['MagicURL', 'QRCode'];
+
+/// `ParticipantLinkOrigin`.
+const participantLinkOriginValues = [
+  'EmailMatch',
+  'DirectoryPull',
+  'InvitationRedemption',
+];
+
+/// `ParticipantLinkStatus`.
+const participantLinkStatusValues = ['Candidate', 'Confirmed', 'Ended'];
+
+/// `Platform`.
+const platformValues = ['Web', 'Windows', 'Other'];
+
+/// `PublicationVisibility`.
+const publicationVisibilityValues = ['Unlisted', 'Public', 'Delisted'];
+
 /// Core enum name to the list above, for the comparison test.
 const enumValueLists = {
   'LifecycleState': lifecycleStateValues,
@@ -257,4 +300,17 @@ const enumValueLists = {
   'ReviewRequestState': reviewRequestStateValues,
   'RoundStatus': roundStatusValues,
   'ScorePlaceholderState': scorePlaceholderStateValues,
+  'AccountKind': accountKindValues,
+  'AccountStatus': accountStatusValues,
+  'ActivationKind': activationKindValues,
+  'ClaimStatus': claimStatusValues,
+  'DelistState': delistStateValues,
+  'DelistTrigger': delistTriggerValues,
+  'InvitationAudience': invitationAudienceValues,
+  'InvitationState': invitationStateValues,
+  'InvitationType': invitationTypeValues,
+  'ParticipantLinkOrigin': participantLinkOriginValues,
+  'ParticipantLinkStatus': participantLinkStatusValues,
+  'Platform': platformValues,
+  'PublicationVisibility': publicationVisibilityValues,
 };

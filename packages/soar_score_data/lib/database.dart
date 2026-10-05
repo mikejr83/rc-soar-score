@@ -24,6 +24,19 @@ import 'schema/tables/landing_results_table.dart';
 import 'schema/tables/landing_tables_table.dart';
 import 'schema/tables/local_sync_positions_table.dart';
 import 'schema/tables/model_catalogs_table.dart';
+import 'schema/tables/accounts_table.dart';
+import 'schema/tables/account_identities_table.dart';
+import 'schema/tables/account_public_profiles_table.dart';
+import 'schema/tables/participant_account_links_table.dart';
+import 'schema/tables/participant_directory_entries_table.dart';
+import 'schema/tables/installations_table.dart';
+import 'schema/tables/installation_activations_table.dart';
+import 'schema/tables/sync_cursors_table.dart';
+import 'schema/tables/publication_identities_table.dart';
+import 'schema/tables/publication_projections_table.dart';
+import 'schema/tables/publication_participants_table.dart';
+import 'schema/tables/delist_requests_table.dart';
+import 'schema/tables/invitations_table.dart';
 import 'schema/tables/matrix_revisions_table.dart';
 import 'schema/tables/rounds_table.dart';
 import 'schema/tables/round_groups_table.dart';
@@ -72,6 +85,19 @@ part 'database.g.dart';
     TeamMemberships,
     ModelCatalogs,
     ContestModelLinks,
+    Accounts,
+    AccountIdentities,
+    AccountPublicProfiles,
+    ParticipantAccountLinks,
+    ParticipantDirectoryEntries,
+    Installations,
+    InstallationActivations,
+    SyncCursors,
+    PublicationIdentities,
+    PublicationProjections,
+    PublicationParticipants,
+    DelistRequests,
+    Invitations,
     MatrixRevisions,
     Rounds,
     RoundGroups,
