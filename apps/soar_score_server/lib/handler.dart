@@ -19,6 +19,6 @@ Handler createServerHandler(PostgresConfig config) {
     name: serverName,
     displayName: serverDisplayName,
     version: serverVersion,
-    repository: Repository(ContestRepository(database)),
+    repository: Repository(database),
   );
 }

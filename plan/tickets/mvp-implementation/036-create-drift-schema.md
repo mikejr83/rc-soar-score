@@ -60,6 +60,7 @@ A local accountless contest has no remote account, so native tables that referen
 - **History entities have stores:** `AuditEvent`, `ConflictRecord`, `MutationRecord` and `Tombstone` are registered too, so their examples load like the others. The unit of work still writes them only as part of a mutation.
 - **Configuration revisions:** `ContestConfigurationRevision` is now an `AppendOnly` entity and is stored with `WriteContext.append`.
 - **Repository contract:** `ContestRepository.save` and `delete` take `MutationMetadata` and run through the unit of work, so every write names who made it.
+- **Contest setup repositories (issue 109, PR 1):** core has one contract per entity (`ContestConfigurationRevisionRepository`, `ParticipantProfileRepository`, `ContestParticipationRepository`, `TeamRepository`, `TeamMembershipRepository`), implemented in the data package on a shared `DriftRepository` base, and the `Repository` aggregate exposes them. Reads are by id and by parent (`listForContest` and so on); writes take `MutationMetadata` and run through the unit of work. Deleting a team or a participation also deletes its memberships in the same transaction. Each further mutation of one request takes `MutationMetadata.forPart`, because a mutation id is unique per contest. Later PRs add the matrix, score and result families.
 
 ## Design Requirements
 
