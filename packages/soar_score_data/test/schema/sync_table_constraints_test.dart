@@ -1,13 +1,17 @@
 import 'package:drift/drift.dart';
 import 'package:soar_score_core/soar_score_core.dart' as core;
+import 'package:soar_score_data/soar_score_data.dart' show portableSql;
 import 'package:test/test.dart';
 
+import '../support/backends.dart';
 import '../support/fixtures.dart';
 
-void main() {
+void main() => forEachBackend(_tests);
+
+void _tests(Backend backend) {
   late Installation inst;
-  setUp(() => inst = Installation.open());
-  tearDown(() => inst.db.close());
+  setUp(() async => inst = await Installation.open(backend));
+  tearDown(() => inst.close());
 
   Future<void> insert({
     String? contest,
@@ -16,10 +20,13 @@ void main() {
     String outcome = 'Pending',
     int? sequence,
   }) => inst.db.customInsert(
-    'INSERT INTO mutation_records (id, contest_id, owner_account_id, '
-    'sequence, entity_type, entity_id, client_mutation_id, authority, '
-    "client_time, payload, outcome) VALUES (?, ?, ?, ?, 'Contest', ?, ?, "
-    "'Director', '2026-05-01T11:00:00Z', '{}', ?)",
+    portableSql(
+      inst.db,
+      'INSERT INTO mutation_records (id, contest_id, owner_account_id, '
+      'sequence, entity_type, entity_id, client_mutation_id, authority, '
+      "client_time, payload, outcome) VALUES (?, ?, ?, ?, 'Contest', ?, ?, "
+      "'Director', '2026-05-01T11:00:00Z', '{}', ?)",
+    ),
     variables: [
       Variable(core.Id.create().value),
       Variable(contest),

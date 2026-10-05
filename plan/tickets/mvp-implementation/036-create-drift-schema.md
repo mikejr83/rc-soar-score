@@ -41,6 +41,9 @@ A local accountless contest has no remote account, so native tables that referen
 - **Entity rows as JSON:** columns are named like the JSON keys, so one `TableMapper` reads and writes any entity table through the model's own `toJson` and `fromJson`. A new entity type needs a table and one registered `EntityStore`.
 - **Mutation payload:** a `VersionedPayload` (version 1) whose data is `{operation: save, entity: {...}}` or `{operation: delete}`. Ticket 037 owns the wire format and may extend it.
 - **Revision on save:** a new entity keeps the revision it was built with (0 by default). A stored entity must be saved at its stored revision, or the unit of work throws `StaleRevisionError`, and the stored revision goes up by one.
+- **Both dialects:** `packages/soar_score_data/build.yaml` generates SQL for SQLite and PostgreSQL. Without it Drift wrote SQLite-only column checks (`CHECK (flag IN (0, 1))` on a boolean) that PostgreSQL rejects, so the schema could not be created on the server at all.
+- **Placeholders:** hand-written SQL uses `?` and goes through `portableSql`, which rewrites it to `$1`, `$2` for PostgreSQL.
+- **Shared test suite:** `test/support/backends.dart` runs each suite on SQLite and, when `POSTGRES_PASSWORD` is set, on PostgreSQL in a database created and dropped per test. Without a server the PostgreSQL group is reported as skipped, which is not a pass. The sync position tests are SQLite only, because that table is client only.
 - **Repository contract:** `ContestRepository.save` and `delete` take `MutationMetadata` and run through the unit of work, so every write names who made it.
 
 ## Design Requirements
