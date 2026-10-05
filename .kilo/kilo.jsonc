@@ -1,5 +1,6 @@
 {
   "$schema": "https://app.kilo.ai/config.json",
+  "instructions": [".kilo/instructions/*.md"],
   "mcp": {
     "context7": {
       "type": "remote",
