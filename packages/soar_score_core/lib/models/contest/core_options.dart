@@ -174,6 +174,28 @@ class CoreOptions extends Equatable {
     );
   }
 
+  /// Every key `core` may hold, as in `plan/data-model/contest-options.md`.
+  static const knownKeys = {
+    'teams_enabled',
+    'team_pilot_count',
+    'team_protection',
+    'roles_enabled',
+    'draw_mode',
+    'preliminary_rounds',
+    'lane_mode',
+    'group_score_mode',
+    'rounding_mode',
+    'decimal_places',
+    'drop_after_rounds',
+    'tiebreaker_enabled',
+    'classes_enabled',
+    'models_enabled',
+    'participant_numbers_enabled',
+    'review_requests_enabled',
+    'public_update_mode',
+    'intended_total_rounds',
+  };
+
   final bool teamsEnabled;
 
   /// Pilot scores counted for the team result; required with teams.
