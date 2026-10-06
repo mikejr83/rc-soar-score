@@ -71,7 +71,13 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(appMode.isOfflineMode, isTrue);
-      expect(find.text('Contest selection'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byType(HomePage),
+          matching: find.text('Contests'),
+        ),
+        findsOneWidget,
+      );
       expect(find.byType(HomePage), findsOneWidget);
     },
   );
