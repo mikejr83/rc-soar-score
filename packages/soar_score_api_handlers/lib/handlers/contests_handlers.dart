@@ -4,7 +4,7 @@ import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_api_handlers/auth/principal.dart';
 import 'package:soar_score_api_handlers/handlers/health_handler.dart';
 import 'package:soar_score_api_handlers/handlers/request_body.dart';
-import 'package:soar_score_api_handlers/middleware/request_id.dart';
+import 'package:soar_score_api_handlers/handlers/write_metadata.dart';
 import 'package:soar_score_core/services/services.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
@@ -53,7 +53,7 @@ void addContestRoutes(Router router, Repository repository) {
         ),
       ),
       ownerAccountId: principal.accountId,
-      metadata: _metadata(principal),
+      metadata: writeMetadata(principal),
     );
     return jsonResponse(contest.toJson(), statusCode: 201);
   });
@@ -75,7 +75,7 @@ void addContestRoutes(Router router, Repository repository) {
         country: body.country,
       ),
       baseRevision: body.baseRevision,
-      metadata: _metadata(principal),
+      metadata: writeMetadata(principal),
     );
     return jsonResponse(contest.toJson());
   });
@@ -89,15 +89,8 @@ void addContestRoutes(Router router, Repository repository) {
       contestId,
       body.action,
       baseRevision: body.baseRevision,
-      metadata: _metadata(principal),
+      metadata: writeMetadata(principal),
     );
     return jsonResponse(contest.toJson());
   });
 }
-
-/// Each write gets its own mutation id (the repository requires one per
-/// contest and mutation), so two requests never collide on it.
-MutationMetadata _metadata(Principal principal) => principal.mutationMetadata(
-  clientMutationId: generateRequestId(),
-  clientTime: DateTime.now().toUtc(),
-);

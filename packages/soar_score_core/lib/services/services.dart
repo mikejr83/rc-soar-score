@@ -6,3 +6,6 @@ export 'contest_lifecycle.dart';
 export 'contests_service.dart';
 export 'discipline_config_validator.dart';
 export 'new_contest.dart';
+export 'participant_details.dart';
+export 'participants_service.dart';
+export 'participations_service.dart';

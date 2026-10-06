@@ -2,6 +2,7 @@ import 'package:soar_score_core/soar_score_core.dart' as core;
 
 import 'stub_configuration_repositories.dart';
 import 'stub_contest_repository.dart';
+import 'stub_participant_repositories.dart';
 
 /// A repository with only the contracts the handlers under test use: the
 /// contests, and (for configuration) its revisions, the system discipline
@@ -19,12 +20,34 @@ class StubRepository implements core.Repository {
 
   final core.ContestRepository _contestRepository;
 
+  /// The participant profiles, participations and roles, and the matrix
+  /// assignments, for tests to inspect and arrange.
+  final participantProfiles = StubParticipantProfileRepository();
+  final participations = StubContestParticipationRepository();
+  final roles = StubRoleRepository();
+  final matrixAssignments = StubMatrixAssignmentRepository();
+
   /// The stored configuration revisions, for tests to inspect.
   final StubConfigurationRevisionRepository configurations;
 
   @override
   core.ContestConfigurationRevisionRepository
   get contestConfigurationRevisionRepository => configurations;
+
+  @override
+  core.ParticipantProfileRepository get participantProfileRepository =>
+      participantProfiles;
+
+  @override
+  core.ContestParticipationRepository get contestParticipationRepository =>
+      participations;
+
+  @override
+  core.RoleRepository get roleRepository => roles;
+
+  @override
+  core.MatrixAssignmentRepository get matrixAssignmentRepository =>
+      matrixAssignments;
 
   @override
   core.DisciplineProfileRepository get disciplineProfileRepository =>
