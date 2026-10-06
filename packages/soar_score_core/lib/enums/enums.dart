@@ -6,6 +6,7 @@ export 'assignment_type.dart';
 export 'audit_action.dart';
 export 'audit_outcome.dart';
 export 'authority.dart';
+export 'contest_action.dart';
 export 'claim_status.dart';
 export 'config_field_type.dart';
 export 'conflict_resolution.dart';
