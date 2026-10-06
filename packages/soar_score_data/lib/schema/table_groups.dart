@@ -57,6 +57,7 @@ const tableGroupByName = <String, TableGroup>{
   'audit_events': TableGroup.contest,
   'tombstones': TableGroup.director,
   'local_sync_positions': TableGroup.clientOnly,
+  'local_account': TableGroup.clientOnly,
 };
 
 /// The tables of [all] that [profile] creates, using [groups] (by default

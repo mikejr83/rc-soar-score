@@ -176,4 +176,29 @@ void main() {
       await second.close();
     }
   });
+
+  test('creates the Local account once and keeps it across launches', () async {
+    final first = await startEmbeddedServer(databasePath);
+    final id = first.localAccountId;
+    await first.close();
+
+    final second = await startEmbeddedServer(databasePath);
+    try {
+      expect(second.localAccountId, id);
+    } finally {
+      await second.close();
+    }
+  });
+
+  test('the demo contests are owned by the Local account', () async {
+    final server = await startEmbeddedServer(databasePath, seedDemo: true);
+    try {
+      final owners = (await server.repository.contestRepository.getAll()).map(
+        (contest) => contest.ownerAccountId,
+      );
+      expect(owners, everyElement(server.localAccountId));
+    } finally {
+      await server.close();
+    }
+  });
 }

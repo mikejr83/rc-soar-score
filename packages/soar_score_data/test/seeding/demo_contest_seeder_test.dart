@@ -10,6 +10,7 @@ void main() => forEachBackend(_tests);
 void _tests(Backend backend) {
   late Installation inst;
   late ContestRepository contests;
+  final owner = core.Id.create();
 
   setUp(() async {
     inst = await Installation.open(backend);
@@ -18,19 +19,29 @@ void _tests(Backend backend) {
   tearDown(() => inst.close());
 
   test('saves the sample contests into an empty database', () async {
-    final saved = await DemoContestSeeder(contests).seed();
+    final saved = await DemoContestSeeder(
+      contests,
+      localAccountId: owner,
+    ).seed();
 
     final stored = await contests.getAll();
     expect(saved, 3);
     expect(stored, hasLength(3));
     expect(
       stored.map((contest) => contest.ownerAccountId),
-      everyElement(isNull),
+      everyElement(owner),
+    );
+    final mutations = await inst.db
+        .customSelect('SELECT actor_id FROM mutation_records')
+        .get();
+    expect(
+      mutations.map((row) => row.read<String>('actor_id')),
+      everyElement(owner.value),
     );
   });
 
   test('is idempotent', () async {
-    final seeder = DemoContestSeeder(contests);
+    final seeder = DemoContestSeeder(contests, localAccountId: owner);
     await seeder.seed();
     final first = await contests.getAll();
 
@@ -57,7 +68,7 @@ void _tests(Backend backend) {
       ),
     );
 
-    expect(await DemoContestSeeder(contests).seed(), 0);
+    expect(await DemoContestSeeder(contests, localAccountId: owner).seed(), 0);
     expect((await contests.getAll()).map((contest) => contest.name), [
       'My own contest',
     ]);

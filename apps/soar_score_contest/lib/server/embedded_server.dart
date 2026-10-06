@@ -26,6 +26,7 @@ class EmbeddedServer {
   late HttpServer _server;
   late SoarScoreDatabase _database;
   late core.Repository _repository;
+  late core.Id _localAccountId;
 
   /// The OS-assigned port the local socket is bound to.
   int get port => _server.port;
@@ -34,6 +35,9 @@ class EmbeddedServer {
   Uri get baseUrl => Uri.parse('http://localhost:$port');
 
   core.Repository get repository => _repository;
+
+  /// The installation's Local account, which owns the contests created here.
+  core.Id get localAccountId => _localAccountId;
 
   Future<void> initializeDatabase() async {
     final dbPath = File(_databasePath);
@@ -45,8 +49,12 @@ class EmbeddedServer {
     // never starts with partial data.
     try {
       await SystemDataSeeder(_database).seed();
+      _localAccountId = await LocalAccountRepository(_database).ensure();
       if (seedDemo) {
-        await DemoContestSeeder(ContestRepository(_database)).seed();
+        await DemoContestSeeder(
+          ContestRepository(_database),
+          localAccountId: _localAccountId,
+        ).seed();
       }
     } catch (_) {
       await _database.close();
