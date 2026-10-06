@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:soar_score_core/soar_score_core.dart';
 
 import '../dto/health_dto.dart';
 import '../errors/api_exception.dart';
@@ -53,6 +54,20 @@ class ApiClient {
     final uri = _resolve('/health');
     final response = await _get(uri);
     return _decode<HealthDto>(response, uri, HealthDto.fromJson);
+  }
+
+  /// `GET /api/v1/contests` — the contests stored on the target server.
+  Future<List<Contest>> contests() async {
+    final uri = _resolve('/api/v1/contests');
+    final response = await _get(uri);
+    return _decode<List<Contest>>(
+      response,
+      uri,
+      (json) => [
+        for (final item in json['contests'] as List<dynamic>)
+          Contest.fromJson(item as Map<String, dynamic>),
+      ],
+    );
   }
 
   Uri _resolve(String path) => baseUrl.resolveUri(Uri.parse(path));
