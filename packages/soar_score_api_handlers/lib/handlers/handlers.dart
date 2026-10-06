@@ -4,6 +4,8 @@ import 'package:soar_score_api_handlers/handlers/health_handler.dart';
 import 'package:soar_score_core/repositories/repository.dart';
 import 'package:soar_score_api_handlers/handlers/configuration_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/contests_handlers.dart';
+import 'package:soar_score_api_handlers/handlers/participants_handlers.dart';
+import 'package:soar_score_api_handlers/handlers/participations_handlers.dart';
 
 ({Handler healthHandler, Handler apiHandler}) createHandlers(
   String name,
@@ -18,6 +20,8 @@ import 'package:soar_score_api_handlers/handlers/contests_handlers.dart';
     );
   addContestRoutes(router, repository);
   addConfigurationRoutes(router, repository);
+  addParticipantRoutes(router, repository);
+  addParticipationRoutes(router, repository);
 
   return (
     healthHandler: createHealthHandler(name, displayName, version, repository),

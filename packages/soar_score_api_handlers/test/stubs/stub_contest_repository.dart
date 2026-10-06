@@ -11,6 +11,10 @@ class StubContestRepository implements ContestRepository {
   /// The metadata of every save, oldest first.
   final List<MutationMetadata> savedWith = [];
 
+  /// Stores [contest] as it is, without a revision bump, to arrange a state
+  /// the API cannot reach in one step.
+  void replace(Contest contest) => _contests[contest.id] = contest;
+
   @override
   Future<Contest?> findById(Id id) async => _contests[id];
 

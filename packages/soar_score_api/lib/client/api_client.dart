@@ -3,11 +3,15 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../dto/add_participation_request.dart';
 import '../dto/contest_action_request.dart';
 import '../dto/create_contest_request.dart';
+import '../dto/create_participant_request.dart';
 import '../dto/health_dto.dart';
 import '../dto/save_configuration_request.dart';
 import '../dto/update_contest_request.dart';
+import '../dto/update_participant_request.dart';
+import '../dto/update_participation_request.dart';
 import '../errors/api_exception.dart';
 import '../errors/api_http_error.dart';
 import '../errors/api_network_error.dart';
@@ -159,6 +163,147 @@ class ApiClient {
       response,
       uri,
       SavedConfiguration.fromJson,
+    );
+  }
+
+  /// `GET /api/v1/participants` — the caller's participant profiles.
+  Future<List<ParticipantProfile>> participants() async {
+    final uri = _resolve('/api/v1/participants');
+    final response = await _send('GET', uri);
+    return _decode<List<ParticipantProfile>>(
+      response,
+      uri,
+      (json) => [
+        for (final item in json['participants'] as List<dynamic>)
+          ParticipantProfile.fromJson(item as Map<String, dynamic>),
+      ],
+    );
+  }
+
+  /// `GET /api/v1/participants/{id}` — one of the caller's profiles.
+  Future<ParticipantProfile> participant(Id id) async {
+    final uri = _resolve('/api/v1/participants/${id.value}');
+    final response = await _send('GET', uri);
+    return _decode<ParticipantProfile>(
+      response,
+      uri,
+      ParticipantProfile.fromJson,
+    );
+  }
+
+  /// `POST /api/v1/participants` — creates a profile owned by the caller.
+  ///
+  /// Repeating the same [request] returns the profile it created; the same id
+  /// with different content is an [ApiHttpError] with status 409.
+  Future<ParticipantProfile> createParticipant(
+    CreateParticipantRequest request,
+  ) async {
+    final uri = _resolve('/api/v1/participants');
+    final response = await _send('POST', uri, body: request.toJson());
+    return _decode<ParticipantProfile>(
+      response,
+      uri,
+      ParticipantProfile.fromJson,
+    );
+  }
+
+  /// `PUT /api/v1/participants/{id}` — replaces the details of profile [id].
+  Future<ParticipantProfile> updateParticipant(
+    Id id,
+    UpdateParticipantRequest request,
+  ) async {
+    final uri = _resolve('/api/v1/participants/${id.value}');
+    final response = await _send('PUT', uri, body: request.toJson());
+    return _decode<ParticipantProfile>(
+      response,
+      uri,
+      ParticipantProfile.fromJson,
+    );
+  }
+
+  /// `DELETE /api/v1/participants/{id}` — deletes profile [id].
+  ///
+  /// A profile that is in a contest is an [ApiHttpError] with status 409.
+  Future<void> deleteParticipant(Id id) async {
+    await _send('DELETE', _resolve('/api/v1/participants/${id.value}'));
+  }
+
+  /// `GET /api/v1/roles` — the system roles and the caller's own roles.
+  Future<List<Role>> roles() async {
+    final uri = _resolve('/api/v1/roles');
+    final response = await _send('GET', uri);
+    return _decode<List<Role>>(
+      response,
+      uri,
+      (json) => [
+        for (final item in json['roles'] as List<dynamic>)
+          Role.fromJson(item as Map<String, dynamic>),
+      ],
+    );
+  }
+
+  /// `GET /api/v1/contests/{id}/participations` — who takes part in contest
+  /// [id], in the order they were added.
+  Future<List<ContestParticipation>> participations(Id id) async {
+    final uri = _resolve('/api/v1/contests/${id.value}/participations');
+    final response = await _send('GET', uri);
+    return _decode<List<ContestParticipation>>(
+      response,
+      uri,
+      (json) => [
+        for (final item in json['participations'] as List<dynamic>)
+          ContestParticipation.fromJson(item as Map<String, dynamic>),
+      ],
+    );
+  }
+
+  /// `POST /api/v1/contests/{id}/participations` — adds one of the caller's
+  /// profiles to contest [id].
+  ///
+  /// Repeating the same [request] returns the participation it created; the
+  /// profile already being in the contest, or a Completed contest, is an
+  /// [ApiHttpError] with status 409.
+  Future<ContestParticipation> addParticipation(
+    Id id,
+    AddParticipationRequest request,
+  ) async {
+    final uri = _resolve('/api/v1/contests/${id.value}/participations');
+    final response = await _send('POST', uri, body: request.toJson());
+    return _decode<ContestParticipation>(
+      response,
+      uri,
+      ContestParticipation.fromJson,
+    );
+  }
+
+  /// `PUT /api/v1/contests/{id}/participations/{participationId}` — changes
+  /// the role, classification or retirement of a participation.
+  Future<ContestParticipation> updateParticipation(
+    Id id,
+    Id participationId,
+    UpdateParticipationRequest request,
+  ) async {
+    final uri = _resolve(
+      '/api/v1/contests/${id.value}/participations/${participationId.value}',
+    );
+    final response = await _send('PUT', uri, body: request.toJson());
+    return _decode<ContestParticipation>(
+      response,
+      uri,
+      ContestParticipation.fromJson,
+    );
+  }
+
+  /// `DELETE /api/v1/contests/{id}/participations/{participationId}` —
+  /// removes a participant from the contest.
+  ///
+  /// One with flight assignments is an [ApiHttpError] with status 409.
+  Future<void> removeParticipation(Id id, Id participationId) async {
+    await _send(
+      'DELETE',
+      _resolve(
+        '/api/v1/contests/${id.value}/participations/${participationId.value}',
+      ),
     );
   }
 
