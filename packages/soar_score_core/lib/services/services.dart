@@ -9,3 +9,4 @@ export 'new_contest.dart';
 export 'participant_details.dart';
 export 'participants_service.dart';
 export 'participations_service.dart';
+export 'teams_service.dart';
