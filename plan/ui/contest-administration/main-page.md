@@ -2,7 +2,7 @@
 
 The user reaches this page after signing in or choosing offline mode. It is the director's contest-selection and system-management page.
 
-The route that the application will come to after the user has logged in will be `/contest-administration/home`.
+The route that the application will come to after the user has logged in will be `/contest-administration/home`. This page is where the application shell starts: the shell wraps this page and every page below it.
 
 ## Page actions
 
@@ -20,7 +20,7 @@ Archived contests are excluded by default and are available through an explicit 
 
 ## Contest list
 
-Each row shows contest name, date range, venue/location, last activity, and the independent status values defined in [overview.md](./overview.md). Show an empty state with `Create contest` when there are no contests. Loading more retains the current selection only if that contest remains in the result set.
+Each row shows contest name, date range, venue/location, last activity, and the independent status values defined in the [README](./README.md#contest-state-presentation). Show an empty state with `Create contest` when there are no contests. Loading more retains the current selection only if that contest remains in the result set.
 
 Selecting a row makes it the active selection and enables applicable actions. Double-clicking is equivalent to the primary open action but every action must also be available by keyboard.
 
