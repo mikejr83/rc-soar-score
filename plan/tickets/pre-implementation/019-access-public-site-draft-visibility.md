@@ -2,11 +2,13 @@
 
 - **Category:** Access / Permissions
 - **Priority:** Medium
-- **Status:** Open
+- **Status:** Decided (see [#76](https://github.com/mikejr83/rc-soar-score/issues/76))
 
 ## Context
 
 The public update policy has three modes (automatic, round completion, manual). The visibility of draft/unconfirmed scores to the public is not specified.
+
+> The questions below assumed a "draft vs confirmed" score state. Helpers enter scores on behalf of pilots and no pilot confirmation is needed, so the director's update policy decides visibility. The rules are in `contest-configuration.md`, "Score Updates On The Public Site".
 
 ## Questions
 

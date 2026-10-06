@@ -2,7 +2,7 @@
 
 - **Category:** Business Rules
 - **Priority:** Medium
-- **Status:** Open
+- **Status:** Decided (see [#80](https://github.com/mikejr83/rc-soar-score/issues/80))
 
 ## Context
 

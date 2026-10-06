@@ -27,7 +27,7 @@
 | `city`                         | String   | No       | None                  | City name                                                                                                                                                                                     |
 | `state`                        | String   | No       | None                  | State/province name                                                                                                                                                                           |
 | `country`                      | String   | No       | None                  | Country name                                                                                                                                                                                  |
-| `owner_account_id`             | UUIDv7   | No       | None                  | FK to Account; null for anonymous/local contests                                                                                                                                              |
+| `owner_account_id`             | UUIDv7   | No       | None                  | FK to Account; the installation's Local account for offline contests; null for contests published anonymously and for the native PoC step 1                                                   |
 | `lifecycle_state`              | Enum     | Yes      | Created               | Created, Configuring, Ready, Running, Completed                                                                                                                                               |
 | `scoring_access`               | Enum     | Yes      | Closed                | Closed, Open                                                                                                                                                                                  |
 | `admin_lock`                   | Enum     | Yes      | Unlocked              | Unlocked, Locked                                                                                                                                                                              |
@@ -67,7 +67,9 @@ Completion closes participant scoring and prevents new participation or matrix c
 - Publication state and visibility (`Unlisted`/`Public`/`Delisted`) belong to the PublicationIdentity, not the contest. A contest with no publication is visible only to its director
 - While results are hidden, participant result views and the published copy show overall scores and placing only through `results_hidden_through_round`; round scores and flight-group positions stay visible
 - Owner identification (`owner_account_id`) links to Account entity for ownership rules
-- Anonymous contests have no `owner_account_id` and use anonymous verification flow
+- An offline contest is owned by the installation's Local account, created on first run. Mutations, audit events and `created_by` carry its id as the actor, so claiming at sign-in is one re-point of the owner and actors to the registered account (see [#210](https://github.com/mikejr83/rc-soar-score/issues/210))
+- Contests published anonymously create no account and have no `owner_account_id`; they use the anonymous verification flow
+- Native PoC step 1 (#191 to #195) keeps a null owner until the Local account exists (#211)
 
 ## Audit and Synchronization
 

@@ -34,7 +34,7 @@ Contests are attended by competitors. Not all competitors are pilots. The applic
 
 Pilots may be organized into teams. The number of team pilots for calculating the team score is necessary if teams are to be used in the contest, otherwise the option is not presented.
 
-An option for giving the participant a unique number for the contest is available. This is an integer value that enables participant to be referred to as "Participant_Type X" where Participant_Type is comes from the role they were assigned or "Pilot" by default and X is that number. The number starts at 1 and increases with each participant in the contest, whatever their role, so every participant has a different number. The number is assigned when the first draw occurs. It cannot be changed afterwards. Pilots added post draw will receive the next number in sequence. _The general use case for the unique numbering for participants is for identifying information placed on specific printed materials._
+An option for giving the participant a unique number for the contest is available. This is an integer value that enables participant to be referred to as "Participant*Type X" where Participant_Type is comes from the role they were assigned or "Pilot" by default and X is that number. The number starts at 1 and increases with each participant in the contest, whatever their role, so every participant has a different number. The number is assigned when the first draw occurs. It cannot be changed afterwards. Pilots added post draw will receive the next number in sequence. \_The general use case for the unique numbering for participants is for identifying information placed on specific printed materials.*
 
 The option for pilot classes is presented. This is used to classify pilots. Generally, "expert", "advanced", "junior", etc. but can be used for any purpose. This is a reporting only feature. A report may show "the top scoring pilot in each class".
 
@@ -175,6 +175,8 @@ Automatic score updates will update as soon as the participants enter the data. 
 When the "Updates at assumed round completion" is selected the scores update on the public site will show when all scores have been entered by participants for the round.
 
 The "Manual" setting requires the contest director to mark the round as completed or have all the scores marked as official.
+
+Scores are shown as entered by anyone, including a helper entering on behalf of a pilot. No pilot confirmation is needed. A score with a pending review request is shown as originally entered until the review ends. In automatic mode, a pilot with no score yet in a round shows as "no score yet" while entered scores show normally. In "Updates at assumed round completion" and "Manual" modes there are no partially shown groups, because a round appears only when it is complete.
 
 ### Removing A Published Contest
 

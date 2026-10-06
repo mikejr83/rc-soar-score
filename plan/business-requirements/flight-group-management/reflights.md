@@ -16,9 +16,17 @@ The re-flight lifecycle is `Proposed`, `DrawPending`, `AwaitingResponses`, `Read
 
 ## Re-Flight Scoring
 
-A pilot which was awarded a re-flight will have their raw score calculated per the rules of the contest discipline. The discipline profile defines the normalization population and how the re-flight attempt is selected for the pilot's official round score. The application must not assume that the higher score always wins.
+This rule applies to all disciplines. Decision: [#80](https://github.com/mikejr83/rc-soar-score/issues/80).
 
-In cases where pilots fly with a pilot awarded a re-flight, pilots not awarded the re-flight will keep the better of their two scores. "Better" means the discipline's official comparison value after normalization, penalties, and applicable re-flight rules; raw scores are retained for audit.
+When a pilot who did not claim the re-flight has to fly again to complete or fill a re-flight group, or an entire group flies again:
+
+1. **First flight normalized.** The original group completes its flight. Each pilot's raw performance (flight time plus landing points minus penalties) is normalized to 1000 points against the highest raw score in that original group.
+2. **Second flight normalized.** The re-flight group (newly composed, or the original group flying again) completes its flight and is scored and normalized entirely on its own, against the highest raw score of the re-flight group. This gives a separate normalized score out of 1000.
+3. **Comparison.** For pilots who did not claim the re-flight and flew in both flights, the official score is the higher of the two normalized scores.
+
+Pilots who claimed the re-flight receive the result of the re-flight. They do not get to pick the better of the two.
+
+A round with a re-flight counts as one round. Its official score is the round's single score, and drop rules see only that score. Raw scores and both normalized scores are retained for audit.
 
 ## Data Tracking
 
@@ -67,4 +75,4 @@ Notification delivery, acknowledgement, decline, and manual director overrides m
 
 The self-scoring screens for participants will display if a re-flight has occurred for their round. The screen should show their overall scoring details as the contest discipline details for re-flights. This will typically be the best group score of both flights. The score details will be from their highest scoring flight. The participant should be able to review their original flight score if it was worse or the re-flight scores if it was worse.
 
-The participant view must distinguish the current official round result from each underlying attempt, show which attempt supplied the official result, and identify any pending or cancelled re-flight. It must use the discipline profile's selection rule rather than deriving the result from display order or a generic higher-score comparison.
+Results, in every application and on the public site, show the official score for the round with a re-flight label. The other flight's normalized score is visible only in the detail view, which must show which attempt supplied the official result and identify any pending or cancelled re-flight. The official result follows the rule in Re-Flight Scoring above rather than display order.

@@ -2,7 +2,7 @@
 
 - **Category:** UI / UX
 - **Priority:** Medium
-- **Status:** Open
+- **Status:** Decided (see [#81](https://github.com/mikejr83/rc-soar-score/issues/81))
 
 ## Context
 
