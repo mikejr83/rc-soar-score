@@ -130,6 +130,40 @@ class Contest extends Equatable implements Synchronizable {
       resultsHiddenAt != null &&
       !now.toUtc().isBefore(resultsHiddenAt!.add(hidingLifetime));
 
+  /// A copy with a changed lifecycle or control value and update time.
+  ///
+  /// [clearResultsHiding] ends results hiding. The revision is kept: the
+  /// repository bumps it when the copy is saved.
+  Contest copyWithState({
+    LifecycleState? lifecycleState,
+    ScoringAccess? scoringAccess,
+    AdminLock? adminLock,
+    bool clearResultsHiding = false,
+    required DateTime updatedAt,
+  }) => Contest(
+    id: id,
+    name: name,
+    startDateTime: startDateTime,
+    endDateTime: endDateTime,
+    timezone: timezone,
+    host: host,
+    city: city,
+    state: state,
+    country: country,
+    ownerAccountId: ownerAccountId,
+    lifecycleState: lifecycleState ?? this.lifecycleState,
+    scoringAccess: scoringAccess ?? this.scoringAccess,
+    adminLock: adminLock ?? this.adminLock,
+    resultsHiddenThroughRound: clearResultsHiding
+        ? null
+        : resultsHiddenThroughRound,
+    resultsHiddenAt: clearResultsHiding ? null : resultsHiddenAt,
+    localArchive: localArchive,
+    createdAt: createdAt,
+    updatedAt: updatedAt,
+    revision: revision,
+  );
+
   Map<String, Object?> toJson() => _$ContestToJson(this);
 
   @override

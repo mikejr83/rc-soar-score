@@ -4,7 +4,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_core/soar_score_core.dart'
     show
+        AdminLock,
+        ContestAction,
         DisciplineType,
+        Id,
+        LifecycleState,
         SystemDisciplineProfiles,
         SystemLandingTables,
         SystemRoles;
@@ -91,6 +95,43 @@ void main() {
       );
       final rebind = await ServerSocket.bind('localhost', port);
       await rebind.close();
+    },
+  );
+
+  test(
+    'a contest created through the API is owned by the Local account',
+    () async {
+      final server = await startEmbeddedServer(databasePath);
+      final client = ApiClient(baseUrl: server.baseUrl);
+      try {
+        final id = Id.create();
+        final created = await client.createContest(
+          CreateContestRequest(
+            id: id,
+            name: 'Spring Open',
+            startDateTime: DateTime.utc(2026, 10, 17, 14),
+            endDateTime: DateTime.utc(2026, 10, 18, 22),
+            timezone: 'America/Denver',
+          ),
+        );
+
+        expect(created.ownerAccountId, server.localAccountId);
+        expect(created.lifecycleState, LifecycleState.created);
+        expect(await client.contest(id), created);
+
+        final locked = await client.applyContestAction(
+          id,
+          ContestActionRequest(
+            action: ContestAction.lock,
+            baseRevision: created.revision,
+          ),
+        );
+        expect(locked.adminLock, AdminLock.locked);
+        expect(locked.revision, created.revision + 1);
+      } finally {
+        client.close();
+        await server.close();
+      }
     },
   );
 

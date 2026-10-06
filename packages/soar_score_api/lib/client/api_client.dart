@@ -3,7 +3,10 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../dto/contest_action_request.dart';
+import '../dto/create_contest_request.dart';
 import '../dto/health_dto.dart';
+import '../dto/update_contest_request.dart';
 import '../errors/api_exception.dart';
 import '../errors/api_http_error.dart';
 import '../errors/api_network_error.dart';
@@ -52,14 +55,14 @@ class ApiClient {
   /// `GET /health` — public server identity and liveness payload.
   Future<HealthDto> health() async {
     final uri = _resolve('/health');
-    final response = await _get(uri);
+    final response = await _send('GET', uri);
     return _decode<HealthDto>(response, uri, HealthDto.fromJson);
   }
 
   /// `GET /api/v1/contests` — the contests stored on the target server.
   Future<List<Contest>> contests() async {
     final uri = _resolve('/api/v1/contests');
-    final response = await _get(uri);
+    final response = await _send('GET', uri);
     return _decode<List<Contest>>(
       response,
       uri,
@@ -70,21 +73,70 @@ class ApiClient {
     );
   }
 
+  /// `GET /api/v1/contests/{id}` — one contest.
+  ///
+  /// A missing contest is an [ApiHttpError] with status 404.
+  Future<Contest> contest(Id id) async {
+    final uri = _resolve('/api/v1/contests/${id.value}');
+    final response = await _send('GET', uri);
+    return _decode<Contest>(response, uri, Contest.fromJson);
+  }
+
+  /// `POST /api/v1/contests` — creates a contest owned by the caller.
+  ///
+  /// Repeating the same [request] returns the contest it created; the same
+  /// id with different content is an [ApiHttpError] with status 409.
+  Future<Contest> createContest(CreateContestRequest request) async {
+    final uri = _resolve('/api/v1/contests');
+    final response = await _send('POST', uri, body: request.toJson());
+    return _decode<Contest>(response, uri, Contest.fromJson);
+  }
+
+  /// `PUT /api/v1/contests/{id}` — replaces the identity, schedule and
+  /// location of contest [id].
+  Future<Contest> updateContest(Id id, UpdateContestRequest request) async {
+    final uri = _resolve('/api/v1/contests/${id.value}');
+    final response = await _send('PUT', uri, body: request.toJson());
+    return _decode<Contest>(response, uri, Contest.fromJson);
+  }
+
+  /// `POST /api/v1/contests/{id}/actions` — applies a director action such as
+  /// completing or locking the contest.
+  Future<Contest> applyContestAction(
+    Id id,
+    ContestActionRequest request,
+  ) async {
+    final uri = _resolve('/api/v1/contests/${id.value}/actions');
+    final response = await _send('POST', uri, body: request.toJson());
+    return _decode<Contest>(response, uri, Contest.fromJson);
+  }
+
   Uri _resolve(String path) => baseUrl.resolveUri(Uri.parse(path));
 
-  /// Sends a GET request for the absolute [uri] and returns its 2xx
-  /// [http.Response].
+  /// Sends a [method] request for the absolute [uri], with [body] as JSON
+  /// when given, and returns its 2xx [http.Response].
   ///
   /// Throws [ApiHttpError] for non-2xx responses and [ApiNetworkError] for
   /// transport failures.
-  Future<http.Response> _get(Uri uri) async {
+  Future<http.Response> _send(
+    String method,
+    Uri uri, {
+    Map<String, dynamic>? body,
+  }) async {
     final headers = <String, String>{'accept': 'application/json'};
     final token = await tokenProvider?.call();
     if (token != null) {
       headers['authorization'] = 'Bearer $token';
     }
     try {
-      final response = await _httpClient.get(uri, headers: headers);
+      final request = http.Request(method, uri)..headers.addAll(headers);
+      if (body != null) {
+        request.headers['content-type'] = 'application/json; charset=utf-8';
+        request.body = jsonEncode(body);
+      }
+      final response = await http.Response.fromStream(
+        await _httpClient.send(request),
+      );
       if (response.statusCode >= 200 && response.statusCode < 300) {
         return response;
       }

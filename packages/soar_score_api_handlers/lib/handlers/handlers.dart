@@ -14,8 +14,8 @@ import 'package:soar_score_api_handlers/handlers/contests_handlers.dart';
     ..get(
       '/ping',
       (Request request) => jsonResponse(<String, Object>{'status': 'ok'}),
-    )
-    ..get('/contests', createContestsHandler(repository));
+    );
+  addContestRoutes(router, repository);
 
   return (
     healthHandler: createHealthHandler(name, displayName, version, repository),

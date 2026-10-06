@@ -8,12 +8,16 @@ import 'package:soar_score_core/repositories/repository.dart';
 
 final _logger = Logger('Main');
 
-/// Serializes [body] as the standard API JSON 200 response.
-Response jsonResponse(Map<String, dynamic> body) => Response(
-  200,
-  body: jsonEncode(body),
-  headers: <String, Object>{'content-type': 'application/json; charset=utf-8'},
-);
+/// Serializes [body] as the standard API JSON response (200 unless
+/// [statusCode] says otherwise).
+Response jsonResponse(Map<String, dynamic> body, {int statusCode = 200}) =>
+    Response(
+      statusCode,
+      body: jsonEncode(body),
+      headers: <String, Object>{
+        'content-type': 'application/json; charset=utf-8',
+      },
+    );
 
 /// `GET /health` — public health payload.
 ///

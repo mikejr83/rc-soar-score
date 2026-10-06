@@ -25,7 +25,9 @@ Response errorResponse(
 
 /// Turns thrown errors and bare 404s into the standard JSON error body.
 ///
-/// - `StaleRevisionError`, `AlreadyStoredError`, `AlreadySupersededError`: 409
+/// - `StaleRevisionError`, `AlreadyStoredError`, `AlreadySupersededError`,
+///   `ContestStateError`: 409
+/// - `EntityNotFoundError`: 404
 /// - `ArgumentError`, `FormatException`, `ScoringValidationError`: 400
 /// - an unmatched route: 404
 /// - anything else: 500 with a generic message. The details go to the log
@@ -47,6 +49,10 @@ Middleware errorMappingMiddleware() =>
         return response;
       } on HijackException {
         rethrow;
+      } on EntityNotFoundError catch (e) {
+        return errorResponse(404, 'not_found', '$e', requestId: requestId);
+      } on ContestStateError catch (e) {
+        return errorResponse(409, e.code, e.message, requestId: requestId);
       } on StaleRevisionError catch (e) {
         return errorResponse(409, 'stale_revision', '$e', requestId: requestId);
       } on AlreadyStoredError catch (e) {
