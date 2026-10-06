@@ -3,61 +3,14 @@ import 'package:soar_score_core/services/services.dart';
 import 'package:test/test.dart';
 
 import '../models/contest/fixtures.dart';
-
-/// Keeps contests in memory and behaves like the real repository where it
-/// matters here: a save bumps the revision and a stale save is refused.
-class _MemoryContestRepository implements ContestRepository {
-  final Map<Id, Contest> stored = {};
-  final List<MutationMetadata> metadata = [];
-
-  @override
-  Future<Contest?> findById(Id id) async => stored[id];
-
-  @override
-  Future<Contest> save(
-    Contest contest, {
-    required MutationMetadata metadata,
-  }) async {
-    final current = stored[contest.id];
-    if (current != null && current.revision != contest.revision) {
-      throw StaleRevisionError(
-        entityType: 'Contest',
-        entityId: contest.id,
-        expectedRevision: contest.revision,
-        storedRevision: current.revision,
-      );
-    }
-    this.metadata.add(metadata);
-    final next = Contest.fromJson({
-      ...contest.toJson(),
-      'revision': current == null ? 0 : current.revision + 1,
-    });
-    stored[contest.id] = next;
-    return next;
-  }
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) =>
-      throw UnimplementedError('${invocation.memberName} is not faked');
-}
-
-class _FakeRepository implements Repository {
-  _FakeRepository(this.contestRepository);
-
-  @override
-  final ContestRepository contestRepository;
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) =>
-      throw UnimplementedError('${invocation.memberName} is not faked');
-}
+import '../support/memory_repositories.dart';
 
 void main() {
   final now = DateTime.utc(2026, 10, 6, 12);
   final owner = id(1);
   final contestId = id(0x20);
 
-  late _MemoryContestRepository contests;
+  late MemoryContestRepository contests;
   late ContestsService service;
 
   MutationMetadata metadata([String key = 'm1']) => MutationMetadata(
@@ -82,8 +35,11 @@ void main() {
   );
 
   setUp(() {
-    contests = _MemoryContestRepository();
-    service = ContestsService(_FakeRepository(contests), clock: () => now);
+    contests = MemoryContestRepository();
+    service = ContestsService(
+      FakeRepository(contestRepository: contests),
+      clock: () => now,
+    );
   });
 
   group('createContest', () {

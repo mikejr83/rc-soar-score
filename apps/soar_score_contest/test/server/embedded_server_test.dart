@@ -6,6 +6,7 @@ import 'package:soar_score_core/soar_score_core.dart'
     show
         AdminLock,
         ContestAction,
+        ContestConfig,
         DisciplineType,
         Id,
         LifecycleState,
@@ -134,6 +135,42 @@ void main() {
       }
     },
   );
+
+  test('a configuration saved through the API moves the contest on', () async {
+    final server = await startEmbeddedServer(databasePath);
+    final client = ApiClient(baseUrl: server.baseUrl);
+    try {
+      final id = Id.create();
+      await client.createContest(
+        CreateContestRequest(
+          id: id,
+          name: 'Spring Open',
+          startDateTime: DateTime.utc(2026, 10, 17, 14),
+          endDateTime: DateTime.utc(2026, 10, 18, 22),
+          timezone: 'America/Denver',
+        ),
+      );
+
+      final saved = await client.saveConfiguration(
+        id,
+        SaveConfigurationRequest(
+          baseRevisionNumber: 0,
+          disciplineProfileId: SystemDisciplineProfiles.f5jId,
+          config: ContestConfig(core: {}, discipline: {'working_time': 600}),
+        ),
+      );
+
+      expect(saved.revision.revisionNumber, 1);
+      expect(saved.revision.createdBy, server.localAccountId);
+      expect(saved.contest.lifecycleState, LifecycleState.configuring);
+      expect(await client.configuration(id), saved.revision);
+      expect(await client.configurationRevisions(id), [saved.revision]);
+      expect(await client.contest(id), saved.contest);
+    } finally {
+      client.close();
+      await server.close();
+    }
+  });
 
   test('opens the SQLite database at the requested path', () async {
     final server = await startEmbeddedServer(databasePath);

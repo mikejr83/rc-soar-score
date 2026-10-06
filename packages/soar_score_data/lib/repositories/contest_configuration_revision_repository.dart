@@ -35,4 +35,21 @@ class ContestConfigurationRevisionRepository extends DriftRepository
     required core.MutationMetadata metadata,
   }) =>
       unitOfWork.run((context) => context.append(revision, metadata: metadata));
+
+  @override
+  Future<core.SavedConfiguration> appendWithContest(
+    core.ContestConfigurationRevision revision, {
+    required core.Contest contest,
+    required core.MutationMetadata metadata,
+  }) => unitOfWork.run((context) async {
+    final storedRevision = await context.append(revision, metadata: metadata);
+    final storedContest = await context.save(
+      contest,
+      metadata: metadata.forPart(contest.id.value),
+    );
+    return core.SavedConfiguration(
+      revision: storedRevision,
+      contest: storedContest,
+    );
+  });
 }

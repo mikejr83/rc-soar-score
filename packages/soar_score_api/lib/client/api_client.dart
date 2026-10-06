@@ -6,6 +6,7 @@ import 'package:soar_score_core/soar_score_core.dart';
 import '../dto/contest_action_request.dart';
 import '../dto/create_contest_request.dart';
 import '../dto/health_dto.dart';
+import '../dto/save_configuration_request.dart';
 import '../dto/update_contest_request.dart';
 import '../errors/api_exception.dart';
 import '../errors/api_http_error.dart';
@@ -109,6 +110,56 @@ class ApiClient {
     final uri = _resolve('/api/v1/contests/${id.value}/actions');
     final response = await _send('POST', uri, body: request.toJson());
     return _decode<Contest>(response, uri, Contest.fromJson);
+  }
+
+  /// `GET /api/v1/contests/{id}/configuration` — the latest configuration
+  /// revision of contest [id].
+  ///
+  /// A contest with no configuration yet is an [ApiHttpError] with status
+  /// 404.
+  Future<ContestConfigurationRevision> configuration(Id id) async {
+    final uri = _resolve('/api/v1/contests/${id.value}/configuration');
+    final response = await _send('GET', uri);
+    return _decode<ContestConfigurationRevision>(
+      response,
+      uri,
+      ContestConfigurationRevision.fromJson,
+    );
+  }
+
+  /// `GET /api/v1/contests/{id}/configuration/revisions` — every
+  /// configuration revision of contest [id], oldest first.
+  Future<List<ContestConfigurationRevision>> configurationRevisions(
+    Id id,
+  ) async {
+    final uri = _resolve(
+      '/api/v1/contests/${id.value}/configuration/revisions',
+    );
+    final response = await _send('GET', uri);
+    return _decode<List<ContestConfigurationRevision>>(
+      response,
+      uri,
+      (json) => [
+        for (final item in json['revisions'] as List<dynamic>)
+          ContestConfigurationRevision.fromJson(item as Map<String, dynamic>),
+      ],
+    );
+  }
+
+  /// `POST /api/v1/contests/{id}/configuration` — stores the next
+  /// configuration revision and returns it with the contest as it is after
+  /// the change (the contest's revision and lifecycle state may have moved).
+  Future<SavedConfiguration> saveConfiguration(
+    Id id,
+    SaveConfigurationRequest request,
+  ) async {
+    final uri = _resolve('/api/v1/contests/${id.value}/configuration');
+    final response = await _send('POST', uri, body: request.toJson());
+    return _decode<SavedConfiguration>(
+      response,
+      uri,
+      SavedConfiguration.fromJson,
+    );
   }
 
   Uri _resolve(String path) => baseUrl.resolveUri(Uri.parse(path));
