@@ -59,7 +59,7 @@ void main() {
   });
 
   testWidgets(
-    'continue offline enables offline mode and opens the contest selection stub',
+    'continue offline enables offline mode and opens the contest selection page',
     (WidgetTester tester) async {
       final appMode = AppModeNotifier();
       expect(appMode.isOfflineMode, isFalse);
@@ -72,10 +72,7 @@ void main() {
 
       expect(appMode.isOfflineMode, isTrue);
       expect(find.text('Contest selection'), findsOneWidget);
-      expect(
-        find.text('Contest selection is not wired up yet.'),
-        findsOneWidget,
-      );
+      expect(find.byType(HomePage), findsOneWidget);
     },
   );
 
