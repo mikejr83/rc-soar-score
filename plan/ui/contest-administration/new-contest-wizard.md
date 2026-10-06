@@ -90,7 +90,7 @@ The step collects:
 - Preliminary number of rounds.
 - Lane mode: none or random.
 - Team protection when teams are enabled. It is not available together with `Seeded Man on Man`; selecting one disables the other and explains why.
-- Allow back-to-back flights (a pilot may fly the last group of one round and the first of the next). It is off by default, so the constraint applies. Turning it on shows a notice that the fairness of the draw will decrease. While it is off, the wizard warns when the contest is too small for the constraint.
+- Allow back-to-back flights (a pilot may fly the last group of one round and the first of the next). It is on by default. Turning it off applies the constraint, shows a notice that the fairness of the draw will decrease, and the wizard warns when the contest is too small for the constraint.
 - Preliminary seeded rounds when seeded mode is selected.
 
 Groups per round is a positive integer. The control displays the calculated minimum and maximum pilots per group and updates them as the value changes. It must prevent a configuration with fewer than two scoring pilots in a group. Team protection may increase the minimum groups per round and the UI must show that constraint.
