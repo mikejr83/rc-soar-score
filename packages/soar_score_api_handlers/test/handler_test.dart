@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:shelf/shelf.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_api_handlers/soar_score_api_handlers.dart';
+import 'package:soar_score_core/soar_score_core.dart';
 import 'package:test/test.dart';
 
 import 'stubs/stub_contest_repository.dart';
@@ -44,6 +45,52 @@ void main() {
 
       expect(response.statusCode, 200);
       expect(await readJson(response), testIdentity.toJson());
+    });
+  });
+
+  group('GET /api/v1/contests', () {
+    final contest = Contest(
+      id: Id.parse('019c0000-0000-7000-8000-000000000010'),
+      name: 'Front Range ALES Open',
+      startDateTime: DateTime.utc(2026, 10, 17, 14),
+      endDateTime: DateTime.utc(2026, 10, 18, 22),
+      timezone: 'America/Denver',
+      createdAt: DateTime.utc(2026, 9),
+      updatedAt: DateTime.utc(2026, 9),
+    );
+
+    test('returns an empty list when nothing is stored', () async {
+      final response = await get('/api/v1/contests');
+
+      expect(response.statusCode, 200);
+      expect(await readJson(response), {'contests': <Object?>[]});
+    });
+
+    test('returns the stored contests as JSON', () async {
+      final repository = StubContestRepository();
+      await repository.save(
+        contest,
+        metadata: MutationMetadata(
+          clientMutationId: 'seed',
+          authority: Authority.system,
+          clientTime: DateTime.utc(2026, 9),
+        ),
+      );
+      final seeded = buildApiHandler(
+        name: testIdentity.name,
+        displayName: testIdentity.displayName,
+        version: testIdentity.version,
+        repository: StubRepository(repository),
+      );
+
+      final response = await seeded(
+        Request('GET', Uri.parse('http://localhost/api/v1/contests')),
+      );
+
+      expect(response.statusCode, 200);
+      expect(await readJson(response), {
+        'contests': [contest.toJson()],
+      });
     });
   });
 
