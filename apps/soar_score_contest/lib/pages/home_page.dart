@@ -4,7 +4,7 @@ import 'package:soar_score_core/soar_score_core.dart';
 import '../api_client_provider.dart';
 import '../widgets/contest_list.dart';
 
-/// Contest selection: lists the contests the app's API holds.
+/// The main page ("Contests"): lists the contests the app's API holds.
 ///
 /// Loading, empty and error states only; selection and actions come later.
 class HomePage extends StatefulWidget {
@@ -44,10 +44,7 @@ class _HomePageState extends State<HomePage> {
     children: [
       Padding(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-        child: Text(
-          'Contest selection',
-          style: Theme.of(context).textTheme.titleLarge,
-        ),
+        child: Text('Contests', style: Theme.of(context).textTheme.titleLarge),
       ),
       Expanded(
         child: FutureBuilder<List<Contest>>(
