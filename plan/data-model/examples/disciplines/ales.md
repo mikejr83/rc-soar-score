@@ -262,6 +262,20 @@ Each entry maps the key the scorer selects to the points awarded: the scorer sel
     "is_zero_reason": true,
     "zero_reason_code": "overflight_gt_one_min",
     "created_at": "2026-09-15T00:00:00Z"
+  },
+  {
+    "id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d19",
+    "discipline_profile_id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d01",
+    "field_key": "flight_penalty",
+    "field_type": "int",
+    "name": "Flight Penalty",
+    "description": "Points deducted from the flight, entered with the score by anyone who enters it. The director's cumulative penalty is applied separately on the official score.",
+    "required": false,
+    "default_value": 0,
+    "validation": { "gte": 0 },
+    "display_order": 6,
+    "is_zero_reason": false,
+    "created_at": "2026-09-15T00:00:00Z"
   }
 ]
 ```
@@ -325,12 +339,13 @@ Each entry maps the key the scorer selects to the points awarded: the scorer sel
     "discipline_profile_id": "019a3c4e-8f2a-7b1c-9d4e-6f5a3b2c1d01",
     "formula_key": "flight_score",
     "formula_type": "intermediate",
-    "description": "Calculate flight score: max(0, time * PPS - overflight penalty)",
-    "formula_text": "max(0, (time_flown * points_per_second) - overflight_penalty)",
+    "description": "Calculate flight score: max(0, time * PPS - overflight penalty - entered flight penalty)",
+    "formula_text": "max(0, (time_flown * points_per_second) - overflight_penalty - flight_penalty)",
     "inputs": {
       "time_flown": "score:time_flown",
       "points_per_second": "config:points_per_second",
-      "overflight_penalty": "calc:overflight_penalty"
+      "overflight_penalty": "calc:overflight_penalty",
+      "flight_penalty": "score:flight_penalty"
     },
     "outputs": { "flight_score": "calc:flight_score" },
     "depends_on": ["overflight_penalty"],

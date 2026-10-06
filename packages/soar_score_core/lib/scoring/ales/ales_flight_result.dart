@@ -12,6 +12,7 @@ class AlesFlightResult extends Equatable {
     this.flightPoints = 0,
     this.landingBonus = 0,
     this.overflightSeconds = 0,
+    this.flightPenalty = 0,
   }) : zeroReasons = List.unmodifiable(zeroReasons);
 
   /// `zero` for a forced zero or a blank score, otherwise `scored`.
@@ -29,14 +30,22 @@ class AlesFlightResult extends Equatable {
   /// Seconds flown past the target time, kept for audit; zero at or under it.
   final double overflightSeconds;
 
-  /// Flight points plus landing bonus.
-  double get rawScore => flightPoints + landingBonus;
+  /// The flight penalty entered with the score.
+  final double flightPenalty;
+
+  /// Flight points plus the landing bonus less the flight penalty, never
+  /// below zero.
+  double get rawScore {
+    final score = flightPoints + landingBonus - flightPenalty;
+    return score < 0 ? 0 : score;
+  }
 
   /// This flight as input to the group score.
   PilotRound toPilotRound(String pilotId, {bool retired = false}) => PilotRound(
     pilotId: pilotId,
     flightPoints: flightPoints,
     landingBonus: landingBonus,
+    deductions: flightPenalty,
     retired: retired,
   );
 
@@ -47,5 +56,6 @@ class AlesFlightResult extends Equatable {
     flightPoints,
     landingBonus,
     overflightSeconds,
+    flightPenalty,
   ];
 }

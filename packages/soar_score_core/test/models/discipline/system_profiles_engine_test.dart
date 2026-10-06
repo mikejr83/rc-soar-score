@@ -5,16 +5,6 @@ import 'package:test/test.dart';
 /// defaults, so they are not discipline config fields.
 const _coreOptions = {'group_score_mode', 'rounding_mode', 'decimal_places'};
 
-/// Score fields the engine accepts that the data rows do not hold yet. Each
-/// is a recorded difference, to be settled in a follow-up, not a decision.
-///
-/// F5J: the engine takes the flight penalty entered with each score
-/// (`plan/data-model/contest-options.md`, "Not options"), but the example
-/// document has no such score field (issue 201).
-final _engineOnlyScoreFields = {
-  DisciplineType.f5j: {'flight_penalty'},
-};
-
 /// The data rows in `SystemDisciplineProfiles` against the scoring engine
 /// profiles in `ScoringProfileRegistry`.
 void main() {
@@ -46,7 +36,7 @@ void main() {
           accepted.difference(
             shipped.scoreFields.map((f) => f.fieldKey).toSet(),
           ),
-          _engineOnlyScoreFields[data.type] ?? isEmpty,
+          isEmpty,
         );
         expect(
           shipped.scoreFields
