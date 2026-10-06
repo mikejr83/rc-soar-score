@@ -2,6 +2,21 @@
 
 The desktop shell reuses the contest-management application and adds local status and recovery controls. Offline mode must preserve the ability to administer a contest without remote connectivity.
 
+## Offline-capable pages
+
+The native application works offline on these pages. Decision: [#81](https://github.com/mikejr83/rc-soar-score/issues/81).
+
+- Score entry, matrix and round groups, official scoring and standings, and a pilot's earlier scores.
+- The new-contest wizard and contest configuration.
+- The participant editor, using local pilot and model data. Matching against remote participant data shows as unavailable.
+- System data management: models, participant roles and landing bonuses.
+- Reports and exports from local data.
+- Contest list actions: create, delete and delist, with offline handling.
+
+The full recovery tools (complete export and import, conflict inspection, destructive-action warnings) are tracked separately and are not part of this page list. Publishing, self-scoring invitation links, QR codes and sign-in need a connection.
+
+For the first release the synchronization status is minimal: a pending-count badge and the last synchronized time. Conflict detail arrives with the synchronization work (#83).
+
 ## Connectivity status
 
 The frame shows separate indicators for:

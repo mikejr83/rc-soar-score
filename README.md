@@ -25,6 +25,7 @@ The system is designed for both connected and disconnected field operations, all
   - [Running Tests & Linting](#running-tests--linting)
   - [Testing Against PostgreSQL](#testing-against-postgresql)
 - [Conventions & Architecture Rules](#conventions--architecture-rules)
+- [License](#license)
 
 ---
 
@@ -329,3 +330,7 @@ Each test creates its own database (named `soar_test_...`) on the server and dro
 - **Separation of Concerns**: `soar_score_core` must never import Flutter or data-layer drivers; domain logic remains 100% pure Dart.
 - **Code Style**: Follow rules defined in root and subproject `analysis_options.yaml`. Run `melos analyze` prior to committing.
 - **Agent Guidelines**: See [`AGENTS.md`](AGENTS.md) for developer conventions, testing requirements, and subproject rules.
+
+## License
+
+RC Soar Score is licensed under the [GNU Affero General Public License v3.0](LICENSE) (AGPL-3.0). A modified version offered to users over a network must make its source available under the same licence. Decision record: [#218](https://github.com/mikejr83/rc-soar-score/issues/218).

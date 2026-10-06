@@ -29,6 +29,7 @@ The engine must support:
    - Remainder: $r = N \bmod G$
    - Exactly $r$ groups contain $b + 1$ pilots, and $G - r$ groups contain $b$ pilots.
 4. **Lane Exclusivity**: Within any flight group, no two pilots may be assigned to the same lane (flight line peg/station).
+5. **Back-to-Back Constraint (director option)**: When the contest director enables it, no pilot may fly in the last group of round $N$ and the first group of round $N+1$. It is a hard constraint with a per-contest toggle. Re-flight groups are exempt. If the constraint makes a draw infeasible (for example in a small contest), the engine must reject the draw with a validation error that tells the director the constraint is the cause and that it can be turned off. The default state of the toggle is not decided yet. Decision: [#78](https://github.com/mikejr83/rc-soar-score/issues/78).
 
 ### 2.2. Soft Optimization Goals (Cost Function Targets)
 
@@ -150,6 +151,8 @@ When a Contest Director adds $K$ rounds to an ongoing contest that already has $
 
 In Seeded Man on Man mode, pilots are grouped by progressive performance so that competitors with similar cumulative scores fly directly against each other.
 
+**Team protection is not available in Seeded Man on Man mode.** The new-contest wizard and contest configuration must prevent selecting both and explain why. Decision: [#77](https://github.com/mikejr83/rc-soar-score/issues/77).
+
 ### 6.1. Configuration and Preliminaries
 
 1. **Preliminary Rounds Setting**: The contest configuration specifies `preliminaryRounds` (integer $\ge 1$, default $1$).
@@ -174,7 +177,7 @@ For round $R_{\text{next}}$:
 3. **Partition into Tiers**:
    - Determine group size quotas for $G$ groups such that $r = N \bmod G$ groups have size $\lfloor N/G \rfloor + 1$ and $G - r$ groups have size $\lfloor N/G \rfloor$.
    - Assign the top-ranked tier of pilots to Group 1, the next tier to Group 2, through to the lowest tier in Group $G$.
-4. **Enforce Team Protection via Minimal Rank-Displacement Swap**:
+4. **Team Protection Is Not Applied**: Seeded mode and team protection cannot be combined (see the note at the start of this section), so no team-clash swap is performed. The steps below describe a rejected combination and are kept only as design history.
    - For each group $g_k$ from $1 \dots G$:
      - If $g_k$ contains multiple pilots from the same team:
        - Keep the highest-ranked teammate in $g_k$.
@@ -196,13 +199,24 @@ Every generated matrix revision produces a structured **Fairness Report** stored
 
 ### 7.1. Metric Summary Attributes
 
-| Metric                     | Description                                                                                                       | Target                                                                          |
-| :------------------------- | :---------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------ |
-| **Max Duplicate Matchups** | The maximum number of times any single pair of pilots $(p_i, p_j)$ fly against each other.                        | $\le \lceil \mu \rceil + 1$ (Standard mode)                                     |
-| **Matchup Distribution**   | Histogram of pair matchup counts: `0 times`, `1 time`, `2 times`, `3+ times`.                                     | Concentrated near $\lfloor \mu \rfloor$ and $\lceil \mu \rceil$ (Standard mode) |
-| **Unmet Opponent Count**   | Number of pilot pairs who never fly against each other ($c = 0$).                                                 | Minimized given $R$ and $G$                                                     |
-| **Lane Uniformity Index**  | Standard deviation of lane usage across all pilots.                                                               | Approaching 0                                                                   |
-| **Overall Fairness Score** | Normalized score from $0\%$ to $100\%$ comparing achieved $J$ against theoretical lower bound $J_{\text{ideal}}$. | $\ge 90\%$ (Standard mode)                                                      |
+| Metric                     | Description                                                                                                                           | Target                                                                          |
+| :------------------------- | :------------------------------------------------------------------------------------------------------------------------------------ | :------------------------------------------------------------------------------ |
+| **Max Duplicate Matchups** | The maximum number of times any single pair of pilots $(p_i, p_j)$ fly against each other.                                            | $\le \lceil \mu \rceil + 1$ (Standard mode)                                     |
+| **Matchup Distribution**   | Histogram of pair matchup counts: `0 times`, `1 time`, `2 times`, `3+ times`.                                                         | Concentrated near $\lfloor \mu \rfloor$ and $\lceil \mu \rceil$ (Standard mode) |
+| **Unmet Opponent Count**   | Number of pilot pairs who never fly against each other ($c = 0$).                                                                     | Minimized given $R$ and $G$                                                     |
+| **Lane Uniformity Index**  | Standard deviation of lane usage across all pilots.                                                                                   | Approaching 0                                                                   |
+| **Overall Fairness Score** | Normalized score from $0\%$ to $100\%$ comparing achieved $J$ against $J_{\text{ideal}}$ (100%) and $J_{\text{worst}}$ (0%), see 7.2. | $\ge 90\%$ (Standard mode)                                                      |
+
+### 7.2. Fairness Score Scale
+
+$$\text{Fairness} = 1 - \frac{J - J_{\text{ideal}}}{J_{\text{worst}} - J_{\text{ideal}}}$$
+
+- **100%** means the achieved cost $J$ equals the theoretical best $J_{\text{ideal}}$.
+- **0%** means $J_{\text{worst}}$, the average cost of a purely random draw for the same contest size. A matrix worse than the random average is displayed as 0%.
+- $J_{\text{worst}}$ is estimated by sampling random draws. The sample count and PRNG seed are fixed so that the same matrix always receives the same score.
+- The score is reported for the whole matrix, with per-round detail shown alongside.
+
+Decision: [#79](https://github.com/mikejr83/rc-soar-score/issues/79).
 
 ### 7.2. Matrix Revision Entity Contract
 

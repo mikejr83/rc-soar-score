@@ -2,7 +2,7 @@
 
 - **Category:** Matrix / Draw
 - **Priority:** Low
-- **Status:** Open
+- **Status:** Decided (see [#79](https://github.com/mikejr83/rc-soar-score/issues/79))
 
 ## Context
 
