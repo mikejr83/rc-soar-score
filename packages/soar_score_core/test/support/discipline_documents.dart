@@ -12,8 +12,10 @@ Map<String, Object?> disciplineDocument(String name) {
     if (dir.parent.path == dir.path) throw StateError('examples not found');
     dir = dir.parent;
   }
+  // A Windows checkout may convert the markdown to CRLF (core.autocrlf).
   final text = File('${dir.path}/plan/data-model/examples/disciplines/$name.md')
-      .readAsStringSync();
+      .readAsStringSync()
+      .replaceAll('\r\n', '\n');
   final block = RegExp(
     r'^## (\w+)\n(?:(?!^## )[\s\S])*?```json\n([\s\S]*?)\n```',
     multiLine: true,
