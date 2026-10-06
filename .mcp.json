@@ -8,6 +8,31 @@
         "-y",
         "@upstash/context7-mcp"
       ]
+    },
+    "dart": {
+      "command": "cmd",
+      "args": [
+        "/c",
+        "dart",
+        "mcp-server"
+      ]
+    },
+    "postgres": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "--network",
+        "container:${POSTGRES_CONTAINER:-postgres}",
+        "-e",
+        "DATABASE_URI",
+        "crystaldba/postgres-mcp",
+        "--access-mode=restricted"
+      ],
+      "env": {
+        "DATABASE_URI": "postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-soar-dev-only}@localhost:5432/${POSTGRES_DB:-rc_soar_score}"
+      }
     }
   }
 }

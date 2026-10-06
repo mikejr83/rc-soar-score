@@ -8,7 +8,7 @@
 # anywhere real.
 services:
   db:
-    image: postgres:17
+    image: postgres:18
     environment:
       POSTGRES_DB: rc_soar_score
       POSTGRES_USER: postgres
