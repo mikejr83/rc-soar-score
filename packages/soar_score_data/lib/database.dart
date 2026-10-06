@@ -22,6 +22,7 @@ import 'schema/tables/discipline_score_fields_table.dart';
 import 'schema/tables/discipline_validations_table.dart';
 import 'schema/tables/landing_results_table.dart';
 import 'schema/tables/landing_tables_table.dart';
+import 'schema/tables/local_account_table.dart';
 import 'schema/tables/local_sync_positions_table.dart';
 import 'schema/tables/model_catalogs_table.dart';
 import 'schema/tables/accounts_table.dart';
@@ -116,6 +117,7 @@ part 'database.g.dart';
     Tombstones,
     AuditEvents,
     LocalSyncPositions,
+    LocalAccount,
   ],
 )
 class SoarScoreDatabase extends _$SoarScoreDatabase {

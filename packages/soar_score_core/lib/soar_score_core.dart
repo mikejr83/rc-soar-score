@@ -27,6 +27,7 @@ export 'repositories/contest_repository.dart';
 export 'repositories/discipline_profile_repository.dart';
 export 'repositories/flight_result_repository.dart';
 export 'repositories/landing_table_repository.dart';
+export 'repositories/local_account_repository.dart';
 export 'repositories/matrix_assignment_repository.dart';
 export 'repositories/matrix_revision_repository.dart';
 export 'repositories/mutation_metadata.dart';

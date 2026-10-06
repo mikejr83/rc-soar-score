@@ -35888,6 +35888,264 @@ class LocalSyncPositionsCompanion
   }
 }
 
+class $LocalAccountTable extends LocalAccount
+    with TableInfo<$LocalAccountTable, LocalAccountData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LocalAccountTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _slotMeta = const VerificationMeta('slot');
+  @override
+  late final GeneratedColumn<int> slot = GeneratedColumn<int>(
+    'slot',
+    aliasedName,
+    false,
+    check: () => slot.equals(1),
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _accountIdMeta = const VerificationMeta(
+    'accountId',
+  );
+  @override
+  late final GeneratedColumn<String> accountId = GeneratedColumn<String>(
+    'account_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<String> createdAt = GeneratedColumn<String>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [slot, accountId, createdAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'local_account';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LocalAccountData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('slot')) {
+      context.handle(
+        _slotMeta,
+        slot.isAcceptableOrUnknown(data['slot']!, _slotMeta),
+      );
+    }
+    if (data.containsKey('account_id')) {
+      context.handle(
+        _accountIdMeta,
+        accountId.isAcceptableOrUnknown(data['account_id']!, _accountIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_accountIdMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {slot};
+  @override
+  LocalAccountData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LocalAccountData(
+      slot: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}slot'],
+      )!,
+      accountId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}account_id'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $LocalAccountTable createAlias(String alias) {
+    return $LocalAccountTable(attachedDatabase, alias);
+  }
+}
+
+class LocalAccountData extends DataClass
+    implements Insertable<LocalAccountData> {
+  /// Always 1, so a second row cannot be inserted.
+  final int slot;
+
+  /// The Local account id (UUIDv7), generated on first run and never changed.
+  final String accountId;
+  final String createdAt;
+  const LocalAccountData({
+    required this.slot,
+    required this.accountId,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['slot'] = Variable<int>(slot);
+    map['account_id'] = Variable<String>(accountId);
+    map['created_at'] = Variable<String>(createdAt);
+    return map;
+  }
+
+  LocalAccountCompanion toCompanion(bool nullToAbsent) {
+    return LocalAccountCompanion(
+      slot: Value(slot),
+      accountId: Value(accountId),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory LocalAccountData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LocalAccountData(
+      slot: serializer.fromJson<int>(json['slot']),
+      accountId: serializer.fromJson<String>(json['accountId']),
+      createdAt: serializer.fromJson<String>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'slot': serializer.toJson<int>(slot),
+      'accountId': serializer.toJson<String>(accountId),
+      'createdAt': serializer.toJson<String>(createdAt),
+    };
+  }
+
+  LocalAccountData copyWith({
+    int? slot,
+    String? accountId,
+    String? createdAt,
+  }) => LocalAccountData(
+    slot: slot ?? this.slot,
+    accountId: accountId ?? this.accountId,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  LocalAccountData copyWithCompanion(LocalAccountCompanion data) {
+    return LocalAccountData(
+      slot: data.slot.present ? data.slot.value : this.slot,
+      accountId: data.accountId.present ? data.accountId.value : this.accountId,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalAccountData(')
+          ..write('slot: $slot, ')
+          ..write('accountId: $accountId, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(slot, accountId, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LocalAccountData &&
+          other.slot == this.slot &&
+          other.accountId == this.accountId &&
+          other.createdAt == this.createdAt);
+}
+
+class LocalAccountCompanion extends UpdateCompanion<LocalAccountData> {
+  final Value<int> slot;
+  final Value<String> accountId;
+  final Value<String> createdAt;
+  const LocalAccountCompanion({
+    this.slot = const Value.absent(),
+    this.accountId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  });
+  LocalAccountCompanion.insert({
+    this.slot = const Value.absent(),
+    required String accountId,
+    required String createdAt,
+  }) : accountId = Value(accountId),
+       createdAt = Value(createdAt);
+  static Insertable<LocalAccountData> custom({
+    Expression<int>? slot,
+    Expression<String>? accountId,
+    Expression<String>? createdAt,
+  }) {
+    return RawValuesInsertable({
+      if (slot != null) 'slot': slot,
+      if (accountId != null) 'account_id': accountId,
+      if (createdAt != null) 'created_at': createdAt,
+    });
+  }
+
+  LocalAccountCompanion copyWith({
+    Value<int>? slot,
+    Value<String>? accountId,
+    Value<String>? createdAt,
+  }) {
+    return LocalAccountCompanion(
+      slot: slot ?? this.slot,
+      accountId: accountId ?? this.accountId,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (slot.present) {
+      map['slot'] = Variable<int>(slot.value);
+    }
+    if (accountId.present) {
+      map['account_id'] = Variable<String>(accountId.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<String>(createdAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalAccountCompanion(')
+          ..write('slot: $slot, ')
+          ..write('accountId: $accountId, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$SoarScoreDatabase extends GeneratedDatabase {
   _$SoarScoreDatabase(QueryExecutor e) : super(e);
   $SoarScoreDatabaseManager get managers => $SoarScoreDatabaseManager(this);
@@ -35973,6 +36231,7 @@ abstract class _$SoarScoreDatabase extends GeneratedDatabase {
   late final $AuditEventsTable auditEvents = $AuditEventsTable(this);
   late final $LocalSyncPositionsTable localSyncPositions =
       $LocalSyncPositionsTable(this);
+  late final $LocalAccountTable localAccount = $LocalAccountTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -36027,6 +36286,7 @@ abstract class _$SoarScoreDatabase extends GeneratedDatabase {
     tombstones,
     auditEvents,
     localSyncPositions,
+    localAccount,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -71792,6 +72052,181 @@ typedef $$LocalSyncPositionsTableProcessedTableManager =
       LocalSyncPositionData,
       PrefetchHooks Function()
     >;
+typedef $$LocalAccountTableCreateCompanionBuilder =
+    LocalAccountCompanion Function({
+      Value<int> slot,
+      required String accountId,
+      required String createdAt,
+    });
+typedef $$LocalAccountTableUpdateCompanionBuilder =
+    LocalAccountCompanion Function({
+      Value<int> slot,
+      Value<String> accountId,
+      Value<String> createdAt,
+    });
+
+class $$LocalAccountTableFilterComposer
+    extends Composer<_$SoarScoreDatabase, $LocalAccountTable> {
+  $$LocalAccountTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get slot => $composableBuilder(
+    column: $table.slot,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get accountId => $composableBuilder(
+    column: $table.accountId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$LocalAccountTableOrderingComposer
+    extends Composer<_$SoarScoreDatabase, $LocalAccountTable> {
+  $$LocalAccountTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get slot => $composableBuilder(
+    column: $table.slot,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get accountId => $composableBuilder(
+    column: $table.accountId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$LocalAccountTableAnnotationComposer
+    extends Composer<_$SoarScoreDatabase, $LocalAccountTable> {
+  $$LocalAccountTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get slot =>
+      $composableBuilder(column: $table.slot, builder: (column) => column);
+
+  GeneratedColumn<String> get accountId =>
+      $composableBuilder(column: $table.accountId, builder: (column) => column);
+
+  GeneratedColumn<String> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+}
+
+class $$LocalAccountTableTableManager
+    extends
+        RootTableManager<
+          _$SoarScoreDatabase,
+          $LocalAccountTable,
+          LocalAccountData,
+          $$LocalAccountTableFilterComposer,
+          $$LocalAccountTableOrderingComposer,
+          $$LocalAccountTableAnnotationComposer,
+          $$LocalAccountTableCreateCompanionBuilder,
+          $$LocalAccountTableUpdateCompanionBuilder,
+          (
+            LocalAccountData,
+            BaseReferences<
+              _$SoarScoreDatabase,
+              $LocalAccountTable,
+              LocalAccountData
+            >,
+          ),
+          LocalAccountData,
+          PrefetchHooks Function()
+        > {
+  $$LocalAccountTableTableManager(
+    _$SoarScoreDatabase db,
+    $LocalAccountTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LocalAccountTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LocalAccountTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$LocalAccountTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> slot = const Value.absent(),
+                Value<String> accountId = const Value.absent(),
+                Value<String> createdAt = const Value.absent(),
+              }) => LocalAccountCompanion(
+                slot: slot,
+                accountId: accountId,
+                createdAt: createdAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> slot = const Value.absent(),
+                required String accountId,
+                required String createdAt,
+              }) => LocalAccountCompanion.insert(
+                slot: slot,
+                accountId: accountId,
+                createdAt: createdAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$LocalAccountTable, LocalAccountData>(table),
+                  BaseReferences<
+                    _$SoarScoreDatabase,
+                    $LocalAccountTable,
+                    LocalAccountData
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$LocalAccountTableProcessedTableManager =
+    ProcessedTableManager<
+      _$SoarScoreDatabase,
+      $LocalAccountTable,
+      LocalAccountData,
+      $$LocalAccountTableFilterComposer,
+      $$LocalAccountTableOrderingComposer,
+      $$LocalAccountTableAnnotationComposer,
+      $$LocalAccountTableCreateCompanionBuilder,
+      $$LocalAccountTableUpdateCompanionBuilder,
+      (
+        LocalAccountData,
+        BaseReferences<
+          _$SoarScoreDatabase,
+          $LocalAccountTable,
+          LocalAccountData
+        >,
+      ),
+      LocalAccountData,
+      PrefetchHooks Function()
+    >;
 
 class $SoarScoreDatabaseManager {
   final _$SoarScoreDatabase _db;
@@ -71924,4 +72359,6 @@ class $SoarScoreDatabaseManager {
       $$AuditEventsTableTableManager(_db, _db.auditEvents);
   $$LocalSyncPositionsTableTableManager get localSyncPositions =>
       $$LocalSyncPositionsTableTableManager(_db, _db.localSyncPositions);
+  $$LocalAccountTableTableManager get localAccount =>
+      $$LocalAccountTableTableManager(_db, _db.localAccount);
 }
