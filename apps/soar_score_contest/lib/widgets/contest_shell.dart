@@ -1,209 +1,71 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../connectivity_provider.dart';
-import '../pages/landing_page.dart';
-import '../router.dart';
-import 'connectivity_indicator.dart';
+import 'app_window_title.dart';
+import 'contest_name_loader.dart';
 import 'contest_status_bar.dart';
-import 'not_wired_up_dialog.dart';
+import 'shell_destinations.dart';
+import 'shell_header.dart';
+import 'shell_rail.dart';
 
-/// The persistent contest-administration shell: title area with connectivity
-/// chips, breadcrumb/back navigation, a navigation rail for administration
-/// tasks, the route's [child] content, and a status bar.
+/// The persistent contest-administration shell (Material 3 rail-first
+/// layout):
 ///
-/// The shell wraps the main page ([homePath]) and every route below it. The
-/// landing page is outside the shell.
+/// - a full-height [ShellRail] on the leading edge with the title and
+///   route-dependent destinations,
+/// - a content pane with a slim [ShellHeader] above the route's [child],
+/// - a [ContestStatusBar] spanning the full window width at the bottom.
+///
+/// The window title names the selected contest, when there is one.
+///
+/// The shell wraps the main page and every route below it, plus the
+/// contest-scoped routes. The landing page is outside the shell.
 class ContestShell extends StatelessWidget {
   const ContestShell({super.key, required this.state, required this.child});
 
-  /// The matched route state; drives the rail's selected destination and the
-  /// breadcrumb/back arrow.
+  /// The matched route state; drives the rail's destinations and the
+  /// header's breadcrumb/back arrow.
   final GoRouterState state;
 
   final Widget child;
 
-  /// The navigation-rail destinations. Only "Contests" is wired; the rest
-  /// show the not-wired-up dialog until their routes land.
-  static const List<_RailDestination> _destinations = [
-    _RailDestination(
-      label: 'Contests',
-      icon: Icons.event_outlined,
-      selectedIcon: Icons.event,
-      location: homePath,
-    ),
-    _RailDestination(
-      label: 'Matrix',
-      icon: Icons.grid_on_outlined,
-      selectedIcon: Icons.grid_on,
-    ),
-    _RailDestination(
-      label: 'Scoring',
-      icon: Icons.edit_note_outlined,
-      selectedIcon: Icons.edit_note,
-    ),
-    _RailDestination(
-      label: 'Reports',
-      icon: Icons.assessment_outlined,
-      selectedIcon: Icons.assessment,
-    ),
-  ];
-
-  /// The rail destination a location belongs to: a destination with a wired
-  /// route is selected for its exact path and anything under it. Unwired
-  /// destinations (no route yet) are never selected.
-  int _selectedIndex(String location) => _destinations.indexWhere(
-    (destination) =>
-        destination.location != null &&
-        (location == destination.location ||
-            location.startsWith('${destination.location}/')),
-  );
-
   @override
   Widget build(BuildContext context) {
-    final actions = <Widget>[];
-
-    // The indicators exist only when a bootstrap created the monitor (D5):
-    // tests that pump the app without one see no chips.
-    final monitor = appConnectivityOf(context);
-    if (monitor != null) {
-      // Internet first; hidden when the host cannot report connectivity at
-      // all (decision D8).
-      if (monitor.supportsConnectivity) {
-        actions.add(ConnectivityIndicator.internet(monitor));
-      }
-      actions.add(ConnectivityIndicator.api(monitor));
-    }
-
     final path = state.uri.path;
-    final isHome = path == homePath;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(LandingPage.title),
-        automaticallyImplyLeading: false,
-        actions: actions,
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(40),
-          child: _Breadcrumb(
-            isHome: isHome,
-            pathSegments: path.startsWith('$homePath/')
-                ? path
-                      .substring(homePath.length)
-                      .split('/')
-                      .where((segment) => segment.isNotEmpty)
-                      .toList()
-                : const <String>[],
-          ),
-        ),
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: Row(
-              children: [
-                NavigationRail(
-                  selectedIndex: _selectedIndex(path),
-                  extended: false,
-                  labelType: NavigationRailLabelType.all,
-                  destinations: [
-                    for (final destination in _destinations)
-                      NavigationRailDestination(
-                        icon: Icon(destination.icon),
-                        selectedIcon: Icon(destination.selectedIcon),
-                        label: Text(destination.label),
+    // The loader stays in the tree in both scopes so the routed child keeps
+    // its place (and state) when entering or leaving a contest.
+    return ContestNameLoader(
+      contestId: contestIdFor(path),
+      builder: (context, contestName) => AppWindowTitle(
+        title: windowTitleFor(contestName: contestName),
+        child: Scaffold(
+          body: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    ShellRail(path: path),
+                    const VerticalDivider(width: 1, thickness: 1),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          ShellHeader(path: path, contestName: contestName),
+                          const Divider(height: 1, thickness: 1),
+                          Expanded(child: child),
+                        ],
                       ),
+                    ),
                   ],
-                  onDestinationSelected: (index) {
-                    final destination = _destinations[index];
-                    if (destination.location != null) {
-                      GoRouter.of(context).go(destination.location!);
-                    } else {
-                      showNotWiredUpDialog(context, destination.label);
-                    }
-                  },
                 ),
-                const VerticalDivider(width: 1, thickness: 1),
-                Expanded(child: child),
-              ],
-            ),
-          ),
-          const ContestStatusBar(),
-        ],
-      ),
-    );
-  }
-}
-
-/// One navigation-rail destination. [location] is `null` for destinations
-/// whose route does not exist yet.
-class _RailDestination {
-  const _RailDestination({
-    required this.label,
-    required this.icon,
-    required this.selectedIcon,
-    this.location,
-  });
-
-  final String label;
-  final IconData icon;
-  final IconData selectedIcon;
-  final String? location;
-}
-
-/// The AppBar breadcrumb row: a "Contests" crumb that navigates to the main
-/// page, plain-text crumbs for deeper segments, and a back arrow for any path
-/// below the main page (go_router provides browser-history back on web).
-class _Breadcrumb extends StatelessWidget {
-  const _Breadcrumb({required this.isHome, required this.pathSegments});
-
-  final bool isHome;
-  final List<String> pathSegments;
-
-  static String _label(String segment) => segment.length > 1
-      ? segment[0].toUpperCase() + segment.substring(1)
-      : segment;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final crumbs = <Widget>[
-      TextButton(
-        onPressed: isHome ? null : () => GoRouter.of(context).go(homePath),
-        child: const Text('Contests'),
-      ),
-      for (final segment in pathSegments)
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: Text(
-            _label(segment),
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
+              ),
+              const ContestStatusBar(),
+            ],
           ),
         ),
-    ];
-
-    return Padding(
-      padding: const EdgeInsetsDirectional.only(start: 16),
-      child: Row(
-        children: [
-          if (!isHome)
-            IconButton(
-              key: const ValueKey('breadcrumb-back'),
-              icon: const Icon(Icons.arrow_back),
-              tooltip: 'Back',
-              onPressed: () {
-                final router = GoRouter.of(context);
-                if (router.canPop()) {
-                  router.pop();
-                }
-              },
-            ),
-          Expanded(
-            child: Row(mainAxisSize: MainAxisSize.min, children: crumbs),
-          ),
-        ],
       ),
     );
   }

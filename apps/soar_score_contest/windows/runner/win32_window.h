@@ -52,6 +52,11 @@ class Win32Window {
   // If true, closing this window will quit the application.
   void SetQuitOnClose(bool quit_on_close);
 
+  // If true, |Create| restores the placement saved when the window last
+  // closed (size, position, and whether it was maximized), and closing the
+  // window saves it. Must be set before |Create|.
+  void SetRememberPlacement(bool remember_placement);
+
   // Return a RECT representing the bounds of the current client area.
   RECT GetClientArea();
 
@@ -91,6 +96,12 @@ class Win32Window {
   static void UpdateTheme(HWND const window);
 
   bool quit_on_close_ = false;
+
+  bool remember_placement_ = false;
+
+  // How |Show| displays the window: normal, or maximized when the restored
+  // placement was maximized.
+  int show_command_ = SW_SHOWNORMAL;
 
   // window handle for top level window.
   HWND window_handle_ = nullptr;

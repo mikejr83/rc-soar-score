@@ -10,7 +10,7 @@ Implement the persistent status area that displays connectivity, sync, and conte
 
 ## Work Items
 
-- [ ] Implement status bar in persistent shell
+- [x] Implement status bar in persistent shell
 - [x] Display internet connectivity status
 - [x] Display remote API connectivity and last successful connection time
 - [ ] Display synchronization state (last sync, unsent mutations, remote revision, conflicts)

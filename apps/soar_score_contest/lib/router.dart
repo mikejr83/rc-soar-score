@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
 import 'app_mode_provider.dart';
+import 'pages/contest_workspace_page.dart';
 import 'pages/home_page.dart';
 import 'pages/landing_page.dart';
 import 'widgets/contest_shell.dart';
@@ -14,6 +15,14 @@ const String landingPath = '/contest-administration';
 /// or choosing offline mode, and the application shell wraps it and every
 /// route below it.
 const String homePath = '$landingPath/home';
+
+/// The root of the per-contest routes. Every route below it belongs to one
+/// selected contest, and the shell shows contest-scoped navigation there.
+const String contestsPath = '$landingPath/contests';
+
+/// The contest workspace for the contest with [contestId].
+String contestWorkspacePath(String contestId) =>
+    '$contestsPath/$contestId/workspace';
 
 GoRouter buildAppRouter({
   String initialLocation = landingPath,
@@ -40,6 +49,13 @@ GoRouter buildAppRouter({
             path: homePath,
             name: 'home',
             builder: (context, state) => const HomePage(),
+          ),
+          GoRoute(
+            path: '$contestsPath/:contestId/workspace',
+            name: 'contestWorkspace',
+            builder: (context, state) => ContestWorkspacePage(
+              contestId: state.pathParameters['contestId']!,
+            ),
           ),
         ],
       ),

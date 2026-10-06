@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_contest/app_mode_provider.dart';
+import 'package:soar_score_contest/pages/contest_workspace_page.dart';
 import 'package:soar_score_contest/router.dart';
 import 'package:soar_score_contest/widgets/contest_shell.dart';
 
@@ -116,6 +117,25 @@ void main() {
       router.go(landingPath);
       await tester.pumpAndSettle();
       expect(find.byType(ContestShell), findsNothing);
+    });
+
+    testWidgets('wraps the contest workspace in the shell', (tester) async {
+      final appMode = AppModeNotifier(isOfflineMode: true);
+      final workspace = contestWorkspacePath(
+        '01890a5d-ac96-774b-bcce-b302099a8057',
+      );
+      final router = buildAppRouter(
+        initialLocation: workspace,
+        appMode: appMode,
+      );
+      addTearDown(router.dispose);
+
+      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+      await tester.pumpAndSettle();
+
+      expect(router.state.uri.path, workspace);
+      expect(find.byType(ContestShell), findsOneWidget);
+      expect(find.byType(ContestWorkspacePage), findsOneWidget);
     });
 
     testWidgets('reacts to appMode changes via refreshListenable', (
