@@ -2,7 +2,8 @@
 
 - **Category:** UI / UX
 - **Priority:** Medium
-- **Status:** Open
+- **Status:** Decided
+- **Decision:** Official score entry targets tablet and desktop, with phone as a stretch goal. It uses standard Material 3 window size classes, a single page with a stacked-card fallback on compact widths, and numeric keypads for time and whole numbers. See [ADR 0002](../../../docs/adr/0002-score-entry-layout.md) and issue #82.
 
 ## Context
 
