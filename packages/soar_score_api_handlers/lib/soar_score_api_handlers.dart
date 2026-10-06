@@ -5,5 +5,6 @@
 /// only `package:soar_score_api_handlers/soar_score_api_handlers.dart`.
 library;
 
+export 'auth/principal.dart';
 export 'handler.dart';
 export 'middleware/middleware.dart';

@@ -9,9 +9,11 @@ import 'package:logging/logging.dart';
 ///
 /// Receives the unauthenticated `/api/v1` handler and returns a replacement
 /// with authentication applied (e.g. the Auth0 JWT middleware from ticket
-/// 010). When no middleware is provided, the `/api/v1` routes stay
-/// unauthenticated — the embedded offline instance (ticket 018) deliberately
-/// never adds a token requirement.
+/// 010). It sets the request's `Principal` (see `auth/principal.dart`); the
+/// embedded offline instance (ticket 018) never adds a token requirement and
+/// uses `fixedPrincipal` with its Local account instead. When no middleware
+/// is provided, the `/api/v1` routes stay unauthenticated and have no
+/// principal.
 typedef AuthMiddleware = Handler Function(Handler);
 
 final _logger = Logger('Handler');
