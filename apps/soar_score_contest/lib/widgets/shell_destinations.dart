@@ -46,6 +46,7 @@ List<ShellDestination> shellDestinationsFor(String path) {
         label: 'Participants',
         icon: Icons.groups_outlined,
         selectedIcon: Icons.groups,
+        location: participantsPath,
       ),
       ShellDestination(
         label: 'Roles',

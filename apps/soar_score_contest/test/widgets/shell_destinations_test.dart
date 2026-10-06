@@ -59,7 +59,8 @@ void main() {
     test('wires Contests to the main page and Workspace to the contest', () {
       final system = shellDestinationsFor(homePath);
       expect(system.first.location, homePath);
-      expect(system.skip(1).every((d) => d.location == null), isTrue);
+      expect(system[1].location, participantsPath);
+      expect(system.skip(2).every((d) => d.location == null), isTrue);
 
       final contest = shellDestinationsFor(contestWorkspacePath(_contestId));
       expect(contest.first.location, contestWorkspacePath(_contestId));
@@ -72,6 +73,10 @@ void main() {
       expect(contests.matches('$homePath/workspace'), isTrue);
       expect(contests.matches('${homePath}x'), isFalse);
       expect(shellDestinationsFor(homePath)[1].matches(homePath), isFalse);
+      expect(
+        shellDestinationsFor(homePath)[1].matches(newParticipantPath),
+        isTrue,
+      );
     });
   });
 }

@@ -119,9 +119,9 @@ void main() {
     addTearDown(router.dispose);
     await pumpShellRouter(tester, router);
 
-    await tester.tap(find.text('Participants'));
+    await tester.tap(find.text('Roles'));
     await tester.pumpAndSettle();
-    expect(find.text('Participants is not available yet'), findsOneWidget);
+    expect(find.text('Roles is not available yet'), findsOneWidget);
     await tester.tap(find.text('OK'));
     await tester.pumpAndSettle();
     expect(find.byType(AlertDialog), findsNothing);
