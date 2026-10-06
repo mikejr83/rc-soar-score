@@ -9,13 +9,12 @@ Handler createContestsHandler(Repository repository) {
 
   final contestsService = ContestsService(repository);
 
-  // Define your contest-related routes here.
-  // Example:
   router.get('/contests', (Request request) async {
-    // Handle fetching contests
     final contests = await contestsService.getContests();
 
-    return jsonResponse(Map<String, dynamic>.from({'contests': contests}));
+    return jsonResponse(<String, dynamic>{
+      'contests': [for (final contest in contests) contest.toJson()],
+    });
   });
 
   return router.call;

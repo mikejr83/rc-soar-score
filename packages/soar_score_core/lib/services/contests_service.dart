@@ -11,7 +11,6 @@ class ContestsService {
 
   Future<List<Contest>> getContests() async {
     _logger.info('Fetching contests from the repository');
-    // Implement fetching contests from the repository
-    return List<Contest>.empty();
+    return repository.contestRepository.getAll();
   }
 }
