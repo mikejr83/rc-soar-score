@@ -139,6 +139,9 @@ class SoarScoreDatabase extends _$SoarScoreDatabase {
       // SQLite ignores foreign keys unless asked; PostgreSQL always checks.
       if (executor.dialect == SqlDialect.sqlite) {
         await customStatement('PRAGMA foreign_keys = ON');
+        if (!details.wasCreated) {
+          await _requireProfileTables();
+        }
       }
     },
     onUpgrade: (m, from, to) {
@@ -148,6 +151,31 @@ class SoarScoreDatabase extends _$SoarScoreDatabase {
       );
     },
   );
+
+  /// Fails with a clear message when an existing SQLite file lacks a table of
+  /// the profile.
+  ///
+  /// Nothing is released, so schema changes go into version 1 in place and a
+  /// file made by an earlier build keeps reporting version 1 while missing
+  /// tables. Without this check the first query on the missing table fails
+  /// with a bare SQL error.
+  Future<void> _requireProfileTables() async {
+    final rows = await customSelect(
+      "SELECT name FROM sqlite_master WHERE type = 'table'",
+    ).get();
+    final existing = {for (final row in rows) row.read<String>('name')};
+    final missing = [
+      for (final table in profileTables)
+        if (!existing.contains(table.actualTableName)) table.actualTableName,
+    ];
+    if (missing.isNotEmpty) {
+      throw StateError(
+        'The local database was created by an older build and lacks the '
+        'tables ${missing.join(', ')}. Schema version 1 is still changing '
+        'in place, so delete the database file and start again.',
+      );
+    }
+  }
 }
 
 SoarScoreDatabase createLocalDatabase(File dbFilePath) {
