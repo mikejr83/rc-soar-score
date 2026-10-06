@@ -54,12 +54,17 @@ class NativeBootstrap extends AppBootstrap {
     return p.join(directory.path, 'soar_score.db');
   }
 
+  /// Whether to seed sample contests: only when built with
+  /// `--dart-define=SOAR_SCORE_SEED_DEMO=true`, and never in a release build.
+  static const bool seedDemo =
+      bool.fromEnvironment('SOAR_SCORE_SEED_DEMO') && !kReleaseMode;
+
   /// Starts the embedded API server and returns the client for it.
   static Future<AppBootstrap> start() async {
     const String rawUrl = String.fromEnvironment('SOAR_SCORE_API_BASE_URL');
     final baseUrl = Uri.parse(rawUrl.isEmpty ? defaultApiBaseUrl : rawUrl);
     final database = await databasePath();
-    final server = await startEmbeddedServer(database);
+    final server = await startEmbeddedServer(database, seedDemo: seedDemo);
     debugPrint('Embedded API server listening on ${server.baseUrl}');
     return NativeBootstrap._(server, ApiClient(baseUrl: baseUrl));
   }

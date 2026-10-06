@@ -147,4 +147,33 @@ void main() {
       await second.close();
     }
   });
+
+  test('has no contests unless the demo seed is requested', () async {
+    final server = await startEmbeddedServer(databasePath);
+    final client = ApiClient(baseUrl: server.baseUrl);
+    try {
+      expect(await client.contests(), isEmpty);
+    } finally {
+      client.close();
+      await server.close();
+    }
+  });
+
+  test('the demo seed serves sample contests once, across launches', () async {
+    final first = await startEmbeddedServer(databasePath, seedDemo: true);
+    final firstClient = ApiClient(baseUrl: first.baseUrl);
+    final seeded = await firstClient.contests();
+    firstClient.close();
+    await first.close();
+
+    final second = await startEmbeddedServer(databasePath, seedDemo: true);
+    final secondClient = ApiClient(baseUrl: second.baseUrl);
+    try {
+      expect(seeded, hasLength(3));
+      expect(await secondClient.contests(), seeded);
+    } finally {
+      secondClient.close();
+      await second.close();
+    }
+  });
 }

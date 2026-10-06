@@ -17,9 +17,12 @@ const String embeddedServerVersion = '0.1.0';
 /// can never conflict; [baseUrl] is the loopback address the app's own
 /// `ApiClient` (from `soar_score_api`) is pointed at.
 class EmbeddedServer {
-  EmbeddedServer._(this._databasePath);
+  EmbeddedServer._(this._databasePath, {required this.seedDemo});
 
   final String _databasePath;
+
+  /// Whether to insert the sample contests into an empty database.
+  final bool seedDemo;
   late HttpServer _server;
   late SoarScoreDatabase _database;
   late core.Repository _repository;
@@ -42,6 +45,9 @@ class EmbeddedServer {
     // never starts with partial data.
     try {
       await SystemDataSeeder(_database).seed();
+      if (seedDemo) {
+        await DemoContestSeeder(ContestRepository(_database)).seed();
+      }
     } catch (_) {
       await _database.close();
       rethrow;
@@ -76,8 +82,14 @@ class EmbeddedServer {
 /// The embedded instance is always unauthenticated: the shared
 /// `buildApiHandler` factory is called without an `authMiddleware`, per the
 /// decision recorded on ticket 017.
-Future<EmbeddedServer> startEmbeddedServer(String databasePath) async {
-  final server = EmbeddedServer._(databasePath);
+///
+/// With [seedDemo], an empty contests table gets a few sample contests
+/// (development only, see `DemoContestSeeder`).
+Future<EmbeddedServer> startEmbeddedServer(
+  String databasePath, {
+  bool seedDemo = false,
+}) async {
+  final server = EmbeddedServer._(databasePath, seedDemo: seedDemo);
   await server.initializeDatabase();
   await server.initialize();
   return server;

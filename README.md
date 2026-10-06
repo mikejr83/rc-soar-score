@@ -186,6 +186,20 @@ flutter run -d chrome      # Run as web app
 flutter run -d windows     # Run as Windows desktop shell
 ```
 
+##### Demo contests (development only)
+
+A fresh native install has no contests, and the app cannot create them yet. To see sample contests on the home page while developing, build or run the native app with the `SOAR_SCORE_SEED_DEMO` define:
+
+```bash
+flutter run -d windows --dart-define=SOAR_SCORE_SEED_DEMO=true
+```
+
+- With the flag, the embedded server inserts three sample contests (they have no owner) the first time it opens an empty local database. A database that already holds contests is left alone, so restarting never duplicates them.
+- The flag is off by default and is ignored in release builds.
+- It has no effect on web builds, which use the deployed server, or on the server itself.
+- Contests are seeded only into an empty database. To reseed, delete the local `soar_score.db` file (in the per-user application support folder, `%APPDATA%` on Windows).
+- This is a stand-in until contests can be created in the app, and will be removed then.
+
 #### Public Results Site
 
 ```bash
