@@ -1,6 +1,6 @@
 # RC Soar Score User Interface - Landing Page
 
-The online and desktop applications share the landing page structure. The page provides:
+The online and desktop applications share the landing page structure. The landing page is a plain page outside the application shell (see the [README](README.md#navigation-and-route-contract)); the shell starts at the main page. It may later also show version information. The page provides:
 
 - `Sign in`, which navigates to the configured identity provider and returns to the application after authentication.
 - `Create account`, which navigates to the identity provider registration flow.

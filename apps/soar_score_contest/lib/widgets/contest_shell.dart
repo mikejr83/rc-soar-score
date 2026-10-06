@@ -8,9 +8,12 @@ import 'connectivity_indicator.dart';
 import 'contest_status_bar.dart';
 import 'not_wired_up_dialog.dart';
 
-/// The persistent contest-administration shell (ticket 020): title area with
-/// connectivity chips, breadcrumb/back navigation, a navigation rail for
-/// administration tasks, the route's [child] content, and a status bar.
+/// The persistent contest-administration shell: title area with connectivity
+/// chips, breadcrumb/back navigation, a navigation rail for administration
+/// tasks, the route's [child] content, and a status bar.
+///
+/// The shell wraps the main page ([homePath]) and every route below it. The
+/// landing page is outside the shell.
 class ContestShell extends StatelessWidget {
   const ContestShell({super.key, required this.state, required this.child});
 
@@ -20,19 +23,14 @@ class ContestShell extends StatelessWidget {
 
   final Widget child;
 
-  /// The navigation-rail destinations. Only "Landing" is wired; the rest show
-  /// the not-wired-up dialog until their routes land (tickets 022 ff.).
+  /// The navigation-rail destinations. Only "Contests" is wired; the rest
+  /// show the not-wired-up dialog until their routes land.
   static const List<_RailDestination> _destinations = [
-    _RailDestination(
-      label: 'Landing',
-      icon: Icons.dashboard_outlined,
-      selectedIcon: Icons.dashboard,
-      location: landingPath,
-    ),
     _RailDestination(
       label: 'Contests',
       icon: Icons.event_outlined,
       selectedIcon: Icons.event,
+      location: homePath,
     ),
     _RailDestination(
       label: 'Matrix',
@@ -78,7 +76,7 @@ class ContestShell extends StatelessWidget {
     }
 
     final path = state.uri.path;
-    final isLanding = path == landingPath;
+    final isHome = path == homePath;
 
     return Scaffold(
       appBar: AppBar(
@@ -88,11 +86,14 @@ class ContestShell extends StatelessWidget {
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(40),
           child: _Breadcrumb(
-            isLanding: isLanding,
-            pathSegments: path
-                .split('/')
-                .where((segment) => segment.isNotEmpty)
-                .toList(),
+            isHome: isHome,
+            pathSegments: path.startsWith('$homePath/')
+                ? path
+                      .substring(homePath.length)
+                      .split('/')
+                      .where((segment) => segment.isNotEmpty)
+                      .toList()
+                : const <String>[],
           ),
         ),
       ),
@@ -150,13 +151,13 @@ class _RailDestination {
   final String? location;
 }
 
-/// The AppBar breadcrumb row: a "Landing" crumb that navigates to the root,
-/// plain-text crumbs for deeper segments, and a back arrow for any path
-/// below the landing page (go_router provides browser-history back on web).
+/// The AppBar breadcrumb row: a "Contests" crumb that navigates to the main
+/// page, plain-text crumbs for deeper segments, and a back arrow for any path
+/// below the main page (go_router provides browser-history back on web).
 class _Breadcrumb extends StatelessWidget {
-  const _Breadcrumb({required this.isLanding, required this.pathSegments});
+  const _Breadcrumb({required this.isHome, required this.pathSegments});
 
-  final bool isLanding;
+  final bool isHome;
   final List<String> pathSegments;
 
   static String _label(String segment) => segment.length > 1
@@ -168,12 +169,10 @@ class _Breadcrumb extends StatelessWidget {
     final theme = Theme.of(context);
     final crumbs = <Widget>[
       TextButton(
-        onPressed: isLanding
-            ? null
-            : () => GoRouter.of(context).go(landingPath),
-        child: const Text('Landing'),
+        onPressed: isHome ? null : () => GoRouter.of(context).go(homePath),
+        child: const Text('Contests'),
       ),
-      for (final segment in isLanding ? const <String>[] : pathSegments)
+      for (final segment in pathSegments)
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8),
           child: Text(
@@ -189,7 +188,7 @@ class _Breadcrumb extends StatelessWidget {
       padding: const EdgeInsetsDirectional.only(start: 16),
       child: Row(
         children: [
-          if (!isLanding)
+          if (!isHome)
             IconButton(
               key: const ValueKey('breadcrumb-back'),
               icon: const Icon(Icons.arrow_back),

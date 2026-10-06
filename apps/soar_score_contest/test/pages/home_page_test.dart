@@ -20,7 +20,7 @@ Contest _contest(String name, {int day = 17}) => Contest(
 );
 
 Widget _app(ApiClient? client) {
-  const page = MaterialApp(home: HomePage());
+  const page = MaterialApp(home: Scaffold(body: HomePage()));
   return client == null
       ? page
       : ApiClientInherited(client: client, child: page);

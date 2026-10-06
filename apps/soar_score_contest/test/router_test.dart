@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_contest/app_mode_provider.dart';
 import 'package:soar_score_contest/router.dart';
+import 'package:soar_score_contest/widgets/contest_shell.dart';
 
 void main() {
   group('AppModeNotifier', () {
@@ -96,6 +97,25 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(router.state.uri.path, '$landingPath/home');
+    });
+
+    testWidgets('wraps the main page in the shell and not the landing page', (
+      tester,
+    ) async {
+      final appMode = AppModeNotifier(isOfflineMode: true);
+      final router = buildAppRouter(
+        initialLocation: homePath,
+        appMode: appMode,
+      );
+      addTearDown(router.dispose);
+
+      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+      await tester.pumpAndSettle();
+      expect(find.byType(ContestShell), findsOneWidget);
+
+      router.go(landingPath);
+      await tester.pumpAndSettle();
+      expect(find.byType(ContestShell), findsNothing);
     });
 
     testWidgets('reacts to appMode changes via refreshListenable', (

@@ -39,28 +39,39 @@ class _HomePageState extends State<HomePage> {
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('Contest selection')),
-    body: FutureBuilder<List<Contest>>(
-      future: _contests,
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return _Message(
-            text: 'Contests could not be loaded.',
-            detail: '${snapshot.error}',
-            onRetry: _retry,
-          );
-        }
-        final contests = snapshot.data;
-        if (contests == null) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        if (contests.isEmpty) {
-          return const _Message(text: 'No contests yet.');
-        }
-        return ContestList(contests: contests);
-      },
-    ),
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      Padding(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+        child: Text(
+          'Contest selection',
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
+      ),
+      Expanded(
+        child: FutureBuilder<List<Contest>>(
+          future: _contests,
+          builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              return _Message(
+                text: 'Contests could not be loaded.',
+                detail: '${snapshot.error}',
+                onRetry: _retry,
+              );
+            }
+            final contests = snapshot.data;
+            if (contests == null) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (contests.isEmpty) {
+              return const _Message(text: 'No contests yet.');
+            }
+            return ContestList(contests: contests);
+          },
+        ),
+      ),
+    ],
   );
 }
 

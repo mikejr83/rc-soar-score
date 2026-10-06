@@ -5,9 +5,15 @@ import 'package:go_router/go_router.dart';
 import 'app_mode_provider.dart';
 import 'pages/home_page.dart';
 import 'pages/landing_page.dart';
+import 'widgets/contest_shell.dart';
 
 /// The contest-administration root path (the landing page).
 const String landingPath = '/contest-administration';
+
+/// The main page (contest selection). The user arrives here after signing in
+/// or choosing offline mode, and the application shell wraps it and every
+/// route below it.
+const String homePath = '$landingPath/home';
 
 GoRouter buildAppRouter({
   String initialLocation = landingPath,
@@ -19,15 +25,23 @@ GoRouter buildAppRouter({
     redirect: (context, state) =>
         navigationGuard(context, state, appMode: appMode),
     routes: [
+      // The landing page is a plain page outside the shell; the shell starts
+      // once the user is using the application.
       GoRoute(
         path: landingPath,
         name: 'landing',
         builder: (context, state) => const LandingPage(),
       ),
-      GoRoute(
-        path: '$landingPath/home',
-        name: 'home',
-        builder: (context, state) => const HomePage(),
+      ShellRoute(
+        builder: (context, state, child) =>
+            ContestShell(state: state, child: child),
+        routes: [
+          GoRoute(
+            path: homePath,
+            name: 'home',
+            builder: (context, state) => const HomePage(),
+          ),
+        ],
       ),
     ],
   );

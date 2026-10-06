@@ -24,7 +24,7 @@ Administrative screens target tablet and larger screens. They must remain usable
 
 ## Navigation and route contract
 
-The application uses a persistent shell with:
+The application uses a persistent shell once the user is using the application: it wraps the main page (`/contest-administration/home`) and every page below it. The landing page is outside the shell. The shell has:
 
 - A title and current contest name when a contest is selected.
 - Breadcrumbs or an equivalent back-navigation control showing the current location.
