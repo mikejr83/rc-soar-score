@@ -71,6 +71,7 @@ class EmbeddedServer {
       version: embeddedServerVersion,
       schemaRevision: _database.schemaVersion,
       repository: _repository,
+      authMiddleware: fixedPrincipal(Principal(accountId: _localAccountId)),
     );
     _server = await shelf_io.serve(handler, 'localhost', 0);
   }
@@ -87,9 +88,9 @@ class EmbeddedServer {
 /// created if needed) and starts the embedded API on `localhost` with an
 /// OS-assigned free port (port `0` is passed to `shelf_io.serve`).
 ///
-/// The embedded instance is always unauthenticated: the shared
-/// `buildApiHandler` factory is called without an `authMiddleware`, per the
-/// decision recorded on ticket 017.
+/// The embedded instance never asks for a token (ticket 017). Every request
+/// instead acts as the installation's Local account, through the same
+/// `Principal` seam the hosted server fills from a verified token.
 ///
 /// With [seedDemo], an empty contests table gets a few sample contests
 /// (development only, see `DemoContestSeeder`).
