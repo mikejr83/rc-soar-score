@@ -6,7 +6,6 @@
 library;
 
 export 'client/api_client.dart';
-export 'dto/contest_list_dto.dart';
 export 'dto/health_dto.dart';
 export 'errors/api_exception.dart';
 export 'errors/api_http_error.dart';
