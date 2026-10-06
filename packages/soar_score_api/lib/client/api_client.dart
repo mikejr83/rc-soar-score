@@ -4,14 +4,17 @@ import 'package:http/http.dart' as http;
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../dto/add_participation_request.dart';
+import '../dto/add_team_member_request.dart';
 import '../dto/contest_action_request.dart';
 import '../dto/create_contest_request.dart';
 import '../dto/create_participant_request.dart';
+import '../dto/create_team_request.dart';
 import '../dto/health_dto.dart';
 import '../dto/save_configuration_request.dart';
 import '../dto/update_contest_request.dart';
 import '../dto/update_participant_request.dart';
 import '../dto/update_participation_request.dart';
+import '../dto/update_team_request.dart';
 import '../errors/api_exception.dart';
 import '../errors/api_http_error.dart';
 import '../errors/api_network_error.dart';
@@ -303,6 +306,89 @@ class ApiClient {
       'DELETE',
       _resolve(
         '/api/v1/contests/${id.value}/participations/${participationId.value}',
+      ),
+    );
+  }
+
+  /// `GET /api/v1/contests/{id}/teams` — the teams of contest [id], by name.
+  Future<List<Team>> teams(Id id) async {
+    final uri = _resolve('/api/v1/contests/${id.value}/teams');
+    final response = await _send('GET', uri);
+    return _decode<List<Team>>(
+      response,
+      uri,
+      (json) => [
+        for (final item in json['teams'] as List<dynamic>)
+          Team.fromJson(item as Map<String, dynamic>),
+      ],
+    );
+  }
+
+  /// `POST /api/v1/contests/{id}/teams` — creates a team.
+  ///
+  /// Repeating the same [request] returns the team it created; the name
+  /// already being used in the contest is an [ApiHttpError] with status 409.
+  Future<Team> createTeam(Id id, CreateTeamRequest request) async {
+    final uri = _resolve('/api/v1/contests/${id.value}/teams');
+    final response = await _send('POST', uri, body: request.toJson());
+    return _decode<Team>(response, uri, Team.fromJson);
+  }
+
+  /// `PUT /api/v1/contests/{id}/teams/{teamId}` — renames a team.
+  Future<Team> updateTeam(Id id, Id teamId, UpdateTeamRequest request) async {
+    final uri = _resolve('/api/v1/contests/${id.value}/teams/${teamId.value}');
+    final response = await _send('PUT', uri, body: request.toJson());
+    return _decode<Team>(response, uri, Team.fromJson);
+  }
+
+  /// `DELETE /api/v1/contests/{id}/teams/{teamId}` — deletes a team with its
+  /// memberships.
+  ///
+  /// A team with pilots, once a matrix is drawn, is an [ApiHttpError] with
+  /// status 409.
+  Future<void> deleteTeam(Id id, Id teamId) async {
+    await _send(
+      'DELETE',
+      _resolve('/api/v1/contests/${id.value}/teams/${teamId.value}'),
+    );
+  }
+
+  /// `GET /api/v1/contests/{id}/team-memberships` — who is on which team in
+  /// contest [id].
+  Future<List<TeamMembership>> teamMemberships(Id id) async {
+    final uri = _resolve('/api/v1/contests/${id.value}/team-memberships');
+    final response = await _send('GET', uri);
+    return _decode<List<TeamMembership>>(
+      response,
+      uri,
+      (json) => [
+        for (final item in json['team_memberships'] as List<dynamic>)
+          TeamMembership.fromJson(item as Map<String, dynamic>),
+      ],
+    );
+  }
+
+  /// `POST /api/v1/contests/{id}/team-memberships` — puts a participant on a
+  /// team.
+  ///
+  /// A participant already on a team, or a pilot once a matrix is drawn, is
+  /// an [ApiHttpError] with status 409.
+  Future<TeamMembership> addTeamMember(
+    Id id,
+    AddTeamMemberRequest request,
+  ) async {
+    final uri = _resolve('/api/v1/contests/${id.value}/team-memberships');
+    final response = await _send('POST', uri, body: request.toJson());
+    return _decode<TeamMembership>(response, uri, TeamMembership.fromJson);
+  }
+
+  /// `DELETE /api/v1/contests/{id}/team-memberships/{membershipId}` — takes a
+  /// participant off their team.
+  Future<void> removeTeamMember(Id id, Id membershipId) async {
+    await _send(
+      'DELETE',
+      _resolve(
+        '/api/v1/contests/${id.value}/team-memberships/${membershipId.value}',
       ),
     );
   }
