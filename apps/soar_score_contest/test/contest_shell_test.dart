@@ -1,117 +1,91 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:go_router/go_router.dart';
+import 'package:soar_score_contest/pages/landing_page.dart';
 import 'package:soar_score_contest/router.dart';
 import 'package:soar_score_contest/widgets/contest_shell.dart';
 import 'package:soar_score_contest/widgets/contest_status_bar.dart';
+import 'package:soar_score_contest/widgets/shell_header.dart';
 
-class _LandingStub extends StatelessWidget {
-  const _LandingStub();
+import 'support/shell_test_router.dart';
 
-  @override
-  Widget build(BuildContext context) =>
-      const Center(child: Text('Landing stub'));
-}
-
-/// Finds the "Contests" crumb inside the AppBar (the rail also renders a
-/// "Contests" destination label).
-Finder _contestsCrumb(WidgetTester tester) =>
-    find.descendant(of: find.byType(AppBar), matching: find.text('Contests'));
-
-/// Builds a router with the landing route outside the shell, and the main
-/// page plus a nested route (a test-local stand-in for a future page) inside
-/// it, so the breadcrumb and back-arrow behavior of [ContestShell] can be
-/// exercised.
-GoRouter _buildShellRouter({String initialLocation = homePath}) {
-  return GoRouter(
-    initialLocation: initialLocation,
-    routes: [
-      GoRoute(
-        path: landingPath,
-        name: 'landing',
-        builder: (context, state) => const _LandingStub(),
-      ),
-      ShellRoute(
-        builder: (context, state, child) =>
-            ContestShell(state: state, child: child),
-        routes: [
-          GoRoute(
-            path: homePath,
-            name: 'home',
-            builder: (context, state) => const Text('Home content'),
-            routes: [
-              GoRoute(
-                path: 'workspace',
-                name: 'workspace',
-                builder: (context, state) => const Text('Workspace content'),
-              ),
-            ],
-          ),
-        ],
-      ),
-    ],
-  );
-}
+Finder _contestsCrumb() => find.byKey(const ValueKey('breadcrumb-contests'));
 
 void main() {
-  testWidgets('shell renders the rail, status bar and contests crumb', (
-    tester,
-  ) async {
-    final router = _buildShellRouter();
+  testWidgets('shell renders the rail, header, status bar and system '
+      'destinations on the main page', (tester) async {
+    final router = buildShellTestRouter();
     addTearDown(router.dispose);
-
-    await tester.pumpWidget(
-      MaterialApp.router(
-        debugShowCheckedModeBanner: false,
-        routerConfig: router,
-      ),
-    );
-    await tester.pumpAndSettle();
+    await pumpShellRouter(tester, router);
 
     expect(find.byType(ContestShell), findsOneWidget);
     expect(find.byType(NavigationRail), findsOneWidget);
+    expect(find.byType(ShellHeader), findsOneWidget);
     expect(find.byType(ContestStatusBar), findsOneWidget);
+    expect(find.byType(AppBar), findsNothing);
     expect(find.text('Home content'), findsOneWidget);
 
     // The crumb appears on the main page; the back arrow does not.
-    expect(_contestsCrumb(tester), findsOneWidget);
+    expect(_contestsCrumb(), findsOneWidget);
     expect(find.byKey(const ValueKey('breadcrumb-back')), findsNothing);
 
-    // The "Contests" rail destination (index 0) is selected on the main page.
+    // System-level destinations only: contest tasks need a contest.
+    expect(railLabels(tester), [
+      'Contests',
+      'Participants',
+      'Roles',
+      'Bonuses',
+    ]);
     final rail = tester.widget<NavigationRail>(find.byType(NavigationRail));
     expect(rail.selectedIndex, 0);
-    expect((rail.destinations.first.label as Text).data, 'Contests');
+
+    // The title and the Create contest FAB sit at the top of the rail.
+    expect(
+      find.descendant(
+        of: find.byType(NavigationRail),
+        matching: find.text(LandingPage.title),
+      ),
+      findsOneWidget,
+    );
+    expect(find.byKey(const ValueKey('create-contest')), findsOneWidget);
+  });
+
+  testWidgets('the rail runs full height and the status bar spans the full '
+      'window width', (tester) async {
+    final router = buildShellTestRouter();
+    addTearDown(router.dispose);
+    await pumpShellRouter(tester, router);
+
+    final window = tester.getSize(find.byType(ContestShell));
+    final statusBar = tester.getRect(find.byType(ContestStatusBar));
+    expect(statusBar.width, window.width);
+    expect(statusBar.bottom, window.height);
+
+    // Nothing sits above the rail: it starts at the top of the window and
+    // ends at the status bar.
+    final rail = tester.getRect(find.byType(NavigationRail));
+    expect(rail.top, 0);
+    expect(rail.bottom, statusBar.top);
+
+    // The header spans the content pane only, not the rail.
+    final header = tester.getRect(find.byType(ShellHeader));
+    expect(header.left, greaterThanOrEqualTo(rail.right));
   });
 
   testWidgets('the landing page is outside the shell', (tester) async {
-    final router = _buildShellRouter(initialLocation: landingPath);
+    final router = buildShellTestRouter(initialLocation: landingPath);
     addTearDown(router.dispose);
+    await pumpShellRouter(tester, router);
 
-    await tester.pumpWidget(
-      MaterialApp.router(
-        debugShowCheckedModeBanner: false,
-        routerConfig: router,
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    expect(find.byType(_LandingStub), findsOneWidget);
+    expect(find.byType(LandingStub), findsOneWidget);
     expect(find.byType(ContestShell), findsNothing);
     expect(find.byType(NavigationRail), findsNothing);
   });
 
   testWidgets('deeper routes show the back arrow and breadcrumb crumbs; '
       'back returns to the main page', (tester) async {
-    final router = _buildShellRouter();
+    final router = buildShellTestRouter();
     addTearDown(router.dispose);
-
-    await tester.pumpWidget(
-      MaterialApp.router(
-        debugShowCheckedModeBanner: false,
-        routerConfig: router,
-      ),
-    );
-    await tester.pumpAndSettle();
+    await pumpShellRouter(tester, router);
     expect(find.text('Home content'), findsOneWidget);
 
     // `pushNamed` creates a real back entry behind the new page on every
@@ -123,7 +97,7 @@ void main() {
     expect(router.canPop(), isTrue);
 
     expect(find.byKey(const ValueKey('breadcrumb-back')), findsOneWidget);
-    expect(_contestsCrumb(tester), findsOneWidget);
+    expect(_contestsCrumb(), findsOneWidget);
     expect(find.text('Workspace'), findsOneWidget);
 
     final shell = tester.widget<ContestShell>(find.byType(ContestShell));
@@ -139,29 +113,25 @@ void main() {
     expect(shellAfterBack.state.uri.path, homePath);
   });
 
-  testWidgets('unwired rail destinations show the not-wired-up dialog', (
-    tester,
-  ) async {
-    final router = _buildShellRouter();
+  testWidgets('unwired rail destinations and the Create contest FAB show the '
+      'not-wired-up dialog', (tester) async {
+    final router = buildShellTestRouter();
     addTearDown(router.dispose);
+    await pumpShellRouter(tester, router);
 
-    await tester.pumpWidget(
-      MaterialApp.router(
-        debugShowCheckedModeBanner: false,
-        routerConfig: router,
-      ),
-    );
+    await tester.tap(find.text('Participants'));
     await tester.pumpAndSettle();
-
-    expect(find.text('Matrix'), findsOneWidget);
-    await tester.tap(find.text('Matrix'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Matrix is not available yet'), findsOneWidget);
-
+    expect(find.text('Participants is not available yet'), findsOneWidget);
     await tester.tap(find.text('OK'));
     await tester.pumpAndSettle();
     expect(find.byType(AlertDialog), findsNothing);
     expect(find.text('Home content'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('create-contest')));
+    await tester.pumpAndSettle();
+    expect(find.text('Create contest is not available yet'), findsOneWidget);
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
+    expect(find.byType(AlertDialog), findsNothing);
   });
 }

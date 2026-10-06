@@ -4,6 +4,7 @@
 #include <flutter_windows.h>
 
 #include "resource.h"
+#include "window_placement.h"
 
 namespace {
 
@@ -146,11 +147,21 @@ bool Win32Window::Create(const std::wstring& title,
 
   UpdateTheme(window);
 
+  if (remember_placement_) {
+    if (auto placement = LoadWindowPlacement()) {
+      // Apply the saved bounds while the window is still hidden; |Show|
+      // displays it in the saved state once Flutter has drawn a frame.
+      show_command_ = placement->showCmd;
+      placement->showCmd = SW_HIDE;
+      SetWindowPlacement(window, &*placement);
+    }
+  }
+
   return OnCreate();
 }
 
 bool Win32Window::Show() {
-  return ShowWindow(window_handle_, SW_SHOWNORMAL);
+  return ShowWindow(window_handle_, show_command_);
 }
 
 // static
@@ -179,7 +190,18 @@ Win32Window::MessageHandler(HWND hwnd,
                             WPARAM const wparam,
                             LPARAM const lparam) noexcept {
   switch (message) {
+    case WM_ENDSESSION:
+      // Signing out or shutting down ends the process without destroying the
+      // window, so save the placement here as well.
+      if (wparam && remember_placement_) {
+        SaveWindowPlacement(hwnd);
+      }
+      return 0;
+
     case WM_DESTROY:
+      if (remember_placement_) {
+        SaveWindowPlacement(hwnd);
+      }
       window_handle_ = nullptr;
       Destroy();
       if (quit_on_close_) {
@@ -261,6 +283,10 @@ HWND Win32Window::GetHandle() {
 
 void Win32Window::SetQuitOnClose(bool quit_on_close) {
   quit_on_close_ = quit_on_close;
+}
+
+void Win32Window::SetRememberPlacement(bool remember_placement) {
+  remember_placement_ = remember_placement;
 }
 
 bool Win32Window::OnCreate() {

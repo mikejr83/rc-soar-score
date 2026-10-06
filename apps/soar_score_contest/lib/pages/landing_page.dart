@@ -8,6 +8,7 @@ import 'package:soar_score_contest/services/connectivity/app_connectivity.dart';
 import 'package:soar_score_contest/widgets/connectivity_indicator.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../widgets/app_window_title.dart';
 import '../widgets/not_wired_up_dialog.dart';
 
 class LandingPage extends StatelessWidget {
@@ -112,80 +113,86 @@ class LandingPage extends StatelessWidget {
       actionWidgets.add(ConnectivityIndicator.api(monitor));
     }
 
-    return Scaffold(
-      appBar: AppBar(automaticallyImplyLeading: false, actions: actionWidgets),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 560),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // const SoarLogo(size: 72),
-                const SizedBox(height: 16),
-                Text(
-                  'RC Soar Score',
-                  style: Theme.of(context).textTheme.headlineMedium,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Manage and score RC sailplane soaring contests.',
-                  style: Theme.of(context).textTheme.bodyLarge,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 32),
-                _authenticationButtons(context, monitor),
-                const SizedBox(height: 32),
-                if (!isWeb) ...[
+    return AppWindowTitle(
+      title: windowTitleFor(),
+      child: Scaffold(
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          actions: actionWidgets,
+        ),
+        body: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 560),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // const SoarLogo(size: 72),
+                  const SizedBox(height: 16),
                   Text(
-                    'Offline contests stay on this device unless you publish '
-                    'them or sign in to enable synchronization.',
-                    style: Theme.of(context).textTheme.bodyMedium,
+                    'RC Soar Score',
+                    style: Theme.of(context).textTheme.headlineMedium,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Manage and score RC sailplane soaring contests.',
+                    style: Theme.of(context).textTheme.bodyLarge,
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 16),
-                ],
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  alignment: WrapAlignment.center,
-                  children: [
-                    // `Continue offline` is available only in the offline
-                    // (desktop) version of the app. The web build does not
-                    // show it.
-                    if (!isWeb)
-                      TextButton.icon(
-                        onPressed: () {
-                          if (!kIsWeb) {
-                            appModeOf(context)?.enterOfflineMode();
-                          }
-                          context.pushNamed('home');
-                        },
-                        icon: const Icon(Icons.wifi_off, size: 16),
-                        label: const Text('Continue offline'),
-                      ),
-                    TextButton.icon(
-                      onPressed: () => _openExternalLink(
-                        context,
-                        'https://example.com/help',
-                        'Help',
-                      ),
-                      icon: const Icon(Icons.open_in_new, size: 16),
-                      label: const Text('Help'),
+                  const SizedBox(height: 32),
+                  _authenticationButtons(context, monitor),
+                  const SizedBox(height: 32),
+                  if (!isWeb) ...[
+                    Text(
+                      'Offline contests stay on this device unless you publish '
+                      'them or sign in to enable synchronization.',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                      textAlign: TextAlign.center,
                     ),
-                    TextButton.icon(
-                      onPressed: () => _openExternalLink(
-                        context,
-                        'https://example.com/public',
-                        'Public contest site',
-                      ),
-                      icon: const Icon(Icons.open_in_new, size: 16),
-                      label: const Text('Public contest site'),
-                    ),
+                    const SizedBox(height: 16),
                   ],
-                ),
-              ],
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    alignment: WrapAlignment.center,
+                    children: [
+                      // `Continue offline` is available only in the offline
+                      // (desktop) version of the app. The web build does not
+                      // show it.
+                      if (!isWeb)
+                        TextButton.icon(
+                          onPressed: () {
+                            if (!kIsWeb) {
+                              appModeOf(context)?.enterOfflineMode();
+                            }
+                            context.pushNamed('home');
+                          },
+                          icon: const Icon(Icons.wifi_off, size: 16),
+                          label: const Text('Continue offline'),
+                        ),
+                      TextButton.icon(
+                        onPressed: () => _openExternalLink(
+                          context,
+                          'https://example.com/help',
+                          'Help',
+                        ),
+                        icon: const Icon(Icons.open_in_new, size: 16),
+                        label: const Text('Help'),
+                      ),
+                      TextButton.icon(
+                        onPressed: () => _openExternalLink(
+                          context,
+                          'https://example.com/public',
+                          'Public contest site',
+                        ),
+                        icon: const Icon(Icons.open_in_new, size: 16),
+                        label: const Text('Public contest site'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),
