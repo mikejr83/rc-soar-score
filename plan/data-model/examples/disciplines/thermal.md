@@ -15,6 +15,7 @@ plus landing bonus normalized together).
   "description": "Duration task with prescribed target time and precision landing. Flight score + landing bonus normalized to 1000. Default group scoring: Normalized.",
   "category": "duration",
   "default_landing_table_id": "019a3c4b-8f2a-7b1c-9d4e-6f5a3b2c3c02",
+  "default_options": { "decimal_places": 0 },
   "status": "published",
   "superseded_by": null,
   "created_by": "019a3c40-0000-7000-8000-000000000001",

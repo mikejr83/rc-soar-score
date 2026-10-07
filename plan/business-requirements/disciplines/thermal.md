@@ -10,6 +10,8 @@ Thermal Duration is a variation of how a duration type task is scored.
 
 "Group Score" selection should be set to "Normalized" as a default. Contest directors changing the "Group Score" after the discipline has been selected should be warned that their contest no longer meets the traditional definition of the Thermal Duration soaring discipline.
 
+The group score is rounded to 0 decimal places (whole points) by default.
+
 ## Scoring Rules
 
 The Thermal Duration discipline is a duration task. The pilot is attempting to fly a prescribed time and perform a precision landing. Thus the following must be configured by the contest director:

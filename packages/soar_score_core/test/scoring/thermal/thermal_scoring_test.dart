@@ -99,14 +99,14 @@ void main() {
   });
 
   group('defaults', () {
-    test('are Normalized, whole seconds and rounding to 1 decimal', () {
+    test('are Normalized, whole seconds and rounding to whole points', () {
       final options = thermal.options();
 
       expect(options.targetTime.targetTimeSeconds, 600);
       expect(options.targetTime.timeDecimals, 0);
       expect(options.groupScore.mode, GroupScoreMode.normalized);
       expect(options.groupScore.roundingMode, RoundingMode.round);
-      expect(options.groupScore.decimalPlaces, 1);
+      expect(options.groupScore.decimalPlaces, 0);
     });
 
     test('have no motor restart option', () {

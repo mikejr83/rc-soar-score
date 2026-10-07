@@ -112,7 +112,7 @@ void main() {
       WizardDiscipline.thermalDuration,
     );
     expect(thermal.groupScoreMode, GroupScoreMode.normalized);
-    expect(thermal.decimalPlaces, 1);
+    expect(thermal.decimalPlaces, 0);
     expect(thermal.reviewRequests, isTrue);
     expect(thermal.publicUpdateMode, PublicUpdateMode.roundCompletion);
   });
