@@ -33,8 +33,20 @@ class _ParticipantsPageState extends State<ParticipantsPage> {
     if (client == null) {
       return Future.error(StateError('No API client is available.'));
     }
-    return client.participants();
+    return client.participants().then(_sorted);
   }
+
+  /// The API lists profiles in creation order; the list shows them by last
+  /// name, then first name, ignoring case.
+  static List<ParticipantProfile> _sorted(List<ParticipantProfile> profiles) =>
+      [...profiles]..sort((a, b) {
+        final byLast = a.lastName.toLowerCase().compareTo(
+          b.lastName.toLowerCase(),
+        );
+        return byLast != 0
+            ? byLast
+            : a.firstName.toLowerCase().compareTo(b.firstName.toLowerCase());
+      });
 
   void _reload() {
     final participants = _load();

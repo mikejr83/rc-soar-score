@@ -23,6 +23,30 @@ void main() {
     expect(find.text('Bo Peep'), findsOneWidget);
   });
 
+  testWidgets('sorts by last name, then first name, ignoring case', (
+    tester,
+  ) async {
+    final client = clientFor(
+      (_) async => json({
+        'participants': [
+          profile('Zed', 'smith', n: 10).toJson(),
+          profile('Ann', 'Walker', n: 11).toJson(),
+          profile('Bea', 'Smith', n: 12).toJson(),
+          profile('Cal', 'Adams', n: 13).toJson(),
+        ],
+      }),
+    );
+
+    await tester.pumpWidget(participantsApp(client));
+    await tester.pumpAndSettle();
+
+    final names = tester
+        .widgetList<ListTile>(find.byType(ListTile))
+        .map((tile) => (tile.title! as Text).data)
+        .toList();
+    expect(names, ['Cal Adams', 'Bea Smith', 'Zed smith', 'Ann Walker']);
+  });
+
   testWidgets('shows an empty state', (tester) async {
     final client = clientFor((_) async => json({'participants': []}));
 
