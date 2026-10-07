@@ -22,16 +22,16 @@ import '../../repositories/repository.dart';
 import '../../enums/draw_mode.dart';
 import 'basic_draw.dart';
 import '../../models/matrix/current_matrix.dart';
-import 'draw_fairness.dart';
-import 'seeded_random.dart';
+import 'draw_engine.dart';
+import 'draw_optimizer.dart';
 
 /// The flight matrix operations of the API: reading the current matrix and
 /// drawing it.
 ///
-/// The draw is the basic one (`BasicDraw`), which builds each round several
-/// times and keeps the build where pilots meet again least; the optimizer
-/// improves on it later. Every draw is finalized as it is made, so there is no
-/// draft stage yet.
+/// The draw is made by [DrawEngine]: every round is built several times and
+/// the fairest build kept, the whole draw is improved across all rounds, and
+/// that is repeated for several seeds, keeping the fairest result. Every draw
+/// is finalized as it is made, so there is no draft stage yet.
 class MatrixService {
   MatrixService(
     this.repository, {
@@ -44,7 +44,7 @@ class MatrixService {
 
   /// Names the draw engine on every revision. A change to how pilots are
   /// dealt needs a new version, so an old draw can still be reproduced.
-  static const String algorithmVersion = 'basic-2';
+  static const String algorithmVersion = DrawEngine.algorithmVersion;
 
   final Repository repository;
   final DateTime Function() _clock;
@@ -91,7 +91,9 @@ class MatrixService {
   /// Idempotent on [id]: repeating a draw returns the matrix it made. The
   /// [randomSeed] (32-bit unsigned) makes the draw reproducible; one is
   /// generated when null. Each round is built [attemptsPerRound] times and the
-  /// build where pilots meet again least is kept. Every pilot without a retirement is drawn, in
+  /// build where pilots meet again least is kept, the whole draw is improved
+  /// across all rounds, and that is done for [seedCount] seeds, keeping the
+  /// fairest result; the revision stores the winning seed. Every pilot without a retirement is drawn, in
   /// every round. The draw gives each participation without one a participant
   /// number (one running sequence, in the order they were added), creates a
   /// score placeholder for every assignment, and moves the contest from
@@ -104,7 +106,7 @@ class MatrixService {
   ///   draw needs a saved configuration, and a matrix already exists
   ///   afterward), is locked, or uses a draw mode this draw does not support;
   /// - `ArgumentError` when the settings cannot be met: no pilots, [rounds]
-  ///   below 1, [attemptsPerRound] outside 1 to 200, [groupsPerRound] outside 1 to the number of pilots, or fewer
+  ///   below 1, [attemptsPerRound] outside 1 to 200, [seedCount] outside 1 to 20, [groupsPerRound] outside 1 to the number of pilots, or fewer
   ///   groups than the largest team under team protection.
   Future<CurrentMatrix> drawFirst(
     Id contestId, {
@@ -113,6 +115,7 @@ class MatrixService {
     required int groupsPerRound,
     int? randomSeed,
     int attemptsPerRound = BasicDraw.defaultAttemptsPerRound,
+    int seedCount = DrawEngine.defaultSeedCount,
     required Id actorId,
     required MutationMetadata metadata,
   }) async {
@@ -177,14 +180,15 @@ class MatrixService {
       throw ArgumentError('the contest has no pilots to draw');
     }
 
-    final seed = randomSeed ?? _newSeed();
-    final drawn = const BasicDraw().generate(
+    final requestedSeed = randomSeed ?? _newSeed();
+    final drawn = const DrawEngine().generate(
       pilots: pilots,
       rounds: rounds,
       groupsPerRound: groupsPerRound,
       teamProtection: options.teamProtection,
       laneMode: options.laneMode,
-      random: SeededRandom(seed),
+      seed: requestedSeed,
+      seedCount: seedCount,
       attemptsPerRound: attemptsPerRound,
     );
 
@@ -197,7 +201,8 @@ class MatrixService {
       id: id,
       groupsPerRound: groupsPerRound,
       attemptsPerRound: attemptsPerRound,
-      seed: seed,
+      seedCount: seedCount,
+      requestedSeed: requestedSeed,
       options: options,
       actorId: actorId,
       now: now,
@@ -213,11 +218,12 @@ class MatrixService {
     required Contest contest,
     required List<ContestParticipation> participations,
     required List<DrawPilot> pilots,
-    required List<List<List<DrawSlot>>> drawn,
+    required DrawResult drawn,
     required Id id,
     required int groupsPerRound,
     required int attemptsPerRound,
-    required int seed,
+    required int seedCount,
+    required int requestedSeed,
     required CoreOptions options,
     required Id actorId,
     required DateTime now,
@@ -227,14 +233,17 @@ class MatrixService {
       contestId: contest.id,
       revisionNumber: 1,
       firstRound: 1,
-      lastRound: drawn.length,
+      lastRound: drawn.rounds.length,
       drawMode: DrawMode.standardManOnMan,
-      randomSeed: seed,
+      randomSeed: drawn.seed,
       algorithmVersion: algorithmVersion,
       drawConfig: {
         'schema_version': 1,
         'groups_per_round': groupsPerRound,
         'attempts_per_round': attemptsPerRound,
+        'seed_count': seedCount,
+        'requested_seed': requestedSeed,
+        'iterations_per_placement': DrawOptimizer.defaultIterationsPerPlacement,
         'team_protection': options.teamProtection,
         'lane_mode': options.laneMode.json,
         'configured_draw_mode': options.drawMode.json,
@@ -248,10 +257,7 @@ class MatrixService {
             },
         ],
       },
-      fairnessSummary: drawFairness(
-        drawn,
-        teamProtection: options.teamProtection,
-      ),
+      fairnessSummary: drawn.fairness,
       reason: 'initial draw',
       createdBy: actorId,
       createdAt: now,
@@ -263,7 +269,8 @@ class MatrixService {
     final groups = <RoundGroup>[];
     final assignments = <MatrixAssignment>[];
     final placeholders = <ScorePlaceholder>[];
-    for (var r = 0; r < drawn.length; r++) {
+    final drawnRounds = drawn.rounds;
+    for (var r = 0; r < drawnRounds.length; r++) {
       final round = Round(
         id: _newId(),
         contestId: contest.id,
@@ -272,7 +279,7 @@ class MatrixService {
         groupCount: groupsPerRound,
       );
       rounds.add(round);
-      for (var g = 0; g < drawn[r].length; g++) {
+      for (var g = 0; g < drawnRounds[r].length; g++) {
         groups.add(
           RoundGroup(
             id: _newId(),
@@ -281,7 +288,7 @@ class MatrixService {
             groupNumber: g + 1,
           ),
         );
-        for (final slot in drawn[r][g]) {
+        for (final slot in drawnRounds[r][g]) {
           final assignment = MatrixAssignment(
             id: _newId(),
             contestId: contest.id,

@@ -43,6 +43,9 @@ class BasicDraw {
   ///
   /// With [teamProtection], no two pilots of a team share a group; that needs
   /// at least as many groups as the largest team ([ArgumentError] otherwise).
+  /// With [spreadMeetings] off, pilots are dealt without looking at who they
+  /// have met and [attemptsPerRound] is ignored (a random valid draw, the
+  /// baseline of the fairness score).
   /// Throws an [ArgumentError] when the settings cannot be met.
   List<List<List<DrawSlot>>> generate({
     required List<DrawPilot> pilots,
@@ -52,6 +55,7 @@ class BasicDraw {
     required LaneMode laneMode,
     required SeededRandom random,
     int attemptsPerRound = defaultAttemptsPerRound,
+    bool spreadMeetings = true,
   }) {
     if (rounds < 1) {
       throw ArgumentError.value(rounds, 'rounds', 'must be at least 1');
@@ -91,9 +95,10 @@ class BasicDraw {
         pilots,
         groupsPerRound,
         teamProtection,
-        attemptsPerRound,
+        spreadMeetings ? attemptsPerRound : 1,
         meetings,
         random,
+        spreadMeetings,
       );
       for (final group in groups) {
         for (var i = 0; i < group.length; i++) {
@@ -131,6 +136,7 @@ class BasicDraw {
     int attempts,
     List<List<int>> meetings,
     SeededRandom random,
+    bool spreadMeetings,
   ) {
     List<List<int>>? best;
     var bestCost = 0;
@@ -144,6 +150,7 @@ class BasicDraw {
         teamProtection,
         meetings,
         random,
+        spreadMeetings,
       );
       if (groups == null) {
         continue;
@@ -186,6 +193,7 @@ class BasicDraw {
     bool teamProtection,
     List<List<int>> meetings,
     SeededRandom random,
+    bool spreadMeetings,
   ) {
     final base = pilots.length ~/ groupCount;
     final extra = pilots.length % groupCount;
@@ -230,8 +238,10 @@ class BasicDraw {
         }
         // What this pilot adds in this group: the opponents met least win.
         var added = 0;
-        for (final other in groups[g]) {
-          added += 2 * meetings[pilot][other] + 1;
+        if (spreadMeetings) {
+          for (final other in groups[g]) {
+            added += 2 * meetings[pilot][other] + 1;
+          }
         }
         if (candidates.isEmpty || added < bestAdded) {
           bestAdded = added;
