@@ -125,6 +125,18 @@ void main() {
     expect(find.byKey(const ValueKey('breadcrumb-roles')), findsOneWidget);
     expect(find.byKey(const ValueKey('new-role')), findsOneWidget);
 
+    // New role opens the roles page with its name dialog requested.
+    await tester.tap(find.byKey(const ValueKey('new-role')));
+    await tester.pumpAndSettle();
+    expect(
+      tester
+          .widget<ContestShell>(find.byType(ContestShell))
+          .state
+          .uri
+          .toString(),
+      newRolePath,
+    );
+
     await tester.tap(find.text('Landings'));
     await tester.pumpAndSettle();
     expect(find.text('Landings content'), findsOneWidget);

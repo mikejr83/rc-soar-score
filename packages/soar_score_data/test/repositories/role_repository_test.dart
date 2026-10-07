@@ -88,5 +88,58 @@ void _tests(Backend backend) {
       expect(names, ['Helper', 'Pilot', 'Team Manager', 'Timekeeper']);
       expect(anonymous, ['Helper', 'Pilot', 'Team Manager']);
     });
+
+    group('director roles', () {
+      final owner = core.Id.create();
+      late core.Role role;
+
+      setUp(() {
+        role = core.Role(
+          id: core.Id.create(),
+          ownerAccountId: owner,
+          displayName: 'Timekeeper',
+          type: core.RoleType.nonFlier,
+        );
+      });
+
+      test('save inserts a role and bumps the revision on update', () async {
+        final inserted = await repo.save(role, metadata: metadata());
+        expect(inserted.revision, 0);
+        expect(await repo.findById(role.id), inserted);
+
+        final renamed = core.Role(
+          id: role.id,
+          ownerAccountId: owner,
+          displayName: 'Scorer',
+          type: core.RoleType.nonFlier,
+        );
+        final updated = await repo.save(renamed, metadata: metadata());
+
+        expect(updated.revision, 1);
+        expect((await repo.findById(role.id))?.displayName, 'Scorer');
+      });
+
+      test('save refuses a role read at an older revision', () async {
+        await repo.save(role, metadata: metadata());
+        await repo.save(role, metadata: metadata());
+
+        expect(
+          repo.save(role, metadata: metadata()),
+          throwsA(isA<core.StaleRevisionError>()),
+        );
+      });
+
+      test('findById returns null for an unknown id', () async {
+        expect(await repo.findById(core.Id.create()), isNull);
+      });
+
+      test('delete removes the role and says whether it did', () async {
+        await repo.save(role, metadata: metadata());
+
+        expect(await repo.delete(role.id, metadata: metadata()), isTrue);
+        expect(await repo.findById(role.id), isNull);
+        expect(await repo.delete(role.id, metadata: metadata()), isFalse);
+      });
+    });
   });
 }

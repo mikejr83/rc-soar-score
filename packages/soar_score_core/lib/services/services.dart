@@ -26,4 +26,6 @@ export 'landing_tables_service.dart';
 export 'participant_details.dart';
 export 'participants_service.dart';
 export 'participations_service.dart';
+export 'role_usage.dart';
+export 'roles_service.dart';
 export 'teams_service.dart';

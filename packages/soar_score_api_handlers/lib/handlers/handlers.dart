@@ -8,6 +8,7 @@ import 'package:soar_score_api_handlers/handlers/landing_table_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/matrix_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/participants_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/participations_handlers.dart';
+import 'package:soar_score_api_handlers/handlers/roles_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/teams_handlers.dart';
 
 ({Handler healthHandler, Handler apiHandler}) createHandlers(
@@ -25,6 +26,7 @@ import 'package:soar_score_api_handlers/handlers/teams_handlers.dart';
   addConfigurationRoutes(router, repository);
   addLandingTableRoutes(router, repository);
   addParticipantRoutes(router, repository);
+  addRoleRoutes(router, repository);
   addParticipationRoutes(router, repository);
   addTeamRoutes(router, repository);
   addMatrixRoutes(router, repository);

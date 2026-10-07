@@ -135,6 +135,14 @@ void _tests(Backend backend) {
       expect(await repo.listForProfile(first.participantProfileId), [first]);
     });
 
+    test('listForRole returns the participations with that role', () async {
+      final first = examples.first;
+      final sameRole = examples.where((p) => p.roleId == first.roleId);
+
+      expect(await repo.listForRole(first.roleId), unorderedEquals(sameRole));
+      expect(await repo.listForRole(core.Id.create()), isEmpty);
+    });
+
     test('save updates the row and bumps the revision', () async {
       final participation = core.ContestParticipation.fromJson({
         ...examples.first.toJson(),
