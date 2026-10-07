@@ -5,7 +5,8 @@ import '../router.dart';
 import 'shell_destinations.dart';
 
 /// The slim header at the top of the shell's content pane: a back arrow
-/// below the main page, a `Contests` crumb that returns to the main page,
+/// below a top-level page (the main page or the participant list), a root
+/// crumb (`Contests` or `Participants`) that returns to that page,
 /// the selected contest's name in the contest scope, and plain-text crumbs
 /// for deeper segments (go_router provides browser-history back on web).
 ///
@@ -28,11 +29,21 @@ class ShellHeader extends StatelessWidget {
       ? segment[0].toUpperCase() + segment.substring(1)
       : segment;
 
-  /// Path segments to show as plain crumbs after the `Contests` crumb (and
-  /// the contest name in the contest scope).
+  /// Whether [path] is the participant list or a page below it.
+  static bool _isParticipants(String path) =>
+      path == participantsPath || path.startsWith('$participantsPath/');
+
+  /// Path segments to show as plain crumbs after the root crumb (and the
+  /// contest name in the contest scope). Participant ids are not shown;
+  /// the editor reads `New` or `Edit`.
   static List<String> _trailingSegments(String path, String? contestId) {
     final String rest;
-    if (contestId != null) {
+    if (_isParticipants(path)) {
+      if (path == participantsPath) {
+        return const [];
+      }
+      return [path == newParticipantPath ? 'New' : 'Edit'];
+    } else if (contestId != null) {
       rest = path.substring('$contestsPath/$contestId'.length);
     } else if (path.startsWith('$homePath/')) {
       rest = path.substring(homePath.length);
@@ -42,19 +53,21 @@ class ShellHeader extends StatelessWidget {
     return rest.split('/').where((segment) => segment.isNotEmpty).toList();
   }
 
-  void _back(BuildContext context) {
+  void _back(BuildContext context, String rootPath) {
     final router = GoRouter.of(context);
     if (router.canPop()) {
       router.pop();
     } else {
-      router.go(homePath);
+      router.go(rootPath);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isHome = path == homePath;
+    final participants = _isParticipants(path);
+    final rootPath = participants ? participantsPath : homePath;
+    final isRoot = path == rootPath;
     final contestId = contestIdFor(path);
     final crumbStyle = theme.textTheme.bodyMedium?.copyWith(
       color: theme.colorScheme.onSurfaceVariant,
@@ -71,19 +84,23 @@ class ShellHeader extends StatelessWidget {
         padding: const EdgeInsetsDirectional.only(start: 8, end: 16),
         child: Row(
           children: [
-            if (!isHome)
+            if (!isRoot)
               IconButton(
                 key: const ValueKey('breadcrumb-back'),
                 icon: const Icon(Icons.arrow_back),
                 tooltip: 'Back',
-                onPressed: () => _back(context),
+                onPressed: () => _back(context, rootPath),
               ),
             TextButton(
-              key: const ValueKey('breadcrumb-contests'),
-              onPressed: isHome
+              key: ValueKey(
+                participants
+                    ? 'breadcrumb-participants'
+                    : 'breadcrumb-contests',
+              ),
+              onPressed: isRoot
                   ? null
-                  : () => GoRouter.of(context).go(homePath),
-              child: const Text('Contests'),
+                  : () => GoRouter.of(context).go(rootPath),
+              child: Text(participants ? 'Participants' : 'Contests'),
             ),
             if (contestId != null) ...[
               separator,
