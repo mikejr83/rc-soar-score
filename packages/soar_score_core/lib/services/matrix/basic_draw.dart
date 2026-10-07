@@ -29,6 +29,9 @@ class DrawSlot {
 /// meeting counts most even (the lowest sum of squared counts) is kept. The
 /// optimizer (`matrix-draw.md`) improves a draw like this one across all
 /// rounds later; the inputs, the seed and the output shape stay the same.
+///
+/// A draw can continue earlier rounds: the meetings of those rounds count as
+/// if they were the first rounds of this draw.
 class BasicDraw {
   const BasicDraw();
 
@@ -46,6 +49,8 @@ class BasicDraw {
   /// With [spreadMeetings] off, pilots are dealt without looking at who they
   /// have met and [attemptsPerRound] is ignored (a random valid draw, the
   /// baseline of the fairness score).
+  /// [history] holds the rounds flown or kept before these ones. Pilots who
+  /// are not in [pilots] (they retired) are ignored.
   /// Throws an [ArgumentError] when the settings cannot be met.
   List<List<List<DrawSlot>>> generate({
     required List<DrawPilot> pilots,
@@ -56,6 +61,7 @@ class BasicDraw {
     required SeededRandom random,
     int attemptsPerRound = defaultAttemptsPerRound,
     bool spreadMeetings = true,
+    List<List<List<DrawSlot>>> history = const [],
   }) {
     if (rounds < 1) {
       throw ArgumentError.value(rounds, 'rounds', 'must be at least 1');
@@ -89,6 +95,24 @@ class BasicDraw {
     final meetings = [
       for (final _ in pilots) List<int>.filled(pilots.length, 0),
     ];
+    final position = {
+      for (var i = 0; i < pilots.length; i++) pilots[i].participationId: i,
+    };
+    for (final round in history) {
+      for (final group in round) {
+        final present = [
+          for (final slot in group)
+            if (position[slot.pilot.participationId] != null)
+              position[slot.pilot.participationId]!,
+        ];
+        for (var i = 0; i < present.length; i++) {
+          for (var j = i + 1; j < present.length; j++) {
+            meetings[present[i]][present[j]]++;
+            meetings[present[j]][present[i]]++;
+          }
+        }
+      }
+    }
     final result = <List<List<DrawSlot>>>[];
     for (var round = 0; round < rounds; round++) {
       final groups = _round(
