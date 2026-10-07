@@ -14,6 +14,12 @@ The documents in this folder define the contest director's administration experi
 - [`participant-data.md`](participant-data.md) - Director-owned participant editing requirements.
 - [`reports.md`](reports.md) - Contest standings, result, and export views.
 
+## Design briefs
+
+Prompts handed to a design tool to produce visual designs. They summarize the requirement documents above and are not themselves requirements; when a brief and a requirement document disagree, the requirement document wins.
+
+- [`new-contest-wizard-design-brief.md`](new-contest-wizard-design-brief.md) - Design prompt for the new contest wizard.
+
 ## Technology and visual rules
 
 The application should be built to Material 3 standards.
