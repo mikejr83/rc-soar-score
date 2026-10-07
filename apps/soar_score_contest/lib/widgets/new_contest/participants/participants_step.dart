@@ -22,7 +22,7 @@ import 'participants_table.dart';
 /// Step 4: the people in the contest.
 ///
 /// Search adds people as Pilots; `Add participant` opens the participant
-/// editor over the wizard and selects the new person. Rows edit inline
+/// editor over the wizard and appends the new person to the list. Rows edit inline
 /// (stacked cards on narrow windows), several rows can be edited at once,
 /// and a `Needs fixing` filter and the summary links lead to the rows that
 /// block continuing.
@@ -124,15 +124,12 @@ class _ParticipantsStepState extends State<ParticipantsStep> {
     ]);
   }
 
-  void _add(DraftParticipant participant, {bool select = false}) {
+  void _add(DraftParticipant participant) {
     if (_draft.participants.any((p) => p.profileId == participant.profileId)) {
       widget.onMessage?.call('${participant.name} is already in the contest.');
       return;
     }
     _setParticipants([..._draft.participants, participant]);
-    if (select) {
-      setState(() => _selected.add(participant.profileId.value));
-    }
   }
 
   Future<void> _addNew() async {
@@ -159,11 +156,9 @@ class _ParticipantsStepState extends State<ParticipantsStep> {
       return;
     }
     final participant = DraftParticipant.fromProfile(profile);
-    _add(participant, select: true);
+    _add(participant);
     setState(() => _profiles = [...?_profiles, profile]);
-    widget.onMessage?.call(
-      '${participant.name} is added as Pilot and selected.',
-    );
+    widget.onMessage?.call('${participant.name} is added as Pilot.');
   }
 
   void _removeSelected() {
@@ -358,12 +353,15 @@ class _ParticipantsStepState extends State<ParticipantsStep> {
             runSpacing: 8,
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              chip(Icons.groups, '${participants.length} people'),
-              chip(Icons.flight_takeoff, '$scoring scoring pilots'),
-              chip(
-                Icons.badge_outlined,
-                '${participants.length - scoring} non-flying',
-              ),
+              if (_draft.has(ParticipantOption.roles)) ...[
+                chip(Icons.groups, '${participants.length} people'),
+                chip(Icons.flight_takeoff, '$scoring scoring pilots'),
+                chip(
+                  Icons.badge_outlined,
+                  '${participants.length - scoring} non-flying',
+                ),
+              ] else
+                chip(Icons.flight_takeoff, '$scoring pilots'),
               if (needing.isNotEmpty)
                 FilterChip(
                   key: const ValueKey('needs-fixing-filter'),

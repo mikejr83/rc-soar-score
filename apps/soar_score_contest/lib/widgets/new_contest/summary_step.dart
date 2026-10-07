@@ -187,7 +187,7 @@ class SummaryStep extends StatelessWidget {
         ('Back-to-back', draw.allowBackToBack ? 'Allowed' : 'Avoided'),
       ]),
       _Section('Rounds and groups', 6, [
-        ('Rounds', '${draw.rounds.trim()} (planning value)'),
+        ('Rounds', '${d.roundsText.trim()} (rounds can be appended)'),
         ('Groups per round', '${plan.groups}'),
         ('Pilots per group', plan.groupsValid ? plan.perGroupText : '—'),
       ], DraftValidation.drawOptions(d) ? null : 'Group settings are blocked'),
@@ -225,18 +225,32 @@ class SummaryStep extends StatelessWidget {
                 ((constraints.maxWidth + 16) / (_minSectionWidth + 16))
                     .floor()
                     .clamp(1, 3);
-            final width = (constraints.maxWidth - 16 * (columns - 1)) / columns;
-            return Wrap(
-              spacing: 16,
-              runSpacing: 16,
+            final sections = _sections();
+            // Each row of cards is as tall as its tallest card.
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                for (final section in _sections())
-                  SizedBox(
-                    width: width,
-                    child: _SectionCard(
-                      section: section,
-                      busy: busy,
-                      onEdit: () => onEdit(section.step),
+                for (var start = 0; start < sections.length; start += columns)
+                  Padding(
+                    padding: EdgeInsets.only(top: start == 0 ? 0 : 16),
+                    child: IntrinsicHeight(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          for (var i = start; i < start + columns; i++) ...[
+                            if (i > start) const SizedBox(width: 16),
+                            Expanded(
+                              child: i < sections.length
+                                  ? _SectionCard(
+                                      section: sections[i],
+                                      busy: busy,
+                                      onEdit: () => onEdit(sections[i].step),
+                                    )
+                                  : const SizedBox.shrink(),
+                            ),
+                          ],
+                        ],
+                      ),
                     ),
                   ),
               ],

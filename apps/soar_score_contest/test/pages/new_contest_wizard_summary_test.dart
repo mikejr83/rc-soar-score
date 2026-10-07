@@ -123,6 +123,20 @@ void main() {
     expect(stepTitle(tester), 'Discipline');
   });
 
+  testWidgets('the cards in a row of the summary share one height', (
+    tester,
+  ) async {
+    final store = await _ready();
+    await pumpWizard(tester, respond: _FakeApi().call, store: store);
+
+    Rect rect(String title) =>
+        tester.getRect(find.byKey(ValueKey('summary-$title')));
+    final details = rect('Details');
+    final copy = rect('Copy source');
+    expect(details.top, copy.top);
+    expect(details.height, copy.height);
+  });
+
   testWidgets('Create is disabled with its reason while a step is invalid', (
     tester,
   ) async {

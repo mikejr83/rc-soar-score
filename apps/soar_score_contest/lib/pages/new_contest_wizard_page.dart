@@ -631,7 +631,7 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
         throw StateError('No API client is available.');
       }
       final contest = await ContestCreator(client)
-          .create(draft, _store.creationIds);
+          .create(draft, _store.creationIdsFor(draft));
       _store.drawSuggestions[contest.id] = draft.drawSettings;
       _store.discard();
       if (!mounted) {

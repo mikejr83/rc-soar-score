@@ -161,26 +161,31 @@ class ScoringStep extends StatelessWidget {
       defaults.dropPolicy.label.toLowerCase(),
       () => settings.copyWith(dropPolicy: defaults.dropPolicy),
     );
-    final first = tag(
-      settings.firstDrop == defaults.firstDrop,
-      'round ${defaults.firstDrop}',
-      () => settings.copyWith(firstDrop: defaults.firstDrop),
-    );
-    final second = tag(
-      settings.secondDrop == defaults.secondDrop,
-      'round ${defaults.secondDrop}',
-      () => settings.copyWith(secondDrop: defaults.secondDrop),
-    );
-    final review = tag(
-      settings.reviewRequests == defaults.reviewRequests,
-      defaults.reviewRequests ? 'on' : 'off',
-      () => settings.copyWith(reviewRequests: defaults.reviewRequests),
-    );
-    final policy = tag(
-      settings.publicUpdateMode == defaults.publicUpdateMode,
-      ScoringLabels.publicUpdate(defaults.publicUpdateMode).toLowerCase(),
-      () => settings.copyWith(publicUpdateMode: defaults.publicUpdateMode),
-    );
+    // A drop round is only a discipline default when the discipline drops
+    // that many rounds; otherwise the row is a change from its standard.
+    final standard = '${discipline?.name ?? 'platform'} standard';
+    final first = defaults.dropPolicy == DropPolicy.disabled
+        ? tag(
+            false,
+            '$standard (${defaults.dropPolicy.label.toLowerCase()})',
+            () => settings.copyWith(dropPolicy: defaults.dropPolicy),
+          )
+        : tag(
+            settings.firstDrop == defaults.firstDrop,
+            'round ${defaults.firstDrop}',
+            () => settings.copyWith(firstDrop: defaults.firstDrop),
+          );
+    final second = defaults.dropPolicy == DropPolicy.two
+        ? tag(
+            settings.secondDrop == defaults.secondDrop,
+            'round ${defaults.secondDrop}',
+            () => settings.copyWith(secondDrop: defaults.secondDrop),
+          )
+        : tag(
+            false,
+            '$standard (${defaults.dropPolicy.label.toLowerCase()})',
+            () => settings.copyWith(dropPolicy: defaults.dropPolicy),
+          );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -239,7 +244,7 @@ class ScoringStep extends StatelessWidget {
             ),
           ),
           SettingRow(
-            label: 'Decimal precision',
+            label: 'Total score decimal precision',
             description: 'Digits shown and stored after the decimal point.',
             defaultLabel: places.defaultLabel,
             changedFrom: places.changedFrom,
@@ -325,9 +330,6 @@ class ScoringStep extends StatelessWidget {
             description:
                 'Let pilots ask the contest director to review a '
                 'score.',
-            defaultLabel: review.defaultLabel,
-            changedFrom: review.changedFrom,
-            onReset: review.onReset,
             control: Semantics(
               label: 'Score-review requests',
               child: Switch(
@@ -342,9 +344,6 @@ class ScoringStep extends StatelessWidget {
             label: 'Public update policy',
             description:
                 'When public results refresh once the contest is published.',
-            defaultLabel: policy.defaultLabel,
-            changedFrom: policy.changedFrom,
-            onReset: policy.onReset,
             control: const SizedBox.shrink(),
             below: RadioGroup<PublicUpdateMode>(
               groupValue: settings.publicUpdateMode,

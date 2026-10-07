@@ -183,11 +183,11 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(store.draft.participants.single.name, 'Jordan Lee');
-    expect(find.text('1 selected'), findsOneWidget);
-    expect(
-      find.text('Jordan Lee is added as Pilot and selected.'),
-      findsOneWidget,
-    );
+    expect(find.text('1 selected'), findsNothing);
+    expect(find.text('Jordan Lee is added as Pilot.'), findsOneWidget);
+    // Roles are off, so one pilot count replaces the three chips.
+    expect(find.text('1 pilots'), findsOneWidget);
+    expect(find.textContaining('non-flying'), findsNothing);
   });
 
   testWidgets('narrow windows stack the rows as cards', (tester) async {

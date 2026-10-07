@@ -123,7 +123,7 @@ abstract final class DraftValidation {
               : !plan.protectionMet
               ? 'Team protection needs at least ${plan.minGroups} groups.'
               : null),
-      rounds: whole(settings.rounds, 'Enter a whole number above 0.'),
+      rounds: whole(draft.roundsText, 'Enter a whole number above 0.'),
       seededRounds: settings.seeded
           ? whole(settings.seededRounds, 'Enter 1 or more.')
           : null,
