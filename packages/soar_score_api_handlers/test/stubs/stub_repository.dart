@@ -27,12 +27,13 @@ class StubRepository implements core.Repository {
   final participantProfiles = StubParticipantProfileRepository();
   final participations = StubContestParticipationRepository();
   final roles = StubRoleRepository();
-  final matrixAssignments = StubMatrixAssignmentRepository();
   final teams = StubTeamRepository();
   final teamMemberships = StubTeamMembershipRepository();
   final rounds = StubRoundRepository();
   final roundGroups = StubRoundGroupRepository();
   final scorePlaceholders = StubScorePlaceholderRepository();
+  late final matrixAssignments = StubMatrixAssignmentRepository()
+    ..placeholders = scorePlaceholders;
   late final matrixRevisions = StubMatrixRevisionRepository(
     _contestRepository as StubContestRepository,
     participations,

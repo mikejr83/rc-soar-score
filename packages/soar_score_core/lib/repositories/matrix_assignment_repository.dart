@@ -1,5 +1,6 @@
 import '../models/id.dart';
 import '../models/matrix/matrix_assignment.dart';
+import '../models/scores/score_placeholder.dart';
 import 'mutation_metadata.dart';
 
 /// Abstract persistence contract for [MatrixAssignment]s.
@@ -30,11 +31,13 @@ abstract interface class MatrixAssignmentRepository {
   });
 
   /// Stores [moved], an assignment of type `Moved`, and marks the assignment
-  /// it moves from as replaced, in one transaction.
+  /// it moves from as replaced, together with the empty score [placeholder]
+  /// of [moved], in one transaction.
   ///
   /// Throws an `AlreadySupersededError` if the source was already moved.
   Future<MatrixAssignment> move(
     MatrixAssignment moved, {
+    required ScorePlaceholder placeholder,
     required MutationMetadata metadata,
   });
 }

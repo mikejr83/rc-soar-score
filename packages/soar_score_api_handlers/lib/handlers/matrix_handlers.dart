@@ -15,11 +15,15 @@ import 'package:soar_score_core/soar_score_core.dart';
 ///   draw;
 /// - `POST /contests/{id}/matrix/draws` draws and finalizes the first matrix,
 ///   which moves a `Configuring` contest to `Ready` and numbers the
-///   participants.
+///   participants;
+/// - `POST /contests/{id}/matrix/assignments/{assignmentId}/moves` moves a
+///   pilot to another group, lane or round, resetting a score already
+///   entered for the old slot.
 ///
 /// The handlers only translate between HTTP and [MatrixService].
 void addMatrixRoutes(Router router, Repository repository) {
   final service = MatrixService(repository);
+  final moves = AssignmentMoveService(repository);
 
   router.get('/contests/<id>/matrix', (Request request, String id) async {
     requirePrincipal(request);
@@ -43,6 +47,29 @@ void addMatrixRoutes(Router router, Repository repository) {
       attemptsPerRound:
           body.attemptsPerRound ?? BasicDraw.defaultAttemptsPerRound,
       seedCount: body.seedCount ?? DrawEngine.defaultSeedCount,
+      actorId: principal.accountId,
+      metadata: writeMetadata(principal),
+    );
+    return jsonResponse(matrix.toJson(), statusCode: 201);
+  });
+
+  router.post('/contests/<id>/matrix/assignments/<assignmentId>/moves', (
+    Request request,
+    String id,
+    String assignmentId,
+  ) async {
+    final principal = requirePrincipal(request);
+    final body = await readJsonBody(request, MoveAssignmentRequest.fromJson);
+
+    final matrix = await moves.move(
+      Id.parse(id),
+      Id.parse(assignmentId),
+      id: body.id,
+      scheduledRoundId: body.scheduledRoundId,
+      group: body.group,
+      lane: body.lane,
+      reason: body.reason,
+      overrideLocks: body.overrideLocks,
       actorId: principal.accountId,
       metadata: writeMetadata(principal),
     );
