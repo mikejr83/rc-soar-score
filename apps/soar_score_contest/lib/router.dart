@@ -6,6 +6,7 @@ import 'app_mode_provider.dart';
 import 'pages/contest_workspace_page.dart';
 import 'pages/home_page.dart';
 import 'pages/landing_page.dart';
+import 'pages/new_contest_wizard_page.dart';
 import 'pages/participant_editor_page.dart';
 import 'pages/participants_page.dart';
 import 'widgets/contest_shell.dart';
@@ -23,6 +24,10 @@ const String homePath = '$landingPath/home';
 /// The root of the per-contest routes. Every route below it belongs to one
 /// selected contest, and the shell shows contest-scoped navigation there.
 const String contestsPath = '$landingPath/contests';
+
+/// The New Contest wizard. It sits below [contestsPath] but creates a
+/// contest rather than belonging to one, so it stays in the system scope.
+const String newContestPath = '$contestsPath/new';
 
 /// The director's participant list (system scope).
 const String participantsPath = '$landingPath/participants';
@@ -50,6 +55,7 @@ GoRouter buildAppRouter({
 }) {
   // One editor is open at a time, so one guard serves both editor routes.
   final editorGuard = UnsavedChangesGuard();
+  final wizardGuard = UnsavedChangesGuard();
   return GoRouter(
     initialLocation: initialLocation,
     refreshListenable: !kIsWeb ? appMode : null,
@@ -102,6 +108,13 @@ GoRouter buildAppRouter({
               guard: editorGuard,
             ),
             onExit: (context, state) => editorGuard.confirmLeave(),
+          ),
+          GoRoute(
+            path: newContestPath,
+            name: 'newContest',
+            builder: (context, state) =>
+                NewContestWizardPage(guard: wizardGuard),
+            onExit: (context, state) => wizardGuard.confirmLeave(),
           ),
           GoRoute(
             path: '$contestsPath/:contestId/workspace',

@@ -7,9 +7,11 @@ import 'package:go_router/go_router.dart';
 import 'api_client_provider.dart';
 import 'app_mode_provider.dart';
 import 'connectivity_provider.dart';
+import 'contest_draft_provider.dart';
 import 'platform/app_bootstrap.dart';
 import 'router.dart';
 import 'services/connectivity/app_connectivity.dart';
+import 'services/new_contest/contest_draft_store.dart';
 import 'theme/app_theme.dart';
 
 class SoarScoreContestApp extends StatefulWidget {
@@ -51,6 +53,9 @@ class _SoarScoreContestAppState extends State<SoarScoreContestApp> {
   late final bool _ownsAppMode;
   late final GoRouter _router;
 
+  /// The user's single New Contest draft, kept until the app is closed.
+  final ContestDraftStore _draftStore = ContestDraftStore();
+
   @override
   void initState() {
     super.initState();
@@ -82,6 +87,7 @@ class _SoarScoreContestAppState extends State<SoarScoreContestApp> {
       _appMode?.dispose();
     }
     _router.dispose();
+    _draftStore.dispose();
     super.dispose();
   }
 
@@ -95,6 +101,7 @@ class _SoarScoreContestAppState extends State<SoarScoreContestApp> {
       themeMode: ThemeMode.system,
       routerConfig: _router,
     );
+    app = ContestDraftInherited(store: _draftStore, child: app);
     final bootstrap = widget.bootstrap;
     if (bootstrap != null) {
       app = ApiClientInherited(client: bootstrap.apiClient, child: app);

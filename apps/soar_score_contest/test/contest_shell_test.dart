@@ -114,7 +114,7 @@ void main() {
   });
 
   testWidgets('Roles and Landings open their stub pages; the Create contest '
-      'FAB shows the not-wired-up dialog', (tester) async {
+      'FAB opens the New Contest wizard', (tester) async {
     final router = buildShellTestRouter();
     addTearDown(router.dispose);
     await pumpShellRouter(tester, router);
@@ -135,10 +135,17 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('create-contest')));
     await tester.pumpAndSettle();
-    expect(find.text('Create contest is not available yet'), findsOneWidget);
-    await tester.tap(find.text('OK'));
-    await tester.pumpAndSettle();
-    expect(find.byType(AlertDialog), findsNothing);
+    expect(find.text('New contest content'), findsOneWidget);
+
+    // The wizard keeps Contests selected, has no FAB of its own and reads
+    // `Contests > New contest` in the system scope.
+    final rail = tester.widget<NavigationRail>(find.byType(NavigationRail));
+    expect(rail.selectedIndex, 0);
+    expect(find.byKey(const ValueKey('create-contest')), findsNothing);
+    expect(_contestsCrumb(), findsOneWidget);
+    expect(find.text('New contest'), findsOneWidget);
+    expect(find.byKey(const ValueKey('contest-title')), findsNothing);
+    expect(find.byKey(const ValueKey('breadcrumb-back')), findsOneWidget);
   });
 
   testWidgets('on the participant page the FAB adds a participant', (

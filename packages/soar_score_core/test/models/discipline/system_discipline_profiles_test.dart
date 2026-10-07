@@ -81,7 +81,9 @@ void main() {
         'rounding_mode': 'Truncate',
       });
       expect(SystemDisciplineProfiles.f5j.profile.defaultOptions, isNull);
-      expect(SystemDisciplineProfiles.thermal.profile.defaultOptions, isNull);
+      expect(SystemDisciplineProfiles.thermal.profile.defaultOptions, {
+        'decimal_places': 0,
+      });
     });
 
     for (final MapEntry(key: name, value: shipped) in profiles.entries) {

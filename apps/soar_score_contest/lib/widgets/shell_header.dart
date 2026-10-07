@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../contest_draft_provider.dart';
 import '../router.dart';
+import 'new_contest/draft_status_label.dart';
 import 'shell_destinations.dart';
 
 /// The slim header at the top of the shell's content pane: a back arrow
@@ -10,6 +12,9 @@ import 'shell_destinations.dart';
 /// crumb (`Contests` or `Participants`) that returns to that page,
 /// the selected contest's name in the contest scope, and plain-text crumbs
 /// for deeper segments (go_router provides browser-history back on web).
+///
+/// In the New Contest wizard the crumbs read `Contests > New contest` and
+/// the trailing end shows whether the draft is saved.
 ///
 /// It spans the content pane only, leaving the rail full height and as much
 /// vertical space as possible for the routed page.
@@ -54,6 +59,8 @@ class ShellHeader extends StatelessWidget {
       return [path == newParticipantPath ? 'New' : 'Edit'];
     } else if (_stubRoot(path) != null) {
       return const [];
+    } else if (path == newContestPath) {
+      return const ['New contest'];
     } else if (contestId != null) {
       rest = path.substring('$contestsPath/$contestId'.length);
     } else if (path.startsWith('$homePath/')) {
@@ -87,6 +94,9 @@ class ShellHeader extends StatelessWidget {
         : 'breadcrumb-contests';
     final isRoot = path == rootPath;
     final contestId = contestIdFor(path);
+    final draftStore = path == newContestPath
+        ? contestDraftStoreOf(context)
+        : null;
     final crumbStyle = theme.textTheme.bodyMedium?.copyWith(
       color: theme.colorScheme.onSurfaceVariant,
     );
@@ -135,6 +145,15 @@ class ShellHeader extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: Text(_label(segment), style: crumbStyle),
+              ),
+            ],
+            if (draftStore != null) ...[
+              const SizedBox(width: 8),
+              Expanded(
+                child: Align(
+                  alignment: AlignmentDirectional.centerEnd,
+                  child: DraftStatusLabel(store: draftStore),
+                ),
               ),
             ],
           ],

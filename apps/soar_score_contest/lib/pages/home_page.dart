@@ -12,7 +12,9 @@ import '../widgets/message_view.dart';
 /// The main page ("Contests"): the contests the app's API holds, as a list
 /// beside the selected contest's detail (one pane at a time when narrow).
 ///
-/// Loading, empty and error states, selection and opening a contest.
+/// Loading, empty and error states, selection and opening a contest. The
+/// empty state offers `Create contest`, which opens the New Contest wizard
+/// (the rail's FAB does the same at any time).
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -62,7 +64,15 @@ class _HomePageState extends State<HomePage> {
         return const Center(child: CircularProgressIndicator());
       }
       if (contests.isEmpty) {
-        return const MessageView(text: 'No contests yet.');
+        return MessageView(
+          text: 'No contests yet.',
+          action: FilledButton.icon(
+            key: const ValueKey('empty-create-contest'),
+            onPressed: () => context.go(newContestPath),
+            icon: const Icon(Icons.add),
+            label: const Text('Create contest'),
+          ),
+        );
       }
       final selected = contests.firstWhere(
         (contest) => contest.id == _selectedId,

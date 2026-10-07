@@ -23,8 +23,8 @@ class ThermalProfile extends ScoringProfile {
   @override
   int get rulesVersion => 1;
 
-  /// The official defaults. The docs name no rounding default; Thermal uses
-  /// rounding to 1 decimal place, like F5J.
+  /// The official defaults. Thermal rounds the group score to whole points
+  /// (0 decimal places).
   @override
   Map<String, Object?> get defaultOptions => const {
     'target_time': 600,
@@ -32,7 +32,7 @@ class ThermalProfile extends ScoringProfile {
     'fractional_seconds': 0,
     'group_score_mode': 'Normalized',
     'rounding_mode': 'Round',
-    'decimal_places': 1,
+    'decimal_places': 0,
   };
 
   @override

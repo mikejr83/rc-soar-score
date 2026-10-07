@@ -16,13 +16,31 @@ import '../widgets/unsaved_changes_guard.dart';
 /// inline and entered values survive a failed save; a possible duplicate by
 /// email is shown before a new profile is created, and leaving with unsaved
 /// changes asks for confirmation.
+///
+/// Opened from another flow (the New Contest wizard), [onDone] receives the
+/// saved or chosen profile and [onCancel] is called instead of returning to
+/// the participant list.
 class ParticipantEditorPage extends StatefulWidget {
-  const ParticipantEditorPage({super.key, this.participantId, this.guard});
+  const ParticipantEditorPage({
+    super.key,
+    this.participantId,
+    this.guard,
+    this.onDone,
+    this.onCancel,
+  });
 
   final String? participantId;
 
   /// Asked by the router before any navigation away from this page.
   final UnsavedChangesGuard? guard;
+
+  /// Called with the saved profile (or the existing one the user chose)
+  /// instead of returning to the participant list.
+  final ValueChanged<ParticipantProfile>? onDone;
+
+  /// Called instead of returning to the participant list when the user
+  /// cancels.
+  final VoidCallback? onCancel;
 
   @override
   State<ParticipantEditorPage> createState() => _ParticipantEditorPageState();
@@ -141,6 +159,7 @@ class _ParticipantEditorPageState extends State<ParticipantEditorPage> {
       _saving = true;
       _saveError = null;
     });
+    final ParticipantProfile saved;
     try {
       if (_creating) {
         if (!_separateConfirmed) {
@@ -153,7 +172,7 @@ class _ParticipantEditorPageState extends State<ParticipantEditorPage> {
             return;
           }
         }
-        await client.createParticipant(
+        saved = await client.createParticipant(
           CreateParticipantRequest(
             id: Id.create(),
             firstName: _firstName.text.trim(),
@@ -168,7 +187,7 @@ class _ParticipantEditorPageState extends State<ParticipantEditorPage> {
           ),
         );
       } else {
-        await client.updateParticipant(
+        saved = await client.updateParticipant(
           _loaded!.id,
           UpdateParticipantRequest(
             baseRevision: _loaded!.revision,
@@ -195,6 +214,20 @@ class _ParticipantEditorPageState extends State<ParticipantEditorPage> {
     }
     if (mounted) {
       _dirty = false;
+      _leave(saved);
+    }
+  }
+
+  /// Returns to where the editor was opened from, with [profile] when one
+  /// was saved or chosen.
+  void _leave([ParticipantProfile? profile]) {
+    final onDone = widget.onDone;
+    final onCancel = widget.onCancel;
+    if (profile != null && onDone != null) {
+      onDone(profile);
+    } else if (profile == null && onCancel != null) {
+      onCancel();
+    } else {
       context.go(participantsPath);
     }
   }
@@ -226,7 +259,7 @@ class _ParticipantEditorPageState extends State<ParticipantEditorPage> {
   Future<void> _cancel() async {
     if (await _confirmDiscard() && mounted) {
       _dirty = false;
-      context.go(participantsPath);
+      _leave();
     }
   }
 
@@ -279,7 +312,7 @@ class _ParticipantEditorPageState extends State<ParticipantEditorPage> {
           }
           if (await _confirmDiscard() && context.mounted) {
             _dirty = false;
-            context.go(participantsPath);
+            _leave();
           }
         },
         child: _form(context),
@@ -385,7 +418,11 @@ class _ParticipantEditorPageState extends State<ParticipantEditorPage> {
                   key: const ValueKey('use-existing'),
                   onPressed: () {
                     _dirty = false;
-                    context.go(participantPath(match.id.value));
+                    if (widget.onDone != null) {
+                      widget.onDone!(match);
+                    } else {
+                      context.go(participantPath(match.id.value));
+                    }
                   },
                   child: const Text('Use existing participant'),
                 ),
