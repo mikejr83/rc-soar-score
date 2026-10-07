@@ -33,7 +33,8 @@ class StubRepository implements core.Repository {
   final roundGroups = StubRoundGroupRepository();
   final scorePlaceholders = StubScorePlaceholderRepository();
   late final matrixAssignments = StubMatrixAssignmentRepository()
-    ..placeholders = scorePlaceholders;
+    ..placeholders = scorePlaceholders
+    ..participations = participations;
   late final matrixRevisions = StubMatrixRevisionRepository(
     _contestRepository as StubContestRepository,
     participations,

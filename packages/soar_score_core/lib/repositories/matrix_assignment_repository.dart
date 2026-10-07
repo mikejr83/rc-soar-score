@@ -1,5 +1,6 @@
 import '../models/id.dart';
 import '../models/matrix/matrix_assignment.dart';
+import '../models/participants/contest_participation.dart';
 import '../models/scores/score_placeholder.dart';
 import 'mutation_metadata.dart';
 
@@ -38,6 +39,19 @@ abstract interface class MatrixAssignmentRepository {
   Future<MatrixAssignment> move(
     MatrixAssignment moved, {
     required ScorePlaceholder placeholder,
+    required MutationMetadata metadata,
+  });
+
+  /// Stores [lateAdd], an assignment of type `LateAdd`, together with its
+  /// empty score [placeholder] and, when the pilot had none, the
+  /// [numberedParticipation] that gives the pilot a participant number, in
+  /// one transaction.
+  ///
+  /// Throws an `AlreadyStoredError` if one with the same id is stored.
+  Future<MatrixAssignment> addLate(
+    MatrixAssignment lateAdd, {
+    required ScorePlaceholder placeholder,
+    ContestParticipation? numberedParticipation,
     required MutationMetadata metadata,
   });
 }

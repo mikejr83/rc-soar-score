@@ -18,12 +18,16 @@ import 'package:soar_score_core/soar_score_core.dart';
 ///   participants;
 /// - `POST /contests/{id}/matrix/assignments/{assignmentId}/moves` moves a
 ///   pilot to another group, lane or round, resetting a score already
-///   entered for the old slot.
+///   entered for the old slot;
+/// - `POST /contests/{id}/matrix/late-adds` places a pilot who joined after
+///   the draw, or who is making up a missed round, in a group with an open
+///   spot.
 ///
 /// The handlers only translate between HTTP and [MatrixService].
 void addMatrixRoutes(Router router, Repository repository) {
   final service = MatrixService(repository);
   final moves = AssignmentMoveService(repository);
+  final lateAdds = LateAddService(repository);
 
   router.get('/contests/<id>/matrix', (Request request, String id) async {
     requirePrincipal(request);
@@ -70,6 +74,28 @@ void addMatrixRoutes(Router router, Repository repository) {
       lane: body.lane,
       reason: body.reason,
       overrideLocks: body.overrideLocks,
+      actorId: principal.accountId,
+      metadata: writeMetadata(principal),
+    );
+    return jsonResponse(matrix.toJson(), statusCode: 201);
+  });
+
+  router.post('/contests/<id>/matrix/late-adds', (
+    Request request,
+    String id,
+  ) async {
+    final principal = requirePrincipal(request);
+    final body = await readJsonBody(request, LateAddRequest.fromJson);
+
+    final matrix = await lateAdds.add(
+      Id.parse(id),
+      id: body.id,
+      participationId: body.contestParticipationId,
+      scheduledRoundId: body.scheduledRoundId,
+      creditedRoundId: body.creditedRoundId,
+      group: body.group,
+      lane: body.lane,
+      reason: body.reason,
       actorId: principal.accountId,
       metadata: writeMetadata(principal),
     );

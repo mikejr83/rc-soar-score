@@ -15,6 +15,7 @@ export 'dto/create_participant_request.dart';
 export 'dto/create_team_request.dart';
 export 'dto/draw_matrix_request.dart';
 export 'dto/health_dto.dart';
+export 'dto/late_add_request.dart';
 export 'dto/move_assignment_request.dart';
 export 'dto/save_configuration_request.dart';
 export 'dto/update_contest_request.dart';

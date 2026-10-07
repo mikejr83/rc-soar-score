@@ -242,6 +242,62 @@ void _tests(Backend backend) {
       );
     });
 
+    test('addLate stores the row, its placeholder and the number', () async {
+      final base = assignments.first;
+      final participation = await repository.contestParticipationRepository
+          .findById(base.contestParticipationId);
+      final round = core.Round(
+        id: core.Id.create(),
+        contestId: base.contestId,
+        matrixRevisionId: base.matrixRevisionId,
+        ordinal: 3,
+        groupCount: 1,
+      );
+      await repository.roundRepository.save(round, metadata: metadata());
+      await repository.roundGroupRepository.save(
+        core.RoundGroup(
+          id: core.Id.create(),
+          contestId: base.contestId,
+          roundId: round.id,
+          groupNumber: 1,
+        ),
+        metadata: metadata(),
+      );
+      final lateAdd = core.MatrixAssignment.fromJson({
+        ...base.toJson(),
+        'id': core.Id.create().value,
+        'scheduled_round_id': round.id.value,
+        'credited_round_id': round.id.value,
+        'group': 1,
+        'lane': null,
+        'assignment_type': 'LateAdd',
+        'reason': 'Joined late',
+        'created_at': '2026-10-17T16:00:00Z',
+      });
+      final placeholder = placeholderOf(lateAdd);
+
+      await repo.addLate(
+        lateAdd,
+        placeholder: placeholder,
+        numberedParticipation: participation!.withParticipantNumber(99),
+        metadata: metadata(),
+      );
+
+      expect(await repo.findById(lateAdd.id), lateAdd);
+      expect(
+        (await repository.scorePlaceholderRepository.findForAssignment(
+          lateAdd.id,
+        ))?.id,
+        placeholder.id,
+      );
+      expect(
+        (await repository.contestParticipationRepository.findById(
+          participation.id,
+        ))?.participantNumber,
+        99,
+      );
+    });
+
     test('a second move of the same assignment is refused', () async {
       final source = assignments.first;
       final first = moveOf(source);
