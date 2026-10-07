@@ -45,6 +45,33 @@ void main() {
     expect(name.focusNode!.hasFocus, isTrue);
   });
 
+  testWidgets('the end date follows the start date unless a later one is '
+      'chosen', (tester) async {
+    await pumpWizard(tester, respond: emptyApi);
+    String endText() => tester
+        .widget<TextField>(find.byKey(const ValueKey('contest-end')))
+        .controller!
+        .text;
+
+    await tester.enterText(
+      find.byKey(const ValueKey('contest-start')),
+      'Nov 14, 2026',
+    );
+    await tester.pump();
+    expect(endText(), 'Nov 14, 2026');
+
+    await tester.enterText(
+      find.byKey(const ValueKey('contest-end')),
+      'Nov 16, 2026',
+    );
+    await tester.enterText(
+      find.byKey(const ValueKey('contest-start')),
+      'Nov 15, 2026',
+    );
+    await tester.pump();
+    expect(endText(), 'Nov 16, 2026');
+  });
+
   testWidgets('an end date before the start date is an error', (tester) async {
     await pumpWizard(tester, respond: emptyApi);
     await fillDetails(tester);

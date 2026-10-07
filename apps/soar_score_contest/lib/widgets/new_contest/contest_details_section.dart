@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../services/new_contest/contest_draft.dart';
+import '../../services/new_contest/draft_dates.dart';
 import '../../services/new_contest/draft_validation.dart';
 import '../../services/new_contest/time_zones.dart';
 import 'span_grid.dart';
@@ -72,6 +73,15 @@ class _ContestDetailsSectionState extends State<ContestDetailsSection> {
     super.dispose();
   }
 
+  /// Records a new start date and shows the end date that follows it.
+  void _changeStart(String text) {
+    final next = DraftDates.withStartDate(widget.draft, text);
+    if (next.endDate != _end.text) {
+      _end.text = next.endDate;
+    }
+    widget.onChanged(next);
+  }
+
   Future<void> _pickDate(TextEditingController controller, bool start) async {
     final current =
         DraftValidation.parseDate(controller.text) ??
@@ -89,11 +99,11 @@ class _ContestDetailsSectionState extends State<ContestDetailsSection> {
     }
     final text = DraftValidation.dateFormat.format(picked);
     controller.text = text;
-    widget.onChanged(
-      start
-          ? widget.draft.copyWith(startDate: text)
-          : widget.draft.copyWith(endDate: text),
-    );
+    if (start) {
+      _changeStart(text);
+    } else {
+      widget.onChanged(widget.draft.copyWith(endDate: text));
+    }
   }
 
   @override
@@ -141,11 +151,9 @@ class _ContestDetailsSectionState extends State<ContestDetailsSection> {
       label: start ? 'Start date *' : 'End date *',
       hint: 'MMM D, YYYY',
       check: start ? DetailsField.startDate : DetailsField.endDate,
-      onChanged: (value) => widget.onChanged(
-        start
-            ? draft.copyWith(startDate: value)
-            : draft.copyWith(endDate: value),
-      ),
+      onChanged: (value) => start
+          ? _changeStart(value)
+          : widget.onChanged(draft.copyWith(endDate: value)),
       suffix: IconButton(
         tooltip: start ? 'Choose the start date' : 'Choose the end date',
         icon: Icon(
