@@ -62,6 +62,7 @@ extension DraftCopy on ContestDraft {
             DraftParticipant(
               profileId: pilot.profileId,
               name: pilot.name,
+              email: pilot.email,
               classification: pilot.classification ?? '',
             ),
       ],

@@ -2,6 +2,7 @@ import 'package:intl/intl.dart';
 
 import 'contest_draft.dart';
 import 'participant_option.dart';
+import 'participant_rules.dart';
 
 /// A required or checked field in step 1.
 enum DetailsField {
@@ -68,4 +69,13 @@ abstract final class DraftValidation {
     final value = int.tryParse(draft.teamPilotCount.trim());
     return value == null || value < 1 ? 'Enter a whole number above 0.' : null;
   }
+
+  /// The fewest scoring pilots a contest can have.
+  static const int minScoringPilots = 2;
+
+  /// Whether step 4 can be left: enough scoring pilots and every row
+  /// complete.
+  static bool participants(ContestDraft draft) =>
+      draft.scoringCount >= minScoringPilots &&
+      draft.participantsNeedingFixes.isEmpty;
 }

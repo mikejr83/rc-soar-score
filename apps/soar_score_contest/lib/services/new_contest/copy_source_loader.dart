@@ -22,10 +22,10 @@ Future<CopySource> loadCopySource(ApiClient client, Contest contest) async {
   final pilots = participations
       .where((participation) => participation.roleType == RoleType.pilot)
       .toList();
-  final names = <Id, String>{};
+  final profiles = <Id, ParticipantProfile>{};
   if (pilots.isNotEmpty) {
     for (final profile in await client.participants()) {
-      names[profile.id] = '${profile.firstName} ${profile.lastName}';
+      profiles[profile.id] = profile;
     }
   }
   return CopySource(
@@ -38,11 +38,19 @@ Future<CopySource> loadCopySource(ApiClient client, Contest contest) async {
         : CoreOptions.fromMap(configuration.config.core),
     pilots: [
       for (final pilot in pilots)
-        SourcePilot(
-          profileId: pilot.participantProfileId,
-          name: names[pilot.participantProfileId] ?? 'Unknown pilot',
-          classification: pilot.classification,
-        ),
+        if (profiles[pilot.participantProfileId] case final profile?)
+          SourcePilot(
+            profileId: pilot.participantProfileId,
+            name: '${profile.firstName} ${profile.lastName}',
+            email: profile.email,
+            classification: pilot.classification,
+          )
+        else
+          SourcePilot(
+            profileId: pilot.participantProfileId,
+            name: 'Unknown pilot',
+            classification: pilot.classification,
+          ),
     ],
   );
 }

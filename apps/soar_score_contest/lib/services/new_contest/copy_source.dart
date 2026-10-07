@@ -8,11 +8,13 @@ class SourcePilot {
   const SourcePilot({
     required this.profileId,
     required this.name,
+    this.email,
     this.classification,
   });
 
   final Id profileId;
   final String name;
+  final String? email;
   final String? classification;
 }
 

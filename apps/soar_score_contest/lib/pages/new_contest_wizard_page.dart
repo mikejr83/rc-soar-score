@@ -10,11 +10,13 @@ import '../services/new_contest/contest_draft.dart';
 import '../services/new_contest/contest_draft_store.dart';
 import '../services/new_contest/draft_validation.dart';
 import '../services/new_contest/participant_option.dart';
+import '../services/new_contest/participant_rules.dart';
 import '../services/new_contest/wizard_discipline.dart';
 import '../widgets/new_contest/contest_details_section.dart';
 import '../widgets/new_contest/copy_source_section.dart';
 import '../widgets/new_contest/discipline_step.dart';
 import '../widgets/new_contest/participant_options_step.dart';
+import '../widgets/new_contest/participants/participants_step.dart';
 import '../widgets/new_contest/wizard_banner.dart';
 import '../widgets/new_contest/wizard_confirm_dialog.dart';
 import '../widgets/new_contest/wizard_dot_stepper.dart';
@@ -32,8 +34,8 @@ import '../widgets/unsaved_changes_guard.dart';
 /// to a visited step or leaving loses nothing; leaving only warns when
 /// something is actually unsaved.
 ///
-/// Steps 1 to 3 are built. Steps 4 to 7 are listed and reachable but not
-/// built yet, so the wizard cannot go past step 4.
+/// Steps 1 to 4 are built. Steps 5 to 7 are listed and reachable but not
+/// built yet, so the wizard cannot go past step 5.
 class NewContestWizardPage extends StatefulWidget {
   const NewContestWizardPage({super.key, this.guard});
 
@@ -70,7 +72,7 @@ class NewContestWizardPage extends StatefulWidget {
   ];
 
   /// The steps built so far; later steps show a placeholder.
-  static const int builtSteps = 3;
+  static const int builtSteps = 4;
 
   static const String leftMessage =
       'Left the wizard. Your draft is kept until you close the app.';
@@ -155,6 +157,7 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
     1 => DraftValidation.details(_draft).isEmpty,
     2 => DraftValidation.discipline(_draft) == null,
     3 => DraftValidation.teamPilotCount(_draft) == null,
+    4 => DraftValidation.participants(_draft),
     _ => null,
   };
 
@@ -162,7 +165,8 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
   /// soon as a typed team count is invalid).
   bool _showErrors(int step) =>
       _tried.contains(step) ||
-      (step == 3 && _draft.teamPilotCount.trim().isNotEmpty);
+      (step == 3 && _draft.teamPilotCount.trim().isNotEmpty) ||
+      (step == 4 && _draft.participantsNeedingFixes.isNotEmpty);
 
   List<WizardStepEntry> get _entries => [
     for (var n = 1; n <= NewContestWizardPage.stepTitles.length; n++)
@@ -474,6 +478,14 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
       teamPilotCountFocus: _teamCountFocus,
       showErrors: _showErrors(3),
     ),
+    4 => ParticipantsStep(
+      draft: _draft,
+      onChanged: _update,
+      showErrors: _showErrors(4),
+      offline: _offline,
+      narrow: narrow,
+      onMessage: _message,
+    ),
     _ => const _NotBuiltYet(),
   };
 
@@ -579,7 +591,7 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
   );
 }
 
-/// The placeholder for steps 4 to 7 until they are built.
+/// The placeholder for steps 5 to 7 until they are built.
 class _NotBuiltYet extends StatelessWidget {
   const _NotBuiltYet();
 
@@ -608,9 +620,9 @@ class _NotBuiltYet extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Participants, scoring, draw options and the summary come '
-                    'in a later update. Your draft keeps everything you '
-                    'entered in the earlier steps.',
+                    'Scoring, draw options and the summary come in a later '
+                    'update. Your draft keeps everything you entered in the '
+                    'earlier steps.',
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),

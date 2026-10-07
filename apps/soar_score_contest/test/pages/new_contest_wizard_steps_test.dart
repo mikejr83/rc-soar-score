@@ -190,12 +190,11 @@ void main() {
     await tester.pump();
     await next(tester);
 
-    // Step 4 is reachable but not built yet, so Create can't be reached.
+    // Step 4 needs at least 2 scoring pilots.
     expect(stepTitle(tester), 'Participants');
-    expect(find.byKey(const ValueKey('wizard-step-not-built')), findsOneWidget);
-    expect(find.text('This step isn’t built yet.'), findsOneWidget);
     await next(tester);
     expect(stepTitle(tester), 'Participants');
+    expect(find.text('Add at least 2 scoring pilots'), findsOneWidget);
   });
 
   testWidgets('narrow windows show the dot stepper and reflow the fields', (
