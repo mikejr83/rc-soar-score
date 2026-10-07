@@ -5,6 +5,10 @@ import 'package:soar_score_core/soar_score_core.dart';
 
 import '../support/participant_test_support.dart';
 
+/// The title of the row for [name]; titles also carry the email, so match on
+/// the name part of the rich text.
+Finder _name(String name) => find.textContaining(name, findRichText: true);
+
 void main() {
   testWidgets('lists the participants the API returns', (tester) async {
     final client = clientFor(
@@ -19,9 +23,13 @@ void main() {
     await tester.pumpWidget(participantsApp(client));
     await tester.pumpAndSettle();
 
-    expect(find.text('Ada Lovelace'), findsOneWidget);
-    expect(find.text('Front Range · ada@example.com'), findsOneWidget);
-    expect(find.text('Bo Peep'), findsOneWidget);
+    expect(_name('Ada Lovelace'), findsOneWidget);
+    expect(find.text('Front Range'), findsOneWidget);
+    expect(
+      find.textContaining('ada@example.com', findRichText: true),
+      findsOne,
+    );
+    expect(_name('Bo Peep'), findsOneWidget);
   });
 
   testWidgets('sorts by last name, then first name, ignoring case', (
@@ -43,7 +51,12 @@ void main() {
 
     final names = tester
         .widgetList<ListTile>(find.byType(ListTile))
-        .map((tile) => (tile.title! as Text).data)
+        .map(
+          (tile) => (tile.title! as Text).textSpan!
+              .toPlainText()
+              .split('\uFFFC')
+              .first,
+        )
         .toList();
     expect(names, ['Cal Adams', 'Bea Smith', 'Zed smith', 'Ann Walker']);
   });
@@ -94,19 +107,19 @@ void main() {
     expect(find.byType(ListTile), findsNWidgets(3));
 
     await search('lovelace ada');
-    expect(find.text('Ada Lovelace'), findsOneWidget);
+    expect(_name('Ada Lovelace'), findsOneWidget);
     expect(find.byType(ListTile), findsOneWidget);
 
     await search('BO@EXAMPLE');
-    expect(find.text('Bo Peep'), findsOneWidget);
+    expect(_name('Bo Peep'), findsOneWidget);
     expect(find.byType(ListTile), findsOneWidget);
 
     await search('fai-2002');
-    expect(find.text('Bo Peep'), findsOneWidget);
+    expect(_name('Bo Peep'), findsOneWidget);
     expect(find.byType(ListTile), findsOneWidget);
 
     await search('ama 555');
-    expect(find.text('Ada Lovelace'), findsOneWidget);
+    expect(_name('Ada Lovelace'), findsOneWidget);
     expect(find.byType(ListTile), findsOneWidget);
 
     await search('zzz');
@@ -114,6 +127,37 @@ void main() {
 
     await search('');
     expect(find.byType(ListTile), findsNWidgets(3));
+  });
+
+  testWidgets('shows IDs and club in the subtitle and copes with no email', (
+    tester,
+  ) async {
+    final base = profile('Ada', 'Lovelace');
+    final noEmail = ParticipantProfile(
+      id: base.id,
+      ownerAccountId: base.ownerAccountId,
+      firstName: 'Ada',
+      lastName: 'Lovelace',
+      club: 'Front Range',
+      faiNumber: 'FAI-1001',
+      nationalOrgId: 'AMA 555',
+      createdAt: base.createdAt,
+      updatedAt: base.updatedAt,
+    );
+    final client = clientFor(
+      (_) async => json({
+        'participants': [noEmail.toJson()],
+      }),
+    );
+
+    await tester.pumpWidget(participantsApp(client));
+    await tester.pumpAndSettle();
+
+    expect(_name('Ada Lovelace'), findsOneWidget);
+    expect(
+      find.text('National ID: AMA 555 · FAI Number: FAI-1001 · Front Range'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('shows an empty state', (tester) async {
@@ -143,7 +187,7 @@ void main() {
 
     await tester.tap(find.text('Retry'));
     await tester.pumpAndSettle();
-    expect(find.text('Ada Lovelace'), findsOneWidget);
+    expect(_name('Ada Lovelace'), findsOneWidget);
   });
 
   testWidgets('add opens the editor and a row opens its profile', (
@@ -213,6 +257,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('The participant is in a contest.'), findsOneWidget);
-    expect(find.text('Ada Lovelace'), findsOneWidget);
+    expect(_name('Ada Lovelace'), findsOneWidget);
   });
 }

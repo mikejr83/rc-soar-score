@@ -175,22 +175,29 @@ class _ParticipantsPageState extends State<ParticipantsPage> {
   );
 
   static Text _title(ParticipantProfile profile) {
-    // return Text('${profile.firstName} ${profile.lastName}');
-    return Text.rich(TextSpan(
-      children: [
-        TextSpan(text: '${profile.firstName} ${profile.lastName}'),
-        WidgetSpan(child: SizedBox(width: 8)),
-        TextSpan(text: profile.email!, style: const TextStyle(fontStyle: FontStyle.italic, fontSize: 12)),
-      ]
-    ));
+    final email = profile.email;
+    return Text.rich(
+      TextSpan(
+        children: [
+          TextSpan(text: '${profile.firstName} ${profile.lastName}'),
+          if (email != null && email.isNotEmpty) ...[
+            const WidgetSpan(child: SizedBox(width: 8)),
+            TextSpan(
+              text: email,
+              style: const TextStyle(fontStyle: FontStyle.italic, fontSize: 12),
+            ),
+          ],
+        ],
+      ),
+    );
   }
 
   static String _subtitle(ParticipantProfile profile) {
     List<String> parts = [];
-    if(profile.nationalOrgId != null && profile.nationalOrgId!.isNotEmpty) {
+    if (profile.nationalOrgId != null && profile.nationalOrgId!.isNotEmpty) {
       parts.add("National ID: ${profile.nationalOrgId!}");
     }
-    if(profile.faiNumber != null && profile.faiNumber!.isNotEmpty) {
+    if (profile.faiNumber != null && profile.faiNumber!.isNotEmpty) {
       parts.add("FAI Number: ${profile.faiNumber!}");
     }
 
