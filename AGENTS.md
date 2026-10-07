@@ -48,7 +48,8 @@ Soar Score is an RC sailplane soaring contest scoring and management suite. It c
 ## CI/CD
 
 - GitHub Actions workflow in `.github/workflows/ci.yml` (owned by ticket 011)
-- Runs on push/PR to `main` and `develop` branches
+- Runs on push/PR to `master`
+- Documentation-only changes skip the workflow entirely (`paths-ignore` covers `plan/**`, `docs/**`, `**/*.md`, `LICENSE`, `.prettierrc`, `.prettierignore`). A docs-only PR showing no checks is expected, not a CI problem.
 - Steps: install deps → analyze → test → build
 
 **Toolchain pins** (recorded in `plan/tickets/mvp-implementation/001-setup-toolchain-baseline.md`, which is the source of truth — CI must not drift from it):
