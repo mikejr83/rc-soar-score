@@ -13,6 +13,7 @@ export 'dto/contest_action_request.dart';
 export 'dto/create_contest_request.dart';
 export 'dto/create_participant_request.dart';
 export 'dto/create_team_request.dart';
+export 'dto/draw_matrix_request.dart';
 export 'dto/health_dto.dart';
 export 'dto/save_configuration_request.dart';
 export 'dto/update_contest_request.dart';

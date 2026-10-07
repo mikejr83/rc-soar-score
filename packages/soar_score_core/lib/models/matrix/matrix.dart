@@ -1,3 +1,4 @@
+export 'current_matrix.dart';
 export 'matrix_assignment.dart';
 export 'matrix_draw.dart';
 export 'matrix_revision.dart';

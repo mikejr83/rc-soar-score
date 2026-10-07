@@ -1,0 +1,81 @@
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
+import 'package:soar_score_api/soar_score_api.dart';
+import 'package:soar_score_core/soar_score_core.dart';
+import 'package:test/test.dart';
+
+void main() {
+  final baseUrl = Uri.parse('http://localhost:8085');
+  const jsonHeaders = <String, String>{
+    'content-type': 'application/json; charset=utf-8',
+  };
+  final contestId = Id.parse('019c0000-0000-7000-8000-000000000020');
+  final revisionId = Id.parse('019c0000-0000-7000-8000-000000000501');
+  final matrixPath = '/api/v1/contests/${contestId.value}/matrix';
+
+  late http.Request seen;
+
+  ApiClient clientFor(http.Response Function(http.Request) respond) {
+    final client = ApiClient(
+      baseUrl: baseUrl,
+      httpClient: MockClient((request) async {
+        seen = request;
+        return respond(request);
+      }),
+    );
+    addTearDown(client.close);
+    return client;
+  }
+
+  http.Response body(Object json, [int status = 200]) =>
+      http.Response(jsonEncode(json), status, headers: jsonHeaders);
+
+  test('matrix(id) reads the current matrix, empty before a draw', () async {
+    final client = clientFor((_) => body(CurrentMatrix().toJson()));
+
+    final matrix = await client.matrix(contestId);
+
+    expect(matrix.isEmpty, isTrue);
+    expect(seen.method, 'GET');
+    expect(seen.url.path, matrixPath);
+  });
+
+  test('drawMatrix POSTs the request and decodes the matrix', () async {
+    final client = clientFor((_) => body(CurrentMatrix().toJson(), 201));
+    final request = DrawMatrixRequest(
+      id: revisionId,
+      rounds: 5,
+      groupsPerRound: 3,
+      randomSeed: 42,
+    );
+
+    await client.drawMatrix(contestId, request);
+
+    expect(seen.method, 'POST');
+    expect(seen.url.path, '$matrixPath/draws');
+    expect(jsonDecode(seen.body), {
+      'id': revisionId.value,
+      'rounds': 5,
+      'groups_per_round': 3,
+      'random_seed': 42,
+    });
+  });
+
+  test('a conflict is an ApiHttpError', () async {
+    final client = clientFor(
+      (_) => body({
+        'error': {'code': 'matrix_exists', 'message': 'already drawn'},
+      }, 409),
+    );
+
+    await expectLater(
+      client.drawMatrix(
+        contestId,
+        DrawMatrixRequest(id: revisionId, rounds: 1, groupsPerRound: 1),
+      ),
+      throwsA(isA<ApiHttpError>().having((e) => e.statusCode, 'status', 409)),
+    );
+  });
+}

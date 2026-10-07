@@ -118,6 +118,89 @@ void _tests(Backend backend) {
       );
     });
 
+    /// [newDraw] finalized: a placeholder for its assignment, a participant
+    /// number for the assigned participation, and the contest made Ready.
+    Future<core.FinalizedDraw> newFinalized({String? placeholderId}) async {
+      final draw = newDraw();
+      final assignment = draw.assignments.single;
+      final participation = (await repository.contestParticipationRepository
+          .findById(assignment.contestParticipationId))!;
+      final contest = (await repository.contestRepository.findById(
+        example.contestId,
+      ))!;
+      return core.FinalizedDraw(
+        draw: draw,
+        placeholders: [
+          core.ScorePlaceholder(
+            id: core.Id.parse(placeholderId ?? core.Id.create().value),
+            contestId: example.contestId,
+            contestParticipationId: participation.id,
+            assignmentId: assignment.id,
+          ),
+        ],
+        numberedParticipations: [participation.withParticipantNumber(99)],
+        contest: contest.copyWithState(
+          lifecycleState: core.LifecycleState.ready,
+          updatedAt: DateTime.utc(2026, 5, 1, 12),
+        ),
+      );
+    }
+
+    test('appendFinalizedDraw stores the draw, placeholders, participant '
+        'numbers and the Ready contest together', () async {
+      final finalized = await newFinalized();
+      final before = await inst.count('mutation_records');
+
+      await repo.appendFinalizedDraw(finalized, metadata: metadata());
+
+      final assignment = finalized.draw.assignments.single;
+      expect(
+        await repo.findById(finalized.draw.revision.id),
+        finalized.draw.revision,
+      );
+      expect(
+        (await repository.scorePlaceholderRepository.findForAssignment(
+          assignment.id,
+        ))!.contestParticipationId,
+        assignment.contestParticipationId,
+      );
+      expect(
+        (await repository.contestParticipationRepository.findById(
+          assignment.contestParticipationId,
+        ))!.participantNumber,
+        99,
+      );
+      expect(
+        (await repository.contestRepository.findById(example.contestId))!
+            .lifecycleState,
+        core.LifecycleState.ready,
+      );
+      // Revision, round, group, assignment, placeholder, participation and
+      // contest.
+      expect(await inst.count('mutation_records'), before + 7);
+    });
+
+    test('appendFinalizedDraw stores nothing when a placeholder is '
+        'refused', () async {
+      final taken = (await repository.scorePlaceholderRepository.listForContest(
+        example.contestId,
+      )).first;
+      final finalized = await newFinalized(placeholderId: taken.id.value);
+
+      await expectLater(
+        repo.appendFinalizedDraw(finalized, metadata: metadata()),
+        throwsA(anything),
+      );
+
+      expect(await repo.findById(finalized.draw.revision.id), isNull);
+      expect(
+        (await repository.contestParticipationRepository.findById(
+          finalized.draw.assignments.single.contestParticipationId,
+        ))!.participantNumber,
+        isNot(99),
+      );
+    });
+
     test('listForContest and latestForContest order by number', () async {
       final draw = newDraw();
       await repo.appendDraw(draw, metadata: metadata());

@@ -9,6 +9,7 @@ import '../dto/contest_action_request.dart';
 import '../dto/create_contest_request.dart';
 import '../dto/create_participant_request.dart';
 import '../dto/create_team_request.dart';
+import '../dto/draw_matrix_request.dart';
 import '../dto/health_dto.dart';
 import '../dto/save_configuration_request.dart';
 import '../dto/update_contest_request.dart';
@@ -391,6 +392,29 @@ class ApiClient {
         '/api/v1/contests/${id.value}/team-memberships/${membershipId.value}',
       ),
     );
+  }
+
+  /// `GET /api/v1/contests/{id}/matrix` — the contest's current matrix:
+  /// the latest finalized revision with its rounds, groups and assignments.
+  /// Empty (no revision) until the first draw.
+  Future<CurrentMatrix> matrix(Id id) async {
+    final uri = _resolve('/api/v1/contests/${id.value}/matrix');
+    final response = await _send('GET', uri);
+    return _decode<CurrentMatrix>(response, uri, CurrentMatrix.fromJson);
+  }
+
+  /// `POST /api/v1/contests/{id}/matrix/draws` — draws and finalizes the
+  /// first matrix.
+  ///
+  /// Repeating the same [request] returns the matrix it drew. A contest that
+  /// is not being configured, is locked, or already has a matrix is an
+  /// [ApiHttpError] with status 409; settings the draw cannot meet (no
+  /// pilots, more groups than pilots, a team larger than the groups under
+  /// team protection) are status 400.
+  Future<CurrentMatrix> drawMatrix(Id id, DrawMatrixRequest request) async {
+    final uri = _resolve('/api/v1/contests/${id.value}/matrix/draws');
+    final response = await _send('POST', uri, body: request.toJson());
+    return _decode<CurrentMatrix>(response, uri, CurrentMatrix.fromJson);
   }
 
   Uri _resolve(String path) => baseUrl.resolveUri(Uri.parse(path));

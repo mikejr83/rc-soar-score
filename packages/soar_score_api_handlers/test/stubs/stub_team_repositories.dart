@@ -64,32 +64,3 @@ class StubTeamMembershipRepository implements TeamMembershipRepository {
   Future<bool> delete(Id id, {required MutationMetadata metadata}) async =>
       memberships.remove(id) != null;
 }
-
-/// A [MatrixRevisionRepository] that reports a drawn matrix for the contests
-/// a test marks as drawn.
-class StubMatrixRevisionRepository implements MatrixRevisionRepository {
-  final Set<Id> drawnContests = {};
-
-  @override
-  Future<MatrixRevision?> latestForContest(Id contestId) async =>
-      drawnContests.contains(contestId)
-      ? MatrixRevision(
-          id: Id.create(),
-          contestId: contestId,
-          revisionNumber: 1,
-          firstRound: 1,
-          lastRound: 1,
-          drawMode: DrawMode.values.first,
-          randomSeed: 1,
-          algorithmVersion: 'test',
-          drawConfig: const {},
-          seedingSnapshot: const {},
-          createdBy: Id.create(),
-          createdAt: DateTime.utc(2026, 10, 1),
-        )
-      : null;
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) =>
-      throw UnimplementedError('${invocation.memberName} is not stubbed');
-}
