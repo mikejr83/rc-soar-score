@@ -28,8 +28,9 @@ import 'seeded_random.dart';
 /// The flight matrix operations of the API: reading the current matrix and
 /// drawing it.
 ///
-/// The draw is the basic one (`BasicDraw`); the optimizer replaces the
-/// dealing later. Every draw is finalized as it is made, so there is no
+/// The draw is the basic one (`BasicDraw`), which builds each round several
+/// times and keeps the build where pilots meet again least; the optimizer
+/// improves on it later. Every draw is finalized as it is made, so there is no
 /// draft stage yet.
 class MatrixService {
   MatrixService(
@@ -43,7 +44,7 @@ class MatrixService {
 
   /// Names the draw engine on every revision. A change to how pilots are
   /// dealt needs a new version, so an old draw can still be reproduced.
-  static const String algorithmVersion = 'basic-1';
+  static const String algorithmVersion = 'basic-2';
 
   final Repository repository;
   final DateTime Function() _clock;
@@ -89,7 +90,8 @@ class MatrixService {
   ///
   /// Idempotent on [id]: repeating a draw returns the matrix it made. The
   /// [randomSeed] (32-bit unsigned) makes the draw reproducible; one is
-  /// generated when null. Every pilot without a retirement is drawn, in
+  /// generated when null. Each round is built [attemptsPerRound] times and the
+  /// build where pilots meet again least is kept. Every pilot without a retirement is drawn, in
   /// every round. The draw gives each participation without one a participant
   /// number (one running sequence, in the order they were added), creates a
   /// score placeholder for every assignment, and moves the contest from
@@ -102,7 +104,7 @@ class MatrixService {
   ///   draw needs a saved configuration, and a matrix already exists
   ///   afterward), is locked, or uses a draw mode this draw does not support;
   /// - `ArgumentError` when the settings cannot be met: no pilots, [rounds]
-  ///   below 1, [groupsPerRound] outside 1 to the number of pilots, or fewer
+  ///   below 1, [attemptsPerRound] outside 1 to 200, [groupsPerRound] outside 1 to the number of pilots, or fewer
   ///   groups than the largest team under team protection.
   Future<CurrentMatrix> drawFirst(
     Id contestId, {
@@ -110,6 +112,7 @@ class MatrixService {
     required int rounds,
     required int groupsPerRound,
     int? randomSeed,
+    int attemptsPerRound = BasicDraw.defaultAttemptsPerRound,
     required Id actorId,
     required MutationMetadata metadata,
   }) async {
@@ -182,6 +185,7 @@ class MatrixService {
       teamProtection: options.teamProtection,
       laneMode: options.laneMode,
       random: SeededRandom(seed),
+      attemptsPerRound: attemptsPerRound,
     );
 
     final now = _clock();
@@ -192,6 +196,7 @@ class MatrixService {
       drawn: drawn,
       id: id,
       groupsPerRound: groupsPerRound,
+      attemptsPerRound: attemptsPerRound,
       seed: seed,
       options: options,
       actorId: actorId,
@@ -211,6 +216,7 @@ class MatrixService {
     required List<List<List<DrawSlot>>> drawn,
     required Id id,
     required int groupsPerRound,
+    required int attemptsPerRound,
     required int seed,
     required CoreOptions options,
     required Id actorId,
@@ -228,6 +234,7 @@ class MatrixService {
       drawConfig: {
         'schema_version': 1,
         'groups_per_round': groupsPerRound,
+        'attempts_per_round': attemptsPerRound,
         'team_protection': options.teamProtection,
         'lane_mode': options.laneMode.json,
         'configured_draw_mode': options.drawMode.json,
@@ -241,7 +248,10 @@ class MatrixService {
             },
         ],
       },
-      fairnessSummary: drawFairness(drawn),
+      fairnessSummary: drawFairness(
+        drawn,
+        teamProtection: options.teamProtection,
+      ),
       reason: 'initial draw',
       createdBy: actorId,
       createdAt: now,

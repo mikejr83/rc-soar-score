@@ -49,6 +49,7 @@ void main() {
       rounds: 5,
       groupsPerRound: 3,
       randomSeed: 42,
+      attemptsPerRound: 20,
     );
 
     await client.drawMatrix(contestId, request);
@@ -60,6 +61,7 @@ void main() {
       'rounds': 5,
       'groups_per_round': 3,
       'random_seed': 42,
+      'attempts_per_round': 20,
     });
   });
 

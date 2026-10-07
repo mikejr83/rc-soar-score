@@ -17,6 +17,7 @@ List<List<List<DrawSlot>>> _draw(
   bool teamProtection = false,
   LaneMode laneMode = LaneMode.none,
   int seed = 7,
+  int attempts = BasicDraw.defaultAttemptsPerRound,
 }) => const BasicDraw().generate(
   pilots: pilots,
   rounds: rounds,
@@ -24,6 +25,7 @@ List<List<List<DrawSlot>>> _draw(
   teamProtection: teamProtection,
   laneMode: laneMode,
   random: SeededRandom(seed),
+  attemptsPerRound: attempts,
 );
 
 void main() {
@@ -156,23 +158,104 @@ void main() {
     });
   });
 
+  group('attempts per round', () {
+    double meanDeviation(int attempts) {
+      var total = 0.0;
+      for (var seed = 1; seed <= 20; seed++) {
+        final rounds = _draw(
+          _pilots(15),
+          rounds: 6,
+          groups: 3,
+          seed: seed,
+          attempts: attempts,
+        );
+        total +=
+            drawFairness(
+                  rounds,
+                  teamProtection: false,
+                )['mean_absolute_deviation']!
+                as double;
+      }
+      return total / 20;
+    }
+
+    test('more attempts make the draw fairer', () {
+      expect(meanDeviation(10), lessThan(meanDeviation(1)));
+    });
+
+    test('a draw with several attempts is still reproducible', () {
+      final a = _draw(_pilots(12), attempts: 5);
+      final b = _draw(_pilots(12), attempts: 5);
+
+      List<List<List<Id>>> ids(List<List<List<DrawSlot>>> rounds) => [
+        for (final round in rounds)
+          [
+            for (final group in round)
+              [for (final slot in group) slot.pilot.participationId],
+          ],
+      ];
+      expect(ids(a), ids(b));
+    });
+
+    test('keep teammates apart whatever the attempts', () {
+      final rounds = _draw(
+        _pilots(12, teams: {1: 1, 2: 1, 3: 1, 4: 2, 5: 2, 6: 2}),
+        groups: 3,
+        teamProtection: true,
+        attempts: 25,
+      );
+
+      for (final round in rounds) {
+        for (final group in round) {
+          final teams = [
+            for (final slot in group)
+              if (slot.pilot.teamId != null) slot.pilot.teamId,
+          ];
+          expect(teams.toSet(), hasLength(teams.length));
+        }
+      }
+    });
+
+    test('rejects a count outside 1 to 200', () {
+      expect(() => _draw(_pilots(6), attempts: 0), throwsArgumentError);
+      expect(() => _draw(_pilots(6), attempts: 201), throwsArgumentError);
+    });
+  });
+
   group('drawFairness', () {
     test('counts how often pilots meet', () {
       // Two rounds of one group of three: every pair meets twice.
       final rounds = _draw(_pilots(3), rounds: 2, groups: 1);
-      expect(drawFairness(rounds), {
+      expect(drawFairness(rounds, teamProtection: false), {
+        'feasible_pairs': 3,
         'max_duplicate_matchups': 2,
         'matchup_histogram': {'2': 3},
         'unmet_opponent_count': 0,
+        'mean_absolute_deviation': 0.0,
       });
     });
 
     test('counts pairs that never meet', () {
       final rounds = _draw(_pilots(4), rounds: 1, groups: 2);
-      final fairness = drawFairness(rounds);
+      final fairness = drawFairness(rounds, teamProtection: false);
       expect(fairness['max_duplicate_matchups'], 1);
-      expect(fairness['matchup_histogram'], {'1': 2});
+      expect(fairness['matchup_histogram'], {'0': 4, '1': 2});
       expect(fairness['unmet_opponent_count'], 4);
+    });
+
+    test('leaves teammates out under team protection', () {
+      // Two teams of two among four pilots in two groups, one round: the
+      // two pairs of teammates cannot meet, so only 4 pairs can.
+      final pilots = _pilots(4, teams: {1: 1, 2: 1, 3: 2, 4: 2});
+      final rounds = _draw(pilots, rounds: 1, groups: 2, teamProtection: true);
+
+      final fairness = drawFairness(rounds, teamProtection: true);
+
+      expect(fairness['feasible_pairs'], 4);
+      // Each group holds one pilot of each team, so two feasible pairs
+      // met and two did not.
+      expect(fairness['unmet_opponent_count'], 2);
+      expect(fairness['matchup_histogram'], {'0': 2, '1': 2});
     });
   });
 }

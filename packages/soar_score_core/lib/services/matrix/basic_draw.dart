@@ -20,18 +20,23 @@ class DrawSlot {
   final int? lane;
 }
 
-/// The simple draw behind the first matrix API: balanced groups, teammates
-/// kept apart, no optimization of who meets whom.
+/// The draw behind the first matrix API: balanced groups, teammates kept
+/// apart, and pilots spread so that as few pairs as possible meet again.
 ///
-/// Every round deals the pilots into [groupsPerRound] groups whose sizes
-/// differ by at most one. The optimizer (`matrix-draw.md`) replaces the
-/// dealing later; the inputs, the seed and the output shape stay the same.
+/// Rounds are built one after another. Each round is built [attemptsPerRound]
+/// times, every pilot going to the open group where they meet the opponents
+/// they have met least in the earlier rounds, and the build that keeps the
+/// meeting counts most even (the lowest sum of squared counts) is kept. The
+/// optimizer (`matrix-draw.md`) improves a draw like this one across all
+/// rounds later; the inputs, the seed and the output shape stay the same.
 class BasicDraw {
   const BasicDraw();
 
-  /// How many times a round is dealt again when a deal leaves a pilot
-  /// without a group free of teammates.
-  static const int _attempts = 200;
+  /// How many times a round is built by default.
+  static const int defaultAttemptsPerRound = 50;
+
+  /// The most attempts a round may ask for.
+  static const int maxAttemptsPerRound = 200;
 
   /// The groups of each of [rounds] rounds: `result[round][group]` lists the
   /// slots of that group, with lanes when [laneMode] is `random`.
@@ -46,6 +51,7 @@ class BasicDraw {
     required bool teamProtection,
     required LaneMode laneMode,
     required SeededRandom random,
+    int attemptsPerRound = defaultAttemptsPerRound,
   }) {
     if (rounds < 1) {
       throw ArgumentError.value(rounds, 'rounds', 'must be at least 1');
@@ -55,6 +61,13 @@ class BasicDraw {
         groupsPerRound,
         'groupsPerRound',
         'must be between 1 and the number of pilots (${pilots.length})',
+      );
+    }
+    if (attemptsPerRound < 1 || attemptsPerRound > maxAttemptsPerRound) {
+      throw ArgumentError.value(
+        attemptsPerRound,
+        'attemptsPerRound',
+        'must be between 1 and $maxAttemptsPerRound',
       );
     }
     if (teamProtection) {
@@ -68,10 +81,34 @@ class BasicDraw {
         );
       }
     }
-    return [
-      for (var round = 0; round < rounds; round++)
-        _round(pilots, groupsPerRound, teamProtection, laneMode, random),
+    // How often each pair of pilots (by position) has met so far.
+    final meetings = [
+      for (final _ in pilots) List<int>.filled(pilots.length, 0),
     ];
+    final result = <List<List<DrawSlot>>>[];
+    for (var round = 0; round < rounds; round++) {
+      final groups = _round(
+        pilots,
+        groupsPerRound,
+        teamProtection,
+        attemptsPerRound,
+        meetings,
+        random,
+      );
+      for (final group in groups) {
+        for (var i = 0; i < group.length; i++) {
+          for (var j = i + 1; j < group.length; j++) {
+            meetings[group[i]][group[j]]++;
+            meetings[group[j]][group[i]]++;
+          }
+        }
+      }
+      result.add([
+        for (final group in groups)
+          _withLanes([for (final i in group) pilots[i]], laneMode, random),
+      ]);
+    }
+    return result;
   }
 
   /// The most pilots any one team has among [pilots].
@@ -86,38 +123,73 @@ class BasicDraw {
     return sizes.values.fold(0, (a, b) => a > b ? a : b);
   }
 
-  List<List<DrawSlot>> _round(
+  /// The best of [attempts] builds of one round, as groups of pilot positions.
+  List<List<int>> _round(
     List<DrawPilot> pilots,
     int groupCount,
     bool teamProtection,
-    LaneMode laneMode,
+    int attempts,
+    List<List<int>> meetings,
     SeededRandom random,
   ) {
-    for (var attempt = 0; attempt < _attempts; attempt++) {
-      final groups = _deal(pilots, groupCount, teamProtection, random);
-      if (groups != null) {
-        return [
-          for (final group in groups) _withLanes(group, laneMode, random),
-        ];
+    List<List<int>>? best;
+    var bestCost = 0;
+    var built = 0;
+    // A build can dead-end (no group left free of teammates); those are
+    // tried again without counting as an attempt, up to a limit.
+    for (var tries = 0; built < attempts && tries < attempts + 200; tries++) {
+      final groups = _build(
+        pilots,
+        groupCount,
+        teamProtection,
+        meetings,
+        random,
+      );
+      if (groups == null) {
+        continue;
+      }
+      built++;
+      final cost = _cost(groups, meetings);
+      if (best == null || cost < bestCost) {
+        best = groups;
+        bestCost = cost;
       }
     }
-    throw ArgumentError(
-      'no draw keeps every team apart with $groupCount groups; use more '
-      'groups',
-    );
+    if (best == null) {
+      throw ArgumentError(
+        'no draw keeps every team apart with $groupCount groups; use more '
+        'groups',
+      );
+    }
+    return best;
   }
 
-  /// One dealing of [pilots] into balanced groups, or `null` when it left a
-  /// pilot with no group free of teammates.
-  List<List<DrawPilot>>? _deal(
+  /// What a build adds to the sum of squared meeting counts: a pair that has
+  /// met `c` times costs `2c + 1` to meet once more.
+  int _cost(List<List<int>> groups, List<List<int>> meetings) {
+    var cost = 0;
+    for (final group in groups) {
+      for (var i = 0; i < group.length; i++) {
+        for (var j = i + 1; j < group.length; j++) {
+          cost += 2 * meetings[group[i]][group[j]] + 1;
+        }
+      }
+    }
+    return cost;
+  }
+
+  /// One build of a round, or `null` when it left a pilot with no open group
+  /// free of teammates.
+  List<List<int>>? _build(
     List<DrawPilot> pilots,
     int groupCount,
     bool teamProtection,
+    List<List<int>> meetings,
     SeededRandom random,
   ) {
     final base = pilots.length ~/ groupCount;
     final extra = pilots.length % groupCount;
-    // Which groups take the extra pilot differs from round to round.
+    // Which groups take the extra pilot differs from build to build.
     final order = random.shuffle([for (var g = 0; g < groupCount; g++) g]);
     final capacity = List<int>.filled(groupCount, base);
     for (var i = 0; i < extra; i++) {
@@ -133,32 +205,40 @@ class BasicDraw {
     }
     // Shuffle, then place the biggest teams first so they get distinct
     // groups while there is still room (the sort is stable).
-    final queue = random.shuffle([...pilots]);
-    int size(DrawPilot p) => p.teamId == null ? 0 : teamSizes[p.teamId]!;
+    final queue = random.shuffle([for (var i = 0; i < pilots.length; i++) i]);
+    int size(int p) {
+      final team = pilots[p].teamId;
+      return team == null ? 0 : teamSizes[team]!;
+    }
+
     final indexed = [for (var i = 0; i < queue.length; i++) (i, queue[i])]
       ..sort((a, b) {
         final bySize = size(b.$2).compareTo(size(a.$2));
         return bySize != 0 ? bySize : a.$1.compareTo(b.$1);
       });
 
-    final groups = [for (var g = 0; g < groupCount; g++) <DrawPilot>[]];
+    final groups = [for (var g = 0; g < groupCount; g++) <int>[]];
     final teamsIn = [for (var g = 0; g < groupCount; g++) <Id>{}];
     for (final (_, pilot) in indexed) {
-      final team = pilot.teamId;
-      var bestFree = 0;
+      final team = pilots[pilot].teamId;
+      var bestAdded = 0;
       final candidates = <int>[];
       for (var g = 0; g < groupCount; g++) {
-        final free = capacity[g] - groups[g].length;
-        if (free <= 0 ||
+        if (capacity[g] - groups[g].length <= 0 ||
             (teamProtection && team != null && teamsIn[g].contains(team))) {
           continue;
         }
-        if (free > bestFree) {
-          bestFree = free;
+        // What this pilot adds in this group: the opponents met least win.
+        var added = 0;
+        for (final other in groups[g]) {
+          added += 2 * meetings[pilot][other] + 1;
+        }
+        if (candidates.isEmpty || added < bestAdded) {
+          bestAdded = added;
           candidates
             ..clear()
             ..add(g);
-        } else if (free == bestFree) {
+        } else if (added == bestAdded) {
           candidates.add(g);
         }
       }

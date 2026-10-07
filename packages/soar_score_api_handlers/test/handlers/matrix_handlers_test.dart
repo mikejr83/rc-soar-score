@@ -75,6 +75,7 @@ void main() {
     int rounds = 3,
     int groups = 2,
     int? seed,
+    int? attempts,
     String id = _revisionId,
   }) => api.send(
     'POST',
@@ -84,6 +85,7 @@ void main() {
       'rounds': rounds,
       'groups_per_round': groups,
       'random_seed': ?seed,
+      'attempts_per_round': ?attempts,
     },
   );
 
@@ -209,6 +211,30 @@ void main() {
       await addPilots(3);
 
       expect((await draw(groups: 4)).statusCode, 400);
+    });
+
+    test('an attempts count outside 1 to 200 is a 400', () async {
+      await createContest();
+      await configure();
+      await addPilots(4);
+
+      expect((await draw(attempts: 0)).statusCode, 400);
+      expect((await draw(attempts: 201)).statusCode, 400);
+      expect((await draw(attempts: 5)).statusCode, 201);
+    });
+
+    test('records the attempts and the feasible-pair fairness', () async {
+      await createContest();
+      await configure();
+      await addPilots(6);
+
+      final body = await api.json(await draw(attempts: 5, seed: 3));
+
+      final revision = body['revision'] as Map;
+      expect((revision['draw_config'] as Map)['attempts_per_round'], 5);
+      final fairness = revision['fairness_summary'] as Map;
+      expect(fairness['feasible_pairs'], 15);
+      expect(fairness, contains('mean_absolute_deviation'));
     });
 
     test('no pilots is a 400', () async {

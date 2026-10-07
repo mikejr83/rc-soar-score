@@ -40,6 +40,8 @@ void addMatrixRoutes(Router router, Repository repository) {
       rounds: body.rounds,
       groupsPerRound: body.groupsPerRound,
       randomSeed: body.randomSeed,
+      attemptsPerRound:
+          body.attemptsPerRound ?? BasicDraw.defaultAttemptsPerRound,
       actorId: principal.accountId,
       metadata: writeMetadata(principal),
     );

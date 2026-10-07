@@ -25,12 +25,17 @@ DrawMatrixRequest _$DrawMatrixRequestFromJson(Map<String, dynamic> json) =>
             'random_seed',
             (v) => (v as num?)?.toInt(),
           ),
+          attemptsPerRound: $checkedConvert(
+            'attempts_per_round',
+            (v) => (v as num?)?.toInt(),
+          ),
         );
         return val;
       },
       fieldKeyMap: const {
         'groupsPerRound': 'groups_per_round',
         'randomSeed': 'random_seed',
+        'attemptsPerRound': 'attempts_per_round',
       },
     );
 
@@ -40,4 +45,5 @@ Map<String, dynamic> _$DrawMatrixRequestToJson(DrawMatrixRequest instance) =>
       'rounds': instance.rounds,
       'groups_per_round': instance.groupsPerRound,
       'random_seed': instance.randomSeed,
+      'attempts_per_round': instance.attemptsPerRound,
     };

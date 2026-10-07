@@ -153,6 +153,10 @@ The draw engine **constructs a valid draw, then improves it across all rounds** 
 
 A polish pass took 4 to 9 seconds in Python in the benchmark, and several seeds multiply that. The draw runs off the UI thread (an isolate on native, a worker on web) with progress and a cancel button.
 
+### 4.6. Baseline Draw (`basic-2`)
+
+The first draw is already fairness-driven, before the optimizer exists. The director sets the number of rounds and the number of **attempts per round** (default 50, 1 to 200). Rounds are built one after another, each round `attempts` times: every pilot goes to the open group where they meet the opponents they have met least in earlier rounds, teammates are kept apart, and the build with the lowest sum of squared meeting counts is kept. This is a greedy construction with best-of-N per round, the same family as GliderScore's. In a 30-pilot, 5-group, 16-round team contest it gave a mean absolute deviation of about 0.57 at 10 attempts and 0.53 at 50, against 0.71 with no comparison and 0.445 for GliderScore. The optimizer (sections 4.2 to 4.4) starts from this draw and closes the remaining gap.
+
 ---
 
 ## 5. Incremental Draw (Adding Rounds Mid-Contest)
