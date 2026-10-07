@@ -1,9 +1,12 @@
+import 'dart:convert';
+
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import 'contest_draft.dart';
 import 'draft_participant.dart';
 import 'draft_validation.dart';
+import 'draw_settings.dart';
 import 'participant_option.dart';
 import 'participant_rules.dart';
 import 'time_zones.dart';
@@ -11,6 +14,12 @@ import 'time_zones.dart';
 /// The ids one creation uses, kept for retries so a repeated attempt
 /// returns what an earlier one already stored instead of duplicating it.
 class CreationIds {
+  CreationIds(this.signature);
+
+  /// What the draft described when these ids were first used, from
+  /// [ContestCreator.signature]. A changed draft needs new ids.
+  final String signature;
+
   final Id contest = Id.create();
   final Map<String, Id> _participations = {};
   final Map<String, Id> _teams = {};
@@ -49,6 +58,34 @@ class ContestCreator {
     }
     return client.contest(contest.id);
   }
+
+  /// A fingerprint of everything [create] sends for [draft]. Retries reuse
+  /// ids only while the fingerprint is unchanged: the same contest id with
+  /// different content is refused by the server, and a configuration saved
+  /// by an earlier attempt would silently ignore the new values.
+  static String signature(ContestDraft draft) => jsonEncode([
+    draft.name.trim(),
+    draft.startDate.trim(),
+    draft.endDate.trim(),
+    draft.timeZone ?? TimeZones.device(),
+    draft.venue.trim(),
+    draft.city.trim(),
+    draft.region.trim(),
+    draft.country.trim(),
+    draft.discipline?.profileId?.value,
+    coreOptionsOf(draft),
+    disciplineDefaultsOf(draft),
+    [
+      for (final p in draft.participants)
+        [
+          p.profileId.value,
+          p.source.name,
+          p.roleId.value,
+          p.classification,
+          p.team,
+        ],
+    ],
+  ]);
 
   static String? _optional(String text) =>
       text.trim().isEmpty ? null : text.trim();
@@ -122,7 +159,7 @@ class ContestCreator {
       'review_requests_enabled': scoring.reviewRequests,
       'public_update_mode': scoring.publicUpdateMode.json,
       'intended_total_rounds': draw.seeded
-          ? int.tryParse(draw.rounds.trim())
+          ? int.tryParse(draft.roundsText.trim())
           : null,
     }..removeWhere((key, value) => value == null);
   }

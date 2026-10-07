@@ -35,8 +35,17 @@ class ContestDraftStore extends ChangeNotifier {
   final Map<Id, DrawSettings> drawSuggestions = {};
 
   /// The ids for creating the contest from this draft, kept across retries
-  /// so a repeated attempt can't create a second contest.
-  CreationIds get creationIds => _creationIds ??= CreationIds();
+  /// so a repeated attempt can't create a second contest. Once the draft has
+  /// changed since an earlier attempt, new ids are made, because the server
+  /// refuses an existing contest id with different content.
+  CreationIds creationIdsFor(ContestDraft draft) {
+    final signature = ContestCreator.signature(draft);
+    final ids = _creationIds;
+    if (ids != null && ids.signature == signature) {
+      return ids;
+    }
+    return _creationIds = CreationIds(signature);
+  }
 
   /// The current draft (saved or not).
   ContestDraft get draft => _draft;

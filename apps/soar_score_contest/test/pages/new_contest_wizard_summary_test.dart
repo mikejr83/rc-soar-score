@@ -123,6 +123,46 @@ void main() {
     expect(stepTitle(tester), 'Discipline');
   });
 
+  testWidgets('the cards in a row of the summary share one height', (
+    tester,
+  ) async {
+    final store = await _ready();
+    await pumpWizard(tester, respond: _FakeApi().call, store: store);
+
+    Rect rect(String title) =>
+        tester.getRect(find.byKey(ValueKey('summary-$title')));
+    final details = rect('Details');
+    final copy = rect('Copy source');
+    expect(details.top, copy.top);
+    expect(details.height, copy.height);
+  });
+
+  testWidgets('the summary words roles-off participants, lanes and what '
+      'happens after creating', (tester) async {
+    final store = await _ready();
+    await pumpWizard(tester, respond: _FakeApi().call, store: store);
+
+    // Roles are off: one pilot count instead of people / non-flying.
+    expect(find.text('Pilots'), findsOneWidget);
+    expect(find.text('Non-flying'), findsNothing);
+    expect(find.text('No lane assignment'), findsOneWidget);
+    expect(find.text('The contest configuration page is opened.'), findsOne);
+    expect(
+      find.text(
+        'A flight matrix hasn’t been drawn. The draw can be created from '
+        'the next screen.',
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.text(
+        'Configuration in process is kept until the app is closed or the '
+        'contest is created.',
+      ),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('Create is disabled with its reason while a step is invalid', (
     tester,
   ) async {

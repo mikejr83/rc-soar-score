@@ -124,11 +124,13 @@ class SummaryStep extends StatelessWidget {
       _Section(
         'Participants',
         4,
-        [
-          ('People', '${d.participants.length}'),
-          ('Scoring pilots', '$scoringPilots'),
-          ('Non-flying', '${d.participants.length - scoringPilots}'),
-        ],
+        d.has(ParticipantOption.roles)
+            ? [
+                ('People', '${d.participants.length}'),
+                ('Scoring pilots', '$scoringPilots'),
+                ('Non-flying', '${d.participants.length - scoringPilots}'),
+              ]
+            : [('Pilots', '$scoringPilots')],
         scoringPilots < DraftValidation.minScoringPilots
             ? 'Needs at least 2 scoring pilots'
             : needing > 0
@@ -183,11 +185,14 @@ class SummaryStep extends StatelessWidget {
               : 'Man on Man',
         ),
         ('Team protection', plan.teamProtection ? 'On' : 'Off'),
-        ('Lanes', draw.laneMode.name == 'none' ? 'None' : 'Random'),
+        (
+          'Lanes',
+          draw.laneMode.name == 'none' ? 'No lane assignment' : 'Random',
+        ),
         ('Back-to-back', draw.allowBackToBack ? 'Allowed' : 'Avoided'),
       ]),
       _Section('Rounds and groups', 6, [
-        ('Rounds', '${draw.rounds.trim()} (planning value)'),
+        ('Rounds', '${d.roundsText.trim()} (rounds can be appended)'),
         ('Groups per round', '${plan.groups}'),
         ('Pilots per group', plan.groupsValid ? plan.perGroupText : '—'),
       ], DraftValidation.drawOptions(d) ? null : 'Group settings are blocked'),
@@ -200,15 +205,12 @@ class SummaryStep extends StatelessWidget {
     final scheme = theme.colorScheme;
     final discipline = draft.discipline?.name ?? 'discipline';
     final after = [
-      (
-        Icons.tune,
-        'The contest opens on its configuration page in the Configuring '
-            'state.',
-      ),
+      (Icons.tune, 'The contest configuration page is opened.'),
       (Icons.lock, 'It stays unpublished and private until you publish it.'),
       (
         Icons.grid_view,
-        'The flight matrix isn’t drawn yet. Draw it from configuration.',
+        'A flight matrix hasn’t been drawn. The draw can be created from the '
+            'next screen.',
       ),
       (
         Icons.rule,
@@ -225,18 +227,32 @@ class SummaryStep extends StatelessWidget {
                 ((constraints.maxWidth + 16) / (_minSectionWidth + 16))
                     .floor()
                     .clamp(1, 3);
-            final width = (constraints.maxWidth - 16 * (columns - 1)) / columns;
-            return Wrap(
-              spacing: 16,
-              runSpacing: 16,
+            final sections = _sections();
+            // Each row of cards is as tall as its tallest card.
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                for (final section in _sections())
-                  SizedBox(
-                    width: width,
-                    child: _SectionCard(
-                      section: section,
-                      busy: busy,
-                      onEdit: () => onEdit(section.step),
+                for (var start = 0; start < sections.length; start += columns)
+                  Padding(
+                    padding: EdgeInsets.only(top: start == 0 ? 0 : 16),
+                    child: IntrinsicHeight(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          for (var i = start; i < start + columns; i++) ...[
+                            if (i > start) const SizedBox(width: 16),
+                            Expanded(
+                              child: i < sections.length
+                                  ? _SectionCard(
+                                      section: sections[i],
+                                      busy: busy,
+                                      onEdit: () => onEdit(sections[i].step),
+                                    )
+                                  : const SizedBox.shrink(),
+                            ),
+                          ],
+                        ],
+                      ),
                     ),
                   ),
               ],

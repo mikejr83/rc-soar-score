@@ -52,8 +52,8 @@ void main() {
 
     expect(stepTitle(tester), 'Draw options');
     expect(find.text('The matrix isn’t drawn here'), findsOneWidget);
-    // 10 pilots start as 1 group of 10.
-    expect(find.text('10 pilots'), findsOneWidget);
+    // Groups start at 2, so 10 pilots are 2 groups of 5.
+    expect(find.text('5 pilots'), findsOneWidget);
 
     await tester.enterText(_field('groups-per-round'), '3');
     await tester.pumpAndSettle();
@@ -153,9 +153,10 @@ void main() {
   });
 
   group('GroupPlan', () {
-    test('suggests groups of about 10 within the limits', () {
+    test('starts at 2 groups within the limits', () {
       expect(GroupPlan.suggestedGroups(2, 1), 1);
-      expect(GroupPlan.suggestedGroups(25, 1), 3);
+      expect(GroupPlan.suggestedGroups(4, 1), 2);
+      expect(GroupPlan.suggestedGroups(25, 1), 2);
       expect(GroupPlan.suggestedGroups(25, 4), 4);
       expect(GroupPlan.suggestedGroups(3, 1), 1);
     });

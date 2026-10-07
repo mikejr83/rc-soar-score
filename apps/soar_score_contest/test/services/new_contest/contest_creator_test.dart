@@ -78,7 +78,8 @@ void main() {
 
   test('creates a Configuring contest with its configuration, participants '
       'and teams', () async {
-    final contest = await ContestCreator(client).create(draft(), CreationIds());
+    final contest = await ContestCreator(client)
+        .create(draft(), CreationIds('test'));
 
     expect(contest.name, 'Gator Cup F5J');
     expect(contest.host, 'Hague Field');
@@ -114,7 +115,7 @@ void main() {
   });
 
   test('retrying with the same ids creates nothing twice', () async {
-    final ids = CreationIds();
+    final ids = CreationIds('test');
     final creator = ContestCreator(client);
     await creator.create(draft(), ids);
     final again = await creator.create(draft(), ids);
@@ -140,7 +141,7 @@ void main() {
           WizardDiscipline.ales,
         ).copyWith(dropPolicy: DropPolicy.two, firstDrop: '4', secondDrop: '8'),
       ),
-      CreationIds(),
+      CreationIds('test'),
     );
 
     final core = (await client.configuration(contest.id)).config.coreOptions;

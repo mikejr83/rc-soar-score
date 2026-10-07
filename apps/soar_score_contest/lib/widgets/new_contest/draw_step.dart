@@ -143,7 +143,7 @@ class DrawStep extends StatelessWidget {
         const SizedBox(height: 8),
         WizardNumberField(
           key: const ValueKey('preliminary-rounds'),
-          value: settings.rounds,
+          value: draft.roundsText,
           error: errors.rounds != null,
           semanticLabel: 'Preliminary rounds',
           onChanged: (value) => set(settings.copyWith(rounds: value)),
@@ -157,8 +157,7 @@ class DrawStep extends StatelessWidget {
             Flexible(
               child: Text(
                 errors.rounds ??
-                    'Planning value. You can change it after the contest '
-                        'starts.',
+                    'Rounds can be appended after the contest starts.',
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: errors.rounds != null ? scheme.error : muted,
                 ),

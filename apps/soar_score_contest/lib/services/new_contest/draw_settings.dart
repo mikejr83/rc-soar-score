@@ -14,7 +14,7 @@ class DrawSettings {
   const DrawSettings({
     this.drawMode = DrawMode.standardManOnMan,
     this.groups,
-    this.rounds = '8',
+    this.rounds,
     this.laneMode = LaneMode.none,
     this.teamProtection = false,
     this.allowBackToBack = true,
@@ -26,8 +26,9 @@ class DrawSettings {
   /// Groups per round as typed; `null` uses [GroupPlan.suggestedGroups].
   final String? groups;
 
-  /// The preliminary number of rounds (a planning value).
-  final String rounds;
+  /// The preliminary number of rounds as typed; `null` uses
+  /// [DraftDraw.roundsText], which follows the dropped rounds.
+  final String? rounds;
 
   final LaneMode laneMode;
   final bool teamProtection;
@@ -39,6 +40,10 @@ class DrawSettings {
   bool get seeded => drawMode == DrawMode.seededManOnMan;
 
   static const Object _keep = Object();
+
+  /// The preliminary rounds when the director has not typed a number and no
+  /// round is dropped.
+  static const String defaultRounds = '8';
 
   DrawSettings copyWith({
     DrawMode? drawMode,
@@ -87,12 +92,11 @@ class GroupPlan {
     );
   }
 
-  /// A starting value: groups of about 10 pilots, at least [minimum], and
-  /// never so many that a group has fewer than 2 pilots.
+  /// A starting value: 2 groups, at least [minimum], and never so many that
+  /// a group has fewer than 2 pilots.
   static int suggestedGroups(int scoring, int minimum) {
     final most = scoring ~/ 2 < 1 ? 1 : scoring ~/ 2;
-    final byTen = (scoring / 10).ceil();
-    final suggestion = byTen < minimum ? minimum : byTen;
+    final suggestion = minimum < 2 ? 2 : minimum;
     return suggestion.clamp(1, most < minimum ? minimum : most);
   }
 
@@ -140,6 +144,21 @@ class GroupPlan {
 
 /// The draw settings in a draft and the team sizes they depend on.
 extension DraftDraw on ContestDraft {
+  /// The preliminary rounds in effect: the typed number, else the round
+  /// after which the last round is dropped (the second drop when two rounds
+  /// are dropped), else [DrawSettings.defaultRounds].
+  String get roundsText {
+    final typed = draw.rounds;
+    if (typed != null) {
+      return typed;
+    }
+    final settings = scoringSettings;
+    final drops = settings.dropAfterRounds;
+    return drops == null || drops.isEmpty
+        ? DrawSettings.defaultRounds
+        : '${drops.last}';
+  }
+
   /// Scoring pilots in the largest team (non-pilots don't count).
   int get largestTeamPilots {
     final counts = <String, int>{};
