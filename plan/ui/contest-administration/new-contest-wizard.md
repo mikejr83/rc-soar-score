@@ -65,6 +65,8 @@ When classes are enabled, each pilot must have a class. Class names are compared
 
 When roles are enabled, new participants default to the immutable `Pilot` role. The role selector lists the configured roles. Non-flying roles do not receive score rows, but may be associated with a team and may enter team scores later when authorized.
 
+When models are enabled, the model name and model ID are collected for each scoring pilot. Participations have no place for them yet, so they are kept in the draft and not stored with the contest.
+
 Pilot numbers are assigned at the first draw, not in this wizard. The wizard may preview the expected numbering but must label it as provisional.
 
 The contest requires at least two scoring pilots. Fewer than three pilots shows a warning that groups per round should normally be set to one; it does not by itself block continuation. The step blocks continuation when required class, team, role, model, or other configured participant data is missing.
@@ -96,6 +98,8 @@ The step collects:
 Groups per round is a positive integer. The control displays the calculated minimum and maximum pilots per group and updates them as the value changes. It must prevent a configuration with fewer than two scoring pilots in a group. Team protection may increase the minimum groups per round and the UI must show that constraint.
 
 The preliminary number of rounds is a planning value. In seeded mode, the preliminary seeded-round count defaults to one and cannot be less than one. The wizard labels values that may be changed or extended after the contest starts.
+
+Draw mode, team protection, lane mode and the preliminary seeded rounds are stored in the contest configuration. Groups per round, the back-to-back constraint and the preliminary number of rounds (outside seeded mode) are set when the matrix is drawn (see `plan/data-model/contest-options.md`), so the wizard keeps them as suggestions that prefill the draw.
 
 The wizard does not draw a matrix. Matrix creation is an explicit action on contest configuration after the contest exists and all configuration is valid.
 

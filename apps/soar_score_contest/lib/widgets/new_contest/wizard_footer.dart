@@ -23,6 +23,7 @@ class WizardFooter extends StatelessWidget {
     this.onBack,
     this.blocked,
     this.showArrow = true,
+    this.busy = false,
   });
 
   final String primaryLabel;
@@ -35,6 +36,10 @@ class WizardFooter extends StatelessWidget {
   final WizardBlockedReason? blocked;
 
   final bool showArrow;
+
+  /// While the primary action runs: a spinner, and neither button reacts
+  /// (a second press can't submit twice).
+  final bool busy;
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +61,7 @@ class WizardFooter extends StatelessWidget {
           if (onBack != null)
             TextButton.icon(
               key: const ValueKey('wizard-back'),
-              onPressed: onBack,
+              onPressed: busy ? null : onBack,
               icon: const Icon(Icons.arrow_back, size: 18),
               label: const Text('Back'),
             )
@@ -87,8 +92,9 @@ class WizardFooter extends StatelessWidget {
                   ),
               ],
               Semantics(
-                enabled: blocked == null,
+                enabled: blocked == null && !busy,
                 hint: blocked?.text,
+                liveRegion: busy,
                 child: FilledButton(
                   key: const ValueKey('wizard-primary'),
                   style: blocked == null
@@ -103,10 +109,20 @@ class WizardFooter extends StatelessWidget {
                           overlayColor: Colors.transparent,
                           enabledMouseCursor: SystemMouseCursors.forbidden,
                         ),
-                  onPressed: blocked == null ? onPrimary : () {},
+                  onPressed: blocked == null && !busy ? onPrimary : () {},
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      if (busy) ...[
+                        SizedBox.square(
+                          dimension: 16,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: scheme.onPrimary,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                      ],
                       Text(primaryLabel),
                       if (showArrow) ...[
                         const SizedBox(width: 8),

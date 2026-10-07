@@ -2,16 +2,22 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
+import 'package:go_router/go_router.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../api_client_provider.dart';
 import '../connectivity_provider.dart';
 import '../contest_draft_provider.dart';
+import '../router.dart';
+import '../services/new_contest/contest_creator.dart';
 import '../services/new_contest/contest_draft.dart';
 import '../services/new_contest/contest_draft_store.dart';
 import '../services/new_contest/draft_validation.dart';
 import '../services/new_contest/participant_option.dart';
 import '../services/new_contest/participant_rules.dart';
 import '../services/new_contest/wizard_discipline.dart';
+import '../widgets/api_error_text.dart';
+import '../widgets/new_contest/contest_created_view.dart';
 import '../widgets/new_contest/contest_details_section.dart';
 import '../widgets/new_contest/copy_source_section.dart';
 import '../widgets/new_contest/discipline_step.dart';
@@ -19,6 +25,7 @@ import '../widgets/new_contest/draw_step.dart';
 import '../widgets/new_contest/participant_options_step.dart';
 import '../widgets/new_contest/participants/participants_step.dart';
 import '../widgets/new_contest/scoring_step.dart';
+import '../widgets/new_contest/summary_step.dart';
 import '../widgets/new_contest/wizard_banner.dart';
 import '../widgets/new_contest/wizard_confirm_dialog.dart';
 import '../widgets/new_contest/wizard_dot_stepper.dart';
@@ -36,8 +43,8 @@ import '../widgets/unsaved_changes_guard.dart';
 /// to a visited step or leaving loses nothing; leaving only warns when
 /// something is actually unsaved.
 ///
-/// Steps 1 to 6 are built. Step 7 is listed and reachable but not built
-/// yet, so the contest can't be created yet.
+/// `Create contest` creates the contest through the API (guarded against a
+/// second press and safe to retry), then shows the created contest.
 class NewContestWizardPage extends StatefulWidget {
   const NewContestWizardPage({super.key, this.guard});
 
@@ -73,9 +80,6 @@ class NewContestWizardPage extends StatefulWidget {
     'Check each section, then create the contest.',
   ];
 
-  /// The steps built so far; later steps show a placeholder.
-  static const int builtSteps = 6;
-
   static const String leftMessage =
       'Left the wizard. Your draft is kept until you close the app.';
 
@@ -93,6 +97,10 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
     for (final field in DetailsField.values) field: FocusNode(),
   };
   final FocusNode _teamCountFocus = FocusNode();
+  bool _creating = false;
+  Object? _createError;
+  Contest? _created;
+  String _createdDiscipline = '';
   final ScrollController _scroll = ScrollController();
 
   @override
@@ -110,10 +118,10 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
     _initialized = true;
     final shared = contestDraftStoreOf(context);
     _store = shared ?? (_ownStore = ContestDraftStore());
-    // Resume where the user got to, up to the first step not built yet.
+    // Resume where the user got to.
     _step = _store.draft.visitedThrough.clamp(
       1,
-      NewContestWizardPage.builtSteps + 1,
+      NewContestWizardPage.stepTitles.length,
     );
     if (_store.savedAt == null) {
       // Start the draft once the first frame is built; saving notifies the
@@ -235,8 +243,12 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
       _store.saveFailed || (_showErrors(_step) && _valid(_step) == false);
 
   Future<bool> _confirmLeave() async {
-    if (!mounted) {
+    if (!mounted || _created != null) {
       return true;
+    }
+    if (_creating) {
+      _message('The contest is being created. Wait for it to finish.');
+      return false;
     }
     if (_unsaved) {
       final leave = await showWizardConfirmDialog(
@@ -417,6 +429,30 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
         ),
       );
     }
+    if (_step == 7 && _createError != null) {
+      banners.add(
+        WizardBanner(
+          key: const ValueKey('banner-create-failed'),
+          tone: WizardBannerTone.error,
+          icon: Icons.error,
+          title: 'The contest wasn’t created',
+          body:
+              '${apiErrorText(_createError!)} Everything you entered is kept '
+              'in the draft.',
+          actions: [
+            WizardBannerAction(
+              key: const ValueKey('create-retry'),
+              label: 'Retry',
+              onPressed: () => unawaited(_create()),
+            ),
+            WizardBannerAction(
+              label: 'Cancel',
+              onPressed: () => setState(() => _createError = null),
+            ),
+          ],
+        ),
+      );
+    }
     if (_step == 6) {
       banners.add(
         const WizardBanner(
@@ -542,8 +578,82 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
     ),
     5 => ScoringStep(draft: _draft, onChanged: _update),
     6 => DrawStep(draft: _draft, onChanged: _update),
-    _ => const _NotBuiltYet(),
+    _ => SummaryStep(draft: _draft, onEdit: _go, busy: _creating),
   };
+
+  /// The first step (1 to 6) that blocks creating, if any.
+  int? get _firstInvalidStep {
+    for (var n = 1; n < NewContestWizardPage.stepTitles.length; n++) {
+      if (_valid(n) == false) {
+        return n;
+      }
+    }
+    return null;
+  }
+
+  WizardBlockedReason? get _createBlocked {
+    final step = _firstInvalidStep;
+    if (step == null || _creating) {
+      return null;
+    }
+    final title = NewContestWizardPage.stepTitles[step - 1];
+    final needing = _draft.participantsNeedingFixes.length;
+    final what = step != 4
+        ? '$title needs attention.'
+        : _draft.scoringCount < DraftValidation.minScoringPilots
+        ? 'add at least 2 scoring pilots.'
+        : '$needing participant${needing == 1 ? ' needs' : 's need'} '
+              'fixing.';
+    return WizardBlockedReason(
+      text: 'Can’t create yet: $what',
+      fixLabel: 'Go to $title',
+      onFix: () => _go(step),
+    );
+  }
+
+  Future<void> _create() async {
+    if (_creating || _firstInvalidStep != null) {
+      return;
+    }
+    final client = apiClientOf(context);
+    final draft = _draft;
+    setState(() {
+      _creating = true;
+      _createError = null;
+    });
+    final view = View.of(context);
+    final direction = Directionality.of(context);
+    unawaited(
+      SemanticsService.sendAnnouncement(view, 'Creating contest.', direction),
+    );
+    try {
+      if (client == null) {
+        throw StateError('No API client is available.');
+      }
+      final contest = await ContestCreator(client)
+          .create(draft, _store.creationIds);
+      _store.drawSuggestions[contest.id] = draft.drawSettings;
+      _store.discard();
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _creating = false;
+        _created = contest;
+        _createdDiscipline = draft.discipline?.name ?? '';
+      });
+      unawaited(
+        SemanticsService.sendAnnouncement(view, 'Contest created.', direction),
+      );
+    } on Object catch (error) {
+      if (mounted) {
+        setState(() {
+          _creating = false;
+          _createError = error;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) => ListenableBuilder(
@@ -556,7 +666,15 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
       final entries = _entries;
       final titles = NewContestWizardPage.stepTitles;
       final last = _step == titles.length;
-      final built = _step <= NewContestWizardPage.builtSteps;
+      final created = _created;
+      if (created != null) {
+        return ContestCreatedView(
+          contest: created,
+          disciplineName: _createdDiscipline,
+          onOpen: () => context.go(contestWorkspacePath(created.id.value)),
+          onDone: () => context.go(homePath),
+        );
+      }
 
       final content = Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -617,12 +735,15 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
           ),
           WizardFooter(
             onBack: _step > 1 ? () => _go(_step - 1) : null,
-            primaryLabel: last ? 'Create contest' : 'Next: ${titles[_step]}',
+            primaryLabel: !last
+                ? 'Next: ${titles[_step]}'
+                : _creating
+                ? 'Creating contest…'
+                : 'Create contest',
             showArrow: !last,
-            onPrimary: _next,
-            blocked: built
-                ? null
-                : const WizardBlockedReason(text: 'This step isn’t built yet.'),
+            busy: _creating,
+            onPrimary: last ? () => unawaited(_create()) : _next,
+            blocked: last ? _createBlocked : null,
           ),
         ],
       );
@@ -631,7 +752,10 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
         return Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            WizardStepList(steps: entries, onSelect: _go),
+            AbsorbPointer(
+              absorbing: _creating,
+              child: WizardStepList(steps: entries, onSelect: _go),
+            ),
             Expanded(child: content),
           ],
         );
@@ -639,56 +763,13 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          WizardDotStepper(steps: entries, onSelect: _go),
+          AbsorbPointer(
+            absorbing: _creating,
+            child: WizardDotStepper(steps: entries, onSelect: _go),
+          ),
           Expanded(child: content),
         ],
       );
     },
   );
-}
-
-/// The placeholder for step 7 until it is built.
-class _NotBuiltYet extends StatelessWidget {
-  const _NotBuiltYet();
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Card(
-      key: const ValueKey('wizard-step-not-built'),
-      margin: EdgeInsets.zero,
-      elevation: 1,
-      color: theme.colorScheme.surfaceContainerLow,
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(Icons.construction, color: theme.colorScheme.onSurfaceVariant),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'This step isn’t built yet',
-                    style: theme.textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'The summary and Create contest come in a later update. '
-                    'Your draft keeps everything you entered in the earlier '
-                    'steps.',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }

@@ -1,6 +1,10 @@
 import 'package:flutter/foundation.dart';
 
+import 'package:soar_score_core/soar_score_core.dart';
+
+import 'contest_creator.dart';
 import 'contest_draft.dart';
+import 'draw_settings.dart';
 
 /// Writes a draft somewhere; throws when it cannot.
 typedef DraftWriter = Future<void> Function(ContestDraft draft);
@@ -22,6 +26,17 @@ class ContestDraftStore extends ChangeNotifier {
   ContestDraft _draft = const ContestDraft();
   DateTime? _savedAt;
   bool _saveFailed = false;
+  CreationIds? _creationIds;
+
+  /// The draw settings chosen for contests created in this session, by
+  /// contest id. Groups per round, back-to-back flights and planned rounds
+  /// are set when the matrix is drawn, so they wait here to prefill the
+  /// draw.
+  final Map<Id, DrawSettings> drawSuggestions = {};
+
+  /// The ids for creating the contest from this draft, kept across retries
+  /// so a repeated attempt can't create a second contest.
+  CreationIds get creationIds => _creationIds ??= CreationIds();
 
   /// The current draft (saved or not).
   ContestDraft get draft => _draft;
@@ -55,6 +70,7 @@ class ContestDraftStore extends ChangeNotifier {
     _draft = const ContestDraft();
     _savedAt = null;
     _saveFailed = false;
+    _creationIds = null;
     notifyListeners();
   }
 
