@@ -21424,9 +21424,8 @@ class $RoundsTable extends Rounds with TableInfo<$RoundsTable, RoundData> {
         true,
         type: DriftSqlType.string,
         requiredDuringInsert: false,
-        defaultConstraints: GeneratedColumn.constraintIsAlways(
-          'REFERENCES rounds (id)',
-        ),
+        $customConstraints:
+            'NULL REFERENCES rounds (id) DEFERRABLE INITIALLY DEFERRED',
       );
   static const VerificationMeta _revisionMeta = const VerificationMeta(
     'revision',

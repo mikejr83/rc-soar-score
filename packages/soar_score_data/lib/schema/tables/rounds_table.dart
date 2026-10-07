@@ -14,8 +14,11 @@ class Rounds extends Table {
   IntColumn get ordinal => integer()();
   IntColumn get groupCount => integer()();
   TextColumn get status => text().check(status.isIn(roundStatusValues))();
-  TextColumn get supersededByRoundId =>
-      text().nullable().references(Rounds, #id)();
+  // Deferred: a redraw marks the old round before it inserts the new one,
+  // because the unique index on live ordinals would otherwise see both.
+  TextColumn get supersededByRoundId => text().nullable().customConstraint(
+    'NULL REFERENCES rounds (id) DEFERRABLE INITIALLY DEFERRED',
+  )();
   IntColumn get revision => integer().withDefault(const Constant(0))();
 
   @override
