@@ -42,6 +42,7 @@ void addMatrixRoutes(Router router, Repository repository) {
       randomSeed: body.randomSeed,
       attemptsPerRound:
           body.attemptsPerRound ?? BasicDraw.defaultAttemptsPerRound,
+      seedCount: body.seedCount ?? DrawEngine.defaultSeedCount,
       actorId: principal.accountId,
       metadata: writeMetadata(principal),
     );
