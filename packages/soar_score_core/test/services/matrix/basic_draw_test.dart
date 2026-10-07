@@ -216,6 +216,33 @@ void main() {
       }
     });
 
+    test('a draw that ignores meetings is worse on average', () {
+      double meanDeviation(bool spread) {
+        var total = 0.0;
+        for (var seed = 1; seed <= 20; seed++) {
+          final rounds = const BasicDraw().generate(
+            pilots: _pilots(15),
+            rounds: 6,
+            groupsPerRound: 3,
+            teamProtection: false,
+            laneMode: LaneMode.none,
+            random: SeededRandom(seed),
+            attemptsPerRound: 5,
+            spreadMeetings: spread,
+          );
+          total +=
+              drawFairness(
+                    rounds,
+                    teamProtection: false,
+                  )['mean_absolute_deviation']!
+                  as double;
+        }
+        return total / 20;
+      }
+
+      expect(meanDeviation(false), greaterThan(meanDeviation(true)));
+    });
+
     test('rejects a count outside 1 to 200', () {
       expect(() => _draw(_pilots(6), attempts: 0), throwsArgumentError);
       expect(() => _draw(_pilots(6), attempts: 201), throwsArgumentError);
