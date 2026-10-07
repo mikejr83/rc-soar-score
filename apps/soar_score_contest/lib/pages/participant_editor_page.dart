@@ -7,6 +7,7 @@ import '../api_client_provider.dart';
 import '../router.dart';
 import '../widgets/api_error_text.dart';
 import '../widgets/message_view.dart';
+import '../widgets/unsaved_changes_guard.dart';
 
 /// Creates or edits one reusable participant profile
 /// (`plan/ui/contest-administration/participant-data.md`).
@@ -16,9 +17,12 @@ import '../widgets/message_view.dart';
 /// email is shown before a new profile is created, and leaving with unsaved
 /// changes asks for confirmation.
 class ParticipantEditorPage extends StatefulWidget {
-  const ParticipantEditorPage({super.key, this.participantId});
+  const ParticipantEditorPage({super.key, this.participantId, this.guard});
 
   final String? participantId;
+
+  /// Asked by the router before any navigation away from this page.
+  final UnsavedChangesGuard? guard;
 
   @override
   State<ParticipantEditorPage> createState() => _ParticipantEditorPageState();
@@ -63,6 +67,7 @@ class _ParticipantEditorPageState extends State<ParticipantEditorPage> {
   @override
   void initState() {
     super.initState();
+    widget.guard?.attach(_confirmDiscard);
     for (final controller in _controllers) {
       controller.addListener(_markDirty);
     }
@@ -76,6 +81,7 @@ class _ParticipantEditorPageState extends State<ParticipantEditorPage> {
 
   @override
   void dispose() {
+    widget.guard?.detach(_confirmDiscard);
     for (final controller in _controllers) {
       controller.dispose();
     }
