@@ -37,7 +37,9 @@ class DrawOptimizer {
   static const int _ratio = 61582;
   static const int _startTemperature256 = 512; // T0 = 2.0
 
-  /// [start] improved. [pilots] lists every pilot of [start] once.
+  /// [start] improved. [pilots] lists every pilot of [start] once. [history]
+  /// holds the rounds before [start], which the improved rounds continue;
+  /// they are not changed, but their meetings count.
   List<List<List<DrawSlot>>> improve({
     required List<DrawPilot> pilots,
     required List<List<List<DrawSlot>>> start,
@@ -46,6 +48,7 @@ class DrawOptimizer {
     required SeededRandom random,
     int iterationsPerPlacement = defaultIterationsPerPlacement,
     int unmetWeight = defaultUnmetWeight,
+    List<List<List<DrawSlot>>> history = const [],
   }) {
     final n = pilots.length;
     final roundCount = start.length;
@@ -65,11 +68,23 @@ class DrawOptimizer {
         ],
     ];
     final lanes = [for (final round in start) _laneTable(round, index, n)];
+    final prior = [
+      for (final round in history)
+        [
+          for (final group in round)
+            [
+              for (final slot in group)
+                if (index[slot.pilot.participationId] != null)
+                  index[slot.pilot.participationId]!,
+            ],
+        ],
+    ];
 
     if (groups.isNotEmpty && groups.first.length > 1) {
       _anneal(
         n: n,
         groups: groups,
+        prior: prior,
         lanes: lanes,
         team: teamProtection ? team : null,
         random: random,
@@ -119,6 +134,7 @@ class DrawOptimizer {
   void _anneal({
     required int n,
     required List<List<List<int>>> groups,
+    required List<List<List<int>>> prior,
     required List<List<int>> lanes,
     required List<int>? team,
     required SeededRandom random,
@@ -128,7 +144,7 @@ class DrawOptimizer {
     final roundCount = groups.length;
     final groupCount = groups.first.length;
     final meet = List<int>.filled(n * n, 0);
-    for (final round in groups) {
+    for (final round in [...prior, ...groups]) {
       for (final group in round) {
         for (var i = 0; i < group.length; i++) {
           for (var j = i + 1; j < group.length; j++) {

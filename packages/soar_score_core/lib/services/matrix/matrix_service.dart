@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import '../../enums/admin_lock.dart';
-import '../../enums/assignment_type.dart';
 import '../../enums/lifecycle_state.dart';
 import '../../errors/contest_state_error.dart';
 import '../../errors/entity_not_found_error.dart';
@@ -9,12 +8,7 @@ import '../../models/contest/contest.dart';
 import '../../models/contest/core_options.dart';
 import '../../models/id.dart';
 import '../../models/matrix/matrix_assignment.dart';
-import '../../models/matrix/matrix_draw.dart';
-import '../../models/matrix/matrix_revision.dart';
-import '../../models/matrix/round.dart';
-import '../../models/matrix/round_group.dart';
 import '../../models/participants/contest_participation.dart';
-import '../../models/scores/score_placeholder.dart';
 import '../../repositories/already_stored_error.dart';
 import '../../repositories/finalized_draw.dart';
 import '../../repositories/mutation_metadata.dart';
@@ -24,6 +18,7 @@ import 'basic_draw.dart';
 import '../../models/matrix/current_matrix.dart';
 import 'draw_engine.dart';
 import 'draw_optimizer.dart';
+import 'matrix_draw_builder.dart';
 
 /// The flight matrix operations of the API: reading the current matrix and
 /// drawing it.
@@ -40,7 +35,7 @@ class MatrixService {
     int Function()? newSeed,
   }) : _clock = clock ?? DateTime.now,
        _newId = newId ?? Id.create,
-       _newSeed = newSeed ?? _secureSeed;
+       _newSeed = newSeed ?? secureSeed;
 
   /// Names the draw engine on every revision. A change to how pilots are
   /// dealt needs a new version, so an old draw can still be reproduced.
@@ -51,7 +46,8 @@ class MatrixService {
   final Id Function() _newId;
   final int Function() _newSeed;
 
-  static int _secureSeed() => Random.secure().nextInt(0x100000000);
+  /// A fresh 32-bit seed for a draw that was not given one.
+  static int secureSeed() => Random.secure().nextInt(0x100000000);
 
   /// The current matrix of contest [contestId]; empty before the first draw.
   ///
@@ -228,18 +224,17 @@ class MatrixService {
     required Id actorId,
     required DateTime now,
   }) {
-    final revision = MatrixRevision(
-      id: id,
+    final built = MatrixDrawBuilder(newId: _newId).build(
       contestId: contest.id,
+      id: id,
       revisionNumber: 1,
       firstRound: 1,
-      lastRound: drawn.rounds.length,
-      drawMode: DrawMode.standardManOnMan,
-      randomSeed: drawn.seed,
+      drawn: drawn.rounds,
+      seed: drawn.seed,
       algorithmVersion: algorithmVersion,
+      groupsPerRound: groupsPerRound,
       drawConfig: {
         'schema_version': 1,
-        'groups_per_round': groupsPerRound,
         'attempts_per_round': attemptsPerRound,
         'seed_count': seedCount,
         'requested_seed': requestedSeed,
@@ -248,93 +243,16 @@ class MatrixService {
         'lane_mode': options.laneMode.json,
         'configured_draw_mode': options.drawMode.json,
       },
-      seedingSnapshot: {
-        'pilots': [
-          for (final pilot in pilots)
-            {
-              'participation_id': pilot.participationId.value,
-              'team_id': pilot.teamId?.value,
-            },
-        ],
-      },
-      fairnessSummary: drawn.fairness,
+      pilots: pilots,
+      fairness: drawn.fairness,
       reason: 'initial draw',
-      createdBy: actorId,
-      createdAt: now,
-      finalizedBy: actorId,
-      finalizedAt: now,
+      actorId: actorId,
+      now: now,
     );
-
-    final rounds = <Round>[];
-    final groups = <RoundGroup>[];
-    final assignments = <MatrixAssignment>[];
-    final placeholders = <ScorePlaceholder>[];
-    final drawnRounds = drawn.rounds;
-    for (var r = 0; r < drawnRounds.length; r++) {
-      final round = Round(
-        id: _newId(),
-        contestId: contest.id,
-        matrixRevisionId: id,
-        ordinal: r + 1,
-        groupCount: groupsPerRound,
-      );
-      rounds.add(round);
-      for (var g = 0; g < drawnRounds[r].length; g++) {
-        groups.add(
-          RoundGroup(
-            id: _newId(),
-            contestId: contest.id,
-            roundId: round.id,
-            groupNumber: g + 1,
-          ),
-        );
-        for (final slot in drawnRounds[r][g]) {
-          final assignment = MatrixAssignment(
-            id: _newId(),
-            contestId: contest.id,
-            matrixRevisionId: id,
-            contestParticipationId: slot.pilot.participationId,
-            scheduledRoundId: round.id,
-            creditedRoundId: round.id,
-            group: g + 1,
-            lane: slot.lane,
-            assignmentType: AssignmentType.original,
-            actorId: actorId,
-            createdAt: now,
-          );
-          assignments.add(assignment);
-          placeholders.add(
-            ScorePlaceholder(
-              id: _newId(),
-              contestId: contest.id,
-              contestParticipationId: slot.pilot.participationId,
-              assignmentId: assignment.id,
-            ),
-          );
-        }
-      }
-    }
-
-    var next =
-        participations.fold<int>(
-          0,
-          (highest, p) => max(highest, p.participantNumber ?? 0),
-        ) +
-        1;
-    final numbered = [
-      for (final p in participations)
-        if (p.participantNumber == null) p.withParticipantNumber(next++),
-    ];
-
     return FinalizedDraw(
-      draw: MatrixDraw(
-        revision: revision,
-        rounds: rounds,
-        groups: groups,
-        assignments: assignments,
-      ),
-      placeholders: placeholders,
-      numberedParticipations: numbered,
+      draw: built.draw,
+      placeholders: built.placeholders,
+      numberedParticipations: MatrixDrawBuilder.numbered(participations),
       contest: contest.copyWithState(
         lifecycleState: LifecycleState.ready,
         updatedAt: now,

@@ -21,13 +21,16 @@ import 'package:soar_score_core/soar_score_core.dart';
 ///   entered for the old slot;
 /// - `POST /contests/{id}/matrix/late-adds` places a pilot who joined after
 ///   the draw, or who is making up a missed round, in a group with an open
-///   spot.
+///   spot;
+/// - `POST /contests/{id}/matrix/redraws` adds rounds to the matrix or draws
+///   its unscored tail again, as a new matrix revision.
 ///
 /// The handlers only translate between HTTP and [MatrixService].
 void addMatrixRoutes(Router router, Repository repository) {
   final service = MatrixService(repository);
   final moves = AssignmentMoveService(repository);
   final lateAdds = LateAddService(repository);
+  final redraws = MatrixRedrawService(repository);
 
   router.get('/contests/<id>/matrix', (Request request, String id) async {
     requirePrincipal(request);
@@ -95,6 +98,30 @@ void addMatrixRoutes(Router router, Repository repository) {
       creditedRoundId: body.creditedRoundId,
       group: body.group,
       lane: body.lane,
+      reason: body.reason,
+      actorId: principal.accountId,
+      metadata: writeMetadata(principal),
+    );
+    return jsonResponse(matrix.toJson(), statusCode: 201);
+  });
+
+  router.post('/contests/<id>/matrix/redraws', (
+    Request request,
+    String id,
+  ) async {
+    final principal = requirePrincipal(request);
+    final body = await readJsonBody(request, RedrawMatrixRequest.fromJson);
+
+    final matrix = await redraws.redraw(
+      Id.parse(id),
+      id: body.id,
+      firstRound: body.firstRound,
+      rounds: body.rounds,
+      groupsPerRound: body.groupsPerRound,
+      randomSeed: body.randomSeed,
+      attemptsPerRound:
+          body.attemptsPerRound ?? BasicDraw.defaultAttemptsPerRound,
+      seedCount: body.seedCount ?? DrawEngine.defaultSeedCount,
       reason: body.reason,
       actorId: principal.accountId,
       metadata: writeMetadata(principal),

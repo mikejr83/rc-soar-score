@@ -91,6 +91,27 @@ class StubMatrixRevisionRepository implements MatrixRevisionRepository {
   }
 
   @override
+  Future<FinalizedRedraw> appendRedraw(
+    FinalizedRedraw finalized, {
+    required MutationMetadata metadata,
+  }) async {
+    for (final round in finalized.replacedRounds) {
+      final index = _rounds.rounds.indexWhere((r) => r.id == round.id);
+      _rounds.rounds[index] = round;
+    }
+    final draw = finalized.draw;
+    revisions.add(draw.revision);
+    _rounds.rounds.addAll(draw.rounds);
+    _groups.groups.addAll(draw.groups);
+    _assignments.stored.addAll(draw.assignments);
+    _placeholders.stored.addAll(finalized.placeholders);
+    for (final participation in finalized.numberedParticipations) {
+      await _participations.save(participation, metadata: metadata);
+    }
+    return finalized;
+  }
+
+  @override
   dynamic noSuchMethod(Invocation invocation) =>
       throw UnimplementedError('${invocation.memberName} is not stubbed');
 }

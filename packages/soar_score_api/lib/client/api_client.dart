@@ -13,6 +13,7 @@ import '../dto/draw_matrix_request.dart';
 import '../dto/health_dto.dart';
 import '../dto/late_add_request.dart';
 import '../dto/move_assignment_request.dart';
+import '../dto/redraw_matrix_request.dart';
 import '../dto/save_configuration_request.dart';
 import '../dto/update_contest_request.dart';
 import '../dto/update_participant_request.dart';
@@ -452,6 +453,23 @@ class ApiClient {
     final uri = _resolve(
       '/api/v1/contests/${contestId.value}/matrix/late-adds',
     );
+    final response = await _send('POST', uri, body: request.toJson());
+    return _decode<CurrentMatrix>(response, uri, CurrentMatrix.fromJson);
+  }
+
+  /// Adds rounds to the matrix of contest [contestId], or draws its unscored
+  /// tail again, and returns the current matrix.
+  ///
+  /// Repeating the same [request] returns the matrix it drew. A contest that
+  /// has no matrix, is locked, or whose rounds to replace have scores or a
+  /// locked group is an [ApiHttpError] with status 409; settings the draw
+  /// cannot meet, or a first round beyond one past the last round, are status
+  /// 400.
+  Future<CurrentMatrix> redrawMatrix(
+    Id contestId,
+    RedrawMatrixRequest request,
+  ) async {
+    final uri = _resolve('/api/v1/contests/${contestId.value}/matrix/redraws');
     final response = await _send('POST', uri, body: request.toJson());
     return _decode<CurrentMatrix>(response, uri, CurrentMatrix.fromJson);
   }

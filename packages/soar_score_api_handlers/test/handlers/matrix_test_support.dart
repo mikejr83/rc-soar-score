@@ -23,6 +23,7 @@ Future<void> drawnContest(
   int groups = 2,
   Map<String, Object?> core = const {},
   Future<void> Function()? beforeDraw,
+  bool skipDraw = false,
 }) async {
   await api.send(
     'POST',
@@ -65,6 +66,7 @@ Future<void> drawnContest(
     );
   }
   await beforeDraw?.call();
+  if (skipDraw) return;
   final response = await api.send(
     'POST',
     '/contests/$_contestId/matrix/draws',

@@ -144,4 +144,34 @@ void main() {
       'reason': 'Joined late',
     });
   });
+
+  test('redrawMatrix POSTs the request and decodes the matrix', () async {
+    final client = clientFor((_) => body(CurrentMatrix().toJson(), 201));
+    final newId = Id.parse('019c0000-0000-7000-8000-000000000603');
+
+    await client.redrawMatrix(
+      contestId,
+      RedrawMatrixRequest(
+        id: newId,
+        firstRound: 4,
+        rounds: 2,
+        groupsPerRound: 3,
+        randomSeed: 5,
+        reason: 'Two more rounds',
+      ),
+    );
+
+    expect(seen.method, 'POST');
+    expect(seen.url.path, '$matrixPath/redraws');
+    expect(jsonDecode(seen.body), {
+      'id': newId.value,
+      'first_round': 4,
+      'rounds': 2,
+      'groups_per_round': 3,
+      'random_seed': 5,
+      'attempts_per_round': null,
+      'seed_count': null,
+      'reason': 'Two more rounds',
+    });
+  });
 }

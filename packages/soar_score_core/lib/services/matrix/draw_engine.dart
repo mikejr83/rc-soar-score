@@ -54,6 +54,11 @@ class DrawEngine {
   static const double laneWeight = 0.15;
   static const int _randomSeed = 0x5EED;
 
+  /// [rounds] is how many rounds to draw. [history] holds the rounds before
+  /// them, kept as they are: the draw continues them, so who has already met
+  /// counts, and the fairness report covers [history] and the new rounds
+  /// together.
+  ///
   /// Throws an [ArgumentError] when the settings cannot be met, as
   /// [BasicDraw.generate] does, and for a [seedCount] outside
   /// 1 to [maxSeedCount].
@@ -67,6 +72,7 @@ class DrawEngine {
     int seedCount = defaultSeedCount,
     int attemptsPerRound = BasicDraw.defaultAttemptsPerRound,
     int iterationsPerPlacement = DrawOptimizer.defaultIterationsPerPlacement,
+    List<List<List<DrawSlot>>> history = const [],
   }) {
     if (seedCount < 1 || seedCount > maxSeedCount) {
       throw ArgumentError.value(
@@ -98,6 +104,7 @@ class DrawEngine {
         laneMode: laneMode,
         random: random,
         attemptsPerRound: attemptsPerRound,
+        history: history,
       );
       final improved = const DrawOptimizer().improve(
         pilots: pilots,
@@ -106,9 +113,11 @@ class DrawEngine {
         laneMode: laneMode,
         random: random,
         iterationsPerPlacement: iterationsPerPlacement,
+        history: history,
       );
-      final stats = MatchupStats.of(improved, teamProtection: teamProtection);
-      final lanes = LaneStats.of(improved);
+      final all = [...history, ...improved];
+      final stats = MatchupStats.of(all, teamProtection: teamProtection);
+      final lanes = LaneStats.of(all);
       final cost = _cost(stats, lanes);
       if (bestStats == null || _isBetter(stats, cost, bestStats, bestCost)) {
         best = improved;
@@ -119,7 +128,10 @@ class DrawEngine {
       }
     }
 
-    final fairness = drawFairness(best!, teamProtection: teamProtection);
+    final fairness = drawFairness([
+      ...history,
+      ...best!,
+    ], teamProtection: teamProtection);
     fairness['fairness_score'] = _score(
       bestStats!,
       bestLanes,
@@ -129,6 +141,7 @@ class DrawEngine {
       groupsPerRound: groupsPerRound,
       teamProtection: teamProtection,
       fairness: fairness,
+      history: history,
     );
     return DrawResult(rounds: best, seed: bestSeed, fairness: fairness);
   }
@@ -166,6 +179,7 @@ class DrawEngine {
     required int groupsPerRound,
     required bool teamProtection,
     required Map<String, Object?> fairness,
+    required List<List<List<DrawSlot>>> history,
   }) {
     final random = SeededRandom(_randomSeed);
     var total = 0.0;
@@ -178,10 +192,12 @@ class DrawEngine {
         laneMode: laneMode,
         random: random,
         spreadMeetings: false,
+        history: history,
       );
+      final all = [...history, ...sample];
       total += _cost(
-        MatchupStats.of(sample, teamProtection: teamProtection),
-        LaneStats.of(sample),
+        MatchupStats.of(all, teamProtection: teamProtection),
+        LaneStats.of(all),
       );
     }
     final worst = total / _randomSamples;

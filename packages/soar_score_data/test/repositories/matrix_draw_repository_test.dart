@@ -31,14 +31,14 @@ void _tests(Backend backend) {
     );
 
     /// A second revision with one new round, group and assignment.
-    core.MatrixDraw newDraw({String? assignmentId}) {
+    core.MatrixDraw newDraw({String? assignmentId, int ordinal = 3}) {
       final revision = core.MatrixRevision.fromJson({
         ...exampleRows('matrix_revision').single,
         'id': core.Id.create().value,
         'revision_number': 2,
         'previous_revision_id': example.id.value,
-        'first_round': 3,
-        'last_round': 3,
+        'first_round': ordinal,
+        'last_round': ordinal,
         'finalized_by': null,
         'finalized_at': null,
       });
@@ -46,7 +46,7 @@ void _tests(Backend backend) {
         ...exampleRows('round').first,
         'id': core.Id.create().value,
         'matrix_revision_id': revision.id.value,
-        'ordinal': 3,
+        'ordinal': ordinal,
         'revision': 0,
       });
       final group = core.RoundGroup.fromJson({
@@ -178,6 +178,86 @@ void _tests(Backend backend) {
       // Revision, round, group, assignment, placeholder, participation and
       // contest.
       expect(await inst.count('mutation_records'), before + 7);
+    });
+
+    test('appendRedraw supersedes a round and stores the new one in its '
+        'place', () async {
+      final replaced = (await repository.roundRepository.listForContest(
+        example.contestId,
+      )).firstWhere((round) => round.ordinal == 2);
+      final draw = newDraw(ordinal: 2);
+      final assignment = draw.assignments.single;
+      final participation = (await repository.contestParticipationRepository
+          .findById(assignment.contestParticipationId))!;
+      final redraw = core.FinalizedRedraw(
+        draw: draw,
+        placeholders: [
+          core.ScorePlaceholder(
+            id: core.Id.create(),
+            contestId: example.contestId,
+            contestParticipationId: participation.id,
+            assignmentId: assignment.id,
+          ),
+        ],
+        numberedParticipations: [participation.withParticipantNumber(99)],
+        replacedRounds: [
+          core.Round.fromJson({
+            ...replaced.toJson(),
+            'superseded_by_round_id': draw.rounds.single.id.value,
+          }),
+        ],
+      );
+
+      await repo.appendRedraw(redraw, metadata: metadata());
+
+      final rounds = await repository.roundRepository.listForContest(
+        example.contestId,
+      );
+      final live = rounds.where((round) => round.isCurrent).toList();
+      expect(
+        live.where((round) => round.ordinal == 2).single.id,
+        draw.rounds.single.id,
+      );
+      expect(
+        rounds.firstWhere((round) => round.id == replaced.id).isSuperseded,
+        isTrue,
+      );
+      expect(await repo.findById(draw.revision.id), draw.revision);
+      expect(
+        (await repository.scorePlaceholderRepository.findForAssignment(
+          assignment.id,
+        )),
+        isNotNull,
+      );
+    });
+
+    test('appendRedraw cancels a round the redraw does not reach', () async {
+      final replaced = (await repository.roundRepository.listForContest(
+        example.contestId,
+      )).firstWhere((round) => round.ordinal == 2);
+      final draw = newDraw(ordinal: 3);
+      final assignment = draw.assignments.single;
+      final redraw = core.FinalizedRedraw(
+        draw: draw,
+        placeholders: [
+          core.ScorePlaceholder(
+            id: core.Id.create(),
+            contestId: example.contestId,
+            contestParticipationId: assignment.contestParticipationId,
+            assignmentId: assignment.id,
+          ),
+        ],
+        numberedParticipations: const [],
+        replacedRounds: [
+          core.Round.fromJson({...replaced.toJson(), 'status': 'Cancelled'}),
+        ],
+      );
+
+      await repo.appendRedraw(redraw, metadata: metadata());
+
+      final stored = (await repository.roundRepository.findById(replaced.id))!;
+      expect(stored.isCurrent, isFalse);
+      expect(stored.status, core.RoundStatus.cancelled);
     });
 
     test('appendFinalizedDraw stores nothing when a placeholder is '
