@@ -6,6 +6,7 @@ import '../api_client_provider.dart';
 import '../router.dart';
 import '../widgets/api_error_text.dart';
 import '../widgets/message_view.dart';
+import '../widgets/participant_search.dart';
 
 /// The director's reusable participant list (system scope,
 /// `plan/ui/contest-administration/participant-data.md`).
@@ -21,6 +22,7 @@ class ParticipantsPage extends StatefulWidget {
 
 class _ParticipantsPageState extends State<ParticipantsPage> {
   Future<List<ParticipantProfile>>? _participants;
+  String _search = '';
 
   @override
   void didChangeDependencies() {
@@ -113,6 +115,17 @@ class _ParticipantsPageState extends State<ParticipantsPage> {
           ],
         ),
       ),
+      Padding(
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+        child: TextField(
+          key: const ValueKey('participant-search'),
+          decoration: const InputDecoration(
+            prefixIcon: Icon(Icons.search),
+            hintText: 'Search by name, email, FAI number or national ID',
+          ),
+          onChanged: (value) => setState(() => _search = value),
+        ),
+      ),
       Expanded(
         child: FutureBuilder<List<ParticipantProfile>>(
           future: _participants,
@@ -124,12 +137,19 @@ class _ParticipantsPageState extends State<ParticipantsPage> {
                 onRetry: _reload,
               );
             }
-            final participants = snapshot.data;
-            if (participants == null) {
+            final all = snapshot.data;
+            if (all == null) {
               return const Center(child: CircularProgressIndicator());
             }
-            if (participants.isEmpty) {
+            if (all.isEmpty) {
               return const MessageView(text: 'No participants yet.');
+            }
+            final participants = [
+              for (final profile in all)
+                if (matchesParticipantSearch(profile, _search)) profile,
+            ];
+            if (participants.isEmpty) {
+              return const MessageView(text: 'No participants match.');
             }
             return ListView.separated(
               itemCount: participants.length,

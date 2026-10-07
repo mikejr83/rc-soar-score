@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
+import 'package:soar_score_core/soar_score_core.dart';
 
 import '../support/participant_test_support.dart';
 
@@ -45,6 +46,74 @@ void main() {
         .map((tile) => (tile.title! as Text).data)
         .toList();
     expect(names, ['Cal Adams', 'Bea Smith', 'Zed smith', 'Ann Walker']);
+  });
+
+  testWidgets('the search box filters on name, email, FAI and national ID', (
+    tester,
+  ) async {
+    ParticipantProfile withIds(
+      String first,
+      String last,
+      int n, {
+      String? fai,
+      String? national,
+    }) {
+      final base = profile(first, last, n: n);
+      return ParticipantProfile(
+        id: base.id,
+        ownerAccountId: base.ownerAccountId,
+        firstName: first,
+        lastName: last,
+        email: base.email,
+        faiNumber: fai,
+        nationalOrgId: national,
+        createdAt: base.createdAt,
+        updatedAt: base.updatedAt,
+      );
+    }
+
+    final client = clientFor(
+      (_) async => json({
+        'participants': [
+          withIds('Ada', 'Lovelace', 10, fai: 'FAI-1001', national: 'AMA 555'),
+          withIds('Bo', 'Peep', 11, fai: 'FAI-2002', national: 'AMA 777'),
+          withIds('Cy', 'Young', 12),
+        ],
+      }),
+    );
+    Future<void> search(String text) async {
+      await tester.enterText(
+        find.byKey(const ValueKey('participant-search')),
+        text,
+      );
+      await tester.pumpAndSettle();
+    }
+
+    await tester.pumpWidget(participantsApp(client));
+    await tester.pumpAndSettle();
+    expect(find.byType(ListTile), findsNWidgets(3));
+
+    await search('lovelace ada');
+    expect(find.text('Ada Lovelace'), findsOneWidget);
+    expect(find.byType(ListTile), findsOneWidget);
+
+    await search('BO@EXAMPLE');
+    expect(find.text('Bo Peep'), findsOneWidget);
+    expect(find.byType(ListTile), findsOneWidget);
+
+    await search('fai-2002');
+    expect(find.text('Bo Peep'), findsOneWidget);
+    expect(find.byType(ListTile), findsOneWidget);
+
+    await search('ama 555');
+    expect(find.text('Ada Lovelace'), findsOneWidget);
+    expect(find.byType(ListTile), findsOneWidget);
+
+    await search('zzz');
+    expect(find.text('No participants match.'), findsOneWidget);
+
+    await search('');
+    expect(find.byType(ListTile), findsNWidgets(3));
   });
 
   testWidgets('shows an empty state', (tester) async {
