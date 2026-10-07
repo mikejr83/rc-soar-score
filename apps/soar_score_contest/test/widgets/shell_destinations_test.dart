@@ -20,6 +20,8 @@ void main() {
       expect(contestIdFor('$homePath/workspace'), isNull);
       expect(contestIdFor(contestsPath), isNull);
       expect(contestIdFor('$contestsPath/'), isNull);
+      expect(contestIdFor(newContestPath), isNull);
+      expect(shellScopeFor(newContestPath), ShellScope.system);
     });
   });
 

@@ -12,6 +12,11 @@ abstract final class AppTheme {
   static const Color _surfaceColor = Color(0xFFF8FAFC);
   // Custom High-Viz Accent for Timers & Max Scores
   static const Color _highVizAmber = Color(0xFFD97706);
+  // Amber containers for warnings: the accent itself is below 4.5:1 as text.
+  static const Color _amberContainerLight = Color(0xFFFFDDB8);
+  static const Color _onAmberContainerLight = Color(0xFF2C1600);
+  static const Color _amberContainerDark = Color(0xFF653E00);
+  static const Color _onAmberContainerDark = Color(0xFFFFDDB8);
 
   static const double _defaultBorderRadius = 12;
 
@@ -24,6 +29,8 @@ abstract final class AppTheme {
         primary: _primaryColor,
         secondary: _secondaryColor,
         tertiary: _highVizAmber,
+        tertiaryContainer: _amberContainerLight,
+        onTertiaryContainer: _onAmberContainerLight,
         surface: _surfaceColor,
       ),
       cardTheme: CardThemeData(
@@ -46,6 +53,8 @@ abstract final class AppTheme {
         seedColor: _skyBlueSeed,
         brightness: Brightness.dark,
         tertiary: _highVizAmber,
+        tertiaryContainer: _amberContainerDark,
+        onTertiaryContainer: _onAmberContainerDark,
       ),
       cardTheme: CardThemeData(
         elevation: 1,

@@ -59,7 +59,7 @@ The UI identifies whether a result is local, remote, or already selected. It mus
 
 ### Participant row rules
 
-When teams are enabled, each pilot must have a team. Team names are case-insensitive for matching and are normalized for comparison. A missing name receives the next numeric team identifier. A team control offers existing teams and a free-text value. The display may use a short avatar, but the full name must remain available as text or an accessible label.
+When teams are enabled, each pilot can be assigned to a team by name. Typing a new name creates the team. A pilot with no team name is unassigned, which is not an error. Team names are case-insensitive for matching and are normalized for comparison. A team control offers existing teams and a free-text value. The display may use a short avatar, but the full name must remain available as text or an accessible label.
 
 When classes are enabled, each pilot must have a class. Class names are compared case-insensitively and displayed in title case. Previously entered classes are offered as suggestions.
 

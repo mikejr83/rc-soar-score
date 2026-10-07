@@ -13,6 +13,8 @@ import 'shell_stub_page.dart';
 /// expanded rail (wide windows only), the application title and, in the
 /// system scope, a context-aware FAB: `Add participant` on the participant
 /// pages, `Create contest` on the main page, and a stub for the other pages.
+/// The New Contest wizard hides the FAB (its footer holds the one primary
+/// action) and keeps `Contests` selected.
 /// The destinations come from [shellDestinationsFor], so contest-only tasks
 /// (matrix, scoring, reports) appear only while a contest is selected.
 class ShellRail extends StatefulWidget {
@@ -51,6 +53,13 @@ class _ShellRailState extends State<ShellRail> {
       landingsPath => ('New landing', const ValueKey('new-landing')),
       _ => ('Create contest', const ValueKey('create-contest')),
     };
+    if (key == const ValueKey('create-contest')) {
+      return (
+        label: label,
+        key: key,
+        onPressed: () => context.go(newContestPath),
+      );
+    }
     return (
       label: label,
       key: key,
@@ -65,14 +74,17 @@ class _ShellRailState extends State<ShellRail> {
   @override
   Widget build(BuildContext context) {
     final destinations = shellDestinationsFor(widget.path);
+    final wizard = _isUnder(newContestPath);
     final selected = destinations.indexWhere(
-      (destination) => destination.matches(widget.path),
+      (destination) => wizard
+          ? destination.location == homePath
+          : destination.matches(widget.path),
     );
     final canExpand =
         MediaQuery.sizeOf(context).width >= ShellRail.expandableWidth;
     final expanded = canExpand && _expanded;
     final system = shellScopeFor(widget.path) == ShellScope.system;
-    final fab = system ? _fab(context) : null;
+    final fab = system && !wizard ? _fab(context) : null;
 
     return NavigationRail(
       selectedIndex: selected < 0 ? null : selected,
