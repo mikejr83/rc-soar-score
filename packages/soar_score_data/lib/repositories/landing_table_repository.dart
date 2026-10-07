@@ -36,6 +36,31 @@ class LandingTableRepository extends DriftRepository
   );
 
   @override
+  Future<bool> isInUse(core.Id id) async {
+    final references = [
+      store<core.ContestConfigurationRevision>('ContestConfigurationRevision')
+          .whereId('landing_table_id', id),
+      store<core.ContestConfigurationPreset>('ContestConfigurationPreset')
+          .whereId('landing_table_id', id),
+      store<core.DisciplineProfile>('DisciplineProfile')
+          .whereId('default_landing_table_id', id),
+    ];
+    for (final found in references) {
+      if ((await found).isNotEmpty) return true;
+    }
+    return false;
+  }
+
+  @override
+  Future<bool> delete(core.Id id, {required core.MutationMetadata metadata}) =>
+      unitOfWork.run((context) async {
+        final table = await _tables.find(id);
+        if (table == null) return false;
+        await context.removeLandingTable(table, metadata: metadata);
+        return true;
+      });
+
+  @override
   Future<bool> installSystemTable(core.LandingTableWithResults table) {
     if (!table.table.isSystem) {
       throw ArgumentError.value(

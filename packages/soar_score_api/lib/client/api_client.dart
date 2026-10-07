@@ -1,12 +1,14 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:soar_score_core/services/landing_table_view.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../dto/add_participation_request.dart';
 import '../dto/add_team_member_request.dart';
 import '../dto/contest_action_request.dart';
 import '../dto/create_contest_request.dart';
+import '../dto/create_landing_table_request.dart';
 import '../dto/create_participant_request.dart';
 import '../dto/create_team_request.dart';
 import '../dto/draw_matrix_request.dart';
@@ -233,6 +235,39 @@ class ApiClient {
   /// A profile that is in a contest is an [ApiHttpError] with status 409.
   Future<void> deleteParticipant(Id id) async {
     await _send('DELETE', _resolve('/api/v1/participants/${id.value}'));
+  }
+
+  /// `GET /api/v1/landing-tables` — the system landing tables and the
+  /// caller's own, each marked with whether it is in use.
+  Future<List<LandingTableView>> landingTables() async {
+    final uri = _resolve('/api/v1/landing-tables');
+    final response = await _send('GET', uri);
+    return _decode<List<LandingTableView>>(
+      response,
+      uri,
+      (json) => [
+        for (final item in json['landing_tables'] as List<dynamic>)
+          LandingTableView.fromJson(item as Map<String, dynamic>),
+      ],
+    );
+  }
+
+  /// `POST /api/v1/landing-tables` — creates a landing table owned by the
+  /// caller.
+  Future<LandingTableView> createLandingTable(
+    CreateLandingTableRequest request,
+  ) async {
+    final uri = _resolve('/api/v1/landing-tables');
+    final response = await _send('POST', uri, body: request.toJson());
+    return _decode<LandingTableView>(response, uri, LandingTableView.fromJson);
+  }
+
+  /// `DELETE /api/v1/landing-tables/{id}` — removes one of the caller's
+  /// tables.
+  ///
+  /// A system table, or a table in use, is an [ApiHttpError] with status 409.
+  Future<void> deleteLandingTable(Id id) async {
+    await _send('DELETE', _resolve('/api/v1/landing-tables/${id.value}'));
   }
 
   /// `GET /api/v1/roles` — the system roles and the caller's own roles.

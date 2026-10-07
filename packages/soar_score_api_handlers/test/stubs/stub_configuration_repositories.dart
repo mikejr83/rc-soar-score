@@ -75,8 +75,41 @@ class StubLandingTableRepository implements LandingTableRepository {
     for (final table in SystemLandingTables.all) table.table.id: table,
   };
 
+  /// The tables a test says are used by a configuration.
+  final Set<Id> inUse = {};
+
+  /// The metadata of every create and delete, in order.
+  final List<MutationMetadata> writtenWith = [];
+
   @override
   Future<LandingTableWithResults?> findById(Id id) async => _tables[id];
+
+  @override
+  Future<List<LandingTableWithResults>> listVisibleTo({
+    Id? ownerAccountId,
+  }) async => [
+    for (final table in _tables.values)
+      if (table.table.isSystem || table.table.ownerAccountId == ownerAccountId)
+        table,
+  ];
+
+  @override
+  Future<LandingTableWithResults> create(
+    LandingTableWithResults table, {
+    required MutationMetadata metadata,
+  }) async {
+    writtenWith.add(metadata);
+    return _tables[table.table.id] = table;
+  }
+
+  @override
+  Future<bool> isInUse(Id id) async => inUse.contains(id);
+
+  @override
+  Future<bool> delete(Id id, {required MutationMetadata metadata}) async {
+    writtenWith.add(metadata);
+    return _tables.remove(id) != null;
+  }
 
   @override
   dynamic noSuchMethod(Invocation invocation) =>

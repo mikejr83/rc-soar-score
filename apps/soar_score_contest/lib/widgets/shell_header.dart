@@ -41,11 +41,12 @@ class ShellHeader extends StatelessWidget {
 
   /// The path and label of the stub page (`Roles`, `Landings`) that [path]
   /// is, else `null`.
-  static (String, String)? _stubRoot(String path) => switch (path) {
-    rolesPath => (rolesPath, 'Roles'),
-    landingsPath => (landingsPath, 'Landings'),
-    _ => null,
-  };
+  static (String, String)? _stubRoot(String path) {
+    if (path == landingsPath || path.startsWith('$landingsPath/')) {
+      return (landingsPath, 'Landings');
+    }
+    return path == rolesPath ? (rolesPath, 'Roles') : null;
+  }
 
   /// Path segments to show as plain crumbs after the root crumb (and the
   /// contest name in the contest scope). Participant ids are not shown;
@@ -58,7 +59,7 @@ class ShellHeader extends StatelessWidget {
       }
       return [path == newParticipantPath ? 'New' : 'Edit'];
     } else if (_stubRoot(path) != null) {
-      return const [];
+      return path == newLandingPath ? const ['New'] : const [];
     } else if (path == newContestPath) {
       return const ['New contest'];
     } else if (contestId != null) {

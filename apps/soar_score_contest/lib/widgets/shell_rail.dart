@@ -55,9 +55,16 @@ class _ShellRailState extends State<ShellRail> {
         onPressed: () => context.go(newParticipantPath),
       );
     }
+    if (_isUnder(landingsPath)) {
+      return (
+        label: 'New landing',
+        icon: Icons.add,
+        key: const ValueKey('new-landing'),
+        onPressed: () => context.go(newLandingPath),
+      );
+    }
     final (label, key) = switch (widget.path) {
       rolesPath => ('New role', const ValueKey('new-role')),
-      landingsPath => ('New landing', const ValueKey('new-landing')),
       _ => (
         CreateContestEntry.label(hasDraft),
         const ValueKey('create-contest'),

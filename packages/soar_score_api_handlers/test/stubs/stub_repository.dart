@@ -28,6 +28,7 @@ class StubRepository implements core.Repository {
   final participations = StubContestParticipationRepository();
   final roles = StubRoleRepository();
   final teams = StubTeamRepository();
+  final landingTables = StubLandingTableRepository();
   final teamMemberships = StubTeamMembershipRepository();
   final rounds = StubRoundRepository();
   final roundGroups = StubRoundGroupRepository();
@@ -90,8 +91,7 @@ class StubRepository implements core.Repository {
       StubDisciplineProfileRepository();
 
   @override
-  core.LandingTableRepository get landingTableRepository =>
-      StubLandingTableRepository();
+  core.LandingTableRepository get landingTableRepository => landingTables;
 
   @override
   dynamic noSuchMethod(Invocation invocation) =>
