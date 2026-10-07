@@ -1,6 +1,7 @@
 import '../models/id.dart';
 import '../models/matrix/matrix_draw.dart';
 import '../models/matrix/matrix_revision.dart';
+import 'finalized_draw.dart';
 import 'mutation_metadata.dart';
 
 /// Abstract persistence contract for [MatrixRevision]s and the draws in them.
@@ -24,6 +25,20 @@ abstract interface class MatrixRevisionRepository {
   /// revision or one of the assignments is already stored.
   Future<MatrixDraw> appendDraw(
     MatrixDraw draw, {
+    required MutationMetadata metadata,
+  });
+
+  /// Stores [finalized]: the draw (as [appendDraw] does), its score
+  /// placeholders, the participant numbers and the contest, in one
+  /// transaction.
+  ///
+  /// Throws an `AlreadyStoredError` if the revision, an assignment or a
+  /// placeholder is already stored, and a `StaleRevisionError` if the
+  /// contest or a participation changed since it was read. Each stored entity
+  /// gets its own mutation, derived from [metadata] with
+  /// `MutationMetadata.forPart`.
+  Future<FinalizedDraw> appendFinalizedDraw(
+    FinalizedDraw finalized, {
     required MutationMetadata metadata,
   });
 }

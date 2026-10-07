@@ -82,6 +82,22 @@ class ContestParticipation extends Equatable implements Synchronizable {
   @override
   final int revision;
 
+  /// This participation with [number] as its participant number.
+  ContestParticipation withParticipantNumber(int number) =>
+      ContestParticipation(
+        id: id,
+        contestId: contestId,
+        participantProfileId: participantProfileId,
+        classification: classification,
+        roleId: roleId,
+        roleName: roleName,
+        roleType: roleType,
+        participantNumber: number,
+        scoringUuid: scoringUuid,
+        retiredAtRound: retiredAtRound,
+        revision: revision,
+      );
+
   bool get isPilot => roleType == RoleType.pilot;
   bool get isRetired => retiredAtRound != null;
 

@@ -109,37 +109,3 @@ class StubRoleRepository implements RoleRepository {
   Future<bool> installSystemRole(Role role) =>
       throw UnimplementedError('not used by handlers');
 }
-
-/// A [MatrixAssignmentRepository] that reports the participations a test
-/// marks as having flight assignments.
-class StubMatrixAssignmentRepository implements MatrixAssignmentRepository {
-  final Set<Id> participationsWithAssignments = {};
-
-  @override
-  Future<List<MatrixAssignment>> listForParticipation(
-    Id contestParticipationId,
-  ) async {
-    if (!participationsWithAssignments.contains(contestParticipationId)) {
-      return const [];
-    }
-    final round = Id.create();
-    return [
-      MatrixAssignment(
-        id: Id.create(),
-        contestId: Id.create(),
-        matrixRevisionId: Id.create(),
-        contestParticipationId: contestParticipationId,
-        scheduledRoundId: round,
-        creditedRoundId: round,
-        group: 1,
-        assignmentType: AssignmentType.original,
-        actorId: Id.create(),
-        createdAt: DateTime.utc(2026, 10, 1),
-      ),
-    ];
-  }
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) =>
-      throw UnimplementedError('${invocation.memberName} is not stubbed');
-}

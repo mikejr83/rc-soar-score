@@ -2,6 +2,7 @@ import 'package:soar_score_core/soar_score_core.dart' as core;
 
 import 'stub_configuration_repositories.dart';
 import 'stub_contest_repository.dart';
+import 'stub_matrix_repositories.dart';
 import 'stub_participant_repositories.dart';
 import 'stub_team_repositories.dart';
 
@@ -29,7 +30,17 @@ class StubRepository implements core.Repository {
   final matrixAssignments = StubMatrixAssignmentRepository();
   final teams = StubTeamRepository();
   final teamMemberships = StubTeamMembershipRepository();
-  final matrixRevisions = StubMatrixRevisionRepository();
+  final rounds = StubRoundRepository();
+  final roundGroups = StubRoundGroupRepository();
+  final scorePlaceholders = StubScorePlaceholderRepository();
+  late final matrixRevisions = StubMatrixRevisionRepository(
+    _contestRepository as StubContestRepository,
+    participations,
+    rounds,
+    roundGroups,
+    matrixAssignments,
+    scorePlaceholders,
+  );
 
   /// The stored configuration revisions, for tests to inspect.
   final StubConfigurationRevisionRepository configurations;
@@ -61,6 +72,16 @@ class StubRepository implements core.Repository {
 
   @override
   core.MatrixRevisionRepository get matrixRevisionRepository => matrixRevisions;
+
+  @override
+  core.RoundRepository get roundRepository => rounds;
+
+  @override
+  core.RoundGroupRepository get roundGroupRepository => roundGroups;
+
+  @override
+  core.ScorePlaceholderRepository get scorePlaceholderRepository =>
+      scorePlaceholders;
 
   @override
   core.DisciplineProfileRepository get disciplineProfileRepository =>
