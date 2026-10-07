@@ -47,6 +47,14 @@ GoRouter buildShellTestRouter({String initialLocation = homePath}) {
             ],
           ),
           GoRoute(
+            path: participantsPath,
+            builder: (context, state) => const Text('Participants content'),
+          ),
+          GoRoute(
+            path: '$participantsPath/:participantId',
+            builder: (context, state) => const Text('Participant editor'),
+          ),
+          GoRoute(
             path: '$contestsPath/:contestId/workspace',
             name: 'contestWorkspace',
             builder: (context, state) =>

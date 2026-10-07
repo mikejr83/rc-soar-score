@@ -3,6 +3,7 @@ import 'package:soar_score_core/soar_score_core.dart';
 
 import '../api_client_provider.dart';
 import '../widgets/contest_list.dart';
+import '../widgets/message_view.dart';
 
 /// The main page ("Contests"): lists the contests the app's API holds.
 ///
@@ -51,7 +52,7 @@ class _HomePageState extends State<HomePage> {
           future: _contests,
           builder: (context, snapshot) {
             if (snapshot.hasError) {
-              return _Message(
+              return MessageView(
                 text: 'Contests could not be loaded.',
                 detail: '${snapshot.error}',
                 onRetry: _retry,
@@ -62,41 +63,12 @@ class _HomePageState extends State<HomePage> {
               return const Center(child: CircularProgressIndicator());
             }
             if (contests.isEmpty) {
-              return const _Message(text: 'No contests yet.');
+              return const MessageView(text: 'No contests yet.');
             }
             return ContestList(contests: contests);
           },
         ),
       ),
     ],
-  );
-}
-
-class _Message extends StatelessWidget {
-  const _Message({required this.text, this.detail, this.onRetry});
-
-  final String text;
-  final String? detail;
-  final VoidCallback? onRetry;
-
-  @override
-  Widget build(BuildContext context) => Center(
-    child: Padding(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(text),
-          if (detail != null) ...[
-            const SizedBox(height: 8),
-            Text(detail!, style: Theme.of(context).textTheme.bodySmall),
-          ],
-          if (onRetry != null) ...[
-            const SizedBox(height: 16),
-            FilledButton(onPressed: onRetry, child: const Text('Retry')),
-          ],
-        ],
-      ),
-    ),
   );
 }

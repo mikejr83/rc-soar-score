@@ -119,9 +119,9 @@ void main() {
     addTearDown(router.dispose);
     await pumpShellRouter(tester, router);
 
-    await tester.tap(find.text('Participants'));
+    await tester.tap(find.text('Roles'));
     await tester.pumpAndSettle();
-    expect(find.text('Participants is not available yet'), findsOneWidget);
+    expect(find.text('Roles is not available yet'), findsOneWidget);
     await tester.tap(find.text('OK'));
     await tester.pumpAndSettle();
     expect(find.byType(AlertDialog), findsNothing);
@@ -133,5 +133,36 @@ void main() {
     await tester.tap(find.text('OK'));
     await tester.pumpAndSettle();
     expect(find.byType(AlertDialog), findsNothing);
+  });
+
+  testWidgets('the participant list is a top-level page titled '
+      'Participants, without a back arrow', (tester) async {
+    final router = buildShellTestRouter(initialLocation: participantsPath);
+    addTearDown(router.dispose);
+    await pumpShellRouter(tester, router);
+
+    expect(find.text('Participants content'), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('breadcrumb-participants')),
+      findsOneWidget,
+    );
+    expect(_contestsCrumb(), findsNothing);
+    expect(find.byKey(const ValueKey('breadcrumb-back')), findsNothing);
+    final rail = tester.widget<NavigationRail>(find.byType(NavigationRail));
+    expect(rail.selectedIndex, 1);
+  });
+
+  testWidgets('the participant editor has no back arrow; the Participants '
+      'crumb returns to the list', (tester) async {
+    final router = buildShellTestRouter(initialLocation: newParticipantPath);
+    addTearDown(router.dispose);
+    await pumpShellRouter(tester, router);
+
+    expect(find.text('New'), findsOneWidget);
+    expect(find.byKey(const ValueKey('breadcrumb-back')), findsNothing);
+
+    await tester.tap(find.byKey(const ValueKey('breadcrumb-participants')));
+    await tester.pumpAndSettle();
+    expect(find.text('Participants content'), findsOneWidget);
   });
 }

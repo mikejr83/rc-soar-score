@@ -6,6 +6,8 @@ import 'app_mode_provider.dart';
 import 'pages/contest_workspace_page.dart';
 import 'pages/home_page.dart';
 import 'pages/landing_page.dart';
+import 'pages/participant_editor_page.dart';
+import 'pages/participants_page.dart';
 import 'widgets/contest_shell.dart';
 
 /// The contest-administration root path (the landing page).
@@ -19,6 +21,16 @@ const String homePath = '$landingPath/home';
 /// The root of the per-contest routes. Every route below it belongs to one
 /// selected contest, and the shell shows contest-scoped navigation there.
 const String contestsPath = '$landingPath/contests';
+
+/// The director's participant list (system scope).
+const String participantsPath = '$landingPath/participants';
+
+/// The participant editor in create mode.
+const String newParticipantPath = '$participantsPath/new';
+
+/// The participant editor for the profile with [participantId].
+String participantPath(String participantId) =>
+    '$participantsPath/$participantId';
 
 /// The contest workspace for the contest with [contestId].
 String contestWorkspacePath(String contestId) =>
@@ -49,6 +61,23 @@ GoRouter buildAppRouter({
             path: homePath,
             name: 'home',
             builder: (context, state) => const HomePage(),
+          ),
+          GoRoute(
+            path: participantsPath,
+            name: 'participants',
+            builder: (context, state) => const ParticipantsPage(),
+          ),
+          GoRoute(
+            path: newParticipantPath,
+            name: 'newParticipant',
+            builder: (context, state) => const ParticipantEditorPage(),
+          ),
+          GoRoute(
+            path: '$participantsPath/:participantId',
+            name: 'editParticipant',
+            builder: (context, state) => ParticipantEditorPage(
+              participantId: state.pathParameters['participantId'],
+            ),
           ),
           GoRoute(
             path: '$contestsPath/:contestId/workspace',
