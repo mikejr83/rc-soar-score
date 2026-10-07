@@ -10,11 +10,16 @@ class DisciplineCard extends StatelessWidget {
     required this.discipline,
     required this.selected,
     required this.onSelect,
+    this.sizingOnly = false,
   });
 
   final WizardDiscipline discipline;
   final bool selected;
   final VoidCallback onSelect;
+
+  /// Whether this copy only exists to be measured, so it carries no key and
+  /// can't be selected. See `DisciplineCardSlot`.
+  final bool sizingOnly;
 
   @override
   Widget build(BuildContext context) {
@@ -47,8 +52,8 @@ class DisciplineCard extends StatelessWidget {
         ),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
-          key: ValueKey('discipline-${discipline.name}'),
-          onTap: supported && !selected ? onSelect : null,
+          key: sizingOnly ? null : ValueKey('discipline-${discipline.name}'),
+          onTap: supported && !selected && !sizingOnly ? onSelect : null,
           mouseCursor: supported
               ? SystemMouseCursors.click
               : SystemMouseCursors.forbidden,

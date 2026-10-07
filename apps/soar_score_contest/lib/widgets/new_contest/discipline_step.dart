@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../services/new_contest/wizard_discipline.dart';
-import 'discipline_card.dart';
+import 'discipline_card_slot.dart';
 
 /// Step 2: pick exactly one discipline. The cards wrap to as many columns
 /// as fit (300 px minimum).
@@ -42,7 +42,7 @@ class DisciplineStep extends StatelessWidget {
                   for (final discipline in WizardDiscipline.values)
                     SizedBox(
                       width: width,
-                      child: DisciplineCard(
+                      child: DisciplineCardSlot(
                         discipline: discipline,
                         selected: discipline == selected,
                         onSelect: () => onSelect(discipline),
