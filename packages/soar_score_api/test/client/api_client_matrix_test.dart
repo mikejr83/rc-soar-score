@@ -114,4 +114,34 @@ void main() {
       'override_locks': true,
     });
   });
+
+  test('lateAdd POSTs the request and decodes the matrix', () async {
+    final client = clientFor((_) => body(CurrentMatrix().toJson(), 201));
+    final newId = Id.parse('019c0000-0000-7000-8000-000000000602');
+    final pilot = Id.parse('019c0000-0000-7000-8000-000000000206');
+    final round = Id.parse('019c0000-0000-7000-8000-000000000081');
+
+    await client.lateAdd(
+      contestId,
+      LateAddRequest(
+        id: newId,
+        contestParticipationId: pilot,
+        scheduledRoundId: round,
+        group: 2,
+        reason: 'Joined late',
+      ),
+    );
+
+    expect(seen.method, 'POST');
+    expect(seen.url.path, '$matrixPath/late-adds');
+    expect(jsonDecode(seen.body), {
+      'id': newId.value,
+      'contest_participation_id': pilot.value,
+      'scheduled_round_id': round.value,
+      'credited_round_id': null,
+      'group': 2,
+      'lane': null,
+      'reason': 'Joined late',
+    });
+  });
 }

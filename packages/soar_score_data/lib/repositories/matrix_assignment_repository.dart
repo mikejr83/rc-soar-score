@@ -64,4 +64,25 @@ class MatrixAssignmentRepository extends DriftRepository
     );
     return stored;
   });
+
+  @override
+  Future<core.MatrixAssignment> addLate(
+    core.MatrixAssignment lateAdd, {
+    required core.ScorePlaceholder placeholder,
+    core.ContestParticipation? numberedParticipation,
+    required core.MutationMetadata metadata,
+  }) => unitOfWork.run((context) async {
+    final stored = await context.append(lateAdd, metadata: metadata);
+    await context.save(
+      placeholder,
+      metadata: metadata.forPart(placeholder.id.value),
+    );
+    if (numberedParticipation != null) {
+      await context.save(
+        numberedParticipation,
+        metadata: metadata.forPart(numberedParticipation.id.value),
+      );
+    }
+    return stored;
+  });
 }

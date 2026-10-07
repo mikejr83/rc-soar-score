@@ -1,9 +1,6 @@
-import 'dart:math';
-
 import '../../enums/admin_lock.dart';
 import '../../enums/assignment_type.dart';
 import '../../enums/existing_score_handling.dart';
-import '../../enums/lane_mode.dart';
 import '../../enums/lifecycle_state.dart';
 import '../../enums/score_placeholder_state.dart';
 import '../../errors/contest_state_error.dart';
@@ -18,6 +15,7 @@ import '../../repositories/already_stored_error.dart';
 import '../../repositories/mutation_metadata.dart';
 import '../../repositories/repository.dart';
 import 'matrix_service.dart';
+import 'matrix_slot_rules.dart';
 
 /// Moves a pilot to another group, lane or round of the current matrix.
 ///
@@ -35,6 +33,7 @@ class AssignmentMoveService {
        _newId = newId ?? Id.create;
 
   final Repository repository;
+  late final _rules = MatrixSlotRules(repository);
   final DateTime Function() _clock;
   final Id Function() _newId;
 
@@ -146,18 +145,17 @@ class AssignmentMoveService {
       );
     }
 
-    final live = await repository.matrixAssignmentRepository.listLiveForRound(
-      targetRound.id,
-    );
-    await _checkSlot(
+    final rows = await _rules.assignmentsOfRound(targetRound);
+    final live = _rules.live(rows);
+    await _rules.checkSlot(
       contestId: contestId,
       round: targetRound,
+      rows: rows,
       group: group,
       lane: lane,
-      live: live,
     );
     _checkTargetFree(source: source, live: live, group: group, lane: lane);
-    await _checkTeams(
+    await _rules.checkTeams(
       contestId: contestId,
       participationId: source.contestParticipationId,
       live: live,
@@ -221,44 +219,6 @@ class AssignmentMoveService {
     return MatrixService(repository).current(contestId);
   }
 
-  /// Checks that [group] and [lane] exist in [round] and fit the contest's
-  /// lane mode.
-  Future<void> _checkSlot({
-    required Id contestId,
-    required Round round,
-    required int group,
-    required int? lane,
-    required List<MatrixAssignment> live,
-  }) async {
-    if (group < 1 || group > round.groupCount) {
-      throw ArgumentError(
-        'group must be between 1 and ${round.groupCount} for this round',
-      );
-    }
-    final configuration = await repository
-        .contestConfigurationRevisionRepository
-        .latestForContest(contestId);
-    final laneMode =
-        configuration?.config.coreOptions.laneMode ?? LaneMode.none;
-    if (laneMode == LaneMode.none) {
-      if (lane != null) {
-        throw ArgumentError('the contest has no lanes; leave lane empty');
-      }
-      return;
-    }
-    // The lanes of a round are as many as its largest group of the draw.
-    final sizes = <int, int>{};
-    for (final assignment in live) {
-      if (assignment.assignmentType == AssignmentType.original) {
-        sizes.update(assignment.group, (n) => n + 1, ifAbsent: () => 1);
-      }
-    }
-    final laneCount = sizes.values.fold<int>(1, max);
-    if (lane == null || lane < 1 || lane > laneCount) {
-      throw ArgumentError('lane must be between 1 and $laneCount');
-    }
-  }
-
   void _checkTargetFree({
     required MatrixAssignment source,
     required List<MatrixAssignment> live,
@@ -278,37 +238,6 @@ class AssignmentMoveService {
         throw ContestStateError(
           'lane_taken',
           'lane $lane of group $group is taken by another pilot',
-        );
-      }
-    }
-  }
-
-  Future<void> _checkTeams({
-    required Id contestId,
-    required Id participationId,
-    required List<MatrixAssignment> live,
-    required int group,
-  }) async {
-    final configuration = await repository
-        .contestConfigurationRevisionRepository
-        .latestForContest(contestId);
-    if (configuration?.config.coreOptions.teamProtection != true) return;
-    final teamOf = {
-      for (final membership
-          in await repository.teamMembershipRepository.listForContest(
-            contestId,
-          ))
-        membership.contestParticipationId: membership.teamId,
-    };
-    final team = teamOf[participationId];
-    if (team == null) return;
-    for (final other in live) {
-      if (other.group == group &&
-          other.contestParticipationId != participationId &&
-          teamOf[other.contestParticipationId] == team) {
-        throw ContestStateError(
-          'team_conflict',
-          'a teammate already flies in this group',
         );
       }
     }

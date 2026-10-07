@@ -11,6 +11,7 @@ import '../dto/create_participant_request.dart';
 import '../dto/create_team_request.dart';
 import '../dto/draw_matrix_request.dart';
 import '../dto/health_dto.dart';
+import '../dto/late_add_request.dart';
 import '../dto/move_assignment_request.dart';
 import '../dto/save_configuration_request.dart';
 import '../dto/update_contest_request.dart';
@@ -434,6 +435,22 @@ class ApiClient {
     final uri = _resolve(
       '/api/v1/contests/${contestId.value}/matrix/assignments/'
       '${assignmentId.value}/moves',
+    );
+    final response = await _send('POST', uri, body: request.toJson());
+    return _decode<CurrentMatrix>(response, uri, CurrentMatrix.fromJson);
+  }
+
+  /// Places a pilot who joined late, or who is making up a missed round, in
+  /// a group of contest [contestId] and returns the current matrix.
+  ///
+  /// Repeating the same [request] changes nothing more. A late add the
+  /// contest cannot take (locked, no open spot, a group that already has
+  /// scores, a lane taken, a teammate in the group, a retired pilot) is an
+  /// [ApiHttpError] with status 409; a missing reason or a slot that does not
+  /// exist is status 400.
+  Future<CurrentMatrix> lateAdd(Id contestId, LateAddRequest request) async {
+    final uri = _resolve(
+      '/api/v1/contests/${contestId.value}/matrix/late-adds',
     );
     final response = await _send('POST', uri, body: request.toJson());
     return _decode<CurrentMatrix>(response, uri, CurrentMatrix.fromJson);

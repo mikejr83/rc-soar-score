@@ -157,6 +157,30 @@ class StubMatrixAssignmentRepository implements MatrixAssignmentRepository {
   StubScorePlaceholderRepository? placeholders;
 
   @override
+  Future<List<MatrixAssignment>> listForRevision(Id matrixRevisionId) async => [
+    for (final assignment in stored)
+      if (assignment.matrixRevisionId == matrixRevisionId) assignment,
+  ];
+
+  /// The participations a late add may number; set by the repository.
+  StubContestParticipationRepository? participations;
+
+  @override
+  Future<MatrixAssignment> addLate(
+    MatrixAssignment lateAdd, {
+    required ScorePlaceholder placeholder,
+    ContestParticipation? numberedParticipation,
+    required MutationMetadata metadata,
+  }) async {
+    stored.add(lateAdd);
+    placeholders?.stored.add(placeholder);
+    if (numberedParticipation != null) {
+      await participations?.save(numberedParticipation, metadata: metadata);
+    }
+    return lateAdd;
+  }
+
+  @override
   Future<MatrixAssignment?> findById(Id id) async =>
       stored.where((assignment) => assignment.id == id).firstOrNull;
 
