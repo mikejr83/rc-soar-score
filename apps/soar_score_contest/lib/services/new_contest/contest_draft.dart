@@ -77,6 +77,26 @@ class ContestDraft {
   /// The furthest step the user has reached (1-based).
   final int visitedThrough;
 
+  /// Whether nothing has been entered yet, so the draft is no different from
+  /// a new one.
+  bool get isBlank =>
+      name.isEmpty &&
+      venue.isEmpty &&
+      startDate.isEmpty &&
+      endDate.isEmpty &&
+      city.isEmpty &&
+      region.isEmpty &&
+      country.isEmpty &&
+      timeZone == null &&
+      copyMode == CopyMode.none &&
+      source == null &&
+      discipline == null &&
+      options.isEmpty &&
+      teamPilotCount.isEmpty &&
+      participants.isEmpty &&
+      scoring == null &&
+      visitedThrough <= 1;
+
   bool has(ParticipantOption option) => options.contains(option);
 
   /// The step 5 values in effect.
