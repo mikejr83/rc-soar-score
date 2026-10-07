@@ -124,11 +124,13 @@ class SummaryStep extends StatelessWidget {
       _Section(
         'Participants',
         4,
-        [
-          ('People', '${d.participants.length}'),
-          ('Scoring pilots', '$scoringPilots'),
-          ('Non-flying', '${d.participants.length - scoringPilots}'),
-        ],
+        d.has(ParticipantOption.roles)
+            ? [
+                ('People', '${d.participants.length}'),
+                ('Scoring pilots', '$scoringPilots'),
+                ('Non-flying', '${d.participants.length - scoringPilots}'),
+              ]
+            : [('Pilots', '$scoringPilots')],
         scoringPilots < DraftValidation.minScoringPilots
             ? 'Needs at least 2 scoring pilots'
             : needing > 0
@@ -183,7 +185,10 @@ class SummaryStep extends StatelessWidget {
               : 'Man on Man',
         ),
         ('Team protection', plan.teamProtection ? 'On' : 'Off'),
-        ('Lanes', draw.laneMode.name == 'none' ? 'None' : 'Random'),
+        (
+          'Lanes',
+          draw.laneMode.name == 'none' ? 'No lane assignment' : 'Random',
+        ),
         ('Back-to-back', draw.allowBackToBack ? 'Allowed' : 'Avoided'),
       ]),
       _Section('Rounds and groups', 6, [
@@ -200,15 +205,12 @@ class SummaryStep extends StatelessWidget {
     final scheme = theme.colorScheme;
     final discipline = draft.discipline?.name ?? 'discipline';
     final after = [
-      (
-        Icons.tune,
-        'The contest opens on its configuration page in the Configuring '
-            'state.',
-      ),
+      (Icons.tune, 'The contest configuration page is opened.'),
       (Icons.lock, 'It stays unpublished and private until you publish it.'),
       (
         Icons.grid_view,
-        'The flight matrix isn’t drawn yet. Draw it from configuration.',
+        'A flight matrix hasn’t been drawn. The draw can be created from the '
+            'next screen.',
       ),
       (
         Icons.rule,

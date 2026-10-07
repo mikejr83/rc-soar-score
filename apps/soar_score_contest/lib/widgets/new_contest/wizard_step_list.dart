@@ -89,9 +89,8 @@ class WizardStepList extends StatelessWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'You can have one draft at a time. It stays until you '
-                      'close the app and doesn’t appear in contest lists '
-                      'until you create the contest.',
+                      'Configuration in process is kept until the app is closed or '
+                      'the contest is created.',
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: scheme.onSurfaceVariant,
                       ),
