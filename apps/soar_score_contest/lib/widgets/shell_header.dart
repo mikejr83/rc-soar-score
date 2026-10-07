@@ -5,7 +5,8 @@ import '../router.dart';
 import 'shell_destinations.dart';
 
 /// The slim header at the top of the shell's content pane: a back arrow
-/// below a top-level page (the main page or the participant list), a root
+/// below the main page (the participant pages have none; their root crumb
+/// is the way back), a root
 /// crumb (`Contests` or `Participants`) that returns to that page,
 /// the selected contest's name in the contest scope, and plain-text crumbs
 /// for deeper segments (go_router provides browser-history back on web).
@@ -53,12 +54,12 @@ class ShellHeader extends StatelessWidget {
     return rest.split('/').where((segment) => segment.isNotEmpty).toList();
   }
 
-  void _back(BuildContext context, String rootPath) {
+  void _back(BuildContext context) {
     final router = GoRouter.of(context);
     if (router.canPop()) {
       router.pop();
     } else {
-      router.go(rootPath);
+      router.go(homePath);
     }
   }
 
@@ -84,12 +85,12 @@ class ShellHeader extends StatelessWidget {
         padding: const EdgeInsetsDirectional.only(start: 8, end: 16),
         child: Row(
           children: [
-            if (!isRoot)
+            if (!isRoot && !participants)
               IconButton(
                 key: const ValueKey('breadcrumb-back'),
                 icon: const Icon(Icons.arrow_back),
                 tooltip: 'Back',
-                onPressed: () => _back(context, rootPath),
+                onPressed: () => _back(context),
               ),
             TextButton(
               key: ValueKey(

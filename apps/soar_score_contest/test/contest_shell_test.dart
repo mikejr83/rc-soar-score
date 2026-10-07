@@ -152,16 +152,16 @@ void main() {
     expect(rail.selectedIndex, 1);
   });
 
-  testWidgets('the participant editor shows a back arrow and returns to the '
-      'participant list', (tester) async {
+  testWidgets('the participant editor has no back arrow; the Participants '
+      'crumb returns to the list', (tester) async {
     final router = buildShellTestRouter(initialLocation: newParticipantPath);
     addTearDown(router.dispose);
     await pumpShellRouter(tester, router);
 
     expect(find.text('New'), findsOneWidget);
-    expect(find.byKey(const ValueKey('breadcrumb-back')), findsOneWidget);
+    expect(find.byKey(const ValueKey('breadcrumb-back')), findsNothing);
 
-    await tester.tap(find.byKey(const ValueKey('breadcrumb-back')));
+    await tester.tap(find.byKey(const ValueKey('breadcrumb-participants')));
     await tester.pumpAndSettle();
     expect(find.text('Participants content'), findsOneWidget);
   });
