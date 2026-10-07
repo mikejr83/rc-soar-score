@@ -18,6 +18,7 @@ The documents in this folder define the contest director's administration experi
 
 Prompts handed to a design tool to produce visual designs. They summarize the requirement documents above and are not themselves requirements; when a brief and a requirement document disagree, the requirement document wins.
 
+- [`matrix-design-brief.md`](matrix-design-brief.md) - Design prompt for the matrix screen (first draw and matrix grid).
 - [`new-contest-wizard-design-brief.md`](new-contest-wizard-design-brief.md) - Design prompt for the new contest wizard.
 
 ## Technology and visual rules
