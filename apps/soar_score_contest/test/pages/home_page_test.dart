@@ -53,10 +53,56 @@ void main() {
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
     await tester.pumpAndSettle();
 
-    expect(find.text('Front Range ALES Open'), findsOneWidget);
     expect(find.text('Second Open'), findsOneWidget);
-    expect(find.text('Created'), findsNWidgets(2));
-    expect(find.text('Oct 17, 2026 to Oct 18, 2026'), findsOneWidget);
+    // The first contest is listed and shown in the detail pane.
+    expect(find.text('Front Range ALES Open'), findsNWidgets(2));
+    expect(find.text('Created'), findsNWidgets(3));
+    expect(find.text('Oct 17, 2026 to Oct 18, 2026'), findsNWidgets(2));
+  });
+
+  testWidgets('selecting a contest shows its detail', (tester) async {
+    final client = _client(
+      (_) async => _json({
+        'contests': [
+          _contest('Front Range ALES Open').toJson(),
+          _contest('Second Open', day: 24).toJson(),
+        ],
+      }),
+    );
+
+    await tester.pumpWidget(_app(client));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Second Open'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Second Open'), findsNWidgets(2));
+    expect(find.text('Oct 24, 2026 to Oct 25, 2026'), findsNWidgets(2));
+    expect(find.byKey(const ValueKey('open-contest')), findsOneWidget);
+  });
+
+  testWidgets('a narrow window shows the list, then the detail with a back '
+      'button', (tester) async {
+    tester.view.physicalSize = const Size(600, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final client = _client(
+      (_) async => _json({
+        'contests': [_contest('Front Range ALES Open').toJson()],
+      }),
+    );
+
+    await tester.pumpWidget(_app(client));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('open-contest')), findsNothing);
+
+    await tester.tap(find.text('Front Range ALES Open'));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('open-contest')), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('contest-detail-back')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('open-contest')), findsNothing);
+    expect(find.text('Front Range ALES Open'), findsOneWidget);
   });
 
   testWidgets('shows an empty state when there are no contests', (
@@ -89,7 +135,7 @@ void main() {
     await tester.tap(find.text('Retry'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Recovered Open'), findsOneWidget);
+    expect(find.text('Recovered Open'), findsNWidgets(2));
     expect(find.text('Contests could not be loaded.'), findsNothing);
   });
 

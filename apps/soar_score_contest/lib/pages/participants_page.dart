@@ -5,14 +5,18 @@ import 'package:soar_score_core/soar_score_core.dart';
 import '../api_client_provider.dart';
 import '../router.dart';
 import '../widgets/api_error_text.dart';
+import '../widgets/master_detail.dart';
 import '../widgets/message_view.dart';
-import '../widgets/participant_search.dart';
+import '../widgets/participant_detail_pane.dart';
+import '../widgets/participant_list_pane.dart';
 
-/// The director's reusable participant list (system scope,
+/// The director's reusable participant list and detail (system scope,
 /// `plan/ui/contest-administration/participant-data.md`).
 ///
-/// Rows open the editor; the delete action asks for confirmation and shows
-/// the server's reason when a participant cannot be removed.
+/// Wide windows show the list beside the selected participant's detail;
+/// narrow ones show the list, then the detail with a way back. Edit opens
+/// the editor; Delete asks for confirmation and shows the server's reason
+/// when a participant cannot be removed. Adding is the shell rail's action.
 class ParticipantsPage extends StatefulWidget {
   const ParticipantsPage({super.key});
 
@@ -23,6 +27,8 @@ class ParticipantsPage extends StatefulWidget {
 class _ParticipantsPageState extends State<ParticipantsPage> {
   Future<List<ParticipantProfile>>? _participants;
   String _search = '';
+  Id? _selectedId;
+  bool _showDetail = false;
 
   @override
   void didChangeDependencies() {
@@ -85,6 +91,10 @@ class _ParticipantsPageState extends State<ParticipantsPage> {
     try {
       await apiClientOf(context)!.deleteParticipant(profile.id);
       if (mounted) {
+        setState(() {
+          _selectedId = null;
+          _showDetail = false;
+        });
         _reload();
       }
     } on Object catch (error) {
@@ -93,117 +103,49 @@ class _ParticipantsPageState extends State<ParticipantsPage> {
   }
 
   @override
-  Widget build(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [
-      Padding(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                'Participants',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-            ),
-            FilledButton.icon(
-              key: const ValueKey('add-participant'),
-              onPressed: () => context.go(newParticipantPath),
-              icon: const Icon(Icons.add),
-              label: const Text('Add participant'),
-            ),
-          ],
+  Widget build(BuildContext context) => FutureBuilder<List<ParticipantProfile>>(
+    future: _participants,
+    builder: (context, snapshot) {
+      if (snapshot.hasError) {
+        return MessageView(
+          text: 'Participants could not be loaded.',
+          detail: apiErrorText(snapshot.error!),
+          onRetry: _reload,
+        );
+      }
+      final all = snapshot.data;
+      if (all == null) {
+        return const Center(child: CircularProgressIndicator());
+      }
+      if (all.isEmpty) {
+        return const MessageView(text: 'No participants yet.');
+      }
+      // The first participant is selected until one is chosen (or when the
+      // chosen one is gone).
+      final selected = all.firstWhere(
+        (profile) => profile.id == _selectedId,
+        orElse: () => all.first,
+      );
+      return MasterDetail(
+        showDetail: _showDetail,
+        list: (context, wide) => ParticipantListPane(
+          participants: all,
+          search: _search,
+          onSearch: (value) => setState(() => _search = value),
+          selectedId: selected.id,
+          highlight: wide,
+          onSelect: (profile) => setState(() {
+            _selectedId = profile.id;
+            _showDetail = true;
+          }),
         ),
-      ),
-      Padding(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-        child: TextField(
-          key: const ValueKey('participant-search'),
-          decoration: const InputDecoration(
-            prefixIcon: Icon(Icons.search),
-            hintText: 'Search by name, email, FAI number or national ID',
-          ),
-          onChanged: (value) => setState(() => _search = value),
+        detail: (context, wide) => ParticipantDetailPane(
+          profile: selected,
+          onBack: wide ? null : () => setState(() => _showDetail = false),
+          onEdit: () => context.go(participantPath(selected.id.value)),
+          onDelete: () => _delete(selected),
         ),
-      ),
-      Expanded(
-        child: FutureBuilder<List<ParticipantProfile>>(
-          future: _participants,
-          builder: (context, snapshot) {
-            if (snapshot.hasError) {
-              return MessageView(
-                text: 'Participants could not be loaded.',
-                detail: apiErrorText(snapshot.error!),
-                onRetry: _reload,
-              );
-            }
-            final all = snapshot.data;
-            if (all == null) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (all.isEmpty) {
-              return const MessageView(text: 'No participants yet.');
-            }
-            final participants = [
-              for (final profile in all)
-                if (matchesParticipantSearch(profile, _search)) profile,
-            ];
-            if (participants.isEmpty) {
-              return const MessageView(text: 'No participants match.');
-            }
-            return ListView.separated(
-              itemCount: participants.length,
-              separatorBuilder: (_, _) => const Divider(height: 1),
-              itemBuilder: (context, index) {
-                final profile = participants[index];
-                return ListTile(
-                  title: _title(profile),
-                  subtitle: Text(_subtitle(profile)),
-                  onTap: () => context.go(participantPath(profile.id.value)),
-                  trailing: IconButton(
-                    tooltip: 'Delete ${profile.firstName} ${profile.lastName}',
-                    icon: const Icon(Icons.delete_outline),
-                    onPressed: () => _delete(profile),
-                  ),
-                );
-              },
-            );
-          },
-        ),
-      ),
-    ],
+      );
+    },
   );
-
-  static Text _title(ParticipantProfile profile) {
-    final email = profile.email;
-    return Text.rich(
-      TextSpan(
-        children: [
-          TextSpan(text: '${profile.firstName} ${profile.lastName}'),
-          if (email != null && email.isNotEmpty) ...[
-            const WidgetSpan(child: SizedBox(width: 8)),
-            TextSpan(
-              text: email,
-              style: const TextStyle(fontStyle: FontStyle.italic, fontSize: 12),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  static String _subtitle(ParticipantProfile profile) {
-    List<String> parts = [];
-    if (profile.nationalOrgId != null && profile.nationalOrgId!.isNotEmpty) {
-      parts.add("National ID: ${profile.nationalOrgId!}");
-    }
-    if (profile.faiNumber != null && profile.faiNumber!.isNotEmpty) {
-      parts.add("FAI Number: ${profile.faiNumber!}");
-    }
-
-    return [
-      ...parts,
-      profile.club,
-    ].whereType<String>().where((part) => part.isNotEmpty).join(' · ');
-  }
 }

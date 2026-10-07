@@ -52,11 +52,13 @@ List<ShellDestination> shellDestinationsFor(String path) {
         label: 'Roles',
         icon: Icons.badge_outlined,
         selectedIcon: Icons.badge,
+        location: rolesPath,
       ),
       ShellDestination(
-        label: 'Bonuses',
-        icon: Icons.flag_outlined,
-        selectedIcon: Icons.flag,
+        label: 'Landings',
+        icon: Icons.track_changes,
+        selectedIcon: Icons.track_changes,
+        location: landingsPath,
       ),
     ];
   }

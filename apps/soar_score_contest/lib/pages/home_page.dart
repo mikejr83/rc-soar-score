@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../api_client_provider.dart';
+import '../router.dart';
+import '../widgets/contest_detail_pane.dart';
 import '../widgets/contest_list.dart';
+import '../widgets/master_detail.dart';
 import '../widgets/message_view.dart';
 
-/// The main page ("Contests"): lists the contests the app's API holds.
+/// The main page ("Contests"): the contests the app's API holds, as a list
+/// beside the selected contest's detail (one pane at a time when narrow).
 ///
-/// Loading, empty and error states only; selection and actions come later.
+/// Loading, empty and error states, selection and opening a contest.
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -17,6 +22,8 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   Future<List<Contest>>? _contests;
+  Id? _selectedId;
+  bool _showDetail = false;
 
   @override
   void didChangeDependencies() {
@@ -40,35 +47,44 @@ class _HomePageState extends State<HomePage> {
   }
 
   @override
-  Widget build(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [
-      Padding(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-        child: Text('Contests', style: Theme.of(context).textTheme.titleLarge),
-      ),
-      Expanded(
-        child: FutureBuilder<List<Contest>>(
-          future: _contests,
-          builder: (context, snapshot) {
-            if (snapshot.hasError) {
-              return MessageView(
-                text: 'Contests could not be loaded.',
-                detail: '${snapshot.error}',
-                onRetry: _retry,
-              );
-            }
-            final contests = snapshot.data;
-            if (contests == null) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (contests.isEmpty) {
-              return const MessageView(text: 'No contests yet.');
-            }
-            return ContestList(contests: contests);
-          },
+  Widget build(BuildContext context) => FutureBuilder<List<Contest>>(
+    future: _contests,
+    builder: (context, snapshot) {
+      if (snapshot.hasError) {
+        return MessageView(
+          text: 'Contests could not be loaded.',
+          detail: '${snapshot.error}',
+          onRetry: _retry,
+        );
+      }
+      final contests = snapshot.data;
+      if (contests == null) {
+        return const Center(child: CircularProgressIndicator());
+      }
+      if (contests.isEmpty) {
+        return const MessageView(text: 'No contests yet.');
+      }
+      final selected = contests.firstWhere(
+        (contest) => contest.id == _selectedId,
+        orElse: () => contests.first,
+      );
+      return MasterDetail(
+        showDetail: _showDetail,
+        list: (context, wide) => ContestList(
+          contests: contests,
+          selectedId: selected.id,
+          highlight: wide,
+          onSelect: (contest) => setState(() {
+            _selectedId = contest.id;
+            _showDetail = true;
+          }),
         ),
-      ),
-    ],
+        detail: (context, wide) => ContestDetailPane(
+          contest: selected,
+          onBack: wide ? null : () => setState(() => _showDetail = false),
+          onOpen: () => context.go(contestWorkspacePath(selected.id.value)),
+        ),
+      );
+    },
   );
 }

@@ -67,7 +67,7 @@ void main() {
     expect(body['last_name'], 'Lovelace');
     expect(body['email'], 'ada@example.com');
     expect(body['club'], isNull);
-    expect(find.text('Participants'), findsOneWidget);
+    expect(find.text('No participants yet.'), findsOneWidget);
   });
 
   testWidgets('shows a duplicate email before creating a second profile', (
@@ -192,7 +192,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Discard'));
     await tester.pumpAndSettle();
-    expect(find.text('Participants'), findsOneWidget);
+    expect(find.text('No participants yet.'), findsOneWidget);
   });
 
   testWidgets('cancel leaves at once when nothing changed', (tester) async {
@@ -207,6 +207,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Discard changes?'), findsNothing);
-    expect(find.text('Participants'), findsOneWidget);
+    expect(find.text('No participants yet.'), findsOneWidget);
   });
 }

@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_contest/router.dart';
 import 'package:soar_score_contest/widgets/shell_destinations.dart';
@@ -42,7 +43,7 @@ void main() {
         'Contests',
         'Participants',
         'Roles',
-        'Bonuses',
+        'Landings',
       ]);
       expect(_labels(homePath), isNot(contains('Matrix')));
     });
@@ -60,11 +61,18 @@ void main() {
       final system = shellDestinationsFor(homePath);
       expect(system.first.location, homePath);
       expect(system[1].location, participantsPath);
-      expect(system.skip(2).every((d) => d.location == null), isTrue);
+      expect(system[2].location, rolesPath);
+      expect(system[3].location, landingsPath);
 
       final contest = shellDestinationsFor(contestWorkspacePath(_contestId));
       expect(contest.first.location, contestWorkspacePath(_contestId));
       expect(contest.skip(1).every((d) => d.location == null), isTrue);
+    });
+
+    test('Landings uses the track_changes icon', () {
+      final landings = shellDestinationsFor(homePath)[3];
+      expect(landings.icon, Icons.track_changes);
+      expect(landings.selectedIcon, Icons.track_changes);
     });
 
     test('a destination matches its page and pages below it only', () {
