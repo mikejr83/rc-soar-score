@@ -268,6 +268,38 @@ void main() {
       expect(fairness, contains('mean_absolute_deviation'));
     });
 
+    test('a retired pilot is skipped by the draw', () async {
+      await createContest();
+      await configure();
+      await addPilots(5);
+      final retire = await api.send(
+        'PUT',
+        '/contests/$_contestId/participations/${_participationId(5)}',
+        body: {'base_revision': 0, 'retired_at_round': 1},
+      );
+      expect(retire.statusCode, 200, reason: '${await api.json(retire)}');
+
+      final body = await api.json(await draw(seed: 5));
+
+      final assignments = (body['assignments'] as List).cast<Map>();
+      expect(assignments, hasLength(12));
+      expect(
+        assignments.map((a) => a['contest_participation_id']),
+        isNot(contains(_participationId(5))),
+      );
+    });
+
+    test('a draw mode other than standard man-on-man is a 409', () async {
+      await createContest();
+      await configure(core: {'draw_mode': 'SeededManOnMan'});
+      await addPilots(4);
+
+      final response = await draw();
+
+      expect(response.statusCode, 409);
+      expect((await api.errorOf(response))['code'], 'draw_mode_unsupported');
+    });
+
     test('no pilots is a 400', () async {
       await createContest();
       await configure();
