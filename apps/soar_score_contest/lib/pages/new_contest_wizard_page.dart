@@ -17,6 +17,7 @@ import '../widgets/new_contest/copy_source_section.dart';
 import '../widgets/new_contest/discipline_step.dart';
 import '../widgets/new_contest/participant_options_step.dart';
 import '../widgets/new_contest/participants/participants_step.dart';
+import '../widgets/new_contest/scoring_step.dart';
 import '../widgets/new_contest/wizard_banner.dart';
 import '../widgets/new_contest/wizard_confirm_dialog.dart';
 import '../widgets/new_contest/wizard_dot_stepper.dart';
@@ -34,8 +35,8 @@ import '../widgets/unsaved_changes_guard.dart';
 /// to a visited step or leaving loses nothing; leaving only warns when
 /// something is actually unsaved.
 ///
-/// Steps 1 to 4 are built. Steps 5 to 7 are listed and reachable but not
-/// built yet, so the wizard cannot go past step 5.
+/// Steps 1 to 5 are built. Steps 6 and 7 are listed and reachable but not
+/// built yet, so the wizard cannot go past step 6.
 class NewContestWizardPage extends StatefulWidget {
   const NewContestWizardPage({super.key, this.guard});
 
@@ -72,7 +73,7 @@ class NewContestWizardPage extends StatefulWidget {
   ];
 
   /// The steps built so far; later steps show a placeholder.
-  static const int builtSteps = 4;
+  static const int builtSteps = 5;
 
   static const String leftMessage =
       'Left the wizard. Your draft is kept until you close the app.';
@@ -158,6 +159,7 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
     2 => DraftValidation.discipline(_draft) == null,
     3 => DraftValidation.teamPilotCount(_draft) == null,
     4 => DraftValidation.participants(_draft),
+    5 => DraftValidation.scoring(_draft),
     _ => null,
   };
 
@@ -166,7 +168,8 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
   bool _showErrors(int step) =>
       _tried.contains(step) ||
       (step == 3 && _draft.teamPilotCount.trim().isNotEmpty) ||
-      (step == 4 && _draft.participantsNeedingFixes.isNotEmpty);
+      (step == 4 && _draft.participantsNeedingFixes.isNotEmpty) ||
+      step == 5;
 
   List<WizardStepEntry> get _entries => [
     for (var n = 1; n <= NewContestWizardPage.stepTitles.length; n++)
@@ -291,7 +294,8 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
       confirmLabel: 'Change and clear',
     );
     if (change && mounted) {
-      _update(_draft.copyWith(discipline: discipline));
+      // Scoring values are reset to the new discipline's defaults.
+      _update(_draft.copyWith(discipline: discipline, scoring: null));
       _message(
         'Discipline changed to ${discipline.name}. Incompatible values were '
         'cleared.',
@@ -397,6 +401,19 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
         ),
       );
     }
+    if (_step == 5) {
+      banners.add(
+        const WizardBanner(
+          key: ValueKey('banner-unpublished'),
+          tone: WizardBannerTone.info,
+          icon: Icons.lock,
+          title: 'Created unpublished and private',
+          body:
+              'Nobody outside the contest team can see it. You publish it '
+              'later from the contest configuration page.',
+        ),
+      );
+    }
     if (!_showErrors(_step)) {
       return banners;
     }
@@ -416,6 +433,16 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
         final error = DraftValidation.discipline(_draft);
         if (error != null) {
           links.add(WizardBannerLink(text: error, onTap: () {}));
+        }
+      case 5:
+        final drops = DraftValidation.drops(_draft);
+        for (final (label, error) in [
+          ('Drop after round', drops.first),
+          ('Second drop after round', drops.second),
+        ]) {
+          if (error != null) {
+            links.add(WizardBannerLink(text: '$label: $error', onTap: () {}));
+          }
         }
       case 3:
         if (DraftValidation.teamPilotCount(_draft) != null) {
@@ -486,6 +513,7 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
       narrow: narrow,
       onMessage: _message,
     ),
+    5 => ScoringStep(draft: _draft, onChanged: _update),
     _ => const _NotBuiltYet(),
   };
 
@@ -591,7 +619,7 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
   );
 }
 
-/// The placeholder for steps 5 to 7 until they are built.
+/// The placeholder for steps 6 and 7 until they are built.
 class _NotBuiltYet extends StatelessWidget {
   const _NotBuiltYet();
 
@@ -620,9 +648,9 @@ class _NotBuiltYet extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Scoring, draw options and the summary come in a later '
-                    'update. Your draft keeps everything you entered in the '
-                    'earlier steps.',
+                    'Draw options and the summary come in a later update. '
+                    'Your draft keeps everything you entered in the earlier '
+                    'steps.',
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),

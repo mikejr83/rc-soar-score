@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'contest_draft.dart';
 import 'participant_option.dart';
 import 'participant_rules.dart';
+import 'scoring_settings.dart';
 
 /// A required or checked field in step 1.
 enum DetailsField {
@@ -68,6 +69,34 @@ abstract final class DraftValidation {
     }
     final value = int.tryParse(draft.teamPilotCount.trim());
     return value == null || value < 1 ? 'Enter a whole number above 0.' : null;
+  }
+
+  /// The dropped-round errors of step 5: the first and second "after round"
+  /// inputs, when invalid.
+  static ({String? first, String? second}) drops(ContestDraft draft) {
+    final settings = draft.scoringSettings;
+    if (settings.dropPolicy == DropPolicy.disabled) {
+      return (first: null, second: null);
+    }
+    const whole = 'Enter a whole number above 0.';
+    final first = int.tryParse(settings.firstDrop.trim());
+    final firstError = first == null || first < 1 ? whole : null;
+    if (settings.dropPolicy == DropPolicy.one) {
+      return (first: firstError, second: null);
+    }
+    final second = int.tryParse(settings.secondDrop.trim());
+    final secondError = second == null || second < 1
+        ? whole
+        : firstError == null && second <= first!
+        ? 'Must be after round $first.'
+        : null;
+    return (first: firstError, second: secondError);
+  }
+
+  /// Whether step 5 can be left.
+  static bool scoring(ContestDraft draft) {
+    final errors = drops(draft);
+    return errors.first == null && errors.second == null;
   }
 
   /// The fewest scoring pilots a contest can have.

@@ -5,6 +5,7 @@ import 'copy_mode.dart';
 import 'copy_source.dart';
 import 'draft_participant.dart';
 import 'participant_option.dart';
+import 'scoring_settings.dart';
 
 /// Copying from a source contest into the draft.
 ///
@@ -33,6 +34,7 @@ extension DraftCopy on ContestDraft {
       options: core == null ? options : fromSource,
       optionsFromSource: fromSource,
       teamPilotCount: core?.teamPilotCount?.toString() ?? teamPilotCount,
+      scoring: core == null ? scoring : ScoringSettings.fromOptions(core),
       selectedPilots: {
         for (final pilot in source.pilots) pilot.profileId.value,
       },

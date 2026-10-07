@@ -2,6 +2,7 @@ import 'copy_mode.dart';
 import 'copy_source.dart';
 import 'draft_participant.dart';
 import 'participant_option.dart';
+import 'scoring_settings.dart';
 import 'wizard_discipline.dart';
 
 /// The values entered in the New Contest wizard so far.
@@ -27,6 +28,7 @@ class ContestDraft {
     this.optionsFromSource = const {},
     this.teamPilotCount = '',
     this.participants = const [],
+    this.scoring,
     this.visitedThrough = 1,
   });
 
@@ -63,10 +65,22 @@ class ContestDraft {
 
   final List<DraftParticipant> participants;
 
+  /// The step 5 values the user changed or copied; `null` means the
+  /// discipline's defaults (see [scoringSettings]).
+  final ScoringSettings? scoring;
+
   /// The furthest step the user has reached (1-based).
   final int visitedThrough;
 
   bool has(ParticipantOption option) => options.contains(option);
+
+  /// The step 5 values in effect.
+  ScoringSettings get scoringSettings =>
+      scoring ?? ScoringSettings.defaultsFor(discipline);
+
+  /// The discipline's step 5 defaults, for comparison and reset.
+  ScoringSettings get scoringDefaults =>
+      ScoringSettings.defaultsFor(discipline);
 
   static const Object _keep = Object();
 
@@ -87,6 +101,7 @@ class ContestDraft {
     Set<ParticipantOption>? optionsFromSource,
     String? teamPilotCount,
     List<DraftParticipant>? participants,
+    Object? scoring = _keep,
     int? visitedThrough,
   }) => ContestDraft(
     name: name ?? this.name,
@@ -107,6 +122,9 @@ class ContestDraft {
     optionsFromSource: optionsFromSource ?? this.optionsFromSource,
     teamPilotCount: teamPilotCount ?? this.teamPilotCount,
     participants: participants ?? this.participants,
+    scoring: identical(scoring, _keep)
+        ? this.scoring
+        : scoring as ScoringSettings?,
     visitedThrough: visitedThrough ?? this.visitedThrough,
   );
 }

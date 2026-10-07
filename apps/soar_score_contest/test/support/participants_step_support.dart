@@ -63,6 +63,8 @@ Future<ContestDraftStore> storeAtStep4({
     ParticipantOption.roles,
   },
   List<DraftParticipant> participants = const [],
+  WizardDiscipline discipline = WizardDiscipline.f5j,
+  int visitedThrough = 4,
 }) async {
   final store = ContestDraftStore();
   await store.update(
@@ -71,11 +73,11 @@ Future<ContestDraftStore> storeAtStep4({
       venue: 'Hague Field',
       startDate: 'Nov 14, 2026',
       endDate: 'Nov 15, 2026',
-      discipline: WizardDiscipline.f5j,
+      discipline: discipline,
       options: options,
       teamPilotCount: options.contains(ParticipantOption.teams) ? '2' : '',
       participants: participants,
-      visitedThrough: 4,
+      visitedThrough: visitedThrough,
     ),
   );
   return store;
