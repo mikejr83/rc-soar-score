@@ -1,6 +1,7 @@
 import 'copy_mode.dart';
 import 'copy_source.dart';
 import 'draft_participant.dart';
+import 'draw_settings.dart';
 import 'participant_option.dart';
 import 'scoring_settings.dart';
 import 'wizard_discipline.dart';
@@ -29,6 +30,7 @@ class ContestDraft {
     this.teamPilotCount = '',
     this.participants = const [],
     this.scoring,
+    this.draw = const DrawSettings(),
     this.visitedThrough = 1,
   });
 
@@ -69,6 +71,9 @@ class ContestDraft {
   /// discipline's defaults (see [scoringSettings]).
   final ScoringSettings? scoring;
 
+  /// The step 6 values as entered (see [drawSettings]).
+  final DrawSettings draw;
+
   /// The furthest step the user has reached (1-based).
   final int visitedThrough;
 
@@ -77,6 +82,12 @@ class ContestDraft {
   /// The step 5 values in effect.
   ScoringSettings get scoringSettings =>
       scoring ?? ScoringSettings.defaultsFor(discipline);
+
+  /// The step 6 values in effect: team protection needs teams, and can't be
+  /// combined with a seeded draw.
+  DrawSettings get drawSettings => has(ParticipantOption.teams)
+      ? draw
+      : draw.copyWith(teamProtection: false);
 
   /// The discipline's step 5 defaults, for comparison and reset.
   ScoringSettings get scoringDefaults =>
@@ -102,6 +113,7 @@ class ContestDraft {
     String? teamPilotCount,
     List<DraftParticipant>? participants,
     Object? scoring = _keep,
+    DrawSettings? draw,
     int? visitedThrough,
   }) => ContestDraft(
     name: name ?? this.name,
@@ -125,6 +137,7 @@ class ContestDraft {
     scoring: identical(scoring, _keep)
         ? this.scoring
         : scoring as ScoringSettings?,
+    draw: draw ?? this.draw,
     visitedThrough: visitedThrough ?? this.visitedThrough,
   );
 }

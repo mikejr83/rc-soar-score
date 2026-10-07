@@ -35,6 +35,17 @@ extension DraftCopy on ContestDraft {
       optionsFromSource: fromSource,
       teamPilotCount: core?.teamPilotCount?.toString() ?? teamPilotCount,
       scoring: core == null ? scoring : ScoringSettings.fromOptions(core),
+      draw: core == null
+          ? draw
+          : draw.copyWith(
+              drawMode: core.drawMode,
+              laneMode: core.laneMode,
+              teamProtection: core.teamProtection,
+              seededRounds: '${core.preliminaryRounds ?? 1}',
+              rounds: core.intendedTotalRounds == null
+                  ? null
+                  : '${core.intendedTotalRounds}',
+            ),
       selectedPilots: {
         for (final pilot in source.pilots) pilot.profileId.value,
       },

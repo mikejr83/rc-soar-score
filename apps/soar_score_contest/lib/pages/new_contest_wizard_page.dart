@@ -15,6 +15,7 @@ import '../services/new_contest/wizard_discipline.dart';
 import '../widgets/new_contest/contest_details_section.dart';
 import '../widgets/new_contest/copy_source_section.dart';
 import '../widgets/new_contest/discipline_step.dart';
+import '../widgets/new_contest/draw_step.dart';
 import '../widgets/new_contest/participant_options_step.dart';
 import '../widgets/new_contest/participants/participants_step.dart';
 import '../widgets/new_contest/scoring_step.dart';
@@ -35,8 +36,8 @@ import '../widgets/unsaved_changes_guard.dart';
 /// to a visited step or leaving loses nothing; leaving only warns when
 /// something is actually unsaved.
 ///
-/// Steps 1 to 5 are built. Steps 6 and 7 are listed and reachable but not
-/// built yet, so the wizard cannot go past step 6.
+/// Steps 1 to 6 are built. Step 7 is listed and reachable but not built
+/// yet, so the contest can't be created yet.
 class NewContestWizardPage extends StatefulWidget {
   const NewContestWizardPage({super.key, this.guard});
 
@@ -73,7 +74,7 @@ class NewContestWizardPage extends StatefulWidget {
   ];
 
   /// The steps built so far; later steps show a placeholder.
-  static const int builtSteps = 5;
+  static const int builtSteps = 6;
 
   static const String leftMessage =
       'Left the wizard. Your draft is kept until you close the app.';
@@ -160,6 +161,7 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
     3 => DraftValidation.teamPilotCount(_draft) == null,
     4 => DraftValidation.participants(_draft),
     5 => DraftValidation.scoring(_draft),
+    6 => DraftValidation.drawOptions(_draft),
     _ => null,
   };
 
@@ -169,7 +171,8 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
       _tried.contains(step) ||
       (step == 3 && _draft.teamPilotCount.trim().isNotEmpty) ||
       (step == 4 && _draft.participantsNeedingFixes.isNotEmpty) ||
-      step == 5;
+      step == 5 ||
+      step == 6;
 
   List<WizardStepEntry> get _entries => [
     for (var n = 1; n <= NewContestWizardPage.stepTitles.length; n++)
@@ -414,6 +417,19 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
         ),
       );
     }
+    if (_step == 6) {
+      banners.add(
+        const WizardBanner(
+          key: ValueKey('banner-no-matrix'),
+          tone: WizardBannerTone.info,
+          icon: Icons.grid_view,
+          title: 'The matrix isn’t drawn here',
+          body:
+              'After creating the contest, draw the matrix from contest '
+              'configuration. It will use these settings.',
+        ),
+      );
+    }
     if (!_showErrors(_step)) {
       return banners;
     }
@@ -439,6 +455,17 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
         for (final (label, error) in [
           ('Drop after round', drops.first),
           ('Second drop after round', drops.second),
+        ]) {
+          if (error != null) {
+            links.add(WizardBannerLink(text: '$label: $error', onTap: () {}));
+          }
+        }
+      case 6:
+        final draw = DraftValidation.draw(_draft);
+        for (final (label, error) in [
+          ('Groups per round', draw.groups),
+          ('Preliminary rounds', draw.rounds),
+          ('Seeded rounds', draw.seededRounds),
         ]) {
           if (error != null) {
             links.add(WizardBannerLink(text: '$label: $error', onTap: () {}));
@@ -514,6 +541,7 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
       onMessage: _message,
     ),
     5 => ScoringStep(draft: _draft, onChanged: _update),
+    6 => DrawStep(draft: _draft, onChanged: _update),
     _ => const _NotBuiltYet(),
   };
 
@@ -619,7 +647,7 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
   );
 }
 
-/// The placeholder for steps 6 and 7 until they are built.
+/// The placeholder for step 7 until it is built.
 class _NotBuiltYet extends StatelessWidget {
   const _NotBuiltYet();
 
@@ -648,7 +676,7 @@ class _NotBuiltYet extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Draw options and the summary come in a later update. '
+                    'The summary and Create contest come in a later update. '
                     'Your draft keeps everything you entered in the earlier '
                     'steps.',
                     style: theme.textTheme.bodyMedium?.copyWith(

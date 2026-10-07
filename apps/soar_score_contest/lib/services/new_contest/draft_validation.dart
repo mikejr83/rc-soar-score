@@ -1,6 +1,7 @@
 import 'package:intl/intl.dart';
 
 import 'contest_draft.dart';
+import 'draw_settings.dart';
 import 'participant_option.dart';
 import 'participant_rules.dart';
 import 'scoring_settings.dart';
@@ -97,6 +98,44 @@ abstract final class DraftValidation {
   static bool scoring(ContestDraft draft) {
     final errors = drops(draft);
     return errors.first == null && errors.second == null;
+  }
+
+  /// The step 6 errors, by field, when invalid.
+  static ({String? groups, String? rounds, String? seededRounds}) draw(
+    ContestDraft draft,
+  ) {
+    final settings = draft.drawSettings;
+    final plan = GroupPlan.of(draft);
+    String? whole(String text, String message) {
+      final value = int.tryParse(text.trim());
+      return value == null || value < 1 ? message : null;
+    }
+
+    final groups = settings.groups != null
+        ? whole(settings.groups!, 'Enter a whole number above 0.')
+        : null;
+    return (
+      groups:
+          groups ??
+          (!plan.bigEnough
+              ? 'Use ${plan.maxGroups} or fewer so every group has at least 2 '
+                    'scoring pilots.'
+              : !plan.protectionMet
+              ? 'Team protection needs at least ${plan.minGroups} groups.'
+              : null),
+      rounds: whole(settings.rounds, 'Enter a whole number above 0.'),
+      seededRounds: settings.seeded
+          ? whole(settings.seededRounds, 'Enter 1 or more.')
+          : null,
+    );
+  }
+
+  /// Whether step 6 can be left.
+  static bool drawOptions(ContestDraft draft) {
+    final errors = draw(draft);
+    return errors.groups == null &&
+        errors.rounds == null &&
+        errors.seededRounds == null;
   }
 
   /// The fewest scoring pilots a contest can have.
