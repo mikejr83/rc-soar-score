@@ -9,6 +9,7 @@ import 'pages/landing_page.dart';
 import 'pages/participant_editor_page.dart';
 import 'pages/participants_page.dart';
 import 'widgets/contest_shell.dart';
+import 'widgets/unsaved_changes_guard.dart';
 
 /// The contest-administration root path (the landing page).
 const String landingPath = '/contest-administration';
@@ -40,6 +41,8 @@ GoRouter buildAppRouter({
   String initialLocation = landingPath,
   AppModeNotifier? appMode,
 }) {
+  // One editor is open at a time, so one guard serves both editor routes.
+  final editorGuard = UnsavedChangesGuard();
   return GoRouter(
     initialLocation: initialLocation,
     refreshListenable: !kIsWeb ? appMode : null,
@@ -70,14 +73,18 @@ GoRouter buildAppRouter({
           GoRoute(
             path: newParticipantPath,
             name: 'newParticipant',
-            builder: (context, state) => const ParticipantEditorPage(),
+            builder: (context, state) =>
+                ParticipantEditorPage(guard: editorGuard),
+            onExit: (context, state) => editorGuard.confirmLeave(),
           ),
           GoRoute(
             path: '$participantsPath/:participantId',
             name: 'editParticipant',
             builder: (context, state) => ParticipantEditorPage(
               participantId: state.pathParameters['participantId'],
+              guard: editorGuard,
             ),
+            onExit: (context, state) => editorGuard.confirmLeave(),
           ),
           GoRoute(
             path: '$contestsPath/:contestId/workspace',
