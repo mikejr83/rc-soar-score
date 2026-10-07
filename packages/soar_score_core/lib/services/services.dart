@@ -10,6 +10,7 @@ export 'matrix/basic_draw.dart';
 export 'matrix/draw_engine.dart';
 export 'matrix/draw_fairness.dart';
 export 'matrix/draw_optimizer.dart';
+export 'matrix/lane_stats.dart';
 export 'matrix/matchup_stats.dart';
 export 'matrix/matrix_service.dart';
 export 'matrix/seeded_random.dart';

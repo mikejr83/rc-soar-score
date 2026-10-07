@@ -4,6 +4,7 @@ import '../../enums/lane_mode.dart';
 import 'basic_draw.dart';
 import 'draw_fairness.dart';
 import 'draw_optimizer.dart';
+import 'lane_stats.dart';
 import 'matchup_stats.dart';
 import 'seeded_random.dart';
 
@@ -32,8 +33,9 @@ class DrawResult {
 /// keeping the fairest result.
 ///
 /// Runs are compared by fewest never-met pairs, then the lowest maximum
-/// repeat, then the lowest sum of squared meeting counts. The winning run's
-/// seed is returned so the draw can be reproduced.
+/// repeat, then the lowest total cost `J` (the matchup penalty plus 0.15 times
+/// the lane penalty, `matrix-draw.md` section 3.3). The winning run's seed is
+/// returned so the draw can be reproduced.
 class DrawEngine {
   const DrawEngine();
 
@@ -47,6 +49,9 @@ class DrawEngine {
   /// How many random draws set the 0% mark of the fairness score, and the
   /// seed they use. Both are fixed so a matrix always gets the same score.
   static const int _randomSamples = 20;
+
+  /// The weight of the lane penalty in the total cost `J`.
+  static const double laneWeight = 0.15;
   static const int _randomSeed = 0x5EED;
 
   /// Throws an [ArgumentError] when the settings cannot be met, as
@@ -80,6 +85,8 @@ class DrawEngine {
 
     List<List<List<DrawSlot>>>? best;
     MatchupStats? bestStats;
+    LaneStats? bestLanes;
+    var bestCost = 0.0;
     var bestSeed = seed;
     for (final candidate in seeds) {
       final random = SeededRandom(candidate);
@@ -101,9 +108,13 @@ class DrawEngine {
         iterationsPerPlacement: iterationsPerPlacement,
       );
       final stats = MatchupStats.of(improved, teamProtection: teamProtection);
-      if (bestStats == null || stats.compareQuality(bestStats) < 0) {
+      final lanes = LaneStats.of(improved);
+      final cost = _cost(stats, lanes);
+      if (bestStats == null || _isBetter(stats, cost, bestStats, bestCost)) {
         best = improved;
         bestStats = stats;
+        bestLanes = lanes;
+        bestCost = cost;
         bestSeed = candidate;
       }
     }
@@ -111,6 +122,8 @@ class DrawEngine {
     final fairness = drawFairness(best!, teamProtection: teamProtection);
     fairness['fairness_score'] = _score(
       bestStats!,
+      bestLanes,
+      laneMode: laneMode,
       pilots: pilots,
       rounds: rounds,
       groupsPerRound: groupsPerRound,
@@ -120,11 +133,34 @@ class DrawEngine {
     return DrawResult(rounds: best, seed: bestSeed, fairness: fairness);
   }
 
-  /// 100% when the draw reaches the best cost any draw could, 0% when it is
-  /// no better than the average random draw of the same contest (`matrix-draw.md`
-  /// section 7.2), as a percentage to one decimal.
+  /// The total cost `J`: the matchup penalty plus [laneWeight] times the
+  /// lane penalty (zero without lanes).
+  double _cost(MatchupStats stats, LaneStats? lanes) =>
+      stats.cost + laneWeight * (lanes?.cost ?? 0);
+
+  /// Fewest never-met pairs, then the lowest maximum repeat, then the lowest
+  /// total cost.
+  bool _isBetter(
+    MatchupStats stats,
+    double cost,
+    MatchupStats other,
+    double otherCost,
+  ) {
+    if (stats.unmet != other.unmet) return stats.unmet < other.unmet;
+    if (stats.maxDuplicates != other.maxDuplicates) {
+      return stats.maxDuplicates < other.maxDuplicates;
+    }
+    return cost < otherCost;
+  }
+
+  /// 100% when the draw reaches the best total cost any draw could, 0% when
+  /// it is no better than the average random draw of the same contest
+  /// (`matrix-draw.md` section 7.2), as a percentage to one decimal.
+  /// Adds the costs it used to [fairness].
   double _score(
-    MatchupStats stats, {
+    MatchupStats stats,
+    LaneStats? lanes, {
+    required LaneMode laneMode,
     required List<DrawPilot> pilots,
     required int rounds,
     required int groupsPerRound,
@@ -139,21 +175,26 @@ class DrawEngine {
         rounds: rounds,
         groupsPerRound: groupsPerRound,
         teamProtection: teamProtection,
-        laneMode: LaneMode.none,
+        laneMode: laneMode,
         random: random,
         spreadMeetings: false,
       );
-      total += MatchupStats.of(sample, teamProtection: teamProtection).cost;
+      total += _cost(
+        MatchupStats.of(sample, teamProtection: teamProtection),
+        LaneStats.of(sample),
+      );
     }
     final worst = total / _randomSamples;
-    final ideal = stats.idealCost;
+    final cost = _cost(stats, lanes);
+    final ideal = stats.idealCost + laneWeight * (lanes?.idealCost ?? 0);
     fairness['matchup_cost'] = stats.cost;
-    fairness['matchup_cost_ideal'] = ideal;
-    fairness['matchup_cost_random_average'] = worst;
+    fairness['cost'] = cost;
+    fairness['cost_ideal'] = ideal;
+    fairness['cost_random_average'] = worst;
     if (worst <= ideal) {
       return 100;
     }
-    final share = 1 - (stats.cost - ideal) / (worst - ideal);
+    final share = 1 - (cost - ideal) / (worst - ideal);
     return (math.max(0, math.min(1, share)) * 1000).round() / 10;
   }
 }

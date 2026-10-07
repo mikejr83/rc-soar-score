@@ -90,16 +90,19 @@ void main() {
       expect(fairness['fairness_score'], inInclusiveRange(0, 100));
       expect(fairness['matchup_cost'], greaterThanOrEqualTo(0));
       expect(
-        fairness['matchup_cost'] as double,
-        lessThanOrEqualTo(fairness['matchup_cost_random_average'] as double),
+        fairness['cost'] as double,
+        lessThanOrEqualTo(fairness['cost_random_average'] as double),
       );
+      expect(fairness['cost'], fairness['matchup_cost']);
       expect(fairness, isNot(contains('lane_uniformity_index')));
+      expect(fairness, isNot(contains('lane_cost')));
     });
 
     test('reports the lane uniformity index when there are lanes', () {
       final result = _draw(_pilots(12), laneMode: LaneMode.random);
 
       expect(result.fairness['lane_uniformity_index'], isA<double>());
+      expect(result.fairness['lane_cost'], isA<double>());
     });
 
     test('the same contest gets the same random baseline', () {
@@ -109,6 +112,34 @@ void main() {
       expect(
         a['matchup_cost_random_average'],
         b['matchup_cost_random_average'],
+      );
+    });
+
+    test('the total cost adds 0.15 times the lane penalty to the matchup '
+        'cost', () {
+      final fairness = _draw(_pilots(12), laneMode: LaneMode.random).fairness;
+
+      expect(
+        fairness['cost'] as double,
+        closeTo(
+          (fairness['matchup_cost'] as double) +
+              0.15 * (fairness['lane_cost'] as double),
+          1e-9,
+        ),
+      );
+      expect(
+        fairness['cost_ideal'] as double,
+        lessThanOrEqualTo(fairness['cost'] as double),
+      );
+    });
+
+    test('the random baseline includes random lanes', () {
+      final none = _draw(_pilots(12)).fairness;
+      final lanes = _draw(_pilots(12), laneMode: LaneMode.random).fairness;
+
+      expect(
+        lanes['cost_random_average'] as double,
+        greaterThan(none['cost_random_average'] as double),
       );
     });
 
