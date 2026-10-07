@@ -3,18 +3,21 @@ import 'package:go_router/go_router.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../api_client_provider.dart';
+import '../contest_draft_provider.dart';
 import '../router.dart';
 import '../widgets/contest_detail_pane.dart';
 import '../widgets/contest_list.dart';
 import '../widgets/master_detail.dart';
+import '../widgets/new_contest/create_contest_entry.dart';
 import '../widgets/message_view.dart';
 
 /// The main page ("Contests"): the contests the app's API holds, as a list
 /// beside the selected contest's detail (one pane at a time when narrow).
 ///
 /// Loading, empty and error states, selection and opening a contest. The
-/// empty state offers `Create contest`, which opens the New Contest wizard
-/// (the rail's FAB does the same at any time).
+/// empty state offers `Create contest` (`Continue configuration` while a
+/// draft is underway), which opens the New Contest wizard (the rail's FAB
+/// does the same at any time).
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -64,13 +67,20 @@ class _HomePageState extends State<HomePage> {
         return const Center(child: CircularProgressIndicator());
       }
       if (contests.isEmpty) {
+        final store = contestDraftStoreOf(context);
         return MessageView(
           text: 'No contests yet.',
-          action: FilledButton.icon(
-            key: const ValueKey('empty-create-contest'),
-            onPressed: () => context.go(newContestPath),
-            icon: const Icon(Icons.add),
-            label: const Text('Create contest'),
+          action: ListenableBuilder(
+            listenable: store ?? Listenable.merge(const []),
+            builder: (context, _) {
+              final hasDraft = store?.hasDraft ?? false;
+              return FilledButton.icon(
+                key: const ValueKey('empty-create-contest'),
+                onPressed: () => context.go(newContestPath),
+                icon: Icon(CreateContestEntry.icon(hasDraft)),
+                label: Text(CreateContestEntry.label(hasDraft)),
+              );
+            },
           ),
         );
       }

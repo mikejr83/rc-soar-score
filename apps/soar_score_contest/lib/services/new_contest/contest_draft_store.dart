@@ -50,6 +50,9 @@ class ContestDraftStore extends ChangeNotifier {
   /// The current draft (saved or not).
   ContestDraft get draft => _draft;
 
+  /// Whether the director has started a contest that is not created yet.
+  bool get hasDraft => !_draft.isBlank;
+
   /// When the draft was last saved, or `null` before the first save.
   DateTime? get savedAt => _savedAt;
 

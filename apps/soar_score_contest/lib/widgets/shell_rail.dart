@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../contest_draft_provider.dart';
 import '../pages/landing_page.dart';
 import '../router.dart';
+import 'new_contest/create_contest_entry.dart';
 import 'not_wired_up_dialog.dart';
 import 'shell_destinations.dart';
 import 'shell_stub_page.dart';
@@ -12,7 +14,8 @@ import 'shell_stub_page.dart';
 /// The top holds a menu button that switches between the collapsed and the
 /// expanded rail (wide windows only), the application title and, in the
 /// system scope, a context-aware FAB: `Add participant` on the participant
-/// pages, `Create contest` on the main page, and a stub for the other pages.
+/// pages, `Create contest` on the main page (`Continue configuration` while a
+/// draft is underway), and a stub for the other pages.
 /// The New Contest wizard hides the FAB (its footer holds the one primary
 /// action) and keeps `Contests` selected.
 /// The destinations come from [shellDestinationsFor], so contest-only tasks
@@ -40,10 +43,14 @@ class _ShellRailState extends State<ShellRail> {
       widget.path == location || widget.path.startsWith('$location/');
 
   /// The label, key and action of the FAB for the current page.
-  ({String label, Key key, VoidCallback onPressed}) _fab(BuildContext context) {
+  ({String label, IconData icon, Key key, VoidCallback onPressed}) _fab(
+    BuildContext context,
+    bool hasDraft,
+  ) {
     if (_isUnder(participantsPath)) {
       return (
         label: 'Add participant',
+        icon: Icons.add,
         key: const ValueKey('add-participant'),
         onPressed: () => context.go(newParticipantPath),
       );
@@ -51,17 +58,22 @@ class _ShellRailState extends State<ShellRail> {
     final (label, key) = switch (widget.path) {
       rolesPath => ('New role', const ValueKey('new-role')),
       landingsPath => ('New landing', const ValueKey('new-landing')),
-      _ => ('Create contest', const ValueKey('create-contest')),
+      _ => (
+        CreateContestEntry.label(hasDraft),
+        const ValueKey('create-contest'),
+      ),
     };
     if (key == const ValueKey('create-contest')) {
       return (
         label: label,
+        icon: CreateContestEntry.icon(hasDraft),
         key: key,
         onPressed: () => context.go(newContestPath),
       );
     }
     return (
       label: label,
+      icon: Icons.add,
       key: key,
       onPressed: () => showNotWiredUpDialog(
         context,
@@ -73,6 +85,14 @@ class _ShellRailState extends State<ShellRail> {
 
   @override
   Widget build(BuildContext context) {
+    final store = contestDraftStoreOf(context);
+    return ListenableBuilder(
+      listenable: store ?? Listenable.merge(const []),
+      builder: (context, _) => _buildRail(context, store?.hasDraft ?? false),
+    );
+  }
+
+  Widget _buildRail(BuildContext context, bool hasDraft) {
     final destinations = shellDestinationsFor(widget.path);
     final wizard = _isUnder(newContestPath);
     final selected = destinations.indexWhere(
@@ -84,7 +104,7 @@ class _ShellRailState extends State<ShellRail> {
         MediaQuery.sizeOf(context).width >= ShellRail.expandableWidth;
     final expanded = canExpand && _expanded;
     final system = shellScopeFor(widget.path) == ShellScope.system;
-    final fab = system && !wizard ? _fab(context) : null;
+    final fab = system && !wizard ? _fab(context, hasDraft) : null;
 
     return NavigationRail(
       selectedIndex: selected < 0 ? null : selected,
@@ -113,7 +133,7 @@ class _ShellRailState extends State<ShellRail> {
                 heroTag: null,
                 elevation: 0,
                 onPressed: fab.onPressed,
-                icon: const Icon(Icons.add),
+                icon: Icon(fab.icon),
                 label: Text(fab.label),
               )
             else
@@ -123,7 +143,7 @@ class _ShellRailState extends State<ShellRail> {
                 elevation: 0,
                 tooltip: fab.label,
                 onPressed: fab.onPressed,
-                child: const Icon(Icons.add),
+                child: Icon(fab.icon),
               ),
           ],
         ],
