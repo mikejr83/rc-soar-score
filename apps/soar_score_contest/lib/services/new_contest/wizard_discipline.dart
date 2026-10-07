@@ -11,47 +11,47 @@ enum WizardDiscipline {
     task:
         'Altitude-limited electric soaring. Fly a set target time, then land '
         'on the spot.',
-    time: 'Target time (MM:ss or seconds) · 1 pt per second · 0 decimals',
-    landing: 'ALES system table: 50 to 0 pts in steps of 5',
+    time: 'Target time with overflight allowance',
+    landing: '10m landing circle: 50 to 0 pts in steps of 5 per each meter',
     rules: [
       'Flying past the target loses 1 pt per second over',
       'Motor restart or over-flight of more than 1 min scores 0',
-      'Out of bounds: more than 75 m from the landing marker',
+      'Out of bounds: >75 m from the landing marker',
     ],
   ),
   f3j(
     name: 'F3J',
     task: 'Thermal duration. Fly as long as possible within the working time.',
-    time: 'Working time · 1 pt per second · 1 decimal',
-    landing: 'Official F3J table, up to 100 pts (by points or by distance)',
+    time: '10:00 Working time · 1 decimal place',
+    landing: 'FAI F3J landing circle: 100 - 30 pts within 15 m',
     rules: [
       'Late landing: no landing bonus and a 30 pt penalty',
       'Time can’t exceed the working time',
-      'Out of bounds: more than 75 m from the landing marker',
+      'Out of bounds: >75 m from the landing marker',
     ],
   ),
   f5j(
     name: 'F5J',
     task:
-        'Electric-launch thermal duration within the working time, with a '
+        'Electric-launch thermal duration within a working time, with a '
         'launch height penalty.',
-    time: 'Working time 10:00 · 1 pt per second',
-    landing: 'F5J system table: 50 to 0 pts in steps of 5',
+    time: '10:00 Working time · 1 pt per second',
+    landing: '10m landing circle: 50 to 0 pts in steps of 5 per each meter',
     rules: [
-      'Height penalty 0.5 pt/m, 3 pt/m above the reference height',
-      'Motor restart: Allowed, Non-droppable 0 or Not allowed',
+      'Height penalty 0.5 pt/m, 3 pt/m above 200m launch height',
+      'Motor restart: Allowed, Non-droppable 0, or Not allowed',
       'Late landing forfeits the landing bonus',
     ],
   ),
   thermalDuration(
     name: 'Thermal Duration',
-    task: 'Fly a set target time, then land on the spot.',
-    time: 'Target time (MM:ss or seconds) · 1 pt per second · 0 decimals',
+    task: 'Traditional thermal duration.Fly a set target time, then land on the spot.',
+    time: 'Target time with overflight allowance',
     landing: '100 inch landing tape: 1 pt per inch, 100 to 0',
     rules: [
       'Flying past the target loses 1 pt per second over',
       'Over-flight of more than 1 min scores 0',
-      'Out of bounds: more than 75 m from the landing marker',
+      'Out of bounds: >75 m from the landing marker',
     ],
   ),
   f3b(name: 'F3B', task: 'Multi-task: duration, distance and speed'),
