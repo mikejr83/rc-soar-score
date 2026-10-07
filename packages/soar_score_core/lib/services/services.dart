@@ -6,6 +6,7 @@ export 'contest_lifecycle.dart';
 export 'contests_service.dart';
 export 'discipline_config_validator.dart';
 export 'matrix/acceptance_table.dart';
+export 'matrix/assignment_move_service.dart';
 export 'matrix/basic_draw.dart';
 export 'matrix/draw_engine.dart';
 export 'matrix/draw_fairness.dart';

@@ -54,8 +54,14 @@ class MatrixAssignmentRepository extends DriftRepository
   @override
   Future<core.MatrixAssignment> move(
     core.MatrixAssignment moved, {
+    required core.ScorePlaceholder placeholder,
     required core.MutationMetadata metadata,
-  }) => unitOfWork.run(
-    (context) => context.moveAssignment(moved, metadata: metadata),
-  );
+  }) => unitOfWork.run((context) async {
+    final stored = await context.moveAssignment(moved, metadata: metadata);
+    await context.save(
+      placeholder,
+      metadata: metadata.forPart(placeholder.id.value),
+    );
+    return stored;
+  });
 }

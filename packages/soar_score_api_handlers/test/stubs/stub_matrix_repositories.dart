@@ -118,6 +118,10 @@ class StubRoundGroupRepository implements RoundGroupRepository {
       groups.where((g) => g.contestId == contestId).toList();
 
   @override
+  Future<List<RoundGroup>> listForRound(Id roundId) async =>
+      groups.where((g) => g.roundId == roundId).toList();
+
+  @override
   dynamic noSuchMethod(Invocation invocation) =>
       throw UnimplementedError('${invocation.memberName} is not stubbed');
 }
@@ -133,6 +137,11 @@ class StubScorePlaceholderRepository implements ScorePlaceholderRepository {
   ];
 
   @override
+  Future<ScorePlaceholder?> findForAssignment(Id assignmentId) async => stored
+      .where((placeholder) => placeholder.assignmentId == assignmentId)
+      .firstOrNull;
+
+  @override
   dynamic noSuchMethod(Invocation invocation) =>
       throw UnimplementedError('${invocation.memberName} is not stubbed');
 }
@@ -143,6 +152,29 @@ class StubScorePlaceholderRepository implements ScorePlaceholderRepository {
 class StubMatrixAssignmentRepository implements MatrixAssignmentRepository {
   final List<MatrixAssignment> stored = [];
   final Set<Id> participationsWithAssignments = {};
+
+  /// The placeholders a move stores; set by the repository that owns them.
+  StubScorePlaceholderRepository? placeholders;
+
+  @override
+  Future<MatrixAssignment?> findById(Id id) async =>
+      stored.where((assignment) => assignment.id == id).firstOrNull;
+
+  @override
+  Future<MatrixAssignment> move(
+    MatrixAssignment moved, {
+    required ScorePlaceholder placeholder,
+    required MutationMetadata metadata,
+  }) async {
+    final index = stored.indexWhere((a) => a.id == moved.sourceAssignmentId);
+    stored[index] = MatrixAssignment.fromJson({
+      ...stored[index].toJson(),
+      'superseded_by_assignment_id': moved.id.value,
+    });
+    stored.add(moved);
+    placeholders?.stored.add(placeholder);
+    return moved;
+  }
 
   @override
   Future<List<MatrixAssignment>> listLiveForRound(Id roundId) async => [

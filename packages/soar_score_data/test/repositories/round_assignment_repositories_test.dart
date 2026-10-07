@@ -180,6 +180,14 @@ void _tests(Backend backend) {
           'created_at': '2026-10-17T16:00:00Z',
         });
 
+    core.ScorePlaceholder placeholderOf(core.MatrixAssignment moved) =>
+        core.ScorePlaceholder(
+          id: core.Id.create(),
+          contestId: moved.contestId,
+          contestParticipationId: moved.contestParticipationId,
+          assignmentId: moved.id,
+        );
+
     test('reads back the example assignments unchanged', () async {
       for (final assignment in assignments) {
         expect(await repo.findById(assignment.id), assignment);
@@ -214,7 +222,18 @@ void _tests(Backend backend) {
       final source = assignments.first;
       final moved = moveOf(source);
 
-      expect(await repo.move(moved, metadata: metadata()), moved);
+      final placeholder = placeholderOf(moved);
+
+      expect(
+        await repo.move(moved, placeholder: placeholder, metadata: metadata()),
+        moved,
+      );
+      expect(
+        (await repository.scorePlaceholderRepository.findForAssignment(
+          moved.id,
+        ))?.id,
+        placeholder.id,
+      );
 
       expect(await repo.findById(moved.id), moved);
       expect(
@@ -225,10 +244,20 @@ void _tests(Backend backend) {
 
     test('a second move of the same assignment is refused', () async {
       final source = assignments.first;
-      await repo.move(moveOf(source), metadata: metadata());
+      final first = moveOf(source);
+      await repo.move(
+        first,
+        placeholder: placeholderOf(first),
+        metadata: metadata(),
+      );
 
+      final second = moveOf(source);
       expect(
-        repo.move(moveOf(source), metadata: metadata()),
+        repo.move(
+          second,
+          placeholder: placeholderOf(second),
+          metadata: metadata(),
+        ),
         throwsA(isA<core.AlreadySupersededError>()),
       );
     });
@@ -239,7 +268,11 @@ void _tests(Backend backend) {
       expect(before, contains(source));
 
       final moved = moveOf(source);
-      await repo.move(moved, metadata: metadata());
+      await repo.move(
+        moved,
+        placeholder: placeholderOf(moved),
+        metadata: metadata(),
+      );
 
       final after = await repo.listLiveForRound(core.Id.parse(_round81));
       expect(after.map((a) => a.id), isNot(contains(source.id)));

@@ -11,6 +11,7 @@ import '../dto/create_participant_request.dart';
 import '../dto/create_team_request.dart';
 import '../dto/draw_matrix_request.dart';
 import '../dto/health_dto.dart';
+import '../dto/move_assignment_request.dart';
 import '../dto/save_configuration_request.dart';
 import '../dto/update_contest_request.dart';
 import '../dto/update_participant_request.dart';
@@ -413,6 +414,27 @@ class ApiClient {
   /// team protection) are status 400.
   Future<CurrentMatrix> drawMatrix(Id id, DrawMatrixRequest request) async {
     final uri = _resolve('/api/v1/contests/${id.value}/matrix/draws');
+    final response = await _send('POST', uri, body: request.toJson());
+    return _decode<CurrentMatrix>(response, uri, CurrentMatrix.fromJson);
+  }
+
+  /// Moves the pilot of assignment [assignmentId] of contest [contestId] to
+  /// another slot of the matrix and returns the current matrix.
+  ///
+  /// Repeating the same [request] changes nothing more. A move the contest
+  /// cannot take (locked, a lane taken, a teammate in the group, a locked
+  /// group or score without an override, nothing changed) is an
+  /// [ApiHttpError] with status 409; a missing reason or a slot that does
+  /// not exist is status 400.
+  Future<CurrentMatrix> moveAssignment(
+    Id contestId,
+    Id assignmentId,
+    MoveAssignmentRequest request,
+  ) async {
+    final uri = _resolve(
+      '/api/v1/contests/${contestId.value}/matrix/assignments/'
+      '${assignmentId.value}/moves',
+    );
     final response = await _send('POST', uri, body: request.toJson());
     return _decode<CurrentMatrix>(response, uri, CurrentMatrix.fromJson);
   }

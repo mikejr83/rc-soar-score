@@ -82,4 +82,36 @@ void main() {
       throwsA(isA<ApiHttpError>().having((e) => e.statusCode, 'status', 409)),
     );
   });
+
+  test('moveAssignment POSTs the move and decodes the matrix', () async {
+    final client = clientFor((_) => body(CurrentMatrix().toJson(), 201));
+    final assignmentId = Id.parse('019c0000-0000-7000-8000-000000000601');
+    final newId = Id.parse('019c0000-0000-7000-8000-000000000602');
+
+    await client.moveAssignment(
+      contestId,
+      assignmentId,
+      MoveAssignmentRequest(
+        id: newId,
+        group: 2,
+        lane: 3,
+        reason: 'Wrong group',
+        overrideLocks: true,
+      ),
+    );
+
+    expect(seen.method, 'POST');
+    expect(
+      seen.url.path,
+      '$matrixPath/assignments/${assignmentId.value}/moves',
+    );
+    expect(jsonDecode(seen.body), {
+      'id': newId.value,
+      'scheduled_round_id': null,
+      'group': 2,
+      'lane': 3,
+      'reason': 'Wrong group',
+      'override_locks': true,
+    });
+  });
 }
