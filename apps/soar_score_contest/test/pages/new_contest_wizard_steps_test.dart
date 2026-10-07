@@ -45,6 +45,50 @@ void main() {
     expect(name.focusNode!.hasFocus, isTrue);
   });
 
+  testWidgets('the end date follows the start date unless a later one is '
+      'chosen', (tester) async {
+    await pumpWizard(tester, respond: emptyApi);
+    String endText() => tester
+        .widget<TextField>(find.byKey(const ValueKey('contest-end')))
+        .controller!
+        .text;
+
+    await tester.enterText(
+      find.byKey(const ValueKey('contest-start')),
+      'Nov 14, 2026',
+    );
+    await tester.pump();
+    expect(endText(), 'Nov 14, 2026');
+
+    await tester.enterText(
+      find.byKey(const ValueKey('contest-end')),
+      'Nov 16, 2026',
+    );
+    await tester.enterText(
+      find.byKey(const ValueKey('contest-start')),
+      'Nov 15, 2026',
+    );
+    await tester.pump();
+    expect(endText(), 'Nov 16, 2026');
+  });
+
+  testWidgets('every discipline card is as tall as the tallest', (
+    tester,
+  ) async {
+    await pumpWizard(tester, respond: emptyApi);
+    await fillDetails(tester);
+    await next(tester);
+    expect(stepTitle(tester), 'Discipline');
+
+    final heights = {
+      for (final discipline in WizardDiscipline.values)
+        discipline.name: tester
+            .getSize(find.byKey(ValueKey('discipline-${discipline.name}')))
+            .height,
+    };
+    expect(heights.values.toSet(), hasLength(1), reason: '$heights');
+  });
+
   testWidgets('an end date before the start date is an error', (tester) async {
     await pumpWizard(tester, respond: emptyApi);
     await fillDetails(tester);
