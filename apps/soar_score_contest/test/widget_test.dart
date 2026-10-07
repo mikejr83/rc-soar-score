@@ -74,7 +74,7 @@ void main() {
       expect(
         find.descendant(
           of: find.byType(HomePage),
-          matching: find.text('Contests'),
+          matching: find.text('Contests could not be loaded.'),
         ),
         findsOneWidget,
       );

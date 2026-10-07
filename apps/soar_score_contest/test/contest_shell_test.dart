@@ -33,7 +33,7 @@ void main() {
       'Contests',
       'Participants',
       'Roles',
-      'Bonuses',
+      'Landings',
     ]);
     final rail = tester.widget<NavigationRail>(find.byType(NavigationRail));
     expect(rail.selectedIndex, 0);
@@ -113,26 +113,70 @@ void main() {
     expect(shellAfterBack.state.uri.path, homePath);
   });
 
-  testWidgets('unwired rail destinations and the Create contest FAB show the '
-      'not-wired-up dialog', (tester) async {
+  testWidgets('Roles and Landings open their stub pages; the Create contest '
+      'FAB shows the not-wired-up dialog', (tester) async {
     final router = buildShellTestRouter();
     addTearDown(router.dispose);
     await pumpShellRouter(tester, router);
 
     await tester.tap(find.text('Roles'));
     await tester.pumpAndSettle();
-    expect(find.text('Roles is not available yet'), findsOneWidget);
-    await tester.tap(find.text('OK'));
-    await tester.pumpAndSettle();
-    expect(find.byType(AlertDialog), findsNothing);
-    expect(find.text('Home content'), findsOneWidget);
+    expect(find.text('Roles content'), findsOneWidget);
+    expect(find.byKey(const ValueKey('breadcrumb-roles')), findsOneWidget);
+    expect(find.byKey(const ValueKey('new-role')), findsOneWidget);
 
+    await tester.tap(find.text('Landings'));
+    await tester.pumpAndSettle();
+    expect(find.text('Landings content'), findsOneWidget);
+    expect(find.byKey(const ValueKey('breadcrumb-landings')), findsOneWidget);
+    expect(find.byKey(const ValueKey('new-landing')), findsOneWidget);
+
+    await tester.tap(find.text('Contests'));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('create-contest')));
     await tester.pumpAndSettle();
     expect(find.text('Create contest is not available yet'), findsOneWidget);
     await tester.tap(find.text('OK'));
     await tester.pumpAndSettle();
     expect(find.byType(AlertDialog), findsNothing);
+  });
+
+  testWidgets('on the participant page the FAB adds a participant', (
+    tester,
+  ) async {
+    final router = buildShellTestRouter(initialLocation: participantsPath);
+    addTearDown(router.dispose);
+    await pumpShellRouter(tester, router);
+
+    expect(find.byKey(const ValueKey('create-contest')), findsNothing);
+    await tester.tap(find.byKey(const ValueKey('add-participant')));
+    await tester.pumpAndSettle();
+    expect(find.text('Participant editor'), findsOneWidget);
+  });
+
+  testWidgets('the menu button expands the rail on wide windows and is '
+      'absent on narrow ones', (tester) async {
+    tester.view.physicalSize = const Size(1280, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final router = buildShellTestRouter();
+    addTearDown(router.dispose);
+    await pumpShellRouter(tester, router);
+
+    NavigationRail rail() =>
+        tester.widget<NavigationRail>(find.byType(NavigationRail));
+    expect(rail().extended, isFalse);
+    await tester.tap(find.byKey(const ValueKey('rail-toggle')));
+    await tester.pumpAndSettle();
+    expect(rail().extended, isTrue);
+    expect(find.text('Create contest'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('rail-toggle')));
+    await tester.pumpAndSettle();
+    expect(rail().extended, isFalse);
+
+    tester.view.physicalSize = const Size(834, 1194);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('rail-toggle')), findsNothing);
   });
 
   testWidgets('the participant list is a top-level page titled '

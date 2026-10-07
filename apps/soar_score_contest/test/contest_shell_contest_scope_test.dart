@@ -61,7 +61,7 @@ void main() {
       'Contests',
       'Participants',
       'Roles',
-      'Bonuses',
+      'Landings',
     ]);
   });
 

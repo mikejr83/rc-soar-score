@@ -34,6 +34,14 @@ class ShellHeader extends StatelessWidget {
   static bool _isParticipants(String path) =>
       path == participantsPath || path.startsWith('$participantsPath/');
 
+  /// The path and label of the stub page (`Roles`, `Landings`) that [path]
+  /// is, else `null`.
+  static (String, String)? _stubRoot(String path) => switch (path) {
+    rolesPath => (rolesPath, 'Roles'),
+    landingsPath => (landingsPath, 'Landings'),
+    _ => null,
+  };
+
   /// Path segments to show as plain crumbs after the root crumb (and the
   /// contest name in the contest scope). Participant ids are not shown;
   /// the editor reads `New` or `Edit`.
@@ -44,6 +52,8 @@ class ShellHeader extends StatelessWidget {
         return const [];
       }
       return [path == newParticipantPath ? 'New' : 'Edit'];
+    } else if (_stubRoot(path) != null) {
+      return const [];
     } else if (contestId != null) {
       rest = path.substring('$contestsPath/$contestId'.length);
     } else if (path.startsWith('$homePath/')) {
@@ -67,7 +77,14 @@ class ShellHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final participants = _isParticipants(path);
-    final rootPath = participants ? participantsPath : homePath;
+    final stub = _stubRoot(path);
+    final rootPath = participants ? participantsPath : stub?.$1 ?? homePath;
+    final rootLabel = participants ? 'Participants' : stub?.$2 ?? 'Contests';
+    final rootKey = participants
+        ? 'breadcrumb-participants'
+        : stub != null
+        ? 'breadcrumb-${stub.$2.toLowerCase()}'
+        : 'breadcrumb-contests';
     final isRoot = path == rootPath;
     final contestId = contestIdFor(path);
     final crumbStyle = theme.textTheme.bodyMedium?.copyWith(
@@ -93,15 +110,11 @@ class ShellHeader extends StatelessWidget {
                 onPressed: () => _back(context),
               ),
             TextButton(
-              key: ValueKey(
-                participants
-                    ? 'breadcrumb-participants'
-                    : 'breadcrumb-contests',
-              ),
+              key: ValueKey(rootKey),
               onPressed: isRoot
                   ? null
                   : () => GoRouter.of(context).go(rootPath),
-              child: Text(participants ? 'Participants' : 'Contests'),
+              child: Text(rootLabel),
             ),
             if (contestId != null) ...[
               separator,
