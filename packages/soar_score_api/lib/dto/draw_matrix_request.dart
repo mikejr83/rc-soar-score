@@ -9,7 +9,7 @@ part 'draw_matrix_request.g.dart';
 /// repeating the request returns the matrix it drew. [randomSeed], an
 /// unsigned 32-bit integer, makes the draw reproducible; the server picks one
 /// when it is null. [attemptsPerRound] is how many times each round is built
-/// to find the fairest.
+/// to find the fairest, and [seedCount] how many seeds are tried.
 @JsonSerializable(
   checked: true,
   fieldRename: FieldRename.snake,
@@ -23,6 +23,7 @@ class DrawMatrixRequest {
     required this.groupsPerRound,
     this.randomSeed,
     this.attemptsPerRound,
+    this.seedCount,
   });
 
   factory DrawMatrixRequest.fromJson(Map<String, dynamic> json) =>
@@ -36,6 +37,10 @@ class DrawMatrixRequest {
   /// How many times each round is built before the fairest build is kept,
   /// 1 to 200. The server uses 50 when this is null.
   final int? attemptsPerRound;
+
+  /// How many seeds are tried before the fairest draw is kept, 1 to 20. The
+  /// server uses 3 when this is null.
+  final int? seedCount;
 
   Map<String, dynamic> toJson() => _$DrawMatrixRequestToJson(this);
 }

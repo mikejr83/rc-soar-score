@@ -153,9 +153,25 @@ The draw engine **constructs a valid draw, then improves it across all rounds** 
 
 A polish pass took 4 to 9 seconds in Python in the benchmark, and several seeds multiply that. The draw runs off the UI thread (an isolate on native, a worker on web) with progress and a cancel button.
 
-### 4.6. Baseline Draw (`basic-2`)
+### 4.6. Implementation Status (`optimized-1`)
 
-The first draw is already fairness-driven, before the optimizer exists. The director sets the number of rounds and the number of **attempts per round** (default 50, 1 to 200). Rounds are built one after another, each round `attempts` times: every pilot goes to the open group where they meet the opponents they have met least in earlier rounds, teammates are kept apart, and the build with the lowest sum of squared meeting counts is kept. This is a greedy construction with best-of-N per round, the same family as GliderScore's. In a 30-pilot, 5-group, 16-round team contest it gave a mean absolute deviation of about 0.57 at 10 attempts and 0.53 at 50, against 0.71 with no comparison and 0.445 for GliderScore. The optimizer (sections 4.2 to 4.4) starts from this draw and closes the remaining gap.
+The first draw runs the whole pipeline. The director sets the number of rounds, the number of **attempts per round** for the construction (default 50, 1 to 200) and the number of **seeds** (default 3, 1 to 20).
+
+1. **Construction** (`BasicDraw`): rounds are built one after another, each `attempts` times. Every pilot goes to the open group where they meet the opponents they have met least in earlier rounds, teammates are kept apart, and the build with the lowest sum of squared meeting counts is kept.
+2. **Improvement** (`DrawOptimizer`): conflict-directed annealing over all rounds as in section 4.3, with 400 moves per pilot placement (pilots times rounds), a cool start (T0 = 2.0), the temperature falling in 100 steps to T0/512 (a floor, the run always uses its whole budget), an extra cost of 4 for each pair that never meets, and an integer acceptance test (`AcceptanceTable`) so every platform accepts the same moves. Then the lanes are balanced (`LaneBalancer`): lanes run from 1 to the largest group size, and a lane move is kept when it does not raise the lane penalty.
+3. **Seeds** (`DrawEngine`): steps 1 and 2 run for each seed, and the draw with the fewest never-met pairs, then the lowest maximum repeat, then the lowest sum of squared counts wins. The first run uses the requested seed, so drawing again with the stored winning seed and one seed gives the same matrix.
+4. **Fairness report**: feasible pairs, maximum repeats, the histogram, never-met pairs, mean absolute deviation, the lane uniformity index, the matchup cost and the lane penalty, the total cost `J` of section 3.3 (the matchup cost plus 0.15 times the lane penalty) with its best possible value and its random average, and the 0 to 100% score of section 7.2 computed from that total cost. The best possible lane penalty is the whole-number limit, `pilots * L * f * (1 - f)` with `f` the fractional part of `R / L`. The random average comes from 20 random valid draws, with random lanes when lanes are on, using a fixed seed, so a contest size always gets the same baseline. Seeds are compared by never-met pairs, then maximum repeats, then the total cost.
+
+Measured on teams of 3 to 4 (30 pilots, 5 groups, 16 rounds) and teams of 3 to 5 (63 pilots, 5 groups, 14 rounds), mean absolute deviation (lower is fairer), mean of 6 seeds:
+
+| Draw                                   | 30 pilots | 63 pilots |
+| -------------------------------------- | --------- | --------- |
+| Construction only, 50 attempts         | 0.526     | 0.765     |
+| Construction and improvement, 1 seed   | 0.421     | 0.696     |
+| Construction and improvement, 3 seeds  | 0.418     | 0.696     |
+| GliderScore (recorded in the research) | 0.445     | 0.710     |
+
+The team layouts are close to, not the same as, the research layouts, so the comparison is directional. A draw took about 0.2 s (30 pilots, 3 seeds) and 0.8 s (63 pilots, 3 seeds) on a development machine. Still to do under #137: running off the UI thread with progress and cancel, the back-to-back constraint, the lane count option (#256), and a benchmark harness in the repository.
 
 ---
 

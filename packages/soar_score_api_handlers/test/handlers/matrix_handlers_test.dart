@@ -76,6 +76,7 @@ void main() {
     int groups = 2,
     int? seed,
     int? attempts,
+    int? seeds,
     String id = _revisionId,
   }) => api.send(
     'POST',
@@ -86,6 +87,7 @@ void main() {
       'groups_per_round': groups,
       'random_seed': ?seed,
       'attempts_per_round': ?attempts,
+      'seed_count': ?seeds,
     },
   );
 
@@ -222,6 +224,35 @@ void main() {
       expect((await draw(attempts: 201)).statusCode, 400);
       expect((await draw(attempts: 5)).statusCode, 201);
     });
+
+    test('a seed count outside 1 to 20 is a 400', () async {
+      await createContest();
+      await configure();
+      await addPilots(4);
+
+      expect((await draw(seeds: 0)).statusCode, 400);
+      expect((await draw(seeds: 21)).statusCode, 400);
+      expect((await draw(seeds: 2)).statusCode, 201);
+    });
+
+    test(
+      'records the engine settings, the winning seed and the score',
+      () async {
+        await createContest();
+        await configure();
+        await addPilots(6);
+
+        final body = await api.json(await draw(seeds: 2, seed: 3));
+
+        final revision = body['revision'] as Map;
+        expect(revision['algorithm_version'], 'optimized-1');
+        final config = revision['draw_config'] as Map;
+        expect(config['seed_count'], 2);
+        expect(config['requested_seed'], 3);
+        final fairness = revision['fairness_summary'] as Map;
+        expect(fairness['fairness_score'], inInclusiveRange(0, 100));
+      },
+    );
 
     test('records the attempts and the feasible-pair fairness', () async {
       await createContest();
