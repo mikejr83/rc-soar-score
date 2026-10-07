@@ -157,7 +157,7 @@ class _ParticipantsPageState extends State<ParticipantsPage> {
               itemBuilder: (context, index) {
                 final profile = participants[index];
                 return ListTile(
-                  title: Text('${profile.firstName} ${profile.lastName}'),
+                  title: _title(profile),
                   subtitle: Text(_subtitle(profile)),
                   onTap: () => context.go(participantPath(profile.id.value)),
                   trailing: IconButton(
@@ -174,8 +174,29 @@ class _ParticipantsPageState extends State<ParticipantsPage> {
     ],
   );
 
-  static String _subtitle(ParticipantProfile profile) => [
-    profile.club,
-    profile.email,
-  ].whereType<String>().where((part) => part.isNotEmpty).join(' · ');
+  static Text _title(ParticipantProfile profile) {
+    // return Text('${profile.firstName} ${profile.lastName}');
+    return Text.rich(TextSpan(
+      children: [
+        TextSpan(text: '${profile.firstName} ${profile.lastName}'),
+        WidgetSpan(child: SizedBox(width: 8)),
+        TextSpan(text: profile.email!, style: const TextStyle(fontStyle: FontStyle.italic, fontSize: 12)),
+      ]
+    ));
+  }
+
+  static String _subtitle(ParticipantProfile profile) {
+    List<String> parts = [];
+    if(profile.nationalOrgId != null && profile.nationalOrgId!.isNotEmpty) {
+      parts.add("National ID: ${profile.nationalOrgId!}");
+    }
+    if(profile.faiNumber != null && profile.faiNumber!.isNotEmpty) {
+      parts.add("FAI Number: ${profile.faiNumber!}");
+    }
+
+    return [
+      ...parts,
+      profile.club,
+    ].whereType<String>().where((part) => part.isNotEmpty).join(' · ');
+  }
 }
