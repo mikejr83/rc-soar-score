@@ -15,6 +15,7 @@ import 'participant_account_link_repository.dart';
 import 'participant_directory_entry_repository.dart';
 import 'participant_profile_repository.dart';
 import 'participation_standing_repository.dart';
+import 'audit_event_repository.dart';
 import 'publication_identity_repository.dart';
 import 'publication_participant_repository.dart';
 import 'publication_projection_repository.dart';
@@ -69,6 +70,8 @@ abstract interface class Repository {
   ParticipationStandingRepository get participationStandingRepository;
 
   TeamStandingRepository get teamStandingRepository;
+
+  AuditEventRepository get auditEventRepository;
 
   PublicationIdentityRepository get publicationIdentityRepository;
 
