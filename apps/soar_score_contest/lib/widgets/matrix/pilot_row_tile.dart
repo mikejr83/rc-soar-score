@@ -70,84 +70,93 @@ class PilotRowTile extends StatelessWidget {
       label: label.toString(),
       excludeSemantics: true,
       onTap: onTap,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(8),
-        child: Ink(
-          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-          decoration: BoxDecoration(
-            color: background,
-            border: ring,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            spacing: 6,
-            children: [
-              if (selected || matched)
-                Icon(
-                  selected ? Icons.person_pin : Icons.search,
-                  size: 18,
-                  color: selected ? scheme.primary : colors.warn,
-                ),
-              if (pilot.number != null)
-                Container(
-                  constraints: const BoxConstraints(
-                    minWidth: 26,
-                    minHeight: 22,
+      // The tile gets its own Material so its ink and highlight paint inside
+      // the grid's scroll views. On the page's Material they paint outside
+      // the clipped viewport and show as blue lines beside the grid.
+      child: Material(
+        type: MaterialType.transparency,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(8),
+          child: Ink(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+            decoration: BoxDecoration(
+              color: background,
+              border: ring,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: 6,
+              children: [
+                if (selected || matched)
+                  Icon(
+                    selected ? Icons.person_pin : Icons.search,
+                    size: 18,
+                    color: selected ? scheme.primary : colors.warn,
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: selected
-                        ? scheme.primary
-                        : scheme.surfaceContainerHigh,
-                    borderRadius: BorderRadius.circular(6),
+                if (pilot.number != null)
+                  Container(
+                    constraints: const BoxConstraints(
+                      minWidth: 26,
+                      minHeight: 22,
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: selected
+                          ? scheme.primary
+                          : scheme.surfaceContainerHigh,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      pilot.numberText,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: selected ? scheme.onPrimary : scheme.onSurface,
+                        fontFeatures: const [FontFeature.tabularFigures()],
+                      ),
+                    ),
                   ),
+                if (showTeam) TeamBadge(marker: marker, scale: textScale),
+                Expanded(
                   child: Text(
-                    pilot.numberText,
+                    pilot.name,
+                    maxLines: textScale > 1.15 ? 3 : 1,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: selected ? scheme.onPrimary : scheme.onSurface,
-                      fontFeatures: const [FontFeature.tabularFigures()],
+                      fontSize: 14,
+                      height: 1.45,
+                      fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
                     ),
                   ),
                 ),
-              if (showTeam) TeamBadge(marker: marker, scale: textScale),
-              Expanded(
-                child: Text(
-                  pilot.name,
-                  maxLines: textScale > 1.15 ? 3 : 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 14,
-                    height: 1.45,
-                    fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
+                if (showLane && slot.lane != null)
+                  Container(
+                    constraints: const BoxConstraints(minHeight: 22),
+                    padding: const EdgeInsets.symmetric(horizontal: 6),
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(11),
+                      border: Border.all(color: scheme.outline),
+                    ),
+                    child: Text(
+                      'L${slot.lane}',
+                      style: TextStyle(fontSize: 12),
+                    ),
                   ),
-                ),
-              ),
-              if (showLane && slot.lane != null)
-                Container(
-                  constraints: const BoxConstraints(minHeight: 22),
-                  padding: const EdgeInsets.symmetric(horizontal: 6),
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(11),
-                    border: Border.all(color: scheme.outline),
+                if (selected)
+                  Tooltip(
+                    message: 'Pilot actions (move, late add) · later release',
+                    child: Icon(
+                      Icons.more_vert,
+                      size: 18,
+                      color: scheme.onSurface.withValues(alpha: .38),
+                    ),
                   ),
-                  child: Text('L${slot.lane}', style: TextStyle(fontSize: 12)),
-                ),
-              if (selected)
-                Tooltip(
-                  message: 'Pilot actions (move, late add) · later release',
-                  child: Icon(
-                    Icons.more_vert,
-                    size: 18,
-                    color: scheme.onSurface.withValues(alpha: .38),
-                  ),
-                ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
