@@ -28,7 +28,13 @@ void main() {
     expect(TimeZones.device('EDT'), 'America/New_York');
     expect(TimeZones.device('Pacific Standard Time'), 'America/Los_Angeles');
     expect(TimeZones.device('XYZ'), TimeZones.utc);
-    expect(TimeZones.offered, contains(TimeZones.device()));
+    expect(ContestTimeZones.ids, contains(TimeZones.device()));
+  });
+
+  test('the default zone follows the country, else the device', () {
+    expect(TimeZones.effective(null, ' Italy '), 'Europe/Rome');
+    expect(TimeZones.effective('Asia/Tokyo', 'Italy'), 'Asia/Tokyo');
+    expect(TimeZones.effective(null, 'Atlantis'), TimeZones.device());
   });
 
   test('only disciplines with a system profile are supported', () {

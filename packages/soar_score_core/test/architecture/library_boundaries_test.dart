@@ -10,6 +10,8 @@ const _allowedImports = {
   'package:equatable/equatable.dart',
   'package:json_annotation/json_annotation.dart',
   'package:logging/logging.dart',
+  'package:timezone/data/latest.dart',
+  'package:timezone/timezone.dart',
 };
 
 void main() {

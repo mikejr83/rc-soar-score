@@ -1,35 +1,33 @@
-/// The IANA time zones offered by the New Contest wizard, and a best guess
-/// at this device's.
+import 'package:soar_score_core/soar_score_core.dart';
+
+/// Picks the default IANA time zone for the New Contest wizard.
 ///
-/// Dart reports only the local zone's abbreviation (`EST`) or, on Windows,
-/// its display name (`Eastern Standard Time`), so the device zone is matched
-/// from those. A zone that can't be matched falls back to [utc]; the user
-/// can always pick another.
+/// The zone list and labels live in [ContestTimeZones]. Dart reports only the
+/// local zone's abbreviation (`EST`) or, on Windows, its display name
+/// (`Eastern Standard Time`), so the device zone is matched from those, then
+/// by abbreviation and offset against the zone database. A zone that can't be
+/// matched falls back to [utc]; the user can always pick another.
 abstract final class TimeZones {
   static const String utc = 'UTC';
 
-  static const List<String> offered = [
-    'America/New_York',
-    'America/Chicago',
-    'America/Denver',
-    'America/Phoenix',
-    'America/Los_Angeles',
-    'America/Anchorage',
-    'Pacific/Honolulu',
-    'America/Toronto',
-    'America/Vancouver',
-    'Europe/London',
-    'Europe/Berlin',
-    'Europe/Paris',
-    'Europe/Helsinki',
-    'Africa/Johannesburg',
-    'Asia/Tokyo',
-    'Australia/Perth',
-    'Australia/Adelaide',
-    'Australia/Sydney',
-    'Pacific/Auckland',
-    utc,
-  ];
+  /// Countries with a single zone, by lower-case name, for the default.
+  static const Map<String, String> _byCountry = {
+    'italy': 'Europe/Rome',
+    'spain': 'Europe/Madrid',
+    'germany': 'Europe/Berlin',
+    'france': 'Europe/Paris',
+    'netherlands': 'Europe/Amsterdam',
+    'switzerland': 'Europe/Zurich',
+    'austria': 'Europe/Vienna',
+    'poland': 'Europe/Warsaw',
+    'united kingdom': 'Europe/London',
+    'uk': 'Europe/London',
+    'great britain': 'Europe/London',
+    'china': 'Asia/Shanghai',
+    'japan': 'Asia/Tokyo',
+    'new zealand': 'Pacific/Auckland',
+    'south africa': 'Africa/Johannesburg',
+  };
 
   static const Map<String, String> _byName = {
     'EST': 'America/New_York',
@@ -83,8 +81,26 @@ abstract final class TimeZones {
     'Coordinated Universal Time': utc,
   };
 
-  /// The offered zone matching the local zone [name] (by default this
-  /// device's), else [utc].
-  static String device([String? name]) =>
-      _byName[name ?? DateTime.now().timeZoneName] ?? utc;
+  /// The zone matching the local zone [name] (by default this device's),
+  /// else [utc].
+  static String device([String? name, Duration? offset]) {
+    final clock = DateTime.now();
+    final key = name ?? clock.timeZoneName;
+    final named = _byName[key];
+    if (named != null) return named;
+    final wanted = offset ?? clock.timeZoneOffset;
+    final now = clock.toUtc();
+    for (final id in ContestTimeZones.ids) {
+      final local = ContestTime.inZone(now, id);
+      if (local.timeZoneName == key && local.timeZoneOffset == wanted) {
+        return id;
+      }
+    }
+    return utc;
+  }
+
+  /// The zone to use for a contest: the [chosen] one, else the single zone of
+  /// [country] when we know it, else this device's.
+  static String effective(String? chosen, String country) =>
+      chosen ?? _byCountry[country.trim().toLowerCase()] ?? device();
 }

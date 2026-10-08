@@ -5,6 +5,7 @@ import '../../services/new_contest/draft_dates.dart';
 import '../../services/new_contest/draft_validation.dart';
 import '../../services/new_contest/time_zones.dart';
 import 'span_grid.dart';
+import 'time_zone_picker.dart';
 import 'wizard_section_card.dart';
 
 /// Step 1's contest details: name, venue, dates, location and time zone.
@@ -42,7 +43,6 @@ class _ContestDetailsSectionState extends State<ContestDetailsSection> {
   late final TextEditingController _city;
   late final TextEditingController _region;
   late final TextEditingController _country;
-  late final String _deviceZone = TimeZones.device();
 
   @override
   void initState() {
@@ -169,7 +169,7 @@ class _ContestDetailsSectionState extends State<ContestDetailsSection> {
       ),
     );
 
-    final zone = draft.timeZone ?? _deviceZone;
+    final zone = TimeZones.effective(draft.timeZone, draft.country);
     return WizardSectionCard(
       title: 'Contest details',
       trailing: '* Required',
@@ -232,27 +232,14 @@ class _ContestDetailsSectionState extends State<ContestDetailsSection> {
           ),
           SpanGridItem(
             span: 6,
-            child: DropdownButtonFormField<String>(
-              key: const ValueKey('contest-time-zone'),
-              initialValue: zone,
-              isExpanded: true,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'Time zone',
-                helperText: 'Defaults to this device’s time zone.',
-              ),
-              items: [
-                for (final option in TimeZones.offered)
-                  DropdownMenuItem(
-                    value: option,
-                    child: Text(
-                      option == _deviceZone ? '$option (this device)' : option,
-                    ),
-                  ),
-              ],
-              onChanged: (value) => widget.onChanged(
-                draft.copyWith(timeZone: value == _deviceZone ? null : value),
-              ),
+            child: TimeZonePicker(
+              zone: zone,
+              at: DraftValidation.parseDate(draft.startDate),
+              helperText: draft.timeZone == null
+                  ? 'Defaults from the country, else this device’s time zone.'
+                  : null,
+              onChanged: (value) =>
+                  widget.onChanged(draft.copyWith(timeZone: value)),
             ),
           ),
         ],
