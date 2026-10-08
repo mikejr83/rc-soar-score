@@ -53,7 +53,23 @@ class Repository implements core.Repository {
         database,
         stores: stores,
       ),
-      teamStandingRepository = TeamStandingRepository(database, stores: stores);
+      teamStandingRepository = TeamStandingRepository(database, stores: stores),
+      publicationIdentityRepository = PublicationIdentityRepository(
+        database,
+        stores: stores,
+      ),
+      publicationProjectionRepository = PublicationProjectionRepository(
+        database,
+        stores: stores,
+      ),
+      publicationParticipantRepository = PublicationParticipantRepository(
+        database,
+        stores: stores,
+      ),
+      delistRequestRepository = DelistRequestRepository(
+        database,
+        stores: stores,
+      );
 
   @override
   final core.ContestRepository contestRepository;
@@ -112,6 +128,18 @@ class Repository implements core.Repository {
 
   @override
   final core.TeamStandingRepository teamStandingRepository;
+
+  @override
+  final core.PublicationIdentityRepository publicationIdentityRepository;
+
+  @override
+  final core.PublicationProjectionRepository publicationProjectionRepository;
+
+  @override
+  final core.PublicationParticipantRepository publicationParticipantRepository;
+
+  @override
+  final core.DelistRequestRepository delistRequestRepository;
 }
 
 Repository createRepository(SoarScoreDatabase database) => Repository(database);
