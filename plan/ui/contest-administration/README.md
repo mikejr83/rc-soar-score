@@ -16,10 +16,13 @@ The documents in this folder define the contest director's administration experi
 
 ## Design briefs
 
-Prompts handed to a design tool to produce visual designs. They summarize the requirement documents above and are not themselves requirements; when a brief and a requirement document disagree, the requirement document wins.
+Prompts handed to a design tool to produce visual designs, kept in [`briefs/`](briefs/). They summarize the requirement documents above and are not themselves requirements; when a brief and a requirement document disagree, the requirement document wins.
 
-- [`matrix-design-brief.md`](matrix-design-brief.md) - Design prompt for the matrix screen (first draw and matrix grid).
-- [`new-contest-wizard-design-brief.md`](new-contest-wizard-design-brief.md) - Design prompt for the new contest wizard.
+- [`briefs/configuration.md`](briefs/configuration.md) - Design prompt for the contest configuration page.
+- [`briefs/landings.md`](briefs/landings.md) - Design prompt for the landing tables page and the new landing table form.
+- [`briefs/matrix.md`](briefs/matrix.md) - Design prompt for the matrix screen (first draw and matrix grid).
+- [`briefs/new-contest-wizard.md`](briefs/new-contest-wizard.md) - Design prompt for the new contest wizard.
+- [`briefs/workspace.md`](briefs/workspace.md) - Design prompt for the contest workspace (overview, next step, progress, and contest controls).
 
 ## Technology and visual rules
 
