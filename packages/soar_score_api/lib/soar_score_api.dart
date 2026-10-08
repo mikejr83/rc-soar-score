@@ -16,6 +16,7 @@ export 'dto/create_participant_request.dart';
 export 'dto/create_role_request.dart';
 export 'dto/create_team_request.dart';
 export 'dto/draw_matrix_request.dart';
+export 'dto/enter_score_request.dart';
 export 'dto/health_dto.dart';
 export 'dto/late_add_request.dart';
 export 'dto/move_assignment_request.dart';
@@ -30,5 +31,8 @@ export 'errors/api_exception.dart';
 export 'errors/api_http_error.dart';
 export 'errors/api_network_error.dart';
 
+export 'package:soar_score_core/services/calculated_flight.dart';
+export 'package:soar_score_core/services/contest_scores.dart';
 export 'package:soar_score_core/services/landing_entry_input.dart';
 export 'package:soar_score_core/services/landing_table_view.dart';
+export 'package:soar_score_core/services/score_entry_result.dart';

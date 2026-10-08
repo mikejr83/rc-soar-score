@@ -121,6 +121,10 @@ class StubRoundRepository implements RoundRepository {
   final List<Round> rounds = [];
 
   @override
+  Future<Round?> findById(Id id) async =>
+      rounds.where((r) => r.id == id).firstOrNull;
+
+  @override
   Future<List<Round>> listForContest(Id contestId) async =>
       rounds.where((r) => r.contestId == contestId).toList()
         ..sort((a, b) => a.ordinal.compareTo(b.ordinal));

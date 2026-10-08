@@ -1,8 +1,10 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:soar_score_core/services/contest_scores.dart';
 import 'package:soar_score_core/services/landing_table_view.dart';
 import 'package:soar_score_core/services/role_usage.dart';
+import 'package:soar_score_core/services/score_entry_result.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../dto/add_participation_request.dart';
@@ -14,6 +16,7 @@ import '../dto/create_participant_request.dart';
 import '../dto/create_role_request.dart';
 import '../dto/create_team_request.dart';
 import '../dto/draw_matrix_request.dart';
+import '../dto/enter_score_request.dart';
 import '../dto/health_dto.dart';
 import '../dto/late_add_request.dart';
 import '../dto/move_assignment_request.dart';
@@ -519,6 +522,36 @@ class ApiClient {
     );
     final response = await _send('POST', uri, body: request.toJson());
     return _decode<CurrentMatrix>(response, uri, CurrentMatrix.fromJson);
+  }
+
+  /// `GET /api/v1/contests/{id}/scores` — every score slot of the contest's
+  /// current matrix with its current official score, and the scored and
+  /// total count of each round.
+  Future<ContestScores> scores(Id id) async {
+    final uri = _resolve('/api/v1/contests/${id.value}/scores');
+    final response = await _send('GET', uri);
+    return _decode<ContestScores>(response, uri, ContestScores.fromJson);
+  }
+
+  /// `POST /api/v1/contests/{id}/assignments/{assignmentId}/scores` — enters
+  /// [request] as the official score of one pilot in one group, and returns
+  /// the stored score with the calculated flight.
+  ///
+  /// Repeating the same `client_mutation_id` returns the first entry. A
+  /// locked contest, group or score, a contest that is not being flown, or a
+  /// slot whose score changed since it was read is an [ApiHttpError] with
+  /// status 409; components the discipline refuses are status 400.
+  Future<ScoreEntryResult> enterScore(
+    Id contestId,
+    Id assignmentId,
+    EnterScoreRequest request,
+  ) async {
+    final uri = _resolve(
+      '/api/v1/contests/${contestId.value}/assignments/'
+      '${assignmentId.value}/scores',
+    );
+    final response = await _send('POST', uri, body: request.toJson());
+    return _decode<ScoreEntryResult>(response, uri, ScoreEntryResult.fromJson);
   }
 
   /// Places a pilot who joined late, or who is making up a missed round, in

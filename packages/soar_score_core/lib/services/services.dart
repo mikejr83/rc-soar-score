@@ -1,7 +1,9 @@
+export 'calculated_flight.dart';
 export 'configuration_input.dart';
 export 'contest_configuration_rules.dart';
 export 'contest_configuration_service.dart';
 export 'contest_details.dart';
+export 'contest_scores.dart';
 export 'contest_lifecycle.dart';
 export 'contests_service.dart';
 export 'discipline_config_validator.dart';
@@ -27,5 +29,7 @@ export 'participant_details.dart';
 export 'participants_service.dart';
 export 'participations_service.dart';
 export 'role_usage.dart';
+export 'score_entry_result.dart';
+export 'scores_service.dart';
 export 'roles_service.dart';
 export 'teams_service.dart';
