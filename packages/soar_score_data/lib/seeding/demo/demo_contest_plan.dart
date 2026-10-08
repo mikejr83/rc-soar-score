@@ -19,6 +19,8 @@ class DemoContestPlan {
     this.classes = false,
     this.rounds = 0,
     this.groupsPerRound = 0,
+    this.scoredRounds = 0,
+    this.partialSlots = 0,
     this.configured = true,
   });
 
@@ -33,7 +35,8 @@ class DemoContestPlan {
 
   /// The lifecycle state the contest ends in. `Created` has no configuration,
   /// `Configuring` has participants but no matrix, `Ready` has the drawn
-  /// matrix, `Running` and `Completed` have scoring open or closed on top.
+  /// matrix, `Running` has scores entered and scoring open, `Completed` has every round
+  /// scored and scoring closed.
   final core.LifecycleState finalState;
 
   /// Pilots, taken from the start of the roster.
@@ -54,25 +57,33 @@ class DemoContestPlan {
   final int rounds;
   final int groupsPerRound;
 
+  /// Rounds scored whole, and slots scored in the round after them. Any
+  /// score makes the contest Running; a Completed contest scores every round.
+  final int scoredRounds;
+  final int partialSlots;
+
   /// Whether the contest gets a configuration.
   final bool configured;
 
   bool get drawn => rounds > 0;
 
+  bool get scored => scoredRounds > 0 || partialSlots > 0;
+
   /// The contests the demo database holds, one for each lifecycle state.
   static final List<DemoContestPlan> all = [
     DemoContestPlan(
       number: 1,
-      name: 'Autumn ALES Classic',
+      name: 'Autumn F5J Classic',
       start: DateTime.utc(2026, 9, 12, 15),
       end: DateTime.utc(2026, 9, 13, 22),
       city: 'Golden',
       state: 'CO',
-      disciplineProfileId: core.SystemDisciplineProfiles.alesId,
+      disciplineProfileId: core.SystemDisciplineProfiles.f5jId,
       finalState: core.LifecycleState.completed,
       pilots: 8,
       rounds: 5,
       groupsPerRound: 2,
+      scoredRounds: 5,
     ),
     DemoContestPlan(
       number: 2,
@@ -87,6 +98,8 @@ class DemoContestPlan {
       teamSize: 3,
       rounds: 6,
       groupsPerRound: 3,
+      scoredRounds: 4,
+      partialSlots: 5,
     ),
     DemoContestPlan(
       number: 3,

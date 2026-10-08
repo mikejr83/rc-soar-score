@@ -86,6 +86,10 @@ Planned work is tracked in GitHub issues (milestones M0 to M5, epic parent issue
 
 Documentation is provided in the `./plan` folder. This contains business, architecture, and ui requirements. Consult this documentation when determining the best course of action for implementing business logic.
 
+## Demo Data
+
+The demo database (`packages/soar_score_data/lib/seeding/demo/`) must keep showing every feature that has data. A PR that adds or changes a model, repository or service the demo can use must update the demo seeder, or add the repository to the exemptions in `packages/soar_score_data/test/seeding/demo_coverage_test.dart` with the reason and the issue that will bring it in. That test fails for a repository that is neither seeded nor exempt. Open items are tracked in #305.
+
 ## Getting Help
 
 - Review `analysis_options.yaml` for linting rules
