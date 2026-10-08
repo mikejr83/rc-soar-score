@@ -78,9 +78,9 @@ void main() {
     addTearDown(router.dispose);
     await pumpShellRouter(tester, router);
 
-    await tester.tap(find.text('Matrix'));
+    await tester.tap(find.text('Scoring'));
     await tester.pumpAndSettle();
-    expect(find.text('Matrix is not available yet'), findsOneWidget);
+    expect(find.text('Scoring is not available yet'), findsOneWidget);
 
     await tester.tap(find.text('OK'));
     await tester.pumpAndSettle();

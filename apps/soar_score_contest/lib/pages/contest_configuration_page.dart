@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../api_client_provider.dart';
+import '../router.dart';
 import '../services/configuration/config_impact.dart';
 import '../services/configuration/configuration_data.dart';
 import '../services/configuration/configuration_draft.dart';
@@ -11,7 +13,6 @@ import '../widgets/api_error_text.dart';
 import '../widgets/configuration/configuration_action_bar.dart';
 import '../widgets/configuration/configuration_groups.dart';
 import '../widgets/message_view.dart';
-import '../widgets/not_wired_up_dialog.dart';
 
 /// The configuration of one contest (`plan/ui/contest-administration/
 /// contest-workspace.md`): its options in groups, `Save configuration` and
@@ -165,7 +166,12 @@ class _ContestConfigurationPageState extends State<ContestConfigurationPage> {
       final draft = _draft;
       final readiness = DrawReadiness.evaluate(
         contest: data.contest,
-        hasValidConfiguration: draft != null && draft.problem == null,
+        configurationProblem: draft == null
+            ? 'No configuration is saved yet, so the matrix can’t be drawn.'
+            : draft.problem == null
+            ? null
+            : 'The configuration is not valid yet, so the matrix can’t be '
+                  'drawn.',
         scoringPilots: data.scoringPilots,
         matrixDrawn: data.matrix != null,
       );
@@ -199,11 +205,7 @@ class _ContestConfigurationPageState extends State<ContestConfigurationPage> {
             onSave: _save,
             problem: _saveError ?? draft?.problem,
             drawReadiness: readiness,
-            onDraw: () => showNotWiredUpDialog(
-              context,
-              'Draw matrix',
-              detail: 'The matrix page that runs the draw is not built yet.',
-            ),
+            onDraw: () => context.go(contestMatrixPath(widget.contestId)),
           ),
         ],
       );

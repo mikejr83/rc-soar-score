@@ -109,7 +109,7 @@ If the server answers with a conflict (the contest is not in configuring state, 
 
 ### Fairness summary
 
-- The **fairness score** as a percentage, with a one-line meaning: "0% is the average of random draws, 100% is the best possible". Tooltips are not enough on a tablet; the line is visible text.
+- The **fairness score** as a percentage, with a one-line meaning: "0% is a random draw, 100% is the best possible". Tooltips are not enough on a tablet; the line is visible text.
 - **Unmet opponents** (pairs of pilots who never meet), **max repeats** (the most times any pair meets), and **lane uniformity** when lanes are used.
 - A **matchup histogram**: how many pairs meet 0, 1, 2, or more times. A simple bar chart with the values labelled; no colour-only encoding.
 - **Mean absolute deviation** as a secondary figure, kept low in the hierarchy.

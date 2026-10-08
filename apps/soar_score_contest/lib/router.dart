@@ -10,6 +10,7 @@ import 'pages/home_page.dart';
 import 'pages/landing_editor_page.dart';
 import 'pages/landings_page.dart';
 import 'pages/landing_page.dart';
+import 'pages/matrix_page.dart';
 import 'pages/new_contest_wizard_page.dart';
 import 'pages/participant_editor_page.dart';
 import 'pages/participants_page.dart';
@@ -62,6 +63,9 @@ String contestWorkspacePath(String contestId) =>
 /// The configuration page of the contest with [contestId].
 String contestConfigurationPath(String contestId) =>
     '$contestsPath/$contestId/configuration';
+
+/// The matrix page of the contest with [contestId].
+String contestMatrixPath(String contestId) => '$contestsPath/$contestId/matrix';
 
 GoRouter buildAppRouter({
   String initialLocation = landingPath,
@@ -149,6 +153,12 @@ GoRouter buildAppRouter({
             builder: (context, state) => ContestConfigurationPage(
               contestId: state.pathParameters['contestId']!,
             ),
+          ),
+          GoRoute(
+            path: '$contestsPath/:contestId/matrix',
+            name: 'contestMatrix',
+            builder: (context, state) =>
+                MatrixPage(contestId: state.pathParameters['contestId']!),
           ),
           GoRoute(
             path: '$contestsPath/:contestId/workspace',
