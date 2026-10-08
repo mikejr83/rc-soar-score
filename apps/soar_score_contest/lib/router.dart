@@ -55,6 +55,13 @@ String participantPath(String participantId) =>
 String contestWorkspacePath(String contestId) =>
     '$contestsPath/$contestId/workspace';
 
+/// The configuration page of the contest with [contestId].
+///
+/// Until the configuration page lands (#251) this is the workspace, so
+/// opening a `Created` or `Configuring` contest has somewhere to go.
+String contestConfigurationPath(String contestId) =>
+    contestWorkspacePath(contestId);
+
 GoRouter buildAppRouter({
   String initialLocation = landingPath,
   AppModeNotifier? appMode,

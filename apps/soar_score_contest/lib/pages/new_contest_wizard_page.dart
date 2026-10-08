@@ -9,6 +9,7 @@ import '../api_client_provider.dart';
 import '../connectivity_provider.dart';
 import '../contest_draft_provider.dart';
 import '../router.dart';
+import '../services/contest_open_action.dart';
 import '../services/new_contest/contest_creator.dart';
 import '../services/new_contest/contest_draft.dart';
 import '../services/new_contest/contest_draft_store.dart';
@@ -671,7 +672,7 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
         return ContestCreatedView(
           contest: created,
           disciplineName: _createdDiscipline,
-          onOpen: () => context.go(contestWorkspacePath(created.id.value)),
+          onOpen: () => context.go(contestOpenPath(created)),
           onDone: () => context.go(homePath),
         );
       }

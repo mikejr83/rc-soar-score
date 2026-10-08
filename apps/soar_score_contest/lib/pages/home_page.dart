@@ -5,6 +5,7 @@ import 'package:soar_score_core/soar_score_core.dart';
 import '../api_client_provider.dart';
 import '../contest_draft_provider.dart';
 import '../router.dart';
+import '../services/contest_open_action.dart';
 import '../widgets/contest_detail_pane.dart';
 import '../widgets/contest_list.dart';
 import '../widgets/master_detail.dart';
@@ -50,6 +51,8 @@ class _HomePageState extends State<HomePage> {
       _contests = contests;
     });
   }
+
+  void _open(Contest contest) => context.go(contestOpenPath(contest));
 
   @override
   Widget build(BuildContext context) => FutureBuilder<List<Contest>>(
@@ -98,11 +101,12 @@ class _HomePageState extends State<HomePage> {
             _selectedId = contest.id;
             _showDetail = true;
           }),
+          onOpen: _open,
         ),
         detail: (context, wide) => ContestDetailPane(
           contest: selected,
           onBack: wide ? null : () => setState(() => _showDetail = false),
-          onOpen: () => context.go(contestWorkspacePath(selected.id.value)),
+          onOpen: () => _open(selected),
         ),
       );
     },
