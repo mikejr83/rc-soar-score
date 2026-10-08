@@ -45,6 +45,7 @@ export 'repositories/audit_event_repository.dart';
 export 'repositories/publication_identity_repository.dart';
 export 'repositories/publication_participant_repository.dart';
 export 'repositories/publication_projection_repository.dart';
+export 'repositories/publication_publisher.dart';
 export 'repositories/repository.dart';
 export 'repositories/role_repository.dart';
 export 'repositories/round_group_repository.dart';

@@ -40,6 +40,9 @@ final _logger = Logger('Handler');
 ///
 /// [authMiddleware], when provided, wraps only the `/api/v1` subtree;
 /// `GET /health` always stays public (ticket 010 carve-out).
+///
+/// [publishingEnabled] turns on the publication routes. Only the hosted
+/// server sets it; without it they answer 409 `publishing_not_available`.
 Handler buildApiHandler({
   required String name,
   required String displayName,
@@ -47,8 +50,15 @@ Handler buildApiHandler({
   int? schemaRevision,
   required Repository repository,
   AuthMiddleware? authMiddleware,
+  bool publishingEnabled = false,
 }) {
-  final handlers = createHandlers(name, displayName, version, repository);
+  final handlers = createHandlers(
+    name,
+    displayName,
+    version,
+    repository,
+    publishingEnabled: publishingEnabled,
+  );
   Handler api = handlers.apiHandler;
 
   if (authMiddleware != null) {

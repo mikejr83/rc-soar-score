@@ -22,9 +22,11 @@ import '../dto/enter_score_request.dart';
 import '../dto/health_dto.dart';
 import '../dto/late_add_request.dart';
 import '../dto/move_assignment_request.dart';
+import '../dto/publish_contest_request.dart';
 import '../dto/redraw_matrix_request.dart';
 import '../dto/rename_role_request.dart';
 import '../dto/save_configuration_request.dart';
+import '../dto/set_visibility_request.dart';
 import '../dto/update_contest_request.dart';
 import '../dto/update_participant_request.dart';
 import '../dto/update_participation_request.dart';
@@ -584,6 +586,47 @@ class ApiClient {
     final uri = _resolve('/api/v1/contests/${id.value}/results/recalculation');
     final response = await _send('POST', uri);
     return _decode<ContestResults>(response, uri, ContestResults.fromJson);
+  }
+
+  /// `POST /api/v1/contests/{id}/publication` — publishes the contest as it
+  /// is now and returns the publication (`publication_id`, `visibility` and
+  /// a summary of the `current_projection`).
+  ///
+  /// The first publish is Unlisted. Repeating the same `client_mutation_id`
+  /// returns the first projection. Only the contest's director may publish
+  /// (403); a contest that changed since `source_contest_revision`
+  /// (`stale_source_revision`), stale results (`results_stale`), a delisted
+  /// publication or a contest not ready to publish is an [ApiHttpError] with
+  /// status 409. The embedded server answers 409 `publishing_not_available`.
+  Future<Map<String, Object?>> publishContest(
+    Id contestId,
+    PublishContestRequest request,
+  ) async {
+    final uri = _resolve('/api/v1/contests/${contestId.value}/publication');
+    final response = await _send('POST', uri, body: request.toJson());
+    return _decode<Map<String, Object?>>(response, uri, (json) => json);
+  }
+
+  /// `GET /api/v1/contests/{id}/publication` — the director's view of the
+  /// publication. A contest that was never published is a 404.
+  Future<Map<String, Object?>> publication(Id contestId) async {
+    final uri = _resolve('/api/v1/contests/${contestId.value}/publication');
+    final response = await _send('GET', uri);
+    return _decode<Map<String, Object?>>(response, uri, (json) => json);
+  }
+
+  /// `PATCH /api/v1/contests/{id}/publication/visibility` — switches the
+  /// publication between `Unlisted` and `Public`. A delisted publication is
+  /// an [ApiHttpError] with status 409.
+  Future<Map<String, Object?>> setPublicationVisibility(
+    Id contestId,
+    SetVisibilityRequest request,
+  ) async {
+    final uri = _resolve(
+      '/api/v1/contests/${contestId.value}/publication/visibility',
+    );
+    final response = await _send('PATCH', uri, body: request.toJson());
+    return _decode<Map<String, Object?>>(response, uri, (json) => json);
   }
 
   /// Places a pilot who joined late, or who is making up a missed round, in

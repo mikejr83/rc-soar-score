@@ -9,6 +9,7 @@ import 'package:soar_score_api_handlers/handlers/matrix_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/participants_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/participations_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/roles_handlers.dart';
+import 'package:soar_score_api_handlers/handlers/publication_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/results_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/scores_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/teams_handlers.dart';
@@ -17,8 +18,9 @@ import 'package:soar_score_api_handlers/handlers/teams_handlers.dart';
   String name,
   String displayName,
   String version,
-  Repository repository,
-) {
+  Repository repository, {
+  bool publishingEnabled = false,
+}) {
   final router = Router()
     ..get(
       '/ping',
@@ -34,6 +36,7 @@ import 'package:soar_score_api_handlers/handlers/teams_handlers.dart';
   addMatrixRoutes(router, repository);
   addScoreRoutes(router, repository);
   addResultsRoutes(router, repository);
+  addPublicationRoutes(router, repository, enabled: publishingEnabled);
 
   return (
     healthHandler: createHealthHandler(name, displayName, version, repository),

@@ -66,6 +66,14 @@ void main() {
       expect((await errorOf(response))['code'], 'backend_only');
     });
 
+    test('maps a forbidden request to 403 with its code', () async {
+      final response = await failing(
+        ForbiddenError('not_director', 'only the director'),
+      );
+      expect(response.statusCode, 403);
+      expect((await errorOf(response))['code'], 'not_director');
+    });
+
     test('maps domain conflicts to 409', () async {
       final response = await failing(
         StaleRevisionError(

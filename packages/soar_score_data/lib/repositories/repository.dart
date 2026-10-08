@@ -67,6 +67,7 @@ class Repository implements core.Repository {
         database,
         stores: stores,
       ),
+      publicationPublisher = PublicationPublisher(database, stores: stores),
       delistRequestRepository = DelistRequestRepository(
         database,
         stores: stores,
@@ -158,6 +159,9 @@ class Repository implements core.Repository {
 
   @override
   final core.PublicationParticipantRepository publicationParticipantRepository;
+
+  @override
+  final core.PublicationPublisher publicationPublisher;
 
   @override
   final core.DelistRequestRepository delistRequestRepository;
