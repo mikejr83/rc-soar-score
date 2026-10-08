@@ -1,6 +1,7 @@
 import 'package:soar_score_core/soar_score_core.dart';
 
 import 'matrix_pilot.dart';
+import 'round_progress_view.dart';
 
 /// One pilot's place in a group of a round.
 class GridSlot {
@@ -16,13 +17,31 @@ class GridRound {
     required this.ordinal,
     required this.status,
     required this.groups,
-  });
+    this.scored = 0,
+    int? total,
+  }) : total = total ?? -1;
 
   final int ordinal;
   final RoundStatus status;
 
+  /// Flights of the round with an official score.
+  final int scored;
+
+  /// Live flights of the round; the pilot slots when the server sent no
+  /// count.
+  final int total;
+
   /// Slots per group, group A first.
   final List<List<GridSlot>> groups;
+
+  /// The state shown in the round header.
+  RoundProgressView get progress => RoundProgressView.of(
+    status,
+    scored: scored,
+    total: total < 0 ? pilotCount : total,
+  );
+
+  bool get isLocked => status == RoundStatus.locked;
 
   int get pilotCount => groups.fold(0, (total, group) => total + group.length);
 
@@ -66,6 +85,9 @@ class MatrixGridModel {
           ), () => [])
           .add(assignment);
     }
+    final progressByRound = {
+      for (final progress in matrix.progress) progress.roundId: progress,
+    };
     final current = matrix.rounds.where((round) => round.isCurrent).toList()
       ..sort((a, b) => a.ordinal.compareTo(b.ordinal));
     var lanes = false;
@@ -93,8 +115,15 @@ class MatrixGridModel {
         slots.sort(_bySlot);
         groups.add(slots);
       }
+      final progress = progressByRound[round.id];
       rounds.add(
-        GridRound(ordinal: round.ordinal, status: round.status, groups: groups),
+        GridRound(
+          ordinal: round.ordinal,
+          status: round.status,
+          groups: groups,
+          scored: progress?.scored ?? 0,
+          total: progress?.total,
+        ),
       );
     }
 

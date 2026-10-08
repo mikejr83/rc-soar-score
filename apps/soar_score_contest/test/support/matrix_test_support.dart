@@ -97,7 +97,16 @@ List<TeamMembership> matrixMemberships() => [
 
 /// Four pilots, two rounds, two groups: round 1 is {1,2} {3,4}; round 2 is
 /// {1,3} {2,4}. Pilots 1 and 4 never meet.
-CurrentMatrix drawnMatrix({bool lanes = false, Map<String, Object?>? config}) {
+///
+/// [scored] gives the number of scored flights of round 1 and round 2; when
+/// null the server sends no progress. [round2Status] sets the status of
+/// round 2.
+CurrentMatrix drawnMatrix({
+  bool lanes = false,
+  Map<String, Object?>? config,
+  (int, int)? scored,
+  RoundStatus round2Status = RoundStatus.open,
+}) {
   final rounds = [
     for (var r = 1; r <= 2; r++)
       Round(
@@ -106,6 +115,7 @@ CurrentMatrix drawnMatrix({bool lanes = false, Map<String, Object?>? config}) {
         matrixRevisionId: _revisionId,
         ordinal: r,
         groupCount: 2,
+        status: r == 2 ? round2Status : RoundStatus.open,
       ),
   ];
   final groups = [
@@ -166,6 +176,22 @@ CurrentMatrix drawnMatrix({bool lanes = false, Map<String, Object?>? config}) {
       assignment(2, 2, 2, 1),
       assignment(2, 2, 4, 2),
     ],
+    progress: scored == null
+        ? const []
+        : [
+            RoundProgress(
+              roundId: _id('0002', 1),
+              ordinal: 1,
+              scored: scored.$1,
+              total: 4,
+            ),
+            RoundProgress(
+              roundId: _id('0002', 2),
+              ordinal: 2,
+              scored: scored.$2,
+              total: 4,
+            ),
+          ],
   );
 }
 

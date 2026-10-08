@@ -8,6 +8,8 @@ import '../../models/contest/contest.dart';
 import '../../models/contest/core_options.dart';
 import '../../models/id.dart';
 import '../../models/matrix/matrix_assignment.dart';
+import '../../enums/score_placeholder_state.dart';
+import '../contest_scores.dart';
 import '../../models/participants/contest_participation.dart';
 import '../../repositories/already_stored_error.dart';
 import '../../repositories/finalized_draw.dart';
@@ -67,10 +69,35 @@ class MatrixService {
     final groups = (await repository.roundGroupRepository.listForContest(
       contestId,
     )).where((group) => roundIds.contains(group.roundId));
+    final placeholders = {
+      for (final placeholder
+          in await repository.scorePlaceholderRepository.listForContest(
+            contestId,
+          ))
+        placeholder.assignmentId: placeholder,
+    };
     final assignments = <MatrixAssignment>[];
+    final progress = <RoundProgress>[];
     for (final round in rounds) {
-      assignments.addAll(
-        await repository.matrixAssignmentRepository.listLiveForRound(round.id),
+      final live = await repository.matrixAssignmentRepository.listLiveForRound(
+        round.id,
+      );
+      assignments.addAll(live);
+      var scored = 0;
+      var total = 0;
+      for (final assignment in live) {
+        final placeholder = placeholders[assignment.id];
+        if (placeholder == null) continue;
+        total++;
+        if (placeholder.state != ScorePlaceholderState.notEntered) scored++;
+      }
+      progress.add(
+        RoundProgress(
+          roundId: round.id,
+          ordinal: round.ordinal,
+          scored: scored,
+          total: total,
+        ),
       );
     }
     return CurrentMatrix(
@@ -78,6 +105,7 @@ class MatrixService {
       rounds: rounds,
       groups: groups,
       assignments: assignments,
+      progress: progress,
     );
   }
 
