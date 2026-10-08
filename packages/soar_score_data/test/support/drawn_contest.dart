@@ -4,10 +4,14 @@ import 'package:soar_score_data/soar_score_data.dart';
 
 /// Creates, configures and draws an F5J contest of four pilots in two rounds
 /// of one group, owned by [actor].
-Future<core.Id> drawnContest(Repository repository, core.Id actor) async {
+Future<core.Id> drawnContest(
+  Repository repository,
+  core.Id actor, {
+  String mutationPrefix = 'setup',
+}) async {
   var n = 0;
   core.MutationMetadata meta() => core.MutationMetadata(
-    clientMutationId: 'setup-${n++}',
+    clientMutationId: '$mutationPrefix-${n++}',
     authority: core.Authority.director,
     clientTime: DateTime.utc(2026, 10, 8),
     actorId: actor,

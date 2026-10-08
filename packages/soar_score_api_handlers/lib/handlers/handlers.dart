@@ -9,12 +9,14 @@ import 'package:soar_score_api_handlers/handlers/matrix_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/participants_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/participations_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/roles_handlers.dart';
+import 'package:soar_score_api_handlers/handlers/public_publication_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/publication_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/results_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/scores_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/teams_handlers.dart';
 
-({Handler healthHandler, Handler apiHandler}) createHandlers(
+({Handler healthHandler, Handler apiHandler, Handler publicHandler})
+createHandlers(
   String name,
   String displayName,
   String version,
@@ -41,5 +43,6 @@ import 'package:soar_score_api_handlers/handlers/teams_handlers.dart';
   return (
     healthHandler: createHealthHandler(name, displayName, version, repository),
     apiHandler: router.call,
+    publicHandler: buildPublicHandler(repository, enabled: publishingEnabled),
   );
 }

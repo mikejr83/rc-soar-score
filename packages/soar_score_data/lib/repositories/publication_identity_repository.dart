@@ -29,6 +29,16 @@ class PublicationIdentityRepository extends DriftRepository
   );
 
   @override
+  Future<List<core.PublicationIdentity>> listPublic() async => [
+    for (final identity in await _store.whereText(
+      'visibility',
+      'Public',
+      orderBy: 'published_at DESC, id',
+    ))
+      if (identity.publishedAt != null) identity,
+  ];
+
+  @override
   Future<core.PublicationIdentity> save(core.PublicationIdentity identity) =>
       db.transaction(() async {
         final stored = await _store.findJson(identity.id);
