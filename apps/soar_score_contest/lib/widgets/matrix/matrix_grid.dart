@@ -46,7 +46,7 @@ class MatrixGrid extends StatefulWidget {
 class _MatrixGridState extends State<MatrixGrid> {
   static const double _labelWidth = 132;
   static const double _columnWidth = 232;
-  static const double _addWidth = 150;
+  static const double _addWidth = 176;
 
   final _body = ScrollController();
   final _bodyV = ScrollController();
@@ -263,7 +263,11 @@ class _MatrixGridState extends State<MatrixGrid> {
                   child: OutlinedButton.icon(
                     onPressed: null,
                     icon: const Icon(Icons.add, size: 18),
-                    label: const Text('Add rounds'),
+                    label: const Text(
+                      'Add rounds',
+                      maxLines: 1,
+                      softWrap: false,
+                    ),
                   ),
                 ),
               ),
