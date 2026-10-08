@@ -1,10 +1,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
+import 'package:soar_score_api/soar_score_api.dart';
 
 import 'app_mode_provider.dart';
 import 'pages/contest_workspace_page.dart';
 import 'pages/home_page.dart';
+import 'pages/landing_editor_page.dart';
+import 'pages/landings_page.dart';
 import 'pages/landing_page.dart';
 import 'pages/new_contest_wizard_page.dart';
 import 'pages/participant_editor_page.dart';
@@ -35,8 +38,11 @@ const String participantsPath = '$landingPath/participants';
 /// The roles page (system scope; a stub until roles are built).
 const String rolesPath = '$landingPath/roles';
 
-/// The landings page (system scope; a stub until landings are built).
+/// The landings page (system scope).
 const String landingsPath = '$landingPath/landings';
+
+/// The landing table form; a copy starts from the table passed as `extra`.
+const String newLandingPath = '$landingsPath/new';
 
 /// The participant editor in create mode.
 const String newParticipantPath = '$participantsPath/new';
@@ -91,7 +97,18 @@ GoRouter buildAppRouter({
           GoRoute(
             path: landingsPath,
             name: 'landings',
-            builder: (context, state) => const ShellStubPage(title: 'Landings'),
+            builder: (context, state) => const LandingsPage(),
+          ),
+          GoRoute(
+            path: newLandingPath,
+            name: 'newLanding',
+            builder: (context, state) => LandingEditorPage(
+              source: state.extra is LandingTableView
+                  ? state.extra as LandingTableView
+                  : null,
+              guard: editorGuard,
+            ),
+            onExit: (context, state) => editorGuard.confirmLeave(),
           ),
           GoRoute(
             path: newParticipantPath,

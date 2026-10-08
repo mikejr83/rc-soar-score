@@ -33,7 +33,14 @@ class DriftReplicatedChangeApplier implements core.ReplicatedChangeApplier {
     await _db.transaction(() async {
       final stored = await store.findJson(change.entityId);
       if (change.isDelete) {
-        if (stored != null) await store.remove(change.entityId);
+        if (stored == null) return;
+        if (change.entityType == 'LandingTable') {
+          // The entries go with their table.
+          await _stores
+              .of('LandingResult')
+              .removeWhereId('landing_table_id', change.entityId);
+        }
+        await store.remove(change.entityId);
         return;
       }
       final storedRevision = stored?['revision'] as int?;

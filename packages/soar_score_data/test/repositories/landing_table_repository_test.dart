@@ -145,6 +145,86 @@ void _tests(Backend backend) {
     });
   });
 
+  group('delete', () {
+    final owner = core.Id.create();
+
+    Future<core.LandingTableWithResults> stored() async {
+      final id = core.Id.create();
+      final table = core.LandingTableWithResults(
+        table: core.LandingTable(
+          id: id,
+          ownerAccountId: owner,
+          name: 'Club table',
+          inputUnit: core.LandingInputUnit.points,
+          createdAt: DateTime.utc(2026, 10, 5),
+        ),
+        results: [
+          core.LandingResult(
+            id: core.Id.create(),
+            landingTableId: id,
+            entryKey: 'none',
+            displayValue: 'None',
+            pointValue: 0,
+            ordinalPosition: 1,
+          ),
+        ],
+      );
+      await repo.create(table, metadata: metadata());
+      return table;
+    }
+
+    test('removes the table and its entries with a tombstone', () async {
+      final table = await stored();
+      final mutations = await inst.count('mutation_records');
+
+      expect(
+        await repo.delete(table.table.id, metadata: metadata(requestId: 'd')),
+        isTrue,
+      );
+
+      expect(await repo.findById(table.table.id), isNull);
+      expect(await inst.count('landing_results'), 0);
+      expect(await inst.count('tombstones'), 1);
+      expect(await inst.count('mutation_records'), mutations + 1);
+    });
+
+    test('returns false for a table that is not stored', () async {
+      expect(
+        await repo.delete(core.Id.create(), metadata: metadata()),
+        isFalse,
+      );
+    });
+
+    test('refuses a system table and keeps it', () async {
+      await repo.installSystemTable(f5j);
+
+      await expectLater(
+        repo.delete(f5j.table.id, metadata: metadata()),
+        throwsArgumentError,
+      );
+      expect(await repo.findById(f5j.table.id), f5j);
+    });
+
+    test('a replicated delete removes the entries with the table', () async {
+      final table = await stored();
+
+      await inst.applier.apply(
+        core.ReplicatedChange(
+          scope: core.DirectorScopeKey(owner),
+          sequence: 2,
+          entityType: 'LandingTable',
+          entityId: table.table.id,
+          revision: 0,
+          isDelete: true,
+          payload: const {},
+        ),
+      );
+
+      expect(await repo.findById(table.table.id), isNull);
+      expect(await inst.count('landing_results'), 0);
+    });
+  });
+
   group('LandingTableRepository', () {
     test('installs a system table and reads it back unchanged', () async {
       expect(await repo.installSystemTable(f5j), isTrue);

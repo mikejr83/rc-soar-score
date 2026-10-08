@@ -1,3 +1,4 @@
+import '../models/landing/landing_table.dart';
 import '../models/landing/landing_table_with_results.dart';
 import '../models/matrix/matrix_assignment.dart';
 import '../models/shared/append_only.dart';
@@ -36,6 +37,16 @@ abstract interface class WriteContext {
   /// seeded, not written locally.
   Future<LandingTableWithResults> appendLandingTable(
     LandingTableWithResults table, {
+    required MutationMetadata metadata,
+  });
+
+  /// Removes a director-owned landing [table] and its entries, and records a
+  /// `Tombstone` and one `MutationRecord`.
+  ///
+  /// Does nothing when the table is not stored. Throws an `ArgumentError` if
+  /// the table has no owner, because system tables are never removed.
+  Future<void> removeLandingTable(
+    LandingTable table, {
     required MutationMetadata metadata,
   });
 

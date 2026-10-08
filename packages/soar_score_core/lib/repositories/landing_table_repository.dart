@@ -4,8 +4,8 @@ import 'mutation_metadata.dart';
 
 /// Abstract persistence contract for landing tables and their entries.
 ///
-/// Tables are immutable, so there is no update or delete: a change is a new
-/// table.
+/// Tables are immutable, so there is no update: a change is a new table. A
+/// director may remove their own table only while nothing refers to it.
 abstract interface class LandingTableRepository {
   /// The table with [id] and its entries, or `null` when it is not stored.
   Future<LandingTableWithResults?> findById(Id id);
@@ -25,6 +25,18 @@ abstract interface class LandingTableRepository {
     LandingTableWithResults table, {
     required MutationMetadata metadata,
   });
+
+  /// Whether a discipline profile, a configuration preset or a contest
+  /// configuration revision refers to the table with [id].
+  Future<bool> isInUse(Id id);
+
+  /// Removes the director-owned table [id] and its entries in one
+  /// transaction. Records one mutation; returns `false` when it is not stored.
+  ///
+  /// Throws an `ArgumentError` for a system table. The caller checks
+  /// [isInUse] first; a table that is still referenced is refused by the
+  /// database.
+  Future<bool> delete(Id id, {required MutationMetadata metadata});
 
   /// Stores a system [table] and its entries in one transaction, so a table
   /// is complete or absent.

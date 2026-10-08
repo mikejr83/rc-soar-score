@@ -155,6 +155,46 @@ class _Context implements core.WriteContext {
   }
 
   @override
+  Future<void> removeLandingTable(
+    core.LandingTable table, {
+    required core.MutationMetadata metadata,
+  }) async {
+    if (table.isSystem) {
+      throw ArgumentError.value(
+        table.id.value,
+        'table',
+        'must have an owner; system tables are never removed',
+      );
+    }
+    final tables = _uow._stores.of('LandingTable');
+    final stored = await tables.findJson(table.id);
+    if (stored == null) return;
+    await _uow._stores
+        .of('LandingResult')
+        .removeWhereId('landing_table_id', table.id);
+    await tables.remove(table.id);
+    final scope = _scopeOf(table, stored);
+    await _uow._tombstones.upsert(
+      core.Tombstone(
+        id: _uow._newId(),
+        contestId: scope.contestId,
+        ownerAccountId: scope.ownerAccountId,
+        entityType: table.entityType,
+        entityId: table.id,
+        deletedAt: _uow._clock(),
+      ).toJson(),
+    );
+    await _recordMutation(
+      entityType: table.entityType,
+      entityId: table.id,
+      scope: scope,
+      baseRevision: null,
+      metadata: metadata,
+      payload: deletePayload(),
+    );
+  }
+
+  @override
   Future<core.MatrixAssignment> moveAssignment(
     core.MatrixAssignment moved, {
     required core.MutationMetadata metadata,
