@@ -133,6 +133,19 @@ void main() {
       },
     );
 
+    testWidgets('the round chips in the panel run left to right and wrap', (
+      tester,
+    ) async {
+      await pumpMatrixPage(tester, _server());
+      await tester.tap(_row(1, 1));
+      await tester.pumpAndSettle();
+      final first = tester.getRect(find.text('R1 · A'));
+      final second = tester.getRect(find.text('R2 · A'));
+      expect(second.left, greaterThan(first.right));
+      expect(second.top, first.top);
+      expect(first.width, lessThan(100));
+    });
+
     testWidgets('selecting again, or Esc, clears it', (tester) async {
       await pumpMatrixPage(tester, _server());
       await tester.tap(_row(1, 1));
