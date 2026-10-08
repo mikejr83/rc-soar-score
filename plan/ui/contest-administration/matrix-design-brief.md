@@ -71,7 +71,6 @@ The draw form is shown **disabled with the reason beside it**, not hidden, when 
 
 - The contest is locked.
 - The contest is completed.
-- The contest is pending deletion.
 - Fewer than two scoring pilots.
 - The configuration is invalid (say what is missing and link to it).
 
