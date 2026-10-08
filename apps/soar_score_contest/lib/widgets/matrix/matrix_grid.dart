@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../../services/matrix/draw_form_check.dart';
@@ -45,43 +46,32 @@ class MatrixGrid extends StatefulWidget {
 class _MatrixGridState extends State<MatrixGrid> {
   static const double _labelWidth = 132;
   static const double _columnWidth = 232;
-  static const double _addWidth = 176;
+  static const double _addWidth = 150;
 
   final _body = ScrollController();
   final _bodyV = ScrollController();
-  final _header = ScrollController();
-  final _labels = ScrollController();
   double _scale = 1;
+  double _roundWidth = _columnWidth;
   List<double> _rowHeights = const [];
 
   @override
   void initState() {
     super.initState();
     widget.controller._state = this;
-    _body.addListener(() => _follow(_header, _body));
-    _bodyV.addListener(() => _follow(_labels, _bodyV));
   }
 
   @override
   void dispose() {
-    for (final controller in [_body, _bodyV, _header, _labels]) {
-      controller.dispose();
-    }
+    _body.dispose();
+    _bodyV.dispose();
     super.dispose();
-  }
-
-  void _follow(ScrollController follower, ScrollController leader) {
-    if (follower.hasClients && leader.hasClients) {
-      final max = follower.position.maxScrollExtent;
-      follower.jumpTo(leader.offset.clamp(0, max));
-    }
   }
 
   void _jumpTo(int round, int group) {
     const duration = Duration(milliseconds: 250);
     if (_body.hasClients) {
       _body.animateTo(
-        (round * _columnWidth).clamp(0, _body.position.maxScrollExtent),
+        (round * _roundWidth).clamp(0, _body.position.maxScrollExtent),
         duration: duration,
         curve: Curves.easeOut,
       );
@@ -127,23 +117,13 @@ class _MatrixGridState extends State<MatrixGrid> {
     final headerHeight = 100 * _scale;
     final border = BorderSide(color: scheme.outlineVariant);
 
-    // The grid's own outline closes the last row, so it has no border of its
-    // own; otherwise the two lines draw as one thick line.
-    BorderSide bottomBorder(int g) =>
-        g == groups - 1 ? BorderSide.none : border;
-
     Widget label(int g) {
       final sizes = [for (final round in model.rounds) round.groups[g].length];
       final size = sizes.isEmpty ? 0 : sizes.reduce((a, b) => a > b ? a : b);
       final mixed = sizes.any((n) => n != size);
       return Container(
-        height: _rowHeights[g],
-        width: _labelWidth,
         padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: scheme.surfaceContainerLow,
-          border: Border(right: border, bottom: bottomBorder(g)),
-        ),
+        color: scheme.surfaceContainerLow,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -164,17 +144,12 @@ class _MatrixGridState extends State<MatrixGrid> {
       );
     }
 
-    Widget cell(GridRound round, int roundIndex, int g) {
+    Widget cell(GridRound round, int g) {
       final slots = round.groups[g];
       final shown = slots.where(_visible).toList();
       final hidden = slots.length - shown.length;
       return Container(
-        width: _columnWidth,
-        height: _rowHeights[g],
         padding: const EdgeInsets.all(6),
-        decoration: BoxDecoration(
-          border: Border(right: border, bottom: bottomBorder(g)),
-        ),
         child: Semantics(
           container: true,
           label:
@@ -221,45 +196,88 @@ class _MatrixGridState extends State<MatrixGrid> {
       );
     }
 
-    Widget gridFor(double addW) {
-      final headerRow = Row(
-        children: [
-          for (final round in model.rounds)
-            Container(
-              width: _columnWidth,
-              height: headerHeight,
-              decoration: BoxDecoration(
-                color: scheme.surfaceContainer,
-                border: Border(right: border, bottom: border),
-              ),
-              child: RoundHeaderCell(
-                round: round,
-                pilotCount: model.pilots.length,
-                textScale: _scale,
-              ),
-            ),
-          Container(
-            width: addW,
-            height: headerHeight,
-            padding: const EdgeInsets.all(12),
-            alignment: Alignment.topLeft,
-            decoration: BoxDecoration(
-              color: scheme.surfaceContainer,
-              border: Border(bottom: border),
-            ),
-            child: Tooltip(
-              message: 'Add rounds · coming in a later release',
-              child: OutlinedButton.icon(
-                onPressed: null,
-                icon: const Icon(Icons.add, size: 18),
-                label: const Text('Add rounds'),
-              ),
-            ),
+    // Column 0 holds the group labels, columns 1..N the rounds and the last
+    // one the "Add rounds" button. Row 0 holds the headings. The first row and
+    // column are pinned by the table, so it scrolls as one piece.
+    final rounds = model.rounds.length;
+    Widget gridFor(double columnWidth) {
+      final table = TableView.builder(
+        key: const ValueKey('grid-scroll'),
+        horizontalDetails: ScrollableDetails.horizontal(controller: _body),
+        verticalDetails: ScrollableDetails.vertical(controller: _bodyV),
+        pinnedRowCount: 1,
+        pinnedColumnCount: 1,
+        columnCount: rounds + 2,
+        rowCount: groups + 1,
+        columnBuilder: (column) => TableSpan(
+          extent: FixedTableSpanExtent(switch (column) {
+            0 => _labelWidth,
+            _ when column <= rounds => columnWidth,
+            _ => _addWidth,
+          }),
+          foregroundDecoration: column <= rounds
+              ? TableSpanDecoration(border: TableSpanBorder(trailing: border))
+              : null,
+        ),
+        rowBuilder: (row) => TableSpan(
+          extent: FixedTableSpanExtent(
+            row == 0 ? headerHeight : _rowHeights[row - 1],
           ),
-        ],
+          foregroundDecoration: row <= groups - 1
+              ? TableSpanDecoration(border: TableSpanBorder(trailing: border))
+              : null,
+        ),
+        cellBuilder: (context, vicinity) {
+          final row = vicinity.row;
+          final column = vicinity.column;
+          if (row == 0) {
+            if (column == 0) {
+              return TableViewCell(
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  alignment: Alignment.bottomLeft,
+                  color: scheme.surfaceContainer,
+                  child: Text('Groups', style: theme.textTheme.bodySmall),
+                ),
+              );
+            }
+            if (column <= rounds) {
+              return TableViewCell(
+                child: ColoredBox(
+                  color: scheme.surfaceContainer,
+                  child: RoundHeaderCell(
+                    round: model.rounds[column - 1],
+                    pilotCount: model.pilots.length,
+                    textScale: _scale,
+                  ),
+                ),
+              );
+            }
+            return TableViewCell(
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                alignment: Alignment.topLeft,
+                color: scheme.surfaceContainer,
+                child: Tooltip(
+                  message: 'Add rounds · coming in a later release',
+                  child: OutlinedButton.icon(
+                    onPressed: null,
+                    icon: const Icon(Icons.add, size: 18),
+                    label: const Text('Add rounds'),
+                  ),
+                ),
+              ),
+            );
+          }
+          final g = row - 1;
+          if (column == 0) return TableViewCell(child: label(g));
+          if (column <= rounds) {
+            return TableViewCell(child: cell(model.rounds[column - 1], g));
+          }
+          return const TableViewCell(child: SizedBox.shrink());
+        },
       );
-
-      final grid = DecoratedBox(
+      return DecoratedBox(
         decoration: BoxDecoration(
           color: scheme.surface,
           border: Border.all(color: scheme.outlineVariant),
@@ -270,98 +288,10 @@ class _MatrixGridState extends State<MatrixGrid> {
           child: Semantics(
             container: true,
             label: 'Matrix grid, scrolls in both directions',
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      width: _labelWidth,
-                      height: headerHeight,
-                      padding: const EdgeInsets.all(12),
-                      alignment: Alignment.bottomLeft,
-                      decoration: BoxDecoration(
-                        color: scheme.surfaceContainer,
-                        border: Border(right: border, bottom: border),
-                      ),
-                      child: Text('Groups', style: theme.textTheme.bodySmall),
-                    ),
-                    Expanded(
-                      child: SingleChildScrollView(
-                        controller: _header,
-                        scrollDirection: Axis.horizontal,
-                        physics: const NeverScrollableScrollPhysics(),
-                        child: headerRow,
-                      ),
-                    ),
-                  ],
-                ),
-                Expanded(
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        width: _labelWidth,
-                        child: SingleChildScrollView(
-                          controller: _labels,
-                          physics: const NeverScrollableScrollPhysics(),
-                          child: Column(
-                            children: [
-                              for (var g = 0; g < groups; g++) label(g),
-                            ],
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: Scrollbar(
-                          controller: _body,
-                          child: SingleChildScrollView(
-                            key: const ValueKey('grid-scroll'),
-                            controller: _body,
-                            scrollDirection: Axis.horizontal,
-                            child: SizedBox(
-                              width: model.rounds.length * _columnWidth + addW,
-                              child: SingleChildScrollView(
-                                controller: _bodyV,
-                                child: Column(
-                                  children: [
-                                    for (var g = 0; g < groups; g++)
-                                      Row(
-                                        children: [
-                                          for (
-                                            var r = 0;
-                                            r < model.rounds.length;
-                                            r++
-                                          )
-                                            cell(model.rounds[r], r, g),
-                                          // Continues the grid lines under
-                                          // the "Add rounds" header column.
-                                          Container(
-                                            width: addW,
-                                            height: _rowHeights[g],
-                                            decoration: BoxDecoration(
-                                              border: Border(
-                                                bottom: bottomBorder(g),
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+            child: table,
           ),
         ),
       );
-
-      return grid;
     }
 
     // The grid is as tall as its rows, so short matrices leave no blank band
@@ -370,18 +300,21 @@ class _MatrixGridState extends State<MatrixGrid> {
         headerHeight + _rowHeights.fold<double>(0, (a, b) => a + b) + 2;
     return LayoutBuilder(
       builder: (context, box) {
-        // The "Add rounds" column takes whatever width the rounds leave, so
-        // the header and the body cells run to the grid's right border.
-        final spare =
-            box.maxWidth - 2 - _labelWidth - model.rounds.length * _columnWidth;
-        final addW = spare > _addWidth ? spare : _addWidth;
+        // As in the design, the round columns share the spare width, so the
+        // table fills the pane when there are few rounds and scrolls when
+        // there are many. The "Add rounds" column keeps its own width.
+        final spare = box.maxWidth - 2 - _labelWidth - _addWidth;
+        final columnWidth = rounds == 0
+            ? _columnWidth
+            : (spare / rounds).clamp(_columnWidth, double.infinity).toDouble();
+        _roundWidth = columnWidth;
         return Align(
           alignment: Alignment.topCenter,
           child: SizedBox(
             height: box.maxHeight.isFinite && box.maxHeight < total
                 ? box.maxHeight
                 : total,
-            child: gridFor(addW),
+            child: gridFor(columnWidth),
           ),
         );
       },
