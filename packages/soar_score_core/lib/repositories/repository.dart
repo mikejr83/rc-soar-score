@@ -1,6 +1,7 @@
 import 'contest_configuration_revision_repository.dart';
 import 'contest_participation_repository.dart';
 import 'contest_repository.dart';
+import 'delist_request_repository.dart';
 import 'discipline_profile_repository.dart';
 import 'flight_result_repository.dart';
 import 'landing_table_repository.dart';
@@ -9,6 +10,9 @@ import 'matrix_revision_repository.dart';
 import 'official_score_repository.dart';
 import 'participant_profile_repository.dart';
 import 'participation_standing_repository.dart';
+import 'publication_identity_repository.dart';
+import 'publication_participant_repository.dart';
+import 'publication_projection_repository.dart';
 import 'role_repository.dart';
 import 'round_group_repository.dart';
 import 'round_repository.dart';
@@ -60,4 +64,12 @@ abstract interface class Repository {
   ParticipationStandingRepository get participationStandingRepository;
 
   TeamStandingRepository get teamStandingRepository;
+
+  PublicationIdentityRepository get publicationIdentityRepository;
+
+  PublicationProjectionRepository get publicationProjectionRepository;
+
+  PublicationParticipantRepository get publicationParticipantRepository;
+
+  DelistRequestRepository get delistRequestRepository;
 }
