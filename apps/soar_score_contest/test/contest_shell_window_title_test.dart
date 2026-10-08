@@ -47,7 +47,7 @@ void main() {
     await pumpShellRouter(tester, router, client: client);
 
     expect(find.byKey(const ValueKey('contest-title')), findsOneWidget);
-    expect(find.text('Spring F3J 2026'), findsOneWidget);
+    expect(find.text('Spring F3J 2026'), findsNWidgets(2));
     expect(titles.last, 'RC Soar Score: Spring F3J 2026');
 
     router.go(homePath);

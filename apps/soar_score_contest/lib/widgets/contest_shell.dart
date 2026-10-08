@@ -7,13 +7,15 @@ import 'contest_status_bar.dart';
 import 'shell_destinations.dart';
 import 'shell_header.dart';
 import 'shell_rail.dart';
+import 'shell_status_panel.dart';
 
 /// The persistent contest-administration shell (Material 3 rail-first
 /// layout):
 ///
 /// - a full-height [ShellRail] on the leading edge with the title and
 ///   route-dependent destinations,
-/// - a content pane with a slim [ShellHeader] above the route's [child],
+/// - a content pane with a slim [ShellHeader] (naming the selected page) and,
+///   in the contest scope, a [ShellStatusPanel] above the route's [child],
 /// - a [ContestStatusBar] spanning the full window width at the bottom.
 ///
 /// The window title names the selected contest, when there is one.
@@ -37,8 +39,8 @@ class ContestShell extends StatelessWidget {
     // its place (and state) when entering or leaving a contest.
     return ContestNameLoader(
       contestId: contestIdFor(path),
-      builder: (context, contestName) => AppWindowTitle(
-        title: windowTitleFor(contestName: contestName),
+      builder: (context, contest) => AppWindowTitle(
+        title: windowTitleFor(contestName: contest?.name),
         child: Scaffold(
           body: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -53,8 +55,12 @@ class ContestShell extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          ShellHeader(path: path, contestName: contestName),
+                          ShellHeader(path: path, contestName: contest?.name),
                           const Divider(height: 1, thickness: 1),
+                          if (contest != null) ...[
+                            ShellStatusPanel(contest: contest),
+                            const Divider(height: 1, thickness: 1),
+                          ],
                           Expanded(child: child),
                         ],
                       ),

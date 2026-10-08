@@ -6,14 +6,14 @@ import '../api_client_provider.dart';
 import '../router.dart';
 import '../widgets/api_error_text.dart';
 import '../widgets/contest_list.dart';
-import '../widgets/contest_status_chip.dart';
 import '../widgets/detail_section_card.dart';
 import '../widgets/message_view.dart';
 import '../widgets/workspace_nav_summary.dart';
 
 /// The contest workspace for one contest (`plan/ui/contest-administration/
-/// contest-workspace.md`): the contest's identity, its independent status
-/// values and a summary of the pages that administer it.
+/// contest-workspace.md`): the contest's details and a summary of the pages
+/// that administer it. The name lives in the shell header and the status
+/// values in the shell's status panel.
 class ContestWorkspacePage extends StatefulWidget {
   const ContestWorkspacePage({super.key, required this.contestId});
 
@@ -96,39 +96,6 @@ class _Workspace extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
       children: [
-        Text(contest.name, style: theme.textTheme.headlineSmall),
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            ContestStatusChip(state: contest.lifecycleState),
-            Chip(
-              key: const ValueKey('workspace-scoring-access'),
-              avatar: const Icon(Icons.sports_score, size: 18),
-              label: Text(
-                contest.scoringAccess == ScoringAccess.open
-                    ? 'Scoring open'
-                    : 'Scoring closed',
-              ),
-              visualDensity: VisualDensity.compact,
-            ),
-            Chip(
-              key: const ValueKey('workspace-admin-lock'),
-              avatar: Icon(
-                contest.adminLock == AdminLock.locked
-                    ? Icons.lock
-                    : Icons.lock_open,
-                size: 18,
-              ),
-              label: Text(
-                contest.adminLock == AdminLock.locked ? 'Locked' : 'Unlocked',
-              ),
-              visualDensity: VisualDensity.compact,
-            ),
-          ],
-        ),
-        const SizedBox(height: 24),
         DetailSectionCard(
           title: 'Contest',
           items: [

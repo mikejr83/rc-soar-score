@@ -46,7 +46,7 @@ http.Response _json(Object body, [int status = 200]) => http.Response(
 );
 
 void main() {
-  testWidgets('shows the contest identity and status values', (tester) async {
+  testWidgets('shows the contest details', (tester) async {
     await tester.pumpWidget(
       _app(
         MockClient(
@@ -62,10 +62,6 @@ void main() {
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
     await tester.pumpAndSettle();
 
-    expect(find.text('Front Range ALES Open'), findsOneWidget);
-    expect(find.text('Configuring'), findsOneWidget);
-    expect(find.text('Scoring open'), findsOneWidget);
-    expect(find.text('Locked'), findsOneWidget);
     expect(find.text('Front Range Soaring'), findsOneWidget);
   });
 
@@ -109,6 +105,6 @@ void main() {
     expect(find.text('The contest could not be loaded.'), findsOneWidget);
     await tester.tap(find.text('Retry'));
     await tester.pumpAndSettle();
-    expect(find.text('Front Range ALES Open'), findsOneWidget);
+    expect(find.text('Front Range Soaring'), findsOneWidget);
   });
 }
