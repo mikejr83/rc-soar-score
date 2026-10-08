@@ -8,11 +8,13 @@ This page is located at the route: `/contest-administration/contests/:id/workspa
 
 Configuration is grouped into identity, discipline and scoring rules, participant options, participants, draw options, scoring access, administration lock, and public update policy. Each group shows its current revision and whether editing it would invalidate the matrix or derived scores.
 
-The workspace must distinguish `Save configuration` from `Draw matrix`. Saving a valid configuration may move a contest from `Created` to `Configuring`; it never creates a matrix implicitly. `Draw matrix` is enabled only when required configuration is valid, at least two scoring pilots exist, and the contest is not locked or completed. Before a redraw, show the affected matrix revision and whether existing scores prevent the change.
+`Save configuration` never draws a matrix. Saving a valid configuration may move a contest from `Created` to `Configuring`; it never creates a matrix implicitly. Drawing happens only on the Matrix page. The configuration page shows whether a draw is possible and links to the Matrix page: a draw is possible only when required configuration is valid, at least two scoring pilots exist, and the contest is not locked or completed. When it is not, the configuration page shows the reasons.
 
-After a successful draw, show the matrix revision, minimum and maximum group size, fairness summary when available, and actions to inspect groups or redraw according to lifecycle rules. In seeded mode, show whether the preliminary rounds are complete and whether another round can be drawn.
+After a successful draw, the configuration page shows the matrix revision, minimum and maximum group size, and which saved settings differ from those the matrix was drawn with. In seeded mode, the workspace shows whether the preliminary rounds are complete and whether another round can be drawn.
 
 ## State actions
+
+State actions live on the workspace. They are contest controls, not configuration, so the configuration page does not repeat them. The shell's status summary stays read-only and links to the matching workspace control.
 
 Actions are explicit and state-driven:
 

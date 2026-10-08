@@ -1,5 +1,5 @@
 /// The result of checking the draw form's two numbers against the pilots who
-/// will be drawn (`plan/ui/contest-administration/matrix-design-brief.md`).
+/// will be drawn (`plan/ui/contest-administration/briefs/matrix.md`).
 class DrawFormCheck {
   const DrawFormCheck._({
     required this.rounds,
