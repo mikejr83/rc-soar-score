@@ -14,6 +14,7 @@ void main() {
   /// brings them in.
   const exempt = <String, String>{
     'auditEventRepository': 'append-only trail; needs publishing first (#291)',
+    'publicationPublisher': 'backend-only; needs a server demo (#291)',
     'publicationIdentityRepository': 'backend-only; needs a server demo (#291)',
     'publicationProjectionRepository':
         'backend-only; needs a server demo (#291)',

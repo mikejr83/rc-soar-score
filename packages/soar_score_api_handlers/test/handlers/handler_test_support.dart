@@ -10,7 +10,8 @@ import '../stubs/stub_repository.dart';
 /// A handler over [StubRepository], acting as [principal], with helpers to
 /// call it as the real server would be called.
 class HandlerHarness {
-  HandlerHarness(this.principal) : contests = StubContestRepository() {
+  HandlerHarness(this.principal, {bool publishingEnabled = false})
+    : contests = StubContestRepository() {
     repository = StubRepository(contests);
     handler = buildApiHandler(
       name: 'soar_score_server',
@@ -18,6 +19,7 @@ class HandlerHarness {
       version: '0.1.0',
       repository: repository,
       authMiddleware: fixedPrincipal(Principal(accountId: principal)),
+      publishingEnabled: publishingEnabled,
     );
   }
 

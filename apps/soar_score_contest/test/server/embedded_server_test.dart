@@ -377,4 +377,32 @@ void main() {
       await server.close();
     }
   });
+
+  test('refuses to publish a contest', () async {
+    final server = await startEmbeddedServer(databasePath);
+    final client = ApiClient(baseUrl: server.baseUrl);
+    try {
+      await expectLater(
+        client.publishContest(
+          Id.create(),
+          const PublishContestRequest(
+            clientMutationId: 'm-1',
+            sourceContestRevision: 1,
+          ),
+        ),
+        throwsA(
+          isA<ApiHttpError>()
+              .having((e) => e.statusCode, 'status', 409)
+              .having(
+                (e) => e.body,
+                'body',
+                contains('publishing_not_available'),
+              ),
+        ),
+      );
+    } finally {
+      client.close();
+      await server.close();
+    }
+  });
 }

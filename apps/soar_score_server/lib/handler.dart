@@ -17,5 +17,6 @@ Handler createServerHandler(SoarScoreDatabase database) {
     displayName: serverDisplayName,
     version: serverVersion,
     repository: Repository(database),
+    publishingEnabled: true,
   );
 }

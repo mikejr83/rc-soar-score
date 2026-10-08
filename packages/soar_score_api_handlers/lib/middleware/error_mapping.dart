@@ -27,6 +27,7 @@ Response errorResponse(
 ///
 /// - `StaleRevisionError`, `AlreadyStoredError`, `AlreadySupersededError`,
 ///   `ContestStateError`, `BackendOnlyError` (code `backend_only`): 409
+/// - `ForbiddenError`: 403
 /// - `EntityNotFoundError`: 404
 /// - `ArgumentError`, `FormatException`, `ScoringValidationError`: 400
 /// - an unmatched route: 404
@@ -51,6 +52,8 @@ Middleware errorMappingMiddleware() =>
         rethrow;
       } on EntityNotFoundError catch (e) {
         return errorResponse(404, 'not_found', '$e', requestId: requestId);
+      } on ForbiddenError catch (e) {
+        return errorResponse(403, e.code, e.message, requestId: requestId);
       } on BackendOnlyError catch (e) {
         return errorResponse(409, 'backend_only', '$e', requestId: requestId);
       } on ContestStateError catch (e) {

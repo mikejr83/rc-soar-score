@@ -19,6 +19,7 @@ import 'audit_event_repository.dart';
 import 'publication_identity_repository.dart';
 import 'publication_participant_repository.dart';
 import 'publication_projection_repository.dart';
+import 'publication_publisher.dart';
 import 'role_repository.dart';
 import 'round_group_repository.dart';
 import 'round_repository.dart';
@@ -78,6 +79,8 @@ abstract interface class Repository {
   PublicationProjectionRepository get publicationProjectionRepository;
 
   PublicationParticipantRepository get publicationParticipantRepository;
+
+  PublicationPublisher get publicationPublisher;
 
   DelistRequestRepository get delistRequestRepository;
 
