@@ -16,7 +16,13 @@ void main() {
     await pumpShellRouter(tester, router);
 
     expect(find.text('Contest workspace content'), findsOneWidget);
-    expect(railLabels(tester), ['Workspace', 'Matrix', 'Scoring', 'Reports']);
+    expect(railLabels(tester), [
+      'Workspace',
+      'Configuration',
+      'Matrix',
+      'Scoring',
+      'Reports',
+    ]);
     final rail = tester.widget<NavigationRail>(find.byType(NavigationRail));
     expect(rail.selectedIndex, 0);
     expect(find.byKey(const ValueKey('create-contest')), findsNothing);

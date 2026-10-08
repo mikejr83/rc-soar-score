@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../services/contest_open_action.dart';
 import 'contest_list.dart';
 import 'contest_status_chip.dart';
 import 'detail_section_card.dart';
@@ -57,7 +58,7 @@ class ContestDetailPane extends StatelessWidget {
               onPressed: onOpen,
               iconAlignment: IconAlignment.end,
               icon: const Icon(Icons.arrow_forward, size: 18),
-              label: const Text('Open contest'),
+              label: Text(ContestOpenAction.of(contest).label),
             ),
           ],
         ),

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 
 import 'app_mode_provider.dart';
+import 'pages/contest_configuration_page.dart';
 import 'pages/contest_workspace_page.dart';
 import 'pages/home_page.dart';
 import 'pages/landing_editor_page.dart';
@@ -57,6 +58,10 @@ String participantPath(String participantId) =>
 /// The contest workspace for the contest with [contestId].
 String contestWorkspacePath(String contestId) =>
     '$contestsPath/$contestId/workspace';
+
+/// The configuration page of the contest with [contestId].
+String contestConfigurationPath(String contestId) =>
+    '$contestsPath/$contestId/configuration';
 
 GoRouter buildAppRouter({
   String initialLocation = landingPath,
@@ -137,6 +142,13 @@ GoRouter buildAppRouter({
             builder: (context, state) =>
                 NewContestWizardPage(guard: wizardGuard),
             onExit: (context, state) => wizardGuard.confirmLeave(),
+          ),
+          GoRoute(
+            path: '$contestsPath/:contestId/configuration',
+            name: 'contestConfiguration',
+            builder: (context, state) => ContestConfigurationPage(
+              contestId: state.pathParameters['contestId']!,
+            ),
           ),
           GoRoute(
             path: '$contestsPath/:contestId/workspace',

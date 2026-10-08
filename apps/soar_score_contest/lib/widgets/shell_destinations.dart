@@ -71,6 +71,12 @@ List<ShellDestination> shellDestinationsFor(String path) {
       selectedIcon: Icons.dashboard,
       location: contestWorkspacePath(contestId),
     ),
+    ShellDestination(
+      label: 'Configuration',
+      icon: Icons.tune_outlined,
+      selectedIcon: Icons.tune,
+      location: contestConfigurationPath(contestId),
+    ),
     const ShellDestination(
       label: 'Matrix',
       icon: Icons.grid_on_outlined,

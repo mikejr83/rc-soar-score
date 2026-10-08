@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../api_client_provider.dart';
+import '../router.dart';
 import '../widgets/api_error_text.dart';
 import '../widgets/contest_list.dart';
 import '../widgets/contest_status_chip.dart';
@@ -140,7 +141,12 @@ class _Workspace extends StatelessWidget {
         const SizedBox(height: 24),
         Text('Administer', style: theme.textTheme.titleMedium),
         const SizedBox(height: 12),
-        WorkspaceNavSummary(onOpen: context.go),
+        WorkspaceNavSummary(
+          locations: {
+            'Configuration': contestConfigurationPath(contest.id.value),
+          },
+          onOpen: context.go,
+        ),
       ],
     );
   }

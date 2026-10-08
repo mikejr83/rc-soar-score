@@ -53,6 +53,7 @@ void main() {
     test('lists contest tasks for a contest route', () {
       expect(_labels(contestWorkspacePath(_contestId)), [
         'Workspace',
+        'Configuration',
         'Matrix',
         'Scoring',
         'Reports',
@@ -68,7 +69,8 @@ void main() {
 
       final contest = shellDestinationsFor(contestWorkspacePath(_contestId));
       expect(contest.first.location, contestWorkspacePath(_contestId));
-      expect(contest.skip(1).every((d) => d.location == null), isTrue);
+      expect(contest[1].location, contestConfigurationPath(_contestId));
+      expect(contest.skip(2).every((d) => d.location == null), isTrue);
     });
 
     test('Landings uses the track_changes icon', () {
