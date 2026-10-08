@@ -72,18 +72,15 @@ class PublicationService {
     final contest = await _requireContest(contestId);
     final existing = await repository.publicationIdentityRepository
         .findForContest(contestId);
-    Future<Never> refuse(Object error, String code) async {
-      await _audit(
-        contest: contest,
-        identity: existing,
-        actorId: actorId,
-        authority: authority,
-        sourceRevision: sourceContestRevision,
-        outcome: AuditOutcome.rejected,
-        reason: code,
-      );
-      throw error;
-    }
+    Future<Never> refuse(Object error, String code) => _refuse(
+      error,
+      code,
+      contest: contest,
+      existing: existing,
+      actorId: actorId,
+      authority: authority,
+      sourceRevision: sourceContestRevision,
+    );
 
     if (!_isDirector(contest, actorId, authority)) {
       await refuse(
@@ -128,6 +125,86 @@ class PublicationService {
         'not_owner',
       );
     }
+    return _store(
+      contest,
+      existing,
+      ownerProfileId: profile.id,
+      actorId: actorId,
+      authority: authority,
+      publishedBy: actorId,
+      clientMutationId: clientMutationId,
+      sourceRevision: sourceContestRevision,
+      refuse: refuse,
+    );
+  }
+
+  /// Publishes the current state of an already published contest on behalf
+  /// of its director's update mode, after a score entry.
+  ///
+  /// The system acts, not a person: the audit event has no actor and the
+  /// system authority. The caller has checked the update mode. Repeating a
+  /// [clientMutationId] returns the projection it created.
+  ///
+  /// Returns null when the contest was never published or is delisted: this
+  /// path never creates a publication. Throws a [ContestStateError]
+  /// (audited as refused) when the contest cannot be published right now,
+  /// for example because its results are stale.
+  Future<PublishResult?> publishAutomatically(
+    Id contestId, {
+    required String clientMutationId,
+  }) async {
+    final contest = await _requireContest(contestId);
+    final existing = await repository.publicationIdentityRepository
+        .findForContest(contestId);
+    final owner = existing?.ownerPublicProfileId;
+    if (existing == null ||
+        owner == null ||
+        existing.visibility == PublicationVisibility.delisted) {
+      return null;
+    }
+    final prior = await repository.publicationProjectionRepository
+        .findByClientMutationId(existing.id, clientMutationId);
+    if (prior != null) {
+      return PublishResult(
+        view: PublicationView(identity: existing, current: prior),
+        created: false,
+      );
+    }
+    Future<Never> refuse(Object error, String code) => _refuse(
+      error,
+      code,
+      contest: contest,
+      existing: existing,
+      actorId: null,
+      authority: Authority.system,
+      sourceRevision: contest.revision,
+    );
+    return _store(
+      contest,
+      existing,
+      ownerProfileId: owner,
+      actorId: null,
+      authority: Authority.system,
+      publishedBy: contest.ownerAccountId,
+      clientMutationId: clientMutationId,
+      sourceRevision: contest.revision,
+      refuse: refuse,
+    );
+  }
+
+  /// Builds the next projection and stores it with the identity, the
+  /// participant rows and the success event, all or nothing.
+  Future<PublishResult> _store(
+    Contest contest,
+    PublicationIdentity? existing, {
+    required Id ownerProfileId,
+    required Id? actorId,
+    required Authority authority,
+    required Id? publishedBy,
+    required String clientMutationId,
+    required int sourceRevision,
+    required Future<Never> Function(Object error, String code) refuse,
+  }) async {
     final publicationId = existing?.id ?? _newId();
     final latest = existing == null
         ? null
@@ -137,18 +214,18 @@ class PublicationService {
     final now = _clock();
     final built = await _guardBuild(
       () => _builder.build(
-        contestId: contestId,
+        contestId: contest.id,
         publicationId: publicationId,
         projectionRevision: (latest?.projectionRevision ?? 0) + 1,
         clientMutationId: clientMutationId,
-        publishedBy: actorId,
+        publishedBy: publishedBy,
       ),
       refuse,
     );
     final identity = PublicationIdentity(
       id: publicationId,
-      contestId: contestId,
-      ownerPublicProfileId: profile.id,
+      contestId: contest.id,
+      ownerPublicProfileId: ownerProfileId,
       claimStatus: ClaimStatus.claimed,
       visibility: existing?.visibility ?? PublicationVisibility.unlisted,
       publishedAt: existing?.publishedAt ?? now,
@@ -166,7 +243,7 @@ class PublicationService {
         identity: identity,
         actorId: actorId,
         authority: authority,
-        sourceRevision: sourceContestRevision,
+        sourceRevision: sourceRevision,
         outcome: AuditOutcome.success,
         resultingRevision: built.projection.projectionRevision,
       ),
@@ -175,6 +252,28 @@ class PublicationService {
       view: PublicationView(identity: stored, current: built.projection),
       created: true,
     );
+  }
+
+  /// Records a refused attempt, then throws [error].
+  Future<Never> _refuse(
+    Object error,
+    String code, {
+    required Contest contest,
+    required PublicationIdentity? existing,
+    required Id? actorId,
+    required Authority authority,
+    required int sourceRevision,
+  }) async {
+    await _audit(
+      contest: contest,
+      identity: existing,
+      actorId: actorId,
+      authority: authority,
+      sourceRevision: sourceRevision,
+      outcome: AuditOutcome.rejected,
+      reason: code,
+    );
+    throw error;
   }
 
   /// The publication of [contestId] as its director sees it.
@@ -288,7 +387,7 @@ class PublicationService {
   Future<void> _audit({
     required Contest contest,
     required PublicationIdentity? identity,
-    required Id actorId,
+    required Id? actorId,
     required Authority authority,
     required int sourceRevision,
     required AuditOutcome outcome,
@@ -310,7 +409,7 @@ class PublicationService {
   AuditEvent _event({
     required Contest contest,
     required PublicationIdentity? identity,
-    required Id actorId,
+    required Id? actorId,
     required Authority authority,
     required int sourceRevision,
     required AuditOutcome outcome,

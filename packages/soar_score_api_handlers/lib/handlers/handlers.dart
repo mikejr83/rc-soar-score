@@ -36,7 +36,7 @@ createHandlers(
   addParticipationRoutes(router, repository);
   addTeamRoutes(router, repository);
   addMatrixRoutes(router, repository);
-  addScoreRoutes(router, repository);
+  addScoreRoutes(router, repository, publishingEnabled: publishingEnabled);
   addResultsRoutes(router, repository);
   addPublicationRoutes(router, repository, enabled: publishingEnabled);
 
