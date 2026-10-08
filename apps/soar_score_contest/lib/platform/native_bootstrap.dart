@@ -48,25 +48,54 @@ class NativeBootstrap extends AppBootstrap {
   /// Local database file for the native build: `soar_score.db` inside the
   /// per-user application-support directory
   /// (`%APPDATA%\<organization>\<app>` on Windows, the Roaming profile,
-  /// resolved per-user by `path_provider`).
-  static Future<String> databasePath() async {
+  /// resolved per-user by `path_provider`). Demo mode uses `soar_score_demo.db`
+  /// beside it instead, so the real database is never touched.
+  static Future<String> databasePath({bool demo = false}) async {
     final directory = await getApplicationSupportDirectory();
-    return p.join(directory.path, 'soar_score.db');
+    return p.join(
+      directory.path,
+      demo ? demoDatabaseName : standardDatabaseName,
+    );
   }
 
-  /// Whether to seed sample contests: only when built with
-  /// `--dart-define=SOAR_SCORE_SEED_DEMO=true`, and never in a release build.
-  static const bool seedDemo =
-      bool.fromEnvironment('SOAR_SCORE_SEED_DEMO') && !kReleaseMode;
+  static const String standardDatabaseName = 'soar_score.db';
+  static const String demoDatabaseName = 'soar_score_demo.db';
+
+  /// Whether to run on the demo database, which holds example data: only when
+  /// built with `--dart-define=SOAR_SCORE_DEMO=true`, and never in a release
+  /// build.
+  static const bool demo =
+      bool.fromEnvironment('SOAR_SCORE_DEMO') && !kReleaseMode;
+
+  /// Whether demo mode starts from a new demo database, deleting the old one:
+  /// `--dart-define=SOAR_SCORE_DEMO_RESET=true`.
+  static const bool demoReset =
+      demo && bool.fromEnvironment('SOAR_SCORE_DEMO_RESET');
 
   /// Starts the embedded API server and returns the client for it.
   static Future<AppBootstrap> start() async {
     const String rawUrl = String.fromEnvironment('SOAR_SCORE_API_BASE_URL');
     final baseUrl = Uri.parse(rawUrl.isEmpty ? defaultApiBaseUrl : rawUrl);
-    final database = await databasePath();
-    final server = await startEmbeddedServer(database, seedDemo: seedDemo);
+    final database = await databasePath(demo: demo);
+    if (demoReset) {
+      await deleteDatabaseFiles(database);
+    }
+    final server = await startEmbeddedServer(database, seedDemo: demo);
     debugPrint('Embedded API server listening on ${server.baseUrl}');
+    if (demo) {
+      debugPrint('DEMO MODE: using the example database at $database');
+    }
     return NativeBootstrap._(server, ApiClient(baseUrl: baseUrl));
+  }
+
+  /// Deletes the SQLite file at [path] and its journal files, if present.
+  static Future<void> deleteDatabaseFiles(String path) async {
+    for (final suffix in ['', '-wal', '-shm', '-journal']) {
+      final file = File('$path$suffix');
+      if (await file.exists()) {
+        await file.delete();
+      }
+    }
   }
 }
 
