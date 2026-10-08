@@ -63,30 +63,19 @@ class _ShellRailState extends State<ShellRail> {
         onPressed: () => context.go(newLandingPath),
       );
     }
-    final (label, key) = switch (widget.path) {
-      rolesPath => ('New role', const ValueKey('new-role')),
-      _ => (
-        CreateContestEntry.label(hasDraft),
-        const ValueKey('create-contest'),
-      ),
-    };
-    if (key == const ValueKey('create-contest')) {
+    if (widget.path == rolesPath) {
       return (
-        label: label,
-        icon: CreateContestEntry.icon(hasDraft),
-        key: key,
-        onPressed: () => context.go(newContestPath),
+        label: 'New role',
+        icon: Icons.add,
+        key: const ValueKey('new-role'),
+        onPressed: () => context.go(newRolePath),
       );
     }
     return (
-      label: label,
-      icon: Icons.add,
-      key: key,
-      onPressed: () => showNotWiredUpDialog(
-        context,
-        label,
-        detail: ShellRail.notBuiltDetail,
-      ),
+      label: CreateContestEntry.label(hasDraft),
+      icon: CreateContestEntry.icon(hasDraft),
+      key: const ValueKey('create-contest'),
+      onPressed: () => context.go(newContestPath),
     );
   }
 

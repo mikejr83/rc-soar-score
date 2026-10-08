@@ -126,16 +126,6 @@ void main() {
 
       expect(response.statusCode, 404);
     });
-
-    test('lists the system roles', () async {
-      final body = await api.json(await api.send('GET', '/roles'));
-
-      final names = [
-        for (final role in body['roles']! as List<Object?>)
-          (role! as Map<String, Object?>)['display_name'],
-      ];
-      expect(names, containsAll(['Pilot', 'Helper', 'Team Manager']));
-    });
   });
 
   group('PUT /participants/{id}', () {

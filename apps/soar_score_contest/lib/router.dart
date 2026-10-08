@@ -12,8 +12,8 @@ import 'pages/landing_page.dart';
 import 'pages/new_contest_wizard_page.dart';
 import 'pages/participant_editor_page.dart';
 import 'pages/participants_page.dart';
+import 'pages/roles_page.dart';
 import 'widgets/contest_shell.dart';
-import 'widgets/shell_stub_page.dart';
 import 'widgets/unsaved_changes_guard.dart';
 
 /// The contest-administration root path (the landing page).
@@ -35,8 +35,11 @@ const String newContestPath = '$contestsPath/new';
 /// The director's participant list (system scope).
 const String participantsPath = '$landingPath/participants';
 
-/// The roles page (system scope; a stub until roles are built).
+/// The roles page (system scope).
 const String rolesPath = '$landingPath/roles';
+
+/// The roles page with its name dialog open, for the `New role` action.
+const String newRolePath = '$rolesPath?new=1';
 
 /// The landings page (system scope).
 const String landingsPath = '$landingPath/landings';
@@ -92,7 +95,9 @@ GoRouter buildAppRouter({
           GoRoute(
             path: rolesPath,
             name: 'roles',
-            builder: (context, state) => const ShellStubPage(title: 'Roles'),
+            builder: (context, state) => RolesPage(
+              createRequested: state.uri.queryParameters['new'] == '1',
+            ),
           ),
           GoRoute(
             path: landingsPath,

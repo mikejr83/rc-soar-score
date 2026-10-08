@@ -27,6 +27,10 @@ class ContestParticipationRepository extends DriftRepository
   );
 
   @override
+  Future<List<core.ContestParticipation>> listForRole(core.Id roleId) =>
+      _store.whereId('role_id', roleId, orderBy: 'id');
+
+  @override
   Future<core.ContestParticipation> save(
     core.ContestParticipation participation, {
     required core.MutationMetadata metadata,

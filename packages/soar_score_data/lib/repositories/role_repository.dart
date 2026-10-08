@@ -15,6 +15,24 @@ class RoleRepository extends DriftRepository implements core.RoleRepository {
   ];
 
   @override
+  Future<core.Role?> findById(core.Id id) => _roles.find(id);
+
+  @override
+  Future<core.Role> save(
+    core.Role role, {
+    required core.MutationMetadata metadata,
+  }) => unitOfWork.run((context) => context.save(role, metadata: metadata));
+
+  @override
+  Future<bool> delete(core.Id id, {required core.MutationMetadata metadata}) =>
+      unitOfWork.run((context) async {
+        final role = await _roles.find(id);
+        if (role == null) return false;
+        await context.delete(role, metadata: metadata);
+        return true;
+      });
+
+  @override
   Future<bool> installSystemRole(core.Role role) {
     if (!role.isSystem) {
       throw ArgumentError.value(

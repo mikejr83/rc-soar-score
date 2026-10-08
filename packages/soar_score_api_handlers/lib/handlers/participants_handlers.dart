@@ -16,7 +16,6 @@ import 'package:soar_score_core/soar_score_core.dart';
 /// - `POST /participants` creates a profile owned by the request's principal
 /// - `PUT /participants/{id}` replaces its details
 /// - `DELETE /participants/{id}` deletes a profile that is in no contest
-/// - `GET /roles` lists the roles the caller can assign
 ///
 /// A profile belongs to the principal that created it; another principal's
 /// profile is answered as not found. The handlers only translate between
@@ -94,13 +93,5 @@ void addParticipantRoutes(Router router, Repository repository) {
       metadata: writeMetadata(principal),
     );
     return Response(204);
-  });
-
-  router.get('/roles', (Request request) async {
-    final principal = requirePrincipal(request);
-    final roles = await service.roles(principal.accountId);
-    return jsonResponse(<String, dynamic>{
-      'roles': [for (final role in roles) role.toJson()],
-    });
   });
 }

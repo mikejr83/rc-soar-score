@@ -12,6 +12,9 @@ abstract interface class ContestParticipationRepository {
   /// Every participation of the profile [participantProfileId].
   Future<List<ContestParticipation>> listForProfile(Id participantProfileId);
 
+  /// Every participation that was assigned the role [roleId].
+  Future<List<ContestParticipation>> listForRole(Id roleId);
+
   /// Inserts [participation], or updates the stored row with the same id.
   ///
   /// Throws a `StaleRevisionError` when it was read at an older revision.

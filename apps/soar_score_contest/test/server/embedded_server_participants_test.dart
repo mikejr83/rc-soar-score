@@ -73,6 +73,41 @@ void main() {
     );
   });
 
+  test('a role is added, renamed, used, locked and then deleted', () async {
+    final created = await client.createRole(
+      CreateRoleRequest(id: Id.create(), displayName: 'Timer'),
+    );
+    expect(created.ownerAccountId, server.localAccountId);
+    expect(await client.roles(), contains(created));
+
+    final renamed = await client.renameRole(
+      created.id,
+      RenameRoleRequest(baseRevision: created.revision, displayName: 'Scorer'),
+    );
+    expect(renamed.displayName, 'Scorer');
+
+    final profile = await createProfile('Ada');
+    final participation = await client.addParticipation(
+      contestId,
+      AddParticipationRequest(
+        id: Id.create(),
+        participantProfileId: profile.id,
+        roleId: renamed.id,
+      ),
+    );
+    final usage = await client.roleUsage(renamed.id);
+    expect(usage.single.contestName, 'Spring Open');
+    expect(usage.single.participantCount, 1);
+    await expectLater(
+      client.deleteRole(renamed.id),
+      throwsA(isA<ApiHttpError>().having((e) => e.statusCode, 'status', 409)),
+    );
+
+    await client.removeParticipation(contestId, participation.id);
+    await client.deleteRole(renamed.id);
+    expect(await client.roles(), isNot(contains(renamed)));
+  });
+
   test('a participant joins a contest, is changed and is removed', () async {
     final profile = await createProfile('Ada');
 

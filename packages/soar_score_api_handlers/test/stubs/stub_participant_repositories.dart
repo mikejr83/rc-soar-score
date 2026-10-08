@@ -68,6 +68,12 @@ class StubContestParticipationRepository
   ];
 
   @override
+  Future<List<ContestParticipation>> listForRole(Id roleId) async => [
+    for (final p in participations.values)
+      if (p.roleId == roleId) p,
+  ];
+
+  @override
   Future<ContestParticipation> save(
     ContestParticipation participation, {
     required MutationMetadata metadata,
@@ -94,7 +100,8 @@ class StubContestParticipationRepository
       participations.remove(id) != null;
 }
 
-/// A [RoleRepository] holding the system roles plus any [roles] a test adds.
+/// A [RoleRepository] holding the system roles plus any [roles] a test adds;
+/// a stale save throws [StaleRevisionError] like the real one.
 class StubRoleRepository implements RoleRepository {
   final List<Role> roles = SystemRoles.all;
 
@@ -104,6 +111,36 @@ class StubRoleRepository implements RoleRepository {
       if (role.ownerAccountId == null || role.ownerAccountId == ownerAccountId)
         role,
   ];
+
+  @override
+  Future<Role?> findById(Id id) async =>
+      roles.where((role) => role.id == id).firstOrNull;
+
+  @override
+  Future<Role> save(Role role, {required MutationMetadata metadata}) async {
+    final index = roles.indexWhere((r) => r.id == role.id);
+    if (index >= 0 && roles[index].revision != role.revision) {
+      throw StaleRevisionError(
+        entityType: 'Role',
+        entityId: role.id,
+        expectedRevision: role.revision,
+        storedRevision: roles[index].revision,
+      );
+    }
+    final stored = Role.fromJson({
+      ...role.toJson(),
+      'revision': index < 0 ? 0 : roles[index].revision + 1,
+    });
+    index < 0 ? roles.add(stored) : roles[index] = stored;
+    return stored;
+  }
+
+  @override
+  Future<bool> delete(Id id, {required MutationMetadata metadata}) async {
+    final before = roles.length;
+    roles.removeWhere((role) => role.id == id);
+    return roles.length < before;
+  }
 
   @override
   Future<bool> installSystemRole(Role role) =>

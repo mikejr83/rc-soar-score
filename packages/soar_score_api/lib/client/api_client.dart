@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:soar_score_core/services/landing_table_view.dart';
+import 'package:soar_score_core/services/role_usage.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../dto/add_participation_request.dart';
@@ -10,12 +11,14 @@ import '../dto/contest_action_request.dart';
 import '../dto/create_contest_request.dart';
 import '../dto/create_landing_table_request.dart';
 import '../dto/create_participant_request.dart';
+import '../dto/create_role_request.dart';
 import '../dto/create_team_request.dart';
 import '../dto/draw_matrix_request.dart';
 import '../dto/health_dto.dart';
 import '../dto/late_add_request.dart';
 import '../dto/move_assignment_request.dart';
 import '../dto/redraw_matrix_request.dart';
+import '../dto/rename_role_request.dart';
 import '../dto/save_configuration_request.dart';
 import '../dto/update_contest_request.dart';
 import '../dto/update_participant_request.dart';
@@ -280,6 +283,48 @@ class ApiClient {
       (json) => [
         for (final item in json['roles'] as List<dynamic>)
           Role.fromJson(item as Map<String, dynamic>),
+      ],
+    );
+  }
+
+  /// `POST /api/v1/roles` — adds a non-flier role owned by the caller.
+  ///
+  /// Repeating the same [request] returns the role it created. A name the
+  /// caller already has is an [ApiHttpError] with status 409.
+  Future<Role> createRole(CreateRoleRequest request) async {
+    final uri = _resolve('/api/v1/roles');
+    final response = await _send('POST', uri, body: request.toJson());
+    return _decode<Role>(response, uri, Role.fromJson);
+  }
+
+  /// `PUT /api/v1/roles/{id}` — renames the caller's role [id].
+  ///
+  /// A system role is an [ApiHttpError] with status 409.
+  Future<Role> renameRole(Id id, RenameRoleRequest request) async {
+    final uri = _resolve('/api/v1/roles/${id.value}');
+    final response = await _send('PUT', uri, body: request.toJson());
+    return _decode<Role>(response, uri, Role.fromJson);
+  }
+
+  /// `DELETE /api/v1/roles/{id}` — deletes the caller's role [id].
+  ///
+  /// A system role, or a role a contest participant has, is an
+  /// [ApiHttpError] with status 409.
+  Future<void> deleteRole(Id id) async {
+    await _send('DELETE', _resolve('/api/v1/roles/${id.value}'));
+  }
+
+  /// `GET /api/v1/roles/{id}/usage` — the contests with participants in role
+  /// [id].
+  Future<List<RoleUsage>> roleUsage(Id id) async {
+    final uri = _resolve('/api/v1/roles/${id.value}/usage');
+    final response = await _send('GET', uri);
+    return _decode<List<RoleUsage>>(
+      response,
+      uri,
+      (json) => [
+        for (final item in json['usage'] as List<dynamic>)
+          RoleUsage.fromJson(item as Map<String, dynamic>),
       ],
     );
   }
