@@ -5,16 +5,19 @@ import 'demo_configuration.dart';
 import 'demo_contest_plan.dart';
 import 'demo_ids.dart';
 import 'demo_pilot.dart';
+import 'demo_score_seeder.dart';
 
 /// Fills an empty database with example data: pilots and contests in every
-/// lifecycle state, with configurations, participants, teams and drawn
-/// matrices.
+/// lifecycle state, with configurations, participants, teams, drawn matrices,
+/// official scores and the results calculated from them.
 ///
 /// Development only: the native app runs it for the demo database (see the
 /// contest app README). Everything goes through the same services the API
 /// uses, so the demo data obeys the rules real data does. The contests belong
 /// to the installation's Local account, which is also the actor of every
-/// mutation. No scores are entered yet: nothing records them.
+/// mutation. Scores go through
+/// `ScoresService` and the results through `ResultsService`, so the first
+/// score starts a contest just as it does in real use.
 class DemoDataSeeder {
   DemoDataSeeder(
     this._repository, {
@@ -177,39 +180,30 @@ class DemoDataSeeder {
     }
   }
 
-  /// Moves a drawn contest on to Running or Completed. Nothing records a
-  /// score yet, which is what would start a contest, so this saves the state
-  /// directly.
+  /// Scores the contest and moves it on: the first score makes it Running,
+  /// then scoring opens, or the contest completes.
   Future<void> _finish(DemoContestPlan plan) async {
-    final contests = _repository.contestRepository;
-    final stored = await contests.findById(DemoIds.contest(plan.number));
-    if (stored == null) {
+    await DemoScoreSeeder(
+      _repository,
+      actorId: _localAccountId,
+      metadata: _metadata,
+    ).score(plan);
+    final action = switch (plan.finalState) {
+      core.LifecycleState.running => core.ContestAction.openScoring,
+      core.LifecycleState.completed => core.ContestAction.complete,
+      _ => null,
+    };
+    if (action == null) {
       return;
     }
-    final now = _clock().toUtc();
-    switch (plan.finalState) {
-      case core.LifecycleState.running:
-        await contests.save(
-          stored.copyWithState(
-            lifecycleState: core.LifecycleState.running,
-            scoringAccess: core.ScoringAccess.open,
-            updatedAt: now,
-          ),
-          metadata: _metadata(),
-        );
-      case core.LifecycleState.completed:
-        await contests.save(
-          stored.copyWithState(
-            lifecycleState: core.LifecycleState.completed,
-            scoringAccess: core.ScoringAccess.closed,
-            updatedAt: now,
-          ),
-          metadata: _metadata(),
-        );
-      case core.LifecycleState.created ||
-          core.LifecycleState.configuring ||
-          core.LifecycleState.ready:
-        break;
-    }
+    final stored = await _repository.contestRepository.findById(
+      DemoIds.contest(plan.number),
+    );
+    await services.ContestsService(_repository).applyAction(
+      stored!.id,
+      action,
+      baseRevision: stored.revision,
+      metadata: _metadata(),
+    );
   }
 }

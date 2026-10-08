@@ -39,7 +39,7 @@ void _tests(Backend backend) {
     });
     expect(contests.values.map((c) => c.ownerAccountId), everyElement(owner));
     expect(
-      contests['Autumn ALES Classic']!.scoringAccess,
+      contests['Autumn F5J Classic']!.scoringAccess,
       core.ScoringAccess.closed,
     );
     expect(
