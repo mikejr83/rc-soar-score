@@ -69,7 +69,7 @@ void main() {
     expect(find.text('Front Range Soaring'), findsOneWidget);
   });
 
-  testWidgets('summarises the contest pages as not available yet', (
+  testWidgets('summarises the contest pages, those not built yet disabled', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -87,7 +87,7 @@ void main() {
     ]) {
       expect(find.text(label), findsOneWidget);
     }
-    expect(find.textContaining('Not available yet.'), findsNWidgets(6));
+    expect(find.textContaining('Not available yet.'), findsNWidgets(5));
   });
 
   testWidgets('reports a load failure and retries', (tester) async {

@@ -48,6 +48,10 @@ Widget _app(LifecycleState state) {
         path: contestWorkspacePath(_id),
         builder: (context, state) => const Text('workspace page'),
       ),
+      GoRoute(
+        path: contestConfigurationPath(_id),
+        builder: (context, state) => const Text('configuration page'),
+      ),
     ],
   );
   return ApiClientInherited(
@@ -60,12 +64,12 @@ void main() {
   final open = find.byKey(const ValueKey('open-contest'));
   final row = find.byKey(const ValueKey('contest-$_id'));
 
-  for (final (state, label) in [
-    (LifecycleState.created, 'Open'),
-    (LifecycleState.configuring, 'Open'),
-    (LifecycleState.ready, 'Continue'),
-    (LifecycleState.running, 'Continue'),
-    (LifecycleState.completed, 'View'),
+  for (final (state, label, page) in [
+    (LifecycleState.created, 'Open', 'configuration page'),
+    (LifecycleState.configuring, 'Open', 'configuration page'),
+    (LifecycleState.ready, 'Continue', 'workspace page'),
+    (LifecycleState.running, 'Continue', 'workspace page'),
+    (LifecycleState.completed, 'View', 'workspace page'),
   ]) {
     testWidgets('a $state contest offers $label', (tester) async {
       await tester.pumpWidget(_app(state));
@@ -74,7 +78,7 @@ void main() {
       expect(find.descendant(of: open, matching: find.text(label)), findsOne);
       await tester.tap(open);
       await tester.pumpAndSettle();
-      expect(find.text('workspace page'), findsOneWidget);
+      expect(find.text(page), findsOneWidget);
     });
   }
 
