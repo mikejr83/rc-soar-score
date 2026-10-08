@@ -14,7 +14,6 @@ import 'pages/participant_editor_page.dart';
 import 'pages/participants_page.dart';
 import 'pages/roles_page.dart';
 import 'widgets/contest_shell.dart';
-import 'widgets/shell_stub_page.dart';
 import 'widgets/unsaved_changes_guard.dart';
 
 /// The contest-administration root path (the landing page).
