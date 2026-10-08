@@ -16,6 +16,9 @@ import 'shell_destinations.dart';
 /// In the New Contest wizard the crumbs read `Contests > New contest` and
 /// the trailing end shows whether the draft is saved.
 ///
+/// A centred page title names the selected page (with the contest's name
+/// beneath it in the contest scope).
+///
 /// It spans the content pane only, leaving the rail full height and as much
 /// vertical space as possible for the routed page.
 class ShellHeader extends StatelessWidget {
@@ -29,7 +32,7 @@ class ShellHeader extends StatelessWidget {
 
   static const String contestFallback = 'Contest';
 
-  static const double height = 48;
+  static const double height = 64;
 
   static String _label(String segment) => segment.length > 1
       ? segment[0].toUpperCase() + segment.substring(1)
@@ -107,56 +110,93 @@ class ShellHeader extends StatelessWidget {
       color: theme.colorScheme.onSurfaceVariant,
     );
 
+    final trailing = _trailingSegments(path, contestId);
+    // The title names the selected page: the deepest segment, else the
+    // contest's page or the root page itself.
+    final title = trailing.isNotEmpty
+        ? _label(trailing.last)
+        : contestId != null
+        ? 'Workspace'
+        : rootLabel;
+    final crumbs = trailing.isEmpty
+        ? const <String>[]
+        : trailing.sublist(0, trailing.length - 1);
+
     return SizedBox(
       height: height,
       child: Padding(
         padding: const EdgeInsetsDirectional.only(start: 8, end: 16),
         child: Row(
           children: [
-            if (!isRoot && !participants)
-              IconButton(
-                key: const ValueKey('breadcrumb-back'),
-                icon: const Icon(Icons.arrow_back),
-                tooltip: 'Back',
-                onPressed: () => _back(context),
-              ),
-            TextButton(
-              key: ValueKey(rootKey),
-              onPressed: isRoot
-                  ? null
-                  : () => GoRouter.of(context).go(rootPath),
-              child: Text(rootLabel),
-            ),
-            if (contestId != null) ...[
-              separator,
-              Flexible(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: Text(
-                    contestName ?? contestFallback,
-                    key: const ValueKey('contest-title'),
-                    style: theme.textTheme.titleMedium,
-                    overflow: TextOverflow.ellipsis,
+            Expanded(
+              child: Row(
+                children: [
+                  if (!isRoot && !participants)
+                    IconButton(
+                      key: const ValueKey('breadcrumb-back'),
+                      icon: const Icon(Icons.arrow_back),
+                      tooltip: 'Back',
+                      onPressed: () => _back(context),
+                    ),
+                  Flexible(
+                    child: TextButton(
+                      key: ValueKey(rootKey),
+                      onPressed: isRoot
+                          ? null
+                          : () => GoRouter.of(context).go(rootPath),
+                      child: Text(rootLabel, overflow: TextOverflow.ellipsis),
+                    ),
                   ),
+                  if (contestId != null) ...[
+                    separator,
+                    Flexible(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        child: Text(
+                          contestName ?? contestFallback,
+                          key: const ValueKey('contest-title'),
+                          style: crumbStyle,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ),
+                  ],
+                  for (final segment in crumbs) ...[
+                    separator,
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: Text(_label(segment), style: crumbStyle),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  title,
+                  key: const ValueKey('page-title'),
+                  style: theme.textTheme.titleLarge,
                 ),
+                if (contestId != null)
+                  Text(
+                    contestName ?? contestFallback,
+                    key: const ValueKey('page-subtitle'),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+              ],
+            ),
+            Expanded(
+              child: Align(
+                alignment: AlignmentDirectional.centerEnd,
+                child: draftStore == null
+                    ? null
+                    : DraftStatusLabel(store: draftStore),
               ),
-            ],
-            for (final segment in _trailingSegments(path, contestId)) ...[
-              separator,
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Text(_label(segment), style: crumbStyle),
-              ),
-            ],
-            if (draftStore != null) ...[
-              const SizedBox(width: 8),
-              Expanded(
-                child: Align(
-                  alignment: AlignmentDirectional.centerEnd,
-                  child: DraftStatusLabel(store: draftStore),
-                ),
-              ),
-            ],
+            ),
           ],
         ),
       ),

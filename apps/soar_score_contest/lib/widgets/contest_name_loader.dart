@@ -3,10 +3,11 @@ import 'package:soar_score_core/soar_score_core.dart';
 
 import '../api_client_provider.dart';
 
-/// Loads the selected contest's name through the app's API client and hands
-/// it to [builder], so the shell header and the window title share one load.
+/// Loads the selected contest through the app's API client and hands it to
+/// [builder], so the shell header, status panel and window title share one
+/// load.
 ///
-/// The name is `null` when no contest is selected ([contestId] is `null`),
+/// The contest is `null` when none is selected ([contestId] is `null`),
 /// while loading, when no client is available, or when the contest cannot
 /// be loaded; the routed page reports those errors.
 class ContestNameLoader extends StatefulWidget {
@@ -17,7 +18,7 @@ class ContestNameLoader extends StatefulWidget {
   });
 
   final String? contestId;
-  final Widget Function(BuildContext context, String? contestName) builder;
+  final Widget Function(BuildContext context, Contest? contest) builder;
 
   @override
   State<ContestNameLoader> createState() => _ContestNameLoaderState();
@@ -64,7 +65,7 @@ class _ContestNameLoaderState extends State<ContestNameLoader> {
     future: _contest,
     builder: (context, snapshot) => widget.builder(
       context,
-      widget.contestId == null ? null : snapshot.data?.name,
+      widget.contestId == null ? null : snapshot.data,
     ),
   );
 }

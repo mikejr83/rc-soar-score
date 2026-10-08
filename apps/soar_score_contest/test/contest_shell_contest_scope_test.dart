@@ -36,7 +36,7 @@ void main() {
 
     expect(find.byKey(const ValueKey('breadcrumb-back')), findsOneWidget);
     expect(find.byKey(const ValueKey('breadcrumb-contests')), findsOneWidget);
-    expect(find.text(ShellHeader.contestFallback), findsOneWidget);
+    expect(find.text(ShellHeader.contestFallback), findsNWidgets(2));
   });
 
   testWidgets('back with no history returns to the main page', (tester) async {
