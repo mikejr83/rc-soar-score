@@ -141,12 +141,17 @@ class PilotPanel extends StatelessWidget {
               Container(
                 height: 24,
                 padding: const EdgeInsets.symmetric(horizontal: 8),
-                alignment: Alignment.center,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(6),
                   border: Border.all(color: scheme.outlineVariant),
                 ),
-                child: Text(place, style: theme.textTheme.bodySmall),
+                // A Container with an alignment grows to the full row, which
+                // stacks the chips; the width factor keeps each as wide as
+                // its text.
+                child: Center(
+                  widthFactor: 1,
+                  child: Text(place, style: theme.textTheme.bodySmall),
+                ),
               ),
           ],
         ),
