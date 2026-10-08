@@ -1,5 +1,7 @@
 # Ticket 016 — Scaffold `soar_score_data_postres` Package
 
+> **Note:** `soar_score_data_postgres` and its sibling package were later unified into `packages/soar_score_data` (one Drift schema opened over SQLite or PostgreSQL). The package name below is historical.
+
 - **Category:** Scaffold
 - **Priority:** High
 - **Status:** In-Review
