@@ -45,6 +45,7 @@ export 'repositories/participant_account_link_repository.dart';
 export 'repositories/participant_directory_entry_repository.dart';
 export 'repositories/participant_profile_repository.dart';
 export 'repositories/participation_standing_repository.dart';
+export 'repositories/audit_event_repository.dart';
 export 'repositories/publication_identity_repository.dart';
 export 'repositories/publication_participant_repository.dart';
 export 'repositories/publication_projection_repository.dart';
