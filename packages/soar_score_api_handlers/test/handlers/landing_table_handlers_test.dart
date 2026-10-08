@@ -16,7 +16,7 @@ Map<String, Object?> _body({
   'entries':
       entries ??
       [
-        {'entry_key': 'within_1m', 'display_value': '', 'point_value': 10},
+        {'display_value': 'Within 1 m', 'point_value': 10},
         {'entry_key': 'within_2m', 'display_value': '2 m', 'point_value': 5},
       ],
 };
@@ -47,11 +47,11 @@ void main() {
       final results = body['results']! as List<Object?>;
       expect(
         [for (final r in results) (r! as Map<String, Object?>)['entry_key']],
-        ['within_1m', 'within_2m'],
+        ['within_1_m', 'within_2m'],
       );
       expect(
         (results.first! as Map<String, Object?>)['display_value'],
-        'within_1m',
+        'Within 1 m',
       );
       expect(api.repository.landingTables.writtenWith.single.actorId, _owner);
     });

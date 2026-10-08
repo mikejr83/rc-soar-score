@@ -51,7 +51,6 @@ class _LandingEditorPageState extends State<LandingEditorPage> {
       _rows = [
         for (final entry in source.results)
           LandingEntryFields(
-            key: entry.entryKey,
             label: entry.displayValue,
             points: '${entry.pointValue}',
           ),
@@ -75,7 +74,6 @@ class _LandingEditorPageState extends State<LandingEditorPage> {
   }
 
   void _watch(LandingEntryFields row) {
-    row.key.addListener(_markDirty);
     row.label.addListener(_markDirty);
     row.points.addListener(_markDirty);
   }
@@ -101,16 +99,17 @@ class _LandingEditorPageState extends State<LandingEditorPage> {
   static String? _required(String? value, String label) =>
       value == null || value.trim().isEmpty ? '$label is required.' : null;
 
-  /// Fails a key that an earlier row already uses.
-  String? _keyRule(int index, String? value) {
-    final required = _required(value, 'Key');
+  /// Fails a label that an earlier row already uses. The internal key is
+  /// derived from the label, so two entries cannot share one.
+  String? _labelRule(int index, String? value) {
+    final required = _required(value, 'Label');
     if (required != null) {
       return required;
     }
-    final key = value!.trim();
+    final label = value!.trim().toLowerCase();
     for (var i = 0; i < index; i++) {
-      if (_rows[i].key.text.trim() == key) {
-        return 'Key is already used in this table.';
+      if (_rows[i].label.text.trim().toLowerCase() == label) {
+        return 'Label is already used in this table.';
       }
     }
     return null;
@@ -146,7 +145,6 @@ class _LandingEditorPageState extends State<LandingEditorPage> {
           entries: [
             for (final row in _rows)
               LandingEntryInput(
-                entryKey: row.key.text.trim(),
                 displayValue: row.label.text.trim(),
                 pointValue: int.parse(row.points.text.trim()),
               ),
@@ -318,21 +316,12 @@ class _LandingEditorPageState extends State<LandingEditorPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
-            flex: 3,
-            child: TextFormField(
-              key: ValueKey('entry-key-$index'),
-              controller: row.key,
-              decoration: const InputDecoration(labelText: 'Key'),
-              validator: (v) => _keyRule(index, v),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            flex: 3,
+            flex: 5,
             child: TextFormField(
               key: ValueKey('entry-label-$index'),
               controller: row.label,
-              decoration: const InputDecoration(labelText: 'Label (optional)'),
+              decoration: const InputDecoration(labelText: 'Label'),
+              validator: (v) => _labelRule(index, v),
             ),
           ),
           const SizedBox(width: 12),

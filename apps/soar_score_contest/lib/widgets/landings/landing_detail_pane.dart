@@ -116,15 +116,11 @@ class LandingDetailPane extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
             child: Table(
-              columnWidths: const {
-                0: FlexColumnWidth(2),
-                1: FlexColumnWidth(2),
-                2: FlexColumnWidth(),
-              },
+              columnWidths: const {0: FlexColumnWidth(3), 1: FlexColumnWidth()},
               children: [
                 TableRow(
                   children: [
-                    for (final heading in ['Key', 'Label', 'Points'])
+                    for (final heading in ['Label', 'Points'])
                       Padding(
                         padding: const EdgeInsets.only(bottom: 8),
                         child: Text(
@@ -140,7 +136,6 @@ class LandingDetailPane extends StatelessWidget {
                   TableRow(
                     children: [
                       for (final text in [
-                        entry.entryKey,
                         entry.displayValue,
                         '${entry.pointValue}',
                       ])

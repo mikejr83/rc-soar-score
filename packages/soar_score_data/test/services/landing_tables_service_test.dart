@@ -105,6 +105,31 @@ void _tests(Backend backend) {
       expect(view.results.first.displayValue, 'within_1m');
     });
 
+    test('derives internal keys from the labels when none are given', () async {
+      final view = await create(
+        with_: const [
+          LandingEntryInput(displayValue: 'Within 1 m', pointValue: 10),
+          LandingEntryInput(displayValue: 'within 1 M!', pointValue: 5),
+          LandingEntryInput(displayValue: '---', pointValue: 0),
+        ],
+      );
+
+      expect(
+        [for (final r in view.results) r.entryKey],
+        ['within_1_m', 'within_1_m_2', 'entry'],
+      );
+      expect(view.results.first.displayValue, 'Within 1 m');
+    });
+
+    test('an entry with neither key nor label is refused', () async {
+      await expectLater(
+        create(
+          with_: const [LandingEntryInput(displayValue: ' ', pointValue: 1)],
+        ),
+        throwsArgumentError,
+      );
+    });
+
     test('repeating a create returns the stored table', () async {
       final id = core.Id.create();
       final first = await create(id: id);

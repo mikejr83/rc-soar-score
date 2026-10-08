@@ -57,6 +57,7 @@ class LandingTablesService {
       inputUnit: inputUnit,
       createdAt: _clock().toUtc(),
     );
+    final keys = _keysFor(entries);
     final content = LandingTableWithResults(
       table: table,
       results: [
@@ -64,9 +65,9 @@ class LandingTablesService {
           LandingResult(
             id: _newId(),
             landingTableId: id,
-            entryKey: entries[i].entryKey.trim(),
+            entryKey: keys[i],
             displayValue: entries[i].displayValue.trim().isEmpty
-                ? entries[i].entryKey.trim()
+                ? keys[i]
                 : entries[i].displayValue.trim(),
             pointValue: entries[i].pointValue,
             ordinalPosition: i + 1,
@@ -117,6 +118,40 @@ class LandingTablesService {
       );
     }
     await repository.landingTableRepository.delete(id, metadata: metadata);
+  }
+
+  /// The key of each entry: the one given, else one derived from its label
+  /// (lower case, underscores) and made unique with a numeric suffix.
+  ///
+  /// A key given twice is left alone, so the table refuses it.
+  static List<String> _keysFor(List<LandingEntryInput> entries) {
+    final given = {
+      for (final entry in entries)
+        if (entry.entryKey.trim().isNotEmpty) entry.entryKey.trim(),
+    };
+    final taken = {...given};
+    return [
+      for (final entry in entries)
+        if (entry.entryKey.trim().isNotEmpty)
+          entry.entryKey.trim()
+        else if (entry.displayValue.trim().isEmpty)
+          throw ArgumentError.value(entry, 'entries', 'needs a label')
+        else
+          _derive(entry.displayValue, taken),
+    ];
+  }
+
+  static String _derive(String label, Set<String> taken) {
+    final slug = label
+        .toLowerCase()
+        .replaceAll(RegExp(r'[^a-z0-9]+'), '_')
+        .replaceAll(RegExp(r'^_+|_+$'), '');
+    final base = slug.isEmpty ? 'entry' : slug;
+    var key = base;
+    for (var n = 2; !taken.add(key); n++) {
+      key = '${base}_$n';
+    }
+    return key;
   }
 
   Future<LandingTableView> _view(LandingTableWithResults table) async =>

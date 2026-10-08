@@ -36,8 +36,10 @@ void main() {
   testWidgets('shows the entries of the selected table', (tester) async {
     await open(tester, (_) async => json(landingList([unused])));
 
-    expect(find.text('within_1m'), findsOneWidget);
     expect(find.text('Label within_1m'), findsOneWidget);
+    // Keys are internal and never shown.
+    expect(find.text('within_1m'), findsNothing);
+    expect(find.text('Key'), findsNothing);
     expect(find.text('10'), findsOneWidget);
     expect(find.byKey(const ValueKey('landing-locked-notice')), findsNothing);
     expect(find.byKey(const ValueKey('delete-landing')), findsOneWidget);
@@ -131,7 +133,7 @@ void main() {
           .text,
       'Copy of Spring table',
     );
-    expect(find.byKey(const ValueKey('entry-key-1')), findsOneWidget);
+    expect(find.byKey(const ValueKey('entry-label-1')), findsOneWidget);
   });
 
   testWidgets('a failed load offers Retry', (tester) async {
