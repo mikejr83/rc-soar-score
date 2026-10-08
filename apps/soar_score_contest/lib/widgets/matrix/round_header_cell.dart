@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:soar_score_core/soar_score_core.dart';
 
 import '../../services/matrix/matrix_grid_model.dart';
+import '../../services/matrix/round_progress_view.dart';
 import 'matrix_colors.dart';
 
 /// The heading of a round column: its title, a dimmed placeholder for the
@@ -26,22 +26,34 @@ class RoundHeaderCell extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final colors = MatrixColors.of(context);
-    final scored = round.status == RoundStatus.locked;
-    final (icon, text, background, foreground, outlined) = scored
-        ? (
-            Icons.check_circle,
-            'Scored',
-            colors.successContainer,
-            colors.onSuccessContainer,
-            false,
-          )
-        : (
-            Icons.schedule,
-            'Not flown',
-            Colors.transparent,
-            scheme.onSurfaceVariant,
-            true,
-          );
+    final progress = round.progress;
+    final (icon, background, foreground, outlined) = switch (progress.state) {
+      RoundProgressState.scored => (
+        Icons.check_circle,
+        colors.successContainer,
+        colors.onSuccessContainer,
+        false,
+      ),
+      RoundProgressState.inProgress => (
+        Icons.timelapse,
+        scheme.secondaryContainer,
+        scheme.onSecondaryContainer,
+        false,
+      ),
+      RoundProgressState.cancelled => (
+        Icons.cancel_outlined,
+        scheme.errorContainer,
+        scheme.onErrorContainer,
+        false,
+      ),
+      RoundProgressState.notFlown => (
+        Icons.schedule,
+        Colors.transparent,
+        scheme.onSurfaceVariant,
+        true,
+      ),
+    };
+    final text = progress.label;
     final once =
         round.distinctPilots == pilotCount && round.pilotCount == pilotCount;
     final count = once
@@ -57,12 +69,30 @@ class RoundHeaderCell extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: Text(
-                  'Round ${round.ordinal}',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: 4,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        'Round ${round.ordinal}',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    if (round.isLocked)
+                      Tooltip(
+                        message: 'Round locked',
+                        child: Icon(
+                          Icons.lock_outline,
+                          size: 16,
+                          semanticLabel: 'Round locked',
+                          color: scheme.onSurfaceVariant,
+                        ),
+                      ),
+                  ],
                 ),
               ),
               IconButton(

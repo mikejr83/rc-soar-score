@@ -103,6 +103,7 @@ void main() {
       expect(matrix['revision'], isNull);
       expect(matrix['rounds'], isEmpty);
       expect(matrix['assignments'], isEmpty);
+      expect(matrix['progress'], isEmpty);
     });
 
     test('is a 404 for an unknown contest', () async {
@@ -128,6 +129,13 @@ void main() {
       expect(body['groups'], hasLength(6));
       expect(body['assignments'], hasLength(18));
       expect(api.repository.scorePlaceholders.stored, hasLength(18));
+      expect(
+        [
+          for (final round in body['progress'] as List)
+            ((round as Map)['scored'], round['total']),
+        ],
+        [(0, 6), (0, 6), (0, 6)],
+      );
 
       final contest = await api.json(
         await api.send('GET', '/contests/$_contestId'),

@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 
+import '../../services/contest_scores.dart';
 import 'matrix_assignment.dart';
 import 'matrix_revision.dart';
 import 'round.dart';
@@ -16,9 +17,11 @@ class CurrentMatrix extends Equatable {
     Iterable<Round> rounds = const [],
     Iterable<RoundGroup> groups = const [],
     Iterable<MatrixAssignment> assignments = const [],
+    Iterable<RoundProgress> progress = const [],
   }) : rounds = List.unmodifiable(rounds),
        groups = List.unmodifiable(groups),
-       assignments = List.unmodifiable(assignments);
+       assignments = List.unmodifiable(assignments),
+       progress = List.unmodifiable(progress);
 
   factory CurrentMatrix.fromJson(Map<String, Object?> json) {
     final revision = json['revision'] as Map<String, Object?>?;
@@ -31,6 +34,9 @@ class CurrentMatrix extends Equatable {
       rounds: list('rounds', Round.fromJson),
       groups: list('groups', RoundGroup.fromJson),
       assignments: list('assignments', MatrixAssignment.fromJson),
+      progress: json['progress'] == null
+          ? const []
+          : list('progress', RoundProgress.fromJson),
     );
   }
 
@@ -39,6 +45,10 @@ class CurrentMatrix extends Equatable {
   final List<RoundGroup> groups;
   final List<MatrixAssignment> assignments;
 
+  /// How many flights of each current round have an official score, from the
+  /// score placeholders of the live assignments. Empty before the first draw.
+  final List<RoundProgress> progress;
+
   bool get isEmpty => revision == null;
 
   Map<String, Object?> toJson() => {
@@ -46,8 +56,9 @@ class CurrentMatrix extends Equatable {
     'rounds': [for (final round in rounds) round.toJson()],
     'groups': [for (final group in groups) group.toJson()],
     'assignments': [for (final item in assignments) item.toJson()],
+    'progress': [for (final item in progress) item.toJson()],
   };
 
   @override
-  List<Object?> get props => [revision, rounds, groups, assignments];
+  List<Object?> get props => [revision, rounds, groups, assignments, progress];
 }

@@ -259,6 +259,17 @@ void _tests(Backend backend) {
         (2, 0, 4),
       ]);
     });
+
+    test('the matrix counts the scored flights of each round', () async {
+      await enter(slots.first);
+
+      final matrix = await MatrixService(repository).current(contestId);
+
+      expect(matrix.progress.map((r) => (r.ordinal, r.scored, r.total)), [
+        (1, 1, 4),
+        (2, 0, 4),
+      ]);
+    });
   });
 }
 
