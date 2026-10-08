@@ -43,7 +43,13 @@ Future<core.Id> drawnContest(Repository repository, core.Id actor) async {
     final profile = await ParticipantsService(repository).create(
       actor,
       core.Id.create(),
-      ParticipantDetails(firstName: 'Pilot$i', lastName: 'Test'),
+      ParticipantDetails(
+        firstName: 'Pilot$i',
+        lastName: 'Test',
+        club: 'Club$i',
+        faiNumber: 'FAI-$i',
+        email: 'pilot$i@example.com',
+      ),
       metadata: meta(),
     );
     await ParticipationsService(repository).add(

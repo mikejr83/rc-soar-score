@@ -30,6 +30,8 @@ export 'participant_details.dart';
 export 'participants_service.dart';
 export 'participations_service.dart';
 export 'role_usage.dart';
+export 'publication/publication_build.dart';
+export 'publication/publication_projection_builder.dart';
 export 'results_service.dart';
 export 'round_flight_result.dart';
 export 'round_results.dart';

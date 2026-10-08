@@ -6,6 +6,7 @@ import 'package:test/test.dart';
 import '../support/backends.dart';
 import '../support/drawn_contest.dart';
 import '../support/fixtures.dart';
+import '../support/matrix_slot.dart';
 
 void main() => forEachBackend(_tests);
 
@@ -201,12 +202,4 @@ void _tests(Backend backend) {
       );
     });
   });
-}
-
-/// An assignment of the first round and the participation it belongs to.
-class MatrixSlot {
-  const MatrixSlot(this.assignmentId, this.participationId);
-
-  final core.Id assignmentId;
-  final core.Id participationId;
 }
