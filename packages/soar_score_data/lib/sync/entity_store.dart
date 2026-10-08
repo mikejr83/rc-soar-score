@@ -57,6 +57,20 @@ class EntityStore<T extends Object> {
       _decode(json),
   ];
 
+  /// The entities whose text [column] equals [value], in [orderBy] order.
+  ///
+  /// [column] is a column name from the schema, never user input.
+  Future<List<T>> whereText(
+    String column,
+    String value, {
+    String? orderBy,
+  }) async => [
+    for (final json in await _mapper.where('$column = ?', [
+      Variable<String>(value),
+    ], orderBy: orderBy))
+      _decode(json),
+  ];
+
   Future<void> upsertJson(Map<String, Object?> json) => _mapper.upsert(json);
 
   Future<bool> remove(core.Id id) => _mapper.remove(id);

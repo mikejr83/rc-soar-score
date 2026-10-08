@@ -19,6 +19,14 @@ void main() {
     'publicationParticipantRepository':
         'backend-only; needs a server demo (#291)',
     'delistRequestRepository': 'backend-only; needs a server demo (#291)',
+    'accountRepository': 'backend-only; needs a server demo (#305)',
+    'accountIdentityRepository': 'backend-only; needs a server demo (#305)',
+    'accountPublicProfileRepository':
+        'backend-only; needs a server demo (#305)',
+    'participantAccountLinkRepository':
+        'backend-only; needs a server demo (#305)',
+    'participantDirectoryEntryRepository':
+        'backend-only; needs a server demo (#305)',
   };
 
   /// Repositories the demo fills through a service rather than by name.

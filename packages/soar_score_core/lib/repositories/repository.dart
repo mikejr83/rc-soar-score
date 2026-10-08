@@ -1,3 +1,6 @@
+import 'account_identity_repository.dart';
+import 'account_public_profile_repository.dart';
+import 'account_repository.dart';
 import 'contest_configuration_revision_repository.dart';
 import 'contest_participation_repository.dart';
 import 'contest_repository.dart';
@@ -8,6 +11,8 @@ import 'landing_table_repository.dart';
 import 'matrix_assignment_repository.dart';
 import 'matrix_revision_repository.dart';
 import 'official_score_repository.dart';
+import 'participant_account_link_repository.dart';
+import 'participant_directory_entry_repository.dart';
 import 'participant_profile_repository.dart';
 import 'participation_standing_repository.dart';
 import 'publication_identity_repository.dart';
@@ -72,4 +77,14 @@ abstract interface class Repository {
   PublicationParticipantRepository get publicationParticipantRepository;
 
   DelistRequestRepository get delistRequestRepository;
+
+  AccountRepository get accountRepository;
+
+  AccountIdentityRepository get accountIdentityRepository;
+
+  AccountPublicProfileRepository get accountPublicProfileRepository;
+
+  ParticipantAccountLinkRepository get participantAccountLinkRepository;
+
+  ParticipantDirectoryEntryRepository get participantDirectoryEntryRepository;
 }
