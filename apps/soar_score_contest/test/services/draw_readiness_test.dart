@@ -19,12 +19,12 @@ Contest _contest({
 
 DrawReadiness _evaluate({
   Contest? contest,
-  bool valid = true,
+  String? problem,
   int pilots = 2,
   bool drawn = false,
 }) => DrawReadiness.evaluate(
   contest: contest ?? _contest(),
-  hasValidConfiguration: valid,
+  configurationProblem: problem,
   scoringPilots: pilots,
   matrixDrawn: drawn,
 );
@@ -40,7 +40,7 @@ void main() {
   });
 
   test('needs a valid configuration', () {
-    expect(_evaluate(valid: false).enabled, isFalse);
+    expect(_evaluate(problem: 'Missing.').enabled, isFalse);
   });
 
   test('is blocked by a lock, completion and a created contest', () {
@@ -64,8 +64,36 @@ void main() {
 
   test('lists every reason', () {
     expect(
-      _evaluate(valid: false, pilots: 0, drawn: true).reasons,
+      _evaluate(problem: 'Missing.', pilots: 0, drawn: true).reasons,
       hasLength(3),
     );
+  });
+
+  test('each blocker names where to fix it', () {
+    DrawBlocker? first(DrawReadiness r) => r.first;
+    expect(
+      first(_evaluate(contest: _contest(lock: AdminLock.locked)))?.fix,
+      BlockerFix.configuration,
+    );
+    expect(first(_evaluate(pilots: 1))?.fix, BlockerFix.participants);
+    expect(first(_evaluate(problem: 'Missing.'))?.text, 'Missing.');
+    expect(
+      first(_evaluate(contest: _contest(state: LifecycleState.running)))?.fix,
+      BlockerFix.workspace,
+    );
+    expect(
+      first(_evaluate(contest: _contest(state: LifecycleState.completed)))?.fix,
+      isNull,
+    );
+    expect(first(_evaluate()), isNull);
+  });
+
+  test('the most important reason comes first', () {
+    final readiness = _evaluate(
+      contest: _contest(state: LifecycleState.completed),
+      pilots: 0,
+    );
+    expect(readiness.first?.text, contains('completed'));
+    expect(readiness.reasons, hasLength(2));
   });
 }

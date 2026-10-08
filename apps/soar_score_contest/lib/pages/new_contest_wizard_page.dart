@@ -14,6 +14,7 @@ import '../services/new_contest/contest_creator.dart';
 import '../services/new_contest/contest_draft.dart';
 import '../services/new_contest/contest_draft_store.dart';
 import '../services/new_contest/draft_validation.dart';
+import '../services/new_contest/draw_settings.dart';
 import '../services/new_contest/participant_option.dart';
 import '../services/new_contest/participant_rules.dart';
 import '../services/new_contest/wizard_discipline.dart';
@@ -633,7 +634,12 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
       }
       final contest = await ContestCreator(client)
           .create(draft, _store.creationIdsFor(draft));
-      _store.drawSuggestions[contest.id] = draft.drawSettings;
+      // Resolve the values the director saw, so the matrix page can prefill
+      // them even where the draft only had a suggestion.
+      _store.drawSuggestions[contest.id] = draft.drawSettings.copyWith(
+        groups: '${GroupPlan.of(draft).groups}',
+        rounds: draft.roundsText,
+      );
       _store.discard();
       if (!mounted) {
         return;

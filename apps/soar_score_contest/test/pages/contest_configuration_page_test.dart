@@ -230,7 +230,9 @@ void main() {
     );
     expect(tester.widget<OutlinedButton>(_draw).onPressed, isNull);
     expect(
-      find.text('Draw matrix: At least two scoring pilots are needed.'),
+      find.text(
+        'Draw matrix: Drawing needs at least 2 scoring pilots. This contest has 1.',
+      ),
       findsOneWidget,
     );
   });
@@ -253,7 +255,12 @@ void main() {
       isNull,
     );
     expect(tester.widget<OutlinedButton>(_draw).onPressed, isNull);
-    expect(find.text('Draw matrix: Administration is locked.'), findsOneWidget);
+    expect(
+      find.text(
+        'Draw matrix: The contest is locked, so the matrix can’t be drawn.',
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('changing an option that invalidates a drawn matrix warns '
