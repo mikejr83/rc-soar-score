@@ -2,6 +2,8 @@
 
 Outstanding questions that need to be answered before implementation begins. Each ticket is a markdown file in this folder, named `<NNN>-<category>-<slug>.md`.
 
+> **Status note:** the decisions here were carried into GitHub issues (labelled `type:decision`) where they still needed an answer. Each decision is recorded on its issue; these files remain the written history.
+
 ## How to use
 
 - Each ticket has a **Category**, **Priority**, **Status**, **Context**, **Questions**, **Decisions Needed**, and **Sources**.

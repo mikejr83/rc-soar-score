@@ -1,5 +1,7 @@
 # Ticket 007 — Scaffold `soar_score_data_sqlite` Package
 
+> **Note:** `soar_score_data_sqlite` and its sibling package were later unified into `packages/soar_score_data` (one Drift schema opened over SQLite or PostgreSQL). The package name below is historical.
+
 - **Category:** Scaffold
 - **Priority:** High
 - **Status:** In-Review

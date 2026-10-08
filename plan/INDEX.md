@@ -68,10 +68,13 @@ Documents in the sub-folder `data-model` describe the 48-entity domain model tha
 
 ## Application Plans
 
-These documents describe the overall solution and the minimum viable product.
+These documents describe the overall solution and the release scope.
 
-- [`implementation-plan.md`](../implementation-plan.md) - Repository, platform, technology, and delivery plan.
+- [`implementation-plan.md`](implementation-plan.md) - Repository, platform, technology, delivery plan and the release goal.
 - [`application-plan.md`](application-plan.md) - Overall application scope, personas, and solution areas.
-- [`mvp-application.md`](mvp-application.md) - Minimum viable product scope and page requirements.
 
 The overall flow of a contest from its description, to its creation and configuration, through to participants interaction are described over the two documents `contests.md` and `contest-phases.md`. The first document provides the basics of terminology usage and purpose and the second document walks through the conceptual phases of the contest.
+
+## Work Tracking
+
+Planned work is tracked in [GitHub issues](https://github.com/mikejr83/rc-soar-score/issues), grouped under milestones M0 to M5 and epic parent issues. The files under `tickets/` are the historical record of earlier planning and decisions; see [`../CONTRIBUTING.md`](../CONTRIBUTING.md).

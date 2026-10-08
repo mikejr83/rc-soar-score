@@ -2,6 +2,8 @@
 
 Tickets for getting the repository basics in place: toolchain, Melos workspace, the three apps and four shared packages, Auth0 identity, CI/CD, and agentic-coding rules. These are _implementation work_ tickets (work items with checkboxes), distinct from the decision tickets in `../pre-implementation/`.
 
+> **Work is now tracked in GitHub issues.** These files are the historical record of earlier planning. New work is not added here; see [CONTRIBUTING.md](../../../CONTRIBUTING.md). Ticket 037 and later ticket work items live in issues, and each file's checkboxes are no longer maintained unless it says otherwise.
+
 ## How to use
 
 - Each ticket has **Category**, **Priority**, **Status**, **Context**, **Work Items** (checkboxes), **Acceptance Criteria**, **Dependencies**, and **Sources**.
@@ -19,7 +21,7 @@ Tickets for getting the repository basics in place: toolchain, Melos workspace, 
 | [004](004-scaffold-contest-flutter-app.md)           | Scaffold `soar_score_contest` (Flutter web)                                                                                                                | High     | In-Review         |
 | [005](005-scaffold-public-flutter-app.md)            | Scaffold `soar_score_public` (Flutter web)                                                                                                                 | High     | Open              |
 | [006](006-scaffold-core-package.md)                  | Scaffold `soar_score_core` Package                                                                                                                         | High     | In-Review         |
-| [007](007-scaffold-data-package.md)                  | Scaffold `soar_score_data_sqlite` Package                                                                                                                  | High     | In-Review         |
+| [007](007-scaffold-data-package.md)                  | Scaffold `soar_score_data_sqlite` Package (now the unified `soar_score_data`)                                                                              | High     | In-Review         |
 | [008](008-scaffold-api-package.md)                   | Scaffold `soar_score_api` Package                                                                                                                          | High     | In-Review         |
 | [009](009-scaffold-ui-package.md)                    | Scaffold `soar_score_ui` Package                                                                                                                           | High     | In-Review         |
 | [010](010-setup-auth0-identity.md)                   | Auth0 Identity Setup                                                                                                                                       | High     | Open              |
@@ -28,7 +30,7 @@ Tickets for getting the repository basics in place: toolchain, Melos workspace, 
 | [013](013-agentic-coding-rules.md)                   | Agentic Coding Rules (Per-Project AGENTS.md)                                                                                                               | Medium   | Open              |
 | [014](014-setup-melos-workspace.md)                  | Melos Workspace at Repository Root                                                                                                                         | High     | Done              |
 | [015](015-scaffold-contest-windows-target.md)        | Add Windows target to `soar_score_contest`                                                                                                                 | High     | In-Review         |
-| [016](016-scaffold-data-postres-package.md)          | Scaffold `soar_score_data_postgres` Package                                                                                                                | High     | In-Review         |
+| [016](016-scaffold-data-postres-package.md)          | Scaffold `soar_score_data_postgres` Package (now the unified `soar_score_data`)                                                                            | High     | In-Review         |
 | [017](017-sqlite-sync-schema.md)                     | Extract `soar_score_api_handlers` from `soar_score_server` (file name is stale; the original sync-schema spec it carried is orphaned — see its Follow-ups) | High     | In-Review         |
 | [018](018-embed-soar_score_api_handlers.md)          | Embed `soar_score_api_handlers` in the Windows Target of `soar_score_contest`                                                                              | High     | In-Review         |
 | [019](019-scaffold-self-score-flutter-app.md)        | Scaffold `soar_score_self_score` (Flutter web)                                                                                                             | High     | Done              |
@@ -46,8 +48,8 @@ Tickets for getting the repository basics in place: toolchain, Melos workspace, 
 | [031](031-contest-delete-delisting.md)               | Delete and delisting contests                                                                                                                              | High     | Open              |
 | [032](032-contest-archive-filter.md)                 | Contest archive filter                                                                                                                                     | Medium   | Open              |
 | [033](033-home-page-sync-action.md)                  | Sync action on home page                                                                                                                                   | Medium   | Open              |
-| [035](035-create-data-models.md)                     | Implement canonical domain models (48 entities)                                                                                                            | High     | In-Review         |
-| [036](036-create-drift-schema.md)                    | Implement the Drift schema for the 48-entity model                                                                                                         |
+| [035](035-create-data-models.md)                     | Implement canonical domain models (48 entities)                                                                                                            | High     | Done              |
+| [036](036-create-drift-schema.md)                    | Implement the Drift schema for the 48-entity model                                                                                                         | High     | Tracked in issues |
 | [037](037-sync-protocol-and-engine.md)               | Synchronization protocol, server service and client engine (tracked in GitHub issues #83 to #92)                                                           | High     | Tracked in issues |
 
 ## Suggested execution order

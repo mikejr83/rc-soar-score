@@ -78,6 +78,10 @@ Soar Score is an RC sailplane soaring contest scoring and management suite. It c
 - Tables must be column-aligned (Prettier will realign them; just run it).
 - Do not hard-wrap prose unless `proseWrap` is set in the config.
 
+## Work Tracking
+
+Planned work is tracked in GitHub issues (milestones M0 to M5, epic parent issues with sub-issues, `area:`, `type:`, `priority:` and `size:` labels). Do not add ticket files under `plan/tickets/`; those are historical. `./plan` remains the source of truth for requirements. See `CONTRIBUTING.md`.
+
 ## Business and Architecture Requirements
 
 Documentation is provided in the `./plan` folder. This contains business, architecture, and ui requirements. Consult this documentation when determining the best course of action for implementing business logic.
