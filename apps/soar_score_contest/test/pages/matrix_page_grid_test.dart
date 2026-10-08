@@ -44,7 +44,9 @@ void main() {
     expect(find.text('92%'), findsOneWidget);
     expect(find.text('Good draw'), findsOneWidget);
     expect(
-      find.text('0% is a random draw, 100% is the best possible.'),
+      find.text(
+        '0% is the average of random draws, 100% is the best possible.',
+      ),
       findsOneWidget,
     );
     expect(find.text('Unmet opponents'), findsOneWidget);

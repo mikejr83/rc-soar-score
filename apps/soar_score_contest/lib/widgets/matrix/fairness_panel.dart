@@ -60,21 +60,21 @@ class _FairnessPanelState extends State<FairnessPanel> {
             ),
           Padding(
             padding: const EdgeInsets.fromLTRB(12, 0, 8, 0),
-            child: Wrap(
-              crossAxisAlignment: WrapCrossAlignment.center,
-              spacing: 12,
-              children: [
-                if (!_open) _Compact(fairness: fairness),
-                TextButton.icon(
-                  key: const ValueKey('draw-details-toggle'),
-                  onPressed: () => setState(() => _details = !_details),
-                  icon: Icon(
-                    _details ? Icons.expand_less : Icons.expand_more,
-                    size: 18,
+            child: LayoutBuilder(
+              builder: (context, box) {
+                final left = [
+                  if (!_open) _Compact(fairness: fairness),
+                  TextButton.icon(
+                    key: const ValueKey('draw-details-toggle'),
+                    onPressed: () => setState(() => _details = !_details),
+                    icon: Icon(
+                      _details ? Icons.expand_less : Icons.expand_more,
+                      size: 18,
+                    ),
+                    label: const Text('Draw details'),
                   ),
-                  label: const Text('Draw details'),
-                ),
-                TextButton.icon(
+                ];
+                final toggle = TextButton.icon(
                   key: const ValueKey('summary-toggle'),
                   onPressed: () => setState(() => _open = !_open),
                   icon: Icon(
@@ -82,8 +82,30 @@ class _FairnessPanelState extends State<FairnessPanel> {
                     size: 18,
                   ),
                   label: Text(_open ? 'Hide summary' : 'Show summary'),
-                ),
-              ],
+                );
+                // As in the design, "Hide summary" sits at the right end.
+                // There is no room for that on a narrow bar, so it wraps in
+                // with the rest.
+                if (box.maxWidth < 700) {
+                  return Wrap(
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: 12,
+                    children: [...left, toggle],
+                  );
+                }
+                return Row(
+                  children: [
+                    Expanded(
+                      child: Wrap(
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        spacing: 12,
+                        children: left,
+                      ),
+                    ),
+                    toggle,
+                  ],
+                );
+              },
             ),
           ),
           if (_details) ...[
@@ -191,7 +213,7 @@ class _Score extends StatelessWidget {
             ],
           ),
           Text(
-            '0% is a random draw, 100% is the best possible.',
+            '0% is the average of random draws, 100% is the best possible.',
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
