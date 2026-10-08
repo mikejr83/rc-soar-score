@@ -36,19 +36,17 @@ States and button indication:
 | `Ready` or `Running`       | Continue          | Contest workspace, focused on the latest group with accepted scores |
 | `Completed`                | View              | Contest reports or read-only contest workspace                      |
 
-`PendingDelete` opens a read-only deletion-status view. `Deleted` contests cannot be opened.
-
 ## Creating a New Contest
 
 To create a new contest the contest director clicks on the button for creating a new contest. They are navigated to the wizard for creating the contest.
 
 ## Deleting or delisting a selected contest
 
-A delete action is enabled only when a contest is selected and the deletion rules allow it. An unpublished local contest can be deleted after confirmation. The confirmation states that local data, pending mutations, and backup data associated with the contest will be removed and cannot be recovered through the application.
+A delete action is enabled only when a contest is selected. Any contest can be deleted after confirmation. The confirmation states that local data, pending mutations, and backup data associated with the contest will be removed and cannot be recovered through the application. A deleted contest is gone: it is not listed and cannot be opened. A contest has no deletion status.
 
-For a contest published at least once, the action is `Request delisting`. It explains that delisting removes the public projection from public viewing but starts a pending-delete workflow; it does not immediately erase the private contest or publication history. The request requires explicit confirmation and shows `PendingDelete` when accepted. Pending deletion blocks ordinary editing, scoring, and publishing.
+For a contest published at least once, the warning also says that the publication remains, loses its link to the contest, and can no longer be updated. Removing a publication from public view is a separate `Request delisting` action. It creates a delist request that a system administrator approves or denies, and the director can withdraw it while it is pending. Nothing in the contest becomes read-only while a request is pending, and deleting the contest is a separate choice from delisting.
 
-If deletion is rejected by the service, show the server reason and leave the contest unchanged. Do not use a generic success message for a queued or rejected request.
+If deletion is rejected by the service, show the server reason and leave the contest unchanged. Do not use a generic success message for a rejected request.
 
 ## System data management
 

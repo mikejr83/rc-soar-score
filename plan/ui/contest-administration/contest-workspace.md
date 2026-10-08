@@ -8,7 +8,7 @@ This page is located at the route: `/contest-administration/contests/:id/workspa
 
 Configuration is grouped into identity, discipline and scoring rules, participant options, participants, draw options, scoring access, administration lock, and public update policy. Each group shows its current revision and whether editing it would invalidate the matrix or derived scores.
 
-The workspace must distinguish `Save configuration` from `Draw matrix`. Saving a valid configuration may move a contest from `Created` to `Configuring`; it never creates a matrix implicitly. `Draw matrix` is enabled only when required configuration is valid, at least two scoring pilots exist, and the contest is not locked, completed, or pending deletion. Before a redraw, show the affected matrix revision and whether existing scores prevent the change.
+The workspace must distinguish `Save configuration` from `Draw matrix`. Saving a valid configuration may move a contest from `Created` to `Configuring`; it never creates a matrix implicitly. `Draw matrix` is enabled only when required configuration is valid, at least two scoring pilots exist, and the contest is not locked or completed. Before a redraw, show the affected matrix revision and whether existing scores prevent the change.
 
 After a successful draw, show the matrix revision, minimum and maximum group size, fairness summary when available, and actions to inspect groups or redraw according to lifecycle rules. In seeded mode, show whether the preliminary rounds are complete and whether another round can be drawn.
 
@@ -32,4 +32,4 @@ Every transition shows the current value, requested value, affected scope, and r
 - `Participants` opens contest-specific participant data without changing reusable profiles.
 - `Matrix` opens round/group assignments, lane positions, moves, and re-flight actions where permitted.
 
-Completed contests use a read-only workspace except for authorized score correction and publication actions. Pending deletion is read-only and hides mutation actions.
+Completed contests use a read-only workspace except for authorized score correction and publication actions.

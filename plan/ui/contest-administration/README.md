@@ -45,7 +45,7 @@ The UI must handle loading, empty, unavailable, validation-error, authorization-
 
 ## Contest state presentation
 
-Execution lifecycle, participant scoring access, administration lock, publication, public visibility, local archive, and deletion status are separate values. The UI must never combine them into one status field or infer one from another.
+Execution lifecycle, participant scoring access, administration lock, publication, public visibility, and local archive are separate values. The UI must never combine them into one status field or infer one from another.
 
 When a contest is selected, show a compact status summary with labeled values for:
 
@@ -54,9 +54,8 @@ When a contest is selected, show a compact status summary with labeled values fo
 - Administration: `Unlocked` or `Locked`.
 - Publication: `Unpublished` or `Published`.
 - Public visibility: `Private`, `Hidden`, or `Public` when published.
-- Deletion: `None`, `PendingDelete`, `Restored`, or `Deleted` when applicable.
 
-Only controls allowed by the current state and the current user's authority are enabled. Disabled controls must have an adjacent explanation or an accessible disabled-state description. `PendingDelete` is read-only and blocks scoring and publication updates. `Completed` closes participant scoring but permits authorized score correction workflows.
+Only controls allowed by the current state and the current user's authority are enabled. Disabled controls must have an adjacent explanation or an accessible disabled-state description. `Completed` closes participant scoring but permits authorized score correction workflows.
 
 ## Application status area
 
