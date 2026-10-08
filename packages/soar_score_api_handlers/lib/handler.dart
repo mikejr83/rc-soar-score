@@ -41,7 +41,8 @@ final _logger = Logger('Handler');
 /// [authMiddleware], when provided, wraps only the `/api/v1` subtree;
 /// `GET /health` always stays public (ticket 010 carve-out).
 ///
-/// [publishingEnabled] turns on the publication routes. Only the hosted
+/// [publishingEnabled] turns on the publication routes and the public reads
+/// at `/public`, which need no sign-in. Only the hosted
 /// server sets it; without it they answer 409 `publishing_not_available`.
 Handler buildApiHandler({
   required String name,
@@ -70,7 +71,8 @@ Handler buildApiHandler({
 
   final app = Router()
     ..mount('/', handlers.healthHandler)
-    ..mount('/api/v1', api);
+    ..mount('/api/v1', api)
+    ..mount('/public', handlers.publicHandler);
 
   _logger.fine('API handler built successfully.');
 

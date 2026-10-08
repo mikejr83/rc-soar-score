@@ -18,6 +18,10 @@ abstract interface class PublicationIdentityRepository {
   /// Every publication owned by [ownerPublicProfileId], oldest first.
   Future<List<PublicationIdentity>> listForOwner(Id ownerPublicProfileId);
 
+  /// Every publication whose visibility is Public and that has been
+  /// published, newest first. Unlisted and Delisted ones are never returned.
+  Future<List<PublicationIdentity>> listPublic();
+
   /// Stores [identity], bumping its revision, and returns it as stored.
   ///
   /// A new identity is stored at the revision it carries. Throws a

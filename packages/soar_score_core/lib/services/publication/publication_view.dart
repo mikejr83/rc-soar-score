@@ -16,8 +16,8 @@ class PublicationView extends Equatable {
   Map<String, Object?> toJson() => {
     'publication_id': identity.id.value,
     'contest_id': identity.contestId?.value,
-    'visibility': identity.visibility.name,
-    'claim_status': identity.claimStatus.name,
+    'visibility': identity.toJson()['visibility'],
+    'claim_status': identity.toJson()['claim_status'],
     'published_at': identity.publishedAt?.toIso8601String(),
     'results_hidden_through_round': identity.resultsHiddenThroughRound,
     'current_projection': current == null
