@@ -127,6 +127,11 @@ class _MatrixGridState extends State<MatrixGrid> {
     final headerHeight = 100 * _scale;
     final border = BorderSide(color: scheme.outlineVariant);
 
+    // The grid's own outline closes the last row, so it has no border of its
+    // own; otherwise the two lines draw as one thick line.
+    BorderSide bottomBorder(int g) =>
+        g == groups - 1 ? BorderSide.none : border;
+
     Widget label(int g) {
       final sizes = [for (final round in model.rounds) round.groups[g].length];
       final size = sizes.isEmpty ? 0 : sizes.reduce((a, b) => a > b ? a : b);
@@ -137,7 +142,7 @@ class _MatrixGridState extends State<MatrixGrid> {
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: scheme.surfaceContainerLow,
-          border: Border(right: border, bottom: border),
+          border: Border(right: border, bottom: bottomBorder(g)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -168,7 +173,7 @@ class _MatrixGridState extends State<MatrixGrid> {
         height: _rowHeights[g],
         padding: const EdgeInsets.all(6),
         decoration: BoxDecoration(
-          border: Border(right: border, bottom: border),
+          border: Border(right: border, bottom: bottomBorder(g)),
         ),
         child: Semantics(
           container: true,
@@ -325,6 +330,17 @@ class _MatrixGridState extends State<MatrixGrid> {
                                           r++
                                         )
                                           cell(model.rounds[r], r, g),
+                                        // Continues the grid lines under
+                                        // the "Add rounds" header column.
+                                        Container(
+                                          width: _addWidth,
+                                          height: _rowHeights[g],
+                                          decoration: BoxDecoration(
+                                            border: Border(
+                                              bottom: bottomBorder(g),
+                                            ),
+                                          ),
+                                        ),
                                       ],
                                     ),
                                 ],
