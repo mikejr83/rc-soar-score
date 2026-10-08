@@ -7,6 +7,7 @@ import 'package:soar_score_core/soar_score_core.dart'
         AdminLock,
         ContestAction,
         ContestConfig,
+        ScorePlaceholderState,
         DisciplineType,
         Id,
         LifecycleState,
@@ -166,6 +167,80 @@ void main() {
       expect(await client.configuration(id), saved.revision);
       expect(await client.configurationRevisions(id), [saved.revision]);
       expect(await client.contest(id), saved.contest);
+    } finally {
+      client.close();
+      await server.close();
+    }
+  });
+
+  test('a score entered through the API starts the contest', () async {
+    final server = await startEmbeddedServer(databasePath);
+    final client = ApiClient(baseUrl: server.baseUrl);
+    try {
+      final id = Id.create();
+      await client.createContest(
+        CreateContestRequest(
+          id: id,
+          name: 'Spring Open',
+          startDateTime: DateTime.utc(2026, 10, 17, 14),
+          endDateTime: DateTime.utc(2026, 10, 18, 22),
+          timezone: 'America/Denver',
+        ),
+      );
+      await client.saveConfiguration(
+        id,
+        SaveConfigurationRequest(
+          baseRevisionNumber: 0,
+          disciplineProfileId: SystemDisciplineProfiles.f5jId,
+          config: ContestConfig(core: {}, discipline: {'working_time': 600}),
+        ),
+      );
+      for (var i = 0; i < 4; i++) {
+        final profile = Id.create();
+        await client.createParticipant(
+          CreateParticipantRequest(
+            id: profile,
+            firstName: 'Pilot$i',
+            lastName: 'Test',
+          ),
+        );
+        await client.addParticipation(
+          id,
+          AddParticipationRequest(
+            id: Id.create(),
+            participantProfileId: profile,
+          ),
+        );
+      }
+      final matrix = await client.drawMatrix(
+        id,
+        DrawMatrixRequest(
+          id: Id.create(),
+          rounds: 2,
+          groupsPerRound: 1,
+          randomSeed: 7,
+        ),
+      );
+
+      final result = await client.enterScore(
+        id,
+        matrix.assignments.first.id,
+        const EnterScoreRequest(
+          clientMutationId: 'entry-1',
+          baseScoreRevision: 0,
+          components: {'time_flown': 540, 'launch_height': 200},
+        ),
+      );
+
+      expect(result.officialScore.scoreRevision, 1);
+      expect(result.officialScore.setBy, server.localAccountId);
+      expect(result.placeholder.state, ScorePlaceholderState.official);
+      expect(result.calculated.rawScore, 440);
+      expect(result.contest.lifecycleState, LifecycleState.running);
+      final scores = await client.scores(id);
+      expect(scores.slots.where((s) => s.officialScore != null), hasLength(1));
+      expect(scores.rounds.first.scored, 1);
+      expect(scores.rounds.first.total, 4);
     } finally {
       client.close();
       await server.close();

@@ -4,6 +4,7 @@ import 'stub_configuration_repositories.dart';
 import 'stub_contest_repository.dart';
 import 'stub_matrix_repositories.dart';
 import 'stub_participant_repositories.dart';
+import 'stub_score_repositories.dart';
 import 'stub_team_repositories.dart';
 
 /// A repository with only the contracts the handlers under test use: the
@@ -33,6 +34,12 @@ class StubRepository implements core.Repository {
   final rounds = StubRoundRepository();
   final roundGroups = StubRoundGroupRepository();
   final scorePlaceholders = StubScorePlaceholderRepository();
+  late final scoreAttempts = StubScoreAttemptRepository();
+  late final officialScores = StubOfficialScoreRepository(
+    _contestRepository as StubContestRepository,
+    scorePlaceholders,
+    scoreAttempts,
+  );
   late final matrixAssignments = StubMatrixAssignmentRepository()
     ..placeholders = scorePlaceholders
     ..participations = participations;
@@ -85,6 +92,12 @@ class StubRepository implements core.Repository {
   @override
   core.ScorePlaceholderRepository get scorePlaceholderRepository =>
       scorePlaceholders;
+
+  @override
+  core.ScoreAttemptRepository get scoreAttemptRepository => scoreAttempts;
+
+  @override
+  core.OfficialScoreRepository get officialScoreRepository => officialScores;
 
   @override
   core.DisciplineProfileRepository get disciplineProfileRepository =>

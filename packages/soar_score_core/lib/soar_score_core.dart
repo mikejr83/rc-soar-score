@@ -38,6 +38,7 @@ export 'repositories/mutation_metadata.dart';
 export 'repositories/official_score_repository.dart';
 export 'repositories/participant_profile_repository.dart';
 export 'repositories/participation_standing_repository.dart';
+export 'repositories/recorded_score.dart';
 export 'repositories/replicated_change.dart';
 export 'repositories/replicated_change_applier.dart';
 export 'repositories/repository.dart';
