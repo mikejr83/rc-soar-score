@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:soar_score_core/soar_score_core.dart';
 
 import '../../services/new_contest/contest_draft.dart';
 import '../../services/new_contest/copy_mode.dart';
@@ -83,7 +84,13 @@ class SummaryStep extends StatelessWidget {
           ('Dates', dates.isEmpty ? '—' : dates),
           ('Venue / host', d.venue.trim().isEmpty ? '—' : d.venue.trim()),
           ('Location', location.isEmpty ? '—' : location),
-          ('Time zone', d.timeZone ?? TimeZones.device()),
+          (
+            'Time zone',
+            ContestTimeZones.label(
+              TimeZones.effective(d.timeZone, d.country),
+              at: DraftValidation.parseDate(d.startDate),
+            ),
+          ),
         ],
         details == 0
             ? null
