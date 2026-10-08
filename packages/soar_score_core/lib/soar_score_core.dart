@@ -4,6 +4,7 @@
 /// only `package:soar_score_core/soar_score_core.dart`.
 library;
 
+export 'errors/backend_only_error.dart';
 export 'errors/contest_state_error.dart';
 export 'errors/entity_not_found_error.dart';
 export 'errors/scoring_validation_error.dart';
@@ -21,6 +22,9 @@ export 'models/scores/scores.dart';
 export 'models/shared/shared.dart';
 export 'models/sync/sync.dart';
 export 'models/teams/teams.dart';
+export 'repositories/account_identity_repository.dart';
+export 'repositories/account_public_profile_repository.dart';
+export 'repositories/account_repository.dart';
 export 'repositories/already_stored_error.dart';
 export 'repositories/already_superseded_error.dart';
 export 'repositories/contest_configuration_revision_repository.dart';
@@ -37,6 +41,8 @@ export 'repositories/matrix_assignment_repository.dart';
 export 'repositories/matrix_revision_repository.dart';
 export 'repositories/mutation_metadata.dart';
 export 'repositories/official_score_repository.dart';
+export 'repositories/participant_account_link_repository.dart';
+export 'repositories/participant_directory_entry_repository.dart';
 export 'repositories/participant_profile_repository.dart';
 export 'repositories/participation_standing_repository.dart';
 export 'repositories/publication_identity_repository.dart';

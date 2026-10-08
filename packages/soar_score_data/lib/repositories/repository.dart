@@ -69,6 +69,23 @@ class Repository implements core.Repository {
       delistRequestRepository = DelistRequestRepository(
         database,
         stores: stores,
+      ),
+      accountRepository = AccountRepository(database, stores: stores),
+      accountIdentityRepository = AccountIdentityRepository(
+        database,
+        stores: stores,
+      ),
+      accountPublicProfileRepository = AccountPublicProfileRepository(
+        database,
+        stores: stores,
+      ),
+      participantAccountLinkRepository = ParticipantAccountLinkRepository(
+        database,
+        stores: stores,
+      ),
+      participantDirectoryEntryRepository = ParticipantDirectoryEntryRepository(
+        database,
+        stores: stores,
       );
 
   @override
@@ -140,6 +157,22 @@ class Repository implements core.Repository {
 
   @override
   final core.DelistRequestRepository delistRequestRepository;
+
+  @override
+  final core.AccountRepository accountRepository;
+
+  @override
+  final core.AccountIdentityRepository accountIdentityRepository;
+
+  @override
+  final core.AccountPublicProfileRepository accountPublicProfileRepository;
+
+  @override
+  final core.ParticipantAccountLinkRepository participantAccountLinkRepository;
+
+  @override
+  final core.ParticipantDirectoryEntryRepository
+  participantDirectoryEntryRepository;
 }
 
 Repository createRepository(SoarScoreDatabase database) => Repository(database);
