@@ -4,6 +4,7 @@ import 'stub_configuration_repositories.dart';
 import 'stub_contest_repository.dart';
 import 'stub_matrix_repositories.dart';
 import 'stub_participant_repositories.dart';
+import 'stub_result_repositories.dart';
 import 'stub_score_repositories.dart';
 import 'stub_team_repositories.dart';
 
@@ -51,6 +52,10 @@ class StubRepository implements core.Repository {
     matrixAssignments,
     scorePlaceholders,
   );
+
+  final flightResults = StubFlightResultRepository();
+  final participationStandings = StubParticipationStandingRepository();
+  final teamStandings = StubTeamStandingRepository();
 
   /// The stored configuration revisions, for tests to inspect.
   final StubConfigurationRevisionRepository configurations;
@@ -105,6 +110,16 @@ class StubRepository implements core.Repository {
 
   @override
   core.LandingTableRepository get landingTableRepository => landingTables;
+
+  @override
+  core.FlightResultRepository get flightResultRepository => flightResults;
+
+  @override
+  core.ParticipationStandingRepository get participationStandingRepository =>
+      participationStandings;
+
+  @override
+  core.TeamStandingRepository get teamStandingRepository => teamStandings;
 
   @override
   dynamic noSuchMethod(Invocation invocation) =>

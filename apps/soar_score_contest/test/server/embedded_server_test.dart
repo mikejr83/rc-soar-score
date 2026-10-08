@@ -241,6 +241,13 @@ void main() {
       expect(scores.slots.where((s) => s.officialScore != null), hasLength(1));
       expect(scores.rounds.first.scored, 1);
       expect(scores.rounds.first.total, 4);
+      // The entry recalculated the results; three flights are still open.
+      final results = await client.results(id);
+      expect(results.asOfRound, 1);
+      expect(results.isStale, isFalse);
+      expect(results.isPreliminary, isTrue);
+      expect(results.standings, hasLength(4));
+      expect((await client.recalculateResults(id)).standings, hasLength(4));
     } finally {
       client.close();
       await server.close();

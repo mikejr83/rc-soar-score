@@ -5,7 +5,6 @@ import '../enums/lifecycle_state.dart';
 import '../enums/score_placeholder_state.dart';
 import '../errors/contest_state_error.dart';
 import '../errors/entity_not_found_error.dart';
-import '../errors/scoring_validation_error.dart';
 import '../models/contest/contest.dart';
 import '../models/contest/contest_configuration_revision.dart';
 import '../models/id.dart';
@@ -19,9 +18,9 @@ import '../repositories/recorded_score.dart';
 import '../repositories/repository.dart';
 import '../repositories/stale_revision_error.dart';
 import '../scoring/f5j/f5j_profile.dart';
-import '../scoring/profile/scoring_issue.dart';
 import 'calculated_flight.dart';
 import 'contest_scores.dart';
+import 'landing_bonus.dart';
 import 'score_entry_result.dart';
 
 /// Reads the scores of a contest and lets the director enter an official
@@ -350,42 +349,14 @@ class ScoresService {
     final profile = F5jProfile();
     final options = context.revision.config.discipline;
     profile.validateOrThrow(components);
-    final bonus = await _landingBonus(context.revision, components);
+    final bonus = await resolveLandingBonus(
+      repository,
+      context.revision,
+      components,
+    );
     return CalculatedFlight.fromF5j(
       profile.calculate(components, overrides: options, landingBonus: bonus),
     );
-  }
-
-  /// The points of the landing entered, from the contest's landing table.
-  Future<double> _landingBonus(
-    ContestConfigurationRevision revision,
-    Map<String, Object?> components,
-  ) async {
-    final entry = components['landing'];
-    if (entry == null) return 0;
-    final tableId = revision.landingTableId;
-    final table = tableId == null
-        ? null
-        : await repository.landingTableRepository.findById(tableId);
-    if (table == null) {
-      throw ScoringValidationError(const [
-        ScoringIssue(
-          code: 'not_allowed',
-          fieldId: 'landing',
-          message: 'The contest has no landing table to score a landing.',
-        ),
-      ]);
-    }
-    for (final result in table.results) {
-      if (result.entryKey == entry) return result.pointValue.toDouble();
-    }
-    throw ScoringValidationError([
-      ScoringIssue(
-        code: 'not_allowed',
-        fieldId: 'landing',
-        message: '"$entry" is not an entry of the contest\'s landing table.',
-      ),
-    ]);
   }
 
   Future<Contest> _requireContest(Id contestId) async {
