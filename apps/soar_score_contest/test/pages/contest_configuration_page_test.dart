@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
@@ -9,325 +7,394 @@ import 'package:soar_score_contest/api_client_provider.dart';
 import 'package:soar_score_contest/pages/contest_configuration_page.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
-const _id = '019c0000-0000-7000-8000-000000000017';
-final _created = DateTime.utc(2026, 9);
+import '../support/configuration_fixtures.dart';
 
-Contest _contest({
-  LifecycleState state = LifecycleState.configuring,
-  AdminLock lock = AdminLock.unlocked,
-}) => Contest(
-  id: Id.parse(_id),
-  name: 'Front Range ALES Open',
-  startDateTime: DateTime.utc(2026, 10, 17, 14),
-  endDateTime: DateTime.utc(2026, 10, 18, 14),
-  timezone: 'America/Denver',
-  lifecycleState: state,
-  adminLock: lock,
-  createdAt: _created,
-  updatedAt: _created,
-);
-
-ContestConfigurationRevision _revision(
-  int number, [
-  Map<String, Object?> core = const {},
-]) => ContestConfigurationRevision(
-  id: Id.parse('019c0000-0000-7000-8000-0000000000a$number'),
-  contestId: Id.parse(_id),
-  revisionNumber: number,
-  disciplineProfileId: Id.parse('019c0000-0000-7000-8000-0000000000d1'),
-  config: ContestConfig(core: core, discipline: const {}),
-  createdBy: Id.parse('019c0000-0000-7000-8000-0000000000b1'),
-  createdAt: _created,
-);
-
-ContestParticipation _participation(int n, {RoleType type = RoleType.pilot}) =>
-    ContestParticipation(
-      id: Id.parse('019c0000-0000-7000-8000-00000000010$n'),
-      contestId: Id.parse(_id),
-      participantProfileId: Id.parse('019c0000-0000-7000-8000-00000000020$n'),
-      roleId: Id.parse('019c0000-0000-7000-8000-0000000000c1'),
-      roleName: 'Pilot',
-      roleType: type,
-      scoringUuid: ScoringUuid.parse('0000000$n-0000-4000-8000-000000000000'),
-    );
-
-CurrentMatrix _drawnMatrix() => CurrentMatrix(
-  revision: MatrixRevision(
-    id: Id.parse('019c0000-0000-7000-8000-0000000000e1'),
-    contestId: Id.parse(_id),
-    revisionNumber: 1,
-    firstRound: 1,
-    lastRound: 1,
-    drawMode: DrawMode.standardManOnMan,
-    randomSeed: 1,
-    algorithmVersion: '1',
-    drawConfig: const {},
-    seedingSnapshot: const {},
-    createdBy: Id.parse('019c0000-0000-7000-8000-0000000000b1'),
-    createdAt: _created,
-  ),
-);
-
-class _Server {
-  _Server({
-    Contest? contest,
-    this.revision,
-    this.participations = const [],
-    CurrentMatrix? matrix,
-  }) : contest = contest ?? _contest(),
-       matrix = matrix ?? CurrentMatrix();
-
-  final Contest contest;
-  final ContestConfigurationRevision? revision;
-  final List<ContestParticipation> participations;
-  final CurrentMatrix matrix;
-  Map<String, dynamic>? saved;
-
-  http.Response _json(Object body, [int status = 200]) => http.Response(
-    jsonEncode(body),
-    status,
-    headers: {'content-type': 'application/json; charset=utf-8'},
-  );
-
-  Future<http.Response> handle(http.Request request) async {
-    final path = request.url.path;
-    if (request.method == 'POST' && path.endsWith('/configuration')) {
-      saved = jsonDecode(request.body) as Map<String, dynamic>;
-      return _json(
-        SavedConfiguration(
-          revision: _revision(2, {
-            ...?revision?.config.core,
-            ...(saved!['config'] as Map)['core'] as Map<String, Object?>,
-          }),
-          contest: contest,
-        ).toJson(),
-      );
-    }
-    if (path.endsWith('/configuration')) {
-      return revision == null
-          ? _json({
-              'error': {'code': 'not_found', 'message': 'none'},
-            }, 404)
-          : _json(revision!.toJson());
-    }
-    if (path.endsWith('/participations')) {
-      return _json({
-        'participations': [for (final p in participations) p.toJson()],
-      });
-    }
-    if (path.endsWith('/matrix')) {
-      return _json(matrix.toJson());
-    }
-    return _json(contest.toJson());
-  }
-}
-
-Future<void> _pump(WidgetTester tester, _Server server) async {
-  tester.view.physicalSize = const Size(1000, 2400);
+Future<void> _pump(
+  WidgetTester tester,
+  ConfigServer server, {
+  Size size = const Size(1280, 900),
+  Future<http.Response> Function(http.Request)? handler,
+}) async {
+  tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
   await tester.pumpWidget(
     ApiClientInherited(
       client: ApiClient(
         baseUrl: Uri.parse('http://localhost'),
-        httpClient: MockClient(server.handle),
+        httpClient: MockClient(handler ?? server.handle),
       ),
       child: const MaterialApp(
-        home: Scaffold(body: ContestConfigurationPage(contestId: _id)),
+        home: Scaffold(
+          body: ContestConfigurationPage(contestId: configContestId),
+        ),
       ),
     ),
   );
   await tester.pumpAndSettle();
 }
 
-final _save = find.byKey(const ValueKey('save-configuration'));
-final _draw = find.byKey(const ValueKey('draw-matrix'));
+final _saveButton = find.widgetWithText(FilledButton, 'Save configuration');
+final _confirmSave = find.byKey(const ValueKey('confirm-save'));
 
-Future<void> _chooseLanes(WidgetTester tester) async {
-  await tester.tap(find.text('None').last);
+Future<void> _scrollTo(WidgetTester tester, Finder finder) async {
+  await tester.ensureVisible(finder);
   await tester.pumpAndSettle();
-  await tester.tap(find.text('Random').last);
+}
+
+/// Taps the segment labelled [label] in the setting [setting].
+Future<void> _segment(WidgetTester tester, String setting, String label) async {
+  final row = find.byKey(ValueKey('field-$setting'));
+  final segment = find.descendant(of: row, matching: find.text(label));
+  await _scrollTo(tester, segment);
+  await tester.tap(segment);
   await tester.pumpAndSettle();
 }
 
 void main() {
-  testWidgets('shows the groups with their revision and impact', (
-    tester,
-  ) async {
-    await _pump(tester, _Server(revision: _revision(1)));
+  testWidgets('shows every section with the saved revision', (tester) async {
+    await _pump(tester, ConfigServer(revision: configRevision(1)));
 
+    expect(find.text('Configuration revision 1'), findsOneWidget);
     for (final title in [
-      'Identity',
-      'Discipline and scoring rules',
+      'Contest details',
+      'Discipline and rules',
+      'Landing table',
+      'Scoring',
       'Participant options',
       'Participants',
       'Draw options',
-      'Scoring access',
-      'Administration lock',
-      'Public update policy',
+      'Public updates and reviews',
     ]) {
-      expect(find.text(title), findsOneWidget);
+      expect(find.text(title, skipOffstage: false), findsWidgets);
     }
-    expect(find.text('Configuration revision 1'), findsNWidgets(4));
-    expect(find.text('Invalidates the matrix'), findsOneWidget);
-    expect(find.text('Recalculates scores'), findsOneWidget);
-    expect(find.text('Not drawn'), findsOneWidget);
+    expect(find.text('Official rules', skipOffstage: false), findsOneWidget);
+    expect(find.text('Ready to draw'), findsNothing);
+    expect(find.text('Can’t be drawn yet'), findsOneWidget);
   });
 
-  testWidgets('Save is off until an option changes, then saves the next '
-      'revision', (tester) async {
-    final server = _Server(revision: _revision(1));
-    await _pump(tester, server);
-    expect(tester.widget<FilledButton>(_save).onPressed, isNull);
+  testWidgets('the save bar appears only while the draft differs', (
+    tester,
+  ) async {
+    await _pump(tester, ConfigServer(revision: configRevision(1)));
+    expect(find.text('Discard changes'), findsNothing);
 
-    await tester.tap(find.text('Classes'));
+    await _segment(tester, 'decimal_places', '2');
+    expect(find.text('1 unsaved change'), findsOneWidget);
+    expect(find.text('No effect on the matrix or results'), findsOneWidget);
+
+    await tester.tap(find.text('Discard changes'));
     await tester.pumpAndSettle();
-    await tester.tap(_save);
+    expect(find.text('Discard changes'), findsNothing);
+  });
+
+  testWidgets('saving posts the next revision and clears the bar', (
+    tester,
+  ) async {
+    final server = ConfigServer(revision: configRevision(1));
+    await _pump(tester, server);
+
+    await _segment(tester, 'decimal_places', '2');
+    await tester.tap(_saveButton);
     await tester.pumpAndSettle();
 
     expect(server.saved!['base_revision_number'], 1);
-    expect((server.saved!['config'] as Map)['core']['classes_enabled'], true);
-    expect(find.text('Configuration revision 2'), findsNWidgets(4));
-    expect(tester.widget<FilledButton>(_save).onPressed, isNull);
+    expect((server.saved!['config'] as Map)['core']['decimal_places'], 2);
+    expect(find.text('Configuration revision 2'), findsOneWidget);
+    expect(find.text('Discard changes'), findsNothing);
+    expect(server.updatedContest, isNull);
   });
 
-  testWidgets('saving never draws the matrix', (tester) async {
-    final server = _Server(
-      revision: _revision(1),
-      participations: [_participation(1), _participation(2)],
-    );
+  testWidgets('changed contest details are saved to the contest', (
+    tester,
+  ) async {
+    final server = ConfigServer(revision: configRevision(1));
     await _pump(tester, server);
-    await tester.tap(find.text('Classes'));
-    await tester.pumpAndSettle();
-    await tester.tap(_save);
-    await tester.pumpAndSettle();
 
-    expect(find.text('Matrix revision'), findsNothing);
-    expect(find.text('Not drawn'), findsOneWidget);
-  });
-
-  testWidgets('Draw matrix is enabled with two scoring pilots', (tester) async {
-    await _pump(
-      tester,
-      _Server(
-        revision: _revision(1),
-        participations: [
-          _participation(1),
-          _participation(2),
-          _participation(3, type: RoleType.nonFlier),
-        ],
+    await tester.enterText(
+      find.descendant(
+        of: find.byKey(const ValueKey('field-city')),
+        matching: find.byType(TextField),
       ),
+      'Boulder',
     );
-    expect(tester.widget<OutlinedButton>(_draw).onPressed, isNotNull);
-    expect(find.byKey(const ValueKey('draw-reason')), findsNothing);
-    expect(find.text('2'), findsOneWidget);
+    await tester.pumpAndSettle();
+    await tester.tap(_saveButton);
+    await tester.pumpAndSettle();
+
+    expect(server.updatedContest!['city'], 'Boulder');
+    expect(server.saved, isNull);
   });
 
-  testWidgets('Draw matrix says why it is off', (tester) async {
-    await _pump(
-      tester,
-      _Server(revision: _revision(1), participations: [_participation(1)]),
+  testWidgets('an invalid value blocks Save and is listed in the bar', (
+    tester,
+  ) async {
+    await _pump(tester, ConfigServer(revision: configRevision(1)));
+
+    await tester.enterText(
+      find.descendant(
+        of: find.byKey(const ValueKey('field-name')),
+        matching: find.byType(TextField),
+      ),
+      '',
     );
-    expect(tester.widget<OutlinedButton>(_draw).onPressed, isNull);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Enter a contest name.'), findsOneWidget);
     expect(
-      find.text(
-        'Draw matrix: Drawing needs at least 2 scoring pilots. This contest has 1.',
-      ),
+      find.text('1 setting needs fixing before you can save'),
       findsOneWidget,
     );
+    expect(find.text('Fix 1 error to save'), findsOneWidget);
+    expect(tester.widget<FilledButton>(_saveButton).onPressed, isNull);
   });
 
-  testWidgets('a locked contest is read-only', (tester) async {
+  testWidgets('a working time over the limit says what to enter', (
+    tester,
+  ) async {
+    await _pump(tester, ConfigServer(revision: configRevision(1)));
+
+    final field = find.descendant(
+      of: find.byKey(const ValueKey('field-d_working_time')),
+      matching: find.byType(TextField),
+    );
+    await _scrollTo(tester, field);
+    await tester.enterText(field, '10:75');
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Seconds go up to 59'), findsWidgets);
+  });
+
+  testWidgets('a house rule shows the official value and resets to it', (
+    tester,
+  ) async {
     await _pump(
       tester,
-      _Server(
-        contest: _contest(lock: AdminLock.locked),
-        revision: _revision(1),
-        participations: [_participation(1), _participation(2)],
+      ConfigServer(
+        revision: configRevision(1, discipline: {'working_time': 480}),
       ),
     );
-    expect(
-      tester
-          .widget<SwitchListTile>(
-            find.widgetWithText(SwitchListTile, 'Classes'),
-          )
-          .onChanged,
-      isNull,
-    );
-    expect(tester.widget<OutlinedButton>(_draw).onPressed, isNull);
-    expect(
-      find.text(
-        'Draw matrix: The contest is locked, so the matrix can’t be drawn.',
-      ),
-      findsOneWidget,
-    );
+
+    expect(find.text('1 house rule', skipOffstage: false), findsOneWidget);
+    final reset = find.text('Reset to official');
+    await _scrollTo(tester, reset);
+    await tester.tap(reset);
+    await tester.pumpAndSettle();
+    expect(find.text('Reset to official'), findsNothing);
+    expect(find.text('Official rules', skipOffstage: false), findsOneWidget);
   });
 
-  testWidgets('changing an option that invalidates a drawn matrix warns '
-      'first', (tester) async {
-    final server = _Server(
-      revision: _revision(1),
-      participations: [_participation(1), _participation(2)],
-      matrix: _drawnMatrix(),
+  testWidgets('team protection blocks Seeded with a one-tap fix', (
+    tester,
+  ) async {
+    await _pump(
+      tester,
+      ConfigServer(
+        revision: configRevision(
+          1,
+          core: {
+            'teams_enabled': true,
+            'team_pilot_count': 3,
+            'team_protection': true,
+          },
+        ),
+      ),
+    );
+
+    final fix = find.text('Turn off team protection');
+    await _scrollTo(tester, fix);
+    await tester.tap(fix);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Turn off team protection'), findsNothing);
+    expect(find.text('2 unsaved', skipOffstage: false), findsWidgets);
+  });
+
+  testWidgets('a change that outdates the drawn matrix asks first', (
+    tester,
+  ) async {
+    final server = ConfigServer(
+      revision: configRevision(1),
+      participations: [configParticipation(1), configParticipation(2)],
+      matrix: configDrawnMatrix(),
     );
     await _pump(tester, server);
-    expect(find.text('Matrix revision'), findsOneWidget);
+    expect(find.text('Drawn and in sync'), findsOneWidget);
 
-    await _chooseLanes(tester);
-    await tester.tap(_save);
+    await _segment(tester, 'lane_mode', 'Random');
+    expect(find.text('Makes the drawn matrix out of date'), findsOneWidget);
+
+    await tester.tap(_saveButton);
     await tester.pumpAndSettle();
-    expect(find.text('Save these changes?'), findsOneWidget);
+    expect(find.text('The drawn matrix becomes out of date'), findsOneWidget);
     expect(server.saved, isNull);
 
     await tester.tap(find.text('Cancel'));
     await tester.pumpAndSettle();
     expect(server.saved, isNull);
 
-    await tester.tap(_save);
+    await tester.tap(_saveButton);
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const ValueKey('confirm-save')));
+    await tester.tap(_confirmSave);
     await tester.pumpAndSettle();
     expect((server.saved!['config'] as Map)['core']['lane_mode'], 'Random');
   });
 
-  testWidgets('changing lanes with no matrix saves without a warning', (
+  testWidgets('a lane change with no matrix saves without a dialog', (
     tester,
   ) async {
-    final server = _Server(revision: _revision(1));
+    final server = ConfigServer(revision: configRevision(1));
     await _pump(tester, server);
-    await _chooseLanes(tester);
-    await tester.tap(_save);
+
+    await _segment(tester, 'lane_mode', 'Random');
+    await tester.tap(_saveButton);
     await tester.pumpAndSettle();
-    expect(find.text('Save these changes?'), findsNothing);
+
+    expect(find.text('Save configuration?'), findsNothing);
     expect(server.saved, isNotNull);
+  });
+
+  testWidgets('fixed settings once scoring has started', (tester) async {
+    final server = ConfigServer(
+      contest: configContest(state: LifecycleState.running),
+      revision: configRevision(1),
+      participations: [configParticipation(1), configParticipation(2)],
+      matrix: configDrawnMatrix(),
+    );
+    await _pump(tester, server);
+
+    expect(find.text('Scoring has started'), findsOneWidget);
+    expect(
+      find.text('Fixed once scoring has started.', skipOffstage: false),
+      findsWidgets,
+    );
+
+    await _segment(tester, 'decimal_places', '2');
+    expect(find.text('Recalculates all results'), findsOneWidget);
+  });
+
+  testWidgets('a locked contest is read-only', (tester) async {
+    await _pump(
+      tester,
+      ConfigServer(
+        contest: configContest(lock: AdminLock.locked),
+        revision: configRevision(1),
+        participations: [configParticipation(1), configParticipation(2)],
+      ),
+    );
+
+    expect(find.text('Administration is locked'), findsOneWidget);
+    final classes = find.descendant(
+      of: find.byKey(const ValueKey('field-classes_enabled')),
+      matching: find.byType(Switch),
+    );
+    await _scrollTo(tester, classes);
+    expect(tester.widget<Switch>(classes).onChanged, isNull);
+    expect(find.text('Discard changes'), findsNothing);
+  });
+
+  testWidgets('a completed contest is read-only', (tester) async {
+    await _pump(
+      tester,
+      ConfigServer(
+        contest: configContest(state: LifecycleState.completed),
+        revision: configRevision(1),
+      ),
+    );
+    expect(find.text('Contest completed'), findsOneWidget);
+  });
+
+  testWidgets('another device saved first: latest is shown, edits kept', (
+    tester,
+  ) async {
+    final server = ConfigServer(
+      revision: configRevision(1),
+      conflictOnSave: true,
+    );
+    await _pump(tester, server);
+
+    await _segment(tester, 'decimal_places', '2');
+    await tester.tap(_saveButton);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Configuration updated'), findsOneWidget);
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
+    expect(find.text('1 unsaved change'), findsOneWidget);
+  });
+
+  testWidgets('a failed save keeps the values and offers Retry', (
+    tester,
+  ) async {
+    final server = ConfigServer(revision: configRevision(1));
+    var fail = true;
+    await _pump(
+      tester,
+      server,
+      handler: (request) async => fail && request.method == 'POST'
+          ? http.Response('boom', 500)
+          : server.handle(request),
+    );
+
+    await _segment(tester, 'decimal_places', '2');
+    await tester.tap(_saveButton);
+    await tester.pumpAndSettle();
+    expect(find.text('Couldn’t save the configuration'), findsOneWidget);
+    expect(find.text('Retry'), findsOneWidget);
+
+    fail = false;
+    await tester.tap(find.text('Retry'));
+    await tester.pumpAndSettle();
+    expect(server.saved, isNotNull);
+  });
+
+  testWidgets('the landing picker previews a table and uses it', (
+    tester,
+  ) async {
+    await _pump(tester, ConfigServer(revision: configRevision(1)));
+
+    await _scrollTo(tester, find.text('Change table'));
+    await tester.tap(find.text('Change table'));
+    await tester.pumpAndSettle();
+    expect(find.text('Choose a landing table'), findsOneWidget);
+
+    await tester.tap(find.text('Club tape'));
+    await tester.pumpAndSettle();
+    expect(find.text('Preview'), findsOneWidget);
+    await tester.tap(find.text('Use this table'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Club tape'), findsOneWidget);
+    expect(find.text('Saved: F5J standard'), findsOneWidget);
+  });
+
+  testWidgets('narrow pages use the chip row and show readiness inline', (
+    tester,
+  ) async {
+    await _pump(
+      tester,
+      ConfigServer(revision: configRevision(1)),
+      size: const Size(700, 900),
+    );
+    expect(find.byType(ChoiceChip), findsWidgets);
+    expect(find.text('On this page'), findsNothing);
+    expect(find.text('Matrix readiness', skipOffstage: false), findsOneWidget);
   });
 
   testWidgets('a load failure offers Retry', (tester) async {
     var fail = true;
-    final server = _Server(revision: _revision(1));
-    tester.view.physicalSize = const Size(1000, 2400);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.reset);
-    await tester.pumpWidget(
-      ApiClientInherited(
-        client: ApiClient(
-          baseUrl: Uri.parse('http://localhost'),
-          httpClient: MockClient(
-            (request) async =>
-                fail ? http.Response('boom', 500) : server.handle(request),
-          ),
-        ),
-        child: const MaterialApp(
-          home: Scaffold(body: ContestConfigurationPage(contestId: _id)),
-        ),
-      ),
+    final server = ConfigServer(revision: configRevision(1));
+    await _pump(
+      tester,
+      server,
+      handler: (request) async =>
+          fail ? http.Response('boom', 500) : server.handle(request),
     );
-    await tester.pumpAndSettle();
     expect(find.text('The configuration could not be loaded.'), findsOneWidget);
 
     fail = false;
     await tester.tap(find.text('Retry'));
     await tester.pumpAndSettle();
-    expect(find.text('Identity'), findsOneWidget);
+    expect(find.text('Contest details'), findsWidgets);
   });
 }

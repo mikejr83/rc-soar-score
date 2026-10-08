@@ -74,6 +74,7 @@ GoRouter buildAppRouter({
   // One editor is open at a time, so one guard serves both editor routes.
   final editorGuard = UnsavedChangesGuard();
   final wizardGuard = UnsavedChangesGuard();
+  final configurationGuard = UnsavedChangesGuard();
   return GoRouter(
     initialLocation: initialLocation,
     refreshListenable: !kIsWeb ? appMode : null,
@@ -152,7 +153,9 @@ GoRouter buildAppRouter({
             name: 'contestConfiguration',
             builder: (context, state) => ContestConfigurationPage(
               contestId: state.pathParameters['contestId']!,
+              guard: configurationGuard,
             ),
+            onExit: (context, state) => configurationGuard.confirmLeave(),
           ),
           GoRoute(
             path: '$contestsPath/:contestId/matrix',

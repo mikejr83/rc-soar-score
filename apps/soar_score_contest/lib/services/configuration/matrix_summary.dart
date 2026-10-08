@@ -1,12 +1,18 @@
 import 'package:soar_score_core/soar_score_core.dart';
 
-/// The facts about a drawn matrix the configuration page shows: its revision
-/// and the smallest and largest group of any round.
+import 'setting_keys.dart';
+
+/// The facts about a drawn matrix the configuration page shows: its revision,
+/// its rounds, the smallest and largest group of any round and the options it
+/// was drawn with.
 class MatrixSummary {
   const MatrixSummary({
     required this.revisionNumber,
+    required this.lastRound,
     required this.minGroupSize,
     required this.maxGroupSize,
+    this.groupsPerRound,
+    this.drawnWith = const {},
     this.maxDuplicateMatchups,
     this.unmetOpponents,
   });
@@ -29,16 +35,32 @@ class MatrixSummary {
     final fairness = revision.fairnessSummary;
     return MatrixSummary(
       revisionNumber: revision.revisionNumber,
+      lastRound: revision.lastRound,
       minGroupSize: counts.isEmpty ? 0 : counts.reduce((a, b) => a < b ? a : b),
       maxGroupSize: counts.isEmpty ? 0 : counts.reduce((a, b) => a > b ? a : b),
+      groupsPerRound: revision.drawConfig['groups_per_round'] as int?,
+      drawnWith: {
+        SettingKeys.teamProtection: revision.drawConfig['team_protection'],
+        SettingKeys.laneMode: revision.drawConfig['lane_mode'],
+        SettingKeys.drawMode: revision.drawConfig['configured_draw_mode'],
+      },
       maxDuplicateMatchups: fairness?['max_duplicate_matchups'] as int?,
       unmetOpponents: fairness?['unmet_opponent_count'] as int?,
     );
   }
 
   final int revisionNumber;
+
+  /// The last round the matrix covers.
+  final int lastRound;
   final int minGroupSize;
   final int maxGroupSize;
+  final int? groupsPerRound;
+
+  /// The values of the settings the draw recorded (`team_protection`,
+  /// `lane_mode` and `draw_mode`), by setting key; missing ones were not
+  /// recorded.
+  final Map<String, Object?> drawnWith;
 
   /// From the fairness summary, when the draw recorded one.
   final int? maxDuplicateMatchups;
