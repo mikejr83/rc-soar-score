@@ -26,7 +26,7 @@ Response errorResponse(
 /// Turns thrown errors and bare 404s into the standard JSON error body.
 ///
 /// - `StaleRevisionError`, `AlreadyStoredError`, `AlreadySupersededError`,
-///   `ContestStateError`: 409
+///   `ContestStateError`, `BackendOnlyError` (code `backend_only`): 409
 /// - `EntityNotFoundError`: 404
 /// - `ArgumentError`, `FormatException`, `ScoringValidationError`: 400
 /// - an unmatched route: 404
@@ -51,6 +51,8 @@ Middleware errorMappingMiddleware() =>
         rethrow;
       } on EntityNotFoundError catch (e) {
         return errorResponse(404, 'not_found', '$e', requestId: requestId);
+      } on BackendOnlyError catch (e) {
+        return errorResponse(409, 'backend_only', '$e', requestId: requestId);
       } on ContestStateError catch (e) {
         return errorResponse(409, e.code, e.message, requestId: requestId);
       } on StaleRevisionError catch (e) {

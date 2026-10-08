@@ -4,6 +4,7 @@
 /// only `package:soar_score_core/soar_score_core.dart`.
 library;
 
+export 'errors/backend_only_error.dart';
 export 'errors/contest_state_error.dart';
 export 'errors/entity_not_found_error.dart';
 export 'errors/scoring_validation_error.dart';

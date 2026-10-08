@@ -25,3 +25,15 @@ void forEachBackend(void Function(Backend backend) body) {
     );
   }
 }
+
+/// Runs [body] on PostgreSQL only, for backend-only entities that an
+/// installation never has. Reported as skipped when no server is configured.
+void forPostgresOnly(void Function(Backend backend) body) {
+  group(
+    Backend.postgres.name,
+    () => body(Backend.postgres),
+    skip: postgresConfig == null
+        ? 'POSTGRES_PASSWORD is not set (see the README for a local server)'
+        : false,
+  );
+}

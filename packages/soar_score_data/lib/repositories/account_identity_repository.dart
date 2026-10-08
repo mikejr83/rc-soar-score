@@ -8,10 +8,10 @@ class AccountIdentityRepository extends DriftRepository
     implements core.AccountIdentityRepository {
   AccountIdentityRepository(super.db, {super.stores});
 
-  late final _store = store<core.AccountIdentity>('AccountIdentity');
+  late final _store = backendStore<core.AccountIdentity>('AccountIdentity');
 
   @override
-  Future<core.AccountIdentity?> findById(core.Id id) => _store.find(id);
+  Future<core.AccountIdentity?> findById(core.Id id) async => _store.find(id);
 
   @override
   Future<core.AccountIdentity?> findBySubject({
@@ -23,7 +23,7 @@ class AccountIdentityRepository extends DriftRepository
   }
 
   @override
-  Future<List<core.AccountIdentity>> listForAccount(core.Id accountId) =>
+  Future<List<core.AccountIdentity>> listForAccount(core.Id accountId) async =>
       _store.whereId('account_id', accountId, orderBy: 'id');
 
   @override
@@ -33,5 +33,5 @@ class AccountIdentityRepository extends DriftRepository
   }
 
   @override
-  Future<bool> remove(core.Id id) => _store.remove(id);
+  Future<bool> remove(core.Id id) async => _store.remove(id);
 }

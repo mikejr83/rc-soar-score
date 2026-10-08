@@ -60,6 +60,12 @@ void main() {
   group('error mapping', () {
     Future<Response> failing(Object error) => call((r) => throw error, '/a');
 
+    test('maps a backend-only request to 409 backend_only', () async {
+      final response = await failing(BackendOnlyError('Account'));
+      expect(response.statusCode, 409);
+      expect((await errorOf(response))['code'], 'backend_only');
+    });
+
     test('maps domain conflicts to 409', () async {
       final response = await failing(
         StaleRevisionError(

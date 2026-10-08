@@ -8,10 +8,13 @@ class AccountPublicProfileRepository extends DriftRepository
     implements core.AccountPublicProfileRepository {
   AccountPublicProfileRepository(super.db, {super.stores});
 
-  late final _store = store<core.AccountPublicProfile>('AccountPublicProfile');
+  late final _store = backendStore<core.AccountPublicProfile>(
+    'AccountPublicProfile',
+  );
 
   @override
-  Future<core.AccountPublicProfile?> findById(core.Id id) => _store.find(id);
+  Future<core.AccountPublicProfile?> findById(core.Id id) async =>
+      _store.find(id);
 
   @override
   Future<core.AccountPublicProfile?> findForAccount(core.Id accountId) async {

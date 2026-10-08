@@ -8,12 +8,13 @@ class ParticipantAccountLinkRepository extends DriftRepository
     implements core.ParticipantAccountLinkRepository {
   ParticipantAccountLinkRepository(super.db, {super.stores});
 
-  late final _store = store<core.ParticipantAccountLink>(
+  late final _store = backendStore<core.ParticipantAccountLink>(
     'ParticipantAccountLink',
   );
 
   @override
-  Future<core.ParticipantAccountLink?> findById(core.Id id) => _store.find(id);
+  Future<core.ParticipantAccountLink?> findById(core.Id id) async =>
+      _store.find(id);
 
   @override
   Future<core.ParticipantAccountLink?> find({
@@ -37,15 +38,16 @@ class ParticipantAccountLinkRepository extends DriftRepository
   @override
   Future<List<core.ParticipantAccountLink>> listForProfile(
     core.Id participantProfileId,
-  ) => _store.whereId(
+  ) async => _store.whereId(
     'participant_profile_id',
     participantProfileId,
     orderBy: 'id',
   );
 
   @override
-  Future<List<core.ParticipantAccountLink>> listForAccount(core.Id accountId) =>
-      _store.whereId('account_id', accountId, orderBy: 'id');
+  Future<List<core.ParticipantAccountLink>> listForAccount(
+    core.Id accountId,
+  ) async => _store.whereId('account_id', accountId, orderBy: 'id');
 
   @override
   Future<core.ParticipantAccountLink> save(core.ParticipantAccountLink link) =>

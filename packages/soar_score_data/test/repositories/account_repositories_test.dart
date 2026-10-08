@@ -7,7 +7,7 @@ import '../support/example_entities.dart';
 import '../support/example_rows.dart';
 import '../support/fixtures.dart';
 
-void main() => forEachBackend(_tests);
+void main() => forPostgresOnly(_tests);
 
 void _tests(Backend backend) {
   late Installation inst;

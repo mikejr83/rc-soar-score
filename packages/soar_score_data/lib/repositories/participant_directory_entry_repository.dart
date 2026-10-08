@@ -8,12 +8,12 @@ class ParticipantDirectoryEntryRepository extends DriftRepository
     implements core.ParticipantDirectoryEntryRepository {
   ParticipantDirectoryEntryRepository(super.db, {super.stores});
 
-  late final _store = store<core.ParticipantDirectoryEntry>(
+  late final _store = backendStore<core.ParticipantDirectoryEntry>(
     'ParticipantDirectoryEntry',
   );
 
   @override
-  Future<core.ParticipantDirectoryEntry?> findById(core.Id id) =>
+  Future<core.ParticipantDirectoryEntry?> findById(core.Id id) async =>
       _store.find(id);
 
   @override
@@ -42,5 +42,5 @@ class ParticipantDirectoryEntryRepository extends DriftRepository
   }
 
   @override
-  Future<bool> remove(core.Id id) => _store.remove(id);
+  Future<bool> remove(core.Id id) async => _store.remove(id);
 }

@@ -1,6 +1,7 @@
 import 'package:soar_score_core/soar_score_core.dart' as core;
 
 import '../database.dart';
+import '../schema/table_group.dart';
 import '../sync/drift_unit_of_work.dart';
 import '../sync/entity_store.dart';
 import '../sync/entity_stores.dart';
@@ -22,6 +23,18 @@ abstract class DriftRepository {
   /// The store of [entityType], as the entity class [T].
   EntityStore<T> store<T extends Object>(String entityType) =>
       stores.of(entityType) as EntityStore<T>;
+
+  /// The store of a backend-only [entityType], as the entity class [T].
+  ///
+  /// Throws a [core.BackendOnlyError] on a database whose profile has no
+  /// backend-only tables (an installation), so a caller gets a clear error
+  /// instead of a missing-table failure.
+  EntityStore<T> backendStore<T extends Object>(String entityType) {
+    if (!db.profile.groups.contains(TableGroup.backendOnly)) {
+      throw core.BackendOnlyError(entityType);
+    }
+    return store<T>(entityType);
+  }
 
   /// Replaces every row of [contestId] in [store] with [rows], in one
   /// transaction, for derived data that is recomputed and never mutated.

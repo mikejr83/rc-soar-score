@@ -7,10 +7,10 @@ class AccountRepository extends DriftRepository
     implements core.AccountRepository {
   AccountRepository(super.db, {super.stores});
 
-  late final _store = store<core.Account>('Account');
+  late final _store = backendStore<core.Account>('Account');
 
   @override
-  Future<core.Account?> findById(core.Id id) => _store.find(id);
+  Future<core.Account?> findById(core.Id id) async => _store.find(id);
 
   @override
   Future<core.Account?> findByEmail(String email) async {
