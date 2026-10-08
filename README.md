@@ -187,19 +187,20 @@ flutter run -d chrome      # Run as web app
 flutter run -d windows     # Run as Windows desktop shell
 ```
 
-##### Demo contests (development only)
+##### Demo data (development only)
 
-A fresh native install has no contests, and the app cannot create them yet. To see sample contests on the home page while developing, build or run the native app with the `SOAR_SCORE_SEED_DEMO` define:
+A fresh native install is empty. To explore the app with example data, run the native app in demo mode:
 
 ```bash
-flutter run -d windows --dart-define=SOAR_SCORE_SEED_DEMO=true
+flutter run -d windows --dart-define=SOAR_SCORE_DEMO=true
 ```
 
-- With the flag, the embedded server inserts three sample contests (they have no owner) the first time it opens an empty local database. A database that already holds contests is left alone, so restarting never duplicates them.
-- The flag is off by default and is ignored in release builds.
-- It has no effect on web builds, which use the deployed server, or on the server itself.
-- Contests are seeded only into an empty database. To reseed, delete the local `soar_score.db` file (in the per-user application support folder, `%APPDATA%` on Windows).
-- This is a stand-in until contests can be created in the app, and will be removed then.
+- Demo mode uses its own database, `soar_score_demo.db`, beside the normal `soar_score.db` in the per-user application support folder (`%APPDATA%` on Windows). The normal database is never opened or changed, and the demo database is never used without the define.
+- The first start with an empty demo database loads example data: 18 made-up pilots and five contests, one in each lifecycle state (Created, Configuring, Ready with a drawn matrix, Running with teams, and Completed). Later starts keep whatever is in the demo database, including your own changes.
+- Add `--dart-define=SOAR_SCORE_DEMO_RESET=true` to delete the demo database first and load the example data again.
+- No scores are loaded yet, because nothing in the app records them. The Running and Completed contests only have their state and drawn matrix.
+- The defines are ignored in release builds and have no effect on web builds or the server.
+- In VS Code, use the launch configurations **soar_score_contest (Windows, demo data)** and **(Windows, fresh demo data)**, or the tasks **contest app: run with demo data (Windows)** and **contest app: run with fresh demo data (Windows)**.
 
 #### Public Results Site
 

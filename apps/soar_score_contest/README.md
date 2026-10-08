@@ -22,29 +22,29 @@ flutter run -d windows
 
 A release executable comes from `flutter build windows`.
 
-### Demo contests
+### Demo data
 
-Nothing can create contests in the app yet, so a fresh install lists none. For development, build or run with the demo seed:
+A fresh install lists no contests. For development, run in demo mode:
 
 ```bash
-flutter run -d windows --dart-define=SOAR_SCORE_SEED_DEMO=true
+flutter run -d windows --dart-define=SOAR_SCORE_DEMO=true
 ```
 
-On the first start with an empty database this inserts three sample contests. It does nothing on a database that already holds contests. It is off by default and ignored in release builds. See the root [README](../../README.md#demo-contests-development-only) for details.
+Demo mode opens `soar_score_demo.db` instead of `soar_score.db`, so your real data is never touched. On the first start with an empty demo database it loads five example contests, one in each lifecycle state, with participants, teams and drawn matrices. Add `--dart-define=SOAR_SCORE_DEMO_RESET=true` to start over from a new demo database. Both defines are ignored in release builds. See the root [README](../../README.md#demo-data-development-only) for details, including the VS Code launch configurations and tasks.
 
 ### Where the data lives
 
-The database is `soar_score.db` in the per-user application support folder, which on Windows is `%APPDATA%\Laminar Stack\RC Soar Score\` (the company and product names come from `windows/runner/Runner.rc`). Closing the app closes the server and the database.
+The database is `soar_score.db` (`soar_score_demo.db` in demo mode) in the per-user application support folder, which on Windows is `%APPDATA%\Laminar Stack\RC Soar Score\` (the company and product names come from `windows/runner/Runner.rc`). Closing the app closes the server and the database.
 
-Nothing is released yet, so the database schema changes in place. If the app fails at startup with an error about a missing table, the file was made by an older build: delete `soar_score.db` and start again. This also reseeds the demo contests.
+Nothing is released yet, so the database schema changes in place. If the app fails at startup with an error about a missing table, the file was made by an older build: delete `soar_score.db` and start again. In demo mode, use `SOAR_SCORE_DEMO_RESET=true` instead, which also loads the demo data again.
 
 ### Manual checklist: offline proof of concept
 
-1. Build the app with `--dart-define=SOAR_SCORE_SEED_DEMO=true` and delete any existing `soar_score.db`.
+1. Build the app with `--dart-define=SOAR_SCORE_DEMO=true` and delete any existing `soar_score_demo.db`.
 2. Disconnect the network (turn off Wi-Fi or unplug Ethernet).
-3. Start the app, choose **Continue offline**, and confirm the contest selection page lists the three sample contests: "Front Range F5J Open", "Club Thermal Fun Fly" and "Autumn ALES Classic".
-4. Close the app and start it again with the network still disconnected. Confirm the same three contests appear, not six.
-5. Confirm `soar_score.db` exists in the folder above.
+3. Start the app, choose **Continue offline**, and confirm the contest list shows the five demo contests, from "Autumn ALES Classic" to "Spring F3J Challenge".
+4. Close the app and start it again with the network still disconnected. Confirm the same five contests appear, not ten.
+5. Confirm `soar_score_demo.db` exists in the folder above.
 6. Reconnect the network and note anything that behaves differently. Sign-in and synchronization are not part of this proof of concept.
 
 File anything unexpected as a GitHub issue under the native offline proof-of-concept epic (#190).

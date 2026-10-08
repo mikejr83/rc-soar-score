@@ -237,7 +237,7 @@ void main() {
     }
   });
 
-  test('the demo seed serves sample contests once, across launches', () async {
+  test('the demo data is served once, across launches', () async {
     final first = await startEmbeddedServer(databasePath, seedDemo: true);
     final firstClient = ApiClient(baseUrl: first.baseUrl);
     final seeded = await firstClient.contests();
@@ -247,11 +247,27 @@ void main() {
     final second = await startEmbeddedServer(databasePath, seedDemo: true);
     final secondClient = ApiClient(baseUrl: second.baseUrl);
     try {
-      expect(seeded, hasLength(3));
+      expect(seeded, hasLength(5));
       expect(await secondClient.contests(), seeded);
     } finally {
       secondClient.close();
       await second.close();
+    }
+  });
+
+  test('the demo data includes a drawn matrix', () async {
+    final server = await startEmbeddedServer(databasePath, seedDemo: true);
+    final client = ApiClient(baseUrl: server.baseUrl);
+    try {
+      final ready = (await client.contests()).firstWhere(
+        (contest) => contest.name == 'Front Range F5J Open',
+      );
+      expect(ready.lifecycleState, LifecycleState.ready);
+      expect((await client.matrix(ready.id)).rounds, hasLength(8));
+      expect(await client.participations(ready.id), hasLength(16));
+    } finally {
+      client.close();
+      await server.close();
     }
   });
 
@@ -268,7 +284,7 @@ void main() {
     }
   });
 
-  test('the demo contests are owned by the Local account', () async {
+  test('the demo data is owned by the Local account', () async {
     final server = await startEmbeddedServer(databasePath, seedDemo: true);
     try {
       final owners = (await server.repository.contestRepository.getAll()).map(

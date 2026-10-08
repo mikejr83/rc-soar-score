@@ -21,7 +21,7 @@ class EmbeddedServer {
 
   final String _databasePath;
 
-  /// Whether to insert the sample contests into an empty database.
+  /// Whether to fill an empty database with the demo data.
   final bool seedDemo;
   late HttpServer _server;
   late SoarScoreDatabase _database;
@@ -51,8 +51,8 @@ class EmbeddedServer {
       await SystemDataSeeder(_database).seed();
       _localAccountId = await LocalAccountRepository(_database).ensure();
       if (seedDemo) {
-        await DemoContestSeeder(
-          ContestRepository(_database),
+        await DemoDataSeeder(
+          Repository(_database),
           localAccountId: _localAccountId,
         ).seed();
       }
@@ -92,8 +92,9 @@ class EmbeddedServer {
 /// instead acts as the installation's Local account, through the same
 /// `Principal` seam the hosted server fills from a verified token.
 ///
-/// With [seedDemo], an empty contests table gets a few sample contests
-/// (development only, see `DemoContestSeeder`).
+/// With [seedDemo], an empty database gets the example data of
+/// `DemoDataSeeder` (development only; the app passes it for the demo
+/// database).
 Future<EmbeddedServer> startEmbeddedServer(
   String databasePath, {
   bool seedDemo = false,
