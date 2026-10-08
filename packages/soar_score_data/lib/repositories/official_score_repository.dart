@@ -82,10 +82,7 @@ class OfficialScoreRepository extends DriftRepository
     }
     return unitOfWork.run((context) async {
       await context.append(entry.attempt, metadata: metadata);
-      await context.append(
-        score,
-        metadata: metadata.forPart(score.id.value),
-      );
+      await context.append(score, metadata: metadata.forPart(score.id.value));
       final saved = await context.save(
         placeholder,
         metadata: metadata.forPart(placeholder.id.value),

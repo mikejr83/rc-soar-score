@@ -1,9 +1,11 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:soar_score_core/services/contest_results.dart';
 import 'package:soar_score_core/services/contest_scores.dart';
 import 'package:soar_score_core/services/landing_table_view.dart';
 import 'package:soar_score_core/services/role_usage.dart';
+import 'package:soar_score_core/services/round_results.dart';
 import 'package:soar_score_core/services/score_entry_result.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
@@ -552,6 +554,36 @@ class ApiClient {
     );
     final response = await _send('POST', uri, body: request.toJson());
     return _decode<ScoreEntryResult>(response, uri, ScoreEntryResult.fromJson);
+  }
+
+  /// `GET /api/v1/contests/{id}/results` — the standings and team totals as
+  /// of the latest scored round. `preliminary` is set while rounds are
+  /// unscored or the stored results are stale.
+  Future<ContestResults> results(Id id) async {
+    final uri = _resolve('/api/v1/contests/${id.value}/results');
+    final response = await _send('GET', uri);
+    return _decode<ContestResults>(response, uri, ContestResults.fromJson);
+  }
+
+  /// `GET /api/v1/contests/{id}/results/rounds/{ordinal}` — every flight
+  /// result of one round, grouped by group. A round that does not exist is an
+  /// [ApiHttpError] with status 400.
+  Future<RoundResults> roundResults(Id id, int ordinal) async {
+    final uri = _resolve(
+      '/api/v1/contests/${id.value}/results/rounds/$ordinal',
+    );
+    final response = await _send('GET', uri);
+    return _decode<RoundResults>(response, uri, RoundResults.fromJson);
+  }
+
+  /// `POST /api/v1/contests/{id}/results/recalculation` — rebuilds the
+  /// results from the official scores now and returns them. A contest that
+  /// has no configuration, or whose discipline is not calculated yet, is an
+  /// [ApiHttpError] with status 409.
+  Future<ContestResults> recalculateResults(Id id) async {
+    final uri = _resolve('/api/v1/contests/${id.value}/results/recalculation');
+    final response = await _send('POST', uri);
+    return _decode<ContestResults>(response, uri, ContestResults.fromJson);
   }
 
   /// Places a pilot who joined late, or who is making up a missed round, in
