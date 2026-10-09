@@ -9,7 +9,6 @@ import '../api_client_provider.dart';
 import '../connectivity_provider.dart';
 import '../contest_draft_provider.dart';
 import '../router.dart';
-import '../services/contest_open_action.dart';
 import '../services/new_contest/contest_creator.dart';
 import '../services/new_contest/contest_draft.dart';
 import '../services/new_contest/contest_draft_store.dart';
@@ -19,7 +18,6 @@ import '../services/new_contest/participant_option.dart';
 import '../services/new_contest/participant_rules.dart';
 import '../services/new_contest/wizard_discipline.dart';
 import '../widgets/api_error_text.dart';
-import '../widgets/new_contest/contest_created_view.dart';
 import '../widgets/new_contest/contest_details_section.dart';
 import '../widgets/new_contest/copy_source_section.dart';
 import '../widgets/new_contest/discipline_step.dart';
@@ -102,7 +100,6 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
   bool _creating = false;
   Object? _createError;
   Contest? _created;
-  String _createdDiscipline = '';
   final ScrollController _scroll = ScrollController();
 
   @override
@@ -647,11 +644,12 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
       setState(() {
         _creating = false;
         _created = contest;
-        _createdDiscipline = draft.discipline?.name ?? '';
       });
       unawaited(
         SemanticsService.sendAnnouncement(view, 'Contest created.', direction),
       );
+      // A new contest has no matrix yet, so its configuration comes next.
+      context.go(contestConfigurationPath(contest.id.value));
     } on Object catch (error) {
       if (mounted) {
         setState(() {
@@ -673,14 +671,9 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
       final entries = _entries;
       final titles = NewContestWizardPage.stepTitles;
       final last = _step == titles.length;
-      final created = _created;
-      if (created != null) {
-        return ContestCreatedView(
-          contest: created,
-          disciplineName: _createdDiscipline,
-          onOpen: () => context.go(contestOpenPath(created)),
-          onDone: () => context.go(homePath),
-        );
+      if (_created != null) {
+        // Navigating to the new contest's configuration; nothing to show.
+        return const SizedBox.shrink();
       }
 
       final content = Column(
