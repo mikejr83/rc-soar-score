@@ -68,7 +68,7 @@ void main() {
     ]) {
       expect(find.text(title, skipOffstage: false), findsWidgets);
     }
-    expect(find.text('Official rules', skipOffstage: false), findsOneWidget);
+    expect(find.text('F5J default', skipOffstage: false), findsWidgets);
     expect(find.text('Ready to draw'), findsNothing);
     expect(find.text('Can’t be drawn yet'), findsOneWidget);
   });
@@ -176,12 +176,43 @@ void main() {
     );
 
     expect(find.text('1 house rule', skipOffstage: false), findsOneWidget);
-    final reset = find.text('Reset to official');
+    final reset = find.text('Reset to F5J default');
     await _scrollTo(tester, reset);
     await tester.tap(reset);
     await tester.pumpAndSettle();
-    expect(find.text('Reset to official'), findsNothing);
-    expect(find.text('Official rules', skipOffstage: false), findsOneWidget);
+    expect(find.text('Reset to F5J default'), findsNothing);
+    expect(find.text('F5J default', skipOffstage: false), findsWidgets);
+  });
+
+  testWidgets('motor restart has three options and the drop note follows', (
+    tester,
+  ) async {
+    await _pump(
+      tester,
+      ConfigServer(
+        revision: configRevision(
+          1,
+          core: {
+            'drop_after_rounds': [4],
+          },
+          discipline: {'motor_restart_mode': 'non_droppable'},
+        ),
+      ),
+    );
+
+    for (final title in ['Allowed', 'Allowed, not dropped', 'Not allowed']) {
+      expect(find.text(title, skipOffstage: false), findsWidgets);
+    }
+    expect(
+      find.text(
+        'A round with a motor restart can’t be dropped (Motor restart mode: '
+        'Allowed, not dropped).',
+        skipOffstage: false,
+      ),
+      findsOneWidget,
+    );
+    expect(find.text('Not revisioned', skipOffstage: false), findsNothing);
+    expect(find.text('Rules version', skipOffstage: false), findsNothing);
   });
 
   testWidgets('team protection blocks Seeded with a one-tap fix', (

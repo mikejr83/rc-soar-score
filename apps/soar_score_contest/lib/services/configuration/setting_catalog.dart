@@ -1,5 +1,6 @@
 import 'package:soar_score_core/soar_score_core.dart';
 
+import 'discipline_label.dart';
 import 'discipline_settings.dart';
 import 'section_id.dart';
 import 'setting_def.dart';
@@ -14,13 +15,19 @@ class SettingCatalog {
   /// The catalog for a contest of [profile]; without a known profile the
   /// discipline section has no options to edit.
   factory SettingCatalog.forProfile(DisciplineProfileWithRules? profile) {
-    final defaults = profile?.profile.defaultOptions ?? const {};
+    final defaults = {
+      ..._platformDefaults,
+      ...?profile?.profile.defaultOptions,
+    };
+    final defaultLabel = profile == null
+        ? 'Default'
+        : DisciplineLabel.defaultOf(profile.profile.type);
     SettingOption option(Object value, String label, String help, String key) =>
         SettingOption(
           value,
           label,
           help: help,
-          tag: defaults[key] == value ? 'Profile default' : null,
+          tag: defaults[key] == value ? defaultLabel : null,
         );
 
     return SettingCatalog._([
@@ -36,15 +43,6 @@ class SettingCatalog {
               'another discipline, create a new contest.',
           type: SettingType.readOnly,
           readOnlyValue: profile.profile.name,
-        ),
-        SettingDef(
-          key: 'rules_version',
-          section: SectionId.discipline,
-          kind: SettingKind.rules,
-          label: 'Rules version',
-          help: 'The official profile the defaults and checks below come from.',
-          type: SettingType.readOnly,
-          readOnlyValue: 'Profile version ${profile.profile.version}',
         ),
         ...DisciplineSettings.of(profile),
       ],
@@ -325,6 +323,13 @@ class SettingCatalog {
     ], profile);
   }
 
+  /// The defaults of the options that choose between cards, unless the
+  /// profile suggests another.
+  static const _platformDefaults = {
+    SettingKeys.drawMode: SettingKeys.standard,
+    SettingKeys.publicUpdateMode: 'RoundCompletion',
+  };
+
   static const _details = [
     SettingDef(
       key: SettingKeys.name,
@@ -399,6 +404,11 @@ class SettingCatalog {
 
   /// The profile the contest flies; `null` when it is not a system profile.
   final DisciplineProfileWithRules? profile;
+
+  /// `F5J default`: what a profile's own value is called on the page.
+  String get defaultLabel => profile == null
+      ? 'Default'
+      : DisciplineLabel.defaultOf(profile!.profile.type);
 
   final List<SettingDef> settings;
   final Map<String, SettingDef> byKey;

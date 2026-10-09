@@ -50,6 +50,7 @@ class _LandingSectionBodyState extends State<LandingSectionBody> {
         tables: widget.data.landingTables,
         current: _tableId(_draft[SettingKeys.landingTable]),
         defaultTableId: widget.data.profile?.profile.defaultLandingTableId,
+        defaultLabel: _draft.catalog.defaultLabel,
         onCreateTable: widget.onOpenLandings,
       ),
     );
@@ -165,7 +166,7 @@ class _LandingSectionBodyState extends State<LandingSectionBody> {
               ConfigNote(
                 icon: Icons.info_outline,
                 text:
-                    'Not the profile default (${defaultView.table.name}). '
+                    'Not the ${_draft.catalog.defaultLabel} (${defaultView.table.name}). '
                     'That’s fine; any table works for any discipline. The unit '
                     'is ${landingUnitLabel(view.table.inputUnit).toLowerCase()}.',
               ),
@@ -214,7 +215,6 @@ class _LandingSectionBodyState extends State<LandingSectionBody> {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final meta = [
-      ('Owner', view.table.isSystem ? 'System' : 'Yours'),
       ('Unit', landingUnitLabel(view.table.inputUnit)),
       ('Entries', '${view.results.length}'),
       ('Points range', LandingEntriesTable.pointsRange(view)),
@@ -236,18 +236,11 @@ class _LandingSectionBodyState extends State<LandingSectionBody> {
             children: [
               Icon(Icons.table_rows_outlined, color: scheme.primary),
               Text(view.table.name, style: theme.textTheme.titleMedium),
-              ConfigChip.neutral(
-                context,
-                icon: view.table.isSystem
-                    ? Icons.verified_outlined
-                    : Icons.person_outline,
-                text: view.table.isSystem ? 'System' : 'Yours',
-              ),
               if (view.table.id == defaultId)
                 ConfigChip.neutral(
                   context,
-                  icon: Icons.star_outline,
-                  text: 'Profile default',
+                  icon: Icons.verified_outlined,
+                  text: widget.draft.catalog.defaultLabel,
                 ),
               if (changed) ConfigChip.unsaved(context),
               if (fixed && widget.editable) ConfigChip.fixed(context),
