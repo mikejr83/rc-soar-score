@@ -12,8 +12,9 @@ class ContestModelLinks extends Table {
       text().references(Contests, #id, onDelete: KeyAction.cascade)();
   TextColumn get contestParticipationId =>
       text().references(ContestParticipations, #id)();
-  TextColumn get modelCatalogId =>
-      text().references(ModelCatalogs, #id).nullable()();
+  TextColumn get modelCatalogId => text()
+      .references(ModelCatalogs, #id, onDelete: KeyAction.setNull)
+      .nullable()();
   TextColumn get modelName => text()();
   TextColumn get manufacturer => text().nullable()();
   TextColumn get modelId => text()();

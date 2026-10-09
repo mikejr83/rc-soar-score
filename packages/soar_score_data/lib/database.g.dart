@@ -7503,7 +7503,7 @@ class $ContestConfigurationRevisionsTable extends ContestConfigurationRevisions
     type: DriftSqlType.string,
     requiredDuringInsert: false,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES contest_configuration_presets (id)',
+      'REFERENCES contest_configuration_presets (id) ON DELETE SET NULL',
     ),
   );
   static const VerificationMeta _configMeta = const VerificationMeta('config');
@@ -11164,7 +11164,7 @@ class $ContestModelLinksTable extends ContestModelLinks
     type: DriftSqlType.string,
     requiredDuringInsert: false,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES model_catalogs (id)',
+      'REFERENCES model_catalogs (id) ON DELETE SET NULL',
     ),
   );
   static const VerificationMeta _modelNameMeta = const VerificationMeta(
@@ -36300,6 +36300,15 @@ abstract class _$SoarScoreDatabase extends GeneratedDatabase {
     ),
     WritePropagation(
       on: TableUpdateQuery.onTableName(
+        'contest_configuration_presets',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [
+        TableUpdate('contest_configuration_revisions', kind: UpdateKind.update),
+      ],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
         'contests',
         limitUpdateKind: UpdateKind.delete,
       ),
@@ -36325,6 +36334,13 @@ abstract class _$SoarScoreDatabase extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('contest_model_links', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'model_catalogs',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('contest_model_links', kind: UpdateKind.update)],
     ),
     WritePropagation(
       on: TableUpdateQuery.onTableName(
