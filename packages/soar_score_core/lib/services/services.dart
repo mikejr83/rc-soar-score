@@ -37,6 +37,7 @@ export 'publication/publication_build.dart';
 export 'publication/publication_service.dart';
 export 'publication/publication_projection_builder.dart';
 export 'publication/publication_view.dart';
+export 'recalculation/recalculation_service.dart';
 export 'results_service.dart';
 export 'round_flight_result.dart';
 export 'round_results.dart';

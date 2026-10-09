@@ -6,7 +6,6 @@ import 'package:soar_score_api_handlers/auth/principal.dart';
 import 'package:soar_score_api_handlers/handlers/health_handler.dart';
 import 'package:soar_score_api_handlers/handlers/request_body.dart';
 import 'package:soar_score_api_handlers/handlers/write_metadata.dart';
-import 'package:soar_score_core/services/services.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 final _logger = Logger('Scores');
@@ -19,19 +18,26 @@ final _logger = Logger('Scores');
 ///   official score of one pilot in one group (201). Entering a score for a
 ///   slot that already has one is a correction and adds the next score
 ///   revision; the earlier ones are kept. The results are recalculated
-///   afterwards in a separate transaction; if that fails the score is kept
-///   and the results read as stale. On a server that publishes, the contest's
-///   public update mode then decides whether the entry also reaches the public
-///   projection; a failed publish is logged and audited, never an error.
+///   afterwards in a separate transaction; the entry retries that once and,
+///   if it still fails, keeps the score, leaves the results stale and warns
+///   the director on the entry response (ticket 297). On a server that
+///   publishes, the contest's public update mode then decides whether the
+///   entry also reaches the public projection; a failed publish is logged
+///   and audited, never an error.
 ///
 /// The handlers only translate between HTTP and [ScoresService].
+///
+/// [recalculation] defaults to a [RecalculationService] over [repository]; it
+/// is exposed so tests can force a recalculation failure (ticket 297).
 void addScoreRoutes(
   Router router,
   Repository repository, {
   bool publishingEnabled = false,
+  RecalculationService? recalculation,
 }) {
   final service = ScoresService(repository);
   final results = ResultsService(repository);
+  final recalculationService = recalculation ?? RecalculationService(results);
   final publicUpdates = PublicUpdateService(repository);
 
   router.get('/contests/<id>/scores', (Request request, String id) async {
@@ -48,7 +54,7 @@ void addScoreRoutes(
     final principal = requirePrincipal(request);
     final body = await readJsonBody(request, EnterScoreRequest.fromJson);
 
-    final result = await service.enterOfficialScore(
+    var result = await service.enterOfficialScore(
       Id.parse(id),
       Id.parse(assignmentId),
       clientMutationId: body.clientMutationId,
@@ -58,13 +64,14 @@ void addScoreRoutes(
       actorId: principal.accountId,
       metadata: writeMetadata(principal),
     );
-    try {
-      await results.recalculate(Id.parse(id));
-    } on Object catch (error, stackTrace) {
-      _logger.warning(
-        'Recalculation after a score entry failed; the results are stale',
-        error,
-        stackTrace,
+    final warning = await _recalculate(recalculationService, Id.parse(id));
+    if (warning != null) {
+      result = ScoreEntryResult(
+        officialScore: result.officialScore,
+        placeholder: result.placeholder,
+        contest: result.contest,
+        calculated: result.calculated,
+        recalculationWarning: warning,
       );
     }
     if (publishingEnabled) {
@@ -85,4 +92,26 @@ void addScoreRoutes(
     }
     return jsonResponse(result.toJson(), statusCode: 201);
   });
+}
+
+/// Runs the post-entry recalculation, retrying once, and returns the warning
+/// to put on the entry response — null when it succeeded.
+///
+/// A [ContestStateError] is a refusal (the contest is not configured, or its
+/// discipline is not calculated yet): it is not retried and it is rethrown so
+/// the handler answers 409.
+Future<String?> _recalculate(
+  RecalculationService recalculation,
+  Id contestId,
+) async {
+  try {
+    return await recalculation.recalculateAfterEntry(contestId);
+  } on ContestStateError catch (error, stackTrace) {
+    _logger.warning(
+      'Recalculation after a score entry refused; the results are stale',
+      error,
+      stackTrace,
+    );
+    rethrow;
+  }
 }

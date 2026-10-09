@@ -80,4 +80,5 @@ export 'repositories/unit_of_work.dart';
 export 'repositories/write_context.dart';
 export 'enums/enums.dart';
 export 'scoring/scoring.dart';
+export 'services/services.dart';
 export 'time/time.dart';

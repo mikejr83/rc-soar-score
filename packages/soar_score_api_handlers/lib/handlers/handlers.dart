@@ -14,6 +14,7 @@ import 'package:soar_score_api_handlers/handlers/publication_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/results_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/scores_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/teams_handlers.dart';
+import 'package:soar_score_core/services/recalculation/recalculation_service.dart';
 
 ({Handler healthHandler, Handler apiHandler, Handler publicHandler})
 createHandlers(
@@ -22,6 +23,7 @@ createHandlers(
   String version,
   Repository repository, {
   bool publishingEnabled = false,
+  RecalculationService? recalculation,
 }) {
   final router = Router()
     ..get(
@@ -36,7 +38,12 @@ createHandlers(
   addParticipationRoutes(router, repository);
   addTeamRoutes(router, repository);
   addMatrixRoutes(router, repository);
-  addScoreRoutes(router, repository, publishingEnabled: publishingEnabled);
+  addScoreRoutes(
+    router,
+    repository,
+    publishingEnabled: publishingEnabled,
+    recalculation: recalculation,
+  );
   addResultsRoutes(router, repository);
   addPublicationRoutes(router, repository, enabled: publishingEnabled);
 
