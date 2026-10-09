@@ -375,10 +375,7 @@ void main() {
           matrix: configDrawnMatrix(),
         ),
       );
-      expect(
-        find.text('Contest completed', skipOffstage: false),
-        findsWidgets,
-      );
+      expect(find.text('Contest completed', skipOffstage: false), findsWidgets);
       expect(find.text('Drawn and in sync'), findsNothing);
       expect(
         find.descendant(

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
+import 'package:soar_score_contest/router.dart';
 import 'package:soar_score_contest/services/new_contest/contest_draft_store.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
@@ -191,7 +192,7 @@ void main() {
       'contest once', (tester) async {
     final store = await _ready();
     final api = _FakeApi(failCreates: 1);
-    await pumpWizard(tester, respond: api.call, store: store);
+    final wizard = await pumpWizard(tester, respond: api.call, store: store);
 
     await next(tester);
     expect(find.byKey(const ValueKey('banner-create-failed')), findsOneWidget);
@@ -201,25 +202,25 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('create-retry')));
     await tester.pumpAndSettle();
 
-    expect(find.byKey(const ValueKey('contest-created')), findsOneWidget);
-    expect(find.text('Contest created'), findsOneWidget);
-    expect(find.text('Configuring'), findsOneWidget);
+    // The new contest's configuration page opens.
+    expect(
+      wizard.router.state.uri.path,
+      contestConfigurationPath(api.contest!.id.value),
+    );
+    expect(find.byKey(const ValueKey('contest-created')), findsNothing);
     expect(api.contestPosts, 2);
     expect(api.participations, hasLength(2));
     // The draft is gone; the draw values wait for the draw.
     expect(store.draft.name, isEmpty);
     expect(store.drawSuggestions, hasLength(1));
     expect(find.byKey(const ValueKey('draft-status')), findsNothing);
-
-    await tester.tap(find.byKey(const ValueKey('back-to-contests')));
-    await tester.pumpAndSettle();
     expect(find.byType(AlertDialog), findsNothing);
   });
 
   testWidgets('pressing Create twice submits once', (tester) async {
     final store = await _ready();
     final api = _FakeApi(delay: const Duration(seconds: 1));
-    await pumpWizard(tester, respond: api.call, store: store);
+    final wizard = await pumpWizard(tester, respond: api.call, store: store);
 
     await tester.tap(find.byKey(const ValueKey('wizard-primary')));
     await tester.tap(find.byKey(const ValueKey('wizard-primary')));
@@ -228,6 +229,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(api.contestPosts, 1);
-    expect(find.byKey(const ValueKey('contest-created')), findsOneWidget);
+    expect(
+      wizard.router.state.uri.path,
+      contestConfigurationPath(api.contest!.id.value),
+    );
   });
 }
