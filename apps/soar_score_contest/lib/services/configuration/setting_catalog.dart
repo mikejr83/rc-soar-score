@@ -43,6 +43,7 @@ class SettingCatalog {
               'another discipline, create a new contest.',
           type: SettingType.readOnly,
           readOnlyValue: DisciplineLabel.of(profile.profile),
+          readOnlyDetail: DisciplineLabel.taskOf(profile.profile),
         ),
         ...DisciplineSettings.of(profile),
       ],

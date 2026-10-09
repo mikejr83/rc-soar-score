@@ -77,6 +77,10 @@ void main() {
       ),
       findsOneWidget,
     );
+    expect(
+      find.text(WizardDiscipline.f5j.task, skipOffstage: false),
+      findsOneWidget,
+    );
     expect(find.text('Ready to draw'), findsNothing);
     expect(find.text('Can’t be drawn yet'), findsOneWidget);
   });
