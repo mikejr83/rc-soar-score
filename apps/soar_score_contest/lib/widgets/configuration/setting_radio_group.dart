@@ -96,7 +96,7 @@ class SettingRadioGroup extends StatelessWidget {
                 if (option.tag != null)
                   ConfigChip.neutral(
                     context,
-                    icon: Icons.star_outline,
+                    icon: Icons.verified_outlined,
                     text: option.tag!,
                   ),
               ],

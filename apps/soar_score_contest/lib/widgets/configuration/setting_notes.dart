@@ -67,6 +67,7 @@ abstract final class SettingNotes {
     if (def.official != null &&
         SettingValues.canon(def, value) !=
             SettingValues.canon(def, def.official)) {
+      final label = draft.catalog.defaultLabel;
       final official = SettingValues.display(def, def.official);
       final seconds = def.type == SettingType.duration
           ? ' (${SettingValues.parseDuration(def.official)} s)'
@@ -74,9 +75,9 @@ abstract final class SettingNotes {
       notes.add(
         ConfigNote(
           icon: Icons.home_outlined,
-          text: 'Official value: $official$seconds.',
+          text: '$label: $official$seconds.',
           tone: ConfigNoteTone.block,
-          actionLabel: fixed ? null : 'Reset to official',
+          actionLabel: fixed ? null : 'Reset to $label',
           actionIcon: Icons.restart_alt,
           onAction: () => set({key: def.official}),
         ),
@@ -212,12 +213,12 @@ abstract final class SettingNotes {
             : 'Drop the worst round after round ${round(SettingKeys.drop1)}, '
                   'and a second after round ${round(SettingKeys.drop2)}.',
       ),
-      if (drops > 0)
+      if (drops > 0 && draft['d_motor_restart_mode'] == 'non_droppable')
         const ConfigNote(
           icon: Icons.info_outline,
           text:
-              'Zero scores that can’t be dropped, such as a disqualification, '
-              'never are.',
+              'A round with a motor restart can’t be dropped (Motor restart '
+              'mode: Allowed, not dropped).',
         ),
     ];
   }
