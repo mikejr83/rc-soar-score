@@ -3,6 +3,8 @@ import 'package:soar_score_core/soar_score_core.dart';
 /// Flight results in memory, replaced per contest like the real repository.
 class StubFlightResultRepository implements FlightResultRepository {
   final List<FlightResult> stored = [];
+  StubParticipationStandingRepository? standingsRepo;
+  StubTeamStandingRepository? teamStandingsRepo;
 
   @override
   Future<List<FlightResult>> listForContest(Id contestId) async => [
@@ -18,6 +20,37 @@ class StubFlightResultRepository implements FlightResultRepository {
     stored
       ..removeWhere((result) => result.contestId == contestId)
       ..addAll(results);
+  }
+
+  @override
+  Future<void> replaceResultsForContest({
+    required Id contestId,
+    Iterable<FlightResult> flights = const [],
+    Iterable<ParticipationStanding> standings = const [],
+    Iterable<TeamStanding> teamStandings = const [],
+  }) async {
+    for (final flight in flights) {
+      if (flight.contestId != contestId) {
+        throw ArgumentError('a FlightResult belongs to another contest');
+      }
+    }
+    for (final standing in standings) {
+      if (standing.contestId != contestId) {
+        throw ArgumentError(
+          'a ParticipationStanding belongs to another contest',
+        );
+      }
+    }
+    for (final team in teamStandings) {
+      if (team.contestId != contestId) {
+        throw ArgumentError('a TeamStanding belongs to another contest');
+      }
+    }
+    stored
+      ..removeWhere((result) => result.contestId == contestId)
+      ..addAll(flights);
+    await standingsRepo?.replaceForContest(contestId, standings);
+    await teamStandingsRepo?.replaceForContest(contestId, teamStandings);
   }
 
   @override

@@ -41,4 +41,54 @@ class FlightResultRepository extends DriftRepository
     core.Id contestId,
     Iterable<core.FlightResult> results,
   ) => replaceRows(_store, contestId, results, (result) => result.contestId);
+
+  @override
+  Future<void> replaceResultsForContest({
+    required core.Id contestId,
+    Iterable<core.FlightResult> flights = const [],
+    Iterable<core.ParticipationStanding> standings = const [],
+    Iterable<core.TeamStanding> teamStandings = const [],
+  }) {
+    final flightList = flights.toList();
+    for (final flight in flightList) {
+      if (flight.contestId != contestId) {
+        throw ArgumentError('a FlightResult belongs to another contest');
+      }
+    }
+    final standingList = standings.toList();
+    for (final standing in standingList) {
+      if (standing.contestId != contestId) {
+        throw ArgumentError(
+          'a ParticipationStanding belongs to another contest',
+        );
+      }
+    }
+    final teamList = teamStandings.toList();
+    for (final team in teamList) {
+      if (team.contestId != contestId) {
+        throw ArgumentError('a TeamStanding belongs to another contest');
+      }
+    }
+
+    final standingStore = store<core.ParticipationStanding>(
+      'ParticipationStanding',
+    );
+    final teamStore = store<core.TeamStanding>('TeamStanding');
+
+    return db.transaction(() async {
+      await _store.removeWhereId('contest_id', contestId);
+      await standingStore.removeWhereId('contest_id', contestId);
+      await teamStore.removeWhereId('contest_id', contestId);
+
+      for (final flight in flightList) {
+        await _store.upsertJson(_store.encode(flight));
+      }
+      for (final standing in standingList) {
+        await standingStore.upsertJson(standingStore.encode(standing));
+      }
+      for (final team in teamList) {
+        await teamStore.upsertJson(teamStore.encode(team));
+      }
+    });
+  }
 }

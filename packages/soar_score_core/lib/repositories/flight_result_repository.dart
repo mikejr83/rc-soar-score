@@ -1,5 +1,7 @@
 import '../models/id.dart';
 import '../models/results/flight_result.dart';
+import '../models/results/participation_standing.dart';
+import '../models/results/team_standing.dart';
 
 /// Abstract persistence contract for [FlightResult]s.
 ///
@@ -22,4 +24,15 @@ abstract interface class FlightResultRepository {
   ///
   /// Throws an `ArgumentError` if a result belongs to another contest.
   Future<void> replaceForContest(Id contestId, Iterable<FlightResult> results);
+
+  /// Replaces every flight result, participation standing and team standing of
+  /// [contestId] in one transaction.
+  ///
+  /// Throws an [ArgumentError] if an entity belongs to another contest.
+  Future<void> replaceResultsForContest({
+    required Id contestId,
+    Iterable<FlightResult> flights = const [],
+    Iterable<ParticipationStanding> standings = const [],
+    Iterable<TeamStanding> teamStandings = const [],
+  });
 }

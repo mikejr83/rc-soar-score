@@ -53,7 +53,9 @@ class StubRepository implements core.Repository {
     scorePlaceholders,
   );
 
-  final flightResults = StubFlightResultRepository();
+  late final flightResults = StubFlightResultRepository()
+    ..standingsRepo = participationStandings
+    ..teamStandingsRepo = teamStandings;
   final participationStandings = StubParticipationStandingRepository();
   final teamStandings = StubTeamStandingRepository();
 

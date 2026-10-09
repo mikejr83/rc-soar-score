@@ -107,6 +107,195 @@ void _tests(Backend backend) {
 
       expect(await repo.listForContest(contestId), unorderedEquals(flights));
     });
+
+    test(
+      'replaceResultsForContest swaps all three tables atomically',
+      () async {
+        final keptFlights = flights.take(2).toList();
+        final keptStandings = standings.take(1).toList();
+        final keptTeams = teamStandings.take(1).toList();
+
+        await repo.replaceResultsForContest(
+          contestId: contestId,
+          flights: keptFlights,
+          standings: keptStandings,
+          teamStandings: keptTeams,
+        );
+
+        expect(
+          await repo.listForContest(contestId),
+          unorderedEquals(keptFlights),
+        );
+        expect(
+          await repository.participationStandingRepository.listForContest(
+            contestId,
+          ),
+          unorderedEquals(keptStandings),
+        );
+        expect(
+          await repository.teamStandingRepository.listForContest(contestId),
+          unorderedEquals(keptTeams),
+        );
+      },
+    );
+
+    test(
+      'replaceResultsForContest with nothing clears all three tables',
+      () async {
+        await repo.replaceResultsForContest(contestId: contestId);
+
+        expect(await repo.listForContest(contestId), isEmpty);
+        expect(
+          await repository.participationStandingRepository.listForContest(
+            contestId,
+          ),
+          isEmpty,
+        );
+        expect(
+          await repository.teamStandingRepository.listForContest(contestId),
+          isEmpty,
+        );
+      },
+    );
+
+    test('replaceResultsForContest refuses when an entity belongs to another contest', () async {
+      final foreignFlight = core.FlightResult.fromJson({
+        ...flights.first.toJson(),
+        'id': core.Id.create().value,
+        'contest_id': core.Id.create().value,
+      });
+      final foreignStanding = core.ParticipationStanding.fromJson({
+        ...standings.first.toJson(),
+        'id': core.Id.create().value,
+        'contest_id': core.Id.create().value,
+      });
+      final foreignTeam = core.TeamStanding.fromJson({
+        ...teamStandings.first.toJson(),
+        'id': core.Id.create().value,
+        'contest_id': core.Id.create().value,
+      });
+
+      expect(
+        () => repo.replaceResultsForContest(
+          contestId: contestId,
+          flights: [foreignFlight],
+        ),
+        throwsArgumentError,
+      );
+      expect(
+        () => repo.replaceResultsForContest(
+          contestId: contestId,
+          standings: [foreignStanding],
+        ),
+        throwsArgumentError,
+      );
+      expect(
+        () => repo.replaceResultsForContest(
+          contestId: contestId,
+          teamStandings: [foreignTeam],
+        ),
+        throwsArgumentError,
+      );
+
+      expect(await repo.listForContest(contestId), unorderedEquals(flights));
+      expect(
+        await repository.participationStandingRepository.listForContest(
+          contestId,
+        ),
+        unorderedEquals(standings),
+      );
+      expect(
+        await repository.teamStandingRepository.listForContest(contestId),
+        unorderedEquals(teamStandings),
+      );
+    });
+
+    test('replaceResultsForContest leaves all three tables untouched when a flight fails', () async {
+      final duplicate = core.FlightResult.fromJson({
+        ...flights.first.toJson(),
+        'id': core.Id.create().value,
+      });
+
+      await expectLater(
+        repo.replaceResultsForContest(
+          contestId: contestId,
+          flights: [flights.first, duplicate],
+          standings: standings.take(1),
+          teamStandings: teamStandings.take(1),
+        ),
+        throwsA(anything),
+      );
+
+      expect(await repo.listForContest(contestId), unorderedEquals(flights));
+      expect(
+        await repository.participationStandingRepository.listForContest(
+          contestId,
+        ),
+        unorderedEquals(standings),
+      );
+      expect(
+        await repository.teamStandingRepository.listForContest(contestId),
+        unorderedEquals(teamStandings),
+      );
+    });
+
+    test('replaceResultsForContest leaves all three tables untouched when a standing fails', () async {
+      final duplicate = core.ParticipationStanding.fromJson({
+        ...standings.first.toJson(),
+        'id': core.Id.create().value,
+      });
+
+      await expectLater(
+        repo.replaceResultsForContest(
+          contestId: contestId,
+          flights: flights.take(1),
+          standings: [standings.first, duplicate],
+          teamStandings: teamStandings.take(1),
+        ),
+        throwsA(anything),
+      );
+
+      expect(await repo.listForContest(contestId), unorderedEquals(flights));
+      expect(
+        await repository.participationStandingRepository.listForContest(
+          contestId,
+        ),
+        unorderedEquals(standings),
+      );
+      expect(
+        await repository.teamStandingRepository.listForContest(contestId),
+        unorderedEquals(teamStandings),
+      );
+    });
+
+    test('replaceResultsForContest leaves all three tables untouched when a team standing fails', () async {
+      final duplicate = core.TeamStanding.fromJson({
+        ...teamStandings.first.toJson(),
+        'id': core.Id.create().value,
+      });
+
+      await expectLater(
+        repo.replaceResultsForContest(
+          contestId: contestId,
+          flights: flights.take(1),
+          standings: standings.take(1),
+          teamStandings: [teamStandings.first, duplicate],
+        ),
+        throwsA(anything),
+      );
+
+      expect(await repo.listForContest(contestId), unorderedEquals(flights));
+      expect(
+        await repository.participationStandingRepository.listForContest(
+          contestId,
+        ),
+        unorderedEquals(standings),
+      );
+      expect(
+        await repository.teamStandingRepository.listForContest(contestId),
+        unorderedEquals(teamStandings),
+      );
+    });
   });
 
   group('ParticipationStandingRepository', () {
