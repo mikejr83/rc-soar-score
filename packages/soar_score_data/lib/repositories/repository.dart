@@ -93,7 +93,13 @@ class Repository implements core.Repository {
       participantDirectoryEntryRepository = ParticipantDirectoryEntryRepository(
         database,
         stores: stores,
-      );
+      ),
+      installationRepository = InstallationRepository(database, stores: stores),
+      installationActivationRepository = InstallationActivationRepository(
+        database,
+        stores: stores,
+      ),
+      syncCursorRepository = SyncCursorRepository(database, stores: stores);
 
   @override
   final core.ContestRepository contestRepository;
@@ -192,6 +198,15 @@ class Repository implements core.Repository {
   @override
   final core.ParticipantDirectoryEntryRepository
   participantDirectoryEntryRepository;
+
+  @override
+  final core.InstallationRepository installationRepository;
+
+  @override
+  final core.InstallationActivationRepository installationActivationRepository;
+
+  @override
+  final core.SyncCursorRepository syncCursorRepository;
 }
 
 Repository createRepository(SoarScoreDatabase database) => Repository(database);
