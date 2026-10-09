@@ -28,6 +28,7 @@ void main() {
         r.participantAccountLinkRepository.listForAccount(anyId),
     'participant directory entries': (r) =>
         r.participantDirectoryEntryRepository.listListed(),
+    'invitations': (r) => r.invitationRepository.listForContest(anyId),
   };
 
   for (final MapEntry(:key, :value) in calls.entries) {

@@ -35,6 +35,7 @@ void main() {
         'backend-only; needs a server demo (#305)',
     'reFlightRepository': 're-flights are awarded in #136',
     'reFlightParticipantRepository': 're-flights are awarded in #136',
+    'invitationRepository': 'backend-only; needs a server demo (#305)',
   };
 
   /// Repositories the demo fills through a service rather than by name.

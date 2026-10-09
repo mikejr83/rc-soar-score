@@ -99,7 +99,8 @@ class Repository implements core.Repository {
         database,
         stores: stores,
       ),
-      syncCursorRepository = SyncCursorRepository(database, stores: stores);
+      syncCursorRepository = SyncCursorRepository(database, stores: stores),
+      invitationRepository = InvitationRepository(database, stores: stores);
 
   @override
   final core.ContestRepository contestRepository;
@@ -207,6 +208,8 @@ class Repository implements core.Repository {
 
   @override
   final core.SyncCursorRepository syncCursorRepository;
+
+  final core.InvitationRepository invitationRepository;
 }
 
 Repository createRepository(SoarScoreDatabase database) => Repository(database);
