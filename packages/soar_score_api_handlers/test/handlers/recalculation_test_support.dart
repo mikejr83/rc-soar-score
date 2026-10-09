@@ -7,10 +7,7 @@ import '../stubs/stub_repository.dart';
 /// [recalculate], so the post-entry recalculation fails twice and the
 /// handler reports a warning (ticket 297).
 class AlwaysFailingResults extends core.ResultsService {
-  AlwaysFailingResults()
-    : super(
-        StubRepository(StubContestRepository()),
-      );
+  AlwaysFailingResults() : super(StubRepository(StubContestRepository()));
 
   @override
   Future<core.ContestResults> recalculate(core.Id contestId) async {
@@ -22,10 +19,7 @@ class AlwaysFailingResults extends core.ResultsService {
 /// succeeds on the second, to prove the single retry and that a recovered
 /// recalculation carries no warning.
 class FlakyResults extends core.ResultsService {
-  FlakyResults(this._attempts)
-    : super(
-        StubRepository(StubContestRepository()),
-      );
+  FlakyResults(this._attempts) : super(StubRepository(StubContestRepository()));
 
   final List<int> _attempts;
 
@@ -36,5 +30,23 @@ class FlakyResults extends core.ResultsService {
       throw StateError('transient failure');
     }
     return core.ContestResults(isStale: false);
+  }
+}
+
+/// A [ResultsService] that refuses recalculation without treating the
+/// already-committed score entry as a failed request.
+class RefusingResults extends core.ResultsService {
+  RefusingResults(this._attempts)
+    : super(StubRepository(StubContestRepository()));
+
+  final List<int> _attempts;
+
+  @override
+  Future<core.ContestResults> recalculate(core.Id contestId) async {
+    _attempts.add(1);
+    throw core.ContestStateError(
+      'not_configured',
+      'the contest has no configuration yet',
+    );
   }
 }

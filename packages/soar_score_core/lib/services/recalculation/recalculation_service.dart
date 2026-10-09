@@ -15,9 +15,9 @@ final _logger = Logger('RecalculationService');
 /// 297). This class owns only the retry-and-report behaviour; the actual
 /// calculation is [ResultsService.recalculate].
 ///
-/// A [ContestStateError] (the contest is not configured, or its discipline is
-/// not calculated yet) is a refusal, not a transient failure: it is not
-/// retried and it is rethrown so the handler can answer 409.
+/// A [ContestStateError] is a refusal, not a transient failure: it is not
+/// retried, but is reported as a warning because the score entry has already
+/// been committed.
 class RecalculationService {
   RecalculationService(this._results);
 
@@ -26,16 +26,18 @@ class RecalculationService {
   /// Recalculates the results of [contestId] after a score entry.
   ///
   /// Returns `null` when the recalculation succeeded (possibly after one
-  /// retry), or a warning string naming the failure when it failed twice.
-  /// The score that triggered it is already stored in both cases; the
-  /// results read as stale until a later recalculation succeeds.
+  /// retry), or a warning string when recalculation fails or is refused.
+  /// The score that triggered it is already stored in both cases; the results
+  /// read as stale until a later recalculation succeeds.
   Future<String?> recalculateAfterEntry(Id contestId) async {
     try {
       await _results.recalculate(contestId);
       return null;
-    } on ContestStateError {
-      // A refusal: not transient, not retried. The handler answers 409.
-      rethrow;
+    } on ContestStateError catch (error, stackTrace) {
+      const warning =
+          'Recalculation was refused after a score entry; the results are stale';
+      _logger.warning(warning, error, stackTrace);
+      return warning;
     } on Object catch (error, stackTrace) {
       _logger.warning(
         'Recalculation after a score entry failed; retrying once',
@@ -46,8 +48,6 @@ class RecalculationService {
     try {
       await _results.recalculate(contestId);
       return null;
-    } on ContestStateError {
-      rethrow;
     } on Object catch (error, stackTrace) {
       final warning =
           'Recalculation failed after a score entry; the results are stale';

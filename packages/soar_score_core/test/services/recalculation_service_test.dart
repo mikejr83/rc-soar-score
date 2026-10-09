@@ -109,14 +109,13 @@ void main() {
       expect(attempts, hasLength(2));
     });
 
-    test('rethrows a ContestStateError without retrying', () async {
+    test('returns a warning for a ContestStateError without retrying', () async {
       final attempts = <int>[];
       final service = RecalculationService(_RefusingResults(attempts));
 
-      await expectLater(
-        service.recalculateAfterEntry(Id.create()),
-        throwsA(isA<ContestStateError>()),
-      );
+      final warning = await service.recalculateAfterEntry(Id.create());
+
+      expect(warning, contains('refused'));
       expect(attempts, hasLength(1));
     });
   });

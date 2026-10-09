@@ -1,4 +1,5 @@
 import 'package:soar_score_core/soar_score_core.dart';
+import 'package:shelf/shelf.dart';
 import 'package:test/test.dart';
 
 import 'handler_test_support.dart';
@@ -8,11 +9,10 @@ import 'recalculation_test_support.dart';
 final _owner = Id.parse('019c0000-0000-7000-8000-000000000001');
 const _contestId = matrixTestContestId;
 
-Future<Map<String, Object?>> _enterScore(
+Future<Response> _enterScoreResponse(
   HandlerHarness api,
   String mutationId,
-) async {
-  final response = await api.send(
+) async => api.send(
     'POST',
     '/contests/$_contestId/assignments/'
     '${(await assignmentOfPilot(api, 1))['id']}/scores',
@@ -26,6 +26,12 @@ Future<Map<String, Object?>> _enterScore(
       },
     },
   );
+
+Future<Map<String, Object?>> _enterScore(
+  HandlerHarness api,
+  String mutationId,
+) async {
+  final response = await _enterScoreResponse(api, mutationId);
   return api.json(response);
 }
 
@@ -73,6 +79,24 @@ void main() {
       final body = await _enterScore(api, 'entry-1');
 
       expect(body['recalculation_warning'], isNull);
+    });
+
+    test('a recalculation refusal warns without changing the successful '
+        'entry response', () async {
+      final attempts = <int>[];
+      final api = HandlerHarness(
+        _owner,
+        recalculation: RecalculationService(RefusingResults(attempts)),
+      );
+      await drawnContest(api);
+
+      final response = await _enterScoreResponse(api, 'entry-1');
+      final body = await api.json(response);
+
+      expect(response.statusCode, 201);
+      expect(api.repository.officialScores.stored, hasLength(1));
+      expect(body['recalculation_warning'], contains('refused'));
+      expect(attempts, hasLength(1));
     });
   });
 }

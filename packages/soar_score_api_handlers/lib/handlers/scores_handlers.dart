@@ -64,7 +64,9 @@ void addScoreRoutes(
       actorId: principal.accountId,
       metadata: writeMetadata(principal),
     );
-    final warning = await _recalculate(recalculationService, Id.parse(id));
+    final warning = await recalculationService.recalculateAfterEntry(
+      Id.parse(id),
+    );
     if (warning != null) {
       result = ScoreEntryResult(
         officialScore: result.officialScore,
@@ -92,26 +94,4 @@ void addScoreRoutes(
     }
     return jsonResponse(result.toJson(), statusCode: 201);
   });
-}
-
-/// Runs the post-entry recalculation, retrying once, and returns the warning
-/// to put on the entry response — null when it succeeded.
-///
-/// A [ContestStateError] is a refusal (the contest is not configured, or its
-/// discipline is not calculated yet): it is not retried and it is rethrown so
-/// the handler answers 409.
-Future<String?> _recalculate(
-  RecalculationService recalculation,
-  Id contestId,
-) async {
-  try {
-    return await recalculation.recalculateAfterEntry(contestId);
-  } on ContestStateError catch (error, stackTrace) {
-    _logger.warning(
-      'Recalculation after a score entry refused; the results are stale',
-      error,
-      stackTrace,
-    );
-    rethrow;
-  }
 }
