@@ -20,6 +20,8 @@ import 'publication_identity_repository.dart';
 import 'publication_participant_repository.dart';
 import 'publication_projection_repository.dart';
 import 'publication_publisher.dart';
+import 're_flight_participant_repository.dart';
+import 're_flight_repository.dart';
 import 'role_repository.dart';
 import 'round_group_repository.dart';
 import 'round_repository.dart';
@@ -59,6 +61,10 @@ abstract interface class Repository {
   RoundGroupRepository get roundGroupRepository;
 
   MatrixAssignmentRepository get matrixAssignmentRepository;
+
+  ReFlightRepository get reFlightRepository;
+
+  ReFlightParticipantRepository get reFlightParticipantRepository;
 
   ScorePlaceholderRepository get scorePlaceholderRepository;
 

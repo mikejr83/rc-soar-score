@@ -39,6 +39,11 @@ class Repository implements core.Repository {
         database,
         stores: stores,
       ),
+      reFlightRepository = ReFlightRepository(database, stores: stores),
+      reFlightParticipantRepository = ReFlightParticipantRepository(
+        database,
+        stores: stores,
+      ),
       scorePlaceholderRepository = ScorePlaceholderRepository(
         database,
         stores: stores,
@@ -129,6 +134,12 @@ class Repository implements core.Repository {
 
   @override
   final core.MatrixAssignmentRepository matrixAssignmentRepository;
+
+  @override
+  final core.ReFlightRepository reFlightRepository;
+
+  @override
+  final core.ReFlightParticipantRepository reFlightParticipantRepository;
 
   @override
   final core.ScorePlaceholderRepository scorePlaceholderRepository;
