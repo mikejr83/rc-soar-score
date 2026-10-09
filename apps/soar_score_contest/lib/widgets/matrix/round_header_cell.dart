@@ -13,6 +13,7 @@ class RoundHeaderCell extends StatelessWidget {
     required this.round,
     required this.pilotCount,
     required this.textScale,
+    this.dropNumber = 0,
   });
 
   final GridRound round;
@@ -20,6 +21,10 @@ class RoundHeaderCell extends StatelessWidget {
   /// The scoring pilots in the matrix, for the exactly-once check.
   final int pilotCount;
   final double textScale;
+
+  /// 1 or 2 when the contest drops a round score once this round is
+  /// complete (the first or second drop); 0 when no drop starts here.
+  final int dropNumber;
 
   @override
   Widget build(BuildContext context) {
@@ -89,6 +94,19 @@ class RoundHeaderCell extends StatelessWidget {
                           Icons.lock_outline,
                           size: 16,
                           semanticLabel: 'Round locked',
+                          color: scheme.onSurfaceVariant,
+                        ),
+                      ),
+                    if (dropNumber > 0)
+                      Tooltip(
+                        message:
+                            'Drop $dropNumber: the lowest round score is '
+                            'dropped once this round is complete',
+                        child: Icon(
+                          Icons.arrow_circle_down_outlined,
+                          size: 16,
+                          semanticLabel:
+                              'Drop $dropNumber starts after this round',
                           color: scheme.onSurfaceVariant,
                         ),
                       ),

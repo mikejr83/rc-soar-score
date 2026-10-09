@@ -29,9 +29,13 @@ class MatrixGrid extends StatefulWidget {
     required this.teamFilter,
     required this.onSelect,
     required this.controller,
+    this.dropAfterRounds = const [],
   });
 
   final MatrixGridModel model;
+
+  /// The rounds after which the contest drops a round score.
+  final List<int> dropAfterRounds;
   final TeamMarkers markers;
   final Id? selected;
   final String query;
@@ -249,6 +253,11 @@ class _MatrixGridState extends State<MatrixGrid> {
                     round: model.rounds[column - 1],
                     pilotCount: model.pilots.length,
                     textScale: _scale,
+                    dropNumber:
+                        widget.dropAfterRounds.indexOf(
+                          model.rounds[column - 1].ordinal,
+                        ) +
+                        1,
                   ),
                 ),
               );

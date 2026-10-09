@@ -116,6 +116,7 @@ class _MatrixDrawnViewState extends State<MatrixDrawnView> {
         final narrow = constraints.maxWidth < narrowWidth;
         final grid = MatrixGrid(
           model: _model,
+          dropAfterRounds: data.options?.dropAfterRounds ?? const [],
           markers: data.markers,
           selected: _selected,
           query: query,
