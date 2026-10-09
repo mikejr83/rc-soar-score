@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'config_phase.dart';
 import 'configuration_data.dart';
 import 'configuration_draft.dart';
 import 'draw_readiness.dart';
@@ -26,9 +27,9 @@ class ReadinessLine {
   final BlockerFix? fix;
 }
 
-/// What the matrix readiness panel says: whether the matrix can be drawn, or
-/// what the drawn matrix was drawn with and where the configuration has
-/// moved on from it.
+/// What the matrix readiness panel says: that the contest is completed, or
+/// whether the matrix can be drawn, or what the drawn matrix was drawn with
+/// and where the configuration has moved on from it.
 class ReadinessSummary {
   const ReadinessSummary({
     required this.icon,
@@ -43,6 +44,16 @@ class ReadinessSummary {
     ConfigurationData data,
     ConfigurationDraft? draft,
   ) {
+    // A completed contest is finished, not a problem state: no draw, no sync.
+    if (data.phase == ConfigPhase.completed) {
+      return const ReadinessSummary(
+        icon: Icons.flag_outlined,
+        title: 'Contest completed',
+        ok: true,
+        facts: [],
+        lines: [],
+      );
+    }
     final matrix = data.matrix;
     final pilots = data.scoringPilots;
     if (matrix == null) {
@@ -148,7 +159,8 @@ class ReadinessSummary {
   final IconData icon;
   final String title;
 
-  /// The matrix can be drawn, or is drawn and in sync.
+  /// The contest is completed, or the matrix can be drawn, or is drawn and in
+  /// sync.
   final bool ok;
   final List<(String, String)> facts;
   final List<ReadinessLine> lines;

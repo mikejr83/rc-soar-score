@@ -301,8 +301,57 @@ void main() {
         revision: configRevision(1),
       ),
     );
-    expect(find.text('Contest completed'), findsOneWidget);
+    // The page banner and the readiness panel both say it now.
+    expect(find.text('Contest completed'), findsWidgets);
   });
+
+  testWidgets(
+    'a completed contest with a drawn matrix: finished, participants locked',
+    (tester) async {
+      await _pump(
+        tester,
+        ConfigServer(
+          contest: configContest(state: LifecycleState.completed),
+          revision: configRevision(1),
+          participations: [configParticipation(1), configParticipation(2)],
+          matrix: configDrawnMatrix(),
+        ),
+      );
+      expect(
+        find.text('Contest completed', skipOffstage: false),
+        findsWidgets,
+      );
+      expect(find.text('Drawn and in sync'), findsNothing);
+      expect(
+        find.descendant(
+          of: find.byKey(const ValueKey('nav-participants')),
+          matching: find.byIcon(Icons.lock),
+        ),
+        findsOneWidget,
+      );
+    },
+  );
+
+  testWidgets(
+    'an admin-locked contest does not add a read-only mark to participants',
+    (tester) async {
+      await _pump(
+        tester,
+        ConfigServer(
+          contest: configContest(lock: AdminLock.locked),
+          revision: configRevision(1),
+          participations: [configParticipation(1), configParticipation(2)],
+        ),
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(const ValueKey('nav-participants')),
+          matching: find.text('Read-only'),
+        ),
+        findsNothing,
+      );
+    },
+  );
 
   testWidgets('another device saved first: latest is shown, edits kept', (
     tester,

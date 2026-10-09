@@ -244,14 +244,14 @@ Every generated matrix revision produces a structured **Fairness Report** stored
 
 ### 7.1. Metric Summary Attributes
 
-| Metric                      | Description                                                                                                                           | Target                                                                          |
+| Metric | Description | Target |
 | :-------------------------- | :------------------------------------------------------------------------------------------------------------------------------------ | :------------------------------------------------------------------------------ | ----------------------------------------------------------- | ------------------------------------------ |
-| **Max Duplicate Matchups**  | The maximum number of times any single feasible pair of pilots $(p_i, p_j)$ fly against each other.                                   | $\le \lceil \mu \rceil + 1$ (Standard mode)                                     |
-| **Matchup Distribution**    | Histogram of feasible-pair matchup counts: `0 times`, `1 time`, `2 times`, `3+ times`.                                                | Concentrated near $\lfloor \mu \rfloor$ and $\lceil \mu \rceil$ (Standard mode) |
-| **Unmet Opponent Count**    | Number of **feasible** pilot pairs who never fly against each other ($c = 0$). Teammates under team protection are not counted.       | Minimized given $R$ and $G$                                                     |
-| **Mean Absolute Deviation** | Mean of $                                                                                                                             | c - \mu                                                                         | $ over feasible pairs, shown with the matchup distribution. | Approaching $2 f (1 - f)$, the lower bound |
-| **Lane Uniformity Index**   | Standard deviation of lane usage across all pilots.                                                                                   | Approaching 0                                                                   |
-| **Overall Fairness Score**  | Normalized score from $0\%$ to $100\%$ comparing achieved $J$ against $J_{\text{ideal}}$ (100%) and $J_{\text{worst}}$ (0%), see 7.2. | $\ge 90\%$ (Standard mode)                                                      |
+| **Max Duplicate Matchups** | The maximum number of times any single feasible pair of pilots $(p_i, p_j)$ fly against each other. | $\le \lceil \mu \rceil + 1$ (Standard mode) |
+| **Matchup Distribution** | Histogram of feasible-pair matchup counts: `0 times`, `1 time`, `2 times`, `3+ times`. | Concentrated near $\lfloor \mu \rfloor$ and $\lceil \mu \rceil$ (Standard mode) |
+| **Unmet Opponent Count** | Number of **feasible** pilot pairs who never fly against each other ($c = 0$). Teammates under team protection are not counted. | Minimized given $R$ and $G$ |
+| **Mean Absolute Deviation** | Mean of $ | c - \mu | $ over feasible pairs, shown with the matchup distribution. | Approaching $2 f (1 - f)$, the lower bound |
+| **Lane Uniformity Index** | Standard deviation of lane usage across all pilots. | Approaching 0 |
+| **Overall Fairness Score** | Normalized score from $0\%$ to $100\%$ comparing achieved $J$ against $J_{\text{ideal}}$ (100%) and $J_{\text{worst}}$ (0%), see 7.2. | $\ge 90\%$ (Standard mode) |
 
 ### 7.2. Fairness Score Scale
 
