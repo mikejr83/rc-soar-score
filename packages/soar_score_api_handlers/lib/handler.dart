@@ -2,7 +2,8 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:soar_score_api_handlers/handlers/handlers.dart';
 import 'package:soar_score_api_handlers/middleware/middleware.dart';
-import 'package:soar_score_core/soar_score_core.dart';
+import 'package:soar_score_core/repositories/repository.dart';
+import 'package:soar_score_core/services/recalculation/recalculation_service.dart';
 import 'package:logging/logging.dart';
 
 /// Auth layer for the `/api/v1` subtree.
@@ -52,6 +53,7 @@ Handler buildApiHandler({
   required Repository repository,
   AuthMiddleware? authMiddleware,
   bool publishingEnabled = false,
+  RecalculationService? recalculation,
 }) {
   final handlers = createHandlers(
     name,
@@ -59,6 +61,7 @@ Handler buildApiHandler({
     version,
     repository,
     publishingEnabled: publishingEnabled,
+    recalculation: recalculation,
   );
   Handler api = handlers.apiHandler;
 

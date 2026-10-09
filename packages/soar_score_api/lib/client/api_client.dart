@@ -545,6 +545,10 @@ class ApiClient {
   /// locked contest, group or score, a contest that is not being flown, or a
   /// slot whose score changed since it was read is an [ApiHttpError] with
   /// status 409; components the discipline refuses are status 400.
+  ///
+  /// The entry is followed by a recalculation, retried once. When it fails
+  /// twice the score is still stored, the results read as stale, and
+  /// [ScoreEntryResult.recalculationWarning] carries the notice (ticket 297).
   Future<ScoreEntryResult> enterScore(
     Id contestId,
     Id assignmentId,
