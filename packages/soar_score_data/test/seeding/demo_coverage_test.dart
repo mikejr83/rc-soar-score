@@ -21,6 +21,10 @@ void main() {
     'publicationParticipantRepository':
         'backend-only; needs a server demo (#291)',
     'delistRequestRepository': 'backend-only; needs a server demo (#291)',
+    'installationRepository': 'backend-only; needs a server demo (#305)',
+    'installationActivationRepository':
+        'backend-only; needs a server demo (#305)',
+    'syncCursorRepository': 'backend-only; needs a server demo (#305)',
     'accountRepository': 'backend-only; needs a server demo (#305)',
     'accountIdentityRepository': 'backend-only; needs a server demo (#305)',
     'accountPublicProfileRepository':

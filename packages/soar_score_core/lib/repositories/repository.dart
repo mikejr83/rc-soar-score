@@ -7,6 +7,8 @@ import 'contest_repository.dart';
 import 'delist_request_repository.dart';
 import 'discipline_profile_repository.dart';
 import 'flight_result_repository.dart';
+import 'installation_activation_repository.dart';
+import 'installation_repository.dart';
 import 'landing_table_repository.dart';
 import 'matrix_assignment_repository.dart';
 import 'matrix_revision_repository.dart';
@@ -27,6 +29,7 @@ import 'round_group_repository.dart';
 import 'round_repository.dart';
 import 'score_attempt_repository.dart';
 import 'score_placeholder_repository.dart';
+import 'sync_cursor_repository.dart';
 import 'team_membership_repository.dart';
 import 'team_repository.dart';
 import 'team_standing_repository.dart';
@@ -99,4 +102,10 @@ abstract interface class Repository {
   ParticipantAccountLinkRepository get participantAccountLinkRepository;
 
   ParticipantDirectoryEntryRepository get participantDirectoryEntryRepository;
+
+  InstallationRepository get installationRepository;
+
+  InstallationActivationRepository get installationActivationRepository;
+
+  SyncCursorRepository get syncCursorRepository;
 }
