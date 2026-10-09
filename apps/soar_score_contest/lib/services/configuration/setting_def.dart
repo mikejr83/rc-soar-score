@@ -54,6 +54,7 @@ class SettingDef {
     this.heading,
     this.headingHelp,
     this.readOnlyValue,
+    this.readOnlyDetail,
   });
 
   final String key;
@@ -78,6 +79,9 @@ class SettingDef {
   final String? heading;
   final String? headingHelp;
   final String? readOnlyValue;
+
+  /// A line under [readOnlyValue].
+  final String? readOnlyDetail;
 
   /// The label of the option whose value is [value], or `null`.
   String? optionLabel(Object? value) {

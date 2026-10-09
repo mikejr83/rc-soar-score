@@ -154,7 +154,10 @@ class SettingField extends StatelessWidget {
           blocked: _blockedOptions(),
         );
       case SettingType.select || SettingType.readOnly:
-        return _ReadOnlyValue(text: def.readOnlyValue ?? '${value ?? ''}');
+        return _ReadOnlyValue(
+          text: def.readOnlyValue ?? '${value ?? ''}',
+          detail: def.readOnlyDetail,
+        );
     }
   }
 
@@ -205,9 +208,10 @@ class SettingField extends StatelessWidget {
 }
 
 class _ReadOnlyValue extends StatelessWidget {
-  const _ReadOnlyValue({required this.text});
+  const _ReadOnlyValue({required this.text, this.detail});
 
   final String text;
+  final String? detail;
 
   @override
   Widget build(BuildContext context) {
@@ -222,7 +226,21 @@ class _ReadOnlyValue extends StatelessWidget {
             color: theme.colorScheme.onSurfaceVariant,
           ),
           const SizedBox(width: 10),
-          Expanded(child: Text(text, style: theme.textTheme.bodyLarge)),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(text, style: theme.textTheme.bodyLarge),
+                if (detail != null)
+                  Text(
+                    detail!,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+              ],
+            ),
+          ),
         ],
       ),
     );

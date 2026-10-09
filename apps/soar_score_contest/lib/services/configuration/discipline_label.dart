@@ -9,6 +9,11 @@ abstract final class DisciplineLabel {
   static String of(DisciplineProfile profile) =>
       WizardDiscipline.forProfile(profile.id)?.name ?? profile.name;
 
+  /// The wizard's one-sentence description of the discipline's task, or
+  /// `null` for a profile the wizard has no card for.
+  static String? taskOf(DisciplineProfile profile) =>
+      WizardDiscipline.forProfile(profile.id)?.task;
+
   /// `F5J default`.
   static String defaultOf(DisciplineProfile profile) =>
       '${of(profile)} default';
