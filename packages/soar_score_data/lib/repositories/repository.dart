@@ -100,7 +100,14 @@ class Repository implements core.Repository {
         stores: stores,
       ),
       syncCursorRepository = SyncCursorRepository(database, stores: stores),
-      invitationRepository = InvitationRepository(database, stores: stores);
+      invitationRepository = InvitationRepository(database, stores: stores),
+      modelCatalogRepository = ModelCatalogRepository(database, stores: stores),
+      contestConfigurationPresetRepository =
+          ContestConfigurationPresetRepository(database, stores: stores),
+      contestModelLinkRepository = ContestModelLinkRepository(
+        database,
+        stores: stores,
+      );
 
   @override
   final core.ContestRepository contestRepository;
@@ -210,6 +217,16 @@ class Repository implements core.Repository {
   final core.SyncCursorRepository syncCursorRepository;
 
   final core.InvitationRepository invitationRepository;
+
+  @override
+  final core.ModelCatalogRepository modelCatalogRepository;
+
+  @override
+  final core.ContestConfigurationPresetRepository
+  contestConfigurationPresetRepository;
+
+  @override
+  final core.ContestModelLinkRepository contestModelLinkRepository;
 }
 
 Repository createRepository(SoarScoreDatabase database) => Repository(database);

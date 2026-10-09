@@ -25,6 +25,12 @@ void main() {
     'installationActivationRepository':
         'backend-only; needs a server demo (#305)',
     'syncCursorRepository': 'backend-only; needs a server demo (#305)',
+    'modelCatalogRepository':
+        'not used by a screen yet; needs demo data (#288)',
+    'contestConfigurationPresetRepository':
+        'not used by a screen yet; needs demo data (#288)',
+    'contestModelLinkRepository':
+        'not used by a screen yet; needs demo data (#288)',
     'accountRepository': 'backend-only; needs a server demo (#305)',
     'accountIdentityRepository': 'backend-only; needs a server demo (#305)',
     'accountPublicProfileRepository':

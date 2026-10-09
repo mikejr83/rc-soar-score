@@ -14,8 +14,9 @@ class ContestConfigurationRevisions extends Table {
   IntColumn get revisionNumber => integer()();
   TextColumn get disciplineProfileId =>
       text().references(DisciplineProfiles, #id)();
-  TextColumn get sourcePresetId =>
-      text().references(ContestConfigurationPresets, #id).nullable()();
+  TextColumn get sourcePresetId => text()
+      .references(ContestConfigurationPresets, #id, onDelete: KeyAction.setNull)
+      .nullable()();
   TextColumn get config => text()();
   TextColumn get landingTableId =>
       text().references(LandingTables, #id).nullable()();
