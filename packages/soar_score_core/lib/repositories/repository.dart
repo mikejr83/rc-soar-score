@@ -9,6 +9,7 @@ import 'discipline_profile_repository.dart';
 import 'flight_result_repository.dart';
 import 'installation_activation_repository.dart';
 import 'installation_repository.dart';
+import 'invitation_repository.dart';
 import 'landing_table_repository.dart';
 import 'matrix_assignment_repository.dart';
 import 'matrix_revision_repository.dart';
@@ -108,4 +109,6 @@ abstract interface class Repository {
   InstallationActivationRepository get installationActivationRepository;
 
   SyncCursorRepository get syncCursorRepository;
+
+  InvitationRepository get invitationRepository;
 }
