@@ -47,9 +47,13 @@ melos:
         flutter: true
 
     build:dart:win:
-      description: Build the pure-Dart CLI apps (Windows; cmd.exe has no mkdir -p, so use plain mkdir).
+      description: Build the pure-Dart CLI apps (Windows; cmd.exe has no mkdir -p, so guard with `if not exist`).
       exec:
-        command: mkdir build\cli && dart compile exe lib/main.dart -o build/cli/$MELOS_PACKAGE_NAME.exe
+        # The `if` is wrapped in its own parentheses so its exit status (0 whether
+        # mkdir ran or was skipped) gates the `&&` reliably. A bare
+        # `mkdir build\cli && ...` is NOT idempotent: on a re-run the directory
+        # already exists, mkdir exits 1, and `&&` skips the compile step.
+        command: (if not exist build\cli (mkdir build\cli)) && dart compile exe lib/main.dart -o build/cli/$MELOS_PACKAGE_NAME.exe
       packageFilters:
         category: apps
         flutter: false
