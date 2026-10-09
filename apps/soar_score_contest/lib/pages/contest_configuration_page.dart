@@ -57,6 +57,7 @@ class _ContestConfigurationPageState extends State<ContestConfigurationPage> {
   Future<ConfigurationData>? _loading;
   ConfigurationData? _data;
   ConfigurationDraft? _draft;
+  bool _jumping = false;
   bool _saving = false;
   String? _saveError;
 
@@ -330,16 +331,24 @@ class _ContestConfigurationPageState extends State<ContestConfigurationPage> {
       return;
     }
     setState(() => _current = id);
+    _jumping = true;
     Scrollable.ensureVisible(
       context,
       alignment: 0,
       duration: const Duration(milliseconds: 250),
       curve: Curves.easeOut,
-    );
+    ).whenComplete(() {
+      _jumping = false;
+      _followScroll();
+    });
   }
 
   /// Marks the section whose top has passed the top of the page as current.
   void _followScroll() {
+    if (_jumping) {
+      return;
+    }
+    
     final viewport = _scrollKey.currentContext?.findRenderObject();
     if (viewport is! RenderBox || !viewport.hasSize || !_scroll.hasClients) {
       return;
@@ -461,20 +470,23 @@ class _ContestConfigurationPageState extends State<ContestConfigurationPage> {
     children: [
       SizedBox(
         width: 256,
-        child: SingleChildScrollView(
+        child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 24, 8, 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               if (draft != null)
-                SectionNav(
-                  layout: SectionNavLayout.list,
-                  sections: SectionId.values,
-                  statuses: _statuses(data, draft),
-                  current: _current,
-                  onSelect: _jump,
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: SectionNav(
+                      layout: SectionNavLayout.list,
+                      sections: SectionId.values,
+                      statuses: _statuses(data, draft),
+                      current: _current,
+                      onSelect: _jump,
+                    ),
+                  ),
                 ),
-              const SizedBox(height: 20),
               MatrixReadinessPanel(
                 summary: ReadinessSummary.of(data, draft),
                 onFix: _fix,
