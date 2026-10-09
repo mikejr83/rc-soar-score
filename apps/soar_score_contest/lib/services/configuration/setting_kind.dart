@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 enum SettingKind {
   details(
     Icons.info_outline,
-    'Not revisioned',
-    'Contest details aren’t part of the configuration revision',
+    'Contest details',
+    'The contest’s name, dates and venue',
   ),
   structural(
     Icons.account_tree_outlined,

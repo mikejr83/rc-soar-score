@@ -15,6 +15,7 @@ class LandingPickerDialog extends StatefulWidget {
     required this.tables,
     required this.current,
     required this.defaultTableId,
+    required this.defaultLabel,
     required this.onCreateTable,
   });
 
@@ -25,6 +26,9 @@ class LandingPickerDialog extends StatefulWidget {
 
   /// The profile's default table, marked as the default.
   final Id? defaultTableId;
+
+  /// What the default table is called, for example `F5J default`.
+  final String defaultLabel;
 
   /// Opens the Landings page to create a table.
   final VoidCallback onCreateTable;
@@ -46,8 +50,6 @@ class _LandingPickerDialogState extends State<LandingPickerDialog> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final system = widget.tables.where((v) => v.table.isSystem).toList();
-    final own = widget.tables.where((v) => !v.table.isSystem).toList();
     final view = _pickedView;
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
@@ -95,8 +97,14 @@ class _LandingPickerDialogState extends State<LandingPickerDialog> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _group('System tables', system),
-                            _group('Your tables', own),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 12),
+                              child: Column(
+                                children: [
+                                  for (final view in widget.tables) _item(view),
+                                ],
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -152,28 +160,6 @@ class _LandingPickerDialogState extends State<LandingPickerDialog> {
     );
   }
 
-  Widget _group(String title, List<LandingTableView> views) {
-    if (views.isEmpty) {
-      return const SizedBox.shrink();
-    }
-    final theme = Theme.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(4, 12, 4, 4),
-          child: Text(
-            title,
-            style: theme.textTheme.labelMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ),
-        for (final view in views) _item(view),
-      ],
-    );
-  }
-
   Widget _item(LandingTableView view) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
@@ -224,8 +210,7 @@ class _LandingPickerDialogState extends State<LandingPickerDialog> {
         const SizedBox(height: 8),
         Text(view.table.name, style: theme.textTheme.titleMedium),
         Text(
-          '${view.table.isSystem ? 'System' : 'Yours'} · '
-          '${LandingEntriesTable.summary(view)}',
+          LandingEntriesTable.summary(view),
           style: theme.textTheme.bodyMedium?.copyWith(
             color: scheme.onSurfaceVariant,
           ),

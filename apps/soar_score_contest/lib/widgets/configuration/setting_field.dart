@@ -6,6 +6,7 @@ import '../../services/configuration/setting_keys.dart';
 import '../../services/configuration/setting_values.dart';
 import 'config_chip.dart';
 import 'field_registry.dart';
+import 'fixed_chip.dart';
 import 'setting_notes.dart';
 import 'setting_radio_group.dart';
 import 'setting_row.dart';
@@ -68,7 +69,7 @@ class SettingField extends StatelessWidget {
           if (change != null) ConfigChip.unsaved(context),
           if (house) ConfigChip.houseRule(context),
           if (locked && editable && effect.reason != null)
-            ConfigChip.fixed(context),
+            FixedChip(reason: effect.reason!),
           if (mixed)
             ConfigChip.neutral(
               context,
@@ -154,7 +155,10 @@ class SettingField extends StatelessWidget {
           blocked: _blockedOptions(),
         );
       case SettingType.select || SettingType.readOnly:
-        return _ReadOnlyValue(text: def.readOnlyValue ?? '${value ?? ''}');
+        return _ReadOnlyValue(
+          text: def.readOnlyValue ?? '${value ?? ''}',
+          detail: def.readOnlyDetail,
+        );
     }
   }
 
@@ -205,9 +209,10 @@ class SettingField extends StatelessWidget {
 }
 
 class _ReadOnlyValue extends StatelessWidget {
-  const _ReadOnlyValue({required this.text});
+  const _ReadOnlyValue({required this.text, this.detail});
 
   final String text;
+  final String? detail;
 
   @override
   Widget build(BuildContext context) {
@@ -222,7 +227,21 @@ class _ReadOnlyValue extends StatelessWidget {
             color: theme.colorScheme.onSurfaceVariant,
           ),
           const SizedBox(width: 10),
-          Expanded(child: Text(text, style: theme.textTheme.bodyLarge)),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(text, style: theme.textTheme.bodyLarge),
+                if (detail != null)
+                  Text(
+                    detail!,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+              ],
+            ),
+          ),
         ],
       ),
     );

@@ -5,6 +5,8 @@ import 'package:http/testing.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_contest/api_client_provider.dart';
 import 'package:soar_score_contest/pages/contest_configuration_page.dart';
+import 'package:soar_score_contest/services/new_contest/wizard_discipline.dart';
+import 'package:soar_score_contest/widgets/configuration/fixed_chip.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../support/configuration_fixtures.dart';
@@ -68,7 +70,18 @@ void main() {
     ]) {
       expect(find.text(title, skipOffstage: false), findsWidgets);
     }
-    expect(find.text('Official rules', skipOffstage: false), findsOneWidget);
+    expect(find.text('F5J default', skipOffstage: false), findsWidgets);
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('field-discipline'), skipOffstage: false),
+        matching: find.text(WizardDiscipline.f5j.name, skipOffstage: false),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.text(WizardDiscipline.f5j.task, skipOffstage: false),
+      findsOneWidget,
+    );
     expect(find.text('Ready to draw'), findsNothing);
     expect(find.text('Can’t be drawn yet'), findsOneWidget);
   });
@@ -176,12 +189,43 @@ void main() {
     );
 
     expect(find.text('1 house rule', skipOffstage: false), findsOneWidget);
-    final reset = find.text('Reset to official');
+    final reset = find.text('Reset to F5J default');
     await _scrollTo(tester, reset);
     await tester.tap(reset);
     await tester.pumpAndSettle();
-    expect(find.text('Reset to official'), findsNothing);
-    expect(find.text('Official rules', skipOffstage: false), findsOneWidget);
+    expect(find.text('Reset to F5J default'), findsNothing);
+    expect(find.text('F5J default', skipOffstage: false), findsWidgets);
+  });
+
+  testWidgets('motor restart has three options and the drop note follows', (
+    tester,
+  ) async {
+    await _pump(
+      tester,
+      ConfigServer(
+        revision: configRevision(
+          1,
+          core: {
+            'drop_after_rounds': [4],
+          },
+          discipline: {'motor_restart_mode': 'non_droppable'},
+        ),
+      ),
+    );
+
+    for (final title in ['Allowed', 'Allowed, not dropped', 'Not allowed']) {
+      expect(find.text(title, skipOffstage: false), findsWidgets);
+    }
+    expect(
+      find.text(
+        'A round with a motor restart can’t be dropped (Motor restart mode: '
+        'Allowed, not dropped).',
+        skipOffstage: false,
+      ),
+      findsOneWidget,
+    );
+    expect(find.text('Not revisioned', skipOffstage: false), findsNothing);
+    expect(find.text('Rules version', skipOffstage: false), findsNothing);
   });
 
   testWidgets('team protection blocks Seeded with a one-tap fix', (
@@ -264,8 +308,22 @@ void main() {
     await _pump(tester, server);
 
     expect(find.text('Scoring has started'), findsOneWidget);
+    // The reason is the Fixed chip's tooltip, not a block under the setting.
     expect(
       find.text('Fixed once scoring has started.', skipOffstage: false),
+      findsNothing,
+    );
+    expect(find.text('Fixed', skipOffstage: false), findsWidgets);
+    final lanes = find.descendant(
+      of: find.byKey(const ValueKey('field-lane_mode')),
+      matching: find.byType(FixedChip),
+    );
+    await _scrollTo(tester, lanes);
+    await tester.tap(lanes);
+    await tester.pumpAndSettle();
+    expect(find.text('Fixed once scoring has started.'), findsOneWidget);
+    expect(
+      find.bySemanticsLabel('Fixed: Fixed once scoring has started.'),
       findsWidgets,
     );
 

@@ -6,14 +6,12 @@ enum SectionId {
     title: 'Contest details',
     short: 'Details',
     purpose: 'Who runs the contest, where and when.',
-    kinds: [SettingKind.details],
+    kinds: [],
   ),
   discipline(
     title: 'Discipline and rules',
     short: 'Discipline',
-    purpose:
-        'The discipline this contest flies and the options its profile '
-        'defines.',
+    purpose: 'The discipline this contest flies and the options it defines.',
     kinds: [SettingKind.rules],
   ),
   landing(

@@ -9,6 +9,7 @@ import '../landings/landing_unit_text.dart';
 import 'config_chip.dart';
 import 'config_note.dart';
 import 'field_registry.dart';
+import 'fixed_chip.dart';
 import 'landing_entries_table.dart';
 import 'landing_picker_dialog.dart';
 
@@ -50,6 +51,7 @@ class _LandingSectionBodyState extends State<LandingSectionBody> {
         tables: widget.data.landingTables,
         current: _tableId(_draft[SettingKeys.landingTable]),
         defaultTableId: widget.data.profile?.profile.defaultLandingTableId,
+        defaultLabel: _draft.catalog.defaultLabel,
         onCreateTable: widget.onOpenLandings,
       ),
     );
@@ -87,7 +89,13 @@ class _LandingSectionBodyState extends State<LandingSectionBody> {
             Divider(height: 1, color: scheme.outlineVariant),
             const SizedBox(height: 16),
             if (view != null)
-              _currentCard(context, view, change != null, fixed, defaultId)
+              _currentCard(
+                context,
+                view,
+                change != null,
+                widget.editable && effect.fixed ? effect.reason : null,
+                defaultId,
+              )
             else
               Container(
                 padding: const EdgeInsets.all(16),
@@ -150,14 +158,6 @@ class _LandingSectionBodyState extends State<LandingSectionBody> {
                 tone: ConfigNoteTone.error,
               ),
             ],
-            if (widget.editable && effect.fixed && effect.reason != null) ...[
-              const SizedBox(height: 12),
-              ConfigNote(
-                icon: Icons.lock_outline,
-                text: effect.reason!,
-                tone: ConfigNoteTone.block,
-              ),
-            ],
             if (view != null &&
                 defaultView != null &&
                 view.table.id != defaultId) ...[
@@ -165,7 +165,7 @@ class _LandingSectionBodyState extends State<LandingSectionBody> {
               ConfigNote(
                 icon: Icons.info_outline,
                 text:
-                    'Not the profile default (${defaultView.table.name}). '
+                    'Not the ${_draft.catalog.defaultLabel} (${defaultView.table.name}). '
                     'That’s fine; any table works for any discipline. The unit '
                     'is ${landingUnitLabel(view.table.inputUnit).toLowerCase()}.',
               ),
@@ -208,13 +208,12 @@ class _LandingSectionBodyState extends State<LandingSectionBody> {
     BuildContext context,
     LandingTableView view,
     bool changed,
-    bool fixed,
+    String? fixedReason,
     Id? defaultId,
   ) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final meta = [
-      ('Owner', view.table.isSystem ? 'System' : 'Yours'),
       ('Unit', landingUnitLabel(view.table.inputUnit)),
       ('Entries', '${view.results.length}'),
       ('Points range', LandingEntriesTable.pointsRange(view)),
@@ -236,21 +235,14 @@ class _LandingSectionBodyState extends State<LandingSectionBody> {
             children: [
               Icon(Icons.table_rows_outlined, color: scheme.primary),
               Text(view.table.name, style: theme.textTheme.titleMedium),
-              ConfigChip.neutral(
-                context,
-                icon: view.table.isSystem
-                    ? Icons.verified_outlined
-                    : Icons.person_outline,
-                text: view.table.isSystem ? 'System' : 'Yours',
-              ),
               if (view.table.id == defaultId)
                 ConfigChip.neutral(
                   context,
-                  icon: Icons.star_outline,
-                  text: 'Profile default',
+                  icon: Icons.verified_outlined,
+                  text: widget.draft.catalog.defaultLabel,
                 ),
               if (changed) ConfigChip.unsaved(context),
-              if (fixed && widget.editable) ConfigChip.fixed(context),
+              if (fixedReason != null) FixedChip(reason: fixedReason),
             ],
           ),
           const SizedBox(height: 12),

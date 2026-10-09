@@ -130,7 +130,8 @@ class ConfigurationSections extends StatelessWidget {
         ? ConfigChip.neutral(
             context,
             icon: Icons.verified_outlined,
-            text: 'Official rules',
+            text: draft.catalog.defaultLabel,
+            tooltip: 'Every option matches the ${draft.catalog.defaultLabel}',
             dense: false,
           )
         : ConfigChip.houseRule(

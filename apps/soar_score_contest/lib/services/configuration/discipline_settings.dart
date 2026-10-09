@@ -1,5 +1,6 @@
 import 'package:soar_score_core/soar_score_core.dart';
 
+import 'discipline_label.dart';
 import 'section_id.dart';
 import 'setting_def.dart';
 import 'setting_keys.dart';
@@ -16,7 +17,11 @@ abstract final class DisciplineSettings {
     ];
     return [
       for (final (index, field) in fields.indexed)
-        _setting(field, first: index == 0),
+        _setting(
+          field,
+          first: index == 0,
+          label: DisciplineLabel.of(profile.profile),
+        ),
     ];
   }
 
@@ -26,10 +31,30 @@ abstract final class DisciplineSettings {
       field.fieldType == ConfigFieldType.int &&
       field.fieldKey.endsWith('_time');
 
+  /// The wording of options whose profile labels are not the ones shown.
+  static const _optionWording = {
+    'motor_restart_mode': {
+      'allowed': (
+        'Allowed',
+        'Motor restarts are allowed; flight receives a zero score.',
+      ),
+      'non_droppable': (
+        'Allowed, not dropped',
+        'Pilots may restart, but the zero score can’t be dropped.',
+      ),
+      'not_allowed': (
+        'Not allowed',
+        'Scoring screens will not allow a motor restart to be entered.',
+      ),
+    },
+  };
+
   static SettingDef _setting(
     DisciplineConfigField field, {
     required bool first,
+    required String label,
   }) {
+    final wording = _optionWording[field.fieldKey] ?? const {};
     final validation = field.validation ?? const {};
     num? bound(String key) =>
         validation[key] is num ? validation[key] as num : null;
@@ -63,16 +88,17 @@ abstract final class DisciplineSettings {
           if (option is Map)
             SettingOption(
               '${option['value']}',
-              '${option['label'] ?? option['value']}',
+              wording['${option['value']}']?.$1 ??
+                  '${option['label'] ?? option['value']}',
+              help: wording['${option['value']}']?.$2,
               tag: '${option['value']}' == '${field.defaultValue}'
-                  ? 'Official'
+                  ? '$label default'
                   : null,
             ),
       ],
       heading: first ? 'Discipline options' : null,
       headingHelp: first
-          ? 'From the discipline profile. A value that differs from the '
-                'official default is a house rule.'
+          ? 'A value that differs from the $label default is a house rule.'
           : null,
     );
   }
