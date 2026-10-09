@@ -51,6 +51,8 @@ export 'repositories/role_repository.dart';
 export 'repositories/round_group_repository.dart';
 export 'repositories/round_repository.dart';
 export 'repositories/score_attempt_repository.dart';
+export 'repositories/re_flight_participant_repository.dart';
+export 'repositories/re_flight_repository.dart';
 export 'repositories/score_placeholder_repository.dart';
 export 'repositories/team_membership_repository.dart';
 export 'repositories/team_repository.dart';
