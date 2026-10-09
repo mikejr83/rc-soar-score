@@ -84,6 +84,10 @@ class RoundHeaderCell extends StatelessWidget {
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
+                          // A line box as tall as the font keeps the text
+                          // and the 16 px icons beside it on one centre.
+                          height: 1,
+                          leadingDistribution: TextLeadingDistribution.even,
                         ),
                       ),
                     ),

@@ -66,4 +66,18 @@ void main() {
     );
     expect(find.byIcon(Icons.arrow_circle_down_outlined), findsNothing);
   });
+
+  testWidgets('the icon is centred on the round title', (tester) async {
+    await pumpMatrixPage(
+      tester,
+      _server({
+        'drop_after_rounds': [2],
+      }),
+    );
+    final title = tester.getCenter(find.text('Round 2')).dy;
+    final icon = tester
+        .getCenter(find.byIcon(Icons.arrow_circle_down_outlined))
+        .dy;
+    expect(icon, moreOrLessEquals(title, epsilon: 0.5));
+  });
 }
