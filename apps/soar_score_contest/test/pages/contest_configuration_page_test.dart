@@ -5,6 +5,7 @@ import 'package:http/testing.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_contest/api_client_provider.dart';
 import 'package:soar_score_contest/pages/contest_configuration_page.dart';
+import 'package:soar_score_contest/services/new_contest/wizard_discipline.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../support/configuration_fixtures.dart';
@@ -69,6 +70,13 @@ void main() {
       expect(find.text(title, skipOffstage: false), findsWidgets);
     }
     expect(find.text('F5J default', skipOffstage: false), findsWidgets);
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('field-discipline'), skipOffstage: false),
+        matching: find.text(WizardDiscipline.f5j.name, skipOffstage: false),
+      ),
+      findsOneWidget,
+    );
     expect(find.text('Ready to draw'), findsNothing);
     expect(find.text('Can’t be drawn yet'), findsOneWidget);
   });

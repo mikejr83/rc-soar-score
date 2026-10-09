@@ -21,7 +21,7 @@ class SettingCatalog {
     };
     final defaultLabel = profile == null
         ? 'Default'
-        : DisciplineLabel.defaultOf(profile.profile.type);
+        : DisciplineLabel.defaultOf(profile.profile);
     SettingOption option(Object value, String label, String help, String key) =>
         SettingOption(
           value,
@@ -42,7 +42,7 @@ class SettingCatalog {
               'Set when the contest was created and can’t change. To fly '
               'another discipline, create a new contest.',
           type: SettingType.readOnly,
-          readOnlyValue: profile.profile.name,
+          readOnlyValue: DisciplineLabel.of(profile.profile),
         ),
         ...DisciplineSettings.of(profile),
       ],
@@ -406,9 +406,8 @@ class SettingCatalog {
   final DisciplineProfileWithRules? profile;
 
   /// `F5J default`: what a profile's own value is called on the page.
-  String get defaultLabel => profile == null
-      ? 'Default'
-      : DisciplineLabel.defaultOf(profile!.profile.type);
+  String get defaultLabel =>
+      profile == null ? 'Default' : DisciplineLabel.defaultOf(profile!.profile);
 
   final List<SettingDef> settings;
   final Map<String, SettingDef> byKey;

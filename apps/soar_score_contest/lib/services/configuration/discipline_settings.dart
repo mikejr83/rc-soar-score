@@ -20,7 +20,7 @@ abstract final class DisciplineSettings {
         _setting(
           field,
           first: index == 0,
-          label: DisciplineLabel.of(profile.profile.type),
+          label: DisciplineLabel.of(profile.profile),
         ),
     ];
   }
