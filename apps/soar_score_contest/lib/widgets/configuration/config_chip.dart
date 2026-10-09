@@ -55,17 +55,6 @@ class ConfigChip extends StatelessWidget {
     );
   }
 
-  /// `Fixed`: the contest's state does not allow changing the setting.
-  factory ConfigChip.fixed(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return ConfigChip(
-      icon: Icons.lock_outline,
-      text: 'Fixed',
-      foreground: scheme.onSurfaceVariant,
-      outline: scheme.outline,
-    );
-  }
-
   /// A neutral outlined chip.
   factory ConfigChip.neutral(
     BuildContext context, {
