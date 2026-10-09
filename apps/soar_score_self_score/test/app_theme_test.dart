@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:soar_score_self_score/theme/app_theme.dart';
+import 'package:soar_score_ui/soar_score_ui.dart';
 
 void main() {
-  test('AppTheme provides Material 3 light and dark themes', () {
-    final light = AppTheme.light();
-    final dark = AppTheme.dark();
+  test('SelfScoreAppTheme provides Material 3 light and dark themes', () {
+    final light = SelfScoreAppTheme.lightTheme;
+    final dark = SelfScoreAppTheme.darkTheme;
 
     expect(light.useMaterial3, true);
     expect(dark.useMaterial3, true);

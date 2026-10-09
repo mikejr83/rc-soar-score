@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:soar_score_ui/soar_score_ui.dart';
 
 /// Colour roles the matrix page needs beyond the Material 3 scheme: a warning
 /// text colour, a success container, and the team palette. Each has a light
@@ -15,14 +16,10 @@ class MatrixColors {
 
   /// Warning text and outlines on a surface. The amber accent is below 4.5:1
   /// as text on light surfaces, so warnings use this darker amber.
-  Color get warn => _dark ? const Color(0xFFFFB870) : const Color(0xFF8A5100);
-
-  Color get success =>
-      _dark ? const Color(0xFF95D4B3) : const Color(0xFF2D6A4F);
-  Color get successContainer =>
-      _dark ? const Color(0xFF0F5138) : const Color(0xFFB1F1CE);
-  Color get onSuccessContainer =>
-      _dark ? const Color(0xFFB1F1CE) : const Color(0xFF002113);
+  Color get warn => AppStatusColors.getWarning(_dark);
+  Color get success => AppStatusColors.getSuccess(_dark);
+  Color get successContainer => AppStatusColors.getSuccessContainer(_dark);
+  Color get onSuccessContainer => AppStatusColors.getOnSuccessContainer(_dark);
 
   static const _light = [
     (Color(0xFFCDE5FF), Color(0xFF001D32)),

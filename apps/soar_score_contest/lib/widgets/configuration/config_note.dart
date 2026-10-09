@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:soar_score_ui/soar_score_ui.dart';
 
 /// How a [ConfigNote] looks.
 enum ConfigNoteTone {
@@ -44,9 +45,7 @@ class ConfigNote extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final warn = theme.brightness == Brightness.dark
-        ? const Color(0xFFFFB870)
-        : const Color(0xFF8A5100);
+    final warn = AppStatusColors.getWarning(theme.brightness == Brightness.dark);
     final (foreground, iconColor) = switch (tone) {
       ConfigNoteTone.error => (scheme.error, scheme.error),
       ConfigNoteTone.warning => (warn, warn),

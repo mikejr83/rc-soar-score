@@ -5,5 +5,5 @@
 /// import required by consumers: `package:soar_score_ui/soar_score_ui.dart`.
 library;
 
-export 'theme/soar_score_theme_tokens.dart';
+export 'theme/app_theme.dart';
 export 'widgets/score_card.dart';

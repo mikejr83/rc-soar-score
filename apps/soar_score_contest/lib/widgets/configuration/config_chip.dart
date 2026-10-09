@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:soar_score_ui/soar_score_ui.dart';
 /// A small label with an icon: a row tag (`Unsaved`, `House rule`, `Fixed`),
 /// a section kind chip or an impact chip on the save bar. The meaning is in
 /// the text and icon, never the colour alone.
@@ -38,8 +38,8 @@ class ConfigChip extends StatelessWidget {
     return ConfigChip(
       icon: Icons.home_outlined,
       text: text,
-      background: scheme.secondaryContainer,
-      foreground: scheme.onSecondaryContainer,
+      background: AppStatusColors.getSuccessContainer(scheme.brightness == Brightness.dark),
+      foreground: AppStatusColors.getOnSuccessContainer(scheme.brightness == Brightness.dark),
       dense: dense,
     );
   }

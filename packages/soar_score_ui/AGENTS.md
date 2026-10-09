@@ -13,6 +13,7 @@ Shared Flutter UI components and theme tokens used by both Flutter apps.
 
 - **Reusable components only; no state management, no data access.** Do not import `soar_score_core`, `soar_score_api`, `soar_score_data`, or state management packages. Widgets must be stateless where possible; if state is needed, use `ChangeNotifier` or state parameters, not a state management framework.
 - Must work with either app theme (light and dark).
+- `theme/app_theme.dart` is the baseline Material 3 theme shared by all three apps (`ContestAppTheme`, `PublicAppTheme`, `SelfScoreAppTheme`) plus the shared color tokens (`AppColors`, `AppStatusColors`). Per-app differentiation belongs in `theme/app_theme.dart`, not in the apps.
 
 ## Testing
 

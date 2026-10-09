@@ -13,7 +13,7 @@ Contest management application for directors, pilots, and helpers. Runs on web a
 
 - **Must not do direct database access**. All data access goes through `soar_score_api` client (which talks to `soar_score_api_handlers`, which uses `soar_score_data` backed by SQLite in the native app or by PostgreSQL on the server; the web build has no local database and calls the remote API).
 - Depends on: `soar_score_core`, `soar_score_data`, `soar_score_api`, `soar_score_ui`
-- Theme lives here, not in `soar_score_ui`.
+- The Material themes and shared color tokens live in `soar_score_ui` (`theme/app_theme.dart`): `ContestAppTheme`, `PublicAppTheme`, `SelfScoreAppTheme`, `AppColors`, `AppStatusColors`.
 
 ## Design Notes
 
