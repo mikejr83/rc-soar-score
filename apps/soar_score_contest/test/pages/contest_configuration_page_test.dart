@@ -6,6 +6,7 @@ import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_contest/api_client_provider.dart';
 import 'package:soar_score_contest/pages/contest_configuration_page.dart';
 import 'package:soar_score_contest/services/new_contest/wizard_discipline.dart';
+import 'package:soar_score_contest/widgets/configuration/fixed_chip.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../support/configuration_fixtures.dart';
@@ -307,8 +308,22 @@ void main() {
     await _pump(tester, server);
 
     expect(find.text('Scoring has started'), findsOneWidget);
+    // The reason is the Fixed chip's tooltip, not a block under the setting.
     expect(
       find.text('Fixed once scoring has started.', skipOffstage: false),
+      findsNothing,
+    );
+    expect(find.text('Fixed', skipOffstage: false), findsWidgets);
+    final lanes = find.descendant(
+      of: find.byKey(const ValueKey('field-lane_mode')),
+      matching: find.byType(FixedChip),
+    );
+    await _scrollTo(tester, lanes);
+    await tester.tap(lanes);
+    await tester.pumpAndSettle();
+    expect(find.text('Fixed once scoring has started.'), findsOneWidget);
+    expect(
+      find.bySemanticsLabel('Fixed: Fixed once scoring has started.'),
       findsWidgets,
     );
 

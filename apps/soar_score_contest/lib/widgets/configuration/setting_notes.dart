@@ -39,15 +39,6 @@ abstract final class SettingNotes {
         ),
       );
     }
-    if (editable && effect.fixed && effect.reason != null) {
-      notes.add(
-        ConfigNote(
-          icon: Icons.lock_outline,
-          text: effect.reason!,
-          tone: ConfigNoteTone.block,
-        ),
-      );
-    }
     if (key == SettingKeys.teamProtection &&
         draft[SettingKeys.drawMode] == SettingKeys.seeded &&
         editable) {

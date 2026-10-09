@@ -6,6 +6,7 @@ import '../../services/configuration/setting_keys.dart';
 import '../../services/configuration/setting_values.dart';
 import 'config_chip.dart';
 import 'field_registry.dart';
+import 'fixed_chip.dart';
 import 'setting_notes.dart';
 import 'setting_radio_group.dart';
 import 'setting_row.dart';
@@ -68,7 +69,7 @@ class SettingField extends StatelessWidget {
           if (change != null) ConfigChip.unsaved(context),
           if (house) ConfigChip.houseRule(context),
           if (locked && editable && effect.reason != null)
-            ConfigChip.fixed(context),
+            FixedChip(reason: effect.reason!),
           if (mixed)
             ConfigChip.neutral(
               context,

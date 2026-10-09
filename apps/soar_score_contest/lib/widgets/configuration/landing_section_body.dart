@@ -9,6 +9,7 @@ import '../landings/landing_unit_text.dart';
 import 'config_chip.dart';
 import 'config_note.dart';
 import 'field_registry.dart';
+import 'fixed_chip.dart';
 import 'landing_entries_table.dart';
 import 'landing_picker_dialog.dart';
 
@@ -88,7 +89,13 @@ class _LandingSectionBodyState extends State<LandingSectionBody> {
             Divider(height: 1, color: scheme.outlineVariant),
             const SizedBox(height: 16),
             if (view != null)
-              _currentCard(context, view, change != null, fixed, defaultId)
+              _currentCard(
+                context,
+                view,
+                change != null,
+                widget.editable && effect.fixed ? effect.reason : null,
+                defaultId,
+              )
             else
               Container(
                 padding: const EdgeInsets.all(16),
@@ -151,14 +158,6 @@ class _LandingSectionBodyState extends State<LandingSectionBody> {
                 tone: ConfigNoteTone.error,
               ),
             ],
-            if (widget.editable && effect.fixed && effect.reason != null) ...[
-              const SizedBox(height: 12),
-              ConfigNote(
-                icon: Icons.lock_outline,
-                text: effect.reason!,
-                tone: ConfigNoteTone.block,
-              ),
-            ],
             if (view != null &&
                 defaultView != null &&
                 view.table.id != defaultId) ...[
@@ -209,7 +208,7 @@ class _LandingSectionBodyState extends State<LandingSectionBody> {
     BuildContext context,
     LandingTableView view,
     bool changed,
-    bool fixed,
+    String? fixedReason,
     Id? defaultId,
   ) {
     final theme = Theme.of(context);
@@ -243,7 +242,7 @@ class _LandingSectionBodyState extends State<LandingSectionBody> {
                   text: widget.draft.catalog.defaultLabel,
                 ),
               if (changed) ConfigChip.unsaved(context),
-              if (fixed && widget.editable) ConfigChip.fixed(context),
+              if (fixedReason != null) FixedChip(reason: fixedReason),
             ],
           ),
           const SizedBox(height: 12),
