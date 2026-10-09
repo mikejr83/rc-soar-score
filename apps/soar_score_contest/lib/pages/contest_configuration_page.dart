@@ -437,14 +437,19 @@ class _ContestConfigurationPageState extends State<ContestConfigurationPage> {
   Map<SectionId, SectionStatus> _statuses(
     ConfigurationData data,
     ConfigurationDraft draft,
-  ) => {
-    for (final id in SectionId.values)
-      id: SectionStatus.of(
-        id,
-        draft,
-        readOnly: data.readOnly && id != SectionId.participants,
-      ),
-  };
+  ) {
+    final completed = data.phase == ConfigPhase.completed;
+    return {
+      for (final id in SectionId.values)
+        id: SectionStatus.of(
+          id,
+          draft,
+          // The Participants section is marked read-only only when the contest
+          // is completed, not while it is merely admin-locked.
+          readOnly: id == SectionId.participants ? completed : data.readOnly,
+        ),
+    };
+  }
 
   Widget _wideBody(
     BuildContext context,
