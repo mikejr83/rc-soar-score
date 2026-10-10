@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:soar_score_ui/soar_score_ui.dart';
 
 import 'router.dart';
-import 'theme/app_theme.dart';
 
 class SelfScoreApp extends StatelessWidget {
   const SelfScoreApp({super.key});
@@ -11,8 +11,8 @@ class SelfScoreApp extends StatelessWidget {
     return MaterialApp.router(
       title: 'Self Score',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.light(),
-      darkTheme: AppTheme.dark(),
+      theme: SelfScoreAppTheme.lightTheme,
+      darkTheme: SelfScoreAppTheme.darkTheme,
       routerConfig: router,
     );
   }

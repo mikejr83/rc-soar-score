@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:soar_score_ui/soar_score_ui.dart';
 
 import 'router.dart';
-import 'theme/app_theme.dart';
 
 class SoarScorePublicApp extends StatelessWidget {
   const SoarScorePublicApp({super.key});
@@ -13,8 +13,8 @@ class SoarScorePublicApp extends StatelessWidget {
     return MaterialApp.router(
       title: title,
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
+      theme: PublicAppTheme.lightTheme,
+      darkTheme: PublicAppTheme.darkTheme,
       themeMode: ThemeMode.system,
       routerConfig: buildAppRouter(),
     );

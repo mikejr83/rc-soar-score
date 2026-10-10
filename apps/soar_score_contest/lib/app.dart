@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:soar_score_ui/soar_score_ui.dart';
 
 import 'api_client_provider.dart';
 import 'app_mode_provider.dart';
@@ -12,7 +13,6 @@ import 'platform/app_bootstrap.dart';
 import 'router.dart';
 import 'services/connectivity/app_connectivity.dart';
 import 'services/new_contest/contest_draft_store.dart';
-import 'theme/app_theme.dart';
 
 class SoarScoreContestApp extends StatefulWidget {
   const SoarScoreContestApp({
@@ -96,8 +96,8 @@ class _SoarScoreContestAppState extends State<SoarScoreContestApp> {
     Widget app = MaterialApp.router(
       title: SoarScoreContestApp.title,
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
+      theme: ContestAppTheme.lightTheme,
+      darkTheme: ContestAppTheme.darkTheme,
       themeMode: ThemeMode.system,
       routerConfig: _router,
     );

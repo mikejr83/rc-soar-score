@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:soar_score_ui/soar_score_ui.dart';
 
 import '../../services/configuration/section_id.dart';
 import '../../services/configuration/section_notice.dart';
@@ -26,9 +27,10 @@ class ConfigSectionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final warn = theme.brightness == Brightness.dark
-        ? const Color(0xFFFFB870)
-        : const Color(0xFF8A5100);
+    // I'm testing this change to use the theme's color scheme so that there aren't hardcoded colors everywhere.
+    final warn = AppStatusColors.getWarning(
+      theme.brightness == Brightness.dark,
+    );
     return Semantics(
       container: true,
       explicitChildNodes: true,
@@ -43,6 +45,7 @@ class ConfigSectionCard extends StatelessWidget {
             children: [
               Wrap(
                 crossAxisAlignment: WrapCrossAlignment.center,
+                alignment: WrapAlignment.spaceBetween,
                 spacing: 12,
                 runSpacing: 8,
                 children: [
@@ -50,15 +53,22 @@ class ConfigSectionCard extends StatelessWidget {
                     header: true,
                     child: Text(id.title, style: theme.textTheme.titleLarge),
                   ),
-                  for (final kind in id.kinds)
-                    ConfigChip.neutral(
-                      context,
-                      icon: kind.icon,
-                      text: kind.label,
-                      tooltip: kind.description,
-                      dense: false,
-                    ),
-                  ...extraChips,
+                  Wrap(
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: 12,
+                    runSpacing: 8,
+                    children: [
+                      for (final kind in id.kinds)
+                        ConfigChip.neutral(
+                          context,
+                          icon: kind.icon,
+                          text: kind.label,
+                          tooltip: kind.description,
+                          dense: false,
+                        ),
+                      ...extraChips,
+                    ],
+                  ),
                 ],
               ),
               const SizedBox(height: 8),

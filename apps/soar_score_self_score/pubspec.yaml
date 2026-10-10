@@ -38,6 +38,8 @@ dependencies:
   go_router: ^18.0.1
   soar_score_api:
     path: ../../packages/soar_score_api
+  soar_score_ui:
+    path: ../../packages/soar_score_ui
 
 dev_dependencies:
   flutter_test:

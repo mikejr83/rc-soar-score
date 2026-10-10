@@ -318,6 +318,7 @@ Each entry maps the key the scorer selects to the points awarded. A score stores
     "default_value": 200,
     "validation": { "gt": 0 },
     "display_order": 6,
+    "unit": "meters",
     "created_at": "2026-09-15T00:00:00Z"
   },
   {
@@ -331,6 +332,7 @@ Each entry maps the key the scorer selects to the points awarded. A score stores
     "default_value": 0.5,
     "validation": { "gte": 0 },
     "display_order": 7,
+    "unit": "pts / m",
     "created_at": "2026-09-15T00:00:00Z"
   },
   {
@@ -344,6 +346,7 @@ Each entry maps the key the scorer selects to the points awarded. A score stores
     "default_value": 3.0,
     "validation": { "gte": 0 },
     "display_order": 8,
+    "unit": "pts / m",
     "created_at": "2026-09-15T00:00:00Z"
   }
 ]
