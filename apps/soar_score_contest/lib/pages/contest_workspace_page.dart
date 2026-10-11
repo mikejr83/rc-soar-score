@@ -127,9 +127,14 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
             _body(context, snapshot.data, snapshot.error),
       );
     }
-    final error = _validId
-        ? scope.error
-        : StateError('"${widget.contestId}" is not an id.');
+    final Object? error;
+    if (apiClientOf(context) == null) {
+      error = StateError('No API client is available.');
+    } else if (!_validId) {
+      error = StateError('"${widget.contestId}" is not an id.');
+    } else {
+      error = scope.error;
+    }
     return _body(context, scope.contest, error);
   }
 
