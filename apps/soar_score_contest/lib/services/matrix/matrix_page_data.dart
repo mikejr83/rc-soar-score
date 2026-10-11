@@ -39,7 +39,7 @@ class MatrixPageData {
   static Future<MatrixPageData> load(ApiClient client, Id id) async {
     final results = await Future.wait<Object?>([
       client.contest(id),
-      _latestConfiguration(client, id),
+      latestConfiguration(client, id),
       client.participations(id),
       client.participants(),
       client.teams(id),
@@ -57,7 +57,8 @@ class MatrixPageData {
     );
   }
 
-  static Future<ContestConfigurationRevision?> _latestConfiguration(
+  /// The latest saved configuration, or `null` when none is saved yet.
+  static Future<ContestConfigurationRevision?> latestConfiguration(
     ApiClient client,
     Id id,
   ) async {

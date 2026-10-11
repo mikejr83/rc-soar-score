@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../api_client_provider.dart';
+import '../connectivity_provider.dart';
+import '../services/workspace/workspace_facts.dart';
+import '../services/workspace/workspace_facts_loader.dart';
 import '../services/workspace/workspace_layout_plan.dart';
 import '../services/workspace/workspace_section.dart';
 import '../widgets/api_error_text.dart';
@@ -34,6 +37,12 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
   Future<Contest>? _contest;
   final ScrollController _scroll = ScrollController();
   String _announcement = '';
+
+  // The facts behind the sections, loaded once the contest is known and again
+  // whenever the contest changes. A failed load leaves the page on its default
+  // layout rather than hiding it.
+  WorkspaceFacts? _facts;
+  Contest? _factsFor;
 
   @override
   void didChangeDependencies() {
@@ -102,6 +111,35 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
     }
   }
 
+  void _ensureFacts(Contest contest) {
+    if (_factsFor == contest) {
+      return;
+    }
+    _factsFor = contest;
+    final client = apiClientOf(context);
+    if (client == null) {
+      return;
+    }
+    final monitor = appConnectivityOf(context);
+    final offline = monitor?.internetStatus == ConnectivityStatus.unavailable;
+    WorkspaceFactsLoader.load(client, contest, isOffline: offline).then(
+      (facts) {
+        if (mounted && _factsFor == contest) {
+          setState(() {
+            _facts = facts;
+          });
+        }
+      },
+      onError: (Object _) {
+        if (mounted && _factsFor == contest) {
+          setState(() {
+            _facts = null;
+          });
+        }
+      },
+    );
+  }
+
   void _announce(String message) {
     setState(() {
       _announcement = message;
@@ -149,18 +187,24 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
     if (contest == null) {
       return const Center(child: CircularProgressIndicator());
     }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _ensureFacts(contest);
+      }
+    });
     final readOnly = contest.lifecycleState == LifecycleState.completed;
-    // No matrix or attention facts yet (#342); the plan shows the
-    // lifecycle's default layout until they arrive.
+    final facts = _facts;
+    // The needs-attention list arrives with #345; until then it is empty.
     final plan = WorkspaceLayoutPlan.of(
       lifecycle: contest.lifecycleState,
-      hasMatrix: false,
+      hasMatrix: facts?.hasMatrix ?? false,
       hasAttentionItems: false,
     );
     return WorkspaceScope(
       refresh: _refresh,
       announce: _announce,
       readOnly: readOnly,
+      facts: facts,
       child: Stack(
         fit: StackFit.expand,
         children: [

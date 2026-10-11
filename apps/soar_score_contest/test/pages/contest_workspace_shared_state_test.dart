@@ -43,8 +43,10 @@ void main() {
       ApiClientInherited(
         client: ApiClient(
           baseUrl: Uri.parse('http://localhost'),
-          httpClient: MockClient((_) async {
-            requests++;
+          httpClient: MockClient((request) async {
+            if (request.url.path.endsWith('/contests/$_id')) {
+              requests++;
+            }
             return http.Response(
               jsonEncode(_contest(lock).toJson()),
               200,
@@ -99,7 +101,10 @@ void main() {
       ApiClientInherited(
         client: ApiClient(
           baseUrl: Uri.parse('http://localhost'),
-          httpClient: MockClient((_) async {
+          httpClient: MockClient((request) async {
+            if (!request.url.path.endsWith('/contests/$_id')) {
+              return http.Response('{}', 404);
+            }
             requests++;
             return requests == 1
                 ? http.Response(

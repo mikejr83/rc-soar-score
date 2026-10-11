@@ -1,5 +1,7 @@
 import 'package:flutter/widgets.dart';
 
+import '../../services/workspace/workspace_facts.dart';
+
 /// What the workspace page offers to the widgets inside it.
 class WorkspaceScope extends InheritedWidget {
   const WorkspaceScope({
@@ -7,6 +9,7 @@ class WorkspaceScope extends InheritedWidget {
     required this.refresh,
     required this.announce,
     required this.readOnly,
+    this.facts,
     required super.child,
   });
 
@@ -17,6 +20,10 @@ class WorkspaceScope extends InheritedWidget {
   /// Says [message] politely to assistive technology, for example the next
   /// step's new title after an action.
   final void Function(String message) announce;
+
+  /// What the workspace knows about the contest beyond the contest itself;
+  /// `null` until loaded or when loading failed.
+  final WorkspaceFacts? facts;
 
   /// True for a completed contest.
   final bool readOnly;
@@ -29,5 +36,5 @@ class WorkspaceScope extends InheritedWidget {
 
   @override
   bool updateShouldNotify(WorkspaceScope oldWidget) =>
-      readOnly != oldWidget.readOnly;
+      readOnly != oldWidget.readOnly || facts != oldWidget.facts;
 }
