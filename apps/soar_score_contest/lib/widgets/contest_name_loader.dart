@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../api_client_provider.dart';
+import 'contest_scope.dart';
 
 /// Loads the selected contest through the app's API client and hands it to
 /// [builder], so the shell header, status panel and window title share one
@@ -9,7 +10,8 @@ import '../api_client_provider.dart';
 ///
 /// The contest is `null` when none is selected ([contestId] is `null`),
 /// while loading, when no client is available, or when the contest cannot
-/// be loaded; the routed page reports those errors.
+/// be loaded; the routed page reports those errors. A [ContestScope] below
+/// this widget lets a page ask for a reload.
 class ContestNameLoader extends StatefulWidget {
   const ContestNameLoader({
     super.key,
@@ -45,6 +47,13 @@ class _ContestNameLoaderState extends State<ContestNameLoader> {
     }
   }
 
+  void _reload() {
+    final contest = _load();
+    setState(() {
+      _contest = contest;
+    });
+  }
+
   Future<Contest>? _load() {
     final contestId = widget.contestId;
     final client = apiClientOf(context);
@@ -63,9 +72,13 @@ class _ContestNameLoaderState extends State<ContestNameLoader> {
   @override
   Widget build(BuildContext context) => FutureBuilder<Contest>(
     future: _contest,
-    builder: (context, snapshot) => widget.builder(
-      context,
-      widget.contestId == null ? null : snapshot.data,
-    ),
+    builder: (context, snapshot) {
+      final contest = widget.contestId == null ? null : snapshot.data;
+      return ContestScope(
+        contest: contest,
+        reload: _reload,
+        child: Builder(builder: (context) => widget.builder(context, contest)),
+      );
+    },
   );
 }

@@ -114,7 +114,7 @@ Notes:
 - "Configuration page" always means the contest-scoped page above, not the draft step inside the wizard.
 - The rail's "Scoring" and "Reports" entries are placeholders with no route yet.
 - Rail and header code: `widgets/shell_rail.dart` (destinations and create button), `shell_header.dart` (breadcrumbs), `shell_status_panel.dart`, `shell_stub_page.dart`.
-- The workspace summary cards are enabled through `widgets/workspace_nav_summary.dart`.
+- The workspace page is a frame of section and control slots (`widgets/workspace/`) arranged by `WorkspaceLayoutPlan` (`services/workspace/`). It has no page-card list; links sit next to the fact they act on.
 - Opening a contest from the list goes through `ContestOpenAction` / `contestOpenPath`, which picks the page by contest state.
 
 ### Public site (`soar_score_public`)

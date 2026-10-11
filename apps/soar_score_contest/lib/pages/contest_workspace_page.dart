@@ -1,18 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../api_client_provider.dart';
-import '../router.dart';
+import '../services/workspace/workspace_layout_plan.dart';
+import '../services/workspace/workspace_section.dart';
 import '../widgets/api_error_text.dart';
-import '../widgets/contest_list.dart';
-import '../widgets/detail_section_card.dart';
+import '../widgets/contest_scope.dart';
 import '../widgets/message_view.dart';
-import '../widgets/workspace_nav_summary.dart';
+import '../widgets/workspace/workspace_control_slot.dart';
+import '../widgets/workspace/workspace_facts_details.dart';
+import '../widgets/workspace/workspace_frame.dart';
+import '../widgets/workspace/workspace_live_region.dart';
+import '../widgets/workspace/workspace_scope.dart';
+import '../widgets/workspace/workspace_section_slot.dart';
 
 /// The contest workspace for one contest (`plan/ui/contest-administration/
-/// contest-workspace.md`): the contest's details and a summary of the pages
-/// that administer it. The name lives in the shell header and the status
+/// contest-workspace.md`): a frame of section slots arranged by
+/// [WorkspaceLayoutPlan]. The name lives in the shell header and the status
 /// values in the shell's status panel.
 class ContestWorkspacePage extends StatefulWidget {
   const ContestWorkspacePage({super.key, required this.contestId});
@@ -26,6 +30,8 @@ class ContestWorkspacePage extends StatefulWidget {
 
 class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
   Future<Contest>? _contest;
+  final ScrollController _scroll = ScrollController();
+  String _announcement = '';
 
   @override
   void didChangeDependencies() {
@@ -41,6 +47,14 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
     }
   }
 
+  @override
+  void dispose() {
+    _scroll.dispose();
+    super.dispose();
+  }
+
+  // Until the facts loader (#342) lands, the contest is the only thing the
+  // page loads; this is the one seam to widen then.
   Future<Contest> _load() {
     final client = apiClientOf(context);
     if (client == null) {
@@ -60,6 +74,27 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
     });
   }
 
+  /// Reloads the page and the shell's copy of the contest, so the status
+  /// panel follows a change made here.
+  Future<void> _refresh() async {
+    ContestScope.maybeOf(context)?.reload();
+    final contest = _load();
+    setState(() {
+      _contest = contest;
+    });
+    try {
+      await contest;
+    } on Object {
+      // The builder shows the failure; the caller only waits.
+    }
+  }
+
+  void _announce(String message) {
+    setState(() {
+      _announcement = message;
+    });
+  }
+
   @override
   Widget build(BuildContext context) => FutureBuilder<Contest>(
     future: _contest,
@@ -75,46 +110,57 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
       if (contest == null) {
         return const Center(child: CircularProgressIndicator());
       }
-      return _Workspace(contest: contest);
-    },
-  );
-}
-
-class _Workspace extends StatelessWidget {
-  const _Workspace({required this.contest});
-
-  final Contest contest;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final location = [
-      contest.city,
-      contest.state,
-      contest.country,
-    ].whereType<String>().where((part) => part.isNotEmpty).join(', ');
-    return ListView(
-      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
-      children: [
-        DetailSectionCard(
-          title: 'Contest',
-          items: [
-            DetailItem('Dates', ContestList.contestDates(contest)),
-            DetailItem('Timezone', contest.timezone),
-            DetailItem('Host', contest.host),
-            DetailItem('Location', location),
+      final readOnly = contest.lifecycleState == LifecycleState.completed;
+      // No matrix or attention facts yet (#342); the plan shows the
+      // lifecycle's default layout until they arrive.
+      final plan = WorkspaceLayoutPlan.of(
+        lifecycle: contest.lifecycleState,
+        hasMatrix: false,
+        hasAttentionItems: false,
+      );
+      return WorkspaceScope(
+        refresh: _refresh,
+        announce: _announce,
+        readOnly: readOnly,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            WorkspaceFrame(
+              plan: plan,
+              scrollController: _scroll,
+              sectionBuilder: (section) => WorkspaceSectionSlot(
+                section: section,
+                readOnly: readOnly,
+                child: _content(section, contest, plan, readOnly),
+              ),
+            ),
+            Positioned(
+              left: 0,
+              top: 0,
+              child: WorkspaceLiveRegion(message: _announcement),
+            ),
           ],
         ),
-        const SizedBox(height: 24),
-        Text('Administer', style: theme.textTheme.titleMedium),
-        const SizedBox(height: 12),
-        WorkspaceNavSummary(
-          locations: {
-            'Configuration': contestConfigurationPath(contest.id.value),
-          },
-          onOpen: context.go,
-        ),
+      );
+    },
+  );
+
+  Widget? _content(
+    WorkspaceSection section,
+    Contest contest,
+    WorkspaceLayoutPlan plan,
+    bool readOnly,
+  ) => switch (section) {
+    WorkspaceSection.facts => WorkspaceFactsDetails(contest: contest),
+    WorkspaceSection.controls => Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (var i = 0; i < plan.controls.length; i++) ...[
+          if (i > 0) const SizedBox(height: 16),
+          WorkspaceControlSlot(control: plan.controls[i], readOnly: readOnly),
+        ],
       ],
-    );
-  }
+    ),
+    _ => null,
+  };
 }

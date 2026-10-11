@@ -65,27 +65,6 @@ void main() {
     expect(find.text('Front Range Soaring'), findsOneWidget);
   });
 
-  testWidgets('summarises the contest pages, those not built yet disabled', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      _app(MockClient((_) async => _json(_contest().toJson()))),
-    );
-    await tester.pumpAndSettle();
-
-    for (final label in [
-      'Configuration',
-      'Participants',
-      'Matrix',
-      'Scoring',
-      'Reports',
-      'Publication',
-    ]) {
-      expect(find.text(label), findsOneWidget);
-    }
-    expect(find.textContaining('Not available yet.'), findsNWidgets(5));
-  });
-
   testWidgets('reports a load failure and retries', (tester) async {
     var calls = 0;
     await tester.pumpWidget(

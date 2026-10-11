@@ -50,12 +50,8 @@ Actions are explicit and state-driven:
 
 Every transition shows the current value, requested value, affected scope, and result. A stale revision or rejected transition leaves the workspace unchanged and provides retry or refresh.
 
-## Navigation summary
+## No navigation summary
 
-- `Scoring` opens official score entry at the latest relevant round and group.
-- `Reports` opens current or completed results and export actions.
-- `Publication` shows publication history, visibility, public update policy, and publish/delist actions.
-- `Participants` opens contest-specific participant data without changing reusable profiles.
-- `Matrix` opens round/group assignments, lane positions, moves, and re-flight actions where permitted.
+The workspace does not repeat the rail. Every link on the page sits next to the fact it acts on (a checklist item, a round tile, a needs-attention item); there is no list of page cards.
 
 Completed contests use a read-only workspace except for authorized score correction and publication actions.
