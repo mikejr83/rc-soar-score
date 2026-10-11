@@ -330,6 +330,7 @@ Each test creates its own database (named `soar_test_...`) on the server and dro
 - **Path Dependencies**: All shared packages use relative path dependencies within `pubspec.yaml` to ensure monorepo consistency.
 - **Separation of Concerns**: `soar_score_core` must never import Flutter or data-layer drivers; domain logic remains 100% pure Dart.
 - **Code Style**: Follow rules defined in root and subproject `analysis_options.yaml`. Run `melos analyze` prior to committing.
+- **Commit Messages**: Follow the [Conventional Commits](https://www.conventionalcommits.org) specification — `<type>(<scope>): <summary>` with types such as `feat`, `fix`, `docs`, `refactor`, `test`, `chore`, etc. See [`AGENTS.md`](AGENTS.md#commit-messages) for the full rules.
 - **Agent Guidelines**: See [`AGENTS.md`](AGENTS.md) for developer conventions, testing requirements, and subproject rules.
 
 ## License

@@ -65,6 +65,30 @@ Soar Score is an RC sailplane soaring contest scoring and management suite. It c
 3. **State management**: Follow Flutter best practices for the specific app
 4. **API design**: RESTful endpoints on shelf-based server
 
+## Commit Messages
+
+All commit messages follow the [Conventional Commits](https://www.conventionalcommits.org) specification:
+
+```
+<type>(<optional scope>): <short summary>
+
+[optional body: explain what and why]
+
+[optional footer(s): BREAKING CHANGE: ..., Closes #123]
+```
+
+- **Type** is one of: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`.
+- **Scope** is optional. In this monorepo, use the affected app or package directory name, for example `feat(contest-app):`, `fix(server):`, `refactor(soar_score_core):`.
+- **Summary** uses the imperative mood in present tense (`add`, `fix`, `remove` — not `added`, `adds`, `adding`), stays under 72 characters, and has no trailing period.
+- **Body** (optional) explains what and why, not how.
+- **Footers** (optional) reference issues (`Closes #123`, `Ref: #456`) and breaking changes:
+
+  ```
+  feat(server): change publication payload format
+
+  BREAKING CHANGE: `score` fields are now `scorePoints`
+  ```
+
 ## Formatting
 
 ### Markdown
