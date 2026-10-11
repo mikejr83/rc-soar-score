@@ -348,7 +348,7 @@ class _ContestConfigurationPageState extends State<ContestConfigurationPage> {
     if (_jumping) {
       return;
     }
-    
+
     final viewport = _scrollKey.currentContext?.findRenderObject();
     if (viewport is! RenderBox || !viewport.hasSize || !_scroll.hasClients) {
       return;

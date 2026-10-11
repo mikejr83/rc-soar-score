@@ -13,19 +13,19 @@ Future<Response> _enterScoreResponse(
   HandlerHarness api,
   String mutationId,
 ) async => api.send(
-    'POST',
-    '/contests/$_contestId/assignments/'
-    '${(await assignmentOfPilot(api, 1))['id']}/scores',
-    body: {
-      'client_mutation_id': mutationId,
-      'base_score_revision': 0,
-      'components': {
-        'time_flown': 540,
-        'launch_height': 200,
-        'landing': 'points_50',
-      },
+  'POST',
+  '/contests/$_contestId/assignments/'
+      '${(await assignmentOfPilot(api, 1))['id']}/scores',
+  body: {
+    'client_mutation_id': mutationId,
+    'base_score_revision': 0,
+    'components': {
+      'time_flown': 540,
+      'launch_height': 200,
+      'landing': 'points_50',
     },
-  );
+  },
+);
 
 Future<Map<String, Object?>> _enterScore(
   HandlerHarness api,
