@@ -29,6 +29,8 @@ class ContestWorkspacePage extends StatefulWidget {
 }
 
 class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
+  // Only used outside a shell. Inside one, the contest comes from the
+  // [ContestScope] so a refresh is a single request.
   Future<Contest>? _contest;
   final ScrollController _scroll = ScrollController();
   String _announcement = '';
@@ -36,13 +38,16 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _contest ??= _load();
+    if (ContestScope.maybeOf(context) == null) {
+      _contest ??= _load();
+    }
   }
 
   @override
   void didUpdateWidget(ContestWorkspacePage oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.contestId != widget.contestId) {
+    if (oldWidget.contestId != widget.contestId &&
+        ContestScope.maybeOf(context) == null) {
       _contest = _load();
     }
   }
@@ -68,16 +73,24 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
   }
 
   void _retry() {
+    final scope = ContestScope.maybeOf(context);
+    if (scope != null) {
+      scope.reload();
+      return;
+    }
     final contest = _load();
     setState(() {
       _contest = contest;
     });
   }
 
-  /// Reloads the page and the shell's copy of the contest, so the status
-  /// panel follows a change made here.
+  /// Reloads the contest, which also updates the shell's status panel.
   Future<void> _refresh() async {
-    ContestScope.maybeOf(context)?.reload();
+    final scope = ContestScope.maybeOf(context);
+    if (scope != null) {
+      scope.reload();
+      return;
+    }
     final contest = _load();
     setState(() {
       _contest = contest;
@@ -95,55 +108,75 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
     });
   }
 
+  bool get _validId {
+    try {
+      Id.parse(widget.contestId);
+      return true;
+    } on ArgumentError {
+      return false;
+    }
+  }
+
   @override
-  Widget build(BuildContext context) => FutureBuilder<Contest>(
-    future: _contest,
-    builder: (context, snapshot) {
-      if (snapshot.hasError) {
-        return MessageView(
-          text: 'The contest could not be loaded.',
-          detail: apiErrorText(snapshot.error!),
-          onRetry: _retry,
-        );
-      }
-      final contest = snapshot.data;
-      if (contest == null) {
-        return const Center(child: CircularProgressIndicator());
-      }
-      final readOnly = contest.lifecycleState == LifecycleState.completed;
-      // No matrix or attention facts yet (#342); the plan shows the
-      // lifecycle's default layout until they arrive.
-      final plan = WorkspaceLayoutPlan.of(
-        lifecycle: contest.lifecycleState,
-        hasMatrix: false,
-        hasAttentionItems: false,
+  Widget build(BuildContext context) {
+    final scope = ContestScope.maybeOf(context);
+    if (scope == null) {
+      return FutureBuilder<Contest>(
+        future: _contest,
+        builder: (context, snapshot) =>
+            _body(context, snapshot.data, snapshot.error),
       );
-      return WorkspaceScope(
-        refresh: _refresh,
-        announce: _announce,
-        readOnly: readOnly,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            WorkspaceFrame(
-              plan: plan,
-              scrollController: _scroll,
-              sectionBuilder: (section) => WorkspaceSectionSlot(
-                section: section,
-                readOnly: readOnly,
-                child: _content(section, contest, plan, readOnly),
-              ),
-            ),
-            Positioned(
-              left: 0,
-              top: 0,
-              child: WorkspaceLiveRegion(message: _announcement),
-            ),
-          ],
-        ),
+    }
+    final error = _validId
+        ? scope.error
+        : StateError('"${widget.contestId}" is not an id.');
+    return _body(context, scope.contest, error);
+  }
+
+  Widget _body(BuildContext context, Contest? contest, Object? error) {
+    if (contest == null && error != null) {
+      return MessageView(
+        text: 'The contest could not be loaded.',
+        detail: apiErrorText(error),
+        onRetry: _retry,
       );
-    },
-  );
+    }
+    if (contest == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    final readOnly = contest.lifecycleState == LifecycleState.completed;
+    // No matrix or attention facts yet (#342); the plan shows the
+    // lifecycle's default layout until they arrive.
+    final plan = WorkspaceLayoutPlan.of(
+      lifecycle: contest.lifecycleState,
+      hasMatrix: false,
+      hasAttentionItems: false,
+    );
+    return WorkspaceScope(
+      refresh: _refresh,
+      announce: _announce,
+      readOnly: readOnly,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          WorkspaceFrame(
+            plan: plan,
+            scrollController: _scroll,
+            sectionBuilder: (section) => WorkspaceSectionSlot(
+              section: section,
+              readOnly: readOnly,
+              child: _content(section, contest, plan, readOnly),
+            ),
+          ),
+          Positioned(
+            left: 0,
+            top: 0,
+            child: WorkspaceLiveRegion(message: _announcement),
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget? _content(
     WorkspaceSection section,

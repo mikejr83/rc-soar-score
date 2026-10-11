@@ -76,6 +76,7 @@ class _ContestNameLoaderState extends State<ContestNameLoader> {
       final contest = widget.contestId == null ? null : snapshot.data;
       return ContestScope(
         contest: contest,
+        error: widget.contestId == null ? null : snapshot.error,
         reload: _reload,
         child: Builder(builder: (context) => widget.builder(context, contest)),
       );

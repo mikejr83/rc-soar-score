@@ -38,17 +38,19 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     var lock = AdminLock.unlocked;
+    var requests = 0;
     await tester.pumpWidget(
       ApiClientInherited(
         client: ApiClient(
           baseUrl: Uri.parse('http://localhost'),
-          httpClient: MockClient(
-            (_) async => http.Response(
+          httpClient: MockClient((_) async {
+            requests++;
+            return http.Response(
               jsonEncode(_contest(lock).toJson()),
               200,
               headers: {'content-type': 'application/json; charset=utf-8'},
-            ),
-          ),
+            );
+          }),
         ),
         child: MaterialApp(
           home: Scaffold(
@@ -67,6 +69,7 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.textContaining('Unlocked'), findsOneWidget);
+    expect(requests, 1, reason: 'shell and page share one load');
 
     lock = AdminLock.locked;
     final scope = WorkspaceScope.of(
@@ -77,6 +80,7 @@ void main() {
     await tester.pumpAndSettle();
     await done;
 
+    expect(requests, 2, reason: 'a refresh is one request');
     expect(find.textContaining('Unlocked'), findsNothing);
     expect(find.textContaining('Locked'), findsOneWidget);
     expect(
@@ -85,5 +89,51 @@ void main() {
           .message,
       'Administration locked',
     );
+  });
+
+  testWidgets('inside a shell a load failure shows retry that reloads once', (
+    tester,
+  ) async {
+    var requests = 0;
+    await tester.pumpWidget(
+      ApiClientInherited(
+        client: ApiClient(
+          baseUrl: Uri.parse('http://localhost'),
+          httpClient: MockClient((_) async {
+            requests++;
+            return requests == 1
+                ? http.Response(
+                    jsonEncode({
+                      'error': {'code': 'boom', 'message': 'Server broke.'},
+                    }),
+                    500,
+                    headers: {'content-type': 'application/json'},
+                  )
+                : http.Response(
+                    jsonEncode(_contest(AdminLock.unlocked).toJson()),
+                    200,
+                    headers: {'content-type': 'application/json'},
+                  );
+          }),
+        ),
+        child: MaterialApp(
+          home: Scaffold(
+            body: ContestNameLoader(
+              contestId: _id,
+              builder: (context, contest) =>
+                  const ContestWorkspacePage(contestId: _id),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('The contest could not be loaded.'), findsOneWidget);
+    expect(requests, 1);
+
+    await tester.tap(find.text('Retry'));
+    await tester.pumpAndSettle();
+    expect(requests, 2);
+    expect(find.text('Front Range Soaring'), findsOneWidget);
   });
 }

@@ -9,12 +9,17 @@ class ContestScope extends InheritedWidget {
   const ContestScope({
     super.key,
     required this.contest,
+    this.error,
     required this.reload,
     required super.child,
   });
 
   /// The loaded contest, or `null` while loading or when none is selected.
   final Contest? contest;
+
+  /// Why the contest could not be loaded, when it could not; the previous
+  /// [contest] stays while a reload is under way.
+  final Object? error;
 
   /// Loads the contest again and rebuilds everything that reads the scope.
   final VoidCallback reload;
@@ -25,5 +30,5 @@ class ContestScope extends InheritedWidget {
 
   @override
   bool updateShouldNotify(ContestScope oldWidget) =>
-      contest != oldWidget.contest;
+      contest != oldWidget.contest || error != oldWidget.error;
 }
