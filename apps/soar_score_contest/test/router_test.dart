@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_contest/app_mode_provider.dart';
-import 'package:soar_score_contest/pages/contest_workspace_page.dart';
+import 'package:soar_score_contest/pages/contest/workspace_page.dart';
 import 'package:soar_score_contest/router.dart';
 import 'package:soar_score_contest/widgets/contest_shell.dart';
 

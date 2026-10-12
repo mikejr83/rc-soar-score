@@ -4,13 +4,13 @@ import 'package:go_router/go_router.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 
 import 'app_mode_provider.dart';
-import 'pages/contest_configuration_page.dart';
-import 'pages/contest_workspace_page.dart';
+import 'pages/contest/configuration_page.dart';
+import 'pages/contest/workspace_page.dart';
 import 'pages/home_page.dart';
 import 'pages/landing_editor_page.dart';
 import 'pages/landings_page.dart';
 import 'pages/landing_page.dart';
-import 'pages/matrix_page.dart';
+import 'pages/contest/matrix_page.dart';
 import 'pages/new_contest_wizard_page.dart';
 import 'pages/participant_editor_page.dart';
 import 'pages/participants_page.dart';

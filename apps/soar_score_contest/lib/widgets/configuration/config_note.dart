@@ -45,7 +45,9 @@ class ConfigNote extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final warn = AppStatusColors.getWarning(theme.brightness == Brightness.dark);
+    final warn = AppStatusColors.getWarning(
+      theme.brightness == Brightness.dark,
+    );
     final (foreground, iconColor) = switch (tone) {
       ConfigNoteTone.error => (scheme.error, scheme.error),
       ConfigNoteTone.warning => (warn, warn),

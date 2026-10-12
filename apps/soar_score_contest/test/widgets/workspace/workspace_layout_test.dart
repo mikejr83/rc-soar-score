@@ -6,7 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_contest/api_client_provider.dart';
-import 'package:soar_score_contest/pages/contest_workspace_page.dart';
+import 'package:soar_score_contest/pages/contest/workspace_page.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 const _id = '019c0000-0000-7000-8000-000000000017';

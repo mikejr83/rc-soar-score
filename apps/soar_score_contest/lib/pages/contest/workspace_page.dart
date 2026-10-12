@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
-import '../api_client_provider.dart';
-import '../connectivity_provider.dart';
-import '../services/workspace/workspace_facts.dart';
-import '../services/workspace/workspace_facts_loader.dart';
-import '../services/workspace/workspace_layout_plan.dart';
-import '../services/workspace/workspace_section.dart';
-import '../widgets/api_error_text.dart';
-import '../widgets/contest_scope.dart';
-import '../widgets/message_view.dart';
-import '../widgets/workspace/workspace_control_slot.dart';
-import '../widgets/workspace/workspace_facts_details.dart';
-import '../widgets/workspace/workspace_frame.dart';
-import '../widgets/workspace/workspace_live_region.dart';
-import '../widgets/workspace/workspace_scope.dart';
-import '../widgets/workspace/workspace_section_slot.dart';
+import '../../api_client_provider.dart';
+import '../../connectivity_provider.dart';
+import '../../services/workspace/workspace_facts.dart';
+import '../../services/workspace/workspace_facts_loader.dart';
+import '../../services/workspace/workspace_layout_plan.dart';
+import '../../services/workspace/workspace_section.dart';
+import '../../widgets/api_error_text.dart';
+import '../../widgets/contest_scope.dart';
+import '../../widgets/message_view.dart';
+import '../../widgets/workspace/workspace_control_slot.dart';
+import '../../widgets/workspace/workspace_facts_details.dart';
+import '../../widgets/workspace/workspace_frame.dart';
+import '../../widgets/workspace/workspace_live_region.dart';
+import '../../widgets/workspace/workspace_scope.dart';
+import '../../widgets/workspace/workspace_section_slot.dart';
 
 /// The contest workspace for one contest (`plan/ui/contest-administration/
 /// contest-workspace.md`): a frame of section slots arranged by

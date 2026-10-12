@@ -3,19 +3,19 @@ import 'package:go_router/go_router.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
-import '../api_client_provider.dart';
-import '../contest_draft_provider.dart';
-import '../router.dart';
-import '../services/configuration/configuration_problem.dart';
-import '../services/configuration/draw_readiness.dart';
-import '../services/matrix/draw_form_check.dart';
-import '../services/matrix/draw_form_controller.dart';
-import '../services/matrix/matrix_page_data.dart';
-import '../widgets/api_error_text.dart';
-import '../widgets/matrix/draw_confirm_dialog.dart';
-import '../widgets/matrix/draw_form_panel.dart';
-import '../widgets/matrix/matrix_drawn_view.dart';
-import '../widgets/message_view.dart';
+import '../../api_client_provider.dart';
+import '../../contest_draft_provider.dart';
+import '../../router.dart';
+import '../../services/configuration/configuration_problem.dart';
+import '../../services/configuration/draw_readiness.dart';
+import '../../services/matrix/draw_form_check.dart';
+import '../../services/matrix/draw_form_controller.dart';
+import '../../services/matrix/matrix_page_data.dart';
+import '../../widgets/api_error_text.dart';
+import '../../widgets/matrix/draw_confirm_dialog.dart';
+import '../../widgets/matrix/draw_form_panel.dart';
+import '../../widgets/matrix/matrix_drawn_view.dart';
+import '../../widgets/message_view.dart';
 
 /// The matrix of one contest (`plan/ui/contest-administration/matrix.md`):
 /// the first-draw form until a matrix exists, then the grid with its

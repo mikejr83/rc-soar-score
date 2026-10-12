@@ -4,27 +4,27 @@ import 'package:go_router/go_router.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
-import '../api_client_provider.dart';
-import '../router.dart';
-import '../services/configuration/config_phase.dart';
-import '../services/configuration/configuration_data.dart';
-import '../services/configuration/configuration_draft.dart';
-import '../services/configuration/configuration_values.dart';
-import '../services/configuration/draw_readiness.dart';
-import '../services/configuration/readiness_summary.dart';
-import '../services/configuration/section_id.dart';
-import '../services/configuration/section_status.dart';
-import '../services/configuration/setting_catalog.dart';
-import '../widgets/api_error_text.dart';
-import '../widgets/configuration/config_banner.dart';
-import '../widgets/configuration/config_save_bar.dart';
-import '../widgets/configuration/configuration_sections.dart';
-import '../widgets/configuration/field_registry.dart';
-import '../widgets/configuration/matrix_readiness_panel.dart';
-import '../widgets/configuration/save_confirm_dialog.dart';
-import '../widgets/configuration/section_nav.dart';
-import '../widgets/message_view.dart';
-import '../widgets/unsaved_changes_guard.dart';
+import '../../api_client_provider.dart';
+import '../../router.dart';
+import '../../services/configuration/config_phase.dart';
+import '../../services/configuration/configuration_data.dart';
+import '../../services/configuration/configuration_draft.dart';
+import '../../services/configuration/configuration_values.dart';
+import '../../services/configuration/draw_readiness.dart';
+import '../../services/configuration/readiness_summary.dart';
+import '../../services/configuration/section_id.dart';
+import '../../services/configuration/section_status.dart';
+import '../../services/configuration/setting_catalog.dart';
+import '../../widgets/api_error_text.dart';
+import '../../widgets/configuration/config_banner.dart';
+import '../../widgets/configuration/config_save_bar.dart';
+import '../../widgets/configuration/configuration_sections.dart';
+import '../../widgets/configuration/field_registry.dart';
+import '../../widgets/configuration/matrix_readiness_panel.dart';
+import '../../widgets/configuration/save_confirm_dialog.dart';
+import '../../widgets/configuration/section_nav.dart';
+import '../../widgets/message_view.dart';
+import '../../widgets/unsaved_changes_guard.dart';
 
 /// The configuration of one contest (`plan/ui/contest-administration/
 /// contest-workspace.md`): the contest details and every option in sections
@@ -348,7 +348,7 @@ class _ContestConfigurationPageState extends State<ContestConfigurationPage> {
     if (_jumping) {
       return;
     }
-    
+
     final viewport = _scrollKey.currentContext?.findRenderObject();
     if (viewport is! RenderBox || !viewport.hasSize || !_scroll.hasClients) {
       return;

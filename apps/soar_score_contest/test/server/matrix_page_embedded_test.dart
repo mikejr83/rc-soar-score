@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_contest/api_client_provider.dart';
-import 'package:soar_score_contest/pages/matrix_page.dart';
+import 'package:soar_score_contest/pages/contest/matrix_page.dart';
 import 'package:soar_score_contest/server/embedded_server.dart';
 
 import '../support/embedded_matrix_support.dart';
