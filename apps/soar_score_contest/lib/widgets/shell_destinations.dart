@@ -78,20 +78,28 @@ List<ShellDestination> shellDestinationsFor(String path) {
       location: contestConfigurationPath(contestId),
     ),
     ShellDestination(
+      label: 'Participants',
+      icon: Icons.groups_outlined,
+      selectedIcon: Icons.groups,
+      location: contestParticipantsPath(contestId),
+    ),
+    ShellDestination(
       label: 'Matrix',
       icon: Icons.grid_on_outlined,
       selectedIcon: Icons.grid_on,
       location: contestMatrixPath(contestId),
     ),
-    const ShellDestination(
+    ShellDestination(
       label: 'Scoring',
       icon: Icons.edit_note_outlined,
       selectedIcon: Icons.edit_note,
+      location: contestScoringPath(contestId),
     ),
-    const ShellDestination(
+    ShellDestination(
       label: 'Reports',
       icon: Icons.assessment_outlined,
       selectedIcon: Icons.assessment,
+      location: contestReportsPath(contestId),
     ),
   ];
 }

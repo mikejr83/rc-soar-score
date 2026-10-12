@@ -131,13 +131,6 @@ class ShellHeader extends StatelessWidget {
             Expanded(
               child: Row(
                 children: [
-                  if (!isRoot && !participants)
-                    IconButton(
-                      key: const ValueKey('breadcrumb-back'),
-                      icon: const Icon(Icons.arrow_back),
-                      tooltip: 'Back',
-                      onPressed: () => _back(context),
-                    ),
                   Flexible(
                     child: TextButton(
                       key: ValueKey(rootKey),

@@ -2,7 +2,8 @@ import 'package:logging/logging.dart';
 import 'package:soar_score_data/soar_score_data.dart';
 
 import 'config_exception.dart';
-import 'log_format.dart';
+
+import 'package:soar_score_core/config/log_format.dart';
 
 /// Everything the server reads from its environment.
 ///

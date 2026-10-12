@@ -7,7 +7,9 @@ import 'package:logging/logging.dart';
 import 'config/config_exception.dart';
 import 'config/server_config.dart';
 import 'healthcheck.dart';
-import 'logging/log_setup.dart';
+
+import 'package:soar_score_core/logging/log_setup.dart';
+
 import 'server.dart';
 
 final _logger = Logger('Main');
