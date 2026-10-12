@@ -96,10 +96,13 @@ class _FairnessPanelState extends State<FairnessPanel> {
                 return Row(
                   children: [
                     Expanded(
-                      child: Wrap(
-                        crossAxisAlignment: WrapCrossAlignment.center,
-                        spacing: 12,
-                        children: left,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: Wrap(
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          spacing: 12,
+                          children: left,
+                        ),
                       ),
                     ),
                     toggle,
