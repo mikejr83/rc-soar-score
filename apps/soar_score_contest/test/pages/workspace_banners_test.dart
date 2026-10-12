@@ -157,6 +157,73 @@ void main() {
       expect(cardTitle(tester), before);
       handle.dispose();
     });
+
+    for (final status in [500, 503]) {
+      testWidgets('a failed Refresh ($status) keeps the page and the banner', (
+        tester,
+      ) async {
+        final server = WorkspaceServer(
+          state: LifecycleState.configuring,
+          lock: AdminLock.locked,
+          configuration: matrixConfiguration(),
+        )..rejectNext = 409;
+        await pumpShellWorkspace(tester, server);
+        final before = cardTitle(tester);
+        await tester.tap(find.byKey(const ValueKey('next-step-primary')));
+        await tester.pumpAndSettle();
+        expect(find.byKey(_staleKey), findsOneWidget);
+
+        server.contestStatus = status;
+        await tester.tap(find.text('Refresh'));
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(_staleKey), findsOneWidget);
+        expect(find.byKey(const ValueKey('next-step-primary')), findsOneWidget);
+        expect(cardTitle(tester), before);
+      });
+    }
+
+    testWidgets('a failed Refresh over the network keeps the page', (
+      tester,
+    ) async {
+      final server = WorkspaceServer(
+        state: LifecycleState.configuring,
+        lock: AdminLock.locked,
+        configuration: matrixConfiguration(),
+      )..rejectNext = 409;
+      await pumpShellWorkspace(tester, server);
+      await tester.tap(find.byKey(const ValueKey('next-step-primary')));
+      await tester.pumpAndSettle();
+
+      server.networkDown = true;
+      await tester.tap(find.text('Refresh'));
+      await tester.pumpAndSettle();
+
+      // The facts behind the cards fail too, so the card shows its own
+      // retry; the workspace itself stays up, not the load-failed view.
+      expect(find.byKey(_staleKey), findsOneWidget);
+      expect(find.byKey(const ValueKey('workspace-banners')), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('workspace-state-action')),
+        findsNothing,
+      );
+    });
+
+    testWidgets('a Refresh that works clears the banner', (tester) async {
+      final server = WorkspaceServer(
+        state: LifecycleState.configuring,
+        lock: AdminLock.locked,
+        configuration: matrixConfiguration(),
+      )..rejectNext = 409;
+      await pumpShellWorkspace(tester, server);
+      await tester.tap(find.byKey(const ValueKey('next-step-primary')));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Refresh'));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(_staleKey), findsNothing);
+    });
   });
 
   group('the banners widget', () {
@@ -198,6 +265,22 @@ void main() {
       );
       expect(find.text('Try again'), findsOneWidget);
     });
+
+    testWidgets(
+      'the offline banner on the web does not promise local scoring',
+      (tester) async {
+        await tester.pumpWidget(
+          const MaterialApp(
+            home: Scaffold(
+              body: WorkspaceBanners(offline: true, keepsLocalData: false),
+            ),
+          ),
+        );
+        expect(find.textContaining('Offline.'), findsOneWidget);
+        expect(find.textContaining('keep working'), findsNothing);
+        expect(find.textContaining('sync'), findsNothing);
+      },
+    );
 
     for (final mode in ThemeMode.values.where((m) => m != ThemeMode.system)) {
       testWidgets('fits at 200% text scale in a narrow window, $mode', (

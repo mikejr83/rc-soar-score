@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../../api_client_provider.dart';
@@ -74,6 +75,11 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
   // What a rejected change was about, while the stale-page banner shows.
   String? _staleWhat;
 
+  // The contest the page last showed ready. A failed reload keeps it on
+  // screen (with the stale banner, if one is up) instead of replacing the
+  // workspace with the load-failed view.
+  Contest? _shown;
+
   // Scrolls to, focuses and highlights a control; the shell's status panel
   // reaches it through [WorkspaceFocusLink].
   final WorkspaceFocusController _focus = WorkspaceFocusController();
@@ -146,16 +152,20 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
     }
   }
 
-  // Reloads the contest and the facts, not the shell, and clears the stale
-  // banner. The sections stay mounted, so the scroll position is kept.
+  // Reloads the contest and the facts, not the shell. The stale banner stays
+  // until the reload succeeds; a failed one leaves the page and the banner as
+  // they were. The sections stay mounted, so the scroll position is kept.
   void _tryAgain() {
-    setState(() {
-      _staleWhat = null;
-    });
-    _refresh().then((_) {
-      if (mounted) {
-        _reloadFacts();
+    _refresh().then((ok) {
+      if (!mounted) {
+        return;
       }
+      if (ok) {
+        setState(() {
+          _staleWhat = null;
+        });
+      }
+      _reloadFacts();
     });
   }
 
@@ -166,11 +176,11 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
   }
 
   /// Reloads the contest, which also updates the shell's status panel.
-  Future<void> _refresh() async {
+  /// Completes with whether the reload succeeded.
+  Future<bool> _refresh() async {
     final scope = ContestScope.maybeOf(context);
     if (scope != null) {
-      scope.reload();
-      return;
+      return scope.reload();
     }
     final contest = _load();
     setState(() {
@@ -178,8 +188,10 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
     });
     try {
       await contest;
+      return true;
     } on Object {
       // The builder shows the failure; the caller only waits.
+      return false;
     }
   }
 
@@ -270,7 +282,20 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
     return _body(context, scope.contest, error);
   }
 
-  Widget _body(BuildContext context, Contest? contest, Object? error) {
+  Widget _body(BuildContext context, Contest? loaded, Object? error) {
+    // A failed reload (anything but "not found") keeps the page on show.
+    final notFound = error is ApiHttpError && error.statusCode == 404;
+    final kept = _shown;
+    final contest =
+        loaded ??
+        (!notFound && kept != null && kept.id.toString() == widget.contestId
+            ? kept
+            : null);
+    if (loaded != null) {
+      _shown = loaded;
+    } else if (contest == null) {
+      _shown = null;
+    }
     final state = WorkspacePageState.of(
       idValid: _validId,
       contest: contest,
@@ -318,7 +343,9 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
       hasAttentionItems: false,
     );
     return WorkspaceScope(
-      refresh: _refresh,
+      refresh: () async {
+        await _refresh();
+      },
       announce: _announce,
       readOnly: readOnly,
       facts: facts,

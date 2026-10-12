@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'workspace_banner.dart';
@@ -8,6 +9,7 @@ class WorkspaceBanners extends StatelessWidget {
   const WorkspaceBanners({
     super.key,
     this.offline = false,
+    this.keepsLocalData = !kIsWeb,
     this.localCopyTime,
     this.onRetry,
     this.staleChange,
@@ -16,6 +18,10 @@ class WorkspaceBanners extends StatelessWidget {
 
   /// The connectivity monitor says the device is offline.
   final bool offline;
+
+  /// The build keeps contest data on the device (native). The web build does
+  /// not, so offline there promises nothing beyond the page on screen.
+  final bool keepsLocalData;
 
   /// When the local copy on show was taken, formatted for the director;
   /// `null` when the server is reachable. Nothing sets it before the local
@@ -60,14 +66,16 @@ class WorkspaceBanners extends StatelessWidget {
             onAction: onRetry,
           ),
         if (offline)
-          const WorkspaceBanner(
-            key: ValueKey('workspace-banner-offline'),
+          WorkspaceBanner(
+            key: const ValueKey('workspace-banner-offline'),
             kind: WorkspaceBannerKind.status,
             icon: Icons.wifi_off,
-            text:
-                "Offline. Scoring and the other controls keep working on this "
-                "device and sync when you're back. Publishing, visibility and "
-                'delisting need a connection.',
+            text: keepsLocalData
+                ? "Offline. Scoring and the other controls keep working on "
+                      "this device and sync when you're back. Publishing, "
+                      'visibility and delisting need a connection.'
+                : "Offline. Changes can't be saved until you're back online; "
+                      'what is on screen may be out of date.',
           ),
       ],
     );
