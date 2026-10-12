@@ -36,28 +36,52 @@ class MatrixPageData {
     }
   }
 
+  /// Loads the contest and everything else in parallel.
   static Future<MatrixPageData> load(ApiClient client, Id id) async {
+    // Future.wait, not a record's wait, so a failure keeps its own type.
     final results = await Future.wait<Object?>([
       client.contest(id),
-      _latestConfiguration(client, id),
+      _readRest(client, id),
+    ]);
+    return (results[1]! as MatrixPageData Function(Contest))(
+      results[0]! as Contest,
+    );
+  }
+
+  /// Loads everything but the contest, for a caller that already holds
+  /// [contest] and so does not fetch it again.
+  static Future<MatrixPageData> forContest(
+    ApiClient client,
+    Contest contest,
+  ) async => (await _readRest(client, contest.id))(contest);
+
+  /// The one list of reads behind the page, as a builder that takes the
+  /// contest.
+  static Future<MatrixPageData Function(Contest)> _readRest(
+    ApiClient client,
+    Id id,
+  ) async {
+    final results = await Future.wait<Object?>([
+      latestConfiguration(client, id),
       client.participations(id),
       client.participants(),
       client.teams(id),
       client.teamMemberships(id),
       client.matrix(id),
     ]);
-    return MatrixPageData(
-      contest: results[0]! as Contest,
-      configuration: results[1] as ContestConfigurationRevision?,
-      participations: results[2]! as List<ContestParticipation>,
-      profiles: results[3]! as List<ParticipantProfile>,
-      teams: results[4]! as List<Team>,
-      memberships: results[5]! as List<TeamMembership>,
-      matrix: results[6]! as CurrentMatrix,
+    return (contest) => MatrixPageData(
+      contest: contest,
+      configuration: results[0] as ContestConfigurationRevision?,
+      participations: results[1]! as List<ContestParticipation>,
+      profiles: results[2]! as List<ParticipantProfile>,
+      teams: results[3]! as List<Team>,
+      memberships: results[4]! as List<TeamMembership>,
+      matrix: results[5]! as CurrentMatrix,
     );
   }
 
-  static Future<ContestConfigurationRevision?> _latestConfiguration(
+  /// The latest saved configuration, or `null` when none is saved yet.
+  static Future<ContestConfigurationRevision?> latestConfiguration(
     ApiClient client,
     Id id,
   ) async {

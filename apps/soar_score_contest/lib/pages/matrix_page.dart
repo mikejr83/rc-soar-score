@@ -6,6 +6,7 @@ import 'package:soar_score_core/soar_score_core.dart';
 import '../api_client_provider.dart';
 import '../contest_draft_provider.dart';
 import '../router.dart';
+import '../services/configuration/configuration_problem.dart';
 import '../services/configuration/draw_readiness.dart';
 import '../services/matrix/draw_form_check.dart';
 import '../services/matrix/draw_form_controller.dart';
@@ -134,16 +135,10 @@ class _MatrixPageState extends State<MatrixPage> {
     BlockerFix.participants => participantsPath,
   });
 
-  String? _configurationProblem(MatrixPageData data) {
-    if (data.configuration == null) {
-      return 'No configuration is saved yet, so the matrix can’t be drawn.';
-    }
-    if (data.options == null) {
-      return 'The saved configuration is not valid, so the matrix can’t be '
-          'drawn.';
-    }
-    return null;
-  }
+  String? _configurationProblem(MatrixPageData data) => ConfigurationProblem.of(
+    configuration: data.configuration,
+    options: data.options,
+  );
 
   DrawBlocker? _blocker(MatrixPageData data) => DrawReadiness.evaluate(
     contest: data.contest,
