@@ -18,6 +18,7 @@ import 'pages/new_contest_wizard_page.dart';
 import 'pages/participant_editor_page.dart';
 import 'pages/participants_page.dart';
 import 'pages/roles_page.dart';
+import 'services/workspace/workspace_control_target.dart';
 import 'widgets/contest_shell.dart';
 import 'widgets/unsaved_changes_guard.dart';
 
@@ -62,6 +63,13 @@ String participantPath(String participantId) =>
 /// The contest workspace for the contest with [contestId].
 String contestWorkspacePath(String contestId) =>
     '$contestsPath/$contestId/workspace';
+
+/// The workspace of the contest with [contestId], opened on [target]'s
+/// control (`…/workspace#administration`).
+String contestWorkspacePathFor(
+  String contestId,
+  WorkspaceControlTarget target,
+) => '${contestWorkspacePath(contestId)}#${target.fragment}';
 
 /// The configuration page of the contest with [contestId].
 String contestConfigurationPath(String contestId) =>
@@ -183,6 +191,9 @@ GoRouter buildAppRouter({
             name: 'contestWorkspace',
             builder: (context, state) => ContestWorkspacePage(
               contestId: state.pathParameters['contestId']!,
+              initialFocus: WorkspaceControlTarget.fromFragment(
+                state.uri.fragment,
+              ),
             ),
           ),
           GoRoute(

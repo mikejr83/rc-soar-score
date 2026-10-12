@@ -1,16 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../services/workspace/workspace_control_target.dart';
 import 'contest_status_chip.dart';
 
 /// The selected contest's high-level status, shown under the shell header on
 /// every contest page: `Status` (the lifecycle state), `Participant scoring`
 /// and `Administration`. The values stay separate, never combined into one
 /// (`plan/ui/contest-administration/README.md`, "Contest state presentation").
+///
+/// The panel never changes a value. Each one is a button that calls [onOpen]
+/// to take the director to the control that does, on the workspace.
 class ShellStatusPanel extends StatelessWidget {
-  const ShellStatusPanel({super.key, required this.contest});
+  const ShellStatusPanel({super.key, required this.contest, this.onOpen});
 
   final Contest contest;
+
+  /// Called with the control to go to; the values are plain text when `null`.
+  final ValueChanged<WorkspaceControlTarget>? onOpen;
+
+  VoidCallback? _tap(WorkspaceControlTarget target) {
+    final open = onOpen;
+    return open == null ? null : () => open(target);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,21 +42,24 @@ class ShellStatusPanel extends StatelessWidget {
           children: [
             _Item(
               label: 'Status',
+              onTap: _tap(WorkspaceControlTarget.lifecycle),
               theme: theme,
               icon: Icons.flag_outlined,
-              child: Text(ContestStatusChip.label(contest.lifecycleState)),
+              value: ContestStatusChip.label(contest.lifecycleState),
             ),
             _Item(
               label: 'Participant scoring',
+              onTap: _tap(WorkspaceControlTarget.scoring),
               theme: theme,
               icon: Icons.sports_score,
-              child: Text(scoringOpen ? 'Open' : 'Closed'),
+              value: scoringOpen ? 'Open' : 'Closed',
             ),
             _Item(
               label: 'Administration',
+              onTap: _tap(WorkspaceControlTarget.administration),
               theme: theme,
               icon: locked ? Icons.lock : Icons.lock_open,
-              child: Text(locked ? 'Locked' : 'Unlocked'),
+              value: locked ? 'Locked' : 'Unlocked',
             ),
           ],
         ),
@@ -56,33 +71,61 @@ class ShellStatusPanel extends StatelessWidget {
 class _Item extends StatelessWidget {
   const _Item({
     required this.label,
-    required this.child,
+    required this.value,
     required this.icon,
     required this.theme,
+    required this.onTap,
   });
 
   final String label;
-  final Widget child;
+
+  /// The value as text, for the accessible name.
+  final String value;
   final IconData icon;
   final ThemeData theme;
+  final VoidCallback? onTap;
 
   @override
-  Widget build(BuildContext context) => Row(
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      Icon(icon, size: 16, color: theme.colorScheme.onSurfaceVariant),
-      const SizedBox(width: 6),
-      Text(
-        label,
-        style: theme.textTheme.bodySmall?.copyWith(
-          color: theme.colorScheme.onSurfaceVariant,
+  Widget build(BuildContext context) {
+    final content = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 16, color: theme.colorScheme.onSurfaceVariant),
+        const SizedBox(width: 6),
+        Text(
+          label,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(width: 6),
+        Text(
+          value,
+          style: theme.textTheme.bodySmall!.copyWith(
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
+    );
+    if (onTap == null) {
+      return content;
+    }
+    return Semantics(
+      button: true,
+      label: '$label: $value. Go to the ${label.toLowerCase()} control',
+      excludeSemantics: true,
+      onTap: onTap,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Center(widthFactor: 1, child: content),
+          ),
         ),
       ),
-      const SizedBox(width: 6),
-      DefaultTextStyle.merge(
-        style: theme.textTheme.bodySmall!.copyWith(fontWeight: FontWeight.w500),
-        child: child,
-      ),
-    ],
-  );
+    );
+  }
 }
