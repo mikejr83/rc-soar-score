@@ -9,7 +9,9 @@ class WorkspaceScope extends InheritedWidget {
     required this.refresh,
     required this.announce,
     required this.readOnly,
+    required this.reloadFacts,
     this.facts,
+    this.factsFailed = false,
     required super.child,
   });
 
@@ -20,6 +22,13 @@ class WorkspaceScope extends InheritedWidget {
   /// Says [message] politely to assistive technology, for example the next
   /// step's new title after an action.
   final void Function(String message) announce;
+
+  /// Loads the workspace facts again without touching the contest, for a
+  /// Retry after a failed read.
+  final VoidCallback reloadFacts;
+
+  /// True when loading the facts failed; [facts] is then `null`.
+  final bool factsFailed;
 
   /// What the workspace knows about the contest beyond the contest itself;
   /// `null` until loaded or when loading failed.
@@ -36,5 +45,7 @@ class WorkspaceScope extends InheritedWidget {
 
   @override
   bool updateShouldNotify(WorkspaceScope oldWidget) =>
-      readOnly != oldWidget.readOnly || facts != oldWidget.facts;
+      readOnly != oldWidget.readOnly ||
+      facts != oldWidget.facts ||
+      factsFailed != oldWidget.factsFailed;
 }
