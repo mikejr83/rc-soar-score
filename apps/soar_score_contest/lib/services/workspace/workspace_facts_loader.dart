@@ -20,28 +20,14 @@ abstract final class WorkspaceFactsLoader {
     final id = contest.id;
     final unavailable = <WorkspaceFactSource>{};
     final results = await Future.wait<Object?>([
-      MatrixPageData.latestConfiguration(client, id),
-      client.participations(id),
-      client.participants(),
-      client.teams(id),
-      client.teamMemberships(id),
-      client.matrix(id),
+      MatrixPageData.forContest(client, contest),
       _scores(client, id, unavailable),
       _publication(client, id, unavailable),
     ]);
-    final data = MatrixPageData(
-      contest: contest,
-      configuration: results[0] as ContestConfigurationRevision?,
-      participations: results[1]! as List<ContestParticipation>,
-      profiles: results[2]! as List<ParticipantProfile>,
-      teams: results[3]! as List<Team>,
-      memberships: results[4]! as List<TeamMembership>,
-      matrix: results[5]! as CurrentMatrix,
-    );
     return WorkspaceFacts.derive(
-      data: data,
-      scores: results[6] as ContestScores?,
-      publication: results[7]! as PublicationFacts,
+      data: results[0]! as MatrixPageData,
+      scores: results[1] as ContestScores?,
+      publication: results[2]! as PublicationFacts,
       unavailable: unavailable,
       isOffline: isOffline,
     );
