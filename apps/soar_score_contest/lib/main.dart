@@ -13,11 +13,11 @@ import 'platform/app_bootstrap.dart';
 import 'platform/bootstrap.dart' as bootstrap;
 import 'services/connectivity/app_connectivity.dart';
 
-final _logger = Logger('Main'); 
+final _logger = Logger('Main');
 
 Future<void> main() async {
-    configureLogging(level: Level.FINE, format: LogFormat.text);
-  
+  configureLogging(level: Level.FINER, format: LogFormat.text);
+
   WidgetsFlutterBinding.ensureInitialized();
 
   try {

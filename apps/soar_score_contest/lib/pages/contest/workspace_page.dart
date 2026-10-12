@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:soar_score_core/soar_score_core.dart';
+import 'package:logging/logging.dart';
 
 import '../../api_client_provider.dart';
 import '../../connectivity_provider.dart';
@@ -18,6 +19,8 @@ import '../../widgets/workspace/workspace_frame.dart';
 import '../../widgets/workspace/workspace_live_region.dart';
 import '../../widgets/workspace/workspace_scope.dart';
 import '../../widgets/workspace/workspace_section_slot.dart';
+
+final _logger = Logger('ContestWorkspacePage');
 
 DateTime _systemClock() => DateTime.now().toUtc();
 
@@ -150,14 +153,27 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
     final offline = monitor?.internetStatus == ConnectivityStatus.unavailable;
     WorkspaceFactsLoader.load(client, contest, isOffline: offline).then(
       (facts) {
+        _logger.info(
+          'Successfully loaded workspace facts for contest ${contest.id}',
+        );
         if (mounted && _factsFor == contest) {
+          _logger.info(
+            'Workspace facts for contest ${contest.id} are ready to be applied.',
+          );
           setState(() {
             _facts = facts;
             _factsFailed = false;
           });
+        } else {
+          _logger.info(
+            'Workspace facts for contest ${contest.id} were loaded but the widget is no longer mounted or the contest has changed.',
+          );
         }
       },
       onError: (Object _) {
+        _logger.warning(
+          'Failed to load workspace facts for contest ${contest.id}',
+        );
         if (mounted && _factsFor == contest) {
           setState(() {
             _facts = null;
