@@ -21,7 +21,9 @@ void main() {
       // Dark scheme surfaces must actually be darker than light ones.
       expect(
         theme.colorScheme.surface.computeLuminance(),
-        lessThan(PublicAppTheme.lightTheme.colorScheme.surface.computeLuminance()),
+        lessThan(
+          PublicAppTheme.lightTheme.colorScheme.surface.computeLuminance(),
+        ),
       );
     });
   });

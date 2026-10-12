@@ -102,22 +102,24 @@ void main() {
       final attempts = <int>[];
       final service = RecalculationService(_AlwaysFailingResults(attempts));
 
-      final warning =
-          await service.recalculateAfterEntry(Id.create());
+      final warning = await service.recalculateAfterEntry(Id.create());
 
       expect(warning, isNotNull);
       expect(attempts, hasLength(2));
     });
 
-    test('returns a warning for a ContestStateError without retrying', () async {
-      final attempts = <int>[];
-      final service = RecalculationService(_RefusingResults(attempts));
+    test(
+      'returns a warning for a ContestStateError without retrying',
+      () async {
+        final attempts = <int>[];
+        final service = RecalculationService(_RefusingResults(attempts));
 
-      final warning = await service.recalculateAfterEntry(Id.create());
+        final warning = await service.recalculateAfterEntry(Id.create());
 
-      expect(warning, contains('refused'));
-      expect(attempts, hasLength(1));
-    });
+        expect(warning, contains('refused'));
+        expect(attempts, hasLength(1));
+      },
+    );
   });
 }
 

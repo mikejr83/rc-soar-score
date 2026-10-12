@@ -38,7 +38,7 @@ abstract final class AppStatusColors {
   static Color getSuccessContainer(bool dark) {
     return dark ? successContainerDarkTheme : successContainerLightTheme;
   }
-  
+
   static Color getOnSuccessContainer(bool dark) {
     return dark ? onSuccessContainerDarkTheme : onSuccessContainerLightTheme;
   }

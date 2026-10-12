@@ -27,7 +27,7 @@ class SectionNotice {
       if (id == SectionId.details)
         const SectionNotice(
           Icons.info_outline,
-          'Not part of the configuration revision. Changes here don’t affect '
+          'Changes here don’t affect '
           'the matrix or scores.',
         ),
       if (id.kinds.contains(SettingKind.structural))

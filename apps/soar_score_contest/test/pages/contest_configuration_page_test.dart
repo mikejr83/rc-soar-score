@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_contest/api_client_provider.dart';
-import 'package:soar_score_contest/pages/contest_configuration_page.dart';
+import 'package:soar_score_contest/pages/contest/configuration_page.dart';
 import 'package:soar_score_contest/services/new_contest/wizard_discipline.dart';
 import 'package:soar_score_contest/widgets/configuration/fixed_chip.dart';
 import 'package:soar_score_core/soar_score_core.dart';
