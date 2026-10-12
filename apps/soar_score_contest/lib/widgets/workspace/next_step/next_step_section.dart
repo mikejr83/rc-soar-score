@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../../../api_client_provider.dart';
@@ -13,6 +14,8 @@ import 'contest_action_runner.dart';
 import 'next_step_card.dart';
 import 'next_step_navigator.dart';
 import 'next_step_placeholder_card.dart';
+
+final _logger = Logger('NextStepSection');
 
 /// What the snackbar says after an in-place action or a dismissal.
 const String scoringOpenedMessage =
@@ -81,6 +84,10 @@ class _NextStepSectionState extends State<NextStepSection> {
       ),
     );
     _announceChange(scope, step);
+    _logger.fine('Next step resolved: ${step.title} (${step.kind})');
+    _logger.finer(
+      () => 'facts.unavailable.isNotEmpty: ${facts.unavailable.isNotEmpty}',
+    );
     return NextStepCard(
       step: step,
       busy: busy,

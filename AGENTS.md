@@ -118,25 +118,28 @@ When someone refers to a page by name, use this table. Paths below are all in `a
 
 The landing page has no app shell. Every other page sits in the shell (`lib/widgets/contest_shell.dart`), whose rail (`shell_rail.dart`) shows one of two destination sets chosen in `shell_destinations.dart`: system scope (outside a selected contest) and contest scope (any route below `/contest-administration/contests/:contestId`, except the wizard).
 
-| Name people use                                                | Route                                                | Source (`lib/`)                                                   |
-| -------------------------------------------------------------- | ---------------------------------------------------- | ----------------------------------------------------------------- |
-| Landing page (sign in / "Continue offline"), no shell          | `/contest-administration`                            | `pages/landing_page.dart`                                         |
-| Main page, contests page, contest list ("Contests" rail entry) | `/contest-administration/home`                       | `pages/home_page.dart`, `widgets/contest_list.dart`               |
-| New contest wizard (rail "Create contest" button)              | `/contest-administration/contests/new`               | `pages/new_contest_wizard_page.dart`, `widgets/new_contest/`      |
-| Workspace (contest scope, "Workspace" rail entry)              | `/contest-administration/contests/:id/workspace`     | `pages/contest_workspace_page.dart`                               |
-| Contest configuration page ("Configuration" rail entry)        | `/contest-administration/contests/:id/configuration` | `pages/contest_configuration_page.dart`, `widgets/configuration/` |
-| Matrix page, draw ("Matrix" rail entry)                        | `/contest-administration/contests/:id/matrix`        | `pages/matrix_page.dart`, `widgets/matrix/`                       |
-| Participants manager ("Participants" rail entry)               | `/contest-administration/participants`               | `pages/participants_page.dart`                                    |
-| Participant editor (new / edit)                                | `/contest-administration/participants/new`, `/:id`   | `pages/participant_editor_page.dart`                              |
-| Role manager ("Roles" rail entry)                              | `/contest-administration/roles`                      | `pages/roles_page.dart`, `widgets/roles/`                         |
-| Landings manager ("Landings" rail entry)                       | `/contest-administration/landings`                   | `pages/landings_page.dart`, `widgets/landings/`                   |
-| Landing table editor (new / copy)                              | `/contest-administration/landings/new`               | `pages/landing_editor_page.dart`                                  |
-| Startup failure page (not a route)                             | none                                                 | `pages/bootstrap_failure_page.dart`                               |
+| Name people use                                                      | Route                                                | Source (`lib/`)                                                   |
+| -------------------------------------------------------------------- | ---------------------------------------------------- | ----------------------------------------------------------------- |
+| Landing page (sign in / "Continue offline"), no shell                | `/contest-administration`                            | `pages/landing_page.dart`                                         |
+| Main page, contests page, contest list ("Contests" rail entry)       | `/contest-administration/home`                       | `pages/home_page.dart`, `widgets/contest_list.dart`               |
+| New contest wizard (rail "Create contest" button)                    | `/contest-administration/contests/new`               | `pages/new_contest_wizard_page.dart`, `widgets/new_contest/`      |
+| Workspace (contest scope, "Workspace" rail entry)                    | `/contest-administration/contests/:id/workspace`     | `pages/contest_workspace_page.dart`                               |
+| Contest configuration page ("Configuration" rail entry)              | `/contest-administration/contests/:id/configuration` | `pages/contest_configuration_page.dart`, `widgets/configuration/` |
+| Matrix page, draw ("Matrix" rail entry)                              | `/contest-administration/contests/:id/matrix`        | `pages/matrix_page.dart`, `widgets/matrix/`                       |
+| Contest participants page (contest scope, "Participants" rail entry) | `/contest-administration/contests/:id/participants`  | `pages/contest/participants_page.dart`                            |
+| Contest scoring page (contest scope, "Scoring" rail entry)           | `/contest-administration/contests/:id/scoring`       | `pages/contest/scoring_page.dart`                                 |
+| Contest reports page (contest scope, "Reports" rail entry)           | `/contest-administration/contests/:id/reports`       | `pages/contest/reports_page.dart`                                 |
+| Participants manager ("Participants" rail entry)                     | `/contest-administration/participants`               | `pages/participants_page.dart`                                    |
+| Participant editor (new / edit)                                      | `/contest-administration/participants/new`, `/:id`   | `pages/participant_editor_page.dart`                              |
+| Role manager ("Roles" rail entry)                                    | `/contest-administration/roles`                      | `pages/roles_page.dart`, `widgets/roles/`                         |
+| Landings manager ("Landings" rail entry)                             | `/contest-administration/landings`                   | `pages/landings_page.dart`, `widgets/landings/`                   |
+| Landing table editor (new / copy)                                    | `/contest-administration/landings/new`               | `pages/landing_editor_page.dart`                                  |
+| Startup failure page (not a route)                                   | none                                                 | `pages/bootstrap_failure_page.dart`                               |
 
 Notes:
 
 - "Configuration page" always means the contest-scoped page above, not the draft step inside the wizard.
-- The rail's "Scoring" and "Reports" entries are placeholders with no route yet.
+- The contest-scoped "Scoring" and "Reports" pages are placeholders that show only the contest ID; their rail entries and routes are in place.
 - Rail and header code: `widgets/shell_rail.dart` (destinations and create button), `shell_header.dart` (breadcrumbs), `shell_status_panel.dart`, `shell_stub_page.dart`.
 - The workspace page is a frame of section and control slots (`widgets/workspace/`) arranged by `WorkspaceLayoutPlan` (`services/workspace/`). It has no page-card list; links sit next to the fact they act on.
 - Opening a contest from the list goes through `ContestOpenAction` / `contestOpenPath`, which picks the page by contest state.

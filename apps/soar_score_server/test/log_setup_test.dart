@@ -1,8 +1,8 @@
 import 'dart:convert';
 
 import 'package:logging/logging.dart';
-import 'package:soar_score_server/config/log_format.dart';
-import 'package:soar_score_server/logging/log_setup.dart';
+import 'package:soar_score_core/config/log_format.dart';
+import 'package:soar_score_core/logging/log_setup.dart';
 import 'package:test/test.dart';
 
 void main() {
