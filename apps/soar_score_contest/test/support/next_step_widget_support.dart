@@ -231,7 +231,7 @@ Future<GoRouter> pumpShellWorkspace(
   WorkspaceServer server, {
   String? location,
   bool disableAnimations = false,
-  Size size = const Size(1000, 520),
+  Size size = const Size(1000, 560),
   AppConnectivity? monitor,
   bool settle = true,
 }) async {
