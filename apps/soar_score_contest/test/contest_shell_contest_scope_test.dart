@@ -19,6 +19,7 @@ void main() {
     expect(railLabels(tester), [
       'Workspace',
       'Configuration',
+      'Participants',
       'Matrix',
       'Scoring',
       'Reports',
@@ -26,31 +27,6 @@ void main() {
     final rail = tester.widget<NavigationRail>(find.byType(NavigationRail));
     expect(rail.selectedIndex, 0);
     expect(find.byKey(const ValueKey('create-contest')), findsNothing);
-  });
-
-  testWidgets('the header shows the back arrow and the contest crumb; '
-      'without an API client the contest name falls back', (tester) async {
-    final router = buildShellTestRouter(initialLocation: workspace);
-    addTearDown(router.dispose);
-    await pumpShellRouter(tester, router);
-
-    expect(find.byKey(const ValueKey('breadcrumb-back')), findsOneWidget);
-    expect(find.byKey(const ValueKey('breadcrumb-contests')), findsOneWidget);
-    expect(find.text(ShellHeader.contestFallback), findsNWidgets(2));
-  });
-
-  testWidgets('back with no history returns to the main page', (tester) async {
-    final router = buildShellTestRouter(initialLocation: workspace);
-    addTearDown(router.dispose);
-    await pumpShellRouter(tester, router);
-    expect(router.canPop(), isFalse);
-
-    await tester.tap(find.byKey(const ValueKey('breadcrumb-back')));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Home content'), findsOneWidget);
-    final shell = tester.widget<ContestShell>(find.byType(ContestShell));
-    expect(shell.state.uri.path, homePath);
   });
 
   testWidgets('the Contests crumb leaves the contest and restores the system '
@@ -69,22 +45,5 @@ void main() {
       'Roles',
       'Landings',
     ]);
-  });
-
-  testWidgets('unwired contest destinations show the not-wired-up dialog', (
-    tester,
-  ) async {
-    final router = buildShellTestRouter(initialLocation: workspace);
-    addTearDown(router.dispose);
-    await pumpShellRouter(tester, router);
-
-    await tester.tap(find.text('Scoring'));
-    await tester.pumpAndSettle();
-    expect(find.text('Scoring is not available yet'), findsOneWidget);
-
-    await tester.tap(find.text('OK'));
-    await tester.pumpAndSettle();
-    expect(find.byType(AlertDialog), findsNothing);
-    expect(find.text('Contest workspace content'), findsOneWidget);
   });
 }

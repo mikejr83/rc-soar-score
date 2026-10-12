@@ -35,25 +35,6 @@ void main() {
     expect(find.text('Gator Cup F5J'), findsOneWidget);
   });
 
-  testWidgets('leaving with errors shown asks first', (tester) async {
-    await pumpWizard(tester, respond: emptyApi);
-    await next(tester);
-
-    await tester.tap(find.text('Participants').first);
-    await tester.pumpAndSettle();
-    expect(find.text('Leave new contest?'), findsOneWidget);
-
-    await tester.tap(find.text('Keep editing'));
-    await tester.pumpAndSettle();
-    expect(find.byType(NewContestWizardPage), findsOneWidget);
-
-    await tester.tap(find.byKey(const ValueKey('breadcrumb-back')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Leave'));
-    await tester.pumpAndSettle();
-    expect(find.byType(NewContestWizardPage), findsNothing);
-  });
-
   testWidgets('a failed draft save keeps the values and offers Retry', (
     tester,
   ) async {

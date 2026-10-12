@@ -59,31 +59,9 @@ void main() {
         ),
       ),
     );
-    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    expect(find.byType(LinearProgressIndicator), findsOneWidget);
     await tester.pumpAndSettle();
 
-    expect(find.text('Front Range Soaring'), findsOneWidget);
-  });
-
-  testWidgets('reports a load failure and retries', (tester) async {
-    var calls = 0;
-    await tester.pumpWidget(
-      _app(
-        MockClient((_) async {
-          calls++;
-          return calls == 1
-              ? _json({
-                  'error': {'code': 'not_found', 'message': 'No such contest.'},
-                }, 404)
-              : _json(_contest().toJson());
-        }),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    expect(find.text('The contest could not be loaded.'), findsOneWidget);
-    await tester.tap(find.text('Retry'));
-    await tester.pumpAndSettle();
     expect(find.text('Front Range Soaring'), findsOneWidget);
   });
 }

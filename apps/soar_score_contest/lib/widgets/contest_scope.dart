@@ -22,7 +22,8 @@ class ContestScope extends InheritedWidget {
   final Object? error;
 
   /// Loads the contest again and rebuilds everything that reads the scope.
-  final VoidCallback reload;
+  /// Completes with whether the load succeeded.
+  final Future<bool> Function() reload;
 
   /// The nearest scope, or `null` outside a shell.
   static ContestScope? maybeOf(BuildContext context) =>

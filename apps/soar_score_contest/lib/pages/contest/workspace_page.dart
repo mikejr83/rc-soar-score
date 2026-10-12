@@ -1,21 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 import 'package:logging/logging.dart';
 
 import '../../api_client_provider.dart';
+import '../../router.dart';
 import '../../connectivity_provider.dart';
 import '../../services/workspace/next_step/completion_dismissals.dart';
 import '../../services/workspace/workspace_facts.dart';
 import '../../services/workspace/workspace_control_target.dart';
 import '../../services/workspace/workspace_facts_loader.dart';
 import '../../services/workspace/workspace_layout_plan.dart';
+import '../../services/workspace/workspace_page_state.dart';
 import '../../services/workspace/workspace_section.dart';
 import '../../widgets/api_error_text.dart';
 import '../../widgets/contest_scope.dart';
-import '../../widgets/message_view.dart';
 import '../../widgets/workspace/next_step/next_step_section.dart';
 import '../../widgets/workspace/workspace_control_slot.dart';
 import '../../widgets/workspace/workspace_facts_details.dart';
+import '../../widgets/workspace/states/workspace_load_failed_view.dart';
+import '../../widgets/workspace/states/workspace_loading_skeleton.dart';
+import '../../widgets/workspace/states/workspace_not_found_view.dart';
+import '../../widgets/workspace/workspace_banners.dart';
 import '../../widgets/workspace/workspace_focus_controller.dart';
 import '../../widgets/workspace/workspace_focus_link.dart';
 import '../../widgets/workspace/workspace_frame.dart';
@@ -67,6 +74,14 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
   Contest? _factsFor;
   bool _factsFailed = false;
   final CompletionDismissals _dismissals = CompletionDismissals();
+
+  // What a rejected change was about, while the stale-page banner shows.
+  String? _staleWhat;
+
+  // The contest the page last showed ready. A failed reload keeps it on
+  // screen (with the stale banner, if one is up) instead of replacing the
+  // workspace with the load-failed view.
+  Contest? _shown;
 
   // Scrolls to, focuses and highlights a control; the shell's status panel
   // reaches it through [WorkspaceFocusLink].
@@ -131,30 +146,44 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
       return Future.error(StateError('No API client is available.'));
     }
     try {
-      return client.contest(Id.parse(widget.contestId));
+      final contest = client.contest(Id.parse(widget.contestId));
+      // The builder subscribes on the next frame; see ContestNameLoader.
+      contest.ignore();
+      return contest;
     } on ArgumentError {
       return Future.error(StateError('"${widget.contestId}" is not an id.'));
     }
   }
 
-  void _retry() {
-    final scope = ContestScope.maybeOf(context);
-    if (scope != null) {
-      scope.reload();
-      return;
-    }
-    final contest = _load();
+  // Reloads the contest and the facts, not the shell. The stale banner stays
+  // until the reload succeeds; a failed one leaves the page and the banner as
+  // they were. The sections stay mounted, so the scroll position is kept.
+  void _tryAgain() {
+    _refresh().then((ok) {
+      if (!mounted) {
+        return;
+      }
+      if (ok) {
+        setState(() {
+          _staleWhat = null;
+        });
+      }
+      _reloadFacts();
+    });
+  }
+
+  void _reportStale(String what) {
     setState(() {
-      _contest = contest;
+      _staleWhat = what;
     });
   }
 
   /// Reloads the contest, which also updates the shell's status panel.
-  Future<void> _refresh() async {
+  /// Completes with whether the reload succeeded.
+  Future<bool> _refresh() async {
     final scope = ContestScope.maybeOf(context);
     if (scope != null) {
-      scope.reload();
-      return;
+      return scope.reload();
     }
     final contest = _load();
     setState(() {
@@ -162,8 +191,10 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
     });
     try {
       await contest;
+      return true;
     } on Object {
       // The builder shows the failure; the caller only waits.
+      return false;
     }
   }
 
@@ -261,36 +292,66 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
             _body(context, snapshot.data, snapshot.error),
       );
     }
-    final Object? error;
-    if (apiClientOf(context) == null) {
-      error = StateError('No API client is available.');
-    } else if (!_validId) {
-      error = StateError('"${widget.contestId}" is not an id.');
-    } else {
-      error = scope.error;
-    }
+    final Object? error = apiClientOf(context) == null
+        ? StateError('No API client is available.')
+        : scope.error;
     return _body(context, scope.contest, error);
   }
 
-  Widget _body(BuildContext context, Contest? contest, Object? error) {
-    if (contest == null && error != null) {
-      return MessageView(
-        text: 'The contest could not be loaded.',
-        detail: apiErrorText(error),
-        onRetry: _retry,
-      );
+  Widget _body(BuildContext context, Contest? loaded, Object? error) {
+    // A failed reload (anything but "not found") keeps the page on show.
+    final notFound = error is ApiHttpError && error.statusCode == 404;
+    final kept = _shown;
+    final contest =
+        loaded ??
+        (!notFound && kept != null && kept.id.toString() == widget.contestId
+            ? kept
+            : null);
+    if (loaded != null) {
+      _shown = loaded;
+    } else if (contest == null) {
+      _shown = null;
     }
-    if (contest == null) {
-      return const Center(child: CircularProgressIndicator());
-    }
+    final state = WorkspacePageState.of(
+      idValid: _validId,
+      contest: contest,
+      error: error,
+      stale: _staleWhat != null,
+    );
+    return switch (state) {
+      WorkspaceLoading() => const WorkspaceLoadingSkeleton(),
+      WorkspaceNotFound() => WorkspaceNotFoundView(
+        onBack: () => context.go(homePath),
+      ),
+      WorkspaceLoadFailed(:final error) => WorkspaceLoadFailedView(
+        message: apiErrorText(error),
+        onRetry: _tryAgain,
+      ),
+      WorkspaceReady() => _ready(context, contest!),
+    };
+  }
+
+  Widget _ready(BuildContext context, Contest contest) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         _ensureFacts(contest);
         _runPendingFocus();
       }
     });
+    final monitor = appConnectivityOf(context);
+    return ListenableBuilder(
+      listenable: monitor ?? Listenable.merge(const []),
+      builder: (context, _) {
+        final offline =
+            monitor?.internetStatus == ConnectivityStatus.unavailable;
+        return _frame(contest, offline: offline);
+      },
+    );
+  }
+
+  Widget _frame(Contest contest, {required bool offline}) {
     final readOnly = contest.lifecycleState == LifecycleState.completed;
-    final facts = _facts;
+    final facts = _facts?.withOffline(offline);
     // The needs-attention list arrives with #345; until then it is empty.
     final plan = WorkspaceLayoutPlan.of(
       lifecycle: contest.lifecycleState,
@@ -298,28 +359,46 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
       hasAttentionItems: false,
     );
     return WorkspaceScope(
-      refresh: _refresh,
+      refresh: () async {
+        await _refresh();
+      },
       announce: _announce,
       readOnly: readOnly,
       facts: facts,
       factsFailed: _factsFailed,
       reloadFacts: _reloadFacts,
-      child: Stack(
-        fit: StackFit.expand,
+      reportStale: _reportStale,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          WorkspaceFrame(
-            plan: plan,
-            scrollController: _scroll,
-            sectionBuilder: (section) => WorkspaceSectionSlot(
-              section: section,
-              readOnly: readOnly,
-              child: _content(section, contest, plan, readOnly),
-            ),
+          // The unavailable banner (server unreachable, local copy shown)
+          // has no source until the local store lands (#319), so it is not
+          // wired here; it must not fake a local copy.
+          WorkspaceBanners(
+            offline: offline,
+            staleChange: _staleWhat,
+            onRefresh: _tryAgain,
           ),
-          Positioned(
-            left: 0,
-            top: 0,
-            child: WorkspaceLiveRegion(message: _announcement),
+          Expanded(
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                WorkspaceFrame(
+                  plan: plan,
+                  scrollController: _scroll,
+                  sectionBuilder: (section) => WorkspaceSectionSlot(
+                    section: section,
+                    readOnly: readOnly,
+                    child: _content(section, contest, plan, readOnly),
+                  ),
+                ),
+                Positioned(
+                  left: 0,
+                  top: 0,
+                  child: WorkspaceLiveRegion(message: _announcement),
+                ),
+              ],
+            ),
           ),
         ],
       ),

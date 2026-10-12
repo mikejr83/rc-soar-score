@@ -47,11 +47,20 @@ class _ContestNameLoaderState extends State<ContestNameLoader> {
     }
   }
 
-  void _reload() {
+  Future<bool> _reload() async {
     final contest = _load();
     setState(() {
       _contest = contest;
     });
+    if (contest == null) {
+      return false;
+    }
+    try {
+      await contest;
+      return true;
+    } on Object {
+      return false;
+    }
   }
 
   Future<Contest>? _load() {
@@ -66,7 +75,11 @@ class _ContestNameLoaderState extends State<ContestNameLoader> {
     } on ArgumentError {
       return null;
     }
-    return client.contest(id);
+    final contest = client.contest(id);
+    // The builder subscribes on the next frame; a failure that arrives
+    // sooner would otherwise be reported as unhandled.
+    contest.ignore();
+    return contest;
   }
 
   @override

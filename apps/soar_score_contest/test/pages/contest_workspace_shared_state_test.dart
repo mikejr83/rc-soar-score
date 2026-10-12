@@ -133,10 +133,10 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.text('The contest could not be loaded.'), findsOneWidget);
+    expect(find.text("Couldn't load this contest"), findsOneWidget);
     expect(requests, 1);
 
-    await tester.tap(find.text('Retry'));
+    await tester.tap(find.text('Try again'));
     await tester.pumpAndSettle();
     expect(requests, 2);
     expect(find.text('Front Range Soaring'), findsOneWidget);
