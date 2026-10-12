@@ -3,6 +3,7 @@ import 'package:soar_score_core/soar_score_core.dart';
 
 import '../api_client_provider.dart';
 import '../connectivity_provider.dart';
+import '../services/workspace/next_step/completion_dismissals.dart';
 import '../services/workspace/workspace_facts.dart';
 import '../services/workspace/workspace_facts_loader.dart';
 import '../services/workspace/workspace_layout_plan.dart';
@@ -10,6 +11,7 @@ import '../services/workspace/workspace_section.dart';
 import '../widgets/api_error_text.dart';
 import '../widgets/contest_scope.dart';
 import '../widgets/message_view.dart';
+import '../widgets/workspace/next_step/next_step_section.dart';
 import '../widgets/workspace/workspace_control_slot.dart';
 import '../widgets/workspace/workspace_facts_details.dart';
 import '../widgets/workspace/workspace_frame.dart';
@@ -17,15 +19,24 @@ import '../widgets/workspace/workspace_live_region.dart';
 import '../widgets/workspace/workspace_scope.dart';
 import '../widgets/workspace/workspace_section_slot.dart';
 
+DateTime _systemClock() => DateTime.now().toUtc();
+
 /// The contest workspace for one contest (`plan/ui/contest-administration/
 /// contest-workspace.md`): a frame of section slots arranged by
 /// [WorkspaceLayoutPlan]. The name lives in the shell header and the status
 /// values in the shell's status panel.
 class ContestWorkspacePage extends StatefulWidget {
-  const ContestWorkspacePage({super.key, required this.contestId});
+  const ContestWorkspacePage({
+    super.key,
+    required this.contestId,
+    this.clock = _systemClock,
+  });
 
   /// The selected contest's id, taken from the route.
   final String contestId;
+
+  /// The current time for the next-step card, injectable for tests.
+  final DateTime Function() clock;
 
   @override
   State<ContestWorkspacePage> createState() => _ContestWorkspacePageState();
@@ -43,6 +54,8 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
   // layout rather than hiding it.
   WorkspaceFacts? _facts;
   Contest? _factsFor;
+  bool _factsFailed = false;
+  final CompletionDismissals _dismissals = CompletionDismissals();
 
   @override
   void didChangeDependencies() {
@@ -111,6 +124,19 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
     }
   }
 
+  /// Loads the facts again for the same contest, for a Retry.
+  void _reloadFacts() {
+    final contest = _factsFor;
+    if (contest == null) {
+      return;
+    }
+    setState(() {
+      _factsFailed = false;
+    });
+    _factsFor = null;
+    _ensureFacts(contest);
+  }
+
   void _ensureFacts(Contest contest) {
     if (_factsFor == contest) {
       return;
@@ -127,6 +153,7 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
         if (mounted && _factsFor == contest) {
           setState(() {
             _facts = facts;
+            _factsFailed = false;
           });
         }
       },
@@ -134,6 +161,7 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
         if (mounted && _factsFor == contest) {
           setState(() {
             _facts = null;
+            _factsFailed = true;
           });
         }
       },
@@ -205,6 +233,8 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
       announce: _announce,
       readOnly: readOnly,
       facts: facts,
+      factsFailed: _factsFailed,
+      reloadFacts: _reloadFacts,
       child: Stack(
         fit: StackFit.expand,
         children: [
@@ -233,6 +263,11 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
     WorkspaceLayoutPlan plan,
     bool readOnly,
   ) => switch (section) {
+    WorkspaceSection.nextStep => NextStepSection(
+      contest: contest,
+      dismissals: _dismissals,
+      clock: widget.clock,
+    ),
     WorkspaceSection.facts => WorkspaceFactsDetails(contest: contest),
     WorkspaceSection.controls => Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,

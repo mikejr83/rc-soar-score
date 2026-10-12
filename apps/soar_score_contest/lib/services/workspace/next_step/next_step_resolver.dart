@@ -170,6 +170,7 @@ NextStep _build(NextStepKind kind, WorkspaceFacts f) {
         primary: const NextStepAction(
           label: 'Open online scoring',
           target: NextStepTarget.openScoring,
+          busyLabel: 'Opening…',
         ),
         secondary: NextStepActions.scoring('Enter scores', round: 1, group: 1),
       );
