@@ -66,7 +66,11 @@ class _ContestNameLoaderState extends State<ContestNameLoader> {
     } on ArgumentError {
       return null;
     }
-    return client.contest(id);
+    final contest = client.contest(id);
+    // The builder subscribes on the next frame; a failure that arrives
+    // sooner would otherwise be reported as unhandled.
+    contest.ignore();
+    return contest;
   }
 
   @override

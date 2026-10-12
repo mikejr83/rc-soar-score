@@ -146,7 +146,9 @@ void main() {
   });
 
   group('a rejected action', () {
-    testWidgets('leaves the card unchanged and offers Refresh', (tester) async {
+    testWidgets('leaves the card unchanged and shows the stale banner', (
+      tester,
+    ) async {
       final server = _locked()
         ..rejectNext = 409
         ..rejectMessage = 'The contest is not locked.';
@@ -157,7 +159,12 @@ void main() {
       await tester.tap(find.byKey(_primary));
       await tester.pumpAndSettle();
 
-      expect(find.text('The contest is not locked.'), findsOneWidget);
+      expect(
+        find.text(
+          "Your change to administration wasn't applied. This page is out of date.",
+        ),
+        findsOneWidget,
+      );
       expect(cardTitle(tester), before);
       expect(find.text('Unlock administration'), findsOneWidget);
       expect(find.text(unlockedMessage), findsNothing);
@@ -165,11 +172,10 @@ void main() {
       await tester.tap(find.text('Refresh'));
       await tester.pumpAndSettle();
       expect(server.contestReads, greaterThan(reads));
+      expect(find.textContaining("wasn't applied"), findsNothing);
     });
 
-    testWidgets('a stale revision is answered with the server message', (
-      tester,
-    ) async {
+    testWidgets('a stale revision is answered the same way', (tester) async {
       final server = _locked();
       await pumpWorkspace(tester, server);
       // Someone else changed the contest after the page loaded it.
@@ -181,11 +187,25 @@ void main() {
       await tester.tap(find.byKey(_primary));
       await tester.pumpAndSettle();
 
-      expect(
-        find.text('The contest was changed by someone else.'),
-        findsOneWidget,
-      );
+      expect(find.textContaining("wasn't applied"), findsOneWidget);
       expect(server.contest.adminLock, AdminLock.locked);
+    });
+
+    testWidgets('another failure is a snackbar with Refresh', (tester) async {
+      final server = _locked()
+        ..rejectNext = 500
+        ..rejectMessage = 'Server broke.';
+      await pumpWorkspace(tester, server);
+      final reads = server.contestReads;
+
+      await tester.tap(find.byKey(_primary));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Server broke.'), findsOneWidget);
+      expect(find.textContaining("wasn't applied"), findsNothing);
+      await tester.tap(find.text('Refresh'));
+      await tester.pumpAndSettle();
+      expect(server.contestReads, greaterThan(reads));
     });
   });
 

@@ -8,6 +8,8 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_contest/api_client_provider.dart';
+import 'package:soar_score_contest/connectivity_provider.dart';
+import 'package:soar_score_contest/services/connectivity/app_connectivity.dart';
 import 'package:soar_score_contest/pages/contest/workspace_page.dart';
 import 'package:soar_score_contest/router.dart';
 import 'package:soar_score_contest/services/workspace/workspace_control_target.dart';
@@ -42,6 +44,12 @@ class WorkspaceServer {
   /// When set, actions wait for it, so a test can look at the card while one
   /// runs.
   Completer<void>? actionGate;
+
+  /// When not 200, reading the contest fails with this status.
+  int contestStatus = 200;
+
+  /// When true, every request fails like a lost connection.
+  bool networkDown = false;
 
   /// The actions received, as `action` names.
   final List<String> actions = [];
@@ -81,6 +89,9 @@ class WorkspaceServer {
   }, status);
 
   Future<http.Response> handle(http.Request request) async {
+    if (networkDown) {
+      throw http.ClientException('offline', request.url);
+    }
     final path = request.url.path;
     if (request.method == 'POST' && path.endsWith('/actions')) {
       await actionGate?.future;
@@ -97,6 +108,9 @@ class WorkspaceServer {
     }
     if (path.endsWith('/contests/$matrixContestId')) {
       contestReads++;
+      if (contestStatus != 200) {
+        return _error(contestStatus, 'Contest lookup failed.');
+      }
       return _json(contest.toJson());
     }
     return inner.handle(request);
@@ -150,6 +164,9 @@ Future<void> pumpWorkspace(
   Size size = const Size(1200, 1600),
   double textScale = 1,
   DateTime Function()? clock,
+  AppConnectivity? monitor,
+  String contestId = matrixContestId,
+  bool settle = true,
 }) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
@@ -161,7 +178,7 @@ Future<void> pumpWorkspace(
       GoRoute(
         path: contestWorkspacePath(matrixContestId),
         builder: (context, state) => Scaffold(
-          body: ContestWorkspacePage(contestId: matrixContestId, clock: now),
+          body: ContestWorkspacePage(contestId: contestId, clock: now),
         ),
       ),
       for (final entry in {
@@ -177,22 +194,27 @@ Future<void> pumpWorkspace(
   );
   addTearDown(router.dispose);
   await tester.pumpWidget(
-    ApiClientInherited(
-      client: ApiClient(
-        baseUrl: Uri.parse('http://localhost'),
-        httpClient: MockClient(server.handle),
-      ),
-      child: MaterialApp.router(
-        routerConfig: router,
-        builder: (context, child) => MediaQuery(
-          data: MediaQuery.of(context)
-              .copyWith(textScaler: TextScaler.linear(textScale)),
-          child: child!,
+    _withMonitor(
+      monitor,
+      ApiClientInherited(
+        client: ApiClient(
+          baseUrl: Uri.parse('http://localhost'),
+          httpClient: MockClient(server.handle),
+        ),
+        child: MaterialApp.router(
+          routerConfig: router,
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(context)
+                .copyWith(textScaler: TextScaler.linear(textScale)),
+            child: child!,
+          ),
         ),
       ),
     ),
   );
-  await tester.pumpAndSettle();
+  if (settle) {
+    await tester.pumpAndSettle();
+  }
 }
 
 /// The card's title.
@@ -210,6 +232,8 @@ Future<GoRouter> pumpShellWorkspace(
   String? location,
   bool disableAnimations = false,
   Size size = const Size(1000, 520),
+  AppConnectivity? monitor,
+  bool settle = true,
 }) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
@@ -234,27 +258,58 @@ Future<GoRouter> pumpShellWorkspace(
             path: contestConfigurationPath(matrixContestId),
             builder: (context, state) => const Text('Configuration stub'),
           ),
+          GoRoute(
+            path: homePath,
+            builder: (context, state) => const Text('Home stub'),
+          ),
         ],
       ),
     ],
   );
   addTearDown(router.dispose);
   await tester.pumpWidget(
-    ApiClientInherited(
-      client: ApiClient(
-        baseUrl: Uri.parse('http://localhost'),
-        httpClient: MockClient(server.handle),
-      ),
-      child: MaterialApp.router(
-        routerConfig: router,
-        builder: (context, child) => MediaQuery(
-          data: MediaQuery.of(context)
-              .copyWith(disableAnimations: disableAnimations),
-          child: child!,
+    _withMonitor(
+      monitor,
+      ApiClientInherited(
+        client: ApiClient(
+          baseUrl: Uri.parse('http://localhost'),
+          httpClient: MockClient(server.handle),
+        ),
+        child: MaterialApp.router(
+          routerConfig: router,
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(context)
+                .copyWith(disableAnimations: disableAnimations),
+            child: child!,
+          ),
         ),
       ),
     ),
   );
-  await tester.pumpAndSettle();
+  if (settle) {
+    await tester.pumpAndSettle();
+  }
   return router;
 }
+
+Widget _withMonitor(AppConnectivity? monitor, Widget child) => monitor == null
+    ? child
+    : AppConnectivityInherited(monitor: monitor, child: child);
+
+/// [pumpWorkspace] after one frame only, so the loading state is on screen.
+Future<void> pumpWorkspaceNoSettle(
+  WidgetTester tester,
+  WorkspaceServer server,
+) => pumpWorkspace(tester, server, settle: false);
+
+/// [pumpShellWorkspace] after one frame only.
+Future<GoRouter> pumpShellWorkspaceNoSettle(
+  WidgetTester tester,
+  WorkspaceServer server, {
+  bool disableAnimations = false,
+}) => pumpShellWorkspace(
+  tester,
+  server,
+  disableAnimations: disableAnimations,
+  settle: false,
+);

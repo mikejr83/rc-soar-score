@@ -152,6 +152,33 @@ class WorkspaceFacts extends Equatable {
     );
   }
 
+  /// These facts with [isOffline] replaced, so the connectivity monitor's
+  /// changes reach the cards without loading anything again.
+  WorkspaceFacts withOffline(bool isOffline) => this.isOffline == isOffline
+      ? this
+      : WorkspaceFacts._(
+          contest: contest,
+          configuration: configuration,
+          options: options,
+          configurationProblem: configurationProblem,
+          scoringPilots: scoringPilots,
+          teamCount: teamCount,
+          onlyPilotName: onlyPilotName,
+          matrix: matrix,
+          roundCount: roundCount,
+          groupCount: groupCount,
+          groupSizeMin: groupSizeMin,
+          groupSizeMax: groupSizeMax,
+          rounds: rounds,
+          latestScore: latestScore,
+          currentGroup: currentGroup,
+          configDrift: configDrift,
+          drawReadiness: drawReadiness,
+          publication: publication,
+          unavailable: unavailable,
+          isOffline: isOffline,
+        );
+
   static String? _onlyPilotName(MatrixPageData data) {
     for (final participation in data.participations) {
       if (participation.roleType == RoleType.pilot &&

@@ -134,6 +134,7 @@ class _NextStepSectionState extends State<NextStepSection> {
         _run(
           scope,
           ContestAction.openScoring,
+          what: 'participant scoring',
           done: scoringOpenedMessage,
           undo: ContestAction.closeScoring,
         );
@@ -141,6 +142,7 @@ class _NextStepSectionState extends State<NextStepSection> {
         _run(
           scope,
           ContestAction.unlock,
+          what: 'administration',
           done: unlockedMessage,
           undo: ContestAction.lock,
         );
@@ -156,6 +158,7 @@ class _NextStepSectionState extends State<NextStepSection> {
   Future<void> _run(
     WorkspaceScope scope,
     ContestAction action, {
+    required String what,
     required String done,
     required ContestAction undo,
   }) async {
@@ -174,10 +177,12 @@ class _NextStepSectionState extends State<NextStepSection> {
       client: client,
       messenger: messenger,
       refresh: scope.refresh,
+      onStale: scope.reportStale,
     );
     final updated = await runner.run(
       widget.contest,
       action,
+      what: what,
       done: done,
       undo: undo,
     );

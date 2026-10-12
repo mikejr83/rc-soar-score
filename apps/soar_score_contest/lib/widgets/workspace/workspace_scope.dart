@@ -10,6 +10,7 @@ class WorkspaceScope extends InheritedWidget {
     required this.announce,
     required this.readOnly,
     required this.reloadFacts,
+    required this.reportStale,
     this.facts,
     this.factsFailed = false,
     required super.child,
@@ -26,6 +27,10 @@ class WorkspaceScope extends InheritedWidget {
   /// Loads the workspace facts again without touching the contest, for a
   /// Retry after a failed read.
   final VoidCallback reloadFacts;
+
+  /// Shows the stale-page banner for a change to `what` that the server
+  /// rejected as out of date (409).
+  final void Function(String what) reportStale;
 
   /// True when loading the facts failed; [facts] is then `null`.
   final bool factsFailed;

@@ -15,6 +15,7 @@ class ContestActionRunner {
     required this.client,
     required this.messenger,
     required this.refresh,
+    this.onStale,
   });
 
   final ApiClient client;
@@ -23,11 +24,17 @@ class ContestActionRunner {
   /// Loads the contest and the facts again after a change.
   final Future<void> Function() refresh;
 
+  /// Called with `what` when a transition is answered with 409 (a stale
+  /// revision or a rejected transition), so the page can show its stale
+  /// banner. Without it the rejection is a snackbar with Refresh.
+  final void Function(String what)? onStale;
+
   /// Applies [action] to [contest]. Returns the updated contest, or `null`
   /// when the action was rejected.
   Future<Contest?> run(
     Contest contest,
     ContestAction action, {
+    required String what,
     required String done,
     required ContestAction undo,
   }) async {
@@ -38,7 +45,7 @@ class ContestActionRunner {
         ContestActionRequest(action: action, baseRevision: contest.revision),
       );
     } on Object catch (error) {
-      _rejected(error);
+      _rejected(error, what);
       return null;
     }
     await refresh();
@@ -49,27 +56,33 @@ class ContestActionRunner {
           content: Text(done),
           action: SnackBarAction(
             label: 'Undo',
-            onPressed: () => _undo(updated, undo),
+            onPressed: () => _undo(updated, undo, what),
           ),
         ),
       );
     return updated;
   }
 
-  Future<void> _undo(Contest contest, ContestAction undo) async {
+  Future<void> _undo(Contest contest, ContestAction undo, String what) async {
     try {
       await client.applyContestAction(
         contest.id,
         ContestActionRequest(action: undo, baseRevision: contest.revision),
       );
     } on Object catch (error) {
-      _rejected(error);
+      _rejected(error, what);
       return;
     }
     await refresh();
   }
 
-  void _rejected(Object error) {
+  void _rejected(Object error, String what) {
+    final stale = onStale;
+    if (stale != null && error is ApiHttpError && error.statusCode == 409) {
+      messenger.hideCurrentSnackBar();
+      stale(what);
+      return;
+    }
     messenger
       ..hideCurrentSnackBar()
       ..showSnackBar(

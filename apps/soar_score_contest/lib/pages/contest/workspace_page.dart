@@ -1,20 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../../api_client_provider.dart';
+import '../../router.dart';
 import '../../connectivity_provider.dart';
 import '../../services/workspace/next_step/completion_dismissals.dart';
 import '../../services/workspace/workspace_facts.dart';
 import '../../services/workspace/workspace_control_target.dart';
 import '../../services/workspace/workspace_facts_loader.dart';
 import '../../services/workspace/workspace_layout_plan.dart';
+import '../../services/workspace/workspace_page_state.dart';
 import '../../services/workspace/workspace_section.dart';
 import '../../widgets/api_error_text.dart';
 import '../../widgets/contest_scope.dart';
-import '../../widgets/message_view.dart';
 import '../../widgets/workspace/next_step/next_step_section.dart';
 import '../../widgets/workspace/workspace_control_slot.dart';
 import '../../widgets/workspace/workspace_facts_details.dart';
+import '../../widgets/workspace/states/workspace_load_failed_view.dart';
+import '../../widgets/workspace/states/workspace_loading_skeleton.dart';
+import '../../widgets/workspace/states/workspace_not_found_view.dart';
+import '../../widgets/workspace/workspace_banners.dart';
 import '../../widgets/workspace/workspace_focus_controller.dart';
 import '../../widgets/workspace/workspace_focus_link.dart';
 import '../../widgets/workspace/workspace_frame.dart';
@@ -64,6 +70,9 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
   Contest? _factsFor;
   bool _factsFailed = false;
   final CompletionDismissals _dismissals = CompletionDismissals();
+
+  // What a rejected change was about, while the stale-page banner shows.
+  String? _staleWhat;
 
   // Scrolls to, focuses and highlights a control; the shell's status panel
   // reaches it through [WorkspaceFocusLink].
@@ -128,21 +137,31 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
       return Future.error(StateError('No API client is available.'));
     }
     try {
-      return client.contest(Id.parse(widget.contestId));
+      final contest = client.contest(Id.parse(widget.contestId));
+      // The builder subscribes on the next frame; see ContestNameLoader.
+      contest.ignore();
+      return contest;
     } on ArgumentError {
       return Future.error(StateError('"${widget.contestId}" is not an id.'));
     }
   }
 
-  void _retry() {
-    final scope = ContestScope.maybeOf(context);
-    if (scope != null) {
-      scope.reload();
-      return;
-    }
-    final contest = _load();
+  // Reloads the contest and the facts, not the shell, and clears the stale
+  // banner. The sections stay mounted, so the scroll position is kept.
+  void _tryAgain() {
     setState(() {
-      _contest = contest;
+      _staleWhat = null;
+    });
+    _refresh().then((_) {
+      if (mounted) {
+        _reloadFacts();
+      }
+    });
+  }
+
+  void _reportStale(String what) {
+    setState(() {
+      _staleWhat = what;
     });
   }
 
@@ -245,36 +264,53 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
             _body(context, snapshot.data, snapshot.error),
       );
     }
-    final Object? error;
-    if (apiClientOf(context) == null) {
-      error = StateError('No API client is available.');
-    } else if (!_validId) {
-      error = StateError('"${widget.contestId}" is not an id.');
-    } else {
-      error = scope.error;
-    }
+    final Object? error = apiClientOf(context) == null
+        ? StateError('No API client is available.')
+        : scope.error;
     return _body(context, scope.contest, error);
   }
 
   Widget _body(BuildContext context, Contest? contest, Object? error) {
-    if (contest == null && error != null) {
-      return MessageView(
-        text: 'The contest could not be loaded.',
-        detail: apiErrorText(error),
-        onRetry: _retry,
-      );
-    }
-    if (contest == null) {
-      return const Center(child: CircularProgressIndicator());
-    }
+    final state = WorkspacePageState.of(
+      idValid: _validId,
+      contest: contest,
+      error: error,
+      stale: _staleWhat != null,
+    );
+    return switch (state) {
+      WorkspaceLoading() => const WorkspaceLoadingSkeleton(),
+      WorkspaceNotFound() => WorkspaceNotFoundView(
+        onBack: () => context.go(homePath),
+      ),
+      WorkspaceLoadFailed(:final error) => WorkspaceLoadFailedView(
+        message: apiErrorText(error),
+        onRetry: _tryAgain,
+      ),
+      WorkspaceReady() => _ready(context, contest!),
+    };
+  }
+
+  Widget _ready(BuildContext context, Contest contest) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         _ensureFacts(contest);
         _runPendingFocus();
       }
     });
+    final monitor = appConnectivityOf(context);
+    return ListenableBuilder(
+      listenable: monitor ?? Listenable.merge(const []),
+      builder: (context, _) {
+        final offline =
+            monitor?.internetStatus == ConnectivityStatus.unavailable;
+        return _frame(contest, offline: offline);
+      },
+    );
+  }
+
+  Widget _frame(Contest contest, {required bool offline}) {
     final readOnly = contest.lifecycleState == LifecycleState.completed;
-    final facts = _facts;
+    final facts = _facts?.withOffline(offline);
     // The needs-attention list arrives with #345; until then it is empty.
     final plan = WorkspaceLayoutPlan.of(
       lifecycle: contest.lifecycleState,
@@ -288,22 +324,38 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
       facts: facts,
       factsFailed: _factsFailed,
       reloadFacts: _reloadFacts,
-      child: Stack(
-        fit: StackFit.expand,
+      reportStale: _reportStale,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          WorkspaceFrame(
-            plan: plan,
-            scrollController: _scroll,
-            sectionBuilder: (section) => WorkspaceSectionSlot(
-              section: section,
-              readOnly: readOnly,
-              child: _content(section, contest, plan, readOnly),
-            ),
+          // The unavailable banner (server unreachable, local copy shown)
+          // has no source until the local store lands (#319), so it is not
+          // wired here; it must not fake a local copy.
+          WorkspaceBanners(
+            offline: offline,
+            staleChange: _staleWhat,
+            onRefresh: _tryAgain,
           ),
-          Positioned(
-            left: 0,
-            top: 0,
-            child: WorkspaceLiveRegion(message: _announcement),
+          Expanded(
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                WorkspaceFrame(
+                  plan: plan,
+                  scrollController: _scroll,
+                  sectionBuilder: (section) => WorkspaceSectionSlot(
+                    section: section,
+                    readOnly: readOnly,
+                    child: _content(section, contest, plan, readOnly),
+                  ),
+                ),
+                Positioned(
+                  left: 0,
+                  top: 0,
+                  child: WorkspaceLiveRegion(message: _announcement),
+                ),
+              ],
+            ),
           ),
         ],
       ),
