@@ -40,6 +40,14 @@ The overall-results card exists only while Running, and archive is always last. 
 
 State actions live on the workspace. They are contest controls, not configuration, so the configuration page does not repeat them. The shell's status summary stays read-only and links to the matching workspace control.
 
+Each status value is a button. On the workspace it scrolls to the control, moves focus to the control's first action (or to the card itself when every action is disabled, so its reason is announced) and highlights the card for about 2.5 seconds. On any other contest page it opens the workspace with a fragment, and the workspace does the same once loaded. Reduced motion jumps instead of scrolling. An unknown fragment is ignored.
+
+| Status value        | Fragment          |
+| ------------------- | ----------------- |
+| Status (lifecycle)  | `#lifecycle`      |
+| Participant scoring | `#scoring`        |
+| Administration      | `#administration` |
+
 Actions are explicit and state-driven:
 
 - Open or close participant scoring access independently of lifecycle.
