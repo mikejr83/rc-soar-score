@@ -2,6 +2,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:soar_score_api/soar_score_api.dart';
+import 'package:soar_score_contest/pages/contest/participants_page.dart';
+import 'package:soar_score_contest/pages/contest/reports_page.dart';
+import 'package:soar_score_contest/pages/contest/scoring_page.dart';
 
 import 'app_mode_provider.dart';
 import 'pages/contest/configuration_page.dart';
@@ -63,6 +66,18 @@ String contestWorkspacePath(String contestId) =>
 /// The configuration page of the contest with [contestId].
 String contestConfigurationPath(String contestId) =>
     '$contestsPath/$contestId/configuration';
+
+/// The participants page of the contest with [contestId].
+String contestParticipantsPath(String contestId) =>
+    '$contestsPath/$contestId/participants';
+
+/// The scoring page of the contest with [contestId].
+String contestScoringPath(String contestId) =>
+    '$contestsPath/$contestId/scoring';
+
+/// The reports page of the contest with [contestId].
+String contestReportsPath(String contestId) =>
+    '$contestsPath/$contestId/reports';
 
 /// The matrix page of the contest with [contestId].
 String contestMatrixPath(String contestId) => '$contestsPath/$contestId/matrix';
@@ -167,6 +182,27 @@ GoRouter buildAppRouter({
             path: '$contestsPath/:contestId/workspace',
             name: 'contestWorkspace',
             builder: (context, state) => ContestWorkspacePage(
+              contestId: state.pathParameters['contestId']!,
+            ),
+          ),
+          GoRoute(
+            path: '$contestsPath/:contestId/scoring',
+            name: 'contestScoring',
+            builder: (context, state) => ContestScoringPage(
+              contestId: state.pathParameters['contestId']!,
+            ),
+          ),
+          GoRoute(
+            path: '$contestsPath/:contestId/reports',
+            name: 'contestReports',
+            builder: (context, state) => ContestReportsPage(
+              contestId: state.pathParameters['contestId']!,
+            ),
+          ),
+          GoRoute(
+            path: '$contestsPath/:contestId/participants',
+            name: 'contestParticipants',
+            builder: (context, state) => ContestParticipantsPage(
               contestId: state.pathParameters['contestId']!,
             ),
           ),
