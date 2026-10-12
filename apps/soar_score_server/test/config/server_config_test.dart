@@ -1,6 +1,6 @@
 import 'package:logging/logging.dart';
 import 'package:soar_score_server/config/config_exception.dart';
-import 'package:soar_score_server/config/log_format.dart';
+import 'package:soar_score_core/config/log_format.dart';
 import 'package:soar_score_server/config/server_config.dart';
 import 'package:test/test.dart';
 

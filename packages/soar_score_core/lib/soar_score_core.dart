@@ -4,12 +4,14 @@
 /// only `package:soar_score_core/soar_score_core.dart`.
 library;
 
+export 'config/log_format.dart';
 export 'errors/backend_only_error.dart';
 export 'errors/contest_state_error.dart';
 export 'errors/entity_not_found_error.dart';
 export 'errors/forbidden_error.dart';
 export 'errors/scoring_validation_error.dart';
 export 'errors/unknown_scoring_profile_error.dart';
+export 'logging/log_setup.dart';
 export 'models/accounts/accounts.dart';
 export 'models/contest/contest_models.dart';
 export 'models/discipline/discipline.dart';

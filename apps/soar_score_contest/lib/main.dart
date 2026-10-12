@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
+import 'package:soar_score_core/soar_score_core.dart';
 
 import 'app.dart';
 import 'pages/bootstrap_failure_page.dart';
@@ -11,10 +13,15 @@ import 'platform/app_bootstrap.dart';
 import 'platform/bootstrap.dart' as bootstrap;
 import 'services/connectivity/app_connectivity.dart';
 
+final _logger = Logger('Main'); 
+
 Future<void> main() async {
+    configureLogging(level: Level.FINE, format: LogFormat.text);
+  
   WidgetsFlutterBinding.ensureInitialized();
 
   try {
+    _logger.info('Starting Soar Score Contest App');
     _runContestApp(await bootstrap.start());
   } catch (error, stackTrace) {
     debugPrintStack(
