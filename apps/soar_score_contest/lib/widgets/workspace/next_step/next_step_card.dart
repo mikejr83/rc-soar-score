@@ -48,7 +48,7 @@ class NextStepCard extends StatelessWidget {
       key: const ValueKey('next-step-card'),
       margin: EdgeInsets.zero,
       elevation: 2,
-      color: scheme.surfaceContainerHighest,
+      color: scheme.secondaryContainer,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(20),
@@ -62,14 +62,14 @@ class NextStepCard extends StatelessWidget {
                       ? Icons.lightbulb_outline
                       : Icons.flag_outlined,
                   size: 18,
-                  color: scheme.primary,
+                  color: scheme.onSecondaryContainer,
                 ),
                 const SizedBox(width: 8),
                 Flexible(
                   child: Text(
                     step.eyebrow,
                     style: theme.textTheme.labelLarge?.copyWith(
-                      color: scheme.primary,
+                      color: scheme.onSecondaryContainer,
                       letterSpacing: 0.8,
                     ),
                   ),
