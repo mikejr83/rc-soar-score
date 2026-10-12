@@ -20,6 +20,8 @@ class WorkspaceControlSlot extends StatelessWidget {
     required this.control,
     this.highlighted = false,
     this.readOnly = false,
+    this.anchor,
+    this.focusNode,
     this.child,
   });
 
@@ -31,6 +33,13 @@ class WorkspaceControlSlot extends StatelessWidget {
 
   final bool readOnly;
 
+  /// Identifies the card for scrolling to it (the status panel links, #351).
+  final GlobalKey? anchor;
+
+  /// Wraps the card's content, so focus can go to its first action or, when
+  /// it has none to focus, to the card itself.
+  final FocusNode? focusNode;
+
   /// The card content; a placeholder when `null`.
   final Widget? child;
 
@@ -38,26 +47,31 @@ class WorkspaceControlSlot extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Semantics(
+      key: anchor,
       container: true,
       label: workspaceControlLabel(control),
-      child: Card(
-        key: ValueKey('workspace-control-${control.id}'),
-        margin: EdgeInsets.zero,
-        color: highlighted ? scheme.primaryContainer : null,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: highlighted
-              ? BorderSide(color: scheme.primary, width: 2)
-              : BorderSide.none,
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child:
-              child ??
-              Text(
-                '${workspaceControlLabel(control)} goes here',
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
+      child: Focus(
+        focusNode: focusNode,
+        skipTraversal: true,
+        child: Card(
+          key: ValueKey('workspace-control-${control.id}'),
+          margin: EdgeInsets.zero,
+          color: highlighted ? scheme.primaryContainer : null,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: highlighted
+                ? BorderSide(color: scheme.primary, width: 2)
+                : BorderSide.none,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child:
+                child ??
+                Text(
+                  '${workspaceControlLabel(control)} goes here',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+          ),
         ),
       ),
     );

@@ -10,6 +10,8 @@ import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_contest/api_client_provider.dart';
 import 'package:soar_score_contest/pages/contest/workspace_page.dart';
 import 'package:soar_score_contest/router.dart';
+import 'package:soar_score_contest/services/workspace/workspace_control_target.dart';
+import 'package:soar_score_contest/widgets/contest_shell.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import 'matrix_test_support.dart';
@@ -196,3 +198,63 @@ Future<void> pumpWorkspace(
 /// The card's title.
 String cardTitle(WidgetTester tester) =>
     tester.widget<Text>(find.byKey(const ValueKey('next-step-title'))).data!;
+
+/// Pumps the real shell around the workspace for [server]: the status panel
+/// above the page, plus a configuration stub to start from.
+///
+/// [location] is where the router starts; [disableAnimations] turns on
+/// reduced motion.
+Future<GoRouter> pumpShellWorkspace(
+  WidgetTester tester,
+  WorkspaceServer server, {
+  String? location,
+  bool disableAnimations = false,
+  Size size = const Size(1000, 520),
+}) async {
+  tester.view.physicalSize = size;
+  tester.view.devicePixelRatio = 1;
+  addTearDown(tester.view.reset);
+  final router = GoRouter(
+    initialLocation: location ?? contestWorkspacePath(matrixContestId),
+    routes: [
+      ShellRoute(
+        builder: (context, state, child) =>
+            ContestShell(state: state, child: child),
+        routes: [
+          GoRoute(
+            path: contestWorkspacePath(matrixContestId),
+            builder: (context, state) => ContestWorkspacePage(
+              contestId: matrixContestId,
+              initialFocus: WorkspaceControlTarget.fromFragment(
+                state.uri.fragment,
+              ),
+            ),
+          ),
+          GoRoute(
+            path: contestConfigurationPath(matrixContestId),
+            builder: (context, state) => const Text('Configuration stub'),
+          ),
+        ],
+      ),
+    ],
+  );
+  addTearDown(router.dispose);
+  await tester.pumpWidget(
+    ApiClientInherited(
+      client: ApiClient(
+        baseUrl: Uri.parse('http://localhost'),
+        httpClient: MockClient(server.handle),
+      ),
+      child: MaterialApp.router(
+        routerConfig: router,
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context)
+              .copyWith(disableAnimations: disableAnimations),
+          child: child!,
+        ),
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
+  return router;
+}

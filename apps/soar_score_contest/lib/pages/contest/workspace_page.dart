@@ -5,6 +5,7 @@ import '../../api_client_provider.dart';
 import '../../connectivity_provider.dart';
 import '../../services/workspace/next_step/completion_dismissals.dart';
 import '../../services/workspace/workspace_facts.dart';
+import '../../services/workspace/workspace_control_target.dart';
 import '../../services/workspace/workspace_facts_loader.dart';
 import '../../services/workspace/workspace_layout_plan.dart';
 import '../../services/workspace/workspace_section.dart';
@@ -14,6 +15,8 @@ import '../../widgets/message_view.dart';
 import '../../widgets/workspace/next_step/next_step_section.dart';
 import '../../widgets/workspace/workspace_control_slot.dart';
 import '../../widgets/workspace/workspace_facts_details.dart';
+import '../../widgets/workspace/workspace_focus_controller.dart';
+import '../../widgets/workspace/workspace_focus_link.dart';
 import '../../widgets/workspace/workspace_frame.dart';
 import '../../widgets/workspace/workspace_live_region.dart';
 import '../../widgets/workspace/workspace_scope.dart';
@@ -30,10 +33,15 @@ class ContestWorkspacePage extends StatefulWidget {
     super.key,
     required this.contestId,
     this.clock = _systemClock,
+    this.initialFocus,
   });
 
   /// The selected contest's id, taken from the route.
   final String contestId;
+
+  /// The control to take the director to once the page has loaded, from the
+  /// route's fragment (`#administration`).
+  final WorkspaceControlTarget? initialFocus;
 
   /// The current time for the next-step card, injectable for tests.
   final DateTime Function() clock;
@@ -57,9 +65,33 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
   bool _factsFailed = false;
   final CompletionDismissals _dismissals = CompletionDismissals();
 
+  // Scrolls to, focuses and highlights a control; the shell's status panel
+  // reaches it through [WorkspaceFocusLink].
+  final WorkspaceFocusController _focus = WorkspaceFocusController();
+  WorkspaceFocusLink? _link;
+  WorkspaceControlTarget? _pendingFocus;
+
+  @override
+  void initState() {
+    super.initState();
+    _pendingFocus = widget.initialFocus;
+    _focus.addListener(_onFocusChanged);
+  }
+
+  void _onFocusChanged() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    final link = WorkspaceFocusLinkScope.maybeOf(context);
+    if (link != _link) {
+      _link?.detach(_focus);
+      _link = link?..attach(_focus);
+    }
     if (ContestScope.maybeOf(context) == null) {
       _contest ??= _load();
     }
@@ -68,6 +100,10 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
   @override
   void didUpdateWidget(ContestWorkspacePage oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (widget.initialFocus != null &&
+        widget.initialFocus != oldWidget.initialFocus) {
+      _pendingFocus = widget.initialFocus;
+    }
     if (oldWidget.contestId != widget.contestId &&
         ContestScope.maybeOf(context) == null) {
       _contest = _load();
@@ -76,6 +112,10 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
 
   @override
   void dispose() {
+    _link?.detach(_focus);
+    _focus
+      ..removeListener(_onFocusChanged)
+      ..dispose();
     _scroll.dispose();
     super.dispose();
   }
@@ -168,6 +208,18 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
     );
   }
 
+  // Runs the focus asked for by the route once the controls are on the page.
+  // A control that is not there (a failure state, say) drops the request
+  // without a message.
+  void _runPendingFocus() {
+    final target = _pendingFocus;
+    if (target == null) {
+      return;
+    }
+    _pendingFocus = null;
+    _focus.focus(target, animate: !MediaQuery.disableAnimationsOf(context));
+  }
+
   void _announce(String message) {
     setState(() {
       _announcement = message;
@@ -218,6 +270,7 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         _ensureFacts(contest);
+        _runPendingFocus();
       }
     });
     final readOnly = contest.lifecycleState == LifecycleState.completed;
@@ -274,7 +327,13 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
       children: [
         for (var i = 0; i < plan.controls.length; i++) ...[
           if (i > 0) const SizedBox(height: 16),
-          WorkspaceControlSlot(control: plan.controls[i], readOnly: readOnly),
+          WorkspaceControlSlot(
+            control: plan.controls[i],
+            readOnly: readOnly,
+            highlighted: _focus.highlighted == plan.controls[i],
+            anchor: _focus.anchorFor(plan.controls[i]),
+            focusNode: _focus.nodeFor(plan.controls[i]),
+          ),
         ],
       ],
     ),
