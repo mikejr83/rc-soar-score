@@ -8,7 +8,7 @@ import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_contest/api_client_provider.dart';
 import 'package:soar_score_contest/contest_draft_provider.dart';
 import 'package:soar_score_contest/services/new_contest/contest_draft_store.dart';
-import 'package:soar_score_contest/pages/matrix_page.dart';
+import 'package:soar_score_contest/pages/contest/matrix_page.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 const String matrixContestId = '019c0000-0000-7000-8000-000000000017';
