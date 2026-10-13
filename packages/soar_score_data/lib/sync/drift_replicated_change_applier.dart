@@ -23,9 +23,8 @@ class DriftReplicatedChangeApplier implements core.ReplicatedChangeApplier {
   @override
   Future<void> apply(core.ReplicatedChange change) async {
     if (derivedEntityTypes.contains(change.entityType)) {
-      throw ArgumentError.value(
+      throw core.UnsupportedEntityTypeError(
         change.entityType,
-        'change.entityType',
         'is derived data and is recomputed, never replicated',
       );
     }

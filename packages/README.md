@@ -17,7 +17,7 @@ The [Soar Score](https://soar-score.ai) RC sailplane soaring contest scoring sui
 
 ## Sync Layer
 
-- `soar_score_sync` — Client synchronization engine for the native offline application: outbox, pull-first sync, write-through, cursor handling and status. Depends only on `soar_score_core` (including its `SyncStore` contract) and `soar_score_api`, never on `soar_score_data`. Used only by `soar_score_contest`, and only in its native bootstrap. The server-side acceptor lives in `soar_score_core` and `soar_score_data`, with routes in `soar_score_api_handlers`. Planned in ticket 037; not yet created.
+- [`soar_score_sync`](./soar_score_sync/README.md) — Client synchronization engine for the native offline application: outbox, pull-first sync, write-through, cursor handling and status. Depends only on `soar_score_core` (including its `SyncStore` contract) and `soar_score_api`, never on `soar_score_data`. Used only by `soar_score_contest`, and only in its native bootstrap. The server-side acceptor lives in `soar_score_core` and `soar_score_data`, with routes in `soar_score_api_handlers`. Specified in `plan/architecture-requirements/sync-protocol.md`; see its [README](./soar_score_sync/README.md).
 
 ## UI Layer
 

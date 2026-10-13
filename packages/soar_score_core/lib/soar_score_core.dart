@@ -11,6 +11,7 @@ export 'errors/entity_not_found_error.dart';
 export 'errors/forbidden_error.dart';
 export 'errors/scoring_validation_error.dart';
 export 'errors/unknown_scoring_profile_error.dart';
+export 'errors/unsupported_entity_type_error.dart';
 export 'logging/log_setup.dart';
 export 'models/accounts/accounts.dart';
 export 'models/contest/contest_models.dart';
