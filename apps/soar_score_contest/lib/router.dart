@@ -79,9 +79,16 @@ String contestConfigurationPath(String contestId) =>
 String contestParticipantsPath(String contestId) =>
     '$contestsPath/$contestId/participants';
 
-/// The scoring page of the contest with [contestId].
-String contestScoringPath(String contestId) =>
-    '$contestsPath/$contestId/scoring';
+/// The scoring page of the contest with [contestId], opened at [round] (and
+/// [group] within it) when given. The Scoring page (#123) honours the query.
+String contestScoringPath(String contestId, {int? round, int? group}) {
+  final base = '$contestsPath/$contestId/scoring';
+  final query = [
+    if (round != null) 'round=$round',
+    if (round != null && group != null) 'group=$group',
+  ];
+  return query.isEmpty ? base : '$base?${query.join('&')}';
+}
 
 /// The reports page of the contest with [contestId].
 String contestReportsPath(String contestId) =>
@@ -201,6 +208,8 @@ GoRouter buildAppRouter({
             name: 'contestScoring',
             builder: (context, state) => ContestScoringPage(
               contestId: state.pathParameters['contestId']!,
+              round: int.tryParse(state.uri.queryParameters['round'] ?? ''),
+              group: int.tryParse(state.uri.queryParameters['group'] ?? ''),
             ),
           ),
           GoRoute(
