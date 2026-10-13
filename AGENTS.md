@@ -144,7 +144,7 @@ Notes:
 - The Scoring route takes optional `?round=N&group=G` (built by `contestScoringPath`); the progress card's tiles use it. The placeholder only echoes it, and #123 opens the round and group.
 - Rail and header code: `widgets/shell_rail.dart` (destinations and create button), `shell_header.dart` (breadcrumbs), `shell_status_panel.dart`, `shell_stub_page.dart`.
 - The workspace page is a frame of section and control slots (`widgets/workspace/`) arranged by `WorkspaceLayoutPlan` (`services/workspace/`). It has no page-card list; links sit next to the fact they act on.
-- The "Sync" rail entry and the sync item in the status panel appear only in builds that synchronize (native). Screens reach sync through `AppSync` (`services/sync/`), never the sync package. A refused change or open conflict adds a row to the workspace needs-attention list that links to the sync page.
+- The "Sync" rail entry and the sync item in the status panel appear only in builds that synchronize (native). Screens reach sync through `AppSync` (`services/sync/`), never the sync package. A refused change or open conflict adds a row to the workspace needs-attention list that links to the sync page. The sync page also lists the open conflicts and decides each in a dialog (`widgets/sync/conflict_resolve_dialog.dart`).
 - Opening a contest from the list goes through `ContestOpenAction` / `contestOpenPath`, which picks the page by contest state.
 
 ### Public site (`soar_score_public`)

@@ -39,6 +39,24 @@ void main() {
   });
 
   group('conflict resolution', () {
+    test('lists the conflicts the store says need action', () async {
+      final rig = Rig();
+      final record = ConflictRecord(
+        id: idN(90),
+        contestId: scope.contestId,
+        entityType: 'OfficialScore',
+        entityId: idN(91),
+        competingMutationId: idN(92),
+        reasonCode: 'stale_base',
+        createdAt: DateTime.utc(2026, 10, 13),
+        acceptedPayload: {'time_flown': 540},
+        competingPayload: {'time_flown': 545},
+      );
+      rig.store.openConflictRecords = [record];
+
+      expect(await rig.engine.openConflicts(scope), [record]);
+    });
+
     test(
       'sends the choice, then syncs the scope to store the answer',
       () async {

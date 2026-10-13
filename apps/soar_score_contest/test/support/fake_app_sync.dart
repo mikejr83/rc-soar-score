@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:soar_score_contest/services/sync/app_sync.dart';
 import 'package:soar_score_contest/services/sync/app_sync_state.dart';
+import 'package:soar_score_contest/services/sync/conflict_answer.dart';
+import 'package:soar_score_contest/services/sync/open_conflict.dart';
 import 'package:soar_score_contest/services/sync/refused_change.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
@@ -23,6 +25,20 @@ class FakeAppSync implements AppSync {
   /// What [refusedChanges] answers.
   List<RefusedChange> refused = const [];
 
+  /// What [openConflicts] answers.
+  List<OpenConflict> conflicts = const [];
+
+  /// What [resolveConflict] answers, and what it was asked.
+  ConflictAnswer answer = const ConflictAnswer.resolved();
+  final resolutions =
+      <
+        ({
+          OpenConflict conflict,
+          ConflictResolutionChoice choice,
+          Map<String, Object?>? payload,
+        })
+      >[];
+
   @override
   AppSyncState get state => _state;
 
@@ -43,4 +59,19 @@ class FakeAppSync implements AppSync {
   @override
   Future<List<RefusedChange>> refusedChanges(SyncScopeKey scope) async =>
       refused;
+
+  @override
+  Future<List<OpenConflict>> openConflicts(SyncScopeKey scope) async =>
+      conflicts;
+
+  @override
+  Future<ConflictAnswer> resolveConflict(
+    SyncScopeKey scope,
+    OpenConflict conflict,
+    ConflictResolutionChoice choice, {
+    Map<String, Object?>? payload,
+  }) async {
+    resolutions.add((conflict: conflict, choice: choice, payload: payload));
+    return answer;
+  }
 }
