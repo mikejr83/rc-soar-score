@@ -35,6 +35,8 @@ class WorkspaceFacts extends Equatable {
     required this.rounds,
     required this.latestScore,
     required this.currentGroup,
+    required this.frontierGroup,
+    required this.scoreCount,
     required this.configDrift,
     required this.drawReadiness,
     required this.publication,
@@ -94,6 +96,7 @@ class WorkspaceFacts extends Equatable {
         rounds.add(
           WorkspaceRoundFact(
             ordinal: round.ordinal,
+            groupCount: round.groupCount,
             scored: scored,
             total: total,
             state: RoundProgressView.of(
@@ -109,6 +112,26 @@ class WorkspaceFacts extends Equatable {
     final latest = scores == null
         ? null
         : _latestScore(scores, assignments, roundById);
+
+    // The frontier is the latest round, by ordinal, that has a score. A
+    // correction to an earlier round makes the latest score by time sit
+    // behind it, so the group the progress card shows is found separately.
+    final frontier = rounds
+        .where((round) => round.scored > 0)
+        .fold<int?>(
+          null,
+          (most, round) =>
+              most == null || round.ordinal > most ? round.ordinal : most,
+        );
+    final frontierScore = scores == null || frontier == null
+        ? null
+        : _latestScore(
+            scores,
+            assignments,
+            roundById,
+            onlyRoundOrdinal: frontier,
+          );
+    final assignmentIds = {for (final a in assignments) a.id};
     return WorkspaceFacts._(
       contest: data.contest,
       configuration: data.configuration,
@@ -134,6 +157,18 @@ class WorkspaceFacts extends Equatable {
       currentGroup: latest == null || scores == null
           ? null
           : _currentGroup(latest, scores, assignments, roundById, sizes),
+      frontierGroup: frontierScore == null || scores == null
+          ? null
+          : _currentGroup(frontierScore, scores, assignments, roundById, sizes),
+      scoreCount: scores == null
+          ? 0
+          : scores.slots
+                .where(
+                  (slot) =>
+                      slot.officialScore != null &&
+                      assignmentIds.contains(slot.placeholder.assignmentId),
+                )
+                .length,
       configDrift: matrix.revision == null
           ? const []
           : ConfigDrift.differences(
@@ -172,6 +207,8 @@ class WorkspaceFacts extends Equatable {
           rounds: rounds,
           latestScore: latestScore,
           currentGroup: currentGroup,
+          frontierGroup: frontierGroup,
+          scoreCount: scoreCount,
           configDrift: configDrift,
           drawReadiness: drawReadiness,
           publication: publication,
@@ -194,8 +231,9 @@ class WorkspaceFacts extends Equatable {
   static (LatestScore, MatrixAssignment)? _latestScore(
     ContestScores scores,
     List<MatrixAssignment> assignments,
-    Map<Id, Round> roundById,
-  ) {
+    Map<Id, Round> roundById, {
+    int? onlyRoundOrdinal,
+  }) {
     final byId = {
       for (final assignment in assignments) assignment.id: assignment,
     };
@@ -205,6 +243,10 @@ class WorkspaceFacts extends Equatable {
       final score = slot.officialScore;
       final assignment = byId[slot.placeholder.assignmentId];
       if (score == null || assignment == null) {
+        continue;
+      }
+      if (onlyRoundOrdinal != null &&
+          roundById[assignment.scheduledRoundId]!.ordinal != onlyRoundOrdinal) {
         continue;
       }
       if (best == null || score.setAt.isAfter(best.setAt)) {
@@ -309,6 +351,14 @@ class WorkspaceFacts extends Equatable {
   final LatestScore? latestScore;
   final CurrentGroupFacts? currentGroup;
 
+  /// The group of the latest score within the latest round that has a score
+  /// (the progress card's "current group"). It differs from [currentGroup]
+  /// when an earlier round's score was corrected most recently.
+  final CurrentGroupFacts? frontierGroup;
+
+  /// How many slots of the current matrix have an official score.
+  final int scoreCount;
+
   /// Settings that differ from those the matrix was drawn with.
   final List<String> configDrift;
   final DrawReadiness drawReadiness;
@@ -344,6 +394,8 @@ class WorkspaceFacts extends Equatable {
     rounds,
     latestScore,
     currentGroup,
+    frontierGroup,
+    scoreCount,
     configDrift,
     publication,
     unavailable,
