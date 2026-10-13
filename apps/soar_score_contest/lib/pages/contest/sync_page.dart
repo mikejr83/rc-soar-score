@@ -4,8 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../../services/sync/app_sync.dart';
+import '../../services/sync/conflict_answer.dart';
+import '../../services/sync/open_conflict.dart';
 import '../../services/sync/refused_change.dart';
 import '../../widgets/contest_scope.dart';
+import '../../widgets/sync/conflict_resolve_dialog.dart';
+import '../../widgets/sync/conflicts_card.dart';
 import '../../widgets/sync/refused_changes_card.dart';
 import '../../widgets/sync/sync_details_card.dart';
 import '../../widgets/sync/sync_summary_builder.dart';
@@ -41,6 +45,13 @@ class ContestSyncPage extends StatelessWidget {
                 onSyncNow: syncing || (summary?.localOnly ?? true)
                     ? null
                     : () => unawaited(sync.syncNow(scope)),
+              ),
+              const SizedBox(height: 16),
+              _Conflicts(
+                sync: sync,
+                scope: scope,
+                zoneId: zoneId,
+                version: summary?.conflicts ?? 0,
               ),
               const SizedBox(height: 16),
               _Refused(
@@ -99,4 +110,99 @@ class _RefusedState extends State<_Refused> {
   @override
   Widget build(BuildContext context) =>
       RefusedChangesCard(changes: _changes, zoneId: widget.zoneId);
+}
+
+/// Loads the open conflicts, reloads them when [version] changes and opens the
+/// dialog that decides one.
+class _Conflicts extends StatefulWidget {
+  const _Conflicts({
+    required this.sync,
+    required this.scope,
+    required this.zoneId,
+    required this.version,
+  });
+
+  final AppSync sync;
+  final SyncScopeKey scope;
+  final String zoneId;
+  final int version;
+
+  @override
+  State<_Conflicts> createState() => _ConflictsState();
+}
+
+class _ConflictsState extends State<_Conflicts> {
+  List<OpenConflict>? _conflicts;
+
+  // Conflicts the service accepted a decision for. The local record stays
+  // pending until a sync stores the answer, so they are hidden meanwhile and
+  // cannot be decided twice.
+  final _decided = <Id>{};
+  bool _reviewing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_load());
+  }
+
+  @override
+  void didUpdateWidget(_Conflicts oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.version != widget.version) unawaited(_load());
+  }
+
+  Future<void> _load() async {
+    final conflicts = await widget.sync.openConflicts(widget.scope);
+    if (mounted) {
+      setState(() {
+        _conflicts = [
+          for (final conflict in conflicts)
+            if (!_decided.contains(conflict.id)) conflict,
+        ];
+      });
+    }
+  }
+
+  Future<void> _review(OpenConflict conflict) async {
+    if (_reviewing) return;
+    _reviewing = true;
+    final answer = await showDialog<ConflictAnswer>(
+      context: context,
+      builder: (_) => ConflictResolveDialog(
+        conflict: conflict,
+        onResolve: (choice, payload) => widget.sync.resolveConflict(
+          widget.scope,
+          conflict,
+          choice,
+          payload: payload,
+        ),
+      ),
+    );
+    _reviewing = false;
+    if (!mounted) return;
+    if (answer != null && answer.resolved) {
+      _decided.add(conflict.id);
+      final problem = answer.refreshProblem;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            problem == null
+                ? 'Decision saved.'
+                : 'Decision sent. The sync that follows failed '
+                      '(${problem.label.toLowerCase()}), so this screen '
+                      'updates after the next successful sync.',
+          ),
+        ),
+      );
+    }
+    unawaited(_load());
+  }
+
+  @override
+  Widget build(BuildContext context) => ConflictsCard(
+    conflicts: _conflicts,
+    zoneId: widget.zoneId,
+    onReview: (conflict) => unawaited(_review(conflict)),
+  );
 }

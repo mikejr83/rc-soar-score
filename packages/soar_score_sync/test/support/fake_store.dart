@@ -13,6 +13,9 @@ class FakeSyncStore implements SyncStore {
   final syncedAt = <SyncScopeKey, DateTime>{};
   var conflicts = 0;
 
+  /// What [conflictsNeedingAction] answers.
+  var openConflictRecords = <ConflictRecord>[];
+
   @override
   Future<List<MutationRecord>> pendingMutations(SyncScopeKey scope) async => [
     for (final m in mutations)
@@ -71,7 +74,7 @@ class FakeSyncStore implements SyncStore {
   @override
   Future<List<ConflictRecord>> conflictsNeedingAction(
     SyncScopeKey scope,
-  ) async => const [];
+  ) async => openConflictRecords;
 
   @override
   Future<SyncStatus> status(SyncScopeKey scope) async => SyncStatus(

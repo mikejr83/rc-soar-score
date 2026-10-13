@@ -1,6 +1,8 @@
 import 'package:soar_score_core/soar_score_core.dart';
 
 import 'app_sync_state.dart';
+import 'conflict_answer.dart';
+import 'open_conflict.dart';
 import 'refused_change.dart';
 
 /// What the screens may ask of synchronization.
@@ -25,4 +27,16 @@ abstract interface class AppSync {
 
   /// The changes the service refused in [scope], oldest first.
   Future<List<RefusedChange>> refusedChanges(SyncScopeKey scope);
+
+  /// The conflicts in [scope] that wait for a decision, oldest first.
+  Future<List<OpenConflict>> openConflicts(SyncScopeKey scope);
+
+  /// Sends the director's decision for [conflict]. [payload] is the edited
+  /// value and goes with [ConflictResolutionChoice.merged] only.
+  Future<ConflictAnswer> resolveConflict(
+    SyncScopeKey scope,
+    OpenConflict conflict,
+    ConflictResolutionChoice choice, {
+    Map<String, Object?>? payload,
+  });
 }

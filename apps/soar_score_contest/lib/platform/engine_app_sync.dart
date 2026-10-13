@@ -5,6 +5,9 @@ import 'package:soar_score_sync/soar_score_sync.dart';
 
 import '../services/sync/app_sync.dart';
 import '../services/sync/app_sync_state.dart';
+import '../services/sync/conflict_answer.dart';
+import '../services/sync/open_conflict.dart';
+import '../services/sync/reason_text.dart';
 import '../services/sync/refused_change.dart';
 import '../services/sync/sync_problem.dart';
 import '../services/sync/sync_scope_summary.dart';
@@ -49,6 +52,51 @@ class EngineAppSync implements AppSync {
         message: mutation.errorMessage,
       ),
   ];
+
+  @override
+  Future<List<OpenConflict>> openConflicts(core.SyncScopeKey scope) async => [
+    for (final conflict in await _engine.openConflicts(scope))
+      OpenConflict(
+        id: conflict.id,
+        entityType: conflict.entityType,
+        entityId: conflict.entityId,
+        createdAt: conflict.createdAt,
+        reasonCode: conflict.reasonCode,
+        reason: conflict.reason,
+        acceptedPayload: conflict.acceptedPayload,
+        competingPayload: conflict.competingPayload,
+      ),
+  ];
+
+  @override
+  Future<ConflictAnswer> resolveConflict(
+    core.SyncScopeKey scope,
+    OpenConflict conflict,
+    core.ConflictResolutionChoice choice, {
+    Map<String, Object?>? payload,
+  }) async {
+    final outcome = await _engine.resolveConflict(
+      scope,
+      conflict.id,
+      clientMutationId: core.Id.create().toString(),
+      choice: choice,
+      payload: payload,
+    );
+    final failure = _problem(outcome.failure);
+    if (outcome.result == null && failure != null) {
+      return ConflictAnswer.failed(failure);
+    }
+    if (outcome.accepted) {
+      return ConflictAnswer.resolved(refreshProblem: failure);
+    }
+    return ConflictAnswer.notAccepted(_refusal(outcome));
+  }
+
+  static String _refusal(ResolveConflictOutcome outcome) {
+    const base = 'The service did not accept the decision.';
+    final code = outcome.result?.reasonCode;
+    return code == null || code.isEmpty ? base : '$base ${reasonText(code)}';
+  }
 
   Future<void> close() async {
     await _subscription.cancel();

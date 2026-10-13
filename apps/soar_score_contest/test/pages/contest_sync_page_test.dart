@@ -3,6 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_contest/app_sync_provider.dart';
 import 'package:soar_score_contest/pages/contest/sync_page.dart';
 import 'package:soar_score_contest/services/sync/app_sync_state.dart';
+import 'package:soar_score_contest/services/sync/conflict_answer.dart';
+import 'package:soar_score_contest/services/sync/open_conflict.dart';
 import 'package:soar_score_contest/services/sync/refused_change.dart';
 import 'package:soar_score_contest/services/sync/sync_problem.dart';
 import 'package:soar_score_contest/services/sync/sync_scope_summary.dart';
@@ -27,6 +29,8 @@ AppSyncState _state(SyncScopeSummary summary, {bool syncing = false}) =>
     AppSyncState(syncing: syncing, scopes: {_scope: summary});
 
 void main() {
+  conflictTests();
+
   testWidgets('asks the engine to read the contest and shows its numbers', (
     tester,
   ) async {
@@ -135,5 +139,108 @@ void main() {
 
     expect(find.textContaining('only used in the Windows app'), findsOne);
     expect(find.byKey(const ValueKey('sync-now')), findsNothing);
+  });
+}
+
+OpenConflict _conflict() => OpenConflict(
+  id: Id.parse('019c0000-0000-7000-8000-000000000030'),
+  entityType: 'OfficialScore',
+  entityId: Id.parse('019c0000-0000-7000-8000-000000000031'),
+  createdAt: DateTime.utc(2026, 10, 13, 18),
+  reasonCode: 'stale_base',
+  acceptedPayload: {'time_flown': 540},
+  competingPayload: {'time_flown': 545},
+);
+
+void conflictTests() {
+  testWidgets('lists each open conflict and opens its comparison', (
+    tester,
+  ) async {
+    final conflict = _conflict();
+    final sync = FakeAppSync(
+      state: _state(const SyncScopeSummary(conflicts: 1)),
+    )..conflicts = [conflict];
+
+    await _pump(tester, sync);
+
+    expect(
+      find.text('OfficialScore, found 2026-10-13 18:00 UTC'),
+      findsOneWidget,
+    );
+    await tester.tap(find.byKey(ValueKey('conflict-review-${conflict.id}')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('conflict-comparison')), findsOneWidget);
+  });
+
+  testWidgets('a decision goes to the sync with the conflict and choice', (
+    tester,
+  ) async {
+    final conflict = _conflict();
+    final sync = FakeAppSync(
+      state: _state(const SyncScopeSummary(conflicts: 1)),
+    )..conflicts = [conflict];
+
+    await _pump(tester, sync);
+    await tester.tap(find.byKey(ValueKey('conflict-review-${conflict.id}')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('conflict-take-competing')));
+    await tester.pumpAndSettle();
+
+    expect(sync.resolutions.single.conflict, conflict);
+    expect(
+      sync.resolutions.single.choice,
+      ConflictResolutionChoice.tookCompeting,
+    );
+    expect(find.byKey(const ValueKey('conflict-dialog')), findsNothing);
+  });
+
+  testWidgets('a decided conflict leaves the list even if the store still has '
+      'it, and a failed follow-up sync is explained', (tester) async {
+    final conflict = _conflict();
+    final sync =
+        FakeAppSync(state: _state(const SyncScopeSummary(conflicts: 1)))
+          ..conflicts = [conflict]
+          ..answer = const ConflictAnswer.resolved(
+            refreshProblem: SyncProblem.offline,
+          );
+
+    await _pump(tester, sync);
+    await tester.tap(find.byKey(ValueKey('conflict-review-${conflict.id}')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('conflict-keep-accepted')));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(ValueKey('conflict-review-${conflict.id}')),
+      findsNothing,
+    );
+    expect(find.textContaining('The sync that follows failed'), findsOneWidget);
+  });
+
+  testWidgets('a second tap on Review does not stack another dialog', (
+    tester,
+  ) async {
+    final conflict = _conflict();
+    final sync = FakeAppSync(
+      state: _state(const SyncScopeSummary(conflicts: 1)),
+    )..conflicts = [conflict];
+
+    await _pump(tester, sync);
+    final review = find.byKey(ValueKey('conflict-review-${conflict.id}'));
+    // The second tap lands on the button before the first dialog is built.
+    await tester.tap(review);
+    await tester.tap(review, warnIfMissed: false);
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey('conflict-dialog')), findsOneWidget);
+  });
+
+  testWidgets('says so when nothing waits for a decision', (tester) async {
+    await _pump(tester, FakeAppSync(state: _state(const SyncScopeSummary())));
+
+    expect(
+      find.text('None. Nothing is waiting for your decision.'),
+      findsOneWidget,
+    );
   });
 }

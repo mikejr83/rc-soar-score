@@ -82,6 +82,11 @@ class SyncEngine {
   Future<List<MutationRecord>> rejectedMutations(SyncScopeKey scope) =>
       _store.rejectedMutations(scope);
 
+  /// The conflicts in [scope] that wait for the director's decision, with the
+  /// payloads for the side-by-side view.
+  Future<List<ConflictRecord>> openConflicts(SyncScopeKey scope) =>
+      _store.conflictsNeedingAction(scope);
+
   /// Pulls the system data stream (profiles, system roles, landing tables).
   Future<SyncFailureKind?> syncSystemData() {
     final result = _tail.then((_) => _syncSystemData());
