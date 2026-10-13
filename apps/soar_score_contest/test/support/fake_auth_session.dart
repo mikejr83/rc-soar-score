@@ -7,6 +7,12 @@ class FakeAuthSession extends AuthSession {
   bool _signedIn;
   final String? name;
 
+  /// Shown on the landing page when the session ended by itself.
+  String? reason;
+
+  @override
+  String? get endedReason => reason;
+
   /// Set to make the next `signIn` throw it.
   AuthException? signInError;
 

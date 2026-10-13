@@ -53,6 +53,14 @@ void main() {
     expect(find.text('Sign-in was cancelled.'), findsOneWidget);
   });
 
+  testWidgets('says why the session ended', (tester) async {
+    final session = FakeAuthSession()
+      ..reason = 'Your session was ended. Sign in again.';
+    await tester.pumpWidget(_app(session));
+
+    expect(find.text('Your session was ended. Sign in again.'), findsOneWidget);
+  });
+
   testWidgets('a signed-in user can continue or sign out', (tester) async {
     final session = FakeAuthSession(signedIn: true, name: 'Pat Pilot');
     await tester.pumpWidget(_app(session));
