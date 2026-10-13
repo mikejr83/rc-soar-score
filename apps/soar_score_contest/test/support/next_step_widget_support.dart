@@ -184,6 +184,7 @@ Future<void> pumpWorkspace(
       for (final entry in {
         contestConfigurationPath(matrixContestId): 'Configuration stub',
         contestMatrixPath(matrixContestId): 'Matrix stub',
+        contestScoringPath(matrixContestId): 'Scoring stub',
         participantsPath: 'Participants stub',
       }.entries)
         GoRoute(

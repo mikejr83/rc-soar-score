@@ -7,6 +7,7 @@ import 'package:logging/logging.dart';
 import '../../api_client_provider.dart';
 import '../../router.dart';
 import '../../connectivity_provider.dart';
+import '../../services/workspace/attention/needs_attention.dart';
 import '../../services/workspace/next_step/completion_dismissals.dart';
 import '../../services/workspace/workspace_facts.dart';
 import '../../services/workspace/workspace_control_target.dart';
@@ -16,8 +17,10 @@ import '../../services/workspace/workspace_page_state.dart';
 import '../../services/workspace/workspace_section.dart';
 import '../../widgets/api_error_text.dart';
 import '../../widgets/contest_scope.dart';
+import '../../widgets/workspace/attention/attention_section.dart';
 import '../../widgets/workspace/checklist/setup_checklist_section.dart';
 import '../../widgets/workspace/next_step/next_step_section.dart';
+import '../../widgets/workspace/progress/progress_section.dart';
 import '../../widgets/workspace/workspace_control_slot.dart';
 import '../../widgets/workspace/workspace_facts_details.dart';
 import '../../widgets/workspace/states/workspace_load_failed_view.dart';
@@ -353,11 +356,10 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
   Widget _frame(Contest contest, {required bool offline}) {
     final readOnly = contest.lifecycleState == LifecycleState.completed;
     final facts = _facts?.withOffline(offline);
-    // The needs-attention list arrives with #345; until then it is empty.
     final plan = WorkspaceLayoutPlan.of(
       lifecycle: contest.lifecycleState,
       hasMatrix: facts?.hasMatrix ?? false,
-      hasAttentionItems: false,
+      hasAttentionItems: facts != null && NeedsAttention.of(facts).hasItems,
     );
     return WorkspaceScope(
       refresh: () async {
@@ -418,6 +420,8 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
       clock: widget.clock,
     ),
     WorkspaceSection.checklist => SetupChecklistSection(contest: contest),
+    WorkspaceSection.attention => AttentionSection(contest: contest),
+    WorkspaceSection.progress => ProgressSection(contest: contest),
     WorkspaceSection.facts => WorkspaceFactsDetails(contest: contest),
     WorkspaceSection.controls => Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,

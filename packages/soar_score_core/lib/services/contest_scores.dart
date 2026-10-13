@@ -1,6 +1,10 @@
 import 'package:equatable/equatable.dart';
 
+import '../enums/score_placeholder_state.dart';
 import '../models/id.dart';
+import '../models/matrix/matrix_assignment.dart';
+import '../models/matrix/round.dart';
+import '../models/participants/contest_participation.dart';
 import '../models/scores/official_score.dart';
 import '../models/scores/score_placeholder.dart';
 
@@ -48,13 +52,49 @@ class RoundProgress extends Equatable {
     total: json['total']! as int,
   );
 
+  /// Counts [round] from its live [assignments].
+  ///
+  /// A slot counts when it has a placeholder. It is scored when the
+  /// placeholder is past `NotEntered`. A slot of a pilot who retired at or
+  /// before the round and has no score is left out of both counts: nobody
+  /// can enter it, so it is not missing. A retired pilot's slot that does
+  /// hold a score still counts, as scored.
+  factory RoundProgress.count(
+    Round round,
+    Iterable<MatrixAssignment> assignments, {
+    required Map<Id, ScorePlaceholder> placeholders,
+    required Map<Id, ContestParticipation> participations,
+  }) {
+    var scored = 0;
+    var total = 0;
+    for (final assignment in assignments) {
+      final placeholder = placeholders[assignment.id];
+      if (placeholder == null) continue;
+      final isScored = placeholder.state != ScorePlaceholderState.notEntered;
+      final retired =
+          participations[assignment.contestParticipationId]?.hasRetiredBy(
+            round.ordinal,
+          ) ??
+          false;
+      if (retired && !isScored) continue;
+      total++;
+      if (isScored) scored++;
+    }
+    return RoundProgress(
+      roundId: round.id,
+      ordinal: round.ordinal,
+      scored: scored,
+      total: total,
+    );
+  }
+
   final Id roundId;
   final int ordinal;
 
   /// The slots of the round that have a score.
   final int scored;
 
-  /// The slots of the round.
+  /// The slots of the round that can still be, or have been, scored.
   final int total;
 
   bool get isComplete => total > 0 && scored == total;

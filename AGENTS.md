@@ -140,6 +140,7 @@ Notes:
 
 - "Configuration page" always means the contest-scoped page above, not the draft step inside the wizard.
 - The contest-scoped "Scoring" and "Reports" pages are placeholders that show only the contest ID; their rail entries and routes are in place.
+- The Scoring route takes optional `?round=N&group=G` (built by `contestScoringPath`); the progress card's tiles use it. The placeholder only echoes it, and #123 opens the round and group.
 - Rail and header code: `widgets/shell_rail.dart` (destinations and create button), `shell_header.dart` (breadcrumbs), `shell_status_panel.dart`, `shell_stub_page.dart`.
 - The workspace page is a frame of section and control slots (`widgets/workspace/`) arranged by `WorkspaceLayoutPlan` (`services/workspace/`). It has no page-card list; links sit next to the fact they act on.
 - Opening a contest from the list goes through `ContestOpenAction` / `contestOpenPath`, which picks the page by contest state.
