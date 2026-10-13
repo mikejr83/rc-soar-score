@@ -67,7 +67,7 @@ The workspace scaffolding landed in #349 to #352 and the facts loader in #342. T
 | Participant numbers (range)         | `ContestParticipation.participantNumber`; the facts do not keep the participations        | **Not in facts**                   |
 | Publication                         | `facts.publication`                                                                       | Available (can be `unknown`)       |
 | Scoring access                      | `facts.contest.scoringAccess`                                                             | Available                          |
-| Self-scoring "off in configuration" | No such option exists in `CoreOptions` or the discipline fields                           | **No data**                        |
+| Self-scoring "off in configuration" | Dropped: there is no such option, and none will be added (#366)                           | Not shown                          |
 
 No new endpoint, model or sync feature is needed. The additions are to `WorkspaceFacts` and its loader.
 
@@ -77,7 +77,7 @@ No new endpoint, model or sync feature is needed. The additions are to `Workspac
 2. **Publication `unknown` and offline.** The design only has Published and Not published. When the read fails or the endpoint is disabled (issue #363), the row must say it could not be read, not "Not published". The row also needs a decision for offline.
 3. **Participant numbers in 3a.** The design shows "To do" when the matrix has drifted (`m && !changed`), but numbers are assigned at every draw (`MatrixDrawBuilder.numbered`), so a drifted matrix already has them. Show Done.
 4. **Participant numbers when the option is off.** `participantNumbersEnabled` is an option, off by default. Decide whether the row is hidden, or shown as not applicable, when it is off.
-5. **Self-scoring note.** "Self-scoring is off in the configuration" has no backing option. Either drop the sentence or decide the option in a separate issue. The same value drives the design's choice of the Ready next step, which the shipped resolver (#343) makes from `scoringAccess` alone.
+5. **Self-scoring note.** Resolved by #366: there is no self-scoring setting; `scoringAccess` is the only switch. Drop "Self-scoring is off in the configuration". The Ready next step follows `scoringAccess` alone, as the shipped resolver (#343) does.
 6. **Row 4 gating** should use `facts.drawReadiness`, not the design's `cfg.valid && pilots >= 2` shortcut.
 7. **Deep-link anchors** ("Configuration at Discipline" and "at Landing table"): confirm the configuration page can open at a section, or settle for the page link.
 
@@ -85,7 +85,7 @@ No new endpoint, model or sync feature is needed. The additions are to `Workspac
 
 - **Done and relied on:** #342 facts, #349 layout plan, #350 section slots, #351 status-panel focus links, #352 page states.
 - **Open and adjacent:** #250 (contest controls: rows 6 and 7 focus those cards), #363 (publication endpoint disabled in the embedded server: row 6 will often be `unknown`).
-- **Raised from this analysis:** #367 (the card), #365 (facts it needs) and #366 (decision on the self-scoring option).
+- **Raised from this analysis:** #367 (the card), #365 (facts it needs) and #366 (decision on the self-scoring option, resolved: no setting).
 - **Not needed:** #345 (audit trail) and #125 (publication page).
 
 ## What blocks the rest of the workspace (not the checklist)
@@ -103,4 +103,4 @@ No new endpoint, model or sync feature is needed. The additions are to `Workspac
 
 The Setup checklist is **nearly ready to implement**. All three variants are possible with data the workspace already loads, plus four small additions to `WorkspaceFacts` (landing table name, house-rule count, participant-number range, and the saved-at time which is already on the revision). The layout plan and slot are in place.
 
-Before building, settle gaps 1 to 5 above in the design (they are small copy and state decisions, not new data), and raise the checklist as an issue. The self-scoring sentence is the only item that cannot be built as designed.
+Before building, settle gaps 1 to 4, 6 and 7 above in the design (they are small copy and state decisions, not new data). Gap 5 is settled: the self-scoring sentence is dropped.
