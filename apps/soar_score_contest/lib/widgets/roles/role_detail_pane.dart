@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:soar_score_core/services/role_usage.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../detail_section_card.dart';

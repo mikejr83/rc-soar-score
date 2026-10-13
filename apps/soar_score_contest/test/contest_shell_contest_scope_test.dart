@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_contest/router.dart';
-import 'package:soar_score_contest/widgets/contest_shell.dart';
-import 'package:soar_score_contest/widgets/shell_header.dart';
 
 import 'support/shell_test_router.dart';
 

@@ -7,7 +7,6 @@ import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_contest/api_client_provider.dart';
 import 'package:soar_score_contest/pages/roles_page.dart';
 import 'package:soar_score_contest/router.dart';
-import 'package:soar_score_core/services/role_usage.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import 'participant_test_support.dart';

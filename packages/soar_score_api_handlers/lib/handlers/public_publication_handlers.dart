@@ -1,7 +1,6 @@
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:soar_score_api_handlers/handlers/health_handler.dart';
-import 'package:soar_score_core/services/services.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 /// The public routes, served at `/public` with no sign-in:

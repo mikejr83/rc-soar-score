@@ -75,15 +75,6 @@ class ShellHeader extends StatelessWidget {
     return rest.split('/').where((segment) => segment.isNotEmpty).toList();
   }
 
-  void _back(BuildContext context) {
-    final router = GoRouter.of(context);
-    if (router.canPop()) {
-      router.pop();
-    } else {
-      router.go(homePath);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);

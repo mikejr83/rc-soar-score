@@ -1,5 +1,4 @@
 import 'package:soar_score_core/soar_score_core.dart';
-import 'package:soar_score_core/services/landing_entry_input.dart';
 
 /// Body of `POST /api/v1/landing-tables`.
 ///
