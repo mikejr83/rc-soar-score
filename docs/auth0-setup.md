@@ -80,11 +80,21 @@ production tenant; Cloudflare Pages preview URLs are not supported for sign-in.
 | Refresh Token Rotation | On                                 |
 | Connections            | The database connection and Google |
 
-The scheme must match `Auth0Config.windowsScheme`
-(`lib/auth/auth_config.dart`), the constants in
-`windows/runner/main.cpp`, and the registry entry the installer or a
-development `.reg` file writes (see Environment Setup). "Continue offline"
+The scheme is fixed in code, not a build setting. It must match
+`Auth0Config.defaultWindowsScheme` (`lib/auth/auth_config.dart`), the constants
+in `windows/runner/main.cpp`, and the registry entry the installer or a
+development `.reg` file writes (see Environment Setup); change all of them
+together. "Continue offline"
 never contacts Auth0.
+
+### Known limitation: Windows sessions end at token expiry
+
+The app asks for `offline_access` and stores the refresh token, but
+`auth0_flutter` has no token renewal on Windows and the app does not call the
+token endpoint itself. When the access token expires (the API's access token
+lifetime, reported as about an hour), the session ends and the
+user signs in again. Web sessions renew silently. This is a first-cut
+limitation, not a configuration error.
 
 ## 4. Connections
 

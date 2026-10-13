@@ -30,7 +30,9 @@ class Auth0Config {
 
   /// Custom URL scheme the Windows build registers with the operating system.
   /// The Auth0 application's callback and logout URL is
-  /// `<scheme>://callback`.
+  /// `<scheme>://callback`. It is not a build setting: the runner's
+  /// `windows/runner/main.cpp` repeats it in C++ (mutex, pipe and callback
+  /// prefix), so changing it means changing both files and the installer.
   static const String defaultWindowsScheme = 'com.soarscore.contest';
 
   /// The configuration for the web build.
@@ -58,10 +60,7 @@ class Auth0Config {
       'AUTH0_AUDIENCE',
       defaultValue: defaultAudience,
     ),
-    windowsScheme: String.fromEnvironment(
-      'AUTH0_WINDOWS_SCHEME',
-      defaultValue: defaultWindowsScheme,
-    ),
+    windowsScheme: defaultWindowsScheme,
   );
 
   /// Tenant domain without a scheme, for example `tenant.us.auth0.com`.

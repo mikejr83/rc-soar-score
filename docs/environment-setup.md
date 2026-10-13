@@ -136,7 +136,7 @@ The contest app signs in with Auth0's Universal Login through `auth0_flutter`
 identifiers, so the development values are the defaults in
 `lib/auth/auth_config.dart`. Override them with `--dart-define` for another
 tenant or a release build: `AUTH0_DOMAIN`, `AUTH0_WEB_CLIENT_ID`,
-`AUTH0_WINDOWS_CLIENT_ID`, `AUTH0_AUDIENCE` and `AUTH0_WINDOWS_SCHEME`.
+`AUTH0_WINDOWS_CLIENT_ID` and `AUTH0_AUDIENCE`. The Windows URL scheme is fixed in code.
 
 The dashboard settings are listed in [Auth0 Setup](auth0-setup.md). In short, the web application (type Single Page Application)
 needs the app origin, with a trailing slash, in Allowed Callback URLs, Allowed

@@ -22,7 +22,8 @@ const wchar_t* kSingleInstanceMutex = L"Local\\com.soarscore.contest_auth0_singl
 const wchar_t* kRedirectPipeName    = L"\\\\.\\pipe\\com.soarscore.contest_auth0_pipe";
 
 // Only URLs beginning with this prefix are accepted from the pipe.
-// Must match Auth0Config.windowsScheme in lib/auth/auth_config.dart.
+// Must match Auth0Config.defaultWindowsScheme in lib/auth/auth_config.dart;
+// the scheme is deliberately not a --dart-define, so the two cannot drift.
 const wchar_t* kCallbackPrefix = L"com.soarscore.contest://callback";
 
 // Builds a SECURITY_DESCRIPTOR that grants pipe read/write access only to the
