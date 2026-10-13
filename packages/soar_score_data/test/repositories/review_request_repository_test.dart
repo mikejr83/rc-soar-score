@@ -108,4 +108,29 @@ void _tests(Backend backend) {
       throwsA(anything),
     );
   });
+
+  test('save refuses a request filed under another contest', () async {
+    final other = core.ReviewRequest.fromJson({
+      ...openRequest().toJson(),
+      'contest_id': core.Id.create().value,
+    });
+
+    await expectLater(
+      repo.save(other, metadata: metadata()),
+      throwsA(isA<ArgumentError>()),
+    );
+    expect(await repo.findById(other.id), isNull);
+  });
+
+  test('save refuses a request for an unknown score', () async {
+    final unknown = core.ReviewRequest.fromJson({
+      ...openRequest().toJson(),
+      'score_placeholder_id': core.Id.create().value,
+    });
+
+    await expectLater(
+      repo.save(unknown, metadata: metadata()),
+      throwsA(isA<core.EntityNotFoundError>()),
+    );
+  });
 }

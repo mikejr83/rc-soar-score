@@ -8,6 +8,7 @@ class ReviewRequestRepository extends DriftRepository
   ReviewRequestRepository(super.db, {super.stores});
 
   late final _store = store<core.ReviewRequest>('ReviewRequest');
+  late final _placeholders = store<core.ScorePlaceholder>('ScorePlaceholder');
 
   @override
   Future<core.ReviewRequest?> findById(core.Id id) => _store.find(id);
@@ -40,5 +41,21 @@ class ReviewRequestRepository extends DriftRepository
   Future<core.ReviewRequest> save(
     core.ReviewRequest request, {
     required core.MutationMetadata metadata,
-  }) => unitOfWork.run((context) => context.save(request, metadata: metadata));
+  }) async {
+    final placeholder = await _placeholders.find(request.scorePlaceholderId);
+    if (placeholder == null) {
+      throw core.EntityNotFoundError(
+        entityType: 'ScorePlaceholder',
+        entityId: request.scorePlaceholderId,
+      );
+    }
+    if (placeholder.contestId != request.contestId) {
+      throw ArgumentError(
+        'a ReviewRequest belongs to the contest of its score placeholder',
+      );
+    }
+    return unitOfWork.run(
+      (context) => context.save(request, metadata: metadata),
+    );
+  }
 }

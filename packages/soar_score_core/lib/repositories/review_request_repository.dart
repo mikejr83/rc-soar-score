@@ -26,8 +26,10 @@ abstract interface class ReviewRequestRepository {
   /// Inserts [request], or updates the stored row with the same id.
   ///
   /// Throws a `StaleRevisionError` when it was read at an older revision.
-  /// The database refuses a second open request for a score. Returns the
-  /// request as stored.
+  /// Throws an `ArgumentError` when its contest is not the contest of its
+  /// score placeholder, and an `EntityNotFoundError` when the placeholder is
+  /// not stored. The database refuses a second open request for a score.
+  /// Returns the request as stored.
   Future<ReviewRequest> save(
     ReviewRequest request, {
     required MutationMetadata metadata,
