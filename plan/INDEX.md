@@ -13,6 +13,7 @@ Documents in the sub-folder `architecture-requirements` define the application a
 - [`contest-publishing.md`](architecture-requirements/contest-publishing.md) - Requirements for publishing contest data and public projections.
 - [`contest-visibility-state.md`](architecture-requirements/contest-visibility-state.md) - The visibility states for contests on the public site.
 - [`offline-synchronization.md`](architecture-requirements/offline-synchronization.md)
+- [`sync-protocol.md`](architecture-requirements/sync-protocol.md) - The wire protocol for synchronization: routes, request and response shapes, reason codes, versioning, paging, idempotency and call order.
 - [`offline-usage.md`](architecture-requirements/offline-usage.md) - Requirements and goals for using the application offline.
 - [`self-scoring-invites.md`](architecture-requirements/self-scoring-invites.md) - Requirements for issuing and enforcing participant self-scoring invitations.
 - [`participant-score-entry.md`](architecture-requirements/participant-score-entry.md) - Requirements for participant score access, submission, and synchronization.
