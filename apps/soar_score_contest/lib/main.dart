@@ -24,6 +24,7 @@ Future<void> main() async {
     _logger.info('Starting Soar Score Contest App');
     _runContestApp(await bootstrap.start());
   } catch (error, stackTrace) {
+    _logger.severe('Soar Score startup failed: $error\n$stackTrace');
     debugPrintStack(
       label: 'Soar Score startup failed: $error',
       stackTrace: stackTrace,
