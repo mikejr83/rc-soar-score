@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:logging/logging.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:soar_score_api/soar_score_api.dart';
@@ -8,6 +9,8 @@ import 'package:soar_score_contest/platform/web_bootstrap.dart';
 
 import '../server/embedded_server.dart';
 import 'app_bootstrap.dart';
+
+final _logger = Logger('NativeBootstrap');
 
 /// Native (non-web) bootstrap, ticket 018: starts the in-process API server
 /// on `localhost` backed by the app's local SQLite database, then exposes an
@@ -40,6 +43,7 @@ class NativeBootstrap extends AppBootstrap {
     if (_closed) {
       return;
     }
+    _logger.fine('Closing native bootstrap');
     _closed = true;
     await _server.close();
     _remoteClient.close();
@@ -52,6 +56,7 @@ class NativeBootstrap extends AppBootstrap {
   /// beside it instead, so the real database is never touched.
   static Future<String> databasePath({bool demo = false}) async {
     final directory = await getApplicationSupportDirectory();
+    _logger.finer('Using application support directory: ${directory.path}');
     return p.join(
       directory.path,
       demo ? demoDatabaseName : standardDatabaseName,
@@ -76,14 +81,16 @@ class NativeBootstrap extends AppBootstrap {
   static Future<AppBootstrap> start() async {
     const String rawUrl = String.fromEnvironment('SOAR_SCORE_API_BASE_URL');
     final baseUrl = Uri.parse(rawUrl.isEmpty ? defaultApiBaseUrl : rawUrl);
+    _logger.info('Base URL: $baseUrl');
     final database = await databasePath(demo: demo);
     if (demoReset) {
+      _logger.info('Resetting demo database');
       await deleteDatabaseFiles(database);
     }
     final server = await startEmbeddedServer(database, seedDemo: demo);
-    debugPrint('Embedded API server listening on ${server.baseUrl}');
+    _logger.info('Embedded API server listening on ${server.baseUrl}');
     if (demo) {
-      debugPrint('DEMO MODE: using the example database at $database');
+      _logger.info('DEMO MODE: using the example database at $database');
     }
     return NativeBootstrap._(server, ApiClient(baseUrl: baseUrl));
   }

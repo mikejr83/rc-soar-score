@@ -1,6 +1,9 @@
+import 'package:logging/logging.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 
 import 'app_bootstrap.dart';
+
+final _logger = Logger('WebBootstrap');
 
 /// Base URL of the deployed `soar_score_server` for web builds.
 ///
@@ -38,8 +41,10 @@ class WebBootstrap extends AppBootstrap {
 
   /// Builds the client pointed at the deployed API.
   static Future<AppBootstrap> start() async {
+    _logger.info("Starting web bootstrap");
     const String rawUrl = String.fromEnvironment('SOAR_SCORE_API_BASE_URL');
     final baseUrl = Uri.parse(rawUrl.isEmpty ? defaultApiBaseUrl : rawUrl);
+    _logger.info("Base URL: $baseUrl");
     return WebBootstrap(ApiClient(baseUrl: baseUrl));
   }
 }

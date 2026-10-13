@@ -1,10 +1,13 @@
 import 'dart:io';
 
+import 'package:logging/logging.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
 
 import 'package:soar_score_api_handlers/soar_score_api_handlers.dart';
 import 'package:soar_score_core/soar_score_core.dart' as core;
 import 'package:soar_score_data/soar_score_data.dart';
+
+final _logger = Logger('EmbeddedServer');
 
 const String embeddedServerName = 'soar_score_contest';
 const String embeddedServerDisplayName = 'Soar Score Contest (Offline)';
@@ -41,6 +44,7 @@ class EmbeddedServer {
 
   Future<void> initializeDatabase() async {
     final dbPath = File(_databasePath);
+    _logger.finer('Using database path: ${dbPath.path}');
     await dbPath.parent.create(recursive: true);
     _database = createLocalDatabase(dbPath);
     // First launch installs the shipped system data so a director who has
@@ -51,6 +55,7 @@ class EmbeddedServer {
       await SystemDataSeeder(_database).seed();
       _localAccountId = await LocalAccountRepository(_database).ensure();
       if (seedDemo) {
+        _logger.finer('Seeding demo data');
         await DemoDataSeeder(
           Repository(_database),
           localAccountId: _localAccountId,
