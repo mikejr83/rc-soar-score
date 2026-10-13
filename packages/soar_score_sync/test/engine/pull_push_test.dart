@@ -234,6 +234,19 @@ void main() {
     },
   );
 
+  test('other argument errors are not reported as unsupported', () async {
+    final rig = Rig();
+    rig.applier.invalidOnSequence = 1;
+    rig.gateway.onExchange = (request) async =>
+        FakeGateway.response(changes: [change(1)]);
+
+    await expectLater(
+      rig.engine.syncScope(scope),
+      throwsA(isA<ArgumentError>()),
+    );
+    expect(rig.store.cursors[scope] ?? 0, 0);
+  });
+
   test('changes are applied in sequence order', () async {
     final rig = Rig();
     rig.gateway.onExchange = (request) async =>

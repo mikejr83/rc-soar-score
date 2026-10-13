@@ -235,7 +235,7 @@ class SyncEngine {
     for (final change in ordered) {
       try {
         await _applier.apply(changeFromDto(scope, change));
-      } on ArgumentError {
+      } on UnsupportedEntityTypeError {
         // The applier refuses an entity type it has no store for, or one that
         // is derived. Stop here without moving the cursor past it: nothing is
         // dropped, and the scope reports why it cannot go on.

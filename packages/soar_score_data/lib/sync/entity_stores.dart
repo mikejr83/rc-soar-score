@@ -545,12 +545,11 @@ class EntityStores {
 
   final Map<String, EntityStore<Object>> _byType;
 
-  /// The store for [entityType]; throws an [ArgumentError] for an unknown one.
+  /// The store for [entityType]; throws a [core.UnsupportedEntityTypeError] for an unknown one.
   EntityStore<Object> of(String entityType) =>
       _byType[entityType] ??
-      (throw ArgumentError.value(
+      (throw core.UnsupportedEntityTypeError(
         entityType,
-        'entityType',
         'has no store in this database',
       ));
 }

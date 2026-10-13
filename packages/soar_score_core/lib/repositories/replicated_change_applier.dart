@@ -5,7 +5,9 @@ import 'replicated_change.dart';
 /// Unlike a `UnitOfWork` write it keeps the service's revision and sequence
 /// and creates no pending mutation. It must refuse an entity type that is
 /// derived (`FlightResult`, `ParticipationStanding`, `TeamStanding`), because
-/// derived values are recomputed and never synchronized.
+/// derived values are recomputed and never synchronized. An entity type it
+/// cannot store, derived or unknown, is refused with an
+/// `UnsupportedEntityTypeError`, and no other error should look like one.
 abstract interface class ReplicatedChangeApplier {
   /// Applies [change] atomically. Applying the same change again is a no-op.
   Future<void> apply(ReplicatedChange change);
