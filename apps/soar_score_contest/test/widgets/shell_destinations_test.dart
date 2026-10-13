@@ -61,6 +61,21 @@ void main() {
       ]);
     });
 
+    test('adds Sync last in a contest only when the build syncs', () {
+      final path = contestWorkspacePath(_contestId);
+      final labels = [
+        for (final d in shellDestinationsFor(path, showSync: true)) d.label,
+      ];
+      expect(labels.last, 'Sync');
+      expect(
+        shellDestinationsFor(path, showSync: true).last.location,
+        contestSyncPath(_contestId),
+      );
+      expect([
+        for (final d in shellDestinationsFor(homePath, showSync: true)) d.label,
+      ], isNot(contains('Sync')));
+    });
+
     test('wires Contests to the main page and Workspace to the contest', () {
       final system = shellDestinationsFor(homePath);
       expect(system.first.location, homePath);

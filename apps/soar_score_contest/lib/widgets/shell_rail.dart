@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../contest_draft_provider.dart';
 import '../pages/landing_page.dart';
+import '../app_sync_provider.dart';
 import '../router.dart';
 import 'new_contest/create_contest_entry.dart';
 import 'not_wired_up_dialog.dart';
@@ -89,7 +90,10 @@ class _ShellRailState extends State<ShellRail> {
   }
 
   Widget _buildRail(BuildContext context, bool hasDraft) {
-    final destinations = shellDestinationsFor(widget.path);
+    final destinations = shellDestinationsFor(
+      widget.path,
+      showSync: appSyncOf(context).available,
+    );
     final wizard = _isUnder(newContestPath);
     final selected = destinations.indexWhere(
       (destination) => wizard

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_contest/pages/contest/participants_page.dart';
 import 'package:soar_score_contest/pages/contest/reports_page.dart';
+import 'package:soar_score_contest/pages/contest/sync_page.dart';
 import 'package:soar_score_contest/pages/contest/scoring_page.dart';
 
 import 'app_mode_provider.dart';
@@ -95,6 +96,9 @@ String contestScoringPath(String contestId, {int? round, int? group}) {
 /// The reports page of the contest with [contestId].
 String contestReportsPath(String contestId) =>
     '$contestsPath/$contestId/reports';
+
+/// The sync details page of the contest with [contestId].
+String contestSyncPath(String contestId) => '$contestsPath/$contestId/sync';
 
 /// The matrix page of the contest with [contestId].
 String contestMatrixPath(String contestId) => '$contestsPath/$contestId/matrix';
@@ -222,6 +226,12 @@ GoRouter buildAppRouter({
             builder: (context, state) => ContestReportsPage(
               contestId: state.pathParameters['contestId']!,
             ),
+          ),
+          GoRoute(
+            path: '$contestsPath/:contestId/sync',
+            name: 'contestSync',
+            builder: (context, state) =>
+                ContestSyncPage(contestId: state.pathParameters['contestId']!),
           ),
           GoRoute(
             path: '$contestsPath/:contestId/participants',

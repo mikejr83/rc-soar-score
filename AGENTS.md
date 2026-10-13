@@ -129,6 +129,7 @@ The landing page has no app shell. Every other page sits in the shell (`lib/widg
 | Contest participants page (contest scope, "Participants" rail entry) | `/contest-administration/contests/:id/participants`  | `pages/contest/participants_page.dart`                            |
 | Contest scoring page (contest scope, "Scoring" rail entry)           | `/contest-administration/contests/:id/scoring`       | `pages/contest/scoring_page.dart`                                 |
 | Contest reports page (contest scope, "Reports" rail entry)           | `/contest-administration/contests/:id/reports`       | `pages/contest/reports_page.dart`                                 |
+| Contest sync page (contest scope, "Sync" rail entry, native only)    | `/contest-administration/contests/:id/sync`          | `pages/contest/sync_page.dart`, `widgets/sync/`                   |
 | Participants manager ("Participants" rail entry)                     | `/contest-administration/participants`               | `pages/participants_page.dart`                                    |
 | Participant editor (new / edit)                                      | `/contest-administration/participants/new`, `/:id`   | `pages/participant_editor_page.dart`                              |
 | Role manager ("Roles" rail entry)                                    | `/contest-administration/roles`                      | `pages/roles_page.dart`, `widgets/roles/`                         |
@@ -143,6 +144,7 @@ Notes:
 - The Scoring route takes optional `?round=N&group=G` (built by `contestScoringPath`); the progress card's tiles use it. The placeholder only echoes it, and #123 opens the round and group.
 - Rail and header code: `widgets/shell_rail.dart` (destinations and create button), `shell_header.dart` (breadcrumbs), `shell_status_panel.dart`, `shell_stub_page.dart`.
 - The workspace page is a frame of section and control slots (`widgets/workspace/`) arranged by `WorkspaceLayoutPlan` (`services/workspace/`). It has no page-card list; links sit next to the fact they act on.
+- The "Sync" rail entry and the sync item in the status panel appear only in builds that synchronize (native). Screens reach sync through `AppSync` (`services/sync/`), never the sync package. A refused change or open conflict adds a row to the workspace needs-attention list that links to the sync page.
 - Opening a contest from the list goes through `ContestOpenAction` / `contestOpenPath`, which picks the page by contest state.
 
 ### Public site (`soar_score_public`)

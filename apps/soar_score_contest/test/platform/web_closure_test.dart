@@ -5,9 +5,10 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('only the native bootstrap files import the sync engine', () {
     final syncImport = RegExp(
-      r'''^(?:import|export)\s+['"](?:package:soar_score_sync|(?:\.\./|\./)*(?:platform/)?native_sync\.dart)''',
+      r'''^(?:import|export)\s+['"](?:package:soar_score_sync|(?:\.\./|\./)*(?:platform/)?(?:native_sync|engine_app_sync)\.dart)''',
     );
     final allowed = {
+      'lib/platform/engine_app_sync.dart',
       'lib/platform/native_sync.dart',
       'lib/platform/native_bootstrap.dart',
     };

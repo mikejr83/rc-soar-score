@@ -31,6 +31,20 @@ class DriftSyncStore implements core.SyncStore {
   }
 
   @override
+  Future<List<core.MutationRecord>> rejectedMutations(
+    core.SyncScopeKey scope,
+  ) async {
+    if (scope is core.SystemScopeKey) return const [];
+    final (column, id) = _scopeColumn(scope);
+    final rows = await _mutations.where(
+      "outcome = 'Rejected' AND $column = ?",
+      [Variable<String>(id)],
+      orderBy: 'client_time, id',
+    );
+    return [for (final row in rows) core.MutationRecord.fromJson(row)];
+  }
+
+  @override
   Future<void> recordOutcome({
     required core.Id mutationId,
     required core.MutationOutcome outcome,
@@ -134,6 +148,7 @@ class DriftSyncStore implements core.SyncStore {
     final position = await _position(scope);
     return core.SyncStatus(
       pendingMutations: (await pendingMutations(scope)).length,
+      rejectedMutations: (await rejectedMutations(scope)).length,
       conflictsNeedingAction: (await conflictsNeedingAction(scope)).length,
       lastSyncedSequence: position?.lastSyncedSequence ?? 0,
       lastSyncedAt: position?.lastSyncedAt == null

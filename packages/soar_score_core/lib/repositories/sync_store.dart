@@ -10,6 +10,10 @@ abstract interface class SyncStore {
   /// Mutations still `Pending` in the outbox, oldest first.
   Future<List<MutationRecord>> pendingMutations(SyncScopeKey scope);
 
+  /// Mutations the service `Rejected`, oldest first. They stay in the history
+  /// so the director can see what was refused and why.
+  Future<List<MutationRecord>> rejectedMutations(SyncScopeKey scope);
+
   /// Records the service's answer for a mutation in the outbox.
   ///
   /// [sequence] accompanies an `Accepted` outcome only.

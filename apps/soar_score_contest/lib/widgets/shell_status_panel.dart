@@ -12,9 +12,17 @@ import 'contest_status_chip.dart';
 /// The panel never changes a value. Each one is a button that calls [onOpen]
 /// to take the director to the control that does, on the workspace.
 class ShellStatusPanel extends StatelessWidget {
-  const ShellStatusPanel({super.key, required this.contest, this.onOpen});
+  const ShellStatusPanel({
+    super.key,
+    required this.contest,
+    this.onOpen,
+    this.trailing,
+  });
 
   final Contest contest;
+
+  /// An extra entry after the contest's values, for example the sync status.
+  final Widget? trailing;
 
   /// Called with the control to go to; the values are plain text when `null`.
   final ValueChanged<WorkspaceControlTarget>? onOpen;
@@ -61,6 +69,7 @@ class ShellStatusPanel extends StatelessWidget {
               icon: locked ? Icons.lock : Icons.lock_open,
               value: locked ? 'Locked' : 'Unlocked',
             ),
+            ?trailing,
           ],
         ),
       ),

@@ -1,6 +1,8 @@
 import 'package:soar_score_api/soar_score_api.dart';
 
 import '../auth/auth_session.dart';
+import '../services/sync/app_sync.dart';
+import '../services/sync/no_app_sync.dart';
 
 /// Shared view of the platform bootstrap performed before the app's first
 /// frame: the `ApiClient` every screen talks through, and the resources that
@@ -18,6 +20,9 @@ abstract class AppBootstrap {
   ApiClient get apiClient;
 
   ApiClient get remoteApiClient;
+
+  /// What the screens may ask of synchronization; none on the web.
+  AppSync get appSync => const NoAppSync();
 
   /// Tells the platform that the remote API became reachable (or not).
   ///

@@ -4,6 +4,8 @@ import 'package:soar_score_core/soar_score_core.dart';
 
 import '../../../router.dart';
 import '../../../services/workspace/attention/needs_attention.dart';
+import '../../../services/workspace/attention/sync_source.dart';
+import '../../sync/sync_summary_builder.dart';
 import '../workspace_scope.dart';
 import 'needs_attention_card.dart';
 
@@ -23,13 +25,23 @@ class AttentionSection extends StatelessWidget {
         onRetry: scope.factsFailed ? scope.reloadFacts : null,
       );
     }
-    return NeedsAttentionCard(
-      attention: NeedsAttention.of(facts),
-      onRetry: scope.reloadFacts,
-      onOpen: (item) {
-        final round = item.scoringRound;
-        context.go(contestScoringPath(contest.id.value, round: round));
-      },
+    return SyncSummaryBuilder(
+      scope: ContestScopeKey(contest.id),
+      builder: (context, sync, summary, syncing) => NeedsAttentionCard(
+        attention: NeedsAttention.of(
+          facts,
+          sources: [...NeedsAttention.defaultSources, SyncSource(summary)],
+        ),
+        onRetry: scope.reloadFacts,
+        onOpen: (item) {
+          if (item.opensSync) {
+            context.go(contestSyncPath(contest.id.value));
+            return;
+          }
+          final round = item.scoringRound;
+          context.go(contestScoringPath(contest.id.value, round: round));
+        },
+      ),
     );
   }
 }

@@ -20,6 +20,12 @@ class FakeSyncStore implements SyncStore {
   ];
 
   @override
+  Future<List<MutationRecord>> rejectedMutations(SyncScopeKey scope) async => [
+    for (final m in mutations)
+      if (m.outcome == MutationOutcome.rejected) m,
+  ];
+
+  @override
   Future<void> recordOutcome({
     required Id mutationId,
     required MutationOutcome outcome,
@@ -71,6 +77,7 @@ class FakeSyncStore implements SyncStore {
   Future<SyncStatus> status(SyncScopeKey scope) async => SyncStatus(
     pendingMutations: (await pendingMutations(scope)).length,
     conflictsNeedingAction: conflicts,
+    rejectedMutations: (await rejectedMutations(scope)).length,
     lastSyncedSequence: cursors[scope] ?? 0,
     lastSyncedAt: syncedAt[scope],
   );
