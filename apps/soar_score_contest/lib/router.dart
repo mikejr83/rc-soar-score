@@ -7,6 +7,8 @@ import 'package:soar_score_contest/pages/contest/reports_page.dart';
 import 'package:soar_score_contest/pages/contest/scoring_page.dart';
 
 import 'app_mode_provider.dart';
+import 'auth/auth_session.dart';
+import 'auth/auth_session_inherited.dart';
 import 'pages/contest/configuration_page.dart';
 import 'pages/contest/workspace_page.dart';
 import 'pages/home_page.dart';
@@ -100,6 +102,7 @@ String contestMatrixPath(String contestId) => '$contestsPath/$contestId/matrix';
 GoRouter buildAppRouter({
   String initialLocation = landingPath,
   AppModeNotifier? appMode,
+  AuthSession? auth,
 }) {
   // One editor is open at a time, so one guard serves both editor routes.
   final editorGuard = UnsavedChangesGuard();
@@ -107,9 +110,10 @@ GoRouter buildAppRouter({
   final configurationGuard = UnsavedChangesGuard();
   return GoRouter(
     initialLocation: initialLocation,
-    refreshListenable: !kIsWeb ? appMode : null,
+    // Re-runs the guard when offline mode or the signed-in state changes.
+    refreshListenable: Listenable.merge([if (!kIsWeb) ?appMode, ?auth]),
     redirect: (context, state) =>
-        navigationGuard(context, state, appMode: appMode),
+        navigationGuard(context, state, appMode: appMode, auth: auth),
     routes: [
       // The landing page is a plain page outside the shell; the shell starts
       // once the user is using the application.
@@ -239,12 +243,14 @@ GoRouter buildAppRouter({
 /// - The landing page ([landingPath]) is always accessible anonymously.
 /// - When in offline mode (native desktop only), the navigation guard is inactive
 ///   for routes, permitting access beyond the landing page.
+/// - A signed-in user ([auth]) has access beyond the landing page.
 /// - When not in offline mode (and unauthenticated), attempting to access routes
 ///   beyond the landing page redirects back to [landingPath].
 String? navigationGuard(
   BuildContext context,
   GoRouterState state, {
   AppModeNotifier? appMode,
+  AuthSession? auth,
 }) {
   final path = state.uri.path;
 
@@ -265,6 +271,11 @@ String? navigationGuard(
     if (isOffline) {
       return null;
     }
+  }
+
+  // A signed-in user may go anywhere.
+  if (auth?.isSignedIn ?? authSessionOf(context)?.isSignedIn ?? false) {
+    return null;
   }
 
   // When not in offline mode (and not yet authenticated), routes beyond

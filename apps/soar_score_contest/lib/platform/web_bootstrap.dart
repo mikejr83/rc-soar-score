@@ -1,6 +1,8 @@
 import 'package:logging/logging.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 
+import '../auth/auth_session.dart';
+import '../auth/auth_session_factory.dart';
 import 'app_bootstrap.dart';
 
 final _logger = Logger('WebBootstrap');
@@ -19,9 +21,10 @@ const String defaultApiBaseUrl = 'http://localhost:8080';
 /// `ApiClient`; everything else the native bootstrap does (server, SQLite)
 /// is compiled out of the web artifact entirely.
 class WebBootstrap extends AppBootstrap {
-  WebBootstrap(this._client);
+  WebBootstrap(this._client, this._auth);
 
   final ApiClient _client;
+  final AuthSession _auth;
   bool _closed = false;
 
   @override
@@ -29,6 +32,9 @@ class WebBootstrap extends AppBootstrap {
 
   @override
   ApiClient get remoteApiClient => _client;
+
+  @override
+  AuthSession get authSession => _auth;
 
   @override
   Future<void> close() async {
@@ -45,7 +51,14 @@ class WebBootstrap extends AppBootstrap {
     const String rawUrl = String.fromEnvironment('SOAR_SCORE_API_BASE_URL');
     final baseUrl = Uri.parse(rawUrl.isEmpty ? defaultApiBaseUrl : rawUrl);
     _logger.info("Base URL: $baseUrl");
-    return WebBootstrap(ApiClient(baseUrl: baseUrl));
+    // Completes a sign-in redirect (or restores the stored session) before
+    // the first frame, so the router starts with the right signed-in state.
+    final auth = createAuthSession();
+    await auth.restore();
+    return WebBootstrap(
+      ApiClient(baseUrl: baseUrl, tokenProvider: auth.accessToken),
+      auth,
+    );
   }
 }
 

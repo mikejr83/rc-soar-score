@@ -3,7 +3,9 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  auth0_flutter
   connectivity_plus
+  flutter_secure_storage_windows
   url_launcher_windows
 )
 

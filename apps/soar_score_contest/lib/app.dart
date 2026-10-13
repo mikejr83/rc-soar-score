@@ -7,6 +7,7 @@ import 'package:soar_score_ui/soar_score_ui.dart';
 
 import 'api_client_provider.dart';
 import 'app_mode_provider.dart';
+import 'auth/auth_session_inherited.dart';
 import 'connectivity_provider.dart';
 import 'contest_draft_provider.dart';
 import 'platform/app_bootstrap.dart';
@@ -69,6 +70,7 @@ class _SoarScoreContestAppState extends State<SoarScoreContestApp> {
     _router = buildAppRouter(
       initialLocation: widget.routerInitialLocation,
       appMode: _appMode,
+      auth: widget.bootstrap?.authSession,
     );
   }
 
@@ -105,6 +107,10 @@ class _SoarScoreContestAppState extends State<SoarScoreContestApp> {
     final bootstrap = widget.bootstrap;
     if (bootstrap != null) {
       app = ApiClientInherited(client: bootstrap.apiClient, child: app);
+      final auth = bootstrap.authSession;
+      if (auth != null) {
+        app = AuthSessionInherited(session: auth, child: app);
+      }
     }
     final connectivity = widget.connectivity;
     if (connectivity != null) {

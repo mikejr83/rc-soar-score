@@ -1,5 +1,14 @@
 # Project-level configuration.
 cmake_minimum_required(VERSION 3.14)
+
+# vcpkg integration, required by auth0_flutter's native plugin (cpp-httplib,
+# nlohmann-json, openssl). Must come before project(). See
+# docs/environment-setup.md for installing the packages.
+if(DEFINED ENV{VCPKG_ROOT} AND EXISTS "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake")
+  set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+    CACHE STRING "Vcpkg toolchain file")
+endif()
+
 project(soar_score_contest LANGUAGES CXX)
 
 # The name of the executable created for the application. Change this to change
