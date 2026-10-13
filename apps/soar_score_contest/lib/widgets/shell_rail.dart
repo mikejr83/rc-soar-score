@@ -7,6 +7,7 @@ import '../app_sync_provider.dart';
 import '../router.dart';
 import 'new_contest/create_contest_entry.dart';
 import 'not_wired_up_dialog.dart';
+import 'shell_account_button.dart';
 import 'shell_destinations.dart';
 import 'shell_stub_page.dart';
 
@@ -147,6 +148,15 @@ class _ShellRailState extends State<ShellRail> {
               ),
           ],
         ],
+      ),
+      trailing: const Expanded(
+        child: Align(
+          alignment: Alignment.bottomCenter,
+          child: Padding(
+            padding: EdgeInsets.only(bottom: 12),
+            child: ShellAccountButton(),
+          ),
+        ),
       ),
       destinations: [
         for (final destination in destinations)

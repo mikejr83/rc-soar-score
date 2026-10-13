@@ -84,6 +84,7 @@ Future<void> pumpShellRouter(
   WidgetTester tester,
   GoRouter router, {
   ApiClient? client,
+  Widget Function(Widget app)? wrap,
 }) async {
   Widget app = MaterialApp.router(
     debugShowCheckedModeBanner: false,
@@ -91,6 +92,9 @@ Future<void> pumpShellRouter(
   );
   if (client != null) {
     app = ApiClientInherited(client: client, child: app);
+  }
+  if (wrap != null) {
+    app = wrap(app);
   }
   await tester.pumpWidget(app);
   await tester.pumpAndSettle();
