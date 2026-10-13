@@ -21,8 +21,9 @@ abstract final class ChecklistNavigator {
       case ChecklistTarget.configuration:
         context.go(contestConfigurationPath(contestId));
       case ChecklistTarget.participants:
-        // The system Participants manager, until #121 selects per contest.
-        context.go(participantsPath);
+        // The contest's own Participants page, where its participation is
+        // managed.
+        context.go(contestParticipantsPath(contestId));
       case ChecklistTarget.matrix:
         context.go(contestMatrixPath(contestId));
       case ChecklistTarget.publicationControl:

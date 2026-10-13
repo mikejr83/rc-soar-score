@@ -35,7 +35,7 @@ Future<GoRouter> _open(
       for (final entry in {
         contestConfigurationPath(matrixContestId): 'Configuration stub',
         contestMatrixPath(matrixContestId): 'Matrix stub',
-        participantsPath: 'Participants stub',
+        contestParticipantsPath(matrixContestId): 'Participants stub',
         contestWorkspacePath(matrixContestId): 'Workspace stub',
       }.entries)
         GoRoute(path: entry.key, builder: (context, _) => Text(entry.value)),
