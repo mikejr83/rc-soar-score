@@ -166,6 +166,20 @@ A deactivated installation (no open `InstallationActivation` for the contest) ca
 
 `POST /sync/conflicts/{conflictId}/resolve` carries `client_mutation_id`, `choice` (`KeptAccepted`, `TookCompeting` or `Merged`) and, for `Merged`, the merged `payload`. It is itself a mutation: it is idempotent, ordered in the scope's sequence and audited. It returns the same `results` entry shape. Only conflicts with `requires_action` true are offered for a decision. Silent records (a director's value beating a participant submission) are returned in `changes` and `conflicts` with `requires_action` false and are never discarded.
 
+### Conflict records as changes
+
+A `ConflictRecord` reaches every installation of its scope through the normal stream, as a change with `entity_type` `conflict_record`. The entry in `conflicts` of an exchange response only points at it; the change carries the content. The client stores it through the replicated-change path like any other change, so the cursor and idempotency rules apply unchanged.
+
+The change `payload` is the `ConflictRecord` fields plus the two values the side-by-side view needs, so a client never has to look up a mutation it does not hold (the competing one may have come from another installation or a participant):
+
+| Extra field         | Meaning                                                                     |
+| ------------------- | --------------------------------------------------------------------------- |
+| `accepted_payload`  | The entity state the service applied; null while no change has been applied |
+| `competing_payload` | The entity state of the colliding mutation, as submitted                    |
+| `entity_revision`   | The entity's current revision, so a resolution can be based on it           |
+
+Resolving a conflict writes a new revision of the same `conflict_record` entity (`resolution`, `resolution_choice`, `resolved_at`, `resolved_by`), which is delivered the same way. A record with `requires_action` false is silent: it is stored and shown in the score history, but it is not counted as needing action. The raw `MutationRecord` rows of other installations are never sent.
+
 ## Full Download, Export and Import
 
 - **Download** returns the complete current contest state and the scope cursor, enough to initialize a replacement installation. It carries the same `schema_version` and `protocol_version` checks as an exchange.
