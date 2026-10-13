@@ -7,6 +7,7 @@ class SyncScopeState {
     required this.pendingMutations,
     required this.conflictsNeedingAction,
     required this.lastSyncedSequence,
+    this.rejectedMutations = 0,
     this.lastSyncedAt,
     this.remoteSequence,
     this.failure,
@@ -18,6 +19,9 @@ class SyncScopeState {
 
   /// Conflicts the director has to decide.
   final int conflictsNeedingAction;
+
+  /// Mutations the service rejected, kept so the director can see them.
+  final int rejectedMutations;
 
   final int lastSyncedSequence;
 

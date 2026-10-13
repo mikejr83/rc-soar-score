@@ -100,6 +100,9 @@ void main() {
       expect(rig.store.mutations[0].outcome, MutationOutcome.rejected);
       expect(rig.store.mutations[0].reasonCode, 'locked');
       expect(rig.store.mutations[1].outcome, MutationOutcome.accepted);
+      expect(rig.engine.state.scopes[scope]!.rejectedMutations, 1);
+      final rejected = await rig.engine.rejectedMutations(scope);
+      expect(rejected.single.clientMutationId, 'm-1');
     },
   );
 

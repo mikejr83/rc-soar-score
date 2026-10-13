@@ -14,6 +14,7 @@ class AttentionItem extends Equatable {
     required this.detail,
     required this.linkLabel,
     this.scoringRound,
+    this.opensSync = false,
   });
 
   final AttentionKind kind;
@@ -34,6 +35,9 @@ class AttentionItem extends Equatable {
   /// elsewhere.
   final int? scoringRound;
 
+  /// True when the link opens the contest's sync details.
+  final bool opensSync;
+
   @override
   List<Object?> get props => [
     kind,
@@ -42,5 +46,6 @@ class AttentionItem extends Equatable {
     detail,
     linkLabel,
     scoringRound,
+    opensSync,
   ];
 }

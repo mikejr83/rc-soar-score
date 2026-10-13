@@ -10,6 +10,7 @@ import 'package:soar_score_contest/platform/web_bootstrap.dart';
 import '../auth/auth_session.dart';
 import '../auth/auth_session_factory.dart';
 import '../server/embedded_server.dart';
+import '../services/sync/app_sync.dart';
 import 'app_bootstrap.dart';
 import 'native_sync.dart';
 
@@ -44,6 +45,9 @@ class NativeBootstrap extends AppBootstrap {
 
   @override
   ApiClient get remoteApiClient => _remoteClient;
+
+  @override
+  AppSync get appSync => sync.appSync;
 
   @override
   void remoteReachabilityChanged({required bool reachable}) =>

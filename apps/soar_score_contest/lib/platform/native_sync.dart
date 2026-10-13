@@ -7,6 +7,7 @@ import 'package:soar_score_core/soar_score_core.dart' as core;
 import 'package:soar_score_data/soar_score_data.dart';
 import 'package:soar_score_sync/soar_score_sync.dart';
 
+import 'engine_app_sync.dart';
 import 'installation_id_file.dart';
 
 final _logger = Logger('NativeSync');
@@ -18,10 +19,14 @@ final _logger = Logger('NativeSync');
 /// Scopes of contests and data owned by the installation's Local account are
 /// not synced: they have no account to sync to until sign-in claims them.
 class NativeSync {
-  NativeSync._(this.engine, this._scheduler, this._subscription);
+  NativeSync._(this.engine, this._scheduler, this._subscription)
+    : appSync = EngineAppSync(engine);
 
-  /// The engine, for the sync status and conflict screens.
+  /// The engine.
   final SyncEngine engine;
+
+  /// What the screens use; they never see the engine.
+  final EngineAppSync appSync;
   final SyncScheduler _scheduler;
   final StreamSubscription<core.SyncScopeKey> _subscription;
 
@@ -81,5 +86,6 @@ class NativeSync {
   Future<void> close() async {
     await _subscription.cancel();
     _scheduler.dispose();
+    await appSync.close();
   }
 }

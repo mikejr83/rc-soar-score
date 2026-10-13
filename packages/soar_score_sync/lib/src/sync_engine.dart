@@ -59,6 +59,29 @@ class SyncEngine {
     return result;
   }
 
+  /// Reads [scope]'s state from the local store without contacting the
+  /// service, for a screen that opens before any sync has run.
+  ///
+  /// A failure from an earlier attempt is kept. Runs behind a sync in
+  /// progress.
+  Future<void> refresh(SyncScopeKey scope) {
+    final result = _tail.then((_) async {
+      final syncable = await _config.isSyncable?.call(scope) ?? true;
+      await _refresh(
+        scope,
+        failure: _state.scopes[scope]?.failure,
+        skip: syncable ? null : SyncSkipReason.accountless,
+      );
+    });
+    _tail = result.then((_) {}, onError: (_) {});
+    return result;
+  }
+
+  /// The mutations the service rejected in [scope], oldest first, with the
+  /// reason code and message it gave.
+  Future<List<MutationRecord>> rejectedMutations(SyncScopeKey scope) =>
+      _store.rejectedMutations(scope);
+
   /// Pulls the system data stream (profiles, system roles, landing tables).
   Future<SyncFailureKind?> syncSystemData() {
     final result = _tail.then((_) => _syncSystemData());
@@ -318,6 +341,7 @@ class SyncEngine {
       pendingMutations: status.pendingMutations,
       conflictsNeedingAction: status.conflictsNeedingAction,
       lastSyncedSequence: status.lastSyncedSequence,
+      rejectedMutations: status.rejectedMutations,
       lastSyncedAt: status.lastSyncedAt,
       remoteSequence: _remoteSequence[scope],
       failure: failure,

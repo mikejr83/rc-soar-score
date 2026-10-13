@@ -34,7 +34,11 @@ ShellScope shellScopeFor(String path) =>
 
 /// The rail destinations for [path]. Matrix, scoring and reports only make
 /// sense for a selected contest, so they appear only in the contest scope.
-List<ShellDestination> shellDestinationsFor(String path) {
+/// Sync appears only when the build synchronizes ([showSync]).
+List<ShellDestination> shellDestinationsFor(
+  String path, {
+  bool showSync = false,
+}) {
   final contestId = contestIdFor(path);
   if (contestId == null) {
     return const [
@@ -101,5 +105,12 @@ List<ShellDestination> shellDestinationsFor(String path) {
       selectedIcon: Icons.assessment,
       location: contestReportsPath(contestId),
     ),
+    if (showSync)
+      ShellDestination(
+        label: 'Sync',
+        icon: Icons.sync_outlined,
+        selectedIcon: Icons.sync,
+        location: contestSyncPath(contestId),
+      ),
   ];
 }

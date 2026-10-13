@@ -6,6 +6,7 @@ class SyncStatus extends Equatable {
     required this.pendingMutations,
     required this.conflictsNeedingAction,
     required this.lastSyncedSequence,
+    this.rejectedMutations = 0,
     this.lastSyncedAt,
   });
 
@@ -15,6 +16,9 @@ class SyncStatus extends Equatable {
   /// Conflicts the director has to decide.
   final int conflictsNeedingAction;
 
+  /// Mutations the service rejected.
+  final int rejectedMutations;
+
   final int lastSyncedSequence;
   final DateTime? lastSyncedAt;
 
@@ -23,6 +27,7 @@ class SyncStatus extends Equatable {
     pendingMutations,
     conflictsNeedingAction,
     lastSyncedSequence,
+    rejectedMutations,
     lastSyncedAt,
   ];
 }

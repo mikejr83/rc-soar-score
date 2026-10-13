@@ -53,6 +53,24 @@ void _tests(Backend backend) {
       expect(await inst.syncStore.pendingMutations(scope), isEmpty);
     });
 
+    test('a rejected outcome is listed and counted, not pending', () async {
+      final scope = core.ContestScopeKey(a.id);
+      final mutation = (await inst.syncStore.pendingMutations(scope)).single;
+      await inst.syncStore.recordOutcome(
+        mutationId: mutation.id,
+        outcome: core.MutationOutcome.rejected,
+        serverRejectionTime: DateTime.utc(2026, 5, 1, 13),
+        reasonCode: 'locked',
+        errorMessage: 'The contest is locked',
+      );
+
+      final rejected = await inst.syncStore.rejectedMutations(scope);
+      expect(rejected.single.id, mutation.id);
+      expect(rejected.single.reasonCode, 'locked');
+      expect(await inst.syncStore.pendingMutations(scope), isEmpty);
+      expect((await inst.syncStore.status(scope)).rejectedMutations, 1);
+    });
+
     test('an accepted outcome needs a sequence', () async {
       final mutation = (await inst.syncStore.pendingMutations(
         core.ContestScopeKey(a.id),
