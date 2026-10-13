@@ -160,7 +160,8 @@ The Windows build also needs:
 2. The `com.soarscore.contest` URL scheme registered for your user, so Windows
    returns the browser's callback to the app. For a development build, save
    this as a `.reg` file (with the path to your built `soar_score_contest.exe`)
-   and run it. An installer registers the same keys.
+   and run it. An installer registers the same keys; see
+   [Windows Installer Requirements](windows-installer-requirements.md).
 
    ```reg
    Windows Registry Editor Version 5.00
