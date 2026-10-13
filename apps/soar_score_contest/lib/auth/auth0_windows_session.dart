@@ -74,6 +74,9 @@ class Auth0WindowsSession extends AuthSession {
       _credentials?.user.name ?? _credentials?.user.email;
 
   @override
+  Uri? get pictureUrl => _credentials?.user.pictureUrl;
+
+  @override
   String? get endedReason => _endedReason;
 
   bool _isExpired(Credentials credentials) =>

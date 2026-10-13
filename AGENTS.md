@@ -142,6 +142,7 @@ Notes:
 - "Configuration page" always means the contest-scoped page above, not the draft step inside the wizard.
 - The contest-scoped "Scoring" and "Reports" pages are placeholders that show only the contest ID; their rail entries and routes are in place.
 - The Scoring route takes optional `?round=N&group=G` (built by `contestScoringPath`); the progress card's tiles use it. The placeholder only echoes it, and #123 opens the round and group.
+- The account control sits at the bottom of the rail (`widgets/shell_account_button.dart`): the user's picture with a menu (name, Settings, Sign out) when signed in, a gear otherwise (offline: menu with Sign in and Settings). Settings is a not-built dialog for now.
 - Rail and header code: `widgets/shell_rail.dart` (destinations and create button), `shell_header.dart` (breadcrumbs), `shell_status_panel.dart`, `shell_stub_page.dart`.
 - The workspace page is a frame of section and control slots (`widgets/workspace/`) arranged by `WorkspaceLayoutPlan` (`services/workspace/`). It has no page-card list; links sit next to the fact they act on.
 - The "Sync" rail entry and the sync item in the status panel appear only in builds that synchronize (native). Screens reach sync through `AppSync` (`services/sync/`), never the sync package. A refused change or open conflict adds a row to the workspace needs-attention list that links to the sync page.

@@ -33,6 +33,9 @@ class Auth0WebSession extends AuthSession {
   String? get displayName => _user?.name ?? _user?.email;
 
   @override
+  Uri? get pictureUrl => _user?.pictureUrl;
+
+  @override
   Future<void> restore() async {
     try {
       final credentials = await _auth0.onLoad(

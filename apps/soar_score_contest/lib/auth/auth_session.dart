@@ -22,6 +22,10 @@ abstract class AuthSession extends ChangeNotifier {
   /// Name or email of the signed-in user, if known.
   String? get displayName;
 
+  /// Address of the signed-in user's profile picture (a Gravatar for Auth0
+  /// database accounts), or `null` when there is none.
+  Uri? get pictureUrl => null;
+
   /// Why the session ended on its own (for example the refresh token was
   /// revoked), or `null`. Cleared by the next sign-in or sign-out.
   String? get endedReason => null;
