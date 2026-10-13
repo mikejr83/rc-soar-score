@@ -6,7 +6,8 @@ import 'workspace_control.dart';
 enum WorkspaceControlTarget {
   lifecycle('lifecycle', WorkspaceControl.lifecycle),
   scoring('scoring', WorkspaceControl.scoring),
-  administration('administration', WorkspaceControl.administration);
+  administration('administration', WorkspaceControl.administration),
+  publication('publication', WorkspaceControl.publication);
 
   const WorkspaceControlTarget(this.fragment, this.control);
 

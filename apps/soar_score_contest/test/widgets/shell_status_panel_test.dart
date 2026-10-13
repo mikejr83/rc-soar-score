@@ -69,7 +69,13 @@ void main() {
     await tester.tap(find.text('Status'));
     await tester.tap(find.text('Participant scoring'));
     await tester.tap(find.text('Administration'));
-    expect(opened, WorkspaceControlTarget.values);
+    // The panel's three values; publication is a target but has no value
+    // in the panel.
+    expect(opened, [
+      WorkspaceControlTarget.lifecycle,
+      WorkspaceControlTarget.scoring,
+      WorkspaceControlTarget.administration,
+    ]);
     handle.dispose();
   });
 

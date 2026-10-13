@@ -1,12 +1,6 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
-import 'package:soar_score_core/services/contest_results.dart';
-import 'package:soar_score_core/services/contest_scores.dart';
-import 'package:soar_score_core/services/landing_table_view.dart';
-import 'package:soar_score_core/services/role_usage.dart';
-import 'package:soar_score_core/services/round_results.dart';
-import 'package:soar_score_core/services/score_entry_result.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../dto/add_participation_request.dart';

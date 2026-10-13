@@ -1,5 +1,4 @@
 import 'package:soar_score_core/soar_score_core.dart';
-import 'package:soar_score_core/services/services.dart';
 import 'package:test/test.dart';
 
 import '../models/contest/fixtures.dart';

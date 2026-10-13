@@ -5,7 +5,6 @@ import 'package:soar_score_api_handlers/auth/principal.dart';
 import 'package:soar_score_api_handlers/handlers/health_handler.dart';
 import 'package:soar_score_api_handlers/handlers/request_body.dart';
 import 'package:soar_score_api_handlers/middleware/request_id.dart';
-import 'package:soar_score_core/services/services.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 /// Adds the contest configuration routes to [router] (which is mounted under

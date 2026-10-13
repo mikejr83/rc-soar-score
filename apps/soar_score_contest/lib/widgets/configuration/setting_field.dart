@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../services/configuration/configuration_draft.dart';
+import '../../services/configuration/house_rules.dart';
 import '../../services/configuration/setting_def.dart';
 import '../../services/configuration/setting_keys.dart';
 import '../../services/configuration/setting_values.dart';
@@ -49,10 +50,7 @@ class SettingField extends StatelessWidget {
     final enabled = editable && !locked;
     final change = draft.changeOf(key);
     final error = draft.errors[key];
-    final house =
-        def.official != null &&
-        SettingValues.canon(def, draft[key]) !=
-            SettingValues.canon(def, def.official);
+    final house = HouseRules.isHouseRule(def, draft[key]);
     final mixed = def.section.mixed;
 
     return KeyedSubtree(

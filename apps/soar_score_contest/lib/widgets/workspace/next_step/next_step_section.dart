@@ -86,12 +86,12 @@ class _NextStepSectionState extends State<NextStepSection> {
     _announceChange(scope, step);
     _logger.fine('Next step resolved: ${step.title} (${step.kind})');
     _logger.finer(
-      () => 'facts.unavailable.isNotEmpty: ${facts.unavailable.isNotEmpty}',
+      () => 'facts.nextStepFactsUnavailable: ${facts.nextStepFactsUnavailable}',
     );
     return NextStepCard(
       step: step,
       busy: busy,
-      factsUnavailable: facts.unavailable.isNotEmpty,
+      factsUnavailable: facts.nextStepFactsUnavailable,
       onRetryFacts: scope.reloadFacts,
       onPressed: (action) =>
           _onPressed(scope, facts.latestScore?.setAt, action),

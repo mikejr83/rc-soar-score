@@ -18,6 +18,7 @@ import '../../services/workspace/workspace_section.dart';
 import '../../widgets/api_error_text.dart';
 import '../../widgets/contest_scope.dart';
 import '../../widgets/workspace/attention/attention_section.dart';
+import '../../widgets/workspace/checklist/setup_checklist_section.dart';
 import '../../widgets/workspace/next_step/next_step_section.dart';
 import '../../widgets/workspace/progress/progress_section.dart';
 import '../../widgets/workspace/workspace_control_slot.dart';
@@ -418,6 +419,7 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
       dismissals: _dismissals,
       clock: widget.clock,
     ),
+    WorkspaceSection.checklist => SetupChecklistSection(contest: contest),
     WorkspaceSection.attention => AttentionSection(contest: contest),
     WorkspaceSection.progress => ProgressSection(contest: contest),
     WorkspaceSection.facts => WorkspaceFactsDetails(contest: contest),

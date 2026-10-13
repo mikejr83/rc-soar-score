@@ -40,7 +40,13 @@ const _labels = {
 
 void main() {
   group('on the workspace', () {
-    for (final target in WorkspaceControlTarget.values) {
+    // The values the status panel shows; publication is focused from the
+    // setup checklist instead.
+    for (final target in const [
+      WorkspaceControlTarget.lifecycle,
+      WorkspaceControlTarget.scoring,
+      WorkspaceControlTarget.administration,
+    ]) {
       testWidgets('${target.fragment} scrolls, focuses and highlights, then '
           'the highlight fades', (tester) async {
         await pumpShellWorkspace(tester, _server());

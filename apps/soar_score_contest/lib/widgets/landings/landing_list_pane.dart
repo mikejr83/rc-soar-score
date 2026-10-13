@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import 'landing_unit_text.dart';

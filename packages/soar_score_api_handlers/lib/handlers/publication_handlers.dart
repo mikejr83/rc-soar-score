@@ -4,7 +4,6 @@ import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_api_handlers/auth/principal.dart';
 import 'package:soar_score_api_handlers/handlers/health_handler.dart';
 import 'package:soar_score_api_handlers/handlers/request_body.dart';
-import 'package:soar_score_core/services/services.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 /// The publication routes (all inside `/api/v1`, for the contest's director):
