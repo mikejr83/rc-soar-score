@@ -86,3 +86,4 @@ export 'enums/enums.dart';
 export 'scoring/scoring.dart';
 export 'services/services.dart';
 export 'time/time.dart';
+export 'sync/sync_protocol.dart';
