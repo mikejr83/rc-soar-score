@@ -116,6 +116,13 @@ jobs:
       - name: Bootstrap
         run: melos bootstrap
 
+      - name: Install native dependencies for auth0_flutter
+        # The plugin's C++ dependencies come from vcpkg, which the runner
+        # image already has.
+        run: |
+          "VCPKG_ROOT=$env:VCPKG_INSTALLATION_ROOT" | Out-File -FilePath $env:GITHUB_ENV -Append
+          & "$env:VCPKG_INSTALLATION_ROOT\vcpkg.exe" install --recurse "cpp-httplib[core,openssl]:x64-windows" nlohmann-json:x64-windows openssl:x64-windows
+
       - name: Build Windows
         working-directory: apps/soar_score_contest
         run: flutter build windows --no-pub

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 import 'package:soar_score_contest/app_mode_provider.dart';
+import 'package:soar_score_contest/auth/auth_session.dart';
+import 'package:soar_score_contest/auth/auth_session_inherited.dart';
 import 'package:soar_score_contest/connectivity_provider.dart';
 import 'package:soar_score_contest/services/connectivity/app_connectivity.dart';
 import 'package:soar_score_contest/widgets/connectivity_indicator.dart';
@@ -60,16 +62,59 @@ class LandingPage extends StatelessWidget {
     }
   }
 
+  /// Starts sign-in (or sign-up), showing the reason when it fails.
+  Future<void> _signIn(
+    BuildContext context,
+    AuthSession session, {
+    bool createAccount = false,
+  }) async {
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await session.signIn(createAccount: createAccount);
+    } on AuthException catch (error) {
+      messenger.showSnackBar(SnackBar(content: Text(error.message)));
+    }
+  }
+
   Widget _authenticationButtons(
     BuildContext context,
     AppConnectivity? monitor,
+    AuthSession? session,
   ) {
+    if (session != null && session.isSignedIn) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (session.displayName != null) ...[
+            Text(
+              'Signed in as ${session.displayName}',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 12),
+          ],
+          FilledButton.icon(
+            onPressed: () => context.pushNamed('home'),
+            icon: const Icon(Icons.arrow_forward),
+            label: const Text('Continue'),
+          ),
+          const SizedBox(height: 12),
+          OutlinedButton.icon(
+            onPressed: session.signOut,
+            icon: const Icon(Icons.logout),
+            label: const Text('Sign out'),
+          ),
+        ],
+      );
+    }
+
     Widget buildButtons(bool internetAvailable, bool apiAvailable) => Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         FilledButton.icon(
           onPressed: internetAvailable && apiAvailable
-              ? () => showNotWiredUpDialog(context, 'Sign in')
+              ? () => session == null
+                    ? showNotWiredUpDialog(context, 'Sign in')
+                    : _signIn(context, session)
               : null,
           icon: const Icon(Icons.login),
           label: const Text('Sign in'),
@@ -77,7 +122,9 @@ class LandingPage extends StatelessWidget {
         const SizedBox(height: 12),
         OutlinedButton.icon(
           onPressed: internetAvailable
-              ? () => showNotWiredUpDialog(context, 'Create account')
+              ? () => session == null
+                    ? showNotWiredUpDialog(context, 'Create account')
+                    : _signIn(context, session, createAccount: true)
               : null,
           icon: const Icon(Icons.person_add_alt_1),
           label: const Text('Create account'),
@@ -102,6 +149,7 @@ class LandingPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final actionWidgets = List<Widget>.empty(growable: true);
     final monitor = appConnectivityOf(context);
+    final session = authSessionOf(context);
 
     if (!kIsWeb && monitor != null) {
       // Indicators exist only when a bootstrap created the monitor (D5).
@@ -150,7 +198,7 @@ class LandingPage extends StatelessWidget {
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 32),
-                        _authenticationButtons(context, monitor),
+                        _authenticationButtons(context, monitor, session),
                         const SizedBox(height: 32),
                         if (!isWeb) ...[
                           Text(
