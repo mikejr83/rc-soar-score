@@ -110,6 +110,14 @@ class LandingPage extends StatelessWidget {
     Widget buildButtons(bool internetAvailable, bool apiAvailable) => Column(
       mainAxisSize: MainAxisSize.min,
       children: [
+        if (session?.endedReason != null) ...[
+          Text(
+            session!.endedReason!,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          const SizedBox(height: 12),
+        ],
         FilledButton.icon(
           onPressed: internetAvailable && apiAvailable
               ? () => session == null

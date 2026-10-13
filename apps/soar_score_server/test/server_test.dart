@@ -13,6 +13,8 @@ void main() {
   late HttpClient client;
   final config = ServerConfig.parse({
     'POSTGRES_PASSWORD': 'unused',
+    'AUTH0_DOMAIN': 'tenant.us.auth0.com',
+    'API_AUDIENCE': 'https://soar-score.com/server',
     'PORT': '1',
   });
 
@@ -43,6 +45,8 @@ void main() {
       logLevel: config.logLevel,
       logFormat: config.logFormat,
       postgres: config.postgres,
+      auth0Domain: config.auth0Domain,
+      apiAudience: config.apiAudience,
     ),
     database: createInMemoryDatabase(),
     onDatabaseOpen: onDatabaseOpen,
@@ -60,11 +64,22 @@ void main() {
     expect(headers.value('x-request-id'), isNotEmpty);
   });
 
+  test('refuses an /api/v1 request without a token', () async {
+    final server = await start();
+    addTearDown(server.close);
+
+    final (status, body, headers) = await get(server, '/api/v1/meta');
+
+    expect(status, 401);
+    expect((body['error'] as Map)['code'], 'unauthorized');
+    expect(headers.value('www-authenticate'), 'Bearer');
+  });
+
   test('answers an unknown route with the JSON error body', () async {
     final server = await start();
     addTearDown(server.close);
 
-    final (status, body, headers) = await get(server, '/api/v1/nope');
+    final (status, body, headers) = await get(server, '/nope');
 
     expect(status, 404);
     final error = body['error'] as Map<String, Object?>;

@@ -35,7 +35,7 @@ Applications, APIs, Create API (or edit the existing one).
 | Signing algorithm             | RS256                                                             |
 | Allow Offline Access          | On (the apps ask for refresh tokens)                              |
 | RBAC and permissions in token | Off (access is decided by backend relationships, not Auth0 roles) |
-| Access token lifetime         | The default is fine; the Windows app signs in again when it ends  |
+| Access token lifetime         | The default is fine; both apps renew the session silently         |
 
 The server needs the same identifier as `API_AUDIENCE` and the tenant domain
 as `AUTH0_DOMAIN`.
@@ -88,14 +88,16 @@ Environment Setup); change all of them together. What an installer must register
 [Windows Installer Requirements](windows-installer-requirements.md). "Continue offline"
 never contacts Auth0.
 
-### Known limitation: Windows sessions end at token expiry
+### Session renewal
 
-The app asks for `offline_access` and stores the refresh token, but
-`auth0_flutter` has no token renewal on Windows and the app does not call the
-token endpoint itself. When the access token expires (the API's access token
-lifetime, reported as about an hour), the session ends and the
-user signs in again. Web sessions renew silently. This is a first-cut
-limitation, not a configuration error.
+`auth0_flutter` has no token renewal on Windows, so the app renews the session
+itself: when the access token expires it exchanges the stored refresh token at
+`https://<tenant domain>/oauth/token` (grant `refresh_token`, client ID only).
+This needs the application's grant types to include Refresh Token, and Refresh
+Token Rotation on works as expected: the app stores the new refresh token from
+every response. The session ends, with a notice on the landing page, only when
+Auth0 refuses the refresh token (revoked, expired, or reused). Being offline or
+an Auth0 outage does not end it; the next request tries again.
 
 ## 4. Connections
 

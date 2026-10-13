@@ -10,13 +10,18 @@ const String serverVersion = '0.1.0';
 ///
 /// Wires the shared routing and middleware from `soar_score_api_handlers` to
 /// the repositories of [database] and reports the server's identity for the
-/// `/health` payload.
-Handler createServerHandler(SoarScoreDatabase database) {
+/// `/health` payload. [authMiddleware] guards the `/api/v1` routes and sets
+/// each request's principal.
+Handler createServerHandler(
+  SoarScoreDatabase database, {
+  required AuthMiddleware authMiddleware,
+}) {
   return buildApiHandler(
     name: serverName,
     displayName: serverDisplayName,
     version: serverVersion,
     repository: Repository(database),
+    authMiddleware: authMiddleware,
     publishingEnabled: true,
   );
 }

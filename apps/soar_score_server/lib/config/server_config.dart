@@ -12,6 +12,8 @@ import 'package:soar_score_core/config/log_format.dart';
 /// | `PORT` | listening port | 8080 |
 /// | `LOG_LEVEL` | a `package:logging` level name | INFO |
 /// | `LOG_FORMAT` | `json` or `text` | json |
+/// | `AUTH0_DOMAIN` | Auth0 tenant domain, no scheme (`tenant.us.auth0.com`) | required |
+/// | `API_AUDIENCE` | API identifier access tokens must be issued for | required |
 /// | `POSTGRES_PASSWORD` | database password | required |
 /// | `POSTGRES_HOST`, `POSTGRES_PORT`, `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_SSLMODE` | database connection | see [PostgresConfig] |
 class ServerConfig {
@@ -20,6 +22,8 @@ class ServerConfig {
     required this.logLevel,
     required this.logFormat,
     required this.postgres,
+    required this.auth0Domain,
+    required this.apiAudience,
   });
 
   /// The variables [ServerConfig.parse] reads.
@@ -27,6 +31,8 @@ class ServerConfig {
     'PORT',
     'LOG_LEVEL',
     'LOG_FORMAT',
+    'AUTH0_DOMAIN',
+    'API_AUDIENCE',
     'POSTGRES_PASSWORD',
     'POSTGRES_HOST',
     'POSTGRES_PORT',
@@ -39,6 +45,12 @@ class ServerConfig {
   final Level logLevel;
   final LogFormat logFormat;
   final PostgresConfig postgres;
+
+  /// The Auth0 tenant whose tokens the server accepts, without a scheme.
+  final String auth0Domain;
+
+  /// The API identifier those tokens must be issued for.
+  final String apiAudience;
 
   /// Parses [environment].
   ///
@@ -90,6 +102,22 @@ class ServerConfig {
       }
     }
 
+    final domain = value('AUTH0_DOMAIN');
+    if (domain == null) {
+      problems.add('AUTH0_DOMAIN is required.');
+    } else if (domain.contains('://') ||
+        domain.contains('/') ||
+        domain.contains(' ')) {
+      problems.add(
+        'AUTH0_DOMAIN must be a host name without a scheme or path, '
+        'for example tenant.us.auth0.com, got "$domain".',
+      );
+    }
+    final audience = value('API_AUDIENCE');
+    if (audience == null) {
+      problems.add('API_AUDIENCE is required.');
+    }
+
     if (value('POSTGRES_PASSWORD') == null) {
       problems.add('POSTGRES_PASSWORD is required.');
     }
@@ -119,12 +147,14 @@ class ServerConfig {
       logLevel: logLevel,
       logFormat: logFormat,
       postgres: PostgresConfig.fromEnvironment(environment)!,
+      auth0Domain: domain!,
+      apiAudience: audience!,
     );
   }
 
   /// A one-line summary that is safe to log (no password).
   String describe() =>
-      'port=$port logLevel=${logLevel.name} logFormat=${logFormat.name} '
+      'port=$port auth0=$auth0Domain audience=$apiAudience logLevel=${logLevel.name} logFormat=${logFormat.name} '
       'database=${postgres.user}@${postgres.host}:${postgres.port}/'
       '${postgres.database} ssl=${postgres.sslMode.name}';
 }

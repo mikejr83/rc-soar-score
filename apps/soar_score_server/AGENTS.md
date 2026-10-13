@@ -5,9 +5,9 @@ Thin executable that wires dependencies, starts the shelf_io server, and exposes
 ## Structure
 
 - `lib/main.dart` — entry point; parse flags, wire, call `shelf_io.serve`
-- `lib/server/server.dart` — startup, dependency injection, port binding
-- `lib/middleware/` — auth middleware (JWT validation against JWKS)
-- `lib/handlers/` — thin HTTP layer; delegate to `soar_score_api_handlers`
+- `lib/server.dart` — startup, dependency injection, port binding
+- `lib/auth/` — Auth0 token verification (JWKS) and the `/userinfo` profile source
+- `lib/handler.dart` — wires `soar_score_api_handlers` to the repositories
 
 ## Boundaries
 
@@ -17,7 +17,7 @@ Thin executable that wires dependencies, starts the shelf_io server, and exposes
 
 ## Authentication and Authorization
 
-Auth0 JWT middleware validates every `/api/v1/*` request (except `/health`). Token verification uses public JWKS. AuthN config: `AUTH0_DOMAIN`, `API_AUDIENCE` env vars.
+`bearerAuth` (from `soar_score_api_handlers`) guards every `/api/v1/*` request; `/health` and `/public/*` stay open. `Auth0TokenVerifier` checks the RS256 signature against the tenant's public JWKS, `exp`, `iss` (`https://<AUTH0_DOMAIN>/`) and `aud`. `AccountPrincipalResolver` maps the issuer and subject to a registered account, creating it on first sign-in from `/userinfo`, and sets the request's `Principal`. Both `AUTH0_DOMAIN` and `API_AUDIENCE` are required; the server does not start without them.
 
 ## Testing
 
@@ -28,5 +28,5 @@ Auth0 JWT middleware validates every `/api/v1/*` request (except `/health`). Tok
 ## Auth0 Config
 
 - Server verifies JWKS from `AUTH0_DOMAIN` (public)
-- Valid audiences: `soar_score_server`
-- Scope/role mapping: `director`, `pilot`, `helper`, `public` (read-only)
+- Valid audience: `https://soar-score.com/server` (the API identifier in Auth0; set as `API_AUDIENCE`)
+- No Auth0 roles or scopes: authorization comes from backend relationships (ownership, invitations), see `plan/architecture-requirements/data/accounts.md`

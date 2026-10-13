@@ -22,6 +22,10 @@ abstract class AuthSession extends ChangeNotifier {
   /// Name or email of the signed-in user, if known.
   String? get displayName;
 
+  /// Why the session ended on its own (for example the refresh token was
+  /// revoked), or `null`. Cleared by the next sign-in or sign-out.
+  String? get endedReason => null;
+
   /// Restores a stored session, or on web completes a sign-in redirect.
   /// Called once at startup before the first frame.
   Future<void> restore();
@@ -36,8 +40,10 @@ abstract class AuthSession extends ChangeNotifier {
   /// Ends the session here and at Auth0.
   Future<void> signOut();
 
-  /// A current access token for the API, or `null` when signed out or the
-  /// session can no longer produce one. A `null` for a signed-in user also
-  /// ends the session, so the app asks them to sign in again.
+  /// A current access token for the API, or `null` when signed out or no
+  /// token can be produced right now. Whether `null` ends the session is up to
+  /// the implementation: it does when the sign-in can no longer be renewed
+  /// (see [endedReason]), and does not when renewal only failed for want of a
+  /// connection, so the next call tries again.
   Future<String?> accessToken();
 }

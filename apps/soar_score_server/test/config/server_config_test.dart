@@ -6,7 +6,11 @@ import 'package:test/test.dart';
 
 void main() {
   const secret = 's3cret-pw';
-  const minimal = {'POSTGRES_PASSWORD': secret};
+  const minimal = {
+    'POSTGRES_PASSWORD': secret,
+    'AUTH0_DOMAIN': 'tenant.us.auth0.com',
+    'API_AUDIENCE': 'https://soar-score.com/server',
+  };
 
   group('ServerConfig.parse', () {
     test('uses defaults when only the password is set', () {
@@ -17,6 +21,23 @@ void main() {
       expect(config.logFormat, LogFormat.json);
       expect(config.postgres.host, 'localhost');
       expect(config.postgres.password, secret);
+      expect(config.auth0Domain, 'tenant.us.auth0.com');
+      expect(config.apiAudience, 'https://soar-score.com/server');
+    });
+
+    test('rejects an Auth0 domain with a scheme or path', () {
+      for (final domain in ['https://tenant.us.auth0.com', 'tenant/path']) {
+        expect(
+          () => ServerConfig.parse({...minimal, 'AUTH0_DOMAIN': domain}),
+          throwsA(
+            isA<ConfigException>().having(
+              (e) => e.problems.join(),
+              'problems',
+              contains('AUTH0_DOMAIN'),
+            ),
+          ),
+        );
+      }
     });
 
     test('reads every setting', () {
@@ -57,17 +78,19 @@ void main() {
         });
         fail('expected a ConfigException');
       } on ConfigException catch (e) {
-        expect(e.problems, hasLength(6));
+        expect(e.problems, hasLength(8));
         expect(
           e.problems.join('\n'),
-          allOf(
+          allOf([
             contains('PORT'),
             contains('LOG_LEVEL'),
             contains('LOG_FORMAT'),
+            contains('AUTH0_DOMAIN'),
+            contains('API_AUDIENCE'),
             contains('POSTGRES_PASSWORD'),
             contains('POSTGRES_PORT'),
             contains('POSTGRES_SSLMODE'),
-          ),
+          ]),
         );
       }
     });

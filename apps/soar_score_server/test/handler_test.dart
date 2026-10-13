@@ -24,7 +24,10 @@ void main() {
       late Handler handler;
 
       setUp(() {
-        handler = createServerHandler(createPostgresDatabase(config!));
+        handler = createServerHandler(
+          createPostgresDatabase(config!),
+          authMiddleware: (inner) => inner,
+        );
       });
 
       test('serves the /health payload through the extracted handler '

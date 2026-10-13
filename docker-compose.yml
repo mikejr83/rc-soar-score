@@ -37,6 +37,10 @@ services:
       POSTGRES_DB: rc_soar_score
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-soar-dev-only}
+      # Public identifiers of the development tenant and API; override for
+      # another tenant.
+      AUTH0_DOMAIN: ${AUTH0_DOMAIN:-dev-2qpi7354ddlhe45g.us.auth0.com}
+      API_AUDIENCE: ${API_AUDIENCE:-https://soar-score.com/server}
     ports:
       - "8080:8080"
 
