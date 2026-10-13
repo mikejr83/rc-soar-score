@@ -25,6 +25,11 @@ class ConflictRecords extends Table {
   TextColumn get resolvedAt => text().nullable()();
   TextColumn get resolvedBy => text().nullable()();
 
+  /// JSON: the entity state the service applied, and the colliding mutation's.
+  TextColumn get acceptedPayload => text().nullable()();
+  TextColumn get competingPayload => text().nullable()();
+  IntColumn get entityRevision => integer().nullable()();
+
   @override
   Set<Column> get primaryKey => {id};
 
@@ -33,3 +38,9 @@ class ConflictRecords extends Table {
     'CHECK ((contest_id IS NULL) <> (owner_account_id IS NULL))',
   ];
 }
+
+/// Columns of `conflict_records` that hold JSON as text.
+const conflictRecordsJsonColumns = <String>{
+  'accepted_payload',
+  'competing_payload',
+};

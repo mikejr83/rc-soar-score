@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:soar_score_core/soar_score_core.dart' as core;
 
 import '../database.dart';
+import '../schema/tables/conflict_records_table.dart';
 import 'table_mapper.dart';
 
 /// The client's synchronization state: its outbox, conflicts and position.
@@ -12,7 +13,11 @@ class DriftSyncStore implements core.SyncStore {
         _db.mutationRecords,
         jsonColumns: {'payload'},
       ),
-      _conflicts = TableMapper(_db, _db.conflictRecords);
+      _conflicts = TableMapper(
+        _db,
+        _db.conflictRecords,
+        jsonColumns: conflictRecordsJsonColumns,
+      );
 
   final SoarScoreDatabase _db;
   final TableMapper _mutations;
