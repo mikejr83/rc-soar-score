@@ -48,6 +48,10 @@ class Repository implements core.Repository {
         database,
         stores: stores,
       ),
+      reviewRequestRepository = ReviewRequestRepository(
+        database,
+        stores: stores,
+      ),
       scoreAttemptRepository = ScoreAttemptRepository(database, stores: stores),
       officialScoreRepository = OfficialScoreRepository(
         database,
@@ -158,6 +162,9 @@ class Repository implements core.Repository {
 
   @override
   final core.ScorePlaceholderRepository scorePlaceholderRepository;
+
+  @override
+  final core.ReviewRequestRepository reviewRequestRepository;
 
   @override
   final core.ScoreAttemptRepository scoreAttemptRepository;

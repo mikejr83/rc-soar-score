@@ -33,6 +33,7 @@ import 'role_repository.dart';
 import 'round_group_repository.dart';
 import 'round_repository.dart';
 import 'score_attempt_repository.dart';
+import 'review_request_repository.dart';
 import 'score_placeholder_repository.dart';
 import 'sync_cursor_repository.dart';
 import 'team_membership_repository.dart';
@@ -75,6 +76,8 @@ abstract interface class Repository {
   ReFlightParticipantRepository get reFlightParticipantRepository;
 
   ScorePlaceholderRepository get scorePlaceholderRepository;
+
+  ReviewRequestRepository get reviewRequestRepository;
 
   ScoreAttemptRepository get scoreAttemptRepository;
 
