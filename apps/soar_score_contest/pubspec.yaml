@@ -59,6 +59,7 @@ dependencies:
   two_dimensional_scrollables: ^0.5.5
   auth0_flutter: ^2.6.2
   flutter_secure_storage: ^11.2.0
+  win32_registry: ^3.0.3
 
 dev_dependencies:
   flutter_test:

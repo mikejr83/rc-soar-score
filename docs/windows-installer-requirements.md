@@ -24,7 +24,15 @@ though the app starts.
 ### 2. Register the `com.soarscore.contest` URL scheme
 
 Register it for the installing user under `HKEY_CURRENT_USER` (no
-administrator rights needed), pointing at the installed executable:
+administrator rights needed), pointing at the installed executable.
+
+The app also registers it itself, just before every sign-in
+(`lib/auth/url_scheme_registrar.dart`), and rewrites the keys when they point
+at a different executable. So sign-in works even if the installer did not
+register the scheme, and a development build can take it over. The installer
+should still register it: that keeps the registration correct before the first
+sign-in (for example when the callback launches the app) and lets the uninstall
+remove it cleanly. Both write the same keys, so they do not conflict.
 
 ```reg
 [HKEY_CURRENT_USER\Software\Classes\com.soarscore.contest]

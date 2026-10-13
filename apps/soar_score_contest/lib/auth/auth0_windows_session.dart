@@ -6,6 +6,7 @@ import 'package:logging/logging.dart';
 
 import 'auth_config.dart';
 import 'auth_session.dart';
+import 'url_scheme_registrar.dart';
 
 final _logger = Logger('Auth0WindowsSession');
 
@@ -22,7 +23,9 @@ class Auth0WindowsSession extends AuthSession {
     Auth0? auth0,
     this._storage = const FlutterSecureStorage(),
     this._now = DateTime.now,
-  }) : _auth0 = auth0 ?? Auth0(_config.domain, _config.clientId);
+    UrlSchemeRegistrar? urlSchemeRegistrar,
+  }) : _registrar = urlSchemeRegistrar,
+       _auth0 = auth0 ?? Auth0(_config.domain, _config.clientId);
 
   static const String _storageKey = 'auth0_credentials';
 
@@ -34,6 +37,7 @@ class Auth0WindowsSession extends AuthSession {
   final Auth0 _auth0;
   final FlutterSecureStorage _storage;
   final DateTime Function() _now;
+  final UrlSchemeRegistrar? _registrar;
   Credentials? _credentials;
 
   @override
@@ -71,6 +75,7 @@ class Auth0WindowsSession extends AuthSession {
 
   @override
   Future<void> signIn({bool createAccount = false}) async {
+    _registerUrlScheme();
     try {
       final credentials = await _auth0.windowsWebAuthentication().login(
         appCustomURL: _config.windowsCallbackUrl,
@@ -91,6 +96,17 @@ class Auth0WindowsSession extends AuthSession {
             ? 'Sign-in was cancelled.'
             : 'Sign-in failed: ${error.message}',
       );
+    }
+  }
+
+  /// Makes sure Windows sends the browser's callback to this executable. A
+  /// failure is logged, not fatal: an installer may already have registered
+  /// the scheme, and if not the sign-in times out with a clear message.
+  void _registerUrlScheme() {
+    try {
+      _registrar?.ensureRegistered();
+    } on Object catch (error, stackTrace) {
+      _logger.warning('Could not register the URL scheme', error, stackTrace);
     }
   }
 
