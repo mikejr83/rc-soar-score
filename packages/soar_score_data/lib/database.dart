@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
+import 'package:soar_score_core/soar_score_core.dart' show SyncScopeKey;
 import 'package:soar_score_data/postgres_config.dart';
 
 import 'contests_table.dart';
@@ -126,6 +128,25 @@ class SoarScoreDatabase extends _$SoarScoreDatabase {
     : super(executor);
 
   final DatabaseProfile profile;
+
+  final _localChanges = StreamController<SyncScopeKey>.broadcast();
+
+  /// The scope of every local write once it has committed.
+  ///
+  /// The sync scheduler listens here to push soon after a change. A write made
+  /// by applying a replicated change is not announced.
+  Stream<SyncScopeKey> get localChanges => _localChanges.stream;
+
+  /// Called by the unit of work after a commit.
+  void announceLocalChange(SyncScopeKey scope) {
+    if (!_localChanges.isClosed) _localChanges.add(scope);
+  }
+
+  @override
+  Future<void> close() async {
+    await _localChanges.close();
+    await super.close();
+  }
 
   /// The tables this database creates.
   List<TableInfo<Table, Object?>> get profileTables =>

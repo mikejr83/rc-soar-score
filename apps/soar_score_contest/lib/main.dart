@@ -12,6 +12,7 @@ import 'platform/app_bootstrap.dart';
 // Ticket 018.
 import 'platform/bootstrap.dart' as bootstrap;
 import 'services/connectivity/app_connectivity.dart';
+import 'services/connectivity/reachability_forwarder.dart';
 
 final _logger = Logger('Main');
 
@@ -53,6 +54,7 @@ void _runContestApp(AppBootstrap appBootstrap) {
   // is needed on web (its connectivity probe resolves there). Tests that pump
   // the app without a bootstrap simply get no monitor (D5).
   final connectivity = AppConnectivity(client: appBootstrap.remoteApiClient);
+  forwardReachability(connectivity, appBootstrap);
 
   // `SoarScoreContestApp` releases the bootstrap (closing the embedded
   // server and its port) and disposes the monitor on dispose.

@@ -19,6 +19,12 @@ abstract class AppBootstrap {
 
   ApiClient get remoteApiClient;
 
+  /// Tells the platform that the remote API became reachable (or not).
+  ///
+  /// The native build uses it to resume synchronization; the web build has
+  /// nothing to synchronize, so the default does nothing.
+  void remoteReachabilityChanged({required bool reachable}) {}
+
   /// The Auth0 session behind [remoteApiClient]'s bearer token, or `null`
   /// when the bootstrap has no sign-in (tests).
   AuthSession? get authSession => null;
