@@ -74,7 +74,10 @@ class DemoDataSeeder {
 
   Future<void> _build(DemoContestPlan plan) async {
     final contestId = DemoIds.contest(plan.number);
-    await services.ContestsService(_repository).createContest(
+    final now = plan.start.isAfter(DateTime.now())
+        ? DateTime.now()
+        : plan.start;
+    await services.ContestsService(_repository, clock: () => now).createContest(
       services.NewContest(
         id: contestId,
         details: services.ContestDetails(
@@ -93,7 +96,10 @@ class DemoDataSeeder {
     if (!plan.configured) {
       return;
     }
-    await services.ContestConfigurationService(_repository).save(
+    await services.ContestConfigurationService(
+      _repository,
+      clock: () => now,
+    ).save(
       contestId,
       services.ConfigurationInput(
         baseRevisionNumber: 0,
@@ -110,7 +116,7 @@ class DemoDataSeeder {
     if (!plan.drawn) {
       return;
     }
-    await services.MatrixService(_repository).drawFirst(
+    await services.MatrixService(_repository, clock: () => now).drawFirst(
       contestId,
       id: DemoIds.matrix(plan.number),
       rounds: plan.rounds,
