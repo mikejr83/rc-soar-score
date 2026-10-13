@@ -10,7 +10,9 @@ import 'package:soar_score_contest/services/workspace/workspace_facts.dart';
 import 'package:soar_score_contest/services/workspace/workspace_facts_loader.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../../support/configuration_fixtures.dart';
 import '../../support/matrix_test_support.dart';
+import '../../support/workspace_checklist_support.dart';
 import '../../support/workspace_facts_support.dart';
 
 http.Response _json(Object body, [int status = 200]) => http.Response(
@@ -24,15 +26,13 @@ http.Response _json(Object body, [int status = 200]) => http.Response(
 Future<WorkspaceFacts> _load({
   int scoresStatus = 200,
   int publicationStatus = 404,
+  int landingTablesStatus = 200,
   Map<String, Object?> publication = const {},
   bool offline = false,
   List<String>? requests,
 }) {
   final matrix = drawnMatrix();
-  final server = MatrixServer(
-    configuration: matrixConfiguration(),
-    matrix: matrix,
-  );
+  final server = MatrixServer(configuration: configRevision(3), matrix: matrix);
   final client = ApiClient(
     baseUrl: Uri.parse('http://localhost'),
     httpClient: MockClient((request) async {
@@ -44,6 +44,17 @@ Future<WorkspaceFacts> _load({
             : _json({
                 'error': {'code': 'boom', 'message': 'Broken.'},
               }, scoresStatus);
+      }
+      if (path.endsWith('/landing-tables')) {
+        return landingTablesStatus == 200
+            ? _json({
+                'landing_tables': [
+                  landingTableView(f5jLandingTableId, 'F5J default').toJson(),
+                ],
+              })
+            : _json({
+                'error': {'code': 'boom', 'message': 'Broken.'},
+              }, landingTablesStatus);
       }
       if (path.endsWith('/publication')) {
         return _json(
@@ -73,6 +84,8 @@ void main() {
     expect(facts.latestScore?.roundOrdinal, 1);
     expect(facts.publication, PublicationFacts.notPublished);
     expect(facts.unavailable, isEmpty);
+    expect(facts.landingTableName, 'F5J default');
+    expect(facts.disciplineLabel, 'F5J');
     expect(facts.isOffline, isFalse);
     expect(
       requests.where((path) => path.endsWith('/contests/$matrixContestId')),
@@ -105,4 +118,15 @@ void main() {
     expect(facts.unavailable, {WorkspaceFactSource.publication});
     expect(facts.publication, PublicationFacts.unknown);
   });
+
+  test(
+    'a failed landing-table read is listed and the rest still loads',
+    () async {
+      final facts = await _load(landingTablesStatus: 500);
+      expect(facts.unavailable, {WorkspaceFactSource.landingTables});
+      expect(facts.landingTableName, isNull);
+      expect(facts.disciplineLabel, 'F5J');
+      expect(facts.hasMatrix, isTrue);
+    },
+  );
 }
