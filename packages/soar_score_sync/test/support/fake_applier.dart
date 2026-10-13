@@ -7,11 +7,15 @@ class FakeApplier implements ReplicatedChangeApplier {
   final List<String> log;
   final applied = <ReplicatedChange>[];
   int? failOnSequence;
+  int? unsupportedOnSequence;
 
   @override
   Future<void> apply(ReplicatedChange change) async {
     if (change.sequence == failOnSequence) {
       throw StateError('disk full');
+    }
+    if (change.sequence == unsupportedOnSequence) {
+      throw ArgumentError('No store for ${change.entityType}');
     }
     log.add('apply:${change.sequence}');
     applied.add(change);

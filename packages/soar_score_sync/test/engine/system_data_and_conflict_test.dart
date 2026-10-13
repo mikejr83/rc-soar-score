@@ -44,7 +44,7 @@ void main() {
       () async {
         final rig = Rig();
 
-        final failure = await rig.engine.resolveConflict(
+        final outcome = await rig.engine.resolveConflict(
           scope,
           idN(77),
           clientMutationId: 'r-1',
@@ -52,7 +52,8 @@ void main() {
           payload: {'time_flown': 545},
         );
 
-        expect(failure, isNull);
+        expect(outcome.failure, isNull);
+        expect(outcome.accepted, isTrue);
         expect(
           rig.gateway.resolutions.single.choice,
           ConflictResolutionChoice.merged,
@@ -69,19 +70,47 @@ void main() {
       final rig = Rig();
       rig.gateway.resolveError = httpError(401);
 
-      final failure = await rig.engine.resolveConflict(
+      final outcome = await rig.engine.resolveConflict(
         scope,
         idN(77),
         clientMutationId: 'r-2',
         choice: ConflictResolutionChoice.keptAccepted,
       );
 
-      expect(failure, SyncFailureKind.tokenExpired);
+      expect(outcome.failure, SyncFailureKind.tokenExpired);
+      expect(outcome.accepted, isFalse);
       expect(rig.gateway.exchanges, isEmpty);
       expect(
         rig.engine.state.scopes[scope]!.failure,
         SyncFailureKind.tokenExpired,
       );
     });
+
+    for (final outcome in [
+      MutationOutcome.rejected,
+      MutationOutcome.conflict,
+      MutationOutcome.skipped,
+    ]) {
+      test('a $outcome answer is not success and is not synced', () async {
+        final rig = Rig();
+        rig.gateway.resolveResult = SyncMutationResult(
+          clientMutationId: 'r-3',
+          outcome: outcome,
+          reasonCode: 'stale_base',
+        );
+
+        final result = await rig.engine.resolveConflict(
+          scope,
+          idN(77),
+          clientMutationId: 'r-3',
+          choice: ConflictResolutionChoice.keptAccepted,
+        );
+
+        expect(result.accepted, isFalse);
+        expect(result.failure, isNull);
+        expect(result.reason, SyncReasonCode.staleBase);
+        expect(rig.gateway.exchanges, isEmpty);
+      });
+    }
   });
 }

@@ -32,6 +32,9 @@ class FakeGateway implements SyncGateway {
   Object? registerError;
   Object? resolveError;
 
+  /// Overrides the answer to a conflict resolution (default: accepted).
+  SyncMutationResult? resolveResult;
+
   @override
   Future<SyncInfoDto> syncInfo() async {
     infoCalls++;
@@ -83,12 +86,13 @@ class FakeGateway implements SyncGateway {
     final error = resolveError;
     if (error != null) throw error;
     resolutions.add(request);
-    return SyncMutationResult(
-      clientMutationId: request.clientMutationId,
-      outcome: MutationOutcome.accepted,
-      revision: 2,
-      sequence: 99,
-    );
+    return resolveResult ??
+        SyncMutationResult(
+          clientMutationId: request.clientMutationId,
+          outcome: MutationOutcome.accepted,
+          revision: 2,
+          sequence: 99,
+        );
   }
 
   static SyncExchangeResponse response({

@@ -16,4 +16,9 @@ enum SyncFailureKind {
   /// The installation is revoked or no longer the contest's administration
   /// installation. It can still read and export.
   inactiveInstallation,
+
+  /// The service sent a change this installation cannot store (an entity type
+  /// it does not know). The cursor stays before it so nothing is lost; the
+  /// installation needs an update.
+  unsupportedChange,
 }

@@ -215,6 +215,25 @@ void main() {
     expect(rig.log, isNot(contains('cursor:2')));
   });
 
+  test(
+    'a change the applier has no store for stops the pull, not the app',
+    () async {
+      final rig = Rig();
+      rig.applier.unsupportedOnSequence = 2;
+      rig.gateway.onExchange = (request) async =>
+          FakeGateway.response(changes: [change(1), change(2)]);
+
+      final failure = await rig.engine.syncScope(scope);
+
+      expect(failure, SyncFailureKind.unsupportedChange);
+      expect(rig.store.cursors[scope] ?? 0, 0);
+      expect(
+        rig.engine.state.scopes[scope]!.failure,
+        SyncFailureKind.unsupportedChange,
+      );
+    },
+  );
+
   test('changes are applied in sequence order', () async {
     final rig = Rig();
     rig.gateway.onExchange = (request) async =>

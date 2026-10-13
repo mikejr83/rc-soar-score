@@ -4,6 +4,7 @@ import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import 'outbox_order.dart';
+import 'resolve_conflict_outcome.dart';
 import 'sync_engine_config.dart';
 import 'sync_failure_kind.dart';
 import 'sync_gateway.dart';
@@ -65,17 +66,22 @@ class SyncEngine {
     return result;
   }
 
-  /// Sends the director's decision for [conflictId], then syncs [scope] so
-  /// the answer is stored. Returns why it failed, or null on success.
-  Future<SyncFailureKind?> resolveConflict(
+  /// Sends the director's decision for [conflictId]. When the service
+  /// accepts it, syncs [scope] so the answer is stored.
+  ///
+  /// Check [ResolveConflictOutcome.accepted]: the service can answer a
+  /// successful request with a rejection or a conflict, and then the conflict
+  /// is still open.
+  Future<ResolveConflictOutcome> resolveConflict(
     SyncScopeKey scope,
     Id conflictId, {
     required String clientMutationId,
     required ConflictResolutionChoice choice,
     Map<String, Object?>? payload,
   }) async {
+    SyncMutationResult? result;
     final failure = await _guard(() async {
-      await _gateway.resolveConflict(
+      result = await _gateway.resolveConflict(
         conflictId,
         ResolveConflictRequest(
           clientMutationId: clientMutationId,
@@ -84,11 +90,12 @@ class SyncEngine {
         ),
       );
     });
-    if (failure != null) {
+    if (failure != null || result?.outcome != MutationOutcome.accepted) {
       await _refresh(scope, failure: failure);
-      return failure;
+      return ResolveConflictOutcome(failure: failure, result: result);
     }
-    return syncScope(scope);
+    final syncFailure = await syncScope(scope);
+    return ResolveConflictOutcome(failure: syncFailure, result: result);
   }
 
   Future<void> dispose() async {
@@ -226,7 +233,14 @@ class SyncEngine {
     final ordered = [...changes]
       ..sort((a, b) => a.sequence.compareTo(b.sequence));
     for (final change in ordered) {
-      await _applier.apply(changeFromDto(scope, change));
+      try {
+        await _applier.apply(changeFromDto(scope, change));
+      } on ArgumentError {
+        // The applier refuses an entity type it has no store for, or one that
+        // is derived. Stop here without moving the cursor past it: nothing is
+        // dropped, and the scope reports why it cannot go on.
+        throw _UnsupportedChange(change.sequence, change.entityType);
+      }
     }
     final highest = ordered.last.sequence;
     if (highest <= cursor) return cursor;
@@ -274,6 +288,8 @@ class SyncEngine {
       return null;
     } on _UpdateRequired {
       return SyncFailureKind.updateRequired;
+    } on _UnsupportedChange {
+      return SyncFailureKind.unsupportedChange;
     } on SyncRefusedError catch (error) {
       if (error.requiresUpdate) return SyncFailureKind.updateRequired;
       if (error.reason == SyncReasonCode.inactiveInstallation) {
@@ -319,4 +335,12 @@ class SyncEngine {
 /// The service's version range excludes this installation.
 class _UpdateRequired implements Exception {
   const _UpdateRequired();
+}
+
+/// The applier cannot store a change the service sent.
+class _UnsupportedChange implements Exception {
+  const _UnsupportedChange(this.sequence, this.entityType);
+
+  final int sequence;
+  final String entityType;
 }
