@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:drift/drift.dart';
 import 'package:soar_score_core/soar_score_core.dart' as core;
 
@@ -63,19 +65,24 @@ class LocalAccountRepository implements core.LocalAccountRepository {
     for (final MapEntry(key: table, value: columns)
         in localAccountJsonReferences.entries) {
       for (final column in columns) {
-        await _update(
-          "UPDATE $table SET $column = REPLACE($column, ?, ?) "
-          "WHERE $column LIKE ?",
-          [local.value, accountId.value, '%${local.value}%'],
-          table,
-        );
+        await _rewriteJson(table, column, local, accountId);
       }
     }
-    // A director scope is named by the account that owns it.
+    // A director scope is named by the account that owns it. Its position
+    // moves to the account unless the account already has one, which stands:
+    // the Local scope was never synced, so its position says nothing.
     await _update(
       "UPDATE local_sync_positions SET scope_id = ? "
+          "WHERE scope_kind = 'Director' AND scope_id = ? AND NOT EXISTS ("
+          "SELECT 1 FROM local_sync_positions p WHERE p.scope_kind = 'Director' "
+          "AND p.scope_id = ?)",
+      [accountId.value, local.value, accountId.value],
+      'local_sync_positions',
+    );
+    await _update(
+      "DELETE FROM local_sync_positions "
           "WHERE scope_kind = 'Director' AND scope_id = ?",
-      [accountId.value, local.value],
+      [local.value],
       'local_sync_positions',
     );
   });
@@ -87,4 +94,49 @@ class LocalAccountRepository implements core.LocalAccountRepository {
         updates: {_db.allTables.firstWhere((t) => t.actualTableName == table)},
         updateKind: UpdateKind.update,
       );
+
+  /// Rewrites the account fields of the JSON in [table].[column], leaving any
+  /// other text that happens to contain the id, such as a name typed by a
+  /// user, as it was.
+  Future<void> _rewriteJson(
+    String table,
+    String column,
+    core.Id local,
+    core.Id accountId,
+  ) async {
+    final rows = await _db
+        .customSelect(
+          portableSql(
+            _db,
+            'SELECT id, $column AS json FROM $table WHERE $column LIKE ?',
+          ),
+          variables: [Variable<String>('%${local.value}%')],
+        )
+        .get();
+    for (final row in rows) {
+      final decoded = jsonDecode(row.read<String>('json'));
+      final rewritten = _rewriteAccounts(decoded, local.value, accountId.value);
+      await _update('UPDATE $table SET $column = ? WHERE id = ?', [
+        jsonEncode(rewritten),
+        row.read<String>('id'),
+      ], table);
+    }
+  }
+
+  static Object? _rewriteAccounts(Object? node, String from, String to) =>
+      switch (node) {
+        Map() => {
+          for (final MapEntry(:key, :value) in node.entries)
+            key: _accountKeys.contains(key) && value == from
+                ? to
+                : _rewriteAccounts(value, from, to),
+        },
+        List() => [for (final item in node) _rewriteAccounts(item, from, to)],
+        _ => node,
+      };
+
+  /// The JSON keys of the columns that hold an account id.
+  static final _accountKeys = {
+    for (final columns in localAccountReferences.values) ...columns,
+  };
 }

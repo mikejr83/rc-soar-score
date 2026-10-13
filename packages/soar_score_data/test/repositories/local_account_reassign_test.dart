@@ -101,6 +101,35 @@ void _tests(Backend backend) {
       expect(contest!.ownerAccountId, account);
     });
 
+    test('leaves text that merely contains the id alone', skip: skip, () async {
+      final note = 'see ${localId.value}';
+      final saved = await inst.unitOfWork.run(
+        (c) => c.save(
+          core.Contest(
+            id: core.Id.create(),
+            name: note,
+            startDateTime: DateTime.utc(2026, 4, 15, 10),
+            endDateTime: DateTime.utc(2026, 4, 16, 20),
+            timezone: 'America/Denver',
+            ownerAccountId: localId,
+            createdAt: DateTime.utc(2026, 4),
+            updatedAt: DateTime.utc(2026, 4),
+          ),
+          metadata: metadata(),
+        ),
+      );
+
+      await local.reassignTo(account);
+
+      final pending = (await inst.syncStore.pendingMutations(
+        core.ContestScopeKey(saved.id),
+      )).single;
+      final data = pending.payload['data']! as Map;
+      final entity = data['entity']! as Map;
+      expect(entity['name'], note);
+      expect(entity['owner_account_id'], account.value);
+    });
+
     test('moves a director scope position', skip: skip, () async {
       await inst.db.customStatement(
         "INSERT INTO local_sync_positions (scope_kind, scope_id, "
@@ -116,6 +145,27 @@ void _tests(Backend backend) {
       expect(
         await inst.syncStore.readCursor(core.DirectorScopeKey(localId)),
         0,
+      );
+    });
+
+    test('keeps the position the account already has', skip: skip, () async {
+      for (final (id, sequence) in [(localId, 2), (account, 9)]) {
+        await inst.db.customStatement(
+          "INSERT INTO local_sync_positions (scope_kind, scope_id, "
+          "last_synced_sequence) VALUES ('Director', '${id.value}', $sequence)",
+        );
+      }
+
+      await local.reassignTo(account);
+
+      expect(
+        await inst.syncStore.readCursor(core.DirectorScopeKey(account)),
+        9,
+      );
+      expect(
+        await inst.syncStore.readCursor(core.DirectorScopeKey(localId)),
+        0,
+        reason: 'the Local position is dropped',
       );
     });
 
