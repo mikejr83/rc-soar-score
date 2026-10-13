@@ -39,6 +39,9 @@ class EmbeddedServer {
 
   core.Repository get repository => _repository;
 
+  /// The local database, for the sync engine's store and applier.
+  SoarScoreDatabase get database => _database;
+
   /// The installation's Local account, which owns the contests created here.
   core.Id get localAccountId => _localAccountId;
 

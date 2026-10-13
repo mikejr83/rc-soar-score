@@ -17,6 +17,12 @@ abstract class AppBootstrap {
 
   ApiClient get remoteApiClient;
 
+  /// Tells the platform that the remote API became reachable (or not).
+  ///
+  /// The native build uses it to resume synchronization; the web build has
+  /// nothing to synchronize, so the default does nothing.
+  void remoteReachabilityChanged({required bool reachable}) {}
+
   /// Releases everything the bootstrap started. Idempotent — safe to call
   /// more than once (e.g. from both an app dispose and a process exit
   /// hook).

@@ -9,6 +9,7 @@ import 'package:soar_score_contest/platform/web_bootstrap.dart';
 
 import '../server/embedded_server.dart';
 import 'app_bootstrap.dart';
+import 'native_sync.dart';
 
 final _logger = Logger('NativeBootstrap');
 
@@ -23,12 +24,15 @@ final _logger = Logger('NativeBootstrap');
 /// fully disconnected offline application described in
 /// `plan/architecture-requirements/offline-usage.md` boots.
 class NativeBootstrap extends AppBootstrap {
-  NativeBootstrap._(this._server, this._remoteClient)
+  NativeBootstrap._(this._server, this._remoteClient, this.sync)
     : _client = ApiClient(baseUrl: _server.baseUrl);
 
   final EmbeddedServer _server;
   final ApiClient _client;
   final ApiClient _remoteClient;
+
+  /// The sync engine, wired to the local database.
+  final NativeSync sync;
 
   bool _closed = false;
 
@@ -39,12 +43,17 @@ class NativeBootstrap extends AppBootstrap {
   ApiClient get remoteApiClient => _remoteClient;
 
   @override
+  void remoteReachabilityChanged({required bool reachable}) =>
+      sync.remoteReachabilityChanged(reachable: reachable);
+
+  @override
   Future<void> close() async {
     if (_closed) {
       return;
     }
     _logger.fine('Closing native bootstrap');
     _closed = true;
+    await sync.close();
     await _server.close();
     _remoteClient.close();
   }
@@ -92,7 +101,14 @@ class NativeBootstrap extends AppBootstrap {
     if (demo) {
       _logger.info('DEMO MODE: using the example database at $database');
     }
-    return NativeBootstrap._(server, ApiClient(baseUrl: baseUrl));
+    final remote = ApiClient(baseUrl: baseUrl);
+    final sync = await NativeSync.start(
+      database: server.database,
+      localAccountId: server.localAccountId,
+      remote: remote,
+      databasePath: database,
+    );
+    return NativeBootstrap._(server, remote, sync);
   }
 
   /// Deletes the SQLite file at [path] and its journal files, if present.

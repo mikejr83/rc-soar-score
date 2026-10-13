@@ -35,14 +35,23 @@ class DriftUnitOfWork implements core.UnitOfWork {
   final TableMapper _tombstones;
 
   @override
-  Future<T> run<T>(Future<T> Function(core.WriteContext context) body) =>
-      _db.transaction(() => body(_Context(this)));
+  Future<T> run<T>(Future<T> Function(core.WriteContext context) body) async {
+    final context = _Context(this);
+    final result = await _db.transaction(() => body(context));
+    // Told only after the transaction committed, so a listener that starts a
+    // sync sees the new mutation records.
+    context.written.forEach(_db.announceLocalChange);
+    return result;
+  }
 }
 
 class _Context implements core.WriteContext {
   _Context(this._uow);
 
   final DriftUnitOfWork _uow;
+
+  /// The scopes this unit of work wrote a mutation record for.
+  final written = <core.SyncScopeKey>{};
 
   @override
   Future<T> save<T extends core.Synchronizable>(
@@ -301,7 +310,14 @@ class _Context implements core.WriteContext {
     required int? baseRevision,
     required core.MutationMetadata metadata,
     required Map<String, Object?> payload,
-  }) {
+  }) async {
+    final contestId = scope.contestId;
+    final ownerId = scope.ownerAccountId;
+    written.add(
+      contestId != null
+          ? core.ContestScopeKey(contestId)
+          : core.DirectorScopeKey(ownerId!),
+    );
     final record = core.MutationRecord(
       id: _uow._newId(),
       contestId: scope.contestId,
@@ -318,6 +334,6 @@ class _Context implements core.WriteContext {
       payload: payload,
       dependsOnMutationId: metadata.dependsOnMutationId,
     );
-    return _uow._mutations.upsert(record.toJson());
+    await _uow._mutations.upsert(record.toJson());
   }
 }

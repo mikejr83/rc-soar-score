@@ -50,6 +50,8 @@ dependencies:
     path: ../../packages/soar_score_core
   soar_score_data:
     path: ../../packages/soar_score_data
+  soar_score_sync:
+    path: ../../packages/soar_score_sync
   soar_score_ui:
     path: ../../packages/soar_score_ui
   connectivity_plus: ^7.3.1
