@@ -1,5 +1,7 @@
 import 'package:soar_score_api/soar_score_api.dart';
 
+import '../auth/auth_session.dart';
+
 /// Shared view of the platform bootstrap performed before the app's first
 /// frame: the `ApiClient` every screen talks through, and the resources that
 /// `close()` releases on shutdown.
@@ -22,6 +24,10 @@ abstract class AppBootstrap {
   /// The native build uses it to resume synchronization; the web build has
   /// nothing to synchronize, so the default does nothing.
   void remoteReachabilityChanged({required bool reachable}) {}
+
+  /// The Auth0 session behind [remoteApiClient]'s bearer token, or `null`
+  /// when the bootstrap has no sign-in (tests).
+  AuthSession? get authSession => null;
 
   /// Releases everything the bootstrap started. Idempotent — safe to call
   /// more than once (e.g. from both an app dispose and a process exit

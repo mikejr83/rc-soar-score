@@ -19,7 +19,7 @@ class _Monitor extends ChangeNotifier implements AppConnectivity {
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
-class _Bootstrap implements AppBootstrap {
+class _Bootstrap extends AppBootstrap {
   final reports = <bool>[];
 
   @override

@@ -7,6 +7,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_contest/platform/web_bootstrap.dart';
 
+import '../auth/auth_session.dart';
+import '../auth/auth_session_factory.dart';
 import '../server/embedded_server.dart';
 import 'app_bootstrap.dart';
 import 'native_sync.dart';
@@ -24,12 +26,13 @@ final _logger = Logger('NativeBootstrap');
 /// fully disconnected offline application described in
 /// `plan/architecture-requirements/offline-usage.md` boots.
 class NativeBootstrap extends AppBootstrap {
-  NativeBootstrap._(this._server, this._remoteClient, this.sync)
+  NativeBootstrap._(this._server, this._remoteClient, this._auth, this.sync)
     : _client = ApiClient(baseUrl: _server.baseUrl);
 
   final EmbeddedServer _server;
   final ApiClient _client;
   final ApiClient _remoteClient;
+  final AuthSession _auth;
 
   /// The sync engine, wired to the local database.
   final NativeSync sync;
@@ -45,6 +48,9 @@ class NativeBootstrap extends AppBootstrap {
   @override
   void remoteReachabilityChanged({required bool reachable}) =>
       sync.remoteReachabilityChanged(reachable: reachable);
+
+  @override
+  AuthSession get authSession => _auth;
 
   @override
   Future<void> close() async {
@@ -101,14 +107,18 @@ class NativeBootstrap extends AppBootstrap {
     if (demo) {
       _logger.info('DEMO MODE: using the example database at $database');
     }
-    final remote = ApiClient(baseUrl: baseUrl);
+    // Only the remote client carries the token; the embedded server is local
+    // and needs no sign-in.
+    final auth = createAuthSession();
+    await auth.restore();
+    final remote = ApiClient(baseUrl: baseUrl, tokenProvider: auth.accessToken);
     final sync = await NativeSync.start(
       database: server.database,
       localAccountId: server.localAccountId,
       remote: remote,
       databasePath: database,
     );
-    return NativeBootstrap._(server, remote, sync);
+    return NativeBootstrap._(server, remote, auth, sync);
   }
 
   /// Deletes the SQLite file at [path] and its journal files, if present.

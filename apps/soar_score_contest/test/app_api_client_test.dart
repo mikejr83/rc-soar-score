@@ -29,10 +29,7 @@ ApiClient? _exposedClient(WidgetTester tester) {
 
 /// `AppBootstrap` stand-in for widget tests: the real native bootstrap starts
 /// an HTTP server and a SQLite database, which widget tests do not need.
-class _TestBootstrap implements AppBootstrap {
-  @override
-  void remoteReachabilityChanged({required bool reachable}) {}
-
+class _TestBootstrap extends AppBootstrap {
   _TestBootstrap(this._client);
 
   final ApiClient _client;
@@ -95,10 +92,7 @@ void main() {
   });
 }
 
-class _ClosingTestBootstrap implements AppBootstrap {
-  @override
-  void remoteReachabilityChanged({required bool reachable}) {}
-
+class _ClosingTestBootstrap extends AppBootstrap {
   _ClosingTestBootstrap(this._close);
 
   final Future<void> Function() _close;

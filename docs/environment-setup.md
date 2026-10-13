@@ -88,17 +88,17 @@ startup if `POSTGRES_PASSWORD` is not set.
 The server loads variables from the process environment and from a `.env` file
 (`.env` and `.env.*` are git-ignored; never commit them).
 
-| Variable            | Default         | Purpose                                          |
-| ------------------- | --------------- | ------------------------------------------------ |
-| `POSTGRES_PASSWORD` | none (required) | Database password. Unset means "not configured". |
-| `POSTGRES_HOST`     | `localhost`     | Database host.                                   |
-| `POSTGRES_PORT`     | `5432`          | Database port.                                   |
-| `POSTGRES_DB`       | `rc_soar_score` | Database name.                                   |
-| `POSTGRES_USER`     | `postgres`      | Database user.                                   |
-| `POSTGRES_SSLMODE`  | `disable`       | One of `disable`, `require`, `verifyFull`.       |
-| `PORT`              | `8080`          | HTTP port the server listens on.                 |
-| `AUTH0_DOMAIN`      | none            | Auth0 tenant used to fetch JWKS for JWT checks.  |
-| `API_AUDIENCE`      | none            | Expected JWT audience (`soar_score_server`).     |
+| Variable            | Default         | Purpose                                                  |
+| ------------------- | --------------- | -------------------------------------------------------- |
+| `POSTGRES_PASSWORD` | none (required) | Database password. Unset means "not configured".         |
+| `POSTGRES_HOST`     | `localhost`     | Database host.                                           |
+| `POSTGRES_PORT`     | `5432`          | Database port.                                           |
+| `POSTGRES_DB`       | `rc_soar_score` | Database name.                                           |
+| `POSTGRES_USER`     | `postgres`      | Database user.                                           |
+| `POSTGRES_SSLMODE`  | `disable`       | One of `disable`, `require`, `verifyFull`.               |
+| `PORT`              | `8080`          | HTTP port the server listens on.                         |
+| `AUTH0_DOMAIN`      | none            | Auth0 tenant used to fetch JWKS for JWT checks.          |
+| `API_AUDIENCE`      | none            | Expected JWT audience (`https://soar-score.com/server`). |
 
 A minimal local `.env` at the repo root:
 
@@ -126,8 +126,52 @@ unless `POSTGRES_PASSWORD` is set.
 
 Every `/api/v1/*` request except `/health` is validated against an Auth0 JWT.
 For anything beyond unit tests, set `AUTH0_DOMAIN` and `API_AUDIENCE` to a
-tenant/API you control. Ask the maintainer for the development tenant details;
-do not commit them.
+tenant/API you control. The development tenant is `dev-2qpi7354ddlhe45g`; the
+API identifier (the audience) is `https://soar-score.com/server`.
+
+#### Contest app sign-in
+
+The contest app signs in with Auth0's Universal Login through `auth0_flutter`
+(`lib/auth/`). The tenant domain, client IDs and audience are public
+identifiers, so the development values are the defaults in
+`lib/auth/auth_config.dart`. Override them with `--dart-define` for another
+tenant or a release build: `AUTH0_DOMAIN`, `AUTH0_WEB_CLIENT_ID`,
+`AUTH0_WINDOWS_CLIENT_ID` and `AUTH0_AUDIENCE`. The Windows URL scheme is fixed in code.
+
+The dashboard settings are listed in [Auth0 Setup](auth0-setup.md). In short, the web application (type Single Page Application)
+needs the app origin, with a trailing slash, in Allowed Callback URLs, Allowed
+Logout URLs and Allowed Web Origins (for example `http://localhost:5000/` when
+running with `--web-port 5000`). The Windows application (type Native) needs
+`com.soarscore.contest://callback` in Allowed Callback URLs and Allowed Logout
+URLs. The audience API needs Allow Offline Access turned on.
+
+The Windows build also needs:
+
+1. [vcpkg](https://vcpkg.io/) with the plugin's native dependencies, and
+   `VCPKG_ROOT` set before building:
+
+   ```powershell
+   git clone https://github.com/microsoft/vcpkg
+   .\vcpkg\bootstrap-vcpkg.bat
+   $env:VCPKG_ROOT = "$PWD\vcpkg"
+   .\vcpkg\vcpkg.exe install --recurse "cpp-httplib[core,openssl]:x64-windows" nlohmann-json:x64-windows openssl:x64-windows
+   ```
+
+2. The `com.soarscore.contest` URL scheme registered for your user, so Windows
+   returns the browser's callback to the app. For a development build, save
+   this as a `.reg` file (with the path to your built `soar_score_contest.exe`)
+   and run it. An installer registers the same keys.
+
+   ```reg
+   Windows Registry Editor Version 5.00
+
+   [HKEY_CURRENT_USER\Software\Classes\com.soarscore.contest]
+   @="URL:RC Soar Score"
+   "URL Protocol"=""
+
+   [HKEY_CURRENT_USER\Software\Classes\com.soarscore.contest\shell\open\command]
+   @="\"C:\\Path\\To\\soar_score_contest.exe\" \"%1\""
+   ```
 
 ## 5. Run the apps
 
