@@ -138,7 +138,7 @@ identifiers, so the development values are the defaults in
 tenant or a release build: `AUTH0_DOMAIN`, `AUTH0_WEB_CLIENT_ID`,
 `AUTH0_WINDOWS_CLIENT_ID`, `AUTH0_AUDIENCE` and `AUTH0_WINDOWS_SCHEME`.
 
-In the Auth0 dashboard, the web application (type Single Page Application)
+The dashboard settings are listed in [Auth0 Setup](auth0-setup.md). In short, the web application (type Single Page Application)
 needs the app origin, with a trailing slash, in Allowed Callback URLs, Allowed
 Logout URLs and Allowed Web Origins (for example `http://localhost:5000/` when
 running with `--web-port 5000`). The Windows application (type Native) needs
