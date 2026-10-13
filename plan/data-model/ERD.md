@@ -19,6 +19,12 @@ erDiagram
         timestamptz updated_at
     }
 
+    ACCOUNT_ALIAS {
+        uuid        id              PK "the claimed Local account id"
+        uuid        account_id      FK
+        timestamptz claimed_at
+    }
+
     ACCOUNT_IDENTITY {
         uuid        id         PK
         uuid        account_id FK
@@ -721,6 +727,7 @@ erDiagram
     }
 
     %% Relationships
+    ACCOUNT ||--o{ ACCOUNT_ALIAS : "claimed Local accounts"
     ACCOUNT ||--o{ ACCOUNT_IDENTITY : "signs in with"
     ACCOUNT |o--o| ACCOUNT_PUBLIC_PROFILE : "publicly represented by"
     ACCOUNT |o--o{ CONTEST : "owns (optional)"

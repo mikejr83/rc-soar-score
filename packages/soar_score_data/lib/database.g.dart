@@ -12403,6 +12403,274 @@ class AccountsCompanion extends UpdateCompanion<AccountData> {
   }
 }
 
+class $AccountAliasesTable extends AccountAliases
+    with TableInfo<$AccountAliasesTable, AccountAliasData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $AccountAliasesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _accountIdMeta = const VerificationMeta(
+    'accountId',
+  );
+  @override
+  late final GeneratedColumn<String> accountId = GeneratedColumn<String>(
+    'account_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES accounts (id)',
+    ),
+  );
+  static const VerificationMeta _claimedAtMeta = const VerificationMeta(
+    'claimedAt',
+  );
+  @override
+  late final GeneratedColumn<String> claimedAt = GeneratedColumn<String>(
+    'claimed_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, accountId, claimedAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'account_aliases';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<AccountAliasData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('account_id')) {
+      context.handle(
+        _accountIdMeta,
+        accountId.isAcceptableOrUnknown(data['account_id']!, _accountIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_accountIdMeta);
+    }
+    if (data.containsKey('claimed_at')) {
+      context.handle(
+        _claimedAtMeta,
+        claimedAt.isAcceptableOrUnknown(data['claimed_at']!, _claimedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_claimedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  AccountAliasData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return AccountAliasData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      accountId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}account_id'],
+      )!,
+      claimedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}claimed_at'],
+      )!,
+    );
+  }
+
+  @override
+  $AccountAliasesTable createAlias(String alias) {
+    return $AccountAliasesTable(attachedDatabase, alias);
+  }
+}
+
+class AccountAliasData extends DataClass
+    implements Insertable<AccountAliasData> {
+  final String id;
+  final String accountId;
+  final String claimedAt;
+  const AccountAliasData({
+    required this.id,
+    required this.accountId,
+    required this.claimedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['account_id'] = Variable<String>(accountId);
+    map['claimed_at'] = Variable<String>(claimedAt);
+    return map;
+  }
+
+  AccountAliasesCompanion toCompanion(bool nullToAbsent) {
+    return AccountAliasesCompanion(
+      id: Value(id),
+      accountId: Value(accountId),
+      claimedAt: Value(claimedAt),
+    );
+  }
+
+  factory AccountAliasData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return AccountAliasData(
+      id: serializer.fromJson<String>(json['id']),
+      accountId: serializer.fromJson<String>(json['accountId']),
+      claimedAt: serializer.fromJson<String>(json['claimedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'accountId': serializer.toJson<String>(accountId),
+      'claimedAt': serializer.toJson<String>(claimedAt),
+    };
+  }
+
+  AccountAliasData copyWith({
+    String? id,
+    String? accountId,
+    String? claimedAt,
+  }) => AccountAliasData(
+    id: id ?? this.id,
+    accountId: accountId ?? this.accountId,
+    claimedAt: claimedAt ?? this.claimedAt,
+  );
+  AccountAliasData copyWithCompanion(AccountAliasesCompanion data) {
+    return AccountAliasData(
+      id: data.id.present ? data.id.value : this.id,
+      accountId: data.accountId.present ? data.accountId.value : this.accountId,
+      claimedAt: data.claimedAt.present ? data.claimedAt.value : this.claimedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AccountAliasData(')
+          ..write('id: $id, ')
+          ..write('accountId: $accountId, ')
+          ..write('claimedAt: $claimedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, accountId, claimedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is AccountAliasData &&
+          other.id == this.id &&
+          other.accountId == this.accountId &&
+          other.claimedAt == this.claimedAt);
+}
+
+class AccountAliasesCompanion extends UpdateCompanion<AccountAliasData> {
+  final Value<String> id;
+  final Value<String> accountId;
+  final Value<String> claimedAt;
+  final Value<int> rowid;
+  const AccountAliasesCompanion({
+    this.id = const Value.absent(),
+    this.accountId = const Value.absent(),
+    this.claimedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  AccountAliasesCompanion.insert({
+    required String id,
+    required String accountId,
+    required String claimedAt,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       accountId = Value(accountId),
+       claimedAt = Value(claimedAt);
+  static Insertable<AccountAliasData> custom({
+    Expression<String>? id,
+    Expression<String>? accountId,
+    Expression<String>? claimedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (accountId != null) 'account_id': accountId,
+      if (claimedAt != null) 'claimed_at': claimedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  AccountAliasesCompanion copyWith({
+    Value<String>? id,
+    Value<String>? accountId,
+    Value<String>? claimedAt,
+    Value<int>? rowid,
+  }) {
+    return AccountAliasesCompanion(
+      id: id ?? this.id,
+      accountId: accountId ?? this.accountId,
+      claimedAt: claimedAt ?? this.claimedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (accountId.present) {
+      map['account_id'] = Variable<String>(accountId.value);
+    }
+    if (claimedAt.present) {
+      map['claimed_at'] = Variable<String>(claimedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AccountAliasesCompanion(')
+          ..write('id: $id, ')
+          ..write('accountId: $accountId, ')
+          ..write('claimedAt: $claimedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $AccountIdentitiesTable extends AccountIdentities
     with TableInfo<$AccountIdentitiesTable, AccountIdentityData> {
   @override
@@ -36351,6 +36619,7 @@ abstract class _$SoarScoreDatabase extends GeneratedDatabase {
   late final $ContestModelLinksTable contestModelLinks =
       $ContestModelLinksTable(this);
   late final $AccountsTable accounts = $AccountsTable(this);
+  late final $AccountAliasesTable accountAliases = $AccountAliasesTable(this);
   late final $AccountIdentitiesTable accountIdentities =
       $AccountIdentitiesTable(this);
   late final $AccountPublicProfilesTable accountPublicProfiles =
@@ -36425,6 +36694,7 @@ abstract class _$SoarScoreDatabase extends GeneratedDatabase {
     modelCatalogs,
     contestModelLinks,
     accounts,
+    accountAliases,
     accountIdentities,
     accountPublicProfiles,
     participantAccountLinks,
@@ -50105,6 +50375,25 @@ final class $$AccountsTableReferences
     extends BaseReferences<_$SoarScoreDatabase, $AccountsTable, AccountData> {
   $$AccountsTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
+  static MultiTypedResultKey<$AccountAliasesTable, List<AccountAliasData>>
+  _accountAliasesRefsTable(_$SoarScoreDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.accountAliases,
+        aliasName: 'accounts__id__account_aliases__account_id',
+      );
+
+  $$AccountAliasesTableProcessedTableManager get accountAliasesRefs {
+    final manager = $$AccountAliasesTableTableManager(
+      $_db,
+      $_db.accountAliases,
+    ).filter((f) => f.accountId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_accountAliasesRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
   static MultiTypedResultKey<$AccountIdentitiesTable, List<AccountIdentityData>>
   _accountIdentitiesRefsTable(_$SoarScoreDatabase db) =>
       MultiTypedResultKey.fromTable(
@@ -50353,6 +50642,31 @@ class $$AccountsTableFilterComposer
     column: $table.updatedAt,
     builder: (column) => ColumnFilters(column),
   );
+
+  Expression<bool> accountAliasesRefs(
+    Expression<bool> Function($$AccountAliasesTableFilterComposer f) f,
+  ) {
+    final $$AccountAliasesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.accountAliases,
+      getReferencedColumn: (t) => t.accountId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AccountAliasesTableFilterComposer(
+            $db: $db,
+            $table: $db.accountAliases,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 
   Expression<bool> accountIdentitiesRefs(
     Expression<bool> Function($$AccountIdentitiesTableFilterComposer f) f,
@@ -50676,6 +50990,31 @@ class $$AccountsTableAnnotationComposer
   GeneratedColumn<String> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
 
+  Expression<T> accountAliasesRefs<T extends Object>(
+    Expression<T> Function($$AccountAliasesTableAnnotationComposer a) f,
+  ) {
+    final $$AccountAliasesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.accountAliases,
+      getReferencedColumn: (t) => t.accountId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AccountAliasesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.accountAliases,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
   Expression<T> accountIdentitiesRefs<T extends Object>(
     Expression<T> Function($$AccountIdentitiesTableAnnotationComposer a) f,
   ) {
@@ -50902,6 +51241,7 @@ class $$AccountsTableTableManager
           (AccountData, $$AccountsTableReferences),
           AccountData,
           PrefetchHooks Function({
+            bool accountAliasesRefs,
             bool accountIdentitiesRefs,
             bool accountPublicProfilesRefs,
             bool participantAccountLinksRefs,
@@ -50989,6 +51329,7 @@ class $$AccountsTableTableManager
               .toList(),
           prefetchHooksCallback:
               ({
+                accountAliasesRefs = false,
                 accountIdentitiesRefs = false,
                 accountPublicProfilesRefs = false,
                 participantAccountLinksRefs = false,
@@ -51001,6 +51342,7 @@ class $$AccountsTableTableManager
                 return PrefetchHooks(
                   db: db,
                   explicitlyWatchedTables: [
+                    if (accountAliasesRefs) db.accountAliases,
                     if (accountIdentitiesRefs) db.accountIdentities,
                     if (accountPublicProfilesRefs) db.accountPublicProfiles,
                     if (participantAccountLinksRefs) db.participantAccountLinks,
@@ -51014,6 +51356,27 @@ class $$AccountsTableTableManager
                   addJoins: null,
                   getPrefetchedDataCallback: (items) async {
                     return [
+                      if (accountAliasesRefs)
+                        await $_getPrefetchedData<
+                          AccountData,
+                          $AccountsTable,
+                          AccountAliasData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$AccountsTableReferences
+                              ._accountAliasesRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$AccountsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).accountAliasesRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.accountId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                       if (accountIdentitiesRefs)
                         await $_getPrefetchedData<
                           AccountData,
@@ -51203,6 +51566,7 @@ typedef $$AccountsTableProcessedTableManager =
       (AccountData, $$AccountsTableReferences),
       AccountData,
       PrefetchHooks Function({
+        bool accountAliasesRefs,
         bool accountIdentitiesRefs,
         bool accountPublicProfilesRefs,
         bool participantAccountLinksRefs,
@@ -51212,6 +51576,294 @@ typedef $$AccountsTableProcessedTableManager =
         bool syncCursorsRefs,
         bool publicationProjectionsRefs,
       })
+    >;
+typedef $$AccountAliasesTableCreateCompanionBuilder =
+    AccountAliasesCompanion Function({
+      required String id,
+      required String accountId,
+      required String claimedAt,
+      Value<int> rowid,
+    });
+typedef $$AccountAliasesTableUpdateCompanionBuilder =
+    AccountAliasesCompanion Function({
+      Value<String> id,
+      Value<String> accountId,
+      Value<String> claimedAt,
+      Value<int> rowid,
+    });
+
+final class $$AccountAliasesTableReferences
+    extends
+        BaseReferences<
+          _$SoarScoreDatabase,
+          $AccountAliasesTable,
+          AccountAliasData
+        > {
+  $$AccountAliasesTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $AccountsTable _accountIdTable(_$SoarScoreDatabase db) =>
+      db.accounts.createAlias('account_aliases__account_id__accounts__id');
+
+  $$AccountsTableProcessedTableManager get accountId {
+    final $_column = $_itemColumn<String>('account_id')!;
+
+    final manager = $$AccountsTableTableManager(
+      $_db,
+      $_db.accounts,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_accountIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$AccountAliasesTableFilterComposer
+    extends Composer<_$SoarScoreDatabase, $AccountAliasesTable> {
+  $$AccountAliasesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get claimedAt => $composableBuilder(
+    column: $table.claimedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$AccountsTableFilterComposer get accountId {
+    final $$AccountsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.accountId,
+      referencedTable: $db.accounts,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AccountsTableFilterComposer(
+            $db: $db,
+            $table: $db.accounts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$AccountAliasesTableOrderingComposer
+    extends Composer<_$SoarScoreDatabase, $AccountAliasesTable> {
+  $$AccountAliasesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get claimedAt => $composableBuilder(
+    column: $table.claimedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$AccountsTableOrderingComposer get accountId {
+    final $$AccountsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.accountId,
+      referencedTable: $db.accounts,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AccountsTableOrderingComposer(
+            $db: $db,
+            $table: $db.accounts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$AccountAliasesTableAnnotationComposer
+    extends Composer<_$SoarScoreDatabase, $AccountAliasesTable> {
+  $$AccountAliasesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get claimedAt =>
+      $composableBuilder(column: $table.claimedAt, builder: (column) => column);
+
+  $$AccountsTableAnnotationComposer get accountId {
+    final $$AccountsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.accountId,
+      referencedTable: $db.accounts,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AccountsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.accounts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$AccountAliasesTableTableManager
+    extends
+        RootTableManager<
+          _$SoarScoreDatabase,
+          $AccountAliasesTable,
+          AccountAliasData,
+          $$AccountAliasesTableFilterComposer,
+          $$AccountAliasesTableOrderingComposer,
+          $$AccountAliasesTableAnnotationComposer,
+          $$AccountAliasesTableCreateCompanionBuilder,
+          $$AccountAliasesTableUpdateCompanionBuilder,
+          (AccountAliasData, $$AccountAliasesTableReferences),
+          AccountAliasData,
+          PrefetchHooks Function({bool accountId})
+        > {
+  $$AccountAliasesTableTableManager(
+    _$SoarScoreDatabase db,
+    $AccountAliasesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$AccountAliasesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$AccountAliasesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$AccountAliasesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> accountId = const Value.absent(),
+                Value<String> claimedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => AccountAliasesCompanion(
+                id: id,
+                accountId: accountId,
+                claimedAt: claimedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String accountId,
+                required String claimedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => AccountAliasesCompanion.insert(
+                id: id,
+                accountId: accountId,
+                claimedAt: claimedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$AccountAliasesTable, AccountAliasData>(table),
+                  $$AccountAliasesTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({accountId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (accountId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.accountId,
+                        referencedTable: $$AccountAliasesTableReferences
+                            ._accountIdTable(db),
+                        referencedColumn: $$AccountAliasesTableReferences
+                            ._accountIdTable(db)
+                            .id,
+                      ) as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$AccountAliasesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$SoarScoreDatabase,
+      $AccountAliasesTable,
+      AccountAliasData,
+      $$AccountAliasesTableFilterComposer,
+      $$AccountAliasesTableOrderingComposer,
+      $$AccountAliasesTableAnnotationComposer,
+      $$AccountAliasesTableCreateCompanionBuilder,
+      $$AccountAliasesTableUpdateCompanionBuilder,
+      (AccountAliasData, $$AccountAliasesTableReferences),
+      AccountAliasData,
+      PrefetchHooks Function({bool accountId})
     >;
 typedef $$AccountIdentitiesTableCreateCompanionBuilder =
     AccountIdentitiesCompanion Function({
@@ -72528,6 +73180,8 @@ class $SoarScoreDatabaseManager {
       $$ContestModelLinksTableTableManager(_db, _db.contestModelLinks);
   $$AccountsTableTableManager get accounts =>
       $$AccountsTableTableManager(_db, _db.accounts);
+  $$AccountAliasesTableTableManager get accountAliases =>
+      $$AccountAliasesTableTableManager(_db, _db.accountAliases);
   $$AccountIdentitiesTableTableManager get accountIdentities =>
       $$AccountIdentitiesTableTableManager(_db, _db.accountIdentities);
   $$AccountPublicProfilesTableTableManager get accountPublicProfiles =>

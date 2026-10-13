@@ -2,6 +2,7 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:soar_score_api_handlers/handlers/health_handler.dart';
 import 'package:soar_score_core/repositories/repository.dart';
+import 'package:soar_score_api_handlers/handlers/account_claim_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/configuration_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/contests_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/landing_table_handlers.dart';
@@ -30,6 +31,7 @@ createHandlers(
       '/ping',
       (Request request) => jsonResponse(<String, Object>{'status': 'ok'}),
     );
+  addAccountClaimRoutes(router, repository);
   addContestRoutes(router, repository);
   addConfigurationRoutes(router, repository);
   addLandingTableRoutes(router, repository);

@@ -3,7 +3,7 @@ import 'fixtures.dart';
 
 /// The entities with documented example rows
 /// (`plan/data-model/examples/entities`), parents first. Each PR that adds
-/// tables extends the list until all 48 are covered.
+/// tables extends the list until all 49 are covered.
 const exampleEntities = <(String entity, String file)>[
   ('Contest', 'contest'),
   ('LandingTable', 'landing_table'),
@@ -37,6 +37,7 @@ const exampleEntities = <(String entity, String file)>[
   ('ParticipationStanding', 'participation_standing'),
   ('TeamStanding', 'team_standing'),
   ('Account', 'account'),
+  ('AccountAlias', 'account_alias'),
   ('AccountIdentity', 'account_identity'),
   ('AccountPublicProfile', 'account_public_profile'),
   ('ParticipantAccountLink', 'participant_account_link'),

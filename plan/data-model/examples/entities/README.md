@@ -46,6 +46,10 @@ The contest has five pilots and one timekeeper. Only Sam has an account of their
 
 A registered director, a registered pilot, a guest, and a system administrator.
 
+### AccountAlias
+
+[`account_alias.json`](account_alias.json) · [specification](../../entities/account_alias.md)
+
 ### AccountIdentity
 
 [`account_identity.json`](account_identity.json) · [specification](../../entities/account_identity.md)

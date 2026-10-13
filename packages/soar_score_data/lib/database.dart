@@ -28,6 +28,7 @@ import 'schema/tables/local_account_table.dart';
 import 'schema/tables/local_sync_positions_table.dart';
 import 'schema/tables/model_catalogs_table.dart';
 import 'schema/tables/accounts_table.dart';
+import 'schema/tables/account_aliases_table.dart';
 import 'schema/tables/account_identities_table.dart';
 import 'schema/tables/account_public_profiles_table.dart';
 import 'schema/tables/participant_account_links_table.dart';
@@ -89,6 +90,7 @@ part 'database.g.dart';
     ModelCatalogs,
     ContestModelLinks,
     Accounts,
+    AccountAliases,
     AccountIdentities,
     AccountPublicProfiles,
     ParticipantAccountLinks,

@@ -32,6 +32,7 @@ import '../schema/tables/flight_results_table.dart';
 import '../schema/tables/participation_standings_table.dart';
 import '../schema/tables/team_standings_table.dart';
 import '../schema/tables/accounts_table.dart';
+import '../schema/tables/account_aliases_table.dart';
 import '../schema/tables/account_identities_table.dart';
 import '../schema/tables/account_public_profiles_table.dart';
 import '../schema/tables/participant_account_links_table.dart';
@@ -379,6 +380,17 @@ class EntityStores {
       entityType: 'Account',
       mapper: TableMapper(db, db.accounts, jsonColumns: accountsJsonColumns),
       decode: core.Account.fromJson,
+      encode: (entity) => entity.toJson(),
+      hasRevision: false,
+    ),
+    EntityStore<core.AccountAlias>(
+      entityType: 'AccountAlias',
+      mapper: TableMapper(
+        db,
+        db.accountAliases,
+        jsonColumns: accountAliasesJsonColumns,
+      ),
+      decode: core.AccountAlias.fromJson,
       encode: (entity) => entity.toJson(),
       hasRevision: false,
     ),

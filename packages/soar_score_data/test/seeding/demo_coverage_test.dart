@@ -32,6 +32,7 @@ void main() {
     'contestModelLinkRepository':
         'not used by a screen yet; needs demo data (#288)',
     'accountRepository': 'backend-only; needs a server demo (#305)',
+    'accountAliasRepository': 'backend-only; needs a server demo (#305)',
     'accountIdentityRepository': 'backend-only; needs a server demo (#305)',
     'accountPublicProfileRepository':
         'backend-only; needs a server demo (#305)',

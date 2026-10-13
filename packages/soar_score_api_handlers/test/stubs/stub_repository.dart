@@ -1,5 +1,6 @@
 import 'package:soar_score_core/soar_score_core.dart' as core;
 
+import 'stub_account_repositories.dart';
 import 'stub_configuration_repositories.dart';
 import 'stub_contest_repository.dart';
 import 'stub_matrix_repositories.dart';
@@ -26,6 +27,8 @@ class StubRepository implements core.Repository {
 
   /// The participant profiles, participations and roles, and the matrix
   /// assignments, for tests to inspect and arrange.
+  final accounts = StubAccountRepository();
+  final accountAliases = StubAccountAliasRepository();
   final participantProfiles = StubParticipantProfileRepository();
   final participations = StubContestParticipationRepository();
   final roles = StubRoleRepository();
@@ -68,6 +71,12 @@ class StubRepository implements core.Repository {
   @override
   core.ContestConfigurationRevisionRepository
   get contestConfigurationRevisionRepository => configurations;
+
+  @override
+  core.AccountRepository get accountRepository => accounts;
+
+  @override
+  core.AccountAliasRepository get accountAliasRepository => accountAliases;
 
   @override
   core.ParticipantProfileRepository get participantProfileRepository =>
