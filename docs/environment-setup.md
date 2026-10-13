@@ -20,12 +20,12 @@ wins.
 
 Optional tools:
 
-| Tool                                                | Needed for                                                        |
-| --------------------------------------------------- | ----------------------------------------------------------------- |
-| PostgreSQL 14+ / Docker                             | Running the API server and its integration tests (see section 4). |
-| Node.js (for `npx`)                                 | Markdown formatting with Prettier (see section 6).                |
-| PowerShell 7+                                       | `scripts/verify.ps1` (the all-in-one check script).               |
-| Visual Studio 2022 ("Desktop development with C++") | `flutter run -d windows` for the contest desktop shell.           |
+| Tool                                                                        | Needed for                                                        |
+| --------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| PostgreSQL 14+ / Docker                                                     | Running the API server and its integration tests (see section 4). |
+| Node.js (for `npx`)                                                         | Markdown formatting with Prettier (see section 6).                |
+| PowerShell 7+                                                               | `scripts/verify.ps1` (the all-in-one check script).               |
+| Visual Studio 2022 ("Desktop development with C++", plus the ATL component) | `flutter run -d windows` for the contest desktop shell.           |
 
 ## 2. Install the toolchain
 
@@ -147,7 +147,12 @@ URLs. The audience API needs Allow Offline Access turned on.
 
 The Windows build also needs:
 
-1. [vcpkg](https://vcpkg.io/) with the plugin's native dependencies, and
+1. The ATL component of Visual Studio, which `flutter_secure_storage` needs
+   (`atlstr.h`). In Visual Studio Installer, Modify, Individual components,
+   tick "C++ ATL for latest v143 build tools (x86 & x64)". Without it the
+   build stops with `Cannot open include file: 'atlstr.h'`.
+
+2. [vcpkg](https://vcpkg.io/) with the plugin's native dependencies, and
    `VCPKG_ROOT` set before building:
 
    ```powershell
@@ -157,7 +162,15 @@ The Windows build also needs:
    .\vcpkg\vcpkg.exe install --recurse "cpp-httplib[core,openssl]:x64-windows" nlohmann-json:x64-windows openssl:x64-windows
    ```
 
-2. The `com.soarscore.contest` URL scheme registered for your user, so Windows
+   The `$env:` line lasts only for that PowerShell session. To build from VS
+   Code, set it for your user with `setx VCPKG_ROOT <path to vcpkg>` and restart
+   VS Code. CMake keeps the vcpkg toolchain from the first configure, so after
+   changing `VCPKG_ROOT` or installing packages, delete
+   `apps\soar_score_contest\build\windows` (or run `flutter clean`) before
+   building again. `Could not find a package configuration file provided by
+"httplib"` means the toolchain was not used.
+
+3. The `com.soarscore.contest` URL scheme registered for your user, so Windows
    returns the browser's callback to the app. For a development build, save
    this as a `.reg` file (with the path to your built `soar_score_contest.exe`)
    and run it. An installer registers the same keys; see
