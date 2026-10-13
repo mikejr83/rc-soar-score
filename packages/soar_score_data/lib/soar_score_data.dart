@@ -49,6 +49,7 @@ export 'repositories/publication_identity_repository.dart';
 export 'repositories/publication_participant_repository.dart';
 export 'repositories/publication_projection_repository.dart';
 export 'repositories/publication_publisher.dart';
+export 'repositories/results_repository.dart';
 export 'repositories/repository.dart';
 export 'repositories/model_catalog_repository.dart';
 export 'repositories/contest_configuration_preset_repository.dart';

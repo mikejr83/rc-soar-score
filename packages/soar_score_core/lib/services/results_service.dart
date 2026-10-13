@@ -305,17 +305,12 @@ class ResultsService {
     List<FlightResult> flights,
     List<ParticipationStanding> standings,
     List<TeamStanding> teams,
-  ) async {
-    await repository.flightResultRepository.replaceForContest(
-      contestId,
-      flights,
-    );
-    await repository.participationStandingRepository.replaceForContest(
-      contestId,
-      standings,
-    );
-    await repository.teamStandingRepository.replaceForContest(contestId, teams);
-  }
+  ) => repository.resultsRepository.replaceResultsForContest(
+    contestId,
+    flights,
+    standings,
+    teams,
+  );
 
   /// The engine's options: the discipline settings plus the core settings
   /// that shape the group score.

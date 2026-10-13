@@ -85,3 +85,52 @@ class StubTeamStandingRepository implements TeamStandingRepository {
   dynamic noSuchMethod(Invocation invocation) =>
       throw UnimplementedError('${invocation.memberName} is not stubbed');
 }
+
+/// The three result tables in memory, replaced together like the real
+/// repository: one contest, all tables, one step.
+class StubResultsRepository implements ResultsRepository {
+  StubResultsRepository(
+    this.flightResults,
+    this.participationStandings,
+    this.teamStandings,
+  );
+
+  final StubFlightResultRepository flightResults;
+  final StubParticipationStandingRepository participationStandings;
+  final StubTeamStandingRepository teamStandings;
+
+  @override
+  Future<void> replaceResultsForContest(
+    Id contestId,
+    Iterable<FlightResult> flights,
+    Iterable<ParticipationStanding> standings,
+    Iterable<TeamStanding> teams,
+  ) async {
+    for (final row in flights) {
+      if (row.contestId != contestId) {
+        throw ArgumentError('a FlightResult belongs to another contest');
+      }
+    }
+    for (final row in standings) {
+      if (row.contestId != contestId) {
+        throw ArgumentError(
+          'a ParticipationStanding belongs to another contest',
+        );
+      }
+    }
+    for (final row in teams) {
+      if (row.contestId != contestId) {
+        throw ArgumentError('a TeamStanding belongs to another contest');
+      }
+    }
+    flightResults.stored
+      ..removeWhere((row) => row.contestId == contestId)
+      ..addAll(flights);
+    participationStandings.stored
+      ..removeWhere((row) => row.contestId == contestId)
+      ..addAll(standings);
+    teamStandings.stored
+      ..removeWhere((row) => row.contestId == contestId)
+      ..addAll(teams);
+  }
+}
