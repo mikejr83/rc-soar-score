@@ -170,22 +170,14 @@ The Windows build also needs:
    building again. `Could not find a package configuration file provided by
 "httplib"` means the toolchain was not used.
 
-3. The `com.soarscore.contest` URL scheme registered for your user, so Windows
-   returns the browser's callback to the app. For a development build, save
-   this as a `.reg` file (with the path to your built `soar_score_contest.exe`)
-   and run it. An installer registers the same keys; see
+3. The `com.soarscore.contest` URL scheme, so Windows returns the browser's
+   callback to the app. Nothing to do by hand: the app registers it for your
+   user (under `HKEY_CURRENT_USER`, no administrator rights) just before
+   sign-in, pointing at the running executable, so a development build works
+   as is. Running a different build later, such as an installed copy, takes the
+   scheme over the next time that build signs in. An installer should register
+   the same keys; see
    [Windows Installer Requirements](windows-installer-requirements.md).
-
-   ```reg
-   Windows Registry Editor Version 5.00
-
-   [HKEY_CURRENT_USER\Software\Classes\com.soarscore.contest]
-   @="URL:RC Soar Score"
-   "URL Protocol"=""
-
-   [HKEY_CURRENT_USER\Software\Classes\com.soarscore.contest\shell\open\command]
-   @="\"C:\\Path\\To\\soar_score_contest.exe\" \"%1\""
-   ```
 
 ## 5. Run the apps
 
