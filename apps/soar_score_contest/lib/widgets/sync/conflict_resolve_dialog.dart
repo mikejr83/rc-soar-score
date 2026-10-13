@@ -14,7 +14,7 @@ typedef ResolveConflict = Future<ConflictAnswer> Function(
 );
 
 /// Shows both versions of a conflict and asks which to keep. The dialog closes
-/// with true once the service accepted the decision. Otherwise it stays open
+/// with the [ConflictAnswer] once the service accepted the decision. Otherwise it stays open
 /// and says why.
 class ConflictResolveDialog extends StatefulWidget {
   const ConflictResolveDialog({
@@ -65,7 +65,7 @@ class _ConflictResolveDialogState extends State<ConflictResolveDialog> {
     final answer = await widget.onResolve(choice, payload);
     if (!mounted) return;
     if (answer.resolved) {
-      Navigator.of(context).pop(true);
+      Navigator.of(context).pop(answer);
       return;
     }
     final problem = answer.problem;
@@ -147,7 +147,7 @@ class _ConflictResolveDialogState extends State<ConflictResolveDialog> {
       actions: [
         TextButton(
           key: const ValueKey('conflict-close'),
-          onPressed: _sending ? null : () => Navigator.of(context).pop(false),
+          onPressed: _sending ? null : () => Navigator.of(context).pop(),
           child: const Text('Decide later'),
         ),
         if (_editing) ...[

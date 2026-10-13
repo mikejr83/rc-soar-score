@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../../services/sync/app_sync.dart';
+import '../../services/sync/conflict_answer.dart';
 import '../../services/sync/open_conflict.dart';
 import '../../services/sync/refused_change.dart';
 import '../../widgets/contest_scope.dart';
@@ -133,6 +134,12 @@ class _Conflicts extends StatefulWidget {
 class _ConflictsState extends State<_Conflicts> {
   List<OpenConflict>? _conflicts;
 
+  // Conflicts the service accepted a decision for. The local record stays
+  // pending until a sync stores the answer, so they are hidden meanwhile and
+  // cannot be decided twice.
+  final _decided = <Id>{};
+  bool _reviewing = false;
+
   @override
   void initState() {
     super.initState();
@@ -147,11 +154,20 @@ class _ConflictsState extends State<_Conflicts> {
 
   Future<void> _load() async {
     final conflicts = await widget.sync.openConflicts(widget.scope);
-    if (mounted) setState(() => _conflicts = conflicts);
+    if (mounted) {
+      setState(() {
+        _conflicts = [
+          for (final conflict in conflicts)
+            if (!_decided.contains(conflict.id)) conflict,
+        ];
+      });
+    }
   }
 
   Future<void> _review(OpenConflict conflict) async {
-    await showDialog<bool>(
+    if (_reviewing) return;
+    _reviewing = true;
+    final answer = await showDialog<ConflictAnswer>(
       context: context,
       builder: (_) => ConflictResolveDialog(
         conflict: conflict,
@@ -163,7 +179,24 @@ class _ConflictsState extends State<_Conflicts> {
         ),
       ),
     );
-    if (mounted) unawaited(_load());
+    _reviewing = false;
+    if (!mounted) return;
+    if (answer != null && answer.resolved) {
+      _decided.add(conflict.id);
+      final problem = answer.refreshProblem;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            problem == null
+                ? 'Decision saved.'
+                : 'Decision sent. The sync that follows failed '
+                      '(${problem.label.toLowerCase()}), so this screen '
+                      'updates after the next successful sync.',
+          ),
+        ),
+      );
+    }
+    unawaited(_load());
   }
 
   @override

@@ -7,6 +7,7 @@ import '../services/sync/app_sync.dart';
 import '../services/sync/app_sync_state.dart';
 import '../services/sync/conflict_answer.dart';
 import '../services/sync/open_conflict.dart';
+import '../services/sync/reason_text.dart';
 import '../services/sync/refused_change.dart';
 import '../services/sync/sync_problem.dart';
 import '../services/sync/sync_scope_summary.dart';
@@ -85,17 +86,16 @@ class EngineAppSync implements AppSync {
     if (outcome.result == null && failure != null) {
       return ConflictAnswer.failed(failure);
     }
-    if (outcome.accepted) return const ConflictAnswer.resolved();
+    if (outcome.accepted) {
+      return ConflictAnswer.resolved(refreshProblem: failure);
+    }
     return ConflictAnswer.notAccepted(_refusal(outcome));
   }
 
   static String _refusal(ResolveConflictOutcome outcome) {
+    const base = 'The service did not accept the decision.';
     final code = outcome.result?.reasonCode;
-    if (code == null || code.isEmpty) {
-      return 'The service did not accept the decision.';
-    }
-    final words = code.replaceAll('_', ' ');
-    return 'The service did not accept the decision: $words.';
+    return code == null || code.isEmpty ? base : '$base ${reasonText(code)}';
   }
 
   Future<void> close() async {

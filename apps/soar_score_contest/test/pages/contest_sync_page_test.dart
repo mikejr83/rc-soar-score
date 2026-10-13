@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_contest/app_sync_provider.dart';
 import 'package:soar_score_contest/pages/contest/sync_page.dart';
 import 'package:soar_score_contest/services/sync/app_sync_state.dart';
+import 'package:soar_score_contest/services/sync/conflict_answer.dart';
 import 'package:soar_score_contest/services/sync/open_conflict.dart';
 import 'package:soar_score_contest/services/sync/refused_change.dart';
 import 'package:soar_score_contest/services/sync/sync_problem.dart';
@@ -191,6 +192,47 @@ void conflictTests() {
       ConflictResolutionChoice.tookCompeting,
     );
     expect(find.byKey(const ValueKey('conflict-dialog')), findsNothing);
+  });
+
+  testWidgets('a decided conflict leaves the list even if the store still has '
+      'it, and a failed follow-up sync is explained', (tester) async {
+    final conflict = _conflict();
+    final sync =
+        FakeAppSync(state: _state(const SyncScopeSummary(conflicts: 1)))
+          ..conflicts = [conflict]
+          ..answer = const ConflictAnswer.resolved(
+            refreshProblem: SyncProblem.offline,
+          );
+
+    await _pump(tester, sync);
+    await tester.tap(find.byKey(ValueKey('conflict-review-${conflict.id}')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('conflict-keep-accepted')));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(ValueKey('conflict-review-${conflict.id}')),
+      findsNothing,
+    );
+    expect(find.textContaining('The sync that follows failed'), findsOneWidget);
+  });
+
+  testWidgets('a second tap on Review does not stack another dialog', (
+    tester,
+  ) async {
+    final conflict = _conflict();
+    final sync = FakeAppSync(
+      state: _state(const SyncScopeSummary(conflicts: 1)),
+    )..conflicts = [conflict];
+
+    await _pump(tester, sync);
+    final review = find.byKey(ValueKey('conflict-review-${conflict.id}'));
+    // The second tap lands on the button before the first dialog is built.
+    await tester.tap(review);
+    await tester.tap(review, warnIfMissed: false);
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey('conflict-dialog')), findsOneWidget);
   });
 
   testWidgets('says so when nothing waits for a decision', (tester) async {

@@ -1,6 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import 'reason_text.dart';
+
 /// A conflict that waits for the director's decision, with both versions.
 class OpenConflict extends Equatable {
   const OpenConflict({
@@ -38,10 +40,7 @@ class OpenConflict extends Equatable {
   String get explanation {
     final text = reason;
     if (text != null && text.trim().isNotEmpty) return text;
-    final code = reasonCode;
-    if (code == null || code.isEmpty) return 'No reason was given.';
-    final words = code.replaceAll('_', ' ');
-    return '${words[0].toUpperCase()}${words.substring(1)}.';
+    return reasonText(reasonCode);
   }
 
   @override

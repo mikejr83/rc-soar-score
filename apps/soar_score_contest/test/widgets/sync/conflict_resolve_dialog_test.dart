@@ -32,7 +32,7 @@ Future<void> _open(
     MaterialApp(
       home: Builder(
         builder: (context) => TextButton(
-          onPressed: () => showDialog<bool>(
+          onPressed: () => showDialog<ConflictAnswer>(
             context: context,
             builder: (_) => ConflictResolveDialog(
               conflict: _conflict,
