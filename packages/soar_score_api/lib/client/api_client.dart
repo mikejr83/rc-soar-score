@@ -3,9 +3,11 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../dto/activate_installation_request.dart';
 import '../dto/add_participation_request.dart';
 import '../dto/add_team_member_request.dart';
 import '../dto/contest_action_request.dart';
+import '../dto/contest_archive_dto.dart';
 import '../dto/create_contest_request.dart';
 import '../dto/create_landing_table_request.dart';
 import '../dto/create_participant_request.dart';
@@ -17,10 +19,17 @@ import '../dto/health_dto.dart';
 import '../dto/late_add_request.dart';
 import '../dto/move_assignment_request.dart';
 import '../dto/publish_contest_request.dart';
+import '../dto/register_installation_request.dart';
 import '../dto/redraw_matrix_request.dart';
 import '../dto/rename_role_request.dart';
+import '../dto/resolve_conflict_request.dart';
 import '../dto/save_configuration_request.dart';
 import '../dto/set_visibility_request.dart';
+import '../dto/sync_exchange_request.dart';
+import '../dto/sync_exchange_response.dart';
+import '../dto/sync_info_dto.dart';
+import '../dto/sync_mutation_result.dart';
+import '../dto/system_data_response.dart';
 import '../dto/update_contest_request.dart';
 import '../dto/update_participant_request.dart';
 import '../dto/update_participation_request.dart';
@@ -28,6 +37,7 @@ import '../dto/update_team_request.dart';
 import '../errors/api_exception.dart';
 import '../errors/api_http_error.dart';
 import '../errors/api_network_error.dart';
+import '../errors/sync_refused_error.dart';
 
 /// Supplies the bearer token for authenticated requests, or `null` when the
 /// route is public.
@@ -658,6 +668,175 @@ class ApiClient {
     final uri = _resolve('/api/v1/contests/${contestId.value}/matrix/redraws');
     final response = await _send('POST', uri, body: request.toJson());
     return _decode<CurrentMatrix>(response, uri, CurrentMatrix.fromJson);
+  }
+
+  /// `GET /api/v1/sync/info` — the version ranges the service accepts.
+  Future<SyncInfoDto> syncInfo() async {
+    final uri = _resolve('/api/v1/sync/info');
+    final response = await _sendSync('GET', uri);
+    return _decode<SyncInfoDto>(response, uri, SyncInfoDto.fromJson);
+  }
+
+  /// `POST /api/v1/installations` — registers an installation for the
+  /// caller's account. Registering the same id again returns the stored row.
+  Future<Installation> registerInstallation(
+    RegisterInstallationRequest request,
+  ) async {
+    final uri = _resolve('/api/v1/installations');
+    final response = await _sendSync('POST', uri, body: request.toJson());
+    return _decode<Installation>(response, uri, Installation.fromJson);
+  }
+
+  /// `GET /api/v1/installations` — the caller's installations.
+  Future<List<Installation>> installations() async {
+    final uri = _resolve('/api/v1/installations');
+    final response = await _sendSync('GET', uri);
+    return _decode<List<Installation>>(
+      response,
+      uri,
+      (json) => [
+        for (final item in json['installations'] as List<dynamic>)
+          Installation.fromJson(item as Map<String, dynamic>),
+      ],
+    );
+  }
+
+  /// `POST /api/v1/installations/{id}/revoke` — revokes an installation, for
+  /// example a lost device. Returns the revoked row.
+  Future<Installation> revokeInstallation(Id id) async {
+    final uri = _resolve('/api/v1/installations/${id.value}/revoke');
+    final response = await _sendSync('POST', uri);
+    return _decode<Installation>(response, uri, Installation.fromJson);
+  }
+
+  /// `POST /api/v1/contests/{id}/activations` — makes an installation the
+  /// contest's administration installation, ending the previous one.
+  ///
+  /// Throws [SyncRefusedError] with `reclaim_requires_sync` when a reclaim
+  /// is attempted before the installation has pulled and reconciled.
+  Future<InstallationActivation> activateInstallation(
+    Id contestId,
+    ActivateInstallationRequest request,
+  ) async {
+    final uri = _resolve('/api/v1/contests/${contestId.value}/activations');
+    final response = await _sendSync('POST', uri, body: request.toJson());
+    return _decode<InstallationActivation>(
+      response,
+      uri,
+      InstallationActivation.fromJson,
+    );
+  }
+
+  /// `POST /api/v1/sync/exchange` — pushes unsent mutations and pulls the
+  /// changes after the cursor for one scope.
+  ///
+  /// Throws [SyncRefusedError] when the service refuses the versions. A
+  /// rejected mutation is not an error; it is a result in the response.
+  Future<SyncExchangeResponse> exchange(SyncExchangeRequest request) async {
+    final uri = _resolve('/api/v1/sync/exchange');
+    final response = await _sendSync('POST', uri, body: request.toJson());
+    return _decode<SyncExchangeResponse>(
+      response,
+      uri,
+      SyncExchangeResponse.fromJson,
+    );
+  }
+
+  /// `GET /api/v1/sync/system-data` — system data after [afterSequence].
+  /// Pass the previous response's `nextPageToken` as [pageToken] to continue.
+  Future<SystemDataResponse> systemData({
+    required int afterSequence,
+    String? pageToken,
+  }) async {
+    final uri = _resolve('/api/v1/sync/system-data').replace(
+      queryParameters: {
+        'after_sequence': '$afterSequence',
+        'page_token': ?pageToken,
+      },
+    );
+    final response = await _sendSync('GET', uri);
+    return _decode<SystemDataResponse>(
+      response,
+      uri,
+      SystemDataResponse.fromJson,
+    );
+  }
+
+  /// `POST /api/v1/sync/conflicts/{conflictId}/resolve` — submits the
+  /// director's decision for a conflict. Repeating [request] returns the
+  /// original result.
+  Future<SyncMutationResult> resolveConflict(
+    Id conflictId,
+    ResolveConflictRequest request,
+  ) async {
+    final uri = _resolve('/api/v1/sync/conflicts/${conflictId.value}/resolve');
+    final response = await _sendSync('POST', uri, body: request.toJson());
+    return _decode<SyncMutationResult>(
+      response,
+      uri,
+      SyncMutationResult.fromJson,
+    );
+  }
+
+  /// `GET /api/v1/contests/{id}/download` — the complete contest, for
+  /// initializing a replacement installation.
+  Future<ContestArchiveDto> downloadContest(Id contestId) async {
+    final uri = _resolve('/api/v1/contests/${contestId.value}/download');
+    final response = await _sendSync('GET', uri);
+    return _decode<ContestArchiveDto>(
+      response,
+      uri,
+      ContestArchiveDto.fromJson,
+    );
+  }
+
+  /// `GET /api/v1/contests/{id}/export` — everything in the download plus
+  /// audit history, conflicts, tombstones and pending mutations.
+  Future<ContestArchiveDto> exportContest(Id contestId) async {
+    final uri = _resolve('/api/v1/contests/${contestId.value}/export');
+    final response = await _sendSync('GET', uri);
+    return _decode<ContestArchiveDto>(
+      response,
+      uri,
+      ContestArchiveDto.fromJson,
+    );
+  }
+
+  /// `POST /api/v1/contests/import` — imports an export, keeping every
+  /// identifier.
+  ///
+  /// Throws [SyncRefusedError] with `contest_exists` rather than overwrite a
+  /// contest that is already there.
+  Future<ContestArchiveDto> importContest(ContestArchiveDto archive) async {
+    final uri = _resolve('/api/v1/contests/import');
+    final response = await _sendSync('POST', uri, body: archive.toJson());
+    return _decode<ContestArchiveDto>(
+      response,
+      uri,
+      ContestArchiveDto.fromJson,
+    );
+  }
+
+  /// Like [_send], but turns a refusal that names a sync reason code into a
+  /// [SyncRefusedError].
+  Future<http.Response> _sendSync(
+    String method,
+    Uri uri, {
+    Map<String, dynamic>? body,
+  }) async {
+    try {
+      return await _send(method, uri, body: body);
+    } on ApiHttpError catch (error) {
+      final reason = SyncReasonCode.tryParse(error.error?.code);
+      if (reason == null) rethrow;
+      throw SyncRefusedError(
+        error.message,
+        reason: reason,
+        statusCode: error.statusCode,
+        body: error.body,
+        requestUri: error.requestUri,
+      );
+    }
   }
 
   Uri _resolve(String path) => baseUrl.resolveUri(Uri.parse(path));
