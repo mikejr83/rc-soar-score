@@ -18,7 +18,7 @@ class Auth0Config {
   static const String defaultDomain = 'dev-2qpi7354ddlhe45g.us.auth0.com';
 
   /// Client ID of the Auth0 application the web build signs in with.
-  static const String defaultWebClientId = '3FdIOOxNr4DF4iT8BDaqKWc9NabpEKbz';
+  static const String defaultWebClientId = 'ALL8oKywE1J31NEKvcaypfSeZSsoDXII';
 
   /// Client ID of the Auth0 application the Windows build signs in with.
   static const String defaultWindowsClientId =
