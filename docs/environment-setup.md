@@ -80,30 +80,33 @@ dart run build_runner build --delete-conflicting-outputs
 
 ## 4. Configure the API server
 
-The server (`apps/soar_score_server`) needs a PostgreSQL database. It exits at
-startup if `POSTGRES_PASSWORD` is not set.
+The server (`apps/soar_score_server`) needs a PostgreSQL database and the Auth0
+tenant it accepts tokens from. It exits at startup, listing every problem, if
+`POSTGRES_PASSWORD`, `AUTH0_DOMAIN` or `API_AUDIENCE` is not set.
 
 ### Environment variables
 
 The server loads variables from the process environment and from a `.env` file
 (`.env` and `.env.*` are git-ignored; never commit them).
 
-| Variable            | Default         | Purpose                                                  |
-| ------------------- | --------------- | -------------------------------------------------------- |
-| `POSTGRES_PASSWORD` | none (required) | Database password. Unset means "not configured".         |
-| `POSTGRES_HOST`     | `localhost`     | Database host.                                           |
-| `POSTGRES_PORT`     | `5432`          | Database port.                                           |
-| `POSTGRES_DB`       | `rc_soar_score` | Database name.                                           |
-| `POSTGRES_USER`     | `postgres`      | Database user.                                           |
-| `POSTGRES_SSLMODE`  | `disable`       | One of `disable`, `require`, `verifyFull`.               |
-| `PORT`              | `8080`          | HTTP port the server listens on.                         |
-| `AUTH0_DOMAIN`      | none            | Auth0 tenant used to fetch JWKS for JWT checks.          |
-| `API_AUDIENCE`      | none            | Expected JWT audience (`https://soar-score.com/server`). |
+| Variable            | Default         | Purpose                                                    |
+| ------------------- | --------------- | ---------------------------------------------------------- |
+| `POSTGRES_PASSWORD` | none (required) | Database password. Unset means "not configured".           |
+| `POSTGRES_HOST`     | `localhost`     | Database host.                                             |
+| `POSTGRES_PORT`     | `5432`          | Database port.                                             |
+| `POSTGRES_DB`       | `rc_soar_score` | Database name.                                             |
+| `POSTGRES_USER`     | `postgres`      | Database user.                                             |
+| `POSTGRES_SSLMODE`  | `disable`       | One of `disable`, `require`, `verifyFull`.                 |
+| `PORT`              | `8080`          | HTTP port the server listens on.                           |
+| `AUTH0_DOMAIN`      | none (required) | Auth0 tenant host name, no scheme (`tenant.us.auth0.com`). |
+| `API_AUDIENCE`      | none (required) | Expected JWT audience (`https://soar-score.com/server`).   |
 
 A minimal local `.env` at the repo root:
 
 ```dotenv
 POSTGRES_PASSWORD=choose-a-local-password
+AUTH0_DOMAIN=dev-2qpi7354ddlhe45g.us.auth0.com
+API_AUDIENCE=https://soar-score.com/server
 ```
 
 ### Local PostgreSQL with Docker
@@ -124,10 +127,18 @@ unless `POSTGRES_PASSWORD` is set.
 
 ### Auth0
 
-Every `/api/v1/*` request except `/health` is validated against an Auth0 JWT.
-For anything beyond unit tests, set `AUTH0_DOMAIN` and `API_AUDIENCE` to a
-tenant/API you control. The development tenant is `dev-2qpi7354ddlhe45g`; the
-API identifier (the audience) is `https://soar-score.com/server`.
+Every `/api/v1/*` request needs `Authorization: Bearer <access token>`; `/health`
+and the public `/public/*` reads do not. The server checks the token's RS256
+signature against the tenant's public keys (`https://<AUTH0_DOMAIN>/.well-known/jwks.json`),
+its expiry, its issuer (`https://<AUTH0_DOMAIN>/`) and that its audience is
+`API_AUDIENCE`. A missing or bad token gets 401. The development tenant is
+`dev-2qpi7354ddlhe45g`; the API identifier (the audience) is
+`https://soar-score.com/server`.
+
+The first request from a new sign-in creates a registered account. Access
+tokens carry no name or email, so the server asks the tenant's `/userinfo`
+endpoint once for them; it needs the app to have requested the `openid profile
+email` scopes (the contest app does). Later requests only look the account up.
 
 #### Contest app sign-in
 

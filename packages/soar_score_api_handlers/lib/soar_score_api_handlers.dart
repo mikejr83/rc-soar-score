@@ -5,6 +5,10 @@
 /// only `package:soar_score_api_handlers/soar_score_api_handlers.dart`.
 library;
 
+export 'auth/account_principal_resolver.dart';
+export 'auth/bearer_auth.dart';
 export 'auth/principal.dart';
+export 'auth/token_verifier.dart';
+export 'auth/user_profile.dart';
 export 'handler.dart';
 export 'middleware/middleware.dart';

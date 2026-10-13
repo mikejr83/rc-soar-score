@@ -3,8 +3,11 @@ import 'dart:io';
 
 import 'package:logging/logging.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
+import 'package:soar_score_api_handlers/soar_score_api_handlers.dart';
 import 'package:soar_score_data/soar_score_data.dart';
 
+import 'auth/auth0_token_verifier.dart';
+import 'auth/auth0_user_profile_source.dart';
 import 'config/server_config.dart';
 import 'handler.dart';
 
@@ -56,11 +59,16 @@ Future<void> seedSystemData(SoarScoreDatabase database) async {
 /// fails here, before the port opens. [onDatabaseOpen] runs after the
 /// migration and before the first request, which is where startup work such
 /// as seeding system data belongs.
+///
+/// Every `/api/v1` request must carry an Auth0 access token for
+/// `config.auth0Domain` and `config.apiAudience`. Tests pass [authMiddleware]
+/// to use their own verifier.
 Future<RunningServer> startServer(
   ServerConfig config, {
   SoarScoreDatabase? database,
   FutureOr<void> Function(SoarScoreDatabase database)? onDatabaseOpen,
   InternetAddress? address,
+  AuthMiddleware? authMiddleware,
 }) async {
   final db = database ?? createPostgresDatabase(config.postgres);
   try {
@@ -68,7 +76,10 @@ Future<RunningServer> startServer(
     _logger.info('Database open and migrated.');
     await onDatabaseOpen?.call(db);
     final server = await shelf_io.serve(
-      createServerHandler(db),
+      createServerHandler(
+        db,
+        authMiddleware: authMiddleware ?? _auth0Middleware(config, db),
+      ),
       address ?? InternetAddress.anyIPv4,
       config.port,
     );
@@ -78,4 +89,23 @@ Future<RunningServer> startServer(
     await db.close();
     rethrow;
   }
+}
+
+/// The bearer-token layer for Auth0 tokens, with accounts kept in [database].
+AuthMiddleware _auth0Middleware(
+  ServerConfig config,
+  SoarScoreDatabase database,
+) {
+  final repository = Repository(database);
+  return bearerAuth(
+    verifier: Auth0TokenVerifier(
+      domain: config.auth0Domain,
+      audience: config.apiAudience,
+    ),
+    resolver: AccountPrincipalResolver(
+      accounts: repository.accountRepository,
+      identities: repository.accountIdentityRepository,
+      profiles: Auth0UserProfileSource(domain: config.auth0Domain),
+    ),
+  );
 }
