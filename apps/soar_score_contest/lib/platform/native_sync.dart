@@ -19,8 +19,10 @@ final _logger = Logger('NativeSync');
 /// Scopes of contests and data owned by the installation's Local account are
 /// not synced: they have no account to sync to until sign-in claims them.
 class NativeSync {
-  NativeSync._(this.engine, this._scheduler, this._subscription)
+  NativeSync._(this.engine, this._scheduler, this._subscription, this._database)
     : appSync = EngineAppSync(engine);
+
+  final SoarScoreDatabase _database;
 
   /// The engine.
   final SyncEngine engine;
@@ -72,7 +74,7 @@ class NativeSync {
       scheduler.notifyLocalChange,
     );
     _logger.info('Sync engine ready for installation $installationId');
-    return NativeSync._(engine, scheduler, subscription);
+    return NativeSync._(engine, scheduler, subscription, database);
   }
 
   static bool _hasAccount(core.Id? owner, core.Id localAccountId) =>
@@ -81,6 +83,20 @@ class NativeSync {
   /// The remote API became reachable (or stopped being so).
   void remoteReachabilityChanged({required bool reachable}) {
     if (reachable) _scheduler.connectivityRestored();
+  }
+
+  /// The Local account's data now belongs to [accountId]: sync every scope it
+  /// made syncable (the director's own data, the system data and the account's
+  /// contests), which were skipped while they were local only.
+  Future<void> accountClaimed(core.Id accountId) async {
+    final scopes = <core.SyncScopeKey>[
+      core.DirectorScopeKey(accountId),
+      const core.SystemScopeKey(),
+      for (final contest in await ContestRepository(_database).getAll())
+        if (contest.ownerAccountId == accountId)
+          core.ContestScopeKey(contest.id),
+    ];
+    scopes.forEach(_scheduler.notifyLocalChange);
   }
 
   Future<void> close() async {

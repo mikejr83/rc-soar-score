@@ -21,6 +21,7 @@ class EngineAppSync implements AppSync {
   }
 
   final SyncEngine _engine;
+  SyncProblem? _claimProblem;
   final _controller = StreamController<AppSyncState>.broadcast();
   late final StreamSubscription<SyncState> _subscription;
 
@@ -29,6 +30,14 @@ class EngineAppSync implements AppSync {
 
   @override
   AppSyncState get state => _translate(_engine.state);
+
+  /// Why the offline data could not be linked to the signed-in account, or
+  /// null. It shows on the scopes that are still local only.
+  void claimProblemChanged(SyncProblem? problem) {
+    if (problem == _claimProblem) return;
+    _claimProblem = problem;
+    if (!_controller.isClosed) _controller.add(state);
+  }
 
   @override
   Stream<AppSyncState> get states => _controller.stream;
@@ -103,7 +112,7 @@ class EngineAppSync implements AppSync {
     await _controller.close();
   }
 
-  static AppSyncState _translate(SyncState state) => AppSyncState(
+  AppSyncState _translate(SyncState state) => AppSyncState(
     syncing: state.syncing,
     scopes: {
       for (final entry in state.scopes.entries)
@@ -112,7 +121,11 @@ class EngineAppSync implements AppSync {
           rejectedChanges: entry.value.rejectedMutations,
           conflicts: entry.value.conflictsNeedingAction,
           lastSyncedAt: entry.value.lastSyncedAt,
-          problem: _problem(entry.value.failure),
+          problem:
+              _problem(entry.value.failure) ??
+              (entry.value.skipReason == SyncSkipReason.accountless
+                  ? _claimProblem
+                  : null),
           localOnly: entry.value.skipReason == SyncSkipReason.accountless,
         ),
     },

@@ -88,6 +88,38 @@ void main() {
     expect(paths.first, '/api/v1/sync/info');
   });
 
+  test('claiming the Local account makes its contest sync', () async {
+    final contest = await saveContest(server.localAccountId);
+    await settle();
+    expect(paths, isEmpty);
+    final account = core.Id.create();
+
+    await LocalAccountRepository(server.database).reassignTo(account);
+    await sync.accountClaimed(account);
+    await settle();
+
+    expect(paths, isNotEmpty);
+    final scope = core.ContestScopeKey(contest.id);
+    final summary = sync.appSync.state.of(scope)!;
+    expect(summary.localOnly, isFalse);
+    expect(summary.pendingChanges, 1);
+  });
+
+  test('a claim problem shows on a local-only contest', () async {
+    final contest = await saveContest(server.localAccountId);
+    final scope = core.ContestScopeKey(contest.id);
+    await sync.appSync.refresh(scope);
+
+    sync.appSync.claimProblemChanged(SyncProblem.accountClaimBlocked);
+
+    expect(
+      sync.appSync.state.of(scope)!.problem,
+      SyncProblem.accountClaimBlocked,
+    );
+    sync.appSync.claimProblemChanged(null);
+    expect(sync.appSync.state.of(scope)!.problem, isNull);
+  });
+
   group('what the screens see', () {
     test('a local-only contest is reported as local only', () async {
       final contest = await saveContest(server.localAccountId);

@@ -26,6 +26,7 @@ void main() {
     final client = clientFor(
       (_) => http.Response(
         jsonEncode({
+          'account_id': '019c0000-0000-7000-8000-000000000001',
           'local_account_id': local.value,
           'claimed_at': '2026-10-13T12:00:00.000Z',
         }),
@@ -41,6 +42,7 @@ void main() {
     expect(seen.method, 'POST');
     expect(seen.url.path, '/api/v1/account/local-claims');
     expect(jsonDecode(seen.body), {'local_account_id': local.value});
+    expect(claim.accountId.value, '019c0000-0000-7000-8000-000000000001');
     expect(claim.localAccountId, local);
     expect(claim.claimedAt, DateTime.utc(2026, 10, 13, 12));
   });

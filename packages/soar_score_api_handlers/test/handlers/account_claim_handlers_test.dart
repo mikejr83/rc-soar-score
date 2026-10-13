@@ -30,7 +30,7 @@ void main() {
     final json = await api.json(response);
     expect(json['local_account_id'], _local.value);
     expect(json['claimed_at'], isNotNull);
-    expect(json.containsKey('account_id'), isFalse);
+    expect(json['account_id'], _account.value);
     final stored = await api.repository.accountAliases.findById(_local);
     expect(stored?.accountId, _account);
   });
