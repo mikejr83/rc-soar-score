@@ -57,6 +57,7 @@ export 'repositories/publication_publisher.dart';
 export 'repositories/recorded_score.dart';
 export 'repositories/replicated_change.dart';
 export 'repositories/replicated_change_applier.dart';
+export 'repositories/results_repository.dart';
 export 'repositories/repository.dart';
 export 'repositories/model_catalog_repository.dart';
 export 'repositories/contest_configuration_preset_repository.dart';

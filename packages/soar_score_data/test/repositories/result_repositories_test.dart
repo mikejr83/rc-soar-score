@@ -162,6 +162,222 @@ void _tests(Backend backend) {
     });
   });
 
+  group('ResultsRepository', () {
+    late core.ResultsRepository repo;
+    setUp(() => repo = repository.resultsRepository);
+
+    test('replaces all three tables in one operation', () async {
+      final before = await inst.count('mutation_records');
+      final keptFlights = flights.take(2).toList();
+      final keptStandings = standings.take(2).toList();
+      final keptTeams = teamStandings.take(1).toList();
+
+      await repo.replaceResultsForContest(
+        contestId,
+        keptFlights,
+        keptStandings,
+        keptTeams,
+      );
+
+      expect(
+        await repository.flightResultRepository.listForContest(contestId),
+        unorderedEquals(keptFlights),
+      );
+      expect(
+        await repository.participationStandingRepository.listForContest(
+          contestId,
+        ),
+        unorderedEquals(keptStandings),
+      );
+      expect(
+        await repository.teamStandingRepository.listForContest(contestId),
+        unorderedEquals(keptTeams),
+      );
+      expect(await inst.count('mutation_records'), before);
+    });
+
+    test('keeps the old rows when a flight row fails', () async {
+      final duplicate = core.FlightResult.fromJson({
+        ...flights.first.toJson(),
+        'id': core.Id.create().value,
+      });
+
+      await expectLater(
+        repo.replaceResultsForContest(
+          contestId,
+          [flights.first, duplicate],
+          [standings.first],
+          [teamStandings.first],
+        ),
+        throwsA(anything),
+      );
+
+      expect(
+        await repository.flightResultRepository.listForContest(contestId),
+        unorderedEquals(flights),
+      );
+      expect(
+        await repository.participationStandingRepository.listForContest(
+          contestId,
+        ),
+        unorderedEquals(standings),
+      );
+      expect(
+        await repository.teamStandingRepository.listForContest(contestId),
+        unorderedEquals(teamStandings),
+      );
+    });
+
+    test('keeps the old rows when a standing row fails', () async {
+      final duplicate = core.ParticipationStanding.fromJson({
+        ...standings.first.toJson(),
+        'id': core.Id.create().value,
+      });
+
+      await expectLater(
+        repo.replaceResultsForContest(
+          contestId,
+          [flights.first],
+          [standings.first, duplicate],
+          [teamStandings.first],
+        ),
+        throwsA(anything),
+      );
+
+      expect(
+        await repository.flightResultRepository.listForContest(contestId),
+        unorderedEquals(flights),
+      );
+      expect(
+        await repository.participationStandingRepository.listForContest(
+          contestId,
+        ),
+        unorderedEquals(standings),
+      );
+      expect(
+        await repository.teamStandingRepository.listForContest(contestId),
+        unorderedEquals(teamStandings),
+      );
+    });
+
+    test('keeps the old rows when a team standing row fails', () async {
+      final duplicate = core.TeamStanding.fromJson({
+        ...teamStandings.first.toJson(),
+        'id': core.Id.create().value,
+      });
+
+      await expectLater(
+        repo.replaceResultsForContest(
+          contestId,
+          [flights.first],
+          [standings.first],
+          [teamStandings.first, duplicate],
+        ),
+        throwsA(anything),
+      );
+
+      expect(
+        await repository.flightResultRepository.listForContest(contestId),
+        unorderedEquals(flights),
+      );
+      expect(
+        await repository.participationStandingRepository.listForContest(
+          contestId,
+        ),
+        unorderedEquals(standings),
+      );
+      expect(
+        await repository.teamStandingRepository.listForContest(contestId),
+        unorderedEquals(teamStandings),
+      );
+    });
+
+    test('refuses a row of another contest and changes nothing', () async {
+      final foreignFlight = core.FlightResult.fromJson({
+        ...flights.first.toJson(),
+        'id': core.Id.create().value,
+        'contest_id': core.Id.create().value,
+      });
+      final foreignStanding = core.ParticipationStanding.fromJson({
+        ...standings.first.toJson(),
+        'id': core.Id.create().value,
+        'contest_id': core.Id.create().value,
+      });
+      final foreignTeam = core.TeamStanding.fromJson({
+        ...teamStandings.first.toJson(),
+        'id': core.Id.create().value,
+        'contest_id': core.Id.create().value,
+      });
+
+      await expectLater(
+        repo.replaceResultsForContest(
+          contestId,
+          [foreignFlight],
+          [standings.first],
+          [teamStandings.first],
+        ),
+        throwsArgumentError,
+      );
+      await expectLater(
+        repo.replaceResultsForContest(
+          contestId,
+          [flights.first],
+          [foreignStanding],
+          [teamStandings.first],
+        ),
+        throwsArgumentError,
+      );
+      await expectLater(
+        repo.replaceResultsForContest(
+          contestId,
+          [flights.first],
+          [standings.first],
+          [foreignTeam],
+        ),
+        throwsArgumentError,
+      );
+
+      expect(
+        await repository.flightResultRepository.listForContest(contestId),
+        unorderedEquals(flights),
+      );
+      expect(
+        await repository.participationStandingRepository.listForContest(
+          contestId,
+        ),
+        unorderedEquals(standings),
+      );
+      expect(
+        await repository.teamStandingRepository.listForContest(contestId),
+        unorderedEquals(teamStandings),
+      );
+    });
+
+    test('clearing with three empty lists empties all three tables', () async {
+      await repo.replaceResultsForContest(
+        contestId,
+        const [],
+        const [],
+        const [],
+      );
+
+      expect(
+        await repository.flightResultRepository.listForContest(contestId),
+        isEmpty,
+      );
+      expect(
+        await repository.participationStandingRepository.listForContest(
+          contestId,
+        ),
+        isEmpty,
+      );
+      expect(
+        await repository.teamStandingRepository.listForContest(contestId),
+        isEmpty,
+      );
+    });
+  });
+
   group('TeamStandingRepository', () {
     late core.TeamStandingRepository repo;
     setUp(() => repo = repository.teamStandingRepository);
