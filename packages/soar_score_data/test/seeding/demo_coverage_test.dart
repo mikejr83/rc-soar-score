@@ -42,6 +42,8 @@ void main() {
     'reFlightRepository': 're-flights are awarded in #136',
     'reFlightParticipantRepository': 're-flights are awarded in #136',
     'invitationRepository': 'backend-only; needs a server demo (#305)',
+    'reviewRequestRepository':
+        'review requests are filed by participants in #145',
   };
 
   /// Repositories the demo fills through a service rather than by name.
