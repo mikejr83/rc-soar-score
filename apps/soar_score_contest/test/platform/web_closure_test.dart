@@ -12,13 +12,15 @@ void main() {
       'lib/platform/native_sync.dart',
       'lib/platform/native_bootstrap.dart',
     };
+    // Windows lists paths with backslashes.
+    String posix(File file) => file.path.replaceAll(r'\', '/');
     final offenders = [
       for (final file in Directory('lib').listSync(recursive: true))
         if (file is File &&
             file.path.endsWith('.dart') &&
-            !allowed.contains(file.path))
+            !allowed.contains(posix(file)))
           for (final line in file.readAsLinesSync())
-            if (syncImport.hasMatch(line)) '${file.path}: $line',
+            if (syncImport.hasMatch(line)) '${posix(file)}: $line',
     ];
 
     expect(offenders, isEmpty);
