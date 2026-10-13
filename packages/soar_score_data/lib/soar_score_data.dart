@@ -10,6 +10,7 @@ export 'database.dart';
 export 'migrate.dart';
 export 'postgres_config.dart';
 export 'schema/database_profile.dart';
+export 'schema/local_account_references.dart';
 export 'schema/table_group.dart';
 export 'schema/table_groups.dart';
 export 'seeding/demo/demo_data_seeder.dart';

@@ -15,7 +15,7 @@ A registered account is `active` or `archived`. An archived account cannot sign 
 
 ## Claiming
 
-A guest or local account is claimed into a registered account by re-pointing every reference to it (ownership, actors, invitations, participant links) to the registered account. Claiming is one-directional and happens once per account. A registered account is never merged into another account. A guest account is claimed only by someone who redeems the invitation or claim link.
+A guest or local account is claimed into a registered account by re-pointing every reference to it (ownership, actors, invitations, participant links) to the registered account. Claiming is one-directional and happens once per account. On an installation the claim is a single transaction that re-points every column naming the Local account (ownership, actors, and the owner and payload of mutations still waiting to be sent) and the director sync position. It can be repeated without effect, and the Local account id is kept. A registered account is never merged into another account. A guest account is claimed only by someone who redeems the invitation or claim link.
 
 ## Participants, the directory, and the public profile
 
