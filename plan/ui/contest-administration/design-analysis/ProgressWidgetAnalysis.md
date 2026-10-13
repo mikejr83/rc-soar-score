@@ -20,7 +20,7 @@ Source files examined:
 - `apps/soar_score_contest/lib/services/matrix/round_progress_view.dart` (`RoundProgressView`, the matrix page's round states)
 - `apps/soar_score_contest/lib/pages/contest_workspace_page.dart` (current workspace page)
 - Claude design workspace export: `Contest Workspace Canvas.dc.html` (section 4) and `Contest Workspace.dc.html` (the live component, attention and progress sections)
-- GitHub issues #120, #342, #343, #344, #345, #250, #285, #145, #92, #123 (open, checked 10 Oct 2026)
+- GitHub issues #120, #342, #343, #344, #345, #250, #285, #145, #92, #123 (status rechecked 13 Oct 2026; #120 and #342 to #344 are now closed)
 
 ## What the design specifies
 
@@ -72,59 +72,57 @@ The rendered canvas refines the brief in ways the analysis above does not captur
 
 ## Resolved design decisions for the progress widget
 
-The following decisions resolve the earlier inconsistencies and become the canonical implementation spec for the widget:
+The following decisions resolve the earlier inconsistencies and are the implementation spec for the widget:
 
-- Current round = the latest round with accepted scores.
+- Current round = the latest round **by ordinal** with accepted scores. This is not the round of the most recent score by time: a correction to an earlier round must not move the frontier.
 - Current group = the latest group within that round.
-- Missing scores = any group within a round before the current frontier that is not fully scored.
+- A round is finished once a later round has a score. Missing scores = any group within a finished round that is not fully scored.
 - Unflown round is not a separate row; it is folded into missing-scores handling behind the frontier.
 - The round summary uses a wrapping grid of round tiles rather than a single compact strip.
-- The widget is shown once a matrix exists, even before the contest is Running.
-- The “Where we are” headline includes the current round/group plus latest accepted score when available.
-- The needs-attention list includes: missing scores, open review requests, rejected sync change.
-- The empty state is: “Nothing needs attention.”
+- The card is shown only once a matrix exists (`contest-workspace.md`, `WorkspaceLayoutPlan`). Canvas frame 4e ("Before the draw", the "No matrix yet" state) is **dropped**: it would compete with the setup checklist before the draw. The "No matrix yet" state remains only as a fallback when scores are unavailable.
+- The “Where we are” headline includes the current round and group plus the latest accepted score when available.
+- The needs-attention list includes: missing scores, open review requests, rejected sync change. The review and sync rows arrive with their own gates.
+- The empty-state title is “Nothing needs attention.” Its confirmation line says only what the app can verify: until review requests and sync status exist it reads “Every finished round has all its scores.” and widens as each source lands.
 
-## What can be implemented today
+## Status of the code (13 Oct 2026)
 
-The data plumbing for the **progress part** is in place:
+Corrections to the earlier version of this analysis:
 
-- `ApiClient.scores(Id)` → `ContestScores` already returns every score slot plus `RoundProgress` (`roundId`, `ordinal`, `scored`, `total`) per round. `scored`/`total` follow the retirement-aware rules (`ScoresService`, the matrix excludes retired pilots).
-- `ApiClient.matrix(Id)` → `CurrentMatrix` with rounds, groups and assignments, so:
-  - "K missing" = `total − scored` per round;
-  - the current round is the latest round with `scored > 0`;
-  - "not flown" = a round ahead of the latest scored round with `scored == 0`;
-  - "not drawn" (seeded) = rounds of the intended total beyond the drawn rounds.
-- `RoundProgressView.of(...)` already exists in the contest app (`lib/services/matrix/round_progress_view.dart`) with the right state set (not flown / in progress / scored / cancelled) — the same widget the matrix page headers use, so the card should reuse it rather than re-derive states.
-- "Latest accepted score" and "current group" (for the "Where we are" sub-line) are specified in **#342** (`latestScore`, `currentGroup`) but that ticket is open, so those facts are not loaded anywhere yet.
+- #120, #342, #343 and #344 are **closed**. `WorkspaceFacts` already carries `rounds`, `latestScore` and `currentGroup`, `WorkspaceFactsLoader` loads scores, and `WorkspaceLayoutPlan` places the `progress` and `attention` slots. Both slots still show a placeholder card.
+- `RoundProgress` is **not** retirement-aware. `ScoresService.list` counts every live assignment, so a pilot who retired at or before a round leaves that round permanently "missing". `f5j_results_input.dart` applies the rule; the progress counts do not. Fixed by #371.
+- `WorkspaceFacts.latestScore` is the newest score by `setAt`; the frontier must be derived by ordinal (see above).
+- `contest_workspace_page.dart` passed `hasAttentionItems: false` with a comment naming #345. #345 is the audit trail; the list is owned by its own ticket (#374).
+- `contestScoringPath` takes no round, and the Scoring page is a placeholder until #123.
 
-Therefore, buildable now without any new data work:
+## What can be built today
 
-1. **A presentational `ProgressCard` widget**
-   — round tiles in all five states, the "Where we are" headline (minus the latest-score sub-line until #342 lands), the lag note, and the empty state. It consumes `ContestScores` + `CurrentMatrix`, both already fetchable. Its per-round derivations (missing counts, frontier, unflown detection) should be a small pure function with unit tests on hand-built `ContestScores`, mirroring #342's test list.2. **The "missing scores" needs-attention row** — the same derivation (rounds behind the frontier that are incomplete, plus unflown rounds) with the per-round detail list.
+- Round tiles in all states, the headline, the lag note, and the missing-scores row. All read data already loaded in `WorkspaceFacts`, plus the round's group count and a total-scores count.
+- `RoundProgressView.of(...)` is reused for tile states, not re-derived.
+- The final headline leaves out “completed {when}” until `completedAt` exists (#345).
 
-Not buildable without stubs or fakes:
+Not buildable yet:
 
-- **Open review requests** — `ApiClient` has no review-requests method and there is no server handler (`packages/soar_score_api_handlers/lib/handlers/` has no review handler); the model exists (`ReviewRequest`, `ReviewRequestState`) but nothing is exposed. Gated by #285 → #145.
-- **Rejected sync change** and the "everything has synced" part of the empty state — the contest app has no sync status today. Gated by #92.
-- **Link targets** — the Scoring page (#123) does not exist yet, so tiles and rows would be inert until it does; deep-linking a round/group also depends on #123 supporting it.
+- **Open review requests**: `ApiClient` has no review-request read and there is no server handler. The model exists (`ReviewRequest`, `ReviewRequestState`). Gated by #285 then #145.
+- **Rejected sync change** and the “everything has synced” part of the empty state: the contest app has no sync status. `ConflictRecord` exists in core but is not exposed. Gated by #92.
+- **Link targets**: the Scoring page (#123) does not exist, so tiles and rows open the placeholder until it does. The route parameter is added now; #123 honours it.
 
-## Outstanding tickets that gate the full card
+## Tickets
 
-| Design piece                                                                                              | Gate                                                    | Status (10 Oct 2026) |
-| --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- | -------------------- |
-| Page layout: two columns, card order (next step → needs attention → progress), placement of the card      | #120 Contest workspace shell                            | Open                 |
-| Facts loading: `WorkspaceFactsLoader`, `rounds`, `latestScore`, `currentGroup`, partial-failure behaviour | #342 Workspace: facts for the next-step card            | Open                 |
-| Next-step card sharing the card's column and facts (context for layout work)                              | #343 resolver, #344 widget                              | Open                 |
-| "Open review requests" row (repository, API, client read)                                                 | #285 Repository: review requests → #145 review workflow | Open                 |
-| "Rejected sync change" row and the synced part of the empty state                                         | #92 Sync status and conflict UI in the contest app      | Open                 |
-| "See rejected change" deep link into the status bar                                                       | #92 (status bar sync details, #253)                     | Open                 |
-| Tile/row links to Scoring at a round/group                                                                | #123 Official score entry screen (F5J)                  | Open                 |
-| Locked-by / completed-by wording the copy can reference                                                   | #345 Audit trail + per-contest read API                 | Open                 |
-| Completion dialog's "missing scores" group (reuses this card's derivations)                               | #250 Contest state controls in the workspace            | Open                 |
+| Work                                                                         | Ticket | Milestone           | Depends on              |
+| ---------------------------------------------------------------------------- | ------ | ------------------- | ----------------------- |
+| Leave retired pilots out of round progress counts                            | #371   | M1 F5J online slice | none                    |
+| Progress summary derivation (tiles, headline, missing by round, shared rule) | #372   | M1 F5J online slice | #371                    |
+| Progress card widget and wiring                                              | #373   | M1 F5J online slice | #372                    |
+| Needs-attention list with the missing-scores row                             | #374   | M1 F5J online slice | #372                    |
+| Open review requests row                                                     | #375   | M3 Self-scoring     | #374, #285, #145        |
+| Rejected sync change row and full empty-state copy                           | #376   | M4 Offline and sync | #374, #92, #253         |
+| Tile and row deep links at a round and group                                 | #123   | M1 F5J online slice | honours the route param |
+| Completion dialog's “missing scores” group reuses the #372 rule              | #250   | M1 F5J online slice | #372                    |
+| Locked-by / completed-by wording and the final headline's “completed {when}” | #345   | M1 F5J online slice | none                    |
 
 ## Recommended sequencing
 
-1. Build the `ProgressCard` widget and its pure per-round derivations now, with tests; keep it unplaced (no page wiring), so #120 can drop it into the layout as specified.
-2. Model the "missing scores" attention row on the same derivations so #250 and the eventual attention card share one rule set — do not write a second copy.
-3. Leave review-requests and sync rows out until #285/#145 and #92 land; the empty-state copy should not claim "everything has synced" until sync status is available.
-4. When #342 lands, move the `rounds`/`latestScore`/`currentGroup` derivations into `WorkspaceFacts` and point the card at it (per #120's note to reuse `WorkspaceFacts` rather than loading the same data twice).
+1. #371 and #372 in parallel; the derivation tests do not need the fix to be written, but the counts are only right once it lands.
+2. #373 and #374 once #372 is in. They share the missing-scores rule; do not write a second copy.
+3. Check the demo data has a Running contest with a short finished round (#305) so the cards show something.
+4. #375 and #376 when their gates land. They add a source each and widen the empty-state sentence; the card does not change.
