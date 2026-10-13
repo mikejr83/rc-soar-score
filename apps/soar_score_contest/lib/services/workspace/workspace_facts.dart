@@ -2,12 +2,15 @@ import 'package:equatable/equatable.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../configuration/configuration_problem.dart';
+import '../configuration/discipline_label.dart';
 import '../configuration/draw_readiness.dart';
+import '../configuration/house_rules.dart';
 import '../matrix/config_drift.dart';
 import '../matrix/matrix_page_data.dart';
 import '../matrix/round_progress_view.dart';
 import 'current_group_facts.dart';
 import 'latest_score.dart';
+import 'participant_number_range.dart';
 import 'publication_facts.dart';
 import 'workspace_fact_source.dart';
 import 'workspace_round_fact.dart';
@@ -27,6 +30,10 @@ class WorkspaceFacts extends Equatable {
     required this.scoringPilots,
     required this.teamCount,
     required this.onlyPilotName,
+    required this.disciplineLabel,
+    required this.landingTableName,
+    required this.houseRuleCount,
+    required this.participantNumbers,
     required this.matrix,
     required this.roundCount,
     required this.groupCount,
@@ -46,16 +53,19 @@ class WorkspaceFacts extends Equatable {
   /// [scores] and the [publication] to facts.
   ///
   /// [scores] is `null` when that read failed, in which case [unavailable]
-  /// should list [WorkspaceFactSource.scores].
+  /// should list [WorkspaceFactSource.scores]. The same holds for
+  /// [landingTables] and [WorkspaceFactSource.landingTables].
   factory WorkspaceFacts.derive({
     required MatrixPageData data,
     ContestScores? scores,
+    List<LandingTableView>? landingTables,
     PublicationFacts publication = PublicationFacts.unknown,
     Set<WorkspaceFactSource> unavailable = const {},
     bool isOffline = false,
   }) {
     final matrix = data.matrix;
     final options = data.options;
+    final profile = _systemProfile(data.configuration);
     final problem = ConfigurationProblem.of(
       configuration: data.configuration,
       options: options,
@@ -117,6 +127,15 @@ class WorkspaceFacts extends Equatable {
       scoringPilots: data.scoringPilots,
       teamCount: data.teams.length,
       onlyPilotName: data.scoringPilots == 1 ? _onlyPilotName(data) : null,
+      disciplineLabel: profile == null
+          ? null
+          : DisciplineLabel.of(profile.profile),
+      landingTableName: _landingTableName(
+        data.configuration?.landingTableId,
+        landingTables,
+      ),
+      houseRuleCount: HouseRules.ofRevision(data.configuration, profile),
+      participantNumbers: ParticipantNumberRange.of(data.participations),
       matrix: matrix,
       roundCount: liveRounds.length,
       groupCount: liveRounds.fold(
@@ -164,6 +183,10 @@ class WorkspaceFacts extends Equatable {
           scoringPilots: scoringPilots,
           teamCount: teamCount,
           onlyPilotName: onlyPilotName,
+          disciplineLabel: disciplineLabel,
+          landingTableName: landingTableName,
+          houseRuleCount: houseRuleCount,
+          participantNumbers: participantNumbers,
           matrix: matrix,
           roundCount: roundCount,
           groupCount: groupCount,
@@ -178,6 +201,37 @@ class WorkspaceFacts extends Equatable {
           unavailable: unavailable,
           isOffline: isOffline,
         );
+
+  /// The bundled profile the configuration is for; `null` without a
+  /// configuration or for a profile that is not a system one.
+  static DisciplineProfileWithRules? _systemProfile(
+    ContestConfigurationRevision? configuration,
+  ) {
+    if (configuration == null) {
+      return null;
+    }
+    for (final profile in SystemDisciplineProfiles.all) {
+      if (profile.profile.id == configuration.disciplineProfileId) {
+        return profile;
+      }
+    }
+    return null;
+  }
+
+  static String? _landingTableName(
+    Id? id,
+    List<LandingTableView>? landingTables,
+  ) {
+    if (id == null || landingTables == null) {
+      return null;
+    }
+    for (final view in landingTables) {
+      if (view.table.id == id) {
+        return view.table.name;
+      }
+    }
+    return null;
+  }
 
   static String? _onlyPilotName(MatrixPageData data) {
     for (final participation in data.participations) {
@@ -297,6 +351,20 @@ class WorkspaceFacts extends Equatable {
   /// The pilot's name when [scoringPilots] is 1.
   final String? onlyPilotName;
 
+  /// The discipline's name as the wizard shows it (`F5J`); `null` without a
+  /// configuration or for a profile that is not a system one.
+  final String? disciplineLabel;
+
+  /// The saved configuration's landing table; `null` without a configuration
+  /// or table, or when the landing tables could not be read.
+  final String? landingTableName;
+
+  /// Discipline options that differ from the profile's official values.
+  final int houseRuleCount;
+
+  /// The participant numbers handed out; `null` before the first draw.
+  final ParticipantNumberRange? participantNumbers;
+
   /// The current matrix; empty before the first draw.
   final CurrentMatrix matrix;
   final int roundCount;
@@ -320,6 +388,12 @@ class WorkspaceFacts extends Equatable {
 
   bool get hasMatrix => !matrix.isEmpty;
 
+  /// Whether a read the next-step card depends on failed. The landing-table
+  /// read feeds only the setup checklist, so it does not count here.
+  bool get nextStepFactsUnavailable =>
+      unavailable.contains(WorkspaceFactSource.scores) ||
+      unavailable.contains(WorkspaceFactSource.publication);
+
   DrawMode? get drawMode => options?.drawMode;
   int? get intendedTotalRounds => options?.intendedTotalRounds;
 
@@ -336,6 +410,10 @@ class WorkspaceFacts extends Equatable {
     scoringPilots,
     teamCount,
     onlyPilotName,
+    disciplineLabel,
+    landingTableName,
+    houseRuleCount,
+    participantNumbers,
     matrix,
     roundCount,
     groupCount,

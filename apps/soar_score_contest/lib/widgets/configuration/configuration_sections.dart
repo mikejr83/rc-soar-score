@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import '../../services/configuration/configuration_data.dart';
 import '../../services/configuration/configuration_draft.dart';
 import '../../services/configuration/draw_readiness.dart';
+import '../../services/configuration/house_rules.dart';
 import '../../services/configuration/readiness_summary.dart';
 import '../../services/configuration/section_id.dart';
 import '../../services/configuration/section_notice.dart';
-import '../../services/configuration/setting_values.dart';
 import 'config_chip.dart';
 import 'config_section_card.dart';
 import 'field_registry.dart';
@@ -118,14 +118,10 @@ class ConfigurationSections extends StatelessWidget {
   }
 
   Widget _disciplineChip(BuildContext context) {
-    final houseRules = draft.catalog.disciplineSettings
-        .where(
-          (def) =>
-              def.official != null &&
-              SettingValues.canon(def, draft[def.key]) !=
-                  SettingValues.canon(def, def.official),
-        )
-        .length;
+    final houseRules = HouseRules.count(
+      draft.catalog.disciplineSettings,
+      (def) => draft[def.key],
+    );
     return houseRules == 0
         ? ConfigChip.neutral(
             context,

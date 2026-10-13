@@ -10,8 +10,8 @@ import 'workspace_facts.dart';
 /// shell owns it), so it is not fetched again.
 abstract final class WorkspaceFactsLoader {
   /// A failure of the core reads (configuration, participants, teams, matrix)
-  /// is thrown; a failure of the scores or publication read is recorded in
-  /// [WorkspaceFacts.unavailable] and the rest still loads.
+  /// is thrown; a failure of the scores, publication or landing-table read is
+  /// recorded in [WorkspaceFacts.unavailable] and the rest still loads.
   static Future<WorkspaceFacts> load(
     ApiClient client,
     Contest contest, {
@@ -23,11 +23,13 @@ abstract final class WorkspaceFactsLoader {
       MatrixPageData.forContest(client, contest),
       _scores(client, id, unavailable),
       _publication(client, id, unavailable),
+      _landingTables(client, unavailable),
     ]);
     return WorkspaceFacts.derive(
       data: results[0]! as MatrixPageData,
       scores: results[1] as ContestScores?,
       publication: results[2]! as PublicationFacts,
+      landingTables: results[3] as List<LandingTableView>?,
       unavailable: unavailable,
       isOffline: isOffline,
     );
@@ -42,6 +44,18 @@ abstract final class WorkspaceFactsLoader {
       return await client.scores(id);
     } on Object {
       unavailable.add(WorkspaceFactSource.scores);
+      return null;
+    }
+  }
+
+  static Future<List<LandingTableView>?> _landingTables(
+    ApiClient client,
+    Set<WorkspaceFactSource> unavailable,
+  ) async {
+    try {
+      return await client.landingTables();
+    } on Object {
+      unavailable.add(WorkspaceFactSource.landingTables);
       return null;
     }
   }
