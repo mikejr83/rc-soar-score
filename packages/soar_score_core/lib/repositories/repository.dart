@@ -1,3 +1,4 @@
+import 'account_alias_repository.dart';
 import 'account_identity_repository.dart';
 import 'contest_model_link_repository.dart';
 import 'contest_configuration_preset_repository.dart';
@@ -104,6 +105,8 @@ abstract interface class Repository {
   DelistRequestRepository get delistRequestRepository;
 
   AccountRepository get accountRepository;
+
+  AccountAliasRepository get accountAliasRepository;
 
   AccountIdentityRepository get accountIdentityRepository;
 

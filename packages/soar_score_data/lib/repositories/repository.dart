@@ -83,6 +83,7 @@ class Repository implements core.Repository {
         stores: stores,
       ),
       accountRepository = AccountRepository(database, stores: stores),
+      accountAliasRepository = AccountAliasRepository(database, stores: stores),
       accountIdentityRepository = AccountIdentityRepository(
         database,
         stores: stores,
@@ -204,6 +205,9 @@ class Repository implements core.Repository {
 
   @override
   final core.AccountRepository accountRepository;
+
+  @override
+  final core.AccountAliasRepository accountAliasRepository;
 
   @override
   final core.AccountIdentityRepository accountIdentityRepository;

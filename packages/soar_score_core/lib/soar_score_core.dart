@@ -5,6 +5,7 @@
 library;
 
 export 'config/log_format.dart';
+export 'errors/account_claim_error.dart';
 export 'errors/backend_only_error.dart';
 export 'errors/contest_state_error.dart';
 export 'errors/entity_not_found_error.dart';
@@ -26,6 +27,7 @@ export 'models/scores/scores.dart';
 export 'models/shared/shared.dart';
 export 'models/sync/sync.dart';
 export 'models/teams/teams.dart';
+export 'repositories/account_alias_repository.dart';
 export 'repositories/account_identity_repository.dart';
 export 'repositories/account_public_profile_repository.dart';
 export 'repositories/account_repository.dart';

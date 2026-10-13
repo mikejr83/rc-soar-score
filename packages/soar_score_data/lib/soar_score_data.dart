@@ -22,6 +22,7 @@ export 'sync/entity_store.dart';
 export 'sync/entity_stores.dart';
 export 'sync/sql_placeholders.dart';
 export 'sync/table_mapper.dart';
+export 'repositories/account_alias_repository.dart';
 export 'repositories/account_identity_repository.dart';
 export 'repositories/account_public_profile_repository.dart';
 export 'repositories/account_repository.dart';

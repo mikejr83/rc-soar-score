@@ -171,6 +171,118 @@ void _tests(Backend backend) {
     );
   });
 
+  group('AccountAliasRepository', () {
+    late core.AccountAliasRepository repo;
+    setUp(() => repo = repository.accountAliasRepository);
+
+    final alias = core.AccountAlias.fromJson(
+      exampleRows('account_alias').single,
+    );
+    final claimedAt = DateTime.utc(2026, 10, 13, 12);
+
+    test('reads back the example alias unchanged', () async {
+      expect(await repo.findById(alias.id), alias);
+      expect(await repo.findById(core.Id.create()), isNull);
+    });
+
+    test('lists the aliases of an account', () async {
+      expect(await repo.listForAccount(alias.accountId), [alias]);
+      expect(await repo.listForAccount(core.Id.create()), isEmpty);
+    });
+
+    test('claims a Local account id into an account', () async {
+      final local = core.Id.create();
+
+      final claimed = await repo.claim(
+        localAccountId: local,
+        accountId: dana.id,
+        claimedAt: claimedAt,
+      );
+
+      expect(claimed.id, local);
+      expect(claimed.accountId, dana.id);
+      expect(claimed.claimedAt, claimedAt);
+      expect(await repo.findById(local), claimed);
+    });
+
+    test('claiming again for the same account changes nothing', () async {
+      final local = core.Id.create();
+      final first = await repo.claim(
+        localAccountId: local,
+        accountId: dana.id,
+        claimedAt: claimedAt,
+      );
+
+      final again = await repo.claim(
+        localAccountId: local,
+        accountId: dana.id,
+        claimedAt: claimedAt.add(const Duration(days: 1)),
+      );
+
+      expect(again, first);
+      expect(await repo.listForAccount(dana.id), contains(first));
+    });
+
+    test('a claim never moves to another account', () async {
+      final local = core.Id.create();
+      final first = await repo.claim(
+        localAccountId: local,
+        accountId: dana.id,
+        claimedAt: claimedAt,
+      );
+
+      final other = await repo.claim(
+        localAccountId: local,
+        accountId: accounts[1].id,
+        claimedAt: claimedAt,
+      );
+
+      expect(other, first);
+      expect(other.accountId, dana.id);
+    });
+
+    test('one account can hold several aliases', () async {
+      final a = core.Id.create();
+      final b = core.Id.create();
+      await repo.claim(
+        localAccountId: a,
+        accountId: dana.id,
+        claimedAt: claimedAt,
+      );
+      await repo.claim(
+        localAccountId: b,
+        accountId: dana.id,
+        claimedAt: claimedAt,
+      );
+
+      final ids = (await repo.listForAccount(dana.id)).map((x) => x.id);
+
+      expect(ids, containsAll([a, b]));
+    });
+
+    test('the database refuses an alias of an unknown account', () async {
+      await expectLater(
+        repo.claim(
+          localAccountId: core.Id.create(),
+          accountId: core.Id.create(),
+          claimedAt: claimedAt,
+        ),
+        throwsA(anything),
+      );
+    });
+
+    test(
+      'resolves an alias to its account and any other id to itself',
+      () async {
+        final unknown = core.Id.create();
+
+        expect(await repo.resolve(alias.id), alias.accountId);
+        expect(await repo.resolve(dana.id), dana.id);
+        expect(await repo.resolve(unknown), unknown);
+      },
+    );
+  });
+
   group('AccountPublicProfileRepository', () {
     late core.AccountPublicProfileRepository repo;
     setUp(() => repo = repository.accountPublicProfileRepository);

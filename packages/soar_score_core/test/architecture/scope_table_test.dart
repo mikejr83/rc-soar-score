@@ -19,6 +19,7 @@ class _Expected {
 
 final _table = <_Expected>[
   _Expected('Account', Account.fromJson, {SyncScope.backendOnly}),
+  _Expected('AccountAlias', AccountAlias.fromJson, {SyncScope.backendOnly}),
   _Expected('AccountIdentity', AccountIdentity.fromJson, {
     SyncScope.backendOnly,
   }),
@@ -129,7 +130,7 @@ void main() {
 
   test('the table covers every catalog entity once, plus LandingResult', () {
     final named = [for (final e in _table) e.entity, 'LandingResult'];
-    expect(named, hasLength(48));
+    expect(named, hasLength(49));
     expect(named.toSet(), catalog.map((e) => e.entity).toSet());
   });
 

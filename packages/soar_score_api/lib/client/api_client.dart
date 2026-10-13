@@ -6,6 +6,7 @@ import 'package:soar_score_core/soar_score_core.dart';
 import '../dto/activate_installation_request.dart';
 import '../dto/add_participation_request.dart';
 import '../dto/add_team_member_request.dart';
+import '../dto/claim_local_account_request.dart';
 import '../dto/contest_action_request.dart';
 import '../dto/contest_archive_dto.dart';
 import '../dto/create_contest_request.dart';
@@ -16,6 +17,7 @@ import '../dto/create_team_request.dart';
 import '../dto/draw_matrix_request.dart';
 import '../dto/enter_score_request.dart';
 import '../dto/health_dto.dart';
+import '../dto/local_account_claim_dto.dart';
 import '../dto/late_add_request.dart';
 import '../dto/move_assignment_request.dart';
 import '../dto/publish_contest_request.dart';
@@ -306,6 +308,23 @@ class ApiClient {
     final uri = _resolve('/api/v1/roles');
     final response = await _send('POST', uri, body: request.toJson());
     return _decode<Role>(response, uri, Role.fromJson);
+  }
+
+  /// `POST /api/v1/account/local-claims` — claims the installation's Local
+  /// account [request] into the signed-in account.
+  ///
+  /// Repeating a claim for the same account returns the same answer. A Local
+  /// account another account claimed is an [ApiHttpError] with status 409.
+  Future<LocalAccountClaimDto> claimLocalAccount(
+    ClaimLocalAccountRequest request,
+  ) async {
+    final uri = _resolve('/api/v1/account/local-claims');
+    final response = await _send('POST', uri, body: request.toJson());
+    return _decode<LocalAccountClaimDto>(
+      response,
+      uri,
+      LocalAccountClaimDto.fromJson,
+    );
   }
 
   /// `PUT /api/v1/roles/{id}` — renames the caller's role [id].

@@ -1,6 +1,7 @@
 export 'calculated_flight.dart';
 export 'configuration_input.dart';
 export 'contest_configuration_rules.dart';
+export 'account_claims_service.dart';
 export 'contest_configuration_service.dart';
 export 'contest_details.dart';
 export 'contest_results.dart';

@@ -40,6 +40,7 @@ const tableGroupByName = <String, TableGroup>{
   'participation_standings': TableGroup.derived,
   'team_standings': TableGroup.derived,
   'accounts': TableGroup.backendOnly,
+  'account_aliases': TableGroup.backendOnly,
   'account_identities': TableGroup.backendOnly,
   'account_public_profiles': TableGroup.backendOnly,
   'participant_account_links': TableGroup.backendOnly,

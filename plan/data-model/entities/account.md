@@ -4,7 +4,7 @@
 **Purpose:** A person's identity within the backend. An account is one of four kinds: a registered user who signs in through an identity provider, a guest created when someone redeems an invitation without having an account, the local account that owns data created offline on an installation, and the single shared deleted-user account that anonymized references point at. Accounts are a backend concern and are not synced to installations. An account is also the root for deciding what is removed when a deletion is requested.  
 **Identifier:** `id` (UUIDv7)  
 **Parent entity:** None (top-level)  
-**Child entities:** [AccountIdentity](account_identity.md), [AccountPublicProfile](account_public_profile.md), [ParticipantDirectoryEntry](participant_directory_entry.md)
+**Child entities:** [AccountAlias](account_alias.md), [AccountIdentity](account_identity.md), [AccountPublicProfile](account_public_profile.md), [ParticipantDirectoryEntry](participant_directory_entry.md)
 
 ## Relationships
 
@@ -44,7 +44,7 @@
 - Clients never receive Account rows, except an installation's own local account. Records inside contests carry account ids as opaque actor references, and installations do not enforce foreign keys on them. Names for display come from public profiles or from the participant record
 - Linking an account to a participant profile never copies account data into the profile. Data moves only when a director pulls or refreshes a directory entry
 - Creating an account does not automatically merge or rewrite historical contest participation
-- **Claiming:** a guest or local account is claimed into a registered account by re-pointing every reference to it (ownership, actor columns, invitations, participant links) to the registered account. Claiming is one-directional and happens once per account. A registered account is never merged into another account. A guest is claimed only by someone who redeems the invitation or claim link
+- **Claiming:** a guest or local account is claimed into a registered account by re-pointing every reference to it (ownership, actor columns, invitations, participant links) to the registered account. A claimed Local account id is kept as an [AccountAlias](account_alias.md) so references that still carry it resolve to the registered account. Claiming is one-directional and happens once per account. A registered account is never merged into another account. A guest is claimed only by someone who redeems the invitation or claim link
 
 ## Lifecycle
 

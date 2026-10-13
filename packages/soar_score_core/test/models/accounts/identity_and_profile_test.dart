@@ -29,6 +29,24 @@ void main() {
     });
   });
 
+  group('AccountAlias', () {
+    AccountAlias make({Id? alias, Id? account}) => AccountAlias(
+      id: alias ?? exampleId(1),
+      accountId: account ?? exampleId(2),
+      claimedAt: t0,
+    );
+
+    test('round trips and is backend only', () {
+      final a = make();
+      expect(AccountAlias.fromJson(a.toJson()), a);
+      expect(a, isA<BackendOnly>());
+    });
+
+    test('an account is not an alias of itself', () {
+      expect(() => make(alias: exampleId(2)), throwsArgumentError);
+    });
+  });
+
   group('AccountPublicProfile', () {
     AccountPublicProfile make({Id? account, String name = 'Sam O.'}) =>
         AccountPublicProfile(

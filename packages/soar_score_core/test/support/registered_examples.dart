@@ -83,6 +83,7 @@ ExampleRegistry buildExampleRegistry() => ExampleRegistry()
   )
   ..register('TeamStanding', (json) => TeamStanding.fromJson(json).toJson())
   ..register('Account', (json) => Account.fromJson(json).toJson())
+  ..register('AccountAlias', (json) => AccountAlias.fromJson(json).toJson())
   ..register(
     'AccountIdentity',
     (json) => AccountIdentity.fromJson(json).toJson(),

@@ -19,6 +19,7 @@ Canonical documentation for the Soar Score data model. This folder is the source
 | Entity                    | File                                                                               | Source Requirement                                                                         | Purpose                                                                                       |
 | ------------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------- |
 | Account                   | [entities/account.md](entities/account.md)                                         | [accounts.md](../architecture-requirements/data/accounts.md)                               | Authenticated user identity                                                                   |
+| AccountAlias              | [entities/account_alias.md](entities/account_alias.md)                             | [accounts.md](../architecture-requirements/data/accounts.md)                               | Claimed Local account id that stands for a registered account                                 |
 | AccountIdentity           | [entities/account_identity.md](entities/account_identity.md)                       | [accounts.md](../architecture-requirements/data/accounts.md)                               | Identity-provider login (issuer and subject) attached to an account                           |
 | AccountPublicProfile      | [entities/account_public_profile.md](entities/account_public_profile.md)           | [accounts.md](../architecture-requirements/data/accounts.md)                               | Public stand-in for an account referenced by publications                                     |
 | ParticipantProfile        | [entities/participant_profile.md](entities/participant_profile.md)                 | [participants.md](../architecture-requirements/data/participants.md)                       | Director-owned reusable participant details, never shared with other directors                |
@@ -113,7 +114,7 @@ Which stream carries each entity, and who may write it. Contest data synchronize
 | System data           | DisciplineProfile and its field, validation, formula, and rule rows, system Role, system LandingTable and LandingResult                                                                                                                                                                           | Written on the server by administrators and synchronized down only. `Installation.system_data_seq` tracks it                                                                                                                                                                                   |
 | Issued by the service | Invitation                                                                                                                                                                                                                                                                                        | Created and replaced by the service, read by installations                                                                                                                                                                                                                                     |
 | Derived               | FlightResult, ParticipationStanding, TeamStanding                                                                                                                                                                                                                                                 | Written only by the calculator, received read-only, never merged                                                                                                                                                                                                                               |
-| Backend only          | Account, AccountIdentity, AccountPublicProfile, ParticipantAccountLink, ParticipantDirectoryEntry, PublicationIdentity, PublicationProjection, PublicationParticipant, DelistRequest, Installation, InstallationActivation, SyncCursor                                                            | Never synchronized to installations                                                                                                                                                                                                                                                            |
+| Backend only          | Account, AccountAlias, AccountIdentity, AccountPublicProfile, ParticipantAccountLink, ParticipantDirectoryEntry, PublicationIdentity, PublicationProjection, PublicationParticipant, DelistRequest, Installation, InstallationActivation, SyncCursor                                              | Never synchronized to installations                                                                                                                                                                                                                                                            |
 
 ## Relationships
 
@@ -123,6 +124,7 @@ Overview of how the entities relate, grouped as in the catalog above. [ERD.md](E
 graph TD
     subgraph IDP[Identity, Participants and Access]
         A[Account]
+        AAL[AccountAlias]
         AI[AccountIdentity]
         APP[AccountPublicProfile]
         P[ParticipantProfile]
@@ -194,6 +196,7 @@ graph TD
     end
 
     A -->|has| AI
+    A -->|claimed| AAL
     A -->|has| APP
     A -->|offers| PDE
     A -->|owns director's| P
