@@ -30,17 +30,27 @@ LandingTableView landingTableView(Id id, String name) => LandingTableView(
 /// The matrix page's data for a contest on the F5J system profile, whose
 /// options and landing table the checklist facts read.
 MatrixPageData f5jWorkspaceData({
+  LifecycleState state = LifecycleState.configuring,
+  ScoringAccess scoringAccess = ScoringAccess.closed,
+  AdminLock adminLock = AdminLock.unlocked,
   bool withConfiguration = true,
+  Map<String, Object?> core = const {},
   Map<String, Object?> discipline = const {},
   bool numbered = false,
+  CurrentMatrix? matrix,
+  List<ContestParticipation>? participations,
 }) => MatrixPageData(
-  contest: matrixContest(state: LifecycleState.configuring),
+  contest: matrixContest(state: state).copyWithState(
+    scoringAccess: scoringAccess,
+    adminLock: adminLock,
+    updatedAt: DateTime.utc(2026, 9),
+  ),
   configuration: withConfiguration
-      ? configRevision(3, discipline: discipline)
+      ? configRevision(3, core: core, discipline: discipline)
       : null,
-  participations: matrixParticipations(numbered: numbered),
+  participations: participations ?? matrixParticipations(numbered: numbered),
   profiles: matrixProfiles(),
   teams: const [],
   memberships: const [],
-  matrix: CurrentMatrix(),
+  matrix: matrix ?? CurrentMatrix(),
 );
