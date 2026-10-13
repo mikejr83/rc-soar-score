@@ -33178,6 +33178,39 @@ class $ConflictRecordsTable extends ConflictRecords
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _acceptedPayloadMeta = const VerificationMeta(
+    'acceptedPayload',
+  );
+  @override
+  late final GeneratedColumn<String> acceptedPayload = GeneratedColumn<String>(
+    'accepted_payload',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _competingPayloadMeta = const VerificationMeta(
+    'competingPayload',
+  );
+  @override
+  late final GeneratedColumn<String> competingPayload = GeneratedColumn<String>(
+    'competing_payload',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _entityRevisionMeta = const VerificationMeta(
+    'entityRevision',
+  );
+  @override
+  late final GeneratedColumn<int> entityRevision = GeneratedColumn<int>(
+    'entity_revision',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -33195,6 +33228,9 @@ class $ConflictRecordsTable extends ConflictRecords
     createdAt,
     resolvedAt,
     resolvedBy,
+    acceptedPayload,
+    competingPayload,
+    entityRevision,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -33324,6 +33360,33 @@ class $ConflictRecordsTable extends ConflictRecords
         resolvedBy.isAcceptableOrUnknown(data['resolved_by']!, _resolvedByMeta),
       );
     }
+    if (data.containsKey('accepted_payload')) {
+      context.handle(
+        _acceptedPayloadMeta,
+        acceptedPayload.isAcceptableOrUnknown(
+          data['accepted_payload']!,
+          _acceptedPayloadMeta,
+        ),
+      );
+    }
+    if (data.containsKey('competing_payload')) {
+      context.handle(
+        _competingPayloadMeta,
+        competingPayload.isAcceptableOrUnknown(
+          data['competing_payload']!,
+          _competingPayloadMeta,
+        ),
+      );
+    }
+    if (data.containsKey('entity_revision')) {
+      context.handle(
+        _entityRevisionMeta,
+        entityRevision.isAcceptableOrUnknown(
+          data['entity_revision']!,
+          _entityRevisionMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -33393,6 +33456,18 @@ class $ConflictRecordsTable extends ConflictRecords
         DriftSqlType.string,
         data['${effectivePrefix}resolved_by'],
       ),
+      acceptedPayload: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}accepted_payload'],
+      ),
+      competingPayload: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}competing_payload'],
+      ),
+      entityRevision: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}entity_revision'],
+      ),
     );
   }
 
@@ -33419,6 +33494,11 @@ class ConflictRecordData extends DataClass
   final String createdAt;
   final String? resolvedAt;
   final String? resolvedBy;
+
+  /// JSON: the entity state the service applied, and the colliding mutation's.
+  final String? acceptedPayload;
+  final String? competingPayload;
+  final int? entityRevision;
   const ConflictRecordData({
     required this.id,
     this.contestId,
@@ -33435,6 +33515,9 @@ class ConflictRecordData extends DataClass
     required this.createdAt,
     this.resolvedAt,
     this.resolvedBy,
+    this.acceptedPayload,
+    this.competingPayload,
+    this.entityRevision,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -33467,6 +33550,15 @@ class ConflictRecordData extends DataClass
     }
     if (!nullToAbsent || resolvedBy != null) {
       map['resolved_by'] = Variable<String>(resolvedBy);
+    }
+    if (!nullToAbsent || acceptedPayload != null) {
+      map['accepted_payload'] = Variable<String>(acceptedPayload);
+    }
+    if (!nullToAbsent || competingPayload != null) {
+      map['competing_payload'] = Variable<String>(competingPayload);
+    }
+    if (!nullToAbsent || entityRevision != null) {
+      map['entity_revision'] = Variable<int>(entityRevision);
     }
     return map;
   }
@@ -33502,6 +33594,15 @@ class ConflictRecordData extends DataClass
       resolvedBy: resolvedBy == null && nullToAbsent
           ? const Value.absent()
           : Value(resolvedBy),
+      acceptedPayload: acceptedPayload == null && nullToAbsent
+          ? const Value.absent()
+          : Value(acceptedPayload),
+      competingPayload: competingPayload == null && nullToAbsent
+          ? const Value.absent()
+          : Value(competingPayload),
+      entityRevision: entityRevision == null && nullToAbsent
+          ? const Value.absent()
+          : Value(entityRevision),
     );
   }
 
@@ -33530,6 +33631,9 @@ class ConflictRecordData extends DataClass
       createdAt: serializer.fromJson<String>(json['createdAt']),
       resolvedAt: serializer.fromJson<String?>(json['resolvedAt']),
       resolvedBy: serializer.fromJson<String?>(json['resolvedBy']),
+      acceptedPayload: serializer.fromJson<String?>(json['acceptedPayload']),
+      competingPayload: serializer.fromJson<String?>(json['competingPayload']),
+      entityRevision: serializer.fromJson<int?>(json['entityRevision']),
     );
   }
   @override
@@ -33551,6 +33655,9 @@ class ConflictRecordData extends DataClass
       'createdAt': serializer.toJson<String>(createdAt),
       'resolvedAt': serializer.toJson<String?>(resolvedAt),
       'resolvedBy': serializer.toJson<String?>(resolvedBy),
+      'acceptedPayload': serializer.toJson<String?>(acceptedPayload),
+      'competingPayload': serializer.toJson<String?>(competingPayload),
+      'entityRevision': serializer.toJson<int?>(entityRevision),
     };
   }
 
@@ -33570,6 +33677,9 @@ class ConflictRecordData extends DataClass
     String? createdAt,
     Value<String?> resolvedAt = const Value.absent(),
     Value<String?> resolvedBy = const Value.absent(),
+    Value<String?> acceptedPayload = const Value.absent(),
+    Value<String?> competingPayload = const Value.absent(),
+    Value<int?> entityRevision = const Value.absent(),
   }) => ConflictRecordData(
     id: id ?? this.id,
     contestId: contestId.present ? contestId.value : this.contestId,
@@ -33592,6 +33702,15 @@ class ConflictRecordData extends DataClass
     createdAt: createdAt ?? this.createdAt,
     resolvedAt: resolvedAt.present ? resolvedAt.value : this.resolvedAt,
     resolvedBy: resolvedBy.present ? resolvedBy.value : this.resolvedBy,
+    acceptedPayload: acceptedPayload.present
+        ? acceptedPayload.value
+        : this.acceptedPayload,
+    competingPayload: competingPayload.present
+        ? competingPayload.value
+        : this.competingPayload,
+    entityRevision: entityRevision.present
+        ? entityRevision.value
+        : this.entityRevision,
   );
   ConflictRecordData copyWithCompanion(ConflictRecordsCompanion data) {
     return ConflictRecordData(
@@ -33630,6 +33749,15 @@ class ConflictRecordData extends DataClass
       resolvedBy: data.resolvedBy.present
           ? data.resolvedBy.value
           : this.resolvedBy,
+      acceptedPayload: data.acceptedPayload.present
+          ? data.acceptedPayload.value
+          : this.acceptedPayload,
+      competingPayload: data.competingPayload.present
+          ? data.competingPayload.value
+          : this.competingPayload,
+      entityRevision: data.entityRevision.present
+          ? data.entityRevision.value
+          : this.entityRevision,
     );
   }
 
@@ -33650,7 +33778,10 @@ class ConflictRecordData extends DataClass
           ..write('resolutionChoice: $resolutionChoice, ')
           ..write('createdAt: $createdAt, ')
           ..write('resolvedAt: $resolvedAt, ')
-          ..write('resolvedBy: $resolvedBy')
+          ..write('resolvedBy: $resolvedBy, ')
+          ..write('acceptedPayload: $acceptedPayload, ')
+          ..write('competingPayload: $competingPayload, ')
+          ..write('entityRevision: $entityRevision')
           ..write(')'))
         .toString();
   }
@@ -33672,6 +33803,9 @@ class ConflictRecordData extends DataClass
     createdAt,
     resolvedAt,
     resolvedBy,
+    acceptedPayload,
+    competingPayload,
+    entityRevision,
   );
   @override
   bool operator ==(Object other) =>
@@ -33691,7 +33825,10 @@ class ConflictRecordData extends DataClass
           other.resolutionChoice == this.resolutionChoice &&
           other.createdAt == this.createdAt &&
           other.resolvedAt == this.resolvedAt &&
-          other.resolvedBy == this.resolvedBy);
+          other.resolvedBy == this.resolvedBy &&
+          other.acceptedPayload == this.acceptedPayload &&
+          other.competingPayload == this.competingPayload &&
+          other.entityRevision == this.entityRevision);
 }
 
 class ConflictRecordsCompanion extends UpdateCompanion<ConflictRecordData> {
@@ -33710,6 +33847,9 @@ class ConflictRecordsCompanion extends UpdateCompanion<ConflictRecordData> {
   final Value<String> createdAt;
   final Value<String?> resolvedAt;
   final Value<String?> resolvedBy;
+  final Value<String?> acceptedPayload;
+  final Value<String?> competingPayload;
+  final Value<int?> entityRevision;
   final Value<int> rowid;
   const ConflictRecordsCompanion({
     this.id = const Value.absent(),
@@ -33727,6 +33867,9 @@ class ConflictRecordsCompanion extends UpdateCompanion<ConflictRecordData> {
     this.createdAt = const Value.absent(),
     this.resolvedAt = const Value.absent(),
     this.resolvedBy = const Value.absent(),
+    this.acceptedPayload = const Value.absent(),
+    this.competingPayload = const Value.absent(),
+    this.entityRevision = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ConflictRecordsCompanion.insert({
@@ -33745,6 +33888,9 @@ class ConflictRecordsCompanion extends UpdateCompanion<ConflictRecordData> {
     required String createdAt,
     this.resolvedAt = const Value.absent(),
     this.resolvedBy = const Value.absent(),
+    this.acceptedPayload = const Value.absent(),
+    this.competingPayload = const Value.absent(),
+    this.entityRevision = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        entityType = Value(entityType),
@@ -33769,6 +33915,9 @@ class ConflictRecordsCompanion extends UpdateCompanion<ConflictRecordData> {
     Expression<String>? createdAt,
     Expression<String>? resolvedAt,
     Expression<String>? resolvedBy,
+    Expression<String>? acceptedPayload,
+    Expression<String>? competingPayload,
+    Expression<int>? entityRevision,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -33789,6 +33938,9 @@ class ConflictRecordsCompanion extends UpdateCompanion<ConflictRecordData> {
       if (createdAt != null) 'created_at': createdAt,
       if (resolvedAt != null) 'resolved_at': resolvedAt,
       if (resolvedBy != null) 'resolved_by': resolvedBy,
+      if (acceptedPayload != null) 'accepted_payload': acceptedPayload,
+      if (competingPayload != null) 'competing_payload': competingPayload,
+      if (entityRevision != null) 'entity_revision': entityRevision,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -33809,6 +33961,9 @@ class ConflictRecordsCompanion extends UpdateCompanion<ConflictRecordData> {
     Value<String>? createdAt,
     Value<String?>? resolvedAt,
     Value<String?>? resolvedBy,
+    Value<String?>? acceptedPayload,
+    Value<String?>? competingPayload,
+    Value<int?>? entityRevision,
     Value<int>? rowid,
   }) {
     return ConflictRecordsCompanion(
@@ -33827,6 +33982,9 @@ class ConflictRecordsCompanion extends UpdateCompanion<ConflictRecordData> {
       createdAt: createdAt ?? this.createdAt,
       resolvedAt: resolvedAt ?? this.resolvedAt,
       resolvedBy: resolvedBy ?? this.resolvedBy,
+      acceptedPayload: acceptedPayload ?? this.acceptedPayload,
+      competingPayload: competingPayload ?? this.competingPayload,
+      entityRevision: entityRevision ?? this.entityRevision,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -33881,6 +34039,15 @@ class ConflictRecordsCompanion extends UpdateCompanion<ConflictRecordData> {
     if (resolvedBy.present) {
       map['resolved_by'] = Variable<String>(resolvedBy.value);
     }
+    if (acceptedPayload.present) {
+      map['accepted_payload'] = Variable<String>(acceptedPayload.value);
+    }
+    if (competingPayload.present) {
+      map['competing_payload'] = Variable<String>(competingPayload.value);
+    }
+    if (entityRevision.present) {
+      map['entity_revision'] = Variable<int>(entityRevision.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -33905,6 +34072,9 @@ class ConflictRecordsCompanion extends UpdateCompanion<ConflictRecordData> {
           ..write('createdAt: $createdAt, ')
           ..write('resolvedAt: $resolvedAt, ')
           ..write('resolvedBy: $resolvedBy, ')
+          ..write('acceptedPayload: $acceptedPayload, ')
+          ..write('competingPayload: $competingPayload, ')
+          ..write('entityRevision: $entityRevision, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -70671,6 +70841,9 @@ typedef $$ConflictRecordsTableCreateCompanionBuilder =
       required String createdAt,
       Value<String?> resolvedAt,
       Value<String?> resolvedBy,
+      Value<String?> acceptedPayload,
+      Value<String?> competingPayload,
+      Value<int?> entityRevision,
       Value<int> rowid,
     });
 typedef $$ConflictRecordsTableUpdateCompanionBuilder =
@@ -70690,6 +70863,9 @@ typedef $$ConflictRecordsTableUpdateCompanionBuilder =
       Value<String> createdAt,
       Value<String?> resolvedAt,
       Value<String?> resolvedBy,
+      Value<String?> acceptedPayload,
+      Value<String?> competingPayload,
+      Value<int?> entityRevision,
       Value<int> rowid,
     });
 
@@ -70774,6 +70950,21 @@ class $$ConflictRecordsTableFilterComposer
 
   ColumnFilters<String> get resolvedBy => $composableBuilder(
     column: $table.resolvedBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get acceptedPayload => $composableBuilder(
+    column: $table.acceptedPayload,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get competingPayload => $composableBuilder(
+    column: $table.competingPayload,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get entityRevision => $composableBuilder(
+    column: $table.entityRevision,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -70861,6 +71052,21 @@ class $$ConflictRecordsTableOrderingComposer
     column: $table.resolvedBy,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get acceptedPayload => $composableBuilder(
+    column: $table.acceptedPayload,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get competingPayload => $composableBuilder(
+    column: $table.competingPayload,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get entityRevision => $composableBuilder(
+    column: $table.entityRevision,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$ConflictRecordsTableAnnotationComposer
@@ -70936,6 +71142,21 @@ class $$ConflictRecordsTableAnnotationComposer
     column: $table.resolvedBy,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get acceptedPayload => $composableBuilder(
+    column: $table.acceptedPayload,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get competingPayload => $composableBuilder(
+    column: $table.competingPayload,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get entityRevision => $composableBuilder(
+    column: $table.entityRevision,
+    builder: (column) => column,
+  );
 }
 
 class $$ConflictRecordsTableTableManager
@@ -70990,6 +71211,9 @@ class $$ConflictRecordsTableTableManager
                 Value<String> createdAt = const Value.absent(),
                 Value<String?> resolvedAt = const Value.absent(),
                 Value<String?> resolvedBy = const Value.absent(),
+                Value<String?> acceptedPayload = const Value.absent(),
+                Value<String?> competingPayload = const Value.absent(),
+                Value<int?> entityRevision = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ConflictRecordsCompanion(
                 id: id,
@@ -71007,6 +71231,9 @@ class $$ConflictRecordsTableTableManager
                 createdAt: createdAt,
                 resolvedAt: resolvedAt,
                 resolvedBy: resolvedBy,
+                acceptedPayload: acceptedPayload,
+                competingPayload: competingPayload,
+                entityRevision: entityRevision,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -71026,6 +71253,9 @@ class $$ConflictRecordsTableTableManager
                 required String createdAt,
                 Value<String?> resolvedAt = const Value.absent(),
                 Value<String?> resolvedBy = const Value.absent(),
+                Value<String?> acceptedPayload = const Value.absent(),
+                Value<String?> competingPayload = const Value.absent(),
+                Value<int?> entityRevision = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ConflictRecordsCompanion.insert(
                 id: id,
@@ -71043,6 +71273,9 @@ class $$ConflictRecordsTableTableManager
                 createdAt: createdAt,
                 resolvedAt: resolvedAt,
                 resolvedBy: resolvedBy,
+                acceptedPayload: acceptedPayload,
+                competingPayload: competingPayload,
+                entityRevision: entityRevision,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

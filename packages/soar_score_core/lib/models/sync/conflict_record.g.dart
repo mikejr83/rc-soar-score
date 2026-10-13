@@ -50,6 +50,9 @@ ConflictRecord _$ConflictRecordFromJson(Map<String, dynamic> json) =>
         json['resolved_by'],
         const IdConverter().fromJson,
       ),
+      acceptedPayload: json['accepted_payload'] as Map<String, dynamic>?,
+      competingPayload: json['competing_payload'] as Map<String, dynamic>?,
+      entityRevision: (json['entity_revision'] as num?)?.toInt(),
     );
 
 Map<String, dynamic> _$ConflictRecordToJson(ConflictRecord instance) =>
@@ -87,6 +90,9 @@ Map<String, dynamic> _$ConflictRecordToJson(ConflictRecord instance) =>
         instance.resolvedBy,
         const IdConverter().toJson,
       ),
+      'accepted_payload': instance.acceptedPayload,
+      'competing_payload': instance.competingPayload,
+      'entity_revision': instance.entityRevision,
     };
 
 Value? _$JsonConverterFromJson<Json, Value>(

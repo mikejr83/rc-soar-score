@@ -14,23 +14,26 @@
 
 ## Fields/Properties
 
-| Field                   | Type        | Required    | Default | Description                                                                                                                                  |
-| ----------------------- | ----------- | ----------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| `id`                    | UUIDv7      | Yes         | -       | Unique identifier for this conflict record                                                                                                   |
-| `contest_id`            | UUIDv7      | Conditional | -       | FK Contest. Exactly one of `contest_id` and `owner_account_id` is set                                                                        |
-| `owner_account_id`      | UUIDv7      | Conditional | -       | FK Account, for a conflict in the director's own data                                                                                        |
-| `entity_type`           | text        | Yes         | -       | Stable name of the entity type in conflict                                                                                                   |
-| `entity_id`             | UUIDv7      | Yes         | -       | Identifier of the entity in conflict                                                                                                         |
-| `accepted_mutation_id`  | UUIDv7      | No          | -       | FK MutationRecord of the change that was applied. Null while no change has been applied                                                      |
-| `competing_mutation_id` | UUIDv7      | Yes         | -       | FK MutationRecord of the change that collided with it                                                                                        |
-| `reason_code`           | text        | Yes         | -       | Machine-readable reason, for example `stale_base`, `unique_violation`, `director_over_participant`, `scored_assignment`                      |
-| `reason`                | text        | No          | -       | Human-readable explanation of why the conflict arose                                                                                         |
-| `requires_action`       | bool        | Yes         | true    | Whether the director has to decide. False for a silent record, which stays out of the list of conflicts that need action and notifies no one |
-| `resolution`            | enum        | Yes         | Pending | `Pending`, `Automatic`, or `Manual`                                                                                                          |
-| `resolution_choice`     | enum        | No          | -       | `KeptAccepted`, `TookCompeting`, or `Merged`. Set when resolved                                                                              |
-| `created_at`            | timestamptz | Yes         | now     | When the conflict was detected                                                                                                               |
-| `resolved_at`           | timestamptz | No          | -       | When resolution was completed                                                                                                                |
-| `resolved_by`           | UUIDv7      | No          | -       | FK Account that resolved it, for a manual resolution                                                                                         |
+| Field                   | Type        | Required    | Default | Description                                                                                                                                                 |
+| ----------------------- | ----------- | ----------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`                    | UUIDv7      | Yes         | -       | Unique identifier for this conflict record                                                                                                                  |
+| `contest_id`            | UUIDv7      | Conditional | -       | FK Contest. Exactly one of `contest_id` and `owner_account_id` is set                                                                                       |
+| `owner_account_id`      | UUIDv7      | Conditional | -       | FK Account, for a conflict in the director's own data                                                                                                       |
+| `entity_type`           | text        | Yes         | -       | Stable name of the entity type in conflict                                                                                                                  |
+| `entity_id`             | UUIDv7      | Yes         | -       | Identifier of the entity in conflict                                                                                                                        |
+| `accepted_mutation_id`  | UUIDv7      | No          | -       | FK MutationRecord of the change that was applied. Null while no change has been applied                                                                     |
+| `competing_mutation_id` | UUIDv7      | Yes         | -       | FK MutationRecord of the change that collided with it                                                                                                       |
+| `reason_code`           | text        | Yes         | -       | Machine-readable reason, for example `stale_base`, `unique_violation`, `director_over_participant`, `scored_assignment`                                     |
+| `reason`                | text        | No          | -       | Human-readable explanation of why the conflict arose                                                                                                        |
+| `requires_action`       | bool        | Yes         | true    | Whether the director has to decide. False for a silent record, which stays out of the list of conflicts that need action and notifies no one                |
+| `resolution`            | enum        | Yes         | Pending | `Pending`, `Automatic`, or `Manual`                                                                                                                         |
+| `resolution_choice`     | enum        | No          | -       | `KeptAccepted`, `TookCompeting`, or `Merged`. Set when resolved                                                                                             |
+| `created_at`            | timestamptz | Yes         | now     | When the conflict was detected                                                                                                                              |
+| `resolved_at`           | timestamptz | No          | -       | When resolution was completed                                                                                                                               |
+| `resolved_by`           | UUIDv7      | No          | -       | FK Account that resolved it, for a manual resolution                                                                                                        |
+| `accepted_payload`      | JSON        | No          | -       | The entity state the service applied. Null while no change has been applied. Kept so a side-by-side view needs no lookup of another installation's mutation |
+| `competing_payload`     | JSON        | No          | -       | The entity state of the colliding mutation, as submitted                                                                                                    |
+| `entity_revision`       | integer     | No          | -       | The entity's revision when the conflict was recorded, so a resolution can be based on it                                                                    |
 
 ## Invariants and Constraints
 

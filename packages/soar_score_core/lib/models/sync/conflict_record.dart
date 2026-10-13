@@ -32,7 +32,16 @@ class ConflictRecord extends Equatable implements SyncScoped {
     required this.createdAt,
     this.resolvedAt,
     this.resolvedBy,
-  }) : entityType = requireNotBlank(entityType, 'entityType'),
+    Map<String, Object?>? acceptedPayload,
+    Map<String, Object?>? competingPayload,
+    this.entityRevision,
+  }) : acceptedPayload = acceptedPayload == null
+           ? null
+           : Map.unmodifiable(acceptedPayload),
+       competingPayload = competingPayload == null
+           ? null
+           : Map.unmodifiable(competingPayload),
+       entityType = requireNotBlank(entityType, 'entityType'),
        reasonCode = requireNotBlank(reasonCode, 'reasonCode') {
     requireExactlyOneScope(
       contestId: contestId,
@@ -85,6 +94,17 @@ class ConflictRecord extends Equatable implements SyncScoped {
   /// The account that resolved it, for a manual resolution.
   final Id? resolvedBy;
 
+  /// The entity state the service applied; null while no change has been
+  /// applied. Kept with the record so the side-by-side view needs no lookup.
+  final Map<String, Object?>? acceptedPayload;
+
+  /// The entity state of the colliding mutation, as submitted.
+  final Map<String, Object?>? competingPayload;
+
+  /// The entity's revision when the conflict was recorded, so a resolution can
+  /// be based on it.
+  final int? entityRevision;
+
   @override
   SyncScope get syncScope =>
       contestId != null ? SyncScope.contest : SyncScope.director;
@@ -108,5 +128,8 @@ class ConflictRecord extends Equatable implements SyncScoped {
     createdAt,
     resolvedAt,
     resolvedBy,
+    acceptedPayload,
+    competingPayload,
+    entityRevision,
   ];
 }

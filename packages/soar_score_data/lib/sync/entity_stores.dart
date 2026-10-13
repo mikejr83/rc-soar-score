@@ -43,6 +43,7 @@ import '../schema/tables/publication_identities_table.dart';
 import '../schema/tables/publication_projections_table.dart';
 import '../schema/tables/publication_participants_table.dart';
 import '../schema/tables/delist_requests_table.dart';
+import '../schema/tables/conflict_records_table.dart';
 import '../schema/tables/invitations_table.dart';
 import 'entity_store.dart';
 import 'table_mapper.dart';
@@ -522,7 +523,11 @@ class EntityStores {
     ),
     EntityStore<core.ConflictRecord>(
       entityType: 'ConflictRecord',
-      mapper: TableMapper(db, db.conflictRecords),
+      mapper: TableMapper(
+        db,
+        db.conflictRecords,
+        jsonColumns: conflictRecordsJsonColumns,
+      ),
       decode: core.ConflictRecord.fromJson,
       encode: (entity) => entity.toJson(),
       hasRevision: false,
