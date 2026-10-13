@@ -48,7 +48,7 @@ A single, prominent "what to do next" with one primary button, driven by the lif
 - **Created:** "Finish the configuration" → Configuration.
 - **Configuring, not ready:** show what's missing → the page that fixes it. Examples: "Add at least 2 scoring pilots", "Configuration is incomplete: working time is missing".
 - **Configuring, ready to draw:** "Draw the matrix" → Matrix page (the draw happens there).
-- **Ready (matrix drawn, no scores):** "Open participant scoring" or "Enter scores for round 1, group A" → Scoring, depending on whether self-scoring is used. Say how you'd pick.
+- **Ready (matrix drawn, no scores):** "Open participant scoring" or "Enter scores for round 1, group A" → Scoring, depending on participant scoring access: "Open participant scoring" while it is closed, "Enter scores for round 1, group A" once it is open. There is no self-scoring setting in the configuration (decision #366), so do not branch on one.
 - **Running:** "Continue scoring: round 3, group B" → Scoring at the latest relevant round and group. In **Seeded** mode, when all scores for the drawn rounds are in and verified: "Draw round 5" → Matrix.
 - **Running, looks finished** (every round with any score has all scores, or 48 hours without a score): "Complete the contest" with the reason it's suggested. This is a suggestion; the director decides.
 - **Completed:** "Publish results" if unpublished, else "View reports".
