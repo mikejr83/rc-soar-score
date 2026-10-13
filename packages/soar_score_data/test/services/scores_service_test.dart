@@ -270,6 +270,96 @@ void _tests(Backend backend) {
         (2, 0, 4),
       ]);
     });
+
+    group('a retired pilot', () {
+      Future<void> retire(core.Id assignmentId, int round) async {
+        final assignment = (await repository.matrixAssignmentRepository
+            .findById(assignmentId))!;
+        final participation = (await repository.contestParticipationRepository
+            .findById(assignment.contestParticipationId))!;
+        await ParticipationsService(repository).update(
+          contestId,
+          actor,
+          participation.id,
+          retiredAtRound: round,
+          baseRevision: participation.revision,
+          metadata: meta(),
+        );
+      }
+
+      Future<List<core.Id>> secondRound() async {
+        final matrix = await MatrixService(repository).current(contestId);
+        final second = matrix.rounds.firstWhere((round) => round.ordinal == 2);
+        return [
+          for (final assignment in matrix.assignments)
+            if (assignment.scheduledRoundId == second.id) assignment.id,
+        ];
+      }
+
+      Future<List<(int, int, int)>> counts() async => [
+        for (final r in (await service.list(contestId)).rounds)
+          (r.ordinal, r.scored, r.total),
+      ];
+
+      test('is not counted as missing in the rounds they miss', () async {
+        await retire(slots.first, 2);
+
+        // Round 1 is unaffected; round 2 expects three pilots.
+        expect(await counts(), [(1, 0, 4), (2, 0, 3)]);
+      });
+
+      test('leaves the round complete once the others are scored', () async {
+        await retire(slots.first, 2);
+        final round2 = await secondRound();
+        var n = 0;
+        for (final slot in round2) {
+          final assignment = (await repository.matrixAssignmentRepository
+              .findById(slot))!;
+          final participation = (await repository.contestParticipationRepository
+              .findById(assignment.contestParticipationId))!;
+          if (participation.hasRetiredBy(2)) continue;
+          await enter(slot, mutation: 'round2-${n++}');
+        }
+
+        final progress = (await service.list(contestId)).rounds.last;
+
+        expect((progress.scored, progress.total), (3, 3));
+        expect(progress.isComplete, isTrue);
+      });
+
+      test('keeps a score they entered before retiring', () async {
+        await enter(slots.first);
+        await retire(slots.first, 1);
+
+        expect(await counts(), [(1, 1, 4), (2, 0, 3)]);
+      });
+
+      test('leaves a round nobody can fly empty, not complete', () async {
+        for (final slot in slots) {
+          await retire(slot, 1);
+        }
+
+        final scores = await service.list(contestId);
+
+        expect(scores.rounds.map((r) => (r.ordinal, r.scored, r.total)), [
+          (1, 0, 0),
+          (2, 0, 0),
+        ]);
+        expect(scores.rounds.any((r) => r.isComplete), isFalse);
+        expect(scores.slots, hasLength(slotCount));
+      });
+
+      test('is left out of the matrix page counts too', () async {
+        await retire(slots.first, 2);
+
+        final matrix = await MatrixService(repository).current(contestId);
+
+        expect(matrix.progress.map((r) => (r.ordinal, r.scored, r.total)), [
+          (1, 0, 4),
+          (2, 0, 3),
+        ]);
+      });
+    });
   });
 }
 

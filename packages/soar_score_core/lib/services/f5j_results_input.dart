@@ -74,9 +74,7 @@ class F5jResultsInput {
         if (assignment.creditedRoundId != assignment.scheduledRoundId) continue;
         final participation = byId[assignment.contestParticipationId];
         if (participation == null || !participation.isPilot) continue;
-        final retired =
-            participation.retiredAtRound != null &&
-            participation.retiredAtRound! <= round.ordinal;
+        final retired = participation.hasRetiredBy(round.ordinal);
         final placeholder = placeholders[assignment.id];
         final official = placeholder == null
             ? null

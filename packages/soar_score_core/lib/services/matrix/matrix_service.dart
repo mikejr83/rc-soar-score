@@ -8,7 +8,6 @@ import '../../models/contest/contest.dart';
 import '../../models/contest/core_options.dart';
 import '../../models/id.dart';
 import '../../models/matrix/matrix_assignment.dart';
-import '../../enums/score_placeholder_state.dart';
 import '../contest_scores.dart';
 import '../../models/participants/contest_participation.dart';
 import '../../repositories/already_stored_error.dart';
@@ -76,6 +75,13 @@ class MatrixService {
           ))
         placeholder.assignmentId: placeholder,
     };
+    final participations = {
+      for (final participation
+          in await repository.contestParticipationRepository.listForContest(
+            contestId,
+          ))
+        participation.id: participation,
+    };
     final assignments = <MatrixAssignment>[];
     final progress = <RoundProgress>[];
     for (final round in rounds) {
@@ -83,20 +89,12 @@ class MatrixService {
         round.id,
       );
       assignments.addAll(live);
-      var scored = 0;
-      var total = 0;
-      for (final assignment in live) {
-        final placeholder = placeholders[assignment.id];
-        if (placeholder == null) continue;
-        total++;
-        if (placeholder.state != ScorePlaceholderState.notEntered) scored++;
-      }
       progress.add(
-        RoundProgress(
-          roundId: round.id,
-          ordinal: round.ordinal,
-          scored: scored,
-          total: total,
+        RoundProgress.count(
+          round,
+          live,
+          placeholders: placeholders,
+          participations: participations,
         ),
       );
     }

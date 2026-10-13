@@ -101,6 +101,11 @@ class ContestParticipation extends Equatable implements Synchronizable {
   bool get isPilot => roleType == RoleType.pilot;
   bool get isRetired => retiredAtRound != null;
 
+  /// True when this pilot retired at or before round [roundOrdinal], so no
+  /// flight of that round is expected from them.
+  bool hasRetiredBy(int roundOrdinal) =>
+      retiredAtRound != null && retiredAtRound! <= roundOrdinal;
+
   @override
   String get entityType => 'ContestParticipation';
 

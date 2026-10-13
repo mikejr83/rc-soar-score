@@ -68,19 +68,33 @@ class ScoresService {
         placeholder.assignmentId: placeholder,
     };
 
+    final participations = {
+      for (final participation
+          in await repository.contestParticipationRepository.listForContest(
+            contestId,
+          ))
+        participation.id: participation,
+    };
+
+    // The slots of a pilot who retired stay in the list; the counts leave out
+    // the ones nobody can fill (see RoundProgress.count).
     final slots = <ScoreSlot>[];
     final progress = <RoundProgress>[];
     for (final round in rounds) {
-      var scored = 0;
-      var total = 0;
-      for (final assignment
-          in await repository.matrixAssignmentRepository.listLiveForRound(
-            round.id,
-          )) {
+      final live = await repository.matrixAssignmentRepository.listLiveForRound(
+        round.id,
+      );
+      progress.add(
+        RoundProgress.count(
+          round,
+          live,
+          placeholders: placeholders,
+          participations: participations,
+        ),
+      );
+      for (final assignment in live) {
         final placeholder = placeholders[assignment.id];
         if (placeholder == null) continue;
-        total++;
-        if (placeholder.state != ScorePlaceholderState.notEntered) scored++;
         slots.add(
           ScoreSlot(
             placeholder: placeholder,
@@ -89,14 +103,6 @@ class ScoresService {
           ),
         );
       }
-      progress.add(
-        RoundProgress(
-          roundId: round.id,
-          ordinal: round.ordinal,
-          scored: scored,
-          total: total,
-        ),
-      );
     }
     return ContestScores(slots: slots, rounds: progress);
   }
@@ -296,9 +302,7 @@ class ScoresService {
     }
     final participation = await repository.contestParticipationRepository
         .findById(assignment.contestParticipationId);
-    if (participation != null &&
-        participation.retiredAtRound != null &&
-        participation.retiredAtRound! <= round.ordinal) {
+    if (participation != null && participation.hasRetiredBy(round.ordinal)) {
       throw ContestStateError(
         'pilot_retired',
         'the pilot retired before this round',
