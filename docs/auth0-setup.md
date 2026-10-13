@@ -82,9 +82,10 @@ production tenant; Cloudflare Pages preview URLs are not supported for sign-in.
 
 The scheme is fixed in code, not a build setting. It must match
 `Auth0Config.defaultWindowsScheme` (`lib/auth/auth_config.dart`), the constants
-in `windows/runner/main.cpp`, and the registry entry the installer or a
-development `.reg` file writes (see Environment Setup); change all of them
-together. "Continue offline"
+in `windows/runner/main.cpp`, and the registry entry. The app writes that entry
+for the current user before sign-in, and an installer may write it too (see
+Environment Setup); change all of them together. What an installer must register is in
+[Windows Installer Requirements](windows-installer-requirements.md). "Continue offline"
 never contacts Auth0.
 
 ### Session renewal
