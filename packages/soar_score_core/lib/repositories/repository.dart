@@ -28,6 +28,7 @@ import 'publication_projection_repository.dart';
 import 'publication_publisher.dart';
 import 're_flight_participant_repository.dart';
 import 're_flight_repository.dart';
+import 'results_repository.dart';
 import 'role_repository.dart';
 import 'round_group_repository.dart';
 import 'round_repository.dart';
@@ -84,6 +85,8 @@ abstract interface class Repository {
   ParticipationStandingRepository get participationStandingRepository;
 
   TeamStandingRepository get teamStandingRepository;
+
+  ResultsRepository get resultsRepository;
 
   AuditEventRepository get auditEventRepository;
 

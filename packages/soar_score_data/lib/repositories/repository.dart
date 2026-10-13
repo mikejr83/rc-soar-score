@@ -59,6 +59,7 @@ class Repository implements core.Repository {
         stores: stores,
       ),
       teamStandingRepository = TeamStandingRepository(database, stores: stores),
+      resultsRepository = ResultsRepository(database, stores: stores),
       auditEventRepository = AuditEventRepository(database, stores: stores),
       publicationIdentityRepository = PublicationIdentityRepository(
         database,
@@ -172,6 +173,9 @@ class Repository implements core.Repository {
 
   @override
   final core.TeamStandingRepository teamStandingRepository;
+
+  @override
+  final core.ResultsRepository resultsRepository;
 
   @override
   final core.AuditEventRepository auditEventRepository;

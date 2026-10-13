@@ -60,6 +60,7 @@ void main() {
     'flightResultRepository',
     'participationStandingRepository',
     'teamStandingRepository',
+    'resultsRepository',
     'teamRepository',
     'teamMembershipRepository',
     'contestParticipationRepository',

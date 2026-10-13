@@ -56,6 +56,11 @@ class StubRepository implements core.Repository {
   final flightResults = StubFlightResultRepository();
   final participationStandings = StubParticipationStandingRepository();
   final teamStandings = StubTeamStandingRepository();
+  late final results = StubResultsRepository(
+    flightResults,
+    participationStandings,
+    teamStandings,
+  );
 
   /// The stored configuration revisions, for tests to inspect.
   final StubConfigurationRevisionRepository configurations;
@@ -120,6 +125,9 @@ class StubRepository implements core.Repository {
 
   @override
   core.TeamStandingRepository get teamStandingRepository => teamStandings;
+
+  @override
+  core.ResultsRepository get resultsRepository => results;
 
   @override
   dynamic noSuchMethod(Invocation invocation) =>
