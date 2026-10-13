@@ -94,8 +94,12 @@ void _tests(Backend backend) {
 
       expect(await inst.syncStore.conflictsNeedingAction(scope), isEmpty);
       expect(await inst.count('conflict_records'), 1);
-      final status = await inst.syncStore.status(scope);
-      expect(status.conflictsNeedingAction, 0);
+      if (backend != Backend.postgres) {
+        // status() reads the client-only sync position table, which the
+        // server profile does not create.
+        final status = await inst.syncStore.status(scope);
+        expect(status.conflictsNeedingAction, 0);
+      }
     },
   );
 

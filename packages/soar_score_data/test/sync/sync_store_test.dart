@@ -68,7 +68,10 @@ void _tests(Backend backend) {
       expect(rejected.single.id, mutation.id);
       expect(rejected.single.reasonCode, 'locked');
       expect(await inst.syncStore.pendingMutations(scope), isEmpty);
-      expect((await inst.syncStore.status(scope)).rejectedMutations, 1);
+      if (_clientOnly(backend) == false) {
+        // status() reads the client-only sync position table.
+        expect((await inst.syncStore.status(scope)).rejectedMutations, 1);
+      }
     });
 
     test('an accepted outcome needs a sequence', () async {
