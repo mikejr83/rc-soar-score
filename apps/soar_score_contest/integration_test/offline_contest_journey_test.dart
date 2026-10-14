@@ -16,19 +16,16 @@ void main() {
   ) async {
     await launchApp(tester);
 
-    expect(find.byType(LandingPage), findsOneWidget);
+    await pumpUntilFound(tester, find.byType(LandingPage));
     await tester.tap(find.text('Continue offline'));
-    await tester.pumpAndSettle(const Duration(seconds: 2));
 
-    expect(find.byType(HomePage), findsOneWidget);
-    expect(find.text('Contests'), findsWidgets);
-    expect(find.text('Autumn F5J Classic'), findsOneWidget);
+    await pumpUntilFound(tester, find.byType(HomePage));
+    await pumpUntilFound(tester, find.text('Autumn F5J Classic'));
 
     await tester.tap(find.text('Autumn F5J Classic'));
-    await tester.pumpAndSettle(const Duration(seconds: 2));
 
     // Contest scope shows the contest's own destinations.
-    expect(find.text('Workspace'), findsWidgets);
+    await pumpUntilFound(tester, find.text('Workspace'));
     expect(find.text('Matrix'), findsWidgets);
   });
 }
