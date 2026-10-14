@@ -4,6 +4,7 @@ import 'package:test/test.dart';
 
 /// `lib/` is pure domain code: it may import only these libraries.
 const _allowedImports = {
+  'dart:async',
   'dart:core',
   'dart:convert',
   'dart:math',

@@ -25,6 +25,7 @@ Response errorResponse(
 
 /// Turns thrown errors and bare 404s into the standard JSON error body.
 ///
+/// - `SyncRefusal`: its own status and code (426, 409, 403, 410)
 /// - `AccountClaimError`: 409 with its code
 /// - `StaleRevisionError`, `AlreadyStoredError`, `AlreadySupersededError`,
 ///   `ContestStateError`, `BackendOnlyError` (code `backend_only`): 409
@@ -55,6 +56,13 @@ Middleware errorMappingMiddleware() =>
         return errorResponse(404, 'not_found', '$e', requestId: requestId);
       } on ForbiddenError catch (e) {
         return errorResponse(403, e.code, e.message, requestId: requestId);
+      } on SyncRefusal catch (e) {
+        return errorResponse(
+          e.statusCode,
+          e.code,
+          e.message,
+          requestId: requestId,
+        );
       } on AccountClaimError catch (e) {
         return errorResponse(409, e.code, e.message, requestId: requestId);
       } on BackendOnlyError catch (e) {

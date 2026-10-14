@@ -106,6 +106,7 @@ class Repository implements core.Repository {
         stores: stores,
       ),
       syncCursorRepository = SyncCursorRepository(database, stores: stores),
+      syncAcceptorStore = DriftSyncAcceptorStore(database, stores),
       invitationRepository = InvitationRepository(database, stores: stores),
       modelCatalogRepository = ModelCatalogRepository(database, stores: stores),
       contestConfigurationPresetRepository =
@@ -230,6 +231,9 @@ class Repository implements core.Repository {
 
   @override
   final core.SyncCursorRepository syncCursorRepository;
+
+  @override
+  final core.SyncAcceptorStore syncAcceptorStore;
 
   final core.InvitationRepository invitationRepository;
 
