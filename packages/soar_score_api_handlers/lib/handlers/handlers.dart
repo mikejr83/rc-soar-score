@@ -2,6 +2,7 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:soar_score_api_handlers/handlers/health_handler.dart';
 import 'package:soar_score_core/repositories/repository.dart';
+import 'package:soar_score_core/services/sync/sync_versions.dart';
 import 'package:soar_score_api_handlers/handlers/account_claim_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/configuration_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/contests_handlers.dart';
@@ -14,6 +15,7 @@ import 'package:soar_score_api_handlers/handlers/public_publication_handlers.dar
 import 'package:soar_score_api_handlers/handlers/publication_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/results_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/scores_handlers.dart';
+import 'package:soar_score_api_handlers/handlers/sync_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/teams_handlers.dart';
 import 'package:soar_score_core/services/recalculation/recalculation_service.dart';
 
@@ -25,6 +27,7 @@ createHandlers(
   Repository repository, {
   bool publishingEnabled = false,
   RecalculationService? recalculation,
+  SyncVersions? syncVersions,
 }) {
   final router = Router()
     ..get(
@@ -48,6 +51,11 @@ createHandlers(
   );
   addResultsRoutes(router, repository);
   addPublicationRoutes(router, repository, enabled: publishingEnabled);
+  addSyncRoutes(
+    router,
+    repository,
+    versions: syncVersions ?? const SyncVersions.exactly(1),
+  );
 
   return (
     healthHandler: createHealthHandler(name, displayName, version, repository),

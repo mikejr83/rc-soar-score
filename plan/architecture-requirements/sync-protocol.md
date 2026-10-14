@@ -94,7 +94,8 @@ System data (shipped profiles, system roles, landing tables) is not a scope. It 
 
 - `scope` is `{"contest_id": …}` or `{"owner_account_id": …}`.
 - `mutations` are in dependency order: a mutation appears after the one it names in `depends_on_mutation_id`. A matrix revision is therefore sent before the scores that reference it. An empty list is valid and means pull only.
-- A deletion is a mutation whose payload marks the entity deleted. It creates a `Tombstone` on the server.
+- A deletion is a mutation whose payload marks the entity deleted. It creates a `Tombstone` on the server. The change that reaches other installations for it has the payload `{"deleted": true}`.
+- A matrix move carries `supersedes` in its payload data, naming the assignment it replaces. The service marks that assignment superseded in the same transaction.
 - `page_token` is null on the first request of an exchange. It is set only to continue a paged pull (see Paging).
 
 ### Response
@@ -201,6 +202,7 @@ One list, shared by server and client, defined in `soar_score_core`:
 | `unknown_flight_group`         | Rejected           | A score references a group the service does not have yet                       |
 | `entity_deleted`               | Rejected           | The entity has a tombstone                                                     |
 | `unique_violation`             | Conflict           | For example two moves into the same lane                                       |
+| `invalid_payload`              | Rejected           | The payload is malformed, names a derived value, or is not a stored entity     |
 | `locked`                       | Rejected           | The score or contest state does not allow modification                         |
 | `unauthorized`                 | Rejected           | The account lacks authority for the scope or the entity                        |
 | `director_over_participant`    | Conflict (silent)  | A director's official value beat a participant submission                      |
@@ -216,6 +218,12 @@ One list, shared by server and client, defined in `soar_score_core`:
 ## Authority and Resolution
 
 The acceptor applies the authority table in [offline-synchronization.md](offline-synchronization.md#authority-and-conflict-resolution). Last-write-wins is never used for authoritative data. Original score attempts are immutable; official scores follow the director's latest authorized decision; locked scores and states that disallow modification are rejected with `locked`. Derived values are never accepted as input.
+
+## Current implementation notes
+
+- The first accepted upload for a contest from the director's installation creates the `Initial` activation when none exists, so the engine does not call the activation route for a first upload.
+- `GET /sync/system-data` answers an empty page at the seeded sequence until system data changes are published.
+- Exchanges for one scope are serialized with an in-process lock. A deployment with several service instances needs a database lock.
 
 ## Tombstones
 

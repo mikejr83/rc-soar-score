@@ -17,6 +17,7 @@ export 'seeding/demo/demo_data_seeder.dart';
 export 'seeding/system_data_seeder.dart';
 export 'seeding/system_seed_outcome.dart';
 export 'sync/drift_replicated_change_applier.dart';
+export 'sync/drift_sync_acceptor_store.dart';
 export 'sync/drift_sync_store.dart';
 export 'sync/drift_unit_of_work.dart';
 export 'sync/entity_store.dart';

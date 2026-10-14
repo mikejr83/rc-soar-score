@@ -36,6 +36,7 @@ import 'round_repository.dart';
 import 'score_attempt_repository.dart';
 import 'review_request_repository.dart';
 import 'score_placeholder_repository.dart';
+import 'sync_acceptor_store.dart';
 import 'sync_cursor_repository.dart';
 import 'team_membership_repository.dart';
 import 'team_repository.dart';
@@ -121,6 +122,8 @@ abstract interface class Repository {
   InstallationActivationRepository get installationActivationRepository;
 
   SyncCursorRepository get syncCursorRepository;
+
+  SyncAcceptorStore get syncAcceptorStore;
 
   InvitationRepository get invitationRepository;
   ModelCatalogRepository get modelCatalogRepository;
