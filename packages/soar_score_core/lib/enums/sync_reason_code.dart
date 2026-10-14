@@ -20,7 +20,8 @@ enum SyncReasonCode {
   unsupportedProtocolVersion('unsupported_protocol_version'),
   schemaTooOld('schema_too_old'),
   reclaimRequiresSync('reclaim_requires_sync'),
-  contestExists('contest_exists');
+  contestExists('contest_exists'),
+  invalidPayload('invalid_payload');
 
   const SyncReasonCode(this.code);
 

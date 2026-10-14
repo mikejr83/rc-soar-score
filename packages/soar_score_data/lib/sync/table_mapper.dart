@@ -28,16 +28,18 @@ class TableMapper {
     return rows.isEmpty ? null : rows.single;
   }
 
-  /// The rows matching [whereSql], in [orderBy] order.
+  /// The rows matching [whereSql], in [orderBy] order, at most [limit].
   Future<List<Map<String, Object?>>> where(
     String whereSql,
     List<Variable> variables, {
     String? orderBy,
+    int? limit,
   }) async {
     final order = orderBy == null ? '' : ' ORDER BY $orderBy';
+    final cap = limit == null ? '' : ' LIMIT $limit';
     final rows = await _db
         .customSelect(
-          portableSql(_db, 'SELECT * FROM $_name WHERE $whereSql$order'),
+          portableSql(_db, 'SELECT * FROM $_name WHERE $whereSql$order$cap'),
           variables: variables,
           readsFrom: {_table},
         )

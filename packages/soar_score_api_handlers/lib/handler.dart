@@ -4,6 +4,7 @@ import 'package:soar_score_api_handlers/handlers/handlers.dart';
 import 'package:soar_score_api_handlers/middleware/middleware.dart';
 import 'package:soar_score_core/repositories/repository.dart';
 import 'package:soar_score_core/services/recalculation/recalculation_service.dart';
+import 'package:soar_score_core/services/sync/sync_versions.dart';
 import 'package:logging/logging.dart';
 
 /// Auth layer for the `/api/v1` subtree.
@@ -62,6 +63,7 @@ Handler buildApiHandler({
     repository,
     publishingEnabled: publishingEnabled,
     recalculation: recalculation,
+    syncVersions: SyncVersions.exactly(schemaRevision ?? 1),
   );
   Handler api = handlers.apiHandler;
 

@@ -1,7 +1,9 @@
+import 'package:drift/drift.dart' show Variable;
 import 'package:soar_score_core/soar_score_core.dart' as core;
 
 import '../database.dart';
 import 'entity_stores.dart';
+import 'sql_placeholders.dart';
 
 /// Applies changes the service already accepted.
 ///
@@ -48,8 +50,25 @@ class DriftReplicatedChangeApplier implements core.ReplicatedChangeApplier {
           storedRevision >= change.revision) {
         return;
       }
-      final json = {...change.payload};
+      final json = {...change.payload}..remove('supersedes');
       if (store.hasRevision) json['revision'] = change.revision;
+      final supersedes = change.payload['supersedes'];
+      if (change.entityType == 'MatrixAssignment' && supersedes is String) {
+        // A move marks the old row first, so it leaves the unique index on
+        // live assignments before the new row enters it.
+        await _db.customUpdate(
+          portableSql(
+            _db,
+            'UPDATE matrix_assignments SET superseded_by_assignment_id = ? '
+            'WHERE id = ? AND superseded_by_assignment_id IS NULL',
+          ),
+          variables: [
+            Variable<String>(change.entityId.value),
+            Variable<String>(supersedes),
+          ],
+          updates: {_db.matrixAssignments},
+        );
+      }
       await store.upsertJson(store.encode(store.decode(json)));
       if (change.entityType == 'LandingTable') {
         // A landing table travels with its entries in one change.

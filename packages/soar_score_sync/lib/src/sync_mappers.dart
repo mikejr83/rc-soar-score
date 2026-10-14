@@ -14,7 +14,8 @@ SyncMutationDto mutationToDto(MutationRecord mutation) => SyncMutationDto(
   payload: mutation.payload,
 );
 
-/// A change from the service as the applier takes it.
+/// A change from the service as the applier takes it. A deletion arrives as
+/// the payload `{"deleted": true}`.
 ReplicatedChange changeFromDto(SyncScopeKey scope, SyncChangeDto change) =>
     ReplicatedChange(
       scope: scope,
@@ -23,6 +24,7 @@ ReplicatedChange changeFromDto(SyncScopeKey scope, SyncChangeDto change) =>
       entityId: change.entityId,
       revision: change.revision,
       payload: change.payload,
+      isDelete: change.payload['deleted'] == true,
     );
 
 /// The wire scope of [scope]. System data has no exchange scope.

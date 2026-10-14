@@ -71,6 +71,14 @@ class EntityStore<T extends Object> {
       _decode(json),
   ];
 
+  /// The rows whose [column] equals [value], as stored JSON.
+  ///
+  /// [column] is a column name from the schema, never user input.
+  Future<List<Map<String, Object?>>> whereIdJson(
+    String column,
+    core.Id value,
+  ) => _mapper.where('$column = ?', [Variable<String>(value.value)]);
+
   Future<void> upsertJson(Map<String, Object?> json) => _mapper.upsert(json);
 
   Future<bool> remove(core.Id id) => _mapper.remove(id);
