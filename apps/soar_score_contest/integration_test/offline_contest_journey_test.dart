@@ -42,6 +42,14 @@ void main() {
 
     await tester.tap(contestRow);
 
+    final viewButton = find.descendant(
+      of: find.byType(FilledButton),
+      matching: find.text('View'),
+    );
+    await pumpUntilFound(tester, viewButton);
+
+    await tester.tap(viewButton);
+
     // Contest scope shows the contest's own destinations.
     await pumpUntilFound(tester, find.text('Workspace'));
     expect(find.text('Matrix'), findsWidgets);
