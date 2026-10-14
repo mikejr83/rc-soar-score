@@ -92,11 +92,20 @@ class NativeSync {
     final scopes = <core.SyncScopeKey>[
       core.DirectorScopeKey(accountId),
       const core.SystemScopeKey(),
-      for (final contest in await ContestRepository(_database).getAll())
-        if (contest.ownerAccountId == accountId)
-          core.ContestScopeKey(contest.id),
     ];
-    scopes.forEach(_scheduler.notifyLocalChange);
+    try {
+      for (final contest in await ContestRepository(_database).getAll()) {
+        if (contest.ownerAccountId == accountId) {
+          scopes.add(core.ContestScopeKey(contest.id));
+        }
+      }
+    } on Object catch (error, stack) {
+      // The scheduler knows these scopes from now on, so the contests follow
+      // with the next local change or when the service is reachable again.
+      _logger.warning('Could not list the claimed contests', error, stack);
+    } finally {
+      scopes.forEach(_scheduler.notifyLocalChange);
+    }
   }
 
   Future<void> close() async {

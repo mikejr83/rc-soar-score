@@ -26,7 +26,9 @@ class ShellSyncStatus extends StatelessWidget {
           syncing: syncing,
           zoneId: contest.timezone,
         );
-        final attention = (summary?.needsAttention ?? 0) > 0;
+        final attention =
+            (summary?.needsAttention ?? 0) > 0 ||
+            (summary != null && summary.localOnly && summary.problem != null);
         return Semantics(
           button: true,
           label: 'Sync: $text',

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 import 'package:soar_score_ui/soar_score_ui.dart';
 
+import '../../services/sync/sync_problem.dart';
 import '../../services/sync/sync_scope_summary.dart';
 
 /// The numbers and messages behind the sync status of one contest, and the
@@ -56,9 +57,10 @@ class SyncDetailsCard extends StatelessWidget {
             const SizedBox(height: 12),
             if (summary == null)
               const Text('Checking…')
-            else if (summary.localOnly)
-              const Text(localOnlyText, key: ValueKey('sync-local-only'))
-            else ...[
+            else if (summary.localOnly) ...[
+              const Text(localOnlyText, key: ValueKey('sync-local-only')),
+              if (problem != null) ..._problemRow(theme, dark, problem),
+            ] else ...[
               _row(
                 theme,
                 'Last synced',
@@ -73,33 +75,7 @@ class SyncDetailsCard extends StatelessWidget {
                 '${summary.rejectedChanges}',
               ),
               _row(theme, 'Conflicts to decide', '${summary.conflicts}'),
-              if (problem != null) ...[
-                const SizedBox(height: 12),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Icon(
-                      Icons.warning_amber_rounded,
-                      size: 20,
-                      color: AppStatusColors.getWarning(dark),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            problem.label,
-                            key: const ValueKey('sync-problem'),
-                            style: theme.textTheme.titleSmall,
-                          ),
-                          Text(problem.explanation),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+              if (problem != null) ..._problemRow(theme, dark, problem),
             ],
             const SizedBox(height: 12),
             Text(
@@ -126,6 +102,34 @@ class SyncDetailsCard extends StatelessWidget {
       ),
     );
   }
+
+  List<Widget> _problemRow(ThemeData theme, bool dark, SyncProblem problem) => [
+    const SizedBox(height: 12),
+    Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(
+          Icons.warning_amber_rounded,
+          size: 20,
+          color: AppStatusColors.getWarning(dark),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                problem.label,
+                key: const ValueKey('sync-problem'),
+                style: theme.textTheme.titleSmall,
+              ),
+              Text(problem.explanation),
+            ],
+          ),
+        ),
+      ],
+    ),
+  ];
 
   Widget _row(ThemeData theme, String label, String value) => Padding(
     padding: const EdgeInsets.symmetric(vertical: 2),

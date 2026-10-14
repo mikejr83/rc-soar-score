@@ -18,6 +18,18 @@ void main() {
     );
   });
 
+  test('local only names why the account is not linked', () {
+    expect(
+      _text(
+        const SyncScopeSummary(
+          localOnly: true,
+          problem: SyncProblem.accountClaimBlocked,
+        ),
+      ),
+      'Local only · Account not linked',
+    );
+  });
+
   test('a running sync says so', () {
     expect(_text(const SyncScopeSummary(), syncing: true), 'Syncing…');
   });

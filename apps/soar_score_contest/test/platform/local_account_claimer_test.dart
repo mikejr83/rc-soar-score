@@ -166,6 +166,22 @@ void main() {
     expect(claimed, [account]);
   });
 
+  test('signing out while the service answers leaves the data alone', () async {
+    answer = (request) async {
+      await auth.signOut();
+      return LocalAccountClaimDto(
+        accountId: account,
+        localAccountId: request.localAccountId,
+        claimedAt: DateTime.utc(2026, 10, 13),
+      );
+    };
+
+    await claimer.run();
+
+    expect(localAccount.reassigned, isEmpty);
+    expect(claimed, isEmpty);
+  });
+
   test('two runs at once make one claim', () async {
     await Future.wait([claimer.run(), claimer.run()]);
 

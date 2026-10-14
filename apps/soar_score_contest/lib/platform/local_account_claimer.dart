@@ -86,6 +86,9 @@ class LocalAccountClaimer {
       _onProblem(SyncProblem.accountClaimFailed);
       return;
     }
+    // The director may have signed out while the service answered; the data
+    // then stays as it is until the next sign-in repeats the claim.
+    if (!_auth.isSignedIn) return;
     try {
       await _local.reassignTo(accountId);
     } on Object catch (error, stack) {

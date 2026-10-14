@@ -12,7 +12,10 @@ abstract final class SyncStatusText {
     required String zoneId,
   }) {
     if (summary == null) return 'Checking…';
-    if (summary.localOnly) return 'Local only';
+    if (summary.localOnly) {
+      final problem = summary.problem;
+      return problem == null ? 'Local only' : 'Local only · ${problem.label}';
+    }
     if (syncing) return 'Syncing…';
     final parts = <String>[
       if (summary.problem != null)
