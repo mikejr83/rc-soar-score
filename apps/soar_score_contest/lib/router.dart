@@ -250,7 +250,8 @@ GoRouter buildAppRouter({
 ///
 /// Guard behavior:
 /// - Unknown paths outside the contest administration hierarchy fall back to [landingPath].
-/// - The landing page ([landingPath]) is always accessible anonymously.
+/// - The landing page ([landingPath]) is accessible anonymously. A signed-in
+///   user ([auth]) is sent on to the main page ([homePath]) instead.
 /// - When in offline mode (native desktop only), the navigation guard is inactive
 ///   for routes, permitting access beyond the landing page.
 /// - A signed-in user ([auth]) has access beyond the landing page.
@@ -269,9 +270,13 @@ String? navigationGuard(
     return landingPath;
   }
 
-  // The landing page allows anonymous access.
+  final signedIn =
+      auth?.isSignedIn ?? authSessionOf(context)?.isSignedIn ?? false;
+
+  // The landing page allows anonymous access; signing in moves on to the
+  // main page.
   if (path == landingPath) {
-    return null;
+    return signedIn ? homePath : null;
   }
 
   // Check if offline mode is active (desktop only; tree-shaken on web).
@@ -284,7 +289,7 @@ String? navigationGuard(
   }
 
   // A signed-in user may go anywhere.
-  if (auth?.isSignedIn ?? authSessionOf(context)?.isSignedIn ?? false) {
+  if (signedIn) {
     return null;
   }
 
