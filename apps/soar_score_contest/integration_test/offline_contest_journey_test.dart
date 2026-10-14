@@ -21,12 +21,10 @@ void main() {
     // out.
     await pumpUntilFound(
       tester,
-      find.byType(LandingPage).evaluate().isNotEmpty
-          ? find.byType(LandingPage)
-          : find.byWidgetPredicate(
-              (w) => w is LandingPage || w is HomePage,
-              description: 'LandingPage or HomePage',
-            ),
+      find.byWidgetPredicate(
+        (w) => w is LandingPage || w is HomePage,
+        description: 'LandingPage or HomePage',
+      ),
     );
     if (find.byType(LandingPage).evaluate().isNotEmpty) {
       await tester.tap(find.text('Continue offline'));
