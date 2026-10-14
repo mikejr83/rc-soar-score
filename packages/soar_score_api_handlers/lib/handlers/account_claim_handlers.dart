@@ -28,6 +28,7 @@ void addAccountClaimRoutes(Router router, Repository repository) {
     );
     return jsonResponse(
       LocalAccountClaimDto(
+        accountId: principal.accountId,
         localAccountId: alias.id,
         claimedAt: alias.claimedAt,
       ).toJson(),

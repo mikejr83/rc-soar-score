@@ -5,6 +5,7 @@ import 'package:logging/logging.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:soar_score_api/soar_score_api.dart';
+import 'package:soar_score_data/soar_score_data.dart';
 import 'package:soar_score_contest/platform/web_bootstrap.dart';
 
 import '../auth/auth_session.dart';
@@ -12,6 +13,7 @@ import '../auth/auth_session_factory.dart';
 import '../server/embedded_server.dart';
 import '../services/sync/app_sync.dart';
 import 'app_bootstrap.dart';
+import 'local_account_claimer.dart';
 import 'native_sync.dart';
 
 final _logger = Logger('NativeBootstrap');
@@ -27,8 +29,13 @@ final _logger = Logger('NativeBootstrap');
 /// fully disconnected offline application described in
 /// `plan/architecture-requirements/offline-usage.md` boots.
 class NativeBootstrap extends AppBootstrap {
-  NativeBootstrap._(this._server, this._remoteClient, this._auth, this.sync)
-    : _client = ApiClient(baseUrl: _server.baseUrl);
+  NativeBootstrap._(
+    this._server,
+    this._remoteClient,
+    this._auth,
+    this.sync,
+    this._claimer,
+  ) : _client = ApiClient(baseUrl: _server.baseUrl);
 
   final EmbeddedServer _server;
   final ApiClient _client;
@@ -37,6 +44,9 @@ class NativeBootstrap extends AppBootstrap {
 
   /// The sync engine, wired to the local database.
   final NativeSync sync;
+
+  /// Links the Local account to the signed-in one.
+  final LocalAccountClaimer _claimer;
 
   bool _closed = false;
 
@@ -50,8 +60,10 @@ class NativeBootstrap extends AppBootstrap {
   AppSync get appSync => sync.appSync;
 
   @override
-  void remoteReachabilityChanged({required bool reachable}) =>
-      sync.remoteReachabilityChanged(reachable: reachable);
+  void remoteReachabilityChanged({required bool reachable}) {
+    sync.remoteReachabilityChanged(reachable: reachable);
+    if (reachable) _claimer.connectivityRestored();
+  }
 
   @override
   AuthSession get authSession => _auth;
@@ -63,6 +75,7 @@ class NativeBootstrap extends AppBootstrap {
     }
     _logger.fine('Closing native bootstrap');
     _closed = true;
+    _claimer.stop();
     await sync.close();
     await _server.close();
     _remoteClient.close();
@@ -122,7 +135,14 @@ class NativeBootstrap extends AppBootstrap {
       remote: remote,
       databasePath: database,
     );
-    return NativeBootstrap._(server, remote, auth, sync);
+    final claimer = LocalAccountClaimer(
+      auth: auth,
+      local: LocalAccountRepository(server.database),
+      claim: remote.claimLocalAccount,
+      onClaimed: sync.accountClaimed,
+      onProblem: sync.appSync.claimProblemChanged,
+    )..start();
+    return NativeBootstrap._(server, remote, auth, sync, claimer);
   }
 
   /// Deletes the SQLite file at [path] and its journal files, if present.

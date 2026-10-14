@@ -25,6 +25,18 @@ enum SyncProblem {
     'This installation is no longer allowed to send changes for this '
         'contest. You can still read and export it.',
   ),
+  accountClaimBlocked(
+    'Account not linked',
+    'Your offline data could not be moved into your account because your '
+        'account already has a role, model or setting with the same name. '
+        'Rename the duplicate on this device, then sign in again. Nothing on '
+        'this device was changed or lost.',
+  ),
+  accountClaimFailed(
+    'Account not linked',
+    'Your offline data could not be linked to your account. Nothing on this '
+        'device was changed or lost. Sign in again to retry.',
+  ),
   unsupportedChange(
     'Update required',
     'The service sent a change this version cannot store. Update the app to '
