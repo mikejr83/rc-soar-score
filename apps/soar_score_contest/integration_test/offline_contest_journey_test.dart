@@ -16,8 +16,21 @@ void main() {
   ) async {
     await launchApp(tester);
 
-    await pumpUntilFound(tester, find.byType(LandingPage));
-    await tester.tap(find.text('Continue offline'));
+    // A restored sign-in (the developer's own Auth0 session) sends the router
+    // straight to the main page, so the landing page only shows when signed
+    // out.
+    await pumpUntilFound(
+      tester,
+      find.byType(LandingPage).evaluate().isNotEmpty
+          ? find.byType(LandingPage)
+          : find.byWidgetPredicate(
+              (w) => w is LandingPage || w is HomePage,
+              description: 'LandingPage or HomePage',
+            ),
+    );
+    if (find.byType(LandingPage).evaluate().isNotEmpty) {
+      await tester.tap(find.text('Continue offline'));
+    }
 
     await pumpUntilFound(tester, find.byType(HomePage));
     await pumpUntilFound(tester, find.text('Autumn F5J Classic'));
