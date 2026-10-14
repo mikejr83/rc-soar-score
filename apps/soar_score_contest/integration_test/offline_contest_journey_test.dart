@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:soar_score_contest/pages/home_page.dart';
@@ -31,9 +32,15 @@ void main() {
     }
 
     await pumpUntilFound(tester, find.byType(HomePage));
-    await pumpUntilFound(tester, find.text('Autumn F5J Classic'));
+    // The name shows in the list row and, on wide windows, in the detail
+    // pane, so target the row.
+    final contestRow = find.descendant(
+      of: find.byType(ListTile),
+      matching: find.text('Autumn F5J Classic'),
+    );
+    await pumpUntilFound(tester, contestRow);
 
-    await tester.tap(find.text('Autumn F5J Classic'));
+    await tester.tap(contestRow);
 
     // Contest scope shows the contest's own destinations.
     await pumpUntilFound(tester, find.text('Workspace'));
