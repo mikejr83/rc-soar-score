@@ -15,14 +15,20 @@ param(
 $ErrorActionPreference = 'Stop'
 Push-Location (Join-Path $PSScriptRoot '..\apps\soar_score_contest')
 try {
-    $flutterArgs = @(
-        'test', 'integration_test', '-d', $Device,
-        '--dart-define=SOAR_SCORE_DEMO=true',
-        '--dart-define=SOAR_SCORE_DEMO_RESET=true'
-    )
-    if ($Name) { $flutterArgs += @('--name', $Name) }
-    & flutter @flutterArgs
-    exit $LASTEXITCODE
+    # One flutter test run per file: the Windows app allows a single instance,
+    # and a second file's launch fails while the previous run's app is alive.
+    $status = 0
+    foreach ($file in Get-ChildItem integration_test -Filter '*_test.dart') {
+        $flutterArgs = @(
+            'test', "integration_test/$($file.Name)", '-d', $Device,
+            '--dart-define=SOAR_SCORE_DEMO=true',
+            '--dart-define=SOAR_SCORE_DEMO_RESET=true'
+        )
+        if ($Name) { $flutterArgs += @('--name', $Name) }
+        & flutter @flutterArgs
+        if ($LASTEXITCODE -ne 0) { $status = 1 }
+    }
+    exit $status
 }
 finally {
     Pop-Location

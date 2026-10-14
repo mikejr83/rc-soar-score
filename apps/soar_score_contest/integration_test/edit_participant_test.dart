@@ -33,6 +33,12 @@ void main() {
       'Avery',
     );
 
+    // The demo roster has no emails and the editor requires one.
+    await enterIn(
+      tester,
+      find.byKey(const ValueKey('email')),
+      'avery@example.com',
+    );
     await enterIn(tester, editorField('Club'), 'E2E Soaring Club');
     await enterIn(tester, editorField('City'), 'Evergreen');
     await saveParticipant(tester);

@@ -51,7 +51,8 @@ void main() {
     expect(demoPilots, _pilots.length);
 
     // Back to the contest list and the wizard.
-    await tapRail(tester, 'Contests');
+    // The contest scope's rail has no Contests entry; the breadcrumb leads back.
+    await tapVisible(tester, find.byKey(const ValueKey('breadcrumb-contests')));
     await pumpUntilFound(tester, find.byKey(const ValueKey('create-contest')));
     await tapVisible(tester, find.byKey(const ValueKey('create-contest')));
     await pumpUntilFound(tester, find.byType(NewContestWizardPage));
