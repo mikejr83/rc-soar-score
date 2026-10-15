@@ -75,6 +75,22 @@
       "console": "debugConsole"
     },
     {
+      "name": "soar_score_contest (E2E, current file)",
+      "type": "dart",
+      "request": "launch",
+      "program": "${file}",
+      "cwd": "apps/soar_score_contest",
+      "args": [
+        "-d",
+        "windows",
+        "--dart-define",
+        "SOAR_SCORE_DEMO=true",
+        "--dart-define",
+        "SOAR_SCORE_DEMO_RESET=true"
+      ],
+      "console": "debugConsole"
+    },
+    {
       "name": "soar_score_public (Web)",
       "type": "dart",
       "request": "launch",
