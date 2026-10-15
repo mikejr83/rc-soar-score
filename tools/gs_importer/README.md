@@ -8,18 +8,23 @@ app invokes them as child processes and parses their JSON output.
 
 ## Files
 
-| File                                   | Purpose                                         |
-| -------------------------------------- | ----------------------------------------------- |
-| `bin/x86/mdb-json.exe`                 | Export one table as JSON objects (one per line) |
-| `bin/x86/mdb-tables.exe`               | Print the user table names, space-separated     |
-| `bin/x86/libmdb-3.dll`                 | Runtime library for both exes                   |
-| `bin/x86/libgcc_s_dw2-1.dll`           | GCC runtime for libmdb-3.dll                    |
-| `bin/x86/libiconv-2.dll`               | Character-set conversion used by libmdb-3.dll   |
-| `bin/x86/libwinpthread-1.dll`          | Win32 pthreads used by libmdb-3.dll             |
-| `COPYING`, `COPYING.LIB`, `NOTICE.txt` | Upstream GPLv2 / LGPLv2+ license text           |
+| File                          | Purpose                                          |
+| ----------------------------- | ------------------------------------------------ |
+| `bin/x86/mdb-json.exe`        | Export one table as JSON objects (one per line)  |
+| `bin/x86/mdb-tables.exe`      | Print the user table names, space-separated      |
+| `bin/x86/libmdb-3.dll`        | Runtime library for both exes                    |
+| `bin/x86/libgcc_s_dw2-1.dll`  | GCC runtime for libmdb-3.dll                     |
+| `bin/x86/libiconv-2.dll`      | Character-set conversion used by libmdb-3.dll    |
+| `bin/x86/libwinpthread-1.dll` | Win32 pthreads used by libmdb-3.dll              |
+| `COPYING`                     | GPLv2 license text (the `mdb-*` exes)            |
+| `COPYING.LIB`                 | LGPL v2 license text (libmdb, upstream mdbtools) |
+| `LGPL-2.1.txt`                | LGPL 2.1 text (libiconv, win_pthreads)           |
+| `NOTICE.txt`                  | Provenance, SHA-256 checksums, GPL source offer  |
 
 Installation: `apps/soar_score_contest/windows/CMakeLists.txt` validates the
-six files and installs them into `gs_importer/` next to the app executable.
+six files in `bin/x86/` plus the four files above and installs them into
+`gs_importer/` next to the app executable, so the build output — and the
+installer that ships it — carries the license texts with the binaries.
 
 ## Invocation
 

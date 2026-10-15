@@ -132,3 +132,17 @@ foreach(f mdb-json.exe mdb-tables.exe libmdb-3.dll libgcc_s_dw2-1.dll libiconv-2
     DESTINATION "${CMAKE_INSTALL_PREFIX}/gs_importer"
     COMPONENT Runtime)
 endforeach()
+
+# The GPL/LGPL binaries in gs_importer need their license texts next to them,
+# and the source offer lives in NOTICE.txt, so the build output (and the
+# installer that ships it) carries the license files through as well.
+set(GS_IMPORTER_LICENSE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../tools/gs_importer")
+foreach(f COPYING COPYING.LIB LGPL-2.1.txt NOTICE.txt)
+  if(NOT EXISTS "${GS_IMPORTER_LICENSE_DIR}/${f}")
+    message(FATAL_ERROR
+      "gs_importer: missing license file tools/gs_importer/${f}")
+  endif()
+  install(FILES "${GS_IMPORTER_LICENSE_DIR}/${f}"
+    DESTINATION "${CMAKE_INSTALL_PREFIX}/gs_importer"
+    COMPONENT Runtime)
+endforeach()
