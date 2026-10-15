@@ -34,6 +34,3 @@ melos.iml
 # Agent items
 # Kilo agent plans
 /.kilo/plans
-# Third-party agent skill (Apache-2.0, auth0/agent-skills). Restore it with the
-# skills tool from skills-lock.json instead of redistributing it here.
-/.agents/skills/auth0/
