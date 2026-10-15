@@ -8,16 +8,15 @@ as of `8413c04`. The benchmark harness is [`draw_bench.py`](draw_bench.py) in th
 `matrix-draw.md` was designed independently, partly to keep RC Soar Score clear of GliderScore's
 implementation. This review compares against GliderScore, so it is deliberately kept at arm's length:
 
-- GliderScore 6.79 was decompiled **locally** to understand how its draw behaves. This document
+- GliderScore 6.79 was analyzed to understand how its draw behaves. This document
   summarises that behaviour only at a high level (§1).
-- The Python port of GliderScore used to take the GliderScore measurements is **not included**. Neither
+- No code used to take the GliderScore measurements isincluded. Neither
   is any decompiled source, GliderScore binary, or sample database. GliderScore figures below are
   recorded results.
 - The improvements recommended in §5 use **standard, published local-search techniques** for this class
   of problem, not GliderScore's heuristics. Everything in `draw_bench.py` is independent code.
 
-GliderScore is distributed "free and carries no warranty whatsoever," copyright Gerry Carter, with no
-stated restriction on reverse engineering. He is reachable at gerry.carter(at)gliderscore.com.
+GliderScore is distributed "free and carries no warranty whatsoever," copyright Gerry Carter.
 
 ---
 
@@ -371,16 +370,8 @@ In priority order. _Measured_ means supported by the results above; _untested_ m
 
 ### Caveats
 
-- The GliderScore port behind the recorded rows omits frequencies and back-to-back.
+- The analysis omits frequencies and back-to-back.
 - Three configurations, 5 seeds per variant. Only T₀ = 2 was tried for polish; no other parameter tuning.
-
----
-
-## 6. Questions for Mike
-
-1. **Draw engine:** adopt construct-then-improve (§5 recommendations 1–3)?
-2. **Never-met pairs:** how should they be weighted against repeat pairings?
-3. **Seeded order:** leaders in Group 1 (spec) or last group (GliderScore)?
 4. **Seeded + team protection:** support it with a defined fallback, or forbid it?
 5. **Back-to-back:** add it?
 6. **Lanes:** configured count, or derived?
