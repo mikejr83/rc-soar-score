@@ -5,7 +5,8 @@ import 'interact.dart';
 import 'launch_app.dart';
 
 /// From the contest list, selects the contest called [name] and opens it with
-/// the detail pane's View button. Waits for the contest rail.
+/// the detail pane's primary button (Open, Continue or View, by lifecycle
+/// state). Waits for the contest rail.
 Future<void> openContest(WidgetTester tester, String name) async {
   // The name shows in the list row and, on wide windows, in the detail
   // pane, so target the row.
@@ -16,12 +17,15 @@ Future<void> openContest(WidgetTester tester, String name) async {
   await pumpUntilFound(tester, row);
   await tapVisible(tester, row);
 
-  final view = find.descendant(
+  final open = find.descendant(
     of: find.byType(FilledButton),
-    matching: find.text('View'),
+    matching: find.byWidgetPredicate(
+      (w) => w is Text && const {'Open', 'Continue', 'View'}.contains(w.data),
+      description: 'Text Open, Continue or View',
+    ),
   );
-  await pumpUntilFound(tester, view);
-  await tapVisible(tester, view);
+  await pumpUntilFound(tester, open);
+  await tapVisible(tester, open);
   await pumpUntilFound(tester, find.text('Workspace'));
 }
 
