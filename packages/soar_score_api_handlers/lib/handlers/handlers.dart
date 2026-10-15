@@ -18,6 +18,8 @@ import 'package:soar_score_api_handlers/handlers/scores_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/sync_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/teams_handlers.dart';
 import 'package:soar_score_core/services/recalculation/recalculation_service.dart';
+import 'package:soar_score_core/import/glider_score_import_runner.dart';
+import 'package:soar_score_api_handlers/handlers/import_handlers.dart';
 
 ({Handler healthHandler, Handler apiHandler, Handler publicHandler})
 createHandlers(
@@ -28,6 +30,7 @@ createHandlers(
   bool publishingEnabled = false,
   RecalculationService? recalculation,
   SyncVersions? syncVersions,
+  GliderScoreImportRunner? gliderScoreImport,
 }) {
   final router = Router()
     ..get(
@@ -51,6 +54,7 @@ createHandlers(
   );
   addResultsRoutes(router, repository);
   addPublicationRoutes(router, repository, enabled: publishingEnabled);
+  addImportRoutes(router, gliderScoreImport);
   addSyncRoutes(
     router,
     repository,

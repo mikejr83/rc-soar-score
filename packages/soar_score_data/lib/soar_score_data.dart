@@ -7,6 +7,7 @@ library;
 
 export 'contests_table.dart';
 export 'database.dart';
+export 'import/glider_score_import_process_runner.dart';
 export 'migrate.dart';
 export 'postgres_config.dart';
 export 'schema/database_profile.dart';

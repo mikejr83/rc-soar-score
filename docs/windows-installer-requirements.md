@@ -21,6 +21,18 @@ Install everything in `build\windows\x64\runner\Release\`, not just the
 to the executable. Without the OpenSSL DLLs, sign-in fails at runtime even
 though the app starts.
 
+The GliderScore import helpers ship as a `gs_importer\` folder in that same
+output, next to the executable: `mdb-json.exe`, `mdb-tables.exe`, the
+MinGW runtime DLLs they load (`libmdb-3.dll`, `libgcc_s_dw2-1.dll`,
+`libiconv-2.dll`, `libwinpthread-1.dll`), and the GPL/LGPL license texts
+(`COPYING`, `COPYING.LIB`, `LGPL-2.1.txt`) with `NOTICE.txt` (the source
+offer is in `NOTICE.txt`). The app finds `gs_importer\mdb-json.exe` relative
+to its own directory, and answers 503 `import_unavailable` (not 404) if the
+folder or an executable is missing, so the import wizard stays visible even
+where the helpers were not installed. CMake installs those ten files, so a
+build from source already lays them down; the installer must carry the
+folder through (see [tools/gs_importer](../tools/gs_importer)/README.md).
+
 ### 2. Register the `com.soarscore.contest` URL scheme
 
 Register it for the installing user under `HKEY_CURRENT_USER` (no

@@ -405,4 +405,25 @@ void main() {
       await server.close();
     }
   });
+
+  test('the import route is served and answers 503 when the helpers are not shipped', () async {
+    final server = await startEmbeddedServer(databasePath);
+    final client = ApiClient(baseUrl: server.baseUrl);
+    try {
+      // The embedded server always wires the import route; without the
+      // gs_importer helpers next to the executable it answers 503
+      // `import_unavailable` instead of 404 (the route exists).
+      await expectLater(
+        client.importGliderScore('C:\\GliderScoreData.mdb'),
+        throwsA(
+          isA<ApiHttpError>()
+              .having((e) => e.statusCode, 'status', 503)
+              .having((e) => e.body, 'body', contains('import_unavailable')),
+        ),
+      );
+    } finally {
+      client.close();
+      await server.close();
+    }
+  });
 }

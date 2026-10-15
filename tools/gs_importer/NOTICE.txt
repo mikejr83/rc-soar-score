@@ -1,0 +1,53 @@
+gliderscore import helper - vendored third-party binaries
+
+Binaries in this directory (bin/x86/), with SHA-256 checksums. Verify them
+after downloading, e.g. with `sha256sum` (or `Get-FileHash -Algorithm SHA256`
+on Windows). The checksums equal the SHA-256 of each prebuilt artifact as
+committed in the fork repo at the commit below, so the shipped files can be
+checked against the exact upstream build:
+
+  8b12435f51a70d9affa5935e8184b274a30973150f0810e6a010a8c988157ae5  mdb-json.exe
+  71cfba2ae2e556b62c89c7485538fb57b0608ef3c2bbdce812c07d2e1947f992  mdb-tables.exe
+  0eda6348b81cc1aece20313c741b1f0de6c4b502888d9fcc8cbafbe1852678ff  libmdb-3.dll
+  f99611c9b7000dc50f4aeac26c590072bfecffdd1cba9903b6bed649eb14550c  libgcc_s_dw2-1.dll
+  74024fe9b8a1e4f8b9b7561b336b2916a20784699cdeef2948074f0e820c9bde  libiconv-2.dll
+  d58d1ad809314d1bf9bb9e45fc304c97ee434502669503dc0516bb04ed3a55c4  libwinpthread-1.dll
+
+Licensing (license texts in this directory):
+  mdb-json.exe, mdb-tables.exe
+      GNU General Public License v2 (mdbtools utilities) - COPYING.
+  libmdb-3.dll
+      GNU Lesser General Public License v2 (mdbtools library) -
+      COPYING.LIB.
+  libiconv-2.dll
+      GNU Lesser General Public License v2.1 (libiconv) - LGPL-2.1.txt.
+  libwinpthread-1.dll
+      MinGW-w64 winpthreads (from the MSYS2 MinGW32 toolchain,
+      https://www.mingw-w64.org), under its permissive MIT/BSD-style
+      license. It may accompany the app without imposing copyleft on it.
+      Its copyright notice is the one in the mingw-w64 source tree
+      (mingw-w64-libraries/winpthreads/COPYING).
+  libgcc_s_dw2-1.dll
+      GNU General Public License v3 with the GCC runtime exception (MinGW
+      GCC runtime) - freely redistributable as a sidecar, as with the other
+      runtime DLLs.
+
+Source:
+  The mdb JSON helpers are the MinGW32 (MSYS2) build of mdbtools from
+  https://github.com/mdbtools/mdbtools (GPLv2 / LGPL), vendored from the
+  fork https://github.com/lsgunth/mdbtools-win, pinned to commit
+  cefdd6d277b77a36f2073106c71ec84c65bece2d (master). The MinGW runtime
+  DLLs (libgcc, libiconv, libwinpthread) come from the same toolchain.
+  The corresponding source is the mdbtools source at that commit, together
+  with the MinGW-W64 source for the runtime DLLs. It is publicly available
+  at that commit, and we make a written offer to provide a copy of the
+  corresponding source to anyone in possession of these binaries, free of
+  charge, upon request.
+
+These executables and libraries are shipped as separate files and run as a
+separate process; they are never linked into Soar Score.
+
+They are 32-bit Windows binaries and run under WoW64 on x64 Windows. No C or
+C++ toolchain is required for the Soar Score build; CMake installs these
+files, together with the license texts, next to the app (see README.md and
+docs/windows-installer-requirements.md).
