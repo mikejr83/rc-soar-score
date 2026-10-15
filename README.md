@@ -335,4 +335,6 @@ Each test creates its own database (named `soar_test_...`) on the server and dro
 
 ## License
 
-RC Soar Score is licensed under the [GNU Affero General Public License v3.0](LICENSE) (AGPL-3.0). A modified version offered to users over a network must make its source available under the same licence. The planning and rule documentation (Markdown under `plan/`, `docs/` and `research/`) is licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Published contest results remain the data of the contest director and participants and are not licensed by this project. Contributions need no sign-off beyond the licence terms. Decision record: [#218](https://github.com/mikejr83/rc-soar-score/issues/218).
+Copyright (c) 2026 Mike Gardner.
+
+RC Soar Score is licensed under the [GNU Affero General Public License v3.0](LICENSE) (AGPL-3.0). A modified version offered to users over a network must make its source available under the same licence. The planning and rule documentation (Markdown under `plan/`, `docs/` and `research/`) is licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/); credit Mike Gardner and link to this repository when you reuse it. Published contest results remain the data of the contest director and participants and are not licensed by this project. Contributions need no sign-off beyond the licence terms. Decision record: [#218](https://github.com/mikejr83/rc-soar-score/issues/218).
