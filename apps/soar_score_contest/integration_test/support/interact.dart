@@ -52,11 +52,16 @@ Future<void> enterIn(WidgetTester tester, Finder field, String text) async {
   await tester.pump(const Duration(milliseconds: 200));
 }
 
-/// The `TextField` inside the widget with [key].
-Finder fieldWithKey(String key) => find.descendant(
-  of: find.byKey(ValueKey(key)),
-  matching: find.byType(TextField),
-);
+/// The `TextField` with [key]: the keyed widget itself or the one inside the
+/// keyed widget.
+Finder fieldWithKey(String key) {
+  final keyed = find.byKey(ValueKey(key));
+  final widgets = keyed.evaluate();
+  if (widgets.isNotEmpty && widgets.first.widget is TextField) {
+    return keyed;
+  }
+  return find.descendant(of: keyed, matching: find.byType(TextField));
+}
 
 /// The number in the configuration page's count tile called [label], for
 /// example `Scoring pilots`.
