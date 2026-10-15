@@ -5,6 +5,7 @@ import 'package:soar_score_api_handlers/middleware/middleware.dart';
 import 'package:soar_score_core/repositories/repository.dart';
 import 'package:soar_score_core/services/recalculation/recalculation_service.dart';
 import 'package:soar_score_core/services/sync/sync_versions.dart';
+import 'package:soar_score_core/import/glider_score_import_runner.dart';
 import 'package:logging/logging.dart';
 
 /// Auth layer for the `/api/v1` subtree.
@@ -46,6 +47,10 @@ final _logger = Logger('Handler');
 /// [publishingEnabled] turns on the publication routes and the public reads
 /// at `/public`, which need no sign-in. Only the hosted
 /// server sets it; without it they answer 409 `publishing_not_available`.
+///
+/// [gliderScoreImport], when provided, makes the native Windows instance
+/// serve `POST /imports/gliderscore`; without it the route answers 503
+/// `import_unavailable`. Only the embedded instance wires it.
 Handler buildApiHandler({
   required String name,
   required String displayName,
@@ -55,6 +60,7 @@ Handler buildApiHandler({
   AuthMiddleware? authMiddleware,
   bool publishingEnabled = false,
   RecalculationService? recalculation,
+  GliderScoreImportRunner? gliderScoreImport,
 }) {
   final handlers = createHandlers(
     name,
@@ -64,6 +70,7 @@ Handler buildApiHandler({
     publishingEnabled: publishingEnabled,
     recalculation: recalculation,
     syncVersions: SyncVersions.exactly(schemaRevision ?? 1),
+    gliderScoreImport: gliderScoreImport,
   );
   Handler api = handlers.apiHandler;
 

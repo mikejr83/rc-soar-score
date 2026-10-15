@@ -17,6 +17,7 @@ import '../dto/create_team_request.dart';
 import '../dto/draw_matrix_request.dart';
 import '../dto/enter_score_request.dart';
 import '../dto/health_dto.dart';
+import '../dto/import_gliderscore_request.dart';
 import '../dto/local_account_claim_dto.dart';
 import '../dto/late_add_request.dart';
 import '../dto/move_assignment_request.dart';
@@ -818,6 +819,56 @@ class ApiClient {
       response,
       uri,
       ContestArchiveDto.fromJson,
+    );
+  }
+
+  /// `POST /api/v1/imports/gliderscore` — reads the GliderScore `.mdb` at
+  /// [path] on the machine the embedded server runs on and returns its tables
+  /// as a snapshot for the wizard to review. [tables] limits which tables are
+  /// included; `null` includes every table, in database order.
+  ///
+  /// Only the native Windows build serves this route; the hosted server and
+  /// the web build answer 503 `import_unavailable`.
+  Future<GliderScoreImportResult> importGliderScore(
+    String path, {
+    List<String>? tables,
+  }) async {
+    final uri = _resolve('/api/v1/imports/gliderscore');
+    final response = await _send(
+      'POST',
+      uri,
+      body: ImportGliderscoreRequest(path: path, tables: tables).toJson(),
+    );
+    return _decode<GliderScoreImportResult>(
+      response,
+      uri,
+      _gliderScoreImportResultFromJson,
+    );
+  }
+
+  GliderScoreImportResult _gliderScoreImportResultFromJson(
+    Map<String, dynamic> json,
+  ) {
+    final tables = <GliderScoreTable>[];
+    for (final item in json['tables'] as List<dynamic>) {
+      final tableJson = item as Map<String, dynamic>;
+      final rows = <Map<String, Object?>>[];
+      for (final row in tableJson['rows'] as List<dynamic>) {
+        rows.add(Map<String, Object?>.from(row as Map<dynamic, dynamic>));
+      }
+      tables.add(
+        GliderScoreTable(
+          name: tableJson['name'] as String,
+          rows: rows,
+          rowCount: tableJson['rowCount'] as int,
+          rowCapExceeded: tableJson['rowCapExceeded'] as bool,
+        ),
+      );
+    }
+    return GliderScoreImportResult(
+      id: Id.parse(json['id'] as String),
+      sourceDbFile: json['sourceDbFile'] as String,
+      tables: tables,
     );
   }
 

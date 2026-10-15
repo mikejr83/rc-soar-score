@@ -123,7 +123,7 @@ install(FILES "${AOT_LIBRARY}" DESTINATION "${INSTALL_BUNDLE_DATA_DIR}"
 # $<TARGET_FILE_DIR:...> prefix resolves per configuration in the generated
 # install script.
 set(GS_IMPORTER_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../tools/gs_importer/bin/x86")
-foreach(f mdb-json.exe mdb-tables.exe libmdb-3.dll libgcc_s_dw2-1.dll)
+foreach(f mdb-json.exe mdb-tables.exe libmdb-3.dll libgcc_s_dw2-1.dll libiconv-2.dll libwinpthread-1.dll)
   if(NOT EXISTS "${GS_IMPORTER_DIR}/${f}")
     message(FATAL_ERROR
       "gs_importer: missing vendor binary tools/gs_importer/bin/x86/${f}")

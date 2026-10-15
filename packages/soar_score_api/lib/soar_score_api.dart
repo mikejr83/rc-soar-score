@@ -21,6 +21,7 @@ export 'dto/create_team_request.dart';
 export 'dto/draw_matrix_request.dart';
 export 'dto/enter_score_request.dart';
 export 'dto/health_dto.dart';
+export 'dto/import_gliderscore_request.dart';
 export 'dto/local_account_claim_dto.dart';
 export 'dto/late_add_request.dart';
 export 'dto/move_assignment_request.dart';

@@ -14,10 +14,12 @@ app invokes them as child processes and parses their JSON output.
 | `bin/x86/mdb-tables.exe`               | Print the user table names, space-separated     |
 | `bin/x86/libmdb-3.dll`                 | Runtime library for both exes                   |
 | `bin/x86/libgcc_s_dw2-1.dll`           | GCC runtime for libmdb-3.dll                    |
+| `bin/x86/libiconv-2.dll`               | Character-set conversion used by libmdb-3.dll   |
+| `bin/x86/libwinpthread-1.dll`          | Win32 pthreads used by libmdb-3.dll             |
 | `COPYING`, `COPYING.LIB`, `NOTICE.txt` | Upstream GPLv2 / LGPLv2+ license text           |
 
 Installation: `apps/soar_score_contest/windows/CMakeLists.txt` validates the
-four files and installs them into `gs_importer/` next to the app executable.
+six files and installs them into `gs_importer/` next to the app executable.
 
 ## Invocation
 

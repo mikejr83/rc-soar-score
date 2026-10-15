@@ -14,6 +14,7 @@ class HandlerHarness {
     this.principal, {
     bool publishingEnabled = false,
     RecalculationService? recalculation,
+    GliderScoreImportRunner? gliderScoreImport,
   }) : contests = StubContestRepository() {
     repository = StubRepository(contests);
     handler = buildApiHandler(
@@ -24,6 +25,7 @@ class HandlerHarness {
       authMiddleware: fixedPrincipal(Principal(accountId: principal)),
       publishingEnabled: publishingEnabled,
       recalculation: recalculation,
+      gliderScoreImport: gliderScoreImport,
     );
   }
 

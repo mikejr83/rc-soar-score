@@ -80,6 +80,7 @@ class EmbeddedServer {
       schemaRevision: _database.schemaVersion,
       repository: _repository,
       authMiddleware: fixedPrincipal(Principal(accountId: _localAccountId)),
+      gliderScoreImport: GliderScoreImportProcessRunner(),
     );
     _server = await shelf_io.serve(handler, 'localhost', 0);
   }

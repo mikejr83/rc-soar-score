@@ -9,6 +9,7 @@ export 'contest_scores.dart';
 export 'contest_lifecycle.dart';
 export 'contests_service.dart';
 export 'discipline_config_validator.dart';
+export 'glider_score_import_service.dart';
 export 'matrix/acceptance_table.dart';
 export 'matrix/assignment_move_service.dart';
 export 'matrix/basic_draw.dart';
