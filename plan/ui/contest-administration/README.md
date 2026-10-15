@@ -22,6 +22,7 @@ Prompts handed to a design tool to produce visual designs, kept in [`briefs/`](b
 - [`briefs/landings.md`](briefs/landings.md) - Design prompt for the landing tables page and the new landing table form.
 - [`briefs/matrix.md`](briefs/matrix.md) - Design prompt for the matrix screen (first draw and matrix grid).
 - [`briefs/new-contest-wizard.md`](briefs/new-contest-wizard.md) - Design prompt for the new contest wizard.
+- [`briefs/scoring.md`](briefs/scoring.md) - Design prompt for the scoring screen (official score entry for one group).
 - [`briefs/workspace.md`](briefs/workspace.md) - Design prompt for the contest workspace (overview, next step, progress, and contest controls).
 
 ## Technology and visual rules
