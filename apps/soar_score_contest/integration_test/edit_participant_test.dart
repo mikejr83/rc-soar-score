@@ -33,7 +33,11 @@ void main() {
       'Avery',
     );
 
-    await enterIn(tester, editorField('Email'), 'avery.brooks@example.com');
+    await enterIn(
+      tester,
+      find.byKey(const ValueKey('email')),
+      'avery.brooks@example.com',
+    );
     await enterIn(tester, editorField('Club'), 'E2E Soaring Club');
     await enterIn(tester, editorField('City'), 'Evergreen');
     await saveParticipant(tester);
