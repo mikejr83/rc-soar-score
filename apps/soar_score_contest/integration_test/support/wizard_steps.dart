@@ -33,12 +33,29 @@ Future<void> wizardPrimary(WidgetTester tester) =>
 String wizardStepTitle(WidgetTester tester) =>
     tester.widget<Text>(find.byKey(const ValueKey('wizard-step-title'))).data!;
 
+/// The label of the rail's create-contest entry: its tooltip while the rail
+/// is collapsed (an icon button), its text once the rail is expanded.
+String createContestEntryLabel(WidgetTester tester) {
+  final entry = find.byKey(const ValueKey('create-contest'));
+  final button = tester.widget<FloatingActionButton>(entry);
+  if (button.tooltip != null) {
+    return button.tooltip!;
+  }
+  return tester
+      .widget<Text>(find.descendant(of: entry, matching: find.byType(Text)))
+      .data!;
+}
+
 /// Waits for the step called [title].
 Future<void> pumpUntilStep(WidgetTester tester, String title) => pumpUntilFound(
   tester,
-  find.descendant(
-    of: find.byKey(const ValueKey('wizard-step-title')),
-    matching: find.text(title),
+  // The key sits on the title's Text itself, so match the Text by its data.
+  find.byWidgetPredicate(
+    (w) =>
+        w is Text &&
+        w.key == const ValueKey('wizard-step-title') &&
+        w.data == title,
+    description: 'wizard step title "$title"',
   ),
 );
 

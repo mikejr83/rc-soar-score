@@ -14,11 +14,7 @@ void main() {
   testWidgets('leaving the wizard with errors asks first, and the draft '
       'resumes through Continue configuration', (tester) async {
     await openMainPage(tester);
-    final entry = find.byKey(const ValueKey('create-contest'));
-    expect(
-      find.descendant(of: entry, matching: find.text('Create contest')),
-      findsOneWidget,
-    );
+    expect(createContestEntryLabel(tester), 'Create contest');
     await openWizard(tester);
 
     // Only the name, then Next shows the errors of the other fields.
@@ -47,10 +43,8 @@ void main() {
     await pumpUntilFound(tester, find.byType(HomePage));
 
     // The entry now offers to continue, and the draft is as it was left.
-    await pumpUntilFound(
-      tester,
-      find.descendant(of: entry, matching: find.text('Continue configuration')),
-    );
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(createContestEntryLabel(tester), 'Continue configuration');
     await openWizard(tester);
     expect(find.text('E2E Draft Contest'), findsOneWidget);
     expect(find.byKey(const ValueKey('draft-status')), findsOneWidget);
