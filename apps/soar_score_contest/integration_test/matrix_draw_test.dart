@@ -34,8 +34,8 @@ void main() {
     await pumpUntilFound(tester, find.text('No matrix drawn yet'));
     expect(_fairness, findsNothing);
 
-    await enterIn(tester, fieldWithKey('draw-rounds'), '3');
-    await enterIn(tester, fieldWithKey('draw-groups'), '2');
+    await enterIn(tester, find.byKey(const ValueKey('draw-rounds')), '3');
+    await enterIn(tester, find.byKey(const ValueKey('draw-groups')), '2');
     // Six pilots in two groups.
     await pumpUntilFound(tester, find.text('2 groups: 3, 3 pilots'));
 
