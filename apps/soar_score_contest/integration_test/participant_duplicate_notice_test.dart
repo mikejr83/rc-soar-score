@@ -26,13 +26,26 @@ void main() {
     );
     expect(find.textContaining('E2E Original already uses'), findsOneWidget);
 
-    // Use existing opens the person who already has the email.
+    // Use existing opens the editor of the person who already has the email.
     await tapVisible(tester, find.byKey(const ValueKey('use-existing')));
+    final lastName = find.byKey(const ValueKey('last-name'));
+    await pumpUntilFound(tester, lastName);
+    String textOf(Finder field) =>
+        tester.widget<TextFormField>(field).controller!.text;
+    // The loaded profile fills the fields a moment after the editor opens.
     await pumpUntilFound(
       tester,
-      find.byKey(const ValueKey('edit-participant')),
+      find.byWidgetPredicate(
+        (w) =>
+            w is TextFormField &&
+            w.key == const ValueKey('last-name') &&
+            w.controller!.text == 'Original',
+        description: 'last name field with Original',
+      ),
     );
-    expect(find.text(_email), findsWidgets);
+    expect(textOf(find.byKey(const ValueKey('email'))), _email);
+    await tapVisible(tester, find.byKey(const ValueKey('cancel-participant')));
+    await pumpUntilFound(tester, participantSearch);
     await searchParticipants(tester, 'E2E Twin');
     await pumpUntilFound(tester, find.text('No participants match.'));
 
