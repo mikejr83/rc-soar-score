@@ -34,14 +34,14 @@ void main() {
     );
 
     // Leaving asks; Keep editing stays.
-    await tapRail(tester, 'Contests');
+    await tapVisible(tester, find.byKey(const ValueKey('breadcrumb-contests')));
     await pumpUntilFound(tester, find.text('Leave new contest?'));
     await tapVisible(tester, find.text('Keep editing'));
     expect(find.byType(NewContestWizardPage), findsOneWidget);
     expect(find.text('Leave new contest?'), findsNothing);
 
     // Leave goes to the contest list.
-    await tapRail(tester, 'Contests');
+    await tapVisible(tester, find.byKey(const ValueKey('breadcrumb-contests')));
     await pumpUntilFound(tester, find.text('Leave new contest?'));
     await tapVisible(tester, find.widgetWithText(FilledButton, 'Leave'));
     await pumpUntilFound(tester, find.byType(HomePage));

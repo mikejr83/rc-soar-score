@@ -19,7 +19,7 @@ void main() {
     await openConfiguration(tester);
     final sourcePilots = configurationCount(tester, 'Scoring pilots');
 
-    await tapRail(tester, 'Contests');
+    await tapVisible(tester, find.byKey(const ValueKey('breadcrumb-contests')));
     await openWizard(tester);
 
     // 1. Copy configuration and all pilots.
