@@ -41,9 +41,14 @@ void main() {
 
     await tapVisible(tester, _drawButton);
     await pumpUntilFound(tester, find.text('Draw the matrix?'));
-    expect(find.text('6 scoring pilots'), findsOneWidget);
-    expect(find.text('3 rounds'), findsOneWidget);
-    expect(find.text('2 groups per round (3, 3 pilots)'), findsOneWidget);
+    // Scoped to the dialog: the matrix page behind it shows the same counts.
+    Finder inDialog(String text) => find.descendant(
+      of: find.byType(AlertDialog),
+      matching: find.text(text),
+    );
+    expect(inDialog('6 scoring pilots'), findsOneWidget);
+    expect(inDialog('3 rounds'), findsOneWidget);
+    expect(inDialog('2 groups per round (3, 3 pilots)'), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('confirm-draw')));
     await pumpUntilFound(tester, _fairness);
