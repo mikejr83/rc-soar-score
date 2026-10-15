@@ -1,0 +1,22 @@
+gliderscore import helper - vendored third-party binaries
+
+Binaries in this directory (bin/x86/):
+  mdb-json.exe
+  mdb-tables.exe
+  libmdb-3.dll
+  libgcc_s_dw2-1.dll
+
+Source: https://github.com/lsgunth/mdbtools-win
+Commit: cefdd6d277b77a36f2073106c71ec84c65bece2d (master)
+Built there with MinGW32 (MSYS2) against mdbtools 1.0.0.
+
+Upstream project: https://github.com/mdbtools/mdbtools (GPLv2 / LGPLv2+).
+License text: COPYING (GPLv2) and COPYING.LIB (LGPL v2 or later) in this
+directory.
+
+These executables and libraries are shipped as separate files and run as a
+separate process; they are never linked into Soar Score.
+
+They are 32-bit Windows binaries and run under WoW64 on x64 Windows. No C or
+C++ toolchain is required for the Soar Score build; CMake installs these
+files next to the app (see README.md).
