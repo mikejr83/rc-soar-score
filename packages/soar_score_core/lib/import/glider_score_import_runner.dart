@@ -19,7 +19,11 @@ abstract interface class GliderScoreImportRunner {
 
 /// The answer of [GliderScoreImportRunner.availability].
 class ImportAvailability {
-  const ImportAvailability({required this.available, this.executablePath, this.reason});
+  const ImportAvailability({
+    required this.available,
+    this.executablePath,
+    this.reason,
+  });
 
   final bool available;
 

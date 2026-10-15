@@ -64,8 +64,12 @@ void main() {
     final runner = FakeGliderScoreImportRunner(
       allTables: ['Scores', 'Pilots'],
       rowsByTable: {
-        'Scores': [{'pilot': 'J. Smith', 'score': 12}],
-        'Pilots': [{'name': 'J. Smith'}],
+        'Scores': [
+          {'pilot': 'J. Smith', 'score': 12},
+        ],
+        'Pilots': [
+          {'name': 'J. Smith'},
+        ],
       },
     );
     final api = HandlerHarness(_owner, gliderScoreImport: runner);
@@ -83,33 +87,40 @@ void main() {
     final tables = (body['tables'] as List<Object?>)
         .cast<Map<String, Object?>>();
     expect([for (final t in tables) t['name']], ['Scores', 'Pilots']);
-    final scores = tables
-        .singleWhere((t) => t['name'] == 'Scores')['rows'] as List<Object?>;
+    final scores =
+        tables.singleWhere((t) => t['name'] == 'Scores')['rows']
+            as List<Object?>;
     expect((scores.single as Map<Object?, Object?>)['pilot'], 'J. Smith');
   });
 
-  test('requested subset returns only those tables, in request order', () async {
-    final runner = FakeGliderScoreImportRunner(
-      allTables: ['Scores', 'Pilots', 'Comps'],
-      rowsByTable: {
-        'Scores': [{}],
-        'Pilots': [{}],
-        'Comps': [{}],
-      },
-    );
-    final api = HandlerHarness(_owner, gliderScoreImport: runner);
+  test(
+    'requested subset returns only those tables, in request order',
+    () async {
+      final runner = FakeGliderScoreImportRunner(
+        allTables: ['Scores', 'Pilots', 'Comps'],
+        rowsByTable: {
+          'Scores': [{}],
+          'Pilots': [{}],
+          'Comps': [{}],
+        },
+      );
+      final api = HandlerHarness(_owner, gliderScoreImport: runner);
 
-    final response = await api.send(
-      'POST',
-      '/imports/gliderscore',
-      body: {'path': _dbPath, 'tables': ['Comps', 'Scores']},
-    );
+      final response = await api.send(
+        'POST',
+        '/imports/gliderscore',
+        body: {
+          'path': _dbPath,
+          'tables': ['Comps', 'Scores'],
+        },
+      );
 
-    expect(response.statusCode, 201);
-    final tables = ((await api.json(response))['tables']! as List<Object?>)
-        .cast<Map<String, Object?>>();
-    expect([for (final t in tables) t['name']], ['Comps', 'Scores']);
-  });
+      expect(response.statusCode, 201);
+      final tables = ((await api.json(response))['tables']! as List<Object?>)
+          .cast<Map<String, Object?>>();
+      expect([for (final t in tables) t['name']], ['Comps', 'Scores']);
+    },
+  );
 
   test('a missing or blank path is a 400', () async {
     final api = HandlerHarness(
@@ -120,7 +131,11 @@ void main() {
       <String, Object?>{},
       {'path': '   '},
     ]) {
-      final response = await api.send('POST', '/imports/gliderscore', body: body);
+      final response = await api.send(
+        'POST',
+        '/imports/gliderscore',
+        body: body,
+      );
       expect(response.statusCode, 400, reason: '$body');
     }
   });
@@ -178,10 +193,7 @@ void main() {
       ),
     );
 
-    expect(
-      await expectError(api, 404, {'path': _dbPath}),
-      'import_not_found',
-    );
+    expect(await expectError(api, 404, {'path': _dbPath}), 'import_not_found');
   });
 
   test('a corrupt database is a 422 import_corrupt', () async {
@@ -192,10 +204,7 @@ void main() {
       ),
     );
 
-    expect(
-      await expectError(api, 422, {'path': _dbPath}),
-      'import_corrupt',
-    );
+    expect(await expectError(api, 422, {'path': _dbPath}), 'import_corrupt');
   });
 
   test('a malformed table is a 422 import_malformed', () async {
@@ -207,10 +216,7 @@ void main() {
       ),
     );
 
-    expect(
-      await expectError(api, 422, {'path': _dbPath}),
-      'import_malformed',
-    );
+    expect(await expectError(api, 422, {'path': _dbPath}), 'import_malformed');
   });
 
   test('a requested table that is not in the database is a 404', () async {
@@ -218,12 +224,17 @@ void main() {
       _owner,
       gliderScoreImport: FakeGliderScoreImportRunner(
         allTables: ['Scores'],
-        rowsByTable: {'Scores': [{}]},
+        rowsByTable: {
+          'Scores': [{}],
+        },
       ),
     );
 
     expect(
-      await expectError(api, 404, {'path': _dbPath, 'tables': ['Comps']}),
+      await expectError(api, 404, {
+        'path': _dbPath,
+        'tables': ['Comps'],
+      }),
       'import_table_not_found',
     );
   });

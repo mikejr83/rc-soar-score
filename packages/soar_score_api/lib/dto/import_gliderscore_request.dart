@@ -4,10 +4,7 @@
 /// machine the embedded server runs on. [tables] is the set of table names
 /// to include; `null` means every table, in database order.
 class ImportGliderscoreRequest {
-  const ImportGliderscoreRequest({
-    required this.path,
-    this.tables,
-  });
+  const ImportGliderscoreRequest({required this.path, this.tables});
 
   factory ImportGliderscoreRequest.fromJson(Map<String, dynamic> json) {
     final path = json['path'];

@@ -51,24 +51,26 @@ void main() {
       );
     });
 
-    test('is unavailable when mdb-json.exe is missing from the folder',
-        () async {
-      final empty = io.Directory.systemTemp.createTempSync('gs_empty');
-      final runner = GliderScoreImportProcessRunner(
-        helperDirectory: empty.path,
-      );
+    test(
+      'is unavailable when mdb-json.exe is missing from the folder',
+      () async {
+        final empty = io.Directory.systemTemp.createTempSync('gs_empty');
+        final runner = GliderScoreImportProcessRunner(
+          helperDirectory: empty.path,
+        );
 
-      final availability = await runner.availability();
-      expect(availability.available, isFalse);
-      expect(availability.reason, contains('mdb-json.exe'));
-      empty.deleteSync(recursive: true);
-    });
+        final availability = await runner.availability();
+        expect(availability.available, isFalse);
+        expect(availability.reason, contains('mdb-json.exe'));
+        empty.deleteSync(recursive: true);
+      },
+    );
 
     test('locates the gs_importer folder next to the executable', () async {
       final install = io.Directory.systemTemp.createTempSync('gs_install');
-      final helperFolder =
-          io.Directory('${install.path}${io.Platform.pathSeparator}gs_importer')
-              ..createSync();
+      final helperFolder = io.Directory(
+        '${install.path}${io.Platform.pathSeparator}gs_importer',
+      )..createSync();
       io.File('${helperFolder.path}${io.Platform.pathSeparator}mdb-json.exe')
           .writeAsStringSync('fake');
       final runner = GliderScoreImportProcessRunner(
@@ -157,8 +159,11 @@ void main() {
     test('maps a spawn failure to an availability error', () async {
       final runner = GliderScoreImportProcessRunner(
         helperDirectory: helperDir.path,
-        runProcess: (args) async =>
-            throw io.ProcessException(args.first, args.skip(1).toList(), 'not found'),
+        runProcess: (args) async => throw io.ProcessException(
+          args.first,
+          args.skip(1).toList(),
+          'not found',
+        ),
         databaseFileExists: (_) => true,
       );
 
@@ -174,8 +179,7 @@ void main() {
     });
 
     test('reports a missing database file as not found', () async {
-      final missing =
-          r'C:\data\gone.mdb';
+      final missing = r'C:\data\gone.mdb';
       final runner = GliderScoreImportProcessRunner(
         helperDirectory: helperDir.path,
         databaseFileExists: (_path) => false,
@@ -197,19 +201,21 @@ void main() {
     });
 
     test('streams one decoded row per JSON line, skipping blanks', () async {
-      final stream = (
-        '{"CompNo":1,"CompDate":"2009-03-06T00:00:00"}\n'
-        '\n'
-        '{"CompNo":2}\n'
-      );
+      final stream =
+          ('{"CompNo":1,"CompDate":"2009-03-06T00:00:00"}\n'
+          '\n'
+          '{"CompNo":2}\n');
       final runner = GliderScoreImportProcessRunner(
         helperDirectory: helperDir.path,
-        runProcess: stub(stream, expectArgs: (args) {
-          expect(args.length, 5);
-          expect(args.first, endsWith('mdb-json.exe'));
-          expect(args.skip(1).take(2).toList(), ['-T', '%Y-%m-%dT%H:%M:%S']);
-          expect(args.sublist(3), ['C:\\data\\db.mdb', 'Scores']);
-        }),
+        runProcess: stub(
+          stream,
+          expectArgs: (args) {
+            expect(args.length, 5);
+            expect(args.first, endsWith('mdb-json.exe'));
+            expect(args.skip(1).take(2).toList(), ['-T', '%Y-%m-%dT%H:%M:%S']);
+            expect(args.sublist(3), ['C:\\data\\db.mdb', 'Scores']);
+          },
+        ),
         databaseFileExists: (_) => true,
       );
 
@@ -229,8 +235,10 @@ void main() {
         databaseFileExists: (_) => true,
       );
 
-      final rows =
-          await (await runner.exportTable('db.mdb', 'Pilots')).rows.toList();
+      final rows = await (await runner.exportTable(
+        'db.mdb',
+        'Pilots',
+      )).rows.toList();
       expect(rows.single, {'name': 'Léa'});
     });
 
@@ -294,7 +302,8 @@ void main() {
   group('integration against the vendored helpers (opt-in)', () {
     test('lists the reference database tables and exports Scores', () async {
       const defaultDb = r'S:\Shared\GliderScoreData.mdb';
-      final dbPath = io.Platform.environment['GS_IMPORTER_TEST_DB'] ?? defaultDb;
+      final dbPath =
+          io.Platform.environment['GS_IMPORTER_TEST_DB'] ?? defaultDb;
       final binDir = [
         io.Directory.current.path,
         '..',
@@ -305,7 +314,8 @@ void main() {
         'x86',
       ].join(io.Platform.pathSeparator);
       if (!io.Platform.isWindows ||
-          !io.File('$binDir${io.Platform.pathSeparator}mdb-json.exe').existsSync() ||
+          !io.File('$binDir${io.Platform.pathSeparator}mdb-json.exe')
+              .existsSync() ||
           !io.File(dbPath).existsSync()) {
         return; // not Windows, helpers not checked out, or DB not present
       }
@@ -326,9 +336,8 @@ void main() {
   });
 }
 
-List<int> _stringToBytes(Object? value) =>
-    value == null
-        ? const []
-        : value is String
-              ? utf8.encode(value)
-              : value as List<int>;
+List<int> _stringToBytes(Object? value) => value == null
+    ? const []
+    : value is String
+    ? utf8.encode(value)
+    : value as List<int>;

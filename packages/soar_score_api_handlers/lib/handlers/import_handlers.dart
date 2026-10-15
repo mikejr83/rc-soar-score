@@ -16,7 +16,10 @@ import 'package:soar_score_core/soar_score_core.dart';
 /// [createHandlers]; the hosted server and the web build omit it and get a
 /// 503 `import_unavailable` for the route, so its absence never takes the
 /// server down.
-void addImportRoutes(Router router, GliderScoreImportRunner? gliderScoreImport) {
+void addImportRoutes(
+  Router router,
+  GliderScoreImportRunner? gliderScoreImport,
+) {
   router.post('/imports/gliderscore', (Request request) async {
     requirePrincipal(request);
     if (gliderScoreImport == null) {

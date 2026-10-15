@@ -35,7 +35,8 @@ class GliderScoreImportService {
     final availability = await runner.availability();
     if (!availability.available) {
       throw ImportUnavailableError(
-        availability.reason ?? 'GliderScore import is unavailable on this machine',
+        availability.reason ??
+            'GliderScore import is unavailable on this machine',
       );
     }
 
@@ -57,8 +58,7 @@ class GliderScoreImportService {
     );
   }
 
-  bool _isMdb(String file) =>
-      file.toLowerCase().endsWith('.mdb');
+  bool _isMdb(String file) => file.toLowerCase().endsWith('.mdb');
 
   /// The requested names, in the order asked, after checking each exists.
   List<String> _validateRequested(Set<String> tables, List<String> all) {

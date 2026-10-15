@@ -67,7 +67,12 @@ Middleware errorMappingMiddleware() =>
       } on AccountClaimError catch (e) {
         return errorResponse(409, e.code, e.message, requestId: requestId);
       } on GliderScoreImportError catch (e) {
-        return errorResponse(e.statusCode, e.code, e.message, requestId: requestId);
+        return errorResponse(
+          e.statusCode,
+          e.code,
+          e.message,
+          requestId: requestId,
+        );
       } on BackendOnlyError catch (e) {
         return errorResponse(409, 'backend_only', '$e', requestId: requestId);
       } on ContestStateError catch (e) {

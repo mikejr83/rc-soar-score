@@ -16,10 +16,10 @@ class GliderScoreImportProcessRunner implements GliderScoreImportRunner {
     String Function()? resolvedExecutable,
     Future<io.ProcessResult> Function(List<String>)? runProcess,
     bool Function(String path)? databaseFileExists,
-  })  : _helperDirectoryOverride = helperDirectory,
-        _resolvedExecutable = resolvedExecutable,
-        _runProcess = runProcess ?? _systemProcessRun,
-        _databaseFileExists = databaseFileExists ?? _isDatabaseFile;
+  }) : _helperDirectoryOverride = helperDirectory,
+       _resolvedExecutable = resolvedExecutable,
+       _runProcess = runProcess ?? _systemProcessRun,
+       _databaseFileExists = databaseFileExists ?? _isDatabaseFile;
 
   final String? _helperDirectoryOverride;
   final String Function()? _resolvedExecutable;
@@ -27,7 +27,8 @@ class GliderScoreImportProcessRunner implements GliderScoreImportRunner {
   final bool Function(String path) _databaseFileExists;
 
   static bool _isDatabaseFile(String path) =>
-      io.File(path).existsSync() && io.FileSystemEntity.typeSync(path) == io.FileSystemEntityType.file;
+      io.File(path).existsSync() &&
+      io.FileSystemEntity.typeSync(path) == io.FileSystemEntityType.file;
 
   static Future<io.ProcessResult> _systemProcessRun(List<String> args) =>
       io.Process.run(args.first, args.skip(1).toList());
@@ -48,10 +49,7 @@ class GliderScoreImportProcessRunner implements GliderScoreImportRunner {
         reason: 'mdb-json.exe was not found in $dir',
       );
     }
-    return ImportAvailability(
-      available: true,
-      executablePath: executable,
-    );
+    return ImportAvailability(available: true, executablePath: executable);
   }
 
   @override
@@ -99,10 +97,7 @@ class GliderScoreImportProcessRunner implements GliderScoreImportRunner {
       }
       rows.add(decoded);
     }
-    return ImportTableStream(
-      table: table,
-      rows: Stream.fromIterable(rows),
-    );
+    return ImportTableStream(table: table, rows: Stream.fromIterable(rows));
   }
 
   /// The helper folder: the override, the environment variable, else the

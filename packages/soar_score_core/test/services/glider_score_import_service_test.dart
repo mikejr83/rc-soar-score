@@ -15,10 +15,8 @@ class _FakeRunner implements GliderScoreImportRunner {
   final Map<String, List<Map<String, Object?>>> rowsByTable;
 
   @override
-  Future<ImportAvailability> availability() async => ImportAvailability(
-    available: available,
-    reason: unavailableReason,
-  );
+  Future<ImportAvailability> availability() async =>
+      ImportAvailability(available: available, reason: unavailableReason);
 
   @override
   Future<List<String>> listTables(String dbPath) async => tables;
@@ -36,38 +34,39 @@ Map<String, Object?> _row(Object? id) => {'id': id};
 
 void main() {
   group('GliderScoreImportService.importFile', () {
-    test('imports every table in database order when none are requested',
-        () async {
-      final service = GliderScoreImportService();
-      final result = await service.importFile(
-        _FakeRunner(
-          tables: const ['Scores', 'Aircrafts'],
-          rowsByTable: const {
-            'Scores': [
-              {'id': 1, 'name': 'A'},
-              {'id': 2, 'name': 'B'},
-            ],
-            'Aircrafts': [
-              {'id': 10, 'type': '18m'},
-            ],
-          },
-        ),
-        dbPath: 'C:\\data\\GliderScoreData.mdb',
-      );
+    test(
+      'imports every table in database order when none are requested',
+      () async {
+        final service = GliderScoreImportService();
+        final result = await service.importFile(
+          _FakeRunner(
+            tables: const ['Scores', 'Aircrafts'],
+            rowsByTable: const {
+              'Scores': [
+                {'id': 1, 'name': 'A'},
+                {'id': 2, 'name': 'B'},
+              ],
+              'Aircrafts': [
+                {'id': 10, 'type': '18m'},
+              ],
+            },
+          ),
+          dbPath: 'C:\\data\\GliderScoreData.mdb',
+        );
 
-      expect(result.id, isA<Id>());
-      expect(result.sourceDbFile, 'GliderScoreData.mdb');
-      expect(result.tables.map((t) => t.name), ['Scores', 'Aircrafts']);
-      expect(result.tables.first.rows, [
-        {'id': 1, 'name': 'A'},
-        {'id': 2, 'name': 'B'},
-      ]);
-      expect(result.tables.first.rowCount, 2);
-      expect(result.tables.first.rowCapExceeded, isFalse);
-    });
+        expect(result.id, isA<Id>());
+        expect(result.sourceDbFile, 'GliderScoreData.mdb');
+        expect(result.tables.map((t) => t.name), ['Scores', 'Aircrafts']);
+        expect(result.tables.first.rows, [
+          {'id': 1, 'name': 'A'},
+          {'id': 2, 'name': 'B'},
+        ]);
+        expect(result.tables.first.rowCount, 2);
+        expect(result.tables.first.rowCapExceeded, isFalse);
+      },
+    );
 
-    test('imports only the requested tables, in the requested order',
-        () async {
+    test('imports only the requested tables, in the requested order', () async {
       final service = GliderScoreImportService();
       final result = await service.importFile(
         _FakeRunner(
@@ -85,38 +84,41 @@ void main() {
       expect(result.tables.map((t) => t.name), ['Pilots', 'Scores']);
     });
 
-    test('throws ImportTableMissingError for a table the database lacks',
-        () async {
-      final service = GliderScoreImportService();
-      final runner = _FakeRunner(tables: const ['Scores']);
+    test(
+      'throws ImportTableMissingError for a table the database lacks',
+      () async {
+        final service = GliderScoreImportService();
+        final runner = _FakeRunner(tables: const ['Scores']);
 
-      await expectLater(
-        service.importFile(runner, dbPath: 'db.mdb', tables: {'Missing'}),
-        throwsA(
-          isA<ImportTableMissingError>()
-              .having((e) => e.code, 'code', 'import_table_not_found')
-              .having((e) => e.statusCode, 'statusCode', 404)
-              .having((e) => e.message, 'message', contains('Missing')),
-        ),
-      );
-    });
+        await expectLater(
+          service.importFile(runner, dbPath: 'db.mdb', tables: {'Missing'}),
+          throwsA(
+            isA<ImportTableMissingError>()
+                .having((e) => e.code, 'code', 'import_table_not_found')
+                .having((e) => e.statusCode, 'statusCode', 404)
+                .having((e) => e.message, 'message', contains('Missing')),
+          ),
+        );
+      },
+    );
 
-    test('throws ImportUnsupportedFileError for a file without a .mdb name',
-        () async {
-      final service = GliderScoreImportService();
+    test(
+      'throws ImportUnsupportedFileError for a file without a .mdb name',
+      () async {
+        final service = GliderScoreImportService();
 
-      await expectLater(
-        service.importFile(_FakeRunner(), dbPath: 'C:\\data\\scores.json'),
-        throwsA(
-          isA<ImportUnsupportedFileError>()
-              .having((e) => e.code, 'code', 'import_unsupported')
-              .having((e) => e.statusCode, 'statusCode', 415),
-        ),
-      );
-    });
+        await expectLater(
+          service.importFile(_FakeRunner(), dbPath: 'C:\\data\\scores.json'),
+          throwsA(
+            isA<ImportUnsupportedFileError>()
+                .having((e) => e.code, 'code', 'import_unsupported')
+                .having((e) => e.statusCode, 'statusCode', 415),
+          ),
+        );
+      },
+    );
 
-    test('accepts an upper-case extension and a blank-padded path',
-        () async {
+    test('accepts an upper-case extension and a blank-padded path', () async {
       final service = GliderScoreImportService();
       final result = await service.importFile(
         _FakeRunner(tables: const []),
@@ -127,35 +129,40 @@ void main() {
       expect(result.tables, isEmpty);
     });
 
-    test('throws ImportUnavailableError when the helpers are missing',
-        () async {
-      final service = GliderScoreImportService();
-      final runner = _FakeRunner(
-        available: false,
-        unavailableReason: 'the gs_importer helpers were not found',
-      );
+    test(
+      'throws ImportUnavailableError when the helpers are missing',
+      () async {
+        final service = GliderScoreImportService();
+        final runner = _FakeRunner(
+          available: false,
+          unavailableReason: 'the gs_importer helpers were not found',
+        );
 
-      await expectLater(
-        service.importFile(runner, dbPath: 'db.mdb'),
-        throwsA(
-          isA<ImportUnavailableError>()
-              .having((e) => e.code, 'code', 'import_unavailable')
-              .having((e) => e.statusCode, 'statusCode', 503)
-              .having(
-                (e) => e.message,
-                'message',
-                'the gs_importer helpers were not found',
-              ),
-        ),
-      );
-    });
+        await expectLater(
+          service.importFile(runner, dbPath: 'db.mdb'),
+          throwsA(
+            isA<ImportUnavailableError>()
+                .having((e) => e.code, 'code', 'import_unavailable')
+                .having((e) => e.statusCode, 'statusCode', 503)
+                .having(
+                  (e) => e.message,
+                  'message',
+                  'the gs_importer helpers were not found',
+                ),
+          ),
+        );
+      },
+    );
 
     test('reports a default reason when the runner gives none', () async {
       final service = GliderScoreImportService();
 
       Object? error;
       try {
-        await service.importFile(_FakeRunner(available: false), dbPath: 'db.mdb');
+        await service.importFile(
+          _FakeRunner(available: false),
+          dbPath: 'db.mdb',
+        );
       } on Object catch (e) {
         error = e;
       }
@@ -164,46 +171,52 @@ void main() {
       expect((error as ImportUnavailableError).message, isNotEmpty);
     });
 
-    test('counts every row but keeps only the first rowCap of a table',
-        () async {
-      final service = GliderScoreImportService(rowCap: 3);
-      final result = await service.importFile(
-        _FakeRunner(
-          tables: const ['Scores'],
-          rowsByTable: {
-            'Scores': [_row(1), _row(2), _row(3), _row(4), _row(5)],
-          },
-        ),
-        dbPath: 'db.mdb',
-      );
+    test(
+      'counts every row but keeps only the first rowCap of a table',
+      () async {
+        final service = GliderScoreImportService(rowCap: 3);
+        final result = await service.importFile(
+          _FakeRunner(
+            tables: const ['Scores'],
+            rowsByTable: {
+              'Scores': [_row(1), _row(2), _row(3), _row(4), _row(5)],
+            },
+          ),
+          dbPath: 'db.mdb',
+        );
 
-      final table = result.tables.single;
-      expect(table.rowCount, 5);
-      expect(table.rows, [_row(1), _row(2), _row(3)]);
-      expect(table.rowCapExceeded, isTrue);
-    });
+        final table = result.tables.single;
+        expect(table.rowCount, 5);
+        expect(table.rows, [_row(1), _row(2), _row(3)]);
+        expect(table.rowCapExceeded, isTrue);
+      },
+    );
 
-    test('serializes the result with its schema, id and snake_case keys',
-        () async {
-      final service = GliderScoreImportService();
-      final result = await service.importFile(
-        _FakeRunner(
-          tables: const ['Scores'],
-          rowsByTable: {'Scores': [_row(1)]},
-        ),
-        dbPath: 'C:\\data\\db.mdb',
-      );
+    test(
+      'serializes the result with its schema, id and snake_case keys',
+      () async {
+        final service = GliderScoreImportService();
+        final result = await service.importFile(
+          _FakeRunner(
+            tables: const ['Scores'],
+            rowsByTable: {
+              'Scores': [_row(1)],
+            },
+          ),
+          dbPath: 'C:\\data\\db.mdb',
+        );
 
-      final json = result.toJson();
-      expect(json['schema'], GliderScoreImportResult.schema);
-      expect(json['id'], result.id.value);
-      expect(json['sourceDbFile'], 'db.mdb');
-      expect(json, isNot(contains('dbPath')));
-      expect(
-        (json['tables']! as List).single as Map<String, Object?>,
-        containsPair('rowCount', 1),
-      );
-    });
+        final json = result.toJson();
+        expect(json['schema'], GliderScoreImportResult.schema);
+        expect(json['id'], result.id.value);
+        expect(json['sourceDbFile'], 'db.mdb');
+        expect(json, isNot(contains('dbPath')));
+        expect(
+          (json['tables']! as List).single as Map<String, Object?>,
+          containsPair('rowCount', 1),
+        );
+      },
+    );
   });
 
   group('GliderScoreImportError', () {
