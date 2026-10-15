@@ -18,7 +18,10 @@ while [ $# -gt 0 ]; do
   esac
 done
 cd "$(dirname "$0")/../apps/soar_score_contest"
-exec flutter test integration_test -d "$device" \
-  --dart-define=SOAR_SCORE_DEMO=true \
-  --dart-define=SOAR_SCORE_DEMO_RESET=true \
-  "${extra[@]}"
+# One flutter test run per file: the Windows app allows a single instance, and
+# a second file's launch fails while the previous run's app is still alive.
+status=0
+for file in integration_test/*_test.dart; do
+  flutter test "$file" -d "$device"     --dart-define=SOAR_SCORE_DEMO=true     --dart-define=SOAR_SCORE_DEMO_RESET=true     ${extra[@]+"${extra[@]}"} || status=1
+done
+exit $status

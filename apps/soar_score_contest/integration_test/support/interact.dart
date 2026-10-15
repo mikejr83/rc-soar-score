@@ -44,6 +44,10 @@ Future<void> tapRail(WidgetTester tester, String label) => tapVisible(
 Future<void> enterIn(WidgetTester tester, Finder field, String text) async {
   await tester.ensureVisible(field);
   await tester.pump(const Duration(milliseconds: 100));
+  // Focus the field first: without it enterText can be dropped once another
+  // widget (a tapped list row) had the focus.
+  await tester.tap(field);
+  await tester.pump(const Duration(milliseconds: 100));
   await tester.enterText(field, text);
   await tester.pump(const Duration(milliseconds: 200));
 }
