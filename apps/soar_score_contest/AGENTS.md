@@ -26,5 +26,5 @@ Contest management application for directors, pilots, and helpers. Runs on web a
 ## Testing
 
 - Widget tests: `flutter test`
-- Integration tests: `flutter test integration_test/`
+- Integration (E2E) tests: `scripts/e2e.ps1` (or `scripts/e2e.sh`) runs `integration_test/` against the real app on the demo database, recreated per run. Local only, not in CI. Windows by default; `-Device chrome` needs the web bootstrap, which has no offline entry yet.
 - Platform-specific tests: `flutter test integration_test/platform/`
