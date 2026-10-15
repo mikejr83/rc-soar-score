@@ -22,10 +22,11 @@ Licensing (license texts in this directory):
   libiconv-2.dll
       GNU Lesser General Public License v2.1 (libiconv) - LGPL-2.1.txt.
   libwinpthread-1.dll
-      GNU Lesser General Public License v2.1 (pthreads-win32,
-      sourceware.org/pthreads-win32) - LGPL-2.1.txt. The upstream project
-      explicitly permits these libraries to be used and distributed freely,
-      so the DLL may accompany the app without imposing copyleft on it.
+      MinGW-w64 winpthreads (from the MSYS2 MinGW32 toolchain,
+      https://www.mingw-w64.org), under its permissive MIT/BSD-style
+      license. It may accompany the app without imposing copyleft on it.
+      Its copyright notice is the one in the mingw-w64 source tree
+      (mingw-w64-libraries/winpthreads/COPYING).
   libgcc_s_dw2-1.dll
       GNU General Public License v3 with the GCC runtime exception (MinGW
       GCC runtime) - freely redistributable as a sidecar, as with the other
