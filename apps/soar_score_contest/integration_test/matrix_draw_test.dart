@@ -27,7 +27,8 @@ void main() {
     expect(find.text('No matrix drawn yet'), findsNothing);
 
     // "Club Thermal Fun Fly" has its six pilots but no matrix yet.
-    await tapRail(tester, 'Contests');
+    // The contest rail has no Contests entry, so use the header breadcrumb.
+    await tapVisible(tester, find.byKey(const ValueKey('breadcrumb-contests')));
     await openContest(tester, 'Club Thermal Fun Fly');
     await tapRail(tester, 'Matrix');
     await pumpUntilFound(tester, find.text('No matrix drawn yet'));
