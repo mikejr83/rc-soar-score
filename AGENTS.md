@@ -135,7 +135,7 @@ The landing page has no app shell. Every other page sits in the shell (`lib/widg
 | Contest configuration page ("Configuration" rail entry)              | `/contest-administration/contests/:id/configuration` | `pages/contest_configuration_page.dart`, `widgets/configuration/` |
 | Matrix page, draw ("Matrix" rail entry)                              | `/contest-administration/contests/:id/matrix`        | `pages/matrix_page.dart`, `widgets/matrix/`                       |
 | Contest participants page (contest scope, "Participants" rail entry) | `/contest-administration/contests/:id/participants`  | `pages/contest/participants_page.dart`                            |
-| Contest scoring page (contest scope, "Scoring" rail entry)           | `/contest-administration/contests/:id/scoring`       | `pages/contest/scoring_page.dart`                                 |
+| Contest scoring page (contest scope, "Scoring" rail entry)           | `/contest-administration/contests/:id/scoring`       | `pages/contest/scoring_page.dart`, `widgets/scoring/`             |
 | Contest reports page (contest scope, "Reports" rail entry)           | `/contest-administration/contests/:id/reports`       | `pages/contest/reports_page.dart`                                 |
 | Contest sync page (contest scope, "Sync" rail entry, native only)    | `/contest-administration/contests/:id/sync`          | `pages/contest/sync_page.dart`, `widgets/sync/`                   |
 | Participants manager ("Participants" rail entry)                     | `/contest-administration/participants`               | `pages/participants_page.dart`                                    |
@@ -148,8 +148,8 @@ The landing page has no app shell. Every other page sits in the shell (`lib/widg
 Notes:
 
 - "Configuration page" always means the contest-scoped page above, not the draft step inside the wizard.
-- The contest-scoped "Scoring" and "Reports" pages are placeholders that show only the contest ID; their rail entries and routes are in place.
-- The Scoring route takes optional `?round=N&group=G` (built by `contestScoringPath`); the progress card's tiles use it. The placeholder only echoes it, and #123 opens the round and group.
+- The contest-scoped "Reports" page is a placeholder that shows only the contest ID; its rail entry and route are in place.
+- The Scoring route takes optional `?round=N&group=G` (built by `contestScoringPath`); the next-step card and the progress card's tiles use it. The page is official F5J score entry for one group (#123): round and group navigation, a row per pilot saved on its own, Score check, and the save, conflict and not-permitted states. Its state lives in `services/scoring/` (`ScoringController`); lock and mark-official actions are not built yet because the API has none.
 - The account control sits at the bottom of the rail (`widgets/shell_account_button.dart`): the user's picture with a menu (name, Settings, Sign out) when signed in, a gear otherwise (offline: menu with Sign in and Settings). Settings is a not-built dialog for now.
 - Rail and header code: `widgets/shell_rail.dart` (destinations and create button), `shell_header.dart` (breadcrumbs), `shell_status_panel.dart`, `shell_stub_page.dart`.
 - The workspace page is a frame of section and control slots (`widgets/workspace/`) arranged by `WorkspaceLayoutPlan` (`services/workspace/`). It has no page-card list; links sit next to the fact they act on.

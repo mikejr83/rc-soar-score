@@ -83,7 +83,7 @@ String contestParticipantsPath(String contestId) =>
     '$contestsPath/$contestId/participants';
 
 /// The scoring page of the contest with [contestId], opened at [round] (and
-/// [group] within it) when given. The Scoring page (#123) honours the query.
+/// [group] within it) when given. The Scoring page reads both from the query.
 String contestScoringPath(String contestId, {int? round, int? group}) {
   final base = '$contestsPath/$contestId/scoring';
   final query = [
@@ -112,6 +112,7 @@ GoRouter buildAppRouter({
   final editorGuard = UnsavedChangesGuard();
   final wizardGuard = UnsavedChangesGuard();
   final configurationGuard = UnsavedChangesGuard();
+  final scoringGuard = UnsavedChangesGuard();
   return GoRouter(
     initialLocation: initialLocation,
     // Re-runs the guard when offline mode or the signed-in state changes.
@@ -218,7 +219,9 @@ GoRouter buildAppRouter({
               contestId: state.pathParameters['contestId']!,
               round: int.tryParse(state.uri.queryParameters['round'] ?? ''),
               group: int.tryParse(state.uri.queryParameters['group'] ?? ''),
+              guard: scoringGuard,
             ),
+            onExit: (context, state) => scoringGuard.confirmLeave(),
           ),
           GoRoute(
             path: '$contestsPath/:contestId/reports',

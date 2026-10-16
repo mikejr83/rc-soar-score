@@ -2,7 +2,7 @@
 
 Official scoring is optimized for a tablet or larger screen and displays one complete group for one round at a time. Phone support is a stretch goal: the page uses the standard Material 3 window size classes, and compact widths show a stacked card per pilot instead of the grid. See [ADR 0002](../../../docs/adr/0002-score-entry-layout.md). The route identifies the contest, matrix revision, round, and group.
 
-The scoring is performed with the following route scheme: `/contest-administration/contests/:id/scoring/rounds/:round/groups/:group`.
+The scoring is performed at `/contest-administration/contests/:id/scoring`, with the round and group in the query: `?round=3&group=2` (group 1 is group A). Without them the page opens at the first group that is not completely scored.
 
 ## Navigation and grid
 
