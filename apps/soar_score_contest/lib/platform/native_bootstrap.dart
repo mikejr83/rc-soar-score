@@ -13,6 +13,8 @@ import '../auth/auth_session_factory.dart';
 import '../server/embedded_server.dart';
 import '../services/sync/app_sync.dart';
 import 'app_bootstrap.dart';
+import 'acting_account.dart';
+import 'auth_epoch.dart';
 import 'local_account_claimer.dart';
 import 'native_sync.dart';
 
@@ -35,6 +37,7 @@ class NativeBootstrap extends AppBootstrap {
     this._auth,
     this.sync,
     this._claimer,
+    this._epoch,
   ) : _client = ApiClient(baseUrl: _server.baseUrl);
 
   final EmbeddedServer _server;
@@ -47,6 +50,9 @@ class NativeBootstrap extends AppBootstrap {
 
   /// Links the Local account to the signed-in one.
   final LocalAccountClaimer _claimer;
+
+  /// Binds requests to sign-ins; closing it refuses the ones still waiting.
+  final AuthEpoch _epoch;
 
   bool _closed = false;
 
@@ -76,6 +82,7 @@ class NativeBootstrap extends AppBootstrap {
     _logger.fine('Closing native bootstrap');
     _closed = true;
     _claimer.stop();
+    _epoch.close();
     await sync.close();
     await _server.close();
     _remoteClient.close();
@@ -128,21 +135,36 @@ class NativeBootstrap extends AppBootstrap {
     // and needs no sign-in.
     final auth = createAuthSession();
     await auth.restore();
-    final remote = ApiClient(baseUrl: baseUrl, tokenProvider: auth.accessToken);
+    // Requests the app binds to a sign-in carry that sign-in's token or are
+    // not sent (see AuthEpoch).
+    final epoch = AuthEpoch(auth);
+    final acting = ActingAccount(server, epoch);
+    final remote = ApiClient(
+      baseUrl: baseUrl,
+      tokenProvider: epoch.boundToken(auth.accessToken),
+    );
     final sync = await NativeSync.start(
       database: server.database,
       localAccountId: server.localAccountId,
+      acting: acting,
       remote: remote,
       databasePath: database,
     );
     final claimer = LocalAccountClaimer(
       auth: auth,
+      epoch: epoch,
       local: LocalAccountRepository(server.database),
       claim: remote.claimLocalAccount,
-      onClaimed: sync.accountClaimed,
+      onClaimed: (accountId, session) async {
+        // New offline data is the account's from now on and syncs at once,
+        // but only if the sign-in the claim was made under is still the one.
+        if (!acting.actAs(accountId, epoch: session)) return;
+        await sync.accountClaimed(accountId);
+      },
+      onSignedOut: acting.actAsLocal,
       onProblem: sync.appSync.claimProblemChanged,
     )..start();
-    return NativeBootstrap._(server, remote, auth, sync, claimer);
+    return NativeBootstrap._(server, remote, auth, sync, claimer, epoch);
   }
 
   /// Deletes the SQLite file at [path] and its journal files, if present.

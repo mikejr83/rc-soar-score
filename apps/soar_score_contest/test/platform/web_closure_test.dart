@@ -8,6 +8,7 @@ void main() {
       r'''^(?:import|export)\s+['"](?:package:soar_score_sync|(?:\.\./|\./)*(?:platform/)?(?:native_sync|engine_app_sync)\.dart)''',
     );
     final allowed = {
+      'lib/platform/account_bound_sync_gateway.dart',
       'lib/platform/engine_app_sync.dart',
       'lib/platform/native_sync.dart',
       'lib/platform/native_bootstrap.dart',

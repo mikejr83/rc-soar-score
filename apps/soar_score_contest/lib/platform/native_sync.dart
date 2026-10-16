@@ -7,6 +7,8 @@ import 'package:soar_score_core/soar_score_core.dart' as core;
 import 'package:soar_score_data/soar_score_data.dart';
 import 'package:soar_score_sync/soar_score_sync.dart';
 
+import 'account_bound_sync_gateway.dart';
+import 'acting_account.dart';
 import 'engine_app_sync.dart';
 import 'installation_id_file.dart';
 
@@ -22,6 +24,7 @@ final _logger = Logger('NativeSync');
 /// Contests the account owns on the service but this installation has never
 /// held are found by listing the account's contests (see
 /// [discoverAccountContests]); each is synced from the start of its stream.
+/// Data of an account other than the one the app acts as is not synced.
 class NativeSync {
   NativeSync._(
     this.engine,
@@ -31,6 +34,7 @@ class NativeSync {
     this._remote,
     this._discovered,
     this._discoveryDelay,
+    this._acting,
   ) : appSync = EngineAppSync(engine) {
     // Every ordinary sync, scheduled or started by the director, ends with a
     // look at the account's contests.
@@ -45,9 +49,11 @@ class NativeSync {
 
   final ApiClient _remote;
 
-  /// Contests the service lists for the account that are not held locally
-  /// yet; shared with the engine's `isSyncable` check.
-  final Set<core.Id> _discovered;
+  final ActingAccount? _acting;
+
+  /// Contests the service lists for an account that are not held locally
+  /// yet, with that account; shared with the engine's `isSyncable` check.
+  final Map<core.Id, core.Id> _discovered;
   core.Id? _accountId;
   Future<void>? _discovering;
 
@@ -73,18 +79,37 @@ class NativeSync {
     required ApiClient remote,
     required String databasePath,
     Duration discoveryDelay = const Duration(seconds: 2),
+    ActingAccount? acting,
   }) async {
     final installationId = await InstallationIdFile.besides(databasePath)
         .readOrCreate();
     final contests = ContestRepository(database);
-    final discovered = <core.Id>{};
+    final discovered = <core.Id, core.Id>{};
+    // Who owns the data of a scope: the contest's owner, or for a contest
+    // the service lists but this installation does not hold yet, the account
+    // it was listed for.
+    Future<core.Id?> ownerOf(core.SyncScopeKey scope) async => switch (scope) {
+      core.ContestScopeKey(:final contestId) =>
+        (await contests.findById(contestId))?.ownerAccountId ??
+            discovered[contestId],
+      core.DirectorScopeKey(:final ownerAccountId) => ownerAccountId,
+      core.SystemScopeKey() => null,
+    };
+    Future<bool> isSyncable(core.SyncScopeKey scope) async {
+      if (scope is core.SystemScopeKey) return true;
+      return _hasAccount(await ownerOf(scope), localAccountId, acting);
+    }
+
+    final api = ApiClientSyncGateway(remote);
     final engine = SyncEngine(
       store: DriftSyncStore(database),
       applier: DriftReplicatedChangeApplier(
         database,
         EntityStores.forDatabase(database),
       ),
-      gateway: ApiClientSyncGateway(remote),
+      gateway: acting == null
+          ? api
+          : AccountBoundSyncGateway(api, acting: acting, ownerOf: ownerOf),
       config: SyncEngineConfig(
         installationId: installationId,
         label: io.Platform.localHostname,
@@ -92,22 +117,7 @@ class NativeSync {
             ? core.Platform.windows
             : core.Platform.other,
         schemaVersion: database.schemaVersion,
-        isSyncable: (scope) async => switch (scope) {
-          core.ContestScopeKey(:final contestId) => switch (await contests
-              .findById(contestId)) {
-            // The service lists it for the account: not held here yet.
-            null => discovered.contains(contestId),
-            final contest => _hasAccount(
-              contest.ownerAccountId,
-              localAccountId,
-            ),
-          },
-          core.DirectorScopeKey(:final ownerAccountId) => _hasAccount(
-            ownerAccountId,
-            localAccountId,
-          ),
-          core.SystemScopeKey() => true,
-        },
+        isSyncable: isSyncable,
       ),
     );
     final scheduler = SyncScheduler(engine);
@@ -123,11 +133,23 @@ class NativeSync {
       remote,
       discovered,
       discoveryDelay,
+      acting,
     );
   }
 
-  static bool _hasAccount(core.Id? owner, core.Id localAccountId) =>
-      owner != null && owner != localAccountId;
+  /// Whether [owner] is an account to sync for. With [acting] only the
+  /// account the app acts as, under its current sign-in, qualifies: data of
+  /// another account (claimed before the director signed in as someone else)
+  /// must not be sent with this sign-in's credentials, and nothing syncs
+  /// while the app acts as the Local account.
+  static bool _hasAccount(
+    core.Id? owner,
+    core.Id localAccountId,
+    ActingAccount? acting,
+  ) {
+    if (owner == null || owner == localAccountId) return false;
+    return acting == null || acting.leaseFor(owner) != null;
+  }
 
   /// The remote API became reachable (or stopped being so).
   void remoteReachabilityChanged({required bool reachable}) {
@@ -190,13 +212,24 @@ class NativeSync {
         for (final contest in await ContestRepository(_database).getAll())
           contest.id,
       };
-      for (final contest in await _remote.contests()) {
+      // The listing carries the account's token: bound to its sign-in, and
+      // only used while that account still is the acting one.
+      final acting = _acting;
+      final lease = acting?.leaseFor(accountId);
+      if (acting != null && lease == null) return;
+      final listed = acting == null
+          ? await _remote.contests()
+          : await acting.epoch.runBound(lease!, _remote.contests);
+      if (acting != null && acting.leaseFor(accountId) != lease) return;
+      for (final contest in listed) {
         if (contest.ownerAccountId != accountId || held.contains(contest.id)) {
           continue;
         }
         // A contest found before is already known to the scheduler, which
         // retries it; only a new one starts a sync, so this cannot loop.
-        if (_discovered.add(contest.id)) {
+        final isNew = !_discovered.containsKey(contest.id);
+        _discovered[contest.id] = accountId;
+        if (isNew) {
           _scheduler.notifyLocalChange(core.ContestScopeKey(contest.id));
         }
       }

@@ -116,6 +116,7 @@ class SyncEngine {
           choice: choice,
           payload: payload,
         ),
+        scope: scope,
       );
     });
     if (failure != null || result?.outcome != MutationOutcome.accepted) {
