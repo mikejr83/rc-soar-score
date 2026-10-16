@@ -12,6 +12,13 @@ on:
       - "LICENSE"
       - ".prettierrc"
       - ".prettierignore"
+      - ".gitignore"
+      - ".mcp.json"
+      - ".agents/**"
+      - ".kilo/**"
+      - ".vscode/**"
+      - ".github/CODEOWNERS"
+      - ".github/ISSUE_TEMPLATE/**"
   pull_request:
     branches: [master]
     paths-ignore:
@@ -21,6 +28,13 @@ on:
       - "LICENSE"
       - ".prettierrc"
       - ".prettierignore"
+      - ".gitignore"
+      - ".mcp.json"
+      - ".agents/**"
+      - ".kilo/**"
+      - ".vscode/**"
+      - ".github/CODEOWNERS"
+      - ".github/ISSUE_TEMPLATE/**"
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
