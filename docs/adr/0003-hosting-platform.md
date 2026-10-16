@@ -31,4 +31,4 @@ Use a managed host for the first release:
 - Expected cost is about $0 while testing and about $5 to $15 per month once real contests run. Prices come from third-party summaries and must be confirmed on each vendor's page before signing up.
 - A scale-to-zero database can add a second or two to the first request after idle. This matters during a live contest.
 - A single VPS running Docker Compose (API, PostgreSQL, Caddy) is the fixed-price fallback. No trigger for switching was decided; revisit if the bill passes about $10 or cold starts hurt a live contest.
-- The monthly spend cap is still to be set.
+- The monthly spend cap for release 1 is $15 per month (decided 2026-10-06, [#74](https://github.com/mikejr83/rc-soar-score/issues/74)). A budget alert at that amount is set on whichever provider bills. A bill above the cap is the signal to revisit the host or move to the single-VPS fallback.
