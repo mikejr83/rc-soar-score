@@ -10,7 +10,7 @@ implementation. This review compares against GliderScore, so it is deliberately 
 
 - GliderScore 6.79 was analyzed to understand how its draw behaves. This document
   summarises that behaviour only at a high level (§1).
-- No code used to take the GliderScore measurements isincluded. Neither
+- No code used to take the GliderScore measurements is included. Neither
   is any decompiled source, GliderScore binary, or sample database. GliderScore figures below are
   recorded results.
 - The improvements recommended in §5 use **standard, published local-search techniques** for this class
