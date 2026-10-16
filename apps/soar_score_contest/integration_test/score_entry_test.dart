@@ -54,29 +54,25 @@ void main() {
         .first;
     final official = int.parse(before.group(2)!) + 1;
 
-    // Open the first row of group C and enter a flight.
-    final time = _timeFields().first;
+    // Open the first row of group C that has no score yet (which rows are
+    // scored depends on the draw) and enter a flight.
+    final empty = _timeFields()
+        .evaluate()
+        .map((e) => e.widget as TextField)
+        .firstWhere((w) => (w.controller?.text ?? '').isEmpty);
+    final rowId = (empty.key! as ValueKey<String>).value.substring(
+      'score-time-'.length,
+    );
+    final time = find.byKey(ValueKey('score-time-$rowId'));
     await pumpUntilFound(tester, time);
     await tapVisible(tester, time);
     await enterIn(tester, time, '630');
     await pumpUntilFound(tester, find.text('6:30'));
-    final height = find.byWidgetPredicate(
-      (w) =>
-          w is TextField &&
-          w.key is ValueKey<String> &&
-          (w.key! as ValueKey<String>).value.startsWith('score-height-'),
-    );
-    await enterIn(tester, height.first, '180');
+    await enterIn(tester, find.byKey(ValueKey('score-height-$rowId')), '180');
     await pumpUntilFound(tester, find.text('1 unsaved row'));
 
     // Saving the row makes it official, and the strip counts it.
-    final save = find.byWidgetPredicate(
-      (w) =>
-          w.key is ValueKey<String> &&
-          (w.key! as ValueKey<String>).value.startsWith('score-save-') &&
-          !(w.key! as ValueKey<String>).value.startsWith('score-save-all'),
-    );
-    await tapVisible(tester, save.first);
+    await tapVisible(tester, find.byKey(ValueKey('score-save-$rowId')));
     await pumpUntilFound(
       tester,
       find.text('$official of 4 entered · $official official'),
