@@ -33,15 +33,17 @@ class ScoringServer {
     Contest? contest,
     CurrentMatrix? matrix,
     Map<String, Object?> discipline = const {},
+    Map<String, Object?> core = const {},
   }) : matrixServer = MatrixServer(
          contest: contest ?? matrixContest(state: LifecycleState.running),
-         configuration: _configuration(discipline),
+         configuration: _configuration(discipline, core),
          matrix: matrix ?? drawnMatrix(),
        ),
        _score = {};
 
   static ContestConfigurationRevision _configuration(
     Map<String, Object?> discipline,
+    Map<String, Object?> core,
   ) {
     final base = matrixConfiguration();
     return ContestConfigurationRevision(
@@ -49,7 +51,7 @@ class ScoringServer {
       contestId: base.contestId,
       revisionNumber: base.revisionNumber,
       disciplineProfileId: base.disciplineProfileId,
-      config: ContestConfig(core: const {}, discipline: discipline),
+      config: ContestConfig(core: core, discipline: discipline),
       landingTableId: _landingTableId,
       createdBy: base.createdBy,
       createdAt: base.createdAt,

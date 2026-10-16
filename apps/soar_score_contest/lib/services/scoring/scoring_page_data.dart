@@ -3,6 +3,7 @@ import 'package:soar_score_core/soar_score_core.dart';
 
 import '../matrix/matrix_page_data.dart';
 import 'score_entry_settings.dart';
+import 'score_grid_options.dart';
 import 'scoring_completeness.dart';
 import 'scoring_row.dart';
 
@@ -71,6 +72,15 @@ class ScoringPageData {
 
   final MatrixPageData base;
   final ContestScores scores;
+
+  /// The lane or number column and the teams this contest shows.
+  ScoreGridOptions get gridOptions {
+    final lanes = (base.options?.laneMode ?? LaneMode.none) != LaneMode.none;
+    return ScoreGridOptions(
+      idLabel: lanes ? 'Lane' : (base.showNumbers ? 'No.' : null),
+      showTeams: base.showTeams,
+    );
+  }
 
   /// The choices of the contest's landing table, in table order.
   final List<LandingResult> landings;

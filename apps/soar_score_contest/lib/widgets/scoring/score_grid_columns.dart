@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../services/scoring/score_grid_options.dart';
+
 /// How a pilot row is laid out for the width it has.
 enum ScoreGridMode {
   /// One line per pilot under a shared column heading.
@@ -44,9 +46,14 @@ abstract final class ScoreGridColumns {
 
 /// The sticky column headings of the wide table: a name over its unit.
 class ScoreGridHeader extends StatelessWidget {
-  const ScoreGridHeader({super.key, this.showHeight = true});
+  const ScoreGridHeader({
+    super.key,
+    this.showHeight = true,
+    this.options = const ScoreGridOptions(),
+  });
 
   final bool showHeight;
+  final ScoreGridOptions options;
 
   @override
   Widget build(BuildContext context) {
@@ -102,9 +109,16 @@ class ScoreGridHeader extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          cell('Lane', '', ScoreGridColumns.lane, align: TextAlign.center),
-          gap,
-          cell('Pilot · team', '', null),
+          if (options.showId) ...[
+            cell(
+              options.idLabel!,
+              '',
+              ScoreGridColumns.lane,
+              align: TextAlign.center,
+            ),
+            gap,
+          ],
+          cell(options.showTeams ? 'Pilot · team' : 'Pilot', '', null),
           gap,
           cell('Time flown', 'm:ss', ScoreGridColumns.time),
           gap,

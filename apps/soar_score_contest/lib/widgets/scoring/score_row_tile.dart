@@ -12,6 +12,7 @@ import '../matrix/matrix_colors.dart';
 import '../matrix/team_badge.dart';
 import 'score_entry_panel.dart';
 import 'focus_step.dart';
+import '../../services/scoring/score_grid_options.dart';
 import 'score_grid_columns.dart';
 import 'status_chips.dart';
 
@@ -52,6 +53,7 @@ class ScoreRowTile extends StatefulWidget {
     required this.findings,
     required this.actions,
     required this.mode,
+    required this.grid,
     this.focusOrder = false,
     this.theirs,
     this.focusField,
@@ -73,6 +75,9 @@ class ScoreRowTile extends StatefulWidget {
   final List<ScoreFinding> findings;
   final ScoreRowActions actions;
   final ScoreGridMode mode;
+
+  /// Whether the grid shows a lane or number column and teams.
+  final ScoreGridOptions grid;
 
   /// Draws the keyboard path numbers over the controls.
   final bool focusOrder;
@@ -668,7 +673,7 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
               border: Border.all(color: scheme.primary, width: 1.5),
             ),
             child: Text(
-              '${widget.row.lane ?? widget.row.pilot.number ?? ''}',
+              '${(widget.grid.showsLanes ? widget.row.lane : widget.row.pilot.number) ?? ''}',
               style: theme.textTheme.labelLarge?.copyWith(
                 color: widget.active ? scheme.onPrimary : scheme.primary,
               ),
@@ -688,19 +693,22 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
     final theme = Theme.of(context);
     final row = widget.row;
     final sub = [
-      if (row.team != null) row.team!.name,
-      if (row.pilot.number != null) 'No. ${row.pilot.number}',
+      if (widget.grid.showTeams && row.team != null) row.team!.name,
+      if (row.pilot.number != null && widget.grid.idLabel != 'No.')
+        'No. ${row.pilot.number}',
     ].join(' · ');
     return Padding(
       padding: const EdgeInsets.only(top: 10),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Tooltip(
-            message: row.team?.name ?? 'No team',
-            child: TeamBadge(marker: row.team),
-          ),
-          const SizedBox(width: 8),
+          if (widget.grid.showTeams) ...[
+            Tooltip(
+              message: row.team?.name ?? 'No team',
+              child: TeamBadge(marker: row.team),
+            ),
+            const SizedBox(width: 8),
+          ],
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -771,8 +779,10 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
       ScoreGridMode.wide => Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(width: ScoreGridColumns.lane, child: lane),
-          gap,
+          if (widget.grid.showId) ...[
+            SizedBox(width: ScoreGridColumns.lane, child: lane),
+            gap,
+          ],
           Expanded(child: pilot),
           gap,
           SizedBox(width: ScoreGridColumns.time, child: time),
@@ -799,8 +809,10 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(width: 44, child: lane),
-              gap,
+              if (widget.grid.showId) ...[
+                SizedBox(width: 44, child: lane),
+                gap,
+              ],
               Expanded(flex: 2, child: pilot),
               gap,
               Expanded(flex: 2, child: stat),
@@ -812,8 +824,7 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(width: 44),
-              gap,
+              if (widget.grid.showId) ...[const SizedBox(width: 44), gap],
               Expanded(child: time),
               gap,
               Expanded(child: height),
@@ -827,8 +838,7 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(width: 44),
-              gap,
+              if (widget.grid.showId) ...[const SizedBox(width: 44), gap],
               Expanded(child: raw),
               gap,
               Expanded(child: grp),
@@ -848,8 +858,10 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(width: 40, child: lane),
-              gap,
+              if (widget.grid.showId) ...[
+                SizedBox(width: 40, child: lane),
+                gap,
+              ],
               Expanded(child: pilot),
               SizedBox(width: 44, child: menu),
             ],

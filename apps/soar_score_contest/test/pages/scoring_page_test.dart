@@ -419,6 +419,53 @@ void main() {
     });
   });
 
+  group('lanes and teams follow the configuration', () {
+    testWidgets('are left out when the contest does not use them', (
+      tester,
+    ) async {
+      await pumpScoringPage(tester, ScoringServer(), round: 1, group: 1);
+      expect(find.text('Lane'), findsNothing);
+      expect(find.text('No.'), findsNothing);
+      expect(find.text('Pilot'), findsOneWidget);
+      expect(find.text('Flying Gators'), findsNothing);
+      expect(find.text('Pilot · team'), findsNothing);
+    });
+
+    testWidgets('are shown when the contest uses lanes and teams', (
+      tester,
+    ) async {
+      await pumpScoringPage(
+        tester,
+        ScoringServer(
+          core: {
+            'lane_mode': 'Random',
+            'teams_enabled': true,
+            'team_pilot_count': 2,
+          },
+          matrix: drawnMatrix(lanes: true),
+        ),
+        round: 1,
+        group: 1,
+      );
+      expect(find.text('Lane'), findsOneWidget);
+      expect(find.text('Pilot · team'), findsOneWidget);
+      expect(find.textContaining('Flying Gators'), findsWidgets);
+    });
+
+    testWidgets('pilot numbers take the first column when there are no lanes', (
+      tester,
+    ) async {
+      await pumpScoringPage(
+        tester,
+        ScoringServer(core: {'participant_numbers_enabled': true}),
+        round: 1,
+        group: 1,
+      );
+      expect(find.text('Lane'), findsNothing);
+      expect(find.text('No.'), findsOneWidget);
+    });
+  });
+
   group('layout follows the design', () {
     testWidgets('navigation is left and actions are right', (tester) async {
       await pumpScoringPage(tester, ScoringServer(), round: 1, group: 1);

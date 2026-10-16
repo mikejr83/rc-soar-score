@@ -312,7 +312,8 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
       ),
       child: Column(
         children: [
-          if (mode == ScoreGridMode.wide) const ScoreGridHeader(),
+          if (mode == ScoreGridMode.wide)
+            ScoreGridHeader(options: c.data!.gridOptions),
           Expanded(
             child: ListView(
               children: [for (final row in rows) _tile(c, row, mode)],
@@ -337,6 +338,7 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
       landings: data.landings,
       landingTableName: data.landingTableName,
       mode: mode,
+      grid: data.gridOptions,
       focusOrder: c.showFocusOrder,
       heightPenalty: draft.height != null && draft.height! > 0
           ? previewHeightPenalty(
