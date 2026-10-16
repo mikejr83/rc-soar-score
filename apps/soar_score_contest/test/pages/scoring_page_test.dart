@@ -345,7 +345,7 @@ void main() {
       expect(chip.dx, lessThan(60));
     });
 
-    testWidgets('the whole active row is highlighted, with no inner card', (
+    testWidgets('the whole active row is highlighted and holds the band card', (
       tester,
     ) async {
       await pumpScoringPage(tester, ScoringServer(), round: 1, group: 1);
@@ -358,8 +358,9 @@ void main() {
       final band = tester.getRect(
         find.byKey(ValueKey('score-band-${scoringAssignmentId(1, 1).value}')),
       );
+      // The band is a card inside the highlighted row.
       expect(band.left, greaterThan(row.left));
-      expect(band.right, lessThan(row.right + 1));
+      expect(band.right, lessThan(row.right));
     });
 
     testWidgets('a missing field is explained under the field, not by Save', (
@@ -389,8 +390,8 @@ void main() {
       final band = tester.getRect(
         find.byKey(ValueKey('score-band-${scoringAssignmentId(1, 1).value}')),
       );
-      expect(save.dx, closeTo(band.left, 2));
-      expect(hint.dx, closeTo(band.right, 2));
+      expect(save.dx, closeTo(band.left + 16, 2));
+      expect(hint.dx, closeTo(band.right - 16, 2));
     });
   });
 }
