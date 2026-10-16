@@ -38,7 +38,10 @@ class NativeBootstrap extends AppBootstrap {
     this.sync,
     this._claimer,
     this._epoch,
-  ) : _client = ApiClient(baseUrl: _server.baseUrl);
+  ) : _client = ApiClient(
+        baseUrl: _server.baseUrl,
+        tokenProvider: () async => _server.secret,
+      );
 
   final EmbeddedServer _server;
   final ApiClient _client;
@@ -131,8 +134,8 @@ class NativeBootstrap extends AppBootstrap {
     if (demo) {
       _logger.info('DEMO MODE: using the example database at $database');
     }
-    // Only the remote client carries the token; the embedded server is local
-    // and needs no sign-in.
+    // The embedded client carries the server's per-launch secret; only the
+    // remote client carries the sign-in token.
     final auth = createAuthSession();
     await auth.restore();
     // Requests the app binds to a sign-in carry that sign-in's token or are
