@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import 'package:soar_score_contest/widgets/scoring/score_landing_chips.dart';
+
 import '../support/matrix_test_support.dart';
 import '../support/scoring_test_support.dart';
 
@@ -24,6 +26,38 @@ Future<void> _activate(WidgetTester tester, int round, int pilot) async {
 }
 
 void main() {
+  for (final (name, size) in [
+    ('medium', const Size(700, 1400)),
+    ('compact', const Size(400, 1400)),
+  ]) {
+    testWidgets('lays out at $name width without overflow', (tester) async {
+      await pumpScoringPage(
+        tester,
+        ScoringServer(),
+        size: size,
+        round: 1,
+        group: 1,
+      );
+      await tester.tap(_row(1, 1));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(find.byKey(const ValueKey('score-grid-header')), findsNothing);
+      expect(find.text('Ann Lee'), findsOneWidget);
+      expect(find.text('Time flown (m:ss)'), findsWidgets);
+    });
+  }
+
+  testWidgets('wide width shows one heading over the columns', (tester) async {
+    await pumpScoringPage(tester, ScoringServer(), round: 1, group: 1);
+    expect(find.byKey(const ValueKey('score-grid-header')), findsOneWidget);
+    expect(find.text('Landing · flags'), findsOneWidget);
+    expect(find.text('Indicators'), findsOneWidget);
+    // The heading and the rows share their column positions.
+    final head = tester.getTopLeft(find.text('Time flown'));
+    final field = tester.getTopLeft(_time(1, 1));
+    expect(field.dx, closeTo(head.dx, 12));
+  });
+
   testWidgets('opens the first group that is not scored', (tester) async {
     final server = ScoringServer();
     server.seedScore(scoringAssignmentId(1, 1), {
@@ -113,11 +147,11 @@ void main() {
       find.text('Late landing: the landing bonus is not given'),
       findsOneWidget,
     );
-    final chip = tester.widget<ChoiceChip>(
+    final chip = tester.widget<ScoreLandingChip>(
       find.byKey(ValueKey('score-landing-$id-within_1m')),
     );
     expect(chip.selected, isFalse);
-    expect(chip.onSelected, isNull);
+    expect(chip.enabled, isFalse);
   });
 
   testWidgets('out of bounds zeroes time and height and says why', (

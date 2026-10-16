@@ -9,14 +9,21 @@ import 'scoring_row.dart';
 /// Why entry is closed for a group, with the words the page shows beside the
 /// disabled controls.
 enum EntryBlock {
-  contestCompleted('This contest is completed. Scores cannot be entered.'),
+  contestCompleted(
+    'Contest completed',
+    'This contest is completed. Scores cannot be entered.',
+  ),
   administrationLocked(
+    'Administration locked',
     'Administration is locked. Unlock it to enter or correct scores.',
   ),
-  roundLocked('This round is locked.'),
-  groupLocked('This group is locked.');
+  roundLocked('Round locked', 'This round is locked.'),
+  groupLocked('Group locked', 'This group is locked.');
 
-  const EntryBlock(this.message);
+  const EntryBlock(this.chip, this.message);
+
+  /// The short words for the context chip.
+  final String chip;
   final String message;
 }
 
@@ -27,6 +34,7 @@ class ScoringPageData {
     required this.base,
     required this.scores,
     required this.landings,
+    this.landingTableName,
   }) : settings = ScoreEntrySettings.fromDiscipline(
          base.configuration?.config.discipline,
        ),
@@ -45,9 +53,11 @@ class ScoringPageData {
     final tables = results[2]! as List<LandingTableView>;
     final tableId = base.configuration?.landingTableId;
     final landings = <LandingResult>[];
+    String? tableName;
     for (final view in tables) {
       if (view.table.id == tableId) {
         landings.addAll(view.results);
+        tableName = view.table.name;
       }
     }
     landings.sort((a, b) => a.ordinalPosition.compareTo(b.ordinalPosition));
@@ -55,6 +65,7 @@ class ScoringPageData {
       base: base,
       scores: results[1]! as ContestScores,
       landings: landings,
+      landingTableName: tableName,
     );
   }
 
@@ -63,6 +74,9 @@ class ScoringPageData {
 
   /// The choices of the contest's landing table, in table order.
   final List<LandingResult> landings;
+
+  /// The landing table's name, shown over the landing choice.
+  final String? landingTableName;
 
   final ScoreEntrySettings settings;
   final Map<Id, ScoreSlot> _slots;
@@ -193,6 +207,7 @@ class ScoringPageData {
       base: base,
       scores: ContestScores(slots: slots, rounds: scores.rounds),
       landings: landings,
+      landingTableName: landingTableName,
     );
   }
 
@@ -209,6 +224,7 @@ class ScoringPageData {
     ),
     scores: scores,
     landings: landings,
+    landingTableName: landingTableName,
   );
 
   /// The round and group to open when the route names none: the first group

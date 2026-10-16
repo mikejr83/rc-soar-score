@@ -8,10 +8,10 @@ import '../../services/scoring/score_row_draft.dart';
 import '../../services/scoring/scoring_page_data.dart';
 import '../../services/scoring/scoring_row.dart';
 import '../matrix/matrix_colors.dart';
+import '../matrix/team_badge.dart';
 import 'score_entry_panel.dart';
 import 'score_grid_columns.dart';
 import 'status_chips.dart';
-import 'team_chip.dart';
 
 /// What a row's buttons do; the page owns the controller, the row only asks.
 class ScoreRowActions {
@@ -32,9 +32,9 @@ class ScoreRowActions {
   final VoidCallback onRefresh;
 }
 
-/// One pilot of the group. The time and height stay in the row so the quick
-/// path never leaves the line; the active row opens a panel below with the
-/// landing, toggles and penalties.
+/// One pilot of the group: a grid row under the table heading. Time and
+/// height stay in the row so the quick path never leaves the line; the
+/// active row opens a band below with the landing, toggles and penalties.
 class ScoreRowTile extends StatefulWidget {
   const ScoreRowTile({
     super.key,
@@ -44,9 +44,11 @@ class ScoreRowTile extends StatefulWidget {
     required this.active,
     required this.block,
     required this.landings,
+    required this.landingTableName,
     required this.preview,
     required this.findings,
     required this.actions,
+    required this.mode,
     this.theirs,
     this.focusField,
   });
@@ -57,11 +59,13 @@ class ScoreRowTile extends StatefulWidget {
   final bool active;
   final EntryBlock? block;
   final List<LandingResult> landings;
+  final String? landingTableName;
 
   /// The raw score of the typed values, or null.
   final double? preview;
   final List<ScoreFinding> findings;
   final ScoreRowActions actions;
+  final ScoreGridMode mode;
 
   /// What another revision saved, for a stale row.
   final Map<String, Object?>? theirs;
@@ -133,8 +137,7 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
 
   void _focusFirst() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      if (widget.block != null) return;
+      if (!mounted || widget.block != null) return;
       if (widget.draft.measurementsOffReason == null) {
         _timeNode.requestFocus();
       } else {
@@ -161,280 +164,684 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
 
   bool get _readOnly => widget.block != null || widget.row.isLocked;
 
-  @override
-  Widget build(BuildContext context) {
+  // Cells.
+
+  Widget _label(BuildContext context, String text, bool on) => on
+      ? Padding(
+          padding: const EdgeInsets.only(bottom: 3),
+          child: Text(
+            text,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+        )
+      : const SizedBox.shrink();
+
+  OutlineInputBorder _border(Color color, [double width = 1]) =>
+      OutlineInputBorder(
+        borderRadius: BorderRadius.circular(4),
+        borderSide: BorderSide(color: color, width: width),
+      );
+
+  Widget _caption(BuildContext context, String? text, {bool error = false}) {
     final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    final colors = MatrixColors.of(context);
-    final draft = widget.draft;
-    final row = widget.row;
-    final dirty = draft.isDirty;
-    final saved = row.result;
-    final busy = widget.save.isBusy;
-    final off = draft.measurementsOffReason;
-    final editable = !_readOnly && !busy;
+    return SizedBox(
+      height: 32,
+      child: text == null
+          ? null
+          : Padding(
+              padding: const EdgeInsets.only(top: 3),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (error)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 4),
+                      child: Icon(
+                        Icons.error,
+                        size: 14,
+                        color: theme.colorScheme.error,
+                      ),
+                    ),
+                  Expanded(
+                    child: Text(
+                      text,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: error
+                            ? theme.colorScheme.error
+                            : theme.colorScheme.onSurfaceVariant,
+                        height: 1.2,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+    );
+  }
 
-    final time = draft.time;
-    final timeError = time.error;
-    final heightProblem = draft.problems
-        .where((p) => p.field == 'launch_height')
-        .map((p) => p.message)
-        .firstOrNull;
-
-    final timeField = SizedBox(
-      width: ScoreGridColumns.time,
-      child: TextField(
-        key: ValueKey(_k('time')),
-        controller: _time,
-        focusNode: _timeNode,
-        enabled: editable && off == null,
-        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-        textInputAction: TextInputAction.next,
-        inputFormatters: [
-          FilteringTextInputFormatter.allow(RegExp(r'[0-9.,:]')),
-        ],
-        onTap: widget.actions.onActivate,
-        onChanged: draft.setTime,
-        onSubmitted: (_) => _heightNode.requestFocus(),
-        decoration: InputDecoration(
-          labelText: 'Time',
-          helperText: off != null
-              ? 'Scores 0'
-              : (time.display != null && timeError == null
-                    ? time.display
-                    : null),
-          errorText: timeError,
-          errorMaxLines: 3,
-          border: const OutlineInputBorder(),
-          isDense: false,
+  Widget _field(
+    BuildContext context, {
+    required Key key,
+    required TextEditingController controller,
+    required FocusNode node,
+    required bool enabled,
+    required TextInputType type,
+    required List<TextInputFormatter> formatters,
+    required ValueChanged<String> onChanged,
+    required ValueChanged<String> onSubmitted,
+    required bool invalid,
+    String? suffix,
+  }) {
+    final scheme = Theme.of(context).colorScheme;
+    return TextField(
+      key: key,
+      controller: controller,
+      focusNode: node,
+      enabled: enabled,
+      keyboardType: type,
+      textInputAction: TextInputAction.next,
+      inputFormatters: formatters,
+      onTap: widget.actions.onActivate,
+      onChanged: onChanged,
+      onSubmitted: onSubmitted,
+      style: const TextStyle(fontSize: 18),
+      decoration: InputDecoration(
+        isDense: true,
+        filled: !enabled,
+        fillColor: scheme.onSurface.withValues(alpha: 0.06),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 10,
+          vertical: 14,
         ),
+        suffixText: suffix,
+        border: _border(invalid ? scheme.error : scheme.outline),
+        enabledBorder: _border(
+          invalid ? scheme.error : scheme.outline,
+          invalid ? 2 : 1,
+        ),
+        disabledBorder: _border(Colors.transparent),
+        focusedBorder: _border(scheme.primary, 3),
       ),
     );
-    final heightField = SizedBox(
-      width: ScoreGridColumns.height,
-      child: TextField(
-        key: ValueKey(_k('height')),
-        controller: _height,
-        focusNode: _heightNode,
-        enabled: editable && off == null,
-        keyboardType: TextInputType.number,
-        textInputAction: TextInputAction.next,
-        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-        onTap: widget.actions.onActivate,
-        onChanged: draft.setHeight,
-        onSubmitted: (_) =>
-            (draft.landingOffReason == null ? _landingNode : _penaltyNode)
-                .requestFocus(),
-        decoration: InputDecoration(
-          labelText: 'Height',
-          suffixText: 'm',
-          helperText: off != null ? 'Scores 0' : null,
-          errorText: heightProblem != null && !draft.heightZero
-              ? heightProblem
-              : null,
-          errorMaxLines: 3,
-          border: const OutlineInputBorder(),
-        ),
-      ),
-    );
+  }
 
-    String number(double? value) =>
-        value == null ? '–' : value.toStringAsFixed(1);
-    final rawValue = dirty ? widget.preview : saved?.rawPoints;
-    final groupValue = dirty ? null : saved?.groupScore;
-    Widget derived(
-      String label,
-      String value, {
-      bool dim = false,
-      String? note,
-    }) => Column(
+  Widget _timeCell(BuildContext context, bool labels, bool editable) {
+    final d = widget.draft;
+    final off = d.measurementsOffReason;
+    final t = d.time;
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(label, style: theme.textTheme.labelSmall),
-        Text(
-          value,
-          style: theme.textTheme.titleMedium?.copyWith(
-            color: dim ? scheme.onSurfaceVariant : null,
-            fontStyle: dim ? FontStyle.italic : null,
-          ),
+        _label(context, 'Time flown (m:ss)', labels),
+        _field(
+          context,
+          key: ValueKey(_k('time')),
+          controller: _time,
+          node: _timeNode,
+          enabled: editable && off == null,
+          type: const TextInputType.numberWithOptions(decimal: true),
+          formatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.,:]'))],
+          onChanged: d.setTime,
+          onSubmitted: (_) => _heightNode.requestFocus(),
+          invalid: t.error != null,
         ),
-        if (note != null) Text(note, style: theme.textTheme.labelSmall),
+        _caption(
+          context,
+          off != null ? 'Scores 0' : (t.error ?? t.display),
+          error: t.error != null && off == null,
+        ),
       ],
     );
-    final rawBox = SizedBox(
-      width: ScoreGridColumns.raw,
-      child: derived(
-        'Raw',
-        number(rawValue),
-        dim: dirty,
-        note: dirty && widget.preview != null ? 'Preview, not saved' : null,
-      ),
-    );
-    final groupBox = SizedBox(
-      width: ScoreGridColumns.group,
-      child: derived('Group', number(groupValue), dim: dirty),
-    );
-    final penalty = draft.penalty ?? 0;
-    final penaltyBox = SizedBox(
-      width: ScoreGridColumns.penalty,
-      child: derived('Penalty', penalty > 0 ? '−$penalty this flight' : 'None'),
-    );
+  }
 
-    final badge = Container(
-      width: 40,
-      height: 40,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: widget.active ? scheme.primary : null,
-        border: Border.all(color: scheme.primary, width: 2),
-      ),
-      child: Text(
-        '${row.lane ?? row.pilot.number ?? ''}',
-        style: theme.textTheme.titleSmall?.copyWith(
-          color: widget.active ? scheme.onPrimary : scheme.primary,
-        ),
-      ),
-    );
-    final name = Column(
+  Widget _heightCell(BuildContext context, bool labels, bool editable) {
+    final d = widget.draft;
+    final off = d.measurementsOffReason;
+    final problem = d.problems
+        .where((p) => p.field == 'launch_height')
+        .map((p) => p.message)
+        .firstOrNull;
+    final shown = problem != null && !d.heightZero ? problem : null;
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Text(
-          row.pilot.name,
-          style: theme.textTheme.titleMedium?.copyWith(
-            fontWeight: widget.active ? FontWeight.bold : null,
-          ),
+        _label(context, 'Launch height (m)', labels),
+        _field(
+          context,
+          key: ValueKey(_k('height')),
+          controller: _height,
+          node: _heightNode,
+          enabled: editable && off == null,
+          type: TextInputType.number,
+          formatters: [FilteringTextInputFormatter.digitsOnly],
+          onChanged: d.setHeight,
+          onSubmitted: (_) =>
+              (d.landingOffReason == null ? _landingNode : _penaltyNode)
+                  .requestFocus(),
+          invalid: shown != null,
+          suffix: 'm',
         ),
-        if (row.team != null) TeamChip(marker: row.team!),
-        if (row.hasSubmission)
+        _caption(
+          context,
+          off != null ? 'Scores 0' : shown,
+          error: shown != null && off == null,
+        ),
+      ],
+    );
+  }
+
+  Widget _landingCell(BuildContext context, bool labels) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final d = widget.draft;
+    var text = '–';
+    IconData? icon;
+    if (d.measurementsOffReason != null) {
+      text = 'Scores 0';
+      icon = Icons.block;
+    } else if (d.lateLanding) {
+      text = 'No landing bonus';
+      icon = Icons.block;
+    } else if (d.landing != null) {
+      for (final l in widget.landings) {
+        if (l.entryKey == d.landing) text = l.displayValue;
+      }
+    }
+    final flags = <(IconData, String)>[
+      if (d.lateLanding) (Icons.timer_off, 'Late landing'),
+      if (d.motorRestart) (Icons.settings, 'Motor restart'),
+      if (d.outOfBounds) (Icons.wrong_location, 'Out of bounds'),
+      if (d.noAltitude) (Icons.height, 'No altitude'),
+    ];
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _label(context, 'Landing · flags', labels),
           Row(
-            mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.inbox, size: 16),
-              const SizedBox(width: 4),
-              Text('Participant submission', style: theme.textTheme.labelSmall),
+              if (icon != null) ...[
+                Icon(icon, size: 16, color: scheme.onSurfaceVariant),
+                const SizedBox(width: 4),
+              ],
+              Flexible(
+                child: Text(
+                  text,
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 15,
+                  ),
+                ),
+              ),
             ],
           ),
-      ],
+          for (final (flagIcon, flagText) in flags)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: StatusChip(icon: flagIcon, label: flagText, dense: true),
+            ),
+        ],
+      ),
     );
-    final status = Wrap(
-      spacing: 8,
-      runSpacing: 4,
-      crossAxisAlignment: WrapCrossAlignment.center,
-      children: [
-        if (widget.findings.isNotEmpty)
-          Tooltip(
-            message: widget.findings.map((f) => f.message).join('\n'),
-            child: StatusChip(
-              icon: Icons.help_outline,
-              label: 'Check',
-              foreground: colors.warn,
+  }
+
+  Widget _numberCell(
+    BuildContext context,
+    String label,
+    bool labels,
+    String value,
+    bool dirty,
+    String? sub,
+  ) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          _label(context, label, labels),
+          Text(
+            value,
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w500,
+              fontFeatures: const [FontFeature.tabularFigures()],
+              color: dirty ? theme.colorScheme.onSurfaceVariant : null,
             ),
           ),
-        RowStatusChip(status: row.status, unsaved: dirty),
-        PopupMenuButton<void>(
-          tooltip: 'More for ${row.pilot.name}',
-          itemBuilder: (context) => const [
-            PopupMenuItem<void>(enabled: false, child: Text('Score history')),
-            PopupMenuItem<void>(enabled: false, child: Text('Retire pilot')),
-          ],
-        ),
-      ],
-    );
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final wide = constraints.maxWidth >= ScoreGridColumns.wideBreakpoint;
-        final header = wide
-            ? Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(width: ScoreGridColumns.lane, child: badge),
-                  Expanded(child: name),
-                  timeField,
-                  const SizedBox(width: ScoreGridColumns.gap),
-                  heightField,
-                  const SizedBox(width: ScoreGridColumns.gap),
-                  rawBox,
-                  groupBox,
-                  penaltyBox,
-                  SizedBox(width: ScoreGridColumns.status, child: status),
-                ],
-              )
-            : Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      badge,
-                      const SizedBox(width: 12),
-                      Expanded(child: name),
-                      status,
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    crossAxisAlignment: WrapCrossAlignment.start,
-                    children: [timeField, heightField],
-                  ),
-                  const SizedBox(height: 8),
-                  Wrap(spacing: 8, children: [rawBox, groupBox, penaltyBox]),
-                ],
-              );
-        return Semantics(
-          container: true,
-          label: '${row.pilot.name}, ${_statusWord(dirty)}',
-          child: Card(
-            key: ValueKey('score-row-${row.id.value}'),
-            margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-              side: BorderSide(
-                color: widget.active ? scheme.primary : scheme.outlineVariant,
-                width: widget.active ? 2 : 1,
+          if (sub != null)
+            Text(
+              sub,
+              textAlign: TextAlign.end,
+              style: theme.textTheme.labelSmall?.copyWith(
+                fontStyle: FontStyle.italic,
+                color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
-            color: widget.active
+        ],
+      ),
+    );
+  }
+
+  Widget _penaltyCell(BuildContext context, bool labels) {
+    final theme = Theme.of(context);
+    final points = widget.draft.penalty ?? 0;
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _label(context, 'Penalties', labels),
+          if (points > 0)
+            Row(
+              children: [
+                Icon(
+                  Icons.remove,
+                  size: 15,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+                const SizedBox(width: 4),
+                Text('$points flight', style: theme.textTheme.bodyMedium),
+              ],
+            )
+          else
+            Text(
+              'None',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _indicatorCell(BuildContext context, bool labels) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _label(context, 'Indicators', labels),
+          if (widget.row.hasSubmission)
+            const Tooltip(
+              message:
+                  'A pilot or helper submitted values. The submission is '
+                  'kept in history.',
+              child: StatusChip(
+                icon: Icons.smartphone,
+                label: 'Pilot entry',
+                dense: true,
+              ),
+            )
+          else
+            Text(
+              '–',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _statusCell(BuildContext context, bool labels, bool dirty) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final colors = MatrixColors.of(context);
+    final subs = <(IconData, String, Color?)>[
+      if (dirty) (Icons.edit_note, 'Not saved yet', null),
+      if (widget.findings.isNotEmpty)
+        (Icons.help_outline, 'Check: ${widget.findings.length}', colors.warn),
+      if (widget.row.isLocked && widget.block != null)
+        (Icons.lock, widget.block!.message, null),
+    ];
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _label(context, 'Status', labels),
+          RowStatusChip(status: widget.row.status, unsaved: dirty),
+          for (final (icon, text, color) in subs)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(icon, size: 14, color: color ?? scheme.onSurfaceVariant),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      text,
+                      style: theme.textTheme.bodySmall?.copyWith(color: color),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _menuCell(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(top: 6),
+    child: PopupMenuButton<void>(
+      tooltip: 'More for ${widget.row.pilot.name}',
+      icon: const Icon(Icons.more_vert),
+      itemBuilder: (context) => const [
+        PopupMenuItem<void>(
+          enabled: false,
+          child: Text('Score history · Later release'),
+        ),
+        PopupMenuItem<void>(
+          enabled: false,
+          child: Text('Retire pilot · Later release'),
+        ),
+        PopupMenuItem<void>(
+          enabled: false,
+          child: Text('Correct a locked score · Later release'),
+        ),
+      ],
+    ),
+  );
+
+  Widget _laneCell(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return Padding(
+      padding: const EdgeInsets.only(top: 10),
+      child: Column(
+        children: [
+          Container(
+            constraints: const BoxConstraints(minWidth: 36),
+            height: 28,
+            padding: const EdgeInsets.symmetric(horizontal: 6),
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(14),
+              color: widget.active ? scheme.primary : null,
+              border: Border.all(color: scheme.primary, width: 1.5),
+            ),
+            child: Text(
+              '${widget.row.lane ?? widget.row.pilot.number ?? ''}',
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: widget.active ? scheme.onPrimary : scheme.primary,
+              ),
+            ),
+          ),
+          if (widget.active)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Icon(Icons.edit, size: 18, color: scheme.primary),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _pilotCell(BuildContext context) {
+    final theme = Theme.of(context);
+    final row = widget.row;
+    final sub = [
+      if (row.team != null) row.team!.name,
+      if (row.pilot.number != null) 'No. ${row.pilot.number}',
+    ].join(' · ');
+    return Padding(
+      padding: const EdgeInsets.only(top: 10),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Tooltip(
+            message: row.team?.name ?? 'No team',
+            child: TeamBadge(marker: row.team),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  row.pilot.name,
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    fontSize: 15,
+                    fontWeight: widget.active ? FontWeight.bold : null,
+                  ),
+                ),
+                if (sub.isNotEmpty)
+                  Text(
+                    sub,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Layout.
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final d = widget.draft;
+    final dirty = d.isDirty;
+    final saved = widget.row.result;
+    final editable = !_readOnly && !widget.save.isBusy;
+    final labels = widget.mode != ScoreGridMode.wide;
+    final rawValue = dirty ? widget.preview : saved?.rawPoints;
+    final groupValue = dirty ? null : saved?.groupScore;
+    String number(double? v) => v == null ? '–' : v.toStringAsFixed(1);
+
+    final lane = _laneCell(context);
+    final pilot = _pilotCell(context);
+    final time = _timeCell(context, labels, editable);
+    final height = _heightCell(context, labels, editable);
+    final land = _landingCell(context, labels);
+    final raw = _numberCell(
+      context,
+      'Raw score',
+      labels,
+      number(rawValue),
+      dirty,
+      dirty && widget.preview != null ? 'Preview, not saved' : null,
+    );
+    final grp = _numberCell(
+      context,
+      'Group score',
+      labels,
+      number(groupValue),
+      dirty,
+      dirty ? 'Preview, not saved' : null,
+    );
+    final pen = _penaltyCell(context, labels);
+    final ind = _indicatorCell(context, labels);
+    final stat = _statusCell(context, labels, dirty);
+    final menu = _menuCell(context);
+    const gap = SizedBox(width: ScoreGridColumns.gap);
+    const vgap = SizedBox(height: 4);
+
+    final Widget grid = switch (widget.mode) {
+      ScoreGridMode.wide => Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(width: ScoreGridColumns.lane, child: lane),
+          gap,
+          Expanded(child: pilot),
+          gap,
+          SizedBox(width: ScoreGridColumns.time, child: time),
+          gap,
+          SizedBox(width: ScoreGridColumns.height, child: height),
+          gap,
+          SizedBox(width: ScoreGridColumns.land, child: land),
+          gap,
+          SizedBox(width: ScoreGridColumns.raw, child: raw),
+          gap,
+          SizedBox(width: ScoreGridColumns.group, child: grp),
+          gap,
+          SizedBox(width: ScoreGridColumns.pen, child: pen),
+          gap,
+          SizedBox(width: ScoreGridColumns.ind, child: ind),
+          gap,
+          SizedBox(width: ScoreGridColumns.stat, child: stat),
+          gap,
+          SizedBox(width: ScoreGridColumns.menu, child: menu),
+        ],
+      ),
+      ScoreGridMode.medium => Column(
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(width: 44, child: lane),
+              gap,
+              Expanded(flex: 2, child: pilot),
+              gap,
+              Expanded(flex: 2, child: stat),
+              gap,
+              SizedBox(width: 44, child: menu),
+            ],
+          ),
+          vgap,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(width: 44),
+              gap,
+              Expanded(child: time),
+              gap,
+              Expanded(child: height),
+              gap,
+              Expanded(flex: 2, child: land),
+              gap,
+              const SizedBox(width: 44),
+            ],
+          ),
+          vgap,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(width: 44),
+              gap,
+              Expanded(child: raw),
+              gap,
+              Expanded(child: grp),
+              gap,
+              Expanded(child: pen),
+              gap,
+              Expanded(child: ind),
+              gap,
+              const SizedBox(width: 44),
+            ],
+          ),
+        ],
+      ),
+      ScoreGridMode.compact => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(width: 40, child: lane),
+              gap,
+              Expanded(child: pilot),
+              SizedBox(width: 44, child: menu),
+            ],
+          ),
+          stat,
+          vgap,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: time),
+              gap,
+              Expanded(child: height),
+            ],
+          ),
+          land,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: raw),
+              gap,
+              Expanded(child: grp),
+            ],
+          ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: pen),
+              gap,
+              Expanded(child: ind),
+            ],
+          ),
+        ],
+      ),
+    };
+
+    final active = widget.active;
+    return Semantics(
+      container: true,
+      label: '${widget.row.pilot.name}, ${_statusWord(dirty)}',
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: widget.actions.onActivate,
+        child: Container(
+          key: ValueKey('score-row-${widget.row.id.value}'),
+          margin: active ? const EdgeInsets.all(4) : null,
+          padding: const EdgeInsets.symmetric(
+            horizontal: ScoreGridColumns.rowPadding,
+            vertical: 6,
+          ),
+          decoration: BoxDecoration(
+            color: active
                 ? Color.alphaBlend(
-                    scheme.primary.withValues(alpha: 0.06),
+                    scheme.primary.withValues(alpha: 0.08),
                     scheme.surface,
                   )
                 : null,
-            child: InkWell(
-              borderRadius: BorderRadius.circular(12),
-              onTap: widget.actions.onActivate,
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    header,
-                    if (widget.active)
-                      ScoreEntryPanel(
-                        row: row,
-                        draft: draft,
-                        save: widget.save,
-                        block: widget.block,
-                        landings: widget.landings,
-                        theirs: widget.theirs,
-                        findings: widget.findings,
-                        actions: widget.actions,
-                        penaltyController: _penalty,
-                        penaltyNode: _penaltyNode,
-                        landingNode: _landingNode,
-                        readOnly: _readOnly,
-                        keyOf: _k,
-                      ),
-                  ],
-                ),
-              ),
-            ),
+            border: active
+                ? Border.all(color: scheme.primary, width: 2)
+                : Border(bottom: BorderSide(color: scheme.outlineVariant)),
+            borderRadius: active ? BorderRadius.circular(12) : null,
           ),
-        );
-      },
+          child: Column(
+            children: [
+              grid,
+              if (active)
+                ScoreEntryPanel(
+                  row: widget.row,
+                  draft: d,
+                  save: widget.save,
+                  block: widget.block,
+                  landings: widget.landings,
+                  landingTableName: widget.landingTableName,
+                  theirs: widget.theirs,
+                  findings: widget.findings,
+                  actions: widget.actions,
+                  penaltyController: _penalty,
+                  penaltyNode: _penaltyNode,
+                  landingNode: _landingNode,
+                  readOnly: _readOnly,
+                  keyOf: _k,
+                ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 

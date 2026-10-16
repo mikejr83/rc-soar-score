@@ -13,6 +13,7 @@ class StatusChip extends StatelessWidget {
     this.background,
     this.foreground,
     this.dashed = false,
+    this.dense = false,
   });
 
   final IconData icon;
@@ -23,28 +24,38 @@ class StatusChip extends StatelessWidget {
   /// Draws an outline only, for a state that has no value yet.
   final bool dashed;
 
+  /// A small outlined chip for flags and indicators.
+  final bool dense;
+
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final fg = foreground ?? scheme.onSurfaceVariant;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      constraints: BoxConstraints(minHeight: dense ? 22 : 28),
+      padding: dense
+          ? const EdgeInsets.fromLTRB(4, 1, 6, 1)
+          : const EdgeInsets.fromLTRB(6, 2, 10, 2),
       decoration: BoxDecoration(
         color: background,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(dense ? 6 : 8),
         border: Border.all(
           color: background == null ? scheme.outline : Colors.transparent,
-          width: dashed ? 1 : 1.5,
+          width: 1,
         ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 18, color: fg),
-          const SizedBox(width: 6),
-          Text(
-            label,
-            style: Theme.of(context).textTheme.labelLarge?.copyWith(color: fg),
+          Icon(icon, size: dense ? 14 : 18, color: fg),
+          SizedBox(width: dense ? 4 : 6),
+          Flexible(
+            child: Text(
+              label,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.labelLarge
+                  ?.copyWith(color: fg, fontSize: dense ? 12 : 13),
+            ),
           ),
         ],
       ),

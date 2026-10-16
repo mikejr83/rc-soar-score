@@ -237,55 +237,93 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
       children: [
         ScoringToolbar(controller: c, onOpen: _go, onSaveAll: _saveAll),
         ScoringContextStrip(controller: c),
-        if (c.recalculationWarning != null)
-          MaterialBanner(
-            key: const ValueKey('scoring-recalculation-warning'),
-            content: Text(c.recalculationWarning!),
-            leading: const Icon(Icons.warning_amber),
-            actions: [
-              TextButton(onPressed: c.refresh, child: const Text('Refresh')),
-            ],
-          ),
-        if (c.loadError != null)
-          MaterialBanner(
-            content: Text(apiErrorText(c.loadError!)),
-            leading: const Icon(Icons.error_outline),
-            actions: [
-              TextButton(onPressed: c.refresh, child: const Text('Retry')),
-            ],
-          ),
-        if (rows.isNotEmpty)
-          LayoutBuilder(
-            builder: (context, box) =>
-                box.maxWidth >= ScoreGridColumns.wideBreakpoint
-                ? const ScoreGridHeader()
-                : const SizedBox.shrink(),
-          ),
         Expanded(
-          child: rows.isEmpty
-              ? const MessageView(
-                  key: ValueKey('scoring-empty-group'),
-                  text: 'No pilots in this group.',
-                  detail: 'Every pilot assigned here is absent or retired.',
-                )
-              : ListView(
-                  padding: const EdgeInsets.only(bottom: 24, top: 4),
-                  children: [
-                    if (check != null)
-                      ScoreCheckPanel(
-                        result: check,
-                        onJump: _jump,
-                        onClose: c.clearCheck,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (c.recalculationWarning != null)
+                  MaterialBanner(
+                    key: const ValueKey('scoring-recalculation-warning'),
+                    content: Text(c.recalculationWarning!),
+                    leading: const Icon(Icons.warning_amber),
+                    actions: [
+                      TextButton(
+                        onPressed: c.refresh,
+                        child: const Text('Refresh'),
                       ),
-                    for (final row in rows) _tile(c, row),
-                  ],
+                    ],
+                  ),
+                if (c.loadError != null)
+                  MaterialBanner(
+                    content: Text(apiErrorText(c.loadError!)),
+                    leading: const Icon(Icons.error_outline),
+                    actions: [
+                      TextButton(
+                        onPressed: c.refresh,
+                        child: const Text('Retry'),
+                      ),
+                    ],
+                  ),
+                if (check != null)
+                  ScoreCheckPanel(
+                    result: check,
+                    onJump: _jump,
+                    onClose: c.clearCheck,
+                  ),
+                Expanded(
+                  child: rows.isEmpty
+                      ? const MessageView(
+                          key: ValueKey('scoring-empty-group'),
+                          text: 'No pilots in this group.',
+                          detail:
+                              'Every pilot assigned here is absent or retired.',
+                        )
+                      : LayoutBuilder(
+                          builder: (context, box) {
+                            final mode = ScoreGridMode.of(box.maxWidth);
+                            return _table(c, rows, mode);
+                          },
+                        ),
                 ),
+              ],
+            ),
+          ),
         ),
       ],
     );
   }
 
-  Widget _tile(ScoringController c, ScoringRow row) {
+  /// One rounded table: the heading (wide only) and a row per pilot.
+  Widget _table(
+    ScoringController c,
+    List<ScoringRow> rows,
+    ScoreGridMode mode,
+  ) {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      key: const ValueKey('score-table'),
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        color: scheme.surface,
+        border: Border.all(color: scheme.outlineVariant),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        children: [
+          if (mode == ScoreGridMode.wide) const ScoreGridHeader(),
+          Expanded(
+            child: ListView(
+              children: [for (final row in rows) _tile(c, row, mode)],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _tile(ScoringController c, ScoringRow row, ScoreGridMode mode) {
     final data = c.data!;
     final draft = c.draftOf(row);
     final save = c.saveOf(row.id);
@@ -297,6 +335,8 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
       active: c.activeId == row.id,
       block: c.block,
       landings: data.landings,
+      landingTableName: data.landingTableName,
+      mode: mode,
       preview: draft.isDirty
           ? previewRawScore(
               draft.components,

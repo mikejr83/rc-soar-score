@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
+import '../../services/scoring/scoring_completeness.dart';
 import '../../services/scoring/scoring_controller.dart';
 import '../../services/scoring/scoring_row.dart';
 import '../matrix/matrix_colors.dart';
+import 'status_chips.dart';
 
-/// One line above the grid: round status, lock state, unsaved count, and how
-/// many pilots are entered and official.
+/// The group's status line under the toolbar: chips for the round state and
+/// the lock, a chip for unsaved rows, and the count of entered and official.
 class ScoringContextStrip extends StatelessWidget {
   const ScoringContextStrip({super.key, required this.controller});
 
@@ -14,7 +16,10 @@ class ScoringContextStrip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final colors = MatrixColors.of(context);
+    final data = controller.data!;
+    final round = controller.currentRound;
     final rows = controller.rows;
     final entered = rows.where((r) => r.isScored).length;
     final official = rows
@@ -24,41 +29,70 @@ class ScoringContextStrip extends StatelessWidget {
         .length;
     final dirty = controller.dirtyCount;
     final block = controller.block;
-    final facts = <(IconData, String, Color?)>[
-      (
-        Icons.checklist,
-        '$entered of ${rows.length} entered · $official official',
-        null,
-      ),
-      if (dirty > 0)
-        (
-          Icons.edit_note,
-          '$dirty unsaved ${dirty == 1 ? 'row' : 'rows'}',
-          colors.warn,
-        ),
-      if (block != null) (Icons.lock, block.message, null),
-    ];
-    return Container(
-      key: const ValueKey('scoring-context-strip'),
-      width: double.infinity,
-      color: theme.colorScheme.surfaceContainerLow,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+    final roundState = round == null
+        ? CompletenessState.empty
+        : data.roundCompleteness(round).state;
+    final roundText = switch (roundState) {
+      CompletenessState.empty => 'Round not flown',
+      CompletenessState.partial => 'Round in progress',
+      CompletenessState.entered ||
+      CompletenessState.official ||
+      CompletenessState.locked => 'Round scored',
+    };
+    final roundIcon = switch (roundState) {
+      CompletenessState.empty => Icons.radio_button_unchecked,
+      CompletenessState.partial => Icons.timelapse,
+      _ => Icons.check_circle,
+    };
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
       child: Wrap(
-        spacing: 24,
-        runSpacing: 6,
+        key: const ValueKey('scoring-context-strip'),
+        spacing: 10,
+        runSpacing: 8,
+        crossAxisAlignment: WrapCrossAlignment.center,
         children: [
-          for (final (icon, text, color) in facts)
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(icon, size: 18, color: color),
-                const SizedBox(width: 6),
-                Text(
-                  text,
-                  style: theme.textTheme.bodyMedium?.copyWith(color: color),
-                ),
-              ],
+          StatusChip(
+            icon: roundIcon,
+            label: roundText,
+            background: roundState == CompletenessState.partial
+                ? scheme.tertiaryContainer
+                : null,
+            foreground: roundState == CompletenessState.partial
+                ? scheme.onTertiaryContainer
+                : scheme.onSurface,
+          ),
+          if (block != null)
+            StatusChip(
+              icon: Icons.lock,
+              label: block.chip,
+              background: scheme.inverseSurface,
+              foreground: scheme.onInverseSurface,
+            )
+          else
+            StatusChip(
+              icon: Icons.lock_open,
+              label: 'Open for entry',
+              foreground: scheme.onSurface,
             ),
+          if (dirty > 0)
+            StatusChip(
+              icon: Icons.edit_note,
+              label: '$dirty unsaved ${dirty == 1 ? 'row' : 'rows'}',
+              background: scheme.tertiaryContainer,
+              foreground: scheme.onTertiaryContainer,
+            ),
+          Padding(
+            padding: const EdgeInsets.only(left: 4),
+            child: Text(
+              '$entered of ${rows.length} entered · $official official',
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w500,
+                fontFeatures: const [FontFeature.tabularFigures()],
+                color: dirty > 0 ? colors.warn : null,
+              ),
+            ),
+          ),
         ],
       ),
     );

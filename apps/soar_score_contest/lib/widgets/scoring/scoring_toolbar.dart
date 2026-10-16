@@ -4,7 +4,9 @@ import '../../services/scoring/scoring_controller.dart';
 import '../../services/workspace/next_step/next_step_text.dart';
 import 'completeness_menu.dart';
 
-/// Round and group navigation on the left, group actions on the right.
+/// Round and group navigation on the left; on the right the group menu,
+/// Score check and one primary action that follows the state of the group.
+/// When entry is closed, the reason sits in a strip under the buttons.
 class ScoringToolbar extends StatelessWidget {
   const ScoringToolbar({
     super.key,
@@ -30,13 +32,9 @@ class ScoringToolbar extends StatelessWidget {
     final groupIndex = groups.indexOf(controller.group);
     final dirty = controller.dirtyCount;
     final theme = Theme.of(context);
-
-    void toRound(int index) {
-      final target = rounds[index];
-      onOpen(target.ordinal, 1);
-    }
-
-    void toGroup(int index) => onOpen(controller.round, groups[index]);
+    final scheme = theme.colorScheme;
+    final block = controller.block;
+    final rows = controller.rows;
 
     Widget step(IconData icon, String tip, VoidCallback? onTap, String key) =>
         IconButton(
@@ -47,8 +45,11 @@ class ScoringToolbar extends StatelessWidget {
           style: IconButton.styleFrom(minimumSize: const Size(48, 48)),
         );
 
-    final roundNav = Row(
-      mainAxisSize: MainAxisSize.min,
+    void toRound(int index) => onOpen(rounds[index].ordinal, 1);
+    void toGroup(int index) => onOpen(controller.round, groups[index]);
+
+    final roundNav = Wrap(
+      crossAxisAlignment: WrapCrossAlignment.center,
       children: [
         step(
           Icons.first_page,
@@ -66,12 +67,16 @@ class ScoringToolbar extends StatelessWidget {
           key: const ValueKey('round-picker'),
           child: CompletenessMenu(
             title: 'Round ${controller.round} of ${rounds.length}',
+            completeness: round == null
+                ? data.roundCompleteness(rounds.first)
+                : data.roundCompleteness(round),
             selected: controller.round,
             choices: [
               for (final r in rounds)
                 PickerChoice(
                   value: r.ordinal,
                   label: 'Round ${r.ordinal}',
+                  sub: '${r.groupCount} groups',
                   completeness: data.roundCompleteness(r),
                 ),
             ],
@@ -97,11 +102,8 @@ class ScoringToolbar extends StatelessWidget {
       ],
     );
 
-    final pilots = round == null
-        ? 0
-        : data.rowsOf(round, controller.group).length;
-    final groupNav = Row(
-      mainAxisSize: MainAxisSize.min,
+    final groupNav = Wrap(
+      crossAxisAlignment: WrapCrossAlignment.center,
       children: [
         step(
           Icons.first_page,
@@ -119,8 +121,12 @@ class ScoringToolbar extends StatelessWidget {
           key: const ValueKey('group-picker'),
           child: CompletenessMenu(
             title:
-                'Group ${NextStepText.group(controller.group)} of ${groups.length}'
-                ' · $pilots pilots',
+                'Group ${NextStepText.group(controller.group)} of '
+                '${groups.length}',
+            trailing: '${rows.length} pilots',
+            completeness: round == null
+                ? data.roundCompleteness(rounds.first)
+                : data.groupCompleteness(round, controller.group),
             selected: controller.group,
             choices: [
               if (round != null)
@@ -128,6 +134,7 @@ class ScoringToolbar extends StatelessWidget {
                   PickerChoice(
                     value: g,
                     label: 'Group ${NextStepText.group(g)}',
+                    sub: '${data.rowsOf(round, g).length} pilots',
                     completeness: data.groupCompleteness(round, g),
                   ),
             ],
@@ -153,55 +160,147 @@ class ScoringToolbar extends StatelessWidget {
       ],
     );
 
-    final blocked = controller.block != null;
+    // One primary action per state: Save N rows, else Lock… (not built), and
+    // a disabled Save with the reason when entry is closed.
+    final String primaryLabel;
+    final IconData primaryIcon;
+    final VoidCallback? primaryTap;
+    if (block != null) {
+      primaryLabel = 'Save';
+      primaryIcon = Icons.save;
+      primaryTap = null;
+    } else if (dirty > 0) {
+      primaryLabel = 'Save $dirty ${dirty == 1 ? 'row' : 'rows'}';
+      primaryIcon = Icons.save;
+      primaryTap = onSaveAll;
+    } else {
+      primaryLabel = 'Lock…';
+      primaryIcon = Icons.lock_outline;
+      primaryTap = null;
+    }
+    final lockHint = block == null && dirty == 0;
+
+    Widget pill({
+      required Key key,
+      required IconData icon,
+      required String label,
+      required VoidCallback? onTap,
+      bool filled = false,
+    }) {
+      final style = ButtonStyle(
+        minimumSize: const WidgetStatePropertyAll(Size(0, 48)),
+        shape: WidgetStatePropertyAll(
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        ),
+      );
+      return filled
+          ? FilledButton.icon(
+              key: key,
+              onPressed: onTap,
+              icon: Icon(icon, size: 20),
+              label: Text(label),
+              style: style,
+            )
+          : OutlinedButton.icon(
+              key: key,
+              onPressed: onTap,
+              icon: Icon(icon, size: 20),
+              label: Text(label),
+              style: style,
+            );
+    }
+
     final actions = Wrap(
       spacing: 8,
       runSpacing: 8,
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
-        OutlinedButton.icon(
+        PopupMenuButton<void>(
+          key: const ValueKey('group-more'),
+          tooltip: 'More group actions',
+          icon: const Icon(Icons.more_vert),
+          itemBuilder: (context) => const [
+            PopupMenuItem<void>(
+              enabled: false,
+              child: Text('Re-flight group · Later release'),
+            ),
+            PopupMenuItem<void>(
+              enabled: false,
+              child: Text('Re-flight round · Later release'),
+            ),
+            PopupMenuItem<void>(
+              enabled: false,
+              child: Text('Group history · Later release'),
+            ),
+          ],
+        ),
+        pill(
           key: const ValueKey('score-check'),
-          onPressed: controller.rows.isEmpty ? null : controller.runCheck,
-          icon: const Icon(Icons.fact_check_outlined),
-          label: const Text('Score check'),
+          icon: Icons.fact_check_outlined,
+          label: 'Score check',
+          onTap: rows.isEmpty ? null : controller.runCheck,
         ),
         Tooltip(
-          message: 'Locking is not available in this build yet.',
-          child: OutlinedButton.icon(
-            key: const ValueKey('score-lock'),
-            onPressed: null,
-            icon: const Icon(Icons.lock_outline),
-            label: const Text('Lock…'),
+          message: lockHint
+              ? 'Locking is not available in this build yet.'
+              : '',
+          child: pill(
+            key: const ValueKey('score-save-all'),
+            icon: primaryIcon,
+            label: primaryLabel,
+            onTap: primaryTap,
+            filled: true,
           ),
-        ),
-        FilledButton.icon(
-          key: const ValueKey('score-save-all'),
-          onPressed: dirty > 0 && !blocked ? onSaveAll : null,
-          icon: const Icon(Icons.save),
-          label: Text(dirty > 0 ? 'Save $dirty rows' : 'Nothing to save'),
         ),
       ],
     );
 
-    return Material(
-      color: theme.colorScheme.surface,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        child: Wrap(
-          spacing: 16,
-          runSpacing: 8,
-          alignment: WrapAlignment.spaceBetween,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          children: [
-            Wrap(
-              spacing: 16,
-              runSpacing: 8,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [roundNav, groupNav],
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Wrap(
+            spacing: 16,
+            runSpacing: 8,
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              Wrap(
+                spacing: 16,
+                runSpacing: 8,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [roundNav, groupNav],
+              ),
+              actions,
+            ],
+          ),
+          if (block != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Container(
+                key: const ValueKey('score-reason'),
+                width: double.infinity,
+                padding: const EdgeInsets.fromLTRB(12, 8, 8, 8),
+                decoration: BoxDecoration(
+                  color: scheme.surfaceContainer,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.lock_outline, color: scheme.onSurfaceVariant),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        block.message,
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
-            actions,
-          ],
-        ),
+        ],
       ),
     );
   }

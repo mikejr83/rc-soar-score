@@ -67,6 +67,6 @@ void main() {
     await tapVisible(tester, save.first);
     // Group C had one score already; the saved row makes two.
     await pumpUntilFound(tester, find.text('2 of 4 entered · 2 official'));
-    await pumpUntilFound(tester, find.text('Nothing to save'));
+    await pumpUntilFound(tester, find.text('Lock…'));
   });
 }

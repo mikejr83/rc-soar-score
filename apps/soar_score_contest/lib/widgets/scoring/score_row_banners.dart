@@ -32,7 +32,7 @@ class ScoreInlineNote extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          border: Border.all(color: tint, width: 1.5),
+          color: tint.withValues(alpha: 0.12),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Wrap(
