@@ -42,7 +42,19 @@ void main() {
     await tapVisible(tester, find.byKey(const ValueKey('picker-item-3')));
     await pumpUntilFound(tester, find.textContaining('Group C of 3'));
 
-    // Group C is not scored. Open its first row and enter a flight.
+    // The count already there depends on the draw, so it is read, not assumed.
+    await pumpUntilFound(tester, find.textContaining(' of 4 entered · '));
+    final counts = RegExp(r'^(\d+) of 4 entered · (\d+) official$');
+    final before = find
+        .byType(Text)
+        .evaluate()
+        .map((e) => (e.widget as Text).data)
+        .map((t) => t == null ? null : counts.firstMatch(t))
+        .whereType<RegExpMatch>()
+        .first;
+    final official = int.parse(before.group(2)!) + 1;
+
+    // Open the first row of group C and enter a flight.
     final time = _timeFields().first;
     await pumpUntilFound(tester, time);
     await tapVisible(tester, time);
@@ -65,8 +77,10 @@ void main() {
           !(w.key! as ValueKey<String>).value.startsWith('score-save-all'),
     );
     await tapVisible(tester, save.first);
-    // Group C had one score already; the saved row makes two.
-    await pumpUntilFound(tester, find.text('2 of 4 entered · 2 official'));
+    await pumpUntilFound(
+      tester,
+      find.text('$official of 4 entered · $official official'),
+    );
     await pumpUntilFound(tester, find.text('Lock…'));
   });
 }

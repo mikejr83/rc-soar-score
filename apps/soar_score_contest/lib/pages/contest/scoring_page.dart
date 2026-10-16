@@ -10,6 +10,7 @@ import '../../services/scoring/score_preview.dart';
 import '../../services/scoring/scoring_controller.dart';
 import '../../services/scoring/scoring_row.dart';
 import '../../widgets/api_error_text.dart';
+import '../../widgets/contest_scope.dart';
 import '../../widgets/message_view.dart';
 import '../../widgets/scoring/score_check_panel.dart';
 import '../../widgets/scoring/score_grid_columns.dart';
@@ -53,6 +54,9 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
   ScoringController? _controller;
   String? _focusRow;
   String? _focusField;
+  // The lifecycle state the shell was last asked to catch up with, so a slow
+  // or failed reload is not repeated on every change of the page.
+  LifecycleState? _reloadedFor;
 
   @override
   void didChangeDependencies() {
@@ -117,7 +121,23 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
   }
 
   void _changed() {
-    if (mounted) setState(() {});
+    if (!mounted) return;
+    setState(() {});
+    _syncShellContest();
+  }
+
+  /// The first saved score moves a Ready contest to Running on the server. The
+  /// shell loaded the contest once, so without a reload the workspace, rail and
+  /// status panel keep showing Ready after the director goes back.
+  void _syncShellContest() {
+    final scope = ContestScope.maybeOf(context);
+    final shown = scope?.contest;
+    final saved = _controller?.data?.contest;
+    if (scope == null || shown == null || saved == null) return;
+    if (shown.lifecycleState == saved.lifecycleState) return;
+    if (_reloadedFor == saved.lifecycleState) return;
+    _reloadedFor = saved.lifecycleState;
+    scope.reload().ignore();
   }
 
   /// Asks what to do with unsaved rows. True when the caller may go on.
