@@ -44,56 +44,59 @@ class ScoringContextStrip extends StatelessWidget {
       CompletenessState.partial => Icons.timelapse,
       _ => Icons.check_circle,
     };
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-      child: Wrap(
-        key: const ValueKey('scoring-context-strip'),
-        spacing: 10,
-        runSpacing: 8,
-        crossAxisAlignment: WrapCrossAlignment.center,
-        children: [
-          StatusChip(
-            icon: roundIcon,
-            label: roundText,
-            background: roundState == CompletenessState.partial
-                ? scheme.tertiaryContainer
-                : null,
-            foreground: roundState == CompletenessState.partial
-                ? scheme.onTertiaryContainer
-                : scheme.onSurface,
-          ),
-          if (block != null)
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+        child: Wrap(
+          key: const ValueKey('scoring-context-strip'),
+          spacing: 10,
+          runSpacing: 8,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
             StatusChip(
-              icon: Icons.lock,
-              label: block.chip,
-              background: scheme.inverseSurface,
-              foreground: scheme.onInverseSurface,
-            )
-          else
-            StatusChip(
-              icon: Icons.lock_open,
-              label: 'Open for entry',
-              foreground: scheme.onSurface,
+              icon: roundIcon,
+              label: roundText,
+              background: roundState == CompletenessState.partial
+                  ? scheme.tertiaryContainer
+                  : null,
+              foreground: roundState == CompletenessState.partial
+                  ? scheme.onTertiaryContainer
+                  : scheme.onSurface,
             ),
-          if (dirty > 0)
-            StatusChip(
-              icon: Icons.edit_note,
-              label: '$dirty unsaved ${dirty == 1 ? 'row' : 'rows'}',
-              background: scheme.tertiaryContainer,
-              foreground: scheme.onTertiaryContainer,
-            ),
-          Padding(
-            padding: const EdgeInsets.only(left: 4),
-            child: Text(
-              '$entered of ${rows.length} entered · $official official',
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w500,
-                fontFeatures: const [FontFeature.tabularFigures()],
-                color: dirty > 0 ? colors.warn : null,
+            if (block != null)
+              StatusChip(
+                icon: Icons.lock,
+                label: block.chip,
+                background: scheme.inverseSurface,
+                foreground: scheme.onInverseSurface,
+              )
+            else
+              StatusChip(
+                icon: Icons.lock_open,
+                label: 'Open for entry',
+                foreground: scheme.onSurface,
+              ),
+            if (dirty > 0)
+              StatusChip(
+                icon: Icons.edit_note,
+                label: '$dirty unsaved ${dirty == 1 ? 'row' : 'rows'}',
+                background: scheme.tertiaryContainer,
+                foreground: scheme.onTertiaryContainer,
+              ),
+            Padding(
+              padding: const EdgeInsets.only(left: 4),
+              child: Text(
+                '$entered of ${rows.length} entered · $official official',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w500,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                  color: dirty > 0 ? colors.warn : null,
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

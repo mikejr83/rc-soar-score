@@ -324,4 +324,73 @@ void main() {
     expect(find.text('This contest has no matrix yet.'), findsOneWidget);
     expect(find.byKey(const ValueKey('scoring-open-matrix')), findsOneWidget);
   });
+
+  group('layout follows the design', () {
+    testWidgets('navigation is left and actions are right', (tester) async {
+      await pumpScoringPage(tester, ScoringServer(), round: 1, group: 1);
+      final first = tester.getTopLeft(
+        find.byKey(const ValueKey('round-first')),
+      );
+      final action = tester.getTopRight(
+        find.byKey(const ValueKey('score-save-all')),
+      );
+      final width = tester.view.physicalSize.width;
+      expect(first.dx, closeTo(16, 4));
+      expect(action.dx, closeTo(width - 16, 4));
+    });
+
+    testWidgets('the status line starts at the left edge', (tester) async {
+      await pumpScoringPage(tester, ScoringServer(), round: 1, group: 1);
+      final chip = tester.getTopLeft(find.text('Round not flown'));
+      expect(chip.dx, lessThan(60));
+    });
+
+    testWidgets('the whole active row is highlighted, with no inner card', (
+      tester,
+    ) async {
+      await pumpScoringPage(tester, ScoringServer(), round: 1, group: 1);
+      await tester.tap(_row(1, 1));
+      await tester.pumpAndSettle();
+      final row = tester.getRect(_row(1, 1));
+      final table = tester.getRect(find.byKey(const ValueKey('score-table')));
+      // Full width of the table, less its border.
+      expect(row.width, closeTo(table.width, 3));
+      final band = tester.getRect(
+        find.byKey(ValueKey('score-band-${scoringAssignmentId(1, 1).value}')),
+      );
+      expect(band.left, greaterThan(row.left));
+      expect(band.right, lessThan(row.right + 1));
+    });
+
+    testWidgets('a missing field is explained under the field, not by Save', (
+      tester,
+    ) async {
+      await pumpScoringPage(tester, ScoringServer(), round: 1, group: 1);
+      await tester.tap(_row(1, 1));
+      await tester.pumpAndSettle();
+      await tester.enterText(_time(1, 1), '630');
+      await tester.pump();
+      expect(find.text('Launch height is needed with a time.'), findsOneWidget);
+      expect(find.textContaining('Correct the marked fields'), findsNothing);
+      await tester.enterText(_time(1, 1), '');
+      await tester.enterText(_height(1, 1), '180');
+      await tester.pump();
+      expect(find.text('Time flown is needed with a height.'), findsOneWidget);
+    });
+
+    testWidgets('Save row and Revert are left, the hint is right', (
+      tester,
+    ) async {
+      await pumpScoringPage(tester, ScoringServer(), round: 1, group: 1);
+      await tester.tap(_row(1, 1));
+      await tester.pumpAndSettle();
+      final save = tester.getTopLeft(_save(1, 1));
+      final hint = tester.getTopRight(find.textContaining('Enter moves on'));
+      final band = tester.getRect(
+        find.byKey(ValueKey('score-band-${scoringAssignmentId(1, 1).value}')),
+      );
+      expect(save.dx, closeTo(band.left, 2));
+      expect(hint.dx, closeTo(band.right, 2));
+    });
+  });
 }

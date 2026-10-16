@@ -270,20 +270,34 @@ class ScoringToolbar extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Wrap(
-            spacing: 16,
-            runSpacing: 8,
-            alignment: WrapAlignment.spaceBetween,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              Wrap(
+          LayoutBuilder(
+            builder: (context, box) {
+              final nav = Wrap(
                 spacing: 16,
                 runSpacing: 8,
                 crossAxisAlignment: WrapCrossAlignment.center,
                 children: [roundNav, groupNav],
-              ),
-              actions,
-            ],
+              );
+              // Navigation on the left, actions on the right.
+              if (box.maxWidth < 760) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    nav,
+                    const SizedBox(height: 8),
+                    Align(alignment: Alignment.centerRight, child: actions),
+                  ],
+                );
+              }
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(child: nav),
+                  const SizedBox(width: 16),
+                  actions,
+                ],
+              );
+            },
           ),
           if (block != null)
             Padding(

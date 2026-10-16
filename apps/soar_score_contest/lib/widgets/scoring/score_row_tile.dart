@@ -286,6 +286,10 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
     final d = widget.draft;
     final off = d.measurementsOffReason;
     final t = d.time;
+    final missing = d.problems
+        .where((p) => p.field == 'time_flown' && t.error == null)
+        .map((p) => p.message)
+        .firstOrNull;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -301,14 +305,14 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
           formatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.,:]'))],
           onChanged: d.setTime,
           onSubmitted: (_) => _heightNode.requestFocus(),
-          invalid: t.error != null,
+          invalid: t.error != null || missing != null,
           order: 1,
           badge: '1↵',
         ),
         _caption(
           context,
-          off != null ? 'Scores 0' : (t.error ?? t.display),
-          error: t.error != null && off == null,
+          off != null ? 'Scores 0' : (t.error ?? missing ?? t.display),
+          error: (t.error != null || missing != null) && off == null,
         ),
       ],
     );
@@ -823,22 +827,22 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
           onTap: widget.actions.onActivate,
           child: Container(
             key: ValueKey('score-row-${widget.row.id.value}'),
-            margin: active ? const EdgeInsets.all(4) : null,
             padding: const EdgeInsets.symmetric(
               horizontal: ScoreGridColumns.rowPadding,
               vertical: 6,
             ),
             decoration: BoxDecoration(
+              // The whole row, band included, is the highlighted block.
               color: active
-                  ? Color.alphaBlend(
-                      scheme.primary.withValues(alpha: 0.08),
-                      scheme.surface,
-                    )
+                  ? (Theme.of(context).brightness == Brightness.dark
+                        ? const Color(0xFF14283A)
+                        : const Color(0xFFE4EFF8))
                   : null,
               border: active
-                  ? Border.all(color: scheme.primary, width: 2)
+                  ? Border.symmetric(
+                      horizontal: BorderSide(color: scheme.primary, width: 2),
+                    )
                   : Border(bottom: BorderSide(color: scheme.outlineVariant)),
-              borderRadius: active ? BorderRadius.circular(12) : null,
             ),
             child: Column(
               children: [

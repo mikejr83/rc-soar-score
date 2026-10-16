@@ -102,18 +102,10 @@ class ScoreEntryPanel extends StatelessWidget {
     return Container(
       key: ValueKey(keyOf('band')),
       width: double.infinity,
-      margin: const EdgeInsets.only(top: 8, bottom: 4),
-      padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+      margin: const EdgeInsets.only(top: 8),
+      padding: const EdgeInsets.fromLTRB(0, 6, 0, 8),
       decoration: BoxDecoration(
-        color: scheme.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x33000000),
-            blurRadius: 3,
-            offset: Offset(0, 1),
-          ),
-        ],
+        border: Border(top: BorderSide(color: scheme.outlineVariant)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -270,51 +262,64 @@ class ScoreEntryPanel extends StatelessWidget {
             },
           ),
           const SizedBox(height: 14),
-          Wrap(
-            spacing: 12,
-            runSpacing: 8,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              FocusStep(
-                order: 10,
-                badge: focusOrder ? '10 → next pilot 1' : null,
-                enterPath: true,
-                child: FilledButton.icon(
-                  key: ValueKey(keyOf('save')),
-                  onPressed: canSave ? actions.onSave : null,
-                  icon: busy
-                      ? const SizedBox.square(
-                          dimension: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.save, size: 20),
-                  label: Text(busy ? 'Saving…' : 'Save row'),
-                  style: FilledButton.styleFrom(minimumSize: const Size(0, 48)),
+          SizedBox(
+            width: double.infinity,
+            child: Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              spacing: 12,
+              runSpacing: 8,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    FocusStep(
+                      order: 10,
+                      badge: focusOrder ? '10 → next pilot 1' : null,
+                      enterPath: true,
+                      child: FilledButton.icon(
+                        key: ValueKey(keyOf('save')),
+                        onPressed: canSave ? actions.onSave : null,
+                        icon: busy
+                            ? const SizedBox.square(
+                                dimension: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Icon(Icons.save, size: 20),
+                        label: Text(busy ? 'Saving…' : 'Save row'),
+                        style: FilledButton.styleFrom(
+                          minimumSize: const Size(0, 48),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    FocusStep(
+                      order: 11,
+                      child: TextButton(
+                        key: ValueKey(keyOf('revert')),
+                        onPressed: enabled && draft.isDirty
+                            ? actions.onRevert
+                            : null,
+                        child: const Text('Revert'),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-              FocusStep(
-                order: 11,
-                child: TextButton(
-                  key: ValueKey(keyOf('revert')),
-                  onPressed: enabled && draft.isDirty ? actions.onRevert : null,
-                  child: const Text('Revert'),
-                ),
-              ),
-              Text(
-                'Enter moves on. Enter on the penalty saves and opens the '
-                'next pilot.',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: scheme.onSurfaceVariant,
-                ),
-              ),
-              if (problems.isNotEmpty)
-                Text(
-                  'Correct the marked fields to save this row.',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: scheme.error,
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 360),
+                  child: Text(
+                    'Enter moves on. Enter on the penalty saves and opens the '
+                    'next pilot.',
+                    textAlign: TextAlign.end,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
                   ),
                 ),
-            ],
+              ],
+            ),
           ),
         ],
       ),
