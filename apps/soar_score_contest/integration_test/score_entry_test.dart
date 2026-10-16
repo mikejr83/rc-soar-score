@@ -42,7 +42,16 @@ void main() {
     await tapVisible(tester, find.byKey(const ValueKey('picker-item-3')));
     await pumpUntilFound(tester, find.textContaining('Group C of 3'));
 
-    // Group C is not scored. Open its first row and enter a flight.
+    // How many of group C's slots are scored depends on the drawn matrix, so
+    // read the count and expect one more after the save.
+    final strip = find.byWidgetPredicate(
+      (w) => w is Text && RegExp(r'^\d of 4 entered').hasMatch(w.data ?? ''),
+      description: 'the entered count',
+    );
+    await pumpUntilFound(tester, strip);
+    final before = int.parse(tester.widget<Text>(strip).data!.substring(0, 1));
+
+    // Open the first row and enter a flight.
     final time = _timeFields().first;
     await pumpUntilFound(tester, time);
     await tapVisible(tester, time);
@@ -65,8 +74,11 @@ void main() {
           !(w.key! as ValueKey<String>).value.startsWith('score-save-all'),
     );
     await tapVisible(tester, save.first);
-    // Group C had one score already; the saved row makes two.
-    await pumpUntilFound(tester, find.text('2 of 4 entered · 2 official'));
+    final after = before + 1;
+    await pumpUntilFound(
+      tester,
+      find.text('$after of 4 entered · $after official'),
+    );
     await pumpUntilFound(tester, find.text('Lock…'));
   });
 }

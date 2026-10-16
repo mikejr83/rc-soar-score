@@ -7,6 +7,7 @@ Thin executable that wires dependencies, starts the shelf_io server, and exposes
 - `lib/main.dart` — entry point; parse flags, wire, call `shelf_io.serve`
 - `lib/server.dart` — startup, dependency injection, port binding
 - `lib/auth/` — Auth0 token verification (JWKS) and the `/userinfo` profile source
+- `tool/e2e_server.dart` � test-only server for the web E2E tests: SQLite, demo data, **no token checks**. Never deploy it.
 - `lib/handler.dart` — wires `soar_score_api_handlers` to the repositories
 
 ## Boundaries

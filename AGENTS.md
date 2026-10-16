@@ -39,7 +39,7 @@ Soar Score is an RC sailplane soaring contest scoring and management suite. It c
 - Run with: `melos test` or directly with `dart test` / `flutter test`
 - End-to-end (E2E) tests for the contest app live in
   `apps/soar_score_contest/integration_test/` and run only locally with
-  `scripts/e2e.ps1` (or `scripts/e2e.sh`). CI never runs them: `melos test`
+  `scripts/e2e.ps1` (or `scripts/e2e.sh`; `-d web` / `-Device web` runs them in headless Chrome against a token-free test server, see `apps/soar_score_contest/AGENTS.md`). CI never runs them: `melos test`
   runs `test/` only. See `apps/soar_score_contest/AGENTS.md`.
 - **Keep the E2E tests current.** After any change to the contest app's pages,
   routes, widget keys, visible labels, flows or demo data, run

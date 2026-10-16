@@ -18,7 +18,12 @@ Future<void> openMainPage(WidgetTester tester) async {
     ),
   );
   if (find.byType(LandingPage).evaluate().isNotEmpty) {
-    await tester.tap(find.text('Continue offline'));
+    // Windows offers "Continue offline"; the web test build is signed in
+    // already (`E2eSignedInSession`) and offers "Continue".
+    final offline = find.text('Continue offline');
+    await tester.tap(
+      offline.evaluate().isNotEmpty ? offline : find.text('Continue'),
+    );
   }
   await pumpUntilFound(tester, find.byType(HomePage));
 }
