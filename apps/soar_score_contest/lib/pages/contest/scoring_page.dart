@@ -12,6 +12,7 @@ import '../../services/scoring/scoring_row.dart';
 import '../../widgets/api_error_text.dart';
 import '../../widgets/message_view.dart';
 import '../../widgets/scoring/score_check_panel.dart';
+import '../../widgets/scoring/score_grid_columns.dart';
 import '../../widgets/scoring/score_row_tile.dart';
 import '../../widgets/scoring/scoring_context_strip.dart';
 import '../../widgets/scoring/scoring_toolbar.dart';
@@ -253,6 +254,13 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
             actions: [
               TextButton(onPressed: c.refresh, child: const Text('Retry')),
             ],
+          ),
+        if (rows.isNotEmpty)
+          LayoutBuilder(
+            builder: (context, box) =>
+                box.maxWidth >= ScoreGridColumns.wideBreakpoint
+                ? const ScoreGridHeader()
+                : const SizedBox.shrink(),
           ),
         Expanded(
           child: rows.isEmpty

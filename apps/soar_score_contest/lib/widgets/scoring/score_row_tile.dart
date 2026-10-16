@@ -9,6 +9,7 @@ import '../../services/scoring/scoring_page_data.dart';
 import '../../services/scoring/scoring_row.dart';
 import '../matrix/matrix_colors.dart';
 import 'score_entry_panel.dart';
+import 'score_grid_columns.dart';
 import 'status_chips.dart';
 import 'team_chip.dart';
 
@@ -181,7 +182,7 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
         .firstOrNull;
 
     final timeField = SizedBox(
-      width: 150,
+      width: ScoreGridColumns.time,
       child: TextField(
         key: ValueKey(_k('time')),
         controller: _time,
@@ -210,7 +211,7 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
       ),
     );
     final heightField = SizedBox(
-      width: 130,
+      width: ScoreGridColumns.height,
       child: TextField(
         key: ValueKey(_k('height')),
         controller: _height,
@@ -262,7 +263,7 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
       ],
     );
     final rawBox = SizedBox(
-      width: 110,
+      width: ScoreGridColumns.raw,
       child: derived(
         'Raw',
         number(rawValue),
@@ -271,12 +272,12 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
       ),
     );
     final groupBox = SizedBox(
-      width: 80,
+      width: ScoreGridColumns.group,
       child: derived('Group', number(groupValue), dim: dirty),
     );
     final penalty = draft.penalty ?? 0;
     final penaltyBox = SizedBox(
-      width: 110,
+      width: ScoreGridColumns.penalty,
       child: derived('Penalty', penalty > 0 ? '−$penalty this flight' : 'None'),
     );
 
@@ -344,23 +345,21 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final wide = constraints.maxWidth >= 840;
+        final wide = constraints.maxWidth >= ScoreGridColumns.wideBreakpoint;
         final header = wide
             ? Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  badge,
-                  const SizedBox(width: 12),
-                  Expanded(flex: 3, child: name),
+                  SizedBox(width: ScoreGridColumns.lane, child: badge),
+                  Expanded(child: name),
                   timeField,
-                  const SizedBox(width: 8),
+                  const SizedBox(width: ScoreGridColumns.gap),
                   heightField,
-                  const SizedBox(width: 12),
+                  const SizedBox(width: ScoreGridColumns.gap),
                   rawBox,
                   groupBox,
                   penaltyBox,
-                  const SizedBox(width: 8),
-                  status,
+                  SizedBox(width: ScoreGridColumns.status, child: status),
                 ],
               )
             : Column(
