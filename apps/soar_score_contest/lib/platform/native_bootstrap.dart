@@ -6,6 +6,7 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_data/soar_score_data.dart';
+import 'package:soar_score_ui_storage/soar_score_ui_storage.dart';
 import 'package:soar_score_contest/platform/web_bootstrap.dart';
 
 import '../auth/auth_session.dart';
@@ -38,6 +39,7 @@ class NativeBootstrap extends AppBootstrap {
     this.sync,
     this._claimer,
     this._epoch,
+    this.localUiStore,
   ) : _client = ApiClient(baseUrl: _server.baseUrl);
 
   final EmbeddedServer _server;
@@ -53,6 +55,9 @@ class NativeBootstrap extends AppBootstrap {
 
   /// Binds requests to sign-ins; closing it refuses the ones still waiting.
   final AuthEpoch _epoch;
+
+  @override
+  final LocalUiStore localUiStore;
 
   bool _closed = false;
 
@@ -85,6 +90,7 @@ class NativeBootstrap extends AppBootstrap {
     _epoch.close();
     await sync.close();
     await _server.close();
+    await localUiStore.close();
     _remoteClient.close();
   }
 
@@ -164,7 +170,18 @@ class NativeBootstrap extends AppBootstrap {
       onSignedOut: acting.actAsLocal,
       onProblem: sync.appSync.claimProblemChanged,
     )..start();
-    return NativeBootstrap._(server, remote, auth, sync, claimer, epoch);
+    // UI state has its own file beside the contest database, so resetting or
+    // replacing contest data never clears it.
+    final uiStore = await openLocalUiStore(directory: p.dirname(database));
+    return NativeBootstrap._(
+      server,
+      remote,
+      auth,
+      sync,
+      claimer,
+      epoch,
+      uiStore,
+    );
   }
 
   /// Deletes the SQLite file at [path] and its journal files, if present.
