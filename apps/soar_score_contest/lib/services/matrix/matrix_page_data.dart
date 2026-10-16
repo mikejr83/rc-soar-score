@@ -190,6 +190,7 @@ class MatrixPageData {
           : '${profile.firstName} ${profile.lastName}'.trim(),
       role: participation.roleName,
       teamId: _teamOf[participation.id],
+      retiredAtRound: participation.retiredAtRound,
     );
   }
 }

@@ -23,7 +23,10 @@ final _logger = Logger('Scores');
 ///   the director on the entry response (ticket 297). On a server that
 ///   publishes, the contest's public update mode then decides whether the
 ///   entry also reaches the public projection; a failed publish is logged
-///   and audited, never an error.
+///   and audited, never an error;
+/// - `GET /contests/{id}/assignments/{assignmentId}/scores/history` is every
+///   submission to a slot, oldest first: the official revisions with their
+///   reasons, and the attempts that never became official.
 ///
 /// The handlers only translate between HTTP and [ScoresService].
 ///
@@ -44,6 +47,16 @@ void addScoreRoutes(
     requirePrincipal(request);
     final scores = await service.list(Id.parse(id));
     return jsonResponse(scores.toJson());
+  });
+
+  router.get('/contests/<id>/assignments/<assignmentId>/scores/history', (
+    Request request,
+    String id,
+    String assignmentId,
+  ) async {
+    requirePrincipal(request);
+    final history = await service.history(Id.parse(id), Id.parse(assignmentId));
+    return jsonResponse(history.toJson());
   });
 
   router.post('/contests/<id>/assignments/<assignmentId>/scores', (

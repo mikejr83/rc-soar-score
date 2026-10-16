@@ -247,6 +247,92 @@ void _tests(Backend backend) {
       },
     );
 
+    group('the history of a slot', () {
+      test('is empty before any score', () async {
+        final history = await service.history(contestId, slots.first);
+
+        expect(history.entries, isEmpty);
+      });
+
+      test(
+        'lists every revision with its reason, the last as current',
+        () async {
+          final slot = slots.first;
+          await enter(slot);
+          await enter(
+            slot,
+            base: 1,
+            mutation: 'entry-2',
+            components: const {'time_flown': 500, 'launch_height': 200},
+            reason: 'Timer misread',
+          );
+
+          final history = (await service.history(contestId, slot)).entries;
+
+          expect(history.map((e) => e.scoreRevision), [1, 2]);
+          expect(history.map((e) => e.outcome), [
+            ScoreHistoryOutcome.superseded,
+            ScoreHistoryOutcome.current,
+          ]);
+          expect(history.map((e) => e.reason), [
+            ScoresService.defaultReason,
+            'Timer misread',
+          ]);
+          expect(history.first.components['time_flown'], 540);
+          expect(history.last.components['time_flown'], 500);
+          expect(history.every((e) => e.actorId == actor), isTrue);
+          expect(
+            history.every((e) => e.authority == core.Authority.director),
+            isTrue,
+          );
+          expect(history.every((e) => e.at != null), isTrue);
+        },
+      );
+
+      test('lists an attempt that never became official', () async {
+        final slot = slots.first;
+        final first = await enter(slot);
+        final lost = core.ScoreAttempt(
+          id: core.Id.create(),
+          contestId: contestId,
+          scorePlaceholderId: first.placeholder.id,
+          configRevisionId:
+              (await repository.contestConfigurationRevisionRepository
+                      .latestForContest(contestId))!
+                  .id,
+          matrixRevisionId:
+              (await repository.scoreAttemptRepository.latestForPlaceholder(
+                first.placeholder.id,
+              ))!.matrixRevisionId,
+          rawComponents: const {'time_flown': 600, 'launch_height': 100},
+          actorId: core.Id.create(),
+          authority: core.Authority.participant,
+          clientMutationId: 'participant-1',
+          baseScoreRevision: 0,
+        );
+        await repository.scoreAttemptRepository.append(lost, metadata: meta());
+
+        final history = (await service.history(contestId, slot)).entries;
+
+        expect(history.map((e) => e.outcome), [
+          ScoreHistoryOutcome.current,
+          ScoreHistoryOutcome.notAdopted,
+        ]);
+        final notAdopted = history.last;
+        expect(notAdopted.scoreRevision, isNull);
+        expect(notAdopted.authority, core.Authority.participant);
+        expect(notAdopted.components['time_flown'], 600);
+        expect(notAdopted.at, isNull);
+      });
+
+      test('refuses an unknown slot', () async {
+        await expectLater(
+          service.history(contestId, core.Id.create()),
+          throwsA(isA<core.EntityNotFoundError>()),
+        );
+      });
+    });
+
     test('lists the slots and how far each round is scored', () async {
       await enter(slots.first);
 

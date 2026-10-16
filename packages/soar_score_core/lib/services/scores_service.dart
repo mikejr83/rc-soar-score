@@ -22,6 +22,7 @@ import 'calculated_flight.dart';
 import 'contest_scores.dart';
 import 'landing_bonus.dart';
 import 'score_entry_result.dart';
+import 'score_history.dart';
 
 /// Reads the scores of a contest and lets the director enter an official
 /// score for a pilot in a group.
@@ -105,6 +106,72 @@ class ScoresService {
       }
     }
     return ContestScores(slots: slots, rounds: progress);
+  }
+
+  /// Every submission to the slot [assignmentId] of contest [contestId],
+  /// oldest first: each official revision with its reason, who set it and
+  /// when, and the attempts that never became official (a participant's
+  /// entry that lost to the director's decision).
+  ///
+  /// Throws an [EntityNotFoundError] for an unknown contest or slot. A slot
+  /// that was moved keeps its history.
+  Future<ScoreHistory> history(Id contestId, Id assignmentId) async {
+    await _requireContest(contestId);
+    final assignment = await repository.matrixAssignmentRepository.findById(
+      assignmentId,
+    );
+    final placeholder = assignment == null || assignment.contestId != contestId
+        ? null
+        : await repository.scorePlaceholderRepository.findForAssignment(
+            assignmentId,
+          );
+    if (placeholder == null) {
+      throw EntityNotFoundError(
+        entityType: 'MatrixAssignment',
+        entityId: assignmentId,
+      );
+    }
+    final attempts = await repository.scoreAttemptRepository.listForPlaceholder(
+      placeholder.id,
+    );
+    final officials = {
+      for (final score
+          in await repository.officialScoreRepository.listForPlaceholder(
+            placeholder.id,
+          ))
+        score.scoreAttemptId: score,
+    };
+    final current = officials.values.fold<int>(
+      0,
+      (best, score) => score.scoreRevision > best ? score.scoreRevision : best,
+    );
+    return ScoreHistory(
+      assignmentId: assignmentId,
+      entries: [
+        for (final attempt in attempts)
+          if (officials[attempt.id] case final official?)
+            ScoreHistoryEntry(
+              attemptId: attempt.id,
+              outcome: official.scoreRevision == current
+                  ? ScoreHistoryOutcome.current
+                  : ScoreHistoryOutcome.superseded,
+              scoreRevision: official.scoreRevision,
+              components: official.components,
+              reason: official.reason,
+              actorId: official.setBy,
+              authority: attempt.authority,
+              at: official.setAt,
+            )
+          else
+            ScoreHistoryEntry(
+              attemptId: attempt.id,
+              outcome: ScoreHistoryOutcome.notAdopted,
+              components: attempt.rawComponents,
+              actorId: attempt.actorId,
+              authority: attempt.authority,
+            ),
+      ],
+    );
   }
 
   /// Enters [components] as the official score of the slot [assignmentId].

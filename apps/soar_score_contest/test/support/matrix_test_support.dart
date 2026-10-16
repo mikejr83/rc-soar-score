@@ -53,7 +53,13 @@ ContestConfigurationRevision matrixConfiguration([
 const _names = ['Ann Lee', 'Bo Ray', 'Cy Fox', 'Di Park'];
 
 /// Four scoring pilots (numbered when [numbered]) and one official.
-List<ContestParticipation> matrixParticipations({bool numbered = false}) => [
+///
+/// [retired] maps a pilot (1 to 4) to the round the pilot retired at.
+List<ContestParticipation> matrixParticipations({
+  bool numbered = false,
+  Map<int, int> retired = const {},
+  int revision = 0,
+}) => [
   for (var n = 1; n <= 5; n++)
     ContestParticipation(
       id: _id('0001', n),
@@ -64,6 +70,8 @@ List<ContestParticipation> matrixParticipations({bool numbered = false}) => [
       roleType: n <= 4 ? RoleType.pilot : RoleType.nonFlier,
       participantNumber: numbered && n <= 4 ? n : null,
       scoringUuid: ScoringUuid.parse('0000000$n-0000-4000-8000-000000000000'),
+      retiredAtRound: retired[n],
+      revision: revision,
     ),
 ];
 
@@ -218,6 +226,16 @@ class MatrixServer {
   /// The bodies of the draws received.
   final List<Map<String, dynamic>> draws = [];
 
+  /// The round each pilot (1 to 4) retired at.
+  final Map<int, int> retirements = {};
+
+  /// The participation updates received, as `{pilot, body}`.
+  final List<Map<String, dynamic>> participationUpdates = [];
+
+  /// Answers every participation update with this status when not 200.
+  int participationStatus = 200;
+  int _participationRevision = 0;
+
   http.Response _json(Object body, [int status = 200]) => http.Response(
     jsonEncode(body),
     status,
@@ -246,10 +264,41 @@ class MatrixServer {
             }, 404)
           : _json((configuration ?? matrixConfiguration()).toJson());
     }
+    if (request.method == 'PUT' && path.contains('/participations/')) {
+      final body = jsonDecode(request.body) as Map<String, dynamic>;
+      final id = Id.parse(path.split('/').last);
+      final pilot = [
+        for (var n = 1; n <= 5; n++)
+          if (matrixParticipations()[n - 1].id == id) n,
+      ].single;
+      participationUpdates.add({'pilot': pilot, 'body': body});
+      if (participationStatus != 200) {
+        return _json({
+          'error': {'code': 'rejected', 'message': 'The change was rejected.'},
+        }, participationStatus);
+      }
+      final round = body['retired_at_round'] as int?;
+      if (round == null) {
+        retirements.remove(pilot);
+      } else {
+        retirements[pilot] = round;
+      }
+      _participationRevision++;
+      return _json(
+        matrixParticipations(
+          retired: retirements,
+          revision: _participationRevision,
+        )[pilot - 1].toJson(),
+      );
+    }
     if (path.endsWith('/participations')) {
       return _json({
         'participations': [
-          for (final p in matrixParticipations(numbered: matrix != null))
+          for (final p in matrixParticipations(
+            numbered: matrix != null,
+            retired: retirements,
+            revision: _participationRevision,
+          ))
             p.toJson(),
         ],
       });

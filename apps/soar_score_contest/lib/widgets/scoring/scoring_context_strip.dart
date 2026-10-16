@@ -20,7 +20,8 @@ class ScoringContextStrip extends StatelessWidget {
     final colors = MatrixColors.of(context);
     final data = controller.data!;
     final round = controller.currentRound;
-    final rows = controller.rows;
+    // A retired pilot's unscored flight is not missing, so it is not counted.
+    final rows = controller.rows.where((r) => !r.isMissed).toList();
     final entered = rows.where((r) => r.isScored).length;
     final official = rows
         .where(

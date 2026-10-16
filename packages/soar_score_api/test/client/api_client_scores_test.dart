@@ -111,6 +111,40 @@ void main() {
     expect(jsonDecode(seen.body), request.toJson());
   });
 
+  test('scoreHistory(id, assignmentId) GETs the slot history', () async {
+    final history = ScoreHistory(
+      assignmentId: assignmentId,
+      entries: [
+        ScoreHistoryEntry(
+          attemptId: official.scoreAttemptId,
+          outcome: ScoreHistoryOutcome.current,
+          scoreRevision: 1,
+          components: official.components,
+          reason: official.reason,
+          actorId: actor,
+          authority: Authority.director,
+          at: official.setAt,
+        ),
+        ScoreHistoryEntry(
+          attemptId: Id.parse('019c0000-0000-7000-8000-000000000066'),
+          outcome: ScoreHistoryOutcome.notAdopted,
+          components: const {'time_flown': 600},
+          actorId: actor,
+          authority: Authority.participant,
+        ),
+      ],
+    );
+    final client = clientFor((_) => body(history.toJson()));
+
+    expect(await client.scoreHistory(contestId, assignmentId), history);
+    expect(seen.method, 'GET');
+    expect(
+      seen.url.path,
+      '/api/v1/contests/${contestId.value}/assignments/${assignmentId.value}'
+      '/scores/history',
+    );
+  });
+
   test('a stale score is a 409 with its code', () async {
     final client = clientFor(
       (_) => body({

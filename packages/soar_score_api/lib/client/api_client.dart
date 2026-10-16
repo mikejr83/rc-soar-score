@@ -586,6 +586,18 @@ class ApiClient {
     return _decode<ScoreEntryResult>(response, uri, ScoreEntryResult.fromJson);
   }
 
+  /// `GET /api/v1/contests/{id}/assignments/{assignmentId}/scores/history` —
+  /// every submission to one slot, oldest first: the official revisions with
+  /// their reasons, and the attempts that never became official.
+  Future<ScoreHistory> scoreHistory(Id id, Id assignmentId) async {
+    final uri = _resolve(
+      '/api/v1/contests/${id.value}/assignments/'
+      '${assignmentId.value}/scores/history',
+    );
+    final response = await _send('GET', uri);
+    return _decode<ScoreHistory>(response, uri, ScoreHistory.fromJson);
+  }
+
   /// `GET /api/v1/contests/{id}/results` — the standings and team totals as
   /// of the latest scored round. `preliminary` is set while rounds are
   /// unscored or the stored results are stale.

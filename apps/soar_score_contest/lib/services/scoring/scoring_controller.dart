@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import 'pilot_history.dart';
 import 'row_save.dart';
 import 'score_check.dart';
 import 'score_row_draft.dart';
@@ -339,11 +340,76 @@ class ScoringController extends ChangeNotifier {
     notifyListeners();
   }
 
+  // History.
+
+  /// The history of one row, oldest first.
+  Future<ScoreHistory> historyOf(ScoringRow row) =>
+      client.scoreHistory(contestId, row.id);
+
+  /// The history of every row of the group in view, as one list per pilot
+  /// that has anything in it, in row order.
+  Future<List<PilotHistory>> groupHistory() async {
+    final shown = rows;
+    final loaded = await Future.wait([for (final row in shown) historyOf(row)]);
+    return [
+      for (var i = 0; i < shown.length; i++)
+        if (loaded[i].entries.isNotEmpty)
+          PilotHistory(pilot: shown[i].pilot.name, entries: loaded[i].entries),
+    ];
+  }
+
+  // Retirement.
+
+  /// Why the pilots cannot be retired or reinstated now, or null. A completed
+  /// or administration-locked contest takes no changes of who flies.
+  String? get retireBlocked => switch (block) {
+    EntryBlock.contestCompleted => 'Contest completed: retirement is closed',
+    EntryBlock.administrationLocked =>
+      'Administration locked: unlock to change retirement',
+    _ => null,
+  };
+
+  ContestParticipation? _participation(Id id) {
+    for (final p
+        in data?.base.participations ?? const <ContestParticipation>[]) {
+      if (p.id == id) return p;
+    }
+    return null;
+  }
+
+  /// Retires the pilot of [row] from the round in view on. Throws the API
+  /// error when the server refuses; the page shows it.
+  Future<void> retire(ScoringRow row) =>
+      _setRetirement(row, retiredAtRound: round);
+
+  /// Takes back the retirement of the pilot of [row].
+  Future<void> reinstate(ScoringRow row) =>
+      _setRetirement(row, retiredAtRound: null);
+
+  Future<void> _setRetirement(ScoringRow row, {int? retiredAtRound}) async {
+    final participation = _participation(row.pilot.participationId);
+    if (participation == null) {
+      throw StateError('The pilot is not in this contest.');
+    }
+    await client.updateParticipation(
+      contestId,
+      participation.id,
+      UpdateParticipationRequest(
+        baseRevision: participation.revision,
+        classification: participation.classification,
+        retiredAtRound: retiredAtRound,
+      ),
+    );
+    _drafts[row.id]?.resetTo(row.savedComponents);
+    _saves.remove(row.id);
+    await refresh();
+  }
+
   // Score check.
 
   void runCheck() {
     check = runScoreCheck([
-      for (final row in rows)
+      for (final row in rows.where((r) => !r.isMissed))
         CheckInput(
           rowKey: row.id.value,
           pilot: row.pilot.name,

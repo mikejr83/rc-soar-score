@@ -2,6 +2,7 @@ import 'package:soar_score_core/soar_score_core.dart';
 import 'package:test/test.dart';
 
 import 'handler_test_support.dart';
+import 'recalculation_test_support.dart';
 
 final _owner = Id.parse('019c0000-0000-7000-8000-000000000001');
 final _other = Id.parse('019c0000-0000-7000-8000-000000000002');
@@ -11,9 +12,14 @@ const _participationId = '019c0000-0000-7000-8000-000000000201';
 
 void main() {
   late HandlerHarness api;
+  late List<int> recalculations;
 
   setUp(() async {
-    api = HandlerHarness(_owner);
+    recalculations = [];
+    api = HandlerHarness(
+      _owner,
+      recalculation: RecalculationService(RefusingResults(recalculations)),
+    );
     await api.send(
       'POST',
       '/contests',
@@ -259,6 +265,51 @@ void main() {
 
       expect(response.statusCode, 409);
       expect((await api.errorOf(response))['code'], 'stale_revision');
+    });
+
+    test('a changed retirement recalculates the results', () async {
+      await add();
+
+      final response = await api.send(
+        'PUT',
+        path(),
+        body: {'base_revision': 0, 'retired_at_round': 2},
+      );
+
+      expect(response.statusCode, 200);
+      expect(recalculations, hasLength(1));
+    });
+
+    test('reversing a retirement recalculates the results', () async {
+      await add();
+      await api.send(
+        'PUT',
+        path(),
+        body: {'base_revision': 0, 'retired_at_round': 2},
+      );
+      recalculations.clear();
+
+      final response = await api.send(
+        'PUT',
+        path(),
+        body: {'base_revision': 1},
+      );
+
+      expect(response.statusCode, 200);
+      expect((await api.json(response))['retired_at_round'], isNull);
+      expect(recalculations, hasLength(1));
+    });
+
+    test('a change that leaves the retirement alone does not', () async {
+      await add();
+
+      await api.send(
+        'PUT',
+        path(),
+        body: {'base_revision': 0, 'classification': 'Expert'},
+      );
+
+      expect(recalculations, isEmpty);
     });
 
     test('a retirement on a non-flier is a 400', () async {

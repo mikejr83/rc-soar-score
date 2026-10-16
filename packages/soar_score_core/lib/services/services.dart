@@ -44,6 +44,7 @@ export 'results_service.dart';
 export 'round_flight_result.dart';
 export 'round_results.dart';
 export 'score_entry_result.dart';
+export 'score_history.dart';
 export 'scores_service.dart';
 export 'roles_service.dart';
 export 'teams_service.dart';

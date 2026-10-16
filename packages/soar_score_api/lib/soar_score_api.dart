@@ -58,3 +58,4 @@ export 'package:soar_score_core/services/landing_table_view.dart';
 export 'package:soar_score_core/services/round_flight_result.dart';
 export 'package:soar_score_core/services/round_results.dart';
 export 'package:soar_score_core/services/score_entry_result.dart';
+export 'package:soar_score_core/services/score_history.dart';
