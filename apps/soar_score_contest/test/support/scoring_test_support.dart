@@ -9,6 +9,7 @@ import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_contest/api_client_provider.dart';
 import 'package:soar_score_contest/pages/contest/scoring_page.dart';
 import 'package:soar_score_contest/router.dart';
+import 'package:soar_score_contest/widgets/contest_scope.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import 'matrix_test_support.dart';
@@ -185,6 +186,13 @@ class ScoringServer {
       );
       final official = _official(assignmentId, components, revision);
       _score[assignmentId] = official;
+      // The first score moves a Ready contest to Running, as the server does.
+      if (matrixServer.contest.lifecycleState == LifecycleState.ready) {
+        matrixServer.contest = matrixServer.contest.copyWithState(
+          lifecycleState: LifecycleState.running,
+          updatedAt: DateTime.utc(2026, 10, 17, 15),
+        );
+      }
       return _json(
         ScoreEntryResult(
           officialScore: official,
@@ -208,6 +216,7 @@ Future<void> pumpScoringPage(
   Size size = const Size(1280, 1100),
   int? round,
   int? group,
+  ContestScope? shell,
 }) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
@@ -221,13 +230,22 @@ Future<void> pumpScoringPage(
     routes: [
       GoRoute(
         path: contestScoringPath(matrixContestId),
-        builder: (context, state) => Scaffold(
-          body: ContestScoringPage(
-            contestId: matrixContestId,
-            round: int.tryParse(state.uri.queryParameters['round'] ?? ''),
-            group: int.tryParse(state.uri.queryParameters['group'] ?? ''),
-          ),
-        ),
+        builder: (context, state) {
+          final page = Scaffold(
+            body: ContestScoringPage(
+              contestId: matrixContestId,
+              round: int.tryParse(state.uri.queryParameters['round'] ?? ''),
+              group: int.tryParse(state.uri.queryParameters['group'] ?? ''),
+            ),
+          );
+          return shell == null
+              ? page
+              : ContestScope(
+                  contest: shell.contest,
+                  reload: shell.reload,
+                  child: page,
+                );
+        },
       ),
       GoRoute(
         path: contestMatrixPath(matrixContestId),
