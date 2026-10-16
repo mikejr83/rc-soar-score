@@ -9,6 +9,7 @@ import '../../services/configuration/section_id.dart';
 import '../../services/configuration/section_notice.dart';
 import 'config_chip.dart';
 import 'config_section_card.dart';
+import 'contest_state_section_body.dart';
 import 'field_registry.dart';
 import 'landing_section_body.dart';
 import 'matrix_readiness_panel.dart';
@@ -31,6 +32,7 @@ class ConfigurationSections extends StatelessWidget {
     required this.onOpenLandings,
     required this.onOpenParticipants,
     required this.onGoToMatrix,
+    required this.onOpenWorkspace,
   });
 
   final ConfigurationData data;
@@ -48,6 +50,7 @@ class ConfigurationSections extends StatelessWidget {
   final VoidCallback onOpenLandings;
   final VoidCallback onOpenParticipants;
   final VoidCallback onGoToMatrix;
+  final VoidCallback onOpenWorkspace;
 
   @override
   Widget build(BuildContext context) => Column(
@@ -80,6 +83,13 @@ class ConfigurationSections extends StatelessWidget {
           onOpenParticipants: onOpenParticipants,
         ),
       ],
+      SectionId.scoringAccess || SectionId.adminLock => [
+        ContestStateSectionBody(
+          id: id,
+          contest: data.contest,
+          onOpenWorkspace: onOpenWorkspace,
+        ),
+      ],
       _ => [
         for (final def in draft.catalog.inSection(id))
           if (draft.isVisible(def.key))
@@ -104,6 +114,7 @@ class ConfigurationSections extends StatelessWidget {
       id: id,
       notices: SectionNotice.of(id, data.phase, readOnly: readOnly),
       extraChips: [
+        _revisionChip(context, id),
         if (id == SectionId.discipline) _disciplineChip(context),
         if (id == SectionId.participants)
           ConfigChip.neutral(
@@ -114,6 +125,29 @@ class ConfigurationSections extends StatelessWidget {
           ),
       ],
       children: children,
+    );
+  }
+
+  /// The revision the section's values are saved in: the contest's for the
+  /// details and the two contest controls, the configuration's for the rest.
+  Widget _revisionChip(BuildContext context, SectionId id) {
+    final contestLevel =
+        id == SectionId.details ||
+        id == SectionId.scoringAccess ||
+        id == SectionId.adminLock;
+    final number = contestLevel
+        ? data.contest.revision
+        : data.configuration?.revisionNumber;
+    return ConfigChip.neutral(
+      context,
+      icon: Icons.history,
+      text: number == null
+          ? 'Not saved yet'
+          : '${contestLevel ? 'Contest' : 'Config'} rev. $number',
+      tooltip: contestLevel
+          ? 'Saved with the contest, which is at revision ${data.contest.revision}'
+          : 'Saved with the contest configuration',
+      dense: false,
     );
   }
 
