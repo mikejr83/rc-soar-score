@@ -19,5 +19,7 @@ dependencies:
   soar_score_data:
     path: ../../packages/soar_score_data
 dev_dependencies:
+  drift: ^2.35.0
   lints: ^6.1.0
+  postgres: ^3.5.16
   test: ^1.31.1
