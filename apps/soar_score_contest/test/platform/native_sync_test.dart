@@ -17,12 +17,14 @@ void main() {
   late EmbeddedServer server;
   late NativeSync sync;
   late List<String> paths;
+  var status = 503;
 
   setUp(() async {
     dir = Directory.systemTemp.createTempSync('native_sync_test');
     databasePath = '${dir.path}/soar_score.db';
     server = await startEmbeddedServer(databasePath);
     paths = [];
+    status = 503;
     // A hosted server that answers nothing useful: the test only watches which
     // requests the engine makes.
     final remote = ApiClient(
@@ -33,7 +35,7 @@ void main() {
           jsonEncode({
             'error': {'code': 'unavailable', 'message': 'offline'},
           }),
-          503,
+          status,
           headers: {'content-type': 'application/json'},
         );
       }),
@@ -43,6 +45,7 @@ void main() {
       localAccountId: server.localAccountId,
       remote: remote,
       databasePath: databasePath,
+      discoveryDelay: const Duration(milliseconds: 300),
     );
   });
 
@@ -103,6 +106,22 @@ void main() {
     final summary = sync.appSync.state.of(scope)!;
     expect(summary.localOnly, isFalse);
     expect(summary.pendingChanges, 1);
+  });
+
+  test('a burst of syncs lists the account contests once', () async {
+    // A refused token is not retried, so only the syncs below end here.
+    status = 401;
+    final account = core.Id.create();
+    await sync.accountClaimed(account);
+    await settle();
+    final afterClaim = paths.where((p) => p == '/api/v1/contests').length;
+
+    for (var i = 0; i < 5; i++) {
+      await sync.engine.syncScope(core.DirectorScopeKey(account));
+    }
+    await settle();
+
+    expect(paths.where((p) => p == '/api/v1/contests').length, afterClaim + 1);
   });
 
   test('a claim problem shows on a local-only contest', () async {

@@ -13,7 +13,6 @@ import 'package:soar_score_contest/platform/native_sync.dart';
 import 'package:soar_score_contest/server/embedded_server.dart';
 import 'package:soar_score_core/soar_score_core.dart' as core;
 import 'package:soar_score_data/soar_score_data.dart';
-import 'package:soar_score_sync/soar_score_sync.dart';
 
 import '../support/fake_auth_session.dart';
 
@@ -196,27 +195,36 @@ void main() {
       containsAll(['Timekeeper Spring A', 'Timekeeper Spring B']),
     );
 
-    // B's contest comes down once A asks for its scope. The app does not yet
-    // find contests it has never seen, so the test names it, with an engine
-    // that is not held back by the accountless check.
-    final puller = SyncEngine(
-      store: DriftSyncStore(a.database),
-      applier: DriftReplicatedChangeApplier(
-        a.database,
-        EntityStores.forDatabase(a.database),
-      ),
-      gateway: ApiClientSyncGateway(remoteA),
-      config: SyncEngineConfig(
-        installationId: syncA.engine.state.installationId,
-        label: 'A',
-        platform: core.Platform.windows,
-        schemaVersion: a.database.schemaVersion,
-      ),
+    // A is signed in and online. Its next ordinary sync, of the director's
+    // data, finds B's contest by itself: nobody names its id or asks to look.
+    expect(await ContestRepository(a.database).findById(contestB), isNull);
+    expect(
+      await syncA.engine.syncScope(core.DirectorScopeKey(director)),
+      isNull,
     );
-    expect(await puller.syncScope(core.ContestScopeKey(contestB)), isNull);
+    for (var i = 0; i < 100; i++) {
+      if (await ContestRepository(a.database).findById(contestB) != null) break;
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+    }
 
     final onA = await ContestRepository(a.database).getAll();
     expect(onA.map((c) => c.name), unorderedEquals(['Spring A', 'Spring B']));
     expect(onA.map((c) => c.ownerAccountId), everyElement(director));
   });
+
+  test(
+    'a contest the service does not list for the account stays unknown',
+    () async {
+      await signInAndSync(a, syncA, remoteA, contestA);
+      await syncA.discoverAccountContests();
+      expect(
+        await syncA.engine.syncScope(core.ContestScopeKey(core.Id.create())),
+        isNull,
+      );
+      expect(
+        (await ContestRepository(a.database).getAll()).map((c) => c.name),
+        ['Spring A'],
+      );
+    },
+  );
 }
