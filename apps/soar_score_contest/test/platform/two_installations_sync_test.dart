@@ -195,14 +195,17 @@ void main() {
       containsAll(['Timekeeper Spring A', 'Timekeeper Spring B']),
     );
 
-    // A finds B's contest by listing the account's contests; nobody names
-    // its id. Before that, the contest is not held and not syncable.
+    // A is signed in and online. Its next ordinary sync, of the director's
+    // data, finds B's contest by itself: nobody names its id or asks to look.
     expect(await ContestRepository(a.database).findById(contestB), isNull);
-    await syncA.discoverAccountContests();
     expect(
-      await syncA.engine.syncScope(core.ContestScopeKey(contestB)),
+      await syncA.engine.syncScope(core.DirectorScopeKey(director)),
       isNull,
     );
+    for (var i = 0; i < 100; i++) {
+      if (await ContestRepository(a.database).findById(contestB) != null) break;
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+    }
 
     final onA = await ContestRepository(a.database).getAll();
     expect(onA.map((c) => c.name), unorderedEquals(['Spring A', 'Spring B']));

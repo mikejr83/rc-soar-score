@@ -30,7 +30,17 @@ class NativeSync {
     this._database,
     this._remote,
     this._discovered,
-  ) : appSync = EngineAppSync(engine);
+  ) : appSync = EngineAppSync(engine) {
+    // Every ordinary sync, scheduled or started by the director, ends with a
+    // look at the account's contests.
+    var wasSyncing = false;
+    _stateSubscription = engine.states.listen((state) {
+      if (wasSyncing && !state.syncing) unawaited(discoverAccountContests());
+      wasSyncing = state.syncing;
+    });
+  }
+
+  late final StreamSubscription<SyncState> _stateSubscription;
 
   final ApiClient _remote;
 
@@ -123,10 +133,7 @@ class NativeSync {
   /// contests), which were skipped while they were local only.
   Future<void> accountClaimed(core.Id accountId) async {
     _accountId = accountId;
-    final scopes = <core.SyncScopeKey>[
-      core.DirectorScopeKey(accountId),
-      const core.SystemScopeKey(),
-    ];
+    final scopes = <core.SyncScopeKey>[core.DirectorScopeKey(accountId)];
     try {
       for (final contest in await ContestRepository(_database).getAll()) {
         if (contest.ownerAccountId == accountId) {
@@ -139,6 +146,8 @@ class NativeSync {
       _logger.warning('Could not list the claimed contests', error, stack);
     } finally {
       scopes.forEach(_scheduler.notifyLocalChange);
+      // The system data has its own stream; the scheduler cannot sync it.
+      unawaited(engine.syncSystemData());
     }
     await discoverAccountContests();
   }
@@ -149,7 +158,7 @@ class NativeSync {
   ///
   /// Does nothing before the account is known (no sign-in claimed yet). A
   /// failure is logged; the next claim or the service becoming reachable
-  /// again tries once more. Calls overlapping a running one share it.
+  /// again tries once more; it also runs after every sync. Calls overlapping a running one share it.
   Future<void> discoverAccountContests() {
     if (_accountId == null) return Future.value();
     return _discovering ??= _discover(_accountId!)
@@ -166,8 +175,11 @@ class NativeSync {
         if (contest.ownerAccountId != accountId || held.contains(contest.id)) {
           continue;
         }
-        _discovered.add(contest.id);
-        _scheduler.notifyLocalChange(core.ContestScopeKey(contest.id));
+        // A contest found before is already known to the scheduler, which
+        // retries it; only a new one starts a sync, so this cannot loop.
+        if (_discovered.add(contest.id)) {
+          _scheduler.notifyLocalChange(core.ContestScopeKey(contest.id));
+        }
       }
     } on Object catch (error, stack) {
       _logger.fine('Could not list the account contests', error, stack);
@@ -176,6 +188,7 @@ class NativeSync {
 
   Future<void> close() async {
     await _subscription.cancel();
+    await _stateSubscription.cancel();
     _scheduler.dispose();
     await appSync.close();
   }
