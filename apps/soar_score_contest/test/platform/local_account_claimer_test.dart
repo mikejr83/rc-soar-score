@@ -1,38 +1,22 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_api/soar_score_api.dart';
+import 'package:soar_score_contest/platform/auth_epoch.dart';
 import 'package:soar_score_contest/platform/local_account_claimer.dart';
 import 'package:soar_score_contest/services/sync/sync_problem.dart';
 import 'package:soar_score_core/soar_score_core.dart' as core;
 
 import '../support/fake_auth_session.dart';
-
-class _FakeLocalAccount implements core.LocalAccountRepository {
-  _FakeLocalAccount(this.id);
-
-  core.Id? id;
-  final reassigned = <core.Id>[];
-  Object? reassignError;
-
-  @override
-  Future<core.Id?> find() async => id;
-
-  @override
-  Future<core.Id> ensure() async => id ??= core.Id.create();
-
-  @override
-  Future<void> reassignTo(core.Id accountId) async {
-    final error = reassignError;
-    if (error != null) throw error;
-    reassigned.add(accountId);
-  }
-}
+import '../support/fake_local_account.dart';
 
 void main() {
   final local = core.Id.create();
   final account = core.Id.create();
   late FakeAuthSession auth;
-  late _FakeLocalAccount localAccount;
+  late FakeLocalAccount localAccount;
   late List<core.Id> claimed;
+  late int signedOut;
   late List<SyncProblem?> problems;
   late List<ClaimLocalAccountRequest> requests;
   late Future<LocalAccountClaimDto> Function(ClaimLocalAccountRequest) answer;
@@ -40,8 +24,9 @@ void main() {
 
   setUp(() {
     auth = FakeAuthSession(signedIn: true);
-    localAccount = _FakeLocalAccount(local);
+    localAccount = FakeLocalAccount(local);
     claimed = [];
+    signedOut = 0;
     problems = [];
     requests = [];
     answer = (request) async => LocalAccountClaimDto(
@@ -51,12 +36,14 @@ void main() {
     );
     claimer = LocalAccountClaimer(
       auth: auth,
+      epoch: AuthEpoch(auth),
       local: localAccount,
       claim: (request) {
         requests.add(request);
         return answer(request);
       },
-      onClaimed: (id) async => claimed.add(id),
+      onClaimed: (id, _) async => claimed.add(id),
+      onSignedOut: () => signedOut++,
       onProblem: problems.add,
     );
   });
@@ -83,12 +70,14 @@ void main() {
     auth = FakeAuthSession();
     claimer = LocalAccountClaimer(
       auth: auth,
+      epoch: AuthEpoch(auth),
       local: localAccount,
       claim: (request) {
         requests.add(request);
         return answer(request);
       },
-      onClaimed: (id) async => claimed.add(id),
+      onClaimed: (id, _) async => claimed.add(id),
+      onSignedOut: () => signedOut++,
       onProblem: problems.add,
     )..start();
     await claimer.run();
@@ -98,6 +87,97 @@ void main() {
     await claimer.run();
 
     expect(claimed, [account]);
+  });
+
+  test('goes back to the Local account when the director signs out', () async {
+    claimer.start();
+    await claimer.run();
+    expect(signedOut, 0);
+
+    await auth.signOut();
+
+    expect(signedOut, 1);
+    expect(problems.last, isNull);
+  });
+
+  test(
+    'a claim finishes for its account but does not outlive its session',
+    () async {
+      final other = core.Id.create();
+      final firstAnswer = Completer<LocalAccountClaimDto>();
+      var calls = 0;
+      answer = (request) {
+        if (calls++ == 0) return firstAnswer.future;
+        return Future.value(
+          LocalAccountClaimDto(
+            accountId: other,
+            localAccountId: request.localAccountId,
+            claimedAt: DateTime.utc(2026, 10, 16),
+          ),
+        );
+      };
+      claimer.start();
+      final first = claimer.run();
+      await Future<void>.delayed(Duration.zero); // the claim is on its way
+
+      // Account A signs out and account B signs in before A's claim answers.
+      await auth.signOut();
+      await auth.signIn();
+      firstAnswer.complete(
+        LocalAccountClaimDto(
+          accountId: account,
+          localAccountId: local,
+          claimedAt: DateTime.utc(2026, 10, 16),
+        ),
+      );
+      await first;
+
+      expect(localAccount.reassigned, [
+        account,
+        other,
+      ], reason: 'the service recorded A\'s claim, so A gets the data');
+      expect(claimed, [other], reason: 'the app never acts as A');
+      expect(requests, hasLength(2));
+    },
+  );
+
+  test('a refusal for a finished session is not reported', () async {
+    final firstAnswer = Completer<LocalAccountClaimDto>();
+    answer = (_) => firstAnswer.future;
+    claimer.start();
+    final first = claimer.run();
+    await Future<void>.delayed(Duration.zero); // the claim is on its way
+
+    await auth.signOut();
+    answer = (_) async => throw ApiNetworkError(
+      'offline',
+      requestUri: Uri.parse('http://hosted.invalid'),
+    );
+    firstAnswer.completeError(httpError(409));
+    await first;
+
+    expect(problems.last, isNull);
+  });
+
+  test('a claim recorded after sign-out still re-points the data', () async {
+    final firstAnswer = Completer<LocalAccountClaimDto>();
+    answer = (_) => firstAnswer.future;
+    claimer.start();
+    final first = claimer.run();
+    await Future<void>.delayed(Duration.zero); // the claim is on its way
+
+    await auth.signOut();
+    firstAnswer.complete(
+      LocalAccountClaimDto(
+        accountId: account,
+        localAccountId: local,
+        claimedAt: DateTime.utc(2026, 10, 16),
+      ),
+    );
+    await first;
+
+    expect(localAccount.reassigned, [account]);
+    expect(claimed, isEmpty, reason: 'nobody is signed in to act or sync');
   });
 
   test('does nothing before the Local account exists', () async {
@@ -166,21 +246,24 @@ void main() {
     expect(claimed, [account]);
   });
 
-  test('signing out while the service answers leaves the data alone', () async {
-    answer = (request) async {
-      await auth.signOut();
-      return LocalAccountClaimDto(
-        accountId: account,
-        localAccountId: request.localAccountId,
-        claimedAt: DateTime.utc(2026, 10, 13),
-      );
-    };
+  test(
+    'signing out while the service answers still re-points the data',
+    () async {
+      answer = (request) async {
+        await auth.signOut();
+        return LocalAccountClaimDto(
+          accountId: account,
+          localAccountId: request.localAccountId,
+          claimedAt: DateTime.utc(2026, 10, 13),
+        );
+      };
 
-    await claimer.run();
+      await claimer.run();
 
-    expect(localAccount.reassigned, isEmpty);
-    expect(claimed, isEmpty);
-  });
+      expect(localAccount.reassigned, [account]);
+      expect(claimed, isEmpty);
+    },
+  );
 
   test('two runs at once make one claim', () async {
     await Future.wait([claimer.run(), claimer.run()]);

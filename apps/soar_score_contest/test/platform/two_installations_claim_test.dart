@@ -8,6 +8,7 @@ import 'package:http/testing.dart';
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_api_handlers/soar_score_api_handlers.dart';
+import 'package:soar_score_contest/platform/auth_epoch.dart';
 import 'package:soar_score_contest/platform/local_account_claimer.dart';
 import 'package:soar_score_contest/server/embedded_server.dart';
 import 'package:soar_score_contest/services/sync/sync_problem.dart';
@@ -97,11 +98,14 @@ void main() {
   Future<List<SyncProblem?>> signIn(EmbeddedServer installation) async {
     final problems = <SyncProblem?>[];
     final remote = client(director);
+    final auth = FakeAuthSession(signedIn: true);
     final claimer = LocalAccountClaimer(
-      auth: FakeAuthSession(signedIn: true),
+      auth: auth,
+      epoch: AuthEpoch(auth),
       local: LocalAccountRepository(installation.database),
       claim: remote.claimLocalAccount,
-      onClaimed: (_) async {},
+      onClaimed: (_, _) async {},
+      onSignedOut: () {},
       onProblem: problems.add,
     );
     await claimer.run();

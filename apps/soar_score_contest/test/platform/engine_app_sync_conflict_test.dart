@@ -57,8 +57,9 @@ class _Gateway implements SyncGateway {
   @override
   Future<SyncMutationResult> resolveConflict(
     core.Id conflictId,
-    ResolveConflictRequest request,
-  ) async =>
+    ResolveConflictRequest request, {
+    required core.SyncScopeKey scope,
+  }) async =>
       answer ??
       SyncMutationResult(
         clientMutationId: request.clientMutationId,

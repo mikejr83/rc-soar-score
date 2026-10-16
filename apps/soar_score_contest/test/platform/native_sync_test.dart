@@ -5,11 +5,15 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:soar_score_api/soar_score_api.dart';
+import 'package:soar_score_contest/platform/acting_account.dart';
+import 'package:soar_score_contest/platform/auth_epoch.dart';
 import 'package:soar_score_contest/platform/native_sync.dart';
 import 'package:soar_score_contest/server/embedded_server.dart';
 import 'package:soar_score_contest/services/sync/sync_problem.dart';
 import 'package:soar_score_core/soar_score_core.dart' as core;
 import 'package:soar_score_data/soar_score_data.dart';
+
+import '../support/fake_auth_session.dart';
 
 void main() {
   late Directory dir;
@@ -122,6 +126,66 @@ void main() {
     await settle();
 
     expect(paths.where((p) => p == '/api/v1/contests').length, afterClaim + 1);
+  });
+
+  test('data of another account is not synced as the acting account', () async {
+    final acting = core.Id.create();
+    final auth = FakeAuthSession(signedIn: true);
+    final epoch = AuthEpoch(auth);
+    final account = ActingAccount(server, epoch);
+    expect(account.actAs(acting, epoch: epoch.value), isTrue);
+    final actingPaths = <String>[];
+    final actingSync = await NativeSync.start(
+      database: server.database,
+      localAccountId: server.localAccountId,
+      acting: account,
+      remote: ApiClient(
+        baseUrl: Uri.parse('http://hosted.invalid'),
+        httpClient: MockClient((request) async {
+          actingPaths.add(request.url.path);
+          return http.Response('{}', 503);
+        }),
+      ),
+      databasePath: databasePath,
+    );
+    addTearDown(actingSync.close);
+
+    await saveContest(core.Id.create());
+    await settle();
+    expect(actingPaths, isEmpty, reason: 'another account owns it');
+
+    await saveContest(acting);
+    await settle();
+    expect(actingPaths, isNotEmpty, reason: 'the acting account owns it');
+  });
+
+  test('contests are listed only for the account the app acts as', () async {
+    final acting = core.Id.create();
+    final auth = FakeAuthSession(signedIn: true);
+    final epoch = AuthEpoch(auth);
+    final account = ActingAccount(server, epoch);
+    expect(account.actAs(acting, epoch: epoch.value), isTrue);
+    final listed = <String>[];
+    final actingSync = await NativeSync.start(
+      database: server.database,
+      localAccountId: server.localAccountId,
+      acting: account,
+      remote: ApiClient(
+        baseUrl: Uri.parse('http://hosted.invalid'),
+        httpClient: MockClient((request) async {
+          listed.add(request.url.path);
+          return http.Response('[]', 200);
+        }),
+      ),
+      databasePath: databasePath,
+    );
+    addTearDown(actingSync.close);
+
+    await actingSync.accountClaimed(core.Id.create());
+    expect(listed.where((p) => p == '/api/v1/contests'), isEmpty);
+
+    await actingSync.accountClaimed(acting);
+    expect(listed.where((p) => p == '/api/v1/contests'), isNotEmpty);
   });
 
   test('a claim problem shows on a local-only contest', () async {

@@ -30,6 +30,7 @@ class ApiClientSyncGateway implements SyncGateway {
   @override
   Future<SyncMutationResult> resolveConflict(
     Id conflictId,
-    ResolveConflictRequest request,
-  ) => _client.resolveConflict(conflictId, request);
+    ResolveConflictRequest request, {
+    required SyncScopeKey scope,
+  }) => _client.resolveConflict(conflictId, request);
 }

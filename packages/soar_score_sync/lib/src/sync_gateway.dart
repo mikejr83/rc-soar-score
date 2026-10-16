@@ -20,6 +20,7 @@ abstract interface class SyncGateway {
 
   Future<SyncMutationResult> resolveConflict(
     Id conflictId,
-    ResolveConflictRequest request,
-  );
+    ResolveConflictRequest request, {
+    required SyncScopeKey scope,
+  });
 }

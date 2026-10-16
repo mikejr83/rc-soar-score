@@ -80,8 +80,9 @@ class FakeGateway implements SyncGateway {
   @override
   Future<SyncMutationResult> resolveConflict(
     Id conflictId,
-    ResolveConflictRequest request,
-  ) async {
+    ResolveConflictRequest request, {
+    required SyncScopeKey scope,
+  }) async {
     log.add('resolve');
     final error = resolveError;
     if (error != null) throw error;

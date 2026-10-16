@@ -30,6 +30,7 @@ class EmbeddedServer {
   late SoarScoreDatabase _database;
   late core.Repository _repository;
   late core.Id _localAccountId;
+  late core.Id _actingAccountId;
 
   /// The OS-assigned port the local socket is bound to.
   int get port => _server.port;
@@ -45,6 +46,17 @@ class EmbeddedServer {
   /// The installation's Local account, which owns the contests created here.
   core.Id get localAccountId => _localAccountId;
 
+  /// The account every request acts as: the owner of what it creates and the
+  /// actor of its mutations. The Local account until [actAs] says otherwise.
+  core.Id get actingAccountId => _actingAccountId;
+
+  /// Acts as the signed-in [accountId] from now on, so new contests and
+  /// roles belong to it from the start and sync at once.
+  void actAs(core.Id accountId) => _actingAccountId = accountId;
+
+  /// Acts as the installation's Local account again (signed out).
+  void actAsLocal() => _actingAccountId = _localAccountId;
+
   Future<void> initializeDatabase() async {
     final dbPath = File(_databasePath);
     _logger.finer('Using database path: ${dbPath.path}');
@@ -57,6 +69,7 @@ class EmbeddedServer {
     try {
       await SystemDataSeeder(_database).seed();
       _localAccountId = await LocalAccountRepository(_database).ensure();
+      _actingAccountId = _localAccountId;
       if (seedDemo) {
         _logger.finer('Seeding demo data');
         await DemoDataSeeder(
@@ -79,7 +92,14 @@ class EmbeddedServer {
       version: embeddedServerVersion,
       schemaRevision: _database.schemaVersion,
       repository: _repository,
-      authMiddleware: fixedPrincipal(Principal(accountId: _localAccountId)),
+      authMiddleware: (inner) =>
+          (request) => inner(
+            request.change(
+              context: {
+                principalContextKey: Principal(accountId: _actingAccountId),
+              },
+            ),
+          ),
       gliderScoreImport: GliderScoreImportProcessRunner(),
     );
     _server = await shelf_io.serve(handler, 'localhost', 0);
@@ -98,8 +118,10 @@ class EmbeddedServer {
 /// OS-assigned free port (port `0` is passed to `shelf_io.serve`).
 ///
 /// The embedded instance never asks for a token (ticket 017). Every request
-/// instead acts as the installation's Local account, through the same
-/// `Principal` seam the hosted server fills from a verified token.
+/// instead acts as an account chosen by the app, through the same `Principal`
+/// seam the hosted server fills from a verified token: the installation's
+/// Local account, or the signed-in account once the Local account is claimed
+/// (see [EmbeddedServer.actAs]).
 ///
 /// With [seedDemo], an empty database gets the example data of
 /// `DemoDataSeeder` (development only; the app passes it for the demo
