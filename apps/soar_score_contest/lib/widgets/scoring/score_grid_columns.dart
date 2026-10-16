@@ -73,12 +73,13 @@ class ScoreGridHeader extends StatelessWidget {
           children: [
             Text(
               title,
+              textAlign: align,
               style: small?.copyWith(
                 fontWeight: FontWeight.w500,
                 color: scheme.onSurface,
               ),
             ),
-            if (unit.isNotEmpty) Text(unit, style: small),
+            if (unit.isNotEmpty) Text(unit, textAlign: align, style: small),
           ],
         ),
       );
@@ -111,7 +112,12 @@ class ScoreGridHeader extends StatelessWidget {
             cell('Launch height', 'metres', ScoreGridColumns.height),
             gap,
           ],
-          cell('Landing · flags', '', ScoreGridColumns.land),
+          cell(
+            'Landing · flags',
+            '',
+            ScoreGridColumns.land,
+            align: TextAlign.end,
+          ),
           gap,
           cell(
             'Raw score',
@@ -127,7 +133,12 @@ class ScoreGridHeader extends StatelessWidget {
             align: TextAlign.end,
           ),
           gap,
-          cell('Penalties', 'flight · cumulative', ScoreGridColumns.pen),
+          cell(
+            'Penalties',
+            'flight · cumulative',
+            ScoreGridColumns.pen,
+            align: TextAlign.center,
+          ),
           gap,
           cell('Indicators', 'source · review', ScoreGridColumns.ind),
           gap,

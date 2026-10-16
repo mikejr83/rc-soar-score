@@ -366,7 +366,47 @@ void main() {
       await tester.enterText(_height(1, 1), '250');
       await tester.pump();
       // 200 m at 0.5 plus 50 m at 3.0.
-      expect(find.text('Height penalty 250.0 pts'), findsOneWidget);
+      expect(find.text('250 pts'), findsOneWidget);
+    });
+  });
+
+  group('cell alignment', () {
+    testWidgets('a landing value is right aligned and a dash is centered', (
+      tester,
+    ) async {
+      await pumpScoringPage(tester, ScoringServer(), round: 1, group: 1);
+      await tester.tap(_row(1, 1));
+      await tester.pumpAndSettle();
+      // Bo Ray has no landing: the dash sits in the middle of the column.
+      final dash = tester.getCenter(find.text('–').first);
+      final head = tester.getRect(find.text('Landing · flags'));
+      expect(dash.dx, lessThan(head.right));
+      final id = scoringAssignmentId(1, 1).value;
+      await tester.tap(find.byKey(ValueKey('score-landing-$id-within_1m')));
+      await tester.pump();
+      final value = tester.getTopRight(
+        find
+            .descendant(of: _row(1, 1), matching: find.text('Within 1 m'))
+            .first,
+      );
+      expect(value.dx, closeTo(head.right, 12));
+    });
+
+    testWidgets('the penalties column is centered', (tester) async {
+      await pumpScoringPage(tester, ScoringServer(), round: 1, group: 1);
+      final heading = tester.getCenter(find.text('Penalties'));
+      final none = tester.getCenter(find.text('None').first);
+      expect(none.dx, closeTo(heading.dx, 4));
+    });
+
+    testWidgets('no preview note sits under the scores', (tester) async {
+      await pumpScoringPage(tester, ScoringServer(), round: 1, group: 1);
+      await tester.tap(_row(1, 1));
+      await tester.pumpAndSettle();
+      await tester.enterText(_time(1, 1), '630');
+      await tester.enterText(_height(1, 1), '180');
+      await tester.pump();
+      expect(find.text('Preview, not saved'), findsNothing);
     });
   });
 

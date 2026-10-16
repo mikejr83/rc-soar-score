@@ -197,11 +197,17 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
 
   // Cells.
 
-  Widget _label(BuildContext context, String text, bool on) => on
+  Widget _label(
+    BuildContext context,
+    String text,
+    bool on, [
+    TextAlign align = TextAlign.start,
+  ]) => on
       ? Padding(
           padding: const EdgeInsets.only(bottom: 3),
           child: Text(
             text,
+            textAlign: align,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
@@ -366,7 +372,7 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
     }
     final penalty = widget.heightPenalty;
     final note = shown == null && penalty != null && problem == null
-        ? 'Height penalty ${penalty.toStringAsFixed(1)} pts'
+        ? '${_points(penalty)} pts'
         : null;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -399,6 +405,11 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
     );
   }
 
+  /// 250 as "250", 62.5 as "62.5".
+  static String _points(double value) => value == value.roundToDouble()
+      ? value.toStringAsFixed(0)
+      : value.toStringAsFixed(1);
+
   Widget _landingCell(BuildContext context, bool labels) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
@@ -422,13 +433,24 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
       if (d.outOfBounds) (Icons.wrong_location, 'Out of bounds'),
       if (d.noAltitude) (Icons.height, 'No altitude'),
     ];
+    // A value is right aligned; "–" is centered.
+    final hasValue = text != '–';
+    final cross = hasValue ? CrossAxisAlignment.end : CrossAxisAlignment.center;
     return Padding(
       padding: const EdgeInsets.only(top: 12),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: cross,
         children: [
-          _label(context, 'Landing · flags', labels),
+          _label(
+            context,
+            'Landing · flags',
+            labels,
+            hasValue ? TextAlign.end : TextAlign.center,
+          ),
           Row(
+            mainAxisAlignment: hasValue
+                ? MainAxisAlignment.end
+                : MainAxisAlignment.center,
             children: [
               if (icon != null) ...[
                 Icon(icon, size: 16, color: scheme.onSurfaceVariant),
@@ -437,6 +459,7 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
               Flexible(
                 child: Text(
                   text,
+                  textAlign: hasValue ? TextAlign.end : TextAlign.center,
                   style: theme.textTheme.bodyLarge?.copyWith(
                     fontWeight: FontWeight.w500,
                     fontSize: 15,
@@ -461,15 +484,23 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
     bool labels,
     String value,
     bool dirty,
-    String? sub,
   ) {
     final theme = Theme.of(context);
+    // A value is right aligned; "–" is centered.
+    final hasValue = value != '–';
     return Padding(
       padding: const EdgeInsets.only(top: 12),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
+        crossAxisAlignment: hasValue
+            ? CrossAxisAlignment.end
+            : CrossAxisAlignment.center,
         children: [
-          _label(context, label, labels),
+          _label(
+            context,
+            label,
+            labels,
+            hasValue ? TextAlign.end : TextAlign.center,
+          ),
           Text(
             value,
             style: theme.textTheme.titleMedium?.copyWith(
@@ -478,15 +509,6 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
               color: dirty ? theme.colorScheme.onSurfaceVariant : null,
             ),
           ),
-          if (sub != null)
-            Text(
-              sub,
-              textAlign: TextAlign.end,
-              style: theme.textTheme.labelSmall?.copyWith(
-                fontStyle: FontStyle.italic,
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
         ],
       ),
     );
@@ -498,11 +520,12 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
     return Padding(
       padding: const EdgeInsets.only(top: 12),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          _label(context, 'Penalties', labels),
+          _label(context, 'Penalties', labels, TextAlign.center),
           if (points > 0)
             Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
                   Icons.remove,
@@ -516,6 +539,7 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
           else
             Text(
               'None',
+              textAlign: TextAlign.center,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -723,7 +747,6 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
       labels,
       number(rawValue),
       dirty,
-      dirty && widget.preview != null ? 'Preview, not saved' : null,
     );
     final grp = _numberCell(
       context,
@@ -731,7 +754,6 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
       labels,
       number(groupValue),
       dirty,
-      dirty ? 'Preview, not saved' : null,
     );
     final pen = _penaltyCell(context, labels);
     final ind = _indicatorCell(context, labels);
