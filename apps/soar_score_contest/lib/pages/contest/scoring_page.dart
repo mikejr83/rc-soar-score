@@ -199,7 +199,6 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
   Widget build(BuildContext context) {
     final c = _controller;
     return Scaffold(
-      appBar: AppBar(title: const Text('Scoring')),
       body: c == null
           ? const MessageView(text: 'No API client is available.')
           : _body(c),
