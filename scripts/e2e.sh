@@ -7,6 +7,7 @@
 #   ./scripts/e2e.sh                 # Windows desktop (default on Windows)
 #   ./scripts/e2e.sh -d web          # headless Chrome against the E2E server
 #   ./scripts/e2e.sh -d <device>     # any other `flutter test -d` device
+#   ./scripts/e2e.sh -f score_entry_test.dart -- --name 'official score entry'
 #   ./scripts/e2e.sh -- --name journey   # extra args go to flutter test/drive
 #
 # The web mode needs Chrome and a matching chromedriver (`chromedriver` on
@@ -16,16 +17,34 @@
 # demo data. Each test file gets a fresh server, hence fresh demo data.
 set -eu
 device=windows
+test_file=
 extra=()
 while [ $# -gt 0 ]; do
   case "$1" in
     -d | --device) device="$2"; shift 2 ;;
+    -f | --file) test_file="$2"; shift 2 ;;
     --) shift; extra=("$@"); break ;;
-    *) echo "usage: $(basename "$0") [-d <device>] [-- <flutter args>]" >&2; exit 1 ;;
+    *) echo "usage: $(basename "$0") [-d <device>] [-f <test-file>] [-- <flutter test args>]" >&2; exit 1 ;;
   esac
 done
 root="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$root/apps/soar_score_contest"
+if [ -n "$test_file" ]; then
+  case "$test_file" in
+    */* | *\\*) echo "-f expects a test filename, not a path: $test_file" >&2; exit 1 ;;
+  esac
+  case "$test_file" in
+    *_test.dart) ;;
+    *) echo "-f expects an *_test.dart filename: $test_file" >&2; exit 1 ;;
+  esac
+  if [ ! -f "integration_test/$test_file" ]; then
+    echo "No E2E test file named '$test_file' found in integration_test." >&2
+    exit 1
+  fi
+  files=("integration_test/$test_file")
+else
+  files=(integration_test/*_test.dart)
+fi
 
 if [ "$device" = web ] || [ "$device" = chrome ]; then
   port="${E2E_SERVER_PORT:-18080}"
@@ -58,7 +77,7 @@ if [ "$device" = web ] || [ "$device" = chrome ]; then
   "$chromedriver" --port=$driver_port >/dev/null 2>&1 &
   driver_pid=$!
   status=0
-  for file in integration_test/*_test.dart; do
+  for file in "${files[@]}"; do
     start_server
     flutter drive --driver=test_driver/integration_test.dart --target="$file" \
       -d web-server --browser-name=chrome \
@@ -73,7 +92,7 @@ fi
 # One flutter test run per file: the Windows app allows a single instance, and
 # a second file's launch fails while the previous run's app is still alive.
 status=0
-for file in integration_test/*_test.dart; do
+for file in "${files[@]}"; do
   flutter test "$file" -d "$device"     --dart-define=SOAR_SCORE_DEMO=true     --dart-define=SOAR_SCORE_DEMO_RESET=true     ${extra[@]+"${extra[@]}"} || status=1
 done
 exit $status

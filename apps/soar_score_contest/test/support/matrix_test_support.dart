@@ -208,7 +208,7 @@ class MatrixServer {
     this.offline = false,
   }) : contest = contest ?? matrixContest();
 
-  final Contest contest;
+  Contest contest;
   final ContestConfigurationRevision? configuration;
   CurrentMatrix? matrix;
   int drawStatus;

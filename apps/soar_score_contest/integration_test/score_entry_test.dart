@@ -42,42 +42,40 @@ void main() {
     await tapVisible(tester, find.byKey(const ValueKey('picker-item-3')));
     await pumpUntilFound(tester, find.textContaining('Group C of 3'));
 
-    // How many of group C's slots are scored depends on the drawn matrix, so
-    // read the count and expect one more after the save.
-    final strip = find.byWidgetPredicate(
-      (w) => w is Text && RegExp(r'^\d of 4 entered').hasMatch(w.data ?? ''),
-      description: 'the entered count',
-    );
-    await pumpUntilFound(tester, strip);
-    final before = int.parse(tester.widget<Text>(strip).data!.substring(0, 1));
+    // The count already there depends on the draw, so it is read, not assumed.
+    await pumpUntilFound(tester, find.textContaining(' of 4 entered · '));
+    final counts = RegExp(r'^(\d+) of 4 entered · (\d+) official$');
+    final before = find
+        .byType(Text)
+        .evaluate()
+        .map((e) => (e.widget as Text).data)
+        .map((t) => t == null ? null : counts.firstMatch(t))
+        .whereType<RegExpMatch>()
+        .first;
+    final official = int.parse(before.group(2)!) + 1;
 
-    // Open the first row and enter a flight.
-    final time = _timeFields().first;
+    // Open the first row of group C that has no score yet (which rows are
+    // scored depends on the draw) and enter a flight.
+    final empty = _timeFields()
+        .evaluate()
+        .map((e) => e.widget as TextField)
+        .firstWhere((w) => (w.controller?.text ?? '').isEmpty);
+    final rowId = (empty.key! as ValueKey<String>).value.substring(
+      'score-time-'.length,
+    );
+    final time = find.byKey(ValueKey('score-time-$rowId'));
     await pumpUntilFound(tester, time);
     await tapVisible(tester, time);
     await enterIn(tester, time, '630');
     await pumpUntilFound(tester, find.text('6:30'));
-    final height = find.byWidgetPredicate(
-      (w) =>
-          w is TextField &&
-          w.key is ValueKey<String> &&
-          (w.key! as ValueKey<String>).value.startsWith('score-height-'),
-    );
-    await enterIn(tester, height.first, '180');
+    await enterIn(tester, find.byKey(ValueKey('score-height-$rowId')), '180');
     await pumpUntilFound(tester, find.text('1 unsaved row'));
 
     // Saving the row makes it official, and the strip counts it.
-    final save = find.byWidgetPredicate(
-      (w) =>
-          w.key is ValueKey<String> &&
-          (w.key! as ValueKey<String>).value.startsWith('score-save-') &&
-          !(w.key! as ValueKey<String>).value.startsWith('score-save-all'),
-    );
-    await tapVisible(tester, save.first);
-    final after = before + 1;
+    await tapVisible(tester, find.byKey(ValueKey('score-save-$rowId')));
     await pumpUntilFound(
       tester,
-      find.text('$after of 4 entered · $after official'),
+      find.text('$official of 4 entered · $official official'),
     );
     await pumpUntilFound(tester, find.text('Lock…'));
   });
