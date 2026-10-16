@@ -27,3 +27,19 @@ double? previewRawScore(
     return null;
   }
 }
+
+/// The height penalty of a launch of [height] metres under the contest's
+/// options, or null when it cannot be worked out.
+double? previewHeightPenalty(
+  int height, {
+  required Map<String, Object?> discipline,
+}) {
+  try {
+    return F5jProfile().calculate({
+      'time_flown': 1,
+      'launch_height': height,
+    }, overrides: discipline).heightPenalty;
+  } on Object {
+    return null;
+  }
+}

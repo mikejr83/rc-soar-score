@@ -47,6 +47,7 @@ class ScoreRowTile extends StatefulWidget {
     required this.landings,
     required this.landingTableName,
     required this.preview,
+    required this.heightPenalty,
     required this.findings,
     required this.actions,
     required this.mode,
@@ -65,6 +66,9 @@ class ScoreRowTile extends StatefulWidget {
 
   /// The raw score of the typed values, or null.
   final double? preview;
+
+  /// The height penalty of the typed launch height, or null.
+  final double? heightPenalty;
   final List<ScoreFinding> findings;
   final ScoreRowActions actions;
   final ScoreGridMode mode;
@@ -91,6 +95,9 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
   final _landingNode = FocusNode();
   final _penaltyNode = FocusNode();
 
+  /// The launch height is checked only once the director has touched it.
+  bool _heightTouched = false;
+
   @override
   void initState() {
     super.initState();
@@ -99,6 +106,8 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
     _height = TextEditingController(text: draft.heightText);
     _penalty = TextEditingController(text: draft.penaltyText);
     draft.addListener(_onDraft);
+    _timeNode.addListener(_onTimeFocus);
+    _heightNode.addListener(_onHeightFocus);
     if (widget.active) _focusFirst();
   }
 
@@ -122,10 +131,27 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
     for (final c in [_time, _height, _penalty]) {
       c.dispose();
     }
+    _timeNode.removeListener(_onTimeFocus);
+    _heightNode.removeListener(_onHeightFocus);
     for (final n in [_timeNode, _heightNode, _landingNode, _penaltyNode]) {
       n.dispose();
     }
     super.dispose();
+  }
+
+  /// Leaving the time field shows a valid time as m:ss.
+  void _onTimeFocus() {
+    if (_timeNode.hasFocus) return;
+    final t = widget.draft.time;
+    if (t.isValid && t.display != null && t.display != widget.draft.timeText) {
+      widget.draft.setTime(t.display!);
+    }
+  }
+
+  void _onHeightFocus() {
+    if (!_heightNode.hasFocus && !_heightTouched && mounted) {
+      setState(() => _heightTouched = true);
+    }
   }
 
   void _onDraft() {
@@ -325,7 +351,23 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
         .where((p) => p.field == 'launch_height')
         .map((p) => p.message)
         .firstOrNull;
-    final shown = problem != null && !d.heightZero ? problem : null;
+    // Nothing is checked until the field has been touched. Then an empty
+    // field is Required, and a typed value is checked.
+    final touched = _heightTouched || d.heightText.trim().isNotEmpty;
+    final String? shown;
+    if (!touched || d.zeroing) {
+      shown = null;
+    } else if (d.heightText.trim().isEmpty) {
+      shown = 'Required';
+    } else if (problem != null && !d.heightZero) {
+      shown = problem;
+    } else {
+      shown = null;
+    }
+    final penalty = widget.heightPenalty;
+    final note = shown == null && penalty != null && problem == null
+        ? 'Height penalty ${penalty.toStringAsFixed(1)} pts'
+        : null;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -350,7 +392,7 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
         ),
         _caption(
           context,
-          off != null ? 'Scores 0' : shown,
+          off != null ? 'Scores 0' : (shown ?? note),
           error: shown != null && off == null,
         ),
       ],

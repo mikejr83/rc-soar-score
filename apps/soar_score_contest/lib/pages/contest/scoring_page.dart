@@ -338,6 +338,13 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
       landingTableName: data.landingTableName,
       mode: mode,
       focusOrder: c.showFocusOrder,
+      heightPenalty: draft.height != null && draft.height! > 0
+          ? previewHeightPenalty(
+              draft.height!,
+              discipline:
+                  data.base.configuration?.config.discipline ?? const {},
+            )
+          : null,
       preview: draft.isDirty
           ? previewRawScore(
               draft.components,

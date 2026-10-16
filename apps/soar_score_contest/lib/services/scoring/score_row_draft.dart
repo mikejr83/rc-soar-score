@@ -40,7 +40,7 @@ class ScoreRowDraft extends ChangeNotifier {
 
   void _load(Map<String, Object?> saved) {
     final time = saved['time_flown'];
-    timeText = time is num ? _compactText(time) : '';
+    timeText = time is num ? TimeEntry.clock(time) : '';
     final height = saved['launch_height'];
     heightText = height is num ? '${height.toInt()}' : '';
     landing = saved['landing'] as String?;
@@ -51,17 +51,6 @@ class ScoreRowDraft extends ChangeNotifier {
     final penalty = saved['flight_penalty'];
     penaltyText = penalty is num && penalty > 0 ? '${penalty.toInt()}' : '';
     zeroConfirmed = false;
-  }
-
-  /// 540 is typed as `900`, 395.4 as `635.4`.
-  static String _compactText(num seconds) {
-    final whole = seconds.floor();
-    final fraction = seconds - whole;
-    final base = (whole ~/ 60) * 100 + whole % 60;
-    if (fraction == 0) {
-      return '$base';
-    }
-    return '$base${fraction.toStringAsFixed(3).substring(1).replaceFirst(RegExp(r'0+$'), '')}';
   }
 
   /// Replaces the draft with [saved], after a save or a reload.

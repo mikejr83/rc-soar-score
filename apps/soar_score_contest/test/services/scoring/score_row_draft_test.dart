@@ -23,7 +23,7 @@ void main() {
 
   test('a saved row reads back as the same text and is not dirty', () {
     final d = _draft({'time_flown': 390.4, 'launch_height': 180});
-    expect(d.timeText, '630.4');
+    expect(d.timeText, '6:30.4');
     expect(d.heightText, '180');
     expect(d.isDirty, isFalse);
     d.setHeight('181');

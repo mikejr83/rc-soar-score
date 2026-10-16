@@ -216,7 +216,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('score-save-failed')), findsOneWidget);
     expect(find.byKey(const ValueKey('score-retry')), findsOneWidget);
-    expect(tester.widget<TextField>(_time(1, 1)).controller!.text, '630');
+    expect(tester.widget<TextField>(_time(1, 1)).controller!.text, '6:30');
 
     server.offlineOnEntry = false;
     await tester.tap(find.byKey(const ValueKey('score-retry')));
@@ -248,7 +248,7 @@ void main() {
       expect(find.textContaining('launch_height: 150'), findsOneWidget);
       await tester.tap(find.byKey(const ValueKey('score-take-theirs')));
       await tester.pumpAndSettle();
-      expect(tester.widget<TextField>(_time(1, 1)).controller!.text, '820');
+      expect(tester.widget<TextField>(_time(1, 1)).controller!.text, '8:20');
     },
   );
 
@@ -325,6 +325,51 @@ void main() {
     expect(find.byKey(const ValueKey('scoring-open-matrix')), findsOneWidget);
   });
 
+  group('time and launch height captions', () {
+    testWidgets('the time reads as m:ss once the field is left', (
+      tester,
+    ) async {
+      await pumpScoringPage(tester, ScoringServer(), round: 1, group: 1);
+      await tester.tap(_row(1, 1));
+      await tester.pumpAndSettle();
+      await tester.tap(_time(1, 1));
+      await tester.enterText(_time(1, 1), '630.4');
+      await tester.pump();
+      expect(tester.widget<TextField>(_time(1, 1)).controller!.text, '630.4');
+      await tester.tap(_height(1, 1));
+      await tester.pump();
+      expect(tester.widget<TextField>(_time(1, 1)).controller!.text, '6:30.4');
+    });
+
+    testWidgets(
+      'an untouched launch height shows nothing; a touched empty one says Required',
+      (tester) async {
+        await pumpScoringPage(tester, ScoringServer(), round: 1, group: 1);
+        await tester.tap(_row(1, 1));
+        await tester.pumpAndSettle();
+        expect(find.text('Required'), findsNothing);
+        await tester.tap(_height(1, 1));
+        await tester.pump();
+        expect(find.text('Required'), findsNothing);
+        await tester.tap(_time(1, 1));
+        await tester.pump();
+        expect(find.text('Required'), findsOneWidget);
+      },
+    );
+
+    testWidgets('a valid launch height shows its height penalty', (
+      tester,
+    ) async {
+      await pumpScoringPage(tester, ScoringServer(), round: 1, group: 1);
+      await tester.tap(_row(1, 1));
+      await tester.pumpAndSettle();
+      await tester.enterText(_height(1, 1), '250');
+      await tester.pump();
+      // 200 m at 0.5 plus 50 m at 3.0.
+      expect(find.text('Height penalty 250.0 pts'), findsOneWidget);
+    });
+  });
+
   group('layout follows the design', () {
     testWidgets('navigation is left and actions are right', (tester) async {
       await pumpScoringPage(tester, ScoringServer(), round: 1, group: 1);
@@ -371,7 +416,13 @@ void main() {
       await tester.pumpAndSettle();
       await tester.enterText(_time(1, 1), '630');
       await tester.pump();
-      expect(find.text('Launch height is needed with a time.'), findsOneWidget);
+      // The launch height is checked only once it has been touched.
+      expect(find.text('Required'), findsNothing);
+      await tester.tap(_height(1, 1));
+      await tester.pump();
+      await tester.tap(_time(1, 1));
+      await tester.pump();
+      expect(find.text('Required'), findsOneWidget);
       expect(find.textContaining('Correct the marked fields'), findsNothing);
       await tester.enterText(_time(1, 1), '');
       await tester.enterText(_height(1, 1), '180');
