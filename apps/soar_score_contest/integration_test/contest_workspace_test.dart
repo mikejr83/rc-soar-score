@@ -56,16 +56,15 @@ void main() {
     expect(find.byKey(const ValueKey('attention-card')), findsOneWidget);
     expect(find.byKey(const ValueKey('setup-checklist-card')), findsNothing);
 
-    // The next step's Scoring button says score entry is not built yet.
+    // The next step's Scoring button opens the Scoring page at its round.
     await tapVisible(tester, find.byKey(const ValueKey('next-step-primary')));
-    await pumpUntilFound(tester, find.text('Scoring is not available yet'));
-    await tapVisible(tester, find.text('OK'));
-    await tester.pump(const Duration(milliseconds: 500));
-    expect(find.text('Scoring is not available yet'), findsNothing);
+    await pumpUntilFound(tester, find.text('Round 5 of 6'));
 
     // A progress tile opens Scoring at its round.
+    await tapRail(tester, 'Workspace');
+    await pumpUntilFound(tester, find.byKey(const ValueKey('progress-tile-5')));
     await tapVisible(tester, find.byKey(const ValueKey('progress-tile-5')));
-    await pumpUntilFound(tester, find.textContaining('Opened at round 5'));
+    await pumpUntilFound(tester, find.text('Round 5 of 6'));
 
     // A ready contest shows the setup checklist, whose rows open their pages.
     // The contest rail has no Contests entry, so use the header breadcrumb.

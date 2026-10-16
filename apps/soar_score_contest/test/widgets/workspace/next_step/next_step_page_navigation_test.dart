@@ -36,9 +36,7 @@ void main() {
     expect(find.text('Matrix stub'), findsOneWidget);
   });
 
-  testWidgets('a running contest shows the scoring dialog, not a no-op', (
-    tester,
-  ) async {
+  testWidgets('a running contest opens the Scoring page', (tester) async {
     await pumpWorkspace(
       tester,
       WorkspaceServer(
@@ -48,6 +46,6 @@ void main() {
     );
     await tester.tap(find.byKey(_primary));
     await tester.pumpAndSettle();
-    expect(find.text('Scoring is not available yet'), findsOneWidget);
+    expect(find.text('Scoring stub'), findsOneWidget);
   });
 }

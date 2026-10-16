@@ -30,6 +30,7 @@ Future<void> _open(WidgetTester tester, NextStepAction action) async {
         contestConfigurationPath(matrixContestId): 'Configuration stub',
         contestMatrixPath(matrixContestId): 'Matrix stub',
         participantsPath: 'Participants stub',
+        contestScoringPath(matrixContestId): 'Scoring stub',
       }.entries)
         GoRoute(path: entry.key, builder: (context, _) => Text(entry.value)),
     ],
@@ -58,6 +59,48 @@ void main() {
     });
   });
 
+  group('opens scoring', () {
+    testWidgets('at the round and group of the action', (tester) async {
+      final seen = <Uri>[];
+      final router = GoRouter(
+        routes: [
+          GoRoute(
+            path: '/',
+            builder: (context, state) => Scaffold(
+              body: Builder(
+                builder: (context) => TextButton(
+                  onPressed: () => NextStepNavigator.open(
+                    context,
+                    _to(NextStepTarget.scoring, round: 3, group: 2),
+                    contestId: matrixContestId,
+                  ),
+                  child: const Text('Go'),
+                ),
+              ),
+            ),
+          ),
+          GoRoute(
+            path: contestScoringPath(matrixContestId),
+            builder: (context, state) {
+              seen.add(state.uri);
+              return const Text('Scoring stub');
+            },
+          ),
+        ],
+      );
+      addTearDown(router.dispose);
+      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+      await tester.tap(find.text('Go'));
+      await tester.pumpAndSettle();
+      expect(seen.single.queryParameters, {'round': '3', 'group': '2'});
+    });
+
+    testWidgets('without a place goes to the page itself', (tester) async {
+      await _open(tester, _to(NextStepTarget.scoring));
+      expect(find.text('Scoring stub'), findsOneWidget);
+    });
+  });
+
   group('shows the not-available dialog', () {
     final dialogs = {
       NextStepTarget.reports: ('Reports', 'The reports page is not built yet.'),
@@ -73,26 +116,6 @@ void main() {
         expect(find.text('${text.$1} is not available yet'), findsOneWidget);
         expect(find.text(text.$2), findsOneWidget);
       });
-    });
-
-    testWidgets('scoring names the round and group it will open at', (
-      tester,
-    ) async {
-      await _open(tester, _to(NextStepTarget.scoring, round: 3, group: 2));
-      expect(find.text('Scoring is not available yet'), findsOneWidget);
-      expect(
-        find.text(
-          'Score entry is not built yet. It will open at round 3, group B.',
-        ),
-        findsOneWidget,
-      );
-    });
-
-    testWidgets('scoring without a place still explains itself', (
-      tester,
-    ) async {
-      await _open(tester, _to(NextStepTarget.scoring));
-      expect(find.text('Score entry is not built yet.'), findsOneWidget);
     });
   });
 
