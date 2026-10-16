@@ -7,6 +7,7 @@ import '../../services/sync/app_sync.dart';
 import '../../services/sync/conflict_answer.dart';
 import '../../services/sync/open_conflict.dart';
 import '../../services/sync/refused_change.dart';
+import '../../widgets/app_version_label.dart';
 import '../../widgets/contest_scope.dart';
 import '../../widgets/sync/conflict_resolve_dialog.dart';
 import '../../widgets/sync/conflicts_card.dart';
@@ -60,6 +61,11 @@ class ContestSyncPage extends StatelessWidget {
                 zoneId: zoneId,
                 // A new count means the list changed.
                 version: summary?.rejectedChanges ?? 0,
+              ),
+              const SizedBox(height: 16),
+              const Align(
+                alignment: Alignment.centerLeft,
+                child: AppVersionLabel(),
               ),
             ],
           );
