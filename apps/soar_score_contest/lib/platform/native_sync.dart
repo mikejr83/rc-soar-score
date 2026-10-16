@@ -30,12 +30,13 @@ class NativeSync {
     this._database,
     this._remote,
     this._discovered,
+    this._discoveryDelay,
   ) : appSync = EngineAppSync(engine) {
     // Every ordinary sync, scheduled or started by the director, ends with a
     // look at the account's contests.
     var wasSyncing = false;
     _stateSubscription = engine.states.listen((state) {
-      if (wasSyncing && !state.syncing) unawaited(discoverAccountContests());
+      if (wasSyncing && !state.syncing) _discoverSoon();
       wasSyncing = state.syncing;
     });
   }
@@ -49,6 +50,11 @@ class NativeSync {
   final Set<core.Id> _discovered;
   core.Id? _accountId;
   Future<void>? _discovering;
+
+  /// How long after a sync ends discovery waits, so the many scopes of a
+  /// start-up or reconnect make one request.
+  final Duration _discoveryDelay;
+  Timer? _discoveryTimer;
 
   final SoarScoreDatabase _database;
 
@@ -66,6 +72,7 @@ class NativeSync {
     required core.Id localAccountId,
     required ApiClient remote,
     required String databasePath,
+    Duration discoveryDelay = const Duration(seconds: 2),
   }) async {
     final installationId = await InstallationIdFile.besides(databasePath)
         .readOrCreate();
@@ -115,6 +122,7 @@ class NativeSync {
       database,
       remote,
       discovered,
+      discoveryDelay,
     );
   }
 
@@ -152,13 +160,24 @@ class NativeSync {
     await discoverAccountContests();
   }
 
+  /// Looks once, [_discoveryDelay] after the last call: every sync that ends
+  /// within that time shares one request.
+  void _discoverSoon() {
+    if (_accountId == null || _discoveryTimer != null) return;
+    _discoveryTimer = Timer(_discoveryDelay, () {
+      _discoveryTimer = null;
+      unawaited(discoverAccountContests());
+    });
+  }
+
   /// Lists the signed-in account's contests on the service and starts syncing
   /// the ones this installation does not hold, such as a contest made offline
   /// on the director's other installation.
   ///
   /// Does nothing before the account is known (no sign-in claimed yet). A
   /// failure is logged; the next claim or the service becoming reachable
-  /// again tries once more; it also runs after every sync. Calls overlapping a running one share it.
+  /// again tries once more. It also runs after syncs, at most once per
+  /// burst. Calls overlapping a running one share it.
   Future<void> discoverAccountContests() {
     if (_accountId == null) return Future.value();
     return _discovering ??= _discover(_accountId!)
@@ -189,6 +208,7 @@ class NativeSync {
   Future<void> close() async {
     await _subscription.cancel();
     await _stateSubscription.cancel();
+    _discoveryTimer?.cancel();
     _scheduler.dispose();
     await appSync.close();
   }
