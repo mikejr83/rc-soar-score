@@ -118,6 +118,11 @@ class ScoreEntryPanel extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          if (draft.time.error != null && !draft.zeroing)
+            ScoreErrorBanner(
+              key: const ValueKey('score-time-error'),
+              text: draft.time.error!,
+            ),
           if (draft.heightUnusual)
             ScoreInlineNote(
               icon: Icons.help_outline,

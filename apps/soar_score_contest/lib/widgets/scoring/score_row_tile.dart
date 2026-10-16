@@ -7,6 +7,7 @@ import '../../services/scoring/score_check.dart';
 import '../../services/scoring/score_row_draft.dart';
 import '../../services/scoring/scoring_page_data.dart';
 import '../../services/scoring/scoring_row.dart';
+import '../../services/scoring/time_entry.dart';
 import '../matrix/matrix_colors.dart';
 import '../matrix/team_badge.dart';
 import 'score_entry_panel.dart';
@@ -343,7 +344,11 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
         ),
         _caption(
           context,
-          off != null ? 'Scores 0' : (t.error ?? missing ?? t.display),
+          off != null
+              ? 'Scores 0'
+              : (t.error != null
+                    ? TimeEntry.outOfRange
+                    : (missing ?? t.display)),
           error: (t.error != null || missing != null) && off == null,
         ),
       ],

@@ -93,7 +93,9 @@ void main() {
     expect(find.text('6:30.4'), findsOneWidget);
     await tester.enterText(_time(1, 1), '675');
     await tester.pump();
-    expect(find.textContaining('Seconds go up to 59'), findsOneWidget);
+    expect(find.byKey(const ValueKey('score-time-error')), findsOneWidget);
+    expect(find.textContaining('Seconds can’t be above 59'), findsOneWidget);
+    expect(find.text('Out of range'), findsOneWidget);
     // The rejected input is kept.
     expect(tester.widget<TextField>(_time(1, 1)).controller!.text, '675');
   });
@@ -103,8 +105,15 @@ void main() {
     await _activate(tester, 1, 1);
     await tester.enterText(_time(1, 1), '1000');
     await tester.pump();
-    expect(find.textContaining('Over the working time'), findsOneWidget);
-    expect(find.textContaining('9:59'), findsOneWidget);
+    expect(find.text('Out of range'), findsOneWidget);
+    expect(find.byKey(const ValueKey('score-time-error')), findsOneWidget);
+    expect(
+      find.textContaining(
+        'The longest possible time is 9:59 with a 10:00 working time. '
+        '1000 reads as 10:00.',
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('saves one row with the typed components', (tester) async {

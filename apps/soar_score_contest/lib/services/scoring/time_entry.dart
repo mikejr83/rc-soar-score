@@ -47,7 +47,9 @@ class TimeEntry {
       return TimeEntry._(
         text: text,
         display: shown,
-        error: 'Seconds go up to 59. $shown is not a time.',
+        error:
+            'Seconds can’t be above 59. $raw reads as $shown. Your input is '
+            'kept until you correct it.',
       );
     }
     final double total =
@@ -58,8 +60,9 @@ class TimeEntry {
         text: text,
         display: shown,
         error:
-            'Over the working time. The most is '
-            '${_clock(workingTimeSeconds - 1)}.',
+            'The longest possible time is ${_clock(workingTimeSeconds - 1)} '
+            'with a ${_clock(workingTimeSeconds)} working time. $raw reads '
+            'as $shown.',
       );
     }
     return TimeEntry._(text: text, seconds: total, display: shown);
@@ -92,6 +95,10 @@ class TimeEntry {
 
   /// Why the value is rejected, or null.
   final String? error;
+
+  /// The words under the field when the value is rejected; the full reason
+  /// is in [error].
+  static const String outOfRange = 'Out of range';
 
   bool get isEmpty => text.trim().isEmpty;
   bool get isValid => seconds != null;

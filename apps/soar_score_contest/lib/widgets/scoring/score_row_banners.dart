@@ -63,6 +63,48 @@ class ScoreInlineNote extends StatelessWidget {
   }
 }
 
+/// An error message over the entry fields, as in the design: the error
+/// container, an error icon and the full reason. Announced to screen readers.
+class ScoreErrorBanner extends StatelessWidget {
+  const ScoreErrorBanner({super.key, required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.only(top: 10),
+      child: Semantics(
+        liveRegion: true,
+        container: true,
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: BoxDecoration(
+            color: scheme.errorContainer,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(Icons.error, size: 20, color: scheme.onErrorContainer),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  text,
+                  style: Theme.of(context).textTheme.bodyMedium
+                      ?.copyWith(color: scheme.onErrorContainer),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 /// What a failed or conflicting save says, and what can be done. The typed
 /// values are always kept.
 class ScoreSaveBanner extends StatelessWidget {
