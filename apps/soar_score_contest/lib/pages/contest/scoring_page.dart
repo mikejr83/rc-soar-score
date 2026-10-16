@@ -337,6 +337,7 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
       landings: data.landings,
       landingTableName: data.landingTableName,
       mode: mode,
+      focusOrder: c.showFocusOrder,
       preview: draft.isDirty
           ? previewRawScore(
               draft.components,

@@ -10,6 +10,7 @@ import '../../services/scoring/scoring_row.dart';
 import '../matrix/matrix_colors.dart';
 import '../matrix/team_badge.dart';
 import 'score_entry_panel.dart';
+import 'focus_step.dart';
 import 'score_grid_columns.dart';
 import 'status_chips.dart';
 
@@ -49,6 +50,7 @@ class ScoreRowTile extends StatefulWidget {
     required this.findings,
     required this.actions,
     required this.mode,
+    this.focusOrder = false,
     this.theirs,
     this.focusField,
   });
@@ -66,6 +68,9 @@ class ScoreRowTile extends StatefulWidget {
   final List<ScoreFinding> findings;
   final ScoreRowActions actions;
   final ScoreGridMode mode;
+
+  /// Draws the keyboard path numbers over the controls.
+  final bool focusOrder;
 
   /// What another revision saved, for a stale row.
   final Map<String, Object?>? theirs;
@@ -235,9 +240,11 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
     required ValueChanged<String> onSubmitted,
     required bool invalid,
     String? suffix,
+    required double order,
+    required String badge,
   }) {
     final scheme = Theme.of(context).colorScheme;
-    return TextField(
+    final field = TextField(
       key: key,
       controller: controller,
       focusNode: node,
@@ -267,6 +274,12 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
         focusedBorder: _border(scheme.primary, 3),
       ),
     );
+    return FocusStep(
+      order: order,
+      badge: widget.focusOrder ? badge : null,
+      enterPath: true,
+      child: field,
+    );
   }
 
   Widget _timeCell(BuildContext context, bool labels, bool editable) {
@@ -289,6 +302,8 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
           onChanged: d.setTime,
           onSubmitted: (_) => _heightNode.requestFocus(),
           invalid: t.error != null,
+          order: 1,
+          badge: '1↵',
         ),
         _caption(
           context,
@@ -326,6 +341,8 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
                   .requestFocus(),
           invalid: shown != null,
           suffix: 'm',
+          order: 2,
+          badge: '2↵',
         ),
         _caption(
           context,
@@ -533,25 +550,28 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
     );
   }
 
-  Widget _menuCell(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(top: 6),
-    child: PopupMenuButton<void>(
-      tooltip: 'More for ${widget.row.pilot.name}',
-      icon: const Icon(Icons.more_vert),
-      itemBuilder: (context) => const [
-        PopupMenuItem<void>(
-          enabled: false,
-          child: Text('Score history · Later release'),
-        ),
-        PopupMenuItem<void>(
-          enabled: false,
-          child: Text('Retire pilot · Later release'),
-        ),
-        PopupMenuItem<void>(
-          enabled: false,
-          child: Text('Correct a locked score · Later release'),
-        ),
-      ],
+  Widget _menuCell(BuildContext context) => FocusStep(
+    order: 12,
+    child: Padding(
+      padding: const EdgeInsets.only(top: 6),
+      child: PopupMenuButton<void>(
+        tooltip: 'More for ${widget.row.pilot.name}',
+        icon: const Icon(Icons.more_vert),
+        itemBuilder: (context) => const [
+          PopupMenuItem<void>(
+            enabled: false,
+            child: Text('Score history · Later release'),
+          ),
+          PopupMenuItem<void>(
+            enabled: false,
+            child: Text('Retire pilot · Later release'),
+          ),
+          PopupMenuItem<void>(
+            enabled: false,
+            child: Text('Correct a locked score · Later release'),
+          ),
+        ],
+      ),
     ),
   );
 
@@ -793,52 +813,56 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
     };
 
     final active = widget.active;
-    return Semantics(
-      container: true,
-      label: '${widget.row.pilot.name}, ${_statusWord(dirty)}',
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: widget.actions.onActivate,
-        child: Container(
-          key: ValueKey('score-row-${widget.row.id.value}'),
-          margin: active ? const EdgeInsets.all(4) : null,
-          padding: const EdgeInsets.symmetric(
-            horizontal: ScoreGridColumns.rowPadding,
-            vertical: 6,
-          ),
-          decoration: BoxDecoration(
-            color: active
-                ? Color.alphaBlend(
-                    scheme.primary.withValues(alpha: 0.08),
-                    scheme.surface,
-                  )
-                : null,
-            border: active
-                ? Border.all(color: scheme.primary, width: 2)
-                : Border(bottom: BorderSide(color: scheme.outlineVariant)),
-            borderRadius: active ? BorderRadius.circular(12) : null,
-          ),
-          child: Column(
-            children: [
-              grid,
-              if (active)
-                ScoreEntryPanel(
-                  row: widget.row,
-                  draft: d,
-                  save: widget.save,
-                  block: widget.block,
-                  landings: widget.landings,
-                  landingTableName: widget.landingTableName,
-                  theirs: widget.theirs,
-                  findings: widget.findings,
-                  actions: widget.actions,
-                  penaltyController: _penalty,
-                  penaltyNode: _penaltyNode,
-                  landingNode: _landingNode,
-                  readOnly: _readOnly,
-                  keyOf: _k,
-                ),
-            ],
+    return FocusTraversalGroup(
+      policy: OrderedTraversalPolicy(),
+      child: Semantics(
+        container: true,
+        label: '${widget.row.pilot.name}, ${_statusWord(dirty)}',
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: widget.actions.onActivate,
+          child: Container(
+            key: ValueKey('score-row-${widget.row.id.value}'),
+            margin: active ? const EdgeInsets.all(4) : null,
+            padding: const EdgeInsets.symmetric(
+              horizontal: ScoreGridColumns.rowPadding,
+              vertical: 6,
+            ),
+            decoration: BoxDecoration(
+              color: active
+                  ? Color.alphaBlend(
+                      scheme.primary.withValues(alpha: 0.08),
+                      scheme.surface,
+                    )
+                  : null,
+              border: active
+                  ? Border.all(color: scheme.primary, width: 2)
+                  : Border(bottom: BorderSide(color: scheme.outlineVariant)),
+              borderRadius: active ? BorderRadius.circular(12) : null,
+            ),
+            child: Column(
+              children: [
+                grid,
+                if (active)
+                  ScoreEntryPanel(
+                    row: widget.row,
+                    draft: d,
+                    save: widget.save,
+                    block: widget.block,
+                    landings: widget.landings,
+                    landingTableName: widget.landingTableName,
+                    theirs: widget.theirs,
+                    findings: widget.findings,
+                    actions: widget.actions,
+                    penaltyController: _penalty,
+                    penaltyNode: _penaltyNode,
+                    landingNode: _landingNode,
+                    readOnly: _readOnly,
+                    keyOf: _k,
+                    focusOrder: widget.focusOrder,
+                  ),
+              ],
+            ),
           ),
         ),
       ),

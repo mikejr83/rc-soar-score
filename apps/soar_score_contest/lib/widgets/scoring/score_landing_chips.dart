@@ -47,6 +47,7 @@ class ScoreLandingChip extends StatelessWidget {
         ),
         child: InkWell(
           borderRadius: BorderRadius.circular(8),
+          canRequestFocus: false,
           onTap: enabled ? onTap : null,
           child: ConstrainedBox(
             constraints: const BoxConstraints(minWidth: 60, minHeight: 52),
@@ -110,6 +111,7 @@ class ScoreLandingChoice extends StatelessWidget {
     }
 
     return Focus(
+      key: ValueKey(keyPrefix),
       focusNode: focusNode,
       canRequestFocus: enabled,
       onKeyEvent: (node, event) {
@@ -133,7 +135,6 @@ class ScoreLandingChoice extends StatelessWidget {
         return KeyEventResult.ignored;
       },
       child: Wrap(
-        key: ValueKey(keyPrefix),
         spacing: 8,
         runSpacing: 8,
         children: [

@@ -215,20 +215,30 @@ class ScoringToolbar extends StatelessWidget {
       runSpacing: 8,
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
-        PopupMenuButton<void>(
+        PopupMenuButton<String>(
           key: const ValueKey('group-more'),
           tooltip: 'More group actions',
           icon: const Icon(Icons.more_vert),
-          itemBuilder: (context) => const [
-            PopupMenuItem<void>(
+          onSelected: (value) {
+            if (value == 'focus-order') controller.toggleFocusOrder();
+          },
+          itemBuilder: (context) => [
+            CheckedPopupMenuItem<String>(
+              key: const ValueKey('show-focus-order'),
+              value: 'focus-order',
+              checked: controller.showFocusOrder,
+              child: const Text('Show keyboard order'),
+            ),
+            const PopupMenuDivider(),
+            const PopupMenuItem<String>(
               enabled: false,
               child: Text('Re-flight group · Later release'),
             ),
-            PopupMenuItem<void>(
+            const PopupMenuItem<String>(
               enabled: false,
               child: Text('Re-flight round · Later release'),
             ),
-            PopupMenuItem<void>(
+            const PopupMenuItem<String>(
               enabled: false,
               child: Text('Group history · Later release'),
             ),

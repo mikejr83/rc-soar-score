@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'focus_step.dart';
+
 /// The two penalties as two bordered cards, so the difference reads without
 /// a tooltip: this flight and dropped, or the contest total and never dropped.
 class ScorePenaltyCards extends StatelessWidget {
@@ -13,6 +15,7 @@ class ScorePenaltyCards extends StatelessWidget {
     required this.onChanged,
     required this.onSubmitted,
     required this.fieldKey,
+    this.focusOrder = false,
   });
 
   final TextEditingController controller;
@@ -22,6 +25,7 @@ class ScorePenaltyCards extends StatelessWidget {
   final ValueChanged<String> onChanged;
   final VoidCallback onSubmitted;
   final Key fieldKey;
+  final bool focusOrder;
 
   @override
   Widget build(BuildContext context) {
@@ -64,24 +68,29 @@ class ScorePenaltyCards extends StatelessWidget {
               const SizedBox(height: 6),
               SizedBox(
                 width: 160,
-                child: TextField(
-                  key: fieldKey,
-                  controller: controller,
-                  focusNode: focusNode,
-                  enabled: enabled,
-                  keyboardType: TextInputType.number,
-                  textInputAction: TextInputAction.done,
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  onChanged: onChanged,
-                  onSubmitted: (_) => onSubmitted(),
-                  style: const TextStyle(fontSize: 18),
-                  decoration: InputDecoration(
-                    hintText: '0',
-                    suffixText: 'pts',
-                    errorText: errorText,
-                    border: border(),
-                    enabledBorder: border(),
-                    focusedBorder: border(scheme.primary, 3),
+                child: FocusStep(
+                  order: 8,
+                  badge: focusOrder ? '8↵' : null,
+                  enterPath: true,
+                  child: TextField(
+                    key: fieldKey,
+                    controller: controller,
+                    focusNode: focusNode,
+                    enabled: enabled,
+                    keyboardType: TextInputType.number,
+                    textInputAction: TextInputAction.done,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    onChanged: onChanged,
+                    onSubmitted: (_) => onSubmitted(),
+                    style: const TextStyle(fontSize: 18),
+                    decoration: InputDecoration(
+                      hintText: '0',
+                      suffixText: 'pts',
+                      errorText: errorText,
+                      border: border(),
+                      enabledBorder: border(),
+                      focusedBorder: border(scheme.primary, 3),
+                    ),
                   ),
                 ),
               ),
@@ -117,14 +126,18 @@ class ScorePenaltyCards extends StatelessWidget {
             children: [
               title(Icons.push_pin_outlined, 'Cumulative penalty'),
               const SizedBox(height: 6),
-              const SizedBox(
+              SizedBox(
                 width: 160,
-                child: TextField(
-                  key: ValueKey('cumulative-penalty'),
-                  enabled: false,
-                  decoration: InputDecoration(
-                    suffixText: 'pts',
-                    border: OutlineInputBorder(),
+                child: FocusStep(
+                  order: 9,
+                  badge: focusOrder ? '9' : null,
+                  child: const TextField(
+                    key: ValueKey('cumulative-penalty'),
+                    enabled: false,
+                    decoration: InputDecoration(
+                      suffixText: 'pts',
+                      border: OutlineInputBorder(),
+                    ),
                   ),
                 ),
               ),

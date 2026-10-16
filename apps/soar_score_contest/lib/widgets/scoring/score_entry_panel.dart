@@ -7,6 +7,7 @@ import '../../services/scoring/score_row_draft.dart';
 import '../../services/scoring/scoring_page_data.dart';
 import '../../services/scoring/scoring_row.dart';
 import '../matrix/matrix_colors.dart';
+import 'focus_step.dart';
 import 'score_landing_chips.dart';
 import 'score_penalty_cards.dart';
 import 'score_row_banners.dart';
@@ -32,6 +33,7 @@ class ScoreEntryPanel extends StatelessWidget {
     required this.landingNode,
     required this.readOnly,
     required this.keyOf,
+    this.focusOrder = false,
   });
 
   final ScoringRow row;
@@ -49,6 +51,9 @@ class ScoreEntryPanel extends StatelessWidget {
   final bool readOnly;
   final String Function(String name) keyOf;
 
+  /// Draws the keyboard path numbers over the controls.
+  final bool focusOrder;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -65,6 +70,7 @@ class ScoreEntryPanel extends StatelessWidget {
         (!draft.needsZeroConfirmation || draft.zeroConfirmed);
     final landingReason = draft.landingOffReason;
 
+    var step = 3;
     Widget toggle(
       String name,
       String label,
@@ -72,18 +78,26 @@ class ScoreEntryPanel extends StatelessWidget {
       String? off,
       String note,
       ValueChanged<bool> set,
-    ) => SizedBox(
-      width: 236,
-      child: ScoreToggleTile(
-        key: ValueKey(keyOf(name)),
-        label: label,
-        value: value,
-        offReason: off,
-        note: note,
-        enabled: enabled,
-        onChanged: set,
-      ),
-    );
+    ) {
+      step++;
+      return SizedBox(
+        width: 236,
+        child: FocusStep(
+          order: step.toDouble(),
+          badge: focusOrder ? '$step' : null,
+          corner: FocusBadgeCorner.topLeft,
+          child: ScoreToggleTile(
+            key: ValueKey(keyOf(name)),
+            label: label,
+            value: value,
+            offReason: off,
+            note: note,
+            enabled: enabled,
+            onChanged: set,
+          ),
+        ),
+      );
+    }
 
     return Container(
       key: ValueKey(keyOf('band')),
@@ -180,14 +194,20 @@ class ScoreEntryPanel extends StatelessWidget {
               style: theme.textTheme.bodySmall,
             )
           else
-            ScoreLandingChoice(
-              landings: landings,
-              selected: draft.landing,
-              enabled: enabled && landingReason == null,
-              focusNode: landingNode,
-              keyPrefix: keyOf('landing'),
-              onSelected: draft.setLanding,
-              onEnter: penaltyNode.requestFocus,
+            FocusStep(
+              order: 3,
+              badge: focusOrder ? '3↵' : null,
+              enterPath: true,
+              corner: FocusBadgeCorner.topLeft,
+              child: ScoreLandingChoice(
+                landings: landings,
+                selected: draft.landing,
+                enabled: enabled && landingReason == null,
+                focusNode: landingNode,
+                keyPrefix: keyOf('landing'),
+                onSelected: draft.setLanding,
+                onEnter: penaltyNode.requestFocus,
+              ),
             ),
           // Toggles.
           const SizedBox(height: 14),
@@ -236,6 +256,7 @@ class ScoreEntryPanel extends StatelessWidget {
           const SizedBox(height: 14),
           ScorePenaltyCards(
             fieldKey: ValueKey(keyOf('penalty')),
+            focusOrder: focusOrder,
             controller: penaltyController,
             focusNode: penaltyNode,
             enabled: enabled,
@@ -254,22 +275,37 @@ class ScoreEntryPanel extends StatelessWidget {
             runSpacing: 8,
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              FilledButton.icon(
-                key: ValueKey(keyOf('save')),
-                onPressed: canSave ? actions.onSave : null,
-                icon: busy
-                    ? const SizedBox.square(
-                        dimension: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.save, size: 20),
-                label: Text(busy ? 'Saving…' : 'Save row'),
-                style: FilledButton.styleFrom(minimumSize: const Size(0, 48)),
+              FocusStep(
+                order: 10,
+                badge: focusOrder ? '10 → next pilot 1' : null,
+                enterPath: true,
+                child: FilledButton.icon(
+                  key: ValueKey(keyOf('save')),
+                  onPressed: canSave ? actions.onSave : null,
+                  icon: busy
+                      ? const SizedBox.square(
+                          dimension: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.save, size: 20),
+                  label: Text(busy ? 'Saving…' : 'Save row'),
+                  style: FilledButton.styleFrom(minimumSize: const Size(0, 48)),
+                ),
               ),
-              TextButton(
-                key: ValueKey(keyOf('revert')),
-                onPressed: enabled && draft.isDirty ? actions.onRevert : null,
-                child: const Text('Revert'),
+              FocusStep(
+                order: 11,
+                child: TextButton(
+                  key: ValueKey(keyOf('revert')),
+                  onPressed: enabled && draft.isDirty ? actions.onRevert : null,
+                  child: const Text('Revert'),
+                ),
+              ),
+              Text(
+                'Enter moves on. Enter on the penalty saves and opens the '
+                'next pilot.',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                ),
               ),
               if (problems.isNotEmpty)
                 Text(

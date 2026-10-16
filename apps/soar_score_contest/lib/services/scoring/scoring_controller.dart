@@ -43,6 +43,15 @@ class ScoringController extends ChangeNotifier {
   final Map<Id, String> _mutationIds = {};
 
   Id? activeId;
+
+  /// Whether the keyboard path numbers are drawn over the controls.
+  bool showFocusOrder = false;
+
+  void toggleFocusOrder() {
+    showFocusOrder = !showFocusOrder;
+    notifyListeners();
+  }
+
   ScoreCheckResult? check;
 
   /// The notice from the last save that the results are not up to date.

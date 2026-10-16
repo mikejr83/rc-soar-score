@@ -14,6 +14,7 @@ class ScoreInlineNote extends StatelessWidget {
     this.actionLabel,
     this.onAction,
     this.actionKey,
+    this.actionOrder = 9.5,
   });
 
   final IconData icon;
@@ -22,6 +23,10 @@ class ScoreInlineNote extends StatelessWidget {
   final String? actionLabel;
   final VoidCallback? onAction;
   final Key? actionKey;
+
+  /// Where the action sits in the Tab order of the row: after the penalties
+  /// and before Save row.
+  final double actionOrder;
 
   @override
   Widget build(BuildContext context) {
@@ -43,10 +48,13 @@ class ScoreInlineNote extends StatelessWidget {
             Icon(icon, size: 20, color: tint),
             Text(text, style: theme.textTheme.bodyMedium),
             if (actionLabel != null)
-              TextButton(
-                key: actionKey,
-                onPressed: onAction,
-                child: Text(actionLabel!),
+              FocusTraversalOrder(
+                order: NumericFocusOrder(actionOrder),
+                child: TextButton(
+                  key: actionKey,
+                  onPressed: onAction,
+                  child: Text(actionLabel!),
+                ),
               ),
           ],
         ),
