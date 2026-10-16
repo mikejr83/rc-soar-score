@@ -35,6 +35,12 @@ class Auth0Config {
   /// prefix), so changing it means changing both files and the installer.
   static const String defaultWindowsScheme = 'com.soarscore.contest';
 
+  /// Fixed loopback port of the sign-in callback listener (the intermediary
+  /// server of `auth0_flutter`). Auth0 only accepts exact callback URLs, so it
+  /// cannot be an OS-assigned port. Changing it means changing the Auth0
+  /// application's callback and logout URLs too.
+  static const int windowsCallbackPort = 47821;
+
   /// The configuration for the web build.
   factory Auth0Config.web() => const Auth0Config(
     domain: String.fromEnvironment('AUTH0_DOMAIN', defaultValue: defaultDomain),
@@ -73,9 +79,19 @@ class Auth0Config {
 
   final String windowsScheme;
 
-  /// The URL Auth0 sends the Windows browser back to after sign-in or
-  /// sign-out.
+  /// The custom-scheme URL the local listener hands the callback to, which
+  /// Windows delivers to the running app.
   String get windowsCallbackUrl => '$windowsScheme://callback';
+
+  /// The page Auth0 redirects the Windows browser to after sign-in. The
+  /// local listener shows a message there and forwards to
+  /// [windowsCallbackUrl].
+  String get windowsRedirectUrl =>
+      'http://localhost:$windowsCallbackPort/callback';
+
+  /// The page Auth0 sends the Windows browser to after sign-out.
+  String get windowsLogoutReturnUrl =>
+      'http://localhost:$windowsCallbackPort/logout';
 
   /// Scopes requested at sign-in. `offline_access` yields a refresh token.
   static const Set<String> scopes = {
