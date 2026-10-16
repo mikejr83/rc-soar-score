@@ -5,11 +5,15 @@
 #
 #   .\scripts\e2e.ps1                      # Windows desktop
 #   .\scripts\e2e.ps1 -Name journey        # only tests whose name matches
+#   .\scripts\e2e.ps1 -File score_entry_test.dart -Name 'official score entry'
+#                                               # one journey in one test file
 #   .\scripts\e2e.ps1 -Device chrome       # another `flutter test -d` device
 
 param(
     [string]$Device = 'windows',
-    [string]$Name = ''
+    [string]$Name = '',
+    [Alias('File')]
+    [string]$TestFileName = ''
 )
 
 $ErrorActionPreference = 'Stop'
@@ -30,9 +34,17 @@ try {
     }
 
     $status = 0
-    foreach ($file in Get-ChildItem integration_test -Filter '*_test.dart') {
+    $testFiles = @(Get-ChildItem integration_test -Filter '*_test.dart')
+    if ($TestFileName) {
+        $testFiles = @($testFiles | Where-Object { $_.Name -eq $TestFileName })
+        if ($testFiles.Count -eq 0) {
+            throw "No E2E test file named '$TestFileName' found in integration_test."
+        }
+    }
+    foreach ($testFile in $testFiles) {
+        Write-Host "Running $($testFile.Name)"
         $flutterArgs = @(
-            'test', "integration_test/$($file.Name)", '-d', $Device,
+            'test', "integration_test/$($testFile.Name)", '-d', $Device,
             '--dart-define=SOAR_SCORE_DEMO=true',
             '--dart-define=SOAR_SCORE_DEMO_RESET=true'
         )
@@ -45,7 +57,7 @@ try {
             Stop-App
             $launchFailed = ($lines -join "`n") -match 'Unable to start the app'
             if ($code -eq 0 -or -not $launchFailed) { break }
-            Write-Host "Launch failed for $($file.Name); retrying once."
+            Write-Host "Launch failed for $($testFile.Name); retrying once."
         }
         if ($code -ne 0) { $status = 1 }
     }
