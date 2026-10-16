@@ -5,6 +5,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:logging/logging.dart';
 
+import 'auth_callback_listener.dart';
 import 'auth_config.dart';
 import 'auth_session.dart';
 import 'url_scheme_registrar.dart';
@@ -12,8 +13,12 @@ import 'url_scheme_registrar.dart';
 final _logger = Logger('Auth0WindowsSession');
 
 /// Windows sign-in through `auth0_flutter`'s `windowsWebAuthentication`: the
-/// system browser shows Universal Login and Windows hands the callback URL
-/// (a custom scheme) back to the running app.
+/// system browser shows Universal Login and the callback returns to the app
+/// through Auth0's intermediary server pattern: Auth0 redirects the browser to
+/// a short-lived loopback page ([AuthCallbackListener]) that says the window
+/// can be closed and forwards to the app's custom URL scheme, which Windows
+/// hands to the running app. Without a listener the redirect goes to the
+/// custom scheme directly.
 ///
 /// The SDK has no credentials manager on Windows, so the session is stored in
 /// `flutter_secure_storage` (DPAPI-backed) and renewed here: when the access
@@ -33,7 +38,9 @@ class Auth0WindowsSession extends AuthSession {
     this._now = DateTime.now,
     http.Client? httpClient,
     UrlSchemeRegistrar? urlSchemeRegistrar,
+    AuthCallbackListener? callbackListener,
   }) : _registrar = urlSchemeRegistrar,
+       _listener = callbackListener,
        _auth0 = auth0 ?? Auth0(_config.domain, _config.clientId),
        _http = httpClient ?? http.Client();
 
@@ -49,6 +56,7 @@ class Auth0WindowsSession extends AuthSession {
   final DateTime Function() _now;
   final http.Client _http;
   final UrlSchemeRegistrar? _registrar;
+  final AuthCallbackListener? _listener;
   Credentials? _credentials;
   String? _endedReason;
 
@@ -107,9 +115,11 @@ class Auth0WindowsSession extends AuthSession {
   @override
   Future<void> signIn({bool createAccount = false}) async {
     _registerUrlScheme();
+    await _listener?.start();
     try {
       final credentials = await _auth0.windowsWebAuthentication().login(
         appCustomURL: _config.windowsCallbackUrl,
+        redirectUrl: _listener == null ? null : _config.windowsRedirectUrl,
         audience: _config.audience,
         scopes: Auth0Config.scopes,
         parameters: createAccount ? const {'screen_hint': 'signup'} : const {},
@@ -126,6 +136,8 @@ class Auth0WindowsSession extends AuthSession {
             ? 'Sign-in was cancelled.'
             : 'Sign-in failed: ${error.message}',
       );
+    } finally {
+      await _listener?.stop();
     }
   }
 
@@ -147,13 +159,19 @@ class Auth0WindowsSession extends AuthSession {
     await _deleteStored();
     notifyListeners();
     try {
+      await _listener?.start();
       await _auth0.windowsWebAuthentication().logout(
         appCustomURL: _config.windowsCallbackUrl,
+        returnTo: _listener == null ? null : _config.windowsLogoutReturnUrl,
       );
     } on WebAuthenticationException catch (error) {
       // The local session is already gone; only the browser session at Auth0
       // may remain.
       _logger.info('Auth0 logout did not complete: ${error.code}');
+    } on AuthException catch (error) {
+      _logger.info('Auth0 logout could not start: ${error.message}');
+    } finally {
+      await _listener?.stop();
     }
   }
 

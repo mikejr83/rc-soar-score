@@ -69,16 +69,34 @@ production tenant; Cloudflare Pages preview URLs are not supported for sign-in.
 
 ## 3. Contest app, Windows
 
-| Setting                | Value                              |
-| ---------------------- | ---------------------------------- |
-| Name                   | `Soar Score Contest (Desktop)`     |
-| Type                   | Native                             |
-| Client ID              | `3FdIOOxNr4DF4iT8BDaqKWc9NabpEKbz` |
-| Allowed Callback URLs  | `com.soarscore.contest://callback` |
-| Allowed Logout URLs    | `com.soarscore.contest://callback` |
-| Grant types            | Authorization Code, Refresh Token  |
-| Refresh Token Rotation | On                                 |
-| Connections            | The database connection and Google |
+| Setting                | Value                                                                    |
+| ---------------------- | ------------------------------------------------------------------------ |
+| Name                   | `Soar Score Contest (Desktop)`                                           |
+| Type                   | Native                                                                   |
+| Client ID              | `3FdIOOxNr4DF4iT8BDaqKWc9NabpEKbz`                                       |
+| Allowed Callback URLs  | `http://localhost:47821/callback` and `com.soarscore.contest://callback` |
+| Allowed Logout URLs    | `http://localhost:47821/logout` and `com.soarscore.contest://callback`   |
+| Grant types            | Authorization Code, Refresh Token                                        |
+| Refresh Token Rotation | On                                                                       |
+| Connections            | The database connection and Google                                       |
+
+### Callback page in the browser
+
+Auth0 does not redirect straight to the app. The app starts a small listener on
+`localhost:47821` for the length of a sign-in or sign-out (the intermediary
+server pattern of `auth0_flutter`). Auth0 sends the browser to
+`http://localhost:47821/callback`; that page says "You can now close this browser
+window" and hands the callback on to `com.soarscore.contest://callback`, which
+Windows delivers to the running app. Sign-out works the same way through
+`/logout`. The listener is separate from the embedded API (which stays on a
+random port), binds to loopback only, serves nothing else, and only ever
+forwards to the app's scheme (`lib/server/auth_callback_server.dart`).
+
+Auth0 accepts exact callback URLs only, so the port is fixed
+(`Auth0Config.windowsCallbackPort`); change it together with the two URLs above.
+If another program holds the port, sign-in stops with a message saying so. The
+two `com.soarscore.contest://callback` entries stay because the app still
+receives the forwarded callback on that scheme.
 
 The scheme is fixed in code, not a build setting. It must match
 `Auth0Config.defaultWindowsScheme` (`lib/auth/auth_config.dart`), the constants

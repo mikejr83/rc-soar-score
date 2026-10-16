@@ -6,7 +6,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:soar_score_contest/auth/auth0_windows_session.dart';
+import 'package:soar_score_contest/auth/auth_callback_listener.dart';
 import 'package:soar_score_contest/auth/auth_config.dart';
+import 'package:soar_score_contest/auth/auth_session.dart';
 
 const _key = 'auth0_credentials';
 
@@ -33,8 +35,42 @@ String _stored({
 Auth0WindowsSession _session() =>
     Auth0WindowsSession(Auth0Config.windows(), now: () => _now);
 
+class _BusyListener implements AuthCallbackListener {
+  int stops = 0;
+
+  @override
+  Future<void> start() async => throw const AuthException('port busy');
+
+  @override
+  Future<void> stop() async => stops++;
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  test('sign-in stops with a message when the callback port is busy', () async {
+    final listener = _BusyListener();
+    final session = Auth0WindowsSession(
+      Auth0Config.windows(),
+      callbackListener: listener,
+    );
+
+    await expectLater(
+      session.signIn(),
+      throwsA(
+        isA<AuthException>().having((e) => e.message, 'message', 'port busy'),
+      ),
+    );
+    expect(session.isSignedIn, isFalse);
+  });
+
+  test('the redirect URLs point at the loopback listener', () {
+    final config = Auth0Config.windows();
+
+    expect(config.windowsRedirectUrl, 'http://localhost:47821/callback');
+    expect(config.windowsLogoutReturnUrl, 'http://localhost:47821/logout');
+    expect(config.windowsCallbackUrl, 'com.soarscore.contest://callback');
+  });
 
   test('restores a stored session that has not expired', () async {
     FlutterSecureStorage.setMockInitialValues({
