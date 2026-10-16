@@ -30,6 +30,12 @@ Contest _contest(AdminLock lock) => Contest(
   updatedAt: DateTime.utc(2026, 9),
 );
 
+/// [text] inside the shell status panel; the control cards repeat the values.
+Finder _inPanel(String text) => find.descendant(
+  of: find.byType(ShellStatusPanel),
+  matching: find.textContaining(text),
+);
+
 void main() {
   testWidgets('a refresh updates the shell status panel and announces', (
     tester,
@@ -70,7 +76,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.textContaining('Unlocked'), findsOneWidget);
+    expect(_inPanel('Unlocked'), findsOneWidget);
     expect(requests, 1, reason: 'shell and page share one load');
 
     lock = AdminLock.locked;
@@ -83,8 +89,8 @@ void main() {
     await done;
 
     expect(requests, 2, reason: 'a refresh is one request');
-    expect(find.textContaining('Unlocked'), findsNothing);
-    expect(find.textContaining('Locked'), findsOneWidget);
+    expect(_inPanel('Unlocked'), findsNothing);
+    expect(_inPanel('Locked'), findsOneWidget);
     expect(
       tester
           .widget<WorkspaceLiveRegion>(find.byType(WorkspaceLiveRegion))

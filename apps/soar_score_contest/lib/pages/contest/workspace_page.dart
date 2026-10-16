@@ -9,6 +9,7 @@ import '../../router.dart';
 import '../../connectivity_provider.dart';
 import '../../services/workspace/attention/needs_attention.dart';
 import '../../services/workspace/next_step/completion_dismissals.dart';
+import '../../services/workspace/workspace_control.dart';
 import '../../services/workspace/workspace_facts.dart';
 import '../../services/workspace/workspace_control_target.dart';
 import '../../services/workspace/workspace_facts_loader.dart';
@@ -19,6 +20,9 @@ import '../../widgets/api_error_text.dart';
 import '../../widgets/contest_scope.dart';
 import '../../widgets/workspace/attention/attention_section.dart';
 import '../../widgets/workspace/checklist/setup_checklist_section.dart';
+import '../../widgets/workspace/controls/archive_control_card.dart';
+import '../../widgets/workspace/controls/status_summary_card.dart';
+import '../../widgets/workspace/controls/transition_control_card.dart';
 import '../../widgets/workspace/next_step/next_step_section.dart';
 import '../../widgets/workspace/progress/progress_section.dart';
 import '../../widgets/workspace/workspace_control_slot.dart';
@@ -426,18 +430,33 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
     WorkspaceSection.controls => Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        StatusSummaryCard(contest: contest),
         for (var i = 0; i < plan.controls.length; i++) ...[
-          if (i > 0) const SizedBox(height: 16),
+          const SizedBox(height: 16),
           WorkspaceControlSlot(
             control: plan.controls[i],
             readOnly: readOnly,
             highlighted: _focus.highlighted == plan.controls[i],
             anchor: _focus.anchorFor(plan.controls[i]),
             focusNode: _focus.nodeFor(plan.controls[i]),
+            child: _controlContent(contest, plan.controls[i]),
           ),
         ],
       ],
     ),
     _ => null,
   };
+
+  Widget? _controlContent(Contest contest, WorkspaceControl control) =>
+      switch (control) {
+        WorkspaceControl.scoring ||
+        WorkspaceControl.administration ||
+        WorkspaceControl.lifecycle => TransitionControlCard(
+          contest: contest,
+          control: control,
+        ),
+        WorkspaceControl.archive => ArchiveControlCard(),
+        // Results hiding and publication have their own tickets.
+        WorkspaceControl.results || WorkspaceControl.publication => null,
+      };
 }

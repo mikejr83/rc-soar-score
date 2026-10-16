@@ -144,6 +144,12 @@ class WorkspaceServer {
         adminLock: AdminLock.unlocked,
         updatedAt: DateTime.utc(2026, 10, 17, 15),
       ),
+      'complete' when contest.lifecycleState == LifecycleState.running =>
+        contest.copyWithState(
+          lifecycleState: LifecycleState.completed,
+          scoringAccess: ScoringAccess.closed,
+          updatedAt: DateTime.utc(2026, 10, 17, 15),
+        ),
       _ => null,
     };
     if (next == null) {
