@@ -23,6 +23,7 @@ The system is designed for both connected and disconnected field operations, all
   - [Running the Applications](#running-the-applications)
   - [Building](#building)
   - [Running Tests & Linting](#running-tests--linting)
+  - [End-to-End Tests (Contest App)](#end-to-end-tests-contest-app)
   - [Testing Against PostgreSQL](#testing-against-postgresql)
 - [Conventions & Architecture Rules](#conventions--architecture-rules)
 - [License](#license)
@@ -281,6 +282,59 @@ dart test
 cd apps/soar_score_contest
 flutter test
 ```
+
+### End-to-End Tests (Contest App)
+
+The contest app's journeys live in `apps/soar_score_contest/integration_test/`. They run locally or from an agent, never in CI. Every test file starts from freshly seeded demo data.
+
+```bash
+./scripts/e2e.sh                                  # Windows desktop (default)
+./scripts/e2e.sh -d web                           # headless Chrome (any OS)
+./scripts/e2e.sh -d web -f score_entry_test.dart  # one test file
+```
+
+On PowerShell use `.\scripts\e2e.ps1`, with `-Device web` and `-File <name>`. On Windows desktop you can also add `-Name '<test name>'` (or `-- --name '<test name>'` for the shell script) to run one journey of a file; the web mode runs whole files, since `flutter drive` has no name filter.
+
+The web mode builds the app with an always-signed-in session and runs it against `apps/soar_score_server/tool/e2e_server.dart`, a test-only API server on demo data that skips token checks. The scripts start and stop that server for each test file; it must never be deployed. The Windows mode needs the Windows desktop toolchain and a display. The web mode needs only Chrome and chromedriver, as follows.
+
+**Set up Chrome and chromedriver (web mode)**
+
+1. Install Chrome (or Chromium) and note its version: `google-chrome --version` on Linux, `chrome://version` elsewhere. If Flutter cannot find it, set `CHROME_EXECUTABLE=<path to the Chrome binary>`.
+2. Install a chromedriver with the **same major version** as Chrome. A mismatch fails with a session error. Download it from [Chrome for Testing](https://googlechromelabs.github.io/chrome-for-testing/); the file for Chrome `155.0.8059.82` on Windows is:
+
+   ```text
+   https://storage.googleapis.com/chrome-for-testing-public/155.0.8059.82/win64/chromedriver-win64.zip
+   ```
+
+   Replace the version and the platform (`win64`, `linux64`, `mac-x64` or `mac-arm64`) to match your machine. Unzip it and put `chromedriver` on your `PATH`, or point the scripts at it:
+
+   ```bash
+   export CHROMEDRIVER=/path/to/chromedriver        # PowerShell: $env:CHROMEDRIVER = '...'
+   ```
+
+   On a machine without Chrome, such as a Linux cloud agent, `npx @puppeteer/browsers install chrome@stable chromedriver@stable` installs a matching pair and prints their paths.
+
+3. Check it with `chromedriver --version`, then run `./scripts/e2e.sh -d web -f offline_contest_journey_test.dart`.
+
+There is no display to set up: the web mode runs Chrome headless (Flutter's `web-server` device), so it works on servers and in containers. If you need to see the browser while debugging, run a single file by hand with a visible Chrome:
+
+```bash
+# terminal 1: the test server
+cd apps/soar_score_server && dart run tool/e2e_server.dart --port 18080
+
+# terminal 2: chromedriver
+chromedriver --port=4444
+
+# terminal 3: the test file
+cd apps/soar_score_contest
+flutter drive --driver=test_driver/integration_test.dart \
+  --target=integration_test/<file>_test.dart \
+  -d web-server --browser-name=chrome --no-headless \
+  --dart-define=SOAR_SCORE_E2E=true \
+  --dart-define=SOAR_SCORE_API_BASE_URL=http://localhost:18080
+```
+
+The scripts exit at once when chromedriver is missing or does not answer on port 4444 (another instance may hold it). They also stop any test file that runs longer than `E2E_TEST_TIMEOUT` seconds (default 300) and count it as failed. A healthy file takes about a minute, so a run that is silent for much longer is hung. `E2E_SERVER_PORT` (default 18080) changes the test server's port. More in `apps/soar_score_contest/AGENTS.md`.
 
 ### Testing Against PostgreSQL
 
