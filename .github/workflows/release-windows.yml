@@ -1,0 +1,95 @@
+name: Release Windows alpha
+
+# Builds the offline contest app for Windows from a version tag (for example
+# `v0.1.0-alpha.1`) and attaches a zip to a draft GitHub Release. Manual runs
+# build and upload the zip as a workflow artifact only, as a dry run.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to build as, without the leading v (for example 0.1.0-alpha.1)"
+        required: true
+        default: "0.0.0-dryrun"
+
+env:
+  FLUTTER_VERSION: 3.47.x
+  MELOS_VERSION: ^8.9.0
+
+jobs:
+  windows-zip:
+    name: Windows zip
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Work out the version
+        id: version
+        shell: pwsh
+        run: |
+          if ($env:GITHUB_REF_TYPE -eq 'tag') {
+            $full = $env:GITHUB_REF_NAME.TrimStart('v')
+          } else {
+            $full = '${{ inputs.version }}'
+          }
+          # The Windows file version is numeric, so the build name drops any
+          # pre-release suffix; the zip and the release keep the full tag.
+          $core = $full -replace '[-+].*$', ''
+          "full=$full" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "core=$core" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: Install Melos
+        run: dart pub global activate melos "$env:MELOS_VERSION"
+
+      - name: Bootstrap
+        run: melos bootstrap
+
+      - name: Install native dependencies for auth0_flutter
+        run: |
+          "VCPKG_ROOT=$env:VCPKG_INSTALLATION_ROOT" | Out-File -FilePath $env:GITHUB_ENV -Append
+          & "$env:VCPKG_INSTALLATION_ROOT\vcpkg.exe" install --recurse "cpp-httplib[core,openssl]:x64-windows" nlohmann-json:x64-windows openssl:x64-windows
+
+      - name: Build Windows
+        working-directory: apps/soar_score_contest
+        run: >
+          flutter build windows --release --no-pub
+          --build-name ${{ steps.version.outputs.core }}
+          --build-number ${{ github.run_number }}
+
+      - name: Package the zip
+        shell: pwsh
+        run: |
+          $name = "soar-score-contest-windows-${{ steps.version.outputs.full }}"
+          $release = "apps/soar_score_contest/build/windows/x64/runner/Release"
+          $stage = "stage/$name"
+          New-Item -ItemType Directory -Path $stage | Out-Null
+          Copy-Item "$release/*" $stage -Recurse
+          (Get-Content docs/alpha-readme.txt -Raw).Replace('{{VERSION}}', '${{ steps.version.outputs.full }}') |
+            Set-Content "$stage/README.txt"
+          Compress-Archive -Path "stage/$name" -DestinationPath "$name.zip"
+          "ZIP=$name.zip" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - name: Keep the zip as a workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-zip
+          path: ${{ env.ZIP }}
+
+      - name: Attach the zip to a draft release
+        if: github.ref_type == 'tag'
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          prerelease: ${{ contains(github.ref_name, '-') }}
+          generate_release_notes: true
+          files: ${{ env.ZIP }}
