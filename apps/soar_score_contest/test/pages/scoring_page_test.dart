@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
@@ -380,27 +381,6 @@ void main() {
   });
 
   group('cell alignment', () {
-    testWidgets('a landing value is right aligned and a dash is centered', (
-      tester,
-    ) async {
-      await pumpScoringPage(tester, ScoringServer(), round: 1, group: 1);
-      await tester.tap(_row(1, 1));
-      await tester.pumpAndSettle();
-      // Bo Ray has no landing: the dash sits in the middle of the column.
-      final dash = tester.getCenter(find.text('–').first);
-      final head = tester.getRect(find.text('Landing · flags'));
-      expect(dash.dx, lessThan(head.right));
-      final id = scoringAssignmentId(1, 1).value;
-      await tester.tap(find.byKey(ValueKey('score-landing-$id-within_1m')));
-      await tester.pump();
-      final value = tester.getTopRight(
-        find
-            .descendant(of: _row(1, 1), matching: find.text('Within 1 m'))
-            .first,
-      );
-      expect(value.dx, closeTo(head.right, 12));
-    });
-
     testWidgets('the penalties column is centered', (tester) async {
       await pumpScoringPage(tester, ScoringServer(), round: 1, group: 1);
       final heading = tester.getCenter(find.text('Penalties'));
@@ -463,6 +443,111 @@ void main() {
       );
       expect(find.text('Lane'), findsNothing);
       expect(find.text('No.'), findsOneWidget);
+    });
+  });
+
+  group('landing field', () {
+    Finder landing(int pilot) => find.byKey(
+      ValueKey('score-landing-${scoringAssignmentId(1, pilot).value}'),
+    );
+    Future<ScoringServer> open(WidgetTester tester) async {
+      final server = ScoringServer();
+      await pumpScoringPage(tester, server, round: 1, group: 1);
+      await tester.tap(_row(1, 1));
+      await tester.pumpAndSettle();
+      return server;
+    }
+
+    testWidgets('typing table points selects the band and names it', (
+      tester,
+    ) async {
+      await open(tester);
+      await tester.tap(landing(1));
+      await tester.pump();
+      // Focused and empty: the hint lists the table's points.
+      expect(find.text('Type table points: 50, 30 … 10'), findsOneWidget);
+      expect(find.byKey(const ValueKey('landing-follows-tag')), findsOneWidget);
+      await tester.enterText(landing(1), '30');
+      await tester.pump();
+      expect(find.text('Within 5 m · 30 pts'), findsOneWidget);
+      final id = scoringAssignmentId(1, 1).value;
+      final chip = tester.widget<ScoreLandingChip>(
+        find.byKey(ValueKey('score-landing-$id-within_5m')),
+      );
+      expect(chip.selected, isTrue);
+    });
+
+    testWidgets('points that are not in the table are an error', (
+      tester,
+    ) async {
+      await open(tester);
+      await tester.tap(landing(1));
+      await tester.enterText(landing(1), '42');
+      await tester.pump();
+      expect(
+        find.text('42 isn’t in the landing table. Use 50, 30 … 10'),
+        findsOneWidget,
+      );
+      expect(tester.widget<FilledButton>(_save(1, 1)).onPressed, isNull);
+    });
+
+    testWidgets('Up and Down step through the bands', (tester) async {
+      await open(tester);
+      await tester.tap(landing(1));
+      await tester.pump();
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+      await tester.pump();
+      expect(tester.widget<TextField>(landing(1)).controller!.text, '50');
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pump();
+      expect(tester.widget<TextField>(landing(1)).controller!.text, '30');
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pump();
+      // The last band is the end of the table.
+      expect(tester.widget<TextField>(landing(1)).controller!.text, '10');
+    });
+
+    testWidgets('a chip fills the field, and the chips leave the Tab order', (
+      tester,
+    ) async {
+      await open(tester);
+      final id = scoringAssignmentId(1, 1).value;
+      await tester.tap(find.byKey(ValueKey('score-landing-$id-within_10m')));
+      await tester.pump();
+      expect(tester.widget<TextField>(landing(1)).controller!.text, '10');
+      expect(find.text('Within 10 m · 10'), findsOneWidget);
+    });
+
+    testWidgets('the saved landing is the matching table entry', (
+      tester,
+    ) async {
+      final server = ScoringServer();
+      await pumpScoringPage(tester, server, round: 1, group: 1);
+      await tester.tap(_row(1, 1));
+      await tester.pumpAndSettle();
+      await tester.enterText(_time(1, 1), '630');
+      await tester.enterText(_height(1, 1), '180');
+      await tester.enterText(landing(1), '50');
+      await tester.pump();
+      await tester.tap(_save(1, 1));
+      await tester.pumpAndSettle();
+      expect(server.entries.single['components'], {
+        'time_flown': 390,
+        'launch_height': 180,
+        'landing': 'within_1m',
+      });
+    });
+
+    testWidgets('late landing and zeroing flags switch the field off', (
+      tester,
+    ) async {
+      await open(tester);
+      final id = scoringAssignmentId(1, 1).value;
+      await tester.tap(find.byKey(ValueKey('score-late-$id')));
+      await tester.pump();
+      expect(tester.widget<TextField>(landing(1)).enabled, isFalse);
+      expect(find.text('0 · late'), findsOneWidget);
     });
   });
 

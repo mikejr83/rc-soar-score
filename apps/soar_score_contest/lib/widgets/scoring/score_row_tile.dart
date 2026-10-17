@@ -96,6 +96,7 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
   late final TextEditingController _time;
   late final TextEditingController _height;
   late final TextEditingController _penalty;
+  late final TextEditingController _landing;
   final _timeNode = FocusNode();
   final _heightNode = FocusNode();
   final _landingNode = FocusNode();
@@ -104,6 +105,9 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
   /// The launch height is checked only once the director has touched it.
   bool _heightTouched = false;
 
+  /// True while the Landing field has focus; the chip strip follows it.
+  bool _landingFocused = false;
+
   @override
   void initState() {
     super.initState();
@@ -111,9 +115,11 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
     _time = TextEditingController(text: draft.timeText);
     _height = TextEditingController(text: draft.heightText);
     _penalty = TextEditingController(text: draft.penaltyText);
+    _landing = TextEditingController(text: _landingDisplay(draft));
     draft.addListener(_onDraft);
     _timeNode.addListener(_onTimeFocus);
     _heightNode.addListener(_onHeightFocus);
+    _landingNode.addListener(_onLandingFocus);
     if (widget.active) _focusFirst();
   }
 
@@ -134,11 +140,12 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
   @override
   void dispose() {
     widget.draft.removeListener(_onDraft);
-    for (final c in [_time, _height, _penalty]) {
+    for (final c in [_time, _height, _penalty, _landing]) {
       c.dispose();
     }
     _timeNode.removeListener(_onTimeFocus);
     _heightNode.removeListener(_onHeightFocus);
+    _landingNode.removeListener(_onLandingFocus);
     for (final n in [_timeNode, _heightNode, _landingNode, _penaltyNode]) {
       n.dispose();
     }
@@ -160,6 +167,24 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
     }
   }
 
+  void _onLandingFocus() {
+    if (mounted && _landingFocused != _landingNode.hasFocus) {
+      setState(() => _landingFocused = _landingNode.hasFocus);
+    }
+  }
+
+  /// What the Landing field shows: the points typed, else the points of the
+  /// chosen band; 0 when the flight scores 0, and nothing for a late landing.
+  String _landingDisplay(ScoreRowDraft d) {
+    if (d.measurementsOffReason != null) return '0';
+    if (d.lateLanding) return '';
+    if (d.landingText.isNotEmpty) return d.landingText;
+    for (final l in widget.landings) {
+      if (l.entryKey == d.landing) return '${l.pointValue}';
+    }
+    return '';
+  }
+
   void _onDraft() {
     _sync();
     if (mounted) setState(() {});
@@ -170,6 +195,8 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
     if (_time.text != d.timeText) _time.text = d.timeText;
     if (_height.text != d.heightText) _height.text = d.heightText;
     if (_penalty.text != d.penaltyText) _penalty.text = d.penaltyText;
+    final shown = _landingDisplay(d);
+    if (_landing.text != shown) _landing.text = shown;
   }
 
   void _focusFirst() {
@@ -227,10 +254,21 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
         borderSide: BorderSide(color: color, width: width),
       );
 
-  Widget _caption(BuildContext context, String? text, {bool error = false}) {
+  Widget _caption(
+    BuildContext context,
+    String? text, {
+    bool error = false,
+    IconData? icon,
+    Color? color,
+    bool bold = false,
+  }) {
     final theme = Theme.of(context);
-    return SizedBox(
-      height: 32,
+    final tint =
+        color ??
+        (error ? theme.colorScheme.error : theme.colorScheme.onSurfaceVariant);
+    final lead = icon ?? (error ? Icons.error : null);
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 32),
       child: text == null
           ? null
           : Padding(
@@ -238,25 +276,18 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (error)
+                  if (lead != null)
                     Padding(
                       padding: const EdgeInsets.only(right: 4),
-                      child: Icon(
-                        Icons.error,
-                        size: 14,
-                        color: theme.colorScheme.error,
-                      ),
+                      child: Icon(lead, size: 14, color: tint),
                     ),
                   Expanded(
                     child: Text(
                       text,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: error
-                            ? theme.colorScheme.error
-                            : theme.colorScheme.onSurfaceVariant,
+                        color: tint,
                         height: 1.2,
+                        fontWeight: bold ? FontWeight.w500 : null,
                       ),
                     ),
                   ),
@@ -280,9 +311,10 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
     String? suffix,
     required double order,
     required String badge,
+    KeyEventResult Function(KeyEvent event)? onKey,
   }) {
     final scheme = Theme.of(context).colorScheme;
-    final field = TextField(
+    final input = TextField(
       key: key,
       controller: controller,
       focusNode: node,
@@ -312,6 +344,14 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
         focusedBorder: _border(scheme.primary, 3),
       ),
     );
+    final field = onKey == null
+        ? input
+        : Focus(
+            canRequestFocus: false,
+            skipTraversal: true,
+            onKeyEvent: (node, event) => onKey(event),
+            child: input,
+          );
     return FocusStep(
       order: order,
       badge: widget.focusOrder ? badge : null,
@@ -420,22 +460,82 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
       ? value.toStringAsFixed(0)
       : value.toStringAsFixed(1);
 
-  Widget _landingCell(BuildContext context, bool labels) {
+  /// The landing band whose points are [text], or null.
+  LandingResult? _bandFor(String text) {
+    final points = int.tryParse(text.trim());
+    if (points == null) return null;
+    for (final l in widget.landings) {
+      if (l.pointValue == points) return l;
+    }
+    return null;
+  }
+
+  /// Up and Down step one band through the table; the first press picks the
+  /// best band (Up) or the last (Down).
+  KeyEventResult _landingKey(KeyEvent event) {
+    if (event is! KeyDownEvent || widget.landings.isEmpty) {
+      return KeyEventResult.ignored;
+    }
+    final up = event.logicalKey == LogicalKeyboardKey.arrowUp;
+    final down = event.logicalKey == LogicalKeyboardKey.arrowDown;
+    if (!up && !down) return KeyEventResult.ignored;
+    final d = widget.draft;
+    if (d.landingOffReason != null) return KeyEventResult.handled;
+    final last = widget.landings.length - 1;
+    var at = -1;
+    for (var i = 0; i <= last; i++) {
+      if (widget.landings[i].entryKey == d.landing) at = i;
+    }
+    final next = at < 0
+        ? (up ? 0 : last)
+        : (up ? at - 1 : at + 1).clamp(0, last);
+    final band = widget.landings[next];
+    d.setLandingEntry('${band.pointValue}', band.entryKey);
+    return KeyEventResult.handled;
+  }
+
+  /// The Landing field: table points typed on the keypad, with a live caption
+  /// naming the band they select.
+  Widget _landingCell(BuildContext context, bool labels, bool editable) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final d = widget.draft;
-    var text = '–';
+    final off = d.landingOffReason;
+    final focused = _landingFocused && off == null;
+    final points = widget.landings.map((l) => l.pointValue).toList();
+    final hint = points.length < 2
+        ? points.join(', ')
+        : '${points[0]}, ${points[1]} … ${points.last}';
+    String? text;
     IconData? icon;
+    Color? color;
+    var error = false;
+    LandingResult? chosen;
+    for (final l in widget.landings) {
+      if (l.entryKey == d.landing) chosen = l;
+    }
     if (d.measurementsOffReason != null) {
-      text = 'Scores 0';
+      text = '0';
       icon = Icons.block;
     } else if (d.lateLanding) {
-      text = 'No landing bonus';
-      icon = Icons.block;
-    } else if (d.landing != null) {
-      for (final l in widget.landings) {
-        if (l.entryKey == d.landing) text = l.displayValue;
-      }
+      text = '0 · late';
+      icon = Icons.timer_off;
+    } else if (d.landingBad) {
+      text = '${d.landingText.trim()} isn’t in the landing table. Use $hint';
+      icon = Icons.error;
+      error = true;
+    } else if (focused && chosen == null) {
+      text = 'Type table points: $hint';
+      icon = Icons.keyboard;
+      color = scheme.primary;
+    } else if (focused && chosen != null) {
+      text = '${chosen.displayValue} · ${chosen.pointValue} pts';
+      icon = Icons.arrow_right_alt;
+      color = scheme.primary;
+    } else if (chosen != null) {
+      text = '${chosen.displayValue} · ${chosen.pointValue}';
+    } else {
+      text = '—';
     }
     final flags = <(IconData, String)>[
       if (d.lateLanding) (Icons.timer_off, 'Late landing'),
@@ -443,48 +543,53 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
       if (d.outOfBounds) (Icons.wrong_location, 'Out of bounds'),
       if (d.noAltitude) (Icons.height, 'No altitude'),
     ];
-    // A value is right aligned; "–" is centered.
-    final hasValue = text != '–';
-    final cross = hasValue ? CrossAxisAlignment.end : CrossAxisAlignment.center;
-    return Padding(
-      padding: const EdgeInsets.only(top: 12),
-      child: Column(
-        crossAxisAlignment: cross,
-        children: [
-          _label(
-            context,
-            'Landing · flags',
-            labels,
-            hasValue ? TextAlign.end : TextAlign.center,
-          ),
-          Row(
-            mainAxisAlignment: hasValue
-                ? MainAxisAlignment.end
-                : MainAxisAlignment.center,
-            children: [
-              if (icon != null) ...[
-                Icon(icon, size: 16, color: scheme.onSurfaceVariant),
-                const SizedBox(width: 4),
-              ],
-              Flexible(
-                child: Text(
-                  text,
-                  textAlign: hasValue ? TextAlign.end : TextAlign.center,
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    fontWeight: FontWeight.w500,
-                    fontSize: 15,
-                  ),
-                ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (labels)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 3),
+            child: Text(
+              'Landing (pts)',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: focused ? scheme.primary : scheme.onSurfaceVariant,
               ),
-            ],
-          ),
-          for (final (flagIcon, flagText) in flags)
-            Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: StatusChip(icon: flagIcon, label: flagText, dense: true),
             ),
-        ],
-      ),
+          ),
+        _field(
+          context,
+          key: ValueKey(_k('landing')),
+          controller: _landing,
+          node: _landingNode,
+          enabled: editable && off == null,
+          type: TextInputType.number,
+          formatters: [FilteringTextInputFormatter.digitsOnly],
+          onChanged: (value) {
+            final band = _bandFor(value);
+            d.setLandingEntry(value, band?.entryKey);
+          },
+          onSubmitted: (_) => _penaltyNode.requestFocus(),
+          invalid: d.landingBad,
+          suffix: 'pts',
+          order: 3,
+          badge: '3↵',
+          onKey: _landingKey,
+        ),
+        _caption(
+          context,
+          text,
+          error: error,
+          icon: icon,
+          color: color,
+          bold: true,
+        ),
+        for (final (flagIcon, flagText) in flags)
+          Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: StatusChip(icon: flagIcon, label: flagText, dense: true),
+          ),
+      ],
     );
   }
 
@@ -753,7 +858,7 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
     final pilot = _pilotCell(context);
     final time = _timeCell(context, labels, editable);
     final height = _heightCell(context, labels, editable);
-    final land = _landingCell(context, labels);
+    final land = _landingCell(context, labels, editable);
     final raw = _numberCell(
       context,
       'Raw score',
@@ -941,7 +1046,7 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
                     actions: widget.actions,
                     penaltyController: _penalty,
                     penaltyNode: _penaltyNode,
-                    landingNode: _landingNode,
+                    landingFocused: _landingFocused,
                     readOnly: _readOnly,
                     keyOf: _k,
                     focusOrder: widget.focusOrder,

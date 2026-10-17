@@ -30,7 +30,7 @@ class ScoreEntryPanel extends StatelessWidget {
     required this.actions,
     required this.penaltyController,
     required this.penaltyNode,
-    required this.landingNode,
+    this.landingFocused = false,
     required this.readOnly,
     required this.keyOf,
     this.focusOrder = false,
@@ -47,7 +47,9 @@ class ScoreEntryPanel extends StatelessWidget {
   final ScoreRowActions actions;
   final TextEditingController penaltyController;
   final FocusNode penaltyNode;
-  final FocusNode landingNode;
+
+  /// True while the Landing field in the row has focus.
+  final bool landingFocused;
   final bool readOnly;
   final String Function(String name) keyOf;
 
@@ -168,7 +170,7 @@ class ScoreEntryPanel extends StatelessWidget {
               text: block!.message,
             ),
           // Landing.
-          const SizedBox(height: 14),
+          const SizedBox(height: 6),
           Wrap(
             crossAxisAlignment: WrapCrossAlignment.center,
             spacing: 10,
@@ -180,6 +182,31 @@ class ScoreEntryPanel extends StatelessWidget {
               ),
               if (landingTableName != null)
                 Text(landingTableName!, style: theme.textTheme.bodySmall),
+              if (landingFocused && landingReason == null)
+                Container(
+                  key: const ValueKey('landing-follows-tag'),
+                  padding: const EdgeInsets.fromLTRB(6, 2, 10, 2),
+                  decoration: BoxDecoration(
+                    color: scheme.primary,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.keyboard, size: 16, color: scheme.onPrimary),
+                      const SizedBox(width: 6),
+                      Flexible(
+                        child: Text(
+                          'Follows the Landing field · type table points, '
+                          '↑↓ to step',
+                          style: theme.textTheme.labelMedium?.copyWith(
+                            color: scheme.onPrimary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               if (landingReason != null)
                 Row(
                   mainAxisSize: MainAxisSize.min,
@@ -199,19 +226,15 @@ class ScoreEntryPanel extends StatelessWidget {
               style: theme.textTheme.bodySmall,
             )
           else
-            FocusStep(
-              order: 3,
-              badge: focusOrder ? '3↵' : null,
-              enterPath: true,
-              corner: FocusBadgeCorner.topLeft,
-              child: ScoreLandingChoice(
-                landings: landings,
-                selected: draft.landing,
-                enabled: enabled && landingReason == null,
-                focusNode: landingNode,
-                keyPrefix: keyOf('landing'),
-                onSelected: draft.setLanding,
-                onEnter: penaltyNode.requestFocus,
+            ScoreLandingChoice(
+              landings: landings,
+              selected: draft.landing,
+              enabled: enabled && landingReason == null,
+              keyPrefix: keyOf('landing'),
+              followsField: landingFocused && landingReason == null,
+              onSelected: (landing) => draft.setLandingEntry(
+                '${landing.pointValue}',
+                landing.entryKey,
               ),
             ),
           // Toggles.

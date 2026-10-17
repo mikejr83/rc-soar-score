@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 /// One landing choice: its label over its points, 52 dp tall.
@@ -80,60 +79,43 @@ class ScoreLandingChip extends StatelessWidget {
   }
 }
 
-/// The landing choice of the contest's landing table as a radio group. The
-/// arrow keys pick, Enter moves on.
+/// The bands of the contest's landing table as a radio group. They stay
+/// clickable for touch and mouse but are out of the Tab order: the Landing
+/// field in the row is the keyboard path. While that field has focus the
+/// strip is outlined to show that it follows it.
 class ScoreLandingChoice extends StatelessWidget {
   const ScoreLandingChoice({
     super.key,
     required this.landings,
     required this.selected,
     required this.enabled,
-    required this.focusNode,
     required this.keyPrefix,
     required this.onSelected,
-    required this.onEnter,
+    this.followsField = false,
   });
 
   final List<LandingResult> landings;
   final String? selected;
   final bool enabled;
-  final FocusNode focusNode;
   final String keyPrefix;
-  final ValueChanged<String?> onSelected;
-  final VoidCallback onEnter;
+  final ValueChanged<LandingResult> onSelected;
+
+  /// True while the Landing field has focus.
+  final bool followsField;
 
   @override
   Widget build(BuildContext context) {
-    void move(int delta) {
-      final keys = [for (final l in landings) l.entryKey];
-      final at = selected == null ? -1 : keys.indexOf(selected!);
-      onSelected(keys[(at + delta).clamp(0, keys.length - 1)]);
-    }
-
-    return Focus(
-      key: ValueKey(keyPrefix),
-      focusNode: focusNode,
-      canRequestFocus: enabled,
-      onKeyEvent: (node, event) {
-        if (event is! KeyDownEvent) return KeyEventResult.ignored;
-        final key = event.logicalKey;
-        if (key == LogicalKeyboardKey.arrowRight ||
-            key == LogicalKeyboardKey.arrowDown) {
-          move(1);
-          return KeyEventResult.handled;
-        }
-        if (key == LogicalKeyboardKey.arrowLeft ||
-            key == LogicalKeyboardKey.arrowUp) {
-          move(-1);
-          return KeyEventResult.handled;
-        }
-        if (key == LogicalKeyboardKey.enter ||
-            key == LogicalKeyboardKey.numpadEnter) {
-          onEnter();
-          return KeyEventResult.handled;
-        }
-        return KeyEventResult.ignored;
-      },
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      key: ValueKey('$keyPrefix-strip'),
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: followsField ? scheme.primary : Colors.transparent,
+          width: 2,
+        ),
+      ),
       child: Wrap(
         spacing: 8,
         runSpacing: 8,
@@ -145,9 +127,7 @@ class ScoreLandingChoice extends StatelessWidget {
               points: '${landing.pointValue} pts',
               selected: selected == landing.entryKey,
               enabled: enabled,
-              onTap: () => onSelected(
-                selected == landing.entryKey ? null : landing.entryKey,
-              ),
+              onTap: () => onSelected(landing),
             ),
         ],
       ),

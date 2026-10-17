@@ -31,11 +31,6 @@ Future<void> _tab(WidgetTester tester) async {
   await tester.pump();
 }
 
-Future<void> _enter(WidgetTester tester) async {
-  await tester.sendKeyEvent(LogicalKeyboardKey.enter);
-  await tester.pump();
-}
-
 void main() {
   testWidgets('Enter moves time, height, landing, penalty, then saves', (
     tester,
@@ -54,7 +49,8 @@ void main() {
     expect(_focusIn(_key('landing', 1)), isTrue);
     // The toggles are off the Enter path: Enter leaves the landing for the
     // flight penalty.
-    await _enter(tester);
+    await tester.testTextInput.receiveAction(TextInputAction.next);
+    await tester.pump();
     expect(_focusIn(_key('penalty', 1)), isTrue);
     await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pumpAndSettle();

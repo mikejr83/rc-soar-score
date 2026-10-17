@@ -126,12 +126,7 @@ class ScoreGridHeader extends StatelessWidget {
             cell('Launch height', 'metres', ScoreGridColumns.height),
             gap,
           ],
-          cell(
-            'Landing · flags',
-            '',
-            ScoreGridColumns.land,
-            align: TextAlign.end,
-          ),
+          cell('Landing · flags', 'table points', ScoreGridColumns.land),
           gap,
           cell(
             'Raw score',
