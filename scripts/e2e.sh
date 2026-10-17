@@ -15,6 +15,8 @@
 # (an always-signed-in session) and points it at
 # apps/soar_score_server/tool/e2e_server.dart, a token-free API server on
 # demo data. Each test file gets a fresh server, hence fresh demo data.
+# A test file that runs longer than E2E_TEST_TIMEOUT seconds (default 300) is
+# stopped and counted as failed, so a hung browser cannot stall a run.
 set -eu
 device=windows
 test_file=
@@ -74,16 +76,41 @@ if [ "$device" = web ] || [ "$device" = chrome ]; then
     echo "E2E server did not start" >&2
     exit 1
   }
+  test_timeout="${E2E_TEST_TIMEOUT:-300}"
+  if ! command -v "$chromedriver" >/dev/null 2>&1; then
+    echo "chromedriver not found ('$chromedriver'). Install a chromedriver that matches Chrome, or set CHROMEDRIVER=<path>." >&2
+    exit 1
+  fi
   "$chromedriver" --port=$driver_port >/dev/null 2>&1 &
   driver_pid=$!
+  # Fail fast when chromedriver cannot serve (port taken, version mismatch),
+  # instead of letting flutter drive wait for it.
+  ready=
+  for _ in $(seq 1 20); do
+    if curl -sf "http://localhost:$driver_port/status" >/dev/null 2>&1; then ready=1; break; fi
+    kill -0 "$driver_pid" 2>/dev/null || break
+    sleep 0.5
+  done
+  if [ -z "$ready" ]; then
+    echo "chromedriver did not answer on port $driver_port (is another one running?)." >&2
+    exit 1
+  fi
+  with_timeout=()
+  if command -v timeout >/dev/null 2>&1; then
+    with_timeout=(timeout --kill-after=10 "$test_timeout")
+  fi
   status=0
   for file in "${files[@]}"; do
     start_server
-    flutter drive --driver=test_driver/integration_test.dart --target="$file" \
+    "${with_timeout[@]+"${with_timeout[@]}"}" flutter drive --driver=test_driver/integration_test.dart --target="$file" \
       -d web-server --browser-name=chrome \
       --dart-define=SOAR_SCORE_E2E=true \
       --dart-define=SOAR_SCORE_API_BASE_URL="http://localhost:$port" \
-      ${extra[@]+"${extra[@]}"} || status=1
+      ${extra[@]+"${extra[@]}"} || {
+        code=$?
+        [ "$code" -eq 124 ] && echo "TIMEOUT: $file ran longer than ${test_timeout}s and was stopped." >&2
+        status=1
+      }
     stop_server
   done
   exit $status

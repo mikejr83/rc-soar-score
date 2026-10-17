@@ -15,6 +15,8 @@
 # always-signed-in session) and points it at
 # apps/soar_score_server/tool/e2e_server.dart, a token-free API server on demo
 # data. Each test file gets a fresh server, hence fresh demo data.
+# A test file that runs longer than $env:E2E_TEST_TIMEOUT seconds (default 300)
+# is stopped and counted as failed, so a hung browser cannot stall a run.
 
 param(
     [string]$Device = 'windows',
@@ -29,7 +31,24 @@ $root = Resolve-Path (Join-Path $PSScriptRoot '..')
 if ($Device -in 'web', 'chrome') {
     $port = if ($env:E2E_SERVER_PORT) { $env:E2E_SERVER_PORT } else { 18080 }
     $chromedriver = if ($env:CHROMEDRIVER) { $env:CHROMEDRIVER } else { 'chromedriver' }
+    $testTimeout = if ($env:E2E_TEST_TIMEOUT) { [int]$env:E2E_TEST_TIMEOUT } else { 300 }
+    if (-not (Get-Command $chromedriver -ErrorAction SilentlyContinue)) {
+        throw "chromedriver not found ('$chromedriver'). Install one that matches Chrome, or set `$env:CHROMEDRIVER."
+    }
     $driver = Start-Process $chromedriver '--port=4444' -PassThru -WindowStyle Hidden
+    # Fail fast when chromedriver cannot serve, instead of letting flutter
+    # drive wait for it.
+    $ready = $false
+    for ($i = 0; $i -lt 20 -and -not $ready -and -not $driver.HasExited; $i++) {
+        try {
+            Invoke-WebRequest 'http://localhost:4444/status' -UseBasicParsing -TimeoutSec 2 | Out-Null
+            $ready = $true
+        } catch { Start-Sleep -Milliseconds 500 }
+    }
+    if (-not $ready) {
+        Stop-Process -Id $driver.Id -Force -ErrorAction SilentlyContinue
+        throw 'chromedriver did not answer on port 4444 (is another one running?).'
+    }
     $status = 0
     try {
         Push-Location (Join-Path $root 'apps\soar_score_contest')
@@ -62,8 +81,13 @@ if ($Device -in 'web', 'chrome') {
                     "--dart-define=SOAR_SCORE_API_BASE_URL=http://localhost:$port"
                 )
                 if ($Name) { $flutterArgs += @('--name', $Name) }
-                & flutter @flutterArgs
-                if ($LASTEXITCODE -ne 0) { $status = 1 }
+                $flutter = Start-Process (Get-Command flutter).Source `
+                    -ArgumentList $flutterArgs -NoNewWindow -PassThru
+                if (-not $flutter.WaitForExit($testTimeout * 1000)) {
+                    Write-Host "TIMEOUT: $($file.Name) ran longer than $testTimeout s and was stopped."
+                    taskkill /F /T /PID $flutter.Id | Out-Null
+                    $status = 1
+                } elseif ($flutter.ExitCode -ne 0) { $status = 1 }
             }
             finally {
                 # dart run starts a child process; kill the whole tree.
