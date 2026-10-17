@@ -299,22 +299,22 @@ The web mode builds the app with an always-signed-in session and runs it against
 
 **Set up Chrome and chromedriver (web mode)**
 
-1. Install Chrome (or Chromium) and note its version: `google-chrome --version` on Linux, `chrome://version` elsewhere. If Flutter cannot find it, set `CHROME_EXECUTABLE=<path to the Chrome binary>`.
-2. Install a chromedriver with the **same major version** as Chrome. A mismatch fails with a session error. Download it from [Chrome for Testing](https://googlechromelabs.github.io/chrome-for-testing/); the file for Chrome `155.0.8059.82` on Windows is:
+Run the setup script once. It downloads Chrome for Testing and the chromedriver of the same version (about 220 MB) into `.e2e-tools/` at the repo root, which git ignores, and does nothing if they are already there. Nothing is installed system-wide and no `PATH` change is needed: `e2e.sh -d web` and `e2e.ps1 -Device web` look in that folder first.
 
-   ```text
-   https://storage.googleapis.com/chrome-for-testing-public/155.0.8059.82/win64/chromedriver-win64.zip
-   ```
+```bash
+./scripts/e2e-setup.sh               # PowerShell: .\scripts\e2e-setup.ps1
+./scripts/e2e-setup.sh --dry-run     # show what it would download
+./scripts/e2e.sh -d web -f offline_contest_journey_test.dart
+```
 
-   Replace the version and the platform (`win64`, `linux64`, `mac-x64` or `mac-arm64`) to match your machine. Unzip it and put `chromedriver` on your `PATH`, or point the scripts at it:
+`--channel Beta` (or `-Channel`) and `--version <x.y.z.w>` (or `-Version`) pick another Chrome for Testing build. Re-run the script to update; old versions stay in `.e2e-tools/` until you delete it. On Linux, Chrome also needs its system libraries (on Debian or Ubuntu: `sudo apt-get install -y libnss3 libatk-bridge2.0-0 libgtk-3-0 libgbm1 libasound2`).
 
-   ```bash
-   export CHROMEDRIVER=/path/to/chromedriver        # PowerShell: $env:CHROMEDRIVER = '...'
-   ```
+To use your own Chrome instead, install a chromedriver with the **same major version** (a mismatch fails with a session error), then put it on `PATH` or point the scripts at both binaries. The environment overrides `.e2e-tools/`:
 
-   On a machine without Chrome, such as a Linux cloud agent, `npx @puppeteer/browsers install chrome@stable chromedriver@stable` installs a matching pair and prints their paths.
-
-3. Check it with `chromedriver --version`, then run `./scripts/e2e.sh -d web -f offline_contest_journey_test.dart`.
+```bash
+export CHROMEDRIVER=/path/to/chromedriver            # PowerShell: $env:CHROMEDRIVER = '...'
+export CHROME_EXECUTABLE=/path/to/chrome             # optional; Chrome is found automatically otherwise
+```
 
 There is no display to set up: the web mode runs Chrome headless (Flutter's `web-server` device), so it works on servers and in containers. If you need to see the browser while debugging, run a single file by hand with a visible Chrome:
 

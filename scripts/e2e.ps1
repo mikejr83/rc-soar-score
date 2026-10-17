@@ -10,8 +10,10 @@
 #   .\scripts\e2e.ps1 -Device web          # headless Chrome against the E2E server
 #   .\scripts\e2e.ps1 -Device <device>     # another `flutter test -d` device
 #
-# The web mode needs Chrome and a matching chromedriver (`chromedriver` on
-# PATH, or $env:CHROMEDRIVER). It builds the app with SOAR_SCORE_E2E=true (an
+# The web mode needs Chrome and a matching chromedriver. Run
+# .\scripts\e2e-setup.ps1 once to install both into .e2e-tools\ (git-ignored),
+# where this script finds them; or put `chromedriver` on PATH, or set
+# $env:CHROMEDRIVER (and $env:CHROME_EXECUTABLE). It builds the app with SOAR_SCORE_E2E=true (an
 # always-signed-in session) and points it at
 # apps/soar_score_server/tool/e2e_server.dart, a token-free API server on demo
 # data. Each test file gets a fresh server, hence fresh demo data.
@@ -30,10 +32,24 @@ $root = Resolve-Path (Join-Path $PSScriptRoot '..')
 
 if ($Device -in 'web', 'chrome') {
     $port = if ($env:E2E_SERVER_PORT) { $env:E2E_SERVER_PORT } else { 18080 }
-    $chromedriver = if ($env:CHROMEDRIVER) { $env:CHROMEDRIVER } else { 'chromedriver' }
+    # Chrome and chromedriver from scripts/e2e-setup, unless the environment
+    # already names them.
+    $chromedriver = $env:CHROMEDRIVER
+    $chrome = $env:CHROME_EXECUTABLE
+    $pathsFile = Join-Path $root '.e2e-tools/paths.env'
+    if (Test-Path $pathsFile) {
+        $paths = @{}
+        Get-Content $pathsFile | ForEach-Object {
+            $k, $v = $_ -split '=', 2
+            $paths[$k] = Join-Path $root ".e2e-tools/$v"
+        }
+        if (-not $chromedriver) { $chromedriver = $paths['chromedriver'] }
+        if (-not $chrome) { $chrome = $paths['chrome'] }
+    }
+    if (-not $chromedriver) { $chromedriver = 'chromedriver' }
     $testTimeout = if ($env:E2E_TEST_TIMEOUT) { [int]$env:E2E_TEST_TIMEOUT } else { 300 }
     if (-not (Get-Command $chromedriver -ErrorAction SilentlyContinue)) {
-        throw "chromedriver not found ('$chromedriver'). Install one that matches Chrome, or set `$env:CHROMEDRIVER."
+        throw "chromedriver not found ('$chromedriver'). Run .\scripts\e2e-setup.ps1 to install Chrome and chromedriver, or set `$env:CHROMEDRIVER."
     }
     $driver = Start-Process $chromedriver '--port=4444' -PassThru -WindowStyle Hidden
     # Fail fast when chromedriver cannot serve, instead of letting flutter
@@ -80,6 +96,7 @@ if ($Device -in 'web', 'chrome') {
                     '--dart-define=SOAR_SCORE_E2E=true',
                     "--dart-define=SOAR_SCORE_API_BASE_URL=http://localhost:$port"
                 )
+                if ($chrome) { $flutterArgs += "--chrome-binary=$chrome" }
                 if ($Name) { $flutterArgs += @('--name', $Name) }
                 $flutter = Start-Process (Get-Command flutter).Source `
                     -ArgumentList $flutterArgs -NoNewWindow -PassThru

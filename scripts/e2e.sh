@@ -10,8 +10,10 @@
 #   ./scripts/e2e.sh -f score_entry_test.dart -- --name 'official score entry'
 #   ./scripts/e2e.sh -- --name journey   # extra args go to flutter test/drive
 #
-# The web mode needs Chrome and a matching chromedriver (`chromedriver` on
-# PATH, or CHROMEDRIVER=<path>). It builds the app with SOAR_SCORE_E2E=true
+# The web mode needs Chrome and a matching chromedriver. Run
+# ./scripts/e2e-setup.sh once to install both into .e2e-tools/ (git-ignored),
+# where this script finds them; or put `chromedriver` on PATH, or set
+# CHROMEDRIVER=<path> (and CHROME_EXECUTABLE=<path>). It builds the app with SOAR_SCORE_E2E=true
 # (an always-signed-in session) and points it at
 # apps/soar_score_server/tool/e2e_server.dart, a token-free API server on
 # demo data. Each test file gets a fresh server, hence fresh demo data.
@@ -51,7 +53,16 @@ fi
 if [ "$device" = web ] || [ "$device" = chrome ]; then
   port="${E2E_SERVER_PORT:-18080}"
   driver_port=4444
+  # Chrome and chromedriver from scripts/e2e-setup.sh, unless the environment
+  # already names them.
+  tools="$root/.e2e-tools"
+  if [ -f "$tools/paths.env" ]; then
+    [ -n "${CHROMEDRIVER:-}" ] || CHROMEDRIVER="$tools/$(sed -n 's/^chromedriver=//p' "$tools/paths.env" | tr -d '\r')"
+    [ -n "${CHROME_EXECUTABLE:-}" ] || CHROME_EXECUTABLE="$tools/$(sed -n 's/^chrome=//p' "$tools/paths.env" | tr -d '\r')"
+  fi
   chromedriver="${CHROMEDRIVER:-chromedriver}"
+  chrome_args=()
+  [ -z "${CHROME_EXECUTABLE:-}" ] || chrome_args=(--chrome-binary="$CHROME_EXECUTABLE")
   server_pid=""
   driver_pid=""
   stop_server() {
@@ -78,7 +89,7 @@ if [ "$device" = web ] || [ "$device" = chrome ]; then
   }
   test_timeout="${E2E_TEST_TIMEOUT:-300}"
   if ! command -v "$chromedriver" >/dev/null 2>&1; then
-    echo "chromedriver not found ('$chromedriver'). Install a chromedriver that matches Chrome, or set CHROMEDRIVER=<path>." >&2
+    echo "chromedriver not found ('$chromedriver'). Run ./scripts/e2e-setup.sh to install Chrome and chromedriver, or set CHROMEDRIVER=<path>." >&2
     exit 1
   fi
   "$chromedriver" --port=$driver_port >/dev/null 2>&1 &
@@ -103,7 +114,7 @@ if [ "$device" = web ] || [ "$device" = chrome ]; then
   for file in "${files[@]}"; do
     start_server
     "${with_timeout[@]+"${with_timeout[@]}"}" flutter drive --driver=test_driver/integration_test.dart --target="$file" \
-      -d web-server --browser-name=chrome \
+      -d web-server --browser-name=chrome ${chrome_args[@]+"${chrome_args[@]}"} \
       --dart-define=SOAR_SCORE_E2E=true \
       --dart-define=SOAR_SCORE_API_BASE_URL="http://localhost:$port" \
       ${extra[@]+"${extra[@]}"} || {
