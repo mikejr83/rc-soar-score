@@ -15,7 +15,10 @@ void main() {
     server = await startEmbeddedServer(
       '${tempDir.path}${Platform.pathSeparator}soar_score.db',
     );
-    client = ApiClient(baseUrl: server.baseUrl);
+    client = ApiClient(
+      baseUrl: server.baseUrl,
+      tokenProvider: () async => server.secret,
+    );
   });
 
   tearDown(() async {
