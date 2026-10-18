@@ -1,5 +1,6 @@
 import 'package:logging/logging.dart';
 import 'package:soar_score_api/soar_score_api.dart';
+import 'package:soar_score_ui_storage/soar_score_ui_storage.dart';
 
 import '../auth/auth_session.dart';
 import '../auth/auth_session_factory.dart';
@@ -21,10 +22,13 @@ const String defaultApiBaseUrl = 'http://localhost:8080';
 /// `ApiClient`; everything else the native bootstrap does (server, SQLite)
 /// is compiled out of the web artifact entirely.
 class WebBootstrap extends AppBootstrap {
-  WebBootstrap(this._client, this._auth);
+  WebBootstrap(this._client, this._auth, this.localUiStore);
 
   final ApiClient _client;
   final AuthSession _auth;
+  @override
+  final LocalUiStore localUiStore;
+
   bool _closed = false;
 
   @override
@@ -43,6 +47,7 @@ class WebBootstrap extends AppBootstrap {
     }
     _closed = true;
     _client.close();
+    await localUiStore.close();
   }
 
   /// Builds the client pointed at the deployed API.
@@ -58,6 +63,7 @@ class WebBootstrap extends AppBootstrap {
     return WebBootstrap(
       ApiClient(baseUrl: baseUrl, tokenProvider: auth.accessToken),
       auth,
+      await openLocalUiStore(),
     );
   }
 }
