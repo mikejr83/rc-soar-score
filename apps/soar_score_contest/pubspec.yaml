@@ -63,6 +63,7 @@ dependencies:
   flutter_secure_storage: ^11.2.0
   http: ^1.6.0
   win32_registry: ^3.0.3
+  package_info_plus: ^10.2.2
 
 dev_dependencies:
   flutter_test:

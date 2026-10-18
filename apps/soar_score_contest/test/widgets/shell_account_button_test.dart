@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_contest/app_mode_provider.dart';
 import 'package:soar_score_contest/auth/auth_session_inherited.dart';
+import 'package:soar_score_contest/widgets/app_version_label.dart';
 import 'package:soar_score_contest/widgets/shell_account_button.dart';
 
 import '../support/fake_auth_session.dart';
@@ -34,6 +35,20 @@ Future<void> _pump(
 }
 
 void main() {
+  testWidgets('the menu shows the app version', (tester) async {
+    appVersionLoader = () async => '0.1.0-alpha.1';
+    addTearDown(() => appVersionLoader = loadAppVersion);
+    await _pump(
+      tester,
+      session: FakeAuthSession(signedIn: true, name: 'Pat Pilot'),
+    );
+
+    await tester.tap(find.byKey(_menu));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Version 0.1.0-alpha.1'), findsOneWidget);
+  });
+
   testWidgets('signed in: the menu names the user and signs out', (
     tester,
   ) async {

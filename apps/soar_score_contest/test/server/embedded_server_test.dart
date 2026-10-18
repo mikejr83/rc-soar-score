@@ -33,12 +33,15 @@ void main() {
 
   test('serves the health endpoint on an OS-assigned free port', () async {
     final server = await startEmbeddedServer(databasePath);
-    final client = ApiClient(baseUrl: server.baseUrl);
+    final client = ApiClient(
+      baseUrl: server.baseUrl,
+      tokenProvider: () async => server.secret,
+    );
     try {
       // The caller never chooses a port: `startEmbeddedServer` binds port 0
       // and the OS assigns one, which the server reports back.
       expect(server.port, inInclusiveRange(1, 65535));
-      expect(server.baseUrl, Uri.parse('http://localhost:${server.port}'));
+      expect(server.baseUrl, Uri.parse('http://127.0.0.1:${server.port}'));
 
       final health = await client.health();
       expect(
@@ -60,7 +63,10 @@ void main() {
     'the client round-trips /health over loopback with no external network',
     () async {
       final server = await startEmbeddedServer(databasePath);
-      final client = ApiClient(baseUrl: server.baseUrl);
+      final client = ApiClient(
+        baseUrl: server.baseUrl,
+        tokenProvider: () async => server.secret,
+      );
       try {
         // The request travels the loopback interface to the in-process server;
         // nothing off-machine is involved. This is the offline guarantee the
@@ -79,7 +85,10 @@ void main() {
     'closing the server shuts it down cleanly and releases the port',
     () async {
       final server = await startEmbeddedServer(databasePath);
-      final client = ApiClient(baseUrl: server.baseUrl);
+      final client = ApiClient(
+        baseUrl: server.baseUrl,
+        tokenProvider: () async => server.secret,
+      );
       final port = server.port;
 
       // Baseline: the server answers before it is closed.
@@ -104,7 +113,10 @@ void main() {
     'a contest created through the API is owned by the Local account',
     () async {
       final server = await startEmbeddedServer(databasePath);
-      final client = ApiClient(baseUrl: server.baseUrl);
+      final client = ApiClient(
+        baseUrl: server.baseUrl,
+        tokenProvider: () async => server.secret,
+      );
       try {
         final id = Id.create();
         final created = await client.createContest(
@@ -139,7 +151,10 @@ void main() {
 
   test('a configuration saved through the API moves the contest on', () async {
     final server = await startEmbeddedServer(databasePath);
-    final client = ApiClient(baseUrl: server.baseUrl);
+    final client = ApiClient(
+      baseUrl: server.baseUrl,
+      tokenProvider: () async => server.secret,
+    );
     try {
       final id = Id.create();
       await client.createContest(
@@ -175,7 +190,10 @@ void main() {
 
   test('a score entered through the API starts the contest', () async {
     final server = await startEmbeddedServer(databasePath);
-    final client = ApiClient(baseUrl: server.baseUrl);
+    final client = ApiClient(
+      baseUrl: server.baseUrl,
+      tokenProvider: () async => server.secret,
+    );
     try {
       final id = Id.create();
       await client.createContest(
@@ -310,7 +328,10 @@ void main() {
 
   test('has no contests unless the demo seed is requested', () async {
     final server = await startEmbeddedServer(databasePath);
-    final client = ApiClient(baseUrl: server.baseUrl);
+    final client = ApiClient(
+      baseUrl: server.baseUrl,
+      tokenProvider: () async => server.secret,
+    );
     try {
       expect(await client.contests(), isEmpty);
     } finally {
@@ -321,13 +342,19 @@ void main() {
 
   test('the demo data is served once, across launches', () async {
     final first = await startEmbeddedServer(databasePath, seedDemo: true);
-    final firstClient = ApiClient(baseUrl: first.baseUrl);
+    final firstClient = ApiClient(
+      baseUrl: first.baseUrl,
+      tokenProvider: () async => first.secret,
+    );
     final seeded = await firstClient.contests();
     firstClient.close();
     await first.close();
 
     final second = await startEmbeddedServer(databasePath, seedDemo: true);
-    final secondClient = ApiClient(baseUrl: second.baseUrl);
+    final secondClient = ApiClient(
+      baseUrl: second.baseUrl,
+      tokenProvider: () async => second.secret,
+    );
     try {
       expect(seeded, hasLength(5));
       expect(await secondClient.contests(), seeded);
@@ -339,7 +366,10 @@ void main() {
 
   test('the demo data includes a drawn matrix', () async {
     final server = await startEmbeddedServer(databasePath, seedDemo: true);
-    final client = ApiClient(baseUrl: server.baseUrl);
+    final client = ApiClient(
+      baseUrl: server.baseUrl,
+      tokenProvider: () async => server.secret,
+    );
     try {
       final ready = (await client.contests()).firstWhere(
         (contest) => contest.name == 'Front Range F5J Open',
@@ -380,7 +410,10 @@ void main() {
 
   test('refuses to publish a contest', () async {
     final server = await startEmbeddedServer(databasePath);
-    final client = ApiClient(baseUrl: server.baseUrl);
+    final client = ApiClient(
+      baseUrl: server.baseUrl,
+      tokenProvider: () async => server.secret,
+    );
     try {
       await expectLater(
         client.publishContest(
@@ -408,7 +441,10 @@ void main() {
 
   test('the import route is served and answers 503 when the helpers are not shipped', () async {
     final server = await startEmbeddedServer(databasePath);
-    final client = ApiClient(baseUrl: server.baseUrl);
+    final client = ApiClient(
+      baseUrl: server.baseUrl,
+      tokenProvider: () async => server.secret,
+    );
     try {
       // The embedded server always wires the import route; without the
       // gs_importer helpers next to the executable it answers 503

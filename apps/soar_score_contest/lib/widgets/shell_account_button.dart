@@ -5,6 +5,7 @@ import '../app_mode_provider.dart';
 import '../auth/auth_session.dart';
 import '../auth/auth_session_inherited.dart';
 import '../router.dart';
+import 'app_version_label.dart';
 import 'not_wired_up_dialog.dart';
 
 /// The account control at the bottom of the shell rail.
@@ -72,6 +73,8 @@ class ShellAccountButton extends StatelessWidget {
               title: Text(settingsLabel),
             ),
           ),
+          const PopupMenuDivider(),
+          const PopupMenuItem(enabled: false, child: AppVersionLabel()),
         ],
       );
     }
@@ -113,6 +116,8 @@ class ShellAccountButton extends StatelessWidget {
             title: Text('Sign out'),
           ),
         ),
+        const PopupMenuDivider(),
+        const PopupMenuItem(enabled: false, child: AppVersionLabel()),
       ],
       child: Padding(
         padding: const EdgeInsets.all(8),
