@@ -49,6 +49,17 @@ If **participant scoring** is enabled for the contest (the docs call online scor
 - A short caption beside it: "Scan to enter scores". **Do not print the link in text**; the code is the only way in.
 - Show the card **without** a QR code when participant scoring is closed, and **when the contest was organized offline and has not synchronized** (QR codes cannot be generated until it has; the panel says so with a link to the sync page). Say what takes its place so the layout does not collapse (recommended: the space is left to the scoring table, and the identity block expands).
 
+### Closed participant scoring
+
+When participant scoring is **Closed**, the cards cannot carry QR codes, because the invitations go out when it is opened. The report **reminds the director** and lets them open it right there, so they do not have to leave the report, open scoring elsewhere and come back. Design:
+
+- A **persistent banner** above the sheet (screen only): "Participant scoring is closed. These cards have no QR code. Open participant scoring to send invitations and print QR codes." With a button **"Open participant scoring"**. Text plus icon; not colour alone.
+- The **Print reminder.** Pressing Print (or Save as PDF) while it is Closed shows a **short dialog** before the system print dialog: "Participant scoring is closed, so these cards will print without QR codes." Three actions: **"Open participant scoring and print"** (the primary, recommended), **"Print without QR codes"**, and **Cancel**. It is a reminder, never a block: printing without QR codes stays possible.
+- **Opening is a contest state change with side effects**, so it has its own **confirmation** that says what will happen: "Participant scoring will open. Invitations will be sent to participants, and each card will carry a QR code." It names how many invitations will go out. It is the same Open action as on the workspace, with the same authority rule: if the user may not open it, the button is disabled with the reason in text and Print without QR codes remains.
+- **After opening**, the cards **regenerate with QR codes** in place, the banner turns into a short confirmation ("Participant scoring is open. QR codes added."), and the dialog's print continues if it started from "Open participant scoring and print". Show the opening, in progress and failed (invitations could not be issued: retry, and nothing printed with a QR code that is not valid) states.
+- When the contest is **offline and not synchronized**, opening is unavailable: the banner and dialog say so and link to the sync page; printing without QR codes remains.
+- Do not show the banner or the reminder when participant scoring is already open.
+
 ### Scoring table
 
 The main part of the card. A table the pilot writes in, one row per round they fly.
@@ -118,7 +129,7 @@ The panel shows what the choices produce: **"12 cards · 3 pages"** (updated liv
 
 ## States
 
-Design: loading and generating (cards for 100 pilots take time; show progress and keep the panel usable); the normal report; no QR code (participant scoring closed; offline and unsynchronized); **retired pilots** (the option shown and hidden); too many rounds for a half page; Pre-fill enabled, disabled, and on; the empty pilot selection; a range with no rounds; the **configuration changed since the matrix was drawn** banner; out of date (a redraw or a pilot change happened while the tab was open — a banner with Refresh, never an automatic redraw of the cards); offline (QR codes still generate, the page says the link works once the card is scanned online).
+Design: loading and generating (cards for 100 pilots take time; show progress and keep the panel usable); the normal report; participant scoring closed (the banner, the print reminder dialog, the open confirmation, opening, failed, and opened); no QR code when offline and unsynchronized; **retired pilots** (the option shown and hidden); too many rounds for a half page; Pre-fill enabled, disabled, and on; the empty pilot selection; a range with no rounds; the **configuration changed since the matrix was drawn** banner; out of date (a redraw or a pilot change happened while the tab was open — a banner with Refresh, never an automatic redraw of the cards); offline (QR codes still generate, the page says the link works once the card is scanned online).
 
 Also design the preview. On screen, the sheets are shown as pages with several cards each, at a zoom where a card is readable; the director can click a card to see it at full size. This click-to-enlarge is **screen only** and shown as such.
 
@@ -130,7 +141,7 @@ Also design the preview. On screen, the sheets are shown as pages with several c
 4. The **printed pages**: four-up and two-up on Letter and A4, the cut guides and crop marks, the safe-area margin, a "Card 1 of 2" continuation, the card footer.
 5. **Pre-fill**: disabled, enabled, off, on; and how pre-filled values read in black and white.
 6. The **pilot picker** and the round range, at expanded, medium and compact widths, with the live count.
-7. All states listed above.
+7. The **closed participant scoring flow**: the banner, the print reminder dialog, the open confirmation, and the result. All states listed above.
 8. A short rationale covering printability on a household inkjet, the cards-per-page rule, the QR choices, the black-and-white distinctions, and any component or token additions.
 9. Questions and spec ambiguities. List them; don't silently resolve them.
 
@@ -150,7 +161,8 @@ These were open and are settled. Design to them.
 8. **Pre-fill** shows official and not-official values; an asterisk marks not official.
 9. **Retired pilots** are excluded by default; an unchecked option, shown only when the contest has retired pilots, adds them.
 10. **Card order** is alphabetical by last name.
+11. **Closed participant scoring.** Printing cards while it is Closed reminds the director, and the director can open participant scoring from the report (with a confirmation) so invitations go out and the QR codes print. Printing without QR codes remains possible.
 
 ## Questions to carry into the design
 
-1. **Closed participant scoring before the contest.** Participant scoring is a state that is Closed until the director opens it, and cards are usually printed beforehand. As decided, a card printed while it is Closed has no QR code. Should the report instead show a QR code whenever the field QR invitations exist (they are issued when participant scoring is first enabled), so that cards printed after it has been opened and then closed again still carry one? List what you assumed, and design the Closed state so the director understands why there is no QR code and what to do (open participant scoring, then reprint).
+None open from the requirements. List any you find.
