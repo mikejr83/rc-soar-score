@@ -9,7 +9,7 @@ import '../../not_wired_up_dialog.dart';
 /// Where each next-step button goes.
 ///
 /// One entry per target, so the ticket that builds a destination changes one
-/// line: #121 participants, #124 reports, #125 publish, #250
+/// line: #121 participants, #125 publish, #250
 /// completion and #264 the matrix round. The in-place targets
 /// ([NextStepTarget.openScoring], [NextStepTarget.unlock] and
 /// [NextStepTarget.dismissSuggestion]) are handled by the card.
@@ -46,11 +46,7 @@ abstract final class NextStepNavigator {
           ),
         );
       case NextStepTarget.reports:
-        showNotWiredUpDialog(
-          context,
-          'Reports',
-          detail: 'The reports page is not built yet.',
-        );
+        context.go(contestReportsPath(contestId));
       case NextStepTarget.publish:
         showNotWiredUpDialog(
           context,

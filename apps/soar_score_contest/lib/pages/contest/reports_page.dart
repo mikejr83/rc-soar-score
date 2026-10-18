@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:soar_score_api/soar_score_api.dart';
@@ -8,21 +10,14 @@ import '../../connectivity_provider.dart';
 import '../../router.dart';
 import '../../services/reports/report_availability.dart';
 import '../../services/reports/report_kind.dart';
+import '../../services/reports/report_launcher.dart';
 import '../../services/reports/reports_facts.dart';
 import '../../services/reports/reports_facts_loader.dart';
+import '../../widgets/reports/report_card.dart';
 import '../../widgets/reports/reports_context_strip.dart';
 import '../../widgets/reports/reports_list.dart';
 import '../../widgets/reports/reports_states.dart';
 import '../../widgets/workspace/states/workspace_not_found_view.dart';
-
-/// Opens [kind]'s report. The viewer is not built yet, so the default says so;
-/// the viewer replaces it with a new tab or window.
-typedef ReportOpener = void Function(BuildContext context, ReportKind kind);
-
-void _viewerNotBuilt(BuildContext context, ReportKind kind) =>
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('The ${kind.title} viewer isn’t built yet.')),
-    );
 
 /// The reports of one contest (`plan/ui/contest-administration/reports.md`):
 /// a strip saying what reports are built from, then a card for each report
@@ -31,13 +26,13 @@ class ContestReportsPage extends StatefulWidget {
   const ContestReportsPage({
     super.key,
     required this.contestId,
-    this.onOpen = _viewerNotBuilt,
+    this.launcher = const PlatformReportLauncher(),
   });
 
   final String contestId;
 
-  /// What Open does for an available report.
-  final ReportOpener onOpen;
+  /// Opens a report in its own tab (web) or in place (native).
+  final ReportLauncher launcher;
 
   @override
   State<ContestReportsPage> createState() => _ContestReportsPageState();
@@ -45,6 +40,8 @@ class ContestReportsPage extends StatefulWidget {
 
 class _ContestReportsPageState extends State<ContestReportsPage> {
   Future<ReportsFacts>? _loading;
+  final Map<ReportKind, CardOpenState> _openStates = {};
+  Timer? _openedTimer;
 
   @override
   void didChangeDependencies() {
@@ -73,6 +70,44 @@ class _ContestReportsPageState extends State<ContestReportsPage> {
     }
     return ReportsFactsLoader.load(client, id);
   }
+
+  @override
+  void dispose() {
+    _openedTimer?.cancel();
+    super.dispose();
+  }
+
+  String _viewerPath(ReportKind kind) =>
+      contestReportPath(widget.contestId, kind);
+
+  Future<void> _open(ReportKind kind) async {
+    final outcome = await widget.launcher.open(context, _viewerPath(kind));
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      switch (outcome) {
+        case LaunchOutcome.newTab:
+          _openStates[kind] = CardOpenState.opened;
+        case LaunchOutcome.blocked:
+          _openStates[kind] = CardOpenState.blocked;
+        case LaunchOutcome.inPlace:
+          _openStates.remove(kind);
+      }
+    });
+    if (outcome == LaunchOutcome.newTab) {
+      // The confirmation is brief and Open stays enabled: no spinner.
+      _openedTimer?.cancel();
+      _openedTimer = Timer(const Duration(seconds: 4), () {
+        if (mounted && _openStates[kind] == CardOpenState.opened) {
+          setState(() => _openStates.remove(kind));
+        }
+      });
+    }
+  }
+
+  void _openHere(ReportKind kind) =>
+      widget.launcher.openHere(context, _viewerPath(kind));
 
   void _retry() {
     final loading = _load();
@@ -121,7 +156,9 @@ class _ContestReportsPageState extends State<ContestReportsPage> {
                     facts: facts,
                     twoColumns: twoColumns,
                     compact: compact,
-                    onOpen: (kind) => widget.onOpen(context, kind),
+                    onOpen: _open,
+                    openStates: _openStates,
+                    onOpenHere: _openHere,
                     onAction: _go,
                     onOpenSync: () =>
                         context.go(contestSyncPath(widget.contestId)),
@@ -146,6 +183,8 @@ class _Ready extends StatelessWidget {
     required this.onOpen,
     required this.onAction,
     required this.onOpenSync,
+    required this.openStates,
+    required this.onOpenHere,
   });
 
   final ReportsFacts facts;
@@ -154,6 +193,8 @@ class _Ready extends StatelessWidget {
   final ValueChanged<ReportKind> onOpen;
   final ValueChanged<ReportAction> onAction;
   final VoidCallback onOpenSync;
+  final Map<ReportKind, CardOpenState> openStates;
+  final ValueChanged<ReportKind> onOpenHere;
 
   @override
   Widget build(BuildContext context) {
@@ -178,6 +219,8 @@ class _Ready extends StatelessWidget {
               compact: compact,
               onOpen: onOpen,
               onAction: onAction,
+              openStates: openStates,
+              onOpenHere: onOpenHere,
             ),
           ],
         );

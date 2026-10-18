@@ -1,8 +1,10 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_contest/pages/contest/participants_page.dart';
+import 'package:soar_score_contest/pages/contest/report_viewer_page.dart';
 import 'package:soar_score_contest/pages/contest/reports_page.dart';
 import 'package:soar_score_contest/pages/contest/sync_page.dart';
 import 'package:soar_score_contest/pages/contest/scoring_page.dart';
@@ -21,6 +23,8 @@ import 'pages/new_contest_wizard_page.dart';
 import 'pages/participant_editor_page.dart';
 import 'pages/participants_page.dart';
 import 'pages/roles_page.dart';
+import 'services/reports/report_kind.dart';
+import 'services/reports/viewer/report_view_params.dart';
 import 'services/workspace/workspace_control_target.dart';
 import 'widgets/contest_shell.dart';
 import 'widgets/unsaved_changes_guard.dart';
@@ -97,6 +101,11 @@ String contestScoringPath(String contestId, {int? round, int? group}) {
 String contestReportsPath(String contestId) =>
     '$contestsPath/$contestId/reports';
 
+/// The viewer of one report of the contest with [contestId]. It sits outside
+/// the shell and holds its filters and page setup in the query.
+String contestReportPath(String contestId, ReportKind kind) =>
+    '$contestsPath/$contestId/reports/${kind.key}';
+
 /// The sync details page of the contest with [contestId].
 String contestSyncPath(String contestId) => '$contestsPath/$contestId/sync';
 
@@ -126,6 +135,35 @@ GoRouter buildAppRouter({
         path: landingPath,
         name: 'landing',
         builder: (context, state) => const LandingPage(),
+      ),
+      // A report opens in its own tab or window, so it has no shell.
+      GoRoute(
+        path: '$contestsPath/:contestId/reports/:report',
+        name: 'contestReport',
+        builder: (context, state) {
+          final key = state.pathParameters['report'];
+          final inPlace = state.uri.queryParameters['back'] == '1';
+          return ReportViewerPage(
+            contestId: state.pathParameters['contestId']!,
+            report: ReportKind.values
+                .where((kind) => kind.key == key)
+                .firstOrNull,
+            params: ReportViewParams.fromQuery(state.uri.queryParameters),
+            openedInPlace: inPlace,
+            // The URL follows the filters, so refreshing or copying the link
+            // restores the view. Replacing keeps back-button history clean.
+            onParams: (params) => SystemNavigator.routeInformationUpdated(
+              uri: Uri(
+                path: state.uri.path,
+                queryParameters: {
+                  ...params.toQuery(),
+                  if (inPlace) 'back': '1',
+                },
+              ),
+              replace: true,
+            ),
+          );
+        },
       ),
       ShellRoute(
         builder: (context, state, child) =>

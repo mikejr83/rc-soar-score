@@ -15,6 +15,8 @@ class ReportsFacts {
   const ReportsFacts._({
     required this.contest,
     required this.hasMatrix,
+    required this.matrixRevision,
+    required this.configurationRevision,
     required this.roundCount,
     required this.intendedTotalRounds,
     required this.isSeeded,
@@ -45,6 +47,8 @@ class ReportsFacts {
     return ReportsFacts._(
       contest: data.contest,
       hasMatrix: workspace.hasMatrix,
+      matrixRevision: workspace.matrix.revision?.revisionNumber,
+      configurationRevision: workspace.configuration?.revisionNumber,
       roundCount: workspace.roundCount,
       intendedTotalRounds: workspace.intendedTotalRounds,
       isSeeded: workspace.drawMode == DrawMode.seededManOnMan,
@@ -60,6 +64,12 @@ class ReportsFacts {
 
   final Contest contest;
   final bool hasMatrix;
+
+  /// The current matrix revision number; `null` before the first draw.
+  final int? matrixRevision;
+
+  /// The latest saved configuration revision number; `null` when none.
+  final int? configurationRevision;
 
   /// The drawn rounds that are not cancelled.
   final int roundCount;
@@ -108,4 +118,18 @@ class ReportsFacts {
       if (notFlown > 0) '$notFlown not flown',
     ].join(' · ');
   }
+
+  /// Changes whenever something a report is built from changes: the contest,
+  /// the matrix, the configuration or the scores. The viewer compares it to
+  /// tell that its sheet is out of date.
+  String get fingerprint => [
+    contest.revision,
+    matrixRevision,
+    configurationRevision,
+    roundCount,
+    resultStatus.name,
+    for (final round in rounds)
+      '${round.ordinal}:${round.scored}/${round.total}',
+    standing.unofficial,
+  ].join('|');
 }

@@ -15,6 +15,8 @@ class ReportsList extends StatelessWidget {
     required this.compact,
     required this.onOpen,
     required this.onAction,
+    this.openStates = const {},
+    this.onOpenHere,
   });
 
   final ReportsFacts facts;
@@ -22,6 +24,8 @@ class ReportsList extends StatelessWidget {
   final bool compact;
   final ValueChanged<ReportKind> onOpen;
   final ValueChanged<ReportAction> onAction;
+  final Map<ReportKind, CardOpenState> openStates;
+  final ValueChanged<ReportKind>? onOpenHere;
 
   @override
   Widget build(BuildContext context) {
@@ -64,6 +68,10 @@ class ReportsList extends StatelessWidget {
                       compact: compact,
                       onOpen: () => onOpen(kind),
                       onAction: onAction,
+                      openState: openStates[kind] ?? CardOpenState.none,
+                      onOpenHere: onOpenHere == null
+                          ? null
+                          : () => onOpenHere!(kind),
                     ),
                 ],
               ),

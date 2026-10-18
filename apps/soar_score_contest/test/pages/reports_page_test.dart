@@ -7,8 +7,10 @@ import 'package:soar_score_contest/api_client_provider.dart';
 import 'package:soar_score_contest/pages/contest/reports_page.dart';
 import 'package:soar_score_contest/router.dart';
 import 'package:soar_score_contest/services/reports/report_kind.dart';
+import 'package:soar_score_contest/services/reports/report_launcher.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../support/fake_report_launcher.dart';
 import '../support/matrix_test_support.dart';
 import '../support/next_step_widget_support.dart';
 import '../support/workspace_facts_support.dart';
@@ -34,7 +36,7 @@ Future<GoRouter> _pump(
   WorkspaceServer server, {
   Size size = const Size(1280, 1400),
   String contestId = matrixContestId,
-  ReportOpener? onOpen,
+  ReportLauncher? launcher,
   bool settle = true,
 }) async {
   tester.view.physicalSize = size;
@@ -48,7 +50,7 @@ Future<GoRouter> _pump(
         builder: (context, state) => Scaffold(
           body: ContestReportsPage(
             contestId: contestId,
-            onOpen: onOpen ?? (context, kind) {},
+            launcher: launcher ?? FakeReportLauncher(),
           ),
         ),
       ),
@@ -228,46 +230,62 @@ void main() {
     }
   });
 
-  testWidgets('Open calls the opener with the report', (tester) async {
-    final opened = <ReportKind>[];
+  testWidgets('Open launches the report and the card says so', (tester) async {
+    final launcher = FakeReportLauncher();
     await _pump(
       tester,
       _server(matrix: drawnMatrix(), scored: _scored(2)),
-      onOpen: (context, kind) => opened.add(kind),
+      launcher: launcher,
     );
 
     await tester.ensureVisible(_open('cards'));
     await tester.tap(_open('cards'));
     await tester.pump();
-    expect(opened, [ReportKind.cards]);
+    expect(launcher.opened, [
+      contestReportPath(matrixContestId, ReportKind.cards),
+    ]);
+    expect(find.text('Opened in a new tab'), findsOneWidget);
+    // Open stays enabled, with no spinner.
+    expect(_enabled(tester, 'cards'), isTrue);
+
+    await tester.pump(const Duration(seconds: 5));
+    expect(find.text('Opened in a new tab'), findsNothing);
   });
 
-  testWidgets('Open says the viewer is not built yet by default', (
-    tester,
-  ) async {
-    tester.view.physicalSize = const Size(1280, 1400);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.reset);
-    final server = _server(matrix: drawnMatrix(), scored: _scored(2));
-    await tester.pumpWidget(
-      ApiClientInherited(
-        client: ApiClient(
-          baseUrl: Uri.parse('http://localhost'),
-          httpClient: MockClient(server.handle),
-        ),
-        child: const MaterialApp(
-          home: Scaffold(body: ContestReportsPage(contestId: matrixContestId)),
-        ),
-      ),
+  testWidgets('a blocked tab offers Try again and Open here', (tester) async {
+    final launcher = FakeReportLauncher(LaunchOutcome.blocked);
+    await _pump(
+      tester,
+      _server(matrix: drawnMatrix(), scored: _scored(2)),
+      launcher: launcher,
     );
-    await tester.pumpAndSettle();
 
     await tester.tap(_open('standings'));
     await tester.pump();
-    expect(
-      find.text('The Overall Standings viewer isn’t built yet.'),
-      findsOneWidget,
+    expect(find.textContaining('blocked the new tab'), findsOneWidget);
+
+    await tester.tap(find.text('Try again'));
+    await tester.pump();
+    expect(launcher.opened, hasLength(2));
+
+    await tester.tap(find.text('Open here'));
+    await tester.pump();
+    expect(launcher.openedHere, [
+      contestReportPath(matrixContestId, ReportKind.standings),
+    ]);
+  });
+
+  testWidgets('an in-place launch leaves the card quiet', (tester) async {
+    final launcher = FakeReportLauncher(LaunchOutcome.inPlace);
+    await _pump(
+      tester,
+      _server(matrix: drawnMatrix(), scored: _scored(2)),
+      launcher: launcher,
     );
+    await tester.tap(_open('standings'));
+    await tester.pump();
+    expect(find.text('Opened in a new tab'), findsNothing);
+    expect(launcher.opened, hasLength(1));
   });
 
   testWidgets('the help popover defines the statuses', (tester) async {

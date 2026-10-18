@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
@@ -56,4 +57,28 @@ void main() {
     await tapVisible(tester, find.text('Open Scoring'));
     await pumpUntilFound(tester, find.textContaining('Round 1 of'));
   });
+
+  // Native opens the viewer in place; the web opens a new tab, which a journey
+  // cannot drive, so this part is native-only.
+  testWidgets('Open shows the report viewer with a way back (native)', (
+    tester,
+  ) async {
+    await openMainPage(tester);
+    await openContest(tester, _contest);
+    await tapRail(tester, 'Reports');
+    await pumpUntilFound(tester, find.text('Reports are built from'));
+
+    await tapVisible(tester, find.byKey(const ValueKey('report-open-matrix')));
+    await pumpUntilFound(tester, find.byKey(const ValueKey('viewer-title')));
+    expect(
+      tester.widget<Text>(find.byKey(const ValueKey('viewer-title'))).data,
+      'Draw Matrix',
+    );
+    // The paper sheet, its filter and page panel, and Print.
+    expect(find.textContaining('Page 1 of'), findsWidgets);
+    expect(find.text('Print'), findsWidgets);
+
+    await tapVisible(tester, find.byKey(const ValueKey('viewer-back')));
+    await pumpUntilFound(tester, find.text('Reports are built from'));
+  }, skip: kIsWeb);
 }

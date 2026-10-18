@@ -1,0 +1,276 @@
+import 'package:flutter/material.dart';
+
+import '../../../services/reports/result_status.dart';
+import '../../../services/reports/viewer/page_setup.dart';
+import 'paper_style.dart';
+
+/// The room on a paper page: margins, and the running header and footer every
+/// page repeats.
+abstract final class SheetLayout {
+  static const double marginX = 48;
+  static const double marginTop = 36;
+  static const double marginBottom = 28;
+  static const double headerHeight = 72;
+  static const double footerHeight = 40;
+
+  /// What a report's page body can use.
+  static Size bodySize(PageSetup setup) => Size(
+    setup.width - 2 * marginX,
+    setup.height - marginTop - headerHeight - footerHeight - marginBottom,
+  );
+}
+
+/// One printed page: the running header with contest identity and, when the
+/// result is not official, the stamp; the report's [body]; and the running
+/// footer with the report name, page number, generated time and revisions.
+///
+/// Everything here prints. The page is black on white and ignores the theme.
+class ReportSheetPage extends StatelessWidget {
+  const ReportSheetPage({
+    super.key,
+    required this.setup,
+    required this.title,
+    required this.subtitle,
+    required this.detail,
+    required this.reportName,
+    required this.pageNumber,
+    required this.pageCount,
+    required this.generated,
+    required this.body,
+    this.status,
+  });
+
+  final PageSetup setup;
+  final String title;
+  final String subtitle;
+  final String? detail;
+  final String reportName;
+  final int pageNumber;
+  final int pageCount;
+
+  /// "Generated 18 Oct 2026, 14:32 · Matrix rev 3 · Config rev 7".
+  final String generated;
+  final Widget body;
+
+  /// The result status of a report built from scores; `null` otherwise.
+  final ResultStatus? status;
+
+  @override
+  Widget build(BuildContext context) {
+    final stamp = switch (status) {
+      ResultStatus.preliminary => 'PRELIMINARY',
+      _ => null,
+    };
+    return Theme(
+      data: PaperStyle.theme(),
+      child: DefaultTextStyle(
+        style: PaperStyle.body,
+        child: Semantics(
+          container: true,
+          label: '$reportName, page $pageNumber of $pageCount',
+          child: Container(
+            width: setup.width,
+            height: setup.height,
+            color: PaperStyle.paper,
+            padding: const EdgeInsets.fromLTRB(
+              SheetLayout.marginX,
+              SheetLayout.marginTop,
+              SheetLayout.marginX,
+              SheetLayout.marginBottom,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SizedBox(
+                  height: SheetLayout.headerHeight,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              title,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: PaperStyle.body.copyWith(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              subtitle,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: PaperStyle.body.copyWith(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            if (detail != null)
+                              Text(
+                                detail!,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: PaperStyle.body.copyWith(fontSize: 11),
+                              ),
+                          ],
+                        ),
+                      ),
+                      if (stamp != null) ResultStamp(text: stamp),
+                    ],
+                  ),
+                ),
+                Expanded(child: ClipRect(child: body)),
+                _Footer(
+                  reportName: reportName,
+                  pageNumber: pageNumber,
+                  pageCount: pageCount,
+                  generated: generated,
+                  statusWord: switch (status) {
+                    ResultStatus.official => 'OFFICIAL',
+                    ResultStatus.preliminary => 'PRELIMINARY',
+                    _ => null,
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _Footer extends StatelessWidget {
+  const _Footer({
+    required this.reportName,
+    required this.pageNumber,
+    required this.pageCount,
+    required this.generated,
+    required this.statusWord,
+  });
+
+  final String reportName;
+  final int pageNumber;
+  final int pageCount;
+  final String generated;
+  final String? statusWord;
+
+  @override
+  Widget build(BuildContext context) {
+    final small = PaperStyle.body.copyWith(fontSize: 10);
+    return SizedBox(
+      height: SheetLayout.footerHeight,
+      child: DecoratedBox(
+        decoration: const BoxDecoration(
+          border: Border(top: BorderSide(color: PaperStyle.ink)),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.only(top: 6),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text.rich(
+                TextSpan(
+                  children: [
+                    TextSpan(
+                      text: reportName,
+                      style: const TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                    TextSpan(text: ' · Page $pageNumber of $pageCount'),
+                  ],
+                ),
+                style: small,
+              ),
+              Expanded(
+                child: Text(
+                  generated,
+                  textAlign: TextAlign.center,
+                  style: small,
+                ),
+              ),
+              if (statusWord != null)
+                Text(
+                  statusWord!,
+                  style: small.copyWith(fontWeight: FontWeight.w700),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// A bordered text stamp on a hatched ground, so it reads in black and white:
+/// shape and word, never colour.
+class ResultStamp extends StatelessWidget {
+  const ResultStamp({super.key, required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    label: '$text result',
+    child: ExcludeSemantics(
+      child: CustomPaint(
+        painter: _HatchPainter(),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+          decoration: BoxDecoration(
+            border: Border.all(color: PaperStyle.ink, width: 2),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                color: PaperStyle.paper,
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: Text(
+                  text,
+                  style: PaperStyle.body.copyWith(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1.5,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 2),
+              Container(
+                color: PaperStyle.paper,
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: Text(
+                  'Not final · scores incomplete',
+                  style: PaperStyle.body.copyWith(fontSize: 9),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+class _HatchPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas.clipRect(Offset.zero & size);
+    final paint = Paint()
+      ..color = const Color(0xFFBDBDBD)
+      ..strokeWidth = 1.5;
+    for (var x = -size.height; x < size.width; x += 7) {
+      canvas.drawLine(
+        Offset(x, size.height),
+        Offset(x + size.height, 0),
+        paint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_HatchPainter old) => false;
+}

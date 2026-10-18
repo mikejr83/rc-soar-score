@@ -5,6 +5,18 @@ import '../../services/reports/report_availability.dart';
 import '../../services/reports/report_kind.dart';
 import 'report_thumbnail.dart';
 
+/// What the card shows after Open was pressed.
+enum CardOpenState {
+  /// Nothing to say.
+  none,
+
+  /// The report opened in its own tab; the card says so briefly.
+  opened,
+
+  /// The browser blocked the new tab; Try again or Open here.
+  blocked,
+}
+
 /// One report on the reports page: a thumbnail, the title and brief, what it
 /// needs, any warning, and a single Open button. A report that cannot be
 /// produced keeps its place, disables Open and says why in text beside it.
@@ -16,6 +28,8 @@ class ReportCard extends StatelessWidget {
     required this.compact,
     required this.onOpen,
     required this.onAction,
+    this.openState = CardOpenState.none,
+    this.onOpenHere,
   });
 
   final ReportKind kind;
@@ -25,6 +39,10 @@ class ReportCard extends StatelessWidget {
   final bool compact;
   final VoidCallback onOpen;
   final ValueChanged<ReportAction> onAction;
+  final CardOpenState openState;
+
+  /// Opens the report in this window, after the browser blocked a new tab.
+  final VoidCallback? onOpenHere;
 
   @override
   Widget build(BuildContext context) {
@@ -84,10 +102,82 @@ class ReportCard extends StatelessWidget {
                         ),
                     ],
                   ),
+                  if (openState == CardOpenState.opened)
+                    Semantics(
+                      liveRegion: true,
+                      child: Row(
+                        key: ValueKey('report-opened-${kind.key}'),
+                        mainAxisSize: MainAxisSize.min,
+                        spacing: 6,
+                        children: [
+                          Icon(
+                            Icons.check_circle,
+                            size: 18,
+                            color: AppStatusColors.getSuccess(
+                              theme.brightness == Brightness.dark,
+                            ),
+                          ),
+                          const Text('Opened in a new tab'),
+                        ],
+                      ),
+                    ),
+                  if (openState == CardOpenState.blocked)
+                    _BlockedNotice(
+                      key: ValueKey('report-blocked-${kind.key}'),
+                      onTryAgain: onOpen,
+                      onOpenHere: onOpenHere,
+                    ),
                 ],
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// The browser blocked the new tab: Try again, or Open here (this window, with
+/// a way back).
+class _BlockedNotice extends StatelessWidget {
+  const _BlockedNotice({super.key, required this.onTryAgain, this.onOpenHere});
+
+  final VoidCallback onTryAgain;
+  final VoidCallback? onOpenHere;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Semantics(
+      container: true,
+      liveRegion: true,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: scheme.surfaceContainer,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(12, 8, 8, 8),
+          child: Wrap(
+            spacing: 10,
+            runSpacing: 4,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              Icon(Icons.tab_unselected, color: scheme.onSurfaceVariant),
+              ConstrainedBox(
+                constraints: BoxConstraints(minWidth: 160, maxWidth: 360),
+                child: Text(
+                  'Your browser blocked the new tab. Allow pop-ups for Soar '
+                  'Score, or open the report here and use Back to return.',
+                ),
+              ),
+              TextButton(onPressed: onTryAgain, child: const Text('Try again')),
+              FilledButton.tonal(
+                onPressed: onOpenHere,
+                child: const Text('Open here'),
+              ),
+            ],
+          ),
         ),
       ),
     );
