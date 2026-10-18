@@ -3,6 +3,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_contest/app.dart';
 import 'package:soar_score_contest/pages/settings_page.dart';
 import 'package:soar_score_contest/router.dart';
+import 'package:soar_score_contest/services/collapsible_areas/collapsible_area.dart';
+import 'package:soar_score_contest/services/collapsible_areas/collapsible_areas_controller.dart';
+import 'package:soar_score_contest/widgets/settings/reset_areas_setting.dart';
 import 'package:soar_score_contest/widgets/settings/theme_mode_setting.dart';
 import 'package:soar_score_contest/services/theme/theme_controller.dart';
 import 'package:soar_score_ui_storage/soar_score_ui_storage.dart';
@@ -16,12 +19,14 @@ Future<void> _pumpSettings(
   WidgetTester tester,
   LocalUiStore store, {
   ThemeController? controller,
+  CollapsibleAreasController? areas,
 }) async {
   await tester.pumpWidget(
     SoarScoreContestApp(
       bootstrap: FakeBootstrap(store),
       routerInitialLocation: settingsPath,
       themeController: controller,
+      collapsibleAreas: areas,
     ),
   );
   await tester.pumpAndSettle();
@@ -84,6 +89,39 @@ void main() {
 
     expect(_appThemeMode(tester), ThemeMode.dark);
   });
+
+  testWidgets('reset panels restores every hidden area to its default', (
+    tester,
+  ) async {
+    final store = BackendLocalUiStore(MemoryLocalUiBackend());
+    final areas = CollapsibleAreasController(store: store);
+    addTearDown(areas.dispose);
+    await areas.setOpen(matrixSummaryArea, false);
+    await _pumpSettings(tester, store, areas: areas);
+    expect(areas.isOpen(matrixSummaryArea), isFalse);
+
+    await tester.tap(find.byKey(const ValueKey('reset-areas-button')));
+    await tester.pumpAndSettle();
+
+    expect(areas.isOpen(matrixSummaryArea), isTrue);
+    expect(find.text(ResetAreasSetting.doneMessage), findsOneWidget);
+    final fresh = CollapsibleAreasController(store: store);
+    addTearDown(fresh.dispose);
+    await fresh.load();
+    expect(fresh.isOpen(matrixSummaryArea), isTrue);
+  });
+
+  testWidgets('a failed reset save is reported', (tester) async {
+    final store = _FailingStore();
+    final areas = CollapsibleAreasController(store: store);
+    addTearDown(areas.dispose);
+    await _pumpSettings(tester, store, areas: areas);
+
+    await tester.tap(find.byKey(const ValueKey('reset-areas-button')));
+    await tester.pumpAndSettle();
+
+    expect(find.text(ResetAreasSetting.saveFailedMessage), findsOneWidget);
+  });
 }
 
 /// A store whose writes fail, as the contract allows.
@@ -93,4 +131,7 @@ class _FailingStore extends BackendLocalUiStore {
   @override
   Future<bool> set<T>(String accountId, LocalUiKey<T> key, T value) async =>
       false;
+
+  @override
+  Future<bool> remove<T>(String accountId, LocalUiKey<T> key) async => false;
 }
