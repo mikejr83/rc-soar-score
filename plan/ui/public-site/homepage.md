@@ -6,7 +6,7 @@ The user should see any application logo along with text describing the applicat
 
 The page should contain the following navigation elements:
 
-- Login / Registration - Enables a user to login or register through the IdP to get to contest administration or participant administration.
+- Login / Registration - A link to the contest administration app, which signs the user in through the IdP. The public site has no sign-in of its own in the initial release; a profile area for any account holder (own placings, stats) is a later addition.
 - Documentation / Help - Navigates the user to the documentation and help landing page - Route: `/docs`.
 - Contests - Navigates to the contest search page - Route: `/results/contests`.
 

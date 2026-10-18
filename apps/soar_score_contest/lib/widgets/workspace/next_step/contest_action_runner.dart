@@ -8,8 +8,9 @@ import '../../api_error_text.dart';
 ///
 /// A success shows [done] with an Undo button that applies [undo]; a
 /// rejected or stale transition (409) leaves the page as it is and shows the
-/// server's message with a Refresh button. The next-step card uses it now and
-/// the control cards (#250) will too.
+/// server's message with a Refresh button. The next-step card and the control
+/// cards both use it. A transition with no way back passes no `undo` and gets
+/// no Undo button.
 class ContestActionRunner {
   ContestActionRunner({
     required this.client,
@@ -36,7 +37,7 @@ class ContestActionRunner {
     ContestAction action, {
     required String what,
     required String done,
-    required ContestAction undo,
+    required ContestAction? undo,
   }) async {
     final Contest updated;
     try {
@@ -54,10 +55,12 @@ class ContestActionRunner {
       ..showSnackBar(
         SnackBar(
           content: Text(done),
-          action: SnackBarAction(
-            label: 'Undo',
-            onPressed: () => _undo(updated, undo, what),
-          ),
+          action: undo == null
+              ? null
+              : SnackBarAction(
+                  label: 'Undo',
+                  onPressed: () => _undo(updated, undo, what),
+                ),
         ),
       );
     return updated;

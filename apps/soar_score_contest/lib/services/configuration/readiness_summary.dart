@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../matrix/fairness_view.dart';
 import 'config_phase.dart';
 import 'configuration_data.dart';
 import 'configuration_draft.dart';
@@ -131,6 +132,8 @@ class ReadinessSummary {
               ? '${matrix.maxGroupSize} pilots'
               : '${matrix.minGroupSize}–${matrix.maxGroupSize} pilots',
         ),
+        if (_fairnessText(matrix.fairness) case final fairness?)
+          ('Fairness', fairness),
       ],
       lines: [
         for (final key in differences)
@@ -164,6 +167,12 @@ class ReadinessSummary {
   final bool ok;
   final List<(String, String)> facts;
   final List<ReadinessLine> lines;
+
+  /// `Good draw, 92%`; `null` when the draw recorded no fairness score.
+  static String? _fairnessText(FairnessView? fairness) {
+    final tier = fairness?.tier;
+    return tier == null ? null : '${tier.label}, ${fairness!.scoreText}';
+  }
 
   static String _drawModeText(Object? value) =>
       value == SettingKeys.seeded ? 'Seeded Man on Man' : 'Man on Man';

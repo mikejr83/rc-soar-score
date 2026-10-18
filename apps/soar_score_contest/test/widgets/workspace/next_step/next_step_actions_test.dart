@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/services/workspace/controls/contest_transition.dart';
 import 'package:soar_score_contest/widgets/workspace/next_step/next_step_card.dart';
 import 'package:soar_score_contest/widgets/workspace/next_step/next_step_section.dart';
 import 'package:soar_score_contest/widgets/workspace/workspace_frame.dart';
@@ -12,6 +13,12 @@ import 'package:soar_score_core/soar_score_core.dart';
 import '../../../support/matrix_test_support.dart';
 import '../../../support/next_step_widget_support.dart';
 import '../../../support/workspace_facts_support.dart';
+
+/// [text] inside the next-step card; the control cards repeat some labels.
+Finder _inCard(String text) => find.descendant(
+  of: find.byKey(const ValueKey('next-step-card')),
+  matching: find.text(text),
+);
 
 const _primary = ValueKey('next-step-primary');
 const _secondary = ValueKey('next-step-secondary');
@@ -57,7 +64,7 @@ void main() {
       final server = _locked();
       await pumpWorkspace(tester, server);
       expect(cardTitle(tester), 'Draw the matrix');
-      expect(find.text('Unlock administration'), findsOneWidget);
+      expect(_inCard('Unlock administration'), findsOneWidget);
 
       await tester.tap(find.byKey(_primary));
       await tester.pumpAndSettle();
@@ -65,7 +72,7 @@ void main() {
       expect(server.actions, ['unlock']);
       expect(server.contest.adminLock, AdminLock.unlocked);
       expect(find.text(unlockedMessage), findsOneWidget);
-      expect(find.text('Unlock administration'), findsNothing);
+      expect(_inCard('Unlock administration'), findsNothing);
       expect(find.text('Go to Matrix'), findsOneWidget);
 
       await tester.tap(find.text('Undo'));
@@ -73,7 +80,7 @@ void main() {
 
       expect(server.actions, ['unlock', 'lock']);
       expect(server.contest.adminLock, AdminLock.locked);
-      expect(find.text('Unlock administration'), findsOneWidget);
+      expect(_inCard('Unlock administration'), findsOneWidget);
     });
 
     testWidgets('announces the new title politely', (tester) async {
@@ -112,7 +119,7 @@ void main() {
       final server = _ready();
       await pumpWorkspace(tester, server);
       final before = cardTitle(tester);
-      expect(find.text('Open online scoring'), findsOneWidget);
+      expect(_inCard('Open online scoring'), findsOneWidget);
 
       await tester.tap(find.byKey(_primary));
       await tester.pumpAndSettle();
@@ -121,7 +128,7 @@ void main() {
       expect(server.contest.scoringAccess, ScoringAccess.open);
       expect(find.text(scoringOpenedMessage), findsOneWidget);
       expect(cardTitle(tester), isNot(before));
-      expect(find.text('Open online scoring'), findsNothing);
+      expect(_inCard('Open online scoring'), findsNothing);
 
       await tester.tap(find.text('Undo'));
       await tester.pumpAndSettle();
@@ -166,7 +173,7 @@ void main() {
         findsOneWidget,
       );
       expect(cardTitle(tester), before);
-      expect(find.text('Unlock administration'), findsOneWidget);
+      expect(_inCard('Unlock administration'), findsOneWidget);
       expect(find.text(unlockedMessage), findsNothing);
 
       await tester.tap(find.text('Refresh'));

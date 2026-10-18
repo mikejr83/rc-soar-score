@@ -9,15 +9,16 @@ import '../../not_wired_up_dialog.dart';
 /// Where each next-step button goes.
 ///
 /// One entry per target, so the ticket that builds a destination changes one
-/// line: #121 participants, #124 reports, #125 publish, #250
-/// completion and #264 the matrix round. The in-place targets
-/// ([NextStepTarget.openScoring], [NextStepTarget.unlock] and
+/// line: #121 participants, #124 reports, #125 publish and #264 the matrix
+/// round. The in-place targets ([NextStepTarget.openScoring],
+/// [NextStepTarget.unlock], [NextStepTarget.completeDialog] and
 /// [NextStepTarget.dismissSuggestion]) are handled by the card.
 abstract final class NextStepNavigator {
   /// True for the targets the card handles itself.
   static bool isInPlace(NextStepTarget target) => switch (target) {
     NextStepTarget.openScoring ||
     NextStepTarget.unlock ||
+    NextStepTarget.completeDialog ||
     NextStepTarget.dismissSuggestion => true,
     _ => false,
   };
@@ -57,14 +58,9 @@ abstract final class NextStepNavigator {
           'Publish',
           detail: 'The publish flow is not built yet.',
         );
-      case NextStepTarget.completeDialog:
-        showNotWiredUpDialog(
-          context,
-          'Complete contest',
-          detail: 'The completion confirmation is not built yet.',
-        );
       case NextStepTarget.openScoring ||
           NextStepTarget.unlock ||
+          NextStepTarget.completeDialog ||
           NextStepTarget.dismissSuggestion:
         throw ArgumentError.value(
           action.target,
