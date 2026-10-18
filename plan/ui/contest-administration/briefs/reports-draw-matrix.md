@@ -20,7 +20,7 @@ Directors currently run this report from GliderScore. Two printed outputs for a 
 - **Header rows.** The compact output has one combined row per group ("Round 1 Group 1"); the single-column output has a round header with group headers beneath it. The new design has a round header row and a group header row, as the requirements say, and each spans all columns.
 - **Names** are "Surname, Given". Pilot rows are airy, so the report is long (14 rounds take three pages two-column and seven pages single-column).
 - **The compact output keeps a group together** at the bottom of a column or moves it to the next; the single-column output does not. The new design keeps groups together in both.
-- **Extra columns** the new report does not have: radio frequency, country and "Org Rnd" (the round the pilot belongs to, repeated on every row). Do not add them.
+- **Extra columns** the new report does not have: radio frequency (decided: no report shows it), country and "Org Rnd" (the round the pilot belongs to, repeated on every row). Do not add them.
 - **Footer.** The date and time at the left and the page number at the right.
 - **What the new design should improve on.** The combined group header makes it hard to see where a round starts. The airy rows waste paper in the default view, and in compact mode the page is dense without clear separation between the two table columns. Column headings are repeated per column but the round is not repeated when a round spans the column break.
 
@@ -119,7 +119,5 @@ Light theme first. Show one dark-theme viewer screen to prove the sheet stays bl
 4. **Pilot number or ordinal.** The earlier Contest Documents requirement shows an ordinal when there are no pilot numbers. This report's requirement does not. Confirm that there is no ordinal column here.
 5. **Compact sub-options.** Does turning compact mode on forget Additional pilot info, or only disable it? Recommended: only disable it.
 6. **Where do round headers repeat in compact mode.** Per table column, as designed. Confirm.
-7. **Radio frequency column.** The current report shows each pilot's frequency. The requirements do not list it. Recommended: leave it out of this release. Confirm.
-8. **Country column.** The current report shows country. The requirements do not list it. Confirm it is omitted, as on the standings report.
-9. **Discipline in the title.** The current title ends with "- Duration". The requirement has the contest name and "Flight Matrix" only. Confirm the discipline is not shown.
-10. **Name format.** "Surname, Given", normal capitalization, as on the standings report.
+7. **Country column.** The current report shows country. The requirements do not list it. Confirm it is omitted, as on the standings report.
+8. **Discipline in the title.** The current title ends with "- Duration". The requirement has the contest name and "Flight Matrix" only. Confirm the discipline is not shown.

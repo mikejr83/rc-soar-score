@@ -11,6 +11,8 @@ The initial release has four reports. Each has its own brief that builds on this
 - [Scoring Sheet](reports-scoring-sheet.md) — blank grids for officials to write scores on.
 - [Pilot Scoring Cards](reports-pilot-scoring-cards.md) — cut-out cards, one set per pilot.
 
+No report shows a radio frequency column.
+
 Please produce a canvas/prototype with the Reports page in each state, the viewer frame with a stand-in report (use Overall Standings), the filter and options panel, the displayed-versus-printable treatment, the print flow, and the responsive behaviour. The four reports are designed in their own briefs; do not design their content here.
 
 **Users:** contest directors (CDs) and their helpers. Reports are used two ways. **Before the contest** at home on a laptop or tablet: print the matrix, the sheets and the cards, often for a big championship. **During and after the contest**, at the flying field on a tablet or at a laptop in the scoring tent: run the standings between rounds, hand a printout to the announcer, reprint a card for a pilot who lost theirs. They are busy and interrupted. They want to find the report, set a few filters and press print.
