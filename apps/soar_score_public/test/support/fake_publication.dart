@@ -19,7 +19,16 @@ const String fakeContestId = '019c0000-0000-7000-8000-000000000030';
 /// - Waters flies 900, 990, 990; as of round 3 round 1 is dropped, as of
 ///   round 2 nothing is.
 /// - Adams falls to fourth in round 3.
-Map<String, Object?> fakePublicationJson({String? contestStatus}) => {
+/// - Teams: the Eagles (Smith, Adams) lead the Hawks (Baker, Waters);
+///   `teams: false` makes a contest without teams.
+/// - Round 3 flies in two groups; Waters' group 2 flight is replaced by a
+///   re-flight, and its scores carry raw components (#456, #457).
+/// - [discipline] is the `discipline_type`; F3K has no landing column.
+Map<String, Object?> fakePublicationJson({
+  String? contestStatus,
+  bool teams = true,
+  String discipline = 'F5J',
+}) => {
   'publication_id': fakeContestId,
   'visibility': 'Public',
   'projection_revision': 1,
@@ -33,33 +42,47 @@ Map<String, Object?> fakePublicationJson({String? contestStatus}) => {
     'city': 'Boulder',
     'state': 'CO',
     'country': 'USA',
-    'discipline': 'F5J',
+    'discipline': discipline,
     'status': ?contestStatus,
   },
-  'discipline_type': 'F5J',
+  'discipline_type': discipline,
   'calculation_version': 'f5j-1',
   'results_hidden_through_round': null,
   'participants': [
-    _pilot('smith', 'John', 'Smith'),
-    _pilot('baker', 'Mike', 'Baker'),
-    _pilot('adams', 'Dave', 'Adams'),
-    _pilot('waters', 'Chuck', 'Waters'),
+    _pilot('smith', 'John', 'Smith', team: teams ? 'eagles' : null),
+    _pilot('baker', 'Mike', 'Baker', team: teams ? 'hawks' : null),
+    _pilot('adams', 'Dave', 'Adams', team: teams ? 'eagles' : null),
+    _pilot('waters', 'Chuck', 'Waters', team: teams ? 'hawks' : null),
   ],
-  'teams': <Object?>[],
+  'teams': [
+    if (teams) ...[
+      {
+        'team_key': 'eagles',
+        'name': 'Eagles',
+        'pilots': ['adams', 'smith'],
+      },
+      {
+        'team_key': 'hawks',
+        'name': 'Hawks',
+        'pilots': ['baker', 'waters'],
+      },
+    ],
+  ],
   'matrix': null,
   'scores': [
     _score(1, 'smith', 1000),
     _score(2, 'smith', 1000),
-    _score(3, 'smith', 1000),
+    _score(3, 'smith', 1000, time: 600, height: 120),
     _score(1, 'baker', 998),
     _score(2, 'baker', 998),
-    _score(3, 'baker', 998),
+    _score(3, 'baker', 998, time: 598.8, height: 122),
     _score(1, 'adams', 998),
     _score(2, 'adams', 998),
-    _score(3, 'adams', 850),
+    _score(3, 'adams', 850, group: 2, time: 510, height: 140),
     _score(1, 'waters', 900),
     _score(2, 'waters', 990),
-    _score(3, 'waters', 990),
+    _score(3, 'waters', 400, group: 2, selected: false, time: 240, height: 135),
+    _score(3, 'waters', 990, group: 2, reflight: 1, time: 594, height: 118),
   ],
   'standings': {
     'rounds': [
@@ -71,7 +94,9 @@ Map<String, Object?> fakePublicationJson({String? contestStatus}) => {
           _standing('adams', 2, 998, tied: true),
           _standing('waters', 4, 900),
         ],
-        'teams': <Object?>[],
+        'teams': [
+          if (teams) ...[_team('eagles', 1, 1998), _team('hawks', 2, 1898)],
+        ],
       },
       {
         'as_of_round': 2,
@@ -81,7 +106,9 @@ Map<String, Object?> fakePublicationJson({String? contestStatus}) => {
           _standing('adams', 2, 1996, tied: true),
           _standing('waters', 4, 1890),
         ],
-        'teams': <Object?>[],
+        'teams': [
+          if (teams) ...[_team('eagles', 1, 3996), _team('hawks', 2, 3886)],
+        ],
       },
       {
         'as_of_round': 3,
@@ -91,19 +118,26 @@ Map<String, Object?> fakePublicationJson({String? contestStatus}) => {
           _standing('waters', 3, 1980, dropped: [1], penalty: 50),
           _standing('adams', 4, 2846),
         ],
-        'teams': <Object?>[],
+        'teams': [
+          if (teams) ...[_team('eagles', 1, 5846), _team('hawks', 2, 4974)],
+        ],
       },
     ],
   },
   'calculation': {'as_of_round': 3, 'computed_at': '2026-10-11T22:00:00Z'},
 };
 
-Map<String, Object?> _pilot(String key, String first, String last) => {
+Map<String, Object?> _pilot(
+  String key,
+  String first,
+  String last, {
+  String? team,
+}) => {
   'pilot_key': key,
   'classification': null,
   'number': null,
   'retired_at_round': null,
-  'team_key': null,
+  'team_key': team,
   'details': {
     'first_name': first,
     'last_name': last,
@@ -114,16 +148,38 @@ Map<String, Object?> _pilot(String key, String first, String last) => {
   },
 };
 
-Map<String, Object?> _score(int round, String key, double points) => {
+Map<String, Object?> _score(
+  int round,
+  String key,
+  double points, {
+  int group = 1,
+  bool selected = true,
+  int? reflight,
+  double? time,
+  double? height,
+}) => {
   'round': round,
-  'group': 1,
+  'group': group,
   'pilot_key': key,
   'outcome': 'flown',
   'raw_points': points,
   'landing_points': 0,
   'penalty_points': 0,
   'group_score': points,
-  'selected': true,
+  'selected': selected,
+  'preliminary': false,
+  // Provisional keys from #457 and #456; see PublishedContest.
+  'reflight': ?reflight,
+  if (time != null)
+    'raw_components': {'time_flown': time, 'launch_height': height},
+};
+
+Map<String, Object?> _team(String key, int place, double score) => {
+  'team_key': key,
+  'place': place,
+  'tied': false,
+  'team_score': score,
+  'counted_pilots': key == 'eagles' ? ['adams', 'smith'] : ['baker', 'waters'],
   'preliminary': false,
 };
 
