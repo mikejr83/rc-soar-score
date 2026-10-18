@@ -16,6 +16,19 @@ class ThemeModeSetting extends StatelessWidget {
       'Choose a light or dark look, or follow your device. This is saved on '
       'this device for your account and is not shared with other devices.';
 
+  static const saveFailedMessage =
+      'The theme could not be saved. It applies until you close the app.';
+
+  Future<void> _choose(
+    BuildContext context,
+    ThemeController controller,
+    ThemeMode mode,
+  ) async {
+    final messenger = ScaffoldMessenger.of(context);
+    if (await controller.setMode(mode)) return;
+    messenger.showSnackBar(const SnackBar(content: Text(saveFailedMessage)));
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -58,7 +71,8 @@ class ThemeModeSetting extends StatelessWidget {
               selected: {controller?.mode ?? ThemeMode.system},
               onSelectionChanged: controller == null
                   ? null
-                  : (selection) => controller.setMode(selection.single),
+                  : (selection) =>
+                        _choose(context, controller, selection.single),
             ),
           ],
         ),

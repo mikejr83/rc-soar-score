@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_contest/app.dart';
 import 'package:soar_score_contest/pages/settings_page.dart';
 import 'package:soar_score_contest/router.dart';
+import 'package:soar_score_contest/widgets/settings/theme_mode_setting.dart';
 import 'package:soar_score_contest/services/theme/theme_controller.dart';
 import 'package:soar_score_ui_storage/soar_score_ui_storage.dart';
 
@@ -58,6 +59,18 @@ void main() {
     });
   }
 
+  testWidgets('a failed save is reported and the theme still applies', (
+    tester,
+  ) async {
+    await _pumpSettings(tester, _FailingStore());
+
+    await tester.tap(find.text('Dark'));
+    await tester.pumpAndSettle();
+
+    expect(_appThemeMode(tester), ThemeMode.dark);
+    expect(find.text(ThemeModeSetting.saveFailedMessage), findsOneWidget);
+  });
+
   testWidgets('the choice is remembered by a fresh app on the same store', (
     tester,
   ) async {
@@ -71,4 +84,13 @@ void main() {
 
     expect(_appThemeMode(tester), ThemeMode.dark);
   });
+}
+
+/// A store whose writes fail, as the contract allows.
+class _FailingStore extends BackendLocalUiStore {
+  _FailingStore() : super(MemoryLocalUiBackend());
+
+  @override
+  Future<bool> set<T>(String accountId, LocalUiKey<T> key, T value) async =>
+      false;
 }

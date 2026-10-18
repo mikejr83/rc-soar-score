@@ -38,14 +38,17 @@ class ThemeController extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Applies [mode] now and stores it for the current account.
-  Future<void> setMode(ThemeMode mode) async {
+  /// Applies [mode] now and stores it for the current account. Returns
+  /// whether it was saved: `false` means it applies until the app closes or
+  /// the account changes. Without a store there is nothing to save, so that
+  /// counts as saved.
+  Future<bool> setMode(ThemeMode mode) async {
     _generation++;
     if (mode != _mode) {
       _mode = mode;
       notifyListeners();
     }
-    await _store?.set(_account.id, themeModeKey, mode);
+    return await _store?.set(_account.id, themeModeKey, mode) ?? true;
   }
 
   void _accountChanged() => load();
