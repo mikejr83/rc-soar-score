@@ -163,10 +163,21 @@ Every route renders inside the site shell (`widgets/site_shell.dart`: header wit
 | Name people use                     | Route               | Source (`lib/`)                   |
 | ----------------------------------- | ------------------- | --------------------------------- |
 | Site home, landing, homepage        | `/`                 | `pages/site/landing_page.dart`    |
-| Docs                                | `/docs`             | `pages/site/docs_page.dart`       |
-| Help                                | `/help`             | `pages/site/help_page.dart`       |
 | Contests (search, placeholder #434) | `/results/contests` | `pages/results/results_page.dart` |
 | Not found (not a route)             | none                | `pages/site/not_found_page.dart`  |
+
+Documentation, help and support routes are registered in `lib/docs_routes.dart` (spec: `plan/ui/public-site/docs-help.md`, `support.md`). `/help` only redirects to `/docs`.
+
+| Name people use                                    | Route                                       | Source (`lib/`)                            |
+| -------------------------------------------------- | ------------------------------------------- | ------------------------------------------ |
+| Docs landing, help landing                         | `/docs` (`/help` redirects here)            | `pages/docs/docs_landing_page.dart`        |
+| Contest Director Getting Started, competition help | `/docs/competitions`                        | `pages/docs/competitions_page.dart`        |
+| Help Me Enter My Score, participant scoring help   | `/docs/participant-scoring`                 | `pages/docs/participant_scoring_page.dart` |
+| F5J score entry quick reference                    | `/docs/participant-scoring/disciplines/f5j` | `pages/docs/f5j_scoring_page.dart`         |
+| I Need An Account?, user account help              | `/docs/user-accounts`                       | `pages/docs/user_accounts_page.dart`       |
+| Finding Contests and Results, public contests help | `/docs/contests-and-scores`                 | `pages/docs/contests_and_scores_page.dart` |
+| Docs not found (any unknown route under `/docs`)   | `/docs/not-found`                           | `pages/docs/docs_not_found_page.dart`      |
+| Support, request support                           | `/support`                                  | `pages/support/support_page.dart`          |
 
 ### Self-scoring app (`soar_score_self_score`)
 
