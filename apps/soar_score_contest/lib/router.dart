@@ -21,6 +21,7 @@ import 'pages/new_contest_wizard_page.dart';
 import 'pages/participant_editor_page.dart';
 import 'pages/participants_page.dart';
 import 'pages/roles_page.dart';
+import 'pages/settings_page.dart';
 import 'services/workspace/workspace_control_target.dart';
 import 'widgets/contest_shell.dart';
 import 'widgets/unsaved_changes_guard.dart';
@@ -49,6 +50,9 @@ const String rolesPath = '$landingPath/roles';
 
 /// The roles page with its name dialog open, for the `New role` action.
 const String newRolePath = '$rolesPath?new=1';
+
+/// The settings page (system scope), opened from the account control.
+const String settingsPath = '$landingPath/settings';
 
 /// The landings page (system scope).
 const String landingsPath = '$landingPath/landings';
@@ -147,6 +151,11 @@ GoRouter buildAppRouter({
             builder: (context, state) => RolesPage(
               createRequested: state.uri.queryParameters['new'] == '1',
             ),
+          ),
+          GoRoute(
+            path: settingsPath,
+            name: 'settings',
+            builder: (context, state) => const SettingsPage(),
           ),
           GoRoute(
             path: landingsPath,

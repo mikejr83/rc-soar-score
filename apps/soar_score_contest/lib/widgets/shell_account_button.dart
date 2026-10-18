@@ -6,22 +6,20 @@ import '../auth/auth_session.dart';
 import '../auth/auth_session_inherited.dart';
 import '../router.dart';
 import 'app_version_label.dart';
-import 'not_wired_up_dialog.dart';
 
 /// The account control at the bottom of the shell rail.
 ///
 /// Signed in, it is the user's picture; its menu names the user and offers
 /// `Settings` and `Sign out`. Signed out it is a gear: in the offline desktop
 /// app its menu offers `Sign in` and `Settings` (there is no account to show),
-/// otherwise it opens the not-yet-available settings dialog.
+/// otherwise it opens the Settings page directly.
 class ShellAccountButton extends StatelessWidget {
   const ShellAccountButton({super.key});
 
   static const settingsLabel = 'Settings';
-  static const settingsDetail = 'Settings are not built yet.';
 
   static void _openSettings(BuildContext context) =>
-      showNotWiredUpDialog(context, settingsLabel, detail: settingsDetail);
+      GoRouter.of(context).go(settingsPath);
 
   /// Ends the session, then returns to the landing page. The navigation
   /// guard redirects on its own when the session ends; going there here too
