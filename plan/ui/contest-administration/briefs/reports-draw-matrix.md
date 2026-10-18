@@ -10,6 +10,19 @@ The report shows each round and group, and the pilots flying in them. It is the 
 
 **Platform and visual language:** Flutter, Material 3 for everything outside the sheet. The sheet is an unthemed paper document: black on white, a neutral typeface, no theme colours, every mark surviving a black-and-white laser printer. Tablet and larger. It must work with browser text zoom and large system fonts. Never use colour alone for state. The sheet exposes real table semantics to screen readers.
 
+## Reference: the report directors use today
+
+Directors currently run this report from GliderScore. A three-page printed output for a 14-round contest (3 groups per round, 5 pilots per group) is attached to this brief as a reference. It is a reference, not a template: the requirements in this brief win where they differ. What it shows:
+
+- **Heading.** "{Contest} - Draw - Duration" (the discipline name is part of the title), the club and date in brackets, then the vendor's web address. The new heading is the contest name with "Flight Matrix" and a venue and dates subheading. Drop the vendor line and the discipline suffix.
+- **Two columns of tables on every page**, flowing down the left column and then the right column, each with its **own column headings** (Name, Freq, Ctry, Org Rnd). Rounds 1 to 3 fill the left column of page 1 and rounds 4 to 6 the right. The new **Compact mode** reproduces this layout; the default view is a single column.
+- **Header rows.** One combined row per group ("Round 1 Group 1", "Round 1 Group 2"), repeated for every group. There is no separate round header. The new design has a round header row and a group header row, as the requirements say.
+- **Names** are "Surname, Given". Every pilot row has a blank line of space beneath it, so the report is airy but long (14 rounds take three pages).
+- **Groups are not split across a column break.** A whole group stays together at the bottom of a column or moves to the next.
+- **Extra columns** the new report does not have: radio frequency, country and "Org Rnd" (the round the pilot belongs to, repeated on every row). Do not add them.
+- **Footer.** The date and time at the left and the page number at the right.
+- **What the new design should improve on.** The combined group header makes it hard to see where a round starts. The airy rows waste paper in the default view, and in compact mode the page is dense without clear separation between the two table columns. Column headings are repeated per column but the round is not repeated when a round spans the column break.
+
 ## The report
 
 ### Heading
@@ -24,7 +37,7 @@ The default orientation is **portrait**, because the table is tall and narrow.
 
 A tabular layout. One row per pilot per group. Columns:
 
-- **Pilot name**
+- **Pilot name**, formatted "Surname, Given" in normal capitalization (not all capitals).
 - **Lane number**: shown only when lanes are turned on for the contest.
 - **Team**: only when the contest has teams.
 - **Pilot number**: only when the contest uses pilot numbers.
@@ -105,3 +118,7 @@ Light theme first. Show one dark-theme viewer screen to prove the sheet stays bl
 4. **Pilot number or ordinal.** The earlier Contest Documents requirement shows an ordinal when there are no pilot numbers. This report's requirement does not. Confirm that there is no ordinal column here.
 5. **Compact sub-options.** Does turning compact mode on forget Additional pilot info, or only disable it? Recommended: only disable it.
 6. **Where do round headers repeat in compact mode.** Per table column, as designed. Confirm.
+7. **Radio frequency column.** The current report shows each pilot's frequency. The requirements do not list it. Recommended: leave it out of this release. Confirm.
+8. **Country column.** The current report shows country. The requirements do not list it. Confirm it is omitted, as on the standings report.
+9. **Discipline in the title.** The current title ends with "- Duration". The requirement has the contest name and "Flight Matrix" only. Confirm the discipline is not shown.
+10. **Name format.** "Surname, Given", normal capitalization, as on the standings report.
