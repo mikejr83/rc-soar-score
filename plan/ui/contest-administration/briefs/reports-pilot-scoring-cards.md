@@ -86,7 +86,7 @@ Cards are designed to fit into **quadrants** of a standard **Letter or A4** shee
 When the contest has **many rounds**, a quadrant is too short to hold the whole table at a writable row height, so **two cards per page** are used instead (each a half page). Design:
 
 - **Four-up** (quadrant) and **two-up** (half page) layouts on Letter and on A4, with the margin in millimetres. Keep every card inside the printer's safe area (recommend a 6 mm unprintable margin) and say so.
-- How the choice is made: a **Cards per page** setting in the Page group of the panel: Automatic (default), Four, Two. In Automatic, the report uses two-up when the rows would fall below the minimum writable height, and the panel says which it picked and why ("14 rounds don't fit four to a page; using two"). State the threshold in rounds for F5J, assuming the usual component set.
+- How the choice is made: a **Cards per page** setting in the Page group of the panel: Automatic (default), Four, Two. **There is no fixed round count.** The threshold follows from the content sizing: Automatic uses four-up when every round row fits in a quadrant at the minimum writable row height (with the identity block, QR code and header), and two-up otherwise. The panel says which it picked and why ("14 rounds don't fit four to a page; using two"). **Anchor: an 8-round F5J contest must fit four to a page** using the layout of the current report as a base (all F5J columns, Lane, Penalty, Timer and Validated). State the maximum number of rounds your sizing allows in four-up and in two-up, and show that 8 fits four-up and 14 needs two-up. If sizing tradeoffs let more than 8 fit, say what you gave up (row height, QR size).
 - What happens if even a half page cannot hold all rounds (very long contests): recommended, the card continues on a second card for the same pilot ("Card 1 of 2"), with the identity block repeated in small. Show it.
 - A **guideline border** around each card, so the cards can be cut. Draw a thin dashed cut line on the page between cards, and short crop marks at the page edges. The line must be visible on paper and **not** bleed into the card's contents. Show it in black and white.
 - A footer on every card in tiny text: the **matrix revision** and the rounds covered, so a card printed before a redraw is recognisable as old.
@@ -133,17 +133,22 @@ Also design the preview. On screen, the sheets are shown as pages with several c
 
 Light theme first. Show one dark-theme viewer screen to prove the sheet stays black on white.
 
+## Decisions made
+
+These were open and are settled. Design to them.
+
+1. **Name format on the card title.** "Given Surname" in normal capitalization (not all capitals), unlike the lists, which use "Surname, Given".
+2. **Four-up versus two-up.** No fixed round count; the sizing decides. An 8-round F5J contest must fit four-up, using the current report's layout as a base.
+3. **No frequency or country on the card.** Frequency is in no report; country is not on the card.
+
 ## Questions to carry into the design
 
 1. **What "online scoring enabled" means.** The requirement says to show the QR code "if online scoring has been enabled". The contest has no self-scoring setting; participant scoring is a separate Open or Closed state that changes during a contest. Which condition shows the QR code? Recommended: show it unless the invitation service is unavailable, since a card is printed before participant scoring opens.
 2. **Does printing create invitations?** Each QR code is an access token for one pilot. Is a token issued when the card is generated, or does the card carry a stable link? Reprinting a card should not silently invalidate the previous one, or should it? This affects the security wording near the QR code.
 3. **Link printed in text.** Print the URL under the code as a fallback? It exposes the invitation to anyone who sees the card. Recommended: no.
-4. **Cards per page rule.** The requirement says two-up "when contests have a large number of rounds" without a number. The threshold above is a proposal.
-5. **Continuing cards.** For contests too long even for a half page, the continuation card is a proposal.
-6. **Signature block.** The earlier per-round card requirement had a signature block for pilot and timer; this report has a Timer column and no signature. Confirm none is wanted.
-7. **Re-flight.** The earlier requirement had a re-flight column on the card. This report does not. Confirm re-flights are written in a spare row or not at all.
-8. **Pre-fill values.** Official only, or also participant submissions? Recommended: official only, with unofficial values marked.
-9. **Pilots with no matrix rows.** Do withdrawn or late-added pilots get a card? Recommended: late-added yes, withdrawn no, and the picker says which.
-10. **Order of cards.** Alphabetical, by pilot number, or by team? Recommended: alphabetical.
-11. **Name format on the card title.** Lists use "Surname, Given". The current card title is "Given SURNAME". On a card the pilot's name is a large title, and "Given Surname" in normal capitalization reads naturally there. Recommended: "Given Surname". Confirm, or use "Surname, Given" for consistency.
-12. **Two-up as the common layout.** The current output is two cards per page. The requirement says four to a page, with two when there are many rounds. Both PDFs agree that 14 rounds is "many". Confirm that the 14-round example is the case for two-up, and that the threshold is somewhere below it.
+4. **Continuing cards.** For contests too long even for a half page, the continuation card is a proposal.
+5. **Signature block.** The earlier per-round card requirement had a signature block for pilot and timer; this report has a Timer column and no signature. Confirm none is wanted.
+6. **Re-flight.** The earlier requirement had a re-flight column on the card. This report does not. Confirm re-flights are written in a spare row or not at all.
+7. **Pre-fill values.** Official only, or also participant submissions? Recommended: official only, with unofficial values marked.
+8. **Pilots with no matrix rows.** Do withdrawn or late-added pilots get a card? Recommended: late-added yes, withdrawn no, and the picker says which.
+9. **Order of cards.** Alphabetical, by pilot number, or by team? Recommended: alphabetical.
