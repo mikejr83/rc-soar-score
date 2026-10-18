@@ -7,7 +7,7 @@ The page will show the contest information:
 - Name
 - Dates
 - Venue
-- Current status: In-Progress or Completed
+- Current status: In-Progress or Completed. Completed comes from the contest lifecycle state; any other published contest is in progress.
 
 ## Route
 
@@ -33,15 +33,13 @@ The route will change when the round changes: `/results/contests/:contestId/roun
 
 ### Contest Not Visible
 
-The user may navigate to the contest page or its sub-routes through a saved link or some other means. If this occurs when the contest is marked private the page should indicate that the contest is currently in private mode. The screen should indicate that private mode hides the contest information including all scores and results.
+The user may navigate to the contest page or its sub-routes through a saved link or some other means. If this occurs when the contest exists but is not yet public (its results are pending or the director has marked it private) the page shows this message:
 
-A message explaining that this is a contest director action should be placed on the page. It should offer the following rational reasons why a contest is made private:
-
-- The contest has not started and the director does not wish it visible before it actually starts.
-- There is a major discrepancy in entered scores and the director is working to resolve them.
-- Winners are being announced and the director does not wish to spoil the surprise.
+> This contest has pending results or has been marked private. It is not shown at this time. The contest will be shown after the final placing is announced and the contest director makes the results public or 48hrs after the last score entered.
 
 A suggestion to check back at a later time is made. The page should indicate that it will attempt to check after an interval (15 minutes) to see if the contest has become public.
+
+A contest that never existed or has been delisted uses the contest not found page instead ([contest-not-found.md](contest-not-found.md)).
 
 ### Overall Individual Results
 

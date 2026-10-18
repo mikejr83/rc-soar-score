@@ -167,6 +167,14 @@ class ScoreEntryPanel extends StatelessWidget {
               color: scheme.onSurfaceVariant,
               text: block!.message,
             ),
+          if (row.retired)
+            ScoreInlineNote(
+              icon: Icons.person_off_outlined,
+              color: scheme.onSurfaceVariant,
+              text:
+                  '${row.pilot.name} retired from round '
+                  '${row.pilot.retiredAtRound}. Entry is closed for this flight.',
+            ),
           // Landing.
           const SizedBox(height: 14),
           Wrap(

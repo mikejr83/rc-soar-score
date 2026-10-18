@@ -25,6 +25,9 @@ class ScoreRowActions {
     required this.onKeepMine,
     required this.onTakeTheirs,
     required this.onRefresh,
+    required this.onHistory,
+    required this.onRetire,
+    required this.onReinstate,
   });
 
   final VoidCallback onActivate;
@@ -33,6 +36,15 @@ class ScoreRowActions {
   final VoidCallback onKeepMine;
   final VoidCallback onTakeTheirs;
   final VoidCallback onRefresh;
+
+  /// Opens the score history of the row.
+  final VoidCallback onHistory;
+
+  /// Retires the pilot from this round on, after asking.
+  final VoidCallback onRetire;
+
+  /// Takes a retirement back, after asking.
+  final VoidCallback onReinstate;
 }
 
 /// One pilot of the group: a grid row under the table heading. Time and
@@ -57,6 +69,7 @@ class ScoreRowTile extends StatefulWidget {
     this.focusOrder = false,
     this.theirs,
     this.focusField,
+    this.retireBlocked,
   });
 
   final ScoringRow row;
@@ -87,6 +100,9 @@ class ScoreRowTile extends StatefulWidget {
 
   /// A field to put the cursor in, set by a Score check finding.
   final String? focusField;
+
+  /// Why the pilot cannot be retired or reinstated now, or null.
+  final String? retireBlocked;
 
   @override
   State<ScoreRowTile> createState() => _ScoreRowTileState();
@@ -199,7 +215,8 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
 
   String _k(String name) => 'score-$name-${widget.row.id.value}';
 
-  bool get _readOnly => widget.block != null || widget.row.isLocked;
+  bool get _readOnly =>
+      widget.block != null || widget.row.isLocked || widget.row.retired;
 
   // Cells.
 
@@ -600,6 +617,12 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
         (Icons.help_outline, 'Check: ${widget.findings.length}', colors.warn),
       if (widget.row.isLocked && widget.block != null)
         (Icons.lock, widget.block!.message, null),
+      if (widget.row.retired)
+        (
+          Icons.person_off_outlined,
+          'Retired from round ${widget.row.pilot.retiredAtRound}',
+          null,
+        ),
     ];
     return Padding(
       padding: const EdgeInsets.only(top: 12),
@@ -630,30 +653,56 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
     );
   }
 
-  Widget _menuCell(BuildContext context) => FocusStep(
-    order: 12,
-    child: Padding(
-      padding: const EdgeInsets.only(top: 6),
-      child: PopupMenuButton<void>(
-        tooltip: 'More for ${widget.row.pilot.name}',
-        icon: const Icon(Icons.more_vert),
-        itemBuilder: (context) => const [
-          PopupMenuItem<void>(
-            enabled: false,
-            child: Text('Score history · Later release'),
-          ),
-          PopupMenuItem<void>(
-            enabled: false,
-            child: Text('Retire pilot · Later release'),
-          ),
-          PopupMenuItem<void>(
-            enabled: false,
-            child: Text('Correct a locked score · Later release'),
-          ),
-        ],
+  Widget _menuCell(BuildContext context) {
+    final row = widget.row;
+    final retired = row.retired;
+    final blocked = widget.retireBlocked;
+    final round = row.pilot.retiredAtRound;
+    return FocusStep(
+      order: 12,
+      child: Padding(
+        padding: const EdgeInsets.only(top: 6),
+        child: PopupMenuButton<String>(
+          key: ValueKey('row-menu-${row.id.value}'),
+          tooltip: 'More for ${row.pilot.name}',
+          icon: const Icon(Icons.more_vert),
+          onSelected: (value) => switch (value) {
+            'history' => widget.actions.onHistory(),
+            'retire' => widget.actions.onRetire(),
+            'reinstate' => widget.actions.onReinstate(),
+            _ => null,
+          },
+          itemBuilder: (context) => [
+            const PopupMenuItem<String>(
+              key: ValueKey('menu-history'),
+              value: 'history',
+              child: Text('Score history'),
+            ),
+            if (round == null || !retired)
+              PopupMenuItem<String>(
+                key: const ValueKey('menu-retire'),
+                value: 'retire',
+                enabled: blocked == null,
+                child: Text(blocked ?? 'Retire pilot from this round on'),
+              )
+            else
+              PopupMenuItem<String>(
+                key: const ValueKey('menu-reinstate'),
+                value: 'reinstate',
+                enabled: blocked == null,
+                child: Text(
+                  blocked ?? 'Reinstate pilot (retired from round $round)',
+                ),
+              ),
+            const PopupMenuItem<String>(
+              enabled: false,
+              child: Text('Correct a locked score · Later release'),
+            ),
+          ],
+        ),
       ),
-    ),
-  );
+    );
+  }
 
   Widget _laneCell(BuildContext context) {
     final theme = Theme.of(context);
@@ -961,6 +1010,7 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
       RowStatus.submitted => 'submitted by a participant',
       RowStatus.official => 'official',
       RowStatus.locked => 'locked',
+      RowStatus.retired => 'retired',
     };
   }
 }

@@ -63,7 +63,7 @@ class StatusChip extends StatelessWidget {
   }
 }
 
-/// The status of one row: Not entered, Unsaved, Submitted, Official, Locked.
+/// The status of one row: Not entered, Unsaved, Submitted, Official, Locked, Retired.
 class RowStatusChip extends StatelessWidget {
   const RowStatusChip({super.key, required this.status, this.unsaved = false});
 
@@ -107,6 +107,12 @@ class RowStatusChip extends StatelessWidget {
         label: 'Locked',
         background: scheme.inverseSurface,
         foreground: scheme.onInverseSurface,
+      ),
+      RowStatus.retired => StatusChip(
+        icon: Icons.person_off_outlined,
+        label: 'Retired',
+        background: scheme.surfaceContainerHighest,
+        foreground: scheme.onSurface,
       ),
     };
   }

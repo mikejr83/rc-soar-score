@@ -11,6 +11,7 @@ import 'app_mode_provider.dart';
 import 'auth/auth_session_inherited.dart';
 import 'connectivity_provider.dart';
 import 'contest_draft_provider.dart';
+import 'local_ui_store_provider.dart';
 import 'platform/app_bootstrap.dart';
 import 'router.dart';
 import 'services/connectivity/app_connectivity.dart';
@@ -107,6 +108,10 @@ class _SoarScoreContestAppState extends State<SoarScoreContestApp> {
     app = ContestDraftInherited(store: _draftStore, child: app);
     final bootstrap = widget.bootstrap;
     if (bootstrap != null) {
+      final uiStore = bootstrap.localUiStore;
+      if (uiStore != null) {
+        app = LocalUiStoreInherited(store: uiStore, child: app);
+      }
       app = AppSyncInherited(sync: bootstrap.appSync, child: app);
       app = ApiClientInherited(client: bootstrap.apiClient, child: app);
       final auth = bootstrap.authSession;

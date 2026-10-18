@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_public/app.dart';
 import 'package:soar_score_public/pages/results/results_page.dart';
-import 'package:soar_score_public/pages/site/docs_page.dart';
+import 'package:soar_score_public/pages/docs/docs_landing_page.dart';
 import 'package:soar_score_public/pages/site/landing_page.dart';
 
 void main() {
@@ -19,7 +19,10 @@ void main() {
       ),
       findsOneWidget,
     );
-    expect(find.textContaining('RC sailplane soaring contests'), findsOneWidget);
+    expect(
+      find.textContaining('RC sailplane soaring contests'),
+      findsOneWidget,
+    );
     expect(find.byKey(LandingPage.loginLink), findsOneWidget);
     expect(find.text('Login / Registration'), findsOneWidget);
     expect(find.byKey(LandingPage.docsLink), findsOneWidget);
@@ -38,7 +41,7 @@ void main() {
 
     await tester.tap(find.byKey(LandingPage.docsLink));
     await tester.pumpAndSettle();
-    expect(find.byType(DocsPage), findsOneWidget);
+    expect(find.byType(DocsLandingPage), findsOneWidget);
 
     await tester.tap(find.text('Home'));
     await tester.pumpAndSettle();

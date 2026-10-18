@@ -46,6 +46,18 @@ enum SectionId {
     kinds: [SettingKind.structural, SettingKind.present],
     mixed: true,
   ),
+  scoringAccess(
+    title: 'Scoring access',
+    short: 'Scoring access',
+    purpose: 'Whether participants may submit scores.',
+    kinds: [],
+  ),
+  adminLock(
+    title: 'Administration lock',
+    short: 'Admin lock',
+    purpose: 'Whether the contest can still be administered.',
+    kinds: [],
+  ),
   publicUpdates(
     title: 'Public updates and reviews',
     short: 'Public updates',

@@ -1,8 +1,8 @@
 import 'package:go_router/go_router.dart';
 
+import 'contest_routes.dart';
+import 'docs_routes.dart';
 import 'pages/results/results_page.dart';
-import 'pages/site/docs_page.dart';
-import 'pages/site/help_page.dart';
 import 'pages/site/landing_page.dart';
 import 'pages/site/not_found_page.dart';
 import 'widgets/site_shell.dart';
@@ -22,16 +22,7 @@ GoRouter buildAppRouter() {
             name: 'site_home',
             builder: (context, state) => const LandingPage(),
           ),
-          GoRoute(
-            path: '/docs',
-            name: 'site_docs',
-            builder: (context, state) => const DocsPage(),
-          ),
-          GoRoute(
-            path: '/help',
-            name: 'site_help',
-            builder: (context, state) => const HelpPage(),
-          ),
+          ...docsRoutes,
           // Results routes: contest search and results (#434 to #436).
           GoRoute(path: '/results', redirect: (_, _) => '/results/contests'),
           GoRoute(
@@ -39,6 +30,7 @@ GoRouter buildAppRouter() {
             name: 'results_contests',
             builder: (context, state) => const ResultsPage(),
           ),
+          ...contestRoutes,
         ],
       ),
     ],

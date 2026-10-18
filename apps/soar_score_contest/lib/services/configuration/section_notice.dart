@@ -30,6 +30,18 @@ class SectionNotice {
           'Changes here don’t affect '
           'the matrix or scores.',
         ),
+      if (id == SectionId.scoringAccess)
+        const SectionNotice(
+          Icons.info_outline,
+          'Opening or closing scoring access doesn’t affect the matrix or '
+          'scores.',
+        ),
+      if (id == SectionId.adminLock)
+        const SectionNotice(
+          Icons.info_outline,
+          'Locking doesn’t change the matrix or scores. It blocks changes to '
+          'the configuration, participants and matrix.',
+        ),
       if (id.kinds.contains(SettingKind.structural))
         if (running)
           SectionNotice(

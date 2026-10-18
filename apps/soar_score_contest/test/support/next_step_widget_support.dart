@@ -37,6 +37,9 @@ class WorkspaceServer {
   ContestScores? scores;
   int scoresStatus;
 
+  /// When not 404, reading the publication fails with this status.
+  int publicationStatus = 404;
+
   /// When set, the next action is answered with this status and message.
   int? rejectNext;
   String rejectMessage = 'The contest changed.';
@@ -104,7 +107,7 @@ class WorkspaceServer {
           : _json(current.toJson());
     }
     if (path.endsWith('/publication')) {
-      return _error(404, 'No publication.');
+      return _error(publicationStatus, 'No publication.');
     }
     if (path.endsWith('/contests/$matrixContestId')) {
       contestReads++;
@@ -144,6 +147,12 @@ class WorkspaceServer {
         adminLock: AdminLock.unlocked,
         updatedAt: DateTime.utc(2026, 10, 17, 15),
       ),
+      'complete' when contest.lifecycleState == LifecycleState.running =>
+        contest.copyWithState(
+          lifecycleState: LifecycleState.completed,
+          scoringAccess: ScoringAccess.closed,
+          updatedAt: DateTime.utc(2026, 10, 17, 15),
+        ),
       _ => null,
     };
     if (next == null) {

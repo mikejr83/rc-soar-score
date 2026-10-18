@@ -281,4 +281,58 @@ void main() {
       expect(response.statusCode, 404);
     });
   });
+
+  group('reading the history of a slot', () {
+    Future<dynamic> history(Object assignmentId) => api.send(
+      'GET',
+      '/contests/$_contestId/assignments/$assignmentId/scores/history',
+    );
+
+    test('lists every revision with its reason', () async {
+      await drawnContest(api);
+      final slot = await assignmentOf(1);
+      await enter(slot);
+      await enter(
+        slot,
+        base: 1,
+        components: {'time_flown': 500, 'launch_height': 200},
+        reason: 'Timer misread',
+      );
+
+      final response = await history(slot['id']!);
+      final body = await api.json(response);
+
+      expect(response.statusCode, 200, reason: '$body');
+      expect(body['assignment_id'], slot['id']);
+      final entries = (body['entries'] as List).cast<Map>();
+      expect(entries.map((e) => e['score_revision']), [1, 2]);
+      expect(entries.map((e) => e['outcome']), ['superseded', 'current']);
+      expect(entries.map((e) => e['reason']), [
+        'Entered by the director',
+        'Timer misread',
+      ]);
+      expect(entries.last['actor_id'], _owner.value);
+      expect(entries.last['authority'], 'Director');
+      expect((entries.first['components'] as Map)['time_flown'], 540);
+      expect(entries.last['at'], isNotNull);
+    });
+
+    test('is empty for a slot with no score', () async {
+      await drawnContest(api);
+
+      final body = await api.json(
+        await history((await assignmentOf(1))['id']!),
+      );
+
+      expect(body['entries'], isEmpty);
+    });
+
+    test('an unknown slot is 404', () async {
+      await drawnContest(api);
+
+      final response = await history(Id.create().value);
+
+      expect(response.statusCode, 404);
+    });
+  });
 }

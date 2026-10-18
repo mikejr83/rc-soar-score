@@ -69,9 +69,98 @@ class ScoringServer {
   /// The bodies of the entries received, in order.
   final List<Map<String, dynamic>> entries = [];
 
+  /// The history of each slot, oldest first.
+  final Map<Id, List<ScoreHistoryEntry>> _history = {};
+
+  /// Makes every history read fail with this status when not 200.
+  int historyStatus = 200;
+
   /// Pre-fills an official score for one slot.
   void seedScore(Id assignmentId, Map<String, Object?> components) {
     _score[assignmentId] = _official(assignmentId, components, 1);
+    _record(assignmentId, components, 1, 'seeded');
+  }
+
+  /// Pre-fills the next revision of a slot, with its reason.
+  void seedCorrection(
+    Id assignmentId,
+    Map<String, Object?> components,
+    String reason,
+  ) {
+    final revision = (_score[assignmentId]?.scoreRevision ?? 0) + 1;
+    _score[assignmentId] = _official(assignmentId, components, revision);
+    _record(assignmentId, components, revision, reason);
+  }
+
+  final Set<Id> _submitted = {};
+
+  /// A participant's submission waiting for the director: the slot is
+  /// Submitted, with no official score.
+  void seedPendingSubmission(Id assignmentId, Map<String, Object?> components) {
+    _submitted.add(assignmentId);
+    (_history[assignmentId] ??= []).add(
+      ScoreHistoryEntry(
+        attemptId: _sid('000c', 99),
+        outcome: ScoreHistoryOutcome.pending,
+        components: components,
+        actorId: _setBy,
+        authority: Authority.participant,
+      ),
+    );
+  }
+
+  /// Adds a participant's submission that never became official.
+  void seedLostSubmission(Id assignmentId, Map<String, Object?> components) {
+    (_history[assignmentId] ??= []).add(
+      ScoreHistoryEntry(
+        attemptId: _sid('000c', (_history[assignmentId]?.length ?? 0) + 50),
+        outcome: ScoreHistoryOutcome.notAdopted,
+        components: components,
+        actorId: _setBy,
+        authority: Authority.participant,
+      ),
+    );
+  }
+
+  void _record(
+    Id assignmentId,
+    Map<String, Object?> components,
+    int revision,
+    String reason,
+  ) {
+    final entries = _history[assignmentId] ??= [];
+    final shown = [
+      for (final e in entries)
+        if (e.outcome == ScoreHistoryOutcome.current)
+          ScoreHistoryEntry(
+            attemptId: e.attemptId,
+            outcome: ScoreHistoryOutcome.superseded,
+            scoreRevision: e.scoreRevision,
+            components: e.components,
+            reason: e.reason,
+            actorId: e.actorId,
+            authority: e.authority,
+            at: e.at,
+          )
+        else
+          e,
+    ];
+    shown.add(
+      ScoreHistoryEntry(
+        attemptId: _sid(
+          '000c',
+          revision + assignmentId.value.hashCode.abs() % 9999,
+        ),
+        outcome: ScoreHistoryOutcome.current,
+        scoreRevision: revision,
+        components: components,
+        reason: reason,
+        actorId: _setBy,
+        authority: Authority.director,
+        at: DateTime.utc(2026, 10, 17, 14 + revision),
+      ),
+    );
+    _history[assignmentId] = shown;
   }
 
   OfficialScore _official(
@@ -104,9 +193,11 @@ class ScoringServer {
       contestId: contestId,
       contestParticipationId: assignment.contestParticipationId,
       assignmentId: assignmentId,
-      state: score == null
-          ? ScorePlaceholderState.notEntered
-          : ScorePlaceholderState.official,
+      state: score != null
+          ? ScorePlaceholderState.official
+          : _submitted.contains(assignmentId)
+          ? ScorePlaceholderState.submitted
+          : ScorePlaceholderState.notEntered,
       scoreRevision: score?.scoreRevision ?? 0,
     );
   }
@@ -149,6 +240,22 @@ class ScoringServer {
         ],
       });
     }
+    if (request.method == 'GET' && path.endsWith('/scores/history')) {
+      if (historyStatus != 200) {
+        return _json({
+          'error': {'code': 'rejected', 'message': 'No history for you.'},
+        }, historyStatus);
+      }
+      final assignmentId = Id.parse(
+        path.split('/')[path.split('/').length - 3],
+      );
+      return _json(
+        ScoreHistory(
+          assignmentId: assignmentId,
+          entries: _history[assignmentId] ?? const [],
+        ).toJson(),
+      );
+    }
     if (request.method == 'GET' && path.endsWith('/scores')) {
       final matrix = matrixServer.matrix!;
       return _json({
@@ -186,6 +293,12 @@ class ScoringServer {
       );
       final official = _official(assignmentId, components, revision);
       _score[assignmentId] = official;
+      _record(
+        assignmentId,
+        components,
+        revision,
+        body['reason'] as String? ?? 'Entered by the director',
+      );
       // The first score moves a Ready contest to Running, as the server does.
       if (matrixServer.contest.lifecycleState == LifecycleState.ready) {
         matrixServer.contest = matrixServer.contest.copyWithState(

@@ -8,6 +8,7 @@ class MatrixPilot {
     required this.name,
     required this.role,
     required this.teamId,
+    this.retiredAtRound,
   });
 
   final Id participationId;
@@ -17,6 +18,13 @@ class MatrixPilot {
   final String name;
   final String role;
   final Id? teamId;
+
+  /// The first round the pilot no longer flies, or null.
+  final int? retiredAtRound;
+
+  /// Whether the pilot retired at or before round [ordinal].
+  bool hasRetiredBy(int ordinal) =>
+      retiredAtRound != null && retiredAtRound! <= ordinal;
 
   /// "12", or "–" when the contest has no pilot numbers.
   String get numberText => number?.toString() ?? '–';

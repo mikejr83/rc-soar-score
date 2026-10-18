@@ -43,7 +43,7 @@ createHandlers(
   addLandingTableRoutes(router, repository);
   addParticipantRoutes(router, repository);
   addRoleRoutes(router, repository);
-  addParticipationRoutes(router, repository);
+  addParticipationRoutes(router, repository, recalculation: recalculation);
   addTeamRoutes(router, repository);
   addMatrixRoutes(router, repository);
   addScoreRoutes(

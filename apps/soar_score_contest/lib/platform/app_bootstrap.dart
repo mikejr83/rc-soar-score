@@ -1,4 +1,5 @@
 import 'package:soar_score_api/soar_score_api.dart';
+import 'package:soar_score_ui_storage/soar_score_ui_storage.dart';
 
 import '../auth/auth_session.dart';
 import '../services/sync/app_sync.dart';
@@ -20,6 +21,10 @@ abstract class AppBootstrap {
   ApiClient get apiClient;
 
   ApiClient get remoteApiClient;
+
+  /// Where UI-only state (theme, hidden panels, drafts) is kept, or `null`
+  /// when the bootstrap has none (tests).
+  LocalUiStore? get localUiStore => null;
 
   /// What the screens may ask of synchronization; none on the web.
   AppSync get appSync => const NoAppSync();

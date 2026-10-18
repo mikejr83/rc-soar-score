@@ -20,6 +20,13 @@ class StubScoreAttemptRepository implements ScoreAttemptRepository {
       .firstOrNull;
 
   @override
+  Future<List<ScoreAttempt>> listForPlaceholder(Id scorePlaceholderId) async =>
+      [
+        for (final attempt in stored)
+          if (attempt.scorePlaceholderId == scorePlaceholderId) attempt,
+      ];
+
+  @override
   dynamic noSuchMethod(Invocation invocation) =>
       throw UnimplementedError('${invocation.memberName} is not stubbed');
 }

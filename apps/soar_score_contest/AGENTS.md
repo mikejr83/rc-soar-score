@@ -12,7 +12,8 @@ Contest management application for directors, pilots, and helpers. Runs on web a
 ## Boundaries
 
 - **Must not do direct database access**. All data access goes through `soar_score_api` client (which talks to `soar_score_api_handlers`, which uses `soar_score_data` backed by SQLite in the native app or by PostgreSQL on the server; the web build has no local database and calls the remote API).
-- Depends on: `soar_score_core`, `soar_score_data`, `soar_score_api`, `soar_score_sync`, `soar_score_ui`
+- Depends on: `soar_score_core`, `soar_score_data`, `soar_score_api`, `soar_score_sync`, `soar_score_ui`, `soar_score_ui_storage`
+- UI-only state (theme, hidden panels, drafts) goes through `LocalUiStore` from `soar_score_ui_storage`, reached with `localUiStoreOf(context)` (`lib/local_ui_store_provider.dart`; `null` in bare-page tests). Key every call by account id. Contest data never goes through it.
 - `soar_score_sync` is imported only by `lib/platform/native_sync.dart` and `native_bootstrap.dart`, so the web build contains no sync engine (`test/platform/web_closure_test.dart` checks it). Screens reach sync state through `AppBootstrap`, never the package.
 - The Material themes and shared color tokens live in `soar_score_ui` (`theme/app_theme.dart`): `ContestAppTheme`, `PublicAppTheme`, `SelfScoreAppTheme`, `AppColors`, `AppStatusColors`.
 

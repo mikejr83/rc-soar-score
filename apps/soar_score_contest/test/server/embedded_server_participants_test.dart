@@ -133,8 +133,9 @@ void main() {
         retiredAtRound: 2,
       ),
     );
-    expect(retired.retiredAtRound, 2);
-    expect(retired.classification, 'Expert');
+    expect(retired.participation.retiredAtRound, 2);
+    expect(retired.participation.classification, 'Expert');
+    expect(retired.recalculationWarning, isNull);
 
     // The profile is part of the contest, so it cannot be deleted yet.
     await expectLater(
