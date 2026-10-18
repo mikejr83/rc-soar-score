@@ -71,6 +71,16 @@ void main() {
     expect(_key('complete-dialog-missing'), findsNothing);
   });
 
+  testWidgets('still lists scores when only the publication read failed', (
+    tester,
+  ) async {
+    final server = _server(_round(1))..publicationStatus = 500;
+    await pumpWorkspace(tester, server);
+    await _openDialog(tester);
+    expect(_key('complete-dialog-unknown'), findsNothing);
+    expect(_key('complete-dialog-unflown'), findsOneWidget);
+  });
+
   testWidgets('cancel leaves the contest running', (tester) async {
     final server = _server(_round(1));
     await pumpWorkspace(tester, server);

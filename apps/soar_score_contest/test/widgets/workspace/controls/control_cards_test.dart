@@ -29,7 +29,7 @@ WorkspaceServer _server({
 
 void main() {
   group('the status summary', () {
-    testWidgets('shows the six values as text', (tester) async {
+    testWidgets('shows the labelled values as text', (tester) async {
       await pumpWorkspace(
         tester,
         _server(lock: AdminLock.locked, access: ScoringAccess.open),
@@ -39,9 +39,10 @@ void main() {
       expect(_text(tester, 'status-lifecycle-value'), 'Running');
       expect(_text(tester, 'status-scoring-value'), 'Open');
       expect(_text(tester, 'status-administration-value'), 'Locked');
-      expect(_text(tester, 'status-publication-value'), 'Not published');
-      expect(_text(tester, 'status-visibility-value'), 'Not public');
-      expect(_text(tester, 'status-deletion-value'), 'Not scheduled');
+      expect(_text(tester, 'status-publication-value'), 'Unpublished');
+      expect(_text(tester, 'status-results-value'), 'Off');
+      expect(_text(tester, 'status-archive-value'), 'Not archived');
+      expect(_key('status-deletion'), findsNothing);
     });
 
     testWidgets('follows a change without a reload', (tester) async {

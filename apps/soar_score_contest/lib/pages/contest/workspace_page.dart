@@ -455,7 +455,7 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
           contest: contest,
           control: control,
         ),
-        WorkspaceControl.archive => ArchiveControlCard(),
+        WorkspaceControl.archive => ArchiveControlCard(contest: contest),
         // Results hiding and publication have their own tickets.
         WorkspaceControl.results || WorkspaceControl.publication => null,
       };

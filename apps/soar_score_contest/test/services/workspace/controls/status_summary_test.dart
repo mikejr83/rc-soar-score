@@ -7,6 +7,8 @@ Contest _contest({
   LifecycleState state = LifecycleState.running,
   ScoringAccess access = ScoringAccess.open,
   AdminLock lock = AdminLock.locked,
+  int? hiddenThrough,
+  bool archived = false,
 }) => Contest(
   id: Id.parse('019c0000-0000-7000-8000-000000000017'),
   name: 'Test',
@@ -16,6 +18,9 @@ Contest _contest({
   lifecycleState: state,
   scoringAccess: access,
   adminLock: lock,
+  resultsHiddenThroughRound: hiddenThrough,
+  resultsHiddenAt: hiddenThrough == null ? null : DateTime.utc(2026, 10, 17),
+  localArchive: archived,
   createdAt: DateTime.utc(2026, 9),
   updatedAt: DateTime.utc(2026, 9),
 );
@@ -26,16 +31,24 @@ Map<String, String> _values(Contest contest, PublicationFacts publication) => {
 };
 
 void main() {
-  test('has the six independent labelled values, in order', () {
+  test('has the independent labelled values, in order', () {
     final values = StatusSummary.of(_contest(), PublicationFacts.notPublished);
     expect(values.map((v) => v.label), [
       'Lifecycle',
       'Participant scoring',
       'Administration',
       'Publication',
-      'Public visibility',
-      'Deletion',
+      'Results hiding',
+      'Local archive',
     ]);
+  });
+
+  test('has no deletion status', () {
+    final labels = StatusSummary.of(
+      _contest(),
+      PublicationFacts.notPublished,
+    ).map((v) => v.label);
+    expect(labels, isNot(contains('Deletion')));
   });
 
   test('reads each value from its own field', () {
@@ -43,9 +56,9 @@ void main() {
       'Lifecycle': 'Running',
       'Participant scoring': 'Open',
       'Administration': 'Locked',
-      'Publication': 'Not published',
-      'Public visibility': 'Not public',
-      'Deletion': 'Not scheduled',
+      'Publication': 'Unpublished',
+      'Results hiding': 'Off',
+      'Local archive': 'Not archived',
     });
     expect(
       _values(
@@ -53,6 +66,8 @@ void main() {
           state: LifecycleState.completed,
           access: ScoringAccess.closed,
           lock: AdminLock.unlocked,
+          hiddenThrough: 3,
+          archived: true,
         ),
         const PublicationFacts(
           isPublished: true,
@@ -65,7 +80,8 @@ void main() {
         'Administration': 'Unlocked',
         'Publication': 'Published',
         'Public visibility': 'Unlisted',
-        'Deletion': 'Not scheduled',
+        'Results hiding': 'Hidden through round 3',
+        'Local archive': 'Archived',
       },
     );
   });
@@ -73,6 +89,6 @@ void main() {
   test('an unreadable publication is unknown, not unpublished', () {
     final values = _values(_contest(), PublicationFacts.unknown);
     expect(values['Publication'], 'Unknown');
-    expect(values['Public visibility'], 'Unknown');
+    expect(values.containsKey('Public visibility'), isFalse);
   });
 }

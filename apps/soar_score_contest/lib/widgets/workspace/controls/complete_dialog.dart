@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../services/workspace/controls/completion_blockers.dart';
+import '../../../services/workspace/workspace_fact_source.dart';
 import '../../../services/workspace/workspace_facts.dart';
 
 /// Asks the director to confirm completing the contest, listing the scores
@@ -46,8 +47,7 @@ class _Body extends StatelessWidget {
     final facts = this.facts;
     final scoresKnown =
         facts != null &&
-        !facts.nextStepFactsUnavailable &&
-        facts.rounds.isNotEmpty;
+        !facts.unavailable.contains(WorkspaceFactSource.scores);
     final blockers = scoresKnown ? CompletionBlockers.of(facts) : null;
     return Column(
       mainAxisSize: MainAxisSize.min,

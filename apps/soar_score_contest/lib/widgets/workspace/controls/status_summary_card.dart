@@ -18,7 +18,8 @@ class StatusSummaryCard extends StatelessWidget {
     'administration' => Icons.lock_outline,
     'publication' => Icons.publish,
     'visibility' => Icons.visibility_outlined,
-    _ => Icons.delete_outline,
+    'results' => Icons.visibility_off_outlined,
+    _ => Icons.archive_outlined,
   };
 
   @override

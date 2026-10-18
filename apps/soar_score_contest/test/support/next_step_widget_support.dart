@@ -37,6 +37,9 @@ class WorkspaceServer {
   ContestScores? scores;
   int scoresStatus;
 
+  /// When not 404, reading the publication fails with this status.
+  int publicationStatus = 404;
+
   /// When set, the next action is answered with this status and message.
   int? rejectNext;
   String rejectMessage = 'The contest changed.';
@@ -104,7 +107,7 @@ class WorkspaceServer {
           : _json(current.toJson());
     }
     if (path.endsWith('/publication')) {
-      return _error(404, 'No publication.');
+      return _error(publicationStatus, 'No publication.');
     }
     if (path.endsWith('/contests/$matrixContestId')) {
       contestReads++;

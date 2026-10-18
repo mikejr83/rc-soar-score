@@ -31,8 +31,14 @@ void main() {
 
     // The status summary labels each state on its own.
     expect(_status(tester, 'lifecycle'), 'Running');
-    expect(_status(tester, 'deletion'), 'Not scheduled');
-    for (final id in ['scoring', 'administration', 'publication']) {
+    expect(_key('status-deletion'), findsNothing);
+    for (final id in [
+      'scoring',
+      'administration',
+      'publication',
+      'results',
+      'archive',
+    ]) {
       expect(_key('status-$id-value'), findsOneWidget);
     }
 

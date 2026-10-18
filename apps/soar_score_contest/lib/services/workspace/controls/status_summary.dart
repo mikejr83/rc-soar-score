@@ -12,12 +12,15 @@ class StatusValue {
   final String value;
 }
 
-/// The six independent values of a contest's state, each with its own label
-/// so none is read from another: lifecycle, participant scoring,
-/// administration lock, publication, public visibility and deletion.
+/// The contest's independent state values, each with its own label so none
+/// is read from another: lifecycle, participant scoring, administration
+/// lock, publication, public visibility (once published), results hiding and
+/// local archive. There is no deletion status
+/// (`plan/data-model/follow-ups.md`).
 abstract final class StatusSummary {
   static List<StatusValue> of(Contest contest, PublicationFacts publication) {
     final visibility = publication.visibility;
+    final hiddenThrough = contest.resultsHiddenThroughRound;
     return [
       StatusValue(
         'lifecycle',
@@ -41,20 +44,22 @@ abstract final class StatusSummary {
             ? 'Unknown'
             : publication.isPublished
             ? 'Published'
-            : 'Not published',
+            : 'Unpublished',
+      ),
+      // Visibility belongs to the publication record, so it shows only once
+      // there is one.
+      if (publication.isKnown && publication.isPublished && visibility != null)
+        StatusValue('visibility', 'Public visibility', _title(visibility.name)),
+      StatusValue(
+        'results',
+        'Results hiding',
+        hiddenThrough == null ? 'Off' : 'Hidden through round $hiddenThrough',
       ),
       StatusValue(
-        'visibility',
-        'Public visibility',
-        !publication.isKnown
-            ? 'Unknown'
-            : visibility == null
-            ? 'Not public'
-            : _title(visibility.name),
+        'archive',
+        'Local archive',
+        contest.localArchive ? 'Archived' : 'Not archived',
       ),
-      // The contest has no pending-delete state yet (#236), so a contest
-      // that opens is never scheduled for deletion.
-      const StatusValue('deletion', 'Deletion', 'Not scheduled'),
     ];
   }
 
