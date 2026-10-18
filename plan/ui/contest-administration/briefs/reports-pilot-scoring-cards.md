@@ -42,12 +42,12 @@ Show a pilot with every field, a pilot with only a name, and a pilot with a very
 
 ### QR code
 
-If online scoring has been enabled, show a **QR code** on the card. It must be large enough for an inkjet in "document quality" to print without trouble, so scanning does not need high resolution:
+If **participant scoring** is enabled for the contest (the docs call online scoring "participant scoring"), show a **QR code** on the card. The code is a **field QR invitation**: a separate invitation type from the emailed link, issued when participant scoring is enabled, **permanent for the contest** and not invalidated by printing, reprinting or an email invitation. It is for pilots who do not use email or did not receive it. Every reprint of a card shows the **same** code. It must be large enough for an inkjet in "document quality" to print without trouble, so scanning does not need high resolution:
 
 - State a **minimum size in millimetres** for the QR square (recommend at least 25 mm) and the quiet zone around it (at least four modules).
 - Pure black on white. No logo in the middle, no rounded styling, no colour.
-- A short caption beside it: "Scan to enter scores". Show whether to print the link in text as a fallback, and flag the security of that in the questions, because the link is an invitation to a pilot's page.
-- Show the card **without** a QR code when online scoring is off, and say what takes its place so the layout does not collapse (recommended: the space is left to the scoring table, and the identity block expands).
+- A short caption beside it: "Scan to enter scores". **Do not print the link in text**; the code is the only way in.
+- Show the card **without** a QR code when participant scoring is closed, and **when the contest was organized offline and has not synchronized** (QR codes cannot be generated until it has; the panel says so with a link to the sync page). Say what takes its place so the layout does not collapse (recommended: the space is left to the scoring table, and the identity block expands).
 
 ### Scoring table
 
@@ -70,8 +70,10 @@ The main part of the card. A table the pilot writes in, one row per round they f
 **Trailing columns:**
 
 - **Penalty**
-- **Timer** (the timekeeper's initials or name)
-- **Validated** (initials, or a tick box)
+- **Timer**
+- **Validated**
+
+**Timer and Validated are two blank writable columns whose use depends on how the contest is run.** The original intent: the timer initials Timer to confirm the values; an official initials Validated when the score is entered in the app. Some directors tell pilots to write their timer's name or initials in Timer so the pilot knows who is timing, and the timer then initials Validated. So make both cells **wide enough for initials or a short name**, label the headings only "Timer" and "Validated", and do not make either a tick box. There is no signature block and no re-flight column.
 
 Treat the components as a list from the discipline, not as fixed. Show the F5J set in full, and **one variation** (F3J: no height) to prove it holds.
 
@@ -87,11 +89,11 @@ When the contest has **many rounds**, a quadrant is too short to hold the whole 
 
 - **Four-up** (quadrant) and **two-up** (half page) layouts on Letter and on A4, with the margin in millimetres. Keep every card inside the printer's safe area (recommend a 6 mm unprintable margin) and say so.
 - How the choice is made: a **Cards per page** setting in the Page group of the panel: Automatic (default), Four, Two. **There is no fixed round count.** The threshold follows from the content sizing: Automatic uses four-up when every round row fits in a quadrant at the minimum writable row height (with the identity block, QR code and header), and two-up otherwise. The panel says which it picked and why ("14 rounds don't fit four to a page; using two"). **Anchor: an 8-round F5J contest must fit four to a page** using the layout of the current report as a base (all F5J columns, Lane, Penalty, Timer and Validated). State the maximum number of rounds your sizing allows in four-up and in two-up, and show that 8 fits four-up and 14 needs two-up. If sizing tradeoffs let more than 8 fit, say what you gave up (row height, QR size).
-- What happens if even a half page cannot hold all rounds (very long contests): recommended, the card continues on a second card for the same pilot ("Card 1 of 2"), with the identity block repeated in small. Show it.
+- **A card never has to hold more than a half page of rounds in this release.** Contests with several tasks or entries per round (F3K, F3B) need cards that continue or grow, and are not in the initial release. Do not design a continuation card. If the rounds still do not fit a half page at the minimum row height, show a plain notice in the panel and disable Print ("This contest has too many rounds for a scoring card"), rather than shrinking below the minimum or truncating.
 - A **guideline border** around each card, so the cards can be cut. Draw a thin dashed cut line on the page between cards, and short crop marks at the page edges. The line must be visible on paper and **not** bleed into the card's contents. Show it in black and white.
 - A footer on every card in tiny text: the **matrix revision** and the rounds covered, so a card printed before a redraw is recognisable as old.
 
-Order of cards on the pages: by pilot **in the order chosen** (default alphabetical by name). Say whether a team's pilots print together. Recommended: alphabetical, with the team shown on the card.
+Order of cards on the pages: **alphabetical by last name**, then given name. Team pilots are not grouped; the team shows on the card.
 
 ## Options
 
@@ -102,20 +104,21 @@ A panel group titled **Options**.
 - The disabled state when no scores exist, with the reason in text beside the control ("No scores have been entered yet").
 - The enabled state, with helper text ("Prints the scores already entered, so pilots can check them").
 - Pre-filled values must look **different from the blank writable cells** in black and white, without colour: set in a typeface or weight distinct from the blank hint text, with the cell clearly occupied. Show the card both ways. Label the card footer "Includes scores through round N" when pre-fill is on, so the card is dated.
-- Pre-filled values should show **official** values, and say when a value is a participant's submission not yet made official. Ask this in the questions.
+- Pre-fill prints **both official and not-yet-official values**. A value that is **not official** (for example a participant's submission) is printed with an **asterisk**, and the footer carries the legend "\* not official". Official values have no asterisk. Show a card with both.
 
 ## Filtering
 
-A panel group titled **Filter**. Two controls.
+A panel group titled **Filter**. Three controls.
 
 - **Rounds**: a range, with a lower and upper bound, inclusive. The default is **All rounds**. The same control as the other reports. Show a card with only rounds 3 to 6.
+- **Include retired pilots**: shown **only when the contest has retired pilots**, **unchecked by default**. By default cards are made for every pilot in the contest at the time the report is requested, except retired pilots. Checking it adds the retired pilots to the cards and to the pilot list below, each marked "Retired" in text. A late-added pilot gets a card like any other.
 - **Pilots**: choose which pilots get a card. **By default every pilot is selected.** Design a selectable list with search, "Select all" and "Select none", a count ("12 of 38 selected"), and a way to select by group or by team if cheap (say if you leave them out). Remember the list has to work with a keyboard and at compact widths, where it opens in its own sheet.
 
 The panel shows what the choices produce: **"12 cards · 3 pages"** (updated live). Show the empty selection state (no pilots chosen) with the Print button disabled and a reason in text.
 
 ## States
 
-Design: loading and generating (cards for 100 pilots take time; show progress and keep the panel usable); the normal report; no QR code (online scoring off); **a pilot with no matrix rows** (a late-added pilot, or a withdrawn one: say whether they get a card); Pre-fill enabled, disabled, and on; the empty pilot selection; a range with no rounds; the **configuration changed since the matrix was drawn** banner; out of date (a redraw or a pilot change happened while the tab was open — a banner with Refresh, never an automatic redraw of the cards); offline (QR codes still generate, the page says the link works once the card is scanned online).
+Design: loading and generating (cards for 100 pilots take time; show progress and keep the panel usable); the normal report; no QR code (participant scoring closed; offline and unsynchronized); **retired pilots** (the option shown and hidden); too many rounds for a half page; Pre-fill enabled, disabled, and on; the empty pilot selection; a range with no rounds; the **configuration changed since the matrix was drawn** banner; out of date (a redraw or a pilot change happened while the tab was open — a banner with Refresh, never an automatic redraw of the cards); offline (QR codes still generate, the page says the link works once the card is scanned online).
 
 Also design the preview. On screen, the sheets are shown as pages with several cards each, at a zoom where a card is readable; the director can click a card to see it at full size. This click-to-enlarge is **screen only** and shown as such.
 
@@ -139,16 +142,15 @@ These were open and are settled. Design to them.
 
 1. **Name format on the card title.** "Given Surname" in normal capitalization (not all capitals), unlike the lists, which use "Surname, Given".
 2. **Four-up versus two-up.** No fixed round count; the sizing decides. An 8-round F5J contest must fit four-up, using the current report's layout as a base.
-3. **No frequency or country on the card.** Frequency is in no report; country is not on the card.
+3. **No frequency or country on the card.**
+4. **QR condition.** The QR code shows when participant scoring is enabled for the contest. It is a permanent field QR invitation for the contest, not invalidated by reprinting, with the same code on every reprint. It is unavailable when the contest is organized offline and not synchronized.
+5. **No printed link.** The QR code is the only way in.
+6. **Continuation cards are tabled.** Multi-entry formats (F3K, F3B) are not in the initial release.
+7. **Timer and Validated** are both blank writable columns, usage set by the director. No signature block. No re-flight column.
+8. **Pre-fill** shows official and not-official values; an asterisk marks not official.
+9. **Retired pilots** are excluded by default; an unchecked option, shown only when the contest has retired pilots, adds them.
+10. **Card order** is alphabetical by last name.
 
 ## Questions to carry into the design
 
-1. **What "online scoring enabled" means.** The requirement says to show the QR code "if online scoring has been enabled". The contest has no self-scoring setting; participant scoring is a separate Open or Closed state that changes during a contest. Which condition shows the QR code? Recommended: show it unless the invitation service is unavailable, since a card is printed before participant scoring opens.
-2. **Does printing create invitations?** Each QR code is an access token for one pilot. Is a token issued when the card is generated, or does the card carry a stable link? Reprinting a card should not silently invalidate the previous one, or should it? This affects the security wording near the QR code.
-3. **Link printed in text.** Print the URL under the code as a fallback? It exposes the invitation to anyone who sees the card. Recommended: no.
-4. **Continuing cards.** For contests too long even for a half page, the continuation card is a proposal.
-5. **Signature block.** The earlier per-round card requirement had a signature block for pilot and timer; this report has a Timer column and no signature. Confirm none is wanted.
-6. **Re-flight.** The earlier requirement had a re-flight column on the card. This report does not. Confirm re-flights are written in a spare row or not at all.
-7. **Pre-fill values.** Official only, or also participant submissions? Recommended: official only, with unofficial values marked.
-8. **Pilots with no matrix rows.** Do withdrawn or late-added pilots get a card? Recommended: late-added yes, withdrawn no, and the picker says which.
-9. **Order of cards.** Alphabetical, by pilot number, or by team? Recommended: alphabetical.
+1. **Closed participant scoring before the contest.** Participant scoring is a state that is Closed until the director opens it, and cards are usually printed beforehand. As decided, a card printed while it is Closed has no QR code. Should the report instead show a QR code whenever the field QR invitations exist (they are issued when participant scoring is first enabled), so that cards printed after it has been opened and then closed again still carry one? List what you assumed, and design the Closed state so the director understands why there is no QR code and what to do (open participant scoring, then reprint).
