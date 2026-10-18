@@ -1,9 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:soar_score_public/app.dart';
+import 'package:soar_score_public/pages/docs/docs_landing_page.dart';
 import 'package:soar_score_public/pages/results/results_page.dart';
-import 'package:soar_score_public/pages/site/docs_page.dart';
-import 'package:soar_score_public/pages/site/help_page.dart';
 import 'package:soar_score_public/pages/site/landing_page.dart';
 import 'package:soar_score_public/widgets/site_shell.dart';
 
@@ -16,8 +15,8 @@ void main() {
 
     final router = GoRouter.of(tester.element(find.byType(LandingPage)));
     for (final (location, page) in [
-      ('/docs', DocsPage),
-      ('/help', HelpPage),
+      ('/docs', DocsLandingPage),
+      ('/help', DocsLandingPage),
       ('/results/contests', ResultsPage),
       ('/', LandingPage),
     ]) {
@@ -45,8 +44,8 @@ void main() {
     await tester.pumpAndSettle();
 
     for (final (key, page) in [
-      (SiteShell.docsLink, DocsPage),
-      (SiteShell.helpLink, HelpPage),
+      (SiteShell.docsLink, DocsLandingPage),
+      (SiteShell.helpLink, DocsLandingPage),
       (SiteShell.contestsLink, ResultsPage),
       (SiteShell.homeLink, LandingPage),
     ]) {
