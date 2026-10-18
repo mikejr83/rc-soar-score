@@ -106,3 +106,8 @@ Routes `/docs`, `/docs/*`, `/help` and `/support`. Specs: `../docs-help.md`, `..
 8. Any questions or spec ambiguities you hit. List them; do not silently resolve them.
 
 Light theme first. Every page ships in dark mode too, so prove the tokens hold on at least the homepage and the overall results table.
+
+## Working artifacts
+
+- Logo exploration, round 1 (Claude artifact, shared by Mason): https://claude.ai/artifact/NBQL2av1H7mM3pkW5aQKAG
+- Design system, round 1 proposal built from direction 1g and the current theme (Claude artifact): https://claude.ai/artifact/UDyXKKtdQexRQb8zsxznhK
