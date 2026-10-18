@@ -18,7 +18,8 @@ import 'package:soar_score_core/soar_score_core.dart';
 ///
 /// A change of the retirement round recalculates the results, which count a
 /// retired pilot's later flights as retired, not as zeros. The change is
-/// stored first; if the recalculation fails the results read as stale.
+/// stored first; if the recalculation fails the results read as stale and the
+/// response carries `recalculation_warning`, as a score entry does.
 ///
 /// The handlers only translate between HTTP and [ParticipationsService].
 ///
@@ -30,6 +31,7 @@ void addParticipationRoutes(
   RecalculationService? recalculation,
 }) {
   final service = ParticipationsService(repository);
+  final scoresService = ScoresService(repository);
   final recalculationService =
       recalculation ?? RecalculationService(ResultsService(repository));
 
@@ -91,11 +93,24 @@ void addParticipationRoutes(
       baseRevision: body.baseRevision,
       metadata: writeMetadata(principal),
     );
+    String? warning;
     if (before != null &&
         before.retiredAtRound != participation.retiredAtRound) {
-      await recalculationService.recalculateAfterEntry(contestId);
+      // A contest with no official score has no results to go stale.
+      final scores = await scoresService.list(contestId);
+      if (scores.slots.any((slot) => slot.officialScore != null)) {
+        warning = await recalculationService.recalculateAfterEntry(
+          contestId,
+          cause: 'a retirement change',
+        );
+      }
     }
-    return jsonResponse(participation.toJson());
+    return jsonResponse(
+      ParticipationUpdateResult(
+        participation: participation,
+        recalculationWarning: warning,
+      ).toJson(),
+    );
   });
 
   router.delete('/contests/<id>/participations/<participationId>', (

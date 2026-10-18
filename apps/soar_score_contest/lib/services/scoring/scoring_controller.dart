@@ -391,7 +391,7 @@ class ScoringController extends ChangeNotifier {
     if (participation == null) {
       throw StateError('The pilot is not in this contest.');
     }
-    await client.updateParticipation(
+    final updated = await client.updateParticipation(
       contestId,
       participation.id,
       UpdateParticipationRequest(
@@ -403,6 +403,9 @@ class ScoringController extends ChangeNotifier {
     _drafts[row.id]?.resetTo(row.savedComponents);
     _saves.remove(row.id);
     await refresh();
+    // refresh() does not touch the notice, so it shows after the reload.
+    recalculationWarning = updated.recalculationWarning;
+    notifyListeners();
   }
 
   // Score check.

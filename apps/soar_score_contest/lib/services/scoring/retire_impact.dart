@@ -65,7 +65,7 @@ class RetireImpact {
           .toList();
       var after = before;
       for (final flight in own) {
-        if (flight.isScored) {
+        if (flight.countsAsScored) {
           kept++;
         } else if (reinstating) {
           if (flight.isMissed) after++;
@@ -96,7 +96,8 @@ class RetireImpact {
   final int fromRound;
   final List<RoundCountChange> changes;
 
-  /// Scores already entered from [fromRound] on; they stay and still count.
+  /// Scores already entered, or submitted and waiting, from [fromRound] on;
+  /// they stay and still count, as the server counts them.
   final int keptScores;
   final bool reinstating;
 

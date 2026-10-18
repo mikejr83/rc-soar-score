@@ -29,18 +29,24 @@ class RecalculationService {
   /// retry), or a warning string when recalculation fails or is refused.
   /// The score that triggered it is already stored in both cases; the results
   /// read as stale until a later recalculation succeeds.
-  Future<String?> recalculateAfterEntry(Id contestId) async {
+  ///
+  /// [cause] names what triggered it, for the warning and the log (a score
+  /// entry by default; a retirement change uses its own).
+  Future<String?> recalculateAfterEntry(
+    Id contestId, {
+    String cause = 'a score entry',
+  }) async {
     try {
       await _results.recalculate(contestId);
       return null;
     } on ContestStateError catch (error, stackTrace) {
-      const warning =
-          'Recalculation was refused after a score entry; the results are stale';
+      final warning =
+          'Recalculation was refused after $cause; the results are stale';
       _logger.warning(warning, error, stackTrace);
       return warning;
     } on Object catch (error, stackTrace) {
       _logger.warning(
-        'Recalculation after a score entry failed; retrying once',
+        'Recalculation after $cause failed; retrying once',
         error,
         stackTrace,
       );
@@ -50,7 +56,7 @@ class RecalculationService {
       return null;
     } on Object catch (error, stackTrace) {
       final warning =
-          'Recalculation failed after a score entry; the results are stale';
+          'Recalculation failed after $cause; the results are stale';
       _logger.warning(warning, error, stackTrace);
       return warning;
     }

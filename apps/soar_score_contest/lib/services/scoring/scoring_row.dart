@@ -64,8 +64,15 @@ class ScoringRow {
 
   bool get isLocked => locked || (slot?.placeholder.isLocked ?? false);
 
+  /// Whether the slot counts as scored the way the server's round progress
+  /// does: past NotEntered, so a pending participant submission counts too.
+  bool get countsAsScored =>
+      slot != null &&
+      slot!.placeholder.state != ScorePlaceholderState.notEntered;
+
   /// A retired pilot's flight nobody can enter: not counted as missing.
-  bool get isMissed => retired && !isScored;
+  /// Follows the server's count, so a pending submission still counts.
+  bool get isMissed => retired && !countsAsScored;
 
   RowStatus get status {
     if (isMissed) return RowStatus.retired;

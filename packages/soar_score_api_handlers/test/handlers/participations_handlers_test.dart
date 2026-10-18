@@ -267,7 +267,7 @@ void main() {
       expect((await api.errorOf(response))['code'], 'stale_revision');
     });
 
-    test('a changed retirement recalculates the results', () async {
+    test('a contest with no score has nothing to recalculate', () async {
       await add();
 
       final response = await api.send(
@@ -277,39 +277,8 @@ void main() {
       );
 
       expect(response.statusCode, 200);
-      expect(recalculations, hasLength(1));
-    });
-
-    test('reversing a retirement recalculates the results', () async {
-      await add();
-      await api.send(
-        'PUT',
-        path(),
-        body: {'base_revision': 0, 'retired_at_round': 2},
-      );
-      recalculations.clear();
-
-      final response = await api.send(
-        'PUT',
-        path(),
-        body: {'base_revision': 1},
-      );
-
-      expect(response.statusCode, 200);
-      expect((await api.json(response))['retired_at_round'], isNull);
-      expect(recalculations, hasLength(1));
-    });
-
-    test('a change that leaves the retirement alone does not', () async {
-      await add();
-
-      await api.send(
-        'PUT',
-        path(),
-        body: {'base_revision': 0, 'classification': 'Expert'},
-      );
-
       expect(recalculations, isEmpty);
+      expect((await api.json(response))['recalculation_warning'], isNull);
     });
 
     test('a retirement on a non-flier is a 400', () async {

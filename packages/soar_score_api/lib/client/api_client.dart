@@ -397,8 +397,10 @@ class ApiClient {
   }
 
   /// `PUT /api/v1/contests/{id}/participations/{participationId}` — changes
-  /// the role, classification or retirement of a participation.
-  Future<ContestParticipation> updateParticipation(
+  /// the role, classification or retirement of a participation. A changed
+  /// retirement recalculates the results; when that fails the answer carries
+  /// [ParticipationUpdateResult.recalculationWarning].
+  Future<ParticipationUpdateResult> updateParticipation(
     Id id,
     Id participationId,
     UpdateParticipationRequest request,
@@ -407,10 +409,10 @@ class ApiClient {
       '/api/v1/contests/${id.value}/participations/${participationId.value}',
     );
     final response = await _send('PUT', uri, body: request.toJson());
-    return _decode<ContestParticipation>(
+    return _decode<ParticipationUpdateResult>(
       response,
       uri,
-      ContestParticipation.fromJson,
+      ParticipationUpdateResult.fromJson,
     );
   }
 

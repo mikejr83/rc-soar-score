@@ -92,6 +92,23 @@ class ScoringServer {
     _record(assignmentId, components, revision, reason);
   }
 
+  final Set<Id> _submitted = {};
+
+  /// A participant's submission waiting for the director: the slot is
+  /// Submitted, with no official score.
+  void seedPendingSubmission(Id assignmentId, Map<String, Object?> components) {
+    _submitted.add(assignmentId);
+    (_history[assignmentId] ??= []).add(
+      ScoreHistoryEntry(
+        attemptId: _sid('000c', 99),
+        outcome: ScoreHistoryOutcome.pending,
+        components: components,
+        actorId: _setBy,
+        authority: Authority.participant,
+      ),
+    );
+  }
+
   /// Adds a participant's submission that never became official.
   void seedLostSubmission(Id assignmentId, Map<String, Object?> components) {
     (_history[assignmentId] ??= []).add(
@@ -176,9 +193,11 @@ class ScoringServer {
       contestId: contestId,
       contestParticipationId: assignment.contestParticipationId,
       assignmentId: assignmentId,
-      state: score == null
-          ? ScorePlaceholderState.notEntered
-          : ScorePlaceholderState.official,
+      state: score != null
+          ? ScorePlaceholderState.official
+          : _submitted.contains(assignmentId)
+          ? ScorePlaceholderState.submitted
+          : ScorePlaceholderState.notEntered,
       scoreRevision: score?.scoreRevision ?? 0,
     );
   }

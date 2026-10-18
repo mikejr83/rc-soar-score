@@ -30,6 +30,7 @@ export 'landing_table_view.dart';
 export 'landing_tables_service.dart';
 export 'participant_details.dart';
 export 'participants_service.dart';
+export 'participation_update_result.dart';
 export 'participations_service.dart';
 export 'role_usage.dart';
 export 'publication/public_publication.dart';

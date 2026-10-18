@@ -118,6 +118,71 @@ void main() {
     );
   });
 
+  testWidgets('a pending submission counts, as the server counts it', (
+    tester,
+  ) async {
+    final server = ScoringServer();
+    server.seedPendingSubmission(scoringAssignmentId(1, 2), {
+      'time_flown': 480,
+      'launch_height': 150,
+    });
+    server.seedPendingSubmission(scoringAssignmentId(2, 2), {
+      'time_flown': 470,
+      'launch_height': 150,
+    });
+    await pumpScoringPage(tester, server, round: 1, group: 1);
+
+    await _openMenuItem(tester, 1, 2, 'menu-retire');
+
+    // Round 1 and round 2 both keep Bo's slot in their count.
+    expect(find.text('No round count changes.'), findsOneWidget);
+    expect(
+      find.text(
+        '2 scores already entered from round 1 on stay and still count.',
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('a pending submission on a retired pilot is not missing', (
+    tester,
+  ) async {
+    final server = ScoringServer();
+    server.matrixServer.retirements[2] = 1;
+    server.seedPendingSubmission(scoringAssignmentId(1, 2), {
+      'time_flown': 480,
+      'launch_height': 150,
+    });
+    await pumpScoringPage(tester, server, round: 1, group: 1);
+
+    // The submission still waits for a decision, so it is not "Retired".
+    expect(find.text('Submitted'), findsOneWidget);
+    expect(find.text('Retired'), findsNothing);
+  });
+
+  testWidgets('a failed recalculation shows the stale-results notice', (
+    tester,
+  ) async {
+    final server = ScoringServer();
+    server.matrixServer.participationWarning =
+        'Recalculation failed; the results are stale';
+    await pumpScoringPage(tester, server, round: 1, group: 1);
+
+    await _openMenuItem(tester, 1, 2, 'menu-retire');
+    await tester.tap(find.byKey(const ValueKey('retire-confirm')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Retired'), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('scoring-recalculation-warning')),
+      findsOneWidget,
+    );
+    expect(
+      find.text('Recalculation failed; the results are stale'),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('reinstating clears the retirement', (tester) async {
     final server = ScoringServer();
     server.matrixServer.retirements[2] = 1;

@@ -110,8 +110,9 @@ class ScoresService {
 
   /// Every submission to the slot [assignmentId] of contest [contestId],
   /// oldest first: each official revision with its reason, who set it and
-  /// when, and the attempts that never became official (a participant's
-  /// entry that lost to the director's decision).
+  /// when, and the attempts that never became official: a participant's
+  /// entry that lost to the director's decision, or the newest one while the
+  /// slot is still Submitted or InReview (pending).
   ///
   /// Throws an [EntityNotFoundError] for an unknown contest or slot. A slot
   /// that was moved keeps its history.
@@ -141,6 +142,9 @@ class ScoresService {
           ))
         score.scoreAttemptId: score,
     };
+    final awaiting =
+        placeholder.state == ScorePlaceholderState.submitted ||
+        placeholder.state == ScorePlaceholderState.inReview;
     final current = officials.values.fold<int>(
       0,
       (best, score) => score.scoreRevision > best ? score.scoreRevision : best,
@@ -148,7 +152,7 @@ class ScoresService {
     return ScoreHistory(
       assignmentId: assignmentId,
       entries: [
-        for (final attempt in attempts)
+        for (final (i, attempt) in attempts.indexed)
           if (officials[attempt.id] case final official?)
             ScoreHistoryEntry(
               attemptId: attempt.id,
@@ -165,7 +169,10 @@ class ScoresService {
           else
             ScoreHistoryEntry(
               attemptId: attempt.id,
-              outcome: ScoreHistoryOutcome.notAdopted,
+              // Only the newest attempt can still be waiting for a decision.
+              outcome: awaiting && i == attempts.length - 1
+                  ? ScoreHistoryOutcome.pending
+                  : ScoreHistoryOutcome.notAdopted,
               components: attempt.rawComponents,
               actorId: attempt.actorId,
               authority: attempt.authority,

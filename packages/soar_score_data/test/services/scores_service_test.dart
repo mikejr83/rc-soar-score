@@ -325,6 +325,46 @@ void _tests(Backend backend) {
         expect(notAdopted.at, isNull);
       });
 
+      test('shows a submission awaiting a decision as pending', () async {
+        final slot = slots.first;
+        final placeholder = (await repository.scorePlaceholderRepository
+            .findForAssignment(slot))!;
+        final assignment = (await repository.matrixAssignmentRepository
+            .findById(slot))!;
+        final attempt = core.ScoreAttempt(
+          id: core.Id.create(),
+          contestId: contestId,
+          scorePlaceholderId: placeholder.id,
+          configRevisionId:
+              (await repository.contestConfigurationRevisionRepository
+                      .latestForContest(contestId))!
+                  .id,
+          matrixRevisionId: assignment.matrixRevisionId,
+          rawComponents: const {'time_flown': 600, 'launch_height': 100},
+          actorId: core.Id.create(),
+          authority: core.Authority.participant,
+          clientMutationId: 'participant-2',
+          baseScoreRevision: 0,
+        );
+        await repository.scoreAttemptRepository.recordAttempt(
+          attempt,
+          core.ScorePlaceholder(
+            id: placeholder.id,
+            contestId: contestId,
+            contestParticipationId: placeholder.contestParticipationId,
+            assignmentId: placeholder.assignmentId,
+            state: core.ScorePlaceholderState.submitted,
+            scoreRevision: 0,
+            revision: placeholder.revision,
+          ),
+          metadata: meta(),
+        );
+
+        final history = (await service.history(contestId, slot)).entries;
+
+        expect(history.map((e) => e.outcome), [ScoreHistoryOutcome.pending]);
+      });
+
       test('refuses an unknown slot', () async {
         await expectLater(
           service.history(contestId, core.Id.create()),

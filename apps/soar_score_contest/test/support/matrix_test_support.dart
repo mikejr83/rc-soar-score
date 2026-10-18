@@ -234,6 +234,9 @@ class MatrixServer {
 
   /// Answers every participation update with this status when not 200.
   int participationStatus = 200;
+
+  /// A notice sent with every successful participation update.
+  String? participationWarning;
   int _participationRevision = 0;
 
   http.Response _json(Object body, [int status = 200]) => http.Response(
@@ -284,12 +287,13 @@ class MatrixServer {
         retirements[pilot] = round;
       }
       _participationRevision++;
-      return _json(
-        matrixParticipations(
+      return _json({
+        ...matrixParticipations(
           retired: retirements,
           revision: _participationRevision,
         )[pilot - 1].toJson(),
-      );
+        'recalculation_warning': participationWarning,
+      });
     }
     if (path.endsWith('/participations')) {
       return _json({

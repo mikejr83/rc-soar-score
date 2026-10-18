@@ -127,6 +127,7 @@ class _EntryTile extends StatelessWidget {
       ScoreHistoryOutcome.current => (Icons.verified, 'Current'),
       ScoreHistoryOutcome.superseded => (Icons.history, 'Replaced'),
       ScoreHistoryOutcome.notAdopted => (Icons.block, 'Not adopted'),
+      ScoreHistoryOutcome.pending => (Icons.inbox, 'Awaiting decision'),
     };
     final revision = entry.scoreRevision;
     final when = entry.at == null ? null : NextStepText.when(entry.at!, zoneId);

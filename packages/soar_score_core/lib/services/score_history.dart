@@ -13,7 +13,10 @@ enum ScoreHistoryOutcome {
 
   /// A submission that never became official, for example a participant's
   /// entry that lost to the director's decision.
-  notAdopted('not_adopted');
+  notAdopted('not_adopted'),
+
+  /// The newest submission, still waiting for the director's decision.
+  pending('pending');
 
   const ScoreHistoryOutcome(this.wire);
 
