@@ -1,5 +1,6 @@
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../matrix/fairness_view.dart';
 import 'setting_keys.dart';
 
 /// The facts about a drawn matrix the configuration page shows: its revision,
@@ -13,8 +14,7 @@ class MatrixSummary {
     required this.maxGroupSize,
     this.groupsPerRound,
     this.drawnWith = const {},
-    this.maxDuplicateMatchups,
-    this.unmetOpponents,
+    this.fairness,
   });
 
   /// `null` until a matrix is drawn.
@@ -44,8 +44,7 @@ class MatrixSummary {
         SettingKeys.laneMode: revision.drawConfig['lane_mode'],
         SettingKeys.drawMode: revision.drawConfig['configured_draw_mode'],
       },
-      maxDuplicateMatchups: fairness?['max_duplicate_matchups'] as int?,
-      unmetOpponents: fairness?['unmet_opponent_count'] as int?,
+      fairness: fairness == null ? null : FairnessView.of(fairness),
     );
   }
 
@@ -62,7 +61,6 @@ class MatrixSummary {
   /// recorded.
   final Map<String, Object?> drawnWith;
 
-  /// From the fairness summary, when the draw recorded one.
-  final int? maxDuplicateMatchups;
-  final int? unmetOpponents;
+  /// The fairness summary of the draw; `null` when it recorded none.
+  final FairnessView? fairness;
 }

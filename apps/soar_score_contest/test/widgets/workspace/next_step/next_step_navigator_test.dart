@@ -105,10 +105,6 @@ void main() {
     final dialogs = {
       NextStepTarget.reports: ('Reports', 'The reports page is not built yet.'),
       NextStepTarget.publish: ('Publish', 'The publish flow is not built yet.'),
-      NextStepTarget.completeDialog: (
-        'Complete contest',
-        'The completion confirmation is not built yet.',
-      ),
     };
     dialogs.forEach((target, text) {
       testWidgets('${target.name} says what is missing', (tester) async {
@@ -122,6 +118,7 @@ void main() {
   test('the in-place targets are not navigation', () {
     expect(NextStepNavigator.isInPlace(NextStepTarget.unlock), isTrue);
     expect(NextStepNavigator.isInPlace(NextStepTarget.openScoring), isTrue);
+    expect(NextStepNavigator.isInPlace(NextStepTarget.completeDialog), isTrue);
     expect(
       NextStepNavigator.isInPlace(NextStepTarget.dismissSuggestion),
       isTrue,

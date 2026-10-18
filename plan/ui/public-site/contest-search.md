@@ -10,7 +10,7 @@ This page will be located at the route: `/results/contests`.
 
 ## Contest List
 
-A grid/list of contests should be present. By default, it should present the user with a list of the 10 most recent contests which are in-progress or completed.
+A grid/list of contests should be present. By default, it should present the user with a list of the 10 most recent contests which are in-progress or completed, ordered by contest start date (newest first).
 
 The list should contain column data for the following:
 
