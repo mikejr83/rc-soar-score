@@ -160,11 +160,11 @@ Notes:
 
 Every route renders inside the site shell (`widgets/site_shell.dart`: header with logo, app name and navigation, footer) via a go_router `ShellRoute`; unknown routes show `pages/site/not_found_page.dart` (router `errorBuilder`). `/results` redirects to `/results/contests`.
 
-| Name people use                     | Route               | Source (`lib/`)                   |
-| ----------------------------------- | ------------------- | --------------------------------- |
-| Site home, landing, homepage        | `/`                 | `pages/site/landing_page.dart`    |
-| Contests (search, placeholder #434) | `/results/contests` | `pages/results/results_page.dart` |
-| Not found (not a route)             | none                | `pages/site/not_found_page.dart`  |
+| Name people use                                              | Route               | Source (`lib/`)                                       |
+| ------------------------------------------------------------ | ------------------- | ----------------------------------------------------- |
+| Site home, landing, homepage                                 | `/`                 | `pages/site/landing_page.dart`                        |
+| Contests, contest search (`?name=&venue=&from=&to=` filters) | `/results/contests` | `pages/results/results_page.dart`, `widgets/results/` |
+| Not found (not a route)                                      | none                | `pages/site/not_found_page.dart`                      |
 
 Documentation, help and support routes are registered in `lib/docs_routes.dart` (spec: `plan/ui/public-site/docs-help.md`, `support.md`). `/help` only redirects to `/docs`.
 
