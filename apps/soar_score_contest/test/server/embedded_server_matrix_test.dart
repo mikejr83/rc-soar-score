@@ -16,7 +16,10 @@ void main() {
   setUp(() async {
     tempDir = Directory.systemTemp.createTempSync('soar_score_matrix');
     server = await startEmbeddedServer('${tempDir.path}/soar_score.db');
-    client = ApiClient(baseUrl: server.baseUrl);
+    client = ApiClient(
+      baseUrl: server.baseUrl,
+      tokenProvider: () async => server.secret,
+    );
     contestId = Id.create();
     await client.createContest(
       CreateContestRequest(

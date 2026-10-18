@@ -21,6 +21,8 @@ import '../dto/import_gliderscore_request.dart';
 import '../dto/local_account_claim_dto.dart';
 import '../dto/late_add_request.dart';
 import '../dto/move_assignment_request.dart';
+import '../dto/public_publication_dto.dart';
+import '../dto/public_publication_summary_dto.dart';
 import '../dto/publish_contest_request.dart';
 import '../dto/register_installation_request.dart';
 import '../dto/redraw_matrix_request.dart';
@@ -667,6 +669,49 @@ class ApiClient {
     );
     final response = await _send('PATCH', uri, body: request.toJson());
     return _decode<Map<String, Object?>>(response, uri, (json) => json);
+  }
+
+  /// `GET /public/publications` — the Public publications, newest first, with
+  /// no sign-in. [limit] is at most 100 (the server's default is 50) and
+  /// [offset] skips the first entries.
+  ///
+  /// A server that does not publish contests is an [ApiHttpError] with status
+  /// 409 and code `publishing_not_available`.
+  Future<List<PublicPublicationSummaryDto>> publicPublications({
+    int? limit,
+    int? offset,
+  }) async {
+    final query = <String, String>{
+      'limit': ?limit?.toString(),
+      'offset': ?offset?.toString(),
+    };
+    var uri = _resolve('/public/publications');
+    if (query.isNotEmpty) uri = uri.replace(queryParameters: query);
+    final response = await _send('GET', uri);
+    return _decode<List<PublicPublicationSummaryDto>>(
+      response,
+      uri,
+      (json) => [
+        for (final item in json['publications'] as List<dynamic>)
+          PublicPublicationSummaryDto.fromJson(item as Map<String, dynamic>),
+      ],
+    );
+  }
+
+  /// `GET /public/publications/{id}` — the current projection of a Public or
+  /// Unlisted publication, with no sign-in.
+  ///
+  /// An unknown or delisted publication is an [ApiHttpError] with status 404;
+  /// a server that does not publish contests is one with status 409 and code
+  /// `publishing_not_available`.
+  Future<PublicPublicationDto> publicPublication(Id id) async {
+    final uri = _resolve('/public/publications/${id.value}');
+    final response = await _send('GET', uri);
+    return _decode<PublicPublicationDto>(
+      response,
+      uri,
+      PublicPublicationDto.fromJson,
+    );
   }
 
   /// Places a pilot who joined late, or who is making up a missed round, in

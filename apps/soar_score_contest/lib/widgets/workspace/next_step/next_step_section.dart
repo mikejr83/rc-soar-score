@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
-import '../../../api_client_provider.dart';
+import '../../../services/workspace/controls/contest_transition.dart';
 import '../../../services/workspace/next_step/completion_dismissals.dart';
 import '../../../services/workspace/next_step/next_step.dart';
 import '../../../services/workspace/next_step/next_step_action.dart';
@@ -10,20 +10,15 @@ import '../../../services/workspace/next_step/next_step_kind.dart';
 import '../../../services/workspace/next_step/next_step_resolver.dart';
 import '../../../services/workspace/next_step/next_step_target.dart';
 import '../workspace_scope.dart';
-import 'contest_action_runner.dart';
+import '../controls/contest_transition_runner.dart';
 import 'next_step_card.dart';
 import 'next_step_navigator.dart';
 import 'next_step_placeholder_card.dart';
 
 final _logger = Logger('NextStepSection');
 
-/// What the snackbar says after an in-place action or a dismissal.
-const String scoringOpenedMessage =
-    'Participant scoring opened. Pilots and helpers can enter their own '
-    'scores.';
-const String unlockedMessage =
-    'Administration unlocked. Configuration, participants and the matrix can '
-    'be changed.';
+/// What the snackbar says after dismissing a suggestion. The messages after
+/// a transition are in `contest_transition.dart`.
 const String suggestionDismissedMessage =
     'Suggestion dismissed. It returns if another 48 hours pass without '
     'scores.';
@@ -138,21 +133,11 @@ class _NextStepSectionState extends State<NextStepSection> {
             const SnackBar(content: Text(suggestionDismissedMessage)),
           );
       case NextStepTarget.openScoring:
-        _run(
-          scope,
-          ContestAction.openScoring,
-          what: 'participant scoring',
-          done: scoringOpenedMessage,
-          undo: ContestAction.closeScoring,
-        );
+        _run(scope, ContestTransition.openScoring);
       case NextStepTarget.unlock:
-        _run(
-          scope,
-          ContestAction.unlock,
-          what: 'administration',
-          done: unlockedMessage,
-          undo: ContestAction.lock,
-        );
+        _run(scope, ContestTransition.unlock);
+      case NextStepTarget.completeDialog:
+        _run(scope, ContestTransition.complete);
       default:
         NextStepNavigator.open(
           context,
@@ -162,36 +147,18 @@ class _NextStepSectionState extends State<NextStepSection> {
     }
   }
 
-  Future<void> _run(
-    WorkspaceScope scope,
-    ContestAction action, {
-    required String what,
-    required String done,
-    required ContestAction undo,
-  }) async {
-    final client = apiClientOf(context);
-    final messenger = ScaffoldMessenger.of(context);
-    if (client == null) {
-      messenger.showSnackBar(
-        const SnackBar(content: Text('No API client is available.')),
-      );
+  Future<void> _run(WorkspaceScope scope, ContestTransition transition) async {
+    if (!await confirmTransition(context, scope, transition) || !mounted) {
       return;
     }
     setState(() {
       _running = true;
     });
-    final runner = ContestActionRunner(
-      client: client,
-      messenger: messenger,
-      refresh: scope.refresh,
-      onStale: scope.reportStale,
-    );
-    final updated = await runner.run(
+    final updated = await runTransition(
+      context,
+      scope,
       widget.contest,
-      action,
-      what: what,
-      done: done,
-      undo: undo,
+      transition,
     );
     if (!mounted) {
       return;

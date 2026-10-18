@@ -25,6 +25,8 @@ export 'dto/import_gliderscore_request.dart';
 export 'dto/local_account_claim_dto.dart';
 export 'dto/late_add_request.dart';
 export 'dto/move_assignment_request.dart';
+export 'dto/public_publication_dto.dart';
+export 'dto/public_publication_summary_dto.dart';
 export 'dto/publish_contest_request.dart';
 export 'dto/register_installation_request.dart';
 export 'dto/redraw_matrix_request.dart';

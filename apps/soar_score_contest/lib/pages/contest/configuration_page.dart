@@ -455,7 +455,11 @@ class _ContestConfigurationPageState extends State<ContestConfigurationPage> {
           draft,
           // The Participants section is marked read-only only when the contest
           // is completed, not while it is merely admin-locked.
-          readOnly: id == SectionId.participants ? completed : data.readOnly,
+          readOnly: switch (id) {
+            SectionId.participants => completed,
+            SectionId.scoringAccess || SectionId.adminLock => false,
+            _ => data.readOnly,
+          },
         ),
     };
   }
@@ -590,6 +594,8 @@ class _ContestConfigurationPageState extends State<ContestConfigurationPage> {
                       onOpenLandings: () => context.go(landingsPath),
                       onOpenParticipants: () => context.go(participantsPath),
                       onGoToMatrix: _goToMatrix,
+                      onOpenWorkspace: () =>
+                          context.go(contestWorkspacePath(widget.contestId)),
                     ),
                   ),
                 )

@@ -1,11 +1,14 @@
 import 'dart:io';
 
 import 'package:logging/logging.dart';
+import 'package:shelf/shelf.dart' show Pipeline;
 import 'package:shelf/shelf_io.dart' as shelf_io;
 
 import 'package:soar_score_api_handlers/soar_score_api_handlers.dart';
 import 'package:soar_score_core/soar_score_core.dart' as core;
 import 'package:soar_score_data/soar_score_data.dart';
+
+import 'embedded_guard.dart';
 
 final _logger = Logger('EmbeddedServer');
 
@@ -16,9 +19,11 @@ const String embeddedServerVersion = '0.1.0';
 /// An in-process instance of the Soar Score API served by the Windows build
 /// of `soar_score_contest` (ticket 018).
 ///
-/// Bound to `localhost` on an OS-assigned free port so concurrent instances
-/// can never conflict; [baseUrl] is the loopback address the app's own
-/// `ApiClient` (from `soar_score_api`) is pointed at.
+/// Bound to the IPv4 loopback address on an OS-assigned free port so
+/// concurrent instances can never conflict; [baseUrl] is the loopback address
+/// the app's own `ApiClient` (from `soar_score_api`) is pointed at. Every
+/// request but `GET /health` must carry [secret] as a bearer token (see
+/// `embeddedGuard`).
 class EmbeddedServer {
   EmbeddedServer._(this._databasePath, {required this.seedDemo});
 
@@ -27,6 +32,10 @@ class EmbeddedServer {
   /// Whether to fill an empty database with the demo data.
   final bool seedDemo;
   late HttpServer _server;
+
+  /// The per-launch bearer secret, held in memory only. The app's own client
+  /// gets it through its `tokenProvider`.
+  final String secret = generateEmbeddedSecret();
   late SoarScoreDatabase _database;
   late core.Repository _repository;
   late core.Id _localAccountId;
@@ -36,7 +45,7 @@ class EmbeddedServer {
   int get port => _server.port;
 
   /// The loopback base URL the app's `ApiClient` should target.
-  Uri get baseUrl => Uri.parse('http://localhost:$port');
+  Uri get baseUrl => Uri.parse('http://127.0.0.1:$port');
 
   core.Repository get repository => _repository;
 
@@ -102,7 +111,10 @@ class EmbeddedServer {
           ),
       gliderScoreImport: GliderScoreImportProcessRunner(),
     );
-    _server = await shelf_io.serve(handler, 'localhost', 0);
+    final guarded = const Pipeline()
+        .addMiddleware(embeddedGuard(secret: secret, port: () => port))
+        .addHandler(handler);
+    _server = await shelf_io.serve(guarded, InternetAddress.loopbackIPv4, 0);
   }
 
   /// Shuts down the HTTP server and closes the local database, releasing the
@@ -114,12 +126,14 @@ class EmbeddedServer {
 }
 
 /// Opens the local SQLite database at [databasePath] (parent directories are
-/// created if needed) and starts the embedded API on `localhost` with an
+/// created if needed) and starts the embedded API on `127.0.0.1` with an
 /// OS-assigned free port (port `0` is passed to `shelf_io.serve`).
 ///
-/// The embedded instance never asks for a token (ticket 017). Every request
-/// instead acts as an account chosen by the app, through the same `Principal`
-/// seam the hosted server fills from a verified token: the installation's
+/// The embedded instance has no sign-in (ticket 017) but requires the
+/// per-launch [EmbeddedServer.secret] on every request but `GET /health`,
+/// and refuses foreign `Host` and any `Origin` (#425, `docs/embedded-api-security.md`).
+/// Every request that passes acts as an account chosen by the app, through the
+/// same `Principal` seam the hosted server fills from a verified token: the installation's
 /// Local account, or the signed-in account once the Local account is claimed
 /// (see [EmbeddedServer.actAs]).
 ///

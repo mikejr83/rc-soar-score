@@ -66,6 +66,8 @@ void main() {
       'Participant options',
       'Participants',
       'Draw options',
+      'Scoring access',
+      'Administration lock',
       'Public updates and reviews',
     ]) {
       expect(find.text(title, skipOffstage: false), findsWidgets);
@@ -84,6 +86,58 @@ void main() {
     );
     expect(find.text('Ready to draw'), findsNothing);
     expect(find.text('Can’t be drawn yet'), findsOneWidget);
+  });
+
+  testWidgets('each section shows the revision its values are saved in', (
+    tester,
+  ) async {
+    await _pump(tester, ConfigServer(revision: configRevision(3)));
+
+    // The contest in the fixture is at revision 0; the configuration at 3.
+    for (final text in ['Contest rev. 0', 'Config rev. 3']) {
+      expect(find.text(text, skipOffstage: false), findsWidgets);
+    }
+    expect(find.text('Contest rev. 0', skipOffstage: false), findsNWidgets(3));
+    // Six sections are saved with the configuration, the Participants
+    // summary is counted from other records and has no chip.
+    expect(find.text('Config rev. 3', skipOffstage: false), findsNWidgets(6));
+  });
+
+  testWidgets('scoring access and the lock are shown, changed in Workspace', (
+    tester,
+  ) async {
+    await _pump(
+      tester,
+      ConfigServer(
+        contest: configContest(lock: AdminLock.locked),
+        revision: configRevision(1),
+      ),
+    );
+
+    final access = find.byKey(const ValueKey('state-scoringAccess'));
+    final lock = find.byKey(const ValueKey('state-adminLock'));
+    expect(tester.widget<Text>(access.first).data, 'Closed');
+    expect(tester.widget<Text>(lock.first).data, 'Locked');
+    expect(
+      find.text('Change in Workspace', skipOffstage: false),
+      findsNWidgets(2),
+    );
+  });
+
+  testWidgets('a drawn matrix shows its revision, group sizes and fairness', (
+    tester,
+  ) async {
+    await _pump(
+      tester,
+      ConfigServer(
+        revision: configRevision(1),
+        participations: [for (var i = 1; i <= 4; i++) configParticipation(i)],
+        matrix: configDrawnMatrix(fairnessSummary: {'fairness_score': 92.0}),
+      ),
+    );
+
+    expect(find.text('Revision 1'), findsOneWidget);
+    expect(find.text('Good draw, 92%'), findsOneWidget);
   });
 
   testWidgets('the save bar appears only while the draft differs', (
