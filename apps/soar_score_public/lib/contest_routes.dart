@@ -32,10 +32,15 @@ final List<RouteBase> contestRoutes = [
   ),
 ];
 
+/// The page key every contest view shares so that moving between them keeps
+/// the loaded contest (#436 uses it for the team and flight-group pages).
+LocalKey contestPageKey(String contestId) =>
+    ValueKey('results_contest_$contestId');
+
 Page<void> _page(GoRouterState state) {
   final contestId = state.pathParameters['contestId']!;
   return MaterialPage(
-    key: ValueKey('results_contest_$contestId'),
+    key: contestPageKey(contestId),
     child: ContestPage(
       contestId: contestId,
       round: int.tryParse(state.pathParameters['roundNumber'] ?? ''),

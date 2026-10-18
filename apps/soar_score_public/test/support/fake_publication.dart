@@ -146,24 +146,27 @@ Map<String, Object?> _standing(
 };
 
 /// Answers `GET /public/publications/{fakeContestId}` with [publication]
-/// and anything else with 404.
-http.Client fakeServer({Map<String, Object?>? publication}) =>
-    MockClient((request) async {
-      if (request.url.path == '/public/publications/$fakeContestId') {
-        return http.Response(
-          jsonEncode(publication ?? fakePublicationJson()),
-          200,
-          headers: {'content-type': 'application/json'},
-        );
-      }
-      return http.Response(
-        jsonEncode({
-          'error': {'code': 'not_found', 'message': 'no such publication'},
-        }),
-        404,
-        headers: {'content-type': 'application/json'},
-      );
-    });
+/// and anything else with 404. [onRequest] sees every request.
+http.Client fakeServer({
+  Map<String, Object?>? publication,
+  void Function()? onRequest,
+}) => MockClient((request) async {
+  onRequest?.call();
+  if (request.url.path == '/public/publications/$fakeContestId') {
+    return http.Response(
+      jsonEncode(publication ?? fakePublicationJson()),
+      200,
+      headers: {'content-type': 'application/json'},
+    );
+  }
+  return http.Response(
+    jsonEncode({
+      'error': {'code': 'not_found', 'message': 'no such publication'},
+    }),
+    404,
+    headers: {'content-type': 'application/json'},
+  );
+});
 
 /// Pumps the contest routes at [location] against [client] (the fake server
 /// when null) and settles.

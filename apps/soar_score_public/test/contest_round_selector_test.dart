@@ -18,9 +18,11 @@ void main() {
   testWidgets('the selector changes the route and the table follows', (
     tester,
   ) async {
+    var requests = 0;
     final router = await pumpContestRoutes(
       tester,
       contestResultsPath(fakeContestId),
+      client: fakeServer(onRequest: () => requests++),
     );
     // Latest round by default: on the last round, next and last are off.
     expect(find.text('Round 3'), findsNWidgets(2)); // dropdown and column
@@ -53,6 +55,8 @@ void main() {
     await tester.tap(find.text('Round 2').last);
     await tester.pumpAndSettle();
     expect(router.state.uri.path, contestResultsPath(fakeContestId, round: 2));
+    // The routes share a page key, so round changes keep the loaded contest.
+    expect(requests, 1);
   });
 
   testWidgets('a round without standings keeps the selector live', (
@@ -63,6 +67,8 @@ void main() {
       contestResultsPath(fakeContestId, round: 7),
     );
     expect(find.text('There are no results for round 7.'), findsOneWidget);
-    expect(find.byKey(RoundSelector.dropdownKey), findsOneWidget);
+    await tester.tap(find.byKey(RoundSelector.lastKey));
+    await tester.pumpAndSettle();
+    expect(find.text('Round 3'), findsNWidgets(2));
   });
 }

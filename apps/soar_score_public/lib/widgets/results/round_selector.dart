@@ -26,6 +26,9 @@ class RoundSelector extends StatelessWidget {
     final index = selected == null ? -1 : rounds.indexOf(selected!);
     final hasPrevious = index > 0;
     final hasNext = index >= 0 && index < rounds.length - 1;
+    // A round outside the list (a stale link) can still jump to a real one.
+    final hasFirst = hasPrevious || (index < 0 && rounds.isNotEmpty);
+    final hasLast = hasNext || (index < 0 && rounds.isNotEmpty);
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -33,7 +36,7 @@ class RoundSelector extends StatelessWidget {
           key: firstKey,
           tooltip: 'First round',
           icon: const Icon(Icons.first_page),
-          onPressed: hasPrevious ? () => onChanged(rounds.first) : null,
+          onPressed: hasFirst ? () => onChanged(rounds.first) : null,
         ),
         IconButton(
           key: previousKey,
@@ -61,7 +64,7 @@ class RoundSelector extends StatelessWidget {
           key: lastKey,
           tooltip: 'Last round',
           icon: const Icon(Icons.last_page),
-          onPressed: hasNext ? () => onChanged(rounds.last) : null,
+          onPressed: hasLast ? () => onChanged(rounds.last) : null,
         ),
       ],
     );
