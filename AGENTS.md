@@ -158,12 +158,15 @@ Notes:
 
 ### Public site (`soar_score_public`)
 
-| Name people use    | Route      | Source (`lib/`)                   |
-| ------------------ | ---------- | --------------------------------- |
-| Site home, landing | `/`        | `pages/site/landing_page.dart`    |
-| Docs               | `/docs`    | `pages/site/docs_page.dart`       |
-| Help               | `/help`    | `pages/site/help_page.dart`       |
-| Results (listing)  | `/results` | `pages/results/results_page.dart` |
+Every route renders inside the site shell (`widgets/site_shell.dart`: header with logo, app name and navigation, footer) via a go_router `ShellRoute`; unknown routes show `pages/site/not_found_page.dart` (router `errorBuilder`). `/results` redirects to `/results/contests`.
+
+| Name people use                     | Route               | Source (`lib/`)                   |
+| ----------------------------------- | ------------------- | --------------------------------- |
+| Site home, landing, homepage        | `/`                 | `pages/site/landing_page.dart`    |
+| Docs                                | `/docs`             | `pages/site/docs_page.dart`       |
+| Help                                | `/help`             | `pages/site/help_page.dart`       |
+| Contests (search, placeholder #434) | `/results/contests` | `pages/results/results_page.dart` |
+| Not found (not a route)             | none                | `pages/site/not_found_page.dart`  |
 
 ### Self-scoring app (`soar_score_self_score`)
 
