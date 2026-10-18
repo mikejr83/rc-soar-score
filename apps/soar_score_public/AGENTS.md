@@ -4,10 +4,11 @@ Public-facing web site: project landing page, documentation, and contest results
 
 ## Structure
 
-- `lib/main.dart` — entry point
-- `lib/features/site/` — landing page, documentation, help (project pages)
-- `lib/features/results/` — contest results browsing (dense tabular layouts)
-- `lib/widgets/` — local reusable widgets
+- `lib/main.dart` — entry point; `lib/app.dart` — `MaterialApp.router` with `PublicAppTheme` light and dark (follows system mode); `lib/router.dart` — go_router routes, all under one `ShellRoute`
+- `lib/pages/site/` — landing page, documentation, help, not-found (project pages)
+- `lib/pages/results/` — contest results browsing (dense tabular layouts)
+- `lib/widgets/` — local reusable widgets, including the site shell (`site_shell.dart`)
+- `lib/services/` — non-widget helpers (for example `external_url/`, the web-only external link opener with a VM stub)
 
 ## Boundaries
 
