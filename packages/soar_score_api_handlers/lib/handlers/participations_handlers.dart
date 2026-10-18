@@ -16,9 +16,24 @@ import 'package:soar_score_core/soar_score_core.dart';
 ///   classification or retirement
 /// - `DELETE /contests/{id}/participations/{participationId}` removes one
 ///
+/// A change of the retirement round recalculates the results, which count a
+/// retired pilot's later flights as retired, not as zeros. The change is
+/// stored first; if the recalculation fails the results read as stale and the
+/// response carries `recalculation_warning`, as a score entry does.
+///
 /// The handlers only translate between HTTP and [ParticipationsService].
-void addParticipationRoutes(Router router, Repository repository) {
+///
+/// [recalculation] defaults to a [RecalculationService] over [repository]; it
+/// is exposed so tests can force a recalculation failure.
+void addParticipationRoutes(
+  Router router,
+  Repository repository, {
+  RecalculationService? recalculation,
+}) {
   final service = ParticipationsService(repository);
+  final scoresService = ScoresService(repository);
+  final recalculationService =
+      recalculation ?? RecalculationService(ResultsService(repository));
 
   router.get('/contests/<id>/participations', (
     Request request,
@@ -64,8 +79,12 @@ void addParticipationRoutes(Router router, Repository repository) {
       UpdateParticipationRequest.fromJson,
     );
 
+    final contestId = Id.parse(id);
+    final before = (await service.list(contestId))
+        .where((p) => p.id == Id.parse(participationId))
+        .firstOrNull;
     final participation = await service.update(
-      Id.parse(id),
+      contestId,
       principal.accountId,
       Id.parse(participationId),
       roleId: body.roleId,
@@ -74,7 +93,24 @@ void addParticipationRoutes(Router router, Repository repository) {
       baseRevision: body.baseRevision,
       metadata: writeMetadata(principal),
     );
-    return jsonResponse(participation.toJson());
+    String? warning;
+    if (before != null &&
+        before.retiredAtRound != participation.retiredAtRound) {
+      // A contest with no official score has no results to go stale.
+      final scores = await scoresService.list(contestId);
+      if (scores.slots.any((slot) => slot.officialScore != null)) {
+        warning = await recalculationService.recalculateAfterEntry(
+          contestId,
+          cause: 'a retirement change',
+        );
+      }
+    }
+    return jsonResponse(
+      ParticipationUpdateResult(
+        participation: participation,
+        recalculationWarning: warning,
+      ).toJson(),
+    );
   });
 
   router.delete('/contests/<id>/participations/<participationId>', (

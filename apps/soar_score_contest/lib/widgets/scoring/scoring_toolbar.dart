@@ -13,6 +13,7 @@ class ScoringToolbar extends StatelessWidget {
     required this.controller,
     required this.onOpen,
     required this.onSaveAll,
+    required this.onGroupHistory,
   });
 
   final ScoringController controller;
@@ -21,6 +22,9 @@ class ScoringToolbar extends StatelessWidget {
   /// edits before it calls the controller.
   final void Function(int round, int group) onOpen;
   final VoidCallback onSaveAll;
+
+  /// Opens the history of every row in the group.
+  final VoidCallback onGroupHistory;
 
   @override
   Widget build(BuildContext context) {
@@ -221,6 +225,7 @@ class ScoringToolbar extends StatelessWidget {
           icon: const Icon(Icons.more_vert),
           onSelected: (value) {
             if (value == 'focus-order') controller.toggleFocusOrder();
+            if (value == 'group-history') onGroupHistory();
           },
           itemBuilder: (context) => [
             CheckedPopupMenuItem<String>(
@@ -228,6 +233,11 @@ class ScoringToolbar extends StatelessWidget {
               value: 'focus-order',
               checked: controller.showFocusOrder,
               child: const Text('Show keyboard order'),
+            ),
+            const PopupMenuItem<String>(
+              key: ValueKey('menu-group-history'),
+              value: 'group-history',
+              child: Text('Group history'),
             ),
             const PopupMenuDivider(),
             const PopupMenuItem<String>(
@@ -237,10 +247,6 @@ class ScoringToolbar extends StatelessWidget {
             const PopupMenuItem<String>(
               enabled: false,
               child: Text('Re-flight round · Later release'),
-            ),
-            const PopupMenuItem<String>(
-              enabled: false,
-              child: Text('Group history · Later release'),
             ),
           ],
         ),

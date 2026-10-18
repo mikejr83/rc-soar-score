@@ -4,6 +4,7 @@ import 'package:soar_score_core/soar_score_core.dart';
 
 import '../../api_client_provider.dart';
 import '../../router.dart';
+import '../../services/scoring/pilot_history.dart';
 import '../../services/scoring/row_save.dart';
 import '../../services/scoring/score_check.dart';
 import '../../services/scoring/score_preview.dart';
@@ -12,7 +13,10 @@ import '../../services/scoring/scoring_row.dart';
 import '../../widgets/api_error_text.dart';
 import '../../widgets/contest_scope.dart';
 import '../../widgets/message_view.dart';
+import '../../services/scoring/retire_impact.dart';
+import '../../widgets/scoring/retire_pilot_dialog.dart';
 import '../../widgets/scoring/score_check_panel.dart';
+import '../../widgets/scoring/score_history_dialog.dart';
 import '../../widgets/scoring/score_grid_columns.dart';
 import '../../widgets/scoring/score_row_tile.dart';
 import '../../widgets/scoring/scoring_context_strip.dart';
@@ -194,6 +198,67 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
     );
   }
 
+  Future<void> _showHistory(ScoringRow row) {
+    final c = _controller!;
+    return showDialog<void>(
+      context: context,
+      builder: (context) => ScoreHistoryDialog(
+        title: 'Score history · ${row.pilot.name}',
+        load: () async => [
+          PilotHistory(
+            pilot: row.pilot.name,
+            entries: (await c.historyOf(row)).entries,
+          ),
+        ].where((h) => h.entries.isNotEmpty).toList(),
+        landings: c.data!.landings,
+        zoneId: c.data!.contest.timezone,
+      ),
+    );
+  }
+
+  Future<void> _showGroupHistory() {
+    final c = _controller!;
+    return showDialog<void>(
+      context: context,
+      builder: (context) => ScoreHistoryDialog(
+        title: 'Group history',
+        byPilot: true,
+        load: c.groupHistory,
+        landings: c.data!.landings,
+        zoneId: c.data!.contest.timezone,
+      ),
+    );
+  }
+
+  Future<void> _retire(ScoringRow row) async {
+    final c = _controller!;
+    final impact = RetireImpact.retire(c.data!, row, c.round);
+    final done = await confirmRetirement(
+      context,
+      impact: impact,
+      apply: () => c.retire(row),
+    );
+    if (done && mounted) {
+      _say('${row.pilot.name} retired from round ${c.round}.');
+    }
+  }
+
+  Future<void> _reinstate(ScoringRow row) async {
+    final c = _controller!;
+    final impact = RetireImpact.reinstate(c.data!, row);
+    final done = await confirmRetirement(
+      context,
+      impact: impact,
+      apply: () => c.reinstate(row),
+    );
+    if (done && mounted) {
+      _say('${row.pilot.name} reinstated.');
+    }
+  }
+
+  void _say(String text) =>
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
+
   void _jump(ScoreFinding finding) {
     final id = _controller!.rows
         .where((r) => r.id.value == finding.rowKey)
@@ -255,7 +320,12 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
     final check = c.check;
     return Column(
       children: [
-        ScoringToolbar(controller: c, onOpen: _go, onSaveAll: _saveAll),
+        ScoringToolbar(
+          controller: c,
+          onOpen: _go,
+          onSaveAll: _saveAll,
+          onGroupHistory: _showGroupHistory,
+        ),
         ScoringContextStrip(controller: c),
         Expanded(
           child: Padding(
@@ -377,6 +447,7 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
           : null,
       findings: c.check?.of(row.id.value).toList() ?? const [],
       theirs: save.kind == RowSaveKind.stale ? c.theirsOf(row.id) : null,
+      retireBlocked: c.retireBlocked,
       focusField: _focusRow == row.id.value ? _focusField : null,
       actions: ScoreRowActions(
         onActivate: () => c.activate(row.id),
@@ -385,6 +456,9 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
         onKeepMine: () => c.keepMine(row),
         onTakeTheirs: () => c.takeTheirs(row),
         onRefresh: c.refresh,
+        onHistory: () => _showHistory(row),
+        onRetire: () => _retire(row),
+        onReinstate: () => _reinstate(row),
       ),
     );
   }

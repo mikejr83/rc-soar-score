@@ -16,6 +16,9 @@ enum RowStatus {
 
   /// The score, group, round or contest is locked.
   locked,
+
+  /// The pilot retired before this round and has no score here.
+  retired,
 }
 
 /// One pilot's slot in a group: who flies, and what is saved for them.
@@ -27,6 +30,7 @@ class ScoringRow {
     this.team,
     this.result,
     this.locked = false,
+    this.retired = false,
   });
 
   final MatrixAssignment assignment;
@@ -41,6 +45,9 @@ class ScoringRow {
 
   /// True when a lock above the score applies (group, round).
   final bool locked;
+
+  /// True when the pilot retired at or before this row's round.
+  final bool retired;
 
   Id get id => assignment.id;
   int? get lane => assignment.lane;
@@ -57,7 +64,18 @@ class ScoringRow {
 
   bool get isLocked => locked || (slot?.placeholder.isLocked ?? false);
 
+  /// Whether the slot counts as scored the way the server's round progress
+  /// does: past NotEntered, so a pending participant submission counts too.
+  bool get countsAsScored =>
+      slot != null &&
+      slot!.placeholder.state != ScorePlaceholderState.notEntered;
+
+  /// A retired pilot's flight nobody can enter: not counted as missing.
+  /// Follows the server's count, so a pending submission still counts.
+  bool get isMissed => retired && !countsAsScored;
+
   RowStatus get status {
+    if (isMissed) return RowStatus.retired;
     if (isLocked) return RowStatus.locked;
     switch (slot?.placeholder.state) {
       case ScorePlaceholderState.official:
@@ -81,5 +99,6 @@ class ScoringRow {
     team: team,
     result: result,
     locked: locked,
+    retired: retired,
   );
 }

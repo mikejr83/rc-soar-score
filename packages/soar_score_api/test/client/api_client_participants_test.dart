@@ -153,11 +153,39 @@ void main() {
         retiredAtRound: 2,
       );
 
-      await client.updateParticipation(contestId, participationId, request);
+      final result = await client.updateParticipation(
+        contestId,
+        participationId,
+        request,
+      );
 
+      expect(result.participation, participation);
+      expect(result.recalculationWarning, isNull);
       expect(seen.method, 'PUT');
       expect(seen.url.path, '$base/${participationId.value}');
       expect(jsonDecode(seen.body), request.toJson());
+    });
+
+    test('updateParticipation carries the recalculation warning', () async {
+      final client = clientFor(
+        (_) => body({
+          ...participation.toJson(),
+          'recalculation_warning':
+              'Recalculation failed; the results are stale',
+        }),
+      );
+
+      final result = await client.updateParticipation(
+        contestId,
+        participationId,
+        const UpdateParticipationRequest(baseRevision: 0, retiredAtRound: 2),
+      );
+
+      expect(result.participation, participation);
+      expect(
+        result.recalculationWarning,
+        'Recalculation failed; the results are stale',
+      );
     });
 
     test('removeParticipation sends DELETE', () async {

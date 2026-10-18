@@ -143,6 +143,7 @@ class ScoringPageData {
           team: base.markers.of(pilot.teamId),
           result: results[assignment.contestParticipationId],
           locked: locked,
+          retired: pilot.hasRetiredBy(round.ordinal),
         ),
       );
     }
@@ -174,7 +175,7 @@ class ScoringPageData {
 
   /// How complete [group] of [round] is, for the pickers.
   Completeness groupCompleteness(Round round, int group) {
-    final rows = rowsOf(round, group);
+    final rows = rowsOf(round, group).where((r) => !r.isMissed).toList();
     return Completeness.of(
       total: rows.length,
       scored: rows.where((r) => r.isScored).length,
@@ -190,7 +191,7 @@ class ScoringPageData {
     var official = 0;
     var allLocked = round.groupCount > 0;
     for (final group in groupNumbers(round)) {
-      final rows = rowsOf(round, group);
+      final rows = rowsOf(round, group).where((r) => !r.isMissed).toList();
       total += rows.length;
       scored += rows.where((r) => r.isScored).length;
       official += rows.where((r) => r.status == RowStatus.official).length;

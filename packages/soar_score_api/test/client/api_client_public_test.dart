@@ -148,9 +148,7 @@ void main() {
 
       await expectLater(
         client.publicPublication(publicationId),
-        throwsA(
-          isA<ApiHttpError>().having((e) => e.statusCode, 'status', 404),
-        ),
+        throwsA(isA<ApiHttpError>().having((e) => e.statusCode, 'status', 404)),
       );
     });
 
