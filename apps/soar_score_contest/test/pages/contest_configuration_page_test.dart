@@ -98,6 +98,9 @@ void main() {
       expect(find.text(text, skipOffstage: false), findsWidgets);
     }
     expect(find.text('Contest rev. 0', skipOffstage: false), findsNWidgets(3));
+    // Six sections are saved with the configuration, the Participants
+    // summary is counted from other records and has no chip.
+    expect(find.text('Config rev. 3', skipOffstage: false), findsNWidgets(6));
   });
 
   testWidgets('scoring access and the lock are shown, changed in Workspace', (

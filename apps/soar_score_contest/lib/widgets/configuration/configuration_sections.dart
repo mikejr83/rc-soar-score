@@ -114,7 +114,9 @@ class ConfigurationSections extends StatelessWidget {
       id: id,
       notices: SectionNotice.of(id, data.phase, readOnly: readOnly),
       extraChips: [
-        _revisionChip(context, id),
+        // The roster is counted from participation records, which have
+        // revisions of their own, so it has no single revision to show.
+        if (id != SectionId.participants) _revisionChip(context, id),
         if (id == SectionId.discipline) _disciplineChip(context),
         if (id == SectionId.participants)
           ConfigChip.neutral(
