@@ -48,6 +48,7 @@ class ShellHeader extends StatelessWidget {
     if (path == landingsPath || path.startsWith('$landingsPath/')) {
       return (landingsPath, 'Landings');
     }
+    if (path == settingsPath) return (settingsPath, 'Settings');
     return path == rolesPath ? (rolesPath, 'Roles') : null;
   }
 

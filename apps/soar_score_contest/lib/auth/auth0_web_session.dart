@@ -33,7 +33,7 @@ class Auth0WebSession extends AuthSession {
   String? get displayName => _user?.name ?? _user?.email;
 
   @override
-  String? get userId => _user?.sub;
+  String? get subject => _user?.sub;
 
   @override
   Uri? get pictureUrl => _user?.pictureUrl;

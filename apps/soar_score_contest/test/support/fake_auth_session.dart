@@ -2,11 +2,20 @@ import 'package:soar_score_contest/auth/auth_session.dart';
 
 /// `AuthSession` stand-in for widget tests: no Auth0, records calls.
 class FakeAuthSession extends AuthSession {
-  FakeAuthSession({this._signedIn = false, this.name, this.picture});
+  FakeAuthSession({
+    this._signedIn = false,
+    this.name,
+    this.picture,
+    this.subjectId,
+  });
 
   bool _signedIn;
   final String? name;
   final Uri? picture;
+  final String? subjectId;
+
+  @override
+  String? get subject => _signedIn ? subjectId : null;
 
   @override
   Uri? get pictureUrl => picture;

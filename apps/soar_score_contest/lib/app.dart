@@ -14,6 +14,9 @@ import 'contest_draft_provider.dart';
 import 'local_ui_store_provider.dart';
 import 'platform/app_bootstrap.dart';
 import 'router.dart';
+import 'services/theme/theme_controller.dart';
+import 'theme_controller_provider.dart';
+import 'ui_account_provider.dart';
 import 'services/connectivity/app_connectivity.dart';
 import 'services/new_contest/contest_draft_store.dart';
 import 'services/new_contest/local_ui_draft_persistence.dart';
@@ -25,6 +28,7 @@ class SoarScoreContestApp extends StatefulWidget {
     this.connectivity,
     this.appMode,
     this.routerInitialLocation = landingPath,
+    this.themeController,
   });
 
   /// The platform bootstrap that started this app, if any. When present its
@@ -46,6 +50,11 @@ class SoarScoreContestApp extends StatefulWidget {
   /// override it to exercise the navigation guard's redirect.
   final String routerInitialLocation;
 
+  /// The theme controller, already loaded so the first frame has the right
+  /// theme. When `null` the app makes one from the bootstrap's store and loads
+  /// it after the first frame.
+  final ThemeController? themeController;
+
   static const String title = 'RC Soar Score Contest Management';
 
   @override
@@ -56,6 +65,8 @@ class _SoarScoreContestAppState extends State<SoarScoreContestApp> {
   late final AppModeNotifier? _appMode;
   late final bool _ownsAppMode;
   late final GoRouter _router;
+  late final ThemeController _theme;
+  late final bool _ownsTheme;
 
   /// The user's single New Contest draft, kept across restarts where the
   /// bootstrap has local UI storage.
@@ -71,7 +82,7 @@ class _SoarScoreContestAppState extends State<SoarScoreContestApp> {
           ? null
           : LocalUiDraftPersistence(
               uiStore,
-              account: () => bootstrap.uiAccountId,
+              account: () => bootstrap.uiAccount.id,
             ),
     );
     if (!kIsWeb) {
@@ -81,6 +92,15 @@ class _SoarScoreContestAppState extends State<SoarScoreContestApp> {
       _ownsAppMode = false;
       _appMode = null;
     }
+    final givenTheme = widget.themeController;
+    _ownsTheme = givenTheme == null;
+    _theme =
+        givenTheme ??
+        ThemeController(
+          store: widget.bootstrap?.localUiStore,
+          account: widget.bootstrap?.uiAccount,
+        );
+    if (_ownsTheme) unawaited(_theme.load());
     _router = buildAppRouter(
       initialLocation: widget.routerInitialLocation,
       appMode: _appMode,
@@ -103,23 +123,29 @@ class _SoarScoreContestAppState extends State<SoarScoreContestApp> {
       _appMode?.dispose();
     }
     _router.dispose();
+    if (_ownsTheme) _theme.dispose();
     _draftStore.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    Widget app = MaterialApp.router(
-      title: SoarScoreContestApp.title,
-      debugShowCheckedModeBanner: false,
-      theme: ContestAppTheme.lightTheme,
-      darkTheme: ContestAppTheme.darkTheme,
-      themeMode: ThemeMode.system,
-      routerConfig: _router,
+    Widget app = ListenableBuilder(
+      listenable: _theme,
+      builder: (context, _) => MaterialApp.router(
+        title: SoarScoreContestApp.title,
+        debugShowCheckedModeBanner: false,
+        theme: ContestAppTheme.lightTheme,
+        darkTheme: ContestAppTheme.darkTheme,
+        themeMode: _theme.mode,
+        routerConfig: _router,
+      ),
     );
+    app = ThemeControllerInherited(controller: _theme, child: app);
     app = ContestDraftInherited(store: _draftStore, child: app);
     final bootstrap = widget.bootstrap;
     if (bootstrap != null) {
+      app = UiAccountInherited(account: bootstrap.uiAccount, child: app);
       final uiStore = bootstrap.localUiStore;
       if (uiStore != null) {
         app = LocalUiStoreInherited(store: uiStore, child: app);

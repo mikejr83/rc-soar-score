@@ -82,7 +82,7 @@ class Auth0WindowsSession extends AuthSession {
       _credentials?.user.name ?? _credentials?.user.email;
 
   @override
-  String? get userId => _credentials?.user.sub;
+  String? get subject => _credentials?.user.sub;
 
   @override
   Uri? get pictureUrl => _credentials?.user.pictureUrl;
