@@ -34,6 +34,6 @@ void main() {
 
     // The controls themselves are on the Workspace.
     await tapVisible(tester, find.text('Change in Workspace').first);
-    await pumpUntilFound(tester, find.text('Scoring pilots'));
+    await pumpUntilFound(tester, find.text('Setup checklist'));
   });
 }
