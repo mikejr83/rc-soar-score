@@ -146,6 +146,7 @@ The screen **must offer to print the report**, using the user's standard machine
 - Say which page setup the print uses (paper, orientation) beside the button so there is no surprise in the system dialog.
 - **Print failed or cancelled**: a quiet message, no data lost, retry available.
 - **Printing is not available** (for example a kiosk browser): offer to save as PDF where the platform allows, and say so; otherwise explain.
+- **Save as PDF** is offered beside Print as a regular secondary action (it is a print destination on most platforms), not only as a fallback. Directors email results.
 - Do not retain the filter and option choices between sessions. They are only for producing this document. They do stay in the URL for refresh.
 
 ### Viewer states
