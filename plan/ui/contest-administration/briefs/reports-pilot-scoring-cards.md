@@ -10,6 +10,19 @@ A pilot scoring card is a **physical card** a pilot (or their helper) keeps and 
 
 **Platform and visual language:** Flutter, Material 3 for everything outside the sheet. The sheet is an unthemed paper document: black on white, a neutral typeface, no theme colours, every mark surviving a black-and-white inkjet. Tablet and larger. It must work with browser text zoom and large system fonts. Never use colour alone for state. The preview exposes the cards to screen readers as labelled groups (one per pilot).
 
+## Reference: the cards directors use today
+
+Directors currently print these from GliderScore. A seven-page output for a 14-pilot, 14-round contest (14 cards, **two cards per page side by side**) is attached to this brief as a reference. It is a reference, not a template: the requirements in this brief win where they differ. I read it as text, so the QR code, if the page has one, is not described here. What it shows:
+
+- **Card header.** "{Contest} {Club} {Date}" in a line across the top of each card, as the requirement says.
+- **Identity.** The pilot's name as "Given SURNAME" (for example "Gordon BUCKLAND"), then frequency, country and FAI number at the right. The new card drops frequency and country (decided: no report shows frequency; no country column). It keeps the FAI and National ID.
+- **A printed link.** Under the name the card prints the **full online scoring link in text**, with the contest and pilot in the query string. The new design must decide whether to keep a printed link (see the questions).
+- **Table.** One row per round, columns: Round, Group, Time, Landing, Height, a **">75m"** column, a **"ReStart"** column, Penalty, Timer, Submitted. The new table adds Lane when lanes are on, and "Validated" replaces "Submitted". The order of the writable columns is otherwise the same as the requirement.
+- **Pre-filled values.** In this output the scores are already printed in the cells: time as `9:57`, the landing points (`40`), and the height in metres (`119`). A motor restart is a "Yes" under the ReStart column. Pre-filled values look **exactly like handwriting space filled in**; there is nothing to tell them from a blank cell. The new Pre-fill option must make them distinguishable (see Options).
+- **Rows.** All 14 rounds fit on a half-page card at a small row height, with no room to write over a pre-filled cell. Rounds that were not scored leave blank cells.
+- **Footer.** The vendor's web address under each card. Drop it.
+- **What the new design should improve on.** The card has no cut guides or borders, so cutting is by eye. Rows are tight and not ruled, which is poor for handwriting. The printed link is long. The ">75m" and "ReStart" headings are cramped and unlabelled as tick boxes. The Submitted column is unclear to a pilot.
+
 ## The report
 
 The sheet is made of **cards**. One card per pilot, laid out several to a page.
@@ -132,3 +145,5 @@ Light theme first. Show one dark-theme viewer screen to prove the sheet stays bl
 8. **Pre-fill values.** Official only, or also participant submissions? Recommended: official only, with unofficial values marked.
 9. **Pilots with no matrix rows.** Do withdrawn or late-added pilots get a card? Recommended: late-added yes, withdrawn no, and the picker says which.
 10. **Order of cards.** Alphabetical, by pilot number, or by team? Recommended: alphabetical.
+11. **Name format on the card title.** Lists use "Surname, Given". The current card title is "Given SURNAME". On a card the pilot's name is a large title, and "Given Surname" in normal capitalization reads naturally there. Recommended: "Given Surname". Confirm, or use "Surname, Given" for consistency.
+12. **Two-up as the common layout.** The current output is two cards per page. The requirement says four to a page, with two when there are many rounds. Both PDFs agree that 14 rounds is "many". Confirm that the 14-round example is the case for two-up, and that the threshold is somewhere below it.
