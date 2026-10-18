@@ -1,5 +1,6 @@
 import 'package:go_router/go_router.dart';
 
+import 'contest_routes.dart';
 import 'docs_routes.dart';
 import 'pages/results/results_page.dart';
 import 'pages/site/landing_page.dart';
@@ -29,6 +30,7 @@ GoRouter buildAppRouter() {
             name: 'results_contests',
             builder: (context, state) => const ResultsPage(),
           ),
+          ...contestRoutes,
         ],
       ),
     ],
