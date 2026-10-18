@@ -51,15 +51,32 @@ class IndexedDbLocalUiBackend implements LocalUiBackend {
   }
 
   @override
-  Future<void> write(String storageKey, String value) async {
-    await _complete<JSAny?>(
-      _objectStore('readwrite').put(value.toJS, storageKey.toJS),
-    );
-  }
+  Future<void> write(String storageKey, String value) =>
+      _commit((store) => store.put(value.toJS, storageKey.toJS));
 
   @override
-  Future<void> delete(String storageKey) async {
-    await _complete<JSAny?>(_objectStore('readwrite').delete(storageKey.toJS));
+  Future<void> delete(String storageKey) =>
+      _commit((store) => store.delete(storageKey.toJS));
+
+  /// Runs a write and completes when its transaction has committed. A request
+  /// succeeding is not enough: the transaction can still abort afterwards,
+  /// for example when the storage quota is exceeded.
+  Future<void> _commit(IDBRequest Function(IDBObjectStore store) write) {
+    final transaction = _db.transaction(_store.toJS, 'readwrite');
+    final completer = Completer<void>();
+    transaction.oncomplete = ((Event _) => completer.complete()).toJS;
+    void fail(String how) {
+      if (!completer.isCompleted) {
+        completer.completeError(
+          StateError('IndexedDB write $how: ${transaction.error?.message}'),
+        );
+      }
+    }
+
+    transaction.onabort = ((Event _) => fail('aborted')).toJS;
+    transaction.onerror = ((Event _) => fail('failed')).toJS;
+    write(transaction.objectStore(_store));
+    return completer.future;
   }
 
   @override

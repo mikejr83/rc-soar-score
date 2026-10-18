@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:soar_score_ui_storage/soar_score_ui_storage.dart';
 import 'package:test/test.dart';
 
@@ -50,5 +52,17 @@ void main() {
     await pumpEventQueue();
     await subscription.cancel();
     expect(seen, [0]);
+  });
+
+  test('closing the store ends live watch streams', () async {
+    final store = BackendLocalUiStore(MemoryLocalUiBackend());
+    final done = Completer<void>();
+    final subscription = store
+        .watch('a', intKey)
+        .listen((_) {}, onDone: done.complete);
+    await pumpEventQueue();
+    await store.close();
+    await done.future.timeout(const Duration(seconds: 1));
+    await subscription.cancel();
   });
 }

@@ -18,6 +18,7 @@ class BackendLocalUiStore implements LocalUiStore {
   BackendLocalUiStore(this._backend);
 
   final LocalUiBackend _backend;
+  final Set<StreamController<Object?>> _watchers = {};
   final StreamController<_Change> _changes = StreamController.broadcast(
     sync: true,
   );
@@ -103,14 +104,23 @@ class BackendLocalUiStore implements LocalUiStore {
           }
         });
       },
-      onCancel: () => subscription?.cancel(),
+      onCancel: () {
+        _watchers.remove(controller);
+        return subscription?.cancel();
+      },
     );
+    _watchers.add(controller);
     return controller.stream;
   }
 
   @override
   Future<void> close() async {
     await _changes.close();
+    // Live watchers end instead of waiting for a change that cannot come.
+    for (final watcher in _watchers.toList()) {
+      await watcher.close();
+    }
+    _watchers.clear();
     try {
       await _backend.close();
     } catch (error, stackTrace) {
