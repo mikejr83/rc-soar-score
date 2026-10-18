@@ -430,7 +430,7 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
     WorkspaceSection.controls => Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        StatusSummaryCard(contest: contest),
+        StatusSummaryCard(contest: contest, clock: widget.clock),
         for (var i = 0; i < plan.controls.length; i++) ...[
           const SizedBox(height: 16),
           WorkspaceControlSlot(

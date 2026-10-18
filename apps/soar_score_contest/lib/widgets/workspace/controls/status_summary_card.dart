@@ -8,9 +8,16 @@ import '../workspace_scope.dart';
 /// The contest's independent state values, each labelled, so none is guessed
 /// from another. Text carries every value; the icons are decoration.
 class StatusSummaryCard extends StatelessWidget {
-  const StatusSummaryCard({super.key, required this.contest});
+  const StatusSummaryCard({
+    super.key,
+    required this.contest,
+    required this.clock,
+  });
 
   final Contest contest;
+
+  /// The current time, injectable for tests.
+  final DateTime Function() clock;
 
   static IconData _icon(String id) => switch (id) {
     'lifecycle' => Icons.timeline,
@@ -28,7 +35,7 @@ class StatusSummaryCard extends StatelessWidget {
     final publication =
         WorkspaceScope.of(context).facts?.publication ??
         PublicationFacts.unknown;
-    final values = StatusSummary.of(contest, publication);
+    final values = StatusSummary.of(contest, publication, now: clock());
     return Card(
       key: const ValueKey('status-summary'),
       margin: EdgeInsets.zero,

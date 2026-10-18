@@ -18,9 +18,16 @@ class StatusValue {
 /// local archive. There is no deletion status
 /// (`plan/data-model/follow-ups.md`).
 abstract final class StatusSummary {
-  static List<StatusValue> of(Contest contest, PublicationFacts publication) {
+  /// [now] decides whether results hiding has run its 24 hours.
+  static List<StatusValue> of(
+    Contest contest,
+    PublicationFacts publication, {
+    required DateTime now,
+  }) {
     final visibility = publication.visibility;
-    final hiddenThrough = contest.resultsHiddenThroughRound;
+    final hiddenThrough = contest.hidingExpiredAt(now)
+        ? null
+        : contest.resultsHiddenThroughRound;
     return [
       StatusValue(
         'lifecycle',
