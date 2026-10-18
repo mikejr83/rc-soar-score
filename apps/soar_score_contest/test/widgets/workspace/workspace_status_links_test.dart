@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_contest/router.dart';
 import 'package:soar_score_contest/services/workspace/workspace_control_target.dart';
+import 'package:soar_score_contest/widgets/shell_status_panel.dart';
 import 'package:soar_score_contest/widgets/workspace/workspace_focus_controller.dart';
 import 'package:soar_score_contest/widgets/workspace/workspace_frame.dart';
 
@@ -13,7 +14,27 @@ WorkspaceServer _server() => WorkspaceServer(
   matrix: drawnMatrix(),
 );
 
-String? _focusLabel() => FocusManager.instance.primaryFocus?.debugLabel;
+/// [text] inside the shell status panel; the control cards repeat the labels.
+Finder _inPanel(String text) => find.descendant(
+  of: find.byType(ShellStatusPanel),
+  matching: find.text(text),
+);
+
+/// The control whose card holds the focus: the card itself, or the action
+/// the focus moved to inside it.
+String? _focusedControl() {
+  final focus = FocusManager.instance.primaryFocus;
+  if (focus == null) {
+    return null;
+  }
+  for (final node in [focus, ...focus.ancestors]) {
+    final label = node.debugLabel;
+    if (label != null && label.startsWith('workspace-')) {
+      return label.substring('workspace-'.length);
+    }
+  }
+  return null;
+}
 
 double _scrolled(WidgetTester tester) => tester
     .state<ScrollableState>(
@@ -52,10 +73,10 @@ void main() {
         await pumpShellWorkspace(tester, _server());
         expect(_highlighted(tester, target.fragment), isFalse);
 
-        await tester.tap(find.text(_labels[target]!));
+        await tester.tap(_inPanel(_labels[target]!));
         await tester.pumpAndSettle(const Duration(milliseconds: 100));
 
-        expect(_focusLabel(), 'workspace-${target.fragment}');
+        expect(_focusedControl(), target.fragment);
         expect(_highlighted(tester, target.fragment), isTrue);
         if (target == WorkspaceControlTarget.administration) {
           expect(_scrolled(tester), greaterThan(0));
@@ -63,7 +84,7 @@ void main() {
 
         await tester.pump(workspaceHighlightDuration);
         expect(_highlighted(tester, target.fragment), isFalse);
-        expect(_focusLabel(), 'workspace-${target.fragment}');
+        expect(_focusedControl(), target.fragment);
       });
     }
 
@@ -71,9 +92,9 @@ void main() {
       tester,
     ) async {
       await pumpShellWorkspace(tester, _server());
-      await tester.tap(find.text('Administration'));
+      await tester.tap(_inPanel('Administration'));
       await tester.pump(const Duration(seconds: 1));
-      await tester.tap(find.text('Participant scoring'));
+      await tester.tap(_inPanel('Participant scoring'));
       await tester.pump();
 
       expect(_highlighted(tester, 'administration'), isFalse);
@@ -89,7 +110,7 @@ void main() {
       final server = _server();
       await pumpShellWorkspace(tester, server);
       for (final label in _labels.values) {
-        await tester.tap(find.text(label));
+        await tester.tap(_inPanel(label));
         await tester.pumpAndSettle(const Duration(milliseconds: 100));
         await tester.pump(workspaceHighlightDuration);
       }
@@ -100,7 +121,7 @@ void main() {
   group('reduced motion', () {
     testWidgets('jumps to the control and keeps the highlight', (tester) async {
       await pumpShellWorkspace(tester, _server(), disableAnimations: true);
-      await tester.tap(find.text('Administration'));
+      await tester.tap(_inPanel('Administration'));
       await tester.pump();
       final jumped = _scrolled(tester);
       expect(jumped, greaterThan(0));
@@ -111,7 +132,7 @@ void main() {
 
     testWidgets('otherwise the scroll animates', (tester) async {
       await pumpShellWorkspace(tester, _server());
-      await tester.tap(find.text('Administration'));
+      await tester.tap(_inPanel('Administration'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 50));
       final early = _scrolled(tester);
@@ -131,7 +152,7 @@ void main() {
       );
       expect(find.text('Configuration stub'), findsOneWidget);
 
-      await tester.tap(find.text('Administration'));
+      await tester.tap(_inPanel('Administration'));
       await tester.pumpAndSettle(const Duration(milliseconds: 100));
 
       expect(
@@ -142,7 +163,7 @@ void main() {
         ),
       );
       expect(find.text('Configuration stub'), findsNothing);
-      expect(_focusLabel(), 'workspace-administration');
+      expect(_focusedControl(), 'administration');
       expect(_highlighted(tester, 'administration'), isTrue);
     });
   });
@@ -158,7 +179,7 @@ void main() {
         ),
       );
       await tester.pump(const Duration(milliseconds: 100));
-      expect(_focusLabel(), 'workspace-administration');
+      expect(_focusedControl(), 'administration');
       expect(_highlighted(tester, 'administration'), isTrue);
     });
 
@@ -168,7 +189,7 @@ void main() {
         _server(),
         location: '${contestWorkspacePath(matrixContestId)}#nonsense',
       );
-      expect(_focusLabel(), isNot(startsWith('workspace-')));
+      expect(_focusedControl(), isNull);
       for (final id in ['lifecycle', 'scoring', 'administration']) {
         expect(_highlighted(tester, id), isFalse);
       }
