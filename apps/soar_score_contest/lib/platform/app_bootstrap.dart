@@ -26,6 +26,10 @@ abstract class AppBootstrap {
   /// when the bootstrap has none (tests).
   LocalUiStore? get localUiStore => null;
 
+  /// Whose UI-only state applies now: the key to pass to [localUiStore]. It
+  /// can change while the app runs (signing in or out).
+  String get uiAccountId => 'local';
+
   /// What the screens may ask of synchronization; none on the web.
   AppSync get appSync => const NoAppSync();
 

@@ -22,6 +22,10 @@ abstract class AuthSession extends ChangeNotifier {
   /// Name or email of the signed-in user, if known.
   String? get displayName;
 
+  /// A stable identifier of the signed-in user (the identity provider's
+  /// subject), or `null` when signed out or unknown.
+  String? get userId => null;
+
   /// Address of the signed-in user's profile picture (a Gravatar for Auth0
   /// database accounts), or `null` when there is none.
   Uri? get pictureUrl => null;

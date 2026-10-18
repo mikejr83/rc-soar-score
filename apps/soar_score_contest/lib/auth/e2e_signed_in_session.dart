@@ -16,6 +16,9 @@ class E2eSignedInSession extends AuthSession {
   String? get displayName => 'E2E Director';
 
   @override
+  String? get userId => 'e2e-director';
+
+  @override
   Future<void> restore() async {}
 
   @override

@@ -12,6 +12,7 @@ import '../router.dart';
 import '../services/new_contest/contest_creator.dart';
 import '../services/new_contest/contest_draft.dart';
 import '../services/new_contest/contest_draft_store.dart';
+import '../services/new_contest/draft_persistence.dart';
 import '../services/new_contest/draft_validation.dart';
 import '../services/new_contest/draw_settings.dart';
 import '../services/new_contest/participant_option.dart';
@@ -25,6 +26,7 @@ import '../widgets/new_contest/draw_step.dart';
 import '../widgets/new_contest/participant_options_step.dart';
 import '../widgets/new_contest/participants/participants_step.dart';
 import '../widgets/new_contest/scoring_step.dart';
+import '../widgets/new_contest/resume_draft_dialog.dart';
 import '../widgets/new_contest/summary_step.dart';
 import '../widgets/new_contest/wizard_banner.dart';
 import '../widgets/new_contest/wizard_confirm_dialog.dart';
@@ -80,8 +82,7 @@ class NewContestWizardPage extends StatefulWidget {
     'Check each section, then create the contest.',
   ];
 
-  static const String leftMessage =
-      'Left the wizard. Your draft is kept until you close the app.';
+  static const String leftMessage = 'Left the wizard. Your draft is kept.';
 
   @override
   State<NewContestWizardPage> createState() => _NewContestWizardPageState();
@@ -92,6 +93,7 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
   late ContestDraftStore _store;
   late int _step;
   bool _initialized = false;
+  bool _restoring = false;
   final Set<int> _tried = {};
   final Map<DetailsField, FocusNode> _detailsFocus = {
     for (final field in DetailsField.values) field: FocusNode(),
@@ -118,10 +120,21 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
     final shared = contestDraftStoreOf(context);
     _store = shared ?? (_ownStore = ContestDraftStore());
     // Resume where the user got to.
-    _step = _store.draft.visitedThrough.clamp(
-      1,
-      NewContestWizardPage.stepTitles.length,
-    );
+    _step = _resumeStep;
+    if (_store.needsRestore) {
+      _restoring = true;
+      unawaited(_restore());
+    } else {
+      _startDraft();
+    }
+  }
+
+  int get _resumeStep => _store.draft.visitedThrough.clamp(
+    1,
+    NewContestWizardPage.stepTitles.length,
+  );
+
+  void _startDraft() {
     if (_store.savedAt == null) {
       // Start the draft once the first frame is built; saving notifies the
       // header, which is building now.
@@ -131,6 +144,30 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
         }
       });
     }
+  }
+
+  /// Offers the draft stored by an earlier run, then shows the wizard.
+  Future<void> _restore() async {
+    final stored = await _store.restore();
+    if (!mounted) {
+      return;
+    }
+    if (stored != null) {
+      final resume = await showResumeDraftDialog(context, stored);
+      if (!mounted) {
+        return;
+      }
+      if (resume && stored is FoundStoredDraft) {
+        _store.continueWith(stored);
+      } else {
+        _store.discard();
+      }
+    }
+    setState(() {
+      _restoring = false;
+      _step = _resumeStep;
+    });
+    _startDraft();
   }
 
   @override
@@ -255,7 +292,7 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
         icon: Icons.logout,
         title: 'Leave new contest?',
         body:
-            'Your draft is kept until you close the app. You can finish it '
+            'Your draft is kept on this device. You can finish it '
             'later from Contests.',
         warning: _store.saveFailed
             ? 'Your latest changes couldn’t be saved and will be lost.'
@@ -671,6 +708,10 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
       final entries = _entries;
       final titles = NewContestWizardPage.stepTitles;
       final last = _step == titles.length;
+      if (_restoring) {
+        // Blank while the stored draft loads and the director chooses.
+        return const SizedBox.shrink();
+      }
       if (_created != null) {
         // Navigating to the new contest's configuration; nothing to show.
         return const SizedBox.shrink();

@@ -41,6 +41,12 @@ class WebBootstrap extends AppBootstrap {
   AuthSession get authSession => _auth;
 
   @override
+  String get uiAccountId {
+    final user = _auth.userId;
+    return user == null ? 'local' : 'user:$user';
+  }
+
+  @override
   Future<void> close() async {
     if (_closed) {
       return;
