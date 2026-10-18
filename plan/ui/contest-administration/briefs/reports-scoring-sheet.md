@@ -15,9 +15,9 @@ The sheet is a **form that people write on**. It carries the draw (who flies in 
 Directors currently print these from GliderScore. A seven-page output for a 14-round contest (3 groups per round, 4 to 5 pilots per group) is attached to this brief as a reference. It is a reference, not a template: the requirements in this brief win where they differ. I read it as text, so row heights and rules are not described. What it shows:
 
 - **Heading.** "{Contest} - Scoring Sheets - Duration", the club and date in brackets, then the vendor's web address. The new heading is "Official Scoring - {Contest_Name}" with the venue and dates under it. Drop the vendor line and the discipline suffix.
-- **Columns.** Name, Freq, Ctry, Club, **Time**, **Lndg**, **Height**, a **Lndg Over 75m** column, **Motor ReStarted**, **Sfty Plty** (a safety penalty), **Re-Fly?**, **Org Rnd** and **Signature**. The new sheet drops frequency and country (decided), calls the penalty "Penalty", and replaces Signature with **Validated** (see the questions).
-- **Org Rnd is pre-printed** with the round number of the group (a "1" on every Round 1 row), so only a re-flight needs a different number written in.
-- **Hierarchy.** "ROUND 1" in capitals, then "Group 1" indented under it, with the pilots listed beneath. Column headings repeat at the top of every page. The date and time are at the left of the footer and the page number at the right.
+- **Columns.** Name, Freq, Ctry, Club, **Time**, **Lndg**, **Height**, a **Lndg Over 75m** column, **Motor ReStarted**, **Sfty Plty** (a safety penalty), **Re-Fly?**, **Org Rnd** and **Signature**. The new sheet drops frequency, country and Org Rnd (decided), calls the penalty "Penalty", and replaces Signature with **Validated**, a blank text spot.
+- **Org Rnd** is pre-printed with the group's own round number. This release has **no Original round column**; do not add it.
+- **Hierarchy.** "ROUND 1" in capitals (the new headings use Title Case: "Round 1"), then "Group 1" indented under it, with the pilots listed beneath. Column headings repeat at the top of every page. The date and time are at the left of the footer and the page number at the right.
 - **Page breaks.** A group is **split across pages** with a "Group 1 (Cont)" header on the next page, and a round header can end up at the foot of a page. The new design must not split a group that fits on a page (see Pagination).
 - **Names** are "Surname, Given", one pilot per row.
 - **What the new design should improve on.** Rows are tight and not ruled, so there is little room to write. Headings are cramped ("Lndg Over 75m", "Sfty Plty"). Group splits make it hard to find a pilot's row at a glance.
@@ -38,9 +38,9 @@ A table that officials write into. One table per group, grouped by round.
 
 **Leading columns** (printed, pre-filled from the draw):
 
+- **Lane number**: only when lane assignment is enabled for the contest. It is the **first column**.
 - **Pilot name**, formatted "Surname, Given" in normal capitalization (not all capitals).
 - **Club**
-- **Lane number** (only when lanes are on)
 - **Team** (only when the contest has teams)
 - **Pilot number** (only when the contest uses pilot numbers)
 - **Pilot class** (only when the contest uses classes)
@@ -58,9 +58,10 @@ Treat these columns as a list from the discipline, not as fixed. Show the F5J se
 **Trailing columns** (blank, for writing):
 
 - **Penalty**
-- **Reflight** (a tick box; a re-flight is requested)
-- **Original round** (a small number field, the round of the flight being replaced)
-- **Validated** (a tick box or initials box; can be hidden)
+- **Reflight**: a blank **text spot**, not a tick box. Officials use it for several purposes of their own, for example to mark the pilots selected for a re-flight or those entitled to one.
+- **Validated**: a blank **text spot**, wide enough for initials or a short note. Officials often initial it to show the sheet was checked against the electronic entry, and sometimes use it for other official purposes. It can be hidden.
+
+There is **no Original round column** in this release.
 
 Every writable cell is large enough for handwriting in a pen. State the **minimum row height and cell widths in millimetres**; recommend at least 9 mm rows. Tick boxes are real boxes, large enough to tick, not glyphs. Cells have visible rules, not just whitespace. Allow for the component's unit and format as a small hint in the column heading ("Time mm:ss", "Height m", "Landing pts") so the writer enters it consistently.
 
@@ -68,20 +69,21 @@ Every writable cell is large enough for handwriting in a pen. State the **minimu
 
 - Rows are ordered by **round, then group**.
 - A **header row where each round starts** and a **header row where each group starts**, both spanning the table.
-- Pilots within a group are in **ascending lane order** when lanes are on, otherwise in the matrix order.
+- Pilots within a group are in **ascending lane order** when lane assignment is enabled, otherwise in **alphabetical order by surname**.
 
-The two header levels must be distinct without colour (scale, weight, rules, label text: "Round 3", "Group B"). Include the group's size and, if useful, its working time or target ("Working time 10:00"), but ask in the questions whether the second is wanted.
+The two header levels are **headings in normal Title Case**, for example "Round 3" and "Group B" (never all capitals). Use different heading levels to show the hierarchy (a level-two style for the round, a level-three style for the group), and keep them distinct without colour: scale, weight, rules and the label text itself. Include the **group's size and the working time** in the group heading ("Group B · 7 Pilots · Working Time 10:00").
 
 ### Pagination
 
 - A **group stays together on one page** when it fits.
 - A round header never sits alone at the bottom of a page.
-- When a round continues on a new page, the round header repeats with "(continued)".
+- **A page break never splits a group.** Group A may end one page and the later groups of the same round start the next; that is fine.
+- **A round does not start a new page.** The only time a round moves to a new page is when its heading would sit at the foot of one page while its first group overflows to the next: the heading then moves with the group.
+- When a round continues on a new page, the round heading repeats with "(Continued)".
 - **Column headings repeat on every page.**
-- Design whether a **round starts a new page**. Recommended: yes, because officials work one round at a time and hand off the sheet for each round. Show both a round-per-page and a continuous layout, and recommend one.
-- Leave blank rows? No. A pilot who joined late is added by hand; keep one or two blank rows at the end of each group only if you recommend it and say why.
+- There are **no spare blank rows**; a pilot who joined late is added by hand.
 
-Show a printed example of three pages in landscape for a 28-pilot contest with four groups, and a one-page portrait example.
+Show the continuous (round-after-round) layout, with a round heading that moves to the next page with its first group. Show a printed example of three pages in landscape for a 28-pilot contest with four groups, and a one-page portrait example.
 
 ## Options
 
@@ -93,7 +95,7 @@ A panel group titled **Options**. Each can be shown or hidden:
 - **Pilot class** (only when the contest uses classes)
 - **Validated**
 
-A column the contest does not use is not offered. Design the toggles, their defaults, and what a hidden column gives back (the freed width goes to the writable cells, which get wider). Recommended defaults: Club off, Validated on, the contest-enabled Team, Pilot number and Pilot class on. Confirm. Show the **page count** in the panel as options change.
+A column the contest does not use is not offered. Design the toggles, their defaults, and what a hidden column gives back (the freed width goes to the writable cells, which get wider). Recommended defaults: Club off, Validated on, the contest-enabled Team, Pilot number and Pilot class on. Show the **page count** in the panel as options change.
 
 ## Filtering
 
@@ -111,7 +113,7 @@ Also design the scoring sheet on **screen** in a way that is not misleading: the
 2. The **table** with the F5J set and one variation, with all optional columns and with the minimum.
 3. **Writable-cell specification**: heights, widths, tick boxes, unit hints. Mark them on one printed sample.
 4. The **header-row hierarchy** in black and white.
-5. The **printed pages**: one page; three pages with group-keeping and "(continued)" headers; round-per-page versus continuous; Letter and A4; portrait and landscape.
+5. The **printed pages**: one page; three pages with group-keeping and "(continued)" headers; the heading that moves with its group; Letter and A4; portrait and landscape.
 6. The round-range filter and its states.
 7. All states listed above.
 8. A short rationale covering writability, the page-break rules, and any component or token additions.
@@ -119,15 +121,22 @@ Also design the scoring sheet on **screen** in a way that is not misleading: the
 
 Light theme first. Show one dark-theme viewer screen to prove the sheet stays black on white.
 
+## Decisions made
+
+These were open and are settled. Design to them.
+
+1. **Leading column.** Lane number, when lane assignment is enabled; ascending by lane. Without lanes, pilots are in alphabetical order by surname. No ordinal column.
+2. **Country.** Omitted. Frequency is omitted too.
+3. **Reflight.** A blank text spot that officials use as they see fit. Not a tick box, and not necessarily "requested".
+4. **Round per page.** Not needed. A round moves to a new page only when its heading would be alone at the foot of a page with its first group overflowing.
+5. **Working time.** Shown in the group heading.
+6. **Validated.** Kept, a blank text spot for officials' initials or other official use.
+7. **Cell type.** Validated and Reflight are text spots, not tick boxes.
+8. **Spare rows.** None.
+9. **Original round.** Not in this release.
+10. **Headings.** Round and group headings are in Title Case at two heading levels, not all capitals. A group is never split across pages.
+11. **Signature.** No signature block or column.
+
 ## Questions to carry into the design
 
-1. **Leading column.** The earlier Contest Documents requirement puts a lane, pilot number or ordinal first. This report's requirement starts with the pilot name and has no ordinal. Confirm that no ordinal is wanted.
-2. **Country.** The earlier Contest Documents requirement lists an optional country column. This report's does not. Confirm it is omitted.
-3. **Re-flight column naming.** The earlier document says "Re-flight Requested". This report says "Reflight". Recommended label: "Re-flight". Confirm.
-4. **Round per page.** Should a round start a new page? Recommended: yes.
-5. **Working time in the group header.** Wanted, or noise?
-6. **Signature blocks.** The earlier per-round card requirement had a signature block for pilot and timer. This sheet does not. Confirm none is wanted.
-7. **Validated cell type.** Initials, or a tick box? Recommended: a box big enough for initials.
-8. **Spare rows.** Add spare blank rows per group for late additions? Recommended: no.
-9. **Original round pre-printed.** The current sheet pre-prints the group's own round number in the Original round column, so only a re-flight needs a different number. The requirement lists the column without saying so. Recommended: pre-print it, in a lighter style than the blank cells, and say so on the sheet. Confirm.
-10. **Signature.** The current sheet has a Signature column. This report's requirement has Validated instead. Question 6 asks whether a signature is wanted; the current sheet suggests officials like one. Recommended: Validated only, wide enough for initials. Confirm.
+None open from the requirements. List any you find.

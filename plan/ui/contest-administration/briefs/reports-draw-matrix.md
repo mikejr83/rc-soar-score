@@ -58,7 +58,7 @@ Two kinds of **header rows**, each spanning all columns:
 - A **round header** where a round starts.
 - A **group header** where a group starts. Include the group's size ("Group B · 7 pilots").
 
-The two levels must be distinct without colour: scale, weight, rules and shading, and the label text itself ("Round 3", "Group B"). Describe the hierarchy and show it in black and white.
+The headings are in **normal Title Case** ("Round 3", "Group B"), never all capitals, at two heading levels. The two levels must be distinct without colour: scale, weight, rules and shading, and the label text itself ("Round 3", "Group B"). Describe the hierarchy and show it in black and white.
 
 ### Pagination
 
