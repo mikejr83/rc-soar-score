@@ -65,4 +65,21 @@ void main() {
     await done.future.timeout(const Duration(seconds: 1));
     await subscription.cancel();
   });
+
+  test('closing does not wait for unlistened or paused watchers', () async {
+    final backend = _CountingBackend();
+    final store = BackendLocalUiStore(backend);
+    store.watch('a', intKey); // created, never listened to
+    final paused = store.watch('a', intKey).listen((_) {})..pause();
+    await store.close().timeout(const Duration(seconds: 1));
+    expect(backend.closed, isTrue);
+    await paused.cancel();
+  });
+}
+
+class _CountingBackend extends MemoryLocalUiBackend {
+  bool closed = false;
+
+  @override
+  Future<void> close() async => closed = true;
 }

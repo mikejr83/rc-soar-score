@@ -117,8 +117,11 @@ class BackendLocalUiStore implements LocalUiStore {
   Future<void> close() async {
     await _changes.close();
     // Live watchers end instead of waiting for a change that cannot come.
+    // StreamController.close() completes only once a listener has taken the
+    // done event, so it is not awaited: a watcher nobody listens to, or one
+    // that is paused, must not hold shutdown back.
     for (final watcher in _watchers.toList()) {
-      await watcher.close();
+      unawaited(watcher.close());
     }
     _watchers.clear();
     try {
