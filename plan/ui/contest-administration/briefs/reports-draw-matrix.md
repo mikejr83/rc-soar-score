@@ -38,8 +38,8 @@ The default orientation is **portrait**, because the table is tall and narrow.
 
 A tabular layout. One row per pilot per group. Columns:
 
+- **Lane number**: shown only when lanes are turned on for the contest. It is the **first column**, so a pilot scanning for their lane finds it at the left.
 - **Pilot name**, formatted "Surname, Given" in normal capitalization (not all capitals).
-- **Lane number**: shown only when lanes are turned on for the contest.
 - **Team**: only when the contest has teams.
 - **Pilot number**: only when the contest uses pilot numbers.
 - **Pilot class**: only when the contest uses classes.
@@ -83,7 +83,7 @@ A panel group titled **Options**.
 
 Design the compact layout on paper: two tables side by side, each with its own column headings, round and group headers spanning only the width of its table column. Show how headings repeat. It exists to cut the number of sheets, so show the page count in the panel ("4 pages, 2 with compact mode"). State the smallest font size you use and keep it legible at a distance (name the size in points; recommend not below 9 pt).
 
-**Additional pilot info**: shows the pilot's **club** and the pilot's **FAI or National ID**. Each of the two is its own option when this is on ("Club", "FAI ID", "National ID"). **This option is disabled and unavailable when compact mode is on.** Show the disabled state with the reason in text beside the control ("Not available in compact mode"), and show how turning compact mode on resets or hides the sub-options and what happens when it is turned off again (recommended: the sub-options remember their last value).
+**Additional pilot info**: shows the pilot's **club** and the pilot's **FAI or National ID**. Each of the two is its own option when this is on ("Club", "FAI ID", "National ID"). **This option is disabled and unavailable when compact mode is on.** Show the disabled state with the reason in text beside the control ("Not available in compact mode"), and show the sub-options disabled too while compact mode is on. They keep their last values and apply again when compact mode is turned off.
 
 Design the Options group with the dependency clearly visible, without a tooltip.
 
@@ -111,11 +111,17 @@ Pilots with a long name, or a long club name, must wrap or truncate with a rule.
 
 Light theme first. Show one dark-theme viewer screen to prove the sheet stays black on white.
 
+## Decisions made
+
+These were open and are settled. Design to them.
+
+1. **Column order.** Lane first (when lanes are on), then pilot name, team, pilot number, pilot class.
+2. **Lane ordering.** Without lanes, rows follow the matrix's own order within a group.
+3. **Requirements typo.** "Round 4, Group C" in the row-order example is an example, not a rule.
+4. **Ordinal column.** There is none when there are no pilot numbers.
+5. **Compact sub-options.** Compact mode disables Additional pilot info (and its sub-options), which keep their values.
+6. **Compact round headers.** Round and group headers repeat per table column.
+
 ## Questions to carry into the design
 
-1. **Column order.** The requirement lists Pilot Name first and Lane second. A pilot looking for their lane may want lane first. Recommended: lane first when on, then name. Confirm.
-2. **Lane ordering.** Without lanes, rows follow the matrix's own order within a group. Confirm.
-3. **Typo in the requirements.** The row-order example shows "Round 4, Group C" after "Round 3, Group B". Taken as an example, not a rule.
-4. **Pilot number or ordinal.** The earlier Contest Documents requirement shows an ordinal when there are no pilot numbers. This report's requirement does not. Confirm that there is no ordinal column here.
-5. **Compact sub-options.** Does turning compact mode on forget Additional pilot info, or only disable it? Recommended: only disable it.
-6. **Where do round headers repeat in compact mode.** Per table column, as designed. Confirm.
+None open from the requirements. List any you find.
