@@ -160,11 +160,16 @@ Notes:
 
 Every route renders inside the site shell (`widgets/site_shell.dart`: header with logo, app name and navigation, footer) via a go_router `ShellRoute`; unknown routes show `pages/site/not_found_page.dart` (router `errorBuilder`). `/results` redirects to `/results/contests`.
 
-| Name people use                                              | Route               | Source (`lib/`)                                       |
-| ------------------------------------------------------------ | ------------------- | ----------------------------------------------------- |
-| Site home, landing, homepage                                 | `/`                 | `pages/site/landing_page.dart`                        |
-| Contests, contest search (`?name=&venue=&from=&to=` filters) | `/results/contests` | `pages/results/results_page.dart`, `widgets/results/` |
-| Not found (not a route)                                      | none                | `pages/site/not_found_page.dart`                      |
+| Name people use                                                      | Route                                                                              | Source (`lib/`)                                       |
+| -------------------------------------------------------------------- | ---------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| Site home, landing, homepage                                         | `/`                                                                                | `pages/site/landing_page.dart`                        |
+| Contests, contest search (`?name=&venue=&from=&to=` filters)         | `/results/contests`                                                                | `pages/results/results_page.dart`, `widgets/results/` |
+| Not found (not a route)                                              | none                                                                               | `pages/site/not_found_page.dart`                      |
+| Contest results, overall individual results (as of a round)          | `/results/contests/:contestId`, `/results/contests/:contestId/rounds/:roundNumber` | `pages/results/contest_page.dart`, `widgets/results/` |
+| Contest not found (unknown or delisted, shown in place)              | none                                                                               | `pages/results/contest_not_found_page.dart`           |
+| Contest not visible (pending or private, re-checks every 15 minutes) | none                                                                               | `pages/results/contest_not_visible_page.dart`         |
+
+Contest routes live in `lib/contest_routes.dart` (`contestRoutes`, `contestResultsPath(contestId, {round})`); the `:contestId` segment carries the publication id. The round selector (`widgets/results/round_selector.dart`) is shared by every contest view; #436 adds the team and flight-group views beside these routes. Parsed view models live in `lib/models/results/`; widgets never read the raw projection maps.
 
 Documentation, help and support routes are registered in `lib/docs_routes.dart` (spec: `plan/ui/public-site/docs-help.md`, `support.md`). `/help` only redirects to `/docs`.
 
