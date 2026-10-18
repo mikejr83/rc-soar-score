@@ -96,4 +96,59 @@ void main() {
 
     expect(await persistence.load('a'), isA<NoStoredDraft>());
   });
+
+  test(
+    'malformed envelope fields are an unreadable draft, not no draft',
+    () async {
+      for (final raw in <Object?>[
+        {'version': ContestDraftCodec.version, 'data': {}},
+        {'version': ContestDraftCodec.version, 'saved_at': 'yesterday'},
+        {'version': 'one', 'saved_at': savedAt.toIso8601String()},
+        'not an envelope',
+        42,
+      ]) {
+        await putRaw('a', raw);
+
+        expect(
+          await persistence.load('a'),
+          isA<UnreadableStoredDraft>(),
+          reason: '$raw',
+        );
+      }
+    },
+  );
+
+  test('clear and save report a storage that refuses', () async {
+    final refusing = LocalUiDraftPersistence(
+      _RefusingStore(),
+      account: () => 'a',
+    );
+
+    await expectLater(refusing.clear('a'), throwsStateError);
+    await expectLater(
+      refusing.save('a', richDraft(), savedAt),
+      throwsStateError,
+    );
+  });
+}
+
+/// A store whose writes all fail.
+class _RefusingStore implements LocalUiStore {
+  @override
+  Future<T> get<T>(String accountId, LocalUiKey<T> key) async =>
+      key.defaultValue;
+
+  @override
+  Future<bool> set<T>(String accountId, LocalUiKey<T> key, T value) async =>
+      false;
+
+  @override
+  Future<bool> remove<T>(String accountId, LocalUiKey<T> key) async => false;
+
+  @override
+  Stream<T> watch<T>(String accountId, LocalUiKey<T> key) =>
+      const Stream.empty();
+
+  @override
+  Future<void> close() async {}
 }

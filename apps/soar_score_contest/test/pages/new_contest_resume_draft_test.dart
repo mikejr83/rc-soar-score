@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/router.dart';
 import 'package:soar_score_contest/services/new_contest/contest_draft.dart';
 import 'package:soar_score_contest/services/new_contest/contest_draft_store.dart';
 import 'package:soar_score_contest/services/new_contest/draft_persistence.dart';
@@ -115,5 +116,42 @@ void main() {
 
     expect(find.byKey(dialog), findsNothing);
     expect(find.text('Typed'), findsOneWidget);
+  });
+
+  testWidgets('when Start fresh cannot delete the draft, Retry is offered', (
+    tester,
+  ) async {
+    storeDraft(const ContestDraft(name: 'Gator Cup'));
+    await pumpWizard(tester, respond: emptyApi, store: store);
+
+    persistence.failing = true;
+    await tester.tap(find.byKey(fresh));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('banner-save-failed')), findsOneWidget);
+    expect(persistence.stored, isNotEmpty);
+
+    persistence.failing = false;
+    await tester.tap(find.byKey(const ValueKey('draft-retry')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('banner-save-failed')), findsNothing);
+    expect(persistence.stored, isEmpty);
+  });
+
+  testWidgets('leaving while the choice is open loses nothing', (tester) async {
+    storeDraft(const ContestDraft(name: 'Gator Cup'));
+    final wizard = await pumpWizard(tester, respond: emptyApi, store: store);
+    expect(find.byKey(dialog), findsOneWidget);
+
+    // The dialog outlives the page; the choice still counts.
+    wizard.router.go(homePath);
+    await tester.pumpAndSettle();
+    expect(persistence.stored, isNotEmpty);
+    await tester.tap(find.byKey(keep));
+    await tester.pumpAndSettle();
+
+    wizard.router.go(newContestPath);
+    await tester.pumpAndSettle();
+    expect(find.byKey(dialog), findsNothing);
+    expect(find.text('Gator Cup'), findsOneWidget);
   });
 }

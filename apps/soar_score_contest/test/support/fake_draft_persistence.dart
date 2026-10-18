@@ -38,5 +38,10 @@ class FakeDraftPersistence implements DraftPersistence {
   }
 
   @override
-  Future<void> clear(String accountId) async => stored.remove(accountId);
+  Future<void> clear(String accountId) async {
+    if (failing) {
+      throw StateError('storage unavailable');
+    }
+    stored.remove(accountId);
+  }
 }

@@ -10,8 +10,23 @@ import 'draft_persistence.dart';
 class _Envelope {
   const _Envelope(this.version, this.savedAt, this.data);
 
-  final int version;
-  final DateTime savedAt;
+  /// Reads whatever was stored; fields that are missing or the wrong type
+  /// come out `null`, which makes the draft unreadable rather than missing.
+  factory _Envelope.read(Object? raw) {
+    if (raw is! Map) {
+      return const _Envelope(null, null, null);
+    }
+    final version = raw['version'];
+    final savedAt = raw['saved_at'];
+    return _Envelope(
+      version is int ? version : null,
+      savedAt is String ? DateTime.tryParse(savedAt) : null,
+      raw['data'],
+    );
+  }
+
+  final int? version;
+  final DateTime? savedAt;
   final Object? data;
 }
 
@@ -29,20 +44,10 @@ class LocalUiDraftPersistence implements DraftPersistence {
         ? null
         : {
             'version': value.version,
-            'saved_at': value.savedAt.toUtc().toIso8601String(),
+            'saved_at': value.savedAt?.toUtc().toIso8601String(),
             'data': value.data,
           },
-    decode: (data) {
-      if (data == null) {
-        return null;
-      }
-      final map = data as Map;
-      return _Envelope(
-        map['version'] as int,
-        DateTime.parse(map['saved_at'] as String),
-        map['data'],
-      );
-    },
+    decode: (data) => data == null ? null : _Envelope.read(data),
   );
 
   final LocalUiStore _store;
@@ -59,16 +64,17 @@ class LocalUiDraftPersistence implements DraftPersistence {
     if (envelope == null) {
       return const NoStoredDraft();
     }
-    if (envelope.version != ContestDraftCodec.version) {
-      return UnreadableStoredDraft(envelope.savedAt);
+    final savedAt = envelope.savedAt;
+    if (envelope.version != ContestDraftCodec.version || savedAt == null) {
+      return UnreadableStoredDraft(savedAt);
     }
     try {
       final draft = ContestDraftCodec.decode(envelope.data);
       return draft.isBlank
           ? const NoStoredDraft()
-          : FoundStoredDraft(draft, envelope.savedAt);
+          : FoundStoredDraft(draft, savedAt);
     } on FormatException {
-      return UnreadableStoredDraft(envelope.savedAt);
+      return UnreadableStoredDraft(savedAt);
     }
   }
 
@@ -96,6 +102,8 @@ class LocalUiDraftPersistence implements DraftPersistence {
 
   @override
   Future<void> clear(String accountId) async {
-    await _store.remove(accountId, _key);
+    if (!await _store.remove(accountId, _key)) {
+      throw StateError('The draft could not be deleted.');
+    }
   }
 }

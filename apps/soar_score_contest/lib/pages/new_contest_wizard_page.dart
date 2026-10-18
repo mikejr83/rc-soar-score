@@ -82,6 +82,10 @@ class NewContestWizardPage extends StatefulWidget {
     'Check each section, then create the contest.',
   ];
 
+  static const String draftNotDeletedMessage =
+      'Contest created, but its saved draft couldn’t be deleted. You may be '
+      'offered it again; choose Start fresh.';
+
   static const String leftMessage = 'Left the wizard. Your draft is kept.';
 
   @override
@@ -154,13 +158,15 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
     }
     if (stored != null) {
       final resume = await showResumeDraftDialog(context, stored);
-      if (!mounted) {
-        return;
-      }
+      // The choice is the director's even if they left the wizard while the
+      // dialog was open, so it is applied to the store either way.
       if (resume && stored is FoundStoredDraft) {
         _store.continueWith(stored);
       } else {
-        _store.discard();
+        await _store.discard();
+      }
+      if (!mounted) {
+        return;
       }
     }
     setState(() {
@@ -674,9 +680,12 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
         groups: '${GroupPlan.of(draft).groups}',
         rounds: draft.roundsText,
       );
-      _store.discard();
+      await _store.discard();
       if (!mounted) {
         return;
+      }
+      if (_store.saveFailed) {
+        _message(NewContestWizardPage.draftNotDeletedMessage);
       }
       setState(() {
         _creating = false;

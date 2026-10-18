@@ -64,11 +64,12 @@ void main() {
       expect(store.needsRestore, isTrue);
       final offer = await store.restore();
       expect(offer, same(stored));
-      expect(store.needsRestore, isFalse);
-      // The offer is made once; asking again finds nothing to decide.
-      expect(await store.restore(), isNull);
+      // Until the director decides, the same offer comes back.
+      expect(store.needsRestore, isTrue);
 
       store.continueWith(stored);
+      expect(store.needsRestore, isFalse);
+      expect(await store.restore(), isNull);
       expect(store.draft.name, 'Cup');
       expect(store.savedAt, now);
       expect(store.hasDraft, isTrue);
@@ -133,6 +134,42 @@ void main() {
         (persistence.stored['user:b']! as FoundStoredDraft).draft.name,
         'B',
       );
+    });
+
+    test(
+      'leaving before choosing keeps the offer for the next visit',
+      () async {
+        final persistence = FakeDraftPersistence()..stored['local'] = stored;
+        final store = ContestDraftStore(persistence: persistence);
+        addTearDown(store.dispose);
+
+        expect(await store.restore(), same(stored));
+        // The wizard closed without a choice; opening it again asks again.
+        expect(store.needsRestore, isTrue);
+        expect(await store.restore(), same(stored));
+        expect(persistence.stored, isNotEmpty);
+
+        store.continueWith(stored);
+        expect(store.needsRestore, isFalse);
+      },
+    );
+
+    test('a failed delete is reported and retried', () async {
+      final persistence = FakeDraftPersistence()..stored['local'] = stored;
+      final store = ContestDraftStore(persistence: persistence);
+      addTearDown(store.dispose);
+      await store.restore();
+
+      persistence.failing = true;
+      await store.discard();
+      expect(store.hasDraft, isFalse);
+      expect(store.saveFailed, isTrue);
+      expect(persistence.stored, isNotEmpty);
+
+      persistence.failing = false;
+      await store.retry();
+      expect(store.saveFailed, isFalse);
+      expect(persistence.stored, isEmpty);
     });
   });
 }

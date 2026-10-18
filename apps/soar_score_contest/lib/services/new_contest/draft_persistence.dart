@@ -29,8 +29,8 @@ class UnreadableStoredDraft extends StoredDraft {
 /// Keeps one New Contest draft per account across restarts.
 ///
 /// Every call names the account, so a draft always goes back to the account
-/// that made it. Calls never throw except [save], which throws when the draft
-/// could not be stored so the store can report a failed save.
+/// that made it. [load] never throws; [save] and [clear] throw when the change
+/// could not be stored, so the store can report a failure.
 abstract class DraftPersistence {
   /// The account whose draft is current now.
   String get accountId;
