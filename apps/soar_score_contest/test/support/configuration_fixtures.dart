@@ -55,27 +55,29 @@ ContestParticipation configParticipation(
   scoringUuid: ScoringUuid.parse('0000000$n-0000-4000-8000-000000000000'),
 );
 
-CurrentMatrix configDrawnMatrix() => CurrentMatrix(
-  revision: MatrixRevision(
-    id: Id.parse('019c0000-0000-7000-8000-0000000000e1'),
-    contestId: Id.parse(configContestId),
-    revisionNumber: 1,
-    firstRound: 1,
-    lastRound: 4,
-    drawMode: DrawMode.standardManOnMan,
-    randomSeed: 1,
-    algorithmVersion: '1',
-    drawConfig: const {
-      'groups_per_round': 2,
-      'team_protection': false,
-      'lane_mode': 'None',
-      'configured_draw_mode': 'StandardManOnMan',
-    },
-    seedingSnapshot: const {},
-    createdBy: Id.parse('019c0000-0000-7000-8000-0000000000b1'),
-    createdAt: _created,
-  ),
-);
+CurrentMatrix configDrawnMatrix({Map<String, Object?>? fairnessSummary}) =>
+    CurrentMatrix(
+      revision: MatrixRevision(
+        id: Id.parse('019c0000-0000-7000-8000-0000000000e1'),
+        contestId: Id.parse(configContestId),
+        revisionNumber: 1,
+        firstRound: 1,
+        lastRound: 4,
+        drawMode: DrawMode.standardManOnMan,
+        randomSeed: 1,
+        algorithmVersion: '1',
+        drawConfig: const {
+          'groups_per_round': 2,
+          'team_protection': false,
+          'lane_mode': 'None',
+          'configured_draw_mode': 'StandardManOnMan',
+        },
+        seedingSnapshot: const {},
+        fairnessSummary: fairnessSummary,
+        createdBy: Id.parse('019c0000-0000-7000-8000-0000000000b1'),
+        createdAt: _created,
+      ),
+    );
 
 LandingTableView _landing(Id id, String name, {Id? owner}) => LandingTableView(
   content: LandingTableWithResults(
