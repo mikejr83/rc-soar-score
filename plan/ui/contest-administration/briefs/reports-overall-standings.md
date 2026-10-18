@@ -41,6 +41,7 @@ Columns, in order:
 3. **Total score**: formatted as the contest settings say (rounding or truncation, number of decimals).
 4. **Optional columns**, in the fixed order of the Options list below. None, some or all can be on.
 5. **Round columns**: one per round, in round order, starting after the optional columns. Round 1 is leftmost, then Round 2, and so on. For a 14-round contest that is 14 round columns.
+6. **Penalty**: the cumulative penalty, **last column**, only when one exists (see "Cumulative penalty column").
 
 Round columns are **fixed width**, so the grid reads as a regular matrix and the printed pages split predictably. Show the width, and show what happens with a long score (for example "1000.0" with flight details on).
 
@@ -50,13 +51,15 @@ The default orientation is **landscape**.
 
 A **dropped round's cell is highlighted**. On the printed page, highlight means a light grey fill **plus** a visible marker that works without colour. The current report uses an **asterisk before the value** (`*949.95`), so directors already read it. Recommended: keep the asterisk, add the grey fill, and put a legend in the footer ("\* = dropped round"). Show parentheses or a "D" tag only if you find the asterisk fails, and justify it. On screen use the same marker with a tonal fill.
 
-Design the case where a pilot's zero cannot be dropped (a F5J motor restart under the non-droppable option): that cell is not highlighted as dropped, and carries its reason marker (see Flight details).
+Design the case where a pilot's zero cannot be dropped (a F5J motor restart under the non-droppable option): that cell is not highlighted as dropped, and is shown as a plain 0, like every other zero.
 
-### Per-round cells and zero reasons
+### Per-round cells
 
-A round cell shows the **round score** (the group score for that round after flight penalty, as the contest settings format it). A pilot with no score in a round that others have scored shows "—" (not 0), and with a text label for screen readers ("no score"). A zero with a reason (out of bounds, motor restart, missing altitude, retirement) shows 0 plus a short marker from the legend. Ask whether this reason marker is wanted in the standings at all (see Questions); design it as a small, optional-looking mark.
+A round cell shows the **round score** (the group score for that round after flight penalty, as the contest settings format it). A pilot with no score in a round that others have scored shows "—" (not 0), and with a text label for screen readers ("no score"). A zero, whatever its reason (out of bounds, motor restart, missing altitude, retirement), **shows as a plain 0**. This report does not show the reason for a zero and has no marker or legend entry for it.
 
-A cumulative penalty belongs to the total, not to a round. Ask where to show it (see Questions). Provide a design where the total carries a small "penalty" note and the flight in which it was given has a marker, because the public site does this.
+### Cumulative penalty column
+
+A cumulative penalty belongs to the total, not to a round. It gets its own column: **"Penalty", the last column of the table, to the right of the final round column**. It is **shown only when at least one pilot in the report has a cumulative penalty**; otherwise there is no column and no gap. It shows the points deducted per pilot (blank when a pilot has none). Round cells carry no penalty marker. Design the column with the fixed width of a round column, show it on screen and printed, and on a printout that overflows horizontally it appears on the **last page of columns** with the final rounds. Make the heading say what it is ("Penalty" with a helper note "Deducted from total; not dropped") so nobody reads it as a round.
 
 ## Options
 
@@ -84,14 +87,14 @@ Design the **Options** controls so that Provisional also explains the default ("
 
 A panel group titled **Filter** with a **round range**: a lower bound and an upper bound, inclusive. The default is **All rounds**. Design the control (two numeric dropdowns, a range slider with labels, or a segmented "All rounds / Custom" with two fields; recommend one, keyboard accessible). It must accept only rounds that have scores, and say so.
 
-Show the output for a range: the round columns from the lower bound to the upper bound only. **Resolve the following in your design and list it in your questions:** when the director picks, for example, rounds 3 to 5, do **Rank and Total** still reflect all rounds up to round 5, or only rounds 3 to 5? The follow-up requirements say standings must be producible **as of a round**, which suggests the first. The recommended design is: Rank and Total are always the true standings **as of the upper bound** (all rounds 1 to the upper bound, with the contest's drop rule applied to that set), and the lower bound only hides earlier round columns. Make the heading say it ("Standings as of round 5; showing rounds 3 to 5"), and show a one-line note under the filter. Show the alternative if cheap.
+Show the output for a range: the round columns from the lower bound to the upper bound only. **Decided:** when the director picks, for example, rounds 3 to 5, **Rank and Total** still reflect all rounds up to round 5, because standings must be producible **as of a round**. Rank and Total are always the true standings **as of the upper bound** (all rounds 1 to the upper bound, with the contest's drop rule applied to that set), and the lower bound only hides earlier round columns. Make the heading say it ("Standings as of round 5; showing rounds 3 to 5"), and show a one-line note under the filter.
 
 ## Printing
 
 The report may not fit one page across. A contest with many rounds and every optional column on will **overflow horizontally**. Design the printed pages:
 
 - **Page 1** carries the heading, Rank, Pilot name, Total, the selected optional columns, and as many round columns as fit.
-- **Continuation pages** carry only: **Rank**, **Pilot name**, and the **additional rounds** that did not fit on the previous page. The optional columns are not repeated. Each continuation page repeats a short running header and the round columns' headings.
+- **Continuation pages** carry only: **Rank**, **Pilot name**, and the **additional rounds** that did not fit on the previous page. The optional columns are **never** repeated, to keep the page brief. Each continuation page repeats a short running header and the round columns' headings.
 - Page order: **rows first, then columns**, as the current report does. All pilots paginate top to bottom for the first set of columns (pilots 1 to 10 on page 1, 11 to 14 on page 2), then the same pilots paginate again for the next set of columns (pages 3 and 4). Each page repeats the column headings. A pilot's block is never split across pages. Show a four-page example this way (14 pilots, 14 rounds, Flight details on), and make the page indicator say which pilots and rounds a page holds ("Pilots 11 to 14 · Rounds 12 to 14").
 - Show the footer's "Page X of Y" and a note when columns continue: "Rounds 9 to 14 continue on page 2".
 - Show the three cases as printed pages in landscape: (a) everything fits on one page, (b) rounds overflow to a second page, (c) overflow with all options on and Flight details on.
@@ -111,7 +114,7 @@ Also show the heading and footer with each result status (Official, Preliminary,
 
 1. The viewer with the Overall Standings report at expanded width, with the filter and options panel, on a paper sheet. Include the round-range control and the Provisional default.
 2. The **table** in four densities: default; with all optional columns; with Flight details (F5J set and F3J set); with both.
-3. Dropped-round highlighting, on screen and printed in black and white, with the legend. Plus the non-droppable zero, the "—" for no score, and zero reasons.
+3. Dropped-round highlighting, on screen and printed in black and white, with the legend. Plus the non-droppable zero and the "—" for no score; the Penalty column present and absent.
 4. The **printed pages**: one page; overflow to two pages; all options on; Letter and A4; the continuation page layout; the portrait fallback.
 5. The **range filter**, with the "as of round" heading and the note.
 6. All states listed above.
@@ -120,13 +123,19 @@ Also show the heading and footer with each result status (Official, Preliminary,
 
 Light theme first. Show one dark-theme viewer screen to prove the sheet stays black on white.
 
+## Decisions made
+
+These were open and are settled. Design to them.
+
+1. **Round filter and totals.** Rank and Total are standings as of the upper bound round. The lower bound only hides earlier round columns.
+2. **Cumulative penalty.** A last "Penalty" column, shown only when a cumulative penalty exists.
+3. **Zero reasons.** Not shown; a zero is a plain 0.
+4. **Hidden overall results.** The director's report does not respect the hiding rule. It shows the full standings.
+5. **Optional column order.** Percentage, Raw score, Team, Pilot number, Pilot class.
+6. **Continuation pages.** Optional columns are never shown on them.
+7. **Ties.** Tied pilots share a rank and the next rank is skipped (1, 2, 2, 4).
+8. **Team standings.** Not in this report.
+
 ## Questions to carry into the design
 
-1. **Round filter and totals.** As above. Does the lower bound change the total? Recommended: no.
-2. **Cumulative penalty display.** Where does it show on this report, if at all? The public site shows it in the flight where it was given and sums penalties in the total.
-3. **Zero reasons.** Does the standings report show the reason for a zero (out of bounds, motor restart), or only the public site? A small marker is cheap but adds noise.
-4. **Hidden overall results.** Does the director's report respect the hiding rule? Recommended: no, and the footer says so (see the Reports brief).
-5. **Optional column order.** The requirements list Percentage, Raw score, Team, Pilot number, Pilot class. Is that the column order, or should team and number sit beside the name? Recommended: keep the listed order, so the name column and the totals stay together.
-6. **Optional columns on continuation pages.** The requirement says they "do not need to be shown". Confirm that they are never shown, so the layout is predictable.
-7. **Ties.** Confirm that tied pilots show the same rank, and the next rank is skipped (1, 2, 2, 4).
-8. **Team standings.** Out of scope for this report. Confirm.
+None open from the requirements. List any you find.

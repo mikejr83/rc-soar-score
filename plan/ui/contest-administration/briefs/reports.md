@@ -177,7 +177,7 @@ Light theme first. Show one dark-theme screen (the viewer with the paper sheet o
 These are decisions the requirements do not settle. Design a recommended default, show the alternative if cheap, and list the point in your questions.
 
 1. **Result status rules.** The requirements name `official`, `preliminary` and `estimated` but do not say which one a given standings page gets. The working definitions above are mine. Confirm.
-2. **Hidden overall results.** A contest can hide overall scores and placing on the public site and participant views through round N. Do the director's own reports respect that? Recommended: no, the director always sees the full standings, and the report states "Overall results are hidden from participants through round N" so a printout handed to the public is not a surprise.
-3. **Standings as of a round.** Standings must be producible as of a round. Does the round filter mean that? See the Overall Standings brief.
+2. **Hidden overall results.** A contest can hide overall scores and placing on the public site and participant views through round N. **Decided: no.** The director's own reports always show the full standings. Whether to add a "hidden from participants through round N" note to the printout is a design suggestion, not a requirement; show it as an optional footer line.
+3. **Standings as of a round.** Standings must be producible as of a round. **Decided:** yes. Rank and Total are as of the upper bound round; see the Overall Standings brief.
 4. **Which window API on native.** Opening a second native window may not be available on every platform. Design the fallback as navigating in place with a back affordance and say so.
 5. **Page setup defaults and storage.** Paper size defaults by locale. Confirm the page setup is not stored.
