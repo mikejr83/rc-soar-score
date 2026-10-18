@@ -4,6 +4,7 @@ import 'package:soar_score_ui_storage/soar_score_ui_storage.dart';
 import '../auth/auth_session.dart';
 import '../services/sync/app_sync.dart';
 import '../services/sync/no_app_sync.dart';
+import '../services/ui_account/ui_account.dart';
 
 /// Shared view of the platform bootstrap performed before the app's first
 /// frame: the `ApiClient` every screen talks through, and the resources that
@@ -25,6 +26,10 @@ abstract class AppBootstrap {
   /// Where UI-only state (theme, hidden panels, drafts) is kept, or `null`
   /// when the bootstrap has none (tests).
   LocalUiStore? get localUiStore => null;
+
+  /// Which account UI-only state belongs to: the Local account offline, the
+  /// signed-in account otherwise.
+  UiAccount get uiAccount => const FixedUiAccount();
 
   /// What the screens may ask of synchronization; none on the web.
   AppSync get appSync => const NoAppSync();

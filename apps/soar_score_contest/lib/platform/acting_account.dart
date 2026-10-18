@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:soar_score_core/soar_score_core.dart' as core;
 
 import '../server/embedded_server.dart';
@@ -10,7 +11,7 @@ import 'auth_epoch.dart';
 /// sign-in the claim was made under; [actAsLocal] goes back when the director
 /// signs out. [leaseFor] gives the number of the sign-in a request about
 /// that account's data may be sent under, or `null` when it may not be sent.
-class ActingAccount {
+class ActingAccount extends ChangeNotifier {
   ActingAccount(this._server, this._epoch);
 
   final EmbeddedServer _server;
@@ -31,12 +32,14 @@ class ActingAccount {
     if (!_epoch.isCurrent(epoch)) return false;
     _server.actAs(accountId);
     _boundEpoch = epoch;
+    notifyListeners();
     return true;
   }
 
   void actAsLocal() {
     _server.actAsLocal();
     _boundEpoch = -1;
+    notifyListeners();
   }
 
   /// The sign-in a request about [owner]'s data may be sent under, or `null`.

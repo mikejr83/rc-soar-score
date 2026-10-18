@@ -13,6 +13,7 @@ import 'platform/app_bootstrap.dart';
 import 'platform/bootstrap.dart' as bootstrap;
 import 'services/connectivity/app_connectivity.dart';
 import 'services/connectivity/reachability_forwarder.dart';
+import 'services/theme/theme_controller.dart';
 
 final _logger = Logger('Main');
 
@@ -23,7 +24,7 @@ Future<void> main() async {
 
   try {
     _logger.info('Starting Soar Score Contest App');
-    _runContestApp(await bootstrap.start());
+    await _runContestApp(await bootstrap.start());
   } catch (error, stackTrace) {
     _logger.severe('Soar Score startup failed: $error\n$stackTrace');
     debugPrintStack(
@@ -45,10 +46,10 @@ Future<void> main() async {
 }
 
 Future<void> _retryStartup() async {
-  _runContestApp(await bootstrap.start());
+  await _runContestApp(await bootstrap.start());
 }
 
-void _runContestApp(AppBootstrap appBootstrap) {
+Future<void> _runContestApp(AppBootstrap appBootstrap) async {
   // The connectivity monitor observes the same client the app talks through,
   // so no API request ever bypasses `soar_score_api`, and no platform channel
   // is needed on web (its connectivity probe resolves there). Tests that pump
@@ -56,9 +57,20 @@ void _runContestApp(AppBootstrap appBootstrap) {
   final connectivity = AppConnectivity(client: appBootstrap.remoteApiClient);
   forwardReachability(connectivity, appBootstrap);
 
+  // Load the saved theme first so the first frame already has it.
+  final theme = ThemeController(
+    store: appBootstrap.localUiStore,
+    account: appBootstrap.uiAccount,
+  );
+  await theme.load();
+
   // `SoarScoreContestApp` releases the bootstrap (closing the embedded
   // server and its port) and disposes the monitor on dispose.
   runApp(
-    SoarScoreContestApp(bootstrap: appBootstrap, connectivity: connectivity),
+    SoarScoreContestApp(
+      bootstrap: appBootstrap,
+      connectivity: connectivity,
+      themeController: theme,
+    ),
   );
 }
