@@ -34,7 +34,7 @@ class ContestStateSectionBody extends StatelessWidget {
       _ when contest.adminLock == AdminLock.locked => (
         Icons.lock_outline,
         'Locked',
-        'The configuration and participants are read-only.',
+        'The configuration, participants and matrix are read-only.',
       ),
       _ => (Icons.lock_open, 'Unlocked', 'The contest can be administered.'),
     };

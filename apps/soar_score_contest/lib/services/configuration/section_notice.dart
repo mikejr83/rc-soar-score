@@ -40,7 +40,7 @@ class SectionNotice {
         const SectionNotice(
           Icons.info_outline,
           'Locking doesn’t change the matrix or scores. It blocks changes to '
-          'the configuration and participants.',
+          'the configuration, participants and matrix.',
         ),
       if (id.kinds.contains(SettingKind.structural))
         if (running)
