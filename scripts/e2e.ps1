@@ -93,6 +93,7 @@ if ($Device -in 'web', 'chrome') {
                     'drive', '--driver=test_driver/integration_test.dart',
                     "--target=integration_test/$($file.Name)",
                     '-d', 'web-server', '--browser-name=chrome',
+                    '--no-web-resources-cdn',
                     '--dart-define=SOAR_SCORE_E2E=true',
                     "--dart-define=SOAR_SCORE_API_BASE_URL=http://localhost:$port"
                 )

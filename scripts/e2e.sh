@@ -17,6 +17,9 @@
 # (an always-signed-in session) and points it at
 # apps/soar_score_server/tool/e2e_server.dart, a token-free API server on
 # demo data. Each test file gets a fresh server, hence fresh demo data.
+# The renderer (CanvasKit) is bundled with the app (--no-web-resources-cdn), so
+# a run needs no access to gstatic.com, which sandboxed networks block (the
+# page would stay blank until the test timed out).
 # A test file that runs longer than E2E_TEST_TIMEOUT seconds (default 300) is
 # stopped and counted as failed, so a hung browser cannot stall a run.
 set -eu
@@ -61,6 +64,15 @@ if [ "$device" = web ] || [ "$device" = chrome ]; then
     [ -n "${CHROME_EXECUTABLE:-}" ] || CHROME_EXECUTABLE="$tools/$(sed -n 's/^chrome=//p' "$tools/paths.env" | tr -d '\r')"
   fi
   chromedriver="${CHROMEDRIVER:-chromedriver}"
+  # Chrome refuses to start as root (a container, a cloud agent) without
+  # --no-sandbox, so run it through a small wrapper that adds the flag.
+  if [ -n "${CHROME_EXECUTABLE:-}" ] && [ "$(id -u)" = 0 ]; then
+    mkdir -p "$tools"
+    wrapper="$tools/chrome-no-sandbox.sh"
+    printf '#!/bin/sh\nexec "%s" --no-sandbox --disable-dev-shm-usage "$@"\n' "$CHROME_EXECUTABLE" >"$wrapper"
+    chmod +x "$wrapper"
+    CHROME_EXECUTABLE="$wrapper"
+  fi
   chrome_args=()
   [ -z "${CHROME_EXECUTABLE:-}" ] || chrome_args=(--chrome-binary="$CHROME_EXECUTABLE")
   server_pid=""
@@ -115,6 +127,7 @@ if [ "$device" = web ] || [ "$device" = chrome ]; then
     start_server
     "${with_timeout[@]+"${with_timeout[@]}"}" flutter drive --driver=test_driver/integration_test.dart --target="$file" \
       -d web-server --browser-name=chrome ${chrome_args[@]+"${chrome_args[@]}"} \
+      --no-web-resources-cdn \
       --dart-define=SOAR_SCORE_E2E=true \
       --dart-define=SOAR_SCORE_API_BASE_URL="http://localhost:$port" \
       ${extra[@]+"${extra[@]}"} || {
