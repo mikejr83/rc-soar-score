@@ -99,6 +99,8 @@ The report may not fit one page across. A contest with many rounds and every opt
 
 Show the same pages at **A4 and Letter**.
 
+**Save as PDF** sits beside Print in the viewer (see the Reports brief) and produces exactly these pages. Show it in the viewer. No country column and no FAI or National ID column are in this report.
+
 ## States
 
 Design: loading and generating; the normal report; no scores yet (the report is not openable from the list, but a refresh of an open report can land here); a round range with no scored rounds; a **tie** at the top; a pilot with no scores at all; a pilot who retired; the **Provisional** report mid-contest; a report that went stale because a score changed while the tab was open; offline.
@@ -128,6 +130,3 @@ Light theme first. Show one dark-theme viewer screen to prove the sheet stays bl
 6. **Optional columns on continuation pages.** The requirement says they "do not need to be shown". Confirm that they are never shown, so the layout is predictable.
 7. **Ties.** Confirm that tied pilots show the same rank, and the next rank is skipped (1, 2, 2, 4).
 8. **Team standings.** Out of scope for this report. Confirm.
-9. **Registration column.** The current report can show the FAI number. Pilot IDs are not in the requirements' option list. Add an optional "FAI or National ID" column, or leave it out? Recommended: leave it out unless asked.
-10. **Country column.** The current report shows country, and the requirements list no country column. Confirm it is omitted.
-11. **Save as File.** The current report can save the output to a file. The shared viewer has a Save as PDF fallback only when printing is unavailable. Should Save as PDF be a regular second action beside Print? Recommended: yes. It costs nothing on most platforms (it is a print destination), and directors email results. Answer in the Reports brief.
