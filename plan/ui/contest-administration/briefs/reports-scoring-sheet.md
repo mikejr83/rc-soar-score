@@ -10,6 +10,18 @@ The sheet is a **form that people write on**. It carries the draw (who flies in 
 
 **Platform and visual language:** Flutter, Material 3 for everything outside the sheet. The sheet is an unthemed paper document: black on white, a neutral typeface, no theme colours, every mark surviving a black-and-white laser printer or a photocopier. Tablet and larger. It must work with browser text zoom and large system fonts. Never use colour alone for state. The sheet exposes real table semantics to screen readers.
 
+## Reference: the sheets directors use today
+
+Directors currently print these from GliderScore. A seven-page output for a 14-round contest (3 groups per round, 4 to 5 pilots per group) is attached to this brief as a reference. It is a reference, not a template: the requirements in this brief win where they differ. I read it as text, so row heights and rules are not described. What it shows:
+
+- **Heading.** "{Contest} - Scoring Sheets - Duration", the club and date in brackets, then the vendor's web address. The new heading is "Official Scoring - {Contest_Name}" with the venue and dates under it. Drop the vendor line and the discipline suffix.
+- **Columns.** Name, Freq, Ctry, Club, **Time**, **Lndg**, **Height**, a **Lndg Over 75m** column, **Motor ReStarted**, **Sfty Plty** (a safety penalty), **Re-Fly?**, **Org Rnd** and **Signature**. The new sheet drops frequency and country (decided), calls the penalty "Penalty", and replaces Signature with **Validated** (see the questions).
+- **Org Rnd is pre-printed** with the round number of the group (a "1" on every Round 1 row), so only a re-flight needs a different number written in.
+- **Hierarchy.** "ROUND 1" in capitals, then "Group 1" indented under it, with the pilots listed beneath. Column headings repeat at the top of every page. The date and time are at the left of the footer and the page number at the right.
+- **Page breaks.** A group is **split across pages** with a "Group 1 (Cont)" header on the next page, and a round header can end up at the foot of a page. The new design must not split a group that fits on a page (see Pagination).
+- **Names** are "Surname, Given", one pilot per row.
+- **What the new design should improve on.** Rows are tight and not ruled, so there is little room to write. Headings are cramped ("Lndg Over 75m", "Sfty Plty"). Group splits make it hard to find a pilot's row at a glance.
+
 ## The report
 
 ### Heading
@@ -26,7 +38,7 @@ A table that officials write into. One table per group, grouped by round.
 
 **Leading columns** (printed, pre-filled from the draw):
 
-- **Pilot name**
+- **Pilot name**, formatted "Surname, Given" in normal capitalization (not all capitals).
 - **Club**
 - **Lane number** (only when lanes are on)
 - **Team** (only when the contest has teams)
@@ -117,3 +129,5 @@ Light theme first. Show one dark-theme viewer screen to prove the sheet stays bl
 6. **Signature blocks.** The earlier per-round card requirement had a signature block for pilot and timer. This sheet does not. Confirm none is wanted.
 7. **Validated cell type.** Initials, or a tick box? Recommended: a box big enough for initials.
 8. **Spare rows.** Add spare blank rows per group for late additions? Recommended: no.
+9. **Original round pre-printed.** The current sheet pre-prints the group's own round number in the Original round column, so only a re-flight needs a different number. The requirement lists the column without saying so. Recommended: pre-print it, in a lighter style than the blank cells, and say so on the sheet. Confirm.
+10. **Signature.** The current sheet has a Signature column. This report's requirement has Validated instead. Question 6 asks whether a signature is wanted; the current sheet suggests officials like one. Recommended: Validated only, wide enough for initials. Confirm.
