@@ -1,18 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_contest/auth/auth_session_inherited.dart';
+import 'package:soar_score_contest/auth/identity_provider_check.dart';
 import 'package:soar_score_contest/connectivity_provider.dart';
 import 'package:soar_score_contest/router.dart';
 import 'package:soar_score_contest/widgets/contest_shell.dart';
 
 import '../support/fake_app_connectivity.dart';
 import '../support/fake_auth_session.dart';
+import '../support/fake_identity_provider_check.dart';
 
 void main() {
   Widget app(FakeAuthSession session, String initialLocation) {
+    // The router's landing page probes the real identity provider by
+    // default, so tests inject a pre-probed stand-in.
+    final check = FakeIdentityProviderCheck(
+      status: IdentityProviderStatus.available,
+    )
+      ..probeCalls = 1;
+    addTearDown(check.dispose);
     final router = buildAppRouter(
       initialLocation: initialLocation,
       auth: session,
+      identityCheck: check,
     );
     addTearDown(router.dispose);
     return AppConnectivityInherited(
