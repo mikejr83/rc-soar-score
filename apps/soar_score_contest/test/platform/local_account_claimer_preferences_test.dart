@@ -118,7 +118,7 @@ void main() {
         onProblem: (_) {},
         getPreferences: () async => onService,
       ),
-      throwsAssertionError,
+      throwsArgumentError,
     );
   });
 }
