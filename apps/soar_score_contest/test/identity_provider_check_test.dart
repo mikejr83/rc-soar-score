@@ -66,10 +66,10 @@ void main() {
         'out', () async {
       final check = IdentityProviderCheck(
         tenantDomain: 'tenant.example',
-        client: MockClient((request) async {
-          await Future<void>.delayed(const Duration(seconds: 30));
-          return http.Response('{}', 200);
-        }),
+        client: _AbortAwareClient(
+          onRequest: () {},
+          onAbort: () {},
+        ),
         timeout: const Duration(milliseconds: 10),
       );
       addTearDown(check.dispose);
@@ -78,6 +78,27 @@ void main() {
 
       expect(check.status, IdentityProviderStatus.unavailable);
       expect(check.lastError, 'Timed out');
+    });
+
+    test('aborts a timed-out request before allowing a retry', () async {
+      var requests = 0;
+      var aborted = 0;
+      final check = IdentityProviderCheck(
+        tenantDomain: 'tenant.example',
+        client: _AbortAwareClient(
+          onRequest: () => requests++,
+          onAbort: () => aborted++,
+        ),
+        timeout: const Duration(milliseconds: 10),
+      );
+      addTearDown(check.dispose);
+
+      await check.probe();
+      expect(aborted, 1);
+      expect(check.lastError, 'Timed out');
+
+      await check.probe();
+      expect(requests, 2);
     });
 
     test('a second probe while one is in flight issues no second request', () async {
@@ -165,4 +186,20 @@ void main() {
       expect(recorder, contains('close'));
     });
   });
+}
+
+class _AbortAwareClient extends http.BaseClient {
+  _AbortAwareClient({required this.onRequest, required this.onAbort});
+
+  final void Function() onRequest;
+  final void Function() onAbort;
+
+  @override
+  Future<http.StreamedResponse> send(http.BaseRequest request) async {
+    onRequest();
+    final abortable = request as http.AbortableRequest;
+    abortable.abortTrigger!.then((_) => onAbort());
+    await abortable.abortTrigger;
+    throw http.RequestAbortedException(request.url);
+  }
 }

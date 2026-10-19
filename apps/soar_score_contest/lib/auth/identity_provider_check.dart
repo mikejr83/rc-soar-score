@@ -42,6 +42,7 @@ class IdentityProviderCheck extends ChangeNotifier {
   String? _lastError;
   bool _probeInFlight = false;
   bool _disposed = false;
+  Completer<void>? _abortInFlight;
 
   /// Current reachability. [IdentityProviderStatus.checking] both before the
   /// first probe completes and while a later one is in flight.
@@ -70,14 +71,35 @@ class IdentityProviderCheck extends ChangeNotifier {
   }
 
   Future<void> _runProbe() async {
-    http.Response? response;
+    final abort = Completer<void>();
+    _abortInFlight = abort;
+    Timer? timeoutTimer;
+    http.StreamedResponse? response;
     try {
-      response = await _client.get(_probeUrl).timeout(_timeout);
+      timeoutTimer = Timer(_timeout, () {
+        if (!abort.isCompleted) {
+          abort.complete();
+        }
+      });
+      response = await _client.send(
+        http.AbortableRequest(
+          'GET',
+          _probeUrl,
+          abortTrigger: abort.future,
+        ),
+      );
+      await response.stream.drain<void>();
+    } on http.RequestAbortedException {
+      _fail('Timed out');
     } on TimeoutException {
       _fail('Timed out');
     } on Object {
       _fail('No network connection');
     } finally {
+      timeoutTimer?.cancel();
+      if (identical(_abortInFlight, abort)) {
+        _abortInFlight = null;
+      }
       _probeInFlight = false;
     }
     if (_disposed) {
@@ -111,6 +133,10 @@ class IdentityProviderCheck extends ChangeNotifier {
   void dispose() {
     _disposed = true;
     _probeInFlight = false;
+    final abort = _abortInFlight;
+    if (abort != null && !abort.isCompleted) {
+      abort.complete();
+    }
     if (_ownsClient) {
       _client.close();
     }
