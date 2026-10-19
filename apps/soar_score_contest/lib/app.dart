@@ -14,7 +14,9 @@ import 'contest_draft_provider.dart';
 import 'local_ui_store_provider.dart';
 import 'platform/app_bootstrap.dart';
 import 'router.dart';
+import 'services/collapsible_areas/collapsible_areas_controller.dart';
 import 'services/theme/theme_controller.dart';
+import 'collapsible_areas_provider.dart';
 import 'theme_controller_provider.dart';
 import 'ui_account_provider.dart';
 import 'services/connectivity/app_connectivity.dart';
@@ -29,6 +31,7 @@ class SoarScoreContestApp extends StatefulWidget {
     this.appMode,
     this.routerInitialLocation = landingPath,
     this.themeController,
+    this.collapsibleAreas,
   });
 
   /// The platform bootstrap that started this app, if any. When present its
@@ -55,6 +58,11 @@ class SoarScoreContestApp extends StatefulWidget {
   /// it after the first frame.
   final ThemeController? themeController;
 
+  /// The remembered hidden and minimized areas, already loaded so panels do
+  /// not flip after the first frame. When `null` the app makes one from the
+  /// bootstrap's store and loads it after the first frame.
+  final CollapsibleAreasController? collapsibleAreas;
+
   static const String title = 'RC Soar Score Contest Management';
 
   @override
@@ -67,6 +75,8 @@ class _SoarScoreContestAppState extends State<SoarScoreContestApp> {
   late final GoRouter _router;
   late final ThemeController _theme;
   late final bool _ownsTheme;
+  late final CollapsibleAreasController _areas;
+  late final bool _ownsAreas;
 
   /// The user's single New Contest draft, kept across restarts where the
   /// bootstrap has local UI storage.
@@ -101,6 +111,15 @@ class _SoarScoreContestAppState extends State<SoarScoreContestApp> {
           account: widget.bootstrap?.uiAccount,
         );
     if (_ownsTheme) unawaited(_theme.load());
+    final givenAreas = widget.collapsibleAreas;
+    _ownsAreas = givenAreas == null;
+    _areas =
+        givenAreas ??
+        CollapsibleAreasController(
+          store: widget.bootstrap?.localUiStore,
+          account: widget.bootstrap?.uiAccount,
+        );
+    if (_ownsAreas) unawaited(_areas.load());
     _router = buildAppRouter(
       initialLocation: widget.routerInitialLocation,
       appMode: _appMode,
@@ -124,6 +143,7 @@ class _SoarScoreContestAppState extends State<SoarScoreContestApp> {
     }
     _router.dispose();
     if (_ownsTheme) _theme.dispose();
+    if (_ownsAreas) _areas.dispose();
     _draftStore.dispose();
     super.dispose();
   }
@@ -142,6 +162,7 @@ class _SoarScoreContestAppState extends State<SoarScoreContestApp> {
       ),
     );
     app = ThemeControllerInherited(controller: _theme, child: app);
+    app = CollapsibleAreasInherited(controller: _areas, child: app);
     app = ContestDraftInherited(store: _draftStore, child: app);
     final bootstrap = widget.bootstrap;
     if (bootstrap != null) {

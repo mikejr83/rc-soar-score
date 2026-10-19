@@ -3,12 +3,15 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../../collapsible_areas_provider.dart';
+import '../../services/collapsible_areas/collapsible_area.dart';
 import '../../services/matrix/fairness_view.dart';
 import 'matrix_colors.dart';
 
 /// The fairness summary above the grid: score with its meaning, the key
 /// figures, a labelled histogram, and collapsed draw details. It starts open
-/// on a tablet and as one line on a narrow screen.
+/// on a tablet and as one line on a narrow screen until the user chooses; the
+/// choice is remembered per account ([matrixSummaryArea]).
 class FairnessPanel extends StatefulWidget {
   const FairnessPanel({
     super.key,
@@ -25,27 +28,50 @@ class FairnessPanel extends StatefulWidget {
   final int? configurationRevision;
   final bool startCollapsed;
 
+  static const saveFailedMessage =
+      'The summary choice could not be saved. It applies until you close the '
+      'app.';
+
   @override
   State<FairnessPanel> createState() => _FairnessPanelState();
 }
 
 class _FairnessPanelState extends State<FairnessPanel> {
-  late bool _open = !widget.startCollapsed;
+  /// The user's choice when nothing remembers it (tests without the app).
+  bool? _localOpen;
   bool _details = false;
 
   FairnessView get _fairness =>
       FairnessView.of(widget.revision.fairnessSummary);
 
+  Future<void> _toggleSummary(bool open) async {
+    final areas = collapsibleAreasOf(context);
+    if (areas == null) {
+      setState(() => _localOpen = !open);
+      return;
+    }
+    final messenger = ScaffoldMessenger.of(context);
+    if (await areas.setOpen(matrixSummaryArea, !open)) return;
+    messenger.showSnackBar(
+      const SnackBar(content: Text(FairnessPanel.saveFailedMessage)),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final fairness = _fairness;
+    final startOpen = !widget.startCollapsed;
+    final areas = collapsibleAreasOf(context);
+    final open = areas == null
+        ? _localOpen ?? startOpen
+        : areas.isOpen(matrixSummaryArea, fallback: startOpen);
     return Card(
       margin: EdgeInsets.zero,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (_open)
+          if (open)
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 14, 20, 4),
               child: Wrap(
@@ -63,7 +89,7 @@ class _FairnessPanelState extends State<FairnessPanel> {
             child: LayoutBuilder(
               builder: (context, box) {
                 final left = [
-                  if (!_open) _Compact(fairness: fairness),
+                  if (!open) _Compact(fairness: fairness),
                   TextButton.icon(
                     key: const ValueKey('draw-details-toggle'),
                     onPressed: () => setState(() => _details = !_details),
@@ -76,12 +102,12 @@ class _FairnessPanelState extends State<FairnessPanel> {
                 ];
                 final toggle = TextButton.icon(
                   key: const ValueKey('summary-toggle'),
-                  onPressed: () => setState(() => _open = !_open),
+                  onPressed: () => _toggleSummary(open),
                   icon: Icon(
-                    _open ? Icons.expand_less : Icons.expand_more,
+                    open ? Icons.expand_less : Icons.expand_more,
                     size: 18,
                   ),
-                  label: Text(_open ? 'Hide summary' : 'Show summary'),
+                  label: Text(open ? 'Hide summary' : 'Show summary'),
                 );
                 // As in the design, "Hide summary" sits at the right end.
                 // There is no room for that on a narrow bar, so it wraps in

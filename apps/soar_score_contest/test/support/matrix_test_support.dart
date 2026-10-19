@@ -6,7 +6,9 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_contest/api_client_provider.dart';
+import 'package:soar_score_contest/collapsible_areas_provider.dart';
 import 'package:soar_score_contest/contest_draft_provider.dart';
+import 'package:soar_score_contest/services/collapsible_areas/collapsible_areas_controller.dart';
 import 'package:soar_score_contest/services/new_contest/contest_draft_store.dart';
 import 'package:soar_score_contest/pages/contest/matrix_page.dart';
 import 'package:soar_score_core/soar_score_core.dart';
@@ -335,10 +337,17 @@ Future<void> pumpMatrixPage(
   MatrixServer server, {
   Size size = const Size(1280, 1100),
   ContestDraftStore? drafts,
+  CollapsibleAreasController? areas,
 }) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
+  Widget page = const MaterialApp(
+    home: Scaffold(body: MatrixPage(contestId: matrixContestId)),
+  );
+  if (areas != null) {
+    page = CollapsibleAreasInherited(controller: areas, child: page);
+  }
   await tester.pumpWidget(
     ApiClientInherited(
       client: ApiClient(
@@ -347,9 +356,7 @@ Future<void> pumpMatrixPage(
       ),
       child: ContestDraftInherited(
         store: drafts ?? ContestDraftStore(),
-        child: const MaterialApp(
-          home: Scaffold(body: MatrixPage(contestId: matrixContestId)),
-        ),
+        child: page,
       ),
     ),
   );

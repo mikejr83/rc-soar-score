@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
-import 'package:soar_score_contest/pages/settings_page.dart';
 
 import 'support/interact.dart';
 import 'support/launch_app.dart';
+import 'support/open_settings.dart';
 
 ThemeMode _appThemeMode(WidgetTester tester) =>
     tester.widget<MaterialApp>(find.byType(MaterialApp)).themeMode!;
@@ -23,20 +23,6 @@ Future<void> _choose(WidgetTester tester, String label) => tapVisible(
   ),
 );
 
-/// Opens Settings from the account control at the bottom of the rail: a menu
-/// when there is an account or the offline app, a gear otherwise.
-Future<void> _openSettings(WidgetTester tester) async {
-  final menu = find.byKey(const ValueKey('account-menu'));
-  if (menu.evaluate().isNotEmpty) {
-    await tapVisible(tester, menu);
-    await pumpUntilFound(tester, find.text('Settings'));
-    await tapVisible(tester, find.text('Settings'));
-  } else {
-    await tapVisible(tester, find.byKey(const ValueKey('settings-button')));
-  }
-  await pumpUntilFound(tester, find.byType(SettingsPage));
-}
-
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
@@ -44,7 +30,7 @@ void main() {
     tester,
   ) async {
     await openMainPage(tester);
-    await _openSettings(tester);
+    await openSettings(tester);
 
     // The choice lives in the client's UI store, which a demo reset does not
     // clear, so start by putting it to System.
@@ -57,7 +43,7 @@ void main() {
     // Leaving and coming back shows the saved choice.
     await tapRail(tester, 'Roles');
     await pumpUntilFound(tester, find.text('Pilot'));
-    await _openSettings(tester);
+    await openSettings(tester);
     expect(_selected(tester), {ThemeMode.dark});
 
     await _choose(tester, 'Light');

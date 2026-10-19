@@ -13,6 +13,7 @@ import 'platform/app_bootstrap.dart';
 import 'platform/bootstrap.dart' as bootstrap;
 import 'services/connectivity/app_connectivity.dart';
 import 'services/connectivity/reachability_forwarder.dart';
+import 'services/collapsible_areas/collapsible_areas_controller.dart';
 import 'services/theme/theme_controller.dart';
 
 final _logger = Logger('Main');
@@ -63,6 +64,11 @@ Future<void> _runContestApp(AppBootstrap appBootstrap) async {
     account: appBootstrap.uiAccount,
   );
   await theme.load();
+  final areas = CollapsibleAreasController(
+    store: appBootstrap.localUiStore,
+    account: appBootstrap.uiAccount,
+  );
+  await areas.load();
 
   // `SoarScoreContestApp` releases the bootstrap (closing the embedded
   // server and its port) and disposes the monitor on dispose.
@@ -71,6 +77,7 @@ Future<void> _runContestApp(AppBootstrap appBootstrap) async {
       bootstrap: appBootstrap,
       connectivity: connectivity,
       themeController: theme,
+      collapsibleAreas: areas,
     ),
   );
 }
