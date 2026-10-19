@@ -58,6 +58,11 @@ const String newRolePath = '$rolesPath?new=1';
 /// The settings page (system scope), opened from the account control.
 const String settingsPath = '$landingPath/settings';
 
+/// The settings page inside the contest with [contestId], so opening
+/// settings from a contest keeps the contest shell.
+String contestSettingsPath(String contestId) =>
+    '$contestsPath/$contestId/settings';
+
 /// The landings page (system scope).
 const String landingsPath = '$landingPath/landings';
 
@@ -193,6 +198,11 @@ GoRouter buildAppRouter({
           GoRoute(
             path: settingsPath,
             name: 'settings',
+            builder: (context, state) => const SettingsPage(),
+          ),
+          GoRoute(
+            path: '$contestsPath/:contestId/settings',
+            name: 'contestSettings',
             builder: (context, state) => const SettingsPage(),
           ),
           GoRoute(

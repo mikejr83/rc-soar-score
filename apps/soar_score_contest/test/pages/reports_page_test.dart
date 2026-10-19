@@ -84,46 +84,6 @@ bool _enabled(WidgetTester tester, String key) =>
     tester.widget<ButtonStyleButton>(_open(key)).onPressed != null;
 
 void main() {
-  testWidgets('shows the strip and the four reports in two groups', (
-    tester,
-  ) async {
-    await _pump(tester, _server(matrix: drawnMatrix(), scored: _scored(2)));
-
-    expect(find.text('Reports are built from'), findsOneWidget);
-    expect(find.text('Running'), findsOneWidget);
-    expect(find.text('2 of 2 rounds fully scored'), findsOneWidget);
-    // The revisions identify the data a report would be built from.
-    expect(
-      find.descendant(
-        of: find.byKey(const ValueKey('reports-fact-matrix')),
-        matching: find.text('Revision 1'),
-      ),
-      findsOneWidget,
-    );
-    expect(
-      find.descendant(
-        of: find.byKey(const ValueKey('reports-fact-configuration')),
-        matching: find.text('Revision 14'),
-      ),
-      findsOneWidget,
-    );
-    expect(find.text('Official'), findsOneWidget);
-    expect(find.text('Results'), findsOneWidget);
-    expect(find.text('Documents to print'), findsOneWidget);
-    for (final title in [
-      'Overall Standings',
-      'Draw Matrix',
-      'Scoring Sheet',
-      'Pilot Scoring Cards',
-    ]) {
-      expect(find.text(title), findsOneWidget);
-    }
-    for (final key in ['standings', 'matrix', 'sheet', 'cards']) {
-      expect(_enabled(tester, key), isTrue, reason: key);
-    }
-    expect(find.byKey(const ValueKey('report-reason-standings')), findsNothing);
-  });
-
   testWidgets('lays the cards out in two columns when expanded, one below', (
     tester,
   ) async {

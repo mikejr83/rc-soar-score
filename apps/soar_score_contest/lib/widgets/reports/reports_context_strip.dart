@@ -51,43 +51,52 @@ class ReportsContextStrip extends StatelessWidget {
                   color: scheme.onSurfaceVariant,
                 ),
               ),
-              Wrap(
-                spacing: 28,
-                runSpacing: 12,
-                crossAxisAlignment: WrapCrossAlignment.start,
-                children: [
-                  _Fact(
-                    key: const ValueKey('reports-fact-lifecycle'),
-                    icon: completed ? Icons.task_alt : Icons.flag_outlined,
-                    label: 'Lifecycle',
-                    value: completed
-                        ? 'Completed · Results are final'
-                        : ContestStatusChip.label(facts.lifecycle),
-                  ),
-                  _Fact(
-                    key: const ValueKey('reports-fact-matrix'),
-                    icon: Icons.grid_view,
-                    label: 'Matrix',
-                    value: facts.matrixRevision == null
-                        ? 'No matrix drawn'
-                        : 'Revision ${facts.matrixRevision}',
-                  ),
-                  _Fact(
-                    key: const ValueKey('reports-fact-configuration'),
-                    icon: Icons.tune,
-                    label: 'Configuration',
-                    value: facts.configurationRevision == null
-                        ? 'None saved'
-                        : 'Revision ${facts.configurationRevision}',
-                  ),
-                  _Fact(
-                    key: const ValueKey('reports-fact-progress'),
-                    icon: _progressIcon(facts),
-                    label: 'Scoring progress',
-                    value: facts.progressText,
-                  ),
-                  _ResultStatusFact(facts: facts),
-                ],
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final items = [
+                    _Fact(
+                      key: const ValueKey('reports-fact-lifecycle'),
+                      icon: completed ? Icons.task_alt : Icons.flag_outlined,
+                      label: 'Lifecycle',
+                      value: completed
+                          ? 'Completed · Results are final'
+                          : ContestStatusChip.label(facts.lifecycle),
+                    ),
+                    if (facts.matrixRevision == null)
+                      _Fact(
+                        key: const ValueKey('reports-fact-matrix'),
+                        icon: Icons.grid_view,
+                        label: 'Matrix',
+                        value: 'No matrix drawn',
+                      ),
+                    if (facts.configurationRevision == null)
+                      _Fact(
+                        key: const ValueKey('reports-fact-configuration'),
+                        icon: Icons.tune,
+                        label: 'Configuration',
+                        value: 'None saved',
+                      ),
+                    _Fact(
+                      key: const ValueKey('reports-fact-progress'),
+                      icon: _progressIcon(facts),
+                      label: 'Scoring progress',
+                      value: facts.progressText,
+                    ),
+                    _ResultStatusFact(facts: facts),
+                  ];
+                  if (constraints.maxWidth < _stackBreakpoint) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      spacing: 12,
+                      children: items,
+                    );
+                  }
+                  return Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    spacing: 28,
+                    children: [for (final item in items) Expanded(child: item)],
+                  );
+                },
               ),
               if (offline)
                 ReportsOfflineNote(
@@ -100,6 +109,9 @@ class ReportsContextStrip extends StatelessWidget {
       ),
     );
   }
+
+  /// Below this width the three facts stack instead of sharing a row.
+  static const double _stackBreakpoint = 640;
 
   static IconData _progressIcon(ReportsFacts facts) {
     if (facts.rounds.isNotEmpty &&
