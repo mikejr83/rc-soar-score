@@ -13,8 +13,10 @@ import '../auth/auth_session.dart';
 import '../auth/auth_session_factory.dart';
 import '../server/embedded_server.dart';
 import '../services/sync/app_sync.dart';
-import 'app_bootstrap.dart';
+import '../services/ui_account/ui_account.dart';
 import 'acting_account.dart';
+import 'acting_ui_account.dart';
+import 'app_bootstrap.dart';
 import 'auth_epoch.dart';
 import 'local_account_claimer.dart';
 import 'native_sync.dart';
@@ -40,6 +42,7 @@ class NativeBootstrap extends AppBootstrap {
     this._claimer,
     this._epoch,
     this.localUiStore,
+    this._acting,
   ) : _client = ApiClient(
         baseUrl: _server.baseUrl,
         tokenProvider: () async => _server.secret,
@@ -61,6 +64,11 @@ class NativeBootstrap extends AppBootstrap {
 
   @override
   final LocalUiStore localUiStore;
+
+  final ActingAccount _acting;
+
+  @override
+  late final UiAccount uiAccount = ActingUiAccount(_acting);
 
   bool _closed = false;
 
@@ -94,6 +102,7 @@ class NativeBootstrap extends AppBootstrap {
     await sync.close();
     await _server.close();
     await localUiStore.close();
+    (uiAccount as ActingUiAccount).dispose();
     _remoteClient.close();
   }
 
@@ -184,6 +193,7 @@ class NativeBootstrap extends AppBootstrap {
       claimer,
       epoch,
       uiStore,
+      acting,
     );
   }
 

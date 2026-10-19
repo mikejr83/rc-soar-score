@@ -69,9 +69,7 @@ void main() {
     expect(find.text('Landing stub'), findsOneWidget);
   });
 
-  testWidgets('signed in: Settings shows the not-available dialog', (
-    tester,
-  ) async {
+  testWidgets('signed in: Settings opens the Settings page', (tester) async {
     await _pump(tester, session: FakeAuthSession(signedIn: true, name: 'Pat'));
 
     await tester.tap(find.byKey(_menu));
@@ -79,7 +77,11 @@ void main() {
     await tester.tap(find.text('Settings'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Settings is not available yet'), findsOneWidget);
+    expect(find.text('Settings content'), findsOneWidget);
+    expect(
+      tester.widget<Text>(find.byKey(const ValueKey('page-title'))).data,
+      'Settings',
+    );
   });
 
   testWidgets('signed in: the menu opens from the keyboard', (tester) async {
@@ -100,16 +102,14 @@ void main() {
     expect(find.text('Sign out'), findsOneWidget);
   });
 
-  testWidgets('signed out: a gear opens the not-available dialog', (
-    tester,
-  ) async {
+  testWidgets('signed out: a gear opens the Settings page', (tester) async {
     await _pump(tester, session: FakeAuthSession());
 
     expect(find.byKey(_menu), findsNothing);
     await tester.tap(find.byKey(const ValueKey('settings-button')));
     await tester.pumpAndSettle();
 
-    expect(find.text('Settings is not available yet'), findsOneWidget);
+    expect(find.text('Settings content'), findsOneWidget);
   });
 
   testWidgets('offline: no sign-out; Sign in leads to the landing page', (
