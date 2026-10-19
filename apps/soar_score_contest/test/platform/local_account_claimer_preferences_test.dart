@@ -103,4 +103,22 @@ void main() {
     expect(localAccount.reassigned, [account]);
     expect(localAccount.storedPreferences.preferredTimeZone, 'Europe/Rome');
   });
+
+  test('reading without writing the preferences is refused', () {
+    final auth = FakeAuthSession(signedIn: true);
+
+    expect(
+      () => LocalAccountClaimer(
+        auth: auth,
+        epoch: AuthEpoch(auth),
+        local: localAccount,
+        claim: (_) => throw UnimplementedError(),
+        onClaimed: (_, _) async {},
+        onSignedOut: () {},
+        onProblem: (_) {},
+        getPreferences: () async => onService,
+      ),
+      throwsAssertionError,
+    );
+  });
 }

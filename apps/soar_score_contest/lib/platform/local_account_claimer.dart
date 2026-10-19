@@ -40,7 +40,10 @@ class LocalAccountClaimer {
     required this._onProblem,
     this._getPreferences,
     this._putPreferences,
-  });
+  }) : assert(
+         (_getPreferences == null) == (_putPreferences == null),
+         'getPreferences and putPreferences are given together',
+       );
 
   final AuthSession _auth;
   final AuthEpoch _epoch;

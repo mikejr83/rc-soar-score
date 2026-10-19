@@ -13,12 +13,26 @@ part 'account_preferences.g.dart';
 /// the director; pilot-facing times keep using the contest's zone.
 @JsonSerializable(fieldRename: FieldRename.snake, includeIfNull: true)
 class AccountPreferences extends Equatable {
-  AccountPreferences({this.preferredTimeZone, this.preferredLocale}) {
-    final zone = preferredTimeZone;
-    if (zone != null && !ContestTimeZones.isValid(zone)) {
-      throw ArgumentError.value(zone, 'preferredTimeZone', 'Unknown time zone');
+  AccountPreferences({String? preferredTimeZone, String? preferredLocale})
+    : preferredTimeZone = checkTimeZone(preferredTimeZone),
+      preferredLocale = checkLocale(preferredLocale);
+
+  /// [zoneId] when it is null or a known IANA zone; otherwise throws an
+  /// [ArgumentError].
+  static String? checkTimeZone(String? zoneId) {
+    if (zoneId != null && !ContestTimeZones.isValid(zoneId)) {
+      throw ArgumentError.value(
+        zoneId,
+        'preferredTimeZone',
+        'Unknown time zone',
+      );
     }
-    final locale = preferredLocale;
+    return zoneId;
+  }
+
+  /// [locale] when it is null or a supported locale; otherwise throws an
+  /// [ArgumentError].
+  static String? checkLocale(String? locale) {
     if (locale != null && !SupportedLocales.isSupported(locale)) {
       throw ArgumentError.value(
         locale,
@@ -26,6 +40,7 @@ class AccountPreferences extends Equatable {
         'Unsupported locale',
       );
     }
+    return locale;
   }
 
   factory AccountPreferences.fromJson(Map<String, Object?> json) =>

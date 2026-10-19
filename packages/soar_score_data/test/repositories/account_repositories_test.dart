@@ -80,6 +80,9 @@ void _tests(Backend backend) {
       expect(await inst.count('mutation_records'), before);
     });
 
+    // `accounts` is a backend table: it exists on the server profile only,
+    // so this runs on PostgreSQL. The client-side values are tested on SQLite
+    // in local_account_repository_test.dart.
     test('stores the preferences with the account', () async {
       expect(dana.preferredTimeZone, 'America/Chicago');
       expect(dana.preferredLocale, 'en-US');
