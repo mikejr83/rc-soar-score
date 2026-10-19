@@ -126,6 +126,56 @@ void main() {
       );
     });
 
+    test('accepts single-word plural and select branches', () {
+      final words = {
+        'count': '{n, plural, one{pilot} other{{n} pilots}}',
+        'kind': '{v, select, a{one} other{many}}',
+      };
+      final found = checkTranslation(
+        source: words,
+        translation: {
+          '@@locale': 'fr',
+          'count': '{n, plural, one{pilote} other{{n} pilotes}}',
+          'kind': '{v, select, a{un} other{plusieurs}}',
+        },
+        locale: 'fr',
+      );
+
+      expect(found.where((p) => p.isError), isEmpty);
+    });
+
+    test('rejects balanced but malformed brace expressions', () {
+      expect(
+        errors({'@@locale': 'fr', 'plain': 'Panneaux {}'}),
+        contains(contains('malformed expression')),
+      );
+      expect(
+        errors({'@@locale': 'fr', 'plain': 'A {1x} b'}),
+        contains(contains('malformed expression')),
+      );
+      expect(
+        errors({'@@locale': 'fr', 'count': '{n, plural, one 1 other{{n}}}'}),
+        isNotEmpty,
+      );
+    });
+
+    test('rejects an empty or blank translation', () {
+      expect(
+        errors({'@@locale': 'fr', 'plain': '  '}),
+        contains(contains('"plain" is empty')),
+      );
+    });
+
+    test('takes the locale from a recognized file name first', () {
+      expect(expectedLocale(path: 'x/app_fr_FR.arb', declared: 'de'), 'fr_FR');
+      expect(expectedLocale(path: 'my-file.arb', declared: 'de'), 'de');
+      expect(
+        expectedLocale(explicit: 'es', path: 'app_fr.arb', declared: 'de'),
+        'es',
+      );
+      expect(expectedLocale(path: 'my-file.arb'), 'en');
+    });
+
     test('warns about gaps without failing', () {
       final problems = check({'@@locale': 'fr', 'plain': 'Save'});
 

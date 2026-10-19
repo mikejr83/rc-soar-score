@@ -34,7 +34,7 @@ Chinese (Simplified, `zh_CN`), Czech (`cs`), Danish (`da`), English (`en_US`), S
    dart run tool/l10n.dart validate app_fr_FR.arb
    ```
 
-   Errors (a changed placeholder, broken braces, a message that does not exist) must be fixed. Warnings are only reminders of what is untranslated.
+   Errors (a changed placeholder, broken or malformed braces, a plural or select that lost an option, an empty message, a message that does not exist, a language that does not match the file name `app_<locale>.arb`) must be fixed. To leave a message untranslated, remove its key or keep the English text; do not empty it. Warnings are only reminders of what is untranslated.
 
 4. Send the file back: attach it to the issue, or open a pull request that adds it under `apps/soar_score_contest/lib/l10n/`. A maintainer checks it with the same script and adds it to the app.
 

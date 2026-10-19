@@ -48,10 +48,11 @@ void main(List<String> args) {
     stderr.writeln('error: ${file.path} is not valid JSON: ${e.message}');
     exit(1);
   }
-  final locale =
-      _option(args, '--locale') ??
-      translation['@@locale']?.toString() ??
-      _localeFromName(file.path);
+  final locale = expectedLocale(
+    explicit: _option(args, '--locale'),
+    path: file.path,
+    declared: translation['@@locale'],
+  );
   final problems = checkTranslation(
     source: source,
     translation: translation,
@@ -73,12 +74,6 @@ void main(List<String> args) {
 
 String _arbPath(String locale) =>
     'lib/l10n/app_${locale.replaceAll('-', '_')}.arb';
-
-String _localeFromName(String path) {
-  final name = path.split(RegExp(r'[\\/]')).last;
-  final match = RegExp(r'^app_(.+)\.arb$').firstMatch(name);
-  return match?.group(1) ?? 'en';
-}
 
 String? _option(List<String> args, String name) {
   final at = args.indexOf(name);
