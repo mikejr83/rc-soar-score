@@ -31,6 +31,7 @@ Future<void> _open(WidgetTester tester, NextStepAction action) async {
         contestMatrixPath(matrixContestId): 'Matrix stub',
         participantsPath: 'Participants stub',
         contestScoringPath(matrixContestId): 'Scoring stub',
+        contestReportsPath(matrixContestId): 'Reports stub',
       }.entries)
         GoRoute(path: entry.key, builder: (context, _) => Text(entry.value)),
     ],
@@ -50,6 +51,7 @@ void main() {
       NextStepTarget.configuration: 'Configuration stub',
       NextStepTarget.matrix: 'Matrix stub',
       NextStepTarget.participants: 'Participants stub',
+      NextStepTarget.reports: 'Reports stub',
     };
     pages.forEach((target, text) {
       testWidgets('${target.name} goes to its route', (tester) async {
@@ -103,7 +105,6 @@ void main() {
 
   group('shows the not-available dialog', () {
     final dialogs = {
-      NextStepTarget.reports: ('Reports', 'The reports page is not built yet.'),
       NextStepTarget.publish: ('Publish', 'The publish flow is not built yet.'),
     };
     dialogs.forEach((target, text) {

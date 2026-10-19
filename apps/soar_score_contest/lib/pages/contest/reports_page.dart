@@ -1,24 +1,230 @@
-import 'package:flutter/material.dart';
+import 'dart:async';
 
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:soar_score_api/soar_score_api.dart';
+import 'package:soar_score_core/soar_score_core.dart';
+
+import '../../api_client_provider.dart';
+import '../../connectivity_provider.dart';
+import '../../router.dart';
+import '../../services/reports/report_availability.dart';
+import '../../services/reports/report_kind.dart';
+import '../../services/reports/report_launcher.dart';
+import '../../services/reports/reports_facts.dart';
+import '../../services/reports/reports_facts_loader.dart';
+import '../../widgets/reports/report_card.dart';
+import '../../widgets/reports/reports_context_strip.dart';
+import '../../widgets/reports/reports_list.dart';
+import '../../widgets/reports/reports_states.dart';
+import '../../widgets/workspace/states/workspace_not_found_view.dart';
+
+/// The reports of one contest (`plan/ui/contest-administration/reports.md`):
+/// a strip saying what reports are built from, then a card for each report
+/// that can be produced, grouped as results and documents to print.
 class ContestReportsPage extends StatefulWidget {
-  const ContestReportsPage({super.key, required this.contestId});
+  const ContestReportsPage({
+    super.key,
+    required this.contestId,
+    this.launcher = const PlatformReportLauncher(),
+  });
 
   final String contestId;
+
+  /// Opens a report in its own tab (web) or in place (native).
+  final ReportLauncher launcher;
 
   @override
   State<ContestReportsPage> createState() => _ContestReportsPageState();
 }
 
 class _ContestReportsPageState extends State<ContestReportsPage> {
+  Future<ReportsFacts>? _loading;
+  final Map<ReportKind, CardOpenState> _openStates = {};
+  Timer? _openedTimer;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _loading ??= _load();
+  }
+
+  @override
+  void didUpdateWidget(ContestReportsPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.contestId != widget.contestId) {
+      _loading = _load();
+    }
+  }
+
+  Future<ReportsFacts> _load() {
+    final client = apiClientOf(context);
+    if (client == null) {
+      return Future.error(StateError('No API client is available.'));
+    }
+    final Id id;
+    try {
+      id = Id.parse(widget.contestId);
+    } on ArgumentError {
+      return Future.error(const _NotFound());
+    }
+    return ReportsFactsLoader.load(client, id);
+  }
+
+  @override
+  void dispose() {
+    _openedTimer?.cancel();
+    super.dispose();
+  }
+
+  String _viewerPath(ReportKind kind) =>
+      contestReportPath(widget.contestId, kind);
+
+  Future<void> _open(ReportKind kind) async {
+    final outcome = await widget.launcher.open(context, _viewerPath(kind));
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      switch (outcome) {
+        case LaunchOutcome.newTab:
+          _openStates[kind] = CardOpenState.opened;
+        case LaunchOutcome.blocked:
+          _openStates[kind] = CardOpenState.blocked;
+        case LaunchOutcome.inPlace:
+          _openStates.remove(kind);
+      }
+    });
+    if (outcome == LaunchOutcome.newTab) {
+      // The confirmation is brief and Open stays enabled: no spinner.
+      _openedTimer?.cancel();
+      _openedTimer = Timer(const Duration(seconds: 4), () {
+        if (mounted && _openStates[kind] == CardOpenState.opened) {
+          setState(() => _openStates.remove(kind));
+        }
+      });
+    }
+  }
+
+  void _openHere(ReportKind kind) =>
+      widget.launcher.openHere(context, _viewerPath(kind));
+
+  void _retry() {
+    final loading = _load();
+    setState(() {
+      _loading = loading;
+    });
+  }
+
+  void _go(ReportAction action) {
+    final id = widget.contestId;
+    context.go(switch (action.destination) {
+      ReportDestination.scoring => contestScoringPath(id, round: action.round),
+      ReportDestination.matrix => contestMatrixPath(id),
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) => FutureBuilder<ReportsFacts>(
+    future: _loading,
+    builder: (context, snapshot) {
+      final error = snapshot.error;
+      if (error is _NotFound ||
+          (error is ApiHttpError && error.statusCode == 404)) {
+        return WorkspaceNotFoundView(onBack: () => context.go(homePath));
+      }
+      if (error != null) {
+        return ReportsUnavailable(onRetry: _retry);
+      }
+      final width = MediaQuery.sizeOf(context).width;
+      final twoColumns = width >= 840;
+      final compact = width < 600;
+      final facts = snapshot.data;
+      return SingleChildScrollView(
+        padding: EdgeInsets.fromLTRB(
+          compact ? 16 : 24,
+          20,
+          compact ? 16 : 24,
+          40,
+        ),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 1200),
+            child: facts == null
+                ? ReportsLoading(twoColumns: twoColumns)
+                : _Ready(
+                    facts: facts,
+                    twoColumns: twoColumns,
+                    compact: compact,
+                    onOpen: _open,
+                    openStates: _openStates,
+                    onOpenHere: _openHere,
+                    onAction: _go,
+                    onOpenSync: () =>
+                        context.go(contestSyncPath(widget.contestId)),
+                  ),
+          ),
+        ),
+      );
+    },
+  );
+}
+
+/// The id in the route is not an id.
+class _NotFound {
+  const _NotFound();
+}
+
+class _Ready extends StatelessWidget {
+  const _Ready({
+    required this.facts,
+    required this.twoColumns,
+    required this.compact,
+    required this.onOpen,
+    required this.onAction,
+    required this.onOpenSync,
+    required this.openStates,
+    required this.onOpenHere,
+  });
+
+  final ReportsFacts facts;
+  final bool twoColumns;
+  final bool compact;
+  final ValueChanged<ReportKind> onOpen;
+  final ValueChanged<ReportAction> onAction;
+  final VoidCallback onOpenSync;
+  final Map<ReportKind, CardOpenState> openStates;
+  final ValueChanged<ReportKind> onOpenHere;
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Reports')),
-      body: Center(
-        child: Text(
-          'This page isn\'t implemented yet. Just a placeholder. Contest ID: ${widget.contestId}',
-        ),
-      ),
+    final monitor = appConnectivityOf(context);
+    return ListenableBuilder(
+      listenable: monitor ?? Listenable.merge(const []),
+      builder: (context, _) {
+        final offline =
+            monitor?.internetStatus == ConnectivityStatus.unavailable;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          spacing: 28,
+          children: [
+            ReportsContextStrip(
+              facts: facts,
+              offline: offline,
+              onOpenSync: onOpenSync,
+            ),
+            ReportsList(
+              facts: facts,
+              twoColumns: twoColumns,
+              compact: compact,
+              onOpen: onOpen,
+              onAction: onAction,
+              openStates: openStates,
+              onOpenHere: onOpenHere,
+            ),
+          ],
+        );
+      },
     );
   }
 }
