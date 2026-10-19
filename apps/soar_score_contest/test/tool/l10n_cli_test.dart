@@ -11,12 +11,14 @@ void main() {
   ProcessResult validate(String fileName, String declared) {
     final file = File('${dir.path}/$fileName')
       ..writeAsStringSync('{"@@locale": "$declared"}');
+    // `dart` is a .bat wrapper in the Flutter SDK on Windows, which needs a
+    // shell to launch.
     return Process.runSync('dart', [
       'run',
       'tool/l10n.dart',
       'validate',
       file.path,
-    ]);
+    ], runInShell: Platform.isWindows);
   }
 
   test('a file named for one locale and declaring another is rejected', () {
