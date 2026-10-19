@@ -21,17 +21,21 @@ enum IdentityProviderStatus { checking, available, unavailable }
 /// a short user-facing reason in [lastError].
 class IdentityProviderCheck extends ChangeNotifier {
   /// Probes the identity provider at [tenantDomain]. [client] is injectable
-  /// for tests; [timeout] bounds a single probe.
+  /// for tests; [timeout] bounds a single probe. A client the check creates
+  /// itself is closed when the check is disposed; an injected client stays
+  /// open, its owner remaining responsible for closing it.
   IdentityProviderCheck({
     required String tenantDomain,
     http.Client? client,
     Duration timeout = const Duration(seconds: 5),
   }) : _probeUrl = Uri.https(tenantDomain, '/.well-known/openid-configuration'),
        _client = client ?? http.Client(),
+       _ownsClient = client == null,
        _timeout = timeout;
 
   final Uri _probeUrl;
   final http.Client _client;
+  final bool _ownsClient;
   final Duration _timeout;
 
   IdentityProviderStatus _status = IdentityProviderStatus.checking;
@@ -107,6 +111,9 @@ class IdentityProviderCheck extends ChangeNotifier {
   void dispose() {
     _disposed = true;
     _probeInFlight = false;
+    if (_ownsClient) {
+      _client.close();
+    }
     super.dispose();
   }
 }

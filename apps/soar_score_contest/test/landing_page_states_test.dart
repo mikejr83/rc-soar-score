@@ -180,4 +180,105 @@ void main() {
     await tester.pump();
     expect(check.probeCalls, 3);
   });
+
+  testWidgets('adopts the injected check when a session appears, and '
+      'reuses it when the session dependency updates', (tester) async {
+    final monitor = FakeAppConnectivity();
+    final session = FakeAuthSession();
+    final injected = FakeIdentityProviderCheck();
+    addTearDown(injected.dispose);
+    addTearDown(monitor.dispose);
+
+    // No inherited session: no check is created and the one is untouched.
+    await tester.pumpWidget(
+      AppConnectivityInherited(
+        monitor: monitor,
+        child: const MaterialApp(home: LandingPage(isWeb: true)),
+      ),
+    );
+    expect(injected.probeCalls, 0);
+    expect(find.text('Checking sign-in…'), findsNothing);
+
+    // A session appears: the page adopts the injected check and starts one
+    // probe.
+    await tester.pumpWidget(
+      AppConnectivityInherited(
+        monitor: monitor,
+        child: AuthSessionInherited(
+          session: session,
+          child: MaterialApp(
+            home: LandingPage(isWeb: true, identityCheck: injected),
+          ),
+        ),
+      ),
+    );
+    expect(injected.probeCalls, 1);
+    expect(find.text('Checking sign-in…'), findsOneWidget);
+
+    // The session instance swaps: the existing check is reused, not
+    // re-created or re-probed.
+    await tester.pumpWidget(
+      AppConnectivityInherited(
+        monitor: monitor,
+        child: AuthSessionInherited(
+          session: FakeAuthSession(),
+          child: MaterialApp(
+            home: LandingPage(isWeb: true, identityCheck: injected),
+          ),
+        ),
+      ),
+    );
+    expect(injected.probeCalls, 1);
+    expect(find.text('Checking sign-in…'), findsOneWidget);
+
+    // The session disappears: the injected check is released, not disposed
+    // (the owner still owns it), and it remains usable.
+    await tester.pumpWidget(
+      AppConnectivityInherited(
+        monitor: monitor,
+        child: const MaterialApp(home: LandingPage(isWeb: true)),
+      ),
+    );
+    expect(injected.probeCalls, 1);
+    expect(find.text('Checking sign-in…'), findsNothing);
+    expect(find.text('Sign in'), findsOneWidget);
+    injected.status = IdentityProviderStatus.available;
+    injected.notifyListeners();
+  });
+
+  testWidgets('does not dispose an injected check when the page is removed '
+      '(the owner keeps it)', (tester) async {
+    final monitor = FakeAppConnectivity();
+    final session = FakeAuthSession();
+    final injected = FakeIdentityProviderCheck();
+    addTearDown(injected.dispose);
+    addTearDown(monitor.dispose);
+
+    await tester.pumpWidget(
+      AppConnectivityInherited(
+        monitor: monitor,
+        child: AuthSessionInherited(
+          session: session,
+          child: MaterialApp(
+            home: LandingPage(isWeb: true, identityCheck: injected),
+          ),
+        ),
+      ),
+    );
+    expect(injected.probeCalls, 1);
+
+    // The page is removed, but the check is owned by the test, so the page
+    // must release it without disposing it.
+    await tester.pumpWidget(
+      AppConnectivityInherited(
+        monitor: monitor,
+        child: const MaterialApp(home: SizedBox()),
+      ),
+    );
+
+    // Still functional afterwards: a disposed notifier would throw.
+    injected.status = IdentityProviderStatus.available;
+    injected.notifyListeners();
+    expect(injected.probeCalls, 1);
+  });
 }
