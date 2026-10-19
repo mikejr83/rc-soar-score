@@ -21,6 +21,7 @@ class CollapsibleAreasController extends ChangeNotifier {
   final UiAccount _account;
   Map<String, bool> _choices = const {};
   int _generation = 0;
+  Future<void>? _loading;
   bool _disposed = false;
 
   /// Whether [area] is open: the user's choice, else [fallback] when a layout
@@ -29,26 +30,39 @@ class CollapsibleAreasController extends ChangeNotifier {
       _choices[area.id] ?? fallback ?? area.defaultOpen;
 
   /// Reads the stored choices for the current account.
-  Future<void> load() async {
+  Future<void> load() {
     final store = _store;
-    if (store == null) return;
+    if (store == null) return Future.value();
     final generation = ++_generation;
+    return _loading = _read(store, generation);
+  }
+
+  Future<void> _read(LocalUiStore store, int generation) async {
     final choices = await store.get(_account.id, areaChoicesKey);
     if (_disposed || generation != _generation) return;
     _choices = choices;
+    _loading = null;
     notifyListeners();
   }
 
   /// Applies the choice now and stores it. Returns whether it was saved:
   /// `false` means it holds until the app closes or the account changes.
-  Future<bool> setOpen(CollapsibleArea area, bool open) =>
-      _save({..._choices, area.id: open});
+  /// While an account's choices are still loading, waits for them so the
+  /// write builds on that account's values.
+  Future<bool> setOpen(CollapsibleArea area, bool open) async {
+    while (_loading != null) {
+      await _loading;
+      if (_disposed) return false;
+    }
+    return _save({..._choices, area.id: open});
+  }
 
   /// Forgets every choice, so each area is back to its default.
   Future<bool> resetAll() => _save(const {});
 
   Future<bool> _save(Map<String, bool> choices) async {
     _generation++;
+    _loading = null;
     _choices = choices;
     notifyListeners();
     final store = _store;
@@ -58,7 +72,15 @@ class CollapsibleAreasController extends ChangeNotifier {
         : store.set(_account.id, areaChoicesKey, choices);
   }
 
-  void _accountChanged() => load();
+  /// The previous account's choices must not show for, or merge into writes
+  /// of, the new account, so drop them before its own are read.
+  void _accountChanged() {
+    if (_choices.isNotEmpty) {
+      _choices = const {};
+      notifyListeners();
+    }
+    load();
+  }
 
   @override
   void dispose() {

@@ -28,6 +28,10 @@ class FairnessPanel extends StatefulWidget {
   final int? configurationRevision;
   final bool startCollapsed;
 
+  static const saveFailedMessage =
+      'The summary choice could not be saved. It applies until you close the '
+      'app.';
+
   @override
   State<FairnessPanel> createState() => _FairnessPanelState();
 }
@@ -40,13 +44,17 @@ class _FairnessPanelState extends State<FairnessPanel> {
   FairnessView get _fairness =>
       FairnessView.of(widget.revision.fairnessSummary);
 
-  void _toggleSummary(bool open) {
+  Future<void> _toggleSummary(bool open) async {
     final areas = collapsibleAreasOf(context);
     if (areas == null) {
       setState(() => _localOpen = !open);
-    } else {
-      areas.setOpen(matrixSummaryArea, !open);
+      return;
     }
+    final messenger = ScaffoldMessenger.of(context);
+    if (await areas.setOpen(matrixSummaryArea, !open)) return;
+    messenger.showSnackBar(
+      const SnackBar(content: Text(FairnessPanel.saveFailedMessage)),
+    );
   }
 
   @override

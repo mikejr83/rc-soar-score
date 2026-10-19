@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_contest/services/collapsible_areas/collapsed_areas_key.dart';
@@ -82,6 +84,32 @@ void main() {
     expect(controller.isOpen(matrixSummaryArea), isFalse);
   });
 
+  test('a write during an account switch builds on the new account', () async {
+    final backing = BackendLocalUiStore(MemoryLocalUiBackend());
+    await backing.set('b', areaChoicesKey, {_other.id: true});
+    final store = _SlowStore(backing);
+    final account = _SwitchableAccount('a');
+    final controller = CollapsibleAreasController(
+      store: store,
+      account: account,
+    );
+    addTearDown(controller.dispose);
+    await controller.setOpen(matrixSummaryArea, false);
+
+    store.slow = true;
+    account.switchTo('b');
+    // Account a's choices are gone at once, not merged into b's writes.
+    expect(controller.isOpen(matrixSummaryArea), isTrue);
+    final saved = controller.setOpen(matrixSummaryArea, false);
+    store.release();
+    expect(await saved, isTrue);
+
+    final onB = await backing.get('b', areaChoicesKey);
+    expect(onB, {_other.id: true, matrixSummaryArea.id: false});
+    final onA = await backing.get('a', areaChoicesKey);
+    expect(onA, {matrixSummaryArea.id: false});
+  });
+
   test('reset restores every area to its default', () async {
     final store = _store();
     final controller = CollapsibleAreasController(store: store);
@@ -129,3 +157,30 @@ void main() {
 Object? _identity(String value) => value;
 
 String _asString(Object? data) => data as String;
+
+/// A store whose reads wait for [release] while [slow] is set.
+class _SlowStore extends BackendLocalUiStore {
+  _SlowStore(LocalUiStore inner) : super(MemoryLocalUiBackend()) {
+    _inner = inner;
+  }
+
+  late final LocalUiStore _inner;
+  bool slow = false;
+  final _gate = Completer<void>();
+
+  void release() => _gate.complete();
+
+  @override
+  Future<T> get<T>(String accountId, LocalUiKey<T> key) async {
+    if (slow) await _gate.future;
+    return _inner.get(accountId, key);
+  }
+
+  @override
+  Future<bool> set<T>(String accountId, LocalUiKey<T> key, T value) =>
+      _inner.set(accountId, key, value);
+
+  @override
+  Future<bool> remove<T>(String accountId, LocalUiKey<T> key) =>
+      _inner.remove(accountId, key);
+}
