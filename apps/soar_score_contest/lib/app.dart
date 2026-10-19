@@ -19,6 +19,7 @@ import 'theme_controller_provider.dart';
 import 'ui_account_provider.dart';
 import 'services/connectivity/app_connectivity.dart';
 import 'services/new_contest/contest_draft_store.dart';
+import 'services/new_contest/local_ui_draft_persistence.dart';
 
 class SoarScoreContestApp extends StatefulWidget {
   const SoarScoreContestApp({
@@ -67,12 +68,23 @@ class _SoarScoreContestAppState extends State<SoarScoreContestApp> {
   late final ThemeController _theme;
   late final bool _ownsTheme;
 
-  /// The user's single New Contest draft, kept until the app is closed.
-  final ContestDraftStore _draftStore = ContestDraftStore();
+  /// The user's single New Contest draft, kept across restarts where the
+  /// bootstrap has local UI storage.
+  late final ContestDraftStore _draftStore;
 
   @override
   void initState() {
     super.initState();
+    final bootstrap = widget.bootstrap;
+    final uiStore = bootstrap?.localUiStore;
+    _draftStore = ContestDraftStore(
+      persistence: bootstrap == null || uiStore == null
+          ? null
+          : LocalUiDraftPersistence(
+              uiStore,
+              account: () => bootstrap.uiAccount.id,
+            ),
+    );
     if (!kIsWeb) {
       _ownsAppMode = widget.appMode == null;
       _appMode = widget.appMode ?? AppModeNotifier();

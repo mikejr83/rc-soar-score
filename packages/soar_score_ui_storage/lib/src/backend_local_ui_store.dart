@@ -47,13 +47,18 @@ class BackendLocalUiStore implements LocalUiStore {
       final envelope = jsonDecode(raw);
       if (envelope is! Map || envelope['v'] != key.version) {
         _logger.info('Ignoring $storageKey: stored under another version');
-        return key.defaultValue;
+        return _unreadable(key);
       }
       return key.decode(envelope['value']);
     } catch (error) {
       _logger.warning('Ignoring unreadable $storageKey: $error');
-      return key.defaultValue;
+      return _unreadable(key);
     }
+  }
+
+  T _unreadable<T>(LocalUiKey<T> key) {
+    final unreadable = key.unreadable;
+    return unreadable == null ? key.defaultValue : unreadable();
   }
 
   @override

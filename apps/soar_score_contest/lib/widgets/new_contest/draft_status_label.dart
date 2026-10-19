@@ -11,8 +11,8 @@ class DraftStatusLabel extends StatelessWidget {
   final ContestDraftStore store;
 
   static const String explanation =
-      'One draft at a time. It stays until you close the app and isn’t '
-      'listed with contests.';
+      'One draft at a time. It is kept on this device and isn’t listed with '
+      'contests.';
 
   @override
   Widget build(BuildContext context) => ListenableBuilder(

@@ -95,6 +95,28 @@ void localUiStoreContract(
       expect(await store.get('a', intKey), 0);
     });
 
+    test('a key can tell unreadable data from none', () async {
+      final key = LocalUiKey<int>(
+        name: 'count',
+        defaultValue: 0,
+        unreadable: () => -1,
+        encode: intKey.encode,
+        decode: intKey.decode,
+      );
+      final storageKey = BackendLocalUiStore.storageKey('a', 'count');
+      expect(await store.get('a', key), 0);
+
+      await backend.write(storageKey, '{{');
+      expect(await store.get('a', key), -1);
+      await backend.write(storageKey, '{"v":1,"value":"not a number"}');
+      expect(await store.get('a', key), -1);
+      await backend.write(storageKey, '{"v":9,"value":1}');
+      expect(await store.get('a', key), -1);
+
+      await store.set('a', key, 4);
+      expect(await store.get('a', key), 4);
+    });
+
     test('values survive reopening the backend', () async {
       await store.set('a', intKey, 3);
       await store.close();

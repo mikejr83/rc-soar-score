@@ -1,27 +1,39 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 
 import 'package:soar_score_core/soar_score_core.dart';
 
 import 'contest_creator.dart';
 import 'contest_draft.dart';
+import 'draft_persistence.dart';
 import 'draw_settings.dart';
 
-/// Writes a draft somewhere; throws when it cannot.
-typedef DraftWriter = Future<void> Function(ContestDraft draft);
-
-/// Holds the user's single New Contest draft for the life of the app.
+/// Holds the user's single New Contest draft.
 ///
-/// A user has one draft at a time. Leaving the wizard keeps it until the app
-/// is closed, and opening the wizard again resumes it. Every change is saved
-/// as it happens; a failed save keeps the values in memory and reports
-/// [saveFailed] so the wizard can offer a retry.
+/// A user has one draft at a time. Leaving the wizard keeps it, and opening
+/// the wizard again resumes it. Every change is saved as it happens; a failed
+/// save keeps the values in memory and reports [saveFailed] so the wizard can
+/// offer a retry.
+///
+/// With a [persistence] the draft also survives closing the app: the first
+/// time the wizard opens, [restore] finds the account's stored draft and the
+/// director chooses to continue it ([continueWith]) or start fresh
+/// ([discard]).
 class ContestDraftStore extends ChangeNotifier {
-  ContestDraftStore({this.writer, DateTime Function()? clock})
+  ContestDraftStore({this.persistence, DateTime Function()? clock})
     : _clock = clock ?? DateTime.now;
 
-  /// Where the draft is saved; `null` keeps it in memory only.
-  final DraftWriter? writer;
+  /// Where the draft is kept across restarts; `null` keeps it in memory only.
+  final DraftPersistence? persistence;
   final DateTime Function() _clock;
+
+  /// The account the draft in memory belongs to, set by [restore]; saves go
+  /// to this account even if the signed-in account changes meanwhile.
+  String? _account;
+
+  /// The stored draft [restore] found and the director has not decided on.
+  StoredDraft? _offer;
 
   ContestDraft _draft = const ContestDraft();
   DateTime? _savedAt;
@@ -59,6 +71,54 @@ class ContestDraftStore extends ChangeNotifier {
   /// Whether the latest save failed.
   bool get saveFailed => _saveFailed;
 
+  /// Whether the current account's stored draft has not been dealt with yet:
+  /// [restore] has not looked at it, or it was offered and neither continued
+  /// nor discarded (the director left before choosing).
+  bool get needsRestore =>
+      persistence != null &&
+      (_account != persistence!.accountId || _offer != null);
+
+  /// Looks for the current account's stored draft. A draft still in memory
+  /// from another account is dropped first.
+  ///
+  /// Returns what the director must decide on: a [FoundStoredDraft] to
+  /// continue or discard, an [UnreadableStoredDraft] to discard, or `null`
+  /// when there is nothing to ask. Until the director decides ([continueWith]
+  /// or [discard]) the same offer comes back, so leaving the wizard first
+  /// loses nothing.
+  Future<StoredDraft?> restore() async {
+    final persistence = this.persistence;
+    if (persistence == null || !needsRestore) {
+      return null;
+    }
+    final account = persistence.accountId;
+    if (_account != account) {
+      if (_account != null) {
+        // Another account is in now; its draft is not ours to show.
+        _forget();
+      }
+      _offer = null;
+    } else if (_offer != null) {
+      return _offer;
+    }
+    final stored = await persistence.load(account);
+    if (persistence.accountId != account) {
+      // The account changed while loading; that draft is not for this one.
+      return restore();
+    }
+    _account = account;
+    return _offer = stored is NoStoredDraft ? null : stored;
+  }
+
+  /// Takes up a stored draft the director chose to continue.
+  void continueWith(FoundStoredDraft stored) {
+    _offer = null;
+    _draft = stored.draft;
+    _savedAt = stored.savedAt;
+    _saveFailed = false;
+    notifyListeners();
+  }
+
   /// Replaces the draft and saves it.
   Future<void> update(ContestDraft draft) {
     _draft = draft;
@@ -77,19 +137,41 @@ class ContestDraftStore extends ChangeNotifier {
     }
   }
 
-  /// Drops the draft, for example once the contest is created.
-  void discard() {
+  /// Drops the draft and its stored copy, for example once the contest is
+  /// created or the director starts fresh. When the stored copy can't be
+  /// deleted, [saveFailed] is set and [retry] tries again.
+  Future<void> discard() async {
+    final account = _account;
+    _offer = null;
+    _forget();
+    notifyListeners();
+    final persistence = this.persistence;
+    if (account == null || persistence == null) {
+      return;
+    }
+    try {
+      await persistence.clear(account);
+    } on Object {
+      _saveFailed = true;
+      notifyListeners();
+    }
+  }
+
+  void _forget() {
     _draft = const ContestDraft();
     _savedAt = null;
     _saveFailed = false;
     _creationIds = null;
-    notifyListeners();
   }
 
   Future<void> _save() async {
     try {
-      await writer?.call(_draft);
-      _savedAt = _clock();
+      final now = _clock();
+      final persistence = this.persistence;
+      if (persistence != null) {
+        await persistence.save(_account ??= persistence.accountId, _draft, now);
+      }
+      _savedAt = now;
       _saveFailed = false;
     } on Object {
       _saveFailed = true;

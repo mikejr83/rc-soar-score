@@ -10,6 +10,7 @@ class LocalUiKey<T> {
     required this.encode,
     required this.decode,
     this.version = 1,
+    this.unreadable,
   });
 
   /// Stable, unique name of the key within an account, such as `theme_mode`.
@@ -17,6 +18,12 @@ class LocalUiKey<T> {
 
   /// What a read gives when nothing usable is stored.
   final T defaultValue;
+
+  /// What a read gives when something is stored but cannot be used: damaged
+  /// text, another version, or data [decode] rejects. `null` means
+  /// [defaultValue], so the damage is invisible; give a value to tell the
+  /// caller that stored data exists but is unreadable.
+  final T Function()? unreadable;
 
   /// The schema version of the encoded value.
   final int version;

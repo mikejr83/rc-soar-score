@@ -184,6 +184,12 @@ class NativeBootstrap extends AppBootstrap {
     )..start();
     // UI state has its own file beside the contest database, so resetting or
     // replacing contest data never clears it.
+    if (demoReset) {
+      // A fresh demo starts without the last run's drafts and preferences.
+      await deleteDatabaseFiles(
+        p.join(p.dirname(database), 'soar_score_ui.db'),
+      );
+    }
     final uiStore = await openLocalUiStore(directory: p.dirname(database));
     return NativeBootstrap._(
       server,
