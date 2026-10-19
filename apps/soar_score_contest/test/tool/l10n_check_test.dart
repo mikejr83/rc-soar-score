@@ -46,8 +46,62 @@ void main() {
     test('rejects a lost plural', () {
       expect(
         errors({'@@locale': 'fr', 'count': '{n} pilotes'}),
-        contains(contains('plural or select')),
+        contains(contains('must keep the {n, plural, ...} choice')),
       );
+    });
+
+    test('rejects a plural without other or a changed selector', () {
+      expect(
+        errors({'@@locale': 'fr', 'count': '{n, plural, one{1 pilote}}'}),
+        contains(contains('needs an "other" option')),
+      );
+      expect(
+        errors({
+          '@@locale': 'fr',
+          'count': '{m, plural, one{1 pilote} other{{m} pilotes}}',
+        }),
+        contains(contains('must keep the {n, plural, ...} choice')),
+      );
+      expect(
+        errors({
+          '@@locale': 'fr',
+          'count': '{n, select, one{1 pilote} other{{n} pilotes}}',
+        }),
+        isNotEmpty,
+      );
+    });
+
+    test('allows the extra plural categories a language needs', () {
+      expect(
+        errors({
+          '@@locale': 'fr',
+          'count':
+              '{n, plural, one{1 pilote} few{{n} pilotes} other{{n} pilotes}}',
+        }),
+        isEmpty,
+      );
+    });
+
+    test('keeps exact matches and every select option', () {
+      final strict = {
+        'a': '{n, plural, =0{none} one{1} other{{n}}}',
+        'b': '{v, select, x{X} y{Y} other{Z}}',
+      };
+      final found = [
+        for (final p in checkTranslation(
+          source: strict,
+          translation: {
+            '@@locale': 'fr',
+            'a': '{n, plural, one{1} other{{n}}}',
+            'b': '{v, select, x{X} other{Z}}',
+          },
+          locale: 'fr',
+        ))
+          if (p.isError) p.message,
+      ];
+
+      expect(found, contains(contains('must keep the "=0" option')));
+      expect(found, contains(contains('must keep the "y" option')));
     });
 
     test('rejects unbalanced braces and unknown keys', () {

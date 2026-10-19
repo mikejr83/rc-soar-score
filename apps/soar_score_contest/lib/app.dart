@@ -12,6 +12,8 @@ import 'auth/auth_session_inherited.dart';
 import 'connectivity_provider.dart';
 import 'contest_draft_provider.dart';
 import 'l10n/app_localizations.dart';
+import 'locale_controller_provider.dart';
+import 'services/locale/locale_controller.dart';
 import 'local_ui_store_provider.dart';
 import 'platform/app_bootstrap.dart';
 import 'router.dart';
@@ -33,6 +35,7 @@ class SoarScoreContestApp extends StatefulWidget {
     this.routerInitialLocation = landingPath,
     this.themeController,
     this.collapsibleAreas,
+    this.localeController,
   });
 
   /// The platform bootstrap that started this app, if any. When present its
@@ -64,6 +67,10 @@ class SoarScoreContestApp extends StatefulWidget {
   /// bootstrap's store and loads it after the first frame.
   final CollapsibleAreasController? collapsibleAreas;
 
+  /// The preferred locale, already loaded. When `null` the app makes one from
+  /// the bootstrap's account preferences and loads it after the first frame.
+  final LocaleController? localeController;
+
   static const String title = 'RC Soar Score Contest Management';
 
   @override
@@ -78,6 +85,8 @@ class _SoarScoreContestAppState extends State<SoarScoreContestApp> {
   late final bool _ownsTheme;
   late final CollapsibleAreasController _areas;
   late final bool _ownsAreas;
+  late final LocaleController _locale;
+  late final bool _ownsLocale;
 
   /// The user's single New Contest draft, kept across restarts where the
   /// bootstrap has local UI storage.
@@ -121,6 +130,12 @@ class _SoarScoreContestAppState extends State<SoarScoreContestApp> {
           account: widget.bootstrap?.uiAccount,
         );
     if (_ownsAreas) unawaited(_areas.load());
+    final givenLocale = widget.localeController;
+    _ownsLocale = givenLocale == null;
+    _locale =
+        givenLocale ??
+        LocaleController(loadPreferences: widget.bootstrap?.loadPreferences);
+    if (_ownsLocale) unawaited(_locale.load());
     _router = buildAppRouter(
       initialLocation: widget.routerInitialLocation,
       appMode: _appMode,
@@ -145,6 +160,7 @@ class _SoarScoreContestAppState extends State<SoarScoreContestApp> {
     _router.dispose();
     if (_ownsTheme) _theme.dispose();
     if (_ownsAreas) _areas.dispose();
+    if (_ownsLocale) _locale.dispose();
     _draftStore.dispose();
     super.dispose();
   }
@@ -152,7 +168,7 @@ class _SoarScoreContestAppState extends State<SoarScoreContestApp> {
   @override
   Widget build(BuildContext context) {
     Widget app = ListenableBuilder(
-      listenable: _theme,
+      listenable: Listenable.merge([_theme, _locale]),
       builder: (context, _) => MaterialApp.router(
         title: SoarScoreContestApp.title,
         debugShowCheckedModeBanner: false,
@@ -160,10 +176,12 @@ class _SoarScoreContestAppState extends State<SoarScoreContestApp> {
         darkTheme: ContestAppTheme.darkTheme,
         themeMode: _theme.mode,
         routerConfig: _router,
+        locale: _locale.locale,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
       ),
     );
+    app = LocaleControllerInherited(controller: _locale, child: app);
     app = ThemeControllerInherited(controller: _theme, child: app);
     app = CollapsibleAreasInherited(controller: _areas, child: app);
     app = ContestDraftInherited(store: _draftStore, child: app);

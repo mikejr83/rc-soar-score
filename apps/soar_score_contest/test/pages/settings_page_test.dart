@@ -6,6 +6,7 @@ import 'package:soar_score_contest/router.dart';
 import 'package:soar_score_contest/services/collapsible_areas/collapsible_area.dart';
 import 'package:soar_score_contest/services/collapsible_areas/collapsible_areas_controller.dart';
 import 'package:soar_score_contest/l10n/app_localizations_en.dart';
+import 'package:soar_score_contest/services/locale/locale_controller.dart';
 import 'package:soar_score_contest/services/theme/theme_controller.dart';
 import 'package:soar_score_ui_storage/soar_score_ui_storage.dart';
 
@@ -19,6 +20,7 @@ Future<void> _pumpSettings(
   LocalUiStore store, {
   ThemeController? controller,
   CollapsibleAreasController? areas,
+  LocaleController? locale,
 }) async {
   await tester.pumpWidget(
     SoarScoreContestApp(
@@ -26,12 +28,34 @@ Future<void> _pumpSettings(
       routerInitialLocation: settingsPath,
       themeController: controller,
       collapsibleAreas: areas,
+      localeController: locale,
     ),
   );
   await tester.pumpAndSettle();
 }
 
 void main() {
+  testWidgets('the preferred locale is the one the app shows', (tester) async {
+    final locale = LocaleController()..setPreferred('en-US');
+    await _pumpSettings(
+      tester,
+      BackendLocalUiStore(MemoryLocalUiBackend()),
+      locale: locale,
+    );
+
+    expect(
+      tester.widget<MaterialApp>(find.byType(MaterialApp)).locale,
+      const Locale('en', 'US'),
+    );
+    expect(find.text(AppLocalizationsEn().appearanceHeading), findsOneWidget);
+  });
+
+  testWidgets('without a preference the device decides', (tester) async {
+    await _pumpSettings(tester, BackendLocalUiStore(MemoryLocalUiBackend()));
+
+    expect(tester.widget<MaterialApp>(find.byType(MaterialApp)).locale, isNull);
+  });
+
   testWidgets('the theme control starts on System', (tester) async {
     await _pumpSettings(tester, BackendLocalUiStore(MemoryLocalUiBackend()));
 

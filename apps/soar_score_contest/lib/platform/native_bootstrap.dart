@@ -5,6 +5,7 @@ import 'package:logging/logging.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:soar_score_api/soar_score_api.dart';
+import 'package:soar_score_core/soar_score_core.dart' as core;
 import 'package:soar_score_data/soar_score_data.dart';
 import 'package:soar_score_ui_storage/soar_score_ui_storage.dart';
 import 'package:soar_score_contest/platform/web_bootstrap.dart';
@@ -89,6 +90,10 @@ class NativeBootstrap extends AppBootstrap {
 
   @override
   AuthSession get authSession => _auth;
+
+  @override
+  Future<core.AccountPreferences> loadPreferences() =>
+      LocalAccountRepository(_server.database).preferences();
 
   @override
   Future<void> close() async {
