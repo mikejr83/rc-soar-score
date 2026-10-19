@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_contest/services/new_contest/contest_draft.dart';
 import 'package:soar_score_contest/services/new_contest/contest_draft_store.dart';
@@ -170,6 +172,24 @@ void main() {
       await store.retry();
       expect(store.saveFailed, isFalse);
       expect(persistence.stored, isEmpty);
+    });
+
+    test('an account change while loading never shows the old draft', () async {
+      final persistence = FakeDraftPersistence()..stored['local'] = stored;
+      final gate = Completer<void>();
+      persistence.loadGate = gate.future;
+      final store = ContestDraftStore(persistence: persistence);
+      addTearDown(store.dispose);
+
+      final offer = store.restore();
+      persistence.account = 'user:b';
+      gate.complete();
+
+      expect(await offer, isNull);
+      expect(store.hasDraft, isFalse);
+      expect(store.needsRestore, isFalse);
+      // The stored draft still belongs to the first account.
+      expect(persistence.stored['local'], same(stored));
     });
   });
 }

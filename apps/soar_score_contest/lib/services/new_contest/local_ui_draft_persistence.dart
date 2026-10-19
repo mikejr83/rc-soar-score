@@ -40,6 +40,9 @@ class LocalUiDraftPersistence implements DraftPersistence {
   static final LocalUiKey<_Envelope?> _key = LocalUiKey<_Envelope?>(
     name: 'new_contest_draft',
     defaultValue: null,
+    // Damaged text or another storage version is a draft that can only be
+    // discarded, not an absent one.
+    unreadable: () => const _Envelope(null, null, null),
     encode: (value) => value == null
         ? null
         : {

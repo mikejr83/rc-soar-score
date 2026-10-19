@@ -15,7 +15,7 @@ A typed, per-account key-value store for UI-only state on the client: theme, hid
 - **Contest data never goes through this package.** Contest entities live in `soar_score_data` and sync; this is for UI-only state.
 - Depends on nothing in the monorepo. The native backend lives in its own SQLite file (`soar_score_ui.db`), so a contest data reset never clears UI state (decided in #319; the default is that it must not).
 - Keys are namespaced by account id; the Local account is an account like any other.
-- Calls never throw into the UI: a failed read gives the key's default, a failed write returns `false`; both are logged. Bump a key's `version` when its encoded shape changes; older values then read as the default.
+- Calls never throw into the UI: a failed read gives the key's default, a failed write returns `false`; both are logged. Bump a key's `version` when its encoded shape changes; older values then read as the default. A key may set `unreadable` to tell stored-but-unusable data (damaged text, another version, a rejected decode) from nothing stored; without it both read as the default.
 - The barrel does not export `SqliteLocalUiBackend` or `IndexedDbLocalUiBackend`; use `openLocalUiStore` so the web build compiles no SQLite and the native build no `package:web`.
 
 ## Testing

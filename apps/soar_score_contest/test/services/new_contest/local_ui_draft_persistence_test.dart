@@ -9,11 +9,13 @@ import '../../support/rich_contest_draft.dart';
 
 void main() {
   late LocalUiStore store;
+  late MemoryLocalUiBackend backend;
   late LocalUiDraftPersistence persistence;
   final savedAt = DateTime.utc(2026, 10, 18, 12, 30);
 
   setUp(() {
-    store = BackendLocalUiStore(MemoryLocalUiBackend());
+    backend = MemoryLocalUiBackend();
+    store = BackendLocalUiStore(backend);
     persistence = LocalUiDraftPersistence(store, account: () => 'a');
   });
   tearDown(() => store.close());
@@ -117,6 +119,15 @@ void main() {
       }
     },
   );
+
+  test('text that is not JSON is an unreadable draft', () async {
+    await backend.write(
+      BackendLocalUiStore.storageKey('a', 'new_contest_draft'),
+      '{{',
+    );
+
+    expect(await persistence.load('a'), isA<UnreadableStoredDraft>());
+  });
 
   test('clear and save report a storage that refuses', () async {
     final refusing = LocalUiDraftPersistence(

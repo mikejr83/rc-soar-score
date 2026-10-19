@@ -16,9 +16,14 @@ class FakeDraftPersistence implements DraftPersistence {
   @override
   String get accountId => account;
 
+  /// When set, [load] waits for it, so a test can act while a load is pending.
+  Future<void>? loadGate;
+
   @override
-  Future<StoredDraft> load(String accountId) async =>
-      stored[accountId] ?? const NoStoredDraft();
+  Future<StoredDraft> load(String accountId) async {
+    await loadGate;
+    return stored[accountId] ?? const NoStoredDraft();
+  }
 
   @override
   Future<void> save(

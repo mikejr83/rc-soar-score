@@ -102,6 +102,10 @@ class ContestDraftStore extends ChangeNotifier {
       return _offer;
     }
     final stored = await persistence.load(account);
+    if (persistence.accountId != account) {
+      // The account changed while loading; that draft is not for this one.
+      return restore();
+    }
     _account = account;
     return _offer = stored is NoStoredDraft ? null : stored;
   }
