@@ -11,6 +11,7 @@ class FakeLocalAccount implements core.LocalAccountRepository {
   core.Id? id;
   final reassigned = <core.Id>[];
   Object? reassignError;
+  var storedPreferences = core.AccountPreferences();
 
   /// While set, `find` / `reassignTo` wait for it.
   Completer<void>? findGate;
@@ -32,4 +33,11 @@ class FakeLocalAccount implements core.LocalAccountRepository {
     if (error != null) throw error;
     reassigned.add(accountId);
   }
+
+  @override
+  Future<core.AccountPreferences> preferences() async => storedPreferences;
+
+  @override
+  Future<void> savePreferences(core.AccountPreferences preferences) async =>
+      storedPreferences = preferences;
 }

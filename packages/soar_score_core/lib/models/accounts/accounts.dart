@@ -1,5 +1,6 @@
 export 'account.dart';
 export 'account_alias.dart';
+export 'account_preferences.dart';
 export 'account_identity.dart';
 export 'account_public_profile.dart';
 export 'participant_account_link.dart';

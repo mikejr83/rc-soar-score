@@ -181,6 +181,8 @@ class NativeBootstrap extends AppBootstrap {
       },
       onSignedOut: acting.actAsLocal,
       onProblem: sync.appSync.claimProblemChanged,
+      getPreferences: remote.getAccountPreferences,
+      putPreferences: remote.updateAccountPreferences,
     )..start();
     // UI state has its own file beside the contest database, so resetting or
     // replacing contest data never clears it.

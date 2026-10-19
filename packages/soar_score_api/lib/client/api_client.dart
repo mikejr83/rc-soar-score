@@ -330,6 +330,35 @@ class ApiClient {
     );
   }
 
+  /// `GET /api/v1/account/preferences` — the signed-in account's preferred
+  /// time zone and locale; a field is null until chosen.
+  Future<AccountPreferences> getAccountPreferences() async {
+    final uri = _resolve('/api/v1/account/preferences');
+    final response = await _send('GET', uri);
+    return _decode<AccountPreferences>(
+      response,
+      uri,
+      AccountPreferences.fromJson,
+    );
+  }
+
+  /// `PUT /api/v1/account/preferences` — replaces the signed-in account's
+  /// preferences with [preferences]; a null field clears that choice.
+  ///
+  /// An unknown time zone or unsupported locale is an [ApiHttpError] with
+  /// status 400.
+  Future<AccountPreferences> updateAccountPreferences(
+    AccountPreferences preferences,
+  ) async {
+    final uri = _resolve('/api/v1/account/preferences');
+    final response = await _send('PUT', uri, body: preferences.toJson());
+    return _decode<AccountPreferences>(
+      response,
+      uri,
+      AccountPreferences.fromJson,
+    );
+  }
+
   /// `PUT /api/v1/roles/{id}` — renames the caller's role [id].
   ///
   /// A system role is an [ApiHttpError] with status 409.

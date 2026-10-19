@@ -50,4 +50,40 @@ void _tests(Backend backend) {
     expect(ids.toSet(), hasLength(1));
     expect(await inst.count('local_account'), 1);
   });
+
+  test('has no preferences until chosen', skip: skip, () async {
+    await accounts.ensure();
+
+    expect(await accounts.preferences(), core.AccountPreferences());
+  });
+
+  test('keeps the preferences and clears a choice', skip: skip, () async {
+    await accounts.ensure();
+
+    await accounts.savePreferences(
+      core.AccountPreferences(
+        preferredTimeZone: 'Europe/Rome',
+        preferredLocale: 'en-US',
+      ),
+    );
+    expect(
+      await LocalAccountRepository(inst.db).preferences(),
+      core.AccountPreferences(
+        preferredTimeZone: 'Europe/Rome',
+        preferredLocale: 'en-US',
+      ),
+    );
+
+    await accounts.savePreferences(core.AccountPreferences());
+    expect(await accounts.preferences(), core.AccountPreferences());
+  });
+
+  test('refuses preferences before the first run', skip: skip, () async {
+    await expectLater(
+      accounts.savePreferences(
+        core.AccountPreferences(preferredTimeZone: 'Europe/Rome'),
+      ),
+      throwsStateError,
+    );
+  });
 }

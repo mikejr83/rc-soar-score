@@ -41,6 +41,31 @@ class LocalAccountRepository implements core.LocalAccountRepository {
   });
 
   @override
+  Future<core.AccountPreferences> preferences() async {
+    final row = await _db.select(_db.localAccount).getSingleOrNull();
+    return core.AccountPreferences(
+      preferredTimeZone: row?.preferredTimeZone,
+      preferredLocale: row?.preferredLocale,
+    );
+  }
+
+  @override
+  Future<void> savePreferences(core.AccountPreferences preferences) async {
+    final updated =
+        await (_db.update(
+          _db.localAccount,
+        )..where((t) => t.slot.equals(1))).write(
+          LocalAccountCompanion(
+            preferredTimeZone: Value(preferences.preferredTimeZone),
+            preferredLocale: Value(preferences.preferredLocale),
+          ),
+        );
+    if (updated == 0) {
+      throw StateError('the Local account has not been created yet');
+    }
+  }
+
+  @override
   Future<void> reassignTo(core.Id accountId) => _db.transaction(() async {
     final local = await find();
     if (local == null) {

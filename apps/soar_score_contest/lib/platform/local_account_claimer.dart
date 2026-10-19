@@ -38,7 +38,15 @@ class LocalAccountClaimer {
     required this._onClaimed,
     required this._onSignedOut,
     required this._onProblem,
-  });
+    this._getPreferences,
+    this._putPreferences,
+  }) {
+    if ((_getPreferences == null) != (_putPreferences == null)) {
+      throw ArgumentError(
+        'getPreferences and putPreferences must be given together',
+      );
+    }
+  }
 
   final AuthSession _auth;
   final AuthEpoch _epoch;
@@ -47,6 +55,12 @@ class LocalAccountClaimer {
   final Future<void> Function(core.Id accountId, int session) _onClaimed;
   final void Function() _onSignedOut;
   final void Function(SyncProblem? problem) _onProblem;
+
+  /// Reads and stores the signed-in account's preferences on the service.
+  /// Both null (the default) skips carrying preferences over.
+  final Future<core.AccountPreferences> Function()? _getPreferences;
+  final Future<core.AccountPreferences> Function(core.AccountPreferences)?
+  _putPreferences;
 
   Future<void>? _running;
   bool _stopped = false;
@@ -134,10 +148,35 @@ class LocalAccountClaimer {
     }
     if (!_epoch.isCurrent(session) || _stopped) return;
     _onProblem(null);
+    await _carryOverPreferences(session);
     try {
       await _onClaimed(accountId, session);
     } on Object catch (error, stack) {
       _logger.warning('Starting the sync after the claim failed', error, stack);
+    }
+  }
+
+  /// Merges the preferences chosen offline with the account's: a choice the
+  /// account already has stands, one it lacks is taken from this installation.
+  /// The merged result is kept locally too, so the installation shows the
+  /// account's choices. A failure is only logged; the next run tries again.
+  Future<void> _carryOverPreferences(int session) async {
+    final get = _getPreferences;
+    final put = _putPreferences;
+    if (get == null || put == null) return;
+    try {
+      final stored = await _epoch.runBound(session, get);
+      final local = await _local.preferences();
+      final merged = stored.orElse(local);
+      final result = merged == stored
+          ? stored
+          : await _epoch.runBound(session, () => put(merged));
+      if (_stopped || result == local) return;
+      await _local.savePreferences(result);
+    } on SessionChangedError {
+      _logger.fine('Preferences dropped: the sign-in changed');
+    } on Object catch (error, stack) {
+      _logger.warning('Carrying the preferences over failed', error, stack);
     }
   }
 

@@ -11832,6 +11832,29 @@ class $AccountsTable extends Accounts
       SqlDialect.postgres: '',
     }),
   );
+  static const VerificationMeta _preferredTimeZoneMeta = const VerificationMeta(
+    'preferredTimeZone',
+  );
+  @override
+  late final GeneratedColumn<String> preferredTimeZone =
+      GeneratedColumn<String>(
+        'preferred_time_zone',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _preferredLocaleMeta = const VerificationMeta(
+    'preferredLocale',
+  );
+  @override
+  late final GeneratedColumn<String> preferredLocale = GeneratedColumn<String>(
+    'preferred_locale',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -11865,6 +11888,8 @@ class $AccountsTable extends Accounts
     status,
     archivedAt,
     isSystemAdmin,
+    preferredTimeZone,
+    preferredLocale,
     createdAt,
     updatedAt,
   ];
@@ -11951,6 +11976,24 @@ class $AccountsTable extends Accounts
     } else if (isInserting) {
       context.missing(_isSystemAdminMeta);
     }
+    if (data.containsKey('preferred_time_zone')) {
+      context.handle(
+        _preferredTimeZoneMeta,
+        preferredTimeZone.isAcceptableOrUnknown(
+          data['preferred_time_zone']!,
+          _preferredTimeZoneMeta,
+        ),
+      );
+    }
+    if (data.containsKey('preferred_locale')) {
+      context.handle(
+        _preferredLocaleMeta,
+        preferredLocale.isAcceptableOrUnknown(
+          data['preferred_locale']!,
+          _preferredLocaleMeta,
+        ),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -12016,6 +12059,14 @@ class $AccountsTable extends Accounts
         DriftSqlType.bool,
         data['${effectivePrefix}is_system_admin'],
       )!,
+      preferredTimeZone: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}preferred_time_zone'],
+      ),
+      preferredLocale: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}preferred_locale'],
+      ),
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}created_at'],
@@ -12043,6 +12094,8 @@ class AccountData extends DataClass implements Insertable<AccountData> {
   final String status;
   final String? archivedAt;
   final bool isSystemAdmin;
+  final String? preferredTimeZone;
+  final String? preferredLocale;
   final String createdAt;
   final String updatedAt;
   const AccountData({
@@ -12055,6 +12108,8 @@ class AccountData extends DataClass implements Insertable<AccountData> {
     required this.status,
     this.archivedAt,
     required this.isSystemAdmin,
+    this.preferredTimeZone,
+    this.preferredLocale,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -12074,6 +12129,12 @@ class AccountData extends DataClass implements Insertable<AccountData> {
       map['archived_at'] = Variable<String>(archivedAt);
     }
     map['is_system_admin'] = Variable<bool>(isSystemAdmin);
+    if (!nullToAbsent || preferredTimeZone != null) {
+      map['preferred_time_zone'] = Variable<String>(preferredTimeZone);
+    }
+    if (!nullToAbsent || preferredLocale != null) {
+      map['preferred_locale'] = Variable<String>(preferredLocale);
+    }
     map['created_at'] = Variable<String>(createdAt);
     map['updated_at'] = Variable<String>(updatedAt);
     return map;
@@ -12094,6 +12155,12 @@ class AccountData extends DataClass implements Insertable<AccountData> {
           ? const Value.absent()
           : Value(archivedAt),
       isSystemAdmin: Value(isSystemAdmin),
+      preferredTimeZone: preferredTimeZone == null && nullToAbsent
+          ? const Value.absent()
+          : Value(preferredTimeZone),
+      preferredLocale: preferredLocale == null && nullToAbsent
+          ? const Value.absent()
+          : Value(preferredLocale),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
     );
@@ -12114,6 +12181,10 @@ class AccountData extends DataClass implements Insertable<AccountData> {
       status: serializer.fromJson<String>(json['status']),
       archivedAt: serializer.fromJson<String?>(json['archivedAt']),
       isSystemAdmin: serializer.fromJson<bool>(json['isSystemAdmin']),
+      preferredTimeZone: serializer.fromJson<String?>(
+        json['preferredTimeZone'],
+      ),
+      preferredLocale: serializer.fromJson<String?>(json['preferredLocale']),
       createdAt: serializer.fromJson<String>(json['createdAt']),
       updatedAt: serializer.fromJson<String>(json['updatedAt']),
     );
@@ -12131,6 +12202,8 @@ class AccountData extends DataClass implements Insertable<AccountData> {
       'status': serializer.toJson<String>(status),
       'archivedAt': serializer.toJson<String?>(archivedAt),
       'isSystemAdmin': serializer.toJson<bool>(isSystemAdmin),
+      'preferredTimeZone': serializer.toJson<String?>(preferredTimeZone),
+      'preferredLocale': serializer.toJson<String?>(preferredLocale),
       'createdAt': serializer.toJson<String>(createdAt),
       'updatedAt': serializer.toJson<String>(updatedAt),
     };
@@ -12146,6 +12219,8 @@ class AccountData extends DataClass implements Insertable<AccountData> {
     String? status,
     Value<String?> archivedAt = const Value.absent(),
     bool? isSystemAdmin,
+    Value<String?> preferredTimeZone = const Value.absent(),
+    Value<String?> preferredLocale = const Value.absent(),
     String? createdAt,
     String? updatedAt,
   }) => AccountData(
@@ -12158,6 +12233,12 @@ class AccountData extends DataClass implements Insertable<AccountData> {
     status: status ?? this.status,
     archivedAt: archivedAt.present ? archivedAt.value : this.archivedAt,
     isSystemAdmin: isSystemAdmin ?? this.isSystemAdmin,
+    preferredTimeZone: preferredTimeZone.present
+        ? preferredTimeZone.value
+        : this.preferredTimeZone,
+    preferredLocale: preferredLocale.present
+        ? preferredLocale.value
+        : this.preferredLocale,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
   );
@@ -12178,6 +12259,12 @@ class AccountData extends DataClass implements Insertable<AccountData> {
       isSystemAdmin: data.isSystemAdmin.present
           ? data.isSystemAdmin.value
           : this.isSystemAdmin,
+      preferredTimeZone: data.preferredTimeZone.present
+          ? data.preferredTimeZone.value
+          : this.preferredTimeZone,
+      preferredLocale: data.preferredLocale.present
+          ? data.preferredLocale.value
+          : this.preferredLocale,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
@@ -12195,6 +12282,8 @@ class AccountData extends DataClass implements Insertable<AccountData> {
           ..write('status: $status, ')
           ..write('archivedAt: $archivedAt, ')
           ..write('isSystemAdmin: $isSystemAdmin, ')
+          ..write('preferredTimeZone: $preferredTimeZone, ')
+          ..write('preferredLocale: $preferredLocale, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -12212,6 +12301,8 @@ class AccountData extends DataClass implements Insertable<AccountData> {
     status,
     archivedAt,
     isSystemAdmin,
+    preferredTimeZone,
+    preferredLocale,
     createdAt,
     updatedAt,
   );
@@ -12228,6 +12319,8 @@ class AccountData extends DataClass implements Insertable<AccountData> {
           other.status == this.status &&
           other.archivedAt == this.archivedAt &&
           other.isSystemAdmin == this.isSystemAdmin &&
+          other.preferredTimeZone == this.preferredTimeZone &&
+          other.preferredLocale == this.preferredLocale &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
 }
@@ -12242,6 +12335,8 @@ class AccountsCompanion extends UpdateCompanion<AccountData> {
   final Value<String> status;
   final Value<String?> archivedAt;
   final Value<bool> isSystemAdmin;
+  final Value<String?> preferredTimeZone;
+  final Value<String?> preferredLocale;
   final Value<String> createdAt;
   final Value<String> updatedAt;
   final Value<int> rowid;
@@ -12255,6 +12350,8 @@ class AccountsCompanion extends UpdateCompanion<AccountData> {
     this.status = const Value.absent(),
     this.archivedAt = const Value.absent(),
     this.isSystemAdmin = const Value.absent(),
+    this.preferredTimeZone = const Value.absent(),
+    this.preferredLocale = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -12269,6 +12366,8 @@ class AccountsCompanion extends UpdateCompanion<AccountData> {
     required String status,
     this.archivedAt = const Value.absent(),
     required bool isSystemAdmin,
+    this.preferredTimeZone = const Value.absent(),
+    this.preferredLocale = const Value.absent(),
     required String createdAt,
     required String updatedAt,
     this.rowid = const Value.absent(),
@@ -12291,6 +12390,8 @@ class AccountsCompanion extends UpdateCompanion<AccountData> {
     Expression<String>? status,
     Expression<String>? archivedAt,
     Expression<bool>? isSystemAdmin,
+    Expression<String>? preferredTimeZone,
+    Expression<String>? preferredLocale,
     Expression<String>? createdAt,
     Expression<String>? updatedAt,
     Expression<int>? rowid,
@@ -12305,6 +12406,8 @@ class AccountsCompanion extends UpdateCompanion<AccountData> {
       if (status != null) 'status': status,
       if (archivedAt != null) 'archived_at': archivedAt,
       if (isSystemAdmin != null) 'is_system_admin': isSystemAdmin,
+      if (preferredTimeZone != null) 'preferred_time_zone': preferredTimeZone,
+      if (preferredLocale != null) 'preferred_locale': preferredLocale,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (rowid != null) 'rowid': rowid,
@@ -12321,6 +12424,8 @@ class AccountsCompanion extends UpdateCompanion<AccountData> {
     Value<String>? status,
     Value<String?>? archivedAt,
     Value<bool>? isSystemAdmin,
+    Value<String?>? preferredTimeZone,
+    Value<String?>? preferredLocale,
     Value<String>? createdAt,
     Value<String>? updatedAt,
     Value<int>? rowid,
@@ -12335,6 +12440,8 @@ class AccountsCompanion extends UpdateCompanion<AccountData> {
       status: status ?? this.status,
       archivedAt: archivedAt ?? this.archivedAt,
       isSystemAdmin: isSystemAdmin ?? this.isSystemAdmin,
+      preferredTimeZone: preferredTimeZone ?? this.preferredTimeZone,
+      preferredLocale: preferredLocale ?? this.preferredLocale,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       rowid: rowid ?? this.rowid,
@@ -12371,6 +12478,12 @@ class AccountsCompanion extends UpdateCompanion<AccountData> {
     if (isSystemAdmin.present) {
       map['is_system_admin'] = Variable<bool>(isSystemAdmin.value);
     }
+    if (preferredTimeZone.present) {
+      map['preferred_time_zone'] = Variable<String>(preferredTimeZone.value);
+    }
+    if (preferredLocale.present) {
+      map['preferred_locale'] = Variable<String>(preferredLocale.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<String>(createdAt.value);
     }
@@ -12395,6 +12508,8 @@ class AccountsCompanion extends UpdateCompanion<AccountData> {
           ..write('status: $status, ')
           ..write('archivedAt: $archivedAt, ')
           ..write('isSystemAdmin: $isSystemAdmin, ')
+          ..write('preferredTimeZone: $preferredTimeZone, ')
+          ..write('preferredLocale: $preferredLocale, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('rowid: $rowid')
@@ -36352,6 +36467,29 @@ class $LocalAccountTable extends LocalAccount
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _preferredTimeZoneMeta = const VerificationMeta(
+    'preferredTimeZone',
+  );
+  @override
+  late final GeneratedColumn<String> preferredTimeZone =
+      GeneratedColumn<String>(
+        'preferred_time_zone',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _preferredLocaleMeta = const VerificationMeta(
+    'preferredLocale',
+  );
+  @override
+  late final GeneratedColumn<String> preferredLocale = GeneratedColumn<String>(
+    'preferred_locale',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -36364,7 +36502,13 @@ class $LocalAccountTable extends LocalAccount
     requiredDuringInsert: true,
   );
   @override
-  List<GeneratedColumn> get $columns => [slot, accountId, createdAt];
+  List<GeneratedColumn> get $columns => [
+    slot,
+    accountId,
+    preferredTimeZone,
+    preferredLocale,
+    createdAt,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -36391,6 +36535,24 @@ class $LocalAccountTable extends LocalAccount
     } else if (isInserting) {
       context.missing(_accountIdMeta);
     }
+    if (data.containsKey('preferred_time_zone')) {
+      context.handle(
+        _preferredTimeZoneMeta,
+        preferredTimeZone.isAcceptableOrUnknown(
+          data['preferred_time_zone']!,
+          _preferredTimeZoneMeta,
+        ),
+      );
+    }
+    if (data.containsKey('preferred_locale')) {
+      context.handle(
+        _preferredLocaleMeta,
+        preferredLocale.isAcceptableOrUnknown(
+          data['preferred_locale']!,
+          _preferredLocaleMeta,
+        ),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -36416,6 +36578,14 @@ class $LocalAccountTable extends LocalAccount
         DriftSqlType.string,
         data['${effectivePrefix}account_id'],
       )!,
+      preferredTimeZone: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}preferred_time_zone'],
+      ),
+      preferredLocale: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}preferred_locale'],
+      ),
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}created_at'],
@@ -36436,10 +36606,17 @@ class LocalAccountData extends DataClass
 
   /// The Local account id (UUIDv7), generated on first run and never changed.
   final String accountId;
+
+  /// Preferences chosen on this installation (see `AccountPreferences`);
+  /// null until chosen.
+  final String? preferredTimeZone;
+  final String? preferredLocale;
   final String createdAt;
   const LocalAccountData({
     required this.slot,
     required this.accountId,
+    this.preferredTimeZone,
+    this.preferredLocale,
     required this.createdAt,
   });
   @override
@@ -36447,6 +36624,12 @@ class LocalAccountData extends DataClass
     final map = <String, Expression>{};
     map['slot'] = Variable<int>(slot);
     map['account_id'] = Variable<String>(accountId);
+    if (!nullToAbsent || preferredTimeZone != null) {
+      map['preferred_time_zone'] = Variable<String>(preferredTimeZone);
+    }
+    if (!nullToAbsent || preferredLocale != null) {
+      map['preferred_locale'] = Variable<String>(preferredLocale);
+    }
     map['created_at'] = Variable<String>(createdAt);
     return map;
   }
@@ -36455,6 +36638,12 @@ class LocalAccountData extends DataClass
     return LocalAccountCompanion(
       slot: Value(slot),
       accountId: Value(accountId),
+      preferredTimeZone: preferredTimeZone == null && nullToAbsent
+          ? const Value.absent()
+          : Value(preferredTimeZone),
+      preferredLocale: preferredLocale == null && nullToAbsent
+          ? const Value.absent()
+          : Value(preferredLocale),
       createdAt: Value(createdAt),
     );
   }
@@ -36467,6 +36656,10 @@ class LocalAccountData extends DataClass
     return LocalAccountData(
       slot: serializer.fromJson<int>(json['slot']),
       accountId: serializer.fromJson<String>(json['accountId']),
+      preferredTimeZone: serializer.fromJson<String?>(
+        json['preferredTimeZone'],
+      ),
+      preferredLocale: serializer.fromJson<String?>(json['preferredLocale']),
       createdAt: serializer.fromJson<String>(json['createdAt']),
     );
   }
@@ -36476,6 +36669,8 @@ class LocalAccountData extends DataClass
     return <String, dynamic>{
       'slot': serializer.toJson<int>(slot),
       'accountId': serializer.toJson<String>(accountId),
+      'preferredTimeZone': serializer.toJson<String?>(preferredTimeZone),
+      'preferredLocale': serializer.toJson<String?>(preferredLocale),
       'createdAt': serializer.toJson<String>(createdAt),
     };
   }
@@ -36483,16 +36678,30 @@ class LocalAccountData extends DataClass
   LocalAccountData copyWith({
     int? slot,
     String? accountId,
+    Value<String?> preferredTimeZone = const Value.absent(),
+    Value<String?> preferredLocale = const Value.absent(),
     String? createdAt,
   }) => LocalAccountData(
     slot: slot ?? this.slot,
     accountId: accountId ?? this.accountId,
+    preferredTimeZone: preferredTimeZone.present
+        ? preferredTimeZone.value
+        : this.preferredTimeZone,
+    preferredLocale: preferredLocale.present
+        ? preferredLocale.value
+        : this.preferredLocale,
     createdAt: createdAt ?? this.createdAt,
   );
   LocalAccountData copyWithCompanion(LocalAccountCompanion data) {
     return LocalAccountData(
       slot: data.slot.present ? data.slot.value : this.slot,
       accountId: data.accountId.present ? data.accountId.value : this.accountId,
+      preferredTimeZone: data.preferredTimeZone.present
+          ? data.preferredTimeZone.value
+          : this.preferredTimeZone,
+      preferredLocale: data.preferredLocale.present
+          ? data.preferredLocale.value
+          : this.preferredLocale,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
     );
   }
@@ -36502,45 +36711,65 @@ class LocalAccountData extends DataClass
     return (StringBuffer('LocalAccountData(')
           ..write('slot: $slot, ')
           ..write('accountId: $accountId, ')
+          ..write('preferredTimeZone: $preferredTimeZone, ')
+          ..write('preferredLocale: $preferredLocale, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(slot, accountId, createdAt);
+  int get hashCode => Object.hash(
+    slot,
+    accountId,
+    preferredTimeZone,
+    preferredLocale,
+    createdAt,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is LocalAccountData &&
           other.slot == this.slot &&
           other.accountId == this.accountId &&
+          other.preferredTimeZone == this.preferredTimeZone &&
+          other.preferredLocale == this.preferredLocale &&
           other.createdAt == this.createdAt);
 }
 
 class LocalAccountCompanion extends UpdateCompanion<LocalAccountData> {
   final Value<int> slot;
   final Value<String> accountId;
+  final Value<String?> preferredTimeZone;
+  final Value<String?> preferredLocale;
   final Value<String> createdAt;
   const LocalAccountCompanion({
     this.slot = const Value.absent(),
     this.accountId = const Value.absent(),
+    this.preferredTimeZone = const Value.absent(),
+    this.preferredLocale = const Value.absent(),
     this.createdAt = const Value.absent(),
   });
   LocalAccountCompanion.insert({
     this.slot = const Value.absent(),
     required String accountId,
+    this.preferredTimeZone = const Value.absent(),
+    this.preferredLocale = const Value.absent(),
     required String createdAt,
   }) : accountId = Value(accountId),
        createdAt = Value(createdAt);
   static Insertable<LocalAccountData> custom({
     Expression<int>? slot,
     Expression<String>? accountId,
+    Expression<String>? preferredTimeZone,
+    Expression<String>? preferredLocale,
     Expression<String>? createdAt,
   }) {
     return RawValuesInsertable({
       if (slot != null) 'slot': slot,
       if (accountId != null) 'account_id': accountId,
+      if (preferredTimeZone != null) 'preferred_time_zone': preferredTimeZone,
+      if (preferredLocale != null) 'preferred_locale': preferredLocale,
       if (createdAt != null) 'created_at': createdAt,
     });
   }
@@ -36548,11 +36777,15 @@ class LocalAccountCompanion extends UpdateCompanion<LocalAccountData> {
   LocalAccountCompanion copyWith({
     Value<int>? slot,
     Value<String>? accountId,
+    Value<String?>? preferredTimeZone,
+    Value<String?>? preferredLocale,
     Value<String>? createdAt,
   }) {
     return LocalAccountCompanion(
       slot: slot ?? this.slot,
       accountId: accountId ?? this.accountId,
+      preferredTimeZone: preferredTimeZone ?? this.preferredTimeZone,
+      preferredLocale: preferredLocale ?? this.preferredLocale,
       createdAt: createdAt ?? this.createdAt,
     );
   }
@@ -36566,6 +36799,12 @@ class LocalAccountCompanion extends UpdateCompanion<LocalAccountData> {
     if (accountId.present) {
       map['account_id'] = Variable<String>(accountId.value);
     }
+    if (preferredTimeZone.present) {
+      map['preferred_time_zone'] = Variable<String>(preferredTimeZone.value);
+    }
+    if (preferredLocale.present) {
+      map['preferred_locale'] = Variable<String>(preferredLocale.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<String>(createdAt.value);
     }
@@ -36577,6 +36816,8 @@ class LocalAccountCompanion extends UpdateCompanion<LocalAccountData> {
     return (StringBuffer('LocalAccountCompanion(')
           ..write('slot: $slot, ')
           ..write('accountId: $accountId, ')
+          ..write('preferredTimeZone: $preferredTimeZone, ')
+          ..write('preferredLocale: $preferredLocale, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
@@ -50352,6 +50593,8 @@ typedef $$AccountsTableCreateCompanionBuilder = AccountsCompanion Function({
   required String status,
   Value<String?> archivedAt,
   required bool isSystemAdmin,
+  Value<String?> preferredTimeZone,
+  Value<String?> preferredLocale,
   required String createdAt,
   required String updatedAt,
   Value<int> rowid,
@@ -50366,6 +50609,8 @@ typedef $$AccountsTableUpdateCompanionBuilder = AccountsCompanion Function({
   Value<String> status,
   Value<String?> archivedAt,
   Value<bool> isSystemAdmin,
+  Value<String?> preferredTimeZone,
+  Value<String?> preferredLocale,
   Value<String> createdAt,
   Value<String> updatedAt,
   Value<int> rowid,
@@ -50630,6 +50875,16 @@ class $$AccountsTableFilterComposer
 
   ColumnFilters<bool> get isSystemAdmin => $composableBuilder(
     column: $table.isSystemAdmin,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get preferredTimeZone => $composableBuilder(
+    column: $table.preferredTimeZone,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get preferredLocale => $composableBuilder(
+    column: $table.preferredLocale,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -50931,6 +51186,16 @@ class $$AccountsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get preferredTimeZone => $composableBuilder(
+    column: $table.preferredTimeZone,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get preferredLocale => $composableBuilder(
+    column: $table.preferredLocale,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -50981,6 +51246,16 @@ class $$AccountsTableAnnotationComposer
 
   GeneratedColumn<bool> get isSystemAdmin => $composableBuilder(
     column: $table.isSystemAdmin,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get preferredTimeZone => $composableBuilder(
+    column: $table.preferredTimeZone,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get preferredLocale => $composableBuilder(
+    column: $table.preferredLocale,
     builder: (column) => column,
   );
 
@@ -51274,6 +51549,8 @@ class $$AccountsTableTableManager
                 Value<String> status = const Value.absent(),
                 Value<String?> archivedAt = const Value.absent(),
                 Value<bool> isSystemAdmin = const Value.absent(),
+                Value<String?> preferredTimeZone = const Value.absent(),
+                Value<String?> preferredLocale = const Value.absent(),
                 Value<String> createdAt = const Value.absent(),
                 Value<String> updatedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -51287,6 +51564,8 @@ class $$AccountsTableTableManager
                 status: status,
                 archivedAt: archivedAt,
                 isSystemAdmin: isSystemAdmin,
+                preferredTimeZone: preferredTimeZone,
+                preferredLocale: preferredLocale,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 rowid: rowid,
@@ -51302,6 +51581,8 @@ class $$AccountsTableTableManager
                 required String status,
                 Value<String?> archivedAt = const Value.absent(),
                 required bool isSystemAdmin,
+                Value<String?> preferredTimeZone = const Value.absent(),
+                Value<String?> preferredLocale = const Value.absent(),
                 required String createdAt,
                 required String updatedAt,
                 Value<int> rowid = const Value.absent(),
@@ -51315,6 +51596,8 @@ class $$AccountsTableTableManager
                 status: status,
                 archivedAt: archivedAt,
                 isSystemAdmin: isSystemAdmin,
+                preferredTimeZone: preferredTimeZone,
+                preferredLocale: preferredLocale,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 rowid: rowid,
@@ -72956,12 +73239,16 @@ typedef $$LocalAccountTableCreateCompanionBuilder =
     LocalAccountCompanion Function({
       Value<int> slot,
       required String accountId,
+      Value<String?> preferredTimeZone,
+      Value<String?> preferredLocale,
       required String createdAt,
     });
 typedef $$LocalAccountTableUpdateCompanionBuilder =
     LocalAccountCompanion Function({
       Value<int> slot,
       Value<String> accountId,
+      Value<String?> preferredTimeZone,
+      Value<String?> preferredLocale,
       Value<String> createdAt,
     });
 
@@ -72981,6 +73268,16 @@ class $$LocalAccountTableFilterComposer
 
   ColumnFilters<String> get accountId => $composableBuilder(
     column: $table.accountId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get preferredTimeZone => $composableBuilder(
+    column: $table.preferredTimeZone,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get preferredLocale => $composableBuilder(
+    column: $table.preferredLocale,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -73009,6 +73306,16 @@ class $$LocalAccountTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get preferredTimeZone => $composableBuilder(
+    column: $table.preferredTimeZone,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get preferredLocale => $composableBuilder(
+    column: $table.preferredLocale,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -73029,6 +73336,16 @@ class $$LocalAccountTableAnnotationComposer
 
   GeneratedColumn<String> get accountId =>
       $composableBuilder(column: $table.accountId, builder: (column) => column);
+
+  GeneratedColumn<String> get preferredTimeZone => $composableBuilder(
+    column: $table.preferredTimeZone,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get preferredLocale => $composableBuilder(
+    column: $table.preferredLocale,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -73073,20 +73390,28 @@ class $$LocalAccountTableTableManager
               ({
                 Value<int> slot = const Value.absent(),
                 Value<String> accountId = const Value.absent(),
+                Value<String?> preferredTimeZone = const Value.absent(),
+                Value<String?> preferredLocale = const Value.absent(),
                 Value<String> createdAt = const Value.absent(),
               }) => LocalAccountCompanion(
                 slot: slot,
                 accountId: accountId,
+                preferredTimeZone: preferredTimeZone,
+                preferredLocale: preferredLocale,
                 createdAt: createdAt,
               ),
           createCompanionCallback:
               ({
                 Value<int> slot = const Value.absent(),
                 required String accountId,
+                Value<String?> preferredTimeZone = const Value.absent(),
+                Value<String?> preferredLocale = const Value.absent(),
                 required String createdAt,
               }) => LocalAccountCompanion.insert(
                 slot: slot,
                 accountId: accountId,
+                preferredTimeZone: preferredTimeZone,
+                preferredLocale: preferredLocale,
                 createdAt: createdAt,
               ),
           withReferenceMapper: (p0) => p0

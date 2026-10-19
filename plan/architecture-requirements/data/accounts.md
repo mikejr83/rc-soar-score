@@ -17,6 +17,10 @@ A registered account is `active` or `archived`. An archived account cannot sign 
 
 A guest or local account is claimed into a registered account by re-pointing every reference to it (ownership, actors, invitations, participant links) to the registered account. Claiming is one-directional and happens once per account. On an installation the claim is a single transaction that re-points every column naming the Local account (ownership, actors, and the owner and payload of mutations still waiting to be sent) and the director sync position. It can be repeated without effect, and the Local account id is kept. A registered account is never merged into another account. A guest account is claimed only by someone who redeems the invitation or claim link.
 
+## Preferences
+
+An account stores two preferences that follow the person between devices: a preferred IANA time zone and a preferred locale. Both are optional; when unset the app uses the device's time zone and locale. The preferred time zone only changes times shown to the director in the admin UI. Times pilots see keep using the contest's zone. The locale must be one the apps ship (ADR 0004). A signed-in client reads and replaces them through `GET`/`PUT /account/preferences`. The installation keeps the same two values in the client-only `local_account` row for offline use. At claim, a choice the account already has stands and one it lacks is taken from the installation.
+
 ## Participants, the directory, and the public profile
 
 An account may be linked to one or more participant profiles through an explicit participant-account link. Creating an account must not merge or rewrite historical contest participation automatically. A match by verified email is only a candidate link, which the participant must confirm. Linking never copies account data into a director's profile.
