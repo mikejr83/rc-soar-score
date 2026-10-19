@@ -23,6 +23,7 @@ class ReportsFacts {
     required this.configDrift,
     required this.rounds,
     required this.standing,
+    required this.scoresSignature,
   });
 
   /// Reduces [workspace] (derived from the same matrix data and [scores]) and
@@ -59,6 +60,7 @@ class ReportsFacts {
         slots: scores.slots,
         roundOfAssignment: roundOfAssignment,
       ),
+      scoresSignature: _signature(scores),
     );
   }
 
@@ -84,6 +86,22 @@ class ReportsFacts {
   /// Each round's scoring progress.
   final List<WorkspaceRoundFact> rounds;
   final ScoreStanding standing;
+
+  /// A digest of every score slot: its workflow state and the revision and
+  /// time of its official score. It changes when a score is corrected even
+  /// though the counts of scored slots do not.
+  final int scoresSignature;
+
+  static int _signature(ContestScores scores) => Object.hashAll([
+    for (final slot in scores.slots)
+      Object.hash(
+        slot.placeholder.assignmentId,
+        slot.placeholder.state,
+        slot.placeholder.scoreRevision,
+        slot.officialScore?.scoreRevision,
+        slot.officialScore?.setAt,
+      ),
+  ]);
 
   LifecycleState get lifecycle => contest.lifecycleState;
   bool get isCompleted => lifecycle == LifecycleState.completed;
@@ -131,5 +149,6 @@ class ReportsFacts {
     for (final round in rounds)
       '${round.ordinal}:${round.scored}/${round.total}',
     standing.unofficial,
+    scoresSignature,
   ].join('|');
 }

@@ -500,6 +500,22 @@ void main() {
     });
   });
 
+  testWidgets(
+    'a corrected score with the same counts marks the sheet out of date',
+    (tester) async {
+      final server = _server();
+      await _pump(tester, server, pollInterval: const Duration(seconds: 1));
+
+      // One score is corrected: every slot stays scored, only its time changes.
+      final matrix = drawnMatrix();
+      server.scores = scoresFor(matrix, {..._scored(2), (1, 2): at(500)});
+      await tester.pump(const Duration(seconds: 2));
+      await tester.pump();
+
+      expect(find.textContaining('Out of date.'), findsOneWidget);
+    },
+  );
+
   group('window class', () {
     testWidgets('medium collapses the panel into a bar above the sheet', (
       tester,

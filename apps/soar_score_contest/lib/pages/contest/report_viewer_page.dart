@@ -176,6 +176,10 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
     final facts = controller.facts!;
     final count = document.pages.length;
     final stamp = DateFormat('d MMM y, HH:mm').format(_generated);
+    // No calculation version is shown: the contest data the app reads carries
+    // none (only a published projection does), and a report is built from the
+    // current inputs. The matrix and configuration revisions identify the
+    // data state.
     final revisions = [
       if (facts.matrixRevision != null) 'Matrix rev ${facts.matrixRevision}',
       if (facts.configurationRevision != null)

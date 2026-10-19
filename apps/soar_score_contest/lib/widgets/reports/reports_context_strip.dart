@@ -65,6 +65,22 @@ class ReportsContextStrip extends StatelessWidget {
                         : ContestStatusChip.label(facts.lifecycle),
                   ),
                   _Fact(
+                    key: const ValueKey('reports-fact-matrix'),
+                    icon: Icons.grid_view,
+                    label: 'Matrix',
+                    value: facts.matrixRevision == null
+                        ? 'No matrix drawn'
+                        : 'Revision ${facts.matrixRevision}',
+                  ),
+                  _Fact(
+                    key: const ValueKey('reports-fact-configuration'),
+                    icon: Icons.tune,
+                    label: 'Configuration',
+                    value: facts.configurationRevision == null
+                        ? 'None saved'
+                        : 'Revision ${facts.configurationRevision}',
+                  ),
+                  _Fact(
                     key: const ValueKey('reports-fact-progress'),
                     icon: _progressIcon(facts),
                     label: 'Scoring progress',

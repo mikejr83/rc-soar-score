@@ -13,15 +13,13 @@ class ResultStatusHelp extends StatelessWidget {
     (
       ResultStatus.official,
       'Every round up to the last round shown is complete: each pilot has an '
-          'official score, no reviews are open, and the standings were '
-          'calculated under the current configuration and matrix. Printed '
-          'pages carry no stamp.',
+          'official score and no reviews are open. Printed pages carry no '
+          'stamp.',
     ),
     (
       ResultStatus.preliminary,
       'A round up to the last round shown has a missing score, a score not '
-          'yet marked official, or an open review, or the standings are stale '
-          'after a configuration or matrix change. Every page is stamped '
+          'yet marked official, or an open review. Every page is stamped '
           'PRELIMINARY.',
     ),
   ];
