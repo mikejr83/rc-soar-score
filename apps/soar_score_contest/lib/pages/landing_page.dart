@@ -5,6 +5,8 @@ import 'package:soar_score_core/soar_score_core.dart';
 import 'package:soar_score_contest/app_mode_provider.dart';
 import 'package:soar_score_contest/auth/auth_session.dart';
 import 'package:soar_score_contest/auth/auth_session_inherited.dart';
+import 'package:soar_score_contest/auth/auth_config.dart';
+import 'package:soar_score_contest/auth/identity_provider_check.dart';
 import 'package:soar_score_contest/connectivity_provider.dart';
 import 'package:soar_score_contest/services/connectivity/app_connectivity.dart';
 import 'package:soar_score_contest/widgets/connectivity_indicator.dart';
@@ -13,12 +15,98 @@ import 'package:url_launcher/url_launcher.dart';
 import '../widgets/app_window_title.dart';
 import '../widgets/not_wired_up_dialog.dart';
 
-class LandingPage extends StatelessWidget {
-  const LandingPage({super.key, this.isWeb = kIsWeb});
+class LandingPage extends StatefulWidget {
+  const LandingPage({
+    super.key,
+    this.isWeb = kIsWeb,
+    this.identityCheck,
+  });
 
   final bool isWeb;
 
+  /// The identity-provider reachability check behind the loading and
+  /// unavailable states. When `null` (the app's router) the page makes one
+  /// for the platform's Auth0 tenant when a session is present. Provided in
+  /// tests only.
+  final IdentityProviderCheck? identityCheck;
+
   static const String title = 'RC Soar Score';
+
+  @override
+  State<LandingPage> createState() => _LandingPageState();
+}
+
+class _LandingPageState extends State<LandingPage> {
+  /// The page's identity-provider check, present only while a session is
+  /// inherited (bare tests pump the page without one and render exactly as
+  /// before the states existed).
+  IdentityProviderCheck? _check;
+
+  bool _ownsCheck = false;
+
+  AppConnectivity? _monitor;
+
+  /// The monitor's last seen internet status, so only a transition to
+  /// `available` re-probes (no flicker on flapping connections).
+  ConnectivityStatus? _lastInternetStatus;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final session = authSessionOf(context);
+    final monitor = appConnectivityOf(context);
+    final previousMonitor = _monitor;
+    _monitor = monitor;
+    _lastInternetStatus = monitor?.internetStatus;
+    if (previousMonitor != null && previousMonitor != monitor) {
+      previousMonitor.removeListener(_onConnectivityChanged);
+    }
+    if (monitor != null && monitor != previousMonitor) {
+      monitor.addListener(_onConnectivityChanged);
+    }
+    if (session == null) {
+      _disposeCheck();
+      return;
+    }
+    if (_check == null) {
+      final injected = widget.identityCheck;
+      _check = injected ?? IdentityProviderCheck(
+        tenantDomain: widget.isWeb
+            ? Auth0Config.web().domain
+            : Auth0Config.windows().domain,
+      );
+      _ownsCheck = injected == null;
+      _check?.check();
+    }
+  }
+
+  void _onConnectivityChanged() {
+    final monitor = _monitor;
+    if (monitor == null) {
+      return;
+    }
+    if (monitor.internetStatus == ConnectivityStatus.available &&
+        _lastInternetStatus != ConnectivityStatus.available) {
+      _lastInternetStatus = monitor.internetStatus;
+      _check?.check();
+    }
+    _lastInternetStatus = monitor.internetStatus;
+  }
+
+  void _disposeCheck() {
+    if (_ownsCheck) {
+      _check?.dispose();
+    }
+    _check = null;
+    _ownsCheck = false;
+  }
+
+  @override
+  void dispose() {
+    _monitor?.removeListener(_onConnectivityChanged);
+    _disposeCheck();
+    super.dispose();
+  }
 
   /// Opens an external URL in a new tab. External navigation is visibly
   /// identified so it does not silently discard local work: the user
@@ -76,87 +164,140 @@ class LandingPage extends StatelessWidget {
     }
   }
 
-  Widget _authenticationButtons(
+  Widget _authenticationArea(
     BuildContext context,
     AppConnectivity? monitor,
     AuthSession? session,
+    IdentityProviderCheck? check,
   ) {
     if (session != null && session.isSignedIn) {
-      return Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (session.displayName != null) ...[
-            Text(
-              'Signed in as ${session.displayName}',
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-            const SizedBox(height: 12),
-          ],
-          FilledButton.icon(
-            onPressed: () => context.pushNamed('home'),
-            icon: const Icon(Icons.arrow_forward),
-            label: const Text('Continue'),
-          ),
-          const SizedBox(height: 12),
-          OutlinedButton.icon(
-            onPressed: session.signOut,
-            icon: const Icon(Icons.logout),
-            label: const Text('Sign out'),
-          ),
-        ],
-      );
+      return _signedInArea(session);
     }
 
-    Widget buildButtons(bool internetAvailable, bool apiAvailable) => Column(
+    Widget buttons(bool internetAvailable, bool apiAvailable) => Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (session?.endedReason != null) ...[
+              Text(
+                session!.endedReason!,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 12),
+            ],
+            FilledButton.icon(
+              onPressed: internetAvailable && apiAvailable
+                  ? () => session == null
+                      ? showNotWiredUpDialog(context, 'Sign in')
+                      : _signIn(context, session)
+                  : null,
+              icon: const Icon(Icons.login),
+              label: const Text('Sign in'),
+            ),
+            const SizedBox(height: 12),
+            OutlinedButton.icon(
+              onPressed: internetAvailable
+                  ? () => session == null
+                      ? showNotWiredUpDialog(context, 'Create account')
+                      : _signIn(context, session, createAccount: true)
+                  : null,
+              icon: const Icon(Icons.person_add_alt_1),
+              label: const Text('Create account'),
+            ),
+          ],
+        );
+
+    final Widget normal = monitor == null
+        ? buttons(false, false)
+        : ListenableBuilder(
+            listenable: monitor,
+            builder: (context, _) => buttons(
+              monitor.internetStatus == ConnectivityStatus.available,
+              monitor.apiStatus == ConnectivityStatus.available,
+            ),
+          );
+
+    if (check == null) {
+      return normal;
+    }
+
+    return ListenableBuilder(
+      listenable: check,
+      builder: (context, _) {
+        final status = check.status;
+        if (status == IdentityProviderStatus.checking) {
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: const [
+              CircularProgressIndicator(),
+              SizedBox(height: 12),
+              Text('Checking sign-in…'),
+            ],
+          );
+        }
+        if (status == IdentityProviderStatus.unavailable) {
+          final lastError = check.lastError;
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.cloud_off, size: 40),
+              const SizedBox(height: 8),
+              Text(
+                'Sign-in unavailable',
+                style: Theme.of(context).textTheme.titleMedium,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'The identity provider is currently unreachable: '
+                '${lastError ?? 'unknown error'}.',
+                style: Theme.of(context).textTheme.bodyMedium,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 12),
+              FilledButton.icon(
+                onPressed: () => check.check(),
+                icon: const Icon(Icons.refresh),
+                label: const Text('Retry'),
+              ),
+            ],
+          );
+        }
+        return normal;
+      },
+    );
+  }
+
+  Widget _signedInArea(AuthSession session) {
+    return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (session?.endedReason != null) ...[
+        if (session.displayName != null) ...[
           Text(
-            session!.endedReason!,
-            textAlign: TextAlign.center,
+            'Signed in as ${session.displayName}',
             style: Theme.of(context).textTheme.bodyMedium,
           ),
           const SizedBox(height: 12),
         ],
         FilledButton.icon(
-          onPressed: internetAvailable && apiAvailable
-              ? () => session == null
-                    ? showNotWiredUpDialog(context, 'Sign in')
-                    : _signIn(context, session)
-              : null,
-          icon: const Icon(Icons.login),
-          label: const Text('Sign in'),
+          onPressed: () => context.pushNamed('home'),
+          icon: const Icon(Icons.arrow_forward),
+          label: const Text('Continue'),
         ),
         const SizedBox(height: 12),
         OutlinedButton.icon(
-          onPressed: internetAvailable
-              ? () => session == null
-                    ? showNotWiredUpDialog(context, 'Create account')
-                    : _signIn(context, session, createAccount: true)
-              : null,
-          icon: const Icon(Icons.person_add_alt_1),
-          label: const Text('Create account'),
+          onPressed: session.signOut,
+          icon: const Icon(Icons.logout),
+          label: const Text('Sign out'),
         ),
       ],
-    );
-
-    if (monitor == null) {
-      return buildButtons(false, false);
-    }
-
-    return ListenableBuilder(
-      listenable: monitor,
-      builder: (context, _) => buildButtons(
-        monitor.internetStatus == ConnectivityStatus.available,
-        monitor.apiStatus == ConnectivityStatus.available,
-      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     final actionWidgets = List<Widget>.empty(growable: true);
-    final monitor = appConnectivityOf(context);
+    final monitor = _monitor;
     final session = authSessionOf(context);
 
     if (!kIsWeb && monitor != null) {
@@ -206,12 +347,18 @@ class LandingPage extends StatelessWidget {
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 32),
-                        _authenticationButtons(context, monitor, session),
+                        _authenticationArea(
+                          context,
+                          monitor,
+                          session,
+                          _check,
+                        ),
                         const SizedBox(height: 32),
-                        if (!isWeb) ...[
+                        if (!widget.isWeb) ...[
                           Text(
-                            'Offline contests stay on this device unless you publish '
-                            'them or sign in to enable synchronization.',
+                            'Offline contests stay on this device unless you '
+                            'publish them or sign in to enable '
+                            'synchronization.',
                             style: Theme.of(context).textTheme.bodyMedium,
                             textAlign: TextAlign.center,
                           ),
@@ -225,7 +372,7 @@ class LandingPage extends StatelessWidget {
                             // `Continue offline` is available only in the offline
                             // (desktop) version of the app. The web build does not
                             // show it.
-                            if (!isWeb)
+                            if (!widget.isWeb)
                               TextButton.icon(
                                 onPressed: () {
                                   if (!kIsWeb) {

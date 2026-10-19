@@ -12,6 +12,7 @@ import 'package:soar_score_contest/pages/contest/scoring_page.dart';
 import 'app_mode_provider.dart';
 import 'auth/auth_session.dart';
 import 'auth/auth_session_inherited.dart';
+import 'auth/identity_provider_check.dart';
 import 'pages/contest/configuration_page.dart';
 import 'pages/contest/workspace_page.dart';
 import 'pages/home_page.dart';
@@ -121,10 +122,13 @@ String contestSyncPath(String contestId) => '$contestsPath/$contestId/sync';
 /// The matrix page of the contest with [contestId].
 String contestMatrixPath(String contestId) => '$contestsPath/$contestId/matrix';
 
+/// Builds the app router. [appMode], [auth] and [identityCheck] are test-only
+/// seams; the app leaves them null.
 GoRouter buildAppRouter({
   String initialLocation = landingPath,
   AppModeNotifier? appMode,
   AuthSession? auth,
+  IdentityProviderCheck? identityCheck,
 }) {
   // One editor is open at a time, so one guard serves both editor routes.
   final editorGuard = UnsavedChangesGuard();
@@ -143,7 +147,10 @@ GoRouter buildAppRouter({
       GoRoute(
         path: landingPath,
         name: 'landing',
-        builder: (context, state) => const LandingPage(),
+        builder: (context, state) =>
+            identityCheck == null
+                ? const LandingPage()
+                : LandingPage(identityCheck: identityCheck),
       ),
       // A report opens in its own tab or window, so it has no shell.
       GoRoute(
