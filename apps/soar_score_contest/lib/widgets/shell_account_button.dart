@@ -6,6 +6,7 @@ import '../auth/auth_session.dart';
 import '../auth/auth_session_inherited.dart';
 import '../router.dart';
 import 'app_version_label.dart';
+import 'shell_destinations.dart';
 
 /// The account control at the bottom of the shell rail.
 ///
@@ -18,8 +19,15 @@ class ShellAccountButton extends StatelessWidget {
 
   static const settingsLabel = 'Settings';
 
-  static void _openSettings(BuildContext context) =>
-      GoRouter.of(context).go(settingsPath);
+  /// Opens Settings, staying inside the selected contest when there is one.
+  static void _openSettings(BuildContext context) {
+    final router = GoRouter.of(context);
+    final path = router.state.uri.path;
+    final contestId = contestIdFor(path);
+    router.go(
+      contestId == null ? settingsPath : contestSettingsPath(contestId),
+    );
+  }
 
   /// Ends the session, then returns to the landing page. The navigation
   /// guard redirects on its own when the session ends; going there here too
