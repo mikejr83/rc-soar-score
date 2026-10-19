@@ -1,3 +1,4 @@
+import '../models/accounts/account_preferences.dart';
 import '../models/id.dart';
 
 /// Abstract persistence contract for the installation's own Local account.
@@ -24,4 +25,11 @@ abstract interface class LocalAccountRepository {
   /// [StateError] before the first run created the Local account and
   /// [ArgumentError] when [accountId] is the Local account id.
   Future<void> reassignTo(Id accountId);
+
+  /// The preferences chosen on this installation; empty before any choice.
+  Future<AccountPreferences> preferences();
+
+  /// Stores [preferences] as the installation's own, replacing the stored
+  /// ones. Throws [StateError] before the first run created the Local account.
+  Future<void> savePreferences(AccountPreferences preferences);
 }

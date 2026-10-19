@@ -4,6 +4,7 @@ import 'package:json_annotation/json_annotation.dart';
 import '../../enums/account_kind.dart';
 import '../../enums/account_status.dart';
 import '../id.dart';
+import 'account_preferences.dart';
 import '../shared/shared.dart';
 
 part 'account.g.dart';
@@ -26,12 +27,19 @@ class Account extends Equatable implements BackendOnly {
     this.status = AccountStatus.active,
     DateTime? archivedAt,
     this.isSystemAdmin = false,
+    String? preferredTimeZone,
+    String? preferredLocale,
     required DateTime createdAt,
     required DateTime updatedAt,
   }) : firstName = requireNotBlank(firstName, 'firstName'),
        lastName = requireNotBlank(lastName, 'lastName'),
        email = email?.trim().toLowerCase(),
        archivedAt = archivedAt?.toUtc(),
+       preferredTimeZone = AccountPreferences(
+         preferredTimeZone: preferredTimeZone,
+       ).preferredTimeZone,
+       preferredLocale = AccountPreferences(preferredLocale: preferredLocale)
+           .preferredLocale,
        createdAt = createdAt.toUtc(),
        updatedAt = updatedAt.toUtc() {
     if ((status == AccountStatus.archived) != (archivedAt != null)) {
@@ -75,8 +83,38 @@ class Account extends Equatable implements BackendOnly {
   /// Set out of band by the backend, never through a client request.
   final bool isSystemAdmin;
 
+  /// The person's preferred IANA time zone; null until chosen.
+  final String? preferredTimeZone;
+
+  /// The person's preferred locale; null until chosen.
+  final String? preferredLocale;
+
   final DateTime createdAt;
   final DateTime updatedAt;
+
+  /// The preferences stored on the account.
+  AccountPreferences get preferences => AccountPreferences(
+    preferredTimeZone: preferredTimeZone,
+    preferredLocale: preferredLocale,
+  );
+
+  /// This account with [preferences] stored, last modified at [now].
+  Account withPreferences(AccountPreferences preferences, DateTime now) =>
+      Account(
+        id: id,
+        firstName: firstName,
+        lastName: lastName,
+        email: email,
+        emailVerified: emailVerified,
+        kind: kind,
+        status: status,
+        archivedAt: archivedAt,
+        isSystemAdmin: isSystemAdmin,
+        preferredTimeZone: preferences.preferredTimeZone,
+        preferredLocale: preferences.preferredLocale,
+        createdAt: createdAt,
+        updatedAt: now,
+      );
 
   /// Whether the account can sign in at all.
   bool get canSignIn =>
@@ -95,6 +133,8 @@ class Account extends Equatable implements BackendOnly {
     status,
     archivedAt,
     isSystemAdmin,
+    preferredTimeZone,
+    preferredLocale,
     createdAt,
     updatedAt,
   ];

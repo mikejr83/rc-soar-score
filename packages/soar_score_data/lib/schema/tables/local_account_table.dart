@@ -14,6 +14,11 @@ class LocalAccount extends Table {
   /// The Local account id (UUIDv7), generated on first run and never changed.
   TextColumn get accountId => text()();
 
+  /// Preferences chosen on this installation (see `AccountPreferences`);
+  /// null until chosen.
+  TextColumn get preferredTimeZone => text().nullable()();
+  TextColumn get preferredLocale => text().nullable()();
+
   TextColumn get createdAt => text()();
 
   @override

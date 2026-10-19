@@ -80,6 +80,26 @@ void _tests(Backend backend) {
       expect(await inst.count('mutation_records'), before);
     });
 
+    test('stores the preferences with the account', () async {
+      expect(dana.preferredTimeZone, 'America/Chicago');
+      expect(dana.preferredLocale, 'en-US');
+      final service = core.AccountPreferencesService(repository);
+
+      final saved = await service.update(
+        accountId: dana.id,
+        preferences: core.AccountPreferences(preferredTimeZone: 'Europe/Rome'),
+        now: DateTime.utc(2026, 10, 19),
+      );
+
+      expect(saved.preferredTimeZone, 'Europe/Rome');
+      expect(saved.preferredLocale, isNull);
+      expect(await service.get(dana.id), saved);
+      expect(
+        (await repo.findById(dana.id))?.updatedAt,
+        DateTime.utc(2026, 10, 19),
+      );
+    });
+
     test('the database refuses a repeated email', () async {
       await expectLater(
         repo.save(newAccount(email: 'sam@example.org')),

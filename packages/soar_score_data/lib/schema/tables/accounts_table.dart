@@ -14,6 +14,8 @@ class Accounts extends Table {
   TextColumn get status => text().check(status.isIn(accountStatusValues))();
   TextColumn get archivedAt => text().nullable()();
   BoolColumn get isSystemAdmin => boolean()();
+  TextColumn get preferredTimeZone => text().nullable()();
+  TextColumn get preferredLocale => text().nullable()();
   TextColumn get createdAt => text()();
   TextColumn get updatedAt => text()();
 
