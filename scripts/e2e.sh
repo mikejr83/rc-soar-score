@@ -130,6 +130,7 @@ if [ "$device" = web ] || [ "$device" = chrome ]; then
       --no-web-resources-cdn \
       --dart-define=SOAR_SCORE_E2E=true \
       --dart-define=SOAR_SCORE_API_BASE_URL="http://localhost:$port" \
+      $( [ "$(basename "$file")" = "signed_out_landing_journey_test.dart" ] && printf '%s' '--dart-define=SOAR_SCORE_E2E_SIGNED_OUT=true' ) \
       ${extra[@]+"${extra[@]}"} || {
         code=$?
         [ "$code" -eq 124 ] && echo "TIMEOUT: $file ran longer than ${test_timeout}s and was stopped." >&2
@@ -144,6 +145,8 @@ fi
 # a second file's launch fails while the previous run's app is still alive.
 status=0
 for file in "${files[@]}"; do
-  flutter test "$file" -d "$device"     --dart-define=SOAR_SCORE_DEMO=true     --dart-define=SOAR_SCORE_DEMO_RESET=true     ${extra[@]+"${extra[@]}"} || status=1
+  e2e_args=(--dart-define=SOAR_SCORE_DEMO=true --dart-define=SOAR_SCORE_DEMO_RESET=true)
+  [ "$(basename "$file")" = "signed_out_landing_journey_test.dart" ] && e2e_args+=(--dart-define=SOAR_SCORE_E2E_SIGNED_OUT=true)
+  flutter test "$file" -d "$device" "${e2e_args[@]}" ${extra[@]+"${extra[@]}"} || status=1
 done
 exit $status

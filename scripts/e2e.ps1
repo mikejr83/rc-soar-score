@@ -98,6 +98,9 @@ if ($Device -in 'web', 'chrome') {
                     "--dart-define=SOAR_SCORE_API_BASE_URL=http://localhost:$port"
                 )
                 if ($chrome) { $flutterArgs += "--chrome-binary=$chrome" }
+                if ($file.Name -eq 'signed_out_landing_journey_test.dart') {
+                    $flutterArgs += '--dart-define=SOAR_SCORE_E2E_SIGNED_OUT=true'
+                }
                 if ($Name) { $flutterArgs += @('--name', $Name) }
                 $flutter = Start-Process (Get-Command flutter).Source `
                     -ArgumentList $flutterArgs -NoNewWindow -PassThru
@@ -152,6 +155,9 @@ try {
             '--dart-define=SOAR_SCORE_DEMO_RESET=true'
         )
         if ($Name) { $flutterArgs += @('--name', $Name) }
+        if ($testFile.Name -eq 'signed_out_landing_journey_test.dart') {
+            $flutterArgs += '--dart-define=SOAR_SCORE_E2E_SIGNED_OUT=true'
+        }
         for ($attempt = 1; $attempt -le 2; $attempt++) {
             Stop-App
             $output = & flutter @flutterArgs 2>&1 | Tee-Object -Variable lines |

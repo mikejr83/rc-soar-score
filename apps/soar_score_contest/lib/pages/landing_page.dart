@@ -6,6 +6,7 @@ import 'package:soar_score_contest/app_mode_provider.dart';
 import 'package:soar_score_contest/auth/auth_session.dart';
 import 'package:soar_score_contest/auth/auth_session_inherited.dart';
 import 'package:soar_score_contest/auth/auth_config.dart';
+import 'package:soar_score_contest/auth/e2e_mode.dart';
 import 'package:soar_score_contest/auth/identity_provider_check.dart';
 import 'package:soar_score_contest/connectivity_provider.dart';
 import 'package:soar_score_contest/services/connectivity/app_connectivity.dart';
@@ -16,11 +17,7 @@ import '../widgets/app_window_title.dart';
 import '../widgets/not_wired_up_dialog.dart';
 
 class LandingPage extends StatefulWidget {
-  const LandingPage({
-    super.key,
-    this.isWeb = kIsWeb,
-    this.identityCheck,
-  });
+  const LandingPage({super.key, this.isWeb = kIsWeb, this.identityCheck});
 
   final bool isWeb;
 
@@ -70,11 +67,14 @@ class _LandingPageState extends State<LandingPage> {
     }
     if (_check == null) {
       final injected = widget.identityCheck;
-      _check = injected ?? IdentityProviderCheck(
-        tenantDomain: widget.isWeb
-            ? Auth0Config.web().domain
-            : Auth0Config.windows().domain,
-      );
+      _check =
+          injected ??
+          IdentityProviderCheck(
+            tenantDomain: widget.isWeb
+                ? Auth0Config.web().domain
+                : Auth0Config.windows().domain,
+            scriptedE2e: e2eSignedOutMode,
+          );
       _ownsCheck = injected == null;
       _check?.check();
     }
@@ -175,37 +175,37 @@ class _LandingPageState extends State<LandingPage> {
     }
 
     Widget buttons(bool internetAvailable, bool apiAvailable) => Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (session?.endedReason != null) ...[
-              Text(
-                session!.endedReason!,
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-              const SizedBox(height: 12),
-            ],
-            FilledButton.icon(
-              onPressed: internetAvailable && apiAvailable
-                  ? () => session == null
-                      ? showNotWiredUpDialog(context, 'Sign in')
-                      : _signIn(context, session)
-                  : null,
-              icon: const Icon(Icons.login),
-              label: const Text('Sign in'),
-            ),
-            const SizedBox(height: 12),
-            OutlinedButton.icon(
-              onPressed: internetAvailable
-                  ? () => session == null
-                      ? showNotWiredUpDialog(context, 'Create account')
-                      : _signIn(context, session, createAccount: true)
-                  : null,
-              icon: const Icon(Icons.person_add_alt_1),
-              label: const Text('Create account'),
-            ),
-          ],
-        );
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (session?.endedReason != null) ...[
+          Text(
+            session!.endedReason!,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          const SizedBox(height: 12),
+        ],
+        FilledButton.icon(
+          onPressed: internetAvailable && apiAvailable
+              ? () => session == null
+                    ? showNotWiredUpDialog(context, 'Sign in')
+                    : _signIn(context, session)
+              : null,
+          icon: const Icon(Icons.login),
+          label: const Text('Sign in'),
+        ),
+        const SizedBox(height: 12),
+        OutlinedButton.icon(
+          onPressed: internetAvailable
+              ? () => session == null
+                    ? showNotWiredUpDialog(context, 'Create account')
+                    : _signIn(context, session, createAccount: true)
+              : null,
+          icon: const Icon(Icons.person_add_alt_1),
+          label: const Text('Create account'),
+        ),
+      ],
+    );
 
     final Widget normal = monitor == null
         ? buttons(false, false)
@@ -347,12 +347,7 @@ class _LandingPageState extends State<LandingPage> {
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 32),
-                        _authenticationArea(
-                          context,
-                          monitor,
-                          session,
-                          _check,
-                        ),
+                        _authenticationArea(context, monitor, session, _check),
                         const SizedBox(height: 32),
                         if (!widget.isWeb) ...[
                           Text(

@@ -28,15 +28,18 @@ class IdentityProviderCheck extends ChangeNotifier {
     required String tenantDomain,
     http.Client? client,
     Duration timeout = const Duration(seconds: 5),
+    bool scriptedE2e = false,
   }) : _probeUrl = Uri.https(tenantDomain, '/.well-known/openid-configuration'),
        _client = client ?? http.Client(),
        _ownsClient = client == null,
-       _timeout = timeout;
+       _timeout = timeout,
+       _scriptedE2e = scriptedE2e;
 
   final Uri _probeUrl;
   final http.Client _client;
   final bool _ownsClient;
   final Duration _timeout;
+  final bool _scriptedE2e;
 
   IdentityProviderStatus _status = IdentityProviderStatus.checking;
   String? _lastError;
@@ -71,6 +74,20 @@ class IdentityProviderCheck extends ChangeNotifier {
   }
 
   Future<void> _runProbe() async {
+    if (_scriptedE2e) {
+      // Keep the scripted loading state visible long enough for the real E2E
+      // harness to observe it after application bootstrap completes.
+      await Future<void>.delayed(const Duration(seconds: 1));
+      if (_disposed) return;
+      if (_status == IdentityProviderStatus.checking && _lastError == null) {
+        _fail('E2E provider unavailable');
+      } else {
+        _lastError = null;
+        _set(IdentityProviderStatus.available);
+      }
+      _probeInFlight = false;
+      return;
+    }
     final abort = Completer<void>();
     _abortInFlight = abort;
     Timer? timeoutTimer;
@@ -82,11 +99,7 @@ class IdentityProviderCheck extends ChangeNotifier {
         }
       });
       response = await _client.send(
-        http.AbortableRequest(
-          'GET',
-          _probeUrl,
-          abortTrigger: abort.future,
-        ),
+        http.AbortableRequest('GET', _probeUrl, abortTrigger: abort.future),
       );
       await response.stream.drain<void>();
     } on http.RequestAbortedException {

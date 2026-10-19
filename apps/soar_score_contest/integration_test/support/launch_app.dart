@@ -9,9 +9,12 @@ import 'package:soar_score_contest/main.dart' as app;
 /// `SOAR_SCORE_DEMO=true` and `SOAR_SCORE_DEMO_RESET=true`. The app then uses
 /// `soar_score_demo.db`, recreated with the demo data for every run, so the
 /// real database is never touched.
-Future<void> launchApp(WidgetTester tester) async {
+Future<void> launchApp(
+  WidgetTester tester, {
+  Duration initialPump = const Duration(milliseconds: 500),
+}) async {
   await app.main();
-  await tester.pump(const Duration(milliseconds: 500));
+  await tester.pump(initialPump);
 }
 
 /// Pumps frames until [finder] matches, up to [timeout]. Real startup and
