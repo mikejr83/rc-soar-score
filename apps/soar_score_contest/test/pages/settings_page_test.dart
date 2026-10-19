@@ -5,8 +5,7 @@ import 'package:soar_score_contest/pages/settings_page.dart';
 import 'package:soar_score_contest/router.dart';
 import 'package:soar_score_contest/services/collapsible_areas/collapsible_area.dart';
 import 'package:soar_score_contest/services/collapsible_areas/collapsible_areas_controller.dart';
-import 'package:soar_score_contest/widgets/settings/reset_areas_setting.dart';
-import 'package:soar_score_contest/widgets/settings/theme_mode_setting.dart';
+import 'package:soar_score_contest/l10n/app_localizations_en.dart';
 import 'package:soar_score_contest/services/theme/theme_controller.dart';
 import 'package:soar_score_ui_storage/soar_score_ui_storage.dart';
 
@@ -73,7 +72,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(_appThemeMode(tester), ThemeMode.dark);
-    expect(find.text(ThemeModeSetting.saveFailedMessage), findsOneWidget);
+    expect(find.text(AppLocalizationsEn().themeSaveFailed), findsOneWidget);
   });
 
   testWidgets('the choice is remembered by a fresh app on the same store', (
@@ -104,7 +103,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(areas.isOpen(matrixSummaryArea), isTrue);
-    expect(find.text(ResetAreasSetting.doneMessage), findsOneWidget);
+    expect(find.text(AppLocalizationsEn().panelsResetDone), findsOneWidget);
     final fresh = CollapsibleAreasController(store: store);
     addTearDown(fresh.dispose);
     await fresh.load();
@@ -120,7 +119,10 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('reset-areas-button')));
     await tester.pumpAndSettle();
 
-    expect(find.text(ResetAreasSetting.saveFailedMessage), findsOneWidget);
+    expect(
+      find.text(AppLocalizationsEn().panelsResetSaveFailed),
+      findsOneWidget,
+    );
   });
 }
 

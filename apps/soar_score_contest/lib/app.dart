@@ -11,6 +11,7 @@ import 'app_mode_provider.dart';
 import 'auth/auth_session_inherited.dart';
 import 'connectivity_provider.dart';
 import 'contest_draft_provider.dart';
+import 'l10n/app_localizations.dart';
 import 'local_ui_store_provider.dart';
 import 'platform/app_bootstrap.dart';
 import 'router.dart';
@@ -159,6 +160,8 @@ class _SoarScoreContestAppState extends State<SoarScoreContestApp> {
         darkTheme: ContestAppTheme.darkTheme,
         themeMode: _theme.mode,
         routerConfig: _router,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
       ),
     );
     app = ThemeControllerInherited(controller: _theme, child: app);
