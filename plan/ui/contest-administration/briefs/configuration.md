@@ -86,7 +86,7 @@ Counts of scoring pilots, other participants, teams, and classes when enabled, w
 - **Seeded only:** **Preliminary rounds** (Man on Man rounds before seeding; 1 or more, default 1) and **Intended total rounds** (optional, display only, shown as "Round 4 of 8" on score cards and the public site; has no effect on the draw).
 - **Team protection** (only when teams are on): pilots on the same team never fly in the same group. Note that it raises the minimum groups per round to the size of the largest team.
 - **Team protection and Seeded mode can't both be on.** The page must prevent choosing both and explain why, in both directions (choosing Seeded with protection on, and turning protection on in Seeded mode). Design how the blocked option reads and what it offers.
-- **Lanes:** None or Random. With Random, **Lane count** (number of pegs on the field; at least the largest group size).
+- **Lanes:** None or Random.
 - **Groups per round** is chosen on the Matrix page at draw time, not here. After a draw, show it read-only.
 
 ### 8. Public updates and reviews

@@ -3,7 +3,7 @@
 - **Category:** Matrix / Draw
 - **Priority:** Low
 - **Status:** Decided
-- **Decision:** ~~Lane count is derived from the pilot and group counts (L = ceil(N / G)), not configured. (2026-10-04)~~ **Superseded 2026-10-07:** lane count is a contest option `lane_count` (default: the largest group size, used only with `lane_mode` `Random`), because fields have a fixed number of pegs. See [matrix-draw.md](../../architecture-requirements/matrix-draw.md) §3.1.
+- **Decision:** ~~Lane count is derived from the pilot and group counts (L = ceil(N / G)), not configured. (2026-10-04)~~ ~~**Superseded 2026-10-07:** lane count is a contest option `lane_count` (default: the largest group size, used only with `lane_mode` `Random`), because fields have a fixed number of pegs. See [matrix-draw.md](../../architecture-requirements/matrix-draw.md) §3.1.~~ **Superseded 2026-10-20:** the lane count is derived again, as the largest group size of the scheduled round's original draw; `lane_count` is retired and issue #256 is closed as not planned. The reference application derives the lane count from the group size without it ever being a problem, a mismatch is visible when ⌈N/G⌉ exceeds the launch positions and self-corrects by redrawing the matrix, and a field with more pegs than the largest group size is not believed to occur.
 
 ## Context
 
