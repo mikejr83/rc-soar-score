@@ -31,6 +31,8 @@ class ScoreEntryPanel extends StatelessWidget {
     required this.penaltyController,
     required this.penaltyNode,
     required this.landingNode,
+    required this.cumulativePenaltyController,
+    required this.cumulativePenaltyNode,
     required this.readOnly,
     required this.keyOf,
     this.focusOrder = false,
@@ -48,6 +50,8 @@ class ScoreEntryPanel extends StatelessWidget {
   final TextEditingController penaltyController;
   final FocusNode penaltyNode;
   final FocusNode landingNode;
+  final TextEditingController cumulativePenaltyController;
+  final FocusNode cumulativePenaltyNode;
   final bool readOnly;
   final String Function(String name) keyOf;
 
@@ -281,6 +285,13 @@ class ScoreEntryPanel extends StatelessWidget {
             onSubmitted: () {
               if (canSave) actions.onSave();
             },
+            cumulativeController: cumulativePenaltyController,
+            cumulativeFocusNode: cumulativePenaltyNode,
+            cumulativeOnChanged: draft.setCumulativePenalty,
+            cumulativeErrorText: problems
+                .where((p) => p.field == 'cumulative_penalty')
+                .map((p) => p.message)
+                .firstOrNull,
           ),
           const SizedBox(height: 14),
           SizedBox(

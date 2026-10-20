@@ -14,6 +14,7 @@ import '../../widgets/api_error_text.dart';
 import '../../widgets/contest_scope.dart';
 import '../../widgets/message_view.dart';
 import '../../services/scoring/retire_impact.dart';
+import '../../widgets/scoring/penalty_removal_dialog.dart';
 import '../../widgets/scoring/retire_pilot_dialog.dart';
 import '../../widgets/scoring/score_check_panel.dart';
 import '../../widgets/scoring/score_history_dialog.dart';
@@ -181,6 +182,17 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
 
   Future<void> _save(ScoringRow row) async {
     final c = _controller!;
+    // Removing an applied cumulative penalty is an official correction and
+    // needs its own recorded reason before the row is saved.
+    if (c.isPenaltyRemoval(row)) {
+      final reason = await askPenaltyRemovalReason(
+        context,
+        pilot: row.pilot.name,
+      );
+      if (!mounted || reason == null) return;
+      await c.save(row, reason: reason);
+      return;
+    }
     final ok = await c.save(row);
     if (!ok || !mounted) return;
     final rows = c.rows;

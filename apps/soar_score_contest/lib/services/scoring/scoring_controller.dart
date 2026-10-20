@@ -205,6 +205,16 @@ class ScoringController extends ChangeNotifier {
 
   // Saving.
 
+  /// Whether saving this row removes an applied cumulative penalty
+  /// (N → 0), an official correction that needs a recorded reason.
+  bool isPenaltyRemoval(ScoringRow row) {
+    final draft = _drafts[row.id];
+    if (draft == null || !draft.isDirty) return false;
+    final saved = row.savedComponents['cumulative_penalty'];
+    if (saved is! num || saved <= 0) return false;
+    return draft.cumulativePenalty == 0;
+  }
+
   /// Saves one row as its own official revision. Returns whether it saved.
   Future<bool> save(ScoringRow row, {String? reason}) async {
     final draft = draftOf(row);

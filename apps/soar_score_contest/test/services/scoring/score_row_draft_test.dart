@@ -114,6 +114,78 @@ void main() {
     expect(d.zeroConfirmed, isFalse);
   });
 
+  group('cumulative penalty', () {
+    test('is absent, applied or removed by the text', () {
+      final draft = _draft({'time_flown': 390, 'launch_height': 180});
+      expect(draft.cumulativePenalty, isNull);
+      expect(draft.components.containsKey('cumulative_penalty'), isFalse);
+
+      draft.setCumulativePenalty('25');
+      expect(draft.cumulativePenalty, 25);
+      expect(draft.components['cumulative_penalty'], 25);
+
+      draft.setCumulativePenalty('0');
+      expect(draft.cumulativePenalty, 0);
+      expect(draft.components['cumulative_penalty'], 0);
+    });
+
+    test('reads back from the saved row', () {
+      expect(_draft({'cumulative_penalty': 5}).cumulativePenaltyText, '5');
+      expect(_draft({'cumulative_penalty': 0}).cumulativePenaltyText, '0');
+      expect(
+        _draft({
+          'time_flown': 390,
+          'launch_height': 180,
+          'cumulative_penalty': 5,
+        }).isDirty,
+        isFalse,
+      );
+    });
+
+    test('a removal from a saved 5 is a change, and saving it keeps it 0', () {
+      final d = _draft({
+        'time_flown': 390,
+        'launch_height': 180,
+        'cumulative_penalty': 5,
+      });
+      d.setCumulativePenalty('0');
+      expect(d.isDirty, isTrue);
+      expect(d.components['cumulative_penalty'], 0);
+      d.resetTo(d.components);
+      expect(d.isDirty, isFalse);
+    });
+
+    test('empty text stores no key and not a problem, and the row is blank again when nothing else was entered', () {
+      final d = _draft({'cumulative_penalty': 5})..setCumulativePenalty('');
+      expect(d.components.containsKey('cumulative_penalty'), isFalse);
+      expect(
+        d.problems.map((p) => p.field),
+        isNot(contains('cumulative_penalty')),
+      );
+      expect(_draft().isBlank, isTrue);
+      expect((_draft()..setCumulativePenalty('0')).isBlank, isFalse);
+    });
+
+    test('non-numeric or negative text is a problem', () {
+      for (final text in ['a lot', '-5', '1.5']) {
+        final d = _draft()..setCumulativePenalty(text);
+        expect(
+          d.problems.map((p) => p.field),
+          contains('cumulative_penalty'),
+          reason: text,
+        );
+      }
+      expect((_draft()..setCumulativePenalty('0')).problems, isEmpty);
+    });
+
+    test('a flight-penalty 0 is still stripped, like before', () {
+      expect(
+        (_draft()..setPenalty('0')).components.containsKey('flight_penalty'),
+        isFalse,
+      );
+    });
+  });
+
   test('settings follow the contest', () {
     expect(const ScoreEntrySettings().restartsAllowed, isTrue);
     final s = ScoreEntrySettings.fromDiscipline({

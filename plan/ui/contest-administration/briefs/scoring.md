@@ -78,6 +78,14 @@ The page has two penalties, which differ. Make the difference readable without a
 
 Show how a row with each, with both, and with a removed cumulative penalty looks. Only the contest director may apply a cumulative penalty; show how the field reads for a local operator without that authority.
 
+The cumulative penalty field holds three states, and the row, the history and the saved value all distinguish them:
+
+- **Empty** (nothing entered): a penalty was never applied. Saves as absent.
+- **A positive whole number**: a penalty is applied; the field reads it back as the points being deducted from the total.
+- **Zero**: a penalty was applied and then removed. The field and the row read "removed", distinct from empty.
+
+Removing an applied penalty is an official correction: when a save would take an applied penalty (a positive value) to `0`, the UI asks for a **recorded reason** before it proceeds. The reason is stored with the resulting revision and shown in the score history. Setting or clearing a flight penalty, or changing the applied value to another positive number, does not ask for a reason.
+
 ### Score check
 
 A **Score check** action reports, without changing any data: missing entries, and configurable out-of-range values (for example a time or launch height outside the expected range). Design:

@@ -29,6 +29,14 @@ abstract final class ScoreComponentsText {
     }
     final penalty = components['flight_penalty'];
     if (penalty is num && penalty > 0) parts.add('Penalty ${penalty.toInt()}');
+    final cumulative = components['cumulative_penalty'];
+    if (cumulative is num) {
+      if (cumulative > 0) {
+        parts.add('Cumulative penalty ${cumulative.toInt()}');
+      } else {
+        parts.add('Cumulative penalty removed');
+      }
+    }
     return parts.isEmpty ? 'Nothing entered' : parts.join(' · ');
   }
 }

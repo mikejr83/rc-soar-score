@@ -142,6 +142,39 @@ void main() {
         ['out_of_range'],
       );
     });
+
+    test('a non-integer cumulative penalty is rejected', () {
+      expect(
+        issueCodes(
+          () => flight({
+            'time_flown': 100,
+            'launch_height': 100,
+            'cumulative_penalty': 1.5,
+          }),
+        ),
+        ['wrong_type'],
+      );
+    });
+
+    test('the cumulative penalty has the tri-state contract', () {
+      const absent = {'time_flown': 100, 'launch_height': 100};
+      final present = {'time_flown': 100, 'launch_height': 100};
+      expect(f5j.validate(absent), isEmpty);
+      for (final value in <int>[0, 5]) {
+        expect(f5j.validate({...present, 'cumulative_penalty': value}), isEmpty,
+            reason: '$value');
+      }
+      expect(
+        issueCodes(
+          () => flight({
+            'time_flown': 100,
+            'launch_height': 100,
+            'cumulative_penalty': -1,
+          }),
+        ),
+        ['out_of_range'],
+      );
+    });
   });
 
   group('option overrides', () {

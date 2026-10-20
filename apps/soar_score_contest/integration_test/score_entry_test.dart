@@ -79,4 +79,80 @@ void main() {
     );
     await pumpUntilFound(tester, find.text('Lock…'));
   });
+
+  testWidgets('apply and remove a cumulative penalty, with a reason', (
+    tester,
+  ) async {
+    await openMainPage(tester);
+    await openContest(tester, _contest);
+    await pumpUntilFound(tester, find.byKey(const ValueKey('progress-tile-5')));
+
+    // The progress tile opens Scoring at round 5.
+    await tapVisible(tester, find.byKey(const ValueKey('progress-tile-5')));
+    await pumpUntilFound(
+      tester,
+      find.byKey(const ValueKey('scoring-context-strip')),
+    );
+
+    // The active (first unscored) row of the group is shown with its entry
+    // panel; enter a flight and apply a cumulative penalty.
+    final empty = _timeFields()
+        .evaluate()
+        .map((e) => e.widget as TextField)
+        .firstWhere((w) => (w.controller?.text ?? '').isEmpty);
+    final rowId = (empty.key! as ValueKey<String>).value.substring(
+      'score-time-'.length,
+    );
+    await enterIn(tester, find.byKey(ValueKey('score-time-$rowId')), '630');
+    await enterIn(tester, find.byKey(ValueKey('score-height-$rowId')), '180');
+    await enterIn(tester, find.byKey(const ValueKey('cumulative-penalty')), '30');
+    await pumpUntilFound(tester, find.text('−30 pts from the contest total.'));
+
+    // Saving records the applied cumulative penalty.
+    await tapVisible(tester, find.byKey(ValueKey('score-save-$rowId')));
+    // The save advances to the next row, so re-activate the one just saved.
+    await pumpUntilFound(tester, find.byKey(ValueKey('score-row-$rowId')));
+
+    // The score history shows the cumulative penalty applied.
+    await tapVisible(tester, find.byKey(ValueKey('row-menu-$rowId')));
+    await pumpUntilFound(tester, find.byKey(const ValueKey('menu-history')));
+    await tapVisible(tester, find.byKey(const ValueKey('menu-history')));
+    await pumpUntilFound(tester, find.byKey(const ValueKey('score-history-dialog')));
+    await pumpUntilFound(tester, find.textContaining('Cumulative penalty 30'));
+    await tapVisible(tester, find.byKey(const ValueKey('score-history-close')));
+
+    // Re-activate the row and remove the applied cumulative penalty.
+    await tapVisible(tester, find.byKey(ValueKey('score-row-$rowId')));
+    await pumpUntilFound(tester, find.byKey(const ValueKey('cumulative-penalty')));
+    await enterIn(tester, find.byKey(const ValueKey('cumulative-penalty')), '0');
+    await pumpUntilFound(tester, find.text('Applied, then removed.'));
+
+    // Saving a removal asks for a recorded reason first.
+    await tapVisible(tester, find.byKey(ValueKey('score-save-$rowId')));
+    await pumpUntilFound(
+      tester,
+      find.byKey(const ValueKey('penalty-removal-dialog')),
+    );
+    await enterIn(
+      tester,
+      find.byKey(const ValueKey('penalty-removal-reason')),
+      'Timer slip misread on the timekeeper board',
+    );
+    await tapVisible(tester, find.byKey(const ValueKey('penalty-removal-confirm')));
+    await pumpUntilFound(
+      tester,
+      find.byKey(const ValueKey('scoring-context-strip')),
+    );
+
+    // The history now shows the removal with its recorded reason.
+    await tapVisible(tester, find.byKey(ValueKey('row-menu-$rowId')));
+    await pumpUntilFound(tester, find.byKey(const ValueKey('menu-history')));
+    await tapVisible(tester, find.byKey(const ValueKey('menu-history')));
+    await pumpUntilFound(tester, find.byKey(const ValueKey('score-history-dialog')));
+    await pumpUntilFound(tester, find.textContaining('Cumulative penalty removed'));
+    await pumpUntilFound(
+      tester,
+      find.text('Reason: Timer slip misread on the timekeeper board'),
+    );
+  });
 }

@@ -98,6 +98,12 @@ class F5jProfile extends ScoringProfile {
       min: 0,
     ),
     ScoringFieldDefinition(
+      id: 'cumulative_penalty',
+      label: 'Cumulative Penalty',
+      type: ScoreFieldType.int,
+      min: 0,
+    ),
+    ScoringFieldDefinition(
       id: 'raw_score',
       label: 'Raw Score',
       type: ScoreFieldType.float,

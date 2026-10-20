@@ -212,6 +212,63 @@ void main() {
     expect(server.entries.single['components'], {'out_of_bounds': true});
   });
 
+  testWidgets(
+    'removing an applied cumulative penalty asks for a reason first',
+    (tester) async {
+      final server = ScoringServer();
+      server.seedScore(scoringAssignmentId(1, 1), {
+        'time_flown': 540,
+        'launch_height': 200,
+        'cumulative_penalty': 5,
+      });
+      await pumpScoringPage(tester, server, round: 1, group: 1);
+      await _activate(tester, 1, 1);
+      await tester.enterText(
+        find.byKey(const ValueKey('cumulative-penalty')),
+        '0',
+      );
+      await tester.pump();
+      await tester.tap(_save(1, 1));
+      await tester.pumpAndSettle();
+      // The dialog is open, nothing is saved yet.
+      expect(find.byKey(const ValueKey('penalty-removal-dialog')), findsOneWidget);
+      expect(server.entries, isEmpty);
+      // The button is off while the reason is blank.
+      expect(
+        tester.widget<FilledButton>(
+          find.byKey(const ValueKey('penalty-removal-confirm')),
+        ).onPressed,
+        isNull,
+      );
+      // Cancelling keeps the values and saves nothing.
+      await tester.tap(find.byKey(const ValueKey('penalty-removal-cancel')));
+      await tester.pumpAndSettle();
+      expect(server.entries, isEmpty);
+      expect(tester.widget<TextField>(
+        find.byKey(const ValueKey('cumulative-penalty')),
+      ).controller!.text,
+      '0',
+      );
+      // A reason records the removal.
+      await tester.tap(_save(1, 1));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.byKey(const ValueKey('penalty-removal-reason')),
+        'Timer slip misread',
+      );
+      await tester.pump();
+      await tester.tap(find.byKey(const ValueKey('penalty-removal-confirm')));
+      await tester.pumpAndSettle();
+      expect(server.entries, hasLength(1));
+      final body = server.entries.single;
+      expect(
+        body['components'],
+        {'time_flown': 540, 'launch_height': 200, 'cumulative_penalty': 0},
+      );
+      expect(body['reason'], 'Timer slip misread');
+    },
+  );
+
   testWidgets('a failed save keeps the values and offers Retry', (
     tester,
   ) async {

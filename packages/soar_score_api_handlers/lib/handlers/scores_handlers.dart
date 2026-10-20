@@ -17,7 +17,11 @@ final _logger = Logger('Scores');
 /// - `POST /contests/{id}/assignments/{assignmentId}/scores` enters the
 ///   official score of one pilot in one group (201). Entering a score for a
 ///   slot that already has one is a correction and adds the next score
-///   revision; the earlier ones are kept. The results are recalculated
+///   revision; the earlier ones are kept. `cumulative_penalty` in
+///   `components` is tri-state: absent (or `null`) means never applied, a
+///   positive integer is an applied penalty and its value is the points
+///   deducted, and `0` is a penalty that was applied and later removed; a
+///   `0` is stored as stored, not dropped. The results are recalculated
 ///   afterwards in a separate transaction; the entry retries that once and,
 ///   if it still fails, keeps the score, leaves the results stale and warns
 ///   the director on the entry response (ticket 297). On a server that
