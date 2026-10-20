@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../services/preferences/director_time.dart';
-
 import '../../services/new_contest/draft_persistence.dart';
+import '../../services/preferences/director_time.dart';
 
 /// Asks whether to continue the draft stored by an earlier run or start
 /// fresh. Returns `true` to continue and `false` to discard it.

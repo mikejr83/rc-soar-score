@@ -20,6 +20,7 @@ import 'acting_ui_account.dart';
 import 'app_bootstrap.dart';
 import 'auth_epoch.dart';
 import 'local_account_claimer.dart';
+import 'native_preferences.dart';
 import 'native_sync.dart';
 
 final _logger = Logger('NativeBootstrap');
@@ -44,6 +45,7 @@ class NativeBootstrap extends AppBootstrap {
     this._epoch,
     this.localUiStore,
     this._acting,
+    this._preferences,
   ) : _client = ApiClient(
         baseUrl: _server.baseUrl,
         tokenProvider: () async => _server.secret,
@@ -67,6 +69,9 @@ class NativeBootstrap extends AppBootstrap {
   final LocalUiStore localUiStore;
 
   final ActingAccount _acting;
+
+  /// The account's preferences, read and kept here.
+  final NativePreferences _preferences;
 
   @override
   late final UiAccount uiAccount = ActingUiAccount(_acting);
@@ -92,21 +97,14 @@ class NativeBootstrap extends AppBootstrap {
   AuthSession get authSession => _auth;
 
   @override
-  Future<core.AccountPreferences> loadPreferences() =>
-      LocalAccountRepository(_server.database).preferences();
+  Future<core.AccountPreferences> loadPreferences() => _preferences.load();
 
-  /// Saves to the installation's own copy, and to the signed-in account too
-  /// when it can be reached; a failed upload is left for the claim to settle.
   @override
-  Future<void> savePreferences(core.AccountPreferences preferences) async {
-    await LocalAccountRepository(_server.database).savePreferences(preferences);
-    if (!_auth.isSignedIn) return;
-    try {
-      await _remoteClient.updateAccountPreferences(preferences);
-    } on Object catch (error) {
-      _logger.fine('Preferences not uploaded: $error');
-    }
-  }
+  Future<void> savePreferences(core.AccountPreferences preferences) =>
+      _preferences.save(preferences);
+
+  @override
+  Stream<void> get preferencesChanged => _preferences.changes;
 
   @override
   Future<void> close() async {
@@ -116,6 +114,7 @@ class NativeBootstrap extends AppBootstrap {
     _logger.fine('Closing native bootstrap');
     _closed = true;
     _claimer.stop();
+    await _preferences.close();
     _epoch.close();
     await sync.close();
     await _server.close();
@@ -186,6 +185,11 @@ class NativeBootstrap extends AppBootstrap {
       remote: remote,
       databasePath: database,
     );
+    final preferences = NativePreferences(
+      epoch: epoch,
+      local: LocalAccountRepository(server.database),
+      put: remote.updateAccountPreferences,
+    );
     final claimer = LocalAccountClaimer(
       auth: auth,
       epoch: epoch,
@@ -201,6 +205,7 @@ class NativeBootstrap extends AppBootstrap {
       onProblem: sync.appSync.claimProblemChanged,
       getPreferences: remote.getAccountPreferences,
       putPreferences: remote.updateAccountPreferences,
+      onPreferencesChanged: preferences.changed,
     )..start();
     // UI state has its own file beside the contest database, so resetting or
     // replacing contest data never clears it.
@@ -220,6 +225,7 @@ class NativeBootstrap extends AppBootstrap {
       epoch,
       uiStore,
       acting,
+      preferences,
     );
   }
 

@@ -1,5 +1,4 @@
 import 'package:flutter/widgets.dart';
-import 'package:intl/intl.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../../preferences_controller_provider.dart';
@@ -24,6 +23,16 @@ abstract final class DirectorTime {
     );
   }
 
+  /// The clock-only formatter (`14:31`) for the preferences at [context].
+  static TimeText clockOf(BuildContext context) {
+    final preferences = preferencesOf(context);
+    return (utc) => clock(
+      utc,
+      zoneId: preferences?.timeZone,
+      locale: preferences?.localeTag,
+    );
+  }
+
   /// [utc] as `10/8/2026 14:31 CEST` (en-US layout) in [zoneId], or in the
   /// device's own zone without one. [locale] changes the layout; without it
   /// the en-US layout is used.
@@ -33,8 +42,14 @@ abstract final class DirectorTime {
       return ContestTime.format(utc, zoneId, locale: tag);
     }
     final local = utc.toLocal();
-    final canonical = Intl.canonicalizedLocale(tag);
-    return '${DateFormat.yMd(canonical).format(local)} '
-        '${DateFormat.Hm(canonical).format(local)} ${local.timeZoneName}';
+    return ContestTime.formatWallClock(local, local.timeZoneName, locale: tag);
+  }
+
+  /// Just the time of day of [utc] (`14:31`), in the same zone as [format].
+  static String clock(DateTime utc, {String? zoneId, String? locale}) {
+    final wall = zoneId != null && ContestTimeZones.isValid(zoneId)
+        ? ContestTime.inZone(utc, zoneId)
+        : utc.toLocal();
+    return ContestTime.formatClock(wall, locale: locale ?? 'en-US');
   }
 }

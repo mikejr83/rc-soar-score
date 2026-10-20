@@ -39,6 +39,11 @@ void main() {
     );
   });
 
+  test('the clock alone follows the zone and layout', () {
+    expect(DirectorTime.clock(utc, zoneId: 'Europe/Rome'), '14:31');
+    expect(DirectorTime.clock(utc, zoneId: 'Asia/Tokyo'), '21:31');
+  });
+
   test('pilot-facing contest time ignores the preference', () {
     expect(ContestTime.format(utc, 'Europe/Rome'), '2026-10-08 14:31 CEST');
     expect(

@@ -41,6 +41,11 @@ abstract class AppBootstrap {
   Future<core.AccountPreferences> loadPreferences() async =>
       core.AccountPreferences();
 
+  /// Fires when the account's preferences changed behind the app's back (the
+  /// sign-in merged the account's with this installation's), so they should be
+  /// read again.
+  Stream<void> get preferencesChanged => const Stream<void>.empty();
+
   /// Stores the account's preferences. Throws when they cannot be saved (the
   /// web build is signed out, the service is unreachable); the default keeps
   /// nothing.

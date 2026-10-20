@@ -225,6 +225,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The language could not be saved. It applies until you close the app.'**
   String get localeSaveFailed;
+
+  /// Snackbar shown when a preference was changed while signed out, so it cannot be stored on an account.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to keep this on your account. It applies until you close the app.'**
+  String get preferencesNeedSignIn;
 }
 
 class _AppLocalizationsDelegate

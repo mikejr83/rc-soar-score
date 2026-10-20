@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:intl/intl.dart';
 
 import '../workspace_facts.dart';
 import 'checklist_item.dart';
@@ -15,19 +14,16 @@ import 'required_checklist_rows.dart';
 class SetupChecklist extends Equatable {
   const SetupChecklist({required this.required, required this.optional});
 
-  /// [formatSavedAt] writes the time the configuration was saved; it defaults
-  /// to the device's local time.
+  /// [formatSavedAt] writes the time the configuration was saved (the screens
+  /// pass `DirectorTime.of(context)`).
   factory SetupChecklist.resolve(
     WorkspaceFacts facts, {
-    String Function(DateTime savedAt)? formatSavedAt,
+    required String Function(DateTime savedAt) formatSavedAt,
   }) {
     final optionalNumbers = OptionalChecklistRows.participantNumbers(facts);
     return SetupChecklist(
       required: [
-        RequiredChecklistRows.configuration(
-          facts,
-          formatSavedAt ?? _formatLocal,
-        ),
+        RequiredChecklistRows.configuration(facts, formatSavedAt),
         RequiredChecklistRows.discipline(facts),
         RequiredChecklistRows.pilots(facts),
         RequiredChecklistRows.matrix(facts),
@@ -39,9 +35,6 @@ class SetupChecklist extends Equatable {
       ],
     );
   }
-
-  static String _formatLocal(DateTime savedAt) =>
-      DateFormat('MMM d, HH:mm').format(savedAt.toLocal());
 
   final List<ChecklistItem> required;
   final List<ChecklistItem> optional;

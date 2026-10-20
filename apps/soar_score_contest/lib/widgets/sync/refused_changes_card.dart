@@ -1,7 +1,6 @@
-import '../../services/preferences/director_time.dart';
-
 import 'package:flutter/material.dart';
 
+import '../../services/preferences/director_time.dart';
 import '../../services/sync/refused_change.dart';
 
 /// The changes the service refused: what was changed, when and why.

@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
-
-import '../../services/preferences/director_time.dart';
-
 import 'package:flutter/services.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../../collapsible_areas_provider.dart';
 import '../../services/collapsible_areas/collapsible_area.dart';
 import '../../services/matrix/fairness_view.dart';
+import '../../services/preferences/director_time.dart';
 import 'matrix_colors.dart';
 
 /// The fairness summary above the grid: score with its meaning, the key

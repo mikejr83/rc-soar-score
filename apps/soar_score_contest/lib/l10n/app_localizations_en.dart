@@ -82,4 +82,8 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get localeSaveFailed =>
       'The language could not be saved. It applies until you close the app.';
+
+  @override
+  String get preferencesNeedSignIn =>
+      'Sign in to keep this on your account. It applies until you close the app.';
 }

@@ -1,8 +1,8 @@
 import '../preferences/director_time.dart';
-
 import 'sync_scope_summary.dart';
 
-/// The one-line sync status for the shell, in the director's preferred time zone and locale.
+/// The one-line sync status for the shell, in the director's preferred time
+/// zone and locale.
 abstract final class SyncStatusText {
   /// What [summary] says in a few words. [summary] is null before the engine
   /// has looked at the scope.

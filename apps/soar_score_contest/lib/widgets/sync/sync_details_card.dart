@@ -1,8 +1,7 @@
-import '../../services/preferences/director_time.dart';
-
 import 'package:flutter/material.dart';
 import 'package:soar_score_ui/soar_score_ui.dart';
 
+import '../../services/preferences/director_time.dart';
 import '../../services/sync/sync_problem.dart';
 import '../../services/sync/sync_scope_summary.dart';
 

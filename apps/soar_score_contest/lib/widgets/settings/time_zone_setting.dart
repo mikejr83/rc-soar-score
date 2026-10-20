@@ -15,9 +15,15 @@ class TimeZoneSetting extends StatelessWidget {
 
   Future<void> _choose(BuildContext context, String? zoneId) async {
     final messenger = ScaffoldMessenger.of(context);
-    final message = AppLocalizations.of(context).timeZoneSaveFailed;
-    if (await controller.setTimeZone(zoneId)) return;
-    messenger.showSnackBar(SnackBar(content: Text(message)));
+    final l10n = AppLocalizations.of(context);
+    final message = switch (await controller.setTimeZone(zoneId)) {
+      SaveResult.saved => null,
+      SaveResult.needsSignIn => l10n.preferencesNeedSignIn,
+      SaveResult.failed => l10n.timeZoneSaveFailed,
+    };
+    if (message != null) {
+      messenger.showSnackBar(SnackBar(content: Text(message)));
+    }
   }
 
   @override

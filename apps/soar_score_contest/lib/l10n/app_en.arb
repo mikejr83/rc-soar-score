@@ -87,5 +87,9 @@
   "localeSaveFailed": "The language could not be saved. It applies until you close the app.",
   "@localeSaveFailed": {
     "description": "Snackbar shown when the preferred locale could not be stored."
+  },
+  "preferencesNeedSignIn": "Sign in to keep this on your account. It applies until you close the app.",
+  "@preferencesNeedSignIn": {
+    "description": "Snackbar shown when a preference was changed while signed out, so it cannot be stored on an account."
   }
 }

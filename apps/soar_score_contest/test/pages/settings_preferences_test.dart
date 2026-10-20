@@ -82,6 +82,24 @@ void main() {
     expect(find.textContaining('could not be saved'), findsOneWidget);
   });
 
+  testWidgets('signed out, the card says to sign in rather than failing', (
+    tester,
+  ) async {
+    final preferences = PreferencesController(
+      savePreferences: (_) async => throw const SignInRequiredError(),
+    );
+    await _pumpSettings(tester, preferences);
+
+    await tester.enterText(find.byType(TextField).first, 'rome');
+    await tester.pumpAndSettle();
+    await tester.tap(find.textContaining('Rome').last);
+    await tester.pumpAndSettle();
+
+    expect(preferences.timeZone, 'Europe/Rome');
+    expect(find.textContaining('Sign in to keep this'), findsOneWidget);
+    expect(find.textContaining('could not be saved'), findsNothing);
+  });
+
   testWidgets('the language choice offers the device and English', (
     tester,
   ) async {

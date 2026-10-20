@@ -2,8 +2,8 @@ import 'package:flutter/widgets.dart';
 
 import 'services/preferences/preferences_controller.dart';
 
-/// Exposes the [PreferencesController] to the widget tree; dependents rebuild when
-/// the locale changes.
+/// Exposes the [PreferencesController] to the widget tree; dependents rebuild
+/// when the time zone or locale changes.
 class PreferencesControllerInherited
     extends InheritedNotifier<PreferencesController> {
   const PreferencesControllerInherited({

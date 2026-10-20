@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import '../../services/new_contest/contest_draft_store.dart';
+import '../../services/preferences/director_time.dart';
 
 /// The quiet draft state in the shell header while the wizard is open:
 /// `Draft saved · 10:42`, or `Draft not saved` when the last save failed.
@@ -26,7 +26,7 @@ class DraftStatusLabel extends StatelessWidget {
         return const SizedBox.shrink();
       }
       final color = failed ? scheme.error : scheme.onSurfaceVariant;
-      final time = failed ? '' : DateFormat.Hm().format(savedAt!);
+      final time = failed ? '' : DirectorTime.clockOf(context)(savedAt!);
       final narrow = MediaQuery.sizeOf(context).width < 1100;
       final text = failed
           ? 'Draft not saved'

@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-
-import '../../services/preferences/director_time.dart';
-
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../../router.dart';
+import '../../services/preferences/director_time.dart';
 import '../../services/sync/sync_status_text.dart';
 import 'sync_summary_builder.dart';
 

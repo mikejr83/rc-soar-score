@@ -21,10 +21,16 @@ class LocaleSetting extends StatelessWidget {
 
   Future<void> _choose(BuildContext context, String? choice) async {
     final messenger = ScaffoldMessenger.of(context);
-    final message = AppLocalizations.of(context).localeSaveFailed;
+    final l10n = AppLocalizations.of(context);
     final tag = choice == null || choice == deviceChoice ? null : choice;
-    if (await controller.setLocale(tag)) return;
-    messenger.showSnackBar(SnackBar(content: Text(message)));
+    final message = switch (await controller.setLocale(tag)) {
+      SaveResult.saved => null,
+      SaveResult.needsSignIn => l10n.preferencesNeedSignIn,
+      SaveResult.failed => l10n.localeSaveFailed,
+    };
+    if (message != null) {
+      messenger.showSnackBar(SnackBar(content: Text(message)));
+    }
   }
 
   @override

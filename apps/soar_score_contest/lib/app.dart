@@ -148,6 +148,7 @@ class _SoarScoreContestAppState extends State<SoarScoreContestApp> {
         PreferencesController(
           loadPreferences: widget.bootstrap?.loadPreferences,
           savePreferences: widget.bootstrap?.savePreferences,
+          changes: widget.bootstrap?.preferencesChanged,
         );
     if (_ownsPreferences) unawaited(_preferences.load());
     _router = buildAppRouter(

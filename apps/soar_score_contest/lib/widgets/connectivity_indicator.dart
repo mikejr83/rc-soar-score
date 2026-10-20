@@ -1,11 +1,10 @@
 import 'dart:async';
 
-import '../../services/preferences/director_time.dart';
-
 import 'package:flutter/material.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../services/connectivity/app_connectivity.dart';
+import '../services/preferences/director_time.dart';
 
 /// Which of the two indicators a [ConnectivityIndicator] renders.
 enum ConnectivityIndicatorKind { internet, api }

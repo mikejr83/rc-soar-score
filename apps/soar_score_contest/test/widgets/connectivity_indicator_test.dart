@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:soar_score_contest/services/preferences/director_time.dart';
-import 'package:soar_score_core/soar_score_core.dart';
 import 'package:soar_score_contest/services/connectivity/app_connectivity.dart';
+import 'package:soar_score_contest/services/preferences/director_time.dart';
 import 'package:soar_score_contest/widgets/connectivity_indicator.dart';
+import 'package:soar_score_core/soar_score_core.dart';
 
 /// `AppConnectivity` stand-in for widget tests: every public property is
 /// configurable, and [notifyListeners] replays a change to any

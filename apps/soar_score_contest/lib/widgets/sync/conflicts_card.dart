@@ -1,7 +1,6 @@
-import '../../services/preferences/director_time.dart';
-
 import 'package:flutter/material.dart';
 
+import '../../services/preferences/director_time.dart';
 import '../../services/sync/open_conflict.dart';
 
 /// The conflicts that wait for a decision, each with a button to review it.
