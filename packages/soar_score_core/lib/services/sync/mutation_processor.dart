@@ -111,7 +111,8 @@ class MutationProcessor {
     if (!_senders.contains(m.authority)) {
       return reject(
         SyncReasonCode.unauthorized,
-        'Mutations of authority ${m.authority.name} cannot be accepted here.',
+        'Mutations of authority ${m.authority.name} cannot be accepted here '
+        '(accepted: ${_senders.map((a) => a.name).join(', ')}).',
       );
     }
     final MutationPayload payload;
@@ -619,13 +620,15 @@ class MutationProcessor {
     final scopeId =
         ctx.scope.contestIdOrNull?.value ??
         ctx.scope.ownerAccountIdOrNull!.value;
-    final foreign = (
+    _Refusal foreign(Object? found) => (
       SyncReasonCode.unauthorized,
-      'The ${m.entityType} belongs to another scope.',
+      'The ${m.entityType} belongs to another scope: ${kind.scopeKey} is '
+          '$found, the exchange scope is $scopeId.',
     );
-    final notOwner = (
+    _Refusal notOwner(Object? owner) => (
       SyncReasonCode.unauthorized,
-      'Only the contest director owns the contest.',
+      'Only the contest director owns the contest: owner_account_id is '
+          '$owner, the signed-in account is ${ctx.accountId.value}.',
     );
     if (!payload.isDelete) {
       final entity = payload.entity;
@@ -635,17 +638,21 @@ class MutationProcessor {
           'The entity id does not match the mutation.',
         );
       }
-      if (entity[kind.scopeKey] != scopeId) return foreign;
+      if (entity[kind.scopeKey] != scopeId) {
+        return foreign(entity[kind.scopeKey]);
+      }
       if (kind.entityType == 'Contest' &&
           entity['owner_account_id'] != ctx.accountId.value) {
-        return notOwner;
+        return notOwner(entity['owner_account_id']);
       }
     }
     if (stored != null) {
-      if (stored[kind.scopeKey] != scopeId) return foreign;
+      if (stored[kind.scopeKey] != scopeId) {
+        return foreign(stored[kind.scopeKey]);
+      }
       if (kind.entityType == 'Contest' &&
           stored['owner_account_id'] != ctx.accountId.value) {
-        return notOwner;
+        return notOwner(stored['owner_account_id']);
       }
     }
     return null;

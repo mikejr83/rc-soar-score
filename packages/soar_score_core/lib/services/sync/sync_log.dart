@@ -1,3 +1,5 @@
+import 'package:logging/logging.dart';
+
 import '../../enums/audit_action.dart';
 import '../../enums/audit_outcome.dart';
 import '../../enums/conflict_resolution.dart';
@@ -15,6 +17,8 @@ import 'sync_entity_catalog.dart';
 import 'sync_exchange.dart';
 import 'sync_mutation.dart';
 import 'sync_scope_ids.dart';
+
+final _logger = Logger('SyncLog');
 
 /// Writes the decisions of the acceptor into the scope's log.
 ///
@@ -74,6 +78,15 @@ class SyncLog {
     String message, {
     int? currentRevision,
   }) async {
+    _logger.log(
+      reasonCode == 'unauthorized' ? Level.WARNING : Level.INFO,
+      'Sync mutation refused: reason=$reasonCode '
+      'entity=${mutation.entityType}/${mutation.entityId.value} '
+      'mutation=${mutation.clientMutationId} '
+      'authority=${mutation.authority.name} '
+      'scope=${ctx.scope} account=${ctx.accountId.value} '
+      'installation=${ctx.installationId?.value} detail="$message"',
+    );
     await tx.recordMutation(
       _record(
         ctx,
