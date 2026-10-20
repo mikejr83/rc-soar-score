@@ -9,6 +9,7 @@ const _allowedImports = {
   'dart:convert',
   'dart:math',
   'package:equatable/equatable.dart',
+  'package:intl/intl.dart',
   'package:json_annotation/json_annotation.dart',
   'package:logging/logging.dart',
   'package:timezone/data/latest.dart',

@@ -1,3 +1,4 @@
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 import 'package:test/test.dart';
 
@@ -99,6 +100,34 @@ void main() {
         () => ContestTime.format(summer, 'Mars/Olympus'),
         throwsArgumentError,
       );
+    });
+  });
+
+  group('ContestTime with a locale', () {
+    final start = DateTime.utc(2026, 7, 1, 7, 30);
+
+    setUpAll(() => initializeDateFormatting());
+
+    test('lays the date out the way the locale does', () {
+      expect(
+        ContestTime.format(start, 'Europe/Rome', locale: 'en-US'),
+        '7/1/2026 09:30 CEST',
+      );
+      expect(
+        ContestTime.format(start, 'Europe/Rome', locale: 'en-GB'),
+        '01/07/2026 09:30 CEST',
+      );
+    });
+
+    test('still uses the zone it is given, not the locale\'s', () {
+      expect(
+        ContestTime.format(start, 'America/Los_Angeles', locale: 'en-GB'),
+        '01/07/2026 00:30 PDT',
+      );
+    });
+
+    test('is unchanged without a locale', () {
+      expect(ContestTime.format(start, 'Europe/Rome'), '2026-07-01 09:30 CEST');
     });
   });
 }

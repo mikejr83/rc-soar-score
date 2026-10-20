@@ -1,0 +1,47 @@
+{
+  "@@locale": "en",
+  "appearanceHeading": "Appearance",
+  "@appearanceHeading": {
+    "description": "Heading of the Settings card that picks the light or dark look."
+  },
+  "appearanceDescription": "Choose a light or dark look, or follow your device. This is saved on this device for your account and is not shared with other devices.",
+  "@appearanceDescription": {
+    "description": "Explains the Appearance card on the Settings page."
+  },
+  "themeSystem": "System",
+  "@themeSystem": {
+    "description": "Theme choice that follows the device's light or dark setting."
+  },
+  "themeLight": "Light",
+  "@themeLight": {
+    "description": "Theme choice for the light look."
+  },
+  "themeDark": "Dark",
+  "@themeDark": {
+    "description": "Theme choice for the dark look."
+  },
+  "themeSaveFailed": "The theme could not be saved. It applies until you close the app.",
+  "@themeSaveFailed": {
+    "description": "Snackbar shown when the chosen theme could not be stored on the device."
+  },
+  "panelsHeading": "Panels",
+  "@panelsHeading": {
+    "description": "Heading of the Settings card that resets hidden or minimized panels."
+  },
+  "panelsDescription": "Panels you hide or minimize, such as the matrix summary, stay that way on this device for your account, in every contest.",
+  "@panelsDescription": {
+    "description": "Explains the Panels card on the Settings page."
+  },
+  "panelsResetButton": "Reset panels to defaults",
+  "@panelsResetButton": {
+    "description": "Button that brings back every hidden or minimized panel."
+  },
+  "panelsResetDone": "Panels are back to their defaults.",
+  "@panelsResetDone": {
+    "description": "Snackbar shown after the panels were reset."
+  },
+  "panelsResetSaveFailed": "The reset could not be saved. It applies until you close the app.",
+  "@panelsResetSaveFailed": {
+    "description": "Snackbar shown when the panel reset could not be stored on the device."
+  }
+}

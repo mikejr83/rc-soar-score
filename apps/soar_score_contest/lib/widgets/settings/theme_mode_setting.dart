@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/theme/theme_controller.dart';
 
 /// The `Appearance` card on the Settings page: a System, Light or Dark choice
@@ -11,27 +12,21 @@ class ThemeModeSetting extends StatelessWidget {
   /// but cannot be changed.
   final ThemeController? controller;
 
-  static const heading = 'Appearance';
-  static const description =
-      'Choose a light or dark look, or follow your device. This is saved on '
-      'this device for your account and is not shared with other devices.';
-
-  static const saveFailedMessage =
-      'The theme could not be saved. It applies until you close the app.';
-
   Future<void> _choose(
     BuildContext context,
     ThemeController controller,
     ThemeMode mode,
   ) async {
     final messenger = ScaffoldMessenger.of(context);
+    final message = AppLocalizations.of(context).themeSaveFailed;
     if (await controller.setMode(mode)) return;
-    messenger.showSnackBar(const SnackBar(content: Text(saveFailedMessage)));
+    messenger.showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
     final controller = this.controller;
     return Card(
       child: Padding(
@@ -39,10 +34,10 @@ class ThemeModeSetting extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(heading, style: theme.textTheme.titleMedium),
+            Text(l10n.appearanceHeading, style: theme.textTheme.titleMedium),
             const SizedBox(height: 4),
             Text(
-              description,
+              l10n.appearanceDescription,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -51,21 +46,21 @@ class ThemeModeSetting extends StatelessWidget {
             SegmentedButton<ThemeMode>(
               key: const ValueKey('theme-mode-control'),
               showSelectedIcon: false,
-              segments: const [
+              segments: [
                 ButtonSegment(
                   value: ThemeMode.system,
-                  icon: Icon(Icons.brightness_auto_outlined),
-                  label: Text('System'),
+                  icon: const Icon(Icons.brightness_auto_outlined),
+                  label: Text(l10n.themeSystem),
                 ),
                 ButtonSegment(
                   value: ThemeMode.light,
-                  icon: Icon(Icons.light_mode_outlined),
-                  label: Text('Light'),
+                  icon: const Icon(Icons.light_mode_outlined),
+                  label: Text(l10n.themeLight),
                 ),
                 ButtonSegment(
                   value: ThemeMode.dark,
-                  icon: Icon(Icons.dark_mode_outlined),
-                  label: Text('Dark'),
+                  icon: const Icon(Icons.dark_mode_outlined),
+                  label: Text(l10n.themeDark),
                 ),
               ],
               selected: {controller?.mode ?? ThemeMode.system},

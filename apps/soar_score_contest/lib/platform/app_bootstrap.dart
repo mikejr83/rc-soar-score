@@ -1,4 +1,5 @@
 import 'package:soar_score_api/soar_score_api.dart';
+import 'package:soar_score_core/soar_score_core.dart' as core;
 import 'package:soar_score_ui_storage/soar_score_ui_storage.dart';
 
 import '../auth/auth_session.dart';
@@ -33,6 +34,12 @@ abstract class AppBootstrap {
 
   /// What the screens may ask of synchronization; none on the web.
   AppSync get appSync => const NoAppSync();
+
+  /// The preferences of the account in use (preferred time zone and locale),
+  /// empty when none were chosen or they cannot be read. The native build
+  /// reads the installation's own copy; the web build asks the service.
+  Future<core.AccountPreferences> loadPreferences() async =>
+      core.AccountPreferences();
 
   /// Tells the platform that the remote API became reachable (or not).
   ///

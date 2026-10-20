@@ -1,5 +1,6 @@
 import 'package:logging/logging.dart';
 import 'package:soar_score_api/soar_score_api.dart';
+import 'package:soar_score_core/soar_score_core.dart' as core;
 import 'package:soar_score_ui_storage/soar_score_ui_storage.dart';
 
 import '../auth/auth_session.dart';
@@ -45,6 +46,16 @@ class WebBootstrap extends AppBootstrap {
 
   @override
   AuthSession get authSession => _auth;
+
+  @override
+  Future<core.AccountPreferences> loadPreferences() async {
+    if (!_auth.isSignedIn) return core.AccountPreferences();
+    try {
+      return await _client.getAccountPreferences();
+    } on Object {
+      return core.AccountPreferences();
+    }
+  }
 
   @override
   Future<void> close() async {
