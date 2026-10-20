@@ -51,16 +51,21 @@ class EngineAppSync implements AppSync {
   }
 
   @override
-  Future<List<RefusedChange>> refusedChanges(core.SyncScopeKey scope) async => [
-    for (final mutation in await _engine.rejectedMutations(scope))
-      RefusedChange(
-        entityType: mutation.entityType,
-        entityId: mutation.entityId,
-        madeAt: mutation.clientTime,
-        reasonCode: mutation.reasonCode,
-        message: mutation.errorMessage,
-      ),
-  ];
+  Future<List<RefusedChange>> refusedChanges(core.SyncScopeKey scope) async {
+    final changes = [
+      for (final mutation in await _engine.rejectedMutations(scope))
+        RefusedChange(
+          entityType: mutation.entityType,
+          entityId: mutation.entityId,
+          madeAt: mutation.clientTime,
+          reasonCode: mutation.reasonCode,
+          message: mutation.errorMessage,
+        ),
+    ];
+    // Newest first.
+    changes.sort((a, b) => b.madeAt.compareTo(a.madeAt));
+    return changes;
+  }
 
   @override
   Future<List<OpenConflict>> openConflicts(core.SyncScopeKey scope) async => [

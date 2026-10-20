@@ -67,5 +67,12 @@ void main() {
       expect(b.compareTo(a), greaterThan(0));
       expect(a.compareTo(a), 0);
     });
+
+    test('ids created in a burst sort in the order they were created', () {
+      final ids = [for (var i = 0; i < 2000; i++) Id.create()];
+      final sorted = [...ids]..sort((a, b) => a.compareTo(b));
+
+      expect(sorted, ids);
+    });
   });
 }

@@ -29,12 +29,18 @@ class Id {
   /// Generates a fresh, never-reused, offline-safe UUIDv7 identifier.
   factory Id.create() => Id._(_generate());
 
+  /// The timestamp of the last identifier, so two created in the same
+  /// millisecond still sort in the order they were created.
+  static int _lastTimestamp = 0;
+
   static String _generate() {
     final random = Random.secure();
     String hex(int value, int width) =>
         value.toRadixString(16).padLeft(width, '0');
 
-    final timestamp = DateTime.now().millisecondsSinceEpoch & 0xFFFFFFFFFFFF;
+    final now = DateTime.now().millisecondsSinceEpoch & 0xFFFFFFFFFFFF;
+    final timestamp = now > _lastTimestamp ? now : _lastTimestamp + 1;
+    _lastTimestamp = timestamp;
     final group1 = hex(timestamp >> 16, 8);
     final group2 = hex(timestamp & 0xFFFF, 4);
     final group3 = '7${hex(random.nextInt(0x1000), 3)}';

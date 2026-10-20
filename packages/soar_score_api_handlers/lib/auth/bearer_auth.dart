@@ -25,12 +25,17 @@ Handler Function(Handler) bearerAuth({
 }) =>
     (inner) => (request) async {
       final requestId = requestIdOf(request);
-      Response unauthorized(String message) => errorResponse(
-        401,
-        'unauthorized',
-        message,
-        requestId: requestId,
-      ).change(headers: {'www-authenticate': 'Bearer'});
+      Response unauthorized(String message) {
+        _logger.warning(
+          '401 on ${request.method} /${request.url.path}: $message',
+        );
+        return errorResponse(
+          401,
+          'unauthorized',
+          message,
+          requestId: requestId,
+        ).change(headers: {'www-authenticate': 'Bearer'});
+      }
 
       final header = request.headers['authorization'];
       if (header == null) {
@@ -49,7 +54,10 @@ Handler Function(Handler) bearerAuth({
       try {
         verified = await verifier.verify(token);
       } on TokenRejectedException catch (e) {
-        _logger.info('Rejected a token: ${e.reason}');
+        _logger.warning(
+          'Rejected a token on ${request.method} /${request.url.path}: '
+          '${e.reason}',
+        );
         return unauthorized('The token is not valid.');
       }
 

@@ -1,3 +1,4 @@
+import 'package:logging/logging.dart';
 import 'package:soar_score_core/services/services.dart';
 import 'package:soar_score_core/soar_score_core.dart' as core;
 import 'package:test/test.dart';
@@ -203,6 +204,14 @@ void _tests(Backend backend) {
               as core.ParticipantProfile;
       final stored = (await harness.stored('Contest', contestId))!;
 
+      final records = <LogRecord>[];
+      final subscription = Logger.root.onRecord.listen(records.add);
+      addTearDown(subscription.cancel);
+      hierarchicalLoggingEnabled = false;
+      final level = Logger.root.level;
+      Logger.root.level = Level.ALL;
+      addTearDown(() => Logger.root.level = level);
+
       final out = await harness.exchange(
         scope,
         mutations: [
@@ -229,6 +238,15 @@ void _tests(Backend backend) {
         (await harness.stored('Contest', contestId))!['name'],
         stored['name'],
       );
+
+      final warnings = records
+          .where((r) => r.loggerName == 'SyncLog' && r.level == Level.WARNING)
+          .map((r) => r.message)
+          .toList();
+      expect(warnings, hasLength(2));
+      expect(warnings[0], contains('authority=participant'));
+      expect(warnings[1], contains('owner_account_id is'));
+      expect(warnings[1], contains('reason=unauthorized'));
     });
 
     test(

@@ -44,9 +44,12 @@ class DemoDataSeeder {
     return DemoContestPlan.all.length;
   }
 
+  // The demo is the local director's own data, so it syncs like any other:
+  // the service refuses mutations of system authority, which would leave
+  // every contest without an administration installation.
   core.MutationMetadata _metadata() => core.MutationMetadata(
     clientMutationId: 'demo-seed/${_mutations++}',
-    authority: core.Authority.system,
+    authority: core.Authority.director,
     clientTime: _clock().toUtc(),
     actorId: _localAccountId,
   );

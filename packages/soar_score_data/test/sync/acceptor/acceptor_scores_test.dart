@@ -71,6 +71,43 @@ void _tests(Backend backend) {
     expect(contest!['lifecycle_state'], 'Running');
   });
 
+  test(
+    'the outbox sends the attempt before the official score taken from it',
+    () async {
+      await enterScore();
+
+      final sent = await harness.outbox(scope);
+
+      final types = sent.map((m) => m.entityType).toList();
+      expect(
+        types.indexOf('ScoreAttempt'),
+        lessThan(types.indexOf('OfficialScore')),
+      );
+    },
+  );
+
+  test('an official score for an attempt the service lacks is rejected with the reason', () async {
+    await enterScore();
+    final sent = await harness.outbox(scope);
+    await harness.exchange(scope, mutations: sent);
+    final official =
+        (await harness.server.stores.of('OfficialScore').all()).single
+            as core.OfficialScore;
+
+    final out = await harness.exchange(
+      scope,
+      mutations: [
+        harness.save('OfficialScore', {
+          ...official.toJson(),
+          'id': core.Id.create().value,
+          'score_attempt_id': core.Id.create().value,
+        }),
+      ],
+    );
+
+    expect(out.results.single.reasonCode, 'invalid_payload');
+  });
+
   test('a score for a group or matrix the service lacks is rejected with the reason', () async {
     await enterScore();
     final sent = await harness.outbox(scope);
