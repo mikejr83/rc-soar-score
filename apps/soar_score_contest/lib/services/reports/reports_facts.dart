@@ -2,6 +2,7 @@ import 'package:soar_score_core/soar_score_core.dart';
 
 import '../matrix/matrix_page_data.dart';
 import '../workspace/workspace_facts.dart';
+import 'report_pilot.dart';
 import '../workspace/workspace_round_fact.dart';
 import 'result_status.dart';
 import 'score_standing.dart';
@@ -24,6 +25,13 @@ class ReportsFacts {
     required this.rounds,
     required this.standing,
     required this.scoresSignature,
+    required this.pilots,
+    required this.teamsEnabled,
+    required this.numbersEnabled,
+    required this.classesEnabled,
+    required this.decimalPlaces,
+    required this.disciplineLabel,
+    required this.inReviewByRound,
   });
 
   /// Reduces [workspace] (derived from the same matrix data and [scores]) and
@@ -61,6 +69,13 @@ class ReportsFacts {
         roundOfAssignment: roundOfAssignment,
       ),
       scoresSignature: _signature(scores),
+      pilots: _pilots(data),
+      teamsEnabled: data.showTeams,
+      numbersEnabled: data.showNumbers,
+      classesEnabled: data.options?.classesEnabled ?? false,
+      decimalPlaces: data.options?.decimalPlaces ?? 1,
+      disciplineLabel: workspace.disciplineLabel,
+      inReviewByRound: _inReview(scores, roundOfAssignment),
     );
   }
 
@@ -92,6 +107,63 @@ class ReportsFacts {
   /// though the counts of scored slots do not.
   final int scoresSignature;
 
+  /// The scoring pilots, in the order the contest lists them.
+  final List<ReportPilot> pilots;
+
+  /// Whether the contest uses teams, pilot numbers and classes.
+  final bool teamsEnabled;
+  final bool numbersEnabled;
+  final bool classesEnabled;
+
+  /// How many decimals a score shows.
+  final int decimalPlaces;
+
+  /// The discipline as the wizard names it (`F5J`); `null` when unknown.
+  final String? disciplineLabel;
+
+  /// The pilots with a score in review, by round ordinal. The review is an
+  /// open question about the score, shown on screen only.
+  final Map<int, Set<Id>> inReviewByRound;
+
+  static Map<int, Set<Id>> _inReview(
+    ContestScores scores,
+    Map<Id, int> roundOfAssignment,
+  ) {
+    final byRound = <int, Set<Id>>{};
+    for (final slot in scores.slots) {
+      final round = roundOfAssignment[slot.placeholder.assignmentId];
+      if (round != null &&
+          slot.placeholder.state == ScorePlaceholderState.inReview) {
+        byRound
+            .putIfAbsent(round, () => {})
+            .add(slot.placeholder.contestParticipationId);
+      }
+    }
+    return byRound;
+  }
+
+  static List<ReportPilot> _pilots(MatrixPageData data) {
+    final profiles = {for (final p in data.profiles) p.id: p};
+    final teams = {for (final (id, marker) in data.markers.ordered) id: marker};
+    final teamOf = {
+      for (final m in data.memberships) m.contestParticipationId: m.teamId,
+    };
+    final classes = data.options?.classesEnabled ?? false;
+    return [
+      for (final p in data.participations)
+        if (p.roleType == RoleType.pilot)
+          ReportPilot(
+            participationId: p.id,
+            firstName: profiles[p.participantProfileId]?.firstName ?? '',
+            lastName: profiles[p.participantProfileId]?.lastName ?? 'Unknown',
+            number: data.showNumbers ? p.participantNumber : null,
+            team: data.showTeams ? teams[teamOf[p.id]]?.name : null,
+            className: classes ? p.classification : null,
+            retiredAtRound: p.retiredAtRound,
+          ),
+    ];
+  }
+
   static int _signature(ContestScores scores) => Object.hashAll([
     for (final slot in scores.slots)
       Object.hash(
@@ -102,6 +174,33 @@ class ReportsFacts {
         slot.officialScore?.setAt,
       ),
   ]);
+
+  /// The round fact for [ordinal], or `null`.
+  WorkspaceRoundFact? roundFact(int ordinal) {
+    for (final round in rounds) {
+      if (round.ordinal == ordinal) {
+        return round;
+      }
+    }
+    return null;
+  }
+
+  /// The last round with any score; 0 before the first.
+  int get lastScoredRound => standing.lastScoredRound ?? 0;
+
+  /// The last round such that it and every round before it are fully scored;
+  /// 0 when round 1 is not.
+  int get lastFullyScoredRound {
+    var last = 0;
+    for (final round in [...rounds]..sort((a, b) => a.ordinal - b.ordinal)) {
+      if (round.total > 0 && round.scored == round.total) {
+        last = round.ordinal;
+      } else {
+        break;
+      }
+    }
+    return last;
+  }
 
   LifecycleState get lifecycle => contest.lifecycleState;
   bool get isCompleted => lifecycle == LifecycleState.completed;

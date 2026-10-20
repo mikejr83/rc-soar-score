@@ -11,6 +11,10 @@ abstract final class PaperStyle {
   static const Color rule = Color(0xFFBDBDBD);
   static const Color shade = Color(0xFFE8E8E8);
 
+  /// The fill behind a dropped round. The asterisk before the value carries
+  /// the meaning where a printer drops light fills.
+  static const Color dropShade = Color(0xFFE0E0E0);
+
   static const List<String> fontFallback = [
     'Noto Sans',
     'Arial',

@@ -81,4 +81,40 @@ void main() {
     await tapVisible(tester, find.byKey(const ValueKey('viewer-back')));
     await pumpUntilFound(tester, find.text('Reports are built from'));
   }, skip: kIsWeb);
+
+  // The Overall Standings report reads the stored results of a contest that is
+  // being scored. Native opens it in place; the web opens a new tab, which a
+  // journey cannot drive, so this journey is native-only.
+  testWidgets(
+    'Overall Standings shows the standings and follows its options (native)',
+    (tester) async {
+      await openMainPage(tester);
+      await openContest(tester, 'Mountain States Team F5J');
+      await tapRail(tester, 'Reports');
+      await pumpUntilFound(tester, find.text('Reports are built from'));
+
+      await tapVisible(
+        tester,
+        find.byKey(const ValueKey('report-open-standings')),
+      );
+      await pumpUntilFound(tester, find.text('Rank'));
+
+      // The heading, the columns and the pilots in their stored order.
+      expect(find.textContaining('Overall Results - '), findsWidgets);
+      expect(find.text('Total'), findsWidgets);
+      expect(find.text('R1'), findsWidgets);
+      expect(find.text('Raw'), findsNothing);
+
+      // An option adds its column at once.
+      await tapVisible(
+        tester,
+        find.widgetWithText(CheckboxListTile, 'Raw score'),
+      );
+      await pumpUntilFound(tester, find.text('Raw'));
+
+      await tapVisible(tester, find.byKey(const ValueKey('viewer-back')));
+      await pumpUntilFound(tester, find.text('Reports are built from'));
+    },
+    skip: kIsWeb,
+  );
 }

@@ -167,6 +167,7 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
         setup: setup,
         bodySize: SheetLayout.bodySize(setup),
         preview: controller.params.preview,
+        data: controller.data,
       ),
     );
   }
@@ -368,6 +369,23 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
         ),
       );
     }
+    if (controller.dataFailed) {
+      banners.add(
+        ViewerBanner(
+          kind: ViewerBannerKind.error,
+          icon: Icons.error,
+          lead: 'Couldn’t load the scores for these rounds.',
+          text: 'The sheet still shows the last rounds that loaded.',
+          actions: [
+            FilledButton(
+              key: const ValueKey('viewer-retry-data'),
+              onPressed: controller.retryData,
+              child: const Text('Try again'),
+            ),
+          ],
+        ),
+      );
+    }
     if (controller.printFailed) {
       banners.add(
         ViewerBanner(
@@ -432,7 +450,7 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
       pages: pages,
       zoom: controller.params.zoom,
       preview: controller.params.preview,
-      dimmed: controller.refreshing,
+      dimmed: controller.refreshing || controller.generating,
       onFit: (fit) => setState(() => _fit = fit),
       onPage: (page) => setState(() => _page = page),
     );
@@ -569,6 +587,22 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
               actionLabel: 'Try again',
               onAction: controller.retry,
             ),
+            ViewerLoad.ready when controller.dataPending => ViewerLoading(
+              pageAspect: setup.width / setup.height,
+              label: 'Building pages…',
+            ),
+            ViewerLoad.ready
+                when controller.dataFailed && controller.data == null =>
+              ViewerMessage(
+                icon: Icons.error,
+                isError: true,
+                title: 'Can’t read the scores for this report',
+                body:
+                    'They couldn’t be loaded from this device or the server. '
+                    'Your filters are kept.',
+                actionLabel: 'Try again',
+                onAction: controller.retryData,
+              ),
             ViewerLoad.ready => _ready(document, expanded, medium),
           },
         ),

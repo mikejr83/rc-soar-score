@@ -63,6 +63,16 @@ class ReportViewerController extends ChangeNotifier {
   Timer? _timer;
   bool _disposed = false;
 
+  // The report's own data and the filters it was read for. A change to the
+  // data key waits for the new data before the sheet changes; any other change
+  // applies at once.
+  Object? _data;
+  String? _dataKey;
+  Map<String, String>? _shown;
+  bool _dataLoading = false;
+  bool _dataFailed = false;
+  int _dataToken = 0;
+
   ViewerLoad get load => _load;
   ReportsFacts? get facts => _facts;
   ReportViewParams get params => _params;
@@ -72,6 +82,25 @@ class ReportViewerController extends ChangeNotifier {
   bool get refreshing => _refreshing;
   bool get printFailed => _printFailed;
   ViewerNotice? get notice => _notice;
+
+  /// The report's own data; `null` for a report with none, or before it loads.
+  Object? get data => _data;
+
+  /// Whether the report reads data of its own.
+  bool get usesData {
+    final facts = _facts;
+    return facts != null && spec.dataKey(_currentFilters(), facts) != null;
+  }
+
+  /// The first read of the report's data is under way: nothing to show yet.
+  bool get dataPending =>
+      usesData && _data == null && !_dataFailed && check is! ReportEmpty;
+
+  /// A later read is under way; the last good sheet stays, dimmed.
+  bool get generating => _dataLoading && _data != null;
+
+  /// The last read of the report's data failed.
+  bool get dataFailed => _dataFailed;
 
   PageSetup get setup => PageSetup(
     _params.paper ?? defaultPaper,
@@ -94,9 +123,7 @@ class ReportViewerController extends ChangeNotifier {
 
   bool get isInvalid => check is ReportInvalid;
 
-  /// The filters the sheet is built from: the current ones, or the last good
-  /// ones while the current ones are invalid.
-  Map<String, String> get sheetFilters {
+  Map<String, String> _currentFilters() {
     if (isInvalid) {
       final facts = _facts;
       return _lastGood ?? {if (facts != null) ...spec.defaultFilters(facts)};
@@ -104,8 +131,16 @@ class ReportViewerController extends ChangeNotifier {
     return filters;
   }
 
+  /// The filters the sheet is built from: the current ones, or the last good
+  /// ones while the current ones are invalid; for a report with data of its
+  /// own, the ones its data was read for.
+  Map<String, String> get sheetFilters => _shown ?? _currentFilters();
+
   /// Whether the sheet has anything to print.
-  bool get hasSheet => _load == ViewerLoad.ready && check is! ReportEmpty;
+  bool get hasSheet =>
+      _load == ViewerLoad.ready &&
+      check is! ReportEmpty &&
+      (!usesData || _data != null);
 
   // Loading.
 
@@ -136,6 +171,9 @@ class ReportViewerController extends ChangeNotifier {
       _load = ViewerLoad.ready;
       _outdated = false;
       _remember();
+      _changed();
+      await _syncData(force: true);
+      return;
     } on _NotAnId {
       _load = ViewerLoad.notFound;
     } on ApiHttpError catch (error) {
@@ -178,6 +216,7 @@ class ReportViewerController extends ChangeNotifier {
       _facts = await _read();
       _outdated = false;
       _remember();
+      await _syncData(force: true);
     } on Object {
       // Keep the old sheet; the banner stays so the director can try again.
     }
@@ -198,7 +237,60 @@ class ReportViewerController extends ChangeNotifier {
     _remember();
     onParams?.call(params);
     _changed();
+    unawaited(_syncData());
   }
+
+  /// Reads the report's data again when the filters now need other data (or
+  /// [force]), or applies the filters at once when they do not.
+  Future<void> _syncData({bool force = false}) async {
+    final facts = _facts;
+    final api = client;
+    final id = contestId;
+    if (facts == null || api == null || id == null) {
+      return;
+    }
+    final filters = _currentFilters();
+    final key = spec.dataKey(filters, facts);
+    if (key == null) {
+      _shown = null;
+      return;
+    }
+    if (!force && key == _dataKey && _data != null) {
+      _shown = filters;
+      _changed();
+      return;
+    }
+    final token = ++_dataToken;
+    _dataLoading = true;
+    _dataFailed = false;
+    _changed();
+    try {
+      final data = await spec.loadData(
+        ReportDataRequest(
+          client: api,
+          contestId: id,
+          facts: facts,
+          filters: filters,
+        ),
+      );
+      if (token != _dataToken || _disposed) {
+        return;
+      }
+      _data = data;
+      _dataKey = key;
+      _shown = _currentFilters();
+    } on Object {
+      if (token != _dataToken || _disposed) {
+        return;
+      }
+      _dataFailed = true;
+    }
+    _dataLoading = false;
+    _changed();
+  }
+
+  /// Reads the report's data again after a failure.
+  Future<void> retryData() => _syncData(force: true);
 
   void setFilter(String key, String value) =>
       _setParams(_params.copyWith(filters: {..._params.filters, key: value}));

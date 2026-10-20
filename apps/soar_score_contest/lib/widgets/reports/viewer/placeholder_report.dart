@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../services/reports/report_kind.dart';
 import '../../../services/reports/viewer/page_setup.dart';
 import 'paper_style.dart';
+import '../standings/standings_report.dart';
 import 'report_definition.dart';
 
 /// Stands in for a report whose content is not built yet. It has no filters
@@ -75,7 +76,9 @@ class PlaceholderReport extends ReportDefinition {
   }
 }
 
-/// The definition for [kind]. Every report is a placeholder until its content
-/// is built.
-ReportDefinition reportDefinitionFor(ReportKind kind) =>
-    PlaceholderReport(kind);
+/// The definition for [kind]. A report is a placeholder until its content is
+/// built.
+ReportDefinition reportDefinitionFor(ReportKind kind) => switch (kind) {
+  ReportKind.standings => const StandingsReport(),
+  _ => PlaceholderReport(kind),
+};
