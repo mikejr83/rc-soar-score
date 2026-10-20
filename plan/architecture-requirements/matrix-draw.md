@@ -45,7 +45,7 @@ The engine must support:
 
 - Let $P = \{p_1, p_2, \dots, p_N\}$ be the set of $N$ pilots.
 - Let $R$ be the number of rounds, and $G$ be the number of groups per round.
-- Let $L$ be the number of flight lanes: the contest option `lane_count`, which defaults to the largest group size $\lceil N / G \rceil$ and applies only when `lane_mode` is `Random`. It must be at least the largest group size. Decision: Mike, 2026-10-07 (supersedes the "derived" decision in ticket 029).
+- Let $L$ be the number of flight lanes: the largest group size $\lceil N / G \rceil$ of the scheduled round's original draw, applying only when `lane_mode` is `Random`. Decision: Mike, 2026-10-20 (restores the derivation ticket 029 decided on 2026-10-04; the 2026-10-07 configured `lane_count` is retired and #256 is closed as not planned).
 - Let a pair $(p_i, p_j)$ be **feasible** when the hard constraints allow it to meet: pairs on the same team under team protection can never meet and are **not feasible**. Let $P$ be the number of feasible pairs. Every target and every reported metric uses feasible pairs only.
 - Let $c(p_i, p_j)$ be the cumulative number of times pilot $p_i$ and pilot $p_j$ fly in the same group across all evaluated rounds (including historical completed rounds in an incremental draw).
 - Let $laneCount(p_i, l)$ be the number of times pilot $p_i$ is assigned to lane $l \in \{1, \dots, L\}$.
@@ -58,6 +58,7 @@ The engine must support:
 - **Best Achievable Matchup Cost**: meeting counts are integers, so with $f = \mu - \lfloor \mu \rfloor$ the lowest possible $\sum (c - \mu)^2$ is $P \cdot f (1 - f)$, and the lowest possible mean absolute deviation is $2 f (1 - f)$. These are lower bounds. Combinatorial limits often make them unreachable.
 - **Ideal Lane Allocation Target ($\lambda$)**:
   $$\lambda = \frac{R}{L}$$
+  When rounds were drawn under different group counts (an extension or redraw of the remaining rounds, which may use a different number of groups), $L$ is the per-round value within each round's contribution to the penalty.
 
 ### 3.3. Composite Cost Function
 
@@ -173,7 +174,7 @@ Measured on teams of 3 to 4 (30 pilots, 5 groups, 16 rounds) and teams of 3 to 5
 | Construction and improvement, 3 seeds  | 0.418     | 0.696     |
 | GliderScore (recorded in the research) | 0.445     | 0.710     |
 
-The team layouts are close to, not the same as, the research layouts, so the comparison is directional. A draw took about 0.2 s (30 pilots, 3 seeds) and 0.8 s (63 pilots, 3 seeds) on a development machine. Still to do under #137: running off the UI thread with progress and cancel, the back-to-back constraint, the lane count option (#256), and a benchmark harness in the repository.
+The team layouts are close to, not the same as, the research layouts, so the comparison is directional. A draw took about 0.2 s (30 pilots, 3 seeds) and 0.8 s (63 pilots, 3 seeds) on a development machine. Still to do under #137: running off the UI thread with progress and cancel, the back-to-back constraint, and a benchmark harness in the repository.
 
 ---
 
