@@ -9,7 +9,12 @@ import 'package:soar_score_core/soar_score_core.dart' as core;
 /// messages are the en-US text). A preference that is not supported (a locale
 /// removed later) counts as unset.
 class LocaleController extends ChangeNotifier {
-  LocaleController({this.loadPreferences});
+  LocaleController({
+    this.loadPreferences,
+    bool Function(String tag)? isSupported,
+  }) : _isSupported = isSupported ?? core.SupportedLocales.isSupported;
+
+  final bool Function(String tag) _isSupported;
 
   /// Reads the account's preferences; `null` follows the device.
   final Future<core.AccountPreferences> Function()? loadPreferences;
@@ -44,8 +49,8 @@ class LocaleController extends ChangeNotifier {
   }
 
   /// The [Locale] for a supported [tag], or `null`.
-  static Locale? localeFor(String? tag) {
-    if (tag == null || !core.SupportedLocales.isSupported(tag)) return null;
+  Locale? localeFor(String? tag) {
+    if (tag == null || !_isSupported(tag)) return null;
     final parts = tag.split('-');
     return Locale.fromSubtags(
       languageCode: parts.first,

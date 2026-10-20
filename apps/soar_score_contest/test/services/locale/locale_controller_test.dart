@@ -6,12 +6,12 @@ import 'package:soar_score_core/soar_score_core.dart';
 
 void main() {
   test('a supported tag becomes a locale with its region', () {
-    expect(LocaleController.localeFor('en-US'), const Locale('en', 'US'));
+    expect(LocaleController().localeFor('en-US'), const Locale('en', 'US'));
   });
 
   test('no or an unsupported tag follows the device', () {
-    expect(LocaleController.localeFor(null), isNull);
-    expect(LocaleController.localeFor('xx-XX'), isNull);
+    expect(LocaleController().localeFor(null), isNull);
+    expect(LocaleController().localeFor('xx-XX'), isNull);
   });
 
   test('load applies the account preference and notifies', () async {
