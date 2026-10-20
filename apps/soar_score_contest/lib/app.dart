@@ -36,6 +36,8 @@ class SoarScoreContestApp extends StatefulWidget {
     this.themeController,
     this.collapsibleAreas,
     this.localeController,
+    this.extraLocalizationDelegates = const [],
+    this.extraSupportedLocales = const [],
   });
 
   /// The platform bootstrap that started this app, if any. When present its
@@ -70,6 +72,15 @@ class SoarScoreContestApp extends StatefulWidget {
   /// The preferred locale, already loaded. When `null` the app makes one from
   /// the bootstrap's account preferences and loads it after the first frame.
   final LocaleController? localeController;
+
+  /// Delegates tried before the app's own, so a test can add a locale the app
+  /// does not ship and watch Flutter resolve to it.
+  @visibleForTesting
+  final List<LocalizationsDelegate<dynamic>> extraLocalizationDelegates;
+
+  /// The locales those delegates add to the supported ones.
+  @visibleForTesting
+  final List<Locale> extraSupportedLocales;
 
   static const String title = 'RC Soar Score Contest Management';
 
@@ -177,8 +188,14 @@ class _SoarScoreContestAppState extends State<SoarScoreContestApp> {
         themeMode: _theme.mode,
         routerConfig: _router,
         locale: _locale.locale,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: [
+          ...widget.extraLocalizationDelegates,
+          ...AppLocalizations.localizationsDelegates,
+        ],
+        supportedLocales: [
+          ...AppLocalizations.supportedLocales,
+          ...widget.extraSupportedLocales,
+        ],
       ),
     );
     app = LocaleControllerInherited(controller: _locale, child: app);

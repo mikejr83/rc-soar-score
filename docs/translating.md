@@ -10,7 +10,7 @@ Alpha ships English only. A language is added to the app once enough of it is tr
 
 ## Target languages
 
-Chinese (Simplified, `zh_CN`), Czech (`cs`), Danish (`da`), English (`en_US`), Spanish (`es_ES`), Finnish (`fi`), French (`fr_FR`), German (`de`), Greek (`el`), Hungarian (`hu`), Italian (`it`), Japanese (`ja`), Norwegian Bokmål (`nb`), Polish (`pl`), Slovak (`sk`), Slovenian (`sl`), Swedish (`sv`), Turkish (`tr`) and Ukrainian (`uk`).
+Chinese (Simplified, `zh_CN`), Czech (`cs`), Danish (`da`), English (`en_US`; the source file is `app_en.arb`, which holds the en-US text), Spanish (`es_ES`), Finnish (`fi`), French (`fr_FR`), German (`de`), Greek (`el`), Hungarian (`hu`), Italian (`it`), Japanese (`ja`), Norwegian Bokmål (`nb`), Polish (`pl`), Slovak (`sk`), Slovenian (`sl`), Swedish (`sv`), Turkish (`tr`) and Ukrainian (`uk`).
 
 ## How to translate
 
