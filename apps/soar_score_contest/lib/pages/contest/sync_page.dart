@@ -8,7 +8,6 @@ import '../../services/sync/conflict_answer.dart';
 import '../../services/sync/open_conflict.dart';
 import '../../services/sync/refused_change.dart';
 import '../../widgets/app_version_label.dart';
-import '../../widgets/contest_scope.dart';
 import '../../widgets/sync/conflict_resolve_dialog.dart';
 import '../../widgets/sync/conflicts_card.dart';
 import '../../widgets/sync/refused_changes_card.dart';
@@ -24,8 +23,6 @@ class ContestSyncPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final contest = ContestScope.maybeOf(context)?.contest;
-    final zoneId = contest?.timezone ?? 'UTC';
     final scope = ContestScopeKey(Id.parse(contestId));
     return Scaffold(
       body: SyncSummaryBuilder(
@@ -42,7 +39,6 @@ class ContestSyncPage extends StatelessWidget {
               SyncDetailsCard(
                 summary: summary,
                 syncing: syncing,
-                zoneId: zoneId,
                 onSyncNow: syncing || (summary?.localOnly ?? true)
                     ? null
                     : () => unawaited(sync.syncNow(scope)),
@@ -51,14 +47,12 @@ class ContestSyncPage extends StatelessWidget {
               _Conflicts(
                 sync: sync,
                 scope: scope,
-                zoneId: zoneId,
                 version: summary?.conflicts ?? 0,
               ),
               const SizedBox(height: 16),
               _Refused(
                 sync: sync,
                 scope: scope,
-                zoneId: zoneId,
                 // A new count means the list changed.
                 version: summary?.rejectedChanges ?? 0,
               ),
@@ -80,13 +74,11 @@ class _Refused extends StatefulWidget {
   const _Refused({
     required this.sync,
     required this.scope,
-    required this.zoneId,
     required this.version,
   });
 
   final AppSync sync;
   final SyncScopeKey scope;
-  final String zoneId;
   final int version;
 
   @override
@@ -114,8 +106,7 @@ class _RefusedState extends State<_Refused> {
   }
 
   @override
-  Widget build(BuildContext context) =>
-      RefusedChangesCard(changes: _changes, zoneId: widget.zoneId);
+  Widget build(BuildContext context) => RefusedChangesCard(changes: _changes);
 }
 
 /// Loads the open conflicts, reloads them when [version] changes and opens the
@@ -124,13 +115,11 @@ class _Conflicts extends StatefulWidget {
   const _Conflicts({
     required this.sync,
     required this.scope,
-    required this.zoneId,
     required this.version,
   });
 
   final AppSync sync;
   final SyncScopeKey scope;
-  final String zoneId;
   final int version;
 
   @override
@@ -208,7 +197,6 @@ class _ConflictsState extends State<_Conflicts> {
   @override
   Widget build(BuildContext context) => ConflictsCard(
     conflicts: _conflicts,
-    zoneId: widget.zoneId,
     onReview: (conflict) => unawaited(_review(conflict)),
   );
 }

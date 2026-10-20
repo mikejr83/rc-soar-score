@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../../../services/preferences/director_time.dart';
 import '../../../services/workspace/checklist/setup_checklist.dart';
 import '../workspace_scope.dart';
 import 'checklist_navigator.dart';
@@ -23,7 +24,10 @@ class SetupChecklistSection extends StatelessWidget {
       );
     }
     return SetupChecklistCard(
-      checklist: SetupChecklist.resolve(facts),
+      checklist: SetupChecklist.resolve(
+        facts,
+        formatSavedAt: DirectorTime.of(context),
+      ),
       onOpen: (target) =>
           ChecklistNavigator.open(context, target, contestId: contest.id.value),
     );

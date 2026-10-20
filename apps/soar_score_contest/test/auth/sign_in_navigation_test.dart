@@ -16,8 +16,7 @@ void main() {
     // default, so tests inject a pre-probed stand-in.
     final check = FakeIdentityProviderCheck(
       status: IdentityProviderStatus.available,
-    )
-      ..probeCalls = 1;
+    )..probeCalls = 1;
     addTearDown(check.dispose);
     final router = buildAppRouter(
       initialLocation: initialLocation,

@@ -40,6 +40,7 @@ class LocalAccountClaimer {
     required this._onProblem,
     this._getPreferences,
     this._putPreferences,
+    this._onPreferencesChanged,
   }) {
     if ((_getPreferences == null) != (_putPreferences == null)) {
       throw ArgumentError(
@@ -61,6 +62,10 @@ class LocalAccountClaimer {
   final Future<core.AccountPreferences> Function()? _getPreferences;
   final Future<core.AccountPreferences> Function(core.AccountPreferences)?
   _putPreferences;
+
+  /// Called after the preferences were carried over, so the app can read the
+  /// merged copy.
+  final void Function()? _onPreferencesChanged;
 
   Future<void>? _running;
   bool _stopped = false;
@@ -149,6 +154,7 @@ class LocalAccountClaimer {
     if (!_epoch.isCurrent(session) || _stopped) return;
     _onProblem(null);
     await _carryOverPreferences(session);
+    _onPreferencesChanged?.call();
     try {
       await _onClaimed(accountId, session);
     } on Object catch (error, stack) {

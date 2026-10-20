@@ -1,10 +1,15 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/services/preferences/director_time.dart';
 import 'package:soar_score_contest/services/sync/sync_problem.dart';
 import 'package:soar_score_contest/services/sync/sync_scope_summary.dart';
 import 'package:soar_score_contest/services/sync/sync_status_text.dart';
 
 String _text(SyncScopeSummary? summary, {bool syncing = false}) =>
-    SyncStatusText.of(summary, syncing: syncing, zoneId: 'America/Denver');
+    SyncStatusText.of(
+      summary,
+      syncing: syncing,
+      time: (utc) => DirectorTime.format(utc, zoneId: 'America/Denver'),
+    );
 
 void main() {
   test('says it is checking before the engine has looked', () {
@@ -34,10 +39,10 @@ void main() {
     expect(_text(const SyncScopeSummary(), syncing: true), 'Syncing…');
   });
 
-  test('names the last sync in the contest zone', () {
+  test('names the last sync in the given zone', () {
     expect(
       _text(SyncScopeSummary(lastSyncedAt: DateTime.utc(2026, 10, 13, 18, 30))),
-      'Synced 2026-10-13 12:30 MDT',
+      'Synced 10/13/2026 12:30 MDT',
     );
   });
 
@@ -67,7 +72,7 @@ void main() {
           lastSyncedAt: DateTime.utc(2026, 10, 13, 18, 30),
         ),
       ),
-      'Synced 2026-10-13 12:30 MDT · 2 need attention',
+      'Synced 10/13/2026 12:30 MDT · 2 need attention',
     );
     expect(
       _text(const SyncScopeSummary(rejectedChanges: 1)),

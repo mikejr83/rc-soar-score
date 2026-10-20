@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:soar_score_core/soar_score_core.dart';
 import 'package:soar_score_ui/soar_score_ui.dart';
 
+import '../../services/preferences/director_time.dart';
 import '../../services/sync/sync_problem.dart';
 import '../../services/sync/sync_scope_summary.dart';
 
@@ -12,7 +12,6 @@ class SyncDetailsCard extends StatelessWidget {
     super.key,
     required this.summary,
     required this.syncing,
-    required this.zoneId,
     required this.onSyncNow,
   });
 
@@ -20,7 +19,6 @@ class SyncDetailsCard extends StatelessWidget {
   final bool syncing;
 
   /// The contest's time zone, for the last sync time.
-  final String zoneId;
 
   /// Null when a sync cannot be started now.
   final VoidCallback? onSyncNow;
@@ -66,7 +64,7 @@ class SyncDetailsCard extends StatelessWidget {
                 'Last synced',
                 summary.lastSyncedAt == null
                     ? 'Not synced yet'
-                    : ContestTime.format(summary.lastSyncedAt!, zoneId),
+                    : DirectorTime.of(context)(summary.lastSyncedAt!),
               ),
               _row(theme, 'Waiting to be sent', '${summary.pendingChanges}'),
               _row(

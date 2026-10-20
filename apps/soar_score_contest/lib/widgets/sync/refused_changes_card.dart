@@ -1,19 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:soar_score_core/soar_score_core.dart';
 
+import '../../services/preferences/director_time.dart';
 import '../../services/sync/refused_change.dart';
 
 /// The changes the service refused: what was changed, when and why.
 class RefusedChangesCard extends StatelessWidget {
-  const RefusedChangesCard({
-    super.key,
-    required this.changes,
-    required this.zoneId,
-  });
+  const RefusedChangesCard({super.key, required this.changes});
 
   /// Null while they load.
   final List<RefusedChange>? changes;
-  final String zoneId;
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +47,7 @@ class RefusedChangesCard extends StatelessWidget {
                     children: [
                       Text(
                         '${change.entityType}, changed '
-                        '${ContestTime.format(change.madeAt, zoneId)}',
+                        '${DirectorTime.of(context)(change.madeAt)}',
                         style: theme.textTheme.titleSmall,
                       ),
                       Text(change.reason),

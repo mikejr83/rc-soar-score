@@ -16,9 +16,7 @@ Widget _app(AuthSession session, IdentityProviderCheck check) {
     monitor: connectivity,
     child: AuthSessionInherited(
       session: session,
-      child: MaterialApp(
-        home: LandingPage(isWeb: true, identityCheck: check),
-      ),
+      child: MaterialApp(home: LandingPage(isWeb: true, identityCheck: check)),
     ),
   );
 }

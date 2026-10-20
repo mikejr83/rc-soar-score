@@ -12,10 +12,7 @@ class RecordingHttpClient extends http.BaseClient {
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) async {
     recorder.add('send');
-    return http.StreamedResponse(
-      Stream<List<int>>.empty(),
-      200,
-    );
+    return http.StreamedResponse(Stream<List<int>>.empty(), 200);
   }
 
   @override

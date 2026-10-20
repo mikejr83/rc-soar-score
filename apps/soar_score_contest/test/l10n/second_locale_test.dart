@@ -6,7 +6,7 @@ import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_contest/l10n/app_localizations_en.dart';
 import 'package:soar_score_contest/app.dart';
 import 'package:soar_score_contest/router.dart';
-import 'package:soar_score_contest/services/locale/locale_controller.dart';
+import 'package:soar_score_contest/services/preferences/preferences_controller.dart';
 import 'package:soar_score_ui_storage/soar_score_ui_storage.dart';
 
 import '../support/fake_bootstrap.dart';
@@ -50,12 +50,15 @@ class _AnyLocale<T> extends LocalizationsDelegate<T> {
   bool shouldReload(_AnyLocale<T> old) => false;
 }
 
-Future<void> _pump(WidgetTester tester, LocaleController locale) async {
+Future<void> _pump(WidgetTester tester, PreferencesController locale) async {
+  tester.view.physicalSize = const Size(900, 2600);
+  tester.view.devicePixelRatio = 1;
+  addTearDown(tester.view.reset);
   await tester.pumpWidget(
     SoarScoreContestApp(
       bootstrap: FakeBootstrap(BackendLocalUiStore(MemoryLocalUiBackend())),
       routerInitialLocation: settingsPath,
-      localeController: locale,
+      preferences: locale,
       extraSupportedLocales: const [Locale('xx')],
       extraLocalizationDelegates: const [
         _XxDelegate(),
@@ -68,9 +71,9 @@ Future<void> _pump(WidgetTester tester, LocaleController locale) async {
   await tester.pumpAndSettle();
 }
 
-LocaleController _preferring(String tag) =>
-    LocaleController(isSupported: (t) => t == tag || t == 'en-US')
-      ..setPreferred(tag);
+PreferencesController _preferring(String tag) =>
+    PreferencesController(isSupported: (t) => t == tag || t == 'en-US')
+      ..setLocale(tag);
 
 void main() {
   testWidgets('a second locale overrides the messages it translates', (

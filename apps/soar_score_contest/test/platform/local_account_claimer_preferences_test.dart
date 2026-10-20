@@ -15,6 +15,7 @@ void main() {
   late List<core.AccountPreferences> puts;
   late bool serviceDown;
   late LocalAccountClaimer claimer;
+  late int changedCalls;
 
   setUp(() {
     final auth = FakeAuthSession(signedIn: true);
@@ -22,6 +23,7 @@ void main() {
     onService = core.AccountPreferences();
     puts = [];
     serviceDown = false;
+    changedCalls = 0;
     claimer = LocalAccountClaimer(
       auth: auth,
       epoch: AuthEpoch(auth),
@@ -34,6 +36,7 @@ void main() {
       onClaimed: (_, _) async {},
       onSignedOut: () {},
       onProblem: (_) {},
+      onPreferencesChanged: () => changedCalls++,
       getPreferences: () async {
         if (serviceDown) {
           throw ApiNetworkError(
@@ -82,6 +85,15 @@ void main() {
       expect(localAccount.storedPreferences, onService);
     },
   );
+
+  test('the app is told once the merged preferences are in place', () async {
+    onService = core.AccountPreferences(preferredTimeZone: 'Asia/Tokyo');
+
+    await claimer.run();
+
+    expect(changedCalls, 1);
+    expect(localAccount.storedPreferences, onService);
+  });
 
   test('the installation shows the account\'s choices afterwards', () async {
     onService = core.AccountPreferences(preferredTimeZone: 'Asia/Tokyo');

@@ -5,6 +5,7 @@ import 'package:soar_score_ui_storage/soar_score_ui_storage.dart';
 
 import '../auth/auth_session.dart';
 import '../auth/auth_session_factory.dart';
+import '../services/preferences/preferences_controller.dart';
 import '../services/ui_account/auth_ui_account.dart';
 import '../services/ui_account/ui_account.dart';
 import 'app_bootstrap.dart';
@@ -55,6 +56,14 @@ class WebBootstrap extends AppBootstrap {
     } on Object {
       return core.AccountPreferences();
     }
+  }
+
+  @override
+  Future<void> savePreferences(core.AccountPreferences preferences) async {
+    if (!_auth.isSignedIn) {
+      throw const SignInRequiredError();
+    }
+    await _client.updateAccountPreferences(preferences);
   }
 
   @override

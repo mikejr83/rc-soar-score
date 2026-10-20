@@ -126,6 +126,16 @@ void main() {
       );
     });
 
+    test('lays out a wall-clock time and just its clock', () {
+      final wall = DateTime(2026, 7, 1, 9, 30);
+
+      expect(
+        ContestTime.formatWallClock(wall, 'CEST', locale: 'en-US'),
+        '7/1/2026 09:30 CEST',
+      );
+      expect(ContestTime.formatClock(wall, locale: 'en-US'), '09:30');
+    });
+
     test('is unchanged without a locale', () {
       expect(ContestTime.format(start, 'Europe/Rome'), '2026-07-01 09:30 CEST');
     });

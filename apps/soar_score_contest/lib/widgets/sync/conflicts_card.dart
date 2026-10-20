@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:soar_score_core/soar_score_core.dart';
 
+import '../../services/preferences/director_time.dart';
 import '../../services/sync/open_conflict.dart';
 
 /// The conflicts that wait for a decision, each with a button to review it.
@@ -8,13 +8,11 @@ class ConflictsCard extends StatelessWidget {
   const ConflictsCard({
     super.key,
     required this.conflicts,
-    required this.zoneId,
     required this.onReview,
   });
 
   /// Null while they load.
   final List<OpenConflict>? conflicts;
-  final String zoneId;
   final void Function(OpenConflict conflict) onReview;
 
   @override
@@ -55,7 +53,7 @@ class ConflictsCard extends StatelessWidget {
                           children: [
                             Text(
                               '${conflict.entityType}, found '
-                              '${ContestTime.format(conflict.createdAt, zoneId)}',
+                              '${DirectorTime.of(context)(conflict.createdAt)}',
                               style: theme.textTheme.titleSmall,
                             ),
                             Text(conflict.explanation),

@@ -43,5 +43,53 @@
   "panelsResetSaveFailed": "The reset could not be saved. It applies until you close the app.",
   "@panelsResetSaveFailed": {
     "description": "Snackbar shown when the panel reset could not be stored on the device."
+  },
+  "timeZoneHeading": "Time zone",
+  "@timeZoneHeading": {
+    "description": "Heading of the Settings card that sets the preferred time zone."
+  },
+  "timeZoneDescription": "Times shown to you in the app, such as when something was last saved or synced, use this time zone. Times pilots see always use the contest's own time zone. This follows your account.",
+  "@timeZoneDescription": {
+    "description": "Explains the Time zone card on the Settings page."
+  },
+  "timeZoneDeviceButton": "Use this device's time zone",
+  "@timeZoneDeviceButton": {
+    "description": "Button that clears the preferred time zone so the device decides."
+  },
+  "timeZoneFollowsDevice": "Following this device.",
+  "@timeZoneFollowsDevice": {
+    "description": "Shown on the Time zone card when no preferred zone is set."
+  },
+  "timeZoneSaveFailed": "The time zone could not be saved. It applies until you close the app.",
+  "@timeZoneSaveFailed": {
+    "description": "Snackbar shown when the preferred time zone could not be stored."
+  },
+  "localeHeading": "Language and formats",
+  "@localeHeading": {
+    "description": "Heading of the Settings card that sets the preferred locale."
+  },
+  "localeDescription": "Sets the language and how dates and numbers are written for you. This follows your account.",
+  "@localeDescription": {
+    "description": "Explains the locale card on the Settings page."
+  },
+  "localeLabel": "Language and format",
+  "@localeLabel": {
+    "description": "Label of the locale choice on the Settings page."
+  },
+  "localeDevice": "Use this device's language",
+  "@localeDevice": {
+    "description": "Choice that clears the preferred locale so the device decides."
+  },
+  "localeEnUs": "English (United States)",
+  "@localeEnUs": {
+    "description": "Name of the en-US locale in the locale choice."
+  },
+  "localeSaveFailed": "The language could not be saved. It applies until you close the app.",
+  "@localeSaveFailed": {
+    "description": "Snackbar shown when the preferred locale could not be stored."
+  },
+  "preferencesNeedSignIn": "Sign in to keep this on your account. It applies until you close the app.",
+  "@preferencesNeedSignIn": {
+    "description": "Snackbar shown when a preference was changed while signed out, so it cannot be stored on an account."
   }
 }

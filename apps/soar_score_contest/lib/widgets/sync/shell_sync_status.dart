@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../../router.dart';
+import '../../services/preferences/director_time.dart';
 import '../../services/sync/sync_status_text.dart';
 import 'sync_summary_builder.dart';
 
@@ -24,7 +25,7 @@ class ShellSyncStatus extends StatelessWidget {
         final text = SyncStatusText.of(
           summary,
           syncing: syncing,
-          zoneId: contest.timezone,
+          time: DirectorTime.of(context),
         );
         final attention =
             (summary?.needsAttention ?? 0) > 0 ||
