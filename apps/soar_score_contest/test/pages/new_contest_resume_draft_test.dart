@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/services/preferences/director_time.dart';
 import 'package:soar_score_contest/router.dart';
 import 'package:soar_score_contest/services/new_contest/contest_draft.dart';
 import 'package:soar_score_contest/services/new_contest/contest_draft_store.dart';
@@ -31,7 +32,7 @@ void main() {
     await pumpWizard(tester, respond: emptyApi, store: store);
 
     expect(find.byKey(dialog), findsOneWidget);
-    expect(find.textContaining('Oct 18, 2026'), findsOneWidget);
+    expect(find.textContaining(DirectorTime.format(savedAt)), findsOneWidget);
     expect(find.byKey(const ValueKey('contest-name')), findsNothing);
 
     await tester.tap(find.byKey(keep));

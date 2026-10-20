@@ -41,6 +41,11 @@ abstract class AppBootstrap {
   Future<core.AccountPreferences> loadPreferences() async =>
       core.AccountPreferences();
 
+  /// Stores the account's preferences. Throws when they cannot be saved (the
+  /// web build is signed out, the service is unreachable); the default keeps
+  /// nothing.
+  Future<void> savePreferences(core.AccountPreferences preferences) async {}
+
   /// Tells the platform that the remote API became reachable (or not).
   ///
   /// The native build uses it to resume synchronization; the web build has

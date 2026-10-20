@@ -58,6 +58,14 @@ class WebBootstrap extends AppBootstrap {
   }
 
   @override
+  Future<void> savePreferences(core.AccountPreferences preferences) async {
+    if (!_auth.isSignedIn) {
+      throw StateError('Sign in to save preferences');
+    }
+    await _client.updateAccountPreferences(preferences);
+  }
+
+  @override
   Future<void> close() async {
     if (_closed) {
       return;

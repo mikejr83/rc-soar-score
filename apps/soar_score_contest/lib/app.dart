@@ -12,8 +12,8 @@ import 'auth/auth_session_inherited.dart';
 import 'connectivity_provider.dart';
 import 'contest_draft_provider.dart';
 import 'l10n/app_localizations.dart';
-import 'locale_controller_provider.dart';
-import 'services/locale/locale_controller.dart';
+import 'preferences_controller_provider.dart';
+import 'services/preferences/preferences_controller.dart';
 import 'local_ui_store_provider.dart';
 import 'platform/app_bootstrap.dart';
 import 'router.dart';
@@ -35,7 +35,7 @@ class SoarScoreContestApp extends StatefulWidget {
     this.routerInitialLocation = landingPath,
     this.themeController,
     this.collapsibleAreas,
-    this.localeController,
+    this.preferences,
     this.extraLocalizationDelegates = const [],
     this.extraSupportedLocales = const [],
   });
@@ -71,7 +71,7 @@ class SoarScoreContestApp extends StatefulWidget {
 
   /// The preferred locale, already loaded. When `null` the app makes one from
   /// the bootstrap's account preferences and loads it after the first frame.
-  final LocaleController? localeController;
+  final PreferencesController? preferences;
 
   /// Delegates tried before the app's own, so a test can add a locale the app
   /// does not ship and watch Flutter resolve to it.
@@ -96,8 +96,8 @@ class _SoarScoreContestAppState extends State<SoarScoreContestApp> {
   late final bool _ownsTheme;
   late final CollapsibleAreasController _areas;
   late final bool _ownsAreas;
-  late final LocaleController _locale;
-  late final bool _ownsLocale;
+  late final PreferencesController _preferences;
+  late final bool _ownsPreferences;
 
   /// The user's single New Contest draft, kept across restarts where the
   /// bootstrap has local UI storage.
@@ -141,12 +141,15 @@ class _SoarScoreContestAppState extends State<SoarScoreContestApp> {
           account: widget.bootstrap?.uiAccount,
         );
     if (_ownsAreas) unawaited(_areas.load());
-    final givenLocale = widget.localeController;
-    _ownsLocale = givenLocale == null;
-    _locale =
-        givenLocale ??
-        LocaleController(loadPreferences: widget.bootstrap?.loadPreferences);
-    if (_ownsLocale) unawaited(_locale.load());
+    final givenPreferences = widget.preferences;
+    _ownsPreferences = givenPreferences == null;
+    _preferences =
+        givenPreferences ??
+        PreferencesController(
+          loadPreferences: widget.bootstrap?.loadPreferences,
+          savePreferences: widget.bootstrap?.savePreferences,
+        );
+    if (_ownsPreferences) unawaited(_preferences.load());
     _router = buildAppRouter(
       initialLocation: widget.routerInitialLocation,
       appMode: _appMode,
@@ -171,7 +174,7 @@ class _SoarScoreContestAppState extends State<SoarScoreContestApp> {
     _router.dispose();
     if (_ownsTheme) _theme.dispose();
     if (_ownsAreas) _areas.dispose();
-    if (_ownsLocale) _locale.dispose();
+    if (_ownsPreferences) _preferences.dispose();
     _draftStore.dispose();
     super.dispose();
   }
@@ -179,7 +182,7 @@ class _SoarScoreContestAppState extends State<SoarScoreContestApp> {
   @override
   Widget build(BuildContext context) {
     Widget app = ListenableBuilder(
-      listenable: Listenable.merge([_theme, _locale]),
+      listenable: Listenable.merge([_theme, _preferences]),
       builder: (context, _) => MaterialApp.router(
         title: SoarScoreContestApp.title,
         debugShowCheckedModeBanner: false,
@@ -187,7 +190,7 @@ class _SoarScoreContestAppState extends State<SoarScoreContestApp> {
         darkTheme: ContestAppTheme.darkTheme,
         themeMode: _theme.mode,
         routerConfig: _router,
-        locale: _locale.locale,
+        locale: _preferences.locale,
         localizationsDelegates: [
           ...widget.extraLocalizationDelegates,
           ...AppLocalizations.localizationsDelegates,
@@ -198,7 +201,7 @@ class _SoarScoreContestAppState extends State<SoarScoreContestApp> {
         ],
       ),
     );
-    app = LocaleControllerInherited(controller: _locale, child: app);
+    app = PreferencesControllerInherited(controller: _preferences, child: app);
     app = ThemeControllerInherited(controller: _theme, child: app);
     app = CollapsibleAreasInherited(controller: _areas, child: app);
     app = ContestDraftInherited(store: _draftStore, child: app);

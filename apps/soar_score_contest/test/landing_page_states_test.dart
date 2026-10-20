@@ -65,7 +65,8 @@ void main() {
     tester,
   ) async {
     final session = FakeAuthSession();
-    final check = FakeIdentityProviderCheck()..status = IdentityProviderStatus.unavailable;
+    final check = FakeIdentityProviderCheck()
+      ..status = IdentityProviderStatus.unavailable;
     check.lastError = 'Timed out';
     addTearDown(check.dispose);
 
@@ -154,7 +155,9 @@ void main() {
     addTearDown(check.dispose);
     addTearDown(monitor.dispose);
 
-    await tester.pumpWidget(_app(session: session, check: check, monitor: monitor));
+    await tester.pumpWidget(
+      _app(session: session, check: check, monitor: monitor),
+    );
     expect(check.probeCalls, 1);
 
     // Recovery triggers exactly one re-probe.

@@ -147,10 +147,9 @@ GoRouter buildAppRouter({
       GoRoute(
         path: landingPath,
         name: 'landing',
-        builder: (context, state) =>
-            identityCheck == null
-                ? const LandingPage()
-                : LandingPage(identityCheck: identityCheck),
+        builder: (context, state) => identityCheck == null
+            ? const LandingPage()
+            : LandingPage(identityCheck: identityCheck),
       ),
       // A report opens in its own tab or window, so it has no shell.
       GoRoute(

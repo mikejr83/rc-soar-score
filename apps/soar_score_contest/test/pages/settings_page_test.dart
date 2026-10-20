@@ -6,7 +6,7 @@ import 'package:soar_score_contest/router.dart';
 import 'package:soar_score_contest/services/collapsible_areas/collapsible_area.dart';
 import 'package:soar_score_contest/services/collapsible_areas/collapsible_areas_controller.dart';
 import 'package:soar_score_contest/l10n/app_localizations_en.dart';
-import 'package:soar_score_contest/services/locale/locale_controller.dart';
+import 'package:soar_score_contest/services/preferences/preferences_controller.dart';
 import 'package:soar_score_contest/services/theme/theme_controller.dart';
 import 'package:soar_score_ui_storage/soar_score_ui_storage.dart';
 
@@ -20,15 +20,18 @@ Future<void> _pumpSettings(
   LocalUiStore store, {
   ThemeController? controller,
   CollapsibleAreasController? areas,
-  LocaleController? locale,
+  PreferencesController? locale,
 }) async {
+  tester.view.physicalSize = const Size(900, 2600);
+  tester.view.devicePixelRatio = 1;
+  addTearDown(tester.view.reset);
   await tester.pumpWidget(
     SoarScoreContestApp(
       bootstrap: FakeBootstrap(store),
       routerInitialLocation: settingsPath,
       themeController: controller,
       collapsibleAreas: areas,
-      localeController: locale,
+      preferences: locale,
     ),
   );
   await tester.pumpAndSettle();
@@ -36,7 +39,7 @@ Future<void> _pumpSettings(
 
 void main() {
   testWidgets('the preferred locale is the one the app shows', (tester) async {
-    final locale = LocaleController()..setPreferred('en-US');
+    final locale = PreferencesController()..setLocale('en-US');
     await _pumpSettings(
       tester,
       BackendLocalUiStore(MemoryLocalUiBackend()),

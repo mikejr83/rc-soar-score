@@ -11,15 +11,18 @@ import 'package:soar_score_contest/services/sync/sync_scope_summary.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../support/fake_app_sync.dart';
+import '../support/preferences_scope.dart';
 
 const _contestId = '019c0000-0000-7000-8000-000000000020';
 final _scope = ContestScopeKey(Id.parse(_contestId));
 
 Future<void> _pump(WidgetTester tester, FakeAppSync sync) async {
   await tester.pumpWidget(
-    AppSyncInherited(
-      sync: sync,
-      child: const MaterialApp(home: ContestSyncPage(contestId: _contestId)),
+    withPreferredZone(
+      AppSyncInherited(
+        sync: sync,
+        child: const MaterialApp(home: ContestSyncPage(contestId: _contestId)),
+      ),
     ),
   );
   await tester.pumpAndSettle();
@@ -48,7 +51,7 @@ void main() {
     await _pump(tester, sync);
 
     expect(sync.refreshed, [_scope]);
-    expect(find.text('2026-10-13 18:30 UTC'), findsOneWidget);
+    expect(find.text('10/13/2026 18:30 UTC'), findsOneWidget);
     expect(find.text('3'), findsOneWidget);
     expect(find.text('1'), findsOneWidget);
     expect(find.text('2'), findsOneWidget);
@@ -164,7 +167,7 @@ void conflictTests() {
     await _pump(tester, sync);
 
     expect(
-      find.text('OfficialScore, found 2026-10-13 18:00 UTC'),
+      find.text('OfficialScore, found 10/13/2026 18:00 UTC'),
       findsOneWidget,
     );
     await tester.tap(find.byKey(ValueKey('conflict-review-${conflict.id}')));

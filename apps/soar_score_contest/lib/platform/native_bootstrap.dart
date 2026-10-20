@@ -95,6 +95,19 @@ class NativeBootstrap extends AppBootstrap {
   Future<core.AccountPreferences> loadPreferences() =>
       LocalAccountRepository(_server.database).preferences();
 
+  /// Saves to the installation's own copy, and to the signed-in account too
+  /// when it can be reached; a failed upload is left for the claim to settle.
+  @override
+  Future<void> savePreferences(core.AccountPreferences preferences) async {
+    await LocalAccountRepository(_server.database).savePreferences(preferences);
+    if (!_auth.isSignedIn) return;
+    try {
+      await _remoteClient.updateAccountPreferences(preferences);
+    } on Object catch (error) {
+      _logger.fine('Preferences not uploaded: $error');
+    }
+  }
+
   @override
   Future<void> close() async {
     if (_closed) {

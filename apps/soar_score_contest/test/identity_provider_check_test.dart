@@ -66,10 +66,7 @@ void main() {
         'out', () async {
       final check = IdentityProviderCheck(
         tenantDomain: 'tenant.example',
-        client: _AbortAwareClient(
-          onRequest: () {},
-          onAbort: () {},
-        ),
+        client: _AbortAwareClient(onRequest: () {}, onAbort: () {}),
         timeout: const Duration(milliseconds: 10),
       );
       addTearDown(check.dispose);
@@ -101,31 +98,34 @@ void main() {
       expect(requests, 2);
     });
 
-    test('a second probe while one is in flight issues no second request', () async {
-      var requests = 0;
-      late Completer<http.Response> completer;
-      final check = IdentityProviderCheck(
-        tenantDomain: 'tenant.example',
-        client: MockClient((request) async {
-          requests++;
-          completer = Completer();
-          return completer.future;
-        }),
-      );
-      addTearDown(check.dispose);
+    test(
+      'a second probe while one is in flight issues no second request',
+      () async {
+        var requests = 0;
+        late Completer<http.Response> completer;
+        final check = IdentityProviderCheck(
+          tenantDomain: 'tenant.example',
+          client: MockClient((request) async {
+            requests++;
+            completer = Completer();
+            return completer.future;
+          }),
+        );
+        addTearDown(check.dispose);
 
-      final probe = check.probe();
-      check.probe();
-      // Let the in-flight handler issue its request before asserting.
-      await Future<void>.delayed(const Duration(milliseconds: 10));
-      expect(requests, 1);
+        final probe = check.probe();
+        check.probe();
+        // Let the in-flight handler issue its request before asserting.
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+        expect(requests, 1);
 
-      completer.complete(http.Response('{}', 200));
-      await probe;
+        completer.complete(http.Response('{}', 200));
+        await probe;
 
-      expect(requests, 1);
-      expect(check.status, IdentityProviderStatus.available);
-    });
+        expect(requests, 1);
+        expect(check.status, IdentityProviderStatus.available);
+      },
+    );
 
     test('a late completion after dispose neither notifies nor changes '
         'state', () async {
@@ -150,41 +150,47 @@ void main() {
     test('dispose closes the client the check created itself', () async {
       final recorder = <String>[];
       late IdentityProviderCheck check;
-      http.runWithClient(
-        () {
-          // No client injected: the check builds its own via `http.Client()`,
-          // which the zone override routes to the recording client.
-          check = IdentityProviderCheck(tenantDomain: 'tenant.example');
-        },
-        () => RecordingHttpClient(recorder),
-      );
+      http.runWithClient(() {
+        // No client injected: the check builds its own via `http.Client()`,
+        // which the zone override routes to the recording client.
+        check = IdentityProviderCheck(tenantDomain: 'tenant.example');
+      }, () => RecordingHttpClient(recorder));
 
       await check.probe();
       expect(recorder, contains('send'), reason: 'probe issued one request');
 
       check.dispose();
-      expect(recorder, contains('close'),
-          reason: 'dispose closed the owned client');
-    });
-
-    test('dispose leaves an injected client open for its owner to close', () async {
-      final recorder = <String>[];
-      final client = RecordingHttpClient(recorder);
-      final check = IdentityProviderCheck(
-        tenantDomain: 'tenant.example',
-        client: client,
+      expect(
+        recorder,
+        contains('close'),
+        reason: 'dispose closed the owned client',
       );
-
-      await check.probe();
-      expect(recorder, contains('send'));
-
-      check.dispose();
-      expect(recorder, isNot(contains('close')),
-          reason: 'an injected client stays open until its owner closes it');
-      // The owner can still close it afterwards.
-      client.close();
-      expect(recorder, contains('close'));
     });
+
+    test(
+      'dispose leaves an injected client open for its owner to close',
+      () async {
+        final recorder = <String>[];
+        final client = RecordingHttpClient(recorder);
+        final check = IdentityProviderCheck(
+          tenantDomain: 'tenant.example',
+          client: client,
+        );
+
+        await check.probe();
+        expect(recorder, contains('send'));
+
+        check.dispose();
+        expect(
+          recorder,
+          isNot(contains('close')),
+          reason: 'an injected client stays open until its owner closes it',
+        );
+        // The owner can still close it afterwards.
+        client.close();
+        expect(recorder, contains('close'));
+      },
+    );
   });
 }
 

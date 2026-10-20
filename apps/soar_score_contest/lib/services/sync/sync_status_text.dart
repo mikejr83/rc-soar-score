@@ -1,15 +1,15 @@
-import 'package:soar_score_core/soar_score_core.dart';
+import '../preferences/director_time.dart';
 
 import 'sync_scope_summary.dart';
 
-/// The one-line sync status for the shell, in the contest's time zone.
+/// The one-line sync status for the shell, in the director's preferred time zone and locale.
 abstract final class SyncStatusText {
   /// What [summary] says in a few words. [summary] is null before the engine
   /// has looked at the scope.
   static String of(
     SyncScopeSummary? summary, {
     required bool syncing,
-    required String zoneId,
+    required TimeText time,
   }) {
     if (summary == null) return 'Checking…';
     if (summary.localOnly) {
@@ -21,7 +21,7 @@ abstract final class SyncStatusText {
       if (summary.problem != null)
         summary.problem!.label
       else if (summary.lastSyncedAt != null)
-        'Synced ${ContestTime.format(summary.lastSyncedAt!, zoneId)}'
+        'Synced ${time(summary.lastSyncedAt!)}'
       else
         'Not synced yet',
       if (summary.needsAttention > 0)

@@ -1,7 +1,8 @@
 import 'dart:async';
 
+import '../../services/preferences/director_time.dart';
+
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../services/connectivity/app_connectivity.dart';
@@ -121,8 +122,7 @@ class _ConnectivityDetailDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final locale = Localizations.localeOf(context).toString();
-    final DateFormat timeFormat = DateFormat.yMd(locale).add_jm();
+    final timeText = DirectorTime.of(context);
     final theme = Theme.of(context);
 
     final content = ListenableBuilder(
@@ -145,7 +145,7 @@ class _ConnectivityDetailDialog extends StatelessWidget {
           lines.add(
             Text(
               'Last observed: '
-              '${lastObserved == null ? 'Never' : timeFormat.format(lastObserved.toLocal())}',
+              '${lastObserved == null ? 'Never' : timeText(lastObserved)}',
               key: const ValueKey('connectivity last observed'),
             ),
           );
@@ -162,7 +162,7 @@ class _ConnectivityDetailDialog extends StatelessWidget {
           lines.add(
             Text(
               'Last successful connection: '
-              '${lastSuccessful == null ? 'Never' : timeFormat.format(lastSuccessful.toLocal())}',
+              '${lastSuccessful == null ? 'Never' : timeText(lastSuccessful)}',
               key: const ValueKey('connectivity last successful'),
             ),
           );

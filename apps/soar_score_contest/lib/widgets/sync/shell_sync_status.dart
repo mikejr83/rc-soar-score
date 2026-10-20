@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+
+import '../../services/preferences/director_time.dart';
+
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../../router.dart';
@@ -24,7 +27,7 @@ class ShellSyncStatus extends StatelessWidget {
         final text = SyncStatusText.of(
           summary,
           syncing: syncing,
-          zoneId: contest.timezone,
+          time: DirectorTime.of(context),
         );
         final attention =
             (summary?.needsAttention ?? 0) > 0 ||

@@ -159,6 +159,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The reset could not be saved. It applies until you close the app.'**
   String get panelsResetSaveFailed;
+
+  /// Heading of the Settings card that sets the preferred time zone.
+  ///
+  /// In en, this message translates to:
+  /// **'Time zone'**
+  String get timeZoneHeading;
+
+  /// Explains the Time zone card on the Settings page.
+  ///
+  /// In en, this message translates to:
+  /// **'Times shown to you in the app, such as when something was last saved or synced, use this time zone. Times pilots see always use the contest\'s own time zone. This follows your account.'**
+  String get timeZoneDescription;
+
+  /// Button that clears the preferred time zone so the device decides.
+  ///
+  /// In en, this message translates to:
+  /// **'Use this device\'s time zone'**
+  String get timeZoneDeviceButton;
+
+  /// Shown on the Time zone card when no preferred zone is set.
+  ///
+  /// In en, this message translates to:
+  /// **'Following this device.'**
+  String get timeZoneFollowsDevice;
+
+  /// Snackbar shown when the preferred time zone could not be stored.
+  ///
+  /// In en, this message translates to:
+  /// **'The time zone could not be saved. It applies until you close the app.'**
+  String get timeZoneSaveFailed;
+
+  /// Heading of the Settings card that sets the preferred locale.
+  ///
+  /// In en, this message translates to:
+  /// **'Language and formats'**
+  String get localeHeading;
+
+  /// Explains the locale card on the Settings page.
+  ///
+  /// In en, this message translates to:
+  /// **'Sets the language and how dates and numbers are written for you. This follows your account.'**
+  String get localeDescription;
+
+  /// Label of the locale choice on the Settings page.
+  ///
+  /// In en, this message translates to:
+  /// **'Language and format'**
+  String get localeLabel;
+
+  /// Choice that clears the preferred locale so the device decides.
+  ///
+  /// In en, this message translates to:
+  /// **'Use this device\'s language'**
+  String get localeDevice;
+
+  /// Name of the en-US locale in the locale choice.
+  ///
+  /// In en, this message translates to:
+  /// **'English (United States)'**
+  String get localeEnUs;
+
+  /// Snackbar shown when the preferred locale could not be stored.
+  ///
+  /// In en, this message translates to:
+  /// **'The language could not be saved. It applies until you close the app.'**
+  String get localeSaveFailed;
 }
 
 class _AppLocalizationsDelegate

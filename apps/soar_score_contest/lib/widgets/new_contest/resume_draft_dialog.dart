@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+
+import '../../services/preferences/director_time.dart';
 
 import '../../services/new_contest/draft_persistence.dart';
 
@@ -19,9 +20,7 @@ Future<bool> showResumeDraftDialog(
     UnreadableStoredDraft(:final savedAt) => savedAt,
     NoStoredDraft() => null,
   };
-  final when = savedAt == null
-      ? null
-      : DateFormat.yMMMd().add_Hm().format(savedAt.toLocal());
+  final when = savedAt == null ? null : DirectorTime.of(context)(savedAt);
   final resume = await showDialog<bool>(
     context: context,
     barrierDismissible: false,

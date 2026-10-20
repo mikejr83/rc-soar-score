@@ -11,7 +11,6 @@ Future<void> _pump(WidgetTester tester, SyncScopeSummary summary) =>
           body: SyncDetailsCard(
             summary: summary,
             syncing: false,
-            zoneId: 'America/Denver',
             onSyncNow: null,
           ),
         ),

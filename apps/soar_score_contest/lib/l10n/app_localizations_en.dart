@@ -45,4 +45,41 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get panelsResetSaveFailed =>
       'The reset could not be saved. It applies until you close the app.';
+
+  @override
+  String get timeZoneHeading => 'Time zone';
+
+  @override
+  String get timeZoneDescription =>
+      'Times shown to you in the app, such as when something was last saved or synced, use this time zone. Times pilots see always use the contest\'s own time zone. This follows your account.';
+
+  @override
+  String get timeZoneDeviceButton => 'Use this device\'s time zone';
+
+  @override
+  String get timeZoneFollowsDevice => 'Following this device.';
+
+  @override
+  String get timeZoneSaveFailed =>
+      'The time zone could not be saved. It applies until you close the app.';
+
+  @override
+  String get localeHeading => 'Language and formats';
+
+  @override
+  String get localeDescription =>
+      'Sets the language and how dates and numbers are written for you. This follows your account.';
+
+  @override
+  String get localeLabel => 'Language and format';
+
+  @override
+  String get localeDevice => 'Use this device\'s language';
+
+  @override
+  String get localeEnUs => 'English (United States)';
+
+  @override
+  String get localeSaveFailed =>
+      'The language could not be saved. It applies until you close the app.';
 }
