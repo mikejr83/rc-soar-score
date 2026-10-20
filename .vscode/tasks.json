@@ -97,6 +97,7 @@
       "label": "server: reset local database",
       "type": "shell",
       "command": "./scripts/reset-server-db.ps1",
+      "args": ["-Container postgres"],      
       "problemMatcher": [],
       "presentation": {
         "reveal": "always",
