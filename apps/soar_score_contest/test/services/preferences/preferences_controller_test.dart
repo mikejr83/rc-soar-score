@@ -239,5 +239,62 @@ void preferencesSavingTests() {
 
       expect(controller.timeZone, 'Europe/Rome');
     });
+
+    test(
+      'a re-read during the first load keeps a choice made meanwhile',
+      () async {
+        final firstRead = Completer<AccountPreferences>();
+        final changes = StreamController<void>.broadcast();
+        var reads = 0;
+        final controller = PreferencesController(
+          loadPreferences: () {
+            reads++;
+            return reads == 1
+                ? firstRead.future
+                : Future.value(
+                    AccountPreferences(preferredTimeZone: 'Asia/Tokyo'),
+                  );
+          },
+          savePreferences: (_) async {},
+          changes: changes.stream,
+        );
+        final loading = controller.load();
+
+        final change = controller.setTimeZone('Europe/Rome');
+        changes.add(null);
+        await pumpEventQueue();
+        firstRead.complete(AccountPreferences(preferredTimeZone: 'Asia/Tokyo'));
+        await loading;
+        await change;
+
+        expect(controller.timeZone, 'Europe/Rome');
+      },
+    );
+
+    test('a re-read that began before a save finished is dropped', () async {
+      var onAccount = AccountPreferences();
+      final slowRead = Completer<AccountPreferences>();
+      final changes = StreamController<void>.broadcast();
+      var reads = 0;
+      final controller = PreferencesController(
+        loadPreferences: () {
+          reads++;
+          return reads == 2 ? slowRead.future : Future.value(onAccount);
+        },
+        savePreferences: (saved) async => onAccount = saved,
+        changes: changes.stream,
+      );
+      await controller.load();
+
+      final change = controller.setTimeZone('Europe/Rome');
+      changes.add(null);
+      await pumpEventQueue();
+      await change;
+      // The answer was read before the save, so it still shows no zone.
+      slowRead.complete(AccountPreferences());
+      await pumpEventQueue();
+
+      expect(controller.timeZone, 'Europe/Rome');
+    });
   });
 }

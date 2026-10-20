@@ -65,9 +65,10 @@ class PreferencesController extends ChangeNotifier {
   String? _timeZone;
   String? _localeTag;
   Future<void>? _loading;
-  bool _zoneEdited = false;
-  bool _localeEdited = false;
+  int _zoneEdits = 0;
+  int _localeEdits = 0;
   int _pending = 0;
+  int _savesDone = 0;
   Future<void> _tail = Future.value();
   bool _disposed = false;
 
@@ -90,8 +91,9 @@ class PreferencesController extends ChangeNotifier {
   Future<void> _read({required bool initial}) async {
     final loader = loadPreferences;
     if (loader == null) return;
-    _zoneEdited = false;
-    _localeEdited = false;
+    final zoneEdits = _zoneEdits;
+    final localeEdits = _localeEdits;
+    final savesDone = _savesDone;
     final core.AccountPreferences preferences;
     try {
       preferences = await loader();
@@ -99,19 +101,21 @@ class PreferencesController extends ChangeNotifier {
       _logger.warning('The preferences could not be read: $error');
       return;
     }
-    // A later read replaces a save in flight with stale values, so it waits
-    // for the saves; the first read only fills in what was not chosen yet.
-    if (_disposed || (!initial && _pending > 0)) return;
+    if (_disposed) return;
+    // An answer read before a save finished, or while one is in flight, may
+    // predate it, so a later read gives way to the saves. The first read only
+    // fills in what was not chosen while it ran, field by field.
+    if (!initial && (_pending > 0 || _savesDone != savesDone)) return;
     _assign(
-      _zoneEdited ? _timeZone : preferences.preferredTimeZone,
-      _localeEdited ? _localeTag : preferences.preferredLocale,
+      _zoneEdits != zoneEdits ? _timeZone : preferences.preferredTimeZone,
+      _localeEdits != localeEdits ? _localeTag : preferences.preferredLocale,
     );
   }
 
   /// Applies [tag] (a BCP 47 tag such as `en-US`, or `null` for the device
   /// locale) now and saves it.
   Future<SaveResult> setLocale(String? tag) {
-    _localeEdited = true;
+    _localeEdits++;
     _assign(_timeZone, tag);
     return _enqueueSave();
   }
@@ -119,7 +123,7 @@ class PreferencesController extends ChangeNotifier {
   /// Applies [zoneId] (an IANA id, or `null` for the device zone) now and
   /// saves it.
   Future<SaveResult> setTimeZone(String? zoneId) {
-    _zoneEdited = true;
+    _zoneEdits++;
     _assign(zoneId, _localeTag);
     return _enqueueSave();
   }
@@ -131,7 +135,10 @@ class PreferencesController extends ChangeNotifier {
       return _saveNow();
     });
     _tail = result.then((_) {});
-    return result.whenComplete(() => _pending--);
+    return result.whenComplete(() {
+      _pending--;
+      _savesDone++;
+    });
   }
 
   Future<SaveResult> _saveNow() async {
