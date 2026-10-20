@@ -11,6 +11,8 @@
 #
 #   ./scripts/reset-server-db.ps1                 # uses psql on PATH
 #   ./scripts/reset-server-db.ps1 -Docker         # uses `docker compose exec db psql`
+#   $env:POSTGRES_CONTAINER = 'my-postgres'       # or -Container my-postgres:
+#   ./scripts/reset-server-db.ps1                 # runs psql inside that container
 #   ./scripts/reset-server-db.ps1 -Database rc_soar_score -Port 5432
 
 param(
@@ -18,14 +20,17 @@ param(
     [int]$Port = $(if ($env:POSTGRES_PORT) { [int]$env:POSTGRES_PORT } else { 5432 }),
     [string]$Database = $(if ($env:POSTGRES_DB) { $env:POSTGRES_DB } else { 'rc_soar_score' }),
     [string]$User = $(if ($env:POSTGRES_USER) { $env:POSTGRES_USER } else { 'postgres' }),
-    # Run psql inside the compose `db` container instead of on this machine.
+    # Name of a running Docker container to run psql in, instead of on this
+    # machine. Set POSTGRES_CONTAINER to use it without the parameter.
+    [string]$Container = $env:POSTGRES_CONTAINER,
+    # Run psql inside the compose `db` container instead.
     [switch]$Docker,
     [switch]$Force
 )
 
 $ErrorActionPreference = 'Stop'
 
-if (-not $Docker -and $PgHost -notin 'localhost', '127.0.0.1', '::1' -and -not $Force) {
+if (-not $Docker -and -not $Container -and $PgHost -notin 'localhost', '127.0.0.1', '::1' -and -not $Force) {
     Write-Host "Refusing to reset $PgHost; it is not local. Pass -Force if you mean it." -ForegroundColor Red
     exit 1
 }
@@ -33,7 +38,10 @@ if (-not $Docker -and $PgHost -notin 'localhost', '127.0.0.1', '::1' -and -not $
 $sql = 'DROP SCHEMA public CASCADE; CREATE SCHEMA public;'
 Write-Host "==> Resetting $Database" -ForegroundColor Cyan
 
-if ($Docker) {
+if ($Container) {
+    # psql runs inside the container, so host, port and password do not apply.
+    docker exec -i $Container psql -U $User -d $Database -v ON_ERROR_STOP=1 -c $sql
+} elseif ($Docker) {
     docker compose exec -T db psql -U $User -d $Database -v ON_ERROR_STOP=1 -c $sql
 } else {
     if (-not (Get-Command psql -ErrorAction SilentlyContinue)) {

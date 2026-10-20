@@ -9,6 +9,8 @@
 #
 #   ./scripts/reset-server-db.sh            # uses psql on PATH
 #   ./scripts/reset-server-db.sh --docker   # uses `docker compose exec db psql`
+#   POSTGRES_CONTAINER=my-postgres ./scripts/reset-server-db.sh
+#                                           # runs psql inside that container
 #   ./scripts/reset-server-db.sh --force    # allow a host other than localhost
 set -euo pipefail
 
@@ -16,6 +18,7 @@ host="${POSTGRES_HOST:-localhost}"
 port="${POSTGRES_PORT:-5432}"
 db="${POSTGRES_DB:-rc_soar_score}"
 user="${POSTGRES_USER:-postgres}"
+container="${POSTGRES_CONTAINER:-}"
 docker=0
 force=0
 for arg in "$@"; do
@@ -26,7 +29,7 @@ for arg in "$@"; do
   esac
 done
 
-if [ "$docker" = 0 ] && [ "$force" = 0 ] &&
+if [ "$docker" = 0 ] && [ -z "$container" ] && [ "$force" = 0 ] &&
   [ "$host" != localhost ] && [ "$host" != 127.0.0.1 ] && [ "$host" != ::1 ]; then
   echo "Refusing to reset $host; it is not local. Pass --force if you mean it." >&2
   exit 1
@@ -34,7 +37,10 @@ fi
 
 sql='DROP SCHEMA public CASCADE; CREATE SCHEMA public;'
 echo "==> Resetting $db"
-if [ "$docker" = 1 ]; then
+if [ -n "$container" ]; then
+  # psql runs inside the container, so host, port and password do not apply.
+  docker exec -i "$container" psql -U "$user" -d "$db" -v ON_ERROR_STOP=1 -c "$sql"
+elif [ "$docker" = 1 ]; then
   docker compose exec -T db psql -U "$user" -d "$db" -v ON_ERROR_STOP=1 -c "$sql"
 else
   command -v psql >/dev/null || { echo "psql was not found on PATH. Install the PostgreSQL client tools or use --docker." >&2; exit 1; }
