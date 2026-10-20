@@ -65,6 +65,7 @@ dependencies:
   flutter_secure_storage: ^11.2.0
   http: ^1.6.0
   win32_registry: ^3.0.3
+  file_selector: ^1.1.0
   package_info_plus: ^10.2.2
 
 dev_dependencies:

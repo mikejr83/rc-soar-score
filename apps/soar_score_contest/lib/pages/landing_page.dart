@@ -14,6 +14,7 @@ import 'package:soar_score_contest/widgets/connectivity_indicator.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../widgets/app_window_title.dart';
+import '../widgets/glider_score_import_button.dart';
 import '../widgets/not_wired_up_dialog.dart';
 
 class LandingPage extends StatefulWidget {
@@ -367,7 +368,7 @@ class _LandingPageState extends State<LandingPage> {
                             // `Continue offline` is available only in the offline
                             // (desktop) version of the app. The web build does not
                             // show it.
-                            if (!widget.isWeb)
+                            if (!widget.isWeb) ...[
                               TextButton.icon(
                                 onPressed: () {
                                   if (!kIsWeb) {
@@ -378,6 +379,9 @@ class _LandingPageState extends State<LandingPage> {
                                 icon: const Icon(Icons.wifi_off, size: 16),
                                 label: const Text('Continue offline'),
                               ),
+                              const SizedBox(height: 32),
+                              const GliderScoreImportButton(),
+                            ],
                             TextButton.icon(
                               onPressed: () => _openExternalLink(
                                 context,
