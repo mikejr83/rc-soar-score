@@ -25,3 +25,6 @@ web/
 # Dependencies and lockfiles
 node_modules/
 pubspec.lock
+
+# Agents
+.agents/skills/

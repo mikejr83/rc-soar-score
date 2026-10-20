@@ -41,7 +41,7 @@ Overflowed page columns:
 These are optional columns that can be shown on the report. available)
 
 - Percentage of total - This is the percentage of the points the pilot achieved based on the winner. The winner would be 100%. If a pilot managed only to receive 5000pts and the winner had 10,000pts, that pilot would have 50%.
-- Raw Score - The total of all flight scores. This would be the "Total score" plus any of the dropped rounds. This provides an overview of how well a pilot did if there was no drop. *This is not the raw score for each round.*
+- Raw Score - The total of all flight scores. This would be the "Total score" plus any of the dropped rounds. This provides an overview of how well a pilot did if there was no drop. _This is not the raw score for each round._
 - Team\*
 - Pilot Number\*
 - Pilot Class\*
@@ -61,7 +61,7 @@ F3J example
 - Time
 - Landing
 
-**Provisional** - This report may be run mid contest. If this is selected it should show up to the last round with scores even if that round does not have all scores. Regardless of this being selected or not, rounds that have no scores not be shown.  This should default to checked if there are more rounds that have not been scored.
+**Provisional** - This report may be run mid contest. If this is selected it should show up to the last round with scores even if that round does not have all scores. Regardless of this being selected or not, rounds that have no scores not be shown. This should default to checked if there are more rounds that have not been scored.
 
 ## Filtering
 

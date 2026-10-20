@@ -372,6 +372,7 @@ In priority order. _Measured_ means supported by the results above; _untested_ m
 
 - The analysis omits frequencies and back-to-back.
 - Three configurations, 5 seeds per variant. Only T₀ = 2 was tried for polish; no other parameter tuning.
+
 4. **Seeded + team protection:** support it with a defined fallback, or forbid it?
 5. **Back-to-back:** add it?
 6. **Lanes:** configured count, or derived?
