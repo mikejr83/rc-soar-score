@@ -43,10 +43,12 @@ class ResultsService {
   final DateTime Function() _clock;
   final Id Function() _newId;
 
-  /// The standings as of the latest scored round.
+  /// The standings as of the latest scored round, or as of [asOfRound] when
+  /// given (the stored standing of that round).
   ///
-  /// Throws an [EntityNotFoundError] when the contest does not exist.
-  Future<ContestResults> read(Id contestId) async {
+  /// Throws an [EntityNotFoundError] when the contest does not exist and an
+  /// [ArgumentError] when there is no standing as of [asOfRound].
+  Future<ContestResults> read(Id contestId, {int? asOfRound}) async {
     final contest = await _requireContest(contestId);
     final stored = await repository.participationStandingRepository
         .listForContest(contestId);
@@ -54,18 +56,26 @@ class ResultsService {
       return ContestResults(isStale: await _hasScores(contest));
     }
     final latest = stored.map((s) => s.asOfRound).reduce(_max);
+    final round = asOfRound ?? latest;
     final standings = [
       for (final standing in stored)
-        if (standing.asOfRound == latest) standing,
+        if (standing.asOfRound == round) standing,
     ]..sort((a, b) => a.place.compareTo(b.place));
+    if (standings.isEmpty) {
+      throw ArgumentError.value(
+        asOfRound,
+        'asOfRound',
+        'there is no standing as of that round',
+      );
+    }
     final teams = [
       ...await repository.teamStandingRepository.listAsOfRound(
         contestId,
-        latest,
+        round,
       ),
     ]..sort((a, b) => a.place.compareTo(b.place));
     return ContestResults(
-      asOfRound: latest,
+      asOfRound: round,
       isStale: await _isStale(
         contest,
         stamps: ResultStamps(

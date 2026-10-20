@@ -42,6 +42,21 @@ void main() {
     expect(seen.url.path, '/api/v1/contests/${contestId.value}/results');
   });
 
+  test('results(id, asOfRound:) asks for the standings of one round', () async {
+    final results = ContestResults(asOfRound: 2);
+    final client = clientFor((_) => body(results.toJson()));
+
+    expect(await client.results(contestId, asOfRound: 2), results);
+    expect(seen.url.path, '/api/v1/contests/${contestId.value}/results');
+    expect(seen.url.queryParameters, {'asOfRound': '2'});
+  });
+
+  test('results(id) sends no query', () async {
+    final client = clientFor((_) => body(ContestResults().toJson()));
+    await client.results(contestId);
+    expect(seen.url.hasQuery, isFalse);
+  });
+
   test('roundResults GETs one round', () async {
     final results = RoundResults(ordinal: 3, isStale: false, flights: []);
     final client = clientFor((_) => body(results.toJson()));

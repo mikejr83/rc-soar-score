@@ -631,11 +631,16 @@ class ApiClient {
     return _decode<ScoreHistory>(response, uri, ScoreHistory.fromJson);
   }
 
-  /// `GET /api/v1/contests/{id}/results` — the standings and team totals as
-  /// of the latest scored round. `preliminary` is set while rounds are
-  /// unscored or the stored results are stale.
-  Future<ContestResults> results(Id id) async {
-    final uri = _resolve('/api/v1/contests/${id.value}/results');
+  /// `GET /api/v1/contests/{id}/results` - the standings and team totals as
+  /// of the latest scored round, or as of [asOfRound] when given (the stored
+  /// standing of that round). `preliminary` is set while rounds are unscored
+  /// or the stored results are stale.
+  ///
+  /// A round with no standing is an [ApiHttpError] with status 400.
+  Future<ContestResults> results(Id id, {int? asOfRound}) async {
+    final uri = _resolve('/api/v1/contests/${id.value}/results').replace(
+      queryParameters: asOfRound == null ? null : {'asOfRound': '$asOfRound'},
+    );
     final response = await _send('GET', uri);
     return _decode<ContestResults>(response, uri, ContestResults.fromJson);
   }
