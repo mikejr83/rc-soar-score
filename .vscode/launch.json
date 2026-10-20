@@ -9,7 +9,7 @@
       "env": {
         "PORT": "8080",
         "POSTGRES_PASSWORD": "titan#12",
-        "AUTH0_DOMAIN": "soar-score.us.auth0.com",
+        "AUTH0_DOMAIN": "dev-2qpi7354ddlhe45g.us.auth0.com",
         "API_AUDIENCE": "https://soar-score.com/server"
       },
       "console": "debugConsole"
