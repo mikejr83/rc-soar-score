@@ -14,10 +14,10 @@ The title containing the contest name, venue, and date should appear as text acr
 
 The main header or title for the card should be the pilot's identity. This consists of their name along with the following information (shown smaller).
 
-* Club
-* FAI and National ID
-* Class\*
-* Team\*
+- Club
+- FAI and National ID
+- Class\*
+- Team\*
 
 \* Only shows if the contest is configured for them.
 
@@ -31,9 +31,9 @@ The main part of the card is the display of a table for the pilot to keep track 
 
 The table starts with the following columns:
 
-* Round Number
-* Group
-* Lane Number\*
+- Round Number
+- Group
+- Lane Number\*
 
 \* Only if this is enabled for the contest.
 
@@ -41,19 +41,19 @@ Additional columns are displayed based on the score components for the contest's
 
 F5J Example:
 
-* Time
-* Landing
-* Height
-* Over 75m
-* Motor Restart\*
+- Time
+- Landing
+- Height
+- Over 75m
+- Motor Restart\*
 
 \* If enabled by the contest.
 
 Finally three additional columns:
 
-* Penalty
-* Timer
-* Validated
+- Penalty
+- Timer
+- Validated
 
 ## Printing
 
