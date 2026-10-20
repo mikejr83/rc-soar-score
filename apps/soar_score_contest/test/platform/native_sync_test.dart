@@ -59,24 +59,28 @@ void main() {
     dir.deleteSync(recursive: true);
   });
 
-  Future<core.Contest> saveContest(core.Id? owner) =>
-      ContestRepository(server.database).save(
-        core.Contest(
-          id: core.Id.create(),
-          name: 'Spring Meet',
-          startDateTime: DateTime.utc(2026, 4, 15, 10),
-          endDateTime: DateTime.utc(2026, 4, 16, 20),
-          timezone: 'America/Denver',
-          createdAt: DateTime.utc(2026, 4),
-          updatedAt: DateTime.utc(2026, 4),
-          ownerAccountId: owner,
-        ),
-        metadata: core.MutationMetadata(
-          clientMutationId: 'm-${DateTime.now().microsecondsSinceEpoch}',
-          authority: core.Authority.director,
-          clientTime: DateTime.utc(2026, 4),
-        ),
-      );
+  Future<core.Contest> saveContest(
+    core.Id? owner, {
+    core.Id? id,
+    String name = 'Spring Meet',
+    DateTime? at,
+  }) => ContestRepository(server.database).save(
+    core.Contest(
+      id: id ?? core.Id.create(),
+      name: name,
+      startDateTime: DateTime.utc(2026, 4, 15, 10),
+      endDateTime: DateTime.utc(2026, 4, 16, 20),
+      timezone: 'America/Denver',
+      createdAt: DateTime.utc(2026, 4),
+      updatedAt: DateTime.utc(2026, 4),
+      ownerAccountId: owner,
+    ),
+    metadata: core.MutationMetadata(
+      clientMutationId: 'm-${DateTime.now().microsecondsSinceEpoch}',
+      authority: core.Authority.director,
+      clientTime: at ?? DateTime.utc(2026, 4),
+    ),
+  );
 
   Future<void> settle() => Future<void>.delayed(const Duration(seconds: 2));
 
@@ -254,6 +258,32 @@ void main() {
       final refused = await sync.appSync.refusedChanges(scope);
       expect(refused.single.entityType, 'Contest');
       expect(refused.single.reason, 'Locked.');
+    });
+
+    test('refused changes are listed newest first', () async {
+      final contest = await saveContest(core.Id.create());
+      final scope = core.ContestScopeKey(contest.id);
+      await saveContest(
+        core.Id.create(),
+        id: contest.id,
+        name: 'Spring Meet, renamed',
+        at: DateTime.utc(2026, 4, 3),
+      );
+      final store = DriftSyncStore(server.database);
+      for (final pending in await store.pendingMutations(scope)) {
+        await store.recordOutcome(
+          mutationId: pending.id,
+          outcome: core.MutationOutcome.rejected,
+          serverRejectionTime: DateTime.utc(2026, 4, 4),
+          reasonCode: 'locked',
+        );
+      }
+
+      final refused = await sync.appSync.refusedChanges(scope);
+
+      expect(refused, hasLength(2));
+      expect(refused.first.madeAt, DateTime.utc(2026, 4, 3));
+      expect(refused.last.madeAt, DateTime.utc(2026, 4));
     });
   });
 }
