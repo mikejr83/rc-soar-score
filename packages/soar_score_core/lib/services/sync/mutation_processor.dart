@@ -679,6 +679,17 @@ class MutationProcessor {
         'The score is locked. Unlock it to change it.',
       );
     }
+    if (m.entityType == 'OfficialScore') {
+      final attemptId = entity['score_attempt_id'];
+      if (attemptId is! String ||
+          await tx.findEntity('ScoreAttempt', Id.parse(attemptId)) == null) {
+        return (
+          SyncReasonCode.invalidPayload,
+          'The official score refers to a score attempt the service does not '
+              'have: ${attemptId ?? 'none given'}.',
+        );
+      }
+    }
     final matrixId = entity['matrix_revision_id'];
     if (m.entityType == 'ScoreAttempt' &&
         (matrixId is! String ||
