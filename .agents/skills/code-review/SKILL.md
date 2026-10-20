@@ -1,11 +1,11 @@
 ---
 name: code-review
-description: Perform code reviews following Sentry engineering practices. Use when reviewing pull requests, examining code changes, or providing feedback on code quality. Covers security, performance, testing, and design review.
+description: Perform code reviews following Dart, Flutter, Shelf, and Drift engineering practices. Use when reviewing pull requests, examining code changes, or providing feedback on code quality. Covers async safety, UI performance, database efficiency, and API design.
 ---
 
-# Sentry Code Review
+# Flutter, Shelf & Drift Code Review Guidelines
 
-Follow these guidelines when reviewing code for Sentry projects.
+Follow these guidelines when reviewing code for Dart, Flutter, Shelf, and Drift projects.
 
 ## Review Checklist
 
@@ -13,90 +13,106 @@ Follow these guidelines when reviewing code for Sentry projects.
 
 Look for these issues in code changes:
 
-- **Runtime errors**: Potential exceptions, null pointer issues, out-of-bounds access
-- **Performance**: Unbounded O(n²) operations, N+1 queries, unnecessary allocations
-- **Side effects**: Unintended behavioral changes affecting other components
-- **Backwards compatibility**: Breaking API changes without migration path
-- **ORM queries**: Complex Django ORM with unexpected query performance
-- **Security vulnerabilities**: Injection, XSS, access control gaps, secrets exposure
+- **Async & Concurrency**: Uncaught futures, missing `await`, and `BuildContext` usage across async gaps without checking `mounted`.
+- **Resource Management**: Controllers (`TextEditingController`, `ScrollController`, animation controllers) or stream subscriptions not disposed in `dispose()`.
+- **Performance & Rebuilds**: Missing `const` constructors, heavy computations on the UI thread, or unoptimized lists (e.g., using `ListView` instead of `ListView.builder` for dynamic datasets).
+- **Drift & Database**: Inefficient queries, missing indices, improper transaction usage for multi-table writes, or misuse of reactive `.watch()` streams causing excessive UI updates.
+- **Shelf Handlers**: Unhandled exceptions in route handlers, missing input validation, or lack of proper middleware for error handling, CORS, and logging.
+- **Security & Storage**: Unencrypted sensitive local data, improper token handling, or unvalidated request parameters.
 
 ### Design Assessment
 
-- Do component interactions make logical sense?
-- Does the change align with existing project architecture?
-- Are there conflicts with current requirements or goals?
+- Do Flutter widget boundaries and state management approaches align with the project architecture?
+- Are Shelf route handlers decoupled cleanly from business logic and data access?
+- Are Drift DAOs and tables properly structured and separated from service layers?
 
 ### Test Coverage
 
 Every PR should have appropriate test coverage:
 
-- Functional tests for business logic
-- Integration tests for component interactions
-- End-to-end tests for critical user paths
-
-Verify tests cover actual requirements and edge cases. Avoid excessive branching or looping in test code.
+- **Unit tests**: For business logic, view models/providers, and Drift queries/DAOs (using in-memory SQLite instances).
+- **Widget tests**: For component behavior, user interactions, and state changes.
+- **Integration tests**: For critical user paths, end-to-end API requests, and database workflows.
 
 ### Long-Term Impact
 
 Flag for senior engineer review when changes involve:
 
-- Database schema modifications
-- API contract changes
-- New framework or library adoption
-- Performance-critical code paths
-- Security-sensitive functionality
+- Drift database schema migrations and table modifications.
+- Shelf API contract changes or breaking version updates.
+- Introduction of new global state management patterns or heavy packages.
+- Performance-critical rendering or database query hot paths.
 
 ## Feedback Guidelines
 
 ### Tone
 
-- Be polite and empathetic
-- Provide actionable suggestions, not vague criticism
+- Be polite and empathetic.
+- Provide actionable suggestions, not vague criticism.
 - Phrase as questions when uncertain: "Have you considered...?"
 
 ### Approval
 
-- Approve when only minor issues remain
-- Don't block PRs for stylistic preferences
-- Remember: the goal is risk reduction, not perfect code
+- Approve when only minor issues remain.
+- Don't block PRs for stylistic preferences.
+- Remember: the goal is risk reduction, not perfect code.
 
 ## Common Patterns to Flag
 
-### Python/Django
+### Flutter: BuildContext Across Async Gaps
 
-```python
-# Bad: N+1 query
-for user in users:
-    print(user.profile.name)  # Separate query per user
+```dart
+// Bad: Using context after an asynchronous gap without checking mounted
+Future<void> _submitData() async {
+  final data = await apiService.fetchData();
+  Navigator.of(context).pop(data); // Risk if widget unmounted during fetch
+}
 
-# Good: Prefetch related
-users = User.objects.prefetch_related('profile')
+// Good: Check mounted before using context
+Future<void> _submitData() async {
+  final data = await apiService.fetchData();
+  if (!mounted) return;
+  Navigator.of(context).pop(data);
+}
 ```
 
-### TypeScript/React
+### Drift: Transactions & Reactive Queries
 
-```typescript
-// Bad: Missing dependency in useEffect
-useEffect(() => {
-  fetchData(userId);
-}, []);  // userId not in deps
+```dart
+// Bad: Executing independent writes without a transaction
+await db.into(db.todos).insert(todoCompanion);
+await db.into(db.auditLogs).insert(logCompanion);
 
-// Good: Include all dependencies
-useEffect(() => {
-  fetchData(userId);
-}, [userId]);
+// Good: Wrap multi-step mutations in a transaction
+await db.transaction(() async {
+  await db.into(db.todos).insert(todoCompanion);
+  await db.into(db.auditLogs).insert(logCompanion);
+});
 ```
 
-### Security
+### Shelf: Route Handler Error Handling
 
-```python
-# Bad: SQL injection risk
-cursor.execute(f"SELECT * FROM users WHERE id = {user_id}")
+```dart
+// Bad: Uncaught exceptions crashing the handler
+Response _handler(Request request) {
+  final data = jsonDecode(request.readAsString()); // Can throw format exception
+  return Response.ok(jsonEncode(process(data)));
+}
 
-# Good: Parameterized query
-cursor.execute("SELECT * FROM users WHERE id = %s", [user_id])
+// Good: Proper parsing with error catching and validation
+Future<Response> _handler(Request request) async {
+  try {
+    final body = await request.readAsString();
+    final data = jsonDecode(body) as Map<String, dynamic>;
+    return Response.ok(jsonEncode(process(data)), headers: {'Content-Type': 'application/json'});
+  } on FormatException {
+    return Response.badRequest(body: 'Invalid JSON payload');
+  }
+}
 ```
 
 ## References
 
-- [Sentry Code Review Guidelines](https://develop.sentry.dev/engineering-practices/code-review/)
+- [Flutter Best Practices](https://docs.flutter.dev/perf/best-practices)
+- [Drift Documentation](https://drift.simonbinder.eu/)
+- [Shelf Package](https://pub.dev/packages/shelf)
