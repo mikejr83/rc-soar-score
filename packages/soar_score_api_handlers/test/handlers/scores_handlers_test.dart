@@ -105,8 +105,12 @@ void main() {
       final official = body['official_score']! as Map;
       expect((official['components'] as Map)['cumulative_penalty'], 0);
       expect(
-        (api.repository.officialScores.stored.single.components)
-            ['cumulative_penalty'],
+        (api
+            .repository
+            .officialScores
+            .stored
+            .single
+            .components)['cumulative_penalty'],
         0,
       );
     });

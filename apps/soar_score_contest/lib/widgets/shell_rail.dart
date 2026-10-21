@@ -1,6 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../collapsible_areas_provider.dart';
+import '../services/collapsible_areas/collapsible_area.dart';
 import '../contest_draft_provider.dart';
 import '../pages/landing_page.dart';
 import '../app_sync_provider.dart';
@@ -39,7 +43,24 @@ class ShellRail extends StatefulWidget {
 }
 
 class _ShellRailState extends State<ShellRail> {
-  bool _expanded = false;
+  /// Whether the rail is expanded, remembered per account
+  /// ([shellRailArea]) and applied only on wide windows.
+  bool? _localExpanded;
+  bool _expanded() {
+    final areas = collapsibleAreasOf(context);
+    return areas == null
+        ? _localExpanded ?? false
+        : areas.isOpen(shellRailArea, fallback: false);
+  }
+
+  void _toggleExpanded(bool open) {
+    final areas = collapsibleAreasOf(context);
+    if (areas == null) {
+      setState(() => _localExpanded = !open);
+      return;
+    }
+    unawaited(areas.setOpen(shellRailArea, !open));
+  }
 
   bool _isUnder(String location) =>
       widget.path == location || widget.path.startsWith('$location/');
@@ -103,7 +124,7 @@ class _ShellRailState extends State<ShellRail> {
     );
     final canExpand =
         MediaQuery.sizeOf(context).width >= ShellRail.expandableWidth;
-    final expanded = canExpand && _expanded;
+    final expanded = canExpand && _expanded();
     final system = shellScopeFor(widget.path) == ShellScope.system;
     final fab = system && !wizard ? _fab(context, hasDraft) : null;
 
@@ -123,7 +144,7 @@ class _ShellRailState extends State<ShellRail> {
               key: const ValueKey('rail-toggle'),
               tooltip: expanded ? 'Collapse navigation' : 'Expand navigation',
               icon: Icon(expanded ? Icons.menu_open : Icons.menu),
-              onPressed: () => setState(() => _expanded = !_expanded),
+              onPressed: () => _toggleExpanded(expanded),
             ),
           _RailTitle(expanded: expanded),
           if (fab != null) ...[

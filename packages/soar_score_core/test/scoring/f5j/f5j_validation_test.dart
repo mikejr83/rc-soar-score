@@ -161,8 +161,11 @@ void main() {
       final present = {'time_flown': 100, 'launch_height': 100};
       expect(f5j.validate(absent), isEmpty);
       for (final value in <int>[0, 5]) {
-        expect(f5j.validate({...present, 'cumulative_penalty': value}), isEmpty,
-            reason: '$value');
+        expect(
+          f5j.validate({...present, 'cumulative_penalty': value}),
+          isEmpty,
+          reason: '$value',
+        );
       }
       expect(
         issueCodes(

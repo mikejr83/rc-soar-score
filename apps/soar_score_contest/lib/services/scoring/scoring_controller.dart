@@ -215,8 +215,7 @@ class ScoringController extends ChangeNotifier {
 
   /// Whether saving this row removes an applied cumulative penalty
   /// (N → 0), an official correction that needs a recorded reason.
-  bool isPenaltyRemoval(ScoringRow row) =>
-      _removal(row, _drafts[row.id]);
+  bool isPenaltyRemoval(ScoringRow row) => _removal(row, _drafts[row.id]);
 
   /// The dirty rows whose save removes an applied cumulative penalty, in row
   /// order. Each needs a recorded reason the bulk paths must capture.
@@ -256,7 +255,8 @@ class ScoringController extends ChangeNotifier {
     } else {
       _removalReasons.remove(row.id);
     }
-    final effectiveReason = reason ??
+    final effectiveReason =
+        reason ??
         _removalReasons[row.id] ??
         (row.isScored
             ? 'Corrected on the scoring page'
@@ -370,7 +370,8 @@ class ScoringController extends ChangeNotifier {
     final fresh = rows.firstWhere((r) => r.id == row.id, orElse: () => row);
     _saves.remove(row.id);
     _theirs.remove(row.id);
-    final reason = _removalReasons[fresh.id] ??
+    final reason =
+        _removalReasons[fresh.id] ??
         'Kept the entered values over a newer revision';
     return save(fresh, reason: reason);
   }

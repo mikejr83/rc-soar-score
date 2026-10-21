@@ -248,33 +248,36 @@ void _tests(Backend backend) {
     );
 
     group('the cumulative penalty', () {
-      test(
-        'is stored with the score and revises with a reason',
-        () async {
-          final slot = slots.first;
+      test('is stored with the score and revises with a reason', () async {
+        final slot = slots.first;
 
-          final result = await enter(slot, components: const {
+        final result = await enter(
+          slot,
+          components: const {
             'time_flown': 540,
             'launch_height': 200,
             'cumulative_penalty': 25,
-          });
+          },
+        );
 
-          expect(result.officialScore.components['cumulative_penalty'], 25);
-          expect(result.officialScore.scoreRevision, 1);
-          expect(result.officialScore.reason, ScoresService.defaultReason);
-          final stored = await repository.officialScoreRepository
-              .currentForPlaceholder(result.placeholder.id);
-          expect(stored!.components['cumulative_penalty'], 25);
-        },
-      );
+        expect(result.officialScore.components['cumulative_penalty'], 25);
+        expect(result.officialScore.scoreRevision, 1);
+        expect(result.officialScore.reason, ScoresService.defaultReason);
+        final stored = await repository.officialScoreRepository
+            .currentForPlaceholder(result.placeholder.id);
+        expect(stored!.components['cumulative_penalty'], 25);
+      });
 
       test('a change stores a new revision and keeps the old one', () async {
         final slot = slots.first;
-        await enter(slot, components: const {
-          'time_flown': 540,
-          'launch_height': 200,
-          'cumulative_penalty': 5,
-        });
+        await enter(
+          slot,
+          components: const {
+            'time_flown': 540,
+            'launch_height': 200,
+            'cumulative_penalty': 5,
+          },
+        );
 
         final corrected = await enter(
           slot,
@@ -292,10 +295,7 @@ void _tests(Backend backend) {
         expect(corrected.officialScore.components['cumulative_penalty'], 10);
         final history = await repository.officialScoreRepository
             .listForPlaceholder(corrected.placeholder.id);
-        expect(
-          history.map((s) => s.components['cumulative_penalty']),
-          [5, 10],
-        );
+        expect(history.map((s) => s.components['cumulative_penalty']), [5, 10]);
         expect(history.map((s) => s.reason), [
           ScoresService.defaultReason,
           'Recounted the flights',
@@ -304,11 +304,14 @@ void _tests(Backend backend) {
 
       test('a removal stores an explicit 0, not a dropped key', () async {
         final slot = slots.first;
-        await enter(slot, components: const {
-          'time_flown': 540,
-          'launch_height': 200,
-          'cumulative_penalty': 5,
-        });
+        await enter(
+          slot,
+          components: const {
+            'time_flown': 540,
+            'launch_height': 200,
+            'cumulative_penalty': 5,
+          },
+        );
 
         final removed = await enter(
           slot,
@@ -351,19 +354,23 @@ void _tests(Backend backend) {
         final slot = slots.first;
 
         await expectLater(
-          enter(slot, components: const {
-            'time_flown': 540,
-            'launch_height': 200,
-            'cumulative_penalty': -5,
-          }),
+          enter(
+            slot,
+            components: const {
+              'time_flown': 540,
+              'launch_height': 200,
+              'cumulative_penalty': -5,
+            },
+          ),
           throwsA(isA<core.ScoringValidationError>()),
         );
 
         final stored = await repository.officialScoreRepository
             .currentForPlaceholder(
-          (await repository.scorePlaceholderRepository.findForAssignment(slot))!
-              .id,
-        );
+              (await repository.scorePlaceholderRepository.findForAssignment(
+                slot,
+              ))!.id,
+            );
         expect(stored, isNull);
       });
     });

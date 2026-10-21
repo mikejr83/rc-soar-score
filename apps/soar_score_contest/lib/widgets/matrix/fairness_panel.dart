@@ -37,9 +37,9 @@ class FairnessPanel extends StatefulWidget {
 }
 
 class _FairnessPanelState extends State<FairnessPanel> {
-  /// The user's choice when nothing remembers it (tests without the app).
+  /// The user's choices when nothing remembers them (tests without the app).
   bool? _localOpen;
-  bool _details = false;
+  bool? _localDetails;
 
   FairnessView get _fairness =>
       FairnessView.of(widget.revision.fairnessSummary);
@@ -57,6 +57,19 @@ class _FairnessPanelState extends State<FairnessPanel> {
     );
   }
 
+  Future<void> _toggleDetails(bool open) async {
+    final areas = collapsibleAreasOf(context);
+    if (areas == null) {
+      setState(() => _localDetails = !open);
+      return;
+    }
+    final messenger = ScaffoldMessenger.of(context);
+    if (await areas.setOpen(drawDetailsArea, !open)) return;
+    messenger.showSnackBar(
+      const SnackBar(content: Text(FairnessPanel.saveFailedMessage)),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
@@ -66,6 +79,9 @@ class _FairnessPanelState extends State<FairnessPanel> {
     final open = areas == null
         ? _localOpen ?? startOpen
         : areas.isOpen(matrixSummaryArea, fallback: startOpen);
+    final details = areas == null
+        ? _localDetails ?? false
+        : areas.isOpen(drawDetailsArea, fallback: false);
     return Card(
       margin: EdgeInsets.zero,
       child: Column(
@@ -92,9 +108,9 @@ class _FairnessPanelState extends State<FairnessPanel> {
                   if (!open) _Compact(fairness: fairness),
                   TextButton.icon(
                     key: const ValueKey('draw-details-toggle'),
-                    onPressed: () => setState(() => _details = !_details),
+                    onPressed: () => _toggleDetails(details),
                     icon: Icon(
-                      _details ? Icons.expand_less : Icons.expand_more,
+                      details ? Icons.expand_less : Icons.expand_more,
                       size: 18,
                     ),
                     label: const Text('Draw details'),
@@ -137,7 +153,7 @@ class _FairnessPanelState extends State<FairnessPanel> {
               },
             ),
           ),
-          if (_details) ...[
+          if (details) ...[
             Divider(height: 1, color: scheme.outlineVariant),
             _Details(
               revision: widget.revision,

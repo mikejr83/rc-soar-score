@@ -1,6 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../../collapsible_areas_provider.dart';
+import '../../services/collapsible_areas/collapsible_area.dart';
 import '../../services/configuration/configuration_data.dart';
 import '../../services/configuration/configuration_draft.dart';
 import '../../services/configuration/setting_keys.dart';
@@ -37,7 +41,24 @@ class LandingSectionBody extends StatefulWidget {
 }
 
 class _LandingSectionBodyState extends State<LandingSectionBody> {
-  bool _showEntries = false;
+  /// Whether the entries table is shown, remembered per account
+  /// ([landingEntriesArea]).
+  bool? _localEntries;
+  bool _showEntries() {
+    final areas = collapsibleAreasOf(context);
+    return areas == null
+        ? _localEntries ?? false
+        : areas.isOpen(landingEntriesArea);
+  }
+
+  void _toggleEntries() {
+    final areas = collapsibleAreasOf(context);
+    if (areas == null) {
+      setState(() => _localEntries = !_showEntries());
+      return;
+    }
+    unawaited(areas.setOpen(landingEntriesArea, !_showEntries()));
+  }
 
   ConfigurationDraft get _draft => widget.draft;
 
@@ -72,6 +93,7 @@ class _LandingSectionBodyState extends State<LandingSectionBody> {
     );
     final change = _draft.changeOf(SettingKeys.landingTable);
     final error = _draft.errors[SettingKeys.landingTable];
+    final showEntries = _showEntries();
     final defaultId = widget.data.profile?.profile.defaultLandingTableId;
     final defaultView = widget.data.landingTable(defaultId);
     final savedView = widget.data.landingTable(
@@ -134,12 +156,12 @@ class _LandingSectionBodyState extends State<LandingSectionBody> {
                 ),
                 if (view != null)
                   OutlinedButton.icon(
-                    onPressed: () =>
-                        setState(() => _showEntries = !_showEntries),
+                    key: const ValueKey('landing-entries-toggle'),
+                    onPressed: _toggleEntries,
                     icon: Icon(
-                      _showEntries ? Icons.expand_less : Icons.expand_more,
+                      showEntries ? Icons.expand_less : Icons.expand_more,
                     ),
-                    label: Text(_showEntries ? 'Hide entries' : 'Show entries'),
+                    label: Text(showEntries ? 'Hide entries' : 'Show entries'),
                   ),
                 TextButton.icon(
                   onPressed: widget.onOpenLandings,
@@ -193,7 +215,7 @@ class _LandingSectionBodyState extends State<LandingSectionBody> {
                 ),
               ],
             ],
-            if (view != null && _showEntries) ...[
+            if (view != null && showEntries) ...[
               const SizedBox(height: 12),
               LandingEntriesTable(view: view),
             ],
