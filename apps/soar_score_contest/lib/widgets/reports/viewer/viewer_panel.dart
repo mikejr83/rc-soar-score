@@ -1,3 +1,5 @@
+import 'dart:ui' show PlatformDispatcher;
+
 import 'package:flutter/material.dart';
 
 import '../../../services/reports/viewer/page_setup.dart';
@@ -50,7 +52,10 @@ class ViewerPanelGroups extends StatelessWidget {
             selected: setup.paper,
             text: (paper) => paper.label,
             onChanged: onPaper,
-            help: setup.paper.defaultNote(locale),
+            help: setup.paper.defaultNote(
+              locale,
+              system: PlatformDispatcher.instance.locale,
+            ),
           ),
           _Segments<PageOrientation>(
             label: 'Orientation',
