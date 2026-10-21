@@ -13,6 +13,7 @@ import '../../services/reports/report_launcher.dart';
 import '../../services/reports/reports_facts.dart';
 import '../../services/reports/result_status.dart';
 import '../../services/reports/viewer/page_setup.dart';
+import '../../services/reports/viewer/platform_report_printer.dart';
 import '../../services/reports/viewer/report_print_result.dart';
 import '../../services/reports/viewer/report_spec.dart';
 import '../../services/reports/viewer/report_view_params.dart';
@@ -37,7 +38,7 @@ typedef ReportDefinitionFinder = ReportDefinition Function(ReportKind kind);
 /// shell, in its own browser tab or in place, so it carries the report's and
 /// the contest's names and holds its state in the URL.
 ///
-/// Printing and Save as PDF are not wired up yet ([NotWiredReportPrinter]).
+/// Printing and Save as PDF go through [printer].
 class ReportViewerPage extends StatefulWidget {
   const ReportViewerPage({
     super.key,
@@ -46,7 +47,7 @@ class ReportViewerPage extends StatefulWidget {
     this.params = const ReportViewParams(),
     this.openedInPlace = false,
     this.definitionFor = reportDefinitionFor,
-    this.printer = const NotWiredReportPrinter(),
+    this.printer = const PlatformReportPrinter(),
     this.launcher = const PlatformReportLauncher(),
     this.onParams,
     this.pollInterval = const Duration(seconds: 30),
@@ -205,8 +206,6 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
 
   // Actions.
 
-  int get _pageCount => _document()?.pages.length ?? 0;
-
   String get _printTitle {
     final name = _controller!.facts?.contest.name;
     return name == null
@@ -219,7 +218,7 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
     if (!controller.hasSheet || !controller.printer.capabilities.canPrint) {
       return;
     }
-    controller.print(_printTitle, _pageCount);
+    controller.print(_printTitle, _pages(_document()!));
   }
 
   void _savePdf() {
@@ -227,7 +226,7 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
     if (!controller.hasSheet || !controller.printer.capabilities.canSavePdf) {
       return;
     }
-    controller.savePdf(_printTitle, _pageCount);
+    controller.savePdf(_printTitle, _pages(_document()!));
   }
 
   void _goBack() => context.go(contestReportsPath(widget.contestId));

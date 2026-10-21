@@ -1,3 +1,7 @@
+import 'package:flutter/widgets.dart';
+
+import 'page_setup.dart';
+
 /// What happened when the director asked to print or save a report.
 enum ReportPrintResult {
   /// Sent to the printer or saved as a PDF.
@@ -28,8 +32,8 @@ class ReportPrintCapabilities {
 /// Opens the platform's own print dialog for a sheet. The viewer sets paper
 /// and orientation, then hands over; the real dialog belongs to the platform.
 ///
-/// Printing and Save as PDF are not built yet; [NotWiredReportPrinter] stands
-/// in until an engine is chosen.
+/// [PlatformReportPrinter] is the real one; [NotWiredReportPrinter] stands in
+/// where a build has no printing.
 abstract class ReportPrinter {
   ReportPrintCapabilities get capabilities;
 
@@ -38,17 +42,26 @@ abstract class ReportPrinter {
   Future<ReportPrintResult> savePdf(ReportPrintJob job);
 }
 
-/// What is printed: the file name for a PDF and the page count and setup the
-/// dialog is told about.
+/// What is printed: the title (also the PDF's file name), the finished sheet
+/// pages and the setup the dialog is told about.
 class ReportPrintJob {
   const ReportPrintJob({
     required this.title,
     required this.pageCount,
     required this.paperLabel,
     required this.orientationLabel,
+    this.setup,
+    this.pages = const [],
   });
 
   final String title;
+
+  /// The paper and orientation the [pages] are laid out for.
+  final PageSetup? setup;
+
+  /// The finished sheet pages, each exactly [setup] sized. Empty for a printer
+  /// that only records the job.
+  final List<Widget> pages;
   final int pageCount;
   final String paperLabel;
   final String orientationLabel;

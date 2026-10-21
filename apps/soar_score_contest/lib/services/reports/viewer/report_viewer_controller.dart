@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
@@ -337,17 +337,24 @@ class ReportViewerController extends ChangeNotifier {
   // Printing.
 
   /// Opens the platform's print dialog for a sheet of [pageCount] pages.
-  Future<void> print(String title, int pageCount) =>
-      _send(title, pageCount, pdf: false);
+  Future<void> print(String title, List<Widget> pages) =>
+      _send(title, pages, pdf: false);
 
-  Future<void> savePdf(String title, int pageCount) =>
-      _send(title, pageCount, pdf: true);
+  Future<void> savePdf(String title, List<Widget> pages) =>
+      _send(title, pages, pdf: true);
 
-  Future<void> _send(String title, int pageCount, {required bool pdf}) async {
+  Future<void> _send(
+    String title,
+    List<Widget> pages, {
+    required bool pdf,
+  }) async {
     _printFailed = false;
+    final pageCount = pages.length;
     final job = ReportPrintJob(
       title: title,
       pageCount: pageCount,
+      setup: setup,
+      pages: pages,
       paperLabel: setup.paper.label,
       orientationLabel: setup.orientation.label,
     );
@@ -355,13 +362,13 @@ class ReportViewerController extends ChangeNotifier {
     if (_disposed) {
       return;
     }
-    final pages = '$pageCount ${pageCount == 1 ? 'page' : 'pages'}';
+    final pageText = '$pageCount ${pageCount == 1 ? 'page' : 'pages'}';
     switch (result) {
       case ReportPrintResult.sent:
         _notice = ViewerNotice(
           pdf
               ? 'PDF saved · $title.pdf'
-              : 'Sent to the printer · $pages, ${job.paperLabel}, '
+              : 'Sent to the printer · $pageText, ${job.paperLabel}, '
                     '${job.orientationLabel.toLowerCase()}.',
         );
       case ReportPrintResult.cancelled:

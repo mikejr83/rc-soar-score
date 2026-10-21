@@ -329,6 +329,11 @@ void main() {
       expect(printer.printed, hasLength(1));
       expect(printer.printed.single.pageCount, 2);
       expect(printer.printed.single.paperLabel, 'Letter');
+      expect(printer.printed.single.pages, hasLength(2));
+      expect(
+        printer.printed.single.setup,
+        const PageSetup(PaperSize.letter, PageOrientation.landscape),
+      );
       expect(
         find.text('Sent to the printer · 2 pages, Letter, landscape.'),
         findsOneWidget,
