@@ -3,10 +3,7 @@ import 'package:test/test.dart';
 
 void main() {
   group('requireValidPenalties', () {
-    Map<String, Object?> withPenalties({
-      Object? flight,
-      Object? cumulative,
-    }) {
+    Map<String, Object?> withPenalties({Object? flight, Object? cumulative}) {
       final components = <String, Object?>{};
       if (flight != null) components['flight_penalty'] = flight;
       if (cumulative != null) components['cumulative_penalty'] = cumulative;
@@ -16,10 +13,9 @@ void main() {
     test('absent and explicit null penalties are always OK', () {
       expect(() => requireValidPenalties({}), isNot(throwsArgumentError));
       expect(
-        () => requireValidPenalties(withPenalties(
-          flight: null,
-          cumulative: null,
-        )),
+        () => requireValidPenalties(
+          withPenalties(flight: null, cumulative: null),
+        ),
         isNot(throwsArgumentError),
       );
     });
@@ -84,7 +80,9 @@ void main() {
     });
 
     test('only director authority may set a non-null cumulative penalty', () {
-      for (final authority in Authority.values.where((a) => a != Authority.director)) {
+      for (final authority in Authority.values.where(
+        (a) => a != Authority.director,
+      )) {
         for (final value in const [0, 5]) {
           expect(
             () => requireValidPenalties(

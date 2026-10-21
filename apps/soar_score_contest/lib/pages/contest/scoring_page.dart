@@ -187,7 +187,8 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
     // already recorded for this row (its save failed or went stale) is
     // kept instead.
     if (c.isPenaltyRemoval(row)) {
-      final reason = c.removalReason(row.id) ??
+      final reason =
+          c.removalReason(row.id) ??
           await askPenaltyRemovalReason(context, pilots: [row.pilot.name]);
       if (!mounted || reason == null) return;
       await c.save(row, reason: reason);
@@ -226,8 +227,10 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
         if (!mounted || freshReason == null) return 0;
       }
       for (final row in removal) {
-        final fresh =
-            c.rows.firstWhere((r) => r.id == row.id, orElse: () => row);
+        final fresh = c.rows.firstWhere(
+          (r) => r.id == row.id,
+          orElse: () => row,
+        );
         // A removal that already failed or went stale stays with its banner;
         // the director retries or resolves it on the row.
         final pending = c.saveOf(fresh.id).kind;

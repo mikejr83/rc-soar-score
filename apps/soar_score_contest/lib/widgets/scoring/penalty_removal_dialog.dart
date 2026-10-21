@@ -77,9 +77,7 @@ class _PenaltyRemovalDialogState extends State<_PenaltyRemovalDialog> {
               autofocus: true,
               textInputAction: TextInputAction.done,
               maxLines: 3,
-              decoration: const InputDecoration(
-                labelText: 'Correction reason',
-              ),
+              decoration: const InputDecoration(labelText: 'Correction reason'),
               onSubmitted: (_) => _done(),
             ),
           ],

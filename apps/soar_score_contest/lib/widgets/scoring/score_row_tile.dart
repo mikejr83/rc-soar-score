@@ -158,7 +158,13 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
     }
     _timeNode.removeListener(_onTimeFocus);
     _heightNode.removeListener(_onHeightFocus);
-    for (final n in [_timeNode, _heightNode, _landingNode, _penaltyNode, _cumulativeNode]) {
+    for (final n in [
+      _timeNode,
+      _heightNode,
+      _landingNode,
+      _penaltyNode,
+      _cumulativeNode,
+    ]) {
       n.dispose();
     }
     super.dispose();
@@ -189,7 +195,9 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
     if (_time.text != d.timeText) _time.text = d.timeText;
     if (_height.text != d.heightText) _height.text = d.heightText;
     if (_penalty.text != d.penaltyText) _penalty.text = d.penaltyText;
-    if (_cumulative.text != d.cumulativePenaltyText) _cumulative.text = d.cumulativePenaltyText;
+    if (_cumulative.text != d.cumulativePenaltyText) {
+      _cumulative.text = d.cumulativePenaltyText;
+    }
   }
 
   void _focusFirst() {
@@ -574,17 +582,15 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
                   const SizedBox(width: 4),
-                  Text(
-                    '$flight flight',
-                    style: theme.textTheme.bodyMedium,
-                  ),
+                  Text('$flight flight', style: theme.textTheme.bodyMedium),
                 ],
               ),
             )
           else if (cumulative == null)
             Text('None', textAlign: TextAlign.center, style: muted),
           // A removal keeps its row: the value was applied earlier.
-          if (cumulative == 0) Text('Removed', textAlign: TextAlign.center, style: muted),
+          if (cumulative == 0)
+            Text('Removed', textAlign: TextAlign.center, style: muted),
           if (cumulative != null && cumulative > 0)
             Padding(
               padding: EdgeInsets.only(top: flight > 0 ? 4 : 0),

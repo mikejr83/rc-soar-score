@@ -12,8 +12,7 @@ NavigationRail _rail(WidgetTester tester) =>
     tester.widget<NavigationRail>(find.byType(NavigationRail));
 
 Future<void> _pump(
-  WidgetTester tester,
-  {
+  WidgetTester tester, {
   Size size = const Size(1280, 800),
   CollapsibleAreasController? areas,
 }) async {
@@ -60,9 +59,7 @@ void main() {
     expect(_rail(tester).extended, isTrue);
   });
 
-  testWidgets('reset collapses the rail back to how it starts', (
-    tester,
-  ) async {
+  testWidgets('reset collapses the rail back to how it starts', (tester) async {
     final controller = _controller(BackendLocalUiStore(MemoryLocalUiBackend()));
     await _pump(tester, areas: controller);
     await tester.tap(_toggle);

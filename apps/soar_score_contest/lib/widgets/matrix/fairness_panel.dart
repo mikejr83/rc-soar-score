@@ -153,9 +153,9 @@ class _FairnessPanelState extends State<FairnessPanel> {
               },
             ),
           ),
-            if (details) ...[
-              Divider(height: 1, color: scheme.outlineVariant),
-              _Details(
+          if (details) ...[
+            Divider(height: 1, color: scheme.outlineVariant),
+            _Details(
               revision: widget.revision,
               configurationRevision: widget.configurationRevision,
             ),

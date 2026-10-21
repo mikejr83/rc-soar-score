@@ -30,10 +30,8 @@ Future<void> _openFrontRangeMatrix(WidgetTester tester) async {
   await pumpUntilFound(tester, _toggle);
 }
 
-Future<void> _backToContestList(WidgetTester tester) async => tapVisible(
-  tester,
-  find.byKey(const ValueKey('breadcrumb-contests')),
-);
+Future<void> _backToContestList(WidgetTester tester) async =>
+    tapVisible(tester, find.byKey(const ValueKey('breadcrumb-contests')));
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();

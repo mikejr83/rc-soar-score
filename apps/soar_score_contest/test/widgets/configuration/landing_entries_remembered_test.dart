@@ -22,9 +22,7 @@ Future<void> _pump(
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
   Widget page = const MaterialApp(
-    home: Scaffold(
-      body: ContestConfigurationPage(contestId: configContestId),
-    ),
+    home: Scaffold(body: ContestConfigurationPage(contestId: configContestId)),
   );
   if (areas != null) {
     page = CollapsibleAreasInherited(controller: areas, child: page);
@@ -53,7 +51,11 @@ void main() {
   ) async {
     final store = BackendLocalUiStore(MemoryLocalUiBackend());
     final first = _controller(store);
-    await _pump(tester, ConfigServer(revision: configRevision(1)), areas: first);
+    await _pump(
+      tester,
+      ConfigServer(revision: configRevision(1)),
+      areas: first,
+    );
 
     await tester.ensureVisible(_toggle);
     await tester.tap(_toggle);
@@ -64,7 +66,11 @@ void main() {
     await tester.pumpWidget(const SizedBox());
     final second = _controller(store);
     await second.load();
-    await _pump(tester, ConfigServer(revision: configRevision(1)), areas: second);
+    await _pump(
+      tester,
+      ConfigServer(revision: configRevision(1)),
+      areas: second,
+    );
     expect(find.byType(LandingEntriesTable), findsOneWidget);
   });
 

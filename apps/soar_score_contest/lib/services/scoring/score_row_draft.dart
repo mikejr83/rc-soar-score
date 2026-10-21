@@ -89,8 +89,9 @@ class ScoreRowDraft extends ChangeNotifier {
 
   /// The cumulative penalty: `null` when the field is empty (never applied),
   /// or the whole number typed, including `0` (a removal).
-  int? get cumulativePenalty =>
-      cumulativePenaltyText.trim().isEmpty ? null : int.tryParse(cumulativePenaltyText.trim());
+  int? get cumulativePenalty => cumulativePenaltyText.trim().isEmpty
+      ? null
+      : int.tryParse(cumulativePenaltyText.trim());
 
   bool get cumulativePenaltyMalformed =>
       cumulativePenaltyText.trim().isNotEmpty &&

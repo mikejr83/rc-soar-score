@@ -46,7 +46,9 @@ class _LandingSectionBodyState extends State<LandingSectionBody> {
   bool? _localEntries;
   bool _showEntries() {
     final areas = collapsibleAreasOf(context);
-    return areas == null ? _localEntries ?? false : areas.isOpen(landingEntriesArea);
+    return areas == null
+        ? _localEntries ?? false
+        : areas.isOpen(landingEntriesArea);
   }
 
   void _toggleEntries() {
