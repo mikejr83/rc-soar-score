@@ -1,3 +1,4 @@
+import 'package:logging/logging.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:soar_score_api/soar_score_api.dart';
@@ -5,6 +6,8 @@ import 'package:soar_score_api_handlers/auth/principal.dart';
 import 'package:soar_score_api_handlers/handlers/health_handler.dart';
 import 'package:soar_score_api_handlers/handlers/request_body.dart';
 import 'package:soar_score_core/soar_score_core.dart';
+
+final _logger = Logger('Sync');
 
 /// Adds the sync routes to [router] (which is mounted under `/api/v1`):
 ///
@@ -53,6 +56,7 @@ void addSyncRoutes(
       request,
       RegisterInstallationRequest.fromJson,
     );
+    _logger.info('Registering installation for account ${principal.accountId} with id ${body.id}');
     final installation = await installations.register(
       accountId: principal.accountId,
       id: body.id,
@@ -64,7 +68,9 @@ void addSyncRoutes(
 
   router.get('/installations', (Request request) async {
     final principal = requirePrincipal(request);
+    _logger.fine('Listing installations for account ${principal.accountId}');
     final found = await installations.list(principal.accountId);
+    _logger.fine('Found ${found.length} installations for account ${principal.accountId}');
     return jsonResponse(<String, dynamic>{
       'installations': [for (final i in found) i.toJson()],
     });
@@ -76,6 +82,7 @@ void addSyncRoutes(
       accountId: principal.accountId,
       id: Id.parse(id),
     );
+    _logger.fine('Revoked installation $id for account ${principal.accountId}');
     return jsonResponse(installation.toJson());
   });
 
@@ -163,6 +170,7 @@ void addSyncRoutes(
   ) async {
     final principal = requirePrincipal(request);
     final body = await readJsonBody(request, ResolveConflictRequest.fromJson);
+    _logger.info('Resolving conflict $conflictId for account ${principal.accountId}');
     final result = await acceptor.resolveConflict(
       accountId: principal.accountId,
       conflictId: Id.parse(conflictId),

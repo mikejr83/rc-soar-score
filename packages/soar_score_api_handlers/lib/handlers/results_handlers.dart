@@ -3,6 +3,9 @@ import 'package:shelf_router/shelf_router.dart';
 import 'package:soar_score_api_handlers/auth/principal.dart';
 import 'package:soar_score_api_handlers/handlers/health_handler.dart';
 import 'package:soar_score_core/soar_score_core.dart';
+import 'package:logging/logging.dart';
+
+final _logger = Logger('ResultsHandlers');
 
 /// The results routes (all inside `/api/v1`):
 ///
@@ -20,8 +23,16 @@ void addResultsRoutes(Router router, Repository repository) {
 
   router.get('/contests/<id>/results', (Request request, String id) async {
     requirePrincipal(request);
+
     final asOfRound = request.url.queryParameters['asOfRound'];
     final round = asOfRound == null ? null : int.tryParse(asOfRound);
+
+    if (asOfRound != null) {
+      _logger.fine('Fetching results for contest $id as of round $round');
+    } else {
+      _logger.fine('Fetching results for contest $id');
+    }
+
     if (asOfRound != null && round == null) {
       throw ArgumentError.value(asOfRound, 'asOfRound', 'not a round number');
     }
@@ -48,6 +59,7 @@ void addResultsRoutes(Router router, Repository repository) {
     String id,
   ) async {
     requirePrincipal(request);
+    _logger.fine('Recalculating results for contest $id');
     final results = await service.recalculate(Id.parse(id));
     return jsonResponse(results.toJson());
   });

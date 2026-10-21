@@ -59,6 +59,9 @@ void addScoreRoutes(
     String assignmentId,
   ) async {
     requirePrincipal(request);
+    _logger.fine(
+      'Fetching score history for assignment $assignmentId in contest $id',
+    );
     final history = await service.history(Id.parse(id), Id.parse(assignmentId));
     return jsonResponse(history.toJson());
   });
@@ -70,6 +73,10 @@ void addScoreRoutes(
   ) async {
     final principal = requirePrincipal(request);
     final body = await readJsonBody(request, EnterScoreRequest.fromJson);
+
+    _logger.fine(
+      'Entering official score for assignment $assignmentId in contest $id',
+    );
 
     var result = await service.enterOfficialScore(
       Id.parse(id),
@@ -85,6 +92,9 @@ void addScoreRoutes(
       Id.parse(id),
     );
     if (warning != null) {
+      _logger.info(
+        'Recalculation warning for assignment $assignmentId in contest $id: $warning',
+      );
       result = ScoreEntryResult(
         officialScore: result.officialScore,
         placeholder: result.placeholder,
@@ -92,8 +102,15 @@ void addScoreRoutes(
         calculated: result.calculated,
         recalculationWarning: warning,
       );
+    } else {
+      _logger.finer(
+        'No recalculation warning for assignment $assignmentId in contest $id',
+      );
     }
     if (publishingEnabled) {
+      _logger.fine(
+        'Publishing enabled, attempting public update for assignment $assignmentId in contest $id',
+      );
       try {
         await publicUpdates.afterScoreEntry(
           Id.parse(id),
