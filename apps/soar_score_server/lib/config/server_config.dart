@@ -14,6 +14,7 @@ import 'package:soar_score_core/config/log_format.dart';
 /// | `LOG_FORMAT` | `json` or `text` | json |
 /// | `AUTH0_DOMAIN` | Auth0 tenant domain, no scheme (`tenant.us.auth0.com`) | required |
 /// | `API_AUDIENCE` | API identifier access tokens must be issued for | required |
+/// | `CORS_ALLOWED_ORIGINS` | comma-separated browser origins allowed to call the API, such as `http://127.0.0.1:8091` | none |
 /// | `POSTGRES_PASSWORD` | database password | required |
 /// | `POSTGRES_HOST`, `POSTGRES_PORT`, `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_SSLMODE` | database connection | see [PostgresConfig] |
 class ServerConfig {
@@ -24,6 +25,7 @@ class ServerConfig {
     required this.postgres,
     required this.auth0Domain,
     required this.apiAudience,
+    this.corsAllowedOrigins = const {},
   });
 
   /// The variables [ServerConfig.parse] reads.
@@ -33,6 +35,7 @@ class ServerConfig {
     'LOG_FORMAT',
     'AUTH0_DOMAIN',
     'API_AUDIENCE',
+    'CORS_ALLOWED_ORIGINS',
     'POSTGRES_PASSWORD',
     'POSTGRES_HOST',
     'POSTGRES_PORT',
@@ -51,6 +54,9 @@ class ServerConfig {
 
   /// The API identifier those tokens must be issued for.
   final String apiAudience;
+
+  /// Browser origins allowed to call the API cross-origin; empty means none.
+  final Set<String> corsAllowedOrigins;
 
   /// Parses [environment].
   ///
@@ -118,6 +124,28 @@ class ServerConfig {
       problems.add('API_AUDIENCE is required.');
     }
 
+    final origins = <String>{};
+    for (final raw in (value('CORS_ALLOWED_ORIGINS') ?? '').split(',')) {
+      final origin = raw.trim();
+      if (origin.isEmpty) continue;
+      final uri = Uri.tryParse(origin);
+      if (uri == null ||
+          !{'http', 'https'}.contains(uri.scheme) ||
+          uri.host.isEmpty ||
+          (uri.path.isNotEmpty && uri.path != '/') ||
+          uri.hasQuery ||
+          uri.hasFragment ||
+          origin.endsWith('/')) {
+        problems.add(
+          'CORS_ALLOWED_ORIGINS entries must be origins such as '
+          'http://127.0.0.1:8091 (scheme, host, optional port; no path), '
+          'got "$origin".',
+        );
+      } else {
+        origins.add(origin);
+      }
+    }
+
     if (value('POSTGRES_PASSWORD') == null) {
       problems.add('POSTGRES_PASSWORD is required.');
     }
@@ -149,6 +177,7 @@ class ServerConfig {
       postgres: PostgresConfig.fromEnvironment(environment)!,
       auth0Domain: domain!,
       apiAudience: audience!,
+      corsAllowedOrigins: origins,
     );
   }
 
