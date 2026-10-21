@@ -88,7 +88,9 @@ class DemoScoreSeeder {
       clientMutationId: key,
       baseScoreRevision: revision,
       components: flight.components,
-      reason: mistaken == null ? null : 'Timer misread',
+      reason: mistaken == null
+          ? null
+          : (flight.mistakenReason ?? 'Timer misread'),
       actorId: _actorId,
       metadata: _metadata(),
     );

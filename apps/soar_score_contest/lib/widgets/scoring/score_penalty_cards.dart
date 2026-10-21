@@ -15,6 +15,10 @@ class ScorePenaltyCards extends StatelessWidget {
     required this.onChanged,
     required this.onSubmitted,
     required this.fieldKey,
+    required this.cumulativeController,
+    required this.cumulativeFocusNode,
+    required this.cumulativeOnChanged,
+    this.cumulativeErrorText,
     this.focusOrder = false,
   });
 
@@ -25,6 +29,12 @@ class ScorePenaltyCards extends StatelessWidget {
   final ValueChanged<String> onChanged;
   final VoidCallback onSubmitted;
   final Key fieldKey;
+
+  final TextEditingController cumulativeController;
+  final FocusNode cumulativeFocusNode;
+  final ValueChanged<String> cumulativeOnChanged;
+  final String? cumulativeErrorText;
+
   final bool focusOrder;
 
   @override
@@ -120,6 +130,22 @@ class ScorePenaltyCards extends StatelessWidget {
             ],
           ),
         );
+        // The three states of the field: empty = never applied, a number > 0
+        // = applied, 0 = applied earlier and removed.
+        final cumText = cumulativeController.text.trim();
+        final cum = int.tryParse(cumText);
+        String cumState;
+        var cumStateColor = scheme.onSurfaceVariant;
+        if (cumText.isEmpty) {
+          cumState = 'None entered.';
+        } else if (cum == null || cum < 0) {
+          cumState = 'A whole number of points, 0 or more.';
+          cumStateColor = theme.colorScheme.error;
+        } else if (cum == 0) {
+          cumState = 'Applied, then removed.';
+        } else {
+          cumState = '−$cum pts from the contest total.';
+        }
         final cumulative = card(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -131,14 +157,31 @@ class ScorePenaltyCards extends StatelessWidget {
                 child: FocusStep(
                   order: 9,
                   badge: focusOrder ? '9' : null,
-                  child: const TextField(
-                    key: ValueKey('cumulative-penalty'),
-                    enabled: false,
+                  child: TextField(
+                    key: const ValueKey('cumulative-penalty'),
+                    controller: cumulativeController,
+                    focusNode: cumulativeFocusNode,
+                    enabled: enabled,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    onChanged: cumulativeOnChanged,
+                    style: const TextStyle(fontSize: 18),
                     decoration: InputDecoration(
+                      hintText: '0',
                       suffixText: 'pts',
-                      border: OutlineInputBorder(),
+                      errorText: cumulativeErrorText,
+                      border: border(),
+                      enabledBorder: border(),
+                      focusedBorder: border(scheme.primary, 3),
                     ),
                   ),
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                cumState,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: cumStateColor,
                 ),
               ),
               const SizedBox(height: 6),
@@ -159,11 +202,7 @@ class ScorePenaltyCards extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const TextSpan(
-                      text:
-                          ' with its round. Not available yet: the score '
-                          'API does not store it.',
-                    ),
+                    const TextSpan(text: ' with its round.'),
                   ],
                 ),
                 style: theme.textTheme.bodyMedium,

@@ -212,6 +212,249 @@ void main() {
     expect(server.entries.single['components'], {'out_of_bounds': true});
   });
 
+  testWidgets(
+    'removing an applied cumulative penalty asks for a reason first',
+    (tester) async {
+      final server = ScoringServer();
+      server.seedScore(scoringAssignmentId(1, 1), {
+        'time_flown': 540,
+        'launch_height': 200,
+        'cumulative_penalty': 5,
+      });
+      await pumpScoringPage(tester, server, round: 1, group: 1);
+      await _activate(tester, 1, 1);
+      await tester.enterText(
+        find.byKey(const ValueKey('cumulative-penalty')),
+        '0',
+      );
+      await tester.pump();
+      await tester.tap(_save(1, 1));
+      await tester.pumpAndSettle();
+      // The dialog is open, nothing is saved yet.
+      expect(find.byKey(const ValueKey('penalty-removal-dialog')), findsOneWidget);
+      expect(server.entries, isEmpty);
+      // The button is off while the reason is blank.
+      expect(
+        tester.widget<FilledButton>(
+          find.byKey(const ValueKey('penalty-removal-confirm')),
+        ).onPressed,
+        isNull,
+      );
+      // Cancelling keeps the values and saves nothing.
+      await tester.tap(find.byKey(const ValueKey('penalty-removal-cancel')));
+      await tester.pumpAndSettle();
+      expect(server.entries, isEmpty);
+      expect(tester.widget<TextField>(
+        find.byKey(const ValueKey('cumulative-penalty')),
+      ).controller!.text,
+      '0',
+      );
+      // A reason records the removal.
+      await tester.tap(_save(1, 1));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.byKey(const ValueKey('penalty-removal-reason')),
+        'Timer slip misread',
+      );
+      await tester.pump();
+      await tester.tap(find.byKey(const ValueKey('penalty-removal-confirm')));
+      await tester.pumpAndSettle();
+      expect(server.entries, hasLength(1));
+      final body = server.entries.single;
+      expect(
+        body['components'],
+        {'time_flown': 540, 'launch_height': 200, 'cumulative_penalty': 0},
+      );
+      expect(body['reason'], 'Timer slip misread');
+    },
+  );
+
+  testWidgets(
+    'saving several removals asks one shared reason first',
+    (tester) async {
+      final server = ScoringServer();
+      server.seedScore(scoringAssignmentId(1, 1), {
+        'time_flown': 540,
+        'launch_height': 200,
+        'cumulative_penalty': 5,
+      });
+      server.seedScore(scoringAssignmentId(1, 2), {
+        'time_flown': 500,
+        'launch_height': 180,
+        'cumulative_penalty': 10,
+      });
+      await pumpScoringPage(tester, server, round: 1, group: 1);
+      // Both pilots drop their applied penalty to 0.
+      for (final pilot in [1, 2]) {
+        await _activate(tester, 1, pilot);
+        await tester.enterText(
+          find.byKey(const ValueKey('cumulative-penalty')),
+          '0',
+        );
+        await tester.pump();
+      }
+      // The toolbar offers the bulk save, nothing is saved yet.
+      expect(find.text('Save 2 rows'), findsOneWidget);
+      expect(server.entries, isEmpty);
+      await tester.tap(find.byKey(const ValueKey('score-save-all')));
+      await tester.pumpAndSettle();
+      // One dialog names both pilots; the reason is blank, so nothing saves.
+      expect(find.byKey(const ValueKey('penalty-removal-dialog')), findsOneWidget);
+      expect(find.text('Remove 2 penalties?'), findsOneWidget);
+      expect(find.text('Ann Lee, Bo Ray'), findsOneWidget);
+      expect(
+        tester.widget<FilledButton>(
+          find.byKey(const ValueKey('penalty-removal-confirm')),
+        ).onPressed,
+        isNull,
+      );
+      expect(server.entries, isEmpty);
+      // Recording the reason saves both removals under it.
+      await tester.enterText(
+        find.byKey(const ValueKey('penalty-removal-reason')),
+        'Timer slip misread',
+      );
+      await tester.pump();
+      await tester.tap(find.byKey(const ValueKey('penalty-removal-confirm')));
+      await tester.pumpAndSettle();
+      expect(server.entries, hasLength(2));
+      for (final body in server.entries) {
+        expect(body['reason'], 'Timer slip misread');
+        expect(body['components']['cumulative_penalty'], 0);
+      }
+      expect(find.text('Saved 2 rows.'), findsOneWidget);
+    },
+  );
+
+  testWidgets('a bulk save of a removal plus an edit records both reasons', (
+    tester,
+  ) async {
+    final server = ScoringServer();
+    server.seedScore(scoringAssignmentId(1, 1), {
+      'time_flown': 540,
+      'launch_height': 200,
+      'cumulative_penalty': 5,
+    });
+    await pumpScoringPage(tester, server, round: 1, group: 1);
+    await _activate(tester, 1, 1);
+    // Drop the applied penalty (a removal) and correct another pilot's time.
+    await tester.enterText(find.byKey(const ValueKey('cumulative-penalty')), '0');
+    await tester.pump();
+    await _activate(tester, 1, 2);
+    await tester.enterText(_time(1, 2), '630');
+    await tester.enterText(_height(1, 2), '180');
+    await tester.pump();
+    await tester.tap(find.byKey(const ValueKey('score-save-all')));
+    await tester.pumpAndSettle();
+    // Only one removal, so the dialog names that pilot alone.
+    expect(find.text('Remove Ann Lee\'s penalty?'), findsOneWidget);
+    await tester.enterText(
+      find.byKey(const ValueKey('penalty-removal-reason')),
+      'Timer slip misread',
+    );
+    await tester.pump();
+    await tester.tap(find.byKey(const ValueKey('penalty-removal-confirm')));
+    await tester.pumpAndSettle();
+    expect(server.entries, hasLength(2));
+    final removal = server.entries.firstWhere(
+      (b) => b['components']['cumulative_penalty'] == 0,
+    );
+    final edit = server.entries.firstWhere(
+      (b) => !b['components'].containsKey('cumulative_penalty'),
+    );
+    expect(removal['reason'], 'Timer slip misread');
+    expect(edit['reason'], 'Entered on the scoring page');
+  });
+
+  testWidgets(
+    'a bulk save with one removal aborts when the reason is cancelled',
+    (tester) async {
+      final server = ScoringServer();
+      server.seedScore(scoringAssignmentId(1, 1), {
+        'time_flown': 540,
+        'launch_height': 200,
+        'cumulative_penalty': 5,
+      });
+      await pumpScoringPage(tester, server, round: 1, group: 1);
+      await _activate(tester, 1, 1);
+      // Drop the applied penalty so the save would remove it.
+      await tester.enterText(
+        find.byKey(const ValueKey('cumulative-penalty')),
+        '0',
+      );
+      await tester.pump();
+      await tester.tap(find.byKey(const ValueKey('score-save-all')));
+      await tester.pumpAndSettle();
+      // The dialog opens before anything saves.
+      expect(
+        find.byKey(const ValueKey('penalty-removal-dialog')),
+        findsOneWidget,
+      );
+      expect(server.entries, isEmpty);
+      // Cancelling aborts the whole save: nothing saves, the values stay,
+      // and no snackbar reports a save.
+      await tester.tap(find.byKey(const ValueKey('penalty-removal-cancel')));
+      await tester.pumpAndSettle();
+      expect(server.entries, isEmpty);
+      expect(
+        tester.widget<TextField>(
+          find.byKey(const ValueKey('cumulative-penalty')),
+        ).controller!.text,
+        '0',
+      );
+      expect(find.text('1 unsaved row'), findsOneWidget);
+      expect(find.text('Saved 1 row.'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'a failed penalty-removal save stays pending and retries keep the reason',
+    (tester) async {
+      final server = ScoringServer();
+      server.seedScore(scoringAssignmentId(1, 1), {
+        'time_flown': 540,
+        'launch_height': 200,
+        'cumulative_penalty': 5,
+      });
+      await pumpScoringPage(tester, server, round: 1, group: 1);
+      await _activate(tester, 1, 1);
+      await tester.enterText(
+        find.byKey(const ValueKey('cumulative-penalty')),
+        '0',
+      );
+      await tester.pump();
+      server.entryFailures[scoringAssignmentId(1, 1)] = (500, 'boom');
+      await tester.tap(_save(1, 1));
+      await tester.pumpAndSettle();
+      // One reason, recorded when the dialog confirms.
+      await tester.enterText(
+        find.byKey(const ValueKey('penalty-removal-reason')),
+        'Timer slip misread',
+      );
+      await tester.pump();
+      await tester.tap(find.byKey(const ValueKey('penalty-removal-confirm')));
+      await tester.pumpAndSettle();
+      // The failed removal waits on its row, reason recorded with it.
+      expect(find.byKey(const ValueKey('score-save-failed')), findsOneWidget);
+      expect(server.entries, hasLength(1));
+      expect(server.entries.first['reason'], 'Timer slip misread');
+      // A save-all does not retry it under another reason.
+      await tester.tap(find.byKey(const ValueKey('score-save-all')));
+      await tester.pumpAndSettle();
+      expect(server.entries, hasLength(1));
+      expect(find.text('Saved 1 row.'), findsNothing);
+      expect(find.byKey(const ValueKey('score-save-failed')), findsOneWidget);
+      // Once the server answers again, the row's Save retries without a dialog.
+      server.entryFailures.clear();
+      await tester.tap(_save(1, 1));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('penalty-removal-dialog')), findsNothing);
+      expect(find.byKey(const ValueKey('score-save-failed')), findsNothing);
+      expect(server.entries, hasLength(2));
+      expect(server.entries.last['reason'], 'Timer slip misread');
+    },
+  );
+
   testWidgets('a failed save keeps the values and offers Retry', (
     tester,
   ) async {
@@ -258,6 +501,69 @@ void main() {
       await tester.tap(find.byKey(const ValueKey('score-take-theirs')));
       await tester.pumpAndSettle();
       expect(tester.widget<TextField>(_time(1, 1)).controller!.text, '8:20');
+    },
+  );
+
+  testWidgets(
+    'a stale penalty-removal is not save-alled and Keep mine keeps its reason',
+    (tester) async {
+      final server = ScoringServer();
+      server.seedScore(scoringAssignmentId(1, 1), {
+        'time_flown': 540,
+        'launch_height': 200,
+        'cumulative_penalty': 5,
+      });
+      // A newer revision lands while the director is working: the entry
+      // conflicts as stale.
+      server.seedCorrection(
+        scoringAssignmentId(1, 1),
+        {
+          'time_flown': 500,
+          'launch_height': 150,
+          'cumulative_penalty': 5,
+        },
+        'correction',
+      );
+      server.entryFailures[scoringAssignmentId(1, 1)] = (409, 'stale_revision');
+      await pumpScoringPage(tester, server, round: 1, group: 1);
+      await _activate(tester, 1, 1);
+      await tester.enterText(
+        find.byKey(const ValueKey('cumulative-penalty')),
+        '0',
+      );
+      await tester.pump();
+      await tester.tap(find.byKey(const ValueKey('score-save-all')));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.byKey(const ValueKey('penalty-removal-reason')),
+        'Timer slip misread',
+      );
+      await tester.pump();
+      await tester.tap(find.byKey(const ValueKey('penalty-removal-confirm')));
+      await tester.pumpAndSettle();
+      // The conflict waits on the row, reason recorded with it.
+      expect(find.byKey(const ValueKey('score-stale')), findsOneWidget);
+      expect(server.entries, hasLength(1));
+      expect(server.entries.first['reason'], 'Timer slip misread');
+      // A second save-all does not ask again or force the stale removal.
+      await tester.tap(find.byKey(const ValueKey('score-save-all')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('penalty-removal-dialog')), findsNothing);
+      expect(server.entries, hasLength(1));
+      expect(find.text('Saved 1 row.'), findsNothing);
+      expect(find.byKey(const ValueKey('score-stale')), findsOneWidget);
+      // Keep mine re-saves the removal under the director-entered reason, not
+      // the generic conflict message.
+      server.entryFailures.clear();
+      await tester.tap(find.byKey(const ValueKey('score-keep-mine')));
+      await tester.pumpAndSettle();
+      expect(server.entries, hasLength(2));
+      expect(
+        (server.entries.last['components'] as Map)['cumulative_penalty'],
+        0,
+      );
+      expect(server.entries.last['reason'], 'Timer slip misread');
+      expect(find.byKey(const ValueKey('score-stale')), findsNothing);
     },
   );
 

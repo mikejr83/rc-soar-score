@@ -80,6 +80,7 @@ void main() {
       ('out of bounds', _key('oob', 1)),
       ('no altitude', _key('noalt', 1)),
       ('flight penalty', _key('penalty', 1)),
+      ('cumulative penalty', find.byKey(const ValueKey('cumulative-penalty'))),
       ('save row', _key('save', 1)),
       ('revert', _key('revert', 1)),
     ];

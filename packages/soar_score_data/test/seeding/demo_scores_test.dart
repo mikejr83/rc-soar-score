@@ -51,15 +51,21 @@ void _tests(Backend backend) {
     expect(results.teams, hasLength(4));
   });
 
-  test('keeps the corrected score and its history', () async {
+  test('keeps the corrected scores and their reasons', () async {
     final contest = contests['Autumn F5J Classic']!;
     final scores = await services.ScoresService(repository).list(contest.id);
 
-    final corrected = scores.slots.where(
-      (slot) => slot.officialScore?.scoreRevision == 2,
+    final corrected = scores.slots
+        .where((slot) => slot.officialScore?.scoreRevision == 2)
+        .toList();
+    expect(corrected, hasLength(2));
+    expect(
+      corrected.map((slot) => slot.officialScore!.reason),
+      unorderedEquals([
+        'Timer misread',
+        'Penalty removed: the timer slip was a misread',
+      ]),
     );
-    expect(corrected, hasLength(1));
-    expect(corrected.single.officialScore!.reason, 'Timer misread');
   });
 
   test('drawn contests without scores stay Ready', () async {

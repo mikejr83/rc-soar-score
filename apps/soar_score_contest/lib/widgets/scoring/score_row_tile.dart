@@ -112,10 +112,12 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
   late final TextEditingController _time;
   late final TextEditingController _height;
   late final TextEditingController _penalty;
+  late final TextEditingController _cumulative;
   final _timeNode = FocusNode();
   final _heightNode = FocusNode();
   final _landingNode = FocusNode();
   final _penaltyNode = FocusNode();
+  final _cumulativeNode = FocusNode();
 
   /// The launch height is checked only once the director has touched it.
   bool _heightTouched = false;
@@ -127,6 +129,7 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
     _time = TextEditingController(text: draft.timeText);
     _height = TextEditingController(text: draft.heightText);
     _penalty = TextEditingController(text: draft.penaltyText);
+    _cumulative = TextEditingController(text: draft.cumulativePenaltyText);
     draft.addListener(_onDraft);
     _timeNode.addListener(_onTimeFocus);
     _heightNode.addListener(_onHeightFocus);
@@ -150,12 +153,12 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
   @override
   void dispose() {
     widget.draft.removeListener(_onDraft);
-    for (final c in [_time, _height, _penalty]) {
+    for (final c in [_time, _height, _penalty, _cumulative]) {
       c.dispose();
     }
     _timeNode.removeListener(_onTimeFocus);
     _heightNode.removeListener(_onHeightFocus);
-    for (final n in [_timeNode, _heightNode, _landingNode, _penaltyNode]) {
+    for (final n in [_timeNode, _heightNode, _landingNode, _penaltyNode, _cumulativeNode]) {
       n.dispose();
     }
     super.dispose();
@@ -186,6 +189,7 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
     if (_time.text != d.timeText) _time.text = d.timeText;
     if (_height.text != d.heightText) _height.text = d.heightText;
     if (_penalty.text != d.penaltyText) _penalty.text = d.penaltyText;
+    if (_cumulative.text != d.cumulativePenaltyText) _cumulative.text = d.cumulativePenaltyText;
   }
 
   void _focusFirst() {
@@ -207,6 +211,8 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
           _heightNode.requestFocus();
         case 'flight_penalty':
           _penaltyNode.requestFocus();
+        case 'cumulative_penalty':
+          _cumulativeNode.requestFocus();
         default:
           _timeNode.requestFocus();
       }
@@ -543,32 +549,65 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
 
   Widget _penaltyCell(BuildContext context, bool labels) {
     final theme = Theme.of(context);
-    final points = widget.draft.penalty ?? 0;
+    final muted = theme.textTheme.bodyMedium?.copyWith(
+      color: theme.colorScheme.onSurfaceVariant,
+    );
+    final d = widget.draft;
+    final flight = d.penalty ?? 0;
+    final cumulative = d.cumulativePenalty;
     return Padding(
       padding: const EdgeInsets.only(top: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           _label(context, 'Penalties', labels, TextAlign.center),
-          if (points > 0)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.remove,
-                  size: 15,
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-                const SizedBox(width: 4),
-                Text('$points flight', style: theme.textTheme.bodyMedium),
-              ],
+          if (flight > 0)
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.remove,
+                    size: 15,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    '$flight flight',
+                    style: theme.textTheme.bodyMedium,
+                  ),
+                ],
+              ),
             )
-          else
-            Text(
-              'None',
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
+          else if (cumulative == null)
+            Text('None', textAlign: TextAlign.center, style: muted),
+          // A removal keeps its row: the value was applied earlier.
+          if (cumulative == 0) Text('Removed', textAlign: TextAlign.center, style: muted),
+          if (cumulative != null && cumulative > 0)
+            Padding(
+              padding: EdgeInsets.only(top: flight > 0 ? 4 : 0),
+              // The cell is 108 px; scale the line down in the roomiest
+              // test font instead of overflowing.
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.push_pin_outlined,
+                      size: 15,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      '$cumulative total',
+                      style: theme.textTheme.bodyMedium,
+                    ),
+                  ],
+                ),
               ),
             ),
         ],
@@ -991,6 +1030,8 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
                     penaltyController: _penalty,
                     penaltyNode: _penaltyNode,
                     landingNode: _landingNode,
+                    cumulativePenaltyController: _cumulative,
+                    cumulativePenaltyNode: _cumulativeNode,
                     readOnly: _readOnly,
                     keyOf: _k,
                     focusOrder: widget.focusOrder,

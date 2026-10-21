@@ -70,6 +70,64 @@ void main() {
       expect(attempt.rawComponents['launch_height'], 200);
     });
 
+    test('a cumulative penalty is accepted and stored', () async {
+      await drawnContest(api);
+
+      final response = await enter(
+        await assignmentOf(1),
+        components: {
+          'time_flown': 540,
+          'launch_height': 200,
+          'cumulative_penalty': 25,
+        },
+      );
+      final body = await api.json(response);
+
+      expect(response.statusCode, 201, reason: '$body');
+      final official = body['official_score']! as Map;
+      expect((official['components'] as Map)['cumulative_penalty'], 25);
+    });
+
+    test('a cumulative penalty of 0 is stored as 0', () async {
+      await drawnContest(api);
+
+      final response = await enter(
+        await assignmentOf(1),
+        components: {
+          'time_flown': 540,
+          'launch_height': 200,
+          'cumulative_penalty': 0,
+        },
+      );
+      final body = await api.json(response);
+
+      expect(response.statusCode, 201, reason: '$body');
+      final official = body['official_score']! as Map;
+      expect((official['components'] as Map)['cumulative_penalty'], 0);
+      expect(
+        (api.repository.officialScores.stored.single.components)
+            ['cumulative_penalty'],
+        0,
+      );
+    });
+
+    test('a negative cumulative penalty is 400', () async {
+      await drawnContest(api);
+
+      final response = await enter(
+        await assignmentOf(1),
+        components: {
+          'time_flown': 540,
+          'launch_height': 200,
+          'cumulative_penalty': -5,
+        },
+      );
+
+      expect(response.statusCode, 400);
+      expect((await api.errorOf(response))['code'], 'invalid_request');
+      expect(api.repository.officialScores.stored, isEmpty);
+    });
+
     test('a zero flight is scored zero with its reason', () async {
       await drawnContest(api);
 
@@ -132,9 +190,13 @@ void main() {
       await enter(slot);
 
       final response = await enter(slot, base: 0);
+      final error = await api.errorOf(response);
 
       expect(response.statusCode, 409);
-      expect((await api.errorOf(response))['code'], 'stale_revision');
+      expect(error['code'], 'stale_revision');
+      // Both revisions are carried in the free-text message.
+      expect(error['message'], contains('at revision 1'));
+      expect(error['message'], contains('based on 0'));
       expect(api.repository.officialScores.stored, hasLength(1));
     });
 

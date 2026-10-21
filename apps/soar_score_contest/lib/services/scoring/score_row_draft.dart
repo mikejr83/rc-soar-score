@@ -34,6 +34,7 @@ class ScoreRowDraft extends ChangeNotifier {
   bool outOfBounds = false;
   bool noAltitude = false;
   String penaltyText = '';
+  String cumulativePenaltyText = '';
 
   /// True once the director confirmed that an empty or zeroing row is a zero.
   bool zeroConfirmed = false;
@@ -50,6 +51,8 @@ class ScoreRowDraft extends ChangeNotifier {
     noAltitude = saved['no_altitude_recorded'] == true;
     final penalty = saved['flight_penalty'];
     penaltyText = penalty is num && penalty > 0 ? '${penalty.toInt()}' : '';
+    final cumulative = saved['cumulative_penalty'];
+    cumulativePenaltyText = cumulative is num ? '${cumulative.toInt()}' : '';
     zeroConfirmed = false;
   }
 
@@ -83,6 +86,15 @@ class ScoreRowDraft extends ChangeNotifier {
 
   bool get penaltyMalformed =>
       penaltyText.trim().isNotEmpty && (penalty == null || penalty! < 0);
+
+  /// The cumulative penalty: `null` when the field is empty (never applied),
+  /// or the whole number typed, including `0` (a removal).
+  int? get cumulativePenalty =>
+      cumulativePenaltyText.trim().isEmpty ? null : int.tryParse(cumulativePenaltyText.trim());
+
+  bool get cumulativePenaltyMalformed =>
+      cumulativePenaltyText.trim().isNotEmpty &&
+      (cumulativePenalty == null || cumulativePenalty! < 0);
 
   // Rules.
 
@@ -156,6 +168,11 @@ class ScoreRowDraft extends ChangeNotifier {
     _changed();
   }
 
+  void setCumulativePenalty(String value) {
+    cumulativePenaltyText = value;
+    _changed();
+  }
+
   void setLateLanding(bool on) {
     lateLanding = on;
     if (on) landing = null;
@@ -201,7 +218,8 @@ class ScoreRowDraft extends ChangeNotifier {
       landing == null &&
       !lateLanding &&
       !zeroing &&
-      penaltyText.trim().isEmpty;
+      penaltyText.trim().isEmpty &&
+      cumulativePenaltyText.trim().isEmpty;
 
   /// Whether saving would record a zero that the director must acknowledge.
   bool get needsZeroConfirmation => isBlank || zeroing;
@@ -235,6 +253,12 @@ class ScoreRowDraft extends ChangeNotifier {
     }
     final points = penalty;
     if (points != null && points > 0) out['flight_penalty'] = points;
+    final cumulative = cumulativePenalty;
+    if (cumulative != null) {
+      // Unlike the flight penalty, 0 is a real value: an applied penalty
+      // that was removed. It is stored, not dropped.
+      out['cumulative_penalty'] = cumulative;
+    }
     return out;
   }
 
@@ -244,7 +268,9 @@ class ScoreRowDraft extends ChangeNotifier {
   static bool _same(Map<String, Object?> a, Map<String, Object?> b) {
     Map<String, Object?> clean(Map<String, Object?> m) => {
       for (final e in m.entries)
-        if (e.value != null && e.value != false && e.value != 0)
+        if (e.value != null &&
+            e.value != false &&
+            (e.value != 0 || e.key == 'cumulative_penalty'))
           e.key: e.value is num ? (e.value! as num).toDouble() : e.value,
     };
     final x = clean(a);
@@ -293,6 +319,14 @@ class ScoreRowDraft extends ChangeNotifier {
       out.add(
         const RowProblem(
           'flight_penalty',
+          'A whole number of points, 0 or more.',
+        ),
+      );
+    }
+    if (cumulativePenaltyMalformed) {
+      out.add(
+        const RowProblem(
+          'cumulative_penalty',
           'A whole number of points, 0 or more.',
         ),
       );

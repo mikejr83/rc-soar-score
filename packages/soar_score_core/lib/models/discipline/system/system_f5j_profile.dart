@@ -243,6 +243,19 @@ final systemF5jProfile = DisciplineProfileWithRules(
       'is_zero_reason': false,
       'created_at': '2026-09-15T00:00:00Z',
     }),
+    DisciplineScoreField.fromJson(const {
+      'id': '019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2b18',
+      'discipline_profile_id': '019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2b01',
+      'field_key': 'cumulative_penalty',
+      'field_type': 'int',
+      'name': 'Cumulative Penalty',
+      'description': 'Points the director applies by judgement to the total. Tri-state: absent means never applied, a positive value is applied, and 0 means applied then removed. Only the director may apply it; removing one is an official correction with a recorded reason.',
+      'required': false,
+      'validation': {'gte': 0},
+      'display_order': 9,
+      'is_zero_reason': false,
+      'created_at': '2026-09-15T00:00:00Z',
+    }),
   ],
   validations: [
     DisciplineValidation.fromJson(const {

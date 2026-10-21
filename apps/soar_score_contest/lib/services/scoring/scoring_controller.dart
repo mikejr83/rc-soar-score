@@ -43,6 +43,11 @@ class ScoringController extends ChangeNotifier {
   final Map<Id, Map<String, Object?>> _theirs = {};
   final Map<Id, String> _mutationIds = {};
 
+  /// The correction reason recorded for a row whose pending save removes an
+  /// applied cumulative penalty. It outlives a failed or stale save so a
+  /// retry or a "Keep mine" re-uses it instead of a new or generic one.
+  final Map<Id, String> _removalReasons = {};
+
   Id? activeId;
 
   /// Whether the keyboard path numbers are drawn over the controls.
@@ -169,6 +174,7 @@ class ScoringController extends ChangeNotifier {
     _drafts.clear();
     _saves.clear();
     _theirs.clear();
+    _removalReasons.clear();
     check = null;
     activeId = null;
     round = toRound;
@@ -192,6 +198,7 @@ class ScoringController extends ChangeNotifier {
     _drafts.clear();
     _saves.clear();
     _theirs.clear();
+    _removalReasons.clear();
     notifyListeners();
   }
 
@@ -200,18 +207,60 @@ class ScoringController extends ChangeNotifier {
     _drafts[row.id]?.resetTo(row.savedComponents);
     _saves.remove(row.id);
     _theirs.remove(row.id);
+    _clearRemovalReason(row.id);
     notifyListeners();
   }
 
   // Saving.
 
+  /// Whether saving this row removes an applied cumulative penalty
+  /// (N → 0), an official correction that needs a recorded reason.
+  bool isPenaltyRemoval(ScoringRow row) =>
+      _removal(row, _drafts[row.id]);
+
+  /// The dirty rows whose save removes an applied cumulative penalty, in row
+  /// order. Each needs a recorded reason the bulk paths must capture.
+  List<ScoringRow> get removalRows {
+    final removal = <ScoringRow>[];
+    for (final row in rows) {
+      final draft = _drafts[row.id];
+      if (draft != null && _removal(row, draft)) removal.add(row);
+    }
+    return removal;
+  }
+
+  static bool _removal(ScoringRow row, ScoreRowDraft? draft) {
+    if (draft == null || !draft.isDirty) return false;
+    final saved = row.savedComponents['cumulative_penalty'];
+    if (saved is! num || saved <= 0) return false;
+    return draft.cumulativePenalty == 0;
+  }
+
   /// Saves one row as its own official revision. Returns whether it saved.
+  ///
+  /// When the save removed an applied cumulative penalty, any earlier
+  /// recorded removal reason is remembered on the row, so a retry or a
+  /// "Keep mine" after a failure or conflict re-records it instead of
+  /// asking again or falling back to a generic reason.
   Future<bool> save(ScoringRow row, {String? reason}) async {
     final draft = draftOf(row);
     if (saveOf(row.id).isBusy || draft.problems.isNotEmpty) return false;
     if (draft.needsZeroConfirmation && !draft.zeroConfirmed) return false;
     _saves[row.id] = RowSave.saving;
     notifyListeners();
+    final removal = isPenaltyRemoval(row);
+    // A recorded reason belongs to the removal being saved; once the row is
+    // no longer a removal, it no longer applies.
+    if (removal) {
+      if (reason != null) _removalReasons[row.id] = reason;
+    } else {
+      _removalReasons.remove(row.id);
+    }
+    final effectiveReason = reason ??
+        _removalReasons[row.id] ??
+        (row.isScored
+            ? 'Corrected on the scoring page'
+            : 'Entered on the scoring page');
     final mutationId = _mutationIds.putIfAbsent(
       row.id,
       () => Id.create().value,
@@ -224,11 +273,7 @@ class ScoringController extends ChangeNotifier {
           clientMutationId: mutationId,
           baseScoreRevision: row.baseRevision,
           components: draft.components,
-          reason:
-              reason ??
-              (row.isScored
-                  ? 'Corrected on the scoring page'
-                  : 'Entered on the scoring page'),
+          reason: effectiveReason,
         ),
       );
       _mutationIds.remove(row.id);
@@ -240,6 +285,8 @@ class ScoringController extends ChangeNotifier {
       _drafts[row.id]?.resetTo(result.officialScore.components);
       _saves.remove(row.id);
       _theirs.remove(row.id);
+      // The row no longer removes a penalty, so its reason is done with.
+      _clearRemovalReason(row.id);
       recalculationWarning = result.recalculationWarning;
       notifyListeners();
       await _loadResults();
@@ -277,10 +324,18 @@ class ScoringController extends ChangeNotifier {
   }
 
   /// Saves every dirty row, each as its own revision, stopping at none: a
-  /// failed row keeps its message and the others still save.
+  /// failed row keeps its message and the others still save. Rows that
+  /// remove an applied cumulative penalty, or that went stale, are left for
+  /// the director to resolve on the row instead of being saved here.
   Future<int> saveAll() async {
     var saved = 0;
     for (final row in rows.where(isDirty).toList()) {
+      // A removal or a conflicting row has already been dealt with and is
+      // waiting for the director again; saveAll() must not force it through
+      // under a generic reason.
+      if (saveOf(row.id).kind == RowSaveKind.stale || isPenaltyRemoval(row)) {
+        continue;
+      }
       final draft = draftOf(row);
       if (draft.problems.isNotEmpty) continue;
       if (draft.needsZeroConfirmation) draft.confirmZero();
@@ -308,11 +363,16 @@ class ScoringController extends ChangeNotifier {
   }
 
   /// Keeps the typed values over the newer revision, then saves again.
+  ///
+  /// A removal re-records its stored reason instead of the generic
+  /// conflict message: the director already said why the penalty is gone.
   Future<bool> keepMine(ScoringRow row) async {
     final fresh = rows.firstWhere((r) => r.id == row.id, orElse: () => row);
     _saves.remove(row.id);
     _theirs.remove(row.id);
-    return save(fresh, reason: 'Kept the entered values over a newer revision');
+    final reason = _removalReasons[fresh.id] ??
+        'Kept the entered values over a newer revision';
+    return save(fresh, reason: reason);
   }
 
   /// Drops the typed values and shows the newer revision.
@@ -321,6 +381,7 @@ class ScoringController extends ChangeNotifier {
     _drafts[row.id]?.resetTo(fresh.savedComponents);
     _saves.remove(row.id);
     _theirs.remove(row.id);
+    _clearRemovalReason(row.id);
     notifyListeners();
   }
 
@@ -333,6 +394,10 @@ class ScoringController extends ChangeNotifier {
         _drafts[row.id]?.rebase(row.savedComponents);
       }
       _saves.clear();
+      // A reload that shows the penalty already removed settles the row.
+      for (final row in rows) {
+        if (!_removal(row, _drafts[row.id])) _clearRemovalReason(row.id);
+      }
       await _loadResults();
     } on Object catch (error) {
       loadError = error;
@@ -341,6 +406,17 @@ class ScoringController extends ChangeNotifier {
   }
 
   // History.
+
+  // Removal reasons.
+
+  /// The recorded penalty-removal reason of a row still awaiting its save,
+  /// or null. Kept through a failed, refused or stale save so a retry or a
+  /// "Keep mine" re-records it.
+  String? removalReason(Id id) => _removalReasons[id];
+
+  void _clearRemovalReason(Id id) {
+    _removalReasons.remove(id);
+  }
 
   /// The history of one row, oldest first.
   Future<ScoreHistory> historyOf(ScoringRow row) =>

@@ -247,6 +247,127 @@ void _tests(Backend backend) {
       },
     );
 
+    group('the cumulative penalty', () {
+      test(
+        'is stored with the score and revises with a reason',
+        () async {
+          final slot = slots.first;
+
+          final result = await enter(slot, components: const {
+            'time_flown': 540,
+            'launch_height': 200,
+            'cumulative_penalty': 25,
+          });
+
+          expect(result.officialScore.components['cumulative_penalty'], 25);
+          expect(result.officialScore.scoreRevision, 1);
+          expect(result.officialScore.reason, ScoresService.defaultReason);
+          final stored = await repository.officialScoreRepository
+              .currentForPlaceholder(result.placeholder.id);
+          expect(stored!.components['cumulative_penalty'], 25);
+        },
+      );
+
+      test('a change stores a new revision and keeps the old one', () async {
+        final slot = slots.first;
+        await enter(slot, components: const {
+          'time_flown': 540,
+          'launch_height': 200,
+          'cumulative_penalty': 5,
+        });
+
+        final corrected = await enter(
+          slot,
+          base: 1,
+          mutation: 'entry-2',
+          components: const {
+            'time_flown': 540,
+            'launch_height': 200,
+            'cumulative_penalty': 10,
+          },
+          reason: 'Recounted the flights',
+        );
+
+        expect(corrected.officialScore.scoreRevision, 2);
+        expect(corrected.officialScore.components['cumulative_penalty'], 10);
+        final history = await repository.officialScoreRepository
+            .listForPlaceholder(corrected.placeholder.id);
+        expect(
+          history.map((s) => s.components['cumulative_penalty']),
+          [5, 10],
+        );
+        expect(history.map((s) => s.reason), [
+          ScoresService.defaultReason,
+          'Recounted the flights',
+        ]);
+      });
+
+      test('a removal stores an explicit 0, not a dropped key', () async {
+        final slot = slots.first;
+        await enter(slot, components: const {
+          'time_flown': 540,
+          'launch_height': 200,
+          'cumulative_penalty': 5,
+        });
+
+        final removed = await enter(
+          slot,
+          base: 1,
+          mutation: 'entry-2',
+          components: const {
+            'time_flown': 540,
+            'launch_height': 200,
+            'cumulative_penalty': 0,
+          },
+          reason: 'Penalty did not apply',
+        );
+
+        expect(removed.officialScore.scoreRevision, 2);
+        final stored = await repository.officialScoreRepository
+            .currentForPlaceholder(removed.placeholder.id);
+        expect(stored!.components.containsKey('cumulative_penalty'), isTrue);
+        expect(stored.components['cumulative_penalty'], 0);
+        final history = await repository.officialScoreRepository
+            .listForPlaceholder(removed.placeholder.id);
+        expect(history.map((s) => s.components['cumulative_penalty']), [5, 0]);
+      });
+
+      test('a row that never had a penalty keeps the key absent', () async {
+        final slot = slots.first;
+        final result = await enter(slot);
+
+        final stored = await repository.officialScoreRepository
+            .currentForPlaceholder(result.placeholder.id);
+        expect(stored!.components.containsKey('cumulative_penalty'), isFalse);
+        final officialScore = stored;
+        expect(officialScore.components, isNot(throwsArgumentError));
+        expect(
+          () => core.requireValidPenalties(stored.components),
+          returnsNormally,
+        );
+      });
+
+      test('a negative value is refused before anything is stored', () async {
+        final slot = slots.first;
+
+        await expectLater(
+          enter(slot, components: const {
+            'time_flown': 540,
+            'launch_height': 200,
+            'cumulative_penalty': -5,
+          }),
+          throwsA(isA<core.ScoringValidationError>()),
+        );
+
+        final stored = await repository.officialScoreRepository
+            .currentForPlaceholder(
+          (await repository.scorePlaceholderRepository.findForAssignment(slot))!
+              .id,
+        );
+        expect(stored, isNull);
+      });
+    });
+
     group('the history of a slot', () {
       test('is empty before any score', () async {
         final history = await service.history(contestId, slots.first);
