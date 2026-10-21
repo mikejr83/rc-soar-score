@@ -120,5 +120,61 @@ void _tests(Backend backend) {
         expect((await service.getContest(input.id)).name, 'Renamed');
       },
     );
+
+    test('an action stores its audit event with the contest change', () async {
+      final input = newContest();
+      final created = await service.createContest(
+        input,
+        ownerAccountId: actor,
+        metadata: meta(),
+      );
+      final locked = await service.applyAction(
+        input.id,
+        core.ContestAction.lock,
+        baseRevision: created.revision,
+        metadata: meta(),
+      );
+      await expectLater(
+        service.applyAction(
+          input.id,
+          core.ContestAction.lock,
+          baseRevision: locked.revision,
+          metadata: meta(),
+        ),
+        throwsA(isA<core.ContestStateError>()),
+      );
+      await expectLater(
+        service.applyAction(
+          input.id,
+          core.ContestAction.unlock,
+          baseRevision: created.revision,
+          metadata: meta(),
+        ),
+        throwsA(isA<core.StaleRevisionError>()),
+      );
+
+      final events = await service.auditEvents(input.id);
+
+      expect(events, hasLength(1));
+      expect(events.single.action, core.AuditAction.stateTransition);
+      expect(events.single.actorId, actor);
+      expect(events.single.reason, 'lock: AdminLock Unlocked → Locked');
+      expect(events.single.baseRevision, created.revision);
+      expect(events.single.resultingRevision, locked.revision);
+      expect(
+        await service.auditEvents(
+          input.id,
+          action: core.AuditAction.scoreAttempt,
+        ),
+        isEmpty,
+      );
+    });
+
+    test('audit events of an unknown contest are not found', () async {
+      await expectLater(
+        service.auditEvents(core.Id.create()),
+        throwsA(isA<core.EntityNotFoundError>()),
+      );
+    });
   });
 }

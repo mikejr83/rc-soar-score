@@ -208,7 +208,7 @@ class DemoDataSeeder {
     final stored = await _repository.contestRepository.findById(
       DemoIds.contest(plan.number),
     );
-    await services.ContestsService(_repository).applyAction(
+    await services.ContestsService(_repository, clock: _clock).applyAction(
       stored!.id,
       action,
       baseRevision: stored.revision,

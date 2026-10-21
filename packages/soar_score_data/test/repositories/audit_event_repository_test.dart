@@ -72,6 +72,51 @@ void _tests(Backend backend) {
       },
     );
 
+    test(
+      'contest events are listed newest first, by action and limit',
+      () async {
+        final contest = core.Id.create();
+        core.AuditEvent event(
+          core.AuditAction action,
+          int hour, {
+          core.Id? contestId,
+        }) => core.AuditEvent(
+          id: core.Id.create(),
+          entityType: 'Contest',
+          entityId: contest,
+          contestId: contestId ?? contest,
+          action: action,
+          authority: core.Authority.director,
+          serverTimestamp: DateTime.utc(2026, 10, 8, hour),
+        );
+        final first = event(core.AuditAction.stateTransition, 9);
+        final second = event(core.AuditAction.scoreAttempt, 10);
+        final third = event(core.AuditAction.stateTransition, 11);
+        for (final e in [second, third, first]) {
+          await repository.auditEventRepository.append(e);
+        }
+        await repository.auditEventRepository.append(
+          event(
+            core.AuditAction.stateTransition,
+            12,
+            contestId: core.Id.create(),
+          ),
+        );
+        final audits = repository.auditEventRepository;
+
+        expect(await audits.listForContest(contest), [third, second, first]);
+        expect(
+          await audits.listForContest(
+            contest,
+            action: core.AuditAction.stateTransition,
+          ),
+          [third, first],
+        );
+        expect(await audits.listForContest(contest, limit: 2), [third, second]);
+        expect(await audits.listForContest(core.Id.create()), isEmpty);
+      },
+    );
+
     test('an unknown event is not found', () async {
       expect(
         await repository.auditEventRepository.findById(core.Id.create()),

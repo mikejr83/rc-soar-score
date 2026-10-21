@@ -1,5 +1,6 @@
 import '../models/contest/contest.dart';
 import '../models/id.dart';
+import '../models/sync/audit_event.dart';
 import 'mutation_metadata.dart';
 
 /// Abstract persistence contract for [Contest] entities.
@@ -21,7 +22,14 @@ abstract interface class ContestRepository {
   /// The stored revision is bumped and a mutation is recorded. Throws a
   /// `StaleRevisionError` when [contest] was read at an older revision.
   /// Returns the contest as stored.
-  Future<Contest> save(Contest contest, {required MutationMetadata metadata});
+  ///
+  /// An [audit] event is stored in the same transaction as the contest, so
+  /// either both are kept or neither is.
+  Future<Contest> save(
+    Contest contest, {
+    required MutationMetadata metadata,
+    AuditEvent? audit,
+  });
 
   /// Deletes the contest with [id], recording a tombstone and a mutation;
   /// returns whether a row was removed.

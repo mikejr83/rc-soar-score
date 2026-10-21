@@ -1,6 +1,7 @@
 import 'package:soar_score_core/soar_score_core.dart' as core;
 
 import 'stub_account_repositories.dart';
+import 'stub_audit_event_repository.dart';
 import 'stub_configuration_repositories.dart';
 import 'stub_contest_repository.dart';
 import 'stub_matrix_repositories.dart';
@@ -67,6 +68,10 @@ class StubRepository implements core.Repository {
 
   /// The stored configuration revisions, for tests to inspect.
   final StubConfigurationRevisionRepository configurations;
+
+  @override
+  core.AuditEventRepository get auditEventRepository =>
+      StubAuditEventRepository(_contestRepository as StubContestRepository);
 
   @override
   core.ContestConfigurationRevisionRepository

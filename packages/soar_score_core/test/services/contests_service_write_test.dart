@@ -227,6 +227,52 @@ void main() {
       expect(contests.metadata.last.clientMutationId, 'm2');
     });
 
+    test(
+      'a success leaves one StateTransition event with who and what',
+      () async {
+        await service.applyAction(
+          contestId,
+          ContestAction.lock,
+          baseRevision: 0,
+          metadata: metadata('m2'),
+        );
+
+        final event = contests.audits.single;
+        expect(event.action, AuditAction.stateTransition);
+        expect(event.entityType, 'Contest');
+        expect(event.contestId, contestId);
+        expect(event.actorId, owner);
+        expect(event.authority, Authority.director);
+        expect(event.serverTimestamp, now);
+        expect(event.baseRevision, 0);
+        expect(event.resultingRevision, 1);
+        expect(event.reason, 'lock: AdminLock Unlocked → Locked');
+        expect(ContestTransitionAudit.actionOf(event), ContestAction.lock);
+      },
+    );
+
+    test('completing records every field it changes', () async {
+      final running = Contest.fromJson({
+        ...contests.stored[contestId]!.toJson(),
+        'lifecycle_state': 'Running',
+        'scoring_access': 'Open',
+      });
+      contests.stored[contestId] = running;
+
+      await service.applyAction(
+        contestId,
+        ContestAction.complete,
+        baseRevision: 0,
+        metadata: metadata('m2'),
+      );
+
+      expect(
+        contests.audits.single.reason,
+        'complete: LifecycleState Running → Completed; '
+        'ScoringAccess Open → Closed',
+      );
+    });
+
     test('a stale base revision is reported before the state rules', () async {
       expect(
         () => service.applyAction(
@@ -250,6 +296,7 @@ void main() {
         throwsA(isA<ContestStateError>()),
       );
       expect(contests.stored[contestId]!.revision, 0);
+      expect(contests.audits, isEmpty);
     });
 
     test('an unknown contest is not found', () {

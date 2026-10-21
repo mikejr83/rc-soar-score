@@ -30,6 +30,10 @@ Future<WorkspaceFacts> _load({
   Map<String, Object?> publication = const {},
   bool offline = false,
   List<String>? requests,
+  Contest? contest,
+  int auditStatus = 200,
+  List<Map<String, Object?>> auditEvents = const [],
+  String? actingAccountId,
 }) {
   final matrix = drawnMatrix();
   final server = MatrixServer(configuration: configRevision(3), matrix: matrix);
@@ -38,6 +42,13 @@ Future<WorkspaceFacts> _load({
     httpClient: MockClient((request) async {
       requests?.add(request.url.path);
       final path = request.url.path;
+      if (path.endsWith('/audit-events')) {
+        return auditStatus == 200
+            ? _json({'audit_events': auditEvents})
+            : _json({
+                'error': {'code': 'boom', 'message': 'Broken.'},
+              }, auditStatus);
+      }
       if (path.endsWith('/scores')) {
         return scoresStatus == 200
             ? _json(scoresFor(matrix, {(1, 1): at(0)}).toJson())
@@ -71,8 +82,9 @@ Future<WorkspaceFacts> _load({
   );
   return WorkspaceFactsLoader.load(
     client,
-    matrixContest(state: LifecycleState.running),
+    contest ?? matrixContest(state: LifecycleState.running),
     isOffline: offline,
+    actingAccountId: actingAccountId,
   );
 }
 
@@ -129,4 +141,60 @@ void main() {
       expect(facts.hasMatrix, isTrue);
     },
   );
+
+  group('audit trail', () {
+    final director = '019c0000-0000-7000-8000-0000000000b1';
+    Map<String, Object?> event(String transition, String at) => {
+      'id': Id.create().value,
+      'entity_type': 'Contest',
+      'entity_id': matrixContestId,
+      'action': 'StateTransition',
+      'transition': transition,
+      'actor_id': director,
+      'authority': 'Director',
+      'server_timestamp': at,
+      'outcome': 'Success',
+    };
+
+    test('a locked contest gets the lock time and "you"', () async {
+      final facts = await _load(
+        contest: matrixContest(
+          state: LifecycleState.running,
+          lock: AdminLock.locked,
+        ),
+        auditEvents: [event('lock', '2026-10-18T15:00:00.000Z')],
+        actingAccountId: director,
+      );
+
+      expect(facts.lockedAt, DateTime.utc(2026, 10, 18, 15));
+      expect(facts.lockedBy, 'you');
+      expect(facts.unavailable, isEmpty);
+    });
+
+    test(
+      'a failed audit read leaves the facts null and the rest loads',
+      () async {
+        final facts = await _load(
+          contest: matrixContest(
+            state: LifecycleState.running,
+            lock: AdminLock.locked,
+          ),
+          auditStatus: 500,
+          actingAccountId: director,
+        );
+
+        expect(facts.lockedAt, isNull);
+        expect(facts.lockedBy, isNull);
+        expect(facts.unavailable, isEmpty);
+        expect(facts.hasMatrix, isTrue);
+      },
+    );
+
+    test('an open, running contest does not read the trail', () async {
+      final requests = <String>[];
+      await _load(requests: requests);
+
+      expect(requests.where((path) => path.endsWith('/audit-events')), isEmpty);
+    });
+  });
 }

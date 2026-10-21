@@ -12,6 +12,7 @@ import 'current_group_facts.dart';
 import 'latest_score.dart';
 import 'participant_number_range.dart';
 import 'publication_facts.dart';
+import 'transition_facts.dart';
 import 'workspace_fact_source.dart';
 import 'workspace_round_fact.dart';
 
@@ -47,12 +48,13 @@ class WorkspaceFacts extends Equatable {
     required this.configDrift,
     required this.drawReadiness,
     required this.publication,
+    required this.transitions,
     required this.unavailable,
     required this.isOffline,
   });
 
   /// Reduces [data] (the matrix page's data for [data.contest]), the optional
-  /// [scores] and the [publication] to facts.
+  /// [scores], the [publication] and the audit [transitions] to facts.
   ///
   /// [scores] is `null` when that read failed, in which case [unavailable]
   /// should list [WorkspaceFactSource.scores]. The same holds for
@@ -62,6 +64,7 @@ class WorkspaceFacts extends Equatable {
     ContestScores? scores,
     List<LandingTableView>? landingTables,
     PublicationFacts publication = PublicationFacts.unknown,
+    TransitionFacts transitions = TransitionFacts.unknown,
     Set<WorkspaceFactSource> unavailable = const {},
     bool isOffline = false,
   }) {
@@ -201,6 +204,7 @@ class WorkspaceFacts extends Equatable {
         matrixDrawn: !matrix.isEmpty,
       ),
       publication: publication,
+      transitions: transitions,
       unavailable: Set.unmodifiable(unavailable),
       isOffline: isOffline,
     );
@@ -235,6 +239,7 @@ class WorkspaceFacts extends Equatable {
           configDrift: configDrift,
           drawReadiness: drawReadiness,
           publication: publication,
+          transitions: transitions,
           unavailable: unavailable,
           isOffline: isOffline,
         );
@@ -432,6 +437,9 @@ class WorkspaceFacts extends Equatable {
   final DrawReadiness drawReadiness;
   final PublicationFacts publication;
 
+  /// Completion and lock facts from the audit trail; see [completedAt].
+  final TransitionFacts transitions;
+
   /// Secondary reads that failed.
   final Set<WorkspaceFactSource> unavailable;
   final bool isOffline;
@@ -447,10 +455,11 @@ class WorkspaceFacts extends Equatable {
   DrawMode? get drawMode => options?.drawMode;
   int? get intendedTotalRounds => options?.intendedTotalRounds;
 
-  /// Placeholders for the audit trail (#345), which supplies them.
-  DateTime? get completedAt => null;
-  DateTime? get lockedAt => null;
-  String? get lockedBy => null;
+  /// From the audit trail (#345); `null` when it holds no such event or could
+  /// not be read.
+  DateTime? get completedAt => transitions.completedAt;
+  DateTime? get lockedAt => transitions.lockedAt;
+  String? get lockedBy => transitions.lockedBy;
 
   @override
   List<Object?> get props => [
@@ -476,6 +485,7 @@ class WorkspaceFacts extends Equatable {
     scoreCount,
     configDrift,
     publication,
+    transitions,
     unavailable,
     isOffline,
   ];

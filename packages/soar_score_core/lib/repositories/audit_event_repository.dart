@@ -1,3 +1,4 @@
+import '../enums/audit_action.dart';
 import '../models/id.dart';
 import '../models/sync/audit_event.dart';
 
@@ -9,6 +10,15 @@ abstract interface class AuditEventRepository {
 
   /// Every event of [publicationId], oldest first by server time.
   Future<List<AuditEvent>> listForPublication(Id publicationId);
+
+  /// The events of [contestId], newest first by server time.
+  ///
+  /// [action] keeps only events of that kind and [limit] the first that many.
+  Future<List<AuditEvent>> listForContest(
+    Id contestId, {
+    AuditAction? action,
+    int? limit,
+  });
 
   /// Stores a new [event].
   ///
