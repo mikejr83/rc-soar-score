@@ -79,6 +79,7 @@ Future<RunningServer> startServer(
       createServerHandler(
         db,
         authMiddleware: authMiddleware ?? _auth0Middleware(config, db),
+        corsAllowedOrigins: config.corsAllowedOrigins,
       ),
       address ?? InternetAddress.anyIPv4,
       config.port,

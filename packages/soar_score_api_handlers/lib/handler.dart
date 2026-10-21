@@ -51,6 +51,10 @@ final _logger = Logger('Handler');
 /// [gliderScoreImport], when provided, makes the native Windows instance
 /// serve `POST /imports/gliderscore`; without it the route answers 503
 /// `import_unavailable`. Only the embedded instance wires it.
+///
+/// [corsAllowedOrigins] are the exact browser origins (for example
+/// `http://127.0.0.1:8091`) allowed to call the API cross-origin. Empty, the
+/// default, adds no CORS headers.
 Handler buildApiHandler({
   required String name,
   required String displayName,
@@ -61,6 +65,7 @@ Handler buildApiHandler({
   bool publishingEnabled = false,
   RecalculationService? recalculation,
   GliderScoreImportRunner? gliderScoreImport,
+  Set<String> corsAllowedOrigins = const {},
 }) {
   final handlers = createHandlers(
     name,
@@ -88,5 +93,5 @@ Handler buildApiHandler({
 
   _logger.fine('API handler built successfully.');
 
-  return withCommonMiddleware(app.call);
+  return withCommonMiddleware(app.call, corsAllowedOrigins: corsAllowedOrigins);
 }

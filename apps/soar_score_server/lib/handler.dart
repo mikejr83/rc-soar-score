@@ -11,10 +11,12 @@ const String serverVersion = '0.1.0';
 /// Wires the shared routing and middleware from `soar_score_api_handlers` to
 /// the repositories of [database] and reports the server's identity for the
 /// `/health` payload. [authMiddleware] guards the `/api/v1` routes and sets
-/// each request's principal.
+/// each request's principal. [corsAllowedOrigins] are the browser origins
+/// allowed to call the API cross-origin.
 Handler createServerHandler(
   SoarScoreDatabase database, {
   required AuthMiddleware authMiddleware,
+  Set<String> corsAllowedOrigins = const {},
 }) {
   return buildApiHandler(
     name: serverName,
@@ -23,5 +25,6 @@ Handler createServerHandler(
     repository: Repository(database),
     authMiddleware: authMiddleware,
     publishingEnabled: true,
+    corsAllowedOrigins: corsAllowedOrigins,
   );
 }

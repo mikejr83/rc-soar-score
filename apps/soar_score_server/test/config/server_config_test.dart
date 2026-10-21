@@ -25,6 +25,45 @@ void main() {
       expect(config.apiAudience, 'https://soar-score.com/server');
     });
 
+    test('allows no CORS origins by default', () {
+      expect(ServerConfig.parse(minimal).corsAllowedOrigins, isEmpty);
+    });
+
+    test('parses a comma-separated list of CORS origins', () {
+      final config = ServerConfig.parse({
+        ...minimal,
+        'CORS_ALLOWED_ORIGINS':
+            ' http://127.0.0.1:8091, http://localhost:8091 ,',
+      });
+
+      expect(config.corsAllowedOrigins, {
+        'http://127.0.0.1:8091',
+        'http://localhost:8091',
+      });
+    });
+
+    test('rejects CORS origins with a path, a trailing slash or no scheme', () {
+      for (final origin in [
+        'http://localhost:8091/app',
+        'http://localhost:8091/',
+        'localhost:8091',
+        '*',
+      ]) {
+        expect(
+          () =>
+              ServerConfig.parse({...minimal, 'CORS_ALLOWED_ORIGINS': origin}),
+          throwsA(
+            isA<ConfigException>().having(
+              (e) => e.problems.join(),
+              'problems',
+              contains('CORS_ALLOWED_ORIGINS'),
+            ),
+          ),
+          reason: origin,
+        );
+      }
+    });
+
     test('rejects an Auth0 domain with a scheme or path', () {
       for (final domain in ['https://tenant.us.auth0.com', 'tenant/path']) {
         expect(
