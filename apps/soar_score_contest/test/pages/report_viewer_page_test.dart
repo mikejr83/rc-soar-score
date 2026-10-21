@@ -602,6 +602,16 @@ void main() {
     expect(find.byKey(const ValueKey('viewer-back')), findsOneWidget);
   });
 
+  testWidgets('the header is opaque and does not tint when scrolled', (
+    tester,
+  ) async {
+    await _pump(tester, _server());
+    final bar = tester.widget<AppBar>(find.byType(AppBar));
+    expect(bar.backgroundColor?.a, 1.0);
+    expect(bar.surfaceTintColor, Colors.transparent);
+    expect(bar.scrolledUnderElevation, 0);
+  });
+
   testWidgets('a web tab has no leading button', (tester) async {
     await _pump(tester, _server());
     expect(find.byKey(const ValueKey('viewer-back')), findsNothing);
