@@ -183,12 +183,12 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
   Future<void> _save(ScoringRow row) async {
     final c = _controller!;
     // Removing an applied cumulative penalty is an official correction and
-    // needs its own recorded reason before the row is saved.
+    // needs its own recorded reason before the row is saved. A reason
+    // already recorded for this row (its save failed or went stale) is
+    // kept instead.
     if (c.isPenaltyRemoval(row)) {
-      final reason = await askPenaltyRemovalReason(
-        context,
-        pilots: [row.pilot.name],
-      );
+      final reason = c.removalReason(row.id) ??
+          await askPenaltyRemovalReason(context, pilots: [row.pilot.name]);
       if (!mounted || reason == null) return;
       await c.save(row, reason: reason);
       return;
@@ -204,20 +204,41 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
 
   /// Saves every dirty row, first recording a reason for each applied
   /// cumulative penalty the save removes. Returns how many rows saved.
+  ///
+  /// Removals whose save already failed or went stale keep their recorded
+  /// reason and are not asked about again; a missing reason is asked once
+  /// for every removal that lacks one.
   Future<int> _saveAllWithRemovals() async {
     final c = _controller!;
     var saved = 0;
     final removal = c.removalRows;
     if (removal.isNotEmpty) {
-      final reason = await askPenaltyRemovalReason(
-        context,
-        pilots: [for (final r in removal) r.pilot.name],
-      );
-      if (!mounted || reason == null) return 0;
+      final need = [
+        for (final r in removal)
+          if (c.removalReason(r.id) == null) r,
+      ];
+      String? freshReason;
+      if (need.isNotEmpty) {
+        freshReason = await askPenaltyRemovalReason(
+          context,
+          pilots: [for (final r in need) r.pilot.name],
+        );
+        if (!mounted || freshReason == null) return 0;
+      }
       for (final row in removal) {
         final fresh =
             c.rows.firstWhere((r) => r.id == row.id, orElse: () => row);
+        // A removal that already failed or went stale stays with its banner;
+        // the director retries or resolves it on the row.
+        final pending = c.saveOf(fresh.id).kind;
+        if (pending == RowSaveKind.failed ||
+            pending == RowSaveKind.stale ||
+            pending == RowSaveKind.refused) {
+          continue;
+        }
         if (c.isPenaltyRemoval(fresh)) {
+          final reason = c.removalReason(fresh.id) ?? freshReason;
+          if (reason == null) continue;
           if (await c.save(fresh, reason: reason)) saved++;
         }
       }

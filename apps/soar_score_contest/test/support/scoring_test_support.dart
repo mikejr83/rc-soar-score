@@ -66,6 +66,10 @@ class ScoringServer {
   String entryCode = 'rejected';
   bool offlineOnEntry = false;
 
+  /// Answers the entry for [assignmentId] with [status] and [code] instead
+  /// of the defaults, for a row-specific failure while the rest succeeds.
+  final Map<Id, (int, String)> entryFailures = {};
+
   /// The bodies of the entries received, in order.
   final List<Map<String, dynamic>> entries = [];
 
@@ -280,13 +284,16 @@ class ScoringServer {
       }
       final body = jsonDecode(request.body) as Map<String, dynamic>;
       entries.add(body);
-      if (entryStatus != 200) {
-        return _json({
-          'error': {'code': entryCode, 'message': 'The entry was $entryCode.'},
-        }, entryStatus);
-      }
       final segments = path.split('/');
       final assignmentId = Id.parse(segments[segments.length - 2]);
+      final failure = entryFailures[assignmentId];
+      final status = failure?.$1 ?? entryStatus;
+      final code = failure?.$2 ?? entryCode;
+      if (status != 200) {
+        return _json({
+          'error': {'code': code, 'message': 'The entry was $code.'},
+        }, status);
+      }
       final revision = (_score[assignmentId]?.scoreRevision ?? 0) + 1;
       final components = Map<String, Object?>.from(
         body['components'] as Map<String, dynamic>,
