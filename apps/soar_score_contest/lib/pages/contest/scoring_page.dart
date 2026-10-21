@@ -157,7 +157,7 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
         c.discardAll();
         return true;
       case UnsavedChoice.save:
-        await c.saveAll();
+        await _saveAllWithRemovals();
         return !c.hasUnsaved;
     }
   }
@@ -187,7 +187,7 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
     if (c.isPenaltyRemoval(row)) {
       final reason = await askPenaltyRemovalReason(
         context,
-        pilot: row.pilot.name,
+        pilots: [row.pilot.name],
       );
       if (!mounted || reason == null) return;
       await c.save(row, reason: reason);
@@ -202,9 +202,33 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
     }
   }
 
+  /// Saves every dirty row, first recording a reason for each applied
+  /// cumulative penalty the save removes. Returns how many rows saved.
+  Future<int> _saveAllWithRemovals() async {
+    final c = _controller!;
+    var saved = 0;
+    final removal = c.removalRows;
+    if (removal.isNotEmpty) {
+      final reason = await askPenaltyRemovalReason(
+        context,
+        pilots: [for (final r in removal) r.pilot.name],
+      );
+      if (!mounted || reason == null) return 0;
+      for (final row in removal) {
+        final fresh =
+            c.rows.firstWhere((r) => r.id == row.id, orElse: () => row);
+        if (c.isPenaltyRemoval(fresh)) {
+          if (await c.save(fresh, reason: reason)) saved++;
+        }
+      }
+    }
+    saved += await c.saveAll();
+    return saved;
+  }
+
   Future<void> _saveAll() async {
-    final saved = await _controller!.saveAll();
-    if (!mounted) return;
+    final saved = await _saveAllWithRemovals();
+    if (!mounted || saved == 0) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Saved $saved ${saved == 1 ? 'row' : 'rows'}.')),
     );

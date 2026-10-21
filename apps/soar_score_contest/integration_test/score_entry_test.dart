@@ -17,6 +17,25 @@ Finder _timeFields() => find.byWidgetPredicate(
   description: 'a time field',
 );
 
+/// The `score-row-<id>` key of the row that holds [text], for locating a row
+/// by a cell such as the `30 total` cumulative penalty.
+ValueKey<String> _rowContaining(String text) {
+  final key = find
+      .ancestor(
+        of: find.text(text),
+        matching: find.byWidgetPredicate(
+          (w) =>
+              w.key is ValueKey<String> &&
+              (w.key! as ValueKey<String>).value.startsWith('score-row-'),
+        ),
+      )
+      .evaluate()
+      .first
+      .widget
+      .key! as ValueKey<String>;
+  return key;
+}
+
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
@@ -78,6 +97,84 @@ void main() {
       find.text('$official of 4 entered · $official official'),
     );
     await pumpUntilFound(tester, find.text('Lock…'));
+  });
+
+  testWidgets('save all: a pending penalty removal records one reason', (
+    tester,
+  ) async {
+    const reason = 'GliderScore import: the slip was a timer misread';
+    await openMainPage(tester);
+    await openContest(tester, _contest);
+    await pumpUntilFound(tester, find.byKey(const ValueKey('progress-tile-5')));
+
+    // The progress tile opens Scoring at round 5; step back to round 4, the
+    // round the demo carries an applied cumulative penalty.
+    await tapVisible(tester, find.byKey(const ValueKey('progress-tile-5')));
+    await pumpUntilFound(tester, find.text('Round 5 of 6'));
+    await tapVisible(tester, find.byKey(const ValueKey('round-picker')));
+    await pumpUntilFound(tester, find.byKey(const ValueKey('picker-item-4')));
+    await tapVisible(tester, find.byKey(const ValueKey('picker-item-4')));
+    await pumpUntilFound(tester, find.text('Round 4 of 6'));
+
+    // The applied penalty sits in exactly one row of the round, in whatever
+    // group the draw placed it; scan the groups until it is visible.
+    for (final group in [1, 2, 3]) {
+      await tapVisible(tester, find.byKey(const ValueKey('group-picker')));
+      await pumpUntilFound(
+        tester,
+        find.byKey(ValueKey('picker-item-$group')),
+      );
+      await tapVisible(tester, find.byKey(ValueKey('picker-item-$group')));
+      if (find.text('30 total').evaluate().isNotEmpty) break;
+    }
+    await pumpUntilFound(tester, find.text('30 total'));
+
+    // Activate that row and reduce the applied cumulative penalty to 0.
+    final rowKey = _rowContaining('30 total');
+    final rowId = rowKey.value.substring('score-row-'.length);
+    await tapVisible(tester, find.byKey(rowKey));
+    await pumpUntilFound(tester, find.byKey(const ValueKey('cumulative-penalty')));
+    await enterIn(tester, find.byKey(const ValueKey('cumulative-penalty')), '0');
+    await pumpUntilFound(tester, find.text('Applied, then removed.'));
+
+    // Saving the group asks for one shared reason for the pending removal.
+    await tapVisible(tester, find.byKey(const ValueKey('score-save-all')));
+    await pumpUntilFound(
+      tester,
+      find.byKey(const ValueKey('penalty-removal-dialog')),
+    );
+    // A single pending removal asks about that one pilot, not a count.
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('penalty-removal-dialog')),
+        matching: find.byWidgetPredicate(
+          (w) =>
+              w is Text &&
+              (w.data?.startsWith('Remove ') ?? false) &&
+              (w.data?.endsWith("'s penalty?") ?? false),
+        ),
+      ),
+      findsOneWidget,
+    );
+    await enterIn(
+      tester,
+      find.byKey(const ValueKey('penalty-removal-reason')),
+      reason,
+    );
+    await tapVisible(tester, find.byKey(const ValueKey('penalty-removal-confirm')));
+    await pumpUntilFound(
+      tester,
+      find.byKey(const ValueKey('scoring-context-strip')),
+    );
+
+    // The history shows the removal recorded with the reason.
+    await tapVisible(tester, find.byKey(ValueKey('row-menu-$rowId')));
+    await pumpUntilFound(tester, find.byKey(const ValueKey('menu-history')));
+    await tapVisible(tester, find.byKey(const ValueKey('menu-history')));
+    await pumpUntilFound(tester, find.byKey(const ValueKey('score-history-dialog')));
+    await pumpUntilFound(tester, find.textContaining('Cumulative penalty removed'));
+    await pumpUntilFound(tester, find.text('Reason: $reason'));
+    await tapVisible(tester, find.byKey(const ValueKey('score-history-close')));
   });
 
   testWidgets('apply and remove a cumulative penalty, with a reason', (

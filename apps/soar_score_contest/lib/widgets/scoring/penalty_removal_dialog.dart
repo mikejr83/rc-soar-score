@@ -1,24 +1,25 @@
 import 'package:flutter/material.dart';
 
-/// Asks for a correction reason before an applied cumulative penalty is
+/// Asks for a correction reason before applied cumulative penalties are
 /// removed (saved as 0). Removal is an official revision and must record
-/// why (ticket 020). Returns null when the director cancels or leaves the
-/// reason blank.
+/// why (ticket 020). [pilots] is the pilot or pilots whose applied penalty
+/// the save removes when their reasons are blank. Returns null when the
+/// director cancels or leaves the reason blank.
 Future<String?> askPenaltyRemovalReason(
   BuildContext context, {
-  required String pilot,
+  required List<String> pilots,
 }) async {
   final reason = await showDialog<String>(
     context: context,
-    builder: (context) => _PenaltyRemovalDialog(pilot: pilot),
+    builder: (context) => _PenaltyRemovalDialog(pilots: pilots),
   );
   return reason == null || reason.trim().isEmpty ? null : reason.trim();
 }
 
 class _PenaltyRemovalDialog extends StatefulWidget {
-  const _PenaltyRemovalDialog({required this.pilot});
+  const _PenaltyRemovalDialog({required this.pilots});
 
-  final String pilot;
+  final List<String> pilots;
 
   @override
   State<_PenaltyRemovalDialog> createState() => _PenaltyRemovalDialogState();
@@ -44,9 +45,14 @@ class _PenaltyRemovalDialogState extends State<_PenaltyRemovalDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final single = widget.pilots.length == 1 ? widget.pilots.single : null;
     return AlertDialog(
       key: const ValueKey('penalty-removal-dialog'),
-      title: Text("Remove ${widget.pilot}'s penalty?"),
+      title: Text(
+        single != null
+            ? "Remove $single's penalty?"
+            : 'Remove ${widget.pilots.length} penalties?',
+      ),
       content: SizedBox(
         width: 440,
         child: Column(
@@ -57,6 +63,13 @@ class _PenaltyRemovalDialogState extends State<_PenaltyRemovalDialog> {
               'Removal is an official score correction. Enter the reason '
               'to record it.',
             ),
+            if (single == null) ...[
+              const SizedBox(height: 8),
+              Text(
+                widget.pilots.join(', '),
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
             const SizedBox(height: 12),
             TextField(
               key: const ValueKey('penalty-removal-reason'),

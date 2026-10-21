@@ -207,8 +207,21 @@ class ScoringController extends ChangeNotifier {
 
   /// Whether saving this row removes an applied cumulative penalty
   /// (N → 0), an official correction that needs a recorded reason.
-  bool isPenaltyRemoval(ScoringRow row) {
-    final draft = _drafts[row.id];
+  bool isPenaltyRemoval(ScoringRow row) =>
+      _removal(row, _drafts[row.id]);
+
+  /// The dirty rows whose save removes an applied cumulative penalty, in row
+  /// order. Each needs a recorded reason the bulk paths must capture.
+  List<ScoringRow> get removalRows {
+    final removal = <ScoringRow>[];
+    for (final row in rows) {
+      final draft = _drafts[row.id];
+      if (draft != null && _removal(row, draft)) removal.add(row);
+    }
+    return removal;
+  }
+
+  static bool _removal(ScoringRow row, ScoreRowDraft? draft) {
     if (draft == null || !draft.isDirty) return false;
     final saved = row.savedComponents['cumulative_penalty'];
     if (saved is! num || saved <= 0) return false;
