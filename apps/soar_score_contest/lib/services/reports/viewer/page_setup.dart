@@ -27,13 +27,19 @@ enum PaperSize {
 
   /// The paper to start with for [locale]. Page setup is not stored, so every
   /// session starts from this.
-  static PaperSize forLocale(Locale locale) =>
-      _letterCountries.contains(locale.countryCode) ? letter : a4;
+  ///
+  /// The app locale is often a bare language ("en") with no country, so the
+  /// country comes from [system] (the operating system locale) then.
+  static PaperSize forLocale(Locale locale, {Locale? system}) {
+    final country = locale.countryCode ?? system?.countryCode;
+    return _letterCountries.contains(country) ? letter : a4;
+  }
 
   /// The locale-based explanation shown under the paper choice.
-  String defaultNote(Locale locale) => this == forLocale(locale)
-      ? '$label is the default for your locale.'
-      : '${forLocale(locale).label} is the default for your locale.';
+  String defaultNote(Locale locale, {Locale? system}) {
+    final preferred = forLocale(locale, system: system);
+    return '${preferred.label} is the default for your locale.';
+  }
 }
 
 enum PageOrientation {

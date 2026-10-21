@@ -1,3 +1,5 @@
+import 'dart:ui' show PlatformDispatcher;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -106,7 +108,10 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
       client: apiClientOf(context),
       contestId: id,
       spec: definition,
-      defaultPaper: PaperSize.forLocale(Localizations.localeOf(context)),
+      defaultPaper: PaperSize.forLocale(
+        Localizations.localeOf(context),
+        system: PlatformDispatcher.instance.locale,
+      ),
       printer: widget.printer,
       initial: widget.params,
       pollInterval: widget.pollInterval,
@@ -464,6 +469,18 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
         onAction: controller.resetFilters,
       );
     }
+    final noData = controller.noData;
+    if (noData != null) {
+      return ViewerMessage(
+        icon: Icons.insights,
+        title: noData.title,
+        body: noData.body,
+        actionLabel: noData.actionLabel,
+        onAction: () => context.go(
+          contestScoringPath(widget.contestId, round: noData.round),
+        ),
+      );
+    }
     final pages = _pages(document!);
     return ReportSheetArea(
       setup: setup,
@@ -492,7 +509,9 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         ..._banners(document),
-        if (!nothing || controller.check is ReportEmpty)
+        if (!nothing ||
+            controller.check is ReportEmpty ||
+            controller.noData != null)
           ViewerToolbar(
             pageText: nothing
                 ? 'No pages'

@@ -28,7 +28,8 @@ class StandingsOptions {
   factory StandingsOptions.of(Map<String, String> filters, ReportsFacts facts) {
     bool on(String key, bool fallback) =>
         filters[key] == null ? fallback : filters[key] == '1';
-    final provisional = on('prov', defaultProvisional(facts));
+    final provisional =
+        provisionalApplies(facts) && on('prov', defaultProvisional(facts));
     final lastShown = provisional
         ? facts.lastScoredRound
         : facts.lastFullyScoredRound;
@@ -61,10 +62,16 @@ class StandingsOptions {
     );
   }
 
+  /// Provisional only means something while a round is partly scored or not
+  /// flown, and never once the contest is completed: every score is final.
+  static bool provisionalApplies(ReportsFacts facts) =>
+      !facts.isCompleted &&
+      (facts.partlyScoredRounds > 0 || facts.notFlownRounds > 0);
+
   /// Provisional starts on while rounds are not (fully) scored yet, and off
   /// once every round is: then there is nothing partial to show.
   static bool defaultProvisional(ReportsFacts facts) =>
-      facts.partlyScoredRounds > 0 || facts.notFlownRounds > 0;
+      provisionalApplies(facts);
 
   /// The filters that apply when the URL names none.
   static Map<String, String> defaults(ReportsFacts facts) => {

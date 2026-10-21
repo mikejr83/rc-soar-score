@@ -74,6 +74,10 @@ class ViewerAppBar extends StatelessWidget implements PreferredSizeWidget {
             label: const Text('Save as PDF'),
           );
     return AppBar(
+      // The preview scrolls under the bar: keep it opaque and untinted.
+      backgroundColor: theme.colorScheme.surface,
+      surfaceTintColor: Colors.transparent,
+      scrolledUnderElevation: 0,
       centerTitle: true,
       toolbarHeight: 64,
       leading: lead == ViewerLead.back

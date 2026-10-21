@@ -96,6 +96,42 @@ void main() {
     );
   });
 
+  testWidgets('a fully scored contest offers no Provisional option', (
+    tester,
+  ) async {
+    await _pump(tester, server);
+    expect(find.widgetWithText(CheckboxListTile, 'Flight details'), findsOne);
+    expect(find.widgetWithText(CheckboxListTile, 'Provisional'), findsNothing);
+  });
+
+  testWidgets('a partly scored round offers the Provisional option', (
+    tester,
+  ) async {
+    final matrix = drawnMatrix();
+    server = StandingsServer(
+      fixture,
+      scores: scoresFor(matrix, {
+        for (var p = 1; p <= 4; p++) (1, p): at(p),
+        (2, 1): at(10),
+      }),
+    );
+    await _pump(tester, server);
+    expect(find.widgetWithText(CheckboxListTile, 'Provisional'), findsOne);
+  });
+
+  testWidgets('scores without a stored standing say so, not fail', (
+    tester,
+  ) async {
+    fixture.standings.clear();
+    await _pump(tester, server);
+
+    expect(_text('No standings stored for round 2 yet'), findsOneWidget);
+    expect(_text('Open Scoring'), findsOneWidget);
+    expect(find.textContaining('Couldn’t load'), findsNothing);
+    expect(find.textContaining('Can’t read'), findsNothing);
+    expect(_text('Rank'), findsNothing);
+  });
+
   testWidgets('an official result has no stamp', (tester) async {
     await _pump(tester, server);
     expect(find.textContaining('Official.'), findsOneWidget);

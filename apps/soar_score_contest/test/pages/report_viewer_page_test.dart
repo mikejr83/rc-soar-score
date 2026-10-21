@@ -41,6 +41,7 @@ Future<List<ReportViewParams>> _pump(
   String contestId = matrixContestId,
   ReportKind? report = ReportKind.standings,
   bool settle = true,
+  Locale appLocale = const Locale('en', 'US'),
 }) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
@@ -53,7 +54,7 @@ Future<List<ReportViewParams>> _pump(
         httpClient: MockClient(server.handle),
       ),
       child: MaterialApp(
-        locale: const Locale('en', 'US'),
+        locale: appLocale,
         home: ReportViewerPage(
           contestId: contestId,
           report: report,
@@ -127,6 +128,20 @@ void main() {
       tester,
     ) async {
       await _pump(tester, _server());
+      expect(
+        tester
+            .widget<Text>(find.byKey(const ValueKey('viewer-setup-text')))
+            .data,
+        'Letter · Landscape · 2 pages',
+      );
+    });
+
+    testWidgets('a bare language locale takes its country from the system', (
+      tester,
+    ) async {
+      tester.platformDispatcher.localeTestValue = const Locale('en', 'US');
+      addTearDown(tester.platformDispatcher.clearLocaleTestValue);
+      await _pump(tester, _server(), appLocale: const Locale('en'));
       expect(
         tester
             .widget<Text>(find.byKey(const ValueKey('viewer-setup-text')))
@@ -587,6 +602,16 @@ void main() {
     expect(find.byKey(const ValueKey('viewer-back')), findsOneWidget);
   });
 
+  testWidgets('the header is opaque and does not tint when scrolled', (
+    tester,
+  ) async {
+    await _pump(tester, _server());
+    final bar = tester.widget<AppBar>(find.byType(AppBar));
+    expect(bar.backgroundColor?.a, 1.0);
+    expect(bar.surfaceTintColor, Colors.transparent);
+    expect(bar.scrolledUnderElevation, 0);
+  });
+
   testWidgets('a web tab has no leading button', (tester) async {
     await _pump(tester, _server());
     expect(find.byKey(const ValueKey('viewer-back')), findsNothing);
@@ -596,6 +621,18 @@ void main() {
     expect(PaperSize.forLocale(const Locale('en', 'US')), PaperSize.letter);
     expect(PaperSize.forLocale(const Locale('en', 'GB')), PaperSize.a4);
     expect(PaperSize.forLocale(const Locale('de')), PaperSize.a4);
+    expect(PaperSize.forLocale(const Locale('en')), PaperSize.a4);
+    expect(
+      PaperSize.forLocale(const Locale('en'), system: const Locale('en', 'US')),
+      PaperSize.letter,
+    );
+    expect(
+      PaperSize.forLocale(
+        const Locale('en', 'GB'),
+        system: const Locale('en', 'US'),
+      ),
+      PaperSize.a4,
+    );
     expect(PageSetup(PaperSize.letter, PageOrientation.landscape).width, 1056);
   });
 }

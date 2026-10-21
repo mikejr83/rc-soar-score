@@ -316,7 +316,7 @@ class StandingsServer extends WorkspaceServer {
           : _json(results.toJson());
     }
     final asOf = int.tryParse(request.url.queryParameters['asOfRound'] ?? '');
-    final latest = fixture.standings.keys.reduce((a, b) => a > b ? a : b);
+    final latest = fixture.standings.keys.fold(0, (a, b) => a > b ? a : b);
     final results = fixture.standings[asOf ?? latest];
     return results == null
         ? _json({
@@ -333,8 +333,10 @@ ReportsFacts factsOf(
   Map<String, Object?> core = const {},
   List<ContestParticipation>? participations,
   ContestScores? scores,
+  LifecycleState state = LifecycleState.running,
 }) {
   final data = workspaceData(
+    state: state,
     matrix: fixture.matrix,
     core: core,
     participations: participations,
