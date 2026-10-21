@@ -123,14 +123,14 @@ String _provisionalHelp(ReportsFacts facts, StandingsOptions options) {
       .where((r) => r.scored > 0 && r.scored < r.total)
       .map((r) => r.ordinal)
       .firstOrNull;
-  if (options.provisional) {
-    return partial == null
-        ? 'Shows rounds up to the last with any score.'
-        : 'Round $partial is partly scored, so this is on. Shows rounds up to '
-              'the last with any score.';
+  if (options.provisional && partial == null) {
+    return 'Shows rounds up to the last with any score.';
+  } else if (options.provisional && partial != null) {
+    return 'Round $partial is partly scored. Shows rounds up to '
+        'the last with any score.';
   }
   final full = facts.lastFullyScoredRound;
   return full == 0
       ? 'No round is fully scored yet.'
-      : 'Only fully scored rounds (1 to $full) are shown.';
+      : 'Only fully scored rounds (1 to $full) are official.';
 }
