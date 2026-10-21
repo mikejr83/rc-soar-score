@@ -2,7 +2,7 @@ name: Release Windows alpha
 
 # Builds the offline contest app for Windows from a version tag (for example
 # `v0.1.0-alpha.1`) and attaches a zip to a draft GitHub Release. Manual runs
-# build and upload the zip as a workflow artifact only, as a dry run.
+# build the folder and upload it as a workflow artifact only, as a dry run.
 on:
   push:
     tags: ["v*"]
@@ -78,12 +78,17 @@ jobs:
             Set-Content "$stage/README.txt"
           Compress-Archive -Path "stage/$name" -DestinationPath "$name.zip"
           "ZIP=$name.zip" | Out-File -FilePath $env:GITHUB_ENV -Append
+          "ZIP_NAME=$name" | Out-File -FilePath $env:GITHUB_ENV -Append
 
-      - name: Keep the zip as a workflow artifact
+      # Only dry runs need this: a tag run attaches the zip to the release
+      # below. The artifact is the unzipped folder, because GitHub zips every
+      # artifact itself and a zip would arrive zipped twice.
+      - name: Keep the build as a workflow artifact (dry runs)
+        if: github.ref_type != 'tag'
         uses: actions/upload-artifact@v4
         with:
-          name: windows-zip
-          path: ${{ env.ZIP }}
+          name: ${{ env.ZIP_NAME }}
+          path: stage/${{ env.ZIP_NAME }}
 
       - name: Attach the zip to a draft release
         if: github.ref_type == 'tag'

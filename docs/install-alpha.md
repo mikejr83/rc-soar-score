@@ -43,6 +43,6 @@ Push a tag such as `v0.1.0-alpha.1`. The workflow
 **draft** release; review the notes and publish it. The build name is the
 tag without its pre-release suffix (`0.1.0`, because the Windows file version is
 numeric) and the build number is the workflow run number. Run the workflow by
-hand to build a zip as a workflow artifact without releasing. Actions has no
+hand to build without releasing; the result is a workflow artifact holding the unzipped folder. Actions has no
 credits at the moment, so check that the build works on a Windows machine
 first.
