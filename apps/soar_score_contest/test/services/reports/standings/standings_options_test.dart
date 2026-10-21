@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_core/soar_score_core.dart';
 import 'package:soar_score_contest/services/reports/standings/standings_options.dart';
 import 'package:soar_score_contest/services/reports/viewer/report_spec.dart';
 
@@ -40,6 +41,22 @@ void main() {
       expect(options.provisional, isTrue);
       expect(options.lastShown, 2);
       expect(facts.lastFullyScoredRound, 1);
+    });
+
+    test('a completed contest has nothing provisional, even if asked', () {
+      final matrix = drawnMatrix();
+      final scores = scoresFor(matrix, {
+        for (var p = 1; p <= 4; p++) (1, p): at(p),
+        (2, 1): at(10),
+      });
+      final facts = factsOf(
+        fixture,
+        scores: scores,
+        state: LifecycleState.completed,
+      );
+      expect(StandingsOptions.provisionalApplies(facts), isFalse);
+      expect(StandingsOptions.of({'prov': '1'}, facts).provisional, isFalse);
+      expect(StandingsOptions.defaults(facts)['prov'], '0');
     });
 
     test('provisional off shows only fully scored rounds', () {

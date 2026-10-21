@@ -68,13 +68,24 @@ class StandingsReport extends ReportDefinition {
     if (options.to < 1 || options.to < options.from) {
       return null;
     }
-    return StandingsReportData.load(
-      request.client,
-      request.contestId,
-      rounds: options.rounds,
-      asOf: options.to,
-      withDetails: options.details,
-    );
+    try {
+      return await StandingsReportData.load(
+        request.client,
+        request.contestId,
+        rounds: options.rounds,
+        asOf: options.to,
+        withDetails: options.details,
+      );
+    } on NoStoredStandings catch (none) {
+      return ReportNoData(
+        title: 'No standings stored for round ${none.round} yet',
+        body:
+            'Standings are stored when scores are saved or recalculated. Save '
+            'a score on the Scoring page and the report will show them.',
+        actionLabel: 'Open Scoring',
+        round: none.round,
+      );
+    }
   }
 
   @override

@@ -16,6 +16,14 @@ class FlightDetail {
   final int? height;
 }
 
+/// The server has no stored standing as of a round (it answers 400): nothing
+/// was recalculated yet, so scores that exist have no standings.
+class NoStoredStandings implements Exception {
+  const NoStoredStandings(this.round);
+
+  final int round;
+}
+
 /// What the Overall Standings report reads from the API for one filter set:
 /// the stored standings as of a round, the selected flight of each round it
 /// shows, and (when asked) what was recorded for each flight.
@@ -48,7 +56,7 @@ class StandingsReportData {
     required bool withDetails,
   }) async {
     final results = await Future.wait<Object?>([
-      client.results(contestId, asOfRound: asOf),
+      _standing(client, contestId, asOf),
       for (final round in rounds) client.roundResults(contestId, round),
       if (withDetails) _scores(client, contestId),
     ]);
@@ -86,6 +94,21 @@ class StandingsReportData {
       flights: flights,
       details: details,
     );
+  }
+
+  static Future<ContestResults> _standing(
+    ApiClient client,
+    Id contestId,
+    int asOf,
+  ) async {
+    try {
+      return await client.results(contestId, asOfRound: asOf);
+    } on ApiHttpError catch (error) {
+      if (error.statusCode == 400) {
+        throw NoStoredStandings(asOf);
+      }
+      rethrow;
+    }
   }
 
   /// The official scores; a contest with no scores resource has none, which is

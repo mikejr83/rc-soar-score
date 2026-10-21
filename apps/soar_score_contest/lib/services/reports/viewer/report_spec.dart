@@ -33,6 +33,25 @@ final class ReportEmpty extends ReportCheck {
   final String body;
 }
 
+/// What a report's `loadData` returns when the server has nothing to build the
+/// sheet from yet. The viewer shows [title] and [body] in place of the sheet,
+/// with a link to [actionLabel]'s page, instead of an error.
+class ReportNoData {
+  const ReportNoData({
+    required this.title,
+    required this.body,
+    required this.actionLabel,
+    this.round,
+  });
+
+  final String title;
+  final String body;
+  final String actionLabel;
+
+  /// The round to open Scoring at.
+  final int? round;
+}
+
 /// What a report needs to read the data behind a set of filters.
 class ReportDataRequest {
   const ReportDataRequest({

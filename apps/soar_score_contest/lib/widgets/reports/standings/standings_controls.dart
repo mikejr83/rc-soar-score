@@ -100,12 +100,13 @@ List<ReportControlGroup> standingsControls(
           value: options.details,
           onChanged: (v) => toggle('det', v),
         ),
-        ReportCheckOption(
-          label: 'Provisional',
-          help: _provisionalHelp(facts, options),
-          value: options.provisional,
-          onChanged: (v) => toggle('prov', v),
-        ),
+        if (StandingsOptions.provisionalApplies(facts))
+          ReportCheckOption(
+            label: 'Provisional',
+            help: _provisionalHelp(facts, options),
+            value: options.provisional,
+            onChanged: (v) => toggle('prov', v),
+          ),
       ],
     ),
   ];

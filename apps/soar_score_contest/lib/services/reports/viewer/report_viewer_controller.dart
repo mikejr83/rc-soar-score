@@ -100,6 +100,10 @@ class ReportViewerController extends ChangeNotifier {
   bool get dataPending =>
       usesData && _data == null && !_dataFailed && check is! ReportEmpty;
 
+  /// The server has nothing to build the sheet from yet.
+  ReportNoData? get noData =>
+      _data is ReportNoData ? _data as ReportNoData : null;
+
   /// A later read is under way; the last good sheet stays, dimmed.
   bool get generating => _dataLoading && _data != null;
 
@@ -149,7 +153,8 @@ class ReportViewerController extends ChangeNotifier {
   bool get hasSheet =>
       _load == ViewerLoad.ready &&
       check is! ReportEmpty &&
-      (!usesData || _data != null);
+      (!usesData || _data != null) &&
+      noData == null;
 
   // Loading.
 
