@@ -78,6 +78,63 @@ void main() {
       );
     });
 
+    test('asOfRound reads the stored standing of an earlier round', () async {
+      await drawnContest(api);
+      await scoreRoundOne();
+      for (var pilot = 1; pilot <= 6; pilot++) {
+        await enter(pilot, 300 + pilot * 10, ordinal: 2);
+      }
+
+      final latest = await results();
+      final first = await api.json(
+        await api.send('GET', '/contests/$_contestId/results?asOfRound=1'),
+      );
+
+      expect(latest['as_of_round'], 2);
+      expect(first['as_of_round'], 1);
+      expect(standingsOf(first), hasLength(6));
+      expect({for (final s in standingsOf(first)) s['as_of_round']}, {1});
+      // After round 1 pilot 1 led; the later round changed the order.
+      expect(
+        standingsOf(first).first['contest_participation_id'],
+        matrixTestParticipationId(1),
+      );
+      expect(
+        standingsOf(latest).first['contest_participation_id'],
+        isNot(matrixTestParticipationId(1)),
+      );
+    });
+
+    test('asOfRound on a contest with no standings is refused', () async {
+      await drawnContest(api);
+
+      final response = await api.send(
+        'GET',
+        '/contests/$_contestId/results?asOfRound=1',
+      );
+
+      expect(response.statusCode, 400);
+      // Without the query an empty contest still has empty standings.
+      expect((await results())['standings'], isEmpty);
+    });
+
+    test('asOfRound with no standing or no number is refused', () async {
+      await drawnContest(api);
+      await scoreRoundOne();
+
+      final missing = await api.send(
+        'GET',
+        '/contests/$_contestId/results?asOfRound=9',
+      );
+      final bad = await api.send(
+        'GET',
+        '/contests/$_contestId/results?asOfRound=two',
+      );
+
+      expect(missing.statusCode, 400);
+      expect(bad.statusCode, 400);
+    });
+
     test('a round with unscored flights reads as preliminary', () async {
       await drawnContest(api);
       await enter(1, 500);

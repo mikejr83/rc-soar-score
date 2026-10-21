@@ -155,11 +155,20 @@ class StubRoundGroupRepository implements RoundGroupRepository {
 class StubScorePlaceholderRepository implements ScorePlaceholderRepository {
   final List<ScorePlaceholder> stored = [];
 
+  /// When set, listing the placeholders fails, like a database that has gone
+  /// away.
+  bool failListing = false;
+
   @override
-  Future<List<ScorePlaceholder>> listForContest(Id contestId) async => [
-    for (final placeholder in stored)
-      if (placeholder.contestId == contestId) placeholder,
-  ];
+  Future<List<ScorePlaceholder>> listForContest(Id contestId) async {
+    if (failListing) {
+      throw StateError('the database is unreachable');
+    }
+    return [
+      for (final placeholder in stored)
+        if (placeholder.contestId == contestId) placeholder,
+    ];
+  }
 
   @override
   Future<ScorePlaceholder?> findForAssignment(Id assignmentId) async => stored

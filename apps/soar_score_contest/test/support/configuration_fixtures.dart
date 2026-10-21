@@ -111,6 +111,7 @@ class ConfigServer {
     this.participations = const [],
     CurrentMatrix? matrix,
     this.conflictOnSave = false,
+    this.recalculationWarning,
   }) : contest = contest ?? configContest(),
        matrix = matrix ?? CurrentMatrix();
 
@@ -122,6 +123,10 @@ class ConfigServer {
   /// The first configuration save fails with 409, as if another device saved
   /// first.
   bool conflictOnSave;
+
+  /// The notice the save answers with when the recalculation that follows it
+  /// failed.
+  final String? recalculationWarning;
 
   Map<String, dynamic>? saved;
   Map<String, dynamic>? updatedContest;
@@ -152,6 +157,7 @@ class ConfigServer {
             },
           ),
           contest: contest,
+          recalculationWarning: recalculationWarning,
         ).toJson(),
       );
     }

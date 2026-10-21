@@ -5,10 +5,17 @@ import 'paper_style.dart';
 /// The viewer's loading state: a grey page-shaped skeleton with a progress bar
 /// on the sheet backdrop.
 class ViewerLoading extends StatelessWidget {
-  const ViewerLoading({super.key, required this.pageAspect});
+  const ViewerLoading({
+    super.key,
+    required this.pageAspect,
+    this.label = 'Loading contest data…',
+  });
 
   /// Page width over height.
   final double pageAspect;
+
+  /// What is being waited for.
+  final String label;
 
   @override
   Widget build(BuildContext context) {
@@ -16,26 +23,32 @@ class ViewerLoading extends StatelessWidget {
     return ColoredBox(
       color: PaperStyle.backdrop(theme.brightness),
       child: Semantics(
-        label: 'Loading contest data',
+        label: label,
         container: true,
         child: Column(
           key: const ValueKey('viewer-loading'),
           children: [
             const LinearProgressIndicator(),
+            // The page-shaped skeleton takes what room there is, so a short
+            // window scales it down instead of overflowing.
             Expanded(
-              child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
                 child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  spacing: 12,
                   children: [
-                    ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 520),
-                      child: AspectRatio(
-                        aspectRatio: pageAspect,
-                        child: const ColoredBox(color: Color(0xFFEFEFEF)),
+                    Expanded(
+                      child: Center(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 520),
+                          child: AspectRatio(
+                            aspectRatio: pageAspect,
+                            child: const ColoredBox(color: Color(0xFFEFEFEF)),
+                          ),
+                        ),
                       ),
                     ),
-                    const Text('Loading contest data…'),
+                    const SizedBox(height: 12),
+                    Text(label),
                   ],
                 ),
               ),

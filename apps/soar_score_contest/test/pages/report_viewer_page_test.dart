@@ -453,6 +453,20 @@ void main() {
       await tester.pumpAndSettle();
     });
 
+    testWidgets('the loading skeleton scales down in a short window', (
+      tester,
+    ) async {
+      await _pump(
+        tester,
+        _server(),
+        size: const Size(1280, 450),
+        settle: false,
+      );
+      expect(find.byKey(const ValueKey('viewer-loading')), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      await tester.pumpAndSettle();
+    });
+
     testWidgets('unreadable data offers Try again and keeps the page', (
       tester,
     ) async {

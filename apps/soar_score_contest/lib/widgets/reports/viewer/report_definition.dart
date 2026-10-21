@@ -43,6 +43,7 @@ class ReportPageContext {
     required this.setup,
     required this.bodySize,
     required this.preview,
+    this.data,
   });
 
   final ReportsFacts facts;
@@ -57,6 +58,10 @@ class ReportPageContext {
 
   /// Print preview is on: leave out anything that exists only on screen.
   final bool preview;
+
+  /// What the report's `loadData` returned for [filters]; `null` for a report
+  /// with no data of its own.
+  final Object? data;
 }
 
 /// A report ready to draw: the running header, the page bodies and, for a

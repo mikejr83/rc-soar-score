@@ -58,6 +58,9 @@ class ReportDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => DropdownButtonFormField<String>(
+    // A new key when the value changes keeps the field in step with a reset
+    // or a link that sets it.
+    key: ValueKey('$label:$value'),
     initialValue: items.containsKey(value) ? value : null,
     isExpanded: true,
     decoration: InputDecoration(

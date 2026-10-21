@@ -41,7 +41,7 @@ createHandlers(
   addAccountClaimRoutes(router, repository);
   addAccountPreferencesRoutes(router, repository);
   addContestRoutes(router, repository);
-  addConfigurationRoutes(router, repository);
+  addConfigurationRoutes(router, repository, recalculation: recalculation);
   addLandingTableRoutes(router, repository);
   addParticipantRoutes(router, repository);
   addRoleRoutes(router, repository);
