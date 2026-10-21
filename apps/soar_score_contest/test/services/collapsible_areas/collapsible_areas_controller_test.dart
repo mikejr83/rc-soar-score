@@ -30,7 +30,16 @@ void main() {
   test('registered area ids are unique', () {
     final ids = [for (final area in collapsibleAreas) area.id];
     expect(ids.toSet().length, ids.length);
-    expect(collapsibleAreas, contains(matrixSummaryArea));
+    expect(
+      collapsibleAreas,
+      containsAll([
+        matrixSummaryArea,
+        drawAdvancedArea,
+        drawDetailsArea,
+        shellRailArea,
+        landingEntriesArea,
+      ]),
+    );
   });
 
   test('an area starts at its default', () async {
