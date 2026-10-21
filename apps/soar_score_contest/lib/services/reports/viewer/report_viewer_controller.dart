@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
@@ -59,6 +59,7 @@ class ReportViewerController extends ChangeNotifier {
   bool _outdated = false;
   bool _refreshing = false;
   bool _printFailed = false;
+  bool _busy = false;
   ViewerNotice? _notice;
   Timer? _timer;
   bool _disposed = false;
@@ -81,6 +82,9 @@ class ReportViewerController extends ChangeNotifier {
   /// A refresh is under way; the sheet stays and dims slightly.
   bool get refreshing => _refreshing;
   bool get printFailed => _printFailed;
+
+  /// A print or PDF job is being prepared; a second request is ignored.
+  bool get busy => _busy;
   ViewerNotice? get notice => _notice;
 
   /// The report's own data; `null` for a report with none, or before it loads.
@@ -337,31 +341,45 @@ class ReportViewerController extends ChangeNotifier {
   // Printing.
 
   /// Opens the platform's print dialog for a sheet of [pageCount] pages.
-  Future<void> print(String title, int pageCount) =>
-      _send(title, pageCount, pdf: false);
+  Future<void> print(String title, List<Widget> pages) =>
+      _send(title, pages, pdf: false);
 
-  Future<void> savePdf(String title, int pageCount) =>
-      _send(title, pageCount, pdf: true);
+  Future<void> savePdf(String title, List<Widget> pages) =>
+      _send(title, pages, pdf: true);
 
-  Future<void> _send(String title, int pageCount, {required bool pdf}) async {
+  Future<void> _send(
+    String title,
+    List<Widget> pages, {
+    required bool pdf,
+  }) async {
+    if (_busy) {
+      return;
+    }
+    _busy = true;
     _printFailed = false;
-    final job = ReportPrintJob(
-      title: title,
-      pageCount: pageCount,
-      paperLabel: setup.paper.label,
-      orientationLabel: setup.orientation.label,
-    );
-    final result = pdf ? await printer.savePdf(job) : await printer.print(job);
+    // Painting the pages takes the UI thread for a while: say so, and let the
+    // message reach the screen first.
+    _notice = const ViewerNotice('Preparing the pages…');
+    _changed();
+    await WidgetsBinding.instance.endOfFrame;
+    final pageCount = pages.length;
+    final job = ReportPrintJob(title: title, setup: setup, pages: pages);
+    final ReportPrintResult result;
+    try {
+      result = pdf ? await printer.savePdf(job) : await printer.print(job);
+    } finally {
+      _busy = false;
+    }
     if (_disposed) {
       return;
     }
-    final pages = '$pageCount ${pageCount == 1 ? 'page' : 'pages'}';
+    final pageText = '$pageCount ${pageCount == 1 ? 'page' : 'pages'}';
     switch (result) {
       case ReportPrintResult.sent:
         _notice = ViewerNotice(
           pdf
-              ? 'PDF saved · $title.pdf'
-              : 'Sent to the printer · $pages, ${job.paperLabel}, '
+              ? 'PDF saved · ${printer.lastSavedName ?? '$title.pdf'}'
+              : 'Sent to the printer · $pageText, ${job.paperLabel}, '
                     '${job.orientationLabel.toLowerCase()}.',
         );
       case ReportPrintResult.cancelled:

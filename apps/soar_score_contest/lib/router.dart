@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_contest/pages/contest/participants_page.dart';
 import 'package:soar_score_contest/pages/contest/report_viewer_page.dart';
+import 'package:soar_score_contest/services/reports/viewer/report_printers.dart';
 import 'package:soar_score_contest/pages/contest/reports_page.dart';
 import 'package:soar_score_contest/pages/contest/sync_page.dart';
 import 'package:soar_score_contest/pages/contest/scoring_page.dart';
@@ -159,6 +160,7 @@ GoRouter buildAppRouter({
           final key = state.pathParameters['report'];
           final inPlace = state.uri.queryParameters['back'] == '1';
           return ReportViewerPage(
+            printer: ReportPrinters.current,
             contestId: state.pathParameters['contestId']!,
             report: ReportKind.values
                 .where((kind) => kind.key == key)

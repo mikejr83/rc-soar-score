@@ -1,3 +1,7 @@
+import 'package:flutter/widgets.dart';
+
+import 'page_setup.dart';
+
 /// What happened when the director asked to print or save a report.
 enum ReportPrintResult {
   /// Sent to the printer or saved as a PDF.
@@ -28,30 +32,40 @@ class ReportPrintCapabilities {
 /// Opens the platform's own print dialog for a sheet. The viewer sets paper
 /// and orientation, then hands over; the real dialog belongs to the platform.
 ///
-/// Printing and Save as PDF are not built yet; [NotWiredReportPrinter] stands
-/// in until an engine is chosen.
+/// [PlatformReportPrinter] is the real one; [NotWiredReportPrinter] stands in
+/// where a build has no printing.
 abstract class ReportPrinter {
   ReportPrintCapabilities get capabilities;
+
+  /// The name of the file the last successful [savePdf] wrote, which the
+  /// director may have changed in the save dialog; `null` when unknown.
+  String? get lastSavedName;
 
   Future<ReportPrintResult> print(ReportPrintJob job);
 
   Future<ReportPrintResult> savePdf(ReportPrintJob job);
 }
 
-/// What is printed: the file name for a PDF and the page count and setup the
-/// dialog is told about.
+/// What is printed: the title (also the base of a PDF's file name), the
+/// finished sheet pages and the setup the dialog is told about.
 class ReportPrintJob {
   const ReportPrintJob({
     required this.title,
-    required this.pageCount,
-    required this.paperLabel,
-    required this.orientationLabel,
+    required this.setup,
+    required this.pages,
   });
 
   final String title;
-  final int pageCount;
-  final String paperLabel;
-  final String orientationLabel;
+
+  /// The paper and orientation the [pages] are laid out for.
+  final PageSetup setup;
+
+  /// The finished sheet pages, each exactly [setup] sized.
+  final List<Widget> pages;
+
+  int get pageCount => pages.length;
+  String get paperLabel => setup.paper.label;
+  String get orientationLabel => setup.orientation.label;
 }
 
 /// The printer until printing is built: every request answers [notWired].
@@ -60,6 +74,9 @@ class NotWiredReportPrinter implements ReportPrinter {
 
   @override
   ReportPrintCapabilities get capabilities => const ReportPrintCapabilities();
+
+  @override
+  String? get lastSavedName => null;
 
   @override
   Future<ReportPrintResult> print(ReportPrintJob job) async =>

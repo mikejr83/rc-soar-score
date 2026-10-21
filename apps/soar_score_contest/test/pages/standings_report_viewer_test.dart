@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/services/reports/viewer/report_print_result.dart';
 import 'package:http/testing.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_contest/api_client_provider.dart';
@@ -33,6 +34,7 @@ Future<void> _pump(
       child: MaterialApp(
         locale: const Locale('en', 'US'),
         home: ReportViewerPage(
+          printer: const NotWiredReportPrinter(),
           contestId: matrixContestId,
           report: ReportKind.standings,
           params: params,
