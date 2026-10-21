@@ -59,6 +59,7 @@ class ReportViewerController extends ChangeNotifier {
   bool _outdated = false;
   bool _refreshing = false;
   bool _printFailed = false;
+  bool _busy = false;
   ViewerNotice? _notice;
   Timer? _timer;
   bool _disposed = false;
@@ -81,6 +82,9 @@ class ReportViewerController extends ChangeNotifier {
   /// A refresh is under way; the sheet stays and dims slightly.
   bool get refreshing => _refreshing;
   bool get printFailed => _printFailed;
+
+  /// A print or PDF job is being prepared; a second request is ignored.
+  bool get busy => _busy;
   ViewerNotice? get notice => _notice;
 
   /// The report's own data; `null` for a report with none, or before it loads.
@@ -348,17 +352,24 @@ class ReportViewerController extends ChangeNotifier {
     List<Widget> pages, {
     required bool pdf,
   }) async {
+    if (_busy) {
+      return;
+    }
+    _busy = true;
     _printFailed = false;
+    // Painting the pages takes the UI thread for a while: say so, and let the
+    // message reach the screen first.
+    _notice = const ViewerNotice('Preparing the pages…');
+    _changed();
+    await WidgetsBinding.instance.endOfFrame;
     final pageCount = pages.length;
-    final job = ReportPrintJob(
-      title: title,
-      pageCount: pageCount,
-      setup: setup,
-      pages: pages,
-      paperLabel: setup.paper.label,
-      orientationLabel: setup.orientation.label,
-    );
-    final result = pdf ? await printer.savePdf(job) : await printer.print(job);
+    final job = ReportPrintJob(title: title, setup: setup, pages: pages);
+    final ReportPrintResult result;
+    try {
+      result = pdf ? await printer.savePdf(job) : await printer.print(job);
+    } finally {
+      _busy = false;
+    }
     if (_disposed) {
       return;
     }
@@ -367,7 +378,7 @@ class ReportViewerController extends ChangeNotifier {
       case ReportPrintResult.sent:
         _notice = ViewerNotice(
           pdf
-              ? 'PDF saved · $title.pdf'
+              ? 'PDF saved · ${printer.lastSavedName ?? '$title.pdf'}'
               : 'Sent to the printer · $pageText, ${job.paperLabel}, '
                     '${job.orientationLabel.toLowerCase()}.',
         );

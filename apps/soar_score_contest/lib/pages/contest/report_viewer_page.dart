@@ -13,7 +13,6 @@ import '../../services/reports/report_launcher.dart';
 import '../../services/reports/reports_facts.dart';
 import '../../services/reports/result_status.dart';
 import '../../services/reports/viewer/page_setup.dart';
-import '../../services/reports/viewer/platform_report_printer.dart';
 import '../../services/reports/viewer/report_print_result.dart';
 import '../../services/reports/viewer/report_spec.dart';
 import '../../services/reports/viewer/report_view_params.dart';
@@ -47,7 +46,7 @@ class ReportViewerPage extends StatefulWidget {
     this.params = const ReportViewParams(),
     this.openedInPlace = false,
     this.definitionFor = reportDefinitionFor,
-    this.printer = const PlatformReportPrinter(),
+    required this.printer,
     this.launcher = const PlatformReportLauncher(),
     this.onParams,
     this.pollInterval = const Duration(seconds: 30),
@@ -88,6 +87,7 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
   double _fit = 1;
   int _page = 1;
   bool _panelOpen = false;
+  bool _wasBusy = false;
 
   @override
   void didChangeDependencies() {
@@ -136,6 +136,12 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
     }
     setState(() {});
     final notice = controller.notice;
+    if (_wasBusy && !controller.busy && notice == null) {
+      // The job ended without a message of its own: take the "Preparing"
+      // message down.
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    }
+    _wasBusy = controller.busy;
     if (notice != null) {
       controller.clearNotice();
       final messenger = ScaffoldMessenger.of(context);
@@ -213,20 +219,35 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
         : '${widget.report!.title} – $name';
   }
 
+  /// The sheet pages for the printer. They are painted off screen, outside
+  /// this widget tree, so they carry the theme and localizations they would
+  /// have here.
+  List<Widget> _printPages() => [
+    for (final page in _pages(_document()!))
+      Localizations.override(
+        context: context,
+        child: InheritedTheme.captureAll(context, page),
+      ),
+  ];
+
   void _print() {
     final controller = _controller!;
-    if (!controller.hasSheet || !controller.printer.capabilities.canPrint) {
+    if (controller.busy ||
+        !controller.hasSheet ||
+        !controller.printer.capabilities.canPrint) {
       return;
     }
-    controller.print(_printTitle, _pages(_document()!));
+    controller.print(_printTitle, _printPages());
   }
 
   void _savePdf() {
     final controller = _controller!;
-    if (!controller.hasSheet || !controller.printer.capabilities.canSavePdf) {
+    if (controller.busy ||
+        !controller.hasSheet ||
+        !controller.printer.capabilities.canSavePdf) {
       return;
     }
-    controller.savePdf(_printTitle, _pages(_document()!));
+    controller.savePdf(_printTitle, _printPages());
   }
 
   void _goBack() => context.go(contestReportsPath(widget.contestId));
@@ -518,8 +539,8 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
     final document = ready ? _document() : null;
     final caps = controller.printer.capabilities;
     final nothing = document == null;
-    final printEnabled = !nothing && caps.canPrint;
-    final pdfEnabled = !nothing && caps.canSavePdf;
+    final printEnabled = !nothing && !controller.busy && caps.canPrint;
+    final pdfEnabled = !nothing && !controller.busy && caps.canSavePdf;
     final setup = controller.setup;
     final setupText = nothing
         ? 'Nothing to print'

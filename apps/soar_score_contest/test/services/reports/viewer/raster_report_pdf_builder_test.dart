@@ -5,12 +5,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_contest/services/reports/viewer/page_setup.dart';
 import 'package:soar_score_contest/services/reports/viewer/raster_report_pdf_builder.dart';
 import 'package:soar_score_contest/services/reports/viewer/report_print_result.dart';
+import 'package:soar_score_contest/widgets/reports/viewer/report_sheet_page.dart';
 
 ReportPrintJob _job(PageSetup setup, int pages) => ReportPrintJob(
   title: 'Overall Standings – Cup',
-  pageCount: pages,
-  paperLabel: setup.paper.label,
-  orientationLabel: setup.orientation.label,
   setup: setup,
   pages: [
     for (var i = 0; i < pages; i++)
@@ -54,5 +52,35 @@ void main() {
       }
     });
     expect(error, isA<ArgumentError>());
+  });
+
+  testWidgets('paints a real sheet page with its header and footer', (
+    tester,
+  ) async {
+    const setup = PageSetup(PaperSize.letter, PageOrientation.landscape);
+    final job = ReportPrintJob(
+      title: 'Overall Standings – Cup',
+      setup: setup,
+      pages: [
+        ReportSheetPage(
+          setup: setup,
+          title: 'Overall Results - Cup',
+          subtitle: 'F5J',
+          detail: null,
+          reportName: 'Overall Standings',
+          pageNumber: 1,
+          pageCount: 1,
+          generated: 'Generated 18 Oct 2026',
+          body: Table(
+            children: const [
+              TableRow(children: [Text('Rank'), Text('Pilot')]),
+              TableRow(children: [Text('1'), Text('Ada')]),
+            ],
+          ),
+        ),
+      ],
+    );
+    final bytes = (await tester.runAsync(() => builder.build(job)))!;
+    expect(String.fromCharCodes(bytes.take(5)), '%PDF-');
   });
 }

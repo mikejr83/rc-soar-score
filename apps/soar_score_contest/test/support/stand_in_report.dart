@@ -128,6 +128,8 @@ class FakeReportPrinter implements ReportPrinter {
 
   @override
   final ReportPrintCapabilities capabilities;
+  @override
+  String? lastSavedName;
   final List<ReportPrintJob> printed = [];
   final List<ReportPrintJob> saved = [];
 

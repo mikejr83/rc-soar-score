@@ -281,6 +281,7 @@ void main() {
           child: MaterialApp(
             theme: ThemeData.dark(),
             home: ReportViewerPage(
+              printer: const NotWiredReportPrinter(),
               contestId: matrixContestId,
               report: ReportKind.standings,
               definitionFor: (_) => const StandInReport(),
@@ -338,6 +339,19 @@ void main() {
         find.text('Sent to the printer · 2 pages, Letter, landscape.'),
         findsOneWidget,
       );
+    });
+
+    testWidgets('a second request while one runs is ignored', (tester) async {
+      final printer = FakeReportPrinter(ReportPrintResult.sent);
+      await _pump(tester, _server(), printer: printer);
+
+      await tester.tap(find.byKey(const ValueKey('viewer-print')));
+      // The first job is still preparing; Print is off and Ctrl+P does nothing.
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.sendKeyEvent(LogicalKeyboardKey.keyP);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      await tester.pumpAndSettle();
+      expect(printer.printed, hasLength(1));
     });
 
     testWidgets('Ctrl+P prints too', (tester) async {

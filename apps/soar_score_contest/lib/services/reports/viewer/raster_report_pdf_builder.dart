@@ -15,9 +15,9 @@ import 'report_print_result.dart';
 /// is exactly what the director saw. The text in it cannot be selected or
 /// searched.
 class RasterReportPdfBuilder implements ReportPdfBuilder {
-  const RasterReportPdfBuilder({this.pixelRatio = 3, this.compress = true});
+  const RasterReportPdfBuilder({this.pixelRatio = 2, this.compress = true});
 
-  /// Image pixels per logical pixel: 3 gives about 288 dpi.
+  /// Image pixels per logical pixel: 2 gives about 192 dpi.
   final double pixelRatio;
 
   /// Compress the PDF's structure; a test turns it off to read the pages.
@@ -29,16 +29,17 @@ class RasterReportPdfBuilder implements ReportPdfBuilder {
   @override
   Future<Uint8List> build(ReportPrintJob job) async {
     final setup = job.setup;
-    if (setup == null || job.pages.isEmpty) {
-      throw ArgumentError('A print job needs a page setup and pages.');
+    if (job.pages.isEmpty) {
+      throw ArgumentError('A print job needs pages.');
     }
     final format = pdfPageFormat(setup);
     final document = pw.Document(title: job.title, compress: compress);
-    // One page at a time: a set of pilot cards is many pages, and a page's
-    // image is large.
+    // Each page is painted and handed to the document in turn, but the
+    // document keeps every page's pixels until `save`, so memory grows with
+    // the page count (about 9 MB per A4 page at the default ratio). The
+    // pixels go in raw, which spares an encode and a decode of each page.
     for (final page in job.pages) {
-      final png = await _capture(page, setup.size);
-      final image = pw.MemoryImage(png);
+      final image = await _capture(page, setup.size);
       document.addPage(
         pw.Page(
           pageFormat: format,
@@ -56,11 +57,15 @@ class RasterReportPdfBuilder implements ReportPdfBuilder {
     setup.height * _pointsPerPixel,
   );
 
-  Future<Uint8List> _capture(Widget page, Size size) async {
+  Future<pw.RawImage> _capture(Widget page, Size size) async {
     final image = await _paint(page, size);
     try {
-      final data = await image.toByteData(format: ui.ImageByteFormat.png);
-      return data!.buffer.asUint8List();
+      final data = await image.toByteData();
+      return pw.RawImage(
+        bytes: data!.buffer.asUint8List(),
+        width: image.width,
+        height: image.height,
+      );
     } finally {
       image.dispose();
     }

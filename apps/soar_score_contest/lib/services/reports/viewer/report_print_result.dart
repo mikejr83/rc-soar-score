@@ -37,34 +37,35 @@ class ReportPrintCapabilities {
 abstract class ReportPrinter {
   ReportPrintCapabilities get capabilities;
 
+  /// The name of the file the last successful [savePdf] wrote, which the
+  /// director may have changed in the save dialog; `null` when unknown.
+  String? get lastSavedName;
+
   Future<ReportPrintResult> print(ReportPrintJob job);
 
   Future<ReportPrintResult> savePdf(ReportPrintJob job);
 }
 
-/// What is printed: the title (also the PDF's file name), the finished sheet
-/// pages and the setup the dialog is told about.
+/// What is printed: the title (also the base of a PDF's file name), the
+/// finished sheet pages and the setup the dialog is told about.
 class ReportPrintJob {
   const ReportPrintJob({
     required this.title,
-    required this.pageCount,
-    required this.paperLabel,
-    required this.orientationLabel,
-    this.setup,
-    this.pages = const [],
+    required this.setup,
+    required this.pages,
   });
 
   final String title;
 
   /// The paper and orientation the [pages] are laid out for.
-  final PageSetup? setup;
+  final PageSetup setup;
 
-  /// The finished sheet pages, each exactly [setup] sized. Empty for a printer
-  /// that only records the job.
+  /// The finished sheet pages, each exactly [setup] sized.
   final List<Widget> pages;
-  final int pageCount;
-  final String paperLabel;
-  final String orientationLabel;
+
+  int get pageCount => pages.length;
+  String get paperLabel => setup.paper.label;
+  String get orientationLabel => setup.orientation.label;
 }
 
 /// The printer until printing is built: every request answers [notWired].
@@ -73,6 +74,9 @@ class NotWiredReportPrinter implements ReportPrinter {
 
   @override
   ReportPrintCapabilities get capabilities => const ReportPrintCapabilities();
+
+  @override
+  String? get lastSavedName => null;
 
   @override
   Future<ReportPrintResult> print(ReportPrintJob job) async =>

@@ -25,6 +25,8 @@ void main() {
   ) async {
     final printed = <Uint8List>[];
     final saved = <String, Uint8List>{};
+    final original = ReportPrinters.current;
+    addTearDown(() => ReportPrinters.current = original);
     ReportPrinters.current = PlatformReportPrinter(
       printDialog: (job, pdf) async {
         printed.add(pdf);
@@ -32,7 +34,7 @@ void main() {
       },
       saveFile: (fileName, pdf) async {
         saved[fileName] = pdf;
-        return true;
+        return fileName;
       },
     );
 
@@ -52,6 +54,7 @@ void main() {
     // Save as PDF names the file after the report and the contest.
     await tapVisible(tester, find.byKey(const ValueKey('viewer-pdf')));
     await pumpUntilFound(tester, find.textContaining('PDF saved'));
+    expect(find.textContaining('$_contest.pdf'), findsOneWidget);
     expect(saved.keys, ['Draw Matrix – $_contest.pdf']);
 
     // Ctrl+P is the same Print action.
