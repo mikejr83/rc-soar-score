@@ -15,10 +15,26 @@ import 'package:soar_score_core/soar_score_core.dart';
 /// - `POST /contests/{id}/configuration` stores the next revision as the
 ///   request's `Principal`, and returns it with the changed contest
 ///
+/// A new revision makes every stored result stale (a result carries the
+/// revision it was computed under), so a contest that has official scores is
+/// recalculated right after the revision is stored. The revision stays stored
+/// when that fails; the response then carries `recalculation_warning`, as a
+/// score entry does.
+///
 /// The handlers only translate between HTTP and
 /// [ContestConfigurationService].
-void addConfigurationRoutes(Router router, Repository repository) {
+///
+/// [recalculation] defaults to a [RecalculationService] over [repository]; it
+/// is exposed so tests can force a recalculation failure.
+void addConfigurationRoutes(
+  Router router,
+  Repository repository, {
+  RecalculationService? recalculation,
+}) {
   final service = ContestConfigurationService(repository);
+  final scoresService = ScoresService(repository);
+  final recalculationService =
+      recalculation ?? RecalculationService(ResultsService(repository));
 
   router.get('/contests/<id>/configuration', (
     Request request,
@@ -61,6 +77,22 @@ void addConfigurationRoutes(Router router, Repository repository) {
         clientTime: DateTime.now().toUtc(),
       ),
     );
-    return jsonResponse(saved.toJson(), statusCode: 201);
+    String? warning;
+    // A contest with no official score has no results to go stale.
+    final scores = await scoresService.list(contestId);
+    if (scores.slots.any((slot) => slot.officialScore != null)) {
+      warning = await recalculationService.recalculateAfterEntry(
+        contestId,
+        cause: 'a configuration change',
+      );
+    }
+    return jsonResponse(
+      SavedConfiguration(
+        revision: saved.revision,
+        contest: saved.contest,
+        recalculationWarning: warning,
+      ).toJson(),
+      statusCode: 201,
+    );
   });
 }

@@ -206,6 +206,7 @@ class _ContestConfigurationPageState extends State<ContestConfigurationPage> {
       _saveError = null;
     });
     var current = data;
+    String? recalculationWarning;
     final mine = {for (final c in draft.changes) c.def.key: draft[c.def.key]};
     try {
       if (draft.detailsChanged) {
@@ -228,6 +229,7 @@ class _ContestConfigurationPageState extends State<ContestConfigurationPage> {
           ),
         );
         current = current.withSaved(saved);
+        recalculationWarning = saved.recalculationWarning;
       }
       if (!mounted) {
         return;
@@ -240,6 +242,7 @@ class _ContestConfigurationPageState extends State<ContestConfigurationPage> {
         draft.configurationChanged
             ? 'Configuration saved as revision '
                   '${current.configuration!.revisionNumber}.'
+                  '${recalculationWarning == null ? '' : ' $recalculationWarning.'}'
             : 'Contest details saved.',
       );
     } on ApiHttpError catch (error) {

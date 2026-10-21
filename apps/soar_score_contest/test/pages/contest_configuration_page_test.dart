@@ -172,6 +172,29 @@ void main() {
     expect(server.updatedContest, isNull);
   });
 
+  testWidgets('a failed recalculation after saving is reported', (
+    tester,
+  ) async {
+    final server = ConfigServer(
+      revision: configRevision(1),
+      recalculationWarning:
+          'Recalculation failed after a configuration change; the results are '
+          'stale',
+    );
+    await _pump(tester, server);
+
+    await _segment(tester, 'decimal_places', '2');
+    await tester.tap(_saveButton);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Configuration revision 2'), findsOneWidget);
+    expect(
+      find.textContaining('Configuration saved as revision 2.'),
+      findsOneWidget,
+    );
+    expect(find.textContaining('the results are stale.'), findsOneWidget);
+  });
+
   testWidgets('changed contest details are saved to the contest', (
     tester,
   ) async {
