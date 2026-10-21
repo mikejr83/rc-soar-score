@@ -127,4 +127,34 @@ void main() {
       expect(options.pilotClass, isTrue);
     });
   });
+
+  group('cancelled rounds', () {
+    final cancelled = StandingsFixture(round2Cancelled: true);
+    final facts = factsOf(cancelled);
+
+    test('are not rounds the report can show', () {
+      expect(facts.roundOrdinals, [1]);
+      final options = StandingsOptions.of(
+        StandingsOptions.defaults(facts),
+        facts,
+      );
+      expect(options.rounds, [1]);
+      expect(options.to, 1);
+    });
+
+    test(
+      'an upper bound on a cancelled round falls back to the last round',
+      () {
+        final options = StandingsOptions.of({'to': '2'}, facts);
+        expect(options.rounds, [1]);
+        expect(options.to, 1);
+      },
+    );
+
+    test('a range with only cancelled rounds is empty', () {
+      final options = StandingsOptions.of({'from': '2', 'to': '2'}, facts);
+      expect(options.rounds, isEmpty);
+      expect(options.check(facts), isA<ReportEmpty>());
+    });
+  });
 }

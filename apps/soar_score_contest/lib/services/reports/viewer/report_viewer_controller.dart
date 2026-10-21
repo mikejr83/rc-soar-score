@@ -108,13 +108,12 @@ class ReportViewerController extends ChangeNotifier {
   );
 
   /// The filters in force: the URL's over the report's defaults.
-  Map<String, String> get filters {
-    final facts = _facts;
-    return {
-      if (facts != null) ...spec.defaultFilters(facts),
-      ..._params.filters,
-    };
-  }
+  Map<String, String> get filters => _filtersFor(_facts);
+
+  Map<String, String> _filtersFor(ReportsFacts? facts) => {
+    if (facts != null) ...spec.defaultFilters(facts),
+    ..._params.filters,
+  };
 
   ReportCheck get check {
     final facts = _facts;
@@ -123,13 +122,19 @@ class ReportViewerController extends ChangeNotifier {
 
   bool get isInvalid => check is ReportInvalid;
 
-  Map<String, String> _currentFilters() {
-    if (isInvalid) {
-      final facts = _facts;
-      return _lastGood ?? {if (facts != null) ...spec.defaultFilters(facts)};
+  /// The filters to build from for [facts]: the current ones, or the last
+  /// good ones while the current ones are invalid.
+  Map<String, String> _currentFiltersFor(ReportsFacts? facts) {
+    final current = _filtersFor(facts);
+    final invalid =
+        facts != null && spec.check(current, facts) is ReportInvalid;
+    if (invalid) {
+      return _lastGood ?? {...spec.defaultFilters(facts)};
     }
-    return filters;
+    return current;
   }
+
+  Map<String, String> _currentFilters() => _currentFiltersFor(_facts);
 
   /// The filters the sheet is built from: the current ones, or the last good
   /// ones while the current ones are invalid; for a report with data of its
@@ -209,14 +214,19 @@ class ReportViewerController extends ChangeNotifier {
   }
 
   /// Reads the data again and replaces the sheet's. Only ever on request.
+  ///
+  /// The facts and the report's own data are replaced together or not at all:
+  /// when the new data cannot be read the old sheet stays as it was, still
+  /// marked out of date, so it never mixes two snapshots.
   Future<void> refresh() async {
     _refreshing = true;
     _changed();
     try {
-      _facts = await _read();
-      _outdated = false;
-      _remember();
-      await _syncData(force: true);
+      final fresh = await _read();
+      if (await _syncData(force: true, candidate: fresh)) {
+        _outdated = false;
+        _remember();
+      }
     } on Object {
       // Keep the old sheet; the banner stays so the director can try again.
     }
@@ -241,24 +251,29 @@ class ReportViewerController extends ChangeNotifier {
   }
 
   /// Reads the report's data again when the filters now need other data (or
-  /// [force]), or applies the filters at once when they do not.
-  Future<void> _syncData({bool force = false}) async {
-    final facts = _facts;
+  /// [force]), or applies the filters at once when they do not. With a
+  /// [candidate] snapshot of the facts it commits the facts only together with
+  /// the data read for them. Completes with whether it did.
+  Future<bool> _syncData({bool force = false, ReportsFacts? candidate}) async {
+    final facts = candidate ?? _facts;
     final api = client;
     final id = contestId;
     if (facts == null || api == null || id == null) {
-      return;
+      return false;
     }
-    final filters = _currentFilters();
+    final filters = _currentFiltersFor(facts);
     final key = spec.dataKey(filters, facts);
     if (key == null) {
+      if (candidate != null) {
+        _facts = candidate;
+      }
       _shown = null;
-      return;
+      return true;
     }
     if (!force && key == _dataKey && _data != null) {
       _shown = filters;
       _changed();
-      return;
+      return true;
     }
     final token = ++_dataToken;
     _dataLoading = true;
@@ -274,19 +289,27 @@ class ReportViewerController extends ChangeNotifier {
         ),
       );
       if (token != _dataToken || _disposed) {
-        return;
+        return false;
       }
       _data = data;
       _dataKey = key;
+      if (candidate != null) {
+        _facts = candidate;
+      }
       _shown = _currentFilters();
     } on Object {
       if (token != _dataToken || _disposed) {
-        return;
+        return false;
       }
-      _dataFailed = true;
+      // A refresh that cannot read its data leaves the old snapshot alone.
+      _dataFailed = candidate == null;
+      _dataLoading = false;
+      _changed();
+      return false;
     }
     _dataLoading = false;
     _changed();
+    return true;
   }
 
   /// Reads the report's data again after a failure.

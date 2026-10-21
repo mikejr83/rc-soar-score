@@ -135,8 +135,15 @@ Id placeholderOf(
 /// | 4     | 600.0   | 650.0   | 1,250 less 50    |
 class StandingsFixture {
   /// [reviewPilot] has the score of round 2 in review.
-  StandingsFixture({bool preliminary = false, int? reviewPilot})
-    : matrix = drawnMatrix() {
+  StandingsFixture({
+    bool preliminary = false,
+    int? reviewPilot,
+    bool round2Cancelled = false,
+  }) : matrix = drawnMatrix(
+         round2Status: round2Cancelled
+             ? RoundStatus.cancelled
+             : RoundStatus.open,
+       ) {
     final recorded = recordedScores(matrix);
     scores = reviewPilot == null
         ? recorded

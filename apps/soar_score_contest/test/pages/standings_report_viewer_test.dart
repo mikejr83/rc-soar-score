@@ -17,6 +17,7 @@ Future<void> _pump(
   WidgetTester tester,
   StandingsServer server, {
   ReportViewParams params = const ReportViewParams(),
+  Duration? pollInterval,
   Size size = const Size(1280, 1000),
   bool settle = true,
 }) async {
@@ -35,7 +36,7 @@ Future<void> _pump(
           contestId: matrixContestId,
           report: ReportKind.standings,
           params: params,
-          pollInterval: null,
+          pollInterval: pollInterval,
         ),
       ),
     ),
@@ -269,6 +270,26 @@ void main() {
     });
   });
 
+  group('cancelled rounds', () {
+    testWidgets('are never requested and do not stop the report loading', (
+      tester,
+    ) async {
+      server = StandingsServer(StandingsFixture(round2Cancelled: true));
+      await _pump(tester, server);
+
+      expect(
+        _text('Ray, Bo').evaluate().isNotEmpty ||
+            _text('Lee, Ann').evaluate().isNotEmpty,
+        isTrue,
+      );
+      expect(_text('R1'), findsOneWidget);
+      expect(_text('R2'), findsNothing);
+      final paths = server.requests.map((u) => u.path).toList();
+      expect(paths.any((p) => p.endsWith('/results/rounds/2')), isFalse);
+      expect(paths.any((p) => p.endsWith('/results/rounds/1')), isTrue);
+    });
+  });
+
   group('states', () {
     testWidgets('unreadable scores offer Try again and recover', (
       tester,
@@ -315,6 +336,58 @@ void main() {
       server.resultsGate!.complete();
       await tester.pumpAndSettle();
       expect(_text('R2'), findsNothing);
+    });
+
+    testWidgets('flight details that cannot be read are an error, not dashes', (
+      tester,
+    ) async {
+      await _pump(tester, server);
+      server.scoresStatus = 500;
+      await _toggle(tester, 'Flight details');
+
+      expect(
+        find.textContaining('Couldn’t load the scores for these rounds.'),
+        findsOneWidget,
+      );
+      // The sheet stays on the last good result: no detail lines at all.
+      expect(find.textContaining('9:52'), findsNothing);
+      expect(find.textContaining('Flight details: time m:ss'), findsNothing);
+
+      server.scoresStatus = 200;
+      await tester.tap(find.byKey(const ValueKey('viewer-retry-data')));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('9:52'), findsWidgets);
+    });
+
+    testWidgets('a refresh that cannot read its data keeps the old sheet', (
+      tester,
+    ) async {
+      await _pump(tester, server, pollInterval: const Duration(seconds: 1));
+      expect(_text('1,750.0'), findsOneWidget);
+
+      // The contest changes (a score is corrected), but the new data cannot
+      // be read.
+      final matrix = fixture.matrix;
+      server.scores = scoresFor(matrix, {
+        for (var r = 1; r <= 2; r++)
+          for (var p = 1; p <= 4; p++) (r, p): at(900 + r * 10 + p),
+      });
+      server.resultsFail = 500;
+      await tester.pump(const Duration(seconds: 2));
+      await tester.pump();
+      expect(find.textContaining('Out of date.'), findsOneWidget);
+
+      await tester.tap(find.byKey(const ValueKey('viewer-refresh')));
+      await tester.pumpAndSettle();
+      // Still the old sheet, still marked out of date: nothing was replaced.
+      expect(find.textContaining('Out of date.'), findsOneWidget);
+      expect(_text('1,750.0'), findsOneWidget);
+
+      server.resultsFail = null;
+      await tester.tap(find.byKey(const ValueKey('viewer-refresh')));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('Out of date.'), findsNothing);
+      expect(_text('1,750.0'), findsOneWidget);
     });
 
     testWidgets('the result is out of date when a score changes', (

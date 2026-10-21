@@ -35,17 +35,18 @@ class StandingsReportData {
   /// Flight details by round and pilot; empty when not asked for.
   final Map<int, Map<Id, FlightDetail>> details;
 
-  /// Reads the standings as of [asOf] and the flights of rounds [from] to
-  /// [asOf]. With [withDetails] it also reads the official scores for the
-  /// Flight details lines; a failure of that read leaves them `—`.
+  /// Reads the standings as of [asOf] and the flights of the given [rounds],
+  /// which must be rounds that exist (a cancelled round has no results). With
+  /// [withDetails] it also reads the official scores for the Flight details
+  /// lines. Any failed read is thrown, so a sheet is never built from part of
+  /// its data.
   static Future<StandingsReportData> load(
     ApiClient client,
     Id contestId, {
-    required int from,
+    required List<int> rounds,
     required int asOf,
     required bool withDetails,
   }) async {
-    final rounds = [for (var r = from; r <= asOf; r++) r];
     final results = await Future.wait<Object?>([
       client.results(contestId, asOfRound: asOf),
       for (final round in rounds) client.roundResults(contestId, round),
@@ -87,11 +88,17 @@ class StandingsReportData {
     );
   }
 
+  /// The official scores; a contest with no scores resource has none, which is
+  /// not a failure. Any other failure is thrown, because the em dash on the
+  /// sheet means "not recorded" and must not stand for "could not be read".
   static Future<ContestScores?> _scores(ApiClient client, Id id) async {
     try {
       return await client.scores(id);
-    } on Object {
-      return null;
+    } on ApiHttpError catch (error) {
+      if (error.statusCode == 404) {
+        return null;
+      }
+      rethrow;
     }
   }
 

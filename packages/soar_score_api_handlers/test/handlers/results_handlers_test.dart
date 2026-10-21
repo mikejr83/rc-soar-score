@@ -105,6 +105,19 @@ void main() {
       );
     });
 
+    test('asOfRound on a contest with no standings is refused', () async {
+      await drawnContest(api);
+
+      final response = await api.send(
+        'GET',
+        '/contests/$_contestId/results?asOfRound=1',
+      );
+
+      expect(response.statusCode, 400);
+      // Without the query an empty contest still has empty standings.
+      expect((await results())['standings'], isEmpty);
+    });
+
     test('asOfRound with no standing or no number is refused', () async {
       await drawnContest(api);
       await scoreRoundOne();

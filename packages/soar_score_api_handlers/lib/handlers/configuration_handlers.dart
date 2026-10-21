@@ -1,3 +1,4 @@
+import 'package:logging/logging.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:soar_score_api/soar_score_api.dart';
@@ -6,6 +7,8 @@ import 'package:soar_score_api_handlers/handlers/health_handler.dart';
 import 'package:soar_score_api_handlers/handlers/request_body.dart';
 import 'package:soar_score_api_handlers/middleware/request_id.dart';
 import 'package:soar_score_core/soar_score_core.dart';
+
+final _logger = Logger('ConfigurationHandlers');
 
 /// Adds the contest configuration routes to [router] (which is mounted under
 /// `/api/v1`):
@@ -77,14 +80,28 @@ void addConfigurationRoutes(
         clientTime: DateTime.now().toUtc(),
       ),
     );
+    // The revision is already stored, so nothing after this may fail the
+    // request: a failure to read the scores or to recalculate comes back as a
+    // warning, and the results read as stale until a later recalculation.
     String? warning;
-    // A contest with no official score has no results to go stale.
-    final scores = await scoresService.list(contestId);
-    if (scores.slots.any((slot) => slot.officialScore != null)) {
-      warning = await recalculationService.recalculateAfterEntry(
-        contestId,
-        cause: 'a configuration change',
+    try {
+      // A contest with no official score has no results to go stale.
+      final scores = await scoresService.list(contestId);
+      if (scores.slots.any((slot) => slot.officialScore != null)) {
+        warning = await recalculationService.recalculateAfterEntry(
+          contestId,
+          cause: 'a configuration change',
+        );
+      }
+    } on Object catch (error, stackTrace) {
+      _logger.warning(
+        'Reading the scores after a configuration change failed',
+        error,
+        stackTrace,
       );
+      warning =
+          'Recalculation could not be started after a configuration change; '
+          'the results are stale';
     }
     return jsonResponse(
       SavedConfiguration(

@@ -142,4 +142,23 @@ void main() {
     );
     expect(revisions['revision_number'], 2);
   });
+
+  test('a failure to read the scores after the save is a warning', () async {
+    final api = await scoredContest();
+    api.repository.scorePlaceholders.failListing = true;
+
+    final saved = await save(api, {'decimal_places': 2});
+
+    // The revision is stored, so the request succeeds with a warning.
+    expect(
+      saved['recalculation_warning'],
+      'Recalculation could not be started after a configuration change; the '
+      'results are stale',
+    );
+    api.repository.scorePlaceholders.failListing = false;
+    final stored = await api.json(
+      await api.send('GET', '/contests/$_contestId/configuration'),
+    );
+    expect(stored['revision_number'], 2);
+  });
 }

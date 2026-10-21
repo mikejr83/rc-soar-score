@@ -58,7 +58,7 @@ class StandingsReport extends ReportDefinition {
         options.to < options.from) {
       return 'none';
     }
-    return 'from=${options.from};to=${options.to};'
+    return 'rounds=${options.rounds.join(',')};asOf=${options.to};'
         'det=${options.details ? 1 : 0}';
   }
 
@@ -71,7 +71,7 @@ class StandingsReport extends ReportDefinition {
     return StandingsReportData.load(
       request.client,
       request.contestId,
-      from: options.from,
+      rounds: options.rounds,
       asOf: options.to,
       withDetails: options.details,
     );

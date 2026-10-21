@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import '../reports_facts.dart';
 import '../viewer/report_spec.dart';
 
@@ -13,6 +15,7 @@ class StandingsOptions {
     required this.requestedTo,
     required this.to,
     required this.lastShown,
+    required this.rounds,
     required this.provisional,
     required this.percentage,
     required this.raw,
@@ -34,11 +37,20 @@ class StandingsOptions {
     // real round; the sheet itself never goes past [lastShown].
     final requestedTo =
         int.tryParse(filters['to'] ?? '') ?? facts.lastScoredRound;
+    // Only rounds that can be reported count: a cancelled round has no
+    // results, so the range is built from the rounds that exist.
+    final ordinals = facts.roundOrdinals;
+    final cap = requestedTo < lastShown ? requestedTo : lastShown;
+    final to = ordinals.where((round) => round <= cap).fold(0, math.max);
     return StandingsOptions._(
       from: from,
       requestedTo: requestedTo,
-      to: requestedTo < lastShown ? requestedTo : lastShown,
+      to: to,
       lastShown: lastShown,
+      rounds: [
+        for (final round in ordinals)
+          if (round >= from && round <= to) round,
+      ],
       provisional: provisional,
       percentage: on('pct', true),
       raw: on('raw', false),
@@ -87,8 +99,8 @@ class StandingsOptions {
   /// 1, or an upper bound below the last round shown.
   bool get isRange => from != 1 || to != lastShown;
 
-  /// The round numbers shown, ascending.
-  List<int> get rounds => [for (var r = from; r <= to; r++) r];
+  /// The rounds shown, ascending: the reportable rounds from [from] to [to].
+  final List<int> rounds;
 
   /// Judges the range: invalid when the lower bound is above the upper one,
   /// empty when nothing in it can be shown.
@@ -99,7 +111,7 @@ class StandingsOptions {
         'last rounds that were valid.',
       );
     }
-    if (from > lastShown) {
+    if (from > lastShown || rounds.isEmpty) {
       final range = from == requestedTo ? '$from' : '$from–$requestedTo';
       final scored = facts.lastScoredRound;
       return ReportEmpty(

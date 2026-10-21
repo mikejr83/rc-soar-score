@@ -53,6 +53,13 @@ class ResultsService {
     final stored = await repository.participationStandingRepository
         .listForContest(contestId);
     if (stored.isEmpty) {
+      if (asOfRound != null) {
+        throw ArgumentError.value(
+          asOfRound,
+          'asOfRound',
+          'there is no standing as of that round',
+        );
+      }
       return ContestResults(isStale: await _hasScores(contest));
     }
     final latest = stored.map((s) => s.asOfRound).reduce(_max);

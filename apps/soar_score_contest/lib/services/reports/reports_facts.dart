@@ -175,6 +175,11 @@ class ReportsFacts {
       ),
   ]);
 
+  /// The ordinals of the rounds a report can show, ascending: the drawn rounds
+  /// that are not cancelled or replaced.
+  List<int> get roundOrdinals =>
+      [for (final round in rounds) round.ordinal]..sort();
+
   /// The round fact for [ordinal], or `null`.
   WorkspaceRoundFact? roundFact(int ordinal) {
     for (final round in rounds) {
