@@ -315,7 +315,7 @@ class _ParticipantEditorPageState extends State<ParticipantEditorPage> {
             return Column(
               children: [
                 Expanded(child: _content(context, phone, stacked)),
-                _bar(phone),
+                _bar(stacked),
               ],
             );
           },
@@ -497,7 +497,7 @@ class _ParticipantEditorPageState extends State<ParticipantEditorPage> {
     actions: [EditorBannerAction('Clear them', _c.clearKept)],
   );
 
-  Widget _bar(bool phone) {
+  Widget _bar(bool stacked) {
     final c = _c;
     final edit = !c.creating;
     final saving = c.phase == EditorPhase.saving;
@@ -523,7 +523,7 @@ class _ParticipantEditorPageState extends State<ParticipantEditorPage> {
       _ => null,
     };
     return EditorActionBar(
-      compact: phone,
+      compact: stacked,
       status: status,
       saving: saving,
       saveLabel: edit

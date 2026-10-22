@@ -193,6 +193,17 @@ class ParticipantFormSections extends StatelessWidget {
             color: scheme.secondary,
           ),
         ],
+        EmailCheck.failed => [
+          EditorMessage(
+            Icons.error_outline,
+            'Couldn’t check for an existing participant. You can still '
+            'save; the check runs again then.',
+            color: scheme.error,
+            key: const ValueKey('email-check-failed'),
+            actionLabel: 'Try again',
+            onAction: controller.checkEmail,
+          ),
+        ],
         EmailCheck.localOnly => const [
           EditorMessage(
             Icons.cloud_off_outlined,

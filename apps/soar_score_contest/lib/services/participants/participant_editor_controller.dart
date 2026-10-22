@@ -30,7 +30,18 @@ enum EditorPhase {
 }
 
 /// The state of the "does this email already exist" lookup in add mode.
-enum EmailCheck { none, checking, clear, found, localOnly }
+enum EmailCheck {
+  none,
+  checking,
+  clear,
+  found,
+
+  /// Matching online was not possible; only this device was checked.
+  localOnly,
+
+  /// The lookup itself failed. Saving still looks again.
+  failed,
+}
 
 /// How a call to [ParticipantEditorController.save] ended.
 enum SaveOutcome {
@@ -211,7 +222,7 @@ class ParticipantEditorController extends ChangeNotifier {
       found = await _findByEmail(asked);
     } on Object {
       if (values[ParticipantField.email] == asked) {
-        emailCheck = EmailCheck.none;
+        emailCheck = EmailCheck.failed;
         notifyListeners();
       }
       return;

@@ -9,6 +9,8 @@ class EditorMessage {
     this.color,
     this.bold = false,
     this.key,
+    this.actionLabel,
+    this.onAction,
   });
 
   final IconData icon;
@@ -18,6 +20,10 @@ class EditorMessage {
   final Color? color;
   final bool bold;
   final Key? key;
+
+  /// An optional action under the sentence, such as Try again.
+  final String? actionLabel;
+  final VoidCallback? onAction;
 }
 
 /// Renders an [EditorMessage].
@@ -38,13 +44,27 @@ class EditorMessageLine extends StatelessWidget {
           Icon(message.icon, size: 16, color: color),
           const SizedBox(width: 6),
           Expanded(
-            child: Text(
-              message.text,
-              key: message.key,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: color,
-                fontWeight: message.bold ? FontWeight.w500 : null,
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  message.text,
+                  key: message.key,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: color,
+                    fontWeight: message.bold ? FontWeight.w500 : null,
+                  ),
+                ),
+                if (message.actionLabel != null)
+                  TextButton(
+                    onPressed: message.onAction,
+                    style: TextButton.styleFrom(
+                      minimumSize: const Size(0, 32),
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                    ),
+                    child: Text(message.actionLabel!),
+                  ),
+              ],
             ),
           ),
         ],
