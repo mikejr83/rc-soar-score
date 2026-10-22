@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'workspace_state_message.dart';
+import '../../page_states/page_state_view.dart';
 
 /// The workspace when the contest could not be loaded and there is no local
 /// copy to show.
@@ -17,11 +17,13 @@ class WorkspaceLoadFailedView extends StatelessWidget {
   final VoidCallback onRetry;
 
   @override
-  Widget build(BuildContext context) => WorkspaceStateMessage(
-    icon: Icons.error_outline,
+  Widget build(BuildContext context) => PageStateView.unavailable(
     title: "Couldn't load this contest",
     body: '$message Nothing has changed.',
-    actionLabel: 'Try again',
-    onAction: onRetry,
+    primary: PageStateAction(
+      key: const ValueKey('workspace-state-action'),
+      label: 'Try again',
+      onPressed: onRetry,
+    ),
   );
 }

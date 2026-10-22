@@ -52,6 +52,8 @@ Browser back navigation must preserve the current contest and relevant round/gro
 
 The UI must handle loading, empty, unavailable, validation-error, authorization-error, conflict, and save-failed states. A failed save keeps the user's entered values and provides retry and cancel actions. Unsaved wizard changes must produce a leave-page warning.
 
+In the contest app these states use the shared widgets in `apps/soar_score_contest/lib/widgets/page_states/`: `PageStateView` replaces a page's content (loading, empty, unavailable, authorization, conflict, not found), `PageBanner` sits above content that is still usable, and `StatusLabel` speaks a status as "Field: value" next to its icon and word. `ApiFailure.of(error)` sorts an API error by the server's error code first, then by status where the status alone is unambiguous.
+
 ## Contest state presentation
 
 Execution lifecycle, participant scoring access, administration lock, publication, public visibility, and local archive are separate values. The UI must never combine them into one status field or infer one from another.

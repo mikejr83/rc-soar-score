@@ -5,12 +5,13 @@ import 'package:soar_score_core/soar_score_core.dart';
 import '../api_client_provider.dart';
 import '../contest_draft_provider.dart';
 import '../router.dart';
+import '../services/api_failure.dart';
 import '../services/contest_open_action.dart';
 import '../widgets/contest_detail_pane.dart';
 import '../widgets/contest_list.dart';
 import '../widgets/master_detail.dart';
 import '../widgets/new_contest/create_contest_entry.dart';
-import '../widgets/message_view.dart';
+import '../widgets/page_states/page_states.dart';
 
 /// The main page ("Contests"): the contests the app's API holds, as a list
 /// beside the selected contest's detail (one pane at a time when narrow).
@@ -54,25 +55,47 @@ class _HomePageState extends State<HomePage> {
 
   void _open(Contest contest) => context.go(contestOpenPath(contest));
 
+  /// The load failure, sorted by kind: signing in again does not fix an
+  /// unreachable server and retrying does not fix a missing sign-in.
+  Widget _failed(Object error) {
+    final failure = ApiFailure.of(error);
+    final retry = PageStateAction(
+      key: const ValueKey('page-state-retry'),
+      label: 'Retry',
+      onPressed: _retry,
+    );
+    return switch (failure.kind) {
+      ApiFailureKind.unauthorized ||
+      ApiFailureKind.forbidden => PageStateView.authorization(
+        title: 'Contests could not be loaded.',
+        body: failure.kind == ApiFailureKind.unauthorized
+            ? 'You are not signed in. Sign in again, then retry.'
+            : 'Your account is not allowed to see these contests. ${failure.message}',
+        primary: retry,
+      ),
+      _ => PageStateView.unavailable(
+        title: 'Contests could not be loaded.',
+        body: failure.message,
+        primary: retry,
+      ),
+    };
+  }
+
   @override
   Widget build(BuildContext context) => FutureBuilder<List<Contest>>(
     future: _contests,
     builder: (context, snapshot) {
       if (snapshot.hasError) {
-        return MessageView(
-          text: 'Contests could not be loaded.',
-          detail: '${snapshot.error}',
-          onRetry: _retry,
-        );
+        return _failed(snapshot.error!);
       }
       final contests = snapshot.data;
       if (contests == null) {
-        return const Center(child: CircularProgressIndicator());
+        return const PageStateView.loading(label: 'Loading contests');
       }
       if (contests.isEmpty) {
         final store = contestDraftStoreOf(context);
-        return MessageView(
-          text: 'No contests yet.',
+        return PageStateView.empty(
+          title: 'No contests yet.',
           action: ListenableBuilder(
             listenable: store ?? Listenable.merge(const []),
             builder: (context, _) {
