@@ -897,6 +897,46 @@ void main() {
       }
     });
 
+    test('a file cannot bring an inspection owner marker', () async {
+      final victim = core.Id.create();
+      final file = await source.exportNamed(_autumn);
+      file.tables['audit_events']!.add({
+        ...InspectionOwnerMarkers.markerRow(
+          owner: victim,
+          identities: {victim.value},
+          at: DateTime.utc(2026, 10, 22),
+          contestId: core.Id.parse(file.header.contestId),
+        ),
+        'contest_id': file.header.contestId,
+      });
+
+      expect(
+        await refusalsAfter(
+          (f) => f.tables['audit_events'] = file.tables['audit_events']!,
+        ),
+        contains('reserved_row'),
+      );
+      expect(await InspectionOwnerMarkers(target.db).isMarked(victim), isFalse);
+    });
+
+    test('only a marker without a contest counts', () async {
+      final victim = core.Id.create();
+      await EntityStores.forDatabase(target.db).of('AuditEvent').upsertJson({
+        ...InspectionOwnerMarkers.markerRow(
+          owner: victim,
+          identities: {victim.value},
+          at: DateTime.utc(2026, 10, 22),
+          contestId: core.Id.create(),
+        ),
+        'contest_id': null,
+        'owner_account_id': core.Id.create().value,
+      });
+      final markers = InspectionOwnerMarkers(target.db);
+
+      expect(await markers.isMarked(victim), isFalse);
+      expect((await markers.load()).isEmpty, isTrue);
+    });
+
     test('values are only ever bound, never run as SQL', () async {
       final file = await source.exportNamed(_autumn);
       file.rows('contests').single['name'] = "x'); DROP TABLE contests; --";

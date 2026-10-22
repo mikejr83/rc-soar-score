@@ -22,7 +22,11 @@ void addLandingTableRoutes(Router router, Repository repository) {
 
   router.get('/landing-tables', (Request request) async {
     final principal = requirePrincipal(request);
-    final tables = await service.list(principal.accountId);
+    // The system tables come with every owner's list: show them once.
+    final tables = <Id, LandingTableView>{
+      for (final owner in principal.visibleOwners)
+        for (final table in await service.list(owner)) table.table.id: table,
+    }.values;
     return jsonResponse(<String, dynamic>{
       'landing_tables': [for (final table in tables) table.toJson()],
     });

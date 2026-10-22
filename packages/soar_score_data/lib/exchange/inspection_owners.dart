@@ -18,6 +18,10 @@ const inspectionOwnerEntityType = 'InspectionOwner';
 /// `Restoration`, entity type `InspectionOwner`, entity id the owner) written
 /// in the same transaction as the rows it describes, so the marker cannot be
 /// lost without the data. Markers are not in the sync catalog.
+///
+/// A marker has no contest, and an imported file may only bring audit events
+/// of its own contest (and refuses this entity type outright), so a file
+/// cannot make an account id look like an inspection owner.
 class InspectionOwnerSet {
   const InspectionOwnerSet(this._identities);
 
@@ -64,6 +68,7 @@ class InspectionOwnerMarkers {
             _db,
             'SELECT entity_id, reason FROM audit_events '
             "WHERE entity_type = ? AND action = 'Restoration' "
+            'AND contest_id IS NULL AND owner_account_id = entity_id '
             'ORDER BY server_timestamp, id',
           ),
           variables: [Variable<String>(inspectionOwnerEntityType)],
@@ -85,6 +90,29 @@ class InspectionOwnerMarkers {
       }
     }
     return InspectionOwnerSet(identities);
+  }
+
+  /// Whether [owner] has a marker. A targeted read, so a caller that only
+  /// needs one answer does not load every marker. Throws when the audit
+  /// events cannot be read.
+  Future<bool> isMarked(core.Id owner) async {
+    final row = await _db
+        .customSelect(
+          portableSql(
+            _db,
+            'SELECT 1 AS found FROM audit_events '
+            "WHERE entity_type = ? AND action = 'Restoration' "
+            'AND contest_id IS NULL AND owner_account_id = entity_id '
+            'AND entity_id = ? LIMIT 1',
+          ),
+          variables: [
+            Variable<String>(inspectionOwnerEntityType),
+            Variable<String>(owner.value),
+          ],
+          readsFrom: {_db.auditEvents},
+        )
+        .getSingleOrNull();
+    return row != null;
   }
 
   /// The audit event row that marks [owner] as the inspection owner of

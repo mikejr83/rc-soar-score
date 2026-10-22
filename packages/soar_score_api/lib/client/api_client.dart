@@ -248,10 +248,15 @@ class ApiClient {
   ///
   /// Repeating the same [request] returns the profile it created; the same id
   /// with different content is an [ApiHttpError] with status 409.
+  ///
+  /// With [forContest] the profile is made for that contest: when the contest
+  /// was imported for inspection the profile belongs to the contest's owner,
+  /// so it can be added to it. Elsewhere the parameter changes nothing.
   Future<ParticipantProfile> createParticipant(
-    CreateParticipantRequest request,
-  ) async {
-    final uri = _resolve('/api/v1/participants');
+    CreateParticipantRequest request, {
+    Id? forContest,
+  }) async {
+    final uri = _resolve('/api/v1/participants${_forContest(forContest)}');
     final response = await _send('POST', uri, body: request.toJson());
     return _decode<ParticipantProfile>(
       response,
@@ -298,10 +303,13 @@ class ApiClient {
 
   /// `POST /api/v1/landing-tables` — creates a landing table owned by the
   /// caller.
+  ///
+  /// [forContest] is as for [createParticipant].
   Future<LandingTableView> createLandingTable(
-    CreateLandingTableRequest request,
-  ) async {
-    final uri = _resolve('/api/v1/landing-tables');
+    CreateLandingTableRequest request, {
+    Id? forContest,
+  }) async {
+    final uri = _resolve('/api/v1/landing-tables${_forContest(forContest)}');
     final response = await _send('POST', uri, body: request.toJson());
     return _decode<LandingTableView>(response, uri, LandingTableView.fromJson);
   }
@@ -332,8 +340,10 @@ class ApiClient {
   ///
   /// Repeating the same [request] returns the role it created. A name the
   /// caller already has is an [ApiHttpError] with status 409.
-  Future<Role> createRole(CreateRoleRequest request) async {
-    final uri = _resolve('/api/v1/roles');
+  ///
+  /// [forContest] is as for [createParticipant].
+  Future<Role> createRole(CreateRoleRequest request, {Id? forContest}) async {
+    final uri = _resolve('/api/v1/roles${_forContest(forContest)}');
     final response = await _send('POST', uri, body: request.toJson());
     return _decode<Role>(response, uri, Role.fromJson);
   }
@@ -1026,6 +1036,9 @@ class ApiClient {
       );
     }
   }
+
+  String _forContest(Id? contestId) =>
+      contestId == null ? '' : '?contest_id=${contestId.value}';
 
   Uri _resolve(String path) => baseUrl.resolveUri(Uri.parse(path));
 

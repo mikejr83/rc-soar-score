@@ -10,6 +10,7 @@ import 'package:soar_score_sync/soar_score_sync.dart';
 import 'account_bound_sync_gateway.dart';
 import 'acting_account.dart';
 import 'engine_app_sync.dart';
+import 'inspection_owner_guard.dart';
 import 'installation_id_file.dart';
 
 final _logger = Logger('NativeSync');
@@ -25,6 +26,12 @@ final _logger = Logger('NativeSync');
 /// held are found by listing the account's contests (see
 /// [discoverAccountContests]); each is synced from the start of its stream.
 /// Data of an account other than the one the app acts as is not synced.
+///
+/// Contests imported for inspection, and the director data that comes with
+/// them, belong to an inspection owner (see [InspectionOwnerGuard]) and never
+/// sync, whoever is signed in. That is decided explicitly, before any check
+/// for an account, in every place that picks what to sync: [isSyncable],
+/// the scheduler's local-change feed, [accountClaimed] and the gateway.
 class NativeSync {
   NativeSync._(
     this.engine,
@@ -35,6 +42,7 @@ class NativeSync {
     this._discovered,
     this._discoveryDelay,
     this._acting,
+    this._inspection,
   ) : appSync = EngineAppSync(engine) {
     // Every ordinary sync, scheduled or started by the director, ends with a
     // look at the account's contests.
@@ -50,6 +58,8 @@ class NativeSync {
   final ApiClient _remote;
 
   final ActingAccount? _acting;
+
+  final InspectionOwnerGuard _inspection;
 
   /// Contests the service lists for an account that are not held locally
   /// yet, with that account; shared with the engine's `isSyncable` check.
@@ -80,7 +90,9 @@ class NativeSync {
     required String databasePath,
     Duration discoveryDelay = const Duration(seconds: 2),
     ActingAccount? acting,
+    InspectionOwnerGuard? inspectionOwners,
   }) async {
+    final inspection = inspectionOwners ?? InspectionOwnerGuard(database);
     final installationId = await InstallationIdFile.besides(databasePath)
         .readOrCreate();
     final contests = ContestRepository(database);
@@ -97,7 +109,29 @@ class NativeSync {
     };
     Future<bool> isSyncable(core.SyncScopeKey scope) async {
       if (scope is core.SystemScopeKey) return true;
-      return _hasAccount(await ownerOf(scope), localAccountId, acting);
+      final owner = await ownerOf(scope);
+      // No owner, or the Local account, has no account to sync to.
+      if (owner == null || owner == localAccountId) return false;
+      try {
+        // Before the account check: with no acting account that check lets
+        // any other owner through.
+        if (await inspection.isInspection(owner)) return false;
+      } on Object catch (error, stack) {
+        // Unreadable markers: only an owner a sign-in is acting for may sync.
+        _logger.warning('Could not read the inspection owners', error, stack);
+        return acting != null && acting.leaseFor(owner) != null;
+      }
+      return _hasAccount(owner, localAccountId, acting);
+    }
+
+    /// Whether a local change in [scope] may be handed to the scheduler.
+    /// Fails closed: a scope whose owner cannot be told is not queued.
+    Future<bool> mayQueue(core.SyncScopeKey scope) async {
+      try {
+        return !await inspection.isInspection(await ownerOf(scope));
+      } on Object {
+        return false;
+      }
     }
 
     final api = ApiClientSyncGateway(remote);
@@ -108,8 +142,17 @@ class NativeSync {
         EntityStores.forDatabase(database),
       ),
       gateway: acting == null
-          ? api
-          : AccountBoundSyncGateway(api, acting: acting, ownerOf: ownerOf),
+          ? InspectionGuardedSyncGateway(
+              api,
+              ownerOf: ownerOf,
+              isInspectionOwner: inspection.isInspection,
+            )
+          : AccountBoundSyncGateway(
+              api,
+              acting: acting,
+              ownerOf: ownerOf,
+              isInspectionOwner: inspection.isInspection,
+            ),
       config: SyncEngineConfig(
         installationId: installationId,
         label: io.Platform.localHostname,
@@ -121,9 +164,11 @@ class NativeSync {
       ),
     );
     final scheduler = SyncScheduler(engine);
-    final subscription = database.localChanges.listen(
-      scheduler.notifyLocalChange,
-    );
+    final subscription = database.localChanges.listen((scope) {
+      unawaited(() async {
+        if (await mayQueue(scope)) scheduler.notifyLocalChange(scope);
+      }());
+    });
     _logger.info('Sync engine ready for installation $installationId');
     return NativeSync._(
       engine,
@@ -134,6 +179,7 @@ class NativeSync {
       discovered,
       discoveryDelay,
       acting,
+      inspection,
     );
   }
 
@@ -166,7 +212,8 @@ class NativeSync {
     final scopes = <core.SyncScopeKey>[core.DirectorScopeKey(accountId)];
     try {
       for (final contest in await ContestRepository(_database).getAll()) {
-        if (contest.ownerAccountId == accountId) {
+        if (contest.ownerAccountId == accountId &&
+            !await _inspection.isInspection(contest.ownerAccountId)) {
           scopes.add(core.ContestScopeKey(contest.id));
         }
       }

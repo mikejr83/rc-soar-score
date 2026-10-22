@@ -359,6 +359,16 @@ class ContestImporter {
           refuse('invalid_id', 'A row of "$table" has no valid id.', table);
           continue;
         }
+        if (table == 'audit_events' &&
+            row['entity_type'] == inspectionOwnerEntityType) {
+          refuse(
+            'reserved_row',
+            'A row of "$table" uses an identity only this app may write.',
+            table,
+            id,
+          );
+          continue;
+        }
         if (!seen.add(id)) {
           refuse(
             'duplicate_id',

@@ -22,7 +22,11 @@ void addRoleRoutes(Router router, Repository repository) {
 
   router.get('/roles', (Request request) async {
     final principal = requirePrincipal(request);
-    final roles = await service.list(principal.accountId);
+    // The system roles come with every owner's list: show them once.
+    final roles = <Id, Role>{
+      for (final owner in principal.visibleOwners)
+        for (final role in await service.list(owner)) role.id: role,
+    }.values;
     return jsonResponse(<String, dynamic>{
       'roles': [for (final role in roles) role.toJson()],
     });

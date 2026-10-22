@@ -24,7 +24,9 @@ void addParticipantRoutes(Router router, Repository repository) {
 
   router.get('/participants', (Request request) async {
     final principal = requirePrincipal(request);
-    final profiles = await service.list(principal.accountId);
+    final profiles = [
+      for (final owner in principal.visibleOwners) ...await service.list(owner),
+    ];
     return jsonResponse(<String, dynamic>{
       'participants': [for (final profile in profiles) profile.toJson()],
     });
