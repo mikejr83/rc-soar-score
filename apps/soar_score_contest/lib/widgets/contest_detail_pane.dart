@@ -15,11 +15,20 @@ class ContestDetailPane extends StatelessWidget {
     required this.contest,
     required this.onOpen,
     this.onBack,
+    this.inspection = false,
+    this.onExport,
   });
 
   final Contest contest;
   final VoidCallback onOpen;
   final VoidCallback? onBack;
+
+  /// Whether the contest is a local copy imported for inspection, which is
+  /// never synced.
+  final bool inspection;
+
+  /// Exports the contest to a file; `null` when this build cannot.
+  final VoidCallback? onExport;
 
   @override
   Widget build(BuildContext context) {
@@ -48,11 +57,33 @@ class ContestDetailPane extends StatelessWidget {
                 children: [
                   Text(contest.name, style: theme.textTheme.headlineSmall),
                   const SizedBox(height: 8),
-                  ContestStatusChip(state: contest.lifecycleState),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 4,
+                    children: [
+                      ContestStatusChip(state: contest.lifecycleState),
+                      if (inspection)
+                        Chip(
+                          key: const ValueKey('inspection-label'),
+                          avatar: const Icon(Icons.cloud_off, size: 16),
+                          label: const Text('Imported copy, not synced'),
+                          visualDensity: VisualDensity.compact,
+                        ),
+                    ],
+                  ),
                 ],
               ),
             ),
             const SizedBox(width: 16),
+            if (onExport != null) ...[
+              OutlinedButton.icon(
+                key: const ValueKey('export-contest'),
+                onPressed: onExport,
+                icon: const Icon(Icons.file_download_outlined, size: 18),
+                label: const Text('Export…'),
+              ),
+              const SizedBox(width: 8),
+            ],
             FilledButton.icon(
               key: const ValueKey('open-contest'),
               onPressed: onOpen,
@@ -62,6 +93,16 @@ class ContestDetailPane extends StatelessWidget {
             ),
           ],
         ),
+        if (inspection) ...[
+          const SizedBox(height: 16),
+          Text(
+            'This contest was imported for inspection. It stays on this '
+            'computer: nothing in it is sent to the service, whoever is '
+            'signed in.',
+            key: const ValueKey('inspection-notice'),
+            style: theme.textTheme.bodyMedium,
+          ),
+        ],
         const SizedBox(height: 24),
         DetailSectionCard(
           title: 'Schedule',

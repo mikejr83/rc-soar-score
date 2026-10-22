@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../widgets/contest_scope.dart';
 import '../api_client_provider.dart';
 import '../app_sync_provider.dart';
 import '../router.dart';
@@ -117,6 +118,7 @@ class _ParticipantEditorPageState extends State<ParticipantEditorPage> {
       participantId: id == null ? null : Id.parse(id),
       remoteMatchingUnavailable: widget.remoteMatchingUnavailable,
       managedFields: widget.managedFields,
+      forContest: ContestScope.maybeOf(context)?.contest?.id,
     )..addListener(_syncTexts);
     _c.load();
   }
