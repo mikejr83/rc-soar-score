@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:soar_score_ui/soar_score_ui.dart';
 
 import '../../../services/reports/result_status.dart';
 import '../../../services/reports/viewer/page_setup.dart';
@@ -7,9 +8,9 @@ import 'paper_style.dart';
 /// The room on a paper page: margins, and the running header and footer every
 /// page repeats.
 abstract final class SheetLayout {
-  static const double marginX = 48;
-  static const double marginTop = 36;
-  static const double marginBottom = 28;
+  static const double marginX = 16;
+  static const double marginTop = 24;
+  static const double marginBottom = 14;
   static const double headerHeight = 72;
   static const double footerHeight = 40;
 
@@ -119,7 +120,15 @@ class ReportSheetPage extends StatelessWidget {
                           ],
                         ),
                       ),
-                      if (stamp != null) ResultStamp(text: stamp),
+                      if (stamp != null)
+                        Padding(
+                          padding: EdgeInsetsGeometry.only(right: 16),
+                          child: ResultStamp(text: stamp),
+                        ),
+                      const BrandLogo(
+                        variant: BrandLogoVariant.lockup,
+                        height: 32,
+                      ),
                     ],
                   ),
                 ),
