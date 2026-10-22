@@ -8,6 +8,8 @@ A contest director using the offline capabilities of the application will not ne
 
 Participants can be invited to enter scores online. These users are not required to create an account. The application should generate a special URL that is sent to the participant. Behind the scenes the system gives such a participant a temporary guest identity so that their entries can be attributed. If they later create an account, what they did can be attached to it. A guest identity that is never claimed is removed 90 days after the contest is marked completed or 90 days after its scheduled end date, whichever comes first.
 
+A participant who has an account and has been linked to a director's participant record sees the contests they have been invited to, and can continue them without opening the invitation link. The participant confirms the link once. When a participant without an account opens an invitation link, they can create an account or sign in at that point and confirm that the invitation is theirs.
+
 Users viewing the public contests do not need an account.
 
 A contest director who has no account may still publish the results of a contest. They provide an email address and confirm it with a code. If they create an account with that same email later, they can take over management of what they published.
