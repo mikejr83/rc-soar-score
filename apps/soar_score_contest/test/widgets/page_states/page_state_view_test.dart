@@ -77,19 +77,30 @@ void main() {
     }
   });
 
-  testWidgets('failures are alerts and the rest are status', (tester) async {
+  testWidgets('failures are announced as alerts, the rest as status', (
+    tester,
+  ) async {
     final handle = tester.ensureSemantics();
-    await _pump(tester, const PageStateView.unavailable(title: 'Broken'));
-    expect(
-      tester.getSemantics(find.text('Broken')).role,
-      anyOf(SemanticsRole.alert, SemanticsRole.none),
-    );
-    expect(PageStateKind.unavailable.role, SemanticsRole.alert);
-    expect(PageStateKind.authorization.role, SemanticsRole.alert);
-    expect(PageStateKind.conflict.role, SemanticsRole.alert);
-    expect(PageStateKind.loading.role, SemanticsRole.status);
-    expect(PageStateKind.empty.role, SemanticsRole.status);
-    expect(PageStateKind.notFound.role, SemanticsRole.status);
+    final views = <(PageStateView, SemanticsRole)>[
+      (const PageStateView.unavailable(title: 'T'), SemanticsRole.alert),
+      (const PageStateView.authorization(title: 'T'), SemanticsRole.alert),
+      (const PageStateView.conflict(title: 'T'), SemanticsRole.alert),
+      (const PageStateView.loading(label: 'T'), SemanticsRole.status),
+      (const PageStateView.empty(title: 'T'), SemanticsRole.status),
+      (const PageStateView.notFound(title: 'T'), SemanticsRole.status),
+    ];
+    for (final (view, role) in views) {
+      await _pump(tester, view);
+      final node = tester.getSemantics(
+        find.descendant(
+          of: find.byType(PageStateView),
+          matching: find.byWidgetPredicate(
+            (w) => w is Semantics && w.properties.role == role,
+          ),
+        ),
+      );
+      expect(node.role, role, reason: '${view.kind}');
+    }
     handle.dispose();
   });
 
