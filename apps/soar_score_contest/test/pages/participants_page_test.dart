@@ -212,7 +212,7 @@ void main() {
 
     await tester.tap(find.byKey(const ValueKey('edit-participant')));
     await tester.pumpAndSettle();
-    expect(find.text('Edit participant'), findsOneWidget);
+    expect(find.byKey(const ValueKey('first-name')), findsOneWidget);
   });
 
   testWidgets('a narrow window shows the list, then the detail with a back '
