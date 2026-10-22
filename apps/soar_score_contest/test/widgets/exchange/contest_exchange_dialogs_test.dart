@@ -1,6 +1,7 @@
-import 'dart:typed_data';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_contest/services/exchange/contest_exchange.dart';
 import 'package:soar_score_contest/widgets/exchange/contest_exchange_dialogs.dart';
@@ -52,6 +53,14 @@ ExchangePreview _preview({
 );
 
 void main() {
+  ExchangeFiles failingWith(Exception error, {bool onSave = true}) =>
+      ExchangeFiles(
+        choose: () async => onSave
+            ? ChosenExchangeFile(name: 'a.rcsoar', bytes: Uint8List(1))
+            : throw error,
+        save: (_, _) async => throw error,
+      );
+
   final contest = Contest(
     id: Id.create(),
     name: 'Autumn Meet',
@@ -240,6 +249,53 @@ void main() {
 
     expect(
       find.textContaining('notes.rcsoar cannot be imported'),
+      findsOneWidget,
+    );
+    expect(find.byKey(const ValueKey('import-dialog')), findsNothing);
+  });
+
+  testWidgets('a failed save is reported', (tester) async {
+    ExchangeFiles.current = failingWith(
+      const FileSystemException('Cannot create file', '/x'),
+    );
+    await pumpPage(tester);
+    await tester.tap(find.byKey(const ValueKey('go-export')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('export-save')));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.textContaining('could not be saved to a file. Cannot create file'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('a file dialog that fails is reported on export', (tester) async {
+    ExchangeFiles.current = failingWith(
+      PlatformException(code: 'x', message: 'The dialog is not available.'),
+    );
+    await pumpPage(tester);
+    await tester.tap(find.byKey(const ValueKey('go-export')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('export-save')));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('The dialog is not available.'), findsOneWidget);
+  });
+
+  testWidgets('a file that cannot be read is reported on import', (
+    tester,
+  ) async {
+    ExchangeFiles.current = failingWith(
+      const FileSystemException('Cannot open file', '/x'),
+      onSave: false,
+    );
+    await pumpPage(tester);
+    await tester.tap(find.byKey(const ValueKey('go-import')));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.textContaining('The file could not be opened. Cannot open file'),
       findsOneWidget,
     );
     expect(find.byKey(const ValueKey('import-dialog')), findsNothing);

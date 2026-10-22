@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
@@ -35,8 +38,28 @@ Future<void> exportContest(BuildContext context, Contest contest) async {
         content: Text('The contest could not be exported. ${e.message}'),
       ),
     );
+  } on Exception catch (e) {
+    // The file could not be written: a full disk, a folder that is not
+    // writable, a file dialog that failed.
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(
+          'The contest could not be saved to a file. ${_describe(e)}',
+        ),
+      ),
+    );
   }
 }
+
+/// A sentence for a failure of the system file dialogs or the file system.
+String _describe(Exception error) => switch (error) {
+  PlatformException(:final message?) when message.isNotEmpty => message,
+  FileSystemException(:final message, :final osError) =>
+    osError?.message.isNotEmpty == true
+        ? '$message (${osError!.message})'
+        : message,
+  _ => 'Choose another place and try again.',
+};
 
 class _ExportDialog extends StatefulWidget {
   const _ExportDialog({required this.contest});
@@ -107,7 +130,15 @@ Future<ExchangeImported?> importContest(BuildContext context) async {
   final exchange = ContestExchange.current;
   if (exchange == null) return null;
   final messenger = ScaffoldMessenger.of(context);
-  final chosen = await ExchangeFiles.current.choose();
+  final ChosenExchangeFile? chosen;
+  try {
+    chosen = await ExchangeFiles.current.choose();
+  } on Exception catch (e) {
+    messenger.showSnackBar(
+      SnackBar(content: Text('The file could not be opened. ${_describe(e)}')),
+    );
+    return null;
+  }
   if (chosen == null || !context.mounted) return null;
   final ExchangePreview preview;
   try {
