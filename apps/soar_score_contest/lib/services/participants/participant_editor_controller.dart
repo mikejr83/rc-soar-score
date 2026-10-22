@@ -80,9 +80,14 @@ class ParticipantEditorController extends ChangeNotifier {
     this.participantId,
     this.remoteMatchingUnavailable = false,
     this.managedFields = const {},
+    this.forContest,
   }) : phase = participantId == null ? EditorPhase.idle : EditorPhase.loading;
 
   final ApiClient client;
+
+  /// The contest the profile is made for, so a contest imported for
+  /// inspection accepts it.
+  final Id? forContest;
 
   /// The profile to edit, or null to create one.
   final Id? participantId;
@@ -325,6 +330,7 @@ class ParticipantEditorController extends ChangeNotifier {
             state: v.optional(ParticipantField.state),
             country: country,
           ),
+          forContest: forContest,
         );
       } else {
         result = await client.updateParticipant(

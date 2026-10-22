@@ -13,6 +13,7 @@ import 'package:soar_score_contest/platform/web_bootstrap.dart';
 import '../auth/auth_session.dart';
 import '../auth/auth_session_factory.dart';
 import '../server/embedded_server.dart';
+import '../services/exchange/contest_exchange.dart';
 import '../services/sync/app_sync.dart';
 import '../services/ui_account/ui_account.dart';
 import 'acting_account.dart';
@@ -20,6 +21,7 @@ import 'acting_ui_account.dart';
 import 'app_bootstrap.dart';
 import 'auth_epoch.dart';
 import 'local_account_claimer.dart';
+import 'native_contest_exchange.dart';
 import 'native_preferences.dart';
 import 'native_sync.dart';
 
@@ -113,6 +115,7 @@ class NativeBootstrap extends AppBootstrap {
     }
     _logger.fine('Closing native bootstrap');
     _closed = true;
+    ContestExchange.current = null;
     _claimer.stop();
     await _preferences.close();
     _epoch.close();
@@ -163,6 +166,7 @@ class NativeBootstrap extends AppBootstrap {
     }
     final server = await startEmbeddedServer(database, seedDemo: demo);
     _logger.info('Embedded API server listening on ${server.baseUrl}');
+    ContestExchange.current = NativeContestExchange(server);
     if (demo) {
       _logger.info('DEMO MODE: using the example database at $database');
     }
