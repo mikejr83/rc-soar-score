@@ -15,7 +15,7 @@ import '../../widgets/api_error_text.dart';
 import '../../widgets/matrix/draw_confirm_dialog.dart';
 import '../../widgets/matrix/draw_form_panel.dart';
 import '../../widgets/matrix/matrix_drawn_view.dart';
-import '../../widgets/message_view.dart';
+import '../../widgets/page_states/page_states.dart';
 
 /// The matrix of one contest (`plan/ui/contest-administration/matrix.md`):
 /// the first-draw form until a matrix exists, then the grid with its
@@ -331,9 +331,9 @@ class _Unavailable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (error is! ApiNetworkError) {
-      return MessageView(
-        text: 'The matrix could not be loaded.',
-        detail: apiErrorText(error),
+      return loadFailedView(
+        error,
+        title: 'The matrix could not be loaded.',
         onRetry: onRetry,
       );
     }

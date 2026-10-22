@@ -125,6 +125,9 @@ class ParticipantEditorController extends ChangeNotifier {
   /// Why the load or the last save failed, in the server's words.
   String? error;
 
+  /// The exception behind a failed load, for sorting it by kind.
+  Object? loadError;
+
   /// The fields that changed elsewhere, named in the stale banner.
   List<ParticipantField> staleFields = const [];
 
@@ -171,6 +174,7 @@ class ParticipantEditorController extends ChangeNotifier {
     }
     phase = EditorPhase.loading;
     error = null;
+    loadError = null;
     notifyListeners();
     try {
       final profile = await client.participant(participantId!);
@@ -179,6 +183,7 @@ class ParticipantEditorController extends ChangeNotifier {
       phase = EditorPhase.idle;
     } on Object catch (e) {
       error = _text(e);
+      loadError = e;
       phase = EditorPhase.loadFailed;
     }
     notifyListeners();

@@ -562,6 +562,21 @@ void main() {
     expect(find.text('Matrix readiness', skipOffstage: false), findsOneWidget);
   });
 
+  testWidgets('a load refused for access has no Retry', (tester) async {
+    final server = ConfigServer(revision: configRevision(1));
+    await _pump(
+      tester,
+      server,
+      handler: (request) async => http.Response(
+        '{"code":"forbidden","message":"No access."}',
+        403,
+        headers: {'content-type': 'application/json'},
+      ),
+    );
+    expect(find.text('The configuration could not be loaded.'), findsOneWidget);
+    expect(find.text('Retry'), findsNothing);
+  });
+
   testWidgets('a load failure offers Retry', (tester) async {
     var fail = true;
     final server = ConfigServer(revision: configRevision(1));

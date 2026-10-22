@@ -23,7 +23,7 @@ import '../../widgets/configuration/field_registry.dart';
 import '../../widgets/configuration/matrix_readiness_panel.dart';
 import '../../widgets/configuration/save_confirm_dialog.dart';
 import '../../widgets/configuration/section_nav.dart';
-import '../../widgets/message_view.dart';
+import '../../widgets/page_states/page_states.dart';
 import '../../widgets/unsaved_changes_guard.dart';
 
 /// The configuration of one contest (`plan/ui/contest-administration/
@@ -387,15 +387,15 @@ class _ContestConfigurationPageState extends State<ContestConfigurationPage> {
     future: _loading,
     builder: (context, snapshot) {
       if (snapshot.hasError) {
-        return MessageView(
-          text: 'The configuration could not be loaded.',
-          detail: apiErrorText(snapshot.error!),
+        return loadFailedView(
+          snapshot.error!,
+          title: 'The configuration could not be loaded.',
           onRetry: _retry,
         );
       }
       final data = _data;
       if (data == null) {
-        return const Center(child: CircularProgressIndicator());
+        return const PageStateView.loading(label: 'Loading the configuration');
       }
       return _page(context, data, _draft);
     },

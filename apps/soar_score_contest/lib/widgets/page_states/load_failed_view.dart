@@ -16,6 +16,7 @@ Widget loadFailedView(
   Object error, {
   required String title,
   required VoidCallback onRetry,
+  PageStateAction? secondary,
 }) {
   final failure = ApiFailure.of(error);
   final retry = failure.retryable
@@ -29,19 +30,23 @@ Widget loadFailedView(
     ApiFailureKind.unauthorized => PageStateView.authorization(
       title: title,
       body: 'You are not signed in. Sign in again to continue.',
+      secondary: secondary,
     ),
     ApiFailureKind.forbidden => PageStateView.authorization(
       title: title,
       body: 'Your account is not allowed to see this. ${failure.message}',
+      secondary: secondary,
     ),
     ApiFailureKind.notFound => PageStateView.notFound(
       title: title,
       body: failure.message,
+      secondary: secondary,
     ),
     _ => PageStateView.unavailable(
       title: title,
       body: failure.message,
       primary: retry,
+      secondary: secondary,
     ),
   };
 }

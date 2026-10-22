@@ -251,6 +251,25 @@ void main() {
     expect(find.text('Ada Lovelace'), findsOneWidget);
   });
 
+  testWidgets('a profile the account may not see has no Retry', (tester) async {
+    useTallWindow(tester);
+    final client = clientFor(
+      (_) async => errorResponse(403, 'forbidden', 'Not your contest.'),
+    );
+
+    await tester.pumpWidget(
+      participantsApp(
+        client,
+        initial: participantPath(profile('Ada', 'Lovelace').id.value),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Couldn’t load this participant'), findsOneWidget);
+    expect(find.text('Retry'), findsNothing);
+    expect(find.text('Back to participants'), findsOneWidget);
+  });
+
   testWidgets('cancel confirms before discarding changes', (tester) async {
     useTallWindow(tester);
     final client = clientFor((_) async => json({'participants': []}));
