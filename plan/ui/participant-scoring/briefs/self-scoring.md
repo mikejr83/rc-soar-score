@@ -18,14 +18,26 @@ This is the **first version, for F5J**. Design the entry form so that other dura
 
 **Platform and visual language:**
 
-- Flutter web, **Material 3**, using the shared theme in `packages/soar_score_ui`. Use standard M3 components and theme tokens; any custom value must work as a theme token. The brand comes from the public site design; do not invent a separate one.
-- Current theme (a placeholder nobody chose deliberately; you may propose changes): seed/primary `#006399` (deep sky blue), secondary `#2D6A4F` (field green), tertiary `#D97706` (high-viz amber, used for timers and highlights), light surface `#F8FAFC`, 12px corner radius on cards, card elevation 2. Light and dark themes both ship; follow the system setting.
+- Flutter web, **Material 3**, using the shared theme in `packages/soar_score_ui`. Use standard M3 components and theme tokens. The three Soar Score apps share one theme, so do not fork the palette for this app.
+- **Follow the RC Soar Score brand guide** (the design system at https://claude.ai/artifact/UDyXKKtdQexRQb8zsxznhK). Its tokens and rules are settled; design with them and do not invent colours. The parts that matter here:
+  - **Colour:** page ground `surface`; cards, tables and the app bar on `surface-raised`; table header rows and skeleton blocks on `surface-sunken`; text `ink`, secondary text `ink-muted`, rules `hairline`. Brand orange is `brand` (#e8420c) for graphics, progress fills and headings of 24px and up, never for small text. Anything with a label on it (primary buttons, the selected round, the In progress chip) uses `brand-deep` with `on-brand` text. Orange links and small orange labels use `brand-text`. **Use one orange fill per screen region**: orange is the pie on the dial and should feel rare.
+  - **Type:** League Spartan (700 and 800) for headings, Archivo for everything else including every score, and Saira Stencil One as a rare accent: one number or short word per screen at most, for example a pilot's place. Scores, places, percentages and times use the `numeric` style: tabular figures, right-aligned. Use `numeric-lg` for a pilot's own score on a phone.
+  - **Shape and space:** gutters `space-4` on compact; cards pad `space-4`, with `radius-lg` corners and `shadow-card`; buttons, fields and chips at least 44px high with `radius-md` (chips `radius-pill`); the app bar is flat with a hairline (`shadow-header`).
+  - **Icons:** Material Symbols Outlined, weight 400, filled only for the selected navigation item. No emoji, no second icon set.
+  - **Focus:** a 2px `focus` ring offset 2px on every control, in both themes.
+  - **Themes:** light and dark both ship, and every screen ships in both; the dark theme follows the system setting. The logo's own colours (`logo-bezel`, `logo-face`, `logo-light`) are for the mark and illustrations, not for UI.
 - **Phone first.** The first release is mobile web, viewed almost always on a phone; native apps come later. Design at ~400px wide. Standard M3 window size classes apply (compact under 600dp, medium 600 to 839dp, expanded 840dp and up) with no custom breakpoints; tablet and desktop only need to stay usable and need no separate design. Forms never need horizontal scrolling. Everything works with browser text zoom and large system fonts.
-- **Never use colour alone for state.** Every status has text plus an icon or shape plus an accessible label. Full keyboard access, visible focus, and screen-reader announcements.
-- Large touch targets (at least 48dp) and high contrast; this is a sunlight screen. Avoid hover-only affordances.
-- **No logo exists yet.** Leave a clear slot on the landing page and in the app bar.
+- **Never use colour alone for state.** Every status has text plus an icon or shape plus an accessible label. The brand guide's status chips carry all three (colour, Material Symbols icon and word), and rows never change ground colour by state; the chip or cell marker carries it. Full keyboard access, visible focus, and screen-reader announcements.
+- Touch targets at least 44px (the brand minimum), and larger on the entry form where a gloved or hurried thumb is likely; high contrast; this is a sunlight screen. Avoid hover-only affordances.
+- **The logo is locked.** Use the supplied files and never recolour, rotate, add effects to, or retype it:
+  - **Landing page:** the full lockup (mark, wordmark, and the tagline "RC GLIDER CONTEST SCORING"), at least 360px wide, with clear space of at least half the mark's height. Use the light file on light grounds and the dark file on dark grounds.
+  - **App bar:** on compact widths, the mark alone at 32px. The wordmark appears only from expanded widths.
+  - **Small sizes:** the full mark from 64px, `mark-small` from 32 to 63px, `mark-tiny` below 32px.
+  - **App icon:** the supplied 1024px app icon.
 
-**App chrome:** there is no shell today. Propose one that suits a phone: a top app bar (contest name, page title, back), where the account state lives (signed in with a name, or "Guest"), and how a person moves between the pages they use most (team overview or pilot overview, results). Say whether you would use a bottom bar, tabs, or plain links, and why. Keep it quiet; the form and tables are the point. Design a persistent, unobtrusive **connection indicator** (online, offline, scores waiting to send).
+**App chrome:** there is no shell today. Propose one that suits a phone: a top app bar (the mark at 32px, contest name, page title, back), where the account state lives (signed in with a name, or "Guest"), and how a person moves between the pages they use most (team overview or pilot overview, results). Say whether you would use a bottom bar, tabs, or plain links, and why. Keep it quiet; the form and tables are the point. Design a persistent, unobtrusive **connection indicator** (online, offline, scores waiting to send).
+
+**Voice and copy:** write for a pilot standing at the field with a phone in one hand. Short sentences, plain words, the number first: "You are 3rd after round 4." Say "you" for the reader and "the contest director", never "the user". Use the words the FAI rules use (contests, rounds, groups, pilots, teams, re-flights, penalties), and keep round numbers and group letters as the director set them ("Round 4", "Group B"). Sentence case for headings, buttons and chips. No exclamation marks, no emoji, no "Oops". An error says what happened and what to do: "Your score could not be sent. It is saved on this phone. Check your connection and try again." Dates as "Sat 11 Oct 2026". Use real copy in every design, not lorem ipsum.
 
 ## Page behaviour
 
@@ -33,7 +45,7 @@ Specs: [`../participant-scoring.md`](../participant-scoring.md) and [`../../../b
 
 ### Landing page
 
-Route `/`. The logo slot, one sentence saying this is the self-scoring app for RC Soar Score, and two buttons, **Sign in** and **Sign up**, which go to the identity provider and come back. A short line for someone who lost their link: "Ask your contest director to send your link again." This is a small page; do not pad it.
+Route `/`. The full logo lockup, one sentence saying this is the self-scoring app for RC Soar Score, and two buttons, **Sign in** and **Sign up**, which go to the identity provider and come back. Sign in is the one orange primary button; Sign up is secondary. A short line for someone who lost their link: "Ask your contest director to send your link again." This is a small page; do not pad it.
 
 ### Invitation handler
 
@@ -126,7 +138,7 @@ Both tables must read on a phone without horizontal scrolling. Propose how: whic
 
 Route `/contests/{id}/results`. The latest results for the contest, almost always preliminary.
 
-- **Individual overall results**: place, pilot, and group score (one score per pilot, so it stays easy to read). Mark the page preliminary. Ties share a place with a tie indicator. The participant's own row is marked.
+- **Individual overall results**: place, pilot, and group score (one score per pilot, so it stays easy to read). Mark the page preliminary. Ties share a place with a tie indicator ("3="). The participant's own row is marked. The participant's own place and score may use the brand's stencil accent and `numeric-lg` (one stencil number per screen), for example "3rd" with "You are 3rd after round 4."
 - **Team standings**, when teams are enabled: place, team, and team score. Show them for every participant, including pilots whose team has no helper. Propose how the two sections share a phone screen (tabs, a segmented control, or sections), and say why.
 - While the director is hiding overall results, both are held at the recorded round. Use the same note as above.
 - When the contest results are public, a link to the contest on the public site for the complete results and flight details.
@@ -153,7 +165,7 @@ Leave visible, labelled room for: the **F3K task** per round in the overview tab
 
 ## Deliverables
 
-1. **Foundations:** any additions to the M3 tokens, the app chrome (top bar, account state, connection indicator, how a person moves between pages), and the status vocabulary: Up now, Up next, Just flown, Retired, Preliminary, Estimate, Pending review, Queued on device, Submitted, Rejected, each with an icon and text.
+1. **Foundations:** the app chrome (top bar, account state, connection indicator, how a person moves between pages) and the status vocabulary. The brand guide already defines In progress, Completed, Tie, Dropped, Re-flight, Penalty, Preliminary, and Not shown yet; reuse those exactly. Propose the missing ones in the same form (colour from the existing tokens, a Material Symbols icon, and a word): Up now, Up next, Just flown, Retired, Estimate, Pending review, Queued on device, Submitted, Rejected. Up now is the one place a chip may use `brand-deep`, so check it against the one-orange-fill rule on the team overview. Propose new tokens only if the existing ones cannot do the job, and say why.
 2. **Landing, handler, and contests** at ~400px, light and dark where noted: the handler with a valid link and with an invalid link, the sign-in confirmation, the contests list with one contest, the empty state, and the "Is this you?" card.
 3. **Team overview** at ~400px with the six-pilot example and the standings, and with the no-further-flight message.
 4. **Pilot overview** with eight rounds, and in each of the closed, completed, and retired states. The retire confirmation and the copy-link control.
@@ -163,7 +175,7 @@ Leave visible, labelled room for: the **F3K task** per round in the overview tab
 8. **Results** at ~400px with and without team standings, and with the held-standings note.
 9. **Shared states:** loading, load failed, offline and queued, queued then accepted, and each rejection reason.
 10. **One discipline variation** (for example F3J) to prove the form holds.
-11. A short rationale covering: how the app chrome works on a phone, how the two results tables fit a phone, the submit and conflict model, where you used progressive disclosure, how colour independence is achieved for each status, and any component or token additions to the M3 theme.
+11. A short rationale covering: how the app chrome works on a phone, how the two results tables fit a phone, the submit and conflict model, where you used progressive disclosure, how colour independence is achieved for each status, how you used the brand tokens and the one-orange-fill rule, and any component or token additions to the M3 theme.
 12. Any questions or spec ambiguities you hit. List them; do not silently resolve them.
 
-Light theme first. Prove the tokens hold in dark mode on at least the team overview and the F5J entry form.
+Light theme first. Every screen ships in both themes, so prove the dark theme on at least the team overview, the F5J entry form, and the results page.
