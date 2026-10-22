@@ -106,6 +106,7 @@ class StandingsTableView extends StatelessWidget {
     final width = columns.fold<double>(0, (sum, c) => sum + c.width);
     final tall = partialRounds.keys.any(page.rounds.contains) || page.penalty;
     return Semantics(
+      container: true,
       role: SemanticsRole.table,
       label: 'Overall Results, page ${page.number}',
       child: DefaultTextStyle.merge(
@@ -120,6 +121,7 @@ class StandingsTableView extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Semantics(
+                container: true,
                 role: SemanticsRole.row,
                 child: Row(
                   children: [
@@ -376,6 +378,7 @@ class _RowView extends StatelessWidget {
       cells.add(cell(row.penalty > 0 ? format.penalty(row.penalty) : ''));
     }
     return Semantics(
+      container: true,
       role: SemanticsRole.row,
       child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: cells),
     );

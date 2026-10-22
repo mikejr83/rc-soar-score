@@ -137,8 +137,64 @@ void main() {
     await type(tester, 'entry-points-0', '3');
     await save(tester);
 
-    expect(find.text('the server said no'), findsOneWidget);
+    expect(
+      (find.byKey(const ValueKey('save-error')).evaluate().single.widget
+              as Text)
+          .data,
+      contains('the server said no'),
+    );
     expect(find.text('Club'), findsOneWidget);
     expect(find.text('a'), findsOneWidget);
+    expect(find.text('Retry'), findsNothing);
+  });
+
+  testWidgets('a failing server offers Retry, which creates the one table', (
+    tester,
+  ) async {
+    var posts = 0;
+    await open(
+      tester,
+      respond: (request) async {
+        if (request.method != 'POST') {
+          return json(landingList([landingView('Club', 4)]));
+        }
+        posts++;
+        return posts == 1
+            ? errorResponse(503, 'unavailable', 'Try again shortly.')
+            : json(landingView('Club', 4).toJson(), 201);
+      },
+    );
+
+    await type(tester, 'landing-name', 'Club');
+    await type(tester, 'entry-label-0', 'a');
+    await type(tester, 'entry-points-0', '3');
+    await save(tester);
+    expect(find.text('Club'), findsOneWidget);
+    await tester.tap(find.text('Retry'));
+    await tester.pumpAndSettle();
+
+    final ids = {
+      for (final r in requests.where((r) => r.method == 'POST'))
+        (jsonDecode(r.body) as Map<String, dynamic>)['id'],
+    };
+    expect(ids, hasLength(1));
+    expect(find.byKey(const ValueKey('save-landing')), findsNothing);
+  });
+
+  testWidgets('Dismiss closes the failure and keeps the form', (tester) async {
+    await open(
+      tester,
+      respond: (_) async => errorResponse(503, 'unavailable', 'Down.'),
+    );
+
+    await type(tester, 'landing-name', 'Club');
+    await type(tester, 'entry-label-0', 'a');
+    await type(tester, 'entry-points-0', '3');
+    await save(tester);
+    await tester.tap(find.text('Dismiss'));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey('save-error')), findsNothing);
+    expect(find.text('Club'), findsOneWidget);
   });
 }

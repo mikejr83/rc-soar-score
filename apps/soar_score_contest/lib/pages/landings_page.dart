@@ -8,7 +8,7 @@ import '../widgets/api_error_text.dart';
 import '../widgets/landings/landing_detail_pane.dart';
 import '../widgets/landings/landing_list_pane.dart';
 import '../widgets/master_detail.dart';
-import '../widgets/message_view.dart';
+import '../widgets/page_states/page_states.dart';
 
 /// The director's landing tables beside the system ones (system scope,
 /// `plan/ui/contest-administration/main-page.md`).
@@ -104,18 +104,18 @@ class _LandingsPageState extends State<LandingsPage> {
     future: _tables,
     builder: (context, snapshot) {
       if (snapshot.hasError) {
-        return MessageView(
-          text: 'Landing tables could not be loaded.',
-          detail: apiErrorText(snapshot.error!),
+        return loadFailedView(
+          snapshot.error!,
+          title: 'Landing tables could not be loaded.',
           onRetry: _reload,
         );
       }
       final all = snapshot.data;
       if (all == null) {
-        return const Center(child: CircularProgressIndicator());
+        return const PageStateView.loading(label: 'Loading landing tables');
       }
       if (all.isEmpty) {
-        return const MessageView(text: 'No landing tables yet.');
+        return const PageStateView.empty(title: 'No landing tables yet.');
       }
       final selected = all.firstWhere(
         (view) => view.table.id == _selectedId,

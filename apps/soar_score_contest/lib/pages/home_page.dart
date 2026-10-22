@@ -6,7 +6,6 @@ import 'package:soar_score_core/soar_score_core.dart';
 import '../api_client_provider.dart';
 import '../contest_draft_provider.dart';
 import '../router.dart';
-import '../services/api_failure.dart';
 import '../services/contest_open_action.dart';
 import '../services/exchange/contest_exchange.dart';
 import '../widgets/contest_detail_pane.dart';
@@ -99,42 +98,16 @@ class _HomePageState extends State<HomePage> {
 
   void _open(Contest contest) => context.go(contestOpenPath(contest));
 
-  /// The load failure, sorted by kind: signing in again does not fix an
-  /// unreachable server and retrying does not fix a missing sign-in.
-  Widget _failed(Object error) {
-    final failure = ApiFailure.of(error);
-    // Only an unreachable or failing server can recover on its own, so only
-    // that failure offers Retry; retrying a 403 or a rejected request loops.
-    final retry = failure.retryable
-        ? PageStateAction(
-            key: const ValueKey('page-state-retry'),
-            label: 'Retry',
-            onPressed: _retry,
-          )
-        : null;
-    return switch (failure.kind) {
-      ApiFailureKind.unauthorized ||
-      ApiFailureKind.forbidden => PageStateView.authorization(
-        title: 'Contests could not be loaded.',
-        body: failure.kind == ApiFailureKind.unauthorized
-            ? 'You are not signed in. Sign in again to see them.'
-            : 'Your account is not allowed to see these contests. ${failure.message}',
-        primary: retry,
-      ),
-      _ => PageStateView.unavailable(
-        title: 'Contests could not be loaded.',
-        body: failure.message,
-        primary: retry,
-      ),
-    };
-  }
-
   @override
   Widget build(BuildContext context) => FutureBuilder<List<Contest>>(
     future: _contests,
     builder: (context, snapshot) {
       if (snapshot.hasError) {
-        return _failed(snapshot.error!);
+        return loadFailedView(
+          snapshot.error!,
+          title: 'Contests could not be loaded.',
+          onRetry: _retry,
+        );
       }
       final contests = snapshot.data;
       if (contests == null) {
