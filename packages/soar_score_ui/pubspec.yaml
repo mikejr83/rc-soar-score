@@ -18,3 +18,34 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
+
+# Brand kit fonts and logos. Assets declared by a package are bundled into
+# every app that depends on it; apps reach them through BrandFonts and
+# BrandLogos, which carry the required `packages/soar_score_ui/` prefix.
+flutter:
+  assets:
+    - assets/logos/
+    - assets/logos/png/
+  fonts:
+    - family: League Spartan
+      fonts:
+        - asset: assets/fonts/league_spartan/LeagueSpartan-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/league_spartan/LeagueSpartan-ExtraBold.ttf
+          weight: 800
+    - family: Archivo
+      fonts:
+        - asset: assets/fonts/archivo/Archivo-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/archivo/Archivo-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/archivo/Archivo-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/archivo/Archivo-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/archivo/Archivo-ExtraBold.ttf
+          weight: 800
+    - family: Saira Stencil One
+      fonts:
+        - asset: assets/fonts/saira_stencil_one/SairaStencilOne-Regular.ttf
+          weight: 400

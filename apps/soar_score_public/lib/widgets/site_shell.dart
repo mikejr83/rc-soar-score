@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:soar_score_ui/soar_score_ui.dart';
 
 import '../app.dart';
 
@@ -20,10 +21,9 @@ class SiteShell extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         centerTitle: false,
-        leading: const Icon(
-          // Placeholder until a logo asset exists.
-          Icons.flight_takeoff,
-          semanticLabel: 'RC Soar Score logo',
+        leading: const Padding(
+          padding: EdgeInsets.all(10),
+          child: BrandLogo(height: 36),
         ),
         title: const Text(SoarScorePublicApp.title),
         actions: [
