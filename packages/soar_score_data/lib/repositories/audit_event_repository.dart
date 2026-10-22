@@ -28,17 +28,14 @@ class AuditEventRepository extends DriftRepository
     core.Id contestId, {
     core.AuditAction? action,
     int? limit,
-  }) async {
-    final events = await _store.whereId(
-      'contest_id',
-      contestId,
-      orderBy: 'server_timestamp DESC, id DESC',
-    );
-    final wanted = action == null
-        ? events
-        : events.where((event) => event.action == action);
-    return limit == null ? wanted.toList() : wanted.take(limit).toList();
-  }
+  }) => _store.whereIdAndText(
+    'contest_id',
+    contestId,
+    textColumn: action == null ? null : 'action',
+    text: action?.text,
+    orderBy: 'server_timestamp DESC, id DESC',
+    limit: limit,
+  );
 
   @override
   Future<core.AuditEvent> append(core.AuditEvent event) =>

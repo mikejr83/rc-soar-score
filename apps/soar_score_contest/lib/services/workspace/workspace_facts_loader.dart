@@ -1,3 +1,4 @@
+import 'package:logging/logging.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
@@ -6,6 +7,8 @@ import 'publication_facts.dart';
 import 'transition_facts.dart';
 import 'workspace_fact_source.dart';
 import 'workspace_facts.dart';
+
+final Logger _logger = Logger('WorkspaceFactsLoader');
 
 /// Loads what [WorkspaceFacts] reduces. The contest is already loaded (the
 /// shell owns it), so it is not fetched again.
@@ -76,7 +79,8 @@ abstract final class WorkspaceFactsLoader {
         ),
         actingAccountId: actingAccountId,
       );
-    } on Object {
+    } on Object catch (error) {
+      _logger.warning('Could not read the audit trail of ${contest.id}', error);
       return TransitionFacts.unknown;
     }
   }
