@@ -170,6 +170,9 @@ dart pub global activate melos 8.9.0
    cd rc-soar-score
    ```
 
+### Environment Setup
+
+1. The environment setup is now moved into [docs/environment-setup.md](docs/environment-setup.md).
 2. **Bootstrap the Melos workspace:**
 
    ```bash
@@ -187,6 +190,8 @@ cd apps/soar_score_contest
 flutter run -d chrome      # Run as web app
 flutter run -d windows     # Run as Windows desktop shell
 ```
+
+The Windows desktop build needs extra tooling beyond Flutter: Visual Studio 2022 with the "Desktop development with C++" workload plus the ATL component, vcpkg with the `auth0_flutter` native dependencies (`cpp-httplib`, `nlohmann-json`, `openssl`) and `VCPKG_ROOT` set, and the app's `com.soarscore.contest` URL scheme (registered automatically). See the "Windows build also needs" checklist in [`docs/environment-setup.md`](docs/environment-setup.md) for the exact install steps. No Android tooling is needed by any app today; all targets are web or the Windows shell.
 
 ##### Demo data (development only)
 

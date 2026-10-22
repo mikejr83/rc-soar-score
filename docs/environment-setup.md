@@ -20,12 +20,14 @@ wins.
 
 Optional tools:
 
-| Tool                                                                        | Needed for                                                        |
-| --------------------------------------------------------------------------- | ----------------------------------------------------------------- |
-| PostgreSQL 14+ / Docker                                                     | Running the API server and its integration tests (see section 4). |
-| Node.js (for `npx`)                                                         | Markdown formatting with Prettier (see section 6).                |
-| PowerShell 7+                                                               | `scripts/verify.ps1` (the all-in-one check script).               |
-| Visual Studio 2022 ("Desktop development with C++", plus the ATL component) | `flutter run -d windows` for the contest desktop shell.           |
+| Tool                                                                        | Needed for                                                                                                        |
+| --------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| PostgreSQL 14+ / Docker                                                     | Running the API server and its integration tests (see section 4).                                                 |
+| Node.js (for `npx`)                                                         | Markdown formatting with Prettier (see section 6).                                                                |
+| PowerShell 7+                                                               | `scripts/verify.ps1` (the all-in-one check script).                                                               |
+| Visual Studio 2022 ("Desktop development with C++", plus the ATL component) | `flutter run -d windows` for the contest desktop shell.                                                           |
+| vcpkg                                                                       | Native C++ dependencies (`cpp-httplib`, `nlohmann-json`, `openssl`) for the Windows desktop build; see section 2. |
+| Android Studio (SDK, platform-tools, emulator)                              | Nothing is built for Android today; not required for web or Windows targets (see below).                          |
 
 ## 2. Install the toolchain
 
@@ -57,6 +59,66 @@ Add the pub cache bin directory to your `PATH` so `melos` is found:
 
 Melos is also a root `dev_dependency`, so `dart run melos <command>` works
 without the global install.
+
+### vcpkg (Windows desktop builds)
+
+The Windows desktop build pulls `cpp-httplib`, `nlohmann-json`, and `openssl`
+through [vcpkg](https://vcpkg.io/) and requires `VCPKG_ROOT` to point at the
+vcpkg checkout. Set it up once:
+
+```powershell
+# From the repo root, clone vcpkg alongside the app you will build
+cd apps\soar_score_contest
+git clone https://github.com/microsoft/vcpkg
+.\vcpkg\bootstrap-vcpkg.bat
+```
+
+`bootstrap-vcpkg.bat` compiles (or downloads) `vcpkg.exe`. Then install the
+three native dependencies the plugin needs. The `x64-windows` triplet matches
+the desktop shell's architecture:
+
+```powershell
+.\vcpkg\vcpkg.exe install --recurse `
+  "cpp-httplib[core,openssl]:x64-windows" `
+  nlohmann-json:x64-windows `
+  openssl:x64-windows
+```
+
+The first run builds the packages and can take several minutes; later runs are
+fast.
+
+Then make the CMake build see vcpkg. Either:
+
+- For a single PowerShell session: set
+  `$env:VCPKG_ROOT` to the vcpkg folder you cloned (its full path, no trailing
+  backslash) before building, or
+- Persistently (so it also applies when building from VS Code or another
+  terminal): `setx VCPKG_ROOT <full path to the vcpkg folder>`, then close and
+  reopen your shell or VS Code.
+
+Two vcpkg-specific gotchas:
+
+- The CMake toolchain is captured at first configure. If you change
+  `VCPKG_ROOT` or install new packages, delete
+  `apps\soar_score_contest\build\windows` (or run `flutter clean`) before
+  building again, otherwise CMake keeps the old toolchain.
+- `Could not find a package configuration file provided by "httplib"` means
+  the vcpkg toolchain was not used — check `VCPKG_ROOT` and do the `flutter
+clean` above.
+
+### Android Studio
+
+Not required to build or run anything in this repo today. No app has an
+`android/` platform directory; every target is Web (Chrome) or the Windows
+desktop shell, and `flutter run -d chrome` / `flutter run -d windows` need no
+Android SDK.
+
+Only install Android Studio if you will build a native Android app, which is
+planned for the self-scoring app but not part of this release. In that case
+install [Android Studio](https://developer.android.com/studio) (which bundles
+the Android SDK, platform-tools, and the emulator), let `flutter doctor -a`
+list the Android toolchain, and accept its licenses. Nothing in this repo needs
+it in the meantime.
 
 ## 3. Clone and bootstrap
 
@@ -157,32 +219,27 @@ running with `--web-port 5000`). The Windows application (type Native) needs
 `com.soarscore.contest://callback` in Allowed Callback URLs and Allowed Logout
 URLs. The audience API needs Allow Offline Access turned on.
 
-The Windows build also needs:
+`flutter run -d windows` needs four things beyond Flutter. Install all of
+them before the first build:
 
-1. The ATL component of Visual Studio, which `flutter_secure_storage` needs
+1. Visual Studio 2022 with the **"Desktop development with C++"** workload.
+   Flutter's Windows desktop toolchain (MSVC, CMake, and Ninja) ships with it.
+   If `flutter doctor` does not list it, install it from
+   https://visualstudio.microsoft.com/downloads/ and re-run
+   `flutter doctor`.
+
+2. The ATL component of Visual Studio, which `flutter_secure_storage` needs
    (`atlstr.h`). In Visual Studio Installer, Modify, Individual components,
    tick "C++ ATL for latest v143 build tools (x86 & x64)". Without it the
    build stops with `Cannot open include file: 'atlstr.h'`.
 
-2. [vcpkg](https://vcpkg.io/) with the plugin's native dependencies, and
-   `VCPKG_ROOT` set before building:
+3. [vcpkg](https://vcpkg.io/) with the plugin's native dependencies and
+   `VCPKG_ROOT` set before building. Full install steps — cloning,
+   bootstrapping, installing `cpp-httplib[core,openssl]`, `nlohmann-json` and
+   `openssl` for `x64-windows`, and setting the environment variable — are in
+   the [vcpkg subsection of section 2](#vcpkg-windows-desktop-builds).
 
-   ```powershell
-   git clone https://github.com/microsoft/vcpkg
-   .\vcpkg\bootstrap-vcpkg.bat
-   $env:VCPKG_ROOT = "$PWD\vcpkg"
-   .\vcpkg\vcpkg.exe install --recurse "cpp-httplib[core,openssl]:x64-windows" nlohmann-json:x64-windows openssl:x64-windows
-   ```
-
-   The `$env:` line lasts only for that PowerShell session. To build from VS
-   Code, set it for your user with `setx VCPKG_ROOT <path to vcpkg>` and restart
-   VS Code. CMake keeps the vcpkg toolchain from the first configure, so after
-   changing `VCPKG_ROOT` or installing packages, delete
-   `apps\soar_score_contest\build\windows` (or run `flutter clean`) before
-   building again. `Could not find a package configuration file provided by
-"httplib"` means the toolchain was not used.
-
-3. The `com.soarscore.contest` URL scheme, so Windows returns the browser's
+4. The `com.soarscore.contest` URL scheme, so Windows returns the browser's
    callback to the app. Nothing to do by hand: the app registers it for your
    user (under `HKEY_CURRENT_USER`, no administrator rights) just before
    sign-in, pointing at the running executable, so a development build works
@@ -256,14 +313,14 @@ npx prettier --check "**/*.md"
 
 ## 7. Troubleshooting
 
-| Symptom                                              | Fix                                                                                              |
-| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| `melos: command not found`                           | Add the pub cache `bin` directory to `PATH`, or use `dart run melos`.                            |
-| `flutter --version` is not 3.47.x                    | `flutter channel stable && flutter upgrade`.                                                     |
-| Server prints `POSTGRES_PASSWORD is not set`         | Set it in `.env` or your shell, and make sure PostgreSQL is reachable.                           |
-| Pub resolution error mentioning `.plugin_symlinks`   | Workspace globs are intentionally first-level only; do not widen `workspace:` in `pubspec.yaml`. |
-| Missing `*.g.dart` files / undefined generated types | Run `dart run build_runner build --delete-conflicting-outputs` in the affected package.          |
-| `flutter run -d windows` fails to build              | Install Visual Studio with the C++ desktop workload and re-run `flutter doctor`.                 |
+| Symptom                                              | Fix                                                                                                                                                                                                         |
+| ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `melos: command not found`                           | Add the pub cache `bin` directory to `PATH`, or use `dart run melos`.                                                                                                                                       |
+| `flutter --version` is not 3.47.x                    | `flutter channel stable && flutter upgrade`.                                                                                                                                                                |
+| Server prints `POSTGRES_PASSWORD is not set`         | Set it in `.env` or your shell, and make sure PostgreSQL is reachable.                                                                                                                                      |
+| Pub resolution error mentioning `.plugin_symlinks`   | Workspace globs are intentionally first-level only; do not widen `workspace:` in `pubspec.yaml`.                                                                                                            |
+| Missing `*.g.dart` files / undefined generated types | Run `dart run build_runner build --delete-conflicting-outputs` in the affected package.                                                                                                                     |
+| `flutter run -d windows` fails to build              | See section 4: the Windows build needs Visual Studio C++ (plus ATL), vcpkg with the plugin's native dependencies and `VCPKG_ROOT` set, and the `com.soarscore.contest` URL scheme. Re-run `flutter doctor`. |
 
 ## Further reading
 
