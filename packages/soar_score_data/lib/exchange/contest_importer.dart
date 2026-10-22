@@ -352,10 +352,20 @@ class ContestImporter {
         continue;
       }
       final expected = columns[table]!;
+      final seen = <String>{};
       for (final row in rows) {
         final id = row['id'];
         if (id is! String || !_isId(id)) {
           refuse('invalid_id', 'A row of "$table" has no valid id.', table);
+          continue;
+        }
+        if (!seen.add(id)) {
+          refuse(
+            'duplicate_id',
+            'The file has two rows of "$table" with the id $id.',
+            table,
+            id,
+          );
           continue;
         }
         if (row.keys.toSet().difference(expected).isNotEmpty ||
@@ -591,6 +601,24 @@ class ContestImporter {
           ),
         );
       }
+    }
+    // Pending changes of director rows carry no contest: they may only be
+    // repeated as they are, never replaced.
+    final store = stores.of('MutationRecord');
+    for (final row in rewritten['mutation_records'] ?? const []) {
+      if (row['contest_id'] != null) continue;
+      final id = row['id'] as String;
+      final local = await store.findJson(core.Id.parse(id));
+      if (local == null || _same(local, row)) continue;
+      refusals.add(
+        ImportRefusal(
+          'row_exists',
+          'A pending change ($id) already exists here with other content. '
+              'Importing would replace it.',
+          table: 'mutation_records',
+          rowId: id,
+        ),
+      );
     }
     return refusals;
   }

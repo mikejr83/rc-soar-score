@@ -861,6 +861,42 @@ void main() {
       expect((await target.exportNamed(_mountain)).rows('rounds').first, taken);
     });
 
+    test('duplicate ids inside one table are refused', () async {
+      expect(
+        await refusalsAfter(
+          (f) => f.tables['rounds']!.add({...f.rows('rounds').first}),
+        ),
+        contains('duplicate_id'),
+      );
+    });
+
+    test('a pending change of a director row never replaces another', () async {
+      final file = await source.exportNamed(_autumn);
+      final template = file.rows('mutation_records').first;
+      final record = {
+        ...template,
+        'id': core.Id.create().value,
+        'contest_id': null,
+        'owner_account_id': source.localId.value,
+        'entity_id': file.rows('participant_profiles').first['id'],
+      };
+      file.tables['mutation_records']!.add(record);
+      await EntityStores.forDatabase(target.db)
+          .of('MutationRecord')
+          .upsertJson({...record, 'client_mutation_id': 'x'});
+
+      final preview = await target.importer.preview(
+        file,
+        target: target.target,
+      );
+      expect(preview.availableModes, isEmpty);
+      for (final mode in ImportMode.values) {
+        expect([
+          for (final r in preview.refusalsFor(mode)) r.code,
+        ], contains('row_exists'));
+      }
+    });
+
     test('values are only ever bound, never run as SQL', () async {
       final file = await source.exportNamed(_autumn);
       file.rows('contests').single['name'] = "x'); DROP TABLE contests; --";
