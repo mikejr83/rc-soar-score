@@ -5,9 +5,11 @@ import 'package:soar_score_core/soar_score_core.dart';
 
 import '../api_client_provider.dart';
 import '../router.dart';
-import '../widgets/api_error_text.dart';
+import '../services/api_failure.dart';
+import '../widgets/discard_changes_dialog.dart';
 import '../widgets/landings/landing_entry_fields.dart';
 import '../widgets/landings/landing_unit_text.dart';
+import '../widgets/page_states/page_states.dart';
 import '../widgets/unsaved_changes_guard.dart';
 
 /// Creates one landing table: a name, what the keys mean, and the entries a
@@ -37,7 +39,11 @@ class _LandingEditorPageState extends State<LandingEditorPage> {
   LandingInputUnit _unit = LandingInputUnit.points;
   bool _dirty = false;
   bool _saving = false;
-  String? _saveError;
+  ApiFailure? _saveFailure;
+
+  /// The id the table is created with. One per editor, so a Retry after a
+  /// save whose answer was lost does not create a second table.
+  Id? _newId;
 
   @override
   void initState() {
@@ -134,12 +140,12 @@ class _LandingEditorPageState extends State<LandingEditorPage> {
     final client = apiClientOf(context)!;
     setState(() {
       _saving = true;
-      _saveError = null;
+      _saveFailure = null;
     });
     try {
       await client.createLandingTable(
         CreateLandingTableRequest(
-          id: Id.create(),
+          id: _newId ??= Id.create(),
           name: _name.text.trim(),
           inputUnit: _unit,
           entries: [
@@ -155,7 +161,7 @@ class _LandingEditorPageState extends State<LandingEditorPage> {
       if (mounted) {
         setState(() {
           _saving = false;
-          _saveError = apiErrorText(error);
+          _saveFailure = ApiFailure.of(error);
         });
       }
       return;
@@ -170,24 +176,7 @@ class _LandingEditorPageState extends State<LandingEditorPage> {
     if (!_dirty) {
       return true;
     }
-    final discard = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Discard changes?'),
-        content: const Text('Your unsaved changes will be lost.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Keep editing'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Discard'),
-          ),
-        ],
-      ),
-    );
-    return discard ?? false;
+    return confirmDiscard(context);
   }
 
   Future<void> _cancel() async {
@@ -237,11 +226,13 @@ class _LandingEditorPageState extends State<LandingEditorPage> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  if (_saveError != null) ...[
-                    Text(
-                      _saveError!,
-                      key: const ValueKey('save-error'),
-                      style: TextStyle(color: theme.colorScheme.error),
+                  if (_saveFailure case final failure?) ...[
+                    SaveFailedBanner(
+                      messageKey: const ValueKey('save-error'),
+                      message: failure.message,
+                      retryable: failure.retryable,
+                      onRetry: _save,
+                      onDismiss: () => setState(() => _saveFailure = null),
                     ),
                     const SizedBox(height: 12),
                   ],

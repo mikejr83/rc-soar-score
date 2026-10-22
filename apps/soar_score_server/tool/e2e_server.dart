@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:shelf/shelf.dart';
@@ -17,6 +18,11 @@ import 'package:soar_score_data/soar_score_data.dart';
 /// Without `--database` it uses a new temporary file, deleted on exit. It
 /// prints `E2E_SERVER_READY <port>` once it listens; `scripts/e2e` waits for
 /// that line.
+///
+/// `POST /__e2e/fail-next-write` makes the next write (any method but GET,
+/// HEAD and OPTIONS) answer 503 once, so a journey can check what the app
+/// does when a save fails and then succeeds on Retry. Test-only, like the
+/// rest of this server.
 Future<void> main(List<String> args) async {
   final port = int.parse(_option(args, '--port') ?? '8080');
   final given = _option(args, '--database');
@@ -34,6 +40,7 @@ Future<void> main(List<String> args) async {
 
   final handler = const Pipeline()
       .addMiddleware(_cors())
+      .addMiddleware(_failNextWrite())
       .addHandler(
         buildApiHandler(
           name: 'soar_score_e2e',
@@ -81,3 +88,30 @@ Middleware _cors() =>
       final response = await inner(request);
       return response.change(headers: _corsHeaders);
     };
+
+/// See `POST /__e2e/fail-next-write` in the library comment.
+Middleware _failNextWrite() {
+  var failNext = false;
+  return (inner) => (request) async {
+    if (request.method == 'POST' &&
+        request.url.path == '__e2e/fail-next-write') {
+      failNext = true;
+      return Response.ok('The next write will fail.');
+    }
+    final isWrite = !{'GET', 'HEAD', 'OPTIONS'}.contains(request.method);
+    if (failNext && isWrite) {
+      failNext = false;
+      return Response(
+        503,
+        headers: {'content-type': 'application/json; charset=utf-8'},
+        body: jsonEncode({
+          'error': {
+            'code': 'unavailable',
+            'message': 'The E2E server was told to fail this write.',
+          },
+        }),
+      );
+    }
+    return inner(request);
+  };
+}

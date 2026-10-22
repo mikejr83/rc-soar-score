@@ -15,6 +15,11 @@ Future<void> _save(WidgetTester tester) async {
   await tester.pumpAndSettle();
 }
 
+/// The text of the save-failed banner.
+String _banner() =>
+    (find.byKey(const ValueKey('save-error')).evaluate().single.widget as Text)
+        .data!;
+
 Map<String, dynamic> _body(http.Request request) =>
     jsonDecode(request.body) as Map<String, dynamic>;
 
@@ -119,7 +124,73 @@ void main() {
     await _enter(tester, 'email', 'ada@example.com');
     await _save(tester);
 
-    expect(find.text('Last name is too long.'), findsOneWidget);
+    expect(_banner(), contains('Last name is too long.'));
+    expect(_banner(), contains('Everything you entered is kept'));
+    expect(find.text('Ada'), findsOneWidget);
+    expect(find.text('Add participant'), findsOneWidget);
+    // A rejected request cannot be fixed by sending it again.
+    expect(find.text('Retry'), findsNothing);
+  });
+
+  testWidgets('a failing server offers Retry, which saves the same profile', (
+    tester,
+  ) async {
+    useTallWindow(tester);
+    final requests = <http.Request>[];
+    var posts = 0;
+    final client = clientFor((request) async {
+      if (request.method == 'POST') {
+        posts++;
+        return posts == 1
+            ? errorResponse(503, 'unavailable', 'Try again shortly.')
+            : json(profile('Ada', 'Lovelace').toJson(), 201);
+      }
+      return json({'participants': []});
+    }, requests: requests);
+
+    await tester.pumpWidget(
+      participantsApp(client, initial: newParticipantPath),
+    );
+    await tester.pumpAndSettle();
+    await _enter(tester, 'first-name', 'Ada');
+    await _enter(tester, 'last-name', 'Lovelace');
+    await _enter(tester, 'email', 'ada@example.com');
+    await _save(tester);
+
+    expect(_banner(), contains('Try again shortly.'));
+    expect(find.text('Ada'), findsOneWidget);
+    await tester.tap(find.text('Retry'));
+    await tester.pumpAndSettle();
+
+    final ids = {
+      for (final r in requests.where((r) => r.method == 'POST')) _body(r)['id'],
+    };
+    expect(ids, hasLength(1), reason: 'a retry must not create a second one');
+    expect(find.byKey(const ValueKey('save-error')), findsNothing);
+    expect(find.text('Add participant'), findsNothing);
+  });
+
+  testWidgets('Dismiss closes the failure and keeps the form', (tester) async {
+    useTallWindow(tester);
+    final client = clientFor((request) async {
+      if (request.method == 'POST') {
+        return errorResponse(503, 'unavailable', 'Try again shortly.');
+      }
+      return json({'participants': []});
+    });
+
+    await tester.pumpWidget(
+      participantsApp(client, initial: newParticipantPath),
+    );
+    await tester.pumpAndSettle();
+    await _enter(tester, 'first-name', 'Ada');
+    await _enter(tester, 'last-name', 'Lovelace');
+    await _enter(tester, 'email', 'ada@example.com');
+    await _save(tester);
+    await tester.tap(find.text('Dismiss'));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey('save-error')), findsNothing);
     expect(find.text('Ada'), findsOneWidget);
     expect(find.text('Add participant'), findsOneWidget);
   });
@@ -167,7 +238,9 @@ void main() {
     await _enter(tester, 'last-name', 'King');
     await _save(tester);
 
-    expect(find.text('It changed elsewhere.'), findsOneWidget);
+    expect(_banner(), contains('It changed elsewhere.'));
+    // A conflict needs a change, not a blind retry.
+    expect(find.text('Retry'), findsNothing);
   });
 
   testWidgets('cancel confirms before discarding changes', (tester) async {

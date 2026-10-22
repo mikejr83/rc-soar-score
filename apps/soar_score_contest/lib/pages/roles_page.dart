@@ -7,7 +7,7 @@ import '../api_client_provider.dart';
 import '../router.dart';
 import '../widgets/api_error_text.dart';
 import '../widgets/master_detail.dart';
-import '../widgets/message_view.dart';
+import '../widgets/page_states/page_states.dart';
 import '../widgets/roles/role_detail_pane.dart';
 import '../widgets/roles/role_list_pane.dart';
 import '../widgets/roles/role_name_dialog.dart';
@@ -193,15 +193,15 @@ class _RolesPageState extends State<RolesPage> {
     future: _roles,
     builder: (context, snapshot) {
       if (snapshot.hasError) {
-        return MessageView(
-          text: 'Roles could not be loaded.',
-          detail: apiErrorText(snapshot.error!),
+        return loadFailedView(
+          snapshot.error!,
+          title: 'Roles could not be loaded.',
           onRetry: _reload,
         );
       }
       final all = snapshot.data;
       if (all == null) {
-        return const Center(child: CircularProgressIndicator());
+        return const PageStateView.loading(label: 'Loading roles');
       }
       // The first role is selected until one is chosen (or when the chosen
       // one is gone).

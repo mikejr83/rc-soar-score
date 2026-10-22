@@ -5,8 +5,9 @@ import 'package:soar_score_core/soar_score_core.dart';
 
 import '../api_client_provider.dart';
 import '../router.dart';
-import '../widgets/api_error_text.dart';
-import '../widgets/message_view.dart';
+import '../services/api_failure.dart';
+import '../widgets/discard_changes_dialog.dart';
+import '../widgets/page_states/page_states.dart';
 import '../widgets/unsaved_changes_guard.dart';
 
 /// Creates or edits one reusable participant profile
@@ -78,7 +79,11 @@ class _ParticipantEditorPageState extends State<ParticipantEditorPage> {
   bool _dirty = false;
   bool _saving = false;
   bool _separateConfirmed = false;
-  String? _saveError;
+  ApiFailure? _saveFailure;
+
+  /// The id a new profile is created with. One per editor, so a Retry after
+  /// a save whose answer was lost does not create a second profile.
+  Id? _newId;
 
   bool get _creating => widget.participantId == null;
 
@@ -157,7 +162,7 @@ class _ParticipantEditorPageState extends State<ParticipantEditorPage> {
     final client = apiClientOf(context)!;
     setState(() {
       _saving = true;
-      _saveError = null;
+      _saveFailure = null;
     });
     final ParticipantProfile saved;
     try {
@@ -174,7 +179,7 @@ class _ParticipantEditorPageState extends State<ParticipantEditorPage> {
         }
         saved = await client.createParticipant(
           CreateParticipantRequest(
-            id: Id.create(),
+            id: _newId ??= Id.create(),
             firstName: _firstName.text.trim(),
             lastName: _lastName.text.trim(),
             email: _email.text.trim(),
@@ -207,7 +212,7 @@ class _ParticipantEditorPageState extends State<ParticipantEditorPage> {
       if (mounted) {
         setState(() {
           _saving = false;
-          _saveError = apiErrorText(error);
+          _saveFailure = ApiFailure.of(error);
         });
       }
       return;
@@ -236,24 +241,7 @@ class _ParticipantEditorPageState extends State<ParticipantEditorPage> {
     if (!_dirty) {
       return true;
     }
-    final discard = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Discard changes?'),
-        content: const Text('Your unsaved changes will be lost.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Keep editing'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Discard'),
-          ),
-        ],
-      ),
-    );
-    return discard ?? false;
+    return confirmDiscard(context);
   }
 
   Future<void> _cancel() async {
@@ -295,14 +283,14 @@ class _ParticipantEditorPageState extends State<ParticipantEditorPage> {
     future: _loading,
     builder: (context, snapshot) {
       if (snapshot.hasError) {
-        return MessageView(
-          text: 'The participant could not be loaded.',
-          detail: apiErrorText(snapshot.error!),
+        return loadFailedView(
+          snapshot.error!,
+          title: 'The participant could not be loaded.',
           onRetry: () => setState(() => _loading = _load()),
         );
       }
       if (snapshot.connectionState != ConnectionState.done) {
-        return const Center(child: CircularProgressIndicator());
+        return const PageStateView.loading(label: 'Loading participant');
       }
       return PopScope(
         canPop: !_dirty,
@@ -336,11 +324,13 @@ class _ParticipantEditorPageState extends State<ParticipantEditorPage> {
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 16),
-              if (_saveError != null) ...[
-                Text(
-                  _saveError!,
-                  key: const ValueKey('save-error'),
-                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+              if (_saveFailure case final failure?) ...[
+                SaveFailedBanner(
+                  messageKey: const ValueKey('save-error'),
+                  message: failure.message,
+                  retryable: failure.retryable,
+                  onRetry: _save,
+                  onDismiss: () => setState(() => _saveFailure = null),
                 ),
                 const SizedBox(height: 12),
               ],

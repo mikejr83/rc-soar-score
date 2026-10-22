@@ -34,6 +34,9 @@ class PageBanner extends StatelessWidget {
     required this.text,
     this.actionLabel,
     this.onAction,
+    this.secondaryLabel,
+    this.onSecondary,
+    this.textKey,
   });
 
   final PageBannerKind kind;
@@ -43,6 +46,13 @@ class PageBanner extends StatelessWidget {
   /// The label of the banner's one action; no action when `null`.
   final String? actionLabel;
   final VoidCallback? onAction;
+
+  /// A second, quieter action (such as `Dismiss`); none when `null`.
+  final String? secondaryLabel;
+  final VoidCallback? onSecondary;
+
+  /// Key of the banner's text, for tests that read the message.
+  final Key? textKey;
 
   @override
   Widget build(BuildContext context) {
@@ -80,6 +90,7 @@ class PageBanner extends StatelessWidget {
                   children: [
                     Text(
                       text,
+                      key: textKey,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: foreground,
                       ),
@@ -91,6 +102,14 @@ class PageBanner extends StatelessWidget {
                           foregroundColor: foreground,
                         ),
                         child: Text(label),
+                      ),
+                    if (secondaryLabel != null)
+                      TextButton(
+                        onPressed: onSecondary,
+                        style: TextButton.styleFrom(
+                          foregroundColor: foreground,
+                        ),
+                        child: Text(secondaryLabel!),
                       ),
                   ],
                 ),
