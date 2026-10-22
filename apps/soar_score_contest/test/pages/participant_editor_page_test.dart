@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:soar_score_contest/router.dart';
+import 'package:soar_score_core/soar_score_core.dart';
 
 import '../support/participant_test_support.dart';
 
@@ -167,6 +168,54 @@ void main() {
     };
     expect(ids, hasLength(1), reason: 'a retry must not create a second one');
     expect(find.byKey(const ValueKey('save-error')), findsNothing);
+    expect(find.text('Add participant'), findsNothing);
+  });
+
+  testWidgets('Retry after a save whose answer was lost is not a duplicate', (
+    tester,
+  ) async {
+    useTallWindow(tester);
+    final requests = <http.Request>[];
+    var posts = 0;
+    final stored = <Map<String, dynamic>>[];
+    final client = clientFor((request) async {
+      if (request.method == 'POST') {
+        posts++;
+        if (posts == 1) {
+          // The server stores it, but the answer never arrives.
+          final body = _body(request);
+          stored.add(
+            ParticipantProfile(
+              id: Id.parse(body['id'] as String),
+              ownerAccountId: Id.parse(ownerId),
+              firstName: body['first_name'] as String,
+              lastName: body['last_name'] as String,
+              email: body['email'] as String,
+              createdAt: DateTime.utc(2026, 9),
+              updatedAt: DateTime.utc(2026, 9),
+            ).toJson(),
+          );
+          throw http.ClientException('connection lost');
+        }
+        return json(stored.single, 201);
+      }
+      return json({'participants': stored});
+    }, requests: requests);
+
+    await tester.pumpWidget(
+      participantsApp(client, initial: newParticipantPath),
+    );
+    await tester.pumpAndSettle();
+    await _enter(tester, 'first-name', 'Ada');
+    await _enter(tester, 'last-name', 'Lovelace');
+    await _enter(tester, 'email', 'ada@example.com');
+    await _save(tester);
+    expect(find.text('Retry'), findsOneWidget);
+    await tester.tap(find.text('Retry'));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey('duplicate-notice')), findsNothing);
+    expect(posts, 2);
     expect(find.text('Add participant'), findsNothing);
   });
 

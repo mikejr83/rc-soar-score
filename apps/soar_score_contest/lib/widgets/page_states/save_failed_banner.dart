@@ -7,9 +7,11 @@ import 'page_banner.dart';
 ///
 /// What it offers depends on the failure ([retryable] is
 /// `ApiFailure.retryable`): an unreachable or failing server can recover, so
-/// it offers `Retry`; a rejected request or a conflict cannot be fixed by
-/// sending the same thing again, so it asks for a change and the page's
-/// Save button is the way to try again. `Dismiss` only closes the banner; it
+/// it offers `Retry`; a rejected request, a conflict or a missing permission
+/// cannot be fixed by sending the same thing again, so there is no Retry and
+/// the message (the server's words) says why. The text promises no recovery
+/// the banner cannot give: what resolves a conflict or an authorization
+/// failure depends on the flow (#523). `Dismiss` only closes the banner; it
 /// neither leaves the editor nor discards anything (the page's own Cancel
 /// and leave guard do that, with their confirmation).
 class SaveFailedBanner extends StatelessWidget {
@@ -40,10 +42,7 @@ class SaveFailedBanner extends StatelessWidget {
     kind: PageBannerKind.alert,
     icon: Icons.error_outline,
     textKey: messageKey,
-    text: retryable
-        ? "Couldn't $what. $message Everything you entered is kept."
-        : "Couldn't $what. $message Everything you entered is kept. Change it "
-              'and $what again.',
+    text: "Couldn't $what. $message Everything you entered is kept.",
     actionLabel: retryable ? 'Retry' : null,
     onAction: retryable ? onRetry : null,
     secondaryLabel: 'Dismiss',

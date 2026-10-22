@@ -231,21 +231,13 @@ class _RailTitle extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
-                children: [
-                  const _RailLogo(),
-                  const SizedBox(width: 8),
-                  title,
-                ],
+                children: [const _RailLogo(), const SizedBox(width: 8), title],
               ),
             )
           : SizedBox(
               width: 72,
               child: Column(
-                children: [
-                  const _RailLogo(),
-                  const SizedBox(height: 4),
-                  title,
-                ],
+                children: [const _RailLogo(), const SizedBox(height: 4), title],
               ),
             ),
     );

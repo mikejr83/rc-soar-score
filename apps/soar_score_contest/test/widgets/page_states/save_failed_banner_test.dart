@@ -56,7 +56,9 @@ void main() {
     final text =
         (find.byKey(const ValueKey('message')).evaluate().single.widget as Text)
             .data!;
-    expect(text, contains('Change it and save again.'));
+    expect(text, contains('Name is too long.'));
+    expect(text, contains('Everything you entered is kept.'));
+    expect(text, isNot(contains('save again')));
   });
 
   testWidgets('the verb in the message follows `what`', (tester) async {

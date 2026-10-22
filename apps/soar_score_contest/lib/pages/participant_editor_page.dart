@@ -148,6 +148,11 @@ class _ParticipantEditorPageState extends State<ParticipantEditorPage> {
     final email = _email.text.trim().toLowerCase();
     final profiles = await client.participants();
     for (final profile in profiles) {
+      // The profile an earlier attempt of this editor already stored (its
+      // answer was lost) is not somebody else with the same email.
+      if (profile.id == _newId) {
+        continue;
+      }
       if (profile.email?.toLowerCase() == email) {
         return profile;
       }
