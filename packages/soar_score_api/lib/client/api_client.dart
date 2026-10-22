@@ -6,6 +6,7 @@ import 'package:soar_score_core/soar_score_core.dart';
 import '../dto/activate_installation_request.dart';
 import '../dto/add_participation_request.dart';
 import '../dto/add_team_member_request.dart';
+import '../dto/audit_event_dto.dart';
 import '../dto/claim_local_account_request.dart';
 import '../dto/contest_action_request.dart';
 import '../dto/contest_archive_dto.dart';
@@ -113,6 +114,30 @@ class ApiClient {
     final uri = _resolve('/api/v1/contests/${id.value}');
     final response = await _send('GET', uri);
     return _decode<Contest>(response, uri, Contest.fromJson);
+  }
+
+  /// `GET /api/v1/contests/{id}/audit-events` — the contest's audit events,
+  /// newest first, optionally only those of [action] and at most [limit].
+  Future<List<AuditEventDto>> auditEvents(
+    Id id, {
+    AuditAction? action,
+    int? limit,
+  }) async {
+    final uri = _resolve('/api/v1/contests/${id.value}/audit-events').replace(
+      queryParameters: {
+        if (action != null) 'action': action.text,
+        if (limit != null) 'limit': '$limit',
+      },
+    );
+    final response = await _send('GET', uri);
+    return _decode<List<AuditEventDto>>(
+      response,
+      uri,
+      (json) => [
+        for (final item in json['audit_events'] as List<dynamic>)
+          AuditEventDto.fromJson(item as Map<String, dynamic>),
+      ],
+    );
   }
 
   /// `POST /api/v1/contests` — creates a contest owned by the caller.

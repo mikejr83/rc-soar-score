@@ -24,6 +24,20 @@ class AuditEventRepository extends DriftRepository
       );
 
   @override
+  Future<List<core.AuditEvent>> listForContest(
+    core.Id contestId, {
+    core.AuditAction? action,
+    int? limit,
+  }) => _store.whereIdAndText(
+    'contest_id',
+    contestId,
+    textColumn: action == null ? null : 'action',
+    text: action?.text,
+    orderBy: 'server_timestamp DESC, id DESC',
+    limit: limit,
+  );
+
+  @override
   Future<core.AuditEvent> append(core.AuditEvent event) =>
       db.transaction(() async {
         if (await _store.findJson(event.id) != null) {

@@ -71,6 +71,32 @@ class EntityStore<T extends Object> {
       _decode(json),
   ];
 
+  /// The entities whose id [idColumn] equals [id] and text [textColumn]
+  /// equals [text] (when given), in [orderBy] order, at most [limit].
+  ///
+  /// Column names come from the schema, never user input.
+  Future<List<T>> whereIdAndText(
+    String idColumn,
+    core.Id id, {
+    String? textColumn,
+    String? text,
+    String? orderBy,
+    int? limit,
+  }) async => [
+    for (final json in await _mapper.where(
+      textColumn == null
+          ? '$idColumn = ?'
+          : '$idColumn = ? AND $textColumn = ?',
+      [
+        Variable<String>(id.value),
+        if (textColumn != null) Variable<String>(text!),
+      ],
+      orderBy: orderBy,
+      limit: limit,
+    ))
+      _decode(json),
+  ];
+
   /// The rows whose [column] equals [value], as stored JSON.
   ///
   /// [column] is a column name from the schema, never user input.

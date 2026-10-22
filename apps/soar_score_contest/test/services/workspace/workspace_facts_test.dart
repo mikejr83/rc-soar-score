@@ -24,7 +24,7 @@ void main() {
       expect(facts.onlyPilotName, isNull);
     });
 
-    test('has no placeholders from the audit trail', () {
+    test('has no audit facts until the trail supplies them', () {
       expect(facts.completedAt, isNull);
       expect(facts.lockedAt, isNull);
       expect(facts.lockedBy, isNull);

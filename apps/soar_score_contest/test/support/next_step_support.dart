@@ -2,6 +2,7 @@ import 'package:soar_score_contest/services/matrix/matrix_page_data.dart';
 import 'package:soar_score_contest/services/workspace/next_step/next_step.dart';
 import 'package:soar_score_contest/services/workspace/next_step/next_step_resolver.dart';
 import 'package:soar_score_contest/services/workspace/publication_facts.dart';
+import 'package:soar_score_contest/services/workspace/transition_facts.dart';
 import 'package:soar_score_contest/services/workspace/workspace_facts.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
@@ -19,6 +20,7 @@ WorkspaceFacts stepFacts({
   List<ContestParticipation>? participations,
   Map<String, Object?> core = const {},
   PublicationFacts publication = PublicationFacts.unknown,
+  TransitionFacts transitions = TransitionFacts.unknown,
   bool offline = false,
   ContestScores? scores,
 }) {
@@ -50,6 +52,7 @@ WorkspaceFacts stepFacts({
         scores ??
         (scored == null || matrix == null ? null : scoresFor(matrix, scored)),
     publication: publication,
+    transitions: transitions,
     isOffline: offline,
   );
 }

@@ -8,6 +8,7 @@ export 'contest_details.dart';
 export 'contest_results.dart';
 export 'contest_scores.dart';
 export 'contest_lifecycle.dart';
+export 'contest_transition_audit.dart';
 export 'contests_service.dart';
 export 'discipline_config_validator.dart';
 export 'glider_score_import_service.dart';

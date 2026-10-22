@@ -5,6 +5,7 @@ import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_core/soar_score_core.dart'
     show
         AdminLock,
+        AuditAction,
         ContestAction,
         ContestConfig,
         ScorePlaceholderState,
@@ -148,6 +149,47 @@ void main() {
       }
     },
   );
+
+  test('a contest action leaves an audit event the API lists', () async {
+    final server = await startEmbeddedServer(databasePath);
+    final client = ApiClient(
+      baseUrl: server.baseUrl,
+      tokenProvider: () async => server.secret,
+    );
+    try {
+      final id = Id.create();
+      final created = await client.createContest(
+        CreateContestRequest(
+          id: id,
+          name: 'Spring Open',
+          startDateTime: DateTime.utc(2026, 10, 17, 14),
+          endDateTime: DateTime.utc(2026, 10, 18, 22),
+          timezone: 'America/Denver',
+        ),
+      );
+      expect(await client.auditEvents(id), isEmpty);
+
+      await client.applyContestAction(
+        id,
+        ContestActionRequest(
+          action: ContestAction.lock,
+          baseRevision: created.revision,
+        ),
+      );
+
+      final events = await client.auditEvents(
+        id,
+        action: AuditAction.stateTransition,
+      );
+      expect(events, hasLength(1));
+      expect(events.single.transition, ContestAction.lock);
+      expect(events.single.actorId, server.localAccountId);
+      expect(events.single.reason, 'lock: AdminLock Unlocked → Locked');
+    } finally {
+      client.close();
+      await server.close();
+    }
+  });
 
   test('a configuration saved through the API moves the contest on', () async {
     final server = await startEmbeddedServer(databasePath);

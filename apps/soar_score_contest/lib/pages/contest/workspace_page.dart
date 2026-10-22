@@ -6,6 +6,7 @@ import 'package:logging/logging.dart';
 
 import '../../api_client_provider.dart';
 import '../../router.dart';
+import '../../ui_account_provider.dart';
 import '../../connectivity_provider.dart';
 import '../../services/workspace/attention/needs_attention.dart';
 import '../../services/workspace/next_step/completion_dismissals.dart';
@@ -230,7 +231,12 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
     }
     final monitor = appConnectivityOf(context);
     final offline = monitor?.internetStatus == ConnectivityStatus.unavailable;
-    WorkspaceFactsLoader.load(client, contest, isOffline: offline).then(
+    WorkspaceFactsLoader.load(
+      client,
+      contest,
+      isOffline: offline,
+      actingAccountId: uiAccountIdOf(context),
+    ).then(
       (facts) {
         _logger.info(
           'Successfully loaded workspace facts for contest ${contest.id}',

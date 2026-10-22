@@ -13,6 +13,8 @@ import 'package:soar_score_core/soar_score_core.dart';
 /// - `POST /contests` creates a contest owned by the request's principal
 /// - `PUT /contests/{id}` replaces identity, schedule and location
 /// - `POST /contests/{id}/actions` applies a director action
+/// - `GET /contests/{id}/audit-events` lists the contest's audit events,
+///   newest first (`action` and `limit` narrow them)
 ///
 /// Writes act as the request's `Principal`: it owns what is created and is
 /// the actor recorded with each change. The handlers only translate between
@@ -91,5 +93,33 @@ void addContestRoutes(Router router, Repository repository) {
       metadata: writeMetadata(principal),
     );
     return jsonResponse(contest.toJson());
+  });
+  router.get('/contests/<id>/audit-events', (Request request, String id) async {
+    requirePrincipal(request);
+    final query = request.url.queryParameters;
+
+    final actionText = query['action'];
+    final action = actionText == null
+        ? null
+        : AuditActionText.parse(actionText);
+    if (actionText != null && action == null) {
+      throw ArgumentError.value(actionText, 'action', 'not an audit action');
+    }
+    final limitText = query['limit'];
+    final limit = limitText == null ? null : int.tryParse(limitText);
+    if (limitText != null && limit == null) {
+      throw ArgumentError.value(limitText, 'limit', 'not a whole number');
+    }
+
+    final events = await service.auditEvents(
+      Id.parse(id),
+      action: action,
+      limit: limit,
+    );
+    return jsonResponse(<String, dynamic>{
+      'audit_events': [
+        for (final event in events) AuditEventDto.fromEvent(event).toJson(),
+      ],
+    });
   });
 }
