@@ -7,7 +7,6 @@ import 'package:soar_score_ui/soar_score_ui.dart';
 import '../collapsible_areas_provider.dart';
 import '../services/collapsible_areas/collapsible_area.dart';
 import '../contest_draft_provider.dart';
-import '../pages/landing_page.dart';
 import '../app_sync_provider.dart';
 import '../router.dart';
 import 'new_contest/create_contest_entry.dart';
@@ -214,16 +213,6 @@ class _RailTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final color = theme.colorScheme.primary;
-    final title = Text(
-      LandingPage.title,
-      key: const ValueKey('shell-title'),
-      textAlign: expanded ? TextAlign.start : TextAlign.center,
-      style:
-          (expanded ? theme.textTheme.titleMedium : theme.textTheme.labelMedium)
-              ?.copyWith(color: color),
-    );
     return Semantics(
       header: true,
       child: expanded
