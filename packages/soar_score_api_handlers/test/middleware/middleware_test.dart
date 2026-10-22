@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:logging/logging.dart';
@@ -118,91 +119,8 @@ void main() {
       expect(await response.readAsString(), '{"error":"x"}');
     });
 
-    test('writes one warning line for a handled error, without the query',
-        () async {
-      Logger.root.level = Level.ALL;
-      final records = <LogRecord>[];
-      final sub = Logger.root.onRecord.listen(records.add);
-      addTearDown(sub.cancel);
-
-      final response = await call(
-        (r) => throw ArgumentError('bad round number'),
-        '/a/b?token=secret',
-      );
-
-      expect(response.statusCode, 400);
-      final handled = records.where((r) => r.loggerName == 'Errors').toList();
-      expect(handled, hasLength(1));
-      final line = handled.single.message;
-      expect(line, contains('GET /a/b'));
-      expect(line, contains('400'));
-      expect(line, contains('code=invalid_request'));
-      expect(line, contains('request=${response.headers[requestIdHeader]}'));
-      expect(line, contains('bad round number'));
-      expect(line, isNot(contains('secret')));
-      final record = handled.single;
-      expect(record.level, Level.WARNING);
-      expect(record.error, isNull);
-      expect(record.stackTrace, isNull);
-    });
-
-    test('logs one warning line for every handled 4xx status', () async {
-      Logger.root.level = Level.ALL;
-      final records = <LogRecord>[];
-      final sub = Logger.root.onRecord.listen(records.add);
-      addTearDown(sub.cancel);
-
-      final cases = {
-        403: () => failing(
-          ForbiddenError('not_director', 'only the director'),
-        ),
-        404: () => failing(
-          EntityNotFoundError(
-            entityType: 'Contest',
-            entityId: Id.parse('01968c5e-7a3b-7c21-8f4d-2b6a9e1d3c50'),
-          ),
-        ),
-        409: () => failing(
-          StaleRevisionError(
-            entityType: 'Contest',
-            entityId: Id.parse('01968c5e-7a3b-7c21-8f4d-2b5a9e1d3c50'),
-            expectedRevision: 1,
-            storedRevision: 2,
-          ),
-        ),
-      };
-
-      for (final entry in cases.entries) {
-        final response = await entry.value();
-        expect(response.statusCode, entry.key);
-        final handled =
-            records.where((r) => r.loggerName == 'Errors').toList();
-        expect(handled, hasLength(1));
-        final line = handled.single.message;
-        expect(line, contains('${entry.key} on GET /a'));
-        expect(line, contains('request=${response.headers[requestIdHeader]}'));
-        records.clear();
-      }
-    });
-
-    test('logs the unmapped route as a handled 404', () async {
-      Logger.root.level = Level.ALL;
-      final records = <LogRecord>[];
-      final sub = Logger.root.onRecord.listen(records.add);
-      addTearDown(sub.cancel);
-
-      final response = await call((r) => Response.notFound('x'), '/a');
-
-      expect(response.statusCode, 404);
-      final handled = records.where((r) => r.loggerName == 'Errors').toList();
-      expect(handled, hasLength(1));
-      final line = handled.single.message;
-      expect(line, contains('code=not_found'));
-      expect(line, contains('No such route.'));
-      expect(line, contains('request=${response.headers[requestIdHeader]}'));
-    });
-
     test('hides details of unexpected errors from the response', () async {
+      Logger.root.level = Level.ALL;
       final records = <LogRecord>[];
       final sub = Logger.root.onRecord.listen(records.add);
       addTearDown(sub.cancel);
@@ -217,6 +135,106 @@ void main() {
         (r) => r.level == Level.SEVERE && r.error is StateError,
       );
       expect(record.stackTrace, isNotNull);
+    });
+  });
+
+  group('handled error logging', () {
+    Future<Response> failing(Object error) => call((r) => throw error, '/a');
+
+    late List<LogRecord> records;
+    late StreamSubscription<LogRecord> sub;
+
+    setUp(() {
+      Logger.root.level = Level.ALL;
+      records = <LogRecord>[];
+      sub = Logger.root.onRecord.listen(records.add);
+      addTearDown(sub.cancel);
+    });
+
+    List<LogRecord> handled() =>
+        records.where((r) => r.loggerName == 'Errors').toList();
+
+    test('writes one warning line for a handled 400, without the query',
+        () async {
+      final response = await call(
+        (r) => throw ArgumentError('bad round number'),
+        '/a/b?token=secret',
+      );
+
+      expect(response.statusCode, 400);
+      expect(handled(), hasLength(1));
+      final record = handled().single;
+      final line = record.message;
+      expect(line, contains('GET /a/b'));
+      expect(line, contains('400'));
+      expect(line, contains('code=invalid_request'));
+      expect(line, contains('request=${response.headers[requestIdHeader]}'));
+      expect(line, contains('bad round number'));
+      expect(line, isNot(contains('secret')));
+      expect(record.level, Level.WARNING);
+      expect(record.error, isNull);
+      expect(record.stackTrace, isNull);
+    });
+
+    test('logs one warning line for every handled 4xx status', () async {
+      final id = Id.parse('01968c5e-7a3b-7c21-8f4d-2b5a9e1d3c50');
+      final cases = [
+        (
+          403,
+          () => failing(
+            ForbiddenError('not_director', 'only the director'),
+          ),
+        ),
+        (
+          404,
+          () => failing(
+            EntityNotFoundError(entityType: 'Contest', entityId: id),
+          ),
+        ),
+        (
+          409,
+          () => failing(
+            StaleRevisionError(
+              entityType: 'Contest',
+              entityId: id,
+              expectedRevision: 1,
+              storedRevision: 2,
+            ),
+          ),
+        ),
+      ];
+
+      for (final (status, fire) in cases) {
+        final response = await fire();
+        expect(response.statusCode, status);
+        expect(handled(), hasLength(1));
+        final line = handled().single.message;
+        expect(line, contains('$status on GET /a'));
+        expect(line, contains('request=${response.headers[requestIdHeader]}'));
+        records.clear();
+      }
+    });
+
+    test('logs the unmapped route as a handled 404', () async {
+      final response = await call((r) => Response.notFound('x'), '/a');
+
+      expect(response.statusCode, 404);
+      expect(handled(), hasLength(1));
+      final line = handled().single.message;
+      expect(line, contains('code=not_found'));
+      expect(line, contains('No such route.'));
+      expect(line, contains('request=${response.headers[requestIdHeader]}'));
+    });
+
+    test('flattens and truncates the message so it cannot forge a log line',
+        () async {
+      final body = 'a' * 2000;
+      await failing(FormatException('$body\n404 on GET /forge code=evil'));
+
+      expect(handled(), hasLength(1));
+      final line = handled().single.message;
+      expect(line, isNot(contains('forge')));
+      expect(line, isNot(contains('\n')));
     });
   });
 

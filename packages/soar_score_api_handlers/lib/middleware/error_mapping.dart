@@ -23,14 +23,24 @@ Response errorResponse(
   headers: {'content-type': 'application/json; charset=utf-8'},
 );
 
+/// Flattens [text] to a single, bounded line for the log: control characters
+/// (including newlines) become spaces and the result is cut off, so a message
+/// can never forge an extra log line.
+String _oneLine(String text) {
+  const max = 500;
+  final flat = text.replaceAll(RegExp(r'[\u0000-\u001F]'), ' ').trim();
+  return flat.length <= max ? flat : flat.substring(0, max);
+}
+
 /// Logs one warning line for a handled error and answers with the JSON
 /// error response.
 ///
 /// The line carries the method and path without its query string, the status,
 /// the error code and the request id, so an unexpected 400 or 404 leaves a
 /// trace. Query strings and headers are left out, so secrets never reach the
-/// log. The message is the exception's own text, not its stack. Stacks stay
-/// in the log only for the unexpected 500 branch, which does not use this.
+/// log. The message is the exception's own text, not its stack, flattened to
+/// one line and truncated so it cannot forge extra log lines. Stacks stay in
+/// the log only for the unexpected 500 branch, which does not use this.
 Response handledError(
   Request request,
   int statusCode,
@@ -40,7 +50,7 @@ Response handledError(
   final requestId = requestIdOf(request);
   _logger.warning(
     '$statusCode on ${request.method} /${request.url.path} '
-    'code=$code request=$requestId message=$message',
+    'code=$code request=$requestId message=${_oneLine(message)}',
   );
   return errorResponse(
     statusCode,
@@ -97,7 +107,12 @@ Middleware errorMappingMiddleware() =>
       } on ScoringValidationError catch (e) {
         return handledError(request, 400, 'invalid_request', '$e');
       } on ArgumentError catch (e) {
-        return handledError(request, 400, 'invalid_request', '${e.message}');
+        return handledError(
+          request,
+          400,
+          'invalid_request',
+          e.message ?? e.toString(),
+        );
       } on FormatException catch (e) {
         return handledError(request, 400, 'invalid_request', e.message);
       } catch (e, stack) {
