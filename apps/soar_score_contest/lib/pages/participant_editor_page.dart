@@ -1,21 +1,34 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
-import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../api_client_provider.dart';
+import '../app_sync_provider.dart';
 import '../router.dart';
-import '../widgets/api_error_text.dart';
+import '../services/participants/participant_editor_controller.dart';
+import '../services/participants/participant_field.dart';
+import '../services/participants/participant_storage.dart';
+import '../services/sync/app_sync_state.dart';
 import '../widgets/message_view.dart';
+import '../widgets/participant_editor/duplicate_decision_panel.dart';
+import '../widgets/participant_editor/editor_action_bar.dart';
+import '../widgets/participant_editor/editor_banner.dart';
+import '../widgets/participant_editor/editor_header.dart';
+import '../widgets/participant_editor/editor_skeleton.dart';
+import '../widgets/participant_editor/participant_form_sections.dart';
+import '../widgets/participant_editor/review_differences_panel.dart';
+import '../widgets/participant_editor/validation_summary.dart';
 import '../widgets/unsaved_changes_guard.dart';
 
 /// Creates or edits one reusable participant profile
 /// (`plan/ui/contest-administration/participant-data.md`).
 ///
 /// With a null [participantId] the editor creates a profile. Validation is
-/// inline and entered values survive a failed save; a possible duplicate by
-/// email is shown before a new profile is created, and leaving with unsaved
-/// changes asks for confirmation.
+/// inline after a field is left and summarised after a failed save; entered
+/// values survive a failed save; a possible duplicate by email is a decision
+/// shown before a second profile is created; a stale revision can be
+/// reviewed field by field; and leaving with unsaved changes asks first.
 ///
 /// Opened from another flow (the New Contest wizard), [onDone] receives the
 /// saved or chosen profile and [onCancel] is called instead of returning to
@@ -27,6 +40,8 @@ class ParticipantEditorPage extends StatefulWidget {
     this.guard,
     this.onDone,
     this.onCancel,
+    this.remoteMatchingUnavailable = false,
+    this.managedFields = const {},
   });
 
   final String? participantId;
@@ -42,181 +57,136 @@ class ParticipantEditorPage extends StatefulWidget {
   /// cancels.
   final VoidCallback? onCancel;
 
+  /// Show that matching against online records failed, so the email check
+  /// covered this device only (#247; no remote source yet).
+  final bool remoteMatchingUnavailable;
+
+  /// Fields owned by the participant's own account, shown read-only
+  /// (#247; no owned profiles yet).
+  final Set<ParticipantField> managedFields;
+
   @override
   State<ParticipantEditorPage> createState() => _ParticipantEditorPageState();
 }
 
 class _ParticipantEditorPageState extends State<ParticipantEditorPage> {
-  final _formKey = GlobalKey<FormState>();
-  final _firstName = TextEditingController();
-  final _lastName = TextEditingController();
-  final _email = TextEditingController();
-  final _club = TextEditingController();
-  final _faiNumber = TextEditingController();
-  final _nationalOrgId = TextEditingController();
-  final _city = TextEditingController();
-  final _state = TextEditingController();
-  final _country = TextEditingController();
+  static const double _narrowWidth = 600;
 
-  late final List<TextEditingController> _controllers = [
-    _firstName,
-    _lastName,
-    _email,
-    _club,
-    _faiNumber,
-    _nationalOrgId,
-    _city,
-    _state,
-    _country,
-  ];
+  final Map<ParticipantField, TextEditingController> _texts = {
+    for (final field in ParticipantField.values) field: TextEditingController(),
+  };
+  final Map<ParticipantField, FocusNode> _focus = {
+    for (final field in ParticipantField.values) field: FocusNode(),
+  };
+  final FocusNode _decisionFocus = FocusNode();
+  final ScrollController _scroll = ScrollController();
 
-  /// The profile being edited, or the existing profile whose email matched a
-  /// new one (see [_match]).
-  ParticipantProfile? _loaded;
-  ParticipantProfile? _match;
-  Future<void>? _loading;
-  bool _dirty = false;
-  bool _saving = false;
-  bool _separateConfirmed = false;
-  String? _saveError;
+  ParticipantEditorController? _controller;
 
-  bool get _creating => widget.participantId == null;
+  ParticipantEditorController get _c => _controller!;
+
+  bool get _fromWizard => widget.onDone != null;
 
   @override
   void initState() {
     super.initState();
     widget.guard?.attach(_confirmDiscard);
-    for (final controller in _controllers) {
-      controller.addListener(_markDirty);
+    for (final field in ParticipantField.values) {
+      _texts[field]!.addListener(() => _typed(field));
+      _focus[field]!.addListener(() {
+        if (!_focus[field]!.hasFocus) {
+          _controller?.leave(field);
+        }
+      });
     }
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _loading ??= _load();
+    if (_controller != null) {
+      return;
+    }
+    final client = apiClientOf(context);
+    if (client == null) {
+      throw StateError('No API client is available.');
+    }
+    final id = widget.participantId;
+    _controller = ParticipantEditorController(
+      client: client,
+      participantId: id == null ? null : Id.parse(id),
+      remoteMatchingUnavailable: widget.remoteMatchingUnavailable,
+      managedFields: widget.managedFields,
+    )..addListener(_syncTexts);
+    _c.load();
   }
 
   @override
   void dispose() {
     widget.guard?.detach(_confirmDiscard);
-    for (final controller in _controllers) {
-      controller.dispose();
+    _controller?.dispose();
+    for (final text in _texts.values) {
+      text.dispose();
     }
+    for (final node in _focus.values) {
+      node.dispose();
+    }
+    _decisionFocus.dispose();
+    _scroll.dispose();
     super.dispose();
   }
 
-  void _markDirty() {
-    if (!_dirty) {
-      setState(() => _dirty = true);
-    }
-  }
+  void _typed(ParticipantField field) =>
+      _controller?.setValue(field, _texts[field]!.text);
 
-  Future<void> _load() async {
-    final client = apiClientOf(context);
-    if (client == null) {
-      throw StateError('No API client is available.');
-    }
-    if (_creating) {
-      return;
-    }
-    final profile = await client.participant(Id.parse(widget.participantId!));
-    _loaded = profile;
-    _firstName.text = profile.firstName;
-    _lastName.text = profile.lastName;
-    _email.text = profile.email ?? '';
-    _club.text = profile.club ?? '';
-    _faiNumber.text = profile.faiNumber ?? '';
-    _nationalOrgId.text = profile.nationalOrgId ?? '';
-    _city.text = profile.city ?? '';
-    _state.text = profile.state ?? '';
-    _country.text = profile.country ?? '';
-    _dirty = false;
-  }
-
-  String? _optional(TextEditingController controller) {
-    final text = controller.text.trim();
-    return text.isEmpty ? null : text;
-  }
-
-  Future<ParticipantProfile?> _findByEmail(ApiClient client) async {
-    final email = _email.text.trim().toLowerCase();
-    final profiles = await client.participants();
-    for (final profile in profiles) {
-      if (profile.email?.toLowerCase() == email) {
-        return profile;
+  /// Copies values the controller replaced (a loaded profile, kept values,
+  /// a reviewed version) into the text fields.
+  void _syncTexts() {
+    for (final field in ParticipantField.values) {
+      final text = _texts[field]!;
+      if (text.text != _c.values[field]) {
+        text.text = _c.values[field];
       }
     }
-    return null;
   }
 
-  Future<void> _save() async {
-    if (!_formKey.currentState!.validate()) {
+  Future<void> _save({bool another = false}) async {
+    final outcome = await _c.save(another: another);
+    await _react(outcome);
+  }
+
+  Future<void> _react(SaveOutcome outcome) async {
+    if (!mounted) {
       return;
     }
-    final client = apiClientOf(context)!;
-    setState(() {
-      _saving = true;
-      _saveError = null;
-    });
-    final ParticipantProfile saved;
-    try {
-      if (_creating) {
-        if (!_separateConfirmed) {
-          final match = await _findByEmail(client);
-          if (match != null) {
-            setState(() {
-              _match = match;
-              _saving = false;
-            });
-            return;
-          }
+    switch (outcome) {
+      case SaveOutcome.invalid:
+        final first = _c.firstInvalid;
+        if (first != null) {
+          _focus[first]!.requestFocus();
         }
-        saved = await client.createParticipant(
-          CreateParticipantRequest(
-            id: Id.create(),
-            firstName: _firstName.text.trim(),
-            lastName: _lastName.text.trim(),
-            email: _email.text.trim(),
-            club: _optional(_club),
-            faiNumber: _optional(_faiNumber),
-            nationalOrgId: _optional(_nationalOrgId),
-            city: _optional(_city),
-            state: _optional(_state),
-            country: _optional(_country),
-          ),
-        );
-      } else {
-        saved = await client.updateParticipant(
-          _loaded!.id,
-          UpdateParticipantRequest(
-            baseRevision: _loaded!.revision,
-            firstName: _firstName.text.trim(),
-            lastName: _lastName.text.trim(),
-            email: _email.text.trim(),
-            club: _optional(_club),
-            faiNumber: _optional(_faiNumber),
-            nationalOrgId: _optional(_nationalOrgId),
-            city: _optional(_city),
-            state: _optional(_state),
-            country: _optional(_country),
-          ),
-        );
-      }
-    } on Object catch (error) {
-      if (mounted) {
-        setState(() {
-          _saving = false;
-          _saveError = apiErrorText(error);
-        });
-      }
-      return;
-    }
-    if (mounted) {
-      _dirty = false;
-      _leave(saved);
+      case SaveOutcome.needsDecision:
+        _decisionFocus.requestFocus();
+      case SaveOutcome.saved:
+        _leave(_c.saved);
+      case SaveOutcome.savedAnother:
+        final saved = _c.saved!;
+        _snack('${saved.firstName} ${saved.lastName} added');
+        if (_scroll.hasClients) {
+          _scroll.jumpTo(0);
+        }
+        _focus[ParticipantField.firstName]!.requestFocus();
+      case SaveOutcome.failed ||
+          SaveOutcome.conflict ||
+          SaveOutcome.blocked ||
+          SaveOutcome.unchanged:
+        break;
     }
   }
+
+  void _snack(String text) =>
+      ScaffoldMessenger.maybeOf(context)
+          ?.showSnackBar(SnackBar(content: Text(text)));
 
   /// Returns to where the editor was opened from, with [profile] when one
   /// was saved or chosen.
@@ -233,7 +203,7 @@ class _ParticipantEditorPageState extends State<ParticipantEditorPage> {
   }
 
   Future<bool> _confirmDiscard() async {
-    if (!_dirty) {
+    if (_controller == null || !_c.dirty) {
       return true;
     }
     final discard = await showDialog<bool>(
@@ -243,6 +213,7 @@ class _ParticipantEditorPageState extends State<ParticipantEditorPage> {
         content: const Text('Your unsaved changes will be lost.'),
         actions: [
           TextButton(
+            autofocus: true,
             onPressed: () => Navigator.of(context).pop(false),
             child: const Text('Keep editing'),
           ),
@@ -257,191 +228,314 @@ class _ParticipantEditorPageState extends State<ParticipantEditorPage> {
   }
 
   Future<void> _cancel() async {
+    if (_c.phase == EditorPhase.saving) {
+      return;
+    }
     if (await _confirmDiscard() && mounted) {
-      _dirty = false;
+      _c.values = _c.baseline;
       _leave();
     }
   }
 
-  static String? _required(String? value, String label) =>
-      value == null || value.trim().isEmpty ? '$label is required.' : null;
-
-  static String? _emailRule(String? value) {
-    final required = _required(value, 'Email');
-    if (required != null) {
-      return required;
+  void _useExisting() {
+    final match = _c.useExisting();
+    if (match == null) {
+      return;
     }
-    return RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(value!.trim())
-        ? null
-        : 'Enter a valid email address.';
+    _c.values = _c.baseline;
+    if (widget.onDone != null) {
+      widget.onDone!(match);
+    } else {
+      context.go(participantPath(match.id.value));
+    }
   }
 
-  Widget _field(
-    String label,
-    TextEditingController controller, {
-    String? Function(String?)? validator,
-    TextInputType? keyboardType,
-    Key? key,
-  }) => TextFormField(
-    key: key,
-    controller: controller,
-    keyboardType: keyboardType,
-    decoration: InputDecoration(labelText: label),
-    validator: validator,
-  );
+  ParticipantStorage? _storage(AppSyncState sync) {
+    final owner = _c.loaded?.ownerAccountId;
+    if (owner == null) {
+      return null;
+    }
+    return ParticipantStorage.of(sync.of(DirectorScopeKey(owner)));
+  }
 
   @override
-  Widget build(BuildContext context) => FutureBuilder<void>(
-    future: _loading,
-    builder: (context, snapshot) {
-      if (snapshot.hasError) {
-        return MessageView(
-          text: 'The participant could not be loaded.',
-          detail: apiErrorText(snapshot.error!),
-          onRetry: () => setState(() => _loading = _load()),
-        );
+  Widget build(BuildContext context) => ListenableBuilder(
+    listenable: _c,
+    builder: (context, _) {
+      switch (_c.phase) {
+        case EditorPhase.loading:
+          return const EditorSkeleton();
+        case EditorPhase.loadFailed:
+          return MessageView(
+            text: 'Couldn’t load this participant',
+            detail: _c.error,
+            onRetry: _c.load,
+            action: TextButton(
+              onPressed: _leave,
+              child: Text(
+                _fromWizard ? 'Back to contest setup' : 'Back to participants',
+              ),
+            ),
+          );
+        default:
+          return _form(context);
       }
-      if (snapshot.connectionState != ConnectionState.done) {
-        return const Center(child: CircularProgressIndicator());
-      }
-      return PopScope(
-        canPop: !_dirty,
+    },
+  );
+
+  Widget _form(BuildContext context) {
+    final scale = MediaQuery.textScalerOf(context).scale(16) / 16;
+    return CallbackShortcuts(
+      bindings: {
+        const SingleActivator(LogicalKeyboardKey.keyS, control: true): _save,
+        const SingleActivator(LogicalKeyboardKey.escape): () {
+          if (_c.phase == EditorPhase.duplicate) {
+            _c.backToEdit();
+            _focus[ParticipantField.email]!.requestFocus();
+          } else {
+            _cancel();
+          }
+        },
+      },
+      child: PopScope(
+        canPop: !_c.dirty,
         onPopInvokedWithResult: (didPop, _) async {
           if (didPop) {
             return;
           }
-          if (await _confirmDiscard() && context.mounted) {
-            _dirty = false;
+          if (await _confirmDiscard() && mounted) {
+            _c.values = _c.baseline;
             _leave();
           }
         },
-        child: _form(context),
-      );
-    },
-  );
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final phone = constraints.maxWidth < _narrowWidth;
+            final stacked = phone || scale > 1.3;
+            return Column(
+              children: [
+                Expanded(child: _content(context, phone, stacked)),
+                _bar(stacked),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
 
-  Widget _form(BuildContext context) => SingleChildScrollView(
-    padding: const EdgeInsets.all(16),
-    child: Align(
-      alignment: Alignment.topLeft,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 560),
-        child: Form(
-          key: _formKey,
+  Widget _content(BuildContext context, bool phone, bool stacked) {
+    final c = _c;
+    final edit = !c.creating;
+    final loaded = c.loaded;
+    final scheme = Theme.of(context).colorScheme;
+    final attention = c.attention;
+    return SingleChildScrollView(
+      controller: _scroll,
+      padding: phone
+          ? const EdgeInsets.fromLTRB(16, 16, 16, 24)
+          : const EdgeInsets.fromLTRB(32, 24, 32, 32),
+      child: Align(
+        alignment: Alignment.topLeft,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: phone ? double.infinity : 704),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(
-                _creating ? 'Add participant' : 'Edit participant',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              const SizedBox(height: 16),
-              if (_saveError != null) ...[
-                Text(
-                  _saveError!,
-                  key: const ValueKey('save-error'),
-                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+              StreamBuilder<AppSyncState>(
+                stream: appSyncOf(context).states,
+                initialData: appSyncOf(context).state,
+                builder: (context, snapshot) => EditorHeader(
+                  title: edit && loaded != null
+                      ? '${loaded.firstName} ${loaded.lastName}'
+                      : 'Add participant',
+                  subtitle: edit
+                      ? (loaded?.club ?? 'No club')
+                      : 'Details are reused in every contest you add them to.',
+                  initials: edit && loaded != null
+                      ? '${loaded.firstName[0]}${loaded.lastName[0]}'
+                            .toUpperCase()
+                      : null,
+                  storage: edit && snapshot.data != null
+                      ? _storage(snapshot.data!)
+                      : null,
                 ),
-                const SizedBox(height: 12),
+              ),
+              const SizedBox(height: 20),
+              if (attention.isNotEmpty) ...[
+                ValidationSummary(
+                  problems: attention,
+                  onGoTo: (field) => _focus[field]!.requestFocus(),
+                ),
+                const SizedBox(height: 20),
               ],
-              if (_match != null) ...[
-                _matchNotice(context),
-                const SizedBox(height: 12),
+              if (c.phase == EditorPhase.saveFailed) ...[
+                EditorBanner(
+                  key: const ValueKey('save-error'),
+                  icon: Icons.error,
+                  title: 'Couldn’t save',
+                  body: c.error,
+                  background: scheme.errorContainer,
+                  foreground: scheme.onErrorContainer,
+                  actions: [
+                    EditorBannerAction(
+                      'Try again',
+                      () async => _react(await _c.retrySave()),
+                      icon: Icons.refresh,
+                    ),
+                  ],
+                  child: const Padding(
+                    padding: EdgeInsets.only(left: 36, top: 4),
+                    child: Text(
+                      'Nothing was saved and your entries are kept, so it’s '
+                      'safe to try again.',
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
               ],
-              _field(
-                'First name',
-                _firstName,
-                key: const ValueKey('first-name'),
-                validator: (v) => _required(v, 'First name'),
+              if (c.phase == EditorPhase.stale) ...[
+                _staleBanner(scheme),
+                const SizedBox(height: 20),
+              ],
+              if (c.phase == EditorPhase.review && c.review != null) ...[
+                ReviewDifferencesPanel(
+                  review: c.review!,
+                  onChoose: c.chooseInReview,
+                  onReloadTheirs: c.reloadLatest,
+                  onApply: () async => _react(await _c.applyReview()),
+                ),
+                const SizedBox(height: 20),
+              ],
+              if (c.phase == EditorPhase.duplicate && c.match != null) ...[
+                DuplicateDecisionPanel(
+                  key: const ValueKey('duplicate-notice'),
+                  existing: c.match!,
+                  entered: c.values,
+                  addsToContest: _fromWizard,
+                  focusNode: _decisionFocus,
+                  onUseExisting: _useExisting,
+                  onBackToEdit: () {
+                    c.backToEdit();
+                    _focus[ParticipantField.email]!.requestFocus();
+                  },
+                ),
+                const SizedBox(height: 20),
+              ],
+              if (c.keptFrom != null) ...[
+                _keptNotice(scheme),
+                const SizedBox(height: 20),
+              ],
+              ParticipantFormSections(
+                controller: c,
+                texts: _texts,
+                focus: _focus,
+                stacked: stacked,
+                onSubmit: _save,
               ),
-              _field(
-                'Last name',
-                _lastName,
-                key: const ValueKey('last-name'),
-                validator: (v) => _required(v, 'Last name'),
-              ),
-              _field(
-                'Email (private, used for matching only)',
-                _email,
-                key: const ValueKey('email'),
-                keyboardType: TextInputType.emailAddress,
-                validator: _emailRule,
-              ),
-              _field('Club', _club),
-              _field('FAI number', _faiNumber),
-              _field('National organization ID', _nationalOrgId),
-              _field('City', _city),
-              _field('State/province', _state),
-              _field('Country', _country),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  FilledButton(
-                    key: const ValueKey('save-participant'),
-                    onPressed: _saving ? null : _save,
-                    child: const Text('Save'),
+              if (c.creating)
+                CheckboxListTile(
+                  key: const ValueKey('keep-club-location'),
+                  contentPadding: EdgeInsets.zero,
+                  controlAffinity: ListTileControlAffinity.leading,
+                  value: c.keepClubAndLocation,
+                  onChanged: (keep) => c.toggleKeep(keep: keep ?? false),
+                  title: const Text(
+                    'Keep club and location for the next participant',
                   ),
-                  const SizedBox(width: 12),
-                  TextButton(
-                    key: const ValueKey('cancel-participant'),
-                    onPressed: _saving ? null : _cancel,
-                    child: const Text('Cancel'),
+                  subtitle: const Text(
+                    'Used by Save and add another, so a row of pilots from '
+                    'one club needs them once.',
                   ),
-                ],
-              ),
+                ),
             ],
           ),
         ),
       ),
-    ),
+    );
+  }
+
+  Widget _staleBanner(ColorScheme scheme) {
+    final names = _c.staleFields.map((f) => f.label).toList();
+    final changed = switch (names.length) {
+      0 => null,
+      1 => names.single,
+      _ => '${names.sublist(0, names.length - 1).join(', ')} and ${names.last}',
+    };
+    return EditorBanner(
+      key: const ValueKey('stale-revision'),
+      icon: Icons.sync_problem,
+      title: 'This participant was changed elsewhere since you opened it.',
+      body: changed == null
+          ? _c.error
+          : '$changed ${names.length == 1 ? 'was' : 'were'} changed '
+                'elsewhere. Nothing was saved, and your edits are kept.',
+      background: scheme.tertiaryContainer,
+      foreground: scheme.onTertiaryContainer,
+      actions: [
+        EditorBannerAction(
+          'Reload their version',
+          _c.reloadLatest,
+          key: const ValueKey('reload-latest'),
+        ),
+        if (_c.latest != null)
+          EditorBannerAction(
+            'Review differences',
+            _c.startReview,
+            key: const ValueKey('review-start'),
+          ),
+      ],
+    );
+  }
+
+  Widget _keptNotice(ColorScheme scheme) => EditorBanner(
+    key: const ValueKey('kept-values'),
+    icon: Icons.content_copy,
+    title: 'Club and location kept from ${_c.keptFrom}.',
+    background: scheme.secondaryContainer,
+    foreground: scheme.onSecondaryContainer,
+    actions: [EditorBannerAction('Clear them', _c.clearKept)],
   );
 
-  Widget _matchNotice(BuildContext context) {
-    final match = _match!;
-    return Card(
-      key: const ValueKey('duplicate-notice'),
-      color: Theme.of(context).colorScheme.secondaryContainer,
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              '${match.firstName} ${match.lastName} already uses this email '
-              'address.',
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              children: [
-                FilledButton(
-                  key: const ValueKey('use-existing'),
-                  onPressed: () {
-                    _dirty = false;
-                    if (widget.onDone != null) {
-                      widget.onDone!(match);
-                    } else {
-                      context.go(participantPath(match.id.value));
-                    }
-                  },
-                  child: const Text('Use existing participant'),
-                ),
-                OutlinedButton(
-                  key: const ValueKey('create-separate'),
-                  onPressed: () {
-                    setState(() {
-                      _separateConfirmed = true;
-                      _match = null;
-                    });
-                    _save();
-                  },
-                  child: const Text('Create a separate participant'),
-                ),
-              ],
-            ),
-          ],
-        ),
+  Widget _bar(bool stacked) {
+    final c = _c;
+    final edit = !c.creating;
+    final saving = c.phase == EditorPhase.saving;
+    // An unchanged stored profile has nothing to save or cancel, so the bar
+    // waits for the first change (or any state that needs an answer).
+    if (edit && !c.dirty && c.phase == EditorPhase.idle) {
+      return const SizedBox.shrink();
+    }
+    final EditorBarStatus? status = switch (c.phase) {
+      EditorPhase.saving => const EditorBarStatus(Icons.sync, 'Saving…'),
+      EditorPhase.duplicate => const EditorBarStatus(
+        Icons.person_search,
+        'Choose an option above to continue.',
       ),
+      EditorPhase.stale || EditorPhase.review => const EditorBarStatus(
+        Icons.sync_problem,
+        'Resolve the conflict above to save.',
+      ),
+      _ when edit && c.dirty => const EditorBarStatus(
+        Icons.edit,
+        'Unsaved changes',
+      ),
+      _ => null,
+    };
+    return EditorActionBar(
+      compact: stacked,
+      status: status,
+      saving: saving,
+      saveLabel: edit
+          ? 'Save changes'
+          : _fromWizard
+          ? 'Add to contest'
+          : 'Add participant',
+      saveEnabled: !c.blocked && c.dirty,
+      onSave: _save,
+      onCancel: _cancel,
+      anotherEnabled: !c.blocked && c.dirty,
+      onSaveAnother: edit ? null : () => _save(another: true),
     );
   }
 }

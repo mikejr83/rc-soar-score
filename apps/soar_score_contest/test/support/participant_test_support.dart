@@ -90,3 +90,31 @@ Widget participantsApp(ApiClient client, {String initial = participantsPath}) {
     child: MaterialApp.router(routerConfig: router),
   );
 }
+
+/// Types [text] into the editor field with [key] and lets the page react, so
+/// buttons that depend on the change are up to date.
+Future<void> enterField(WidgetTester tester, String key, String text) async {
+  await tester.enterText(find.byKey(ValueKey(key)), text);
+  await tester.pump();
+}
+
+/// Moves focus out of the field with [key] by focusing [next].
+Future<void> leaveField(WidgetTester tester, String key) async {
+  await tester.tap(find.byKey(ValueKey(key)));
+  await tester.pump();
+  await tester.tap(find.byKey(const ValueKey('first-name')));
+  await tester.pump();
+}
+
+/// Taps the editor's Save button and waits for the result.
+Future<void> saveEditor(WidgetTester tester) async {
+  await tester.tap(find.byKey(const ValueKey('save-participant')));
+  await tester.pumpAndSettle();
+}
+
+/// Pumps a lone [ParticipantEditorPage] built by [page] under [client].
+Widget editorApp(ApiClient client, ParticipantEditorPage page) =>
+    ApiClientInherited(
+      client: client,
+      child: MaterialApp(home: Scaffold(body: page)),
+    );
