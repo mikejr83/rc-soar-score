@@ -26,6 +26,7 @@ http.Response _json(Object body, [int status = 200]) => http.Response(
 Future<WorkspaceFacts> _load({
   int scoresStatus = 200,
   int publicationStatus = 404,
+  String publicationErrorCode = 'x',
   int landingTablesStatus = 200,
   Map<String, Object?> publication = const {},
   bool offline = false,
@@ -72,7 +73,10 @@ Future<WorkspaceFacts> _load({
           publicationStatus == 200
               ? publication
               : {
-                  'error': {'code': 'x', 'message': 'No publication.'},
+                  'error': {
+                    'code': publicationErrorCode,
+                    'message': 'No publication.',
+                  },
                 },
           publicationStatus,
         );
@@ -129,6 +133,29 @@ void main() {
     final facts = await _load(publicationStatus: 500);
     expect(facts.unavailable, {WorkspaceFactSource.publication});
     expect(facts.publication, PublicationFacts.unknown);
+  });
+
+  test(
+    'a 409 publishing_not_available is unsupported, not a failed read',
+    () async {
+      final facts = await _load(
+        publicationStatus: 409,
+        publicationErrorCode: 'publishing_not_available',
+      );
+      expect(facts.publication, PublicationFacts.unsupported);
+      expect(facts.unavailable, isEmpty);
+      expect(facts.nextStepFactsUnavailable, isFalse);
+    },
+  );
+
+  test('another 409 on the publication read is still a failed read', () async {
+    final facts = await _load(
+      publicationStatus: 409,
+      publicationErrorCode: 'stale_results',
+    );
+    expect(facts.publication, PublicationFacts.unknown);
+    expect(facts.unavailable, {WorkspaceFactSource.publication});
+    expect(facts.nextStepFactsUnavailable, isTrue);
   });
 
   test(

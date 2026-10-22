@@ -193,6 +193,10 @@ abstract final class NextStepCopy {
       return 'Publication status can’t be loaded right now. Reports are '
           'available.';
     }
+    if (!publication.supported) {
+      return 'Publishing is not available on this server. Reports are '
+          'available.';
+    }
     final at = publication.publishedAt;
     final published = at == null
         ? 'Results were published'

@@ -421,5 +421,20 @@ void main() {
         'Publication status can’t be loaded right now. Reports are available.',
       );
     });
+
+    test('unsupported publishing offers the reports, not publishing', () {
+      final step = stepAt(
+        stepFacts(
+          state: LifecycleState.completed,
+          publication: PublicationFacts.unsupported,
+        ),
+      );
+      expect(step.kind, NextStepKind.viewReports);
+      expect(
+        step.body,
+        'Publishing is not available on this server. Reports are available.',
+      );
+      expect(step.primary.target, NextStepTarget.reports);
+    });
   });
 }

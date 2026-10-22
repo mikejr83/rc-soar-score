@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:soar_score_core/soar_score_core.dart';
+import 'package:soar_score_ui/soar_score_ui.dart';
 import 'package:soar_score_contest/app_mode_provider.dart';
 import 'package:soar_score_contest/auth/auth_session.dart';
 import 'package:soar_score_contest/auth/auth_session_inherited.dart';
@@ -334,13 +335,13 @@ class _LandingPageState extends State<LandingPage> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        // const SoarLogo(size: 72),
-                        const SizedBox(height: 16),
-                        Text(
-                          'RC Soar Score',
-                          style: Theme.of(context).textTheme.headlineMedium,
+                        // The lockup already carries the app name.
+                        const BrandLogo(
+                          variant: BrandLogoVariant.lockup,
+                          height: 120,
+                          semanticLabel: LandingPage.title,
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 16),
                         Text(
                           'Manage and score RC sailplane soaring contests.',
                           style: Theme.of(context).textTheme.bodyLarge,

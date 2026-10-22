@@ -34,7 +34,10 @@ abstract final class BrandLogos {
 }
 
 /// Which logo [BrandLogo] draws.
-enum BrandLogoVariant { lockup, mark }
+///
+/// [appIcon] is the square app icon (the same artwork as the native and web
+/// app icons), drawn with rounded corners.
+enum BrandLogoVariant { lockup, mark, appIcon }
 
 /// The RC Soar Score logo at a given height, picking the file for the size
 /// and the ground it sits on.
@@ -61,6 +64,7 @@ class BrandLogo extends StatelessWidget {
   String assetFor({required bool dark}) => switch (variant) {
     BrandLogoVariant.lockup =>
       (onDark ?? dark) ? BrandLogos.lockupDarkPng : BrandLogos.lockupLightPng,
+    BrandLogoVariant.appIcon => BrandLogos.appIconPng,
     BrandLogoVariant.mark when height < 32 => BrandLogos.markTinyPng,
     BrandLogoVariant.mark when height < 64 => BrandLogos.markSmallPng,
     BrandLogoVariant.mark => BrandLogos.markPng,
@@ -68,12 +72,19 @@ class BrandLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Image.asset(
+    final image = Image.asset(
       assetFor(dark: Theme.of(context).brightness == Brightness.dark),
       package: BrandLogos.package,
       height: height,
       fit: BoxFit.contain,
       semanticLabel: semanticLabel,
+    );
+    if (variant != BrandLogoVariant.appIcon) {
+      return image;
+    }
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(height * 0.22),
+      child: image,
     );
   }
 }

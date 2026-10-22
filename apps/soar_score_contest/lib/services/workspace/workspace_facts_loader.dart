@@ -108,6 +108,12 @@ abstract final class WorkspaceFactsLoader {
       if (error.statusCode == 404) {
         return PublicationFacts.notPublished;
       }
+      if (error.statusCode == 409 &&
+          error.error?.code == 'publishing_not_available') {
+        // This server does not publish contests; a stable state, not a
+        // failed read, so it leaves [unavailable] untouched.
+        return PublicationFacts.unsupported;
+      }
     } on Object {
       // Falls through to unavailable.
     }
