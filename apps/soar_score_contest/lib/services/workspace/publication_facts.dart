@@ -57,6 +57,11 @@ class PublicationFacts extends Equatable {
   final bool supported;
 
   @override
-  List<Object?> get props =>
-      [isPublished, visibility, publishedAt, isKnown, supported];
+  List<Object?> get props => [
+    isPublished,
+    visibility,
+    publishedAt,
+    isKnown,
+    supported,
+  ];
 }

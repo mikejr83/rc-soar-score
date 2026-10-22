@@ -242,19 +242,16 @@ void main() {
       expect(unknown.target, ChecklistTarget.publicationControl);
     });
 
-    test(
-      'unsupported publishing is not a task, not unknown',
-      () {
-        final unsupported = _item(
-          _resolve(_facts(publication: PublicationFacts.unsupported)),
-          ChecklistItemId.publication,
-        );
-        expect(unsupported.status, ChecklistStatus.done);
-        expect(unsupported.title, 'Publication not supported');
-        expect(unsupported.detail, 'This server does not publish contests.');
-        expect(unsupported.target, ChecklistTarget.publicationControl);
-      },
-    );
+    test('unsupported publishing is not a task, not unknown', () {
+      final unsupported = _item(
+        _resolve(_facts(publication: PublicationFacts.unsupported)),
+        ChecklistItemId.publication,
+      );
+      expect(unsupported.status, ChecklistStatus.done);
+      expect(unsupported.title, 'Publication not supported');
+      expect(unsupported.detail, 'This server does not publish contests.');
+      expect(unsupported.target, ChecklistTarget.publicationControl);
+    });
 
     test('scoring access is closed or open', () {
       final closed = _item(_resolve(_facts()), ChecklistItemId.scoringAccess);
