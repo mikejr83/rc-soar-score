@@ -27,7 +27,7 @@ void main() {
     await pumpUntilFound(tester, find.byKey(const ValueKey('first-name')));
     expect(
       tester
-          .widget<TextFormField>(find.byKey(const ValueKey('first-name')))
+          .widget<TextField>(find.byKey(const ValueKey('first-name')))
           .controller!
           .text,
       'Avery',

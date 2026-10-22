@@ -179,7 +179,9 @@ void main() {
       find.byKey(const ValueKey('email')),
       'jordan.lee@example.com',
     );
-    await tester.tap(find.text('Save'));
+    await tester.pump();
+    expect(find.text('Add to contest'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('save-participant')));
     await tester.pumpAndSettle();
 
     expect(store.draft.participants.single.name, 'Jordan Lee');

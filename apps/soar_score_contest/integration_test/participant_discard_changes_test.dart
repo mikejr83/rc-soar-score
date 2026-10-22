@@ -30,7 +30,7 @@ void main() {
     expect(find.text('Discard changes?'), findsNothing);
     expect(
       tester
-          .widget<TextFormField>(find.byKey(const ValueKey('last-name')))
+          .widget<TextField>(find.byKey(const ValueKey('last-name')))
           .controller!
           .text,
       'Discarded',
