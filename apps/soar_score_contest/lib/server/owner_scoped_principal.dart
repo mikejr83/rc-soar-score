@@ -68,6 +68,19 @@ Handler Function(Handler) ownerScopedPrincipal({
     return null;
   }
 
+  /// Only the lists of participants, roles and landing tables show the rows
+  /// of inspection owners with the account's own; other requests need no
+  /// owner list.
+  bool listsAcrossOwners(Request request) {
+    if (request.method != 'GET') return false;
+    var segments = request.url.pathSegments;
+    if (segments.length > 2 && segments[0] == 'api' && segments[1] == 'v1') {
+      segments = segments.sublist(2);
+    }
+    return segments.length == 1 &&
+        const {'participants', 'roles', 'landing-tables'}.contains(segments[0]);
+  }
+
   Future<Principal> principalFor(Request request) async {
     final account = acting();
     try {
@@ -79,7 +92,9 @@ Handler Function(Handler) ownerScopedPrincipal({
       }
       return Principal(
         accountId: account,
-        alsoVisibleOwners: await guard.owners(),
+        alsoVisibleOwners: listsAcrossOwners(request)
+            ? await guard.owners()
+            : const {},
       );
     } on Object catch (error, stack) {
       _logger.warning('Could not read the inspection owners', error, stack);

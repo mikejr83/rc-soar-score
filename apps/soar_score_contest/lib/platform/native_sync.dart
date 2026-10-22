@@ -142,7 +142,11 @@ class NativeSync {
         EntityStores.forDatabase(database),
       ),
       gateway: acting == null
-          ? api
+          ? InspectionGuardedSyncGateway(
+              api,
+              ownerOf: ownerOf,
+              isInspectionOwner: inspection.isInspection,
+            )
           : AccountBoundSyncGateway(
               api,
               acting: acting,

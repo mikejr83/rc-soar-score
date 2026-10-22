@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_contest/platform/acting_account.dart';
+import 'package:soar_score_contest/platform/account_bound_sync_gateway.dart';
 import 'package:soar_score_contest/platform/auth_epoch.dart';
 import 'package:soar_score_contest/platform/inspection_owner_guard.dart';
 import 'package:soar_score_contest/platform/native_sync.dart';
@@ -150,6 +151,31 @@ void main() {
     expect(aboutInspection(), isEmpty);
   });
 
+  test('with no acting account a conflict decision is not sent', () async {
+    final sync = await start();
+    await settle();
+    final before = requests.length;
+
+    for (final scope in [
+      core.ContestScopeKey(inspected.id),
+      core.DirectorScopeKey(owner),
+    ]) {
+      await expectLater(
+        sync.engine.resolveConflict(
+          scope,
+          core.Id.create(),
+          clientMutationId: 'decision-${scope.hashCode}',
+          choice: core.ConflictResolutionChoice.keptAccepted,
+        ),
+        throwsA(isA<InspectionDataError>()),
+      );
+    }
+    await settle();
+
+    expect(requests.length - before, 0);
+    expect(aboutInspection(), isEmpty);
+  });
+
   test(
     'signed in, nothing about it is sent, and the account still syncs',
     () async {
@@ -174,11 +200,11 @@ void main() {
 
     acting.actAsLocal();
     expect(await trySyncEverything(sync), 0);
-    final epoch = AuthEpoch(FakeAuthSession(signedIn: true));
-    final again = ActingAccount(server, epoch)
-      ..actAs(core.Id.create(), epoch: epoch.value);
+    // The second sign-in is the same ActingAccount the engine holds.
+    final another = core.Id.create();
+    expect(acting.actAs(another, epoch: acting.epoch.value), isTrue);
+    expect(acting.leaseFor(another), isNotNull);
     expect(await trySyncEverything(sync), 0);
-    expect(again.isAccount, isTrue);
 
     expect(aboutInspection(), isEmpty);
   });
