@@ -56,7 +56,7 @@ NextStepKind _kindOf(WorkspaceFacts f, DateTime now) {
   final lifecycle = f.contest.lifecycleState;
   if (lifecycle == LifecycleState.completed) {
     final p = f.publication;
-    return p.isKnown && !p.isPublished
+    return p.isKnown && !p.isPublished && p.supported
         ? NextStepKind.publishResults
         : NextStepKind.viewReports;
   }
