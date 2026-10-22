@@ -145,4 +145,78 @@ void main() {
 
     expect(find.text('Contests could not be loaded.'), findsOneWidget);
   });
+
+  testWidgets('shows a loading state while the contests load', (tester) async {
+    await tester.pumpWidget(
+      _app(_client((_) async => _json({'contests': <Object>[]}))),
+    );
+
+    expect(find.text('Loading contests'), findsOneWidget);
+    await tester.pumpAndSettle();
+    expect(find.text('Loading contests'), findsNothing);
+  });
+
+  testWidgets('a 401 says to sign in again instead of blaming the server', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_app(_client((_) async => http.Response('', 401))));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Contests could not be loaded.'), findsOneWidget);
+    expect(find.textContaining('not signed in'), findsOneWidget);
+    expect(find.byIcon(Icons.lock_outline), findsOneWidget);
+    expect(find.byKey(const ValueKey('page-state-retry')), findsNothing);
+  });
+
+  testWidgets('a 403 explains it and does not offer Retry', (tester) async {
+    await tester.pumpWidget(_app(_client((_) async => http.Response('', 403))));
+    await tester.pumpAndSettle();
+
+    expect(find.byIcon(Icons.lock_outline), findsOneWidget);
+    expect(find.textContaining('not allowed'), findsOneWidget);
+    expect(find.byKey(const ValueKey('page-state-retry')), findsNothing);
+  });
+
+  testWidgets('a rejected request shows the server message without Retry', (
+    tester,
+  ) async {
+    final client = _client(
+      (_) async => http.Response(
+        jsonEncode({
+          'error': {'code': 'invalid_request', 'message': 'Bad filter.'},
+        }),
+        400,
+        headers: {'content-type': 'application/json; charset=utf-8'},
+      ),
+    );
+    await tester.pumpWidget(_app(client));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Bad filter.'), findsOneWidget);
+    expect(find.byKey(const ValueKey('page-state-retry')), findsNothing);
+  });
+
+  testWidgets('an unreachable server is shown as unavailable with Retry', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _app(_client((_) async => throw http.ClientException('down'))),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byIcon(Icons.cloud_off), findsOneWidget);
+    expect(find.text('The server could not be reached.'), findsOneWidget);
+    expect(find.byKey(const ValueKey('page-state-retry')), findsOneWidget);
+  });
+
+  testWidgets('the empty state keeps its Create contest action', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _app(_client((_) async => _json({'contests': <Object>[]}))),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey('empty-create-contest')), findsOneWidget);
+  });
 }

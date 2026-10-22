@@ -266,6 +266,73 @@ void main() {
     });
   });
 
+  group('GET /contests/{id}/audit-events', () {
+    Future<Response> act(String action, int base) => send(
+      'POST',
+      '/contests/$_contestId/actions',
+      body: {'action': action, 'base_revision': base},
+    );
+
+    Future<List<Map<String, Object?>>> events(String query) async {
+      final response = await send(
+        'GET',
+        '/contests/$_contestId/audit-events$query',
+      );
+      expect(response.statusCode, 200);
+      return [
+        for (final e in (await json(response))['audit_events']! as List)
+          e as Map<String, Object?>,
+      ];
+    }
+
+    test('lists the transitions newest first with who and what', () async {
+      await create();
+      await act('lock', 0);
+      await act('unlock', 1);
+
+      final listed = await events('');
+
+      expect(listed.map((e) => e['transition']), ['unlock', 'lock']);
+      expect(listed.first['action'], 'StateTransition');
+      expect(listed.first['actor_id'], _owner.value);
+      expect(listed.first['reason'], 'unlock: AdminLock Locked → Unlocked');
+      expect(listed.first['server_timestamp'], isNotNull);
+    });
+
+    test('a refused action leaves no event', () async {
+      await create();
+      await act('complete', 0);
+
+      expect(await events(''), isEmpty);
+    });
+
+    test('filters by action and limits', () async {
+      await create();
+      await act('lock', 0);
+      await act('unlock', 1);
+
+      expect(await events('?action=ScoreAttempt'), isEmpty);
+      expect(await events('?action=StateTransition'), hasLength(2));
+      expect(await events('?limit=1'), hasLength(1));
+    });
+
+    test('a bad action or limit is 400', () async {
+      await create();
+      for (final query in ['?action=Nope', '?limit=x', '?limit=0']) {
+        final response = await send(
+          'GET',
+          '/contests/$_contestId/audit-events$query',
+        );
+        expect(response.statusCode, 400, reason: query);
+      }
+    });
+
+    test('an unknown contest is 404', () async {
+      final response = await send('GET', '/contests/$_contestId/audit-events');
+      expect(response.statusCode, 404);
+    });
+  });
+
   test(
     'writes without an auth layer are a server error, not a write',
     () async {

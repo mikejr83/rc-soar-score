@@ -11,6 +11,7 @@ export 'dto/add_participation_request.dart';
 export 'dto/claim_local_account_request.dart';
 export 'dto/add_team_member_request.dart';
 export 'dto/api_error_dto.dart';
+export 'dto/audit_event_dto.dart';
 export 'dto/contest_action_request.dart';
 export 'dto/contest_archive_dto.dart';
 export 'dto/create_contest_request.dart';

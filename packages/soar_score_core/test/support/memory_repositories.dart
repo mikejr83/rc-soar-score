@@ -7,6 +7,9 @@ class MemoryContestRepository implements ContestRepository {
   final Map<Id, Contest> stored = {};
   final List<MutationMetadata> metadata = [];
 
+  /// The audit events saved with contests, oldest first.
+  final List<AuditEvent> audits = [];
+
   @override
   Future<Contest?> findById(Id id) async => stored[id];
 
@@ -17,6 +20,7 @@ class MemoryContestRepository implements ContestRepository {
   Future<Contest> save(
     Contest contest, {
     required MutationMetadata metadata,
+    AuditEvent? audit,
   }) async {
     final current = stored[contest.id];
     if (current != null && current.revision != contest.revision) {
@@ -28,6 +32,7 @@ class MemoryContestRepository implements ContestRepository {
       );
     }
     this.metadata.add(metadata);
+    if (audit != null) audits.add(audit);
     final next = Contest.fromJson({
       ...contest.toJson(),
       'revision': current == null ? 0 : current.revision + 1,

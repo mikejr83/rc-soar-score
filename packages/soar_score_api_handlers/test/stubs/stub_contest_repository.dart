@@ -11,6 +11,9 @@ class StubContestRepository implements ContestRepository {
   /// The metadata of every save, oldest first.
   final List<MutationMetadata> savedWith = [];
 
+  /// The audit events saved with contests, oldest first.
+  final List<AuditEvent> audits = [];
+
   /// Stores [contest] as it is, without a revision bump, to arrange a state
   /// the API cannot reach in one step.
   void replace(Contest contest) => _contests[contest.id] = contest;
@@ -25,6 +28,7 @@ class StubContestRepository implements ContestRepository {
   Future<Contest> save(
     Contest contest, {
     required MutationMetadata metadata,
+    AuditEvent? audit,
   }) async {
     final current = _contests[contest.id];
     if (current != null && current.revision != contest.revision) {
@@ -36,6 +40,7 @@ class StubContestRepository implements ContestRepository {
       );
     }
     savedWith.add(metadata);
+    if (audit != null) audits.add(audit);
     final stored = Contest.fromJson({
       ...contest.toJson(),
       'revision': current == null ? 0 : current.revision + 1,

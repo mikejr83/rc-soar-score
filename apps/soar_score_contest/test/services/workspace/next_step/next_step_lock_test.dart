@@ -4,6 +4,7 @@ import 'package:soar_score_contest/services/workspace/next_step/next_step_reason
 import 'package:soar_score_contest/services/workspace/next_step/next_step_target.dart';
 import 'package:soar_score_contest/services/workspace/next_step/next_step_tone.dart';
 import 'package:soar_score_contest/services/workspace/publication_facts.dart';
+import 'package:soar_score_contest/services/workspace/transition_facts.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../../../support/matrix_test_support.dart';
@@ -33,6 +34,39 @@ void main() {
     expect(step.secondary, isNull);
     expect(step.note, note);
   }
+
+  test('the unlock card says who locked administration and when', () {
+    final step = stepAt(
+      stepFacts(
+        lock: _locked,
+        transitions: TransitionFacts(
+          lockedAt: DateTime.utc(2026, 10, 18, 15),
+          lockedBy: 'you',
+        ),
+      ),
+    );
+
+    expect(step.kind, NextStepKind.unlock);
+    expect(
+      step.reason,
+      const NextStepReason(
+        lead: 'Blocked:',
+        text: 'administration locked by you at Sun Oct 18, 09:00.',
+        tone: NextStepTone.blocked,
+      ),
+    );
+  });
+
+  test('the unlock card leaves out an actor the trail does not name', () {
+    final step = stepAt(
+      stepFacts(
+        lock: _locked,
+        transitions: TransitionFacts(lockedAt: DateTime.utc(2026, 10, 18, 15)),
+      ),
+    );
+
+    expect(step.reason?.text, 'administration locked at Sun Oct 18, 09:00.');
+  });
 
   test('a locked contest that needs its configuration finished', () {
     expectUnlock(

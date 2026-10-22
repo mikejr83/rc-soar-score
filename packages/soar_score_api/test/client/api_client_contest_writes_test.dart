@@ -95,6 +95,45 @@ void main() {
     expect(jsonDecode(seen.body), {'action': 'lock', 'base_revision': 4});
   });
 
+  test('auditEvents GETs the route with its filters and decodes', () async {
+    final event = AuditEvent(
+      id: Id.parse('019c0000-0000-7000-8000-000000000031'),
+      entityType: 'Contest',
+      entityId: contestId,
+      contestId: contestId,
+      action: AuditAction.stateTransition,
+      actorId: Id.parse('019c0000-0000-7000-8000-000000000001'),
+      authority: Authority.director,
+      serverTimestamp: DateTime.utc(2026, 10, 18, 9),
+      reason: 'lock: AdminLock Unlocked → Locked',
+    );
+    final client = clientFor(
+      (_) => http.Response(
+        jsonEncode({
+          'audit_events': [AuditEventDto.fromEvent(event).toJson()],
+        }),
+        200,
+        headers: jsonHeaders,
+      ),
+    );
+
+    final events = await client.auditEvents(
+      contestId,
+      action: AuditAction.stateTransition,
+      limit: 5,
+    );
+
+    expect(seen.method, 'GET');
+    expect(seen.url.path, '/api/v1/contests/${contestId.value}/audit-events');
+    expect(seen.url.queryParameters, {
+      'action': 'StateTransition',
+      'limit': '5',
+    });
+    expect(events.single.transition, ContestAction.lock);
+    expect(events.single.actorId, event.actorId);
+    expect(events.single.serverTimestamp, event.serverTimestamp);
+  });
+
   test('a 409 carries the server error code', () async {
     final client = clientFor(
       (_) => http.Response(

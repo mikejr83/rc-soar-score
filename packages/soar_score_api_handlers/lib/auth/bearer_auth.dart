@@ -19,6 +19,11 @@ final _logger = Logger('BearerAuth');
 ///
 /// It has the shape of `AuthMiddleware`, so it plugs into `buildApiHandler`
 /// where `fixedPrincipal` does for the offline instance.
+///
+/// 401s here are answered inside this layer, so the 400-404-409 warning line
+/// from `handledError` never runs: they use an older `401 on METHOD /path`
+/// format. That split is deliberate — `errorMappingMiddleware` sees the 401
+/// only as an opaque response. Grepping one format misses the other.
 Handler Function(Handler) bearerAuth({
   required TokenVerifier verifier,
   required AccountPrincipalResolver resolver,

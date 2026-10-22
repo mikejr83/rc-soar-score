@@ -48,6 +48,32 @@ void _tests(Backend backend) {
     );
   });
 
+  test(
+    'records the demo contests\' state transitions as audit events',
+    () async {
+      await seeder.seed();
+      final contests = await contestsByName();
+      final audits = repository.auditEventRepository;
+
+      final completed = await audits.listForContest(
+        contests['Autumn F5J Classic']!.id,
+        action: core.AuditAction.stateTransition,
+      );
+      final running = await audits.listForContest(
+        contests['Mountain States Team F5J']!.id,
+        action: core.AuditAction.stateTransition,
+      );
+
+      expect(completed.map(core.ContestTransitionAudit.actionOf), [
+        core.ContestAction.complete,
+      ]);
+      expect(completed.single.actorId, owner);
+      expect(running.map(core.ContestTransitionAudit.actionOf), [
+        core.ContestAction.openScoring,
+      ]);
+    },
+  );
+
   test('gives drawn contests a matrix and unnumbered ones none', () async {
     await seeder.seed();
     final contests = await contestsByName();

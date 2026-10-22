@@ -13,7 +13,6 @@ void main() {
   /// Repositories the demo does not fill, with why, and the issue that
   /// brings them in.
   const exempt = <String, String>{
-    'auditEventRepository': 'append-only trail; needs publishing first (#291)',
     'publicationPublisher': 'backend-only; needs a server demo (#291)',
     'publicationIdentityRepository': 'backend-only; needs a server demo (#291)',
     'publicationProjectionRepository':
@@ -50,6 +49,7 @@ void main() {
   /// Repositories the demo fills through a service rather than by name.
   const throughServices = <String>{
     'contestConfigurationRevisionRepository',
+    'auditEventRepository',
     'roleRepository',
     'landingTableRepository',
     'disciplineProfileRepository',

@@ -43,6 +43,15 @@ abstract final class OptionalChecklistRows {
         target: ChecklistTarget.publicationControl,
       );
     }
+    if (!publication.supported) {
+      return const ChecklistItem(
+        id: ChecklistItemId.publication,
+        status: ChecklistStatus.done,
+        title: 'Publication not supported',
+        detail: 'This server does not publish contests.',
+        target: ChecklistTarget.publicationControl,
+      );
+    }
     if (!publication.isPublished) {
       return const ChecklistItem(
         id: ChecklistItemId.publication,

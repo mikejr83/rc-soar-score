@@ -45,3 +45,19 @@ enum AuditAction {
   @JsonValue('InstallationActivation')
   installationActivation,
 }
+
+/// The serialized text of an [AuditAction], for places that carry it outside
+/// JSON (a query parameter).
+extension AuditActionText on AuditAction {
+  /// The exact text in `plan/data-model/enumerations.md`, such as
+  /// `StateTransition`.
+  String get text => name[0].toUpperCase() + name.substring(1);
+
+  /// The action with serialized [text], or `null` when there is none.
+  static AuditAction? parse(String text) {
+    for (final action in AuditAction.values) {
+      if (action.text == text) return action;
+    }
+    return null;
+  }
+}

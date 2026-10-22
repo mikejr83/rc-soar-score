@@ -69,6 +69,14 @@ void main() {
     await tester.tap(_key('lock-dialog-confirm'));
     await pumpUntilFound(tester, _key('control-unlock'));
     expect(_status(tester, 'administration'), 'Locked');
+    // The next-step card names who locked and when, from the audit trail (#345).
+    await pumpUntilFound(
+      tester,
+      find.textContaining(
+        'administration locked by you at',
+        findRichText: true,
+      ),
+    );
 
     await tapVisible(tester, _key('control-unlock'));
     await pumpUntilFound(tester, _key('control-lock'));
@@ -84,6 +92,11 @@ void main() {
     await pumpUntilFound(tester, find.text('Completed'));
     expect(_status(tester, 'lifecycle'), 'Completed');
     expect(_status(tester, 'scoring'), 'Closed');
+    // The next-step card dates the completion from the audit trail (#345).
+    await pumpUntilFound(
+      tester,
+      find.textContaining('The contest was completed'),
+    );
     expect(
       tester.widget<FilledButton>(_key('control-complete')).onPressed,
       isNull,
