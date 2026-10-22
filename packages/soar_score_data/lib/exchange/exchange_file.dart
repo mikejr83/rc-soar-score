@@ -191,7 +191,16 @@ class ExchangeFile {
     }
     final Object? root;
     try {
-      root = jsonDecode(utf8.decode(bytes));
+      final text = utf8.decode(bytes);
+      // Before parsing: the parser recurses, so deep nesting is refused with
+      // a bounded scan of the text instead.
+      if (_textDepth(text) > exchangeMaxDepth) {
+        throw const ExchangeException(
+          'too_deep',
+          'The file is nested deeper than a contest export is.',
+        );
+      }
+      root = jsonDecode(text);
     } on FormatException {
       throw const ExchangeException(
         'not_a_contest_file',
@@ -279,6 +288,35 @@ class ExchangeFile {
   /// The file as UTF-8 JSON, ready to save.
   List<int> encode() =>
       utf8.encode(const JsonEncoder.withIndent(' ').convert(toJson()));
+
+  /// The deepest nesting of brackets in [text], skipping strings. One pass,
+  /// no recursion.
+  static int _textDepth(String text) {
+    var depth = 0;
+    var deepest = 0;
+    var inString = false;
+    var escaped = false;
+    for (var i = 0; i < text.length; i++) {
+      final c = text.codeUnitAt(i);
+      if (inString) {
+        if (escaped) {
+          escaped = false;
+        } else if (c == 0x5C) {
+          escaped = true;
+        } else if (c == 0x22) {
+          inString = false;
+        }
+      } else if (c == 0x22) {
+        inString = true;
+      } else if (c == 0x7B || c == 0x5B) {
+        if (++depth > deepest) deepest = depth;
+        if (deepest > exchangeMaxDepth) return deepest;
+      } else if (c == 0x7D || c == 0x5D) {
+        depth--;
+      }
+    }
+    return deepest;
+  }
 
   static int _depth(Object? node) => switch (node) {
     Map() => 1 + node.values.fold(0, (m, v) => _max(m, _depth(v))),

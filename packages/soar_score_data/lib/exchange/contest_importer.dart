@@ -210,6 +210,7 @@ class ContestImporter {
     }
     if (refusals.isEmpty) {
       refusals.addAll(await _missingSystemRows(stores, file));
+      refusals.addAll(await _rowCollisions(stores, file));
     }
 
     final modeRefusals = <ImportMode, List<ImportRefusal>>{};
@@ -325,6 +326,16 @@ class ContestImporter {
         'The file must hold exactly the contest named in its header.',
       );
     }
+    for (final spec in [...contestExchangeTables, ...directorExchangeTables]) {
+      if (!file.tables.containsKey(spec.table)) {
+        refuse(
+          'missing_table',
+          'The file has no "${spec.table}" table; it may be cut short.',
+          spec.table,
+        );
+      }
+    }
+    refusals.addAll(_unreferencedDirectorRows(file));
     final directorIds = {
       for (final spec in directorExchangeTables)
         for (final id in idsOf(file, spec.table)) id,
@@ -363,6 +374,89 @@ class ContestImporter {
             'A row of "$table" belongs to another contest or owner.',
             table,
             id,
+          );
+        }
+      }
+    }
+    return refusals;
+  }
+
+  /// Director rows the contest rows of [file] do not point at. A file holds
+  /// only what its contest uses.
+  List<ImportRefusal> _unreferencedDirectorRows(ExchangeFile file) {
+    Set<String> column(String table, String name) => {
+      for (final row in file.rows(table))
+        if (row[name] case final String id) id,
+    };
+    final presets = column(
+      'contest_configuration_revisions',
+      'source_preset_id',
+    );
+    final landing = column(
+      'contest_configuration_revisions',
+      'landing_table_id',
+    );
+    for (final row in file.rows('contest_configuration_presets')) {
+      final landingId = row['landing_table_id'];
+      if (presets.contains(row['id']) && landingId is String) {
+        landing.add(landingId);
+      }
+    }
+    final allowed = <String, Set<String>>{
+      'participant_profiles': column(
+        'contest_participations',
+        'participant_profile_id',
+      ),
+      'roles': column('contest_participations', 'role_id'),
+      'model_catalogs': column('contest_model_links', 'model_catalog_id'),
+      'contest_configuration_presets': presets,
+      'landing_tables': landing,
+    };
+    return [
+      for (final MapEntry(key: table, value: ids) in allowed.entries)
+        for (final row in file.rows(table))
+          if (!ids.contains(row['id']))
+            ImportRefusal(
+              'unreferenced_row',
+              'A row of "$table" is not used by the contest.',
+              table: table,
+              rowId: '${row['id']}',
+            ),
+      for (final row in file.rows('landing_results'))
+        if (!landing.contains(row['landing_table_id']))
+          ImportRefusal(
+            'unreferenced_row',
+            'A landing result is not part of a table the contest uses.',
+            table: 'landing_results',
+            rowId: '${row['id']}',
+          ),
+    ];
+  }
+
+  /// Contest rows whose id is already taken here. Writing them would replace
+  /// the other row, so they are refused. (Pending changes of director rows
+  /// may repeat: the same change is the same row.)
+  Future<List<ImportRefusal>> _rowCollisions(
+    EntityStores stores,
+    ExchangeFile file,
+  ) async {
+    final refusals = <ImportRefusal>[];
+    for (final spec in contestExchangeTables) {
+      final store = stores.of(spec.entityType);
+      for (final row in file.rows(spec.table)) {
+        if (spec.table == 'mutation_records' && row['contest_id'] == null) {
+          continue;
+        }
+        final id = core.Id.parse(row['id'] as String);
+        if (await store.findJson(id) != null) {
+          refusals.add(
+            ImportRefusal(
+              'row_exists',
+              'A row of "${spec.table}" (${id.value}) already exists here. '
+                  'Importing would replace it.',
+              table: spec.table,
+              rowId: id.value,
+            ),
           );
         }
       }

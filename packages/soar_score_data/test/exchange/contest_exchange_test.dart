@@ -751,6 +751,16 @@ void main() {
       );
     });
 
+    test('nesting is checked before the file is parsed', () {
+      final text = '{"format":"rcsoar","header":${'[' * 200000}';
+      expect(
+        () => ExchangeFile.decode(utf8.encode(text)),
+        throwsA(
+          isA<ExchangeException>().having((e) => e.code, 'code', 'too_deep'),
+        ),
+      );
+    });
+
     Future<List<String>> refusalsAfter(
       void Function(ExchangeFile) tamper,
     ) async {
@@ -804,6 +814,52 @@ void main() {
         );
       },
     );
+
+    test(
+      'a missing contest table is refused, not imported partially',
+      () async {
+        expect(
+          await refusalsAfter((f) => f.tables.remove('official_scores')),
+          contains('missing_table'),
+        );
+      },
+    );
+
+    test('director rows the contest does not use are refused', () async {
+      expect(
+        await refusalsAfter((f) {
+          final profile = {...f.rows('participant_profiles').first};
+          profile['id'] = core.Id.create().value;
+          f.tables['participant_profiles']!.add(profile);
+        }),
+        contains('unreferenced_row'),
+      );
+    });
+
+    test('a row id used by another contest is refused, and kept', () async {
+      await importInspection(await source.exportNamed(_mountain));
+      final taken = (await target.exportNamed(_mountain)).rows('rounds').first;
+      final file = await source.exportNamed(_autumn);
+      file.rows('rounds').first['id'] = taken['id'];
+
+      final preview = await target.importer.preview(
+        file,
+        target: target.target,
+      );
+      expect(preview.availableModes, isEmpty);
+      expect([
+        for (final r in preview.refusals) r.code,
+      ], contains('row_exists'));
+      await expectLater(
+        importInspection(file),
+        throwsA(isA<ImportRefusedException>()),
+      );
+      expect(
+        await countWhere(target.db, 'rounds', 'id', taken['id'] as String),
+        1,
+      );
+      expect((await target.exportNamed(_mountain)).rows('rounds').first, taken);
+    });
 
     test('values are only ever bound, never run as SQL', () async {
       final file = await source.exportNamed(_autumn);
