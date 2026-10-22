@@ -56,7 +56,9 @@ void addSyncRoutes(
       request,
       RegisterInstallationRequest.fromJson,
     );
-    _logger.info('Registering installation for account ${principal.accountId} with id ${body.id}');
+    _logger.info(
+      'Registering installation for account ${principal.accountId} with id ${body.id}',
+    );
     final installation = await installations.register(
       accountId: principal.accountId,
       id: body.id,
@@ -70,7 +72,9 @@ void addSyncRoutes(
     final principal = requirePrincipal(request);
     _logger.fine('Listing installations for account ${principal.accountId}');
     final found = await installations.list(principal.accountId);
-    _logger.fine('Found ${found.length} installations for account ${principal.accountId}');
+    _logger.fine(
+      'Found ${found.length} installations for account ${principal.accountId}',
+    );
     return jsonResponse(<String, dynamic>{
       'installations': [for (final i in found) i.toJson()],
     });
@@ -170,7 +174,9 @@ void addSyncRoutes(
   ) async {
     final principal = requirePrincipal(request);
     final body = await readJsonBody(request, ResolveConflictRequest.fromJson);
-    _logger.info('Resolving conflict $conflictId for account ${principal.accountId}');
+    _logger.info(
+      'Resolving conflict $conflictId for account ${principal.accountId}',
+    );
     final result = await acceptor.resolveConflict(
       accountId: principal.accountId,
       conflictId: Id.parse(conflictId),
