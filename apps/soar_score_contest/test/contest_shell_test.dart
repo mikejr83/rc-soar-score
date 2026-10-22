@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:soar_score_contest/pages/landing_page.dart';
 import 'package:soar_score_contest/router.dart';
 import 'package:soar_score_contest/widgets/contest_shell.dart';
 import 'package:soar_score_contest/widgets/contest_status_bar.dart';
 import 'package:soar_score_contest/widgets/shell_header.dart';
+import 'package:soar_score_ui/soar_score_ui.dart';
 
 import 'support/shell_test_router.dart';
 
@@ -38,11 +38,11 @@ void main() {
     final rail = tester.widget<NavigationRail>(find.byType(NavigationRail));
     expect(rail.selectedIndex, 0);
 
-    // The title and the Create contest FAB sit at the top of the rail.
+    // The brand logo and the Create contest FAB sit at the top of the rail.
     expect(
       find.descendant(
         of: find.byType(NavigationRail),
-        matching: find.text(LandingPage.title),
+        matching: find.byType(BrandLogo),
       ),
       findsOneWidget,
     );

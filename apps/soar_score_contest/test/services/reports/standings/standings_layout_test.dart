@@ -49,12 +49,12 @@ void main() {
     });
 
     test('rounds that do not fit continue on a second set', () {
-      // Letter landscape holds 960 px: 298 px of fixed columns leaves 11 rounds.
+      // Letter landscape holds 1024 px: 298 px of fixed columns leaves 12 rounds.
       final layout = plan(options({}));
       expect(layout.pages, hasLength(2));
-      expect(layout.pages[0].rounds, rounds(11));
-      // Later sets carry only rank and pilot, so the other 3 rounds fit.
-      expect(layout.pages[1].rounds, [12, 13, 14]);
+      expect(layout.pages[0].rounds, rounds(12));
+      // Later sets carry only rank and pilot, so the other rounds fit.
+      expect(layout.pages[1].rounds, [13, 14]);
       expect(layout.pages[1].isFirstSet, isFalse);
     });
 
@@ -105,24 +105,25 @@ void main() {
     });
 
     test('takes the last round with it when the first set is full', () {
-      // 11 rounds fill the first set exactly, leaving no room for Penalty, so
-      // the last round moves to the second set to sit beside it.
-      final layout = plan(options({}), roundCount: 11, penalty: true);
+      // 12 rounds fill the first set exactly (298 + 12 × 58 = 1024), leaving
+      // no room for Penalty, so the last round moves to the second set to sit
+      // beside it.
+      final layout = plan(options({}), roundCount: 13, penalty: true);
       expect(layout.sets, 2);
-      expect(layout.pages.first.rounds, rounds(10));
+      expect(layout.pages.first.rounds, rounds(12));
       expect(layout.pages.first.penalty, isFalse);
-      expect(layout.pages.last.rounds, [11]);
+      expect(layout.pages.last.rounds, [13]);
       expect(layout.pages.last.penalty, isTrue);
     });
   });
 
   group('pilots', () {
     test('split by the first page and reused for every set', () {
-      // A tall page holds 24 plain rows; 30 pilots need two pages per set.
+      // A tall page holds 26 plain rows; 30 pilots need two pages per set.
       final layout = plan(options({}), rows: 30);
       expect(layout.pages, hasLength(4));
-      expect([for (final p in layout.pages) p.pilotStart], [0, 24, 0, 24]);
-      expect([for (final p in layout.pages) p.pilotEnd], [24, 30, 24, 30]);
+      expect([for (final p in layout.pages) p.pilotStart], [0, 26, 0, 26]);
+      expect([for (final p in layout.pages) p.pilotEnd], [26, 30, 26, 30]);
       expect([for (final p in layout.pages) p.number], [1, 2, 3, 4]);
       expect([for (final p in layout.pages) p.setIndex], [0, 0, 1, 1]);
     });
@@ -157,11 +158,11 @@ void main() {
     test('a page points to the next set for the same pilots', () {
       expect(
         StandingsKey.continuation(page: layout.pages[0], layout: layout),
-        'Rounds 12 to 14 continue on page 3',
+        'Rounds 13 to 14 continue on page 3',
       );
       expect(
         StandingsKey.continuation(page: layout.pages[1], layout: layout),
-        'Rounds 12 to 14 continue on page 4',
+        'Rounds 13 to 14 continue on page 4',
       );
       expect(
         StandingsKey.continuation(page: layout.pages[2], layout: layout),
@@ -172,11 +173,11 @@ void main() {
     test('a page says which pilots and rounds it holds', () {
       expect(
         StandingsKey.indicator(page: layout.pages[1]),
-        'Pilots 25 to 30 · Rounds 1 to 11',
+        'Pilots 27 to 30 · Rounds 1 to 12',
       );
       expect(
         StandingsKey.indicator(page: layout.pages[2]),
-        'Pilots 1 to 24 · Rounds 12 to 14',
+        'Pilots 1 to 26 · Rounds 13 to 14',
       );
     });
 
