@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:soar_score_contest/services/participants/participant_field.dart';
+import 'package:soar_score_contest/widgets/participant_editor/participant_field_spec.dart';
+
 import 'interact.dart';
 import 'launch_app.dart';
 
@@ -18,7 +21,13 @@ Finder participantRow(String name) =>
     find.descendant(of: find.byType(ListTile), matching: find.text(name));
 
 /// The field of the participant editor with the label [label].
-Finder editorField(String label) => find.widgetWithText(TextFormField, label);
+Finder editorField(String label) => find.byKey(
+  ValueKey(
+    ParticipantFieldSpec.of(
+      ParticipantField.values.firstWhere((f) => f.label == label),
+    ).key,
+  ),
+);
 
 /// Presses Save in the participant editor and waits for the participants
 /// manager to show again.

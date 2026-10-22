@@ -7,7 +7,6 @@ import 'package:soar_score_ui/soar_score_ui.dart';
 import '../collapsible_areas_provider.dart';
 import '../services/collapsible_areas/collapsible_area.dart';
 import '../contest_draft_provider.dart';
-import '../pages/landing_page.dart';
 import '../app_sync_provider.dart';
 import '../router.dart';
 import 'new_contest/create_contest_entry.dart';
@@ -214,16 +213,6 @@ class _RailTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final color = theme.colorScheme.primary;
-    final title = Text(
-      LandingPage.title,
-      key: const ValueKey('shell-title'),
-      textAlign: expanded ? TextAlign.start : TextAlign.center,
-      style:
-          (expanded ? theme.textTheme.titleMedium : theme.textTheme.labelMedium)
-              ?.copyWith(color: color),
-    );
     return Semantics(
       header: true,
       child: expanded
@@ -231,13 +220,21 @@ class _RailTitle extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
-                children: [const _RailLogo(), const SizedBox(width: 8), title],
+                children: [
+                  const _RailLogo(),
+                  // const SizedBox(width: 8),
+                  // title,
+                ],
               ),
             )
           : SizedBox(
               width: 72,
               child: Column(
-                children: [const _RailLogo(), const SizedBox(height: 4), title],
+                children: [
+                  const _RailLogo(),
+                  // const SizedBox(height: 4),
+                  // title,
+                ],
               ),
             ),
     );
@@ -251,7 +248,7 @@ class _RailLogo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const ExcludeSemantics(
-      child: BrandLogo(variant: BrandLogoVariant.appIcon, height: 28),
+      child: BrandLogo(variant: BrandLogoVariant.mark, height: 48),
     );
   }
 }

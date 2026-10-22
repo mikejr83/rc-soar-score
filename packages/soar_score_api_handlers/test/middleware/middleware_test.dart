@@ -154,42 +154,41 @@ void main() {
     List<LogRecord> handled() =>
         records.where((r) => r.loggerName == 'Errors').toList();
 
-    test('writes one warning line for a handled 400, without the query',
-        () async {
-      final response = await call(
-        (r) => throw ArgumentError('bad round number'),
-        '/a/b?token=secret',
-      );
+    test(
+      'writes one warning line for a handled 400, without the query',
+      () async {
+        final response = await call(
+          (r) => throw ArgumentError('bad round number'),
+          '/a/b?token=secret',
+        );
 
-      expect(response.statusCode, 400);
-      expect(handled(), hasLength(1));
-      final record = handled().single;
-      final line = record.message;
-      expect(line, contains('GET /a/b'));
-      expect(line, contains('400'));
-      expect(line, contains('code=invalid_request'));
-      expect(line, contains('request=${response.headers[requestIdHeader]}'));
-      expect(line, contains('bad round number'));
-      expect(line, isNot(contains('secret')));
-      expect(record.level, Level.WARNING);
-      expect(record.error, isNull);
-      expect(record.stackTrace, isNull);
-    });
+        expect(response.statusCode, 400);
+        expect(handled(), hasLength(1));
+        final record = handled().single;
+        final line = record.message;
+        expect(line, contains('GET /a/b'));
+        expect(line, contains('400'));
+        expect(line, contains('code=invalid_request'));
+        expect(line, contains('request=${response.headers[requestIdHeader]}'));
+        expect(line, contains('bad round number'));
+        expect(line, isNot(contains('secret')));
+        expect(record.level, Level.WARNING);
+        expect(record.error, isNull);
+        expect(record.stackTrace, isNull);
+      },
+    );
 
     test('logs one warning line for every handled 4xx status', () async {
       final id = Id.parse('01968c5e-7a3b-7c21-8f4d-2b5a9e1d3c50');
       final cases = [
         (
           403,
-          () => failing(
-            ForbiddenError('not_director', 'only the director'),
-          ),
+          () => failing(ForbiddenError('not_director', 'only the director')),
         ),
         (
           404,
-          () => failing(
-            EntityNotFoundError(entityType: 'Contest', entityId: id),
-          ),
+          () =>
+              failing(EntityNotFoundError(entityType: 'Contest', entityId: id)),
         ),
         (
           409,
@@ -226,16 +225,18 @@ void main() {
       expect(line, contains('request=${response.headers[requestIdHeader]}'));
     });
 
-    test('flattens and truncates the message so it cannot forge a log line',
-        () async {
-      final body = 'a' * 2000;
-      await failing(FormatException('$body\n404 on GET /forge code=evil'));
+    test(
+      'flattens and truncates the message so it cannot forge a log line',
+      () async {
+        final body = 'a' * 2000;
+        await failing(FormatException('$body\n404 on GET /forge code=evil'));
 
-      expect(handled(), hasLength(1));
-      final line = handled().single.message;
-      expect(line, isNot(contains('forge')));
-      expect(line, isNot(contains('\n')));
-    });
+        expect(handled(), hasLength(1));
+        final line = handled().single.message;
+        expect(line, isNot(contains('forge')));
+        expect(line, isNot(contains('\n')));
+      },
+    );
   });
 
   group('request logging', () {

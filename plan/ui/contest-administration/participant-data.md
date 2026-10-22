@@ -10,7 +10,7 @@ When editing a participant profile owned by a participant account, fields contro
 
 ## Behavior
 
-The editor has `Save` and `Cancel`. Validation is inline and preserves entered values after a failed save. A duplicate or possible match by email is shown before creating a new record; the director must choose the existing record or explicitly create a separate local record where permitted.
+The editor has `Save` and `Cancel`. Validation is inline and preserves entered values after a failed save. A duplicate or possible match by email is shown before creating a new record; the director must choose the existing record or change the email. Two participants cannot share an email, so a separate record is not created.
 
 When opened from the wizard, a successful save returns to the wizard and adds the participant to the selection list. When opened from system management, it returns to the participant list. Unsaved changes require confirmation before leaving.
 
