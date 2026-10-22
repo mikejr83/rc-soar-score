@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_contest/widgets/page_states/page_states.dart';
 
@@ -130,6 +131,34 @@ void main() {
     expect(find.text('This page is out of date.'), findsOneWidget);
     await tester.tap(find.text('Refresh'));
     expect(pressed, 1);
+  });
+
+  test('a banner uses its role on the web and a live region elsewhere', () {
+    final web = PageBannerKind.alert.semantics(web: true);
+    expect((web.role, web.liveRegion), (SemanticsRole.alert, false));
+    final webStatus = PageBannerKind.status.semantics(web: true);
+    expect(
+      (webStatus.role, webStatus.liveRegion),
+      (SemanticsRole.status, false),
+    );
+
+    for (final kind in PageBannerKind.values) {
+      final native = kind.semantics(web: false);
+      expect((native.role, native.liveRegion), (null, true));
+    }
+  });
+
+  testWidgets('a rendered banner is a live region on native', (tester) async {
+    final handle = tester.ensureSemantics();
+    for (final kind in PageBannerKind.values) {
+      await _pump(
+        tester,
+        PageBanner(kind: kind, icon: Icons.info, text: 'Heads up'),
+      );
+      final node = tester.getSemantics(find.text('Heads up'));
+      expect(node.flagsCollection.isLiveRegion, isTrue, reason: '$kind');
+    }
+    handle.dispose();
   });
 
   testWidgets('StatusLabel speaks the field and the value', (tester) async {
