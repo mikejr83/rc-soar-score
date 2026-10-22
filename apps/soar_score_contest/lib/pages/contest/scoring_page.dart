@@ -10,13 +10,13 @@ import '../../services/scoring/score_check.dart';
 import '../../services/scoring/score_preview.dart';
 import '../../services/scoring/scoring_controller.dart';
 import '../../services/scoring/scoring_row.dart';
-import '../../widgets/api_error_text.dart';
 import '../../widgets/contest_scope.dart';
 import '../../widgets/page_states/page_states.dart';
 import '../../services/scoring/retire_impact.dart';
 import '../../widgets/scoring/penalty_removal_dialog.dart';
 import '../../widgets/scoring/retire_pilot_dialog.dart';
 import '../../widgets/scoring/score_check_panel.dart';
+import '../../widgets/scoring/scoring_refresh_failed_banner.dart';
 import '../../widgets/scoring/score_history_dialog.dart';
 import '../../widgets/scoring/score_grid_columns.dart';
 import '../../widgets/scoring/score_row_tile.dart';
@@ -408,15 +408,9 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
                     ],
                   ),
                 if (c.loadError != null)
-                  MaterialBanner(
-                    content: Text(apiErrorText(c.loadError!)),
-                    leading: const Icon(Icons.error_outline),
-                    actions: [
-                      TextButton(
-                        onPressed: c.refresh,
-                        child: const Text('Retry'),
-                      ),
-                    ],
+                  ScoringRefreshFailedBanner(
+                    error: c.loadError!,
+                    onRetry: c.refresh,
                   ),
                 if (check != null)
                   ScoreCheckPanel(

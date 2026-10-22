@@ -391,6 +391,7 @@ class ScoringController extends ChangeNotifier {
     try {
       final loaded = await ScoringPageData.load(client, contestId);
       data = loaded;
+      loadError = null;
       for (final row in rows) {
         _drafts[row.id]?.rebase(row.savedComponents);
       }

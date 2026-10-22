@@ -62,6 +62,9 @@ class ScoringServer {
   final MatrixServer matrixServer;
   final Map<Id, OfficialScore> _score;
 
+  /// When set, every read answers with this status instead of the data.
+  int? readFailure;
+
   int entryStatus = 200;
   String entryCode = 'rejected';
   bool offlineOnEntry = false;
@@ -214,6 +217,13 @@ class ScoringServer {
 
   Future<http.Response> handle(http.Request request) async {
     final path = request.url.path;
+    final failure = readFailure;
+    if (failure != null && request.method == 'GET') {
+      return _json({
+        'code': failure == 403 ? 'forbidden' : 'unavailable',
+        'message': 'Not available.',
+      }, failure);
+    }
     if (request.method == 'GET' && path.endsWith('/landing-tables')) {
       return _json({
         'landing_tables': [
