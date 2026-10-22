@@ -52,12 +52,7 @@ Response handledError(
     '$statusCode on ${request.method} /${request.url.path} '
     'code=$code request=$requestId message=${_oneLine(message)}',
   );
-  return errorResponse(
-    statusCode,
-    code,
-    message,
-    requestId: requestId,
-  );
+  return errorResponse(statusCode, code, message, requestId: requestId);
 }
 
 /// Turns thrown errors and bare 404s into the standard JSON error body.
