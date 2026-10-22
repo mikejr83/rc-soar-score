@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:soar_score_ui/soar_score_ui.dart';
 
 import '../../app.dart';
 import '../../services/external_url/external_url.dart';
@@ -30,15 +31,16 @@ class LandingPage extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Placeholder until a logo asset exists.
-              const Icon(
-                Icons.flight_takeoff,
-                size: 96,
-                semanticLabel: 'RC Soar Score logo',
+              // The lockup carries the name, so it is the page heading.
+              Semantics(
+                header: true,
+                child: const BrandLogo(
+                  variant: BrandLogoVariant.lockup,
+                  height: 140,
+                  semanticLabel: '$title logo',
+                ),
               ),
-              const SizedBox(height: 16),
-              Text(title, style: textTheme.headlineMedium),
-              const SizedBox(height: 12),
+              const SizedBox(height: 24),
               Text(
                 'Scoring and management for RC sailplane soaring contests: '
                 'run a contest, enter and check scores, and publish results '

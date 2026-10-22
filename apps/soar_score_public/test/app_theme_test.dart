@@ -9,8 +9,8 @@ void main() {
 
       expect(theme.useMaterial3, isTrue);
       expect(theme.colorScheme.brightness, Brightness.light);
-      // Same seed as the contest app baseline (Deep Sky Blue).
-      expect(theme.colorScheme.primary.toARGB32(), 0xFF006399);
+      // The brand kit's deep orange: the one orange that takes small text.
+      expect(theme.colorScheme.primary, BrandColors.deepOrange);
     });
 
     test('dark theme is Material 3 with a dark color scheme', () {

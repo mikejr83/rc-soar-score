@@ -6,4 +6,7 @@
 library;
 
 export 'theme/app_theme.dart';
+export 'theme/brand_colors.dart';
+export 'theme/brand_logos.dart';
+export 'theme/brand_typography.dart';
 export 'widgets/score_card.dart';

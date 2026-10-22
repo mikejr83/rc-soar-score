@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 
+import 'brand_colors.dart';
+import 'brand_typography.dart';
+
+/// Colour tokens that are not part of the brand palette: the high-viz amber
+/// used as the Material tertiary role for timers, running contests and
+/// warnings. The brand palette itself is [BrandColors].
 abstract final class AppColors {
-  // Primary Seed Color: Deep Sky Blue
-  static const Color skyBlueSeed = Color(0xFF006399);
-  static const Color primaryColor = Color(0xFF006399);
-  static const Color secondaryColor = Color(0xFF2D6A4F);
-  static const Color surfaceColor = Color(0xFFF8FAFC);
   // Custom High-Viz Accent for Timers & Max Scores
   static const Color highVizAmber = Color(0xFFD97706);
   // Amber containers for warnings: the accent itself is below 4.5:1 as text.
@@ -44,153 +45,117 @@ abstract final class AppStatusColors {
   }
 }
 
-/// Baseline Material 3 theme for the RC Soar Score Contest Management app.
+/// The RC Soar Score brand as a Material 3 theme: the cockpit palette
+/// ([BrandColors]), the bundled fonts ([BrandFonts]) and the type scale
+/// ([BrandTypography]).
 ///
-/// Single source of truth for theming: `MaterialApp` in `app.dart` takes its
-/// themes exclusively from this file (no inline `MaterialApp(theme:)` values).
+/// Light follows the brand kit exactly. The kit defines no dark theme; dark
+/// here keeps its night ground and paper text and lifts the orange to the
+/// kit's on-dark accent so button labels stay readable.
+abstract final class BrandTheme {
+  static const double radius = 12;
+  static const double buttonRadius = 8;
+
+  static ThemeData get light => _theme(
+    ColorScheme.fromSeed(
+      seedColor: BrandColors.deepOrange,
+      brightness: Brightness.light,
+      primary: BrandColors.deepOrange,
+      onPrimary: Colors.white,
+      // Secondary is read as the "positive" tone by the contest app; keep
+      // it the status success green rather than a second brand colour.
+      secondary: AppStatusColors.successColorLightTheme,
+      onSecondary: Colors.white,
+      // Tonal buttons, selected rows and chips: the kit's neutral, not a
+      // seed-derived orange tint ("one orange element per area").
+      secondaryContainer: BrandColors.tableHead,
+      onSecondaryContainer: BrandColors.ink,
+      tertiary: AppColors.highVizAmber,
+      tertiaryContainer: AppColors.amberContainerLight,
+      onTertiaryContainer: AppColors.onAmberContainerLight,
+      surface: BrandColors.paper,
+      onSurface: BrandColors.ink,
+      onSurfaceVariant: BrandColors.muted,
+      surfaceContainerLowest: BrandColors.card,
+      surfaceContainerHigh: BrandColors.tableHead,
+      outline: BrandColors.muted,
+      outlineVariant: BrandColors.hairline,
+    ),
+    cardElevation: 2,
+  );
+
+  static ThemeData get dark => _theme(
+    ColorScheme.fromSeed(
+      seedColor: BrandColors.deepOrange,
+      brightness: Brightness.dark,
+      primary: BrandColors.orangeOnDark,
+      onPrimary: BrandColors.dialBlack,
+      secondary: AppStatusColors.successColorDarkTheme,
+      onSecondary: BrandColors.dialBlack,
+      secondaryContainer: BrandColors.bezelCharcoal,
+      onSecondaryContainer: BrandColors.paper,
+      tertiary: AppColors.highVizAmber,
+      tertiaryContainer: AppColors.amberContainerDark,
+      onTertiaryContainer: AppColors.onAmberContainerDark,
+      surface: BrandColors.nightGround,
+      onSurface: BrandColors.paper,
+      onSurfaceVariant: BrandColors.mutedOnDark,
+      surfaceContainerLowest: BrandColors.dialBlack,
+      outlineVariant: BrandColors.bezelCharcoal,
+    ),
+    cardElevation: 1,
+  );
+
+  static ThemeData _theme(ColorScheme scheme, {required double cardElevation}) {
+    final base = ThemeData(useMaterial3: true, colorScheme: scheme);
+    final shape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(buttonRadius),
+    );
+    return base.copyWith(
+      textTheme: BrandTypography.textTheme(base.textTheme),
+      cardTheme: CardThemeData(
+        elevation: cardElevation,
+        color: scheme.surfaceContainerLowest,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(radius),
+        ),
+      ),
+      appBarTheme: const AppBarTheme(
+        centerTitle: true,
+        scrolledUnderElevation: 3,
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(shape: shape),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(shape: shape),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(shape: shape),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(shape: shape),
+      ),
+      dividerTheme: DividerThemeData(color: scheme.outlineVariant),
+    );
+  }
+}
+
+/// Theme of the contest administration app. Per-app differentiation goes
+/// here, on top of [BrandTheme].
 abstract final class ContestAppTheme {
-  static const double _defaultBorderRadius = 12;
-
-  static ThemeData get lightTheme {
-    return ThemeData(
-      useMaterial3: true,
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: AppColors.skyBlueSeed,
-        brightness: Brightness.light,
-        primary: AppColors.primaryColor,
-        secondary: AppColors.secondaryColor,
-        tertiary: AppColors.highVizAmber,
-        tertiaryContainer: AppColors.amberContainerLight,
-        onTertiaryContainer: AppColors.onAmberContainerLight,
-        surface: AppColors.surfaceColor,
-      ),
-      cardTheme: CardThemeData(
-        elevation: 2,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(_defaultBorderRadius),
-        ),
-      ),
-      appBarTheme: const AppBarTheme(
-        centerTitle: true,
-        scrolledUnderElevation: 3,
-      ),
-    );
-  }
-
-  static ThemeData get darkTheme {
-    return ThemeData(
-      useMaterial3: true,
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: AppColors.skyBlueSeed,
-        brightness: Brightness.dark,
-        tertiary: AppColors.highVizAmber,
-        tertiaryContainer: AppColors.amberContainerDark,
-        onTertiaryContainer: AppColors.onAmberContainerDark,
-      ),
-      cardTheme: CardThemeData(
-        elevation: 1,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(_defaultBorderRadius),
-        ),
-      ),
-    );
-  }
+  static ThemeData get lightTheme => BrandTheme.light;
+  static ThemeData get darkTheme => BrandTheme.dark;
 }
 
+/// Theme of the participant self-scoring app.
 abstract final class SelfScoreAppTheme {
-  static const double _defaultBorderRadius = 12;
-
-  static ThemeData get lightTheme {
-    return ThemeData(
-      useMaterial3: true,
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: AppColors.skyBlueSeed,
-        brightness: Brightness.light,
-        primary: AppColors.primaryColor,
-        secondary: AppColors.secondaryColor,
-        tertiary: AppColors.highVizAmber,
-        tertiaryContainer: AppColors.amberContainerLight,
-        onTertiaryContainer: AppColors.onAmberContainerLight,
-        surface: AppColors.surfaceColor,
-      ),
-      cardTheme: CardThemeData(
-        elevation: 2,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(_defaultBorderRadius),
-        ),
-      ),
-      appBarTheme: const AppBarTheme(
-        centerTitle: true,
-        scrolledUnderElevation: 3,
-      ),
-    );
-  }
-
-  static ThemeData get darkTheme {
-    return ThemeData(
-      useMaterial3: true,
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: AppColors.skyBlueSeed,
-        brightness: Brightness.dark,
-        tertiary: AppColors.highVizAmber,
-        tertiaryContainer: AppColors.amberContainerDark,
-        onTertiaryContainer: AppColors.onAmberContainerDark,
-      ),
-      cardTheme: CardThemeData(
-        elevation: 1,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(_defaultBorderRadius),
-        ),
-      ),
-    );
-  }
+  static ThemeData get lightTheme => BrandTheme.light;
+  static ThemeData get darkTheme => BrandTheme.dark;
 }
 
+/// Theme of the public results site.
 abstract final class PublicAppTheme {
-  static const double _defaultBorderRadius = 12;
-
-  static ThemeData get lightTheme {
-    return ThemeData(
-      useMaterial3: true,
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: AppColors.skyBlueSeed,
-        brightness: Brightness.light,
-        primary: AppColors.primaryColor,
-        secondary: AppColors.secondaryColor,
-        tertiary: AppColors.highVizAmber,
-        tertiaryContainer: AppColors.amberContainerLight,
-        onTertiaryContainer: AppColors.onAmberContainerLight,
-        surface: AppColors.surfaceColor,
-      ),
-      cardTheme: CardThemeData(
-        elevation: 2,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(_defaultBorderRadius),
-        ),
-      ),
-      appBarTheme: const AppBarTheme(
-        centerTitle: true,
-        scrolledUnderElevation: 3,
-      ),
-    );
-  }
-
-  static ThemeData get darkTheme {
-    return ThemeData(
-      useMaterial3: true,
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: AppColors.skyBlueSeed,
-        brightness: Brightness.dark,
-        tertiary: AppColors.highVizAmber,
-        tertiaryContainer: AppColors.amberContainerDark,
-        onTertiaryContainer: AppColors.onAmberContainerDark,
-      ),
-      cardTheme: CardThemeData(
-        elevation: 1,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(_defaultBorderRadius),
-        ),
-      ),
-    );
-  }
+  static ThemeData get lightTheme => BrandTheme.light;
+  static ThemeData get darkTheme => BrandTheme.dark;
 }

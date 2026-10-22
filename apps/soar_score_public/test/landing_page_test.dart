@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_public/app.dart';
 import 'package:soar_score_public/pages/results/results_page.dart';
 import 'package:soar_score_public/pages/docs/docs_landing_page.dart';
 import 'package:soar_score_public/pages/site/landing_page.dart';
+import 'package:soar_score_ui/soar_score_ui.dart';
 
 void main() {
   testWidgets('homepage shows logo, description and navigation', (
@@ -15,7 +15,7 @@ void main() {
     expect(
       find.descendant(
         of: find.byType(LandingPage),
-        matching: find.byIcon(Icons.flight_takeoff),
+        matching: find.byType(BrandLogo),
       ),
       findsOneWidget,
     );
