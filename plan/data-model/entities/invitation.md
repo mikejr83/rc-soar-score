@@ -45,7 +45,9 @@
 - At most one `Active` invitation exists per participation (partial unique index on `contest_participation_id` where `state` is `Active`)
 - Issuing a replacement sets the previous `Active` invitation to `Replaced` in the same transaction. An earlier link never regains access, even from a cached page, a retained session, or a delayed request
 - Using a link does not consume it: `state` stays `Active` across uses, and the participant can return through the same link to their overview
-- A pilot invitation authorizes only that pilot. A non-flier invitation targets the non-flier's own participation and may select and enter scores only for pilots on the same contest team. The service enforces this and does not trust the client-selected pilot
+- A pilot invitation authorizes only that pilot. A non-flier (helper) invitation targets the non-flier's own participation and may select and enter scores only for pilots on the same contest team. Helper invitations exist only when teams are enabled, and the helper is assigned to one team. The service enforces this and does not trust the client-selected pilot
+- The credential is random and unguessable, and an emailed link and a QR code behave the same way. Resending sends the same link. Replacing or revoking an invitation is an optional director action, not part of normal use
+- A linked account whose participant link is confirmed reaches the participation without the credential while its invitation is `Active`. Opening it from the account's contest list sets `redeemed_by_account_id` if it is empty. One guest account exists per invitation; a second device acts as the same guest
 - A valid invitation is not permission by itself. Every read and mutation still checks lifecycle, scoring access, locks, retirement, assignment, and score state
 - Issuance is allowed only while the contest is `Configuring`, `Ready`, or `Running`, and never for `Created`, `Completed`, or deletion states
 - An invitation moves to `Expired` when `expires_at` passes. Magic URL invitations expire 24 hours after contest completion. Field QR tokens do not expire during the contest unless revoked

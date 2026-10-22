@@ -29,6 +29,16 @@ A participant with an account may offer basic details in a participant directory
 
 Publications never reference an account. They reference the account's public profile, which holds only the information the person chose to make public, such as the name shown in results. Unlinking the public profile from an account detaches the person from published data without changing published results.
 
+### Linking and self-scoring access
+
+A participant-account link belongs to a director's participant profile, not to a single contest. The participant confirms it once. Every later participation of the same profile is then reachable through the account as soon as the director invites the participant, without another confirmation. A director who adds a participant from the directory creates a pending link that the participant confirms in their own account.
+
+An account also becomes linked when a participant opens an invitation link, signs in or creates an account, and confirms that the participation named on the invitation is theirs. The confirmation is required so that a forwarded link cannot be used to claim someone else's profile. Records created under the guest identity are then attached to the account (see Claiming).
+
+A guest account is created once per participant link when the invitation is first opened. A second device that opens the same link acts as the same guest. A person is either a pilot or a helper on one participant record; a person who does both needs two participant records with different emails in the first release.
+
+Access to scoring through an account is defined in [self-scoring-invites.md](../self-scoring-invites.md).
+
 ## Anonymous publishers
 
 A contest director who publishes without an account has no account at all. The publication is identified by a verified private email address and has no owner until a registered account with that verified email claims it.

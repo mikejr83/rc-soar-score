@@ -19,6 +19,7 @@ Documents in the sub-folder `architecture-requirements` define the application a
 - [`participant-score-entry.md`](architecture-requirements/participant-score-entry.md) - Requirements for participant score access, submission, and synchronization.
 - [`participant-score-review.md`](architecture-requirements/participant-score-review.md) - Requirements for participant score reviews and retirement.
 - [`participant-score-results.md`](architecture-requirements/participant-score-results.md) - Requirements for participant-visible group results and placement.
+- [`participant-team-overview.md`](architecture-requirements/participant-team-overview.md) - The helper team overview and the Up now and Up next rule.
 - [`participant-scoring-access.md`](architecture-requirements/participant-scoring-access.md) - The states that control participant scoring access.
 - [`matrix-draw.md`](architecture-requirements/matrix-draw.md) - Flight matrix generation, simulated annealing optimization, team protection, and fairness metrics.
 - [`score-review-and-validity-state.md`](architecture-requirements/score-review-and-validity-state.md) - Score validity and score review states.
