@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import 'workspace_banner.dart';
+import '../page_states/page_banner.dart';
 
 /// The banner area above the workspace sections: one banner per cause, so a
 /// stale page and an offline device can show together.
@@ -43,9 +43,9 @@ class WorkspaceBanners extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         if (change != null)
-          WorkspaceBanner(
+          PageBanner(
             key: const ValueKey('workspace-banner-stale'),
-            kind: WorkspaceBannerKind.alert,
+            kind: PageBannerKind.alert,
             icon: Icons.sync_problem,
             text:
                 "Your change to $change wasn't applied. This page is out of date.",
@@ -53,9 +53,9 @@ class WorkspaceBanners extends StatelessWidget {
             onAction: onRefresh,
           ),
         if (copyTime != null)
-          WorkspaceBanner(
+          PageBanner(
             key: const ValueKey('workspace-banner-unavailable'),
-            kind: WorkspaceBannerKind.alert,
+            kind: PageBannerKind.alert,
             icon: Icons.cloud_off,
             text:
                 "Can't reach the Soar Score server. Showing this device's copy "
@@ -66,9 +66,9 @@ class WorkspaceBanners extends StatelessWidget {
             onAction: onRetry,
           ),
         if (offline)
-          WorkspaceBanner(
+          PageBanner(
             key: const ValueKey('workspace-banner-offline'),
-            kind: WorkspaceBannerKind.status,
+            kind: PageBannerKind.status,
             icon: Icons.wifi_off,
             text: keepsLocalData
                 ? "Offline. Scoring and the other controls keep working on "

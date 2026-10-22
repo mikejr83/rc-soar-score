@@ -105,6 +105,12 @@ void main() {
     expect(values.containsKey('Public visibility'), isFalse);
   });
 
+  test('unsupported publishing is not available, not unknown', () {
+    final values = _values(_contest(), PublicationFacts.unsupported);
+    expect(values['Publication'], 'Not available');
+    expect(values.containsKey('Public visibility'), isFalse);
+  });
+
   test('results hiding that has run its 24 hours reads as off', () {
     final contest = _contest(hiddenThrough: 2);
     final hiddenAt = contest.resultsHiddenAt!;

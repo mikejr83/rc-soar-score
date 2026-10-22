@@ -34,6 +34,18 @@ void main() {
       expect(AuditEvent.fromJson(json), event);
     });
 
+    test('every action text matches its serialized text', () {
+      for (final action in AuditAction.values) {
+        expect(
+          make(action: action).toJson()['action'],
+          action.text,
+          reason: '$action',
+        );
+        expect(AuditActionText.parse(action.text), action);
+      }
+      expect(AuditActionText.parse('Nope'), isNull);
+    });
+
     test('allows at most one scope', () {
       expect(make(), isA<AuditEvent>());
       expect(

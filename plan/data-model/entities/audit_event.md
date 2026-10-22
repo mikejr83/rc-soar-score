@@ -42,6 +42,7 @@
 - Client time is retained only as audit information. It is not compared with server time, because client clocks drift
 - Sensitive credentials and private message contents are excluded. Redaction events identify the row by `pilot_key` and never contain the redacted details
 - `base_revision` and `resulting_revision` capture the optimistic locking state
+- A `StateTransition` event of a contest director action records the action and the old and new value in `reason`, as `lock: AdminLock Unlocked → Locked` (the action name, a colon, then each changed field as `Field Old → New`, separated by `; `). The entity has no separate fields for them. `ContestTransitionAudit` in `soar_score_core` writes and reads this text
 
 ## Lifecycle
 

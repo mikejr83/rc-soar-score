@@ -344,6 +344,9 @@ class _OutdatedContests extends MemoryContestRepository {
   Future<Contest?> findById(Id id) async => _outdated;
 
   @override
-  Future<Contest> save(Contest contest, {required MutationMetadata metadata}) =>
-      _real.save(contest, metadata: metadata);
+  Future<Contest> save(
+    Contest contest, {
+    required MutationMetadata metadata,
+    AuditEvent? audit,
+  }) => _real.save(contest, metadata: metadata, audit: audit);
 }

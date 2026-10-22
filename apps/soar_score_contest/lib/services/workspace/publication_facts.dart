@@ -8,6 +8,7 @@ class PublicationFacts extends Equatable {
     this.visibility,
     this.publishedAt,
     this.isKnown = true,
+    this.supported = true,
   });
 
   /// The contest was never published (the server answered 404).
@@ -15,6 +16,13 @@ class PublicationFacts extends Equatable {
 
   /// The read failed or is not available here; not the same as unpublished.
   static const unknown = PublicationFacts(isPublished: false, isKnown: false);
+
+  /// Publishing is not a capability of this server (it answered 409
+  /// `publishing_not_available`); a stable state, not a failed read.
+  static const unsupported = PublicationFacts(
+    isPublished: false,
+    supported: false,
+  );
 
   /// Reads the director's view of a publication, defensively: a missing or
   /// unexpected field gives [unknown], never a thrown error.
@@ -43,6 +51,17 @@ class PublicationFacts extends Equatable {
   /// False for [unknown].
   final bool isKnown;
 
+  /// False when the server does not publish contests at all ([unsupported]);
+  /// then the state is stable and the rest of the workspace must not treat it
+  /// as a failed read.
+  final bool supported;
+
   @override
-  List<Object?> get props => [isPublished, visibility, publishedAt, isKnown];
+  List<Object?> get props => [
+    isPublished,
+    visibility,
+    publishedAt,
+    isKnown,
+    supported,
+  ];
 }

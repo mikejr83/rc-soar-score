@@ -5,6 +5,7 @@ import 'package:soar_score_contest/services/workspace/next_step/next_step_reason
 import 'package:soar_score_contest/services/workspace/next_step/next_step_target.dart';
 import 'package:soar_score_contest/services/workspace/next_step/next_step_tone.dart';
 import 'package:soar_score_contest/services/workspace/publication_facts.dart';
+import 'package:soar_score_contest/services/workspace/transition_facts.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../../../support/matrix_test_support.dart';
@@ -345,6 +346,24 @@ void main() {
       expect(step.primary.enabled, isTrue);
     });
 
+    test('the publish step says when the contest was completed', () {
+      final step = stepAt(
+        stepFacts(
+          state: LifecycleState.completed,
+          publication: PublicationFacts.notPublished,
+          transitions: TransitionFacts(
+            completedAt: DateTime.utc(2026, 10, 18, 15),
+          ),
+        ),
+      );
+      expect(
+        step.body,
+        'The contest was completed Sun Oct 18, 09:00. Results aren’t on the '
+        'public site yet. Publishing first checks participants against the '
+        'global pilot list.',
+      );
+    });
+
     test('publishing is disabled offline', () {
       final step = stepAt(
         stepFacts(
@@ -401,6 +420,21 @@ void main() {
         step.body,
         'Publication status can’t be loaded right now. Reports are available.',
       );
+    });
+
+    test('unsupported publishing offers the reports, not publishing', () {
+      final step = stepAt(
+        stepFacts(
+          state: LifecycleState.completed,
+          publication: PublicationFacts.unsupported,
+        ),
+      );
+      expect(step.kind, NextStepKind.viewReports);
+      expect(
+        step.body,
+        'Publishing is not available on this server. Reports are available.',
+      );
+      expect(step.primary.target, NextStepTarget.reports);
     });
   });
 }

@@ -23,6 +23,38 @@ Response errorResponse(
   headers: {'content-type': 'application/json; charset=utf-8'},
 );
 
+/// Flattens [text] to a single, bounded line for the log: control characters
+/// (including newlines) become spaces and the result is cut off, so a message
+/// can never forge an extra log line.
+String _oneLine(String text) {
+  const max = 500;
+  final flat = text.replaceAll(RegExp(r'[\u0000-\u001F]'), ' ').trim();
+  return flat.length <= max ? flat : flat.substring(0, max);
+}
+
+/// Logs one warning line for a handled error and answers with the JSON
+/// error response.
+///
+/// The line carries the method and path without its query string, the status,
+/// the error code and the request id, so an unexpected 400 or 404 leaves a
+/// trace. Query strings and headers are left out, so secrets never reach the
+/// log. The message is the exception's own text, not its stack, flattened to
+/// one line and truncated so it cannot forge extra log lines. Stacks stay in
+/// the log only for the unexpected 500 branch, which does not use this.
+Response handledError(
+  Request request,
+  int statusCode,
+  String code,
+  String message,
+) {
+  final requestId = requestIdOf(request);
+  _logger.warning(
+    '$statusCode on ${request.method} /${request.url.path} '
+    'code=$code request=$requestId message=${_oneLine(message)}',
+  );
+  return errorResponse(statusCode, code, message, requestId: requestId);
+}
+
 /// Turns thrown errors and bare 404s into the standard JSON error body.
 ///
 /// - `SyncRefusal`: its own status and code (426, 409, 403, 410)
@@ -38,78 +70,48 @@ Response errorResponse(
 ///   only, so a response never leaks a stack trace or SQL.
 Middleware errorMappingMiddleware() =>
     (inner) => (request) async {
-      final requestId = requestIdOf(request);
       try {
         final response = await inner(request);
         if (response.statusCode == 404 &&
             !(response.headers['content-type'] ?? '').contains('json')) {
-          return errorResponse(
-            404,
-            'not_found',
-            'No such route.',
-            requestId: requestId,
-          );
+          return handledError(request, 404, 'not_found', 'No such route.');
         }
         return response;
       } on HijackException {
         rethrow;
       } on EntityNotFoundError catch (e) {
-        return errorResponse(404, 'not_found', '$e', requestId: requestId);
+        return handledError(request, 404, 'not_found', '$e');
       } on ForbiddenError catch (e) {
-        return errorResponse(403, e.code, e.message, requestId: requestId);
+        return handledError(request, 403, e.code, e.message);
       } on SyncRefusal catch (e) {
-        return errorResponse(
-          e.statusCode,
-          e.code,
-          e.message,
-          requestId: requestId,
-        );
+        return handledError(request, e.statusCode, e.code, e.message);
       } on AccountClaimError catch (e) {
-        return errorResponse(409, e.code, e.message, requestId: requestId);
+        return handledError(request, 409, e.code, e.message);
       } on GliderScoreImportError catch (e) {
-        return errorResponse(
-          e.statusCode,
-          e.code,
-          e.message,
-          requestId: requestId,
-        );
+        return handledError(request, e.statusCode, e.code, e.message);
       } on BackendOnlyError catch (e) {
-        return errorResponse(409, 'backend_only', '$e', requestId: requestId);
+        return handledError(request, 409, 'backend_only', '$e');
       } on ContestStateError catch (e) {
-        return errorResponse(409, e.code, e.message, requestId: requestId);
+        return handledError(request, 409, e.code, e.message);
       } on StaleRevisionError catch (e) {
-        return errorResponse(409, 'stale_revision', '$e', requestId: requestId);
+        return handledError(request, 409, 'stale_revision', '$e');
       } on AlreadyStoredError catch (e) {
-        return errorResponse(409, 'already_stored', '$e', requestId: requestId);
+        return handledError(request, 409, 'already_stored', '$e');
       } on AlreadySupersededError catch (e) {
-        return errorResponse(
-          409,
-          'already_superseded',
-          '$e',
-          requestId: requestId,
-        );
+        return handledError(request, 409, 'already_superseded', '$e');
       } on ScoringValidationError catch (e) {
-        return errorResponse(
-          400,
-          'invalid_request',
-          '$e',
-          requestId: requestId,
-        );
+        return handledError(request, 400, 'invalid_request', '$e');
       } on ArgumentError catch (e) {
-        return errorResponse(
+        return handledError(
+          request,
           400,
           'invalid_request',
-          '${e.message}',
-          requestId: requestId,
+          e.message ?? e.toString(),
         );
       } on FormatException catch (e) {
-        return errorResponse(
-          400,
-          'invalid_request',
-          e.message,
-          requestId: requestId,
-        );
+        return handledError(request, 400, 'invalid_request', e.message);
       } catch (e, stack) {
+        final requestId = requestIdOf(request);
         _logger.severe('Unhandled error (request $requestId)', e, stack);
         return errorResponse(
           500,

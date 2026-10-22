@@ -227,6 +227,104 @@ void main() {
       expect(contests.metadata.last.clientMutationId, 'm2');
     });
 
+    test(
+      'a success leaves one StateTransition event with who and what',
+      () async {
+        await service.applyAction(
+          contestId,
+          ContestAction.lock,
+          baseRevision: 0,
+          metadata: metadata('m2'),
+        );
+
+        final event = contests.audits.single;
+        expect(event.action, AuditAction.stateTransition);
+        expect(event.entityType, 'Contest');
+        expect(event.contestId, contestId);
+        expect(event.actorId, owner);
+        expect(event.authority, Authority.director);
+        expect(event.serverTimestamp, now);
+        expect(event.baseRevision, 0);
+        expect(event.resultingRevision, 1);
+        expect(event.reason, 'lock: AdminLock Unlocked → Locked');
+        expect(ContestTransitionAudit.actionOf(event), ContestAction.lock);
+      },
+    );
+
+    test('completing records every field it changes', () async {
+      final running = Contest.fromJson({
+        ...contests.stored[contestId]!.toJson(),
+        'lifecycle_state': 'Running',
+        'scoring_access': 'Open',
+      });
+      contests.stored[contestId] = running;
+
+      await service.applyAction(
+        contestId,
+        ContestAction.complete,
+        baseRevision: 0,
+        metadata: metadata('m2'),
+      );
+
+      expect(
+        contests.audits.single.reason,
+        'complete: LifecycleState Running → Completed; '
+        'ScoringAccess Open → Closed',
+      );
+    });
+
+    test('completing records that it lifted results hiding', () async {
+      contests.stored[contestId] = Contest.fromJson({
+        ...contests.stored[contestId]!.toJson(),
+        'lifecycle_state': 'Running',
+        'scoring_access': 'Open',
+        'results_hidden_through_round': 3,
+        'results_hidden_at': now.toIso8601String(),
+      });
+
+      await service.applyAction(
+        contestId,
+        ContestAction.complete,
+        baseRevision: 0,
+        metadata: metadata('m2'),
+      );
+
+      expect(
+        contests.audits.single.reason,
+        contains('ResultsHidden through round 3 → none'),
+      );
+    });
+
+    test('closeScoring and unlock leave their own events', () async {
+      contests.stored[contestId] = Contest.fromJson({
+        ...contests.stored[contestId]!.toJson(),
+        'scoring_access': 'Open',
+        'admin_lock': 'Locked',
+      });
+
+      final closed = await service.applyAction(
+        contestId,
+        ContestAction.closeScoring,
+        baseRevision: 0,
+        metadata: metadata('m2'),
+      );
+      await service.applyAction(
+        contestId,
+        ContestAction.unlock,
+        baseRevision: closed.revision,
+        metadata: metadata('m3'),
+      );
+
+      expect(contests.audits.map((e) => e.reason), [
+        'closeScoring: ScoringAccess Open → Closed',
+        'unlock: AdminLock Locked → Unlocked',
+      ]);
+      expect(contests.audits.map(ContestTransitionAudit.actionOf), [
+        ContestAction.closeScoring,
+        ContestAction.unlock,
+      ]);
+    });
+
     test('a stale base revision is reported before the state rules', () async {
       expect(
         () => service.applyAction(
@@ -250,6 +348,7 @@ void main() {
         throwsA(isA<ContestStateError>()),
       );
       expect(contests.stored[contestId]!.revision, 0);
+      expect(contests.audits, isEmpty);
     });
 
     test('an unknown contest is not found', () {

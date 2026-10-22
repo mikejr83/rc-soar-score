@@ -49,6 +49,8 @@ abstract final class StatusSummary {
         'Publication',
         !publication.isKnown
             ? 'Unknown'
+            : !publication.supported
+            ? 'Not available'
             : publication.isPublished
             ? 'Published'
             : 'Unpublished',

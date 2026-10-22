@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_contest/widgets/workspace/workspace_banners.dart';
 import 'package:soar_score_core/soar_score_core.dart';
@@ -101,13 +100,17 @@ void main() {
       expect(server.contestReads, reads);
     });
 
-    testWidgets('is announced as a status, not an alert', (tester) async {
+    testWidgets('is announced as a live region (the status role is web-only)', (
+      tester,
+    ) async {
       final handle = tester.ensureSemantics();
       await pumpShellWorkspace(tester, _completed(), monitor: _offline());
       final data = tester
           .getSemantics(find.byKey(_offlineKey))
           .getSemanticsData();
-      expect(data.role, SemanticsRole.status);
+      // Native builds announce banners through the live region; the web role
+      // mapping is covered in page_state_view_test.
+      expect(data.flagsCollection.isLiveRegion, isTrue);
       handle.dispose();
     });
   });
@@ -153,7 +156,7 @@ void main() {
       final data = tester
           .getSemantics(find.byKey(_staleKey))
           .getSemanticsData();
-      expect(data.role, SemanticsRole.alert);
+      expect(data.flagsCollection.isLiveRegion, isTrue);
       expect(cardTitle(tester), before);
       handle.dispose();
     });
