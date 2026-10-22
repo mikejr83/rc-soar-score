@@ -11,7 +11,7 @@ import '../services/participants/participant_editor_controller.dart';
 import '../services/participants/participant_field.dart';
 import '../services/participants/participant_storage.dart';
 import '../services/sync/app_sync_state.dart';
-import '../widgets/message_view.dart';
+import '../widgets/page_states/page_states.dart';
 import '../widgets/participant_editor/duplicate_decision_panel.dart';
 import '../widgets/participant_editor/editor_action_bar.dart';
 import '../widgets/participant_editor/editor_banner.dart';
@@ -268,15 +268,15 @@ class _ParticipantEditorPageState extends State<ParticipantEditorPage> {
         case EditorPhase.loading:
           return const EditorSkeleton();
         case EditorPhase.loadFailed:
-          return MessageView(
-            text: 'Couldn’t load this participant',
-            detail: _c.error,
+          return loadFailedView(
+            _c.loadError ?? StateError(_c.error ?? 'Unknown error'),
+            title: 'Couldn’t load this participant',
             onRetry: _c.load,
-            action: TextButton(
+            secondary: PageStateAction(
+              label: _fromWizard
+                  ? 'Back to contest setup'
+                  : 'Back to participants',
               onPressed: _leave,
-              child: Text(
-                _fromWizard ? 'Back to contest setup' : 'Back to participants',
-              ),
             ),
           );
         default:

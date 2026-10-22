@@ -12,7 +12,7 @@ import '../../services/scoring/scoring_controller.dart';
 import '../../services/scoring/scoring_row.dart';
 import '../../widgets/api_error_text.dart';
 import '../../widgets/contest_scope.dart';
-import '../../widgets/message_view.dart';
+import '../../widgets/page_states/page_states.dart';
 import '../../services/scoring/retire_impact.dart';
 import '../../widgets/scoring/penalty_removal_dialog.dart';
 import '../../widgets/scoring/retire_pilot_dialog.dart';
@@ -345,7 +345,9 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
     final c = _controller;
     return Scaffold(
       body: c == null
-          ? const MessageView(text: 'No API client is available.')
+          ? const PageStateView.unavailable(
+              title: 'No API client is available.',
+            )
           : _body(c),
     );
   }
@@ -353,26 +355,26 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
   Widget _body(ScoringController c) {
     if (c.data == null) {
       if (c.loadError != null) {
-        return MessageView(
-          text: 'The scores could not be loaded.',
-          detail: apiErrorText(c.loadError!),
+        return loadFailedView(
+          c.loadError!,
+          title: 'The scores could not be loaded.',
           onRetry: c.load,
         );
       }
-      return const Center(
+      return const PageStateView.loading(
         key: ValueKey('scoring-loading'),
-        child: CircularProgressIndicator(),
+        label: 'Loading the scores',
       );
     }
     final data = c.data!;
     if (data.matrix.isEmpty) {
-      return MessageView(
-        text: 'This contest has no matrix yet.',
-        detail: 'Draw the matrix first. Then scores can be entered here.',
-        action: FilledButton(
+      return PageStateView.empty(
+        title: 'This contest has no matrix yet.',
+        body: 'Draw the matrix first. Then scores can be entered here.',
+        primary: PageStateAction(
           key: const ValueKey('scoring-open-matrix'),
+          label: 'Open the matrix',
           onPressed: () => context.go(contestMatrixPath(widget.contestId)),
-          child: const Text('Open the matrix'),
         ),
       );
     }
@@ -424,10 +426,10 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
                   ),
                 Expanded(
                   child: rows.isEmpty
-                      ? const MessageView(
+                      ? const PageStateView.empty(
                           key: ValueKey('scoring-empty-group'),
-                          text: 'No pilots in this group.',
-                          detail:
+                          title: 'No pilots in this group.',
+                          body:
                               'Every pilot assigned here is absent or retired.',
                         )
                       : LayoutBuilder(
