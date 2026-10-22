@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_contest/widgets/page_states/page_states.dart';
 
@@ -77,29 +76,32 @@ void main() {
     }
   });
 
-  testWidgets('failures are announced as alerts, the rest as status', (
+  testWidgets('every state is a live region so it is announced', (
     tester,
   ) async {
     final handle = tester.ensureSemantics();
-    final views = <(PageStateView, SemanticsRole)>[
-      (const PageStateView.unavailable(title: 'T'), SemanticsRole.alert),
-      (const PageStateView.authorization(title: 'T'), SemanticsRole.alert),
-      (const PageStateView.conflict(title: 'T'), SemanticsRole.alert),
-      (const PageStateView.loading(label: 'T'), SemanticsRole.status),
-      (const PageStateView.empty(title: 'T'), SemanticsRole.status),
-      (const PageStateView.notFound(title: 'T'), SemanticsRole.status),
+    const views = <PageStateView>[
+      PageStateView.loading(label: 'T'),
+      PageStateView.empty(title: 'T'),
+      PageStateView.notFound(title: 'T'),
+      PageStateView.unavailable(title: 'T'),
+      PageStateView.authorization(title: 'T'),
+      PageStateView.conflict(title: 'T'),
     ];
-    for (final (view, role) in views) {
+    for (final view in views) {
       await _pump(tester, view);
-      final node = tester.getSemantics(
-        find.descendant(
-          of: find.byType(PageStateView),
-          matching: find.byWidgetPredicate(
-            (w) => w is Semantics && w.properties.role == role,
-          ),
+      final live = find.descendant(
+        of: find.byType(PageStateView),
+        matching: find.byWidgetPredicate(
+          (w) => w is Semantics && w.properties.liveRegion == true,
         ),
       );
-      expect(node.role, role, reason: '${view.kind}');
+      expect(live, findsOneWidget, reason: '${view.kind}');
+      expect(
+        tester.getSemantics(live).flagsCollection.isLiveRegion,
+        isTrue,
+        reason: '${view.kind}',
+      );
     }
     handle.dispose();
   });

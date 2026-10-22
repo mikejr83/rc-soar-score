@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/semantics.dart';
 
 /// A button of a [PageStateView]: its label, what it does and an optional key.
 class PageStateAction {
@@ -16,24 +15,21 @@ class PageStateAction {
 
 /// What a [PageStateView] says about the page.
 enum PageStateKind {
-  loading(Icons.hourglass_empty, SemanticsRole.status),
-  empty(Icons.inbox_outlined, SemanticsRole.status),
-  notFound(Icons.search_off, SemanticsRole.status),
-  unavailable(Icons.cloud_off, SemanticsRole.alert),
-  authorization(Icons.lock_outline, SemanticsRole.alert),
-  conflict(Icons.sync_problem, SemanticsRole.alert);
+  loading(Icons.hourglass_empty),
+  empty(Icons.inbox_outlined),
+  notFound(Icons.search_off),
+  unavailable(Icons.cloud_off),
+  authorization(Icons.lock_outline),
+  conflict(Icons.sync_problem);
 
-  const PageStateKind(this.icon, this.role);
+  const PageStateKind(this.icon);
 
   final IconData icon;
-
-  /// Failures are alerts and the rest status, so a screen reader announces
-  /// them when they replace the page.
-  final SemanticsRole role;
 }
 
 /// A page-sized state that replaces a page's content: an icon (or a spinner
-/// while loading), a title, an optional body and up to two actions. The
+/// while loading), a title, an optional body and up to two actions. It is a
+/// live region, so a screen reader announces it when it replaces the page. The
 /// shell's rail and header stay. An icon and text carry the meaning, never
 /// colour alone.
 ///
@@ -129,7 +125,10 @@ class PageStateView extends StatelessWidget {
           constraints: const BoxConstraints(maxWidth: 480),
           child: Semantics(
             container: true,
-            role: kind.role,
+            // A live region announces the state when it replaces the page, on
+            // every platform. Flutter does not allow a status or alert role on
+            // the same node, and roles are only supported on the web.
+            liveRegion: true,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
