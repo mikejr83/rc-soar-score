@@ -4,6 +4,7 @@ import 'package:soar_score_contest/app.dart';
 import 'package:soar_score_contest/app_mode_provider.dart';
 import 'package:soar_score_contest/pages/home_page.dart';
 import 'package:soar_score_contest/pages/landing_page.dart';
+import 'package:soar_score_ui/soar_score_ui.dart';
 
 void main() {
   testWidgets('renders the contest-administration landing page', (
@@ -13,8 +14,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(LandingPage), findsOneWidget);
-    // The title appears in the AppBar and again as the page heading.
-    expect(find.text(LandingPage.title), findsWidgets);
+    // The lockup logo carries the app name.
+    expect(find.byType(BrandLogo), findsOneWidget);
   });
 
   testWidgets('displays the shell structure with title', (
@@ -23,7 +24,7 @@ void main() {
     await tester.pumpWidget(const SoarScoreContestApp());
     await tester.pumpAndSettle();
 
-    expect(find.text('RC Soar Score'), findsWidgets);
+    expect(find.bySemanticsLabel(LandingPage.title), findsWidgets);
     expect(
       find.text('Manage and score RC sailplane soaring contests.'),
       findsOneWidget,

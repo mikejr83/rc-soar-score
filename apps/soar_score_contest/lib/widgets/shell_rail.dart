@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:soar_score_ui/soar_score_ui.dart';
 
 import '../collapsible_areas_provider.dart';
 import '../services/collapsible_areas/collapsible_area.dart';
@@ -231,7 +232,7 @@ class _RailTitle extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.paragliding, color: color),
+                  const _RailLogo(),
                   const SizedBox(width: 8),
                   title,
                 ],
@@ -241,12 +242,24 @@ class _RailTitle extends StatelessWidget {
               width: 72,
               child: Column(
                 children: [
-                  Icon(Icons.paragliding, color: color),
+                  const _RailLogo(),
                   const SizedBox(height: 4),
                   title,
                 ],
               ),
             ),
+    );
+  }
+}
+
+/// The app icon shown beside the application title.
+class _RailLogo extends StatelessWidget {
+  const _RailLogo();
+
+  @override
+  Widget build(BuildContext context) {
+    return const ExcludeSemantics(
+      child: BrandLogo(variant: BrandLogoVariant.appIcon, height: 28),
     );
   }
 }
