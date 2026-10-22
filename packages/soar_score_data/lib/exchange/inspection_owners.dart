@@ -87,6 +87,28 @@ class InspectionOwnerMarkers {
     return InspectionOwnerSet(identities);
   }
 
+  /// Whether [owner] has a marker. A targeted read, so a caller that only
+  /// needs one answer does not load every marker. Throws when the audit
+  /// events cannot be read.
+  Future<bool> isMarked(core.Id owner) async {
+    final row = await _db
+        .customSelect(
+          portableSql(
+            _db,
+            'SELECT 1 AS found FROM audit_events '
+            "WHERE entity_type = ? AND action = 'Restoration' "
+            'AND entity_id = ? LIMIT 1',
+          ),
+          variables: [
+            Variable<String>(inspectionOwnerEntityType),
+            Variable<String>(owner.value),
+          ],
+          readsFrom: {_db.auditEvents},
+        )
+        .getSingleOrNull();
+    return row != null;
+  }
+
   /// The audit event row that marks [owner] as the inspection owner of
   /// [identities], for [contestId] imported from [source].
   static Map<String, Object?> markerRow({

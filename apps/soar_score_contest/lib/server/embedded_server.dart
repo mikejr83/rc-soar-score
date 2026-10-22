@@ -8,7 +8,9 @@ import 'package:soar_score_api_handlers/soar_score_api_handlers.dart';
 import 'package:soar_score_core/soar_score_core.dart' as core;
 import 'package:soar_score_data/soar_score_data.dart';
 
+import '../platform/inspection_owner_guard.dart';
 import 'embedded_guard.dart';
+import 'owner_scoped_principal.dart';
 
 final _logger = Logger('EmbeddedServer');
 
@@ -40,6 +42,12 @@ class EmbeddedServer {
   late core.Repository _repository;
   late core.Id _localAccountId;
   late core.Id _actingAccountId;
+
+  /// Which owner ids belong to contests imported for inspection. Shared with
+  /// the sync engine, so both decide from the same answers.
+  late final InspectionOwnerGuard inspectionOwners = InspectionOwnerGuard(
+    _database,
+  );
 
   /// The OS-assigned port the local socket is bound to.
   int get port => _server.port;
@@ -101,14 +109,11 @@ class EmbeddedServer {
       version: embeddedServerVersion,
       schemaRevision: _database.schemaVersion,
       repository: _repository,
-      authMiddleware: (inner) =>
-          (request) => inner(
-            request.change(
-              context: {
-                principalContextKey: Principal(accountId: _actingAccountId),
-              },
-            ),
-          ),
+      authMiddleware: ownerScopedPrincipal(
+        acting: () => _actingAccountId,
+        database: _database,
+        guard: inspectionOwners,
+      ),
       gliderScoreImport: GliderScoreImportProcessRunner(),
     );
     final guarded = const Pipeline()

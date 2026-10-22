@@ -20,6 +20,7 @@ class AccountBoundSyncGateway implements SyncGateway {
     this._inner, {
     required this.acting,
     required this.ownerOf,
+    this.isInspectionOwner,
   });
 
   final SyncGateway _inner;
@@ -28,6 +29,11 @@ class AccountBoundSyncGateway implements SyncGateway {
   /// The account that owns the data of a scope, or `null` when none does
   /// (not known, or the Local account).
   final Future<core.Id?> Function(core.SyncScopeKey scope) ownerOf;
+
+  /// Whether an owner holds data imported for inspection, which is never
+  /// sent. A second line of defence behind the engine's own check: a request
+  /// about such a scope is refused here, or fails if that cannot be told.
+  final Future<bool> Function(core.Id owner)? isInspectionOwner;
 
   Future<T> _bound<T>(String what, int? lease, Future<T> Function() send) {
     if (lease == null) throw SessionChangedError(what);
@@ -40,6 +46,9 @@ class AccountBoundSyncGateway implements SyncGateway {
     Future<T> Function() send,
   ) async {
     final owner = await ownerOf(scope);
+    if (owner != null && await isInspectionOwner?.call(owner) == true) {
+      throw InspectionDataError(what);
+    }
     // No await between choosing the sign-in and starting the request.
     return _bound(what, owner == null ? null : acting.leaseFor(owner), send);
   }
@@ -86,4 +95,16 @@ class AccountBoundSyncGateway implements SyncGateway {
     scope,
     () => _inner.resolveConflict(conflictId, request, scope: scope),
   );
+}
+
+/// A request about data imported for inspection was about to be sent.
+class InspectionDataError implements Exception {
+  const InspectionDataError(this.what);
+
+  final String what;
+
+  @override
+  String toString() =>
+      'InspectionDataError: $what is data imported for '
+      'inspection and is never sent';
 }

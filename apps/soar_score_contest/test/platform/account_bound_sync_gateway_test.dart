@@ -208,4 +208,69 @@ void main() {
     await expectLater(result, throwsA(isA<SessionChangedError>()));
     expect(sent, isEmpty);
   });
+
+  group('data imported for inspection', () {
+    late AccountBoundSyncGateway inspecting;
+
+    setUp(() {
+      inspecting = AccountBoundSyncGateway(
+        gateway,
+        acting: acting,
+        ownerOf: (scope) async =>
+            scope is core.DirectorScopeKey ? scope.ownerAccountId : null,
+        isInspectionOwner: (owner) async => owner == accountA,
+      );
+    });
+
+    test('is never sent, even for the account the app acts as', () async {
+      await expectLater(
+        inspecting.exchange(
+          SyncExchangeRequest(
+            protocolVersion: 1,
+            schemaVersion: 1,
+            installationId: core.Id.create(),
+            scope: SyncScopeDto.owner(accountA),
+            lastAcknowledgedSequence: 0,
+          ),
+        ),
+        throwsA(isA<InspectionDataError>()),
+      );
+      await expectLater(
+        inspecting.resolveConflict(
+          core.Id.create(),
+          ResolveConflictRequest(
+            clientMutationId: 'm-1',
+            choice: core.ConflictResolutionChoice.keptAccepted,
+          ),
+          scope: scopeA,
+        ),
+        throwsA(isA<InspectionDataError>()),
+      );
+      expect(sent, isEmpty);
+    });
+
+    test('is not sent when the markers cannot be read', () async {
+      final unreadable = AccountBoundSyncGateway(
+        gateway,
+        acting: acting,
+        ownerOf: (scope) async =>
+            scope is core.DirectorScopeKey ? scope.ownerAccountId : null,
+        isInspectionOwner: (owner) async => throw StateError('unreadable'),
+      );
+
+      await expectLater(
+        unreadable.exchange(
+          SyncExchangeRequest(
+            protocolVersion: 1,
+            schemaVersion: 1,
+            installationId: core.Id.create(),
+            scope: SyncScopeDto.owner(accountA),
+            lastAcknowledgedSequence: 0,
+          ),
+        ),
+        throwsA(isA<StateError>()),
+      );
+      expect(sent, isEmpty);
+    });
+  });
 }

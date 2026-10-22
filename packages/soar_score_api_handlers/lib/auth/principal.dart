@@ -16,10 +16,24 @@ class Principal extends Equatable {
   const Principal({
     required this.accountId,
     this.authority = Authority.director,
+    this.alsoVisibleOwners = const {},
   });
 
   final Id accountId;
   final Authority authority;
+
+  /// Owners, besides [accountId], whose data the lists of the director's own
+  /// rows (participants, roles, landing tables) also show. Empty on the
+  /// hosted server; the embedded instance names the owners of contests
+  /// imported for inspection.
+  final Set<Id> alsoVisibleOwners;
+
+  /// The owners the lists show: [accountId] first, then the others.
+  List<Id> get visibleOwners => [
+    accountId,
+    for (final owner in alsoVisibleOwners)
+      if (owner != accountId) owner,
+  ];
 
   /// The metadata for a mutation this principal makes.
   ///
@@ -35,7 +49,7 @@ class Principal extends Equatable {
   );
 
   @override
-  List<Object?> get props => [accountId, authority];
+  List<Object?> get props => [accountId, authority, alsoVisibleOwners];
 }
 
 /// The [Principal] the auth layer set on [request], or null if none did.
