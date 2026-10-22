@@ -233,8 +233,8 @@ class _RailTitle extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   const _RailLogo(),
-                  const SizedBox(width: 8),
-                  title,
+                  // const SizedBox(width: 8),
+                  // title,
                 ],
               ),
             )
@@ -243,8 +243,8 @@ class _RailTitle extends StatelessWidget {
               child: Column(
                 children: [
                   const _RailLogo(),
-                  const SizedBox(height: 4),
-                  title,
+                  // const SizedBox(height: 4),
+                  // title,
                 ],
               ),
             ),
@@ -259,7 +259,7 @@ class _RailLogo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const ExcludeSemantics(
-      child: BrandLogo(variant: BrandLogoVariant.appIcon, height: 28),
+      child: BrandLogo(variant: BrandLogoVariant.mark, height: 48),
     );
   }
 }
