@@ -10,6 +10,7 @@ Drift database schema and the repository implementations for both SQLite (native
 - `lib/sync/` — `SyncStore`, change applier, unit of work and entity stores (hand-written SQL goes through the placeholder rewrite helper)
 - `lib/seeding/` — system data seeder and the demo database seeder (`seeding/demo/`)
 - `lib/import/` — GliderScore import process runner
+- `lib/exchange/` — contest export and import (`.rcsoar` files, see `plan/architecture-requirements/offline-synchronization.md`). A new table must be classified in `exchange_tables.dart` (exported, derived, system, installation state or service only); a test fails otherwise. An account column in an exported table must be listed in `localAccountReferences`.
 - `test/` — mirrors `lib/`; `test/support/` holds the shared database setup
 
 ## Boundaries
