@@ -23,8 +23,23 @@ Future<void> exportContest(BuildContext context, Contest contest) async {
     builder: (_) => _ExportDialog(contest: contest),
   );
   if (redact == null) return;
+  final ExchangeExport export;
   try {
-    final export = await exchange.export(contest.id, redact: redact);
+    export = await exchange.export(contest.id, redact: redact);
+  } on ExchangeFailure catch (e) {
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text('The contest could not be exported. ${e.message}'),
+      ),
+    );
+    return;
+  } on Exception {
+    messenger.showSnackBar(
+      const SnackBar(content: Text('The contest could not be exported.')),
+    );
+    return;
+  }
+  try {
     final name = await ExchangeFiles.current.save(
       export.fileName,
       export.bytes,
@@ -32,15 +47,15 @@ Future<void> exportContest(BuildContext context, Contest contest) async {
     if (name != null) {
       messenger.showSnackBar(SnackBar(content: Text('Saved $name')));
     }
-  } on ExchangeFailure catch (e) {
+  } on PlatformException catch (e) {
     messenger.showSnackBar(
       SnackBar(
-        content: Text('The contest could not be exported. ${e.message}'),
+        content: Text(
+          'The contest could not be saved to a file. ${_describe(e)}',
+        ),
       ),
     );
-  } on Exception catch (e) {
-    // The file could not be written: a full disk, a folder that is not
-    // writable, a file dialog that failed.
+  } on FileSystemException catch (e) {
     messenger.showSnackBar(
       SnackBar(
         content: Text(
@@ -133,7 +148,12 @@ Future<ExchangeImported?> importContest(BuildContext context) async {
   final ChosenExchangeFile? chosen;
   try {
     chosen = await ExchangeFiles.current.choose();
-  } on Exception catch (e) {
+  } on PlatformException catch (e) {
+    messenger.showSnackBar(
+      SnackBar(content: Text('The file could not be opened. ${_describe(e)}')),
+    );
+    return null;
+  } on FileSystemException catch (e) {
     messenger.showSnackBar(
       SnackBar(content: Text('The file could not be opened. ${_describe(e)}')),
     );

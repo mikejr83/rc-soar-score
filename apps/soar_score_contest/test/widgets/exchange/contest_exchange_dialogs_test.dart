@@ -300,6 +300,21 @@ void main() {
     );
     expect(find.byKey(const ValueKey('import-dialog')), findsNothing);
   });
+
+  testWidgets('an export that fails is not reported as a save failure', (
+    tester,
+  ) async {
+    ContestExchange.current = _ExportBreaks();
+    await pumpPage(tester);
+    await tester.tap(find.byKey(const ValueKey('go-export')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('export-save')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('The contest could not be exported.'), findsOneWidget);
+    expect(find.textContaining('saved to a file'), findsNothing);
+    expect(saved, isEmpty);
+  });
 }
 
 class _Unreadable extends _FakeExchange {
@@ -308,4 +323,12 @@ class _Unreadable extends _FakeExchange {
   @override
   Future<ExchangePreview> preview(Uint8List bytes) =>
       throw const ExchangeFailure('It is not a contest file.');
+}
+
+class _ExportBreaks extends _FakeExchange {
+  _ExportBreaks() : super(_preview());
+
+  @override
+  Future<ExchangeExport> export(Id contestId, {required bool redact}) =>
+      throw Exception('database is closed');
 }
