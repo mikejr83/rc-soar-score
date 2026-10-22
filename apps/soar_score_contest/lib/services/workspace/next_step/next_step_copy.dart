@@ -189,13 +189,19 @@ abstract final class NextStepCopy {
 
   static String reportsBody(WorkspaceFacts f) {
     final publication = f.publication;
+    final completedAt = f.completedAt;
+    // Without publication details the card still dates the completion (#345).
+    final completed = completedAt == null
+        ? ''
+        : 'The contest was completed '
+              '${NextStepText.when(completedAt, f.contest.timezone)}. ';
     if (!publication.isKnown) {
-      return 'Publication status can’t be loaded right now. Reports are '
-          'available.';
+      return '${completed}Publication status can’t be loaded right now. '
+          'Reports are available.';
     }
     if (!publication.supported) {
-      return 'Publishing is not available on this server. Reports are '
-          'available.';
+      return '${completed}Publishing is not available on this server. '
+          'Reports are available.';
     }
     final at = publication.publishedAt;
     final published = at == null

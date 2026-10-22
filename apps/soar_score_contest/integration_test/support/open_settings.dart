@@ -11,8 +11,14 @@ Future<void> openSettings(WidgetTester tester) async {
   final menu = find.byKey(const ValueKey('account-menu'));
   if (menu.evaluate().isNotEmpty) {
     await tapVisible(tester, menu);
-    await pumpUntilFound(tester, find.text('Settings'));
-    await tapVisible(tester, find.text('Settings'));
+    // Other widgets can carry the word too (a tooltip shown by the hovering
+    // pointer on Windows), so pick the menu entry itself.
+    final item = find.descendant(
+      of: find.byType(PopupMenuItem<VoidCallback>),
+      matching: find.text('Settings'),
+    );
+    await pumpUntilFound(tester, item);
+    await tapVisible(tester, item);
   } else {
     await tapVisible(tester, find.byKey(const ValueKey('settings-button')));
   }

@@ -61,7 +61,9 @@ void main() {
 
     // Resetting the panels on Settings brings the summary back.
     await _resetPanels(tester);
-    await tapRail(tester, 'Contests');
+    // Settings opened inside a contest keeps the contest rail, which has no
+    // Contests entry, so go back through the breadcrumb.
+    await _backToContestList(tester);
     await _openFrontRangeMatrix(tester);
     expect(_fairness, findsOneWidget);
     expect(find.text('Hide summary'), findsOneWidget);
@@ -83,7 +85,9 @@ void main() {
     expect(_details, findsOneWidget);
 
     await _resetPanels(tester);
-    await tapRail(tester, 'Contests');
+    // Settings opened inside a contest keeps the contest rail, which has no
+    // Contests entry, so go back through the breadcrumb.
+    await _backToContestList(tester);
     await _openFrontRangeMatrix(tester);
     expect(_details, findsNothing);
   });
@@ -112,7 +116,9 @@ void main() {
     expect(_advanced, findsOneWidget);
 
     await _resetPanels(tester);
-    await tapRail(tester, 'Contests');
+    // Settings opened inside a contest keeps the contest rail, which has no
+    // Contests entry, so go back through the breadcrumb.
+    await _backToContestList(tester);
     await openContest(tester, 'Club Thermal Fun Fly');
     await tapRail(tester, 'Matrix');
     await pumpUntilFound(tester, find.text('No matrix drawn yet'));
