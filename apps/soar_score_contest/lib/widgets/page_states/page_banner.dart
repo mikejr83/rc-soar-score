@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
+import 'package:soar_score_ui/soar_score_ui.dart';
 
 /// How urgent a banner is, which sets how assistive technology announces it:
 /// by role on the web and as a live region elsewhere.
@@ -18,7 +19,10 @@ enum PageBannerKind {
   neutral(SemanticsRole.status),
 
   /// Something went through (role status).
-  success(SemanticsRole.status);
+  success(SemanticsRole.status),
+
+  /// Something is settled and good, in the status colours (role status).
+  positive(SemanticsRole.status);
 
   const PageBannerKind(this.role);
 
@@ -46,12 +50,21 @@ class PageBannerAction {
     this.onPressed, {
     this.emphasis = PageBannerEmphasis.text,
     this.key,
+    this.icon,
+    this.focusOrder,
   });
 
   final String label;
   final VoidCallback? onPressed;
   final PageBannerEmphasis emphasis;
   final Key? key;
+
+  /// An icon before the label.
+  final IconData? icon;
+
+  /// Where the button sits in the Tab order of the enclosing group, when it
+  /// must not follow the layout order.
+  final double? focusOrder;
 }
 
 /// A banner above a page's content. It adds to the page and never replaces
@@ -69,6 +82,7 @@ class PageBanner extends StatelessWidget {
     required this.icon,
     required this.text,
     this.title,
+    this.lead,
     this.shape = PageBannerShape.band,
     this.actionLabel,
     this.onAction,
@@ -85,6 +99,9 @@ class PageBanner extends StatelessWidget {
 
   /// A bold line above [text]; none when `null`.
   final String? title;
+
+  /// A bold word or phrase that starts [text] on the same line.
+  final String? lead;
   final PageBannerShape shape;
 
   /// The label of the banner's one action; no action when `null`.
@@ -104,7 +121,10 @@ class PageBanner extends StatelessWidget {
   /// Key of the banner's text, for tests that read the message.
   final Key? textKey;
 
-  (Color, Color) _colors(ColorScheme scheme) => switch (kind) {
+  (Color, Color) _colors(
+    ColorScheme scheme, {
+    required bool dark,
+  }) => switch (kind) {
     PageBannerKind.alert => (scheme.errorContainer, scheme.onErrorContainer),
     PageBannerKind.status => (
       scheme.tertiaryContainer,
@@ -116,46 +136,92 @@ class PageBanner extends StatelessWidget {
       scheme.secondaryContainer,
       scheme.onSecondaryContainer,
     ),
+    PageBannerKind.positive => (
+      AppStatusColors.getSuccessContainer(dark),
+      AppStatusColors.getOnSuccessContainer(dark),
+    ),
   };
 
   Widget _button(
     PageBannerAction action,
     ColorScheme scheme,
     Color foreground,
-  ) => switch (action.emphasis) {
-    PageBannerEmphasis.text => TextButton(
-      key: action.key,
-      onPressed: action.onPressed,
-      style: TextButton.styleFrom(foregroundColor: foreground),
-      child: Text(action.label),
-    ),
-    PageBannerEmphasis.outlined => OutlinedButton(
-      key: action.key,
-      onPressed: action.onPressed,
-      style: OutlinedButton.styleFrom(
-        foregroundColor: foreground,
-        side: BorderSide(color: foreground),
-      ),
-      child: Text(action.label),
-    ),
-    PageBannerEmphasis.filled => FilledButton(
-      key: action.key,
-      onPressed: action.onPressed,
-      style: kind == PageBannerKind.alert
-          ? FilledButton.styleFrom(
-              backgroundColor: scheme.error,
-              foregroundColor: scheme.onError,
-            )
-          : null,
-      child: Text(action.label),
-    ),
-  };
+  ) {
+    final label = Text(action.label);
+    final icon = action.icon == null ? null : Icon(action.icon, size: 18);
+    final button = switch (action.emphasis) {
+      PageBannerEmphasis.text =>
+        icon == null
+            ? TextButton(
+                key: action.key,
+                onPressed: action.onPressed,
+                style: TextButton.styleFrom(foregroundColor: foreground),
+                child: label,
+              )
+            : TextButton.icon(
+                key: action.key,
+                onPressed: action.onPressed,
+                style: TextButton.styleFrom(foregroundColor: foreground),
+                icon: icon,
+                label: label,
+              ),
+      PageBannerEmphasis.outlined =>
+        icon == null
+            ? OutlinedButton(
+                key: action.key,
+                onPressed: action.onPressed,
+                style: _outlined(foreground),
+                child: label,
+              )
+            : OutlinedButton.icon(
+                key: action.key,
+                onPressed: action.onPressed,
+                style: _outlined(foreground),
+                icon: icon,
+                label: label,
+              ),
+      PageBannerEmphasis.filled =>
+        icon == null
+            ? FilledButton(
+                key: action.key,
+                onPressed: action.onPressed,
+                style: _filled(scheme),
+                child: label,
+              )
+            : FilledButton.icon(
+                key: action.key,
+                onPressed: action.onPressed,
+                style: _filled(scheme),
+                icon: icon,
+                label: label,
+              ),
+    };
+    final order = action.focusOrder;
+    return order == null
+        ? button
+        : FocusTraversalOrder(order: NumericFocusOrder(order), child: button);
+  }
+
+  ButtonStyle _outlined(Color foreground) => OutlinedButton.styleFrom(
+    foregroundColor: foreground,
+    side: BorderSide(color: foreground),
+  );
+
+  ButtonStyle? _filled(ColorScheme scheme) => kind == PageBannerKind.alert
+      ? FilledButton.styleFrom(
+          backgroundColor: scheme.error,
+          foregroundColor: scheme.onError,
+        )
+      : null;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final (background, foreground) = _colors(scheme);
+    final (background, foreground) = _colors(
+      scheme,
+      dark: theme.brightness == Brightness.dark,
+    );
     final textStyle = theme.textTheme.bodyMedium?.copyWith(color: foreground);
     final label = actionLabel;
     final secondary = secondaryLabel;
@@ -191,7 +257,23 @@ class PageBanner extends StatelessWidget {
                         title!,
                         style: textStyle?.copyWith(fontWeight: FontWeight.w500),
                       ),
-                    if (text.isNotEmpty)
+                    if (lead != null)
+                      Text.rich(
+                        TextSpan(
+                          children: [
+                            TextSpan(
+                              text: lead,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            TextSpan(text: ' $text'),
+                          ],
+                        ),
+                        key: textKey,
+                        style: textStyle,
+                      )
+                    else if (text.isNotEmpty)
                       Text(text, key: textKey, style: textStyle),
                     ?child,
                   ],

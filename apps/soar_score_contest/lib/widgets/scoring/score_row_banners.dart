@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../services/scoring/row_save.dart';
-import '../matrix/matrix_colors.dart';
+import '../page_states/page_banner.dart';
 
 /// A line of text with an icon, and an optional button, under the entry
 /// fields. A question or a message, never a modal.
@@ -10,7 +10,7 @@ class ScoreInlineNote extends StatelessWidget {
     super.key,
     required this.icon,
     required this.text,
-    this.color,
+    this.kind = PageBannerKind.neutral,
     this.actionLabel,
     this.onAction,
     this.actionKey,
@@ -19,7 +19,7 @@ class ScoreInlineNote extends StatelessWidget {
 
   final IconData icon;
   final String text;
-  final Color? color;
+  final PageBannerKind kind;
   final String? actionLabel;
   final VoidCallback? onAction;
   final Key? actionKey;
@@ -29,80 +29,62 @@ class ScoreInlineNote extends StatelessWidget {
   final double actionOrder;
 
   @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final tint = color ?? theme.colorScheme.onSurface;
-    return Padding(
-      padding: const EdgeInsets.only(top: 10),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          color: tint.withValues(alpha: 0.12),
-          borderRadius: BorderRadius.circular(8),
+  Widget build(BuildContext context) => _RowBanner(
+    kind: kind,
+    icon: icon,
+    text: text,
+    actions: [
+      if (actionLabel != null)
+        PageBannerAction(
+          actionLabel!,
+          onAction,
+          key: actionKey,
+          focusOrder: actionOrder,
         ),
-        child: Wrap(
-          spacing: 8,
-          runSpacing: 4,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          children: [
-            Icon(icon, size: 20, color: tint),
-            Text(text, style: theme.textTheme.bodyMedium),
-            if (actionLabel != null)
-              FocusTraversalOrder(
-                order: NumericFocusOrder(actionOrder),
-                child: TextButton(
-                  key: actionKey,
-                  onPressed: onAction,
-                  child: Text(actionLabel!),
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
+    ],
+  );
 }
 
-/// An error message over the entry fields, as in the design: the error
-/// container, an error icon and the full reason. Announced to screen readers.
+/// An error message over the entry fields: the error container, an error icon
+/// and the full reason. Announced to screen readers.
 class ScoreErrorBanner extends StatelessWidget {
   const ScoreErrorBanner({super.key, required this.text});
 
   final String text;
 
   @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return Padding(
-      padding: const EdgeInsets.only(top: 10),
-      child: Semantics(
-        liveRegion: true,
-        container: true,
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          decoration: BoxDecoration(
-            color: scheme.errorContainer,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(Icons.error, size: 20, color: scheme.onErrorContainer),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  text,
-                  style: Theme.of(context).textTheme.bodyMedium
-                      ?.copyWith(color: scheme.onErrorContainer),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) =>
+      _RowBanner(kind: PageBannerKind.alert, icon: Icons.error, text: text);
+}
+
+/// A [PageBanner] card under the entry fields of a score row.
+class _RowBanner extends StatelessWidget {
+  const _RowBanner({
+    required this.kind,
+    required this.icon,
+    required this.text,
+    this.bannerKey,
+    this.actions = const [],
+  });
+
+  final PageBannerKind kind;
+  final IconData icon;
+  final String text;
+  final Key? bannerKey;
+  final List<PageBannerAction> actions;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(top: 10),
+    child: PageBanner(
+      key: bannerKey,
+      kind: kind,
+      shape: PageBannerShape.card,
+      icon: icon,
+      text: text,
+      actions: actions,
+    ),
+  );
 }
 
 /// What a failed or conflicting save says, and what can be done. The typed
@@ -134,92 +116,57 @@ class ScoreSaveBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final error = theme.colorScheme.error;
-    final warn = MatrixColors.of(context).warn;
     switch (save.kind) {
       case RowSaveKind.stale:
-        return Padding(
-          padding: const EdgeInsets.only(top: 10),
-          child: Container(
-            key: const ValueKey('score-stale'),
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              border: Border.all(color: warn, width: 1.5),
-              borderRadius: BorderRadius.circular(8),
+        return _RowBanner(
+          bannerKey: const ValueKey('score-stale'),
+          kind: PageBannerKind.status,
+          icon: Icons.sync_problem,
+          text:
+              'This row changed since you opened it. Yours: '
+              '${_summary(mine)}. Newer: ${_summary(theirs)}.',
+          actions: [
+            PageBannerAction(
+              'Keep mine',
+              onKeepMine,
+              emphasis: PageBannerEmphasis.filled,
+              key: const ValueKey('score-keep-mine'),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Icon(Icons.sync_problem, color: warn),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        'This row changed since you opened it. Yours: '
-                        '${_summary(mine)}. Newer: ${_summary(theirs)}.',
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  children: [
-                    FilledButton(
-                      key: const ValueKey('score-keep-mine'),
-                      onPressed: onKeepMine,
-                      child: const Text('Keep mine'),
-                    ),
-                    OutlinedButton(
-                      key: const ValueKey('score-take-theirs'),
-                      onPressed: onTakeTheirs,
-                      child: const Text('Take the newer'),
-                    ),
-                  ],
-                ),
-              ],
+            PageBannerAction(
+              'Take the newer',
+              onTakeTheirs,
+              emphasis: PageBannerEmphasis.outlined,
+              key: const ValueKey('score-take-theirs'),
             ),
-          ),
+          ],
         );
       case RowSaveKind.failed:
-        return Padding(
-          padding: const EdgeInsets.only(top: 10),
-          child: Container(
-            key: const ValueKey('score-save-failed'),
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              border: Border.all(color: error, width: 2),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Wrap(
-              spacing: 8,
-              runSpacing: 4,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                Icon(Icons.error_outline, color: error),
-                Text('Not saved. ${save.message ?? ''} Your values are kept.'),
-                if (save.networkProblem)
-                  FilledButton(
-                    key: const ValueKey('score-retry'),
-                    onPressed: onRetry,
-                    child: const Text('Retry'),
-                  )
-                else
-                  OutlinedButton(
-                    key: const ValueKey('score-refresh'),
-                    onPressed: onRefresh,
-                    child: const Text('Refresh'),
-                  ),
-              ],
-            ),
-          ),
+        return _RowBanner(
+          bannerKey: const ValueKey('score-save-failed'),
+          kind: PageBannerKind.alert,
+          icon: Icons.error_outline,
+          text: 'Not saved. ${save.message ?? ''} Your values are kept.',
+          actions: [
+            if (save.networkProblem)
+              PageBannerAction(
+                'Retry',
+                onRetry,
+                emphasis: PageBannerEmphasis.filled,
+                key: const ValueKey('score-retry'),
+              )
+            else
+              PageBannerAction(
+                'Refresh',
+                onRefresh,
+                emphasis: PageBannerEmphasis.outlined,
+                key: const ValueKey('score-refresh'),
+              ),
+          ],
         );
       case RowSaveKind.refused:
         return ScoreInlineNote(
           icon: Icons.error_outline,
-          color: error,
+          kind: PageBannerKind.alert,
           text:
               'Refused: ${save.message ?? 'the entry was not accepted'}. '
               'Your values are kept.',

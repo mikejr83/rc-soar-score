@@ -72,6 +72,33 @@ void main() {
     );
   });
 
+  testWidgets('a lead starts the text and actions can carry an icon', (
+    tester,
+  ) async {
+    await _pump(
+      tester,
+      PageBanner(
+        kind: PageBannerKind.positive,
+        icon: Icons.verified,
+        lead: 'Official.',
+        text: 'All scores are final.',
+        actions: [
+          PageBannerAction(
+            'Open',
+            () {},
+            emphasis: PageBannerEmphasis.filled,
+            icon: Icons.open_in_new,
+            focusOrder: 3,
+          ),
+        ],
+      ),
+    );
+
+    expect(find.textContaining('Official. All scores are final.'), findsOne);
+    expect(find.byIcon(Icons.open_in_new), findsOneWidget);
+    expect(find.byType(FilledButton), findsOneWidget);
+  });
+
   test('only the alert kind has the alert role', () {
     for (final kind in PageBannerKind.values) {
       expect(

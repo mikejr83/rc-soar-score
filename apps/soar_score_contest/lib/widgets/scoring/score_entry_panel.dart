@@ -6,7 +6,7 @@ import '../../services/scoring/score_check.dart';
 import '../../services/scoring/score_row_draft.dart';
 import '../../services/scoring/scoring_page_data.dart';
 import '../../services/scoring/scoring_row.dart';
-import '../matrix/matrix_colors.dart';
+import '../page_states/page_banner.dart';
 import 'focus_step.dart';
 import 'score_landing_chips.dart';
 import 'score_penalty_cards.dart';
@@ -62,7 +62,6 @@ class ScoreEntryPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final colors = MatrixColors.of(context);
     final busy = save.isBusy;
     final enabled = !readOnly && !busy;
     final settings = draft.settings;
@@ -130,7 +129,7 @@ class ScoreEntryPanel extends StatelessWidget {
           if (draft.heightUnusual)
             ScoreInlineNote(
               icon: Icons.help_outline,
-              color: colors.warn,
+              kind: PageBannerKind.status,
               text:
                   '${draft.height} m is a high launch. Is this correct? '
                   'You can still save.',
@@ -138,7 +137,7 @@ class ScoreEntryPanel extends StatelessWidget {
           if (draft.heightZero)
             ScoreInlineNote(
               icon: Icons.help_outline,
-              color: colors.warn,
+              kind: PageBannerKind.status,
               text:
                   '0 m is not a launch height. Saving it as No altitude '
                   'recorded scores 0.',
@@ -148,7 +147,7 @@ class ScoreEntryPanel extends StatelessWidget {
           for (final finding in findings)
             ScoreInlineNote(
               icon: Icons.fact_check_outlined,
-              color: colors.warn,
+              kind: PageBannerKind.status,
               text: finding.message,
             ),
           if (draft.needsZeroConfirmation &&
@@ -168,13 +167,13 @@ class ScoreEntryPanel extends StatelessWidget {
           if (block != null)
             ScoreInlineNote(
               icon: Icons.lock_outline,
-              color: scheme.onSurfaceVariant,
+              kind: PageBannerKind.neutral,
               text: block!.message,
             ),
           if (row.retired)
             ScoreInlineNote(
               icon: Icons.person_off_outlined,
-              color: scheme.onSurfaceVariant,
+              kind: PageBannerKind.neutral,
               text:
                   '${row.pilot.name} retired from round '
                   '${row.pilot.retiredAtRound}. Entry is closed for this flight.',
@@ -359,20 +358,19 @@ class ScoreEntryPanel extends StatelessWidget {
   }
 
   Widget _zeroConfirm(BuildContext context, bool enabled) {
-    final colors = MatrixColors.of(context);
     final why = draft.isBlank
         ? 'Nothing is entered. Saving records No flight, a zero.'
         : 'Saving scores 0 for this pilot.';
     if (draft.zeroConfirmed) {
       return ScoreInlineNote(
         icon: Icons.check_circle_outline,
-        color: colors.success,
+        kind: PageBannerKind.success,
         text: 'Zero confirmed. Save the row to record it.',
       );
     }
     return ScoreInlineNote(
       icon: Icons.help_outline,
-      color: colors.warn,
+      kind: PageBannerKind.status,
       text: why,
       actionLabel: 'Confirm zero',
       onAction: enabled ? draft.confirmZero : null,

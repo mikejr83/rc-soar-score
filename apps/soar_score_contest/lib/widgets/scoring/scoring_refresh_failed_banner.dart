@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../services/api_failure.dart';
+import '../page_states/page_banner.dart';
 
 /// The notice above scores that are already showing when reloading them
 /// failed. The scores stay usable; Retry is offered only when trying again
@@ -18,17 +19,13 @@ class ScoringRefreshFailedBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final failure = ApiFailure.of(error);
-    return MaterialBanner(
+    return PageBanner(
       key: const ValueKey('scoring-refresh-failed'),
-      content: Text(failure.message),
-      leading: const Icon(Icons.error_outline),
-      // MaterialBanner insists on an action; without Retry it gets an empty one.
-      actions: [
-        if (failure.retryable)
-          TextButton(onPressed: onRetry, child: const Text('Retry'))
-        else
-          const SizedBox.shrink(),
-      ],
+      kind: PageBannerKind.alert,
+      icon: Icons.error_outline,
+      text: failure.message,
+      actionLabel: failure.retryable ? 'Retry' : null,
+      onAction: failure.retryable ? onRetry : null,
     );
   }
 }
