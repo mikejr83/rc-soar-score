@@ -192,10 +192,15 @@ Documentation, help and support routes are registered in `lib/docs_routes.dart` 
 
 ### Self-scoring app (`soar_score_self_score`)
 
-| Name people use | Route     | Source (`lib/`)               |
-| --------------- | --------- | ----------------------------- |
-| Home            | `/`       | `pages/home_page.dart`        |
-| Score entry     | `/scores` | `pages/score_entry_page.dart` |
+| Name people use                                | Route       | Source (`lib/`)               |
+| ---------------------------------------------- | ----------- | ----------------------------- |
+| Landing page (Sign in / Sign up)               | `/`         | `pages/home_page.dart`        |
+| Contests list, "Is this you?"                  | `/contests` | `pages/contests_page.dart`    |
+| Team overview (helper view, team standings)    | `/team`     | `pages/team_page.dart`        |
+| Score entry (F5J form, landing sheet/combobox) | `/scores`   | `pages/score_entry_page.dart` |
+| Results (place, score, pilots and teams)       | `/results`  | `pages/results_page.dart`     |
+
+The pages read placeholder data from `models/sample_data.dart` until the self-scoring API exists. The landing field picks its control by table size (`widgets/landing_control.dart`: sheet up to 20 results, autocomplete above); see `plan/ui/participant-scoring/landing-control-decision.md`.
 
 ### Server (`soar_score_server`)
 

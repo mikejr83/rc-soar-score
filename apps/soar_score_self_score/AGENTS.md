@@ -5,8 +5,10 @@ Participant self-scoring web app: pilots enter their own scores for a contest.
 ## Structure
 
 - `lib/main.dart`, `lib/app.dart` — entry point and app widget
-- `lib/router.dart` — go_router routes (`/` home, `/scores` score entry)
+- `lib/router.dart` — go_router routes (`/`, `/contests`, `/team`, `/scores`, `/results`)
 - `lib/pages/` — one file per page
+- `lib/widgets/` — page widgets; `landing_control.dart` picks sheet or autocomplete by landing-table size
+- `lib/models/`, `lib/services/` — placeholder data and pure logic (time parsing, landing search)
 - `lib/api_client_provider.dart` — supplies the `soar_score_api` client to pages
 - `test/` — widget and unit tests
 
