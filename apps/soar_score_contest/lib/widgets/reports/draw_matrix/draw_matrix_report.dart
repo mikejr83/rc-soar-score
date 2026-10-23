@@ -79,13 +79,14 @@ class DrawMatrixReport extends DataReportDefinition<DrawMatrixData> {
       data: data,
       options: options,
       body: context.bodySize,
-      teams: facts.teamsEnabled,
-      numbers: facts.numbersEnabled,
-      classes: facts.classesEnabled,
+      teams: facts.teamsEnabled && options.teamChosen,
+      numbers: facts.numbersEnabled && options.numberChosen,
+      classes: facts.classesEnabled && options.classChosen,
     );
     return ReportDocument(
       title: 'Flight Matrix - ${facts.contest.name}',
       subtitle: _subtitle(facts, options),
+      notice: layout.crowded ? _crowdedNotice(facts, options) : null,
       detail: options.hasUndrawn ? 'Rounds 1 to ${options.drawn} drawn' : null,
       pages: [
         for (var i = 0; i < layout.pages.length; i++)
@@ -115,4 +116,30 @@ class DrawMatrixReport extends DataReportDefinition<DrawMatrixData> {
         'Rounds ${options.from} to ${options.to} of ${options.drawn}',
     ].join(' · ');
   }
+
+  /// Advice for a sheet whose columns need more room than the page has, naming
+  /// the columns that are on and can be turned off.
+  String _crowdedNotice(ReportsFacts facts, DrawMatrixOptions options) {
+    final off = [
+      if (options.showClub) 'Club',
+      if (options.showFai) 'FAI ID',
+      if (options.showNational) 'National ID',
+      if (facts.classesEnabled && options.classChosen) 'Pilot class',
+      if (facts.teamsEnabled && options.teamChosen) 'Team',
+      if (facts.numbersEnabled && options.numberChosen) 'Pilot number',
+    ];
+    final tail = options.compact
+        ? ''
+        : ' Compact mode also gives the columns more room.';
+    return off.isEmpty
+        ? 'Some rows wrap onto a second line. Pilot names are long for this '
+              'page.$tail'
+        : 'The columns need more room than this page has, so some rows wrap '
+              'onto a second line. Turn off ${_list(off)} in Options to give '
+              'the pilot column more room.$tail';
+  }
+
+  String _list(List<String> items) => items.length == 1
+      ? items.single
+      : '${items.sublist(0, items.length - 1).join(', ')} or ${items.last}';
 }

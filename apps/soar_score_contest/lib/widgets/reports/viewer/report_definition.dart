@@ -72,6 +72,7 @@ class ReportDocument {
     required this.subtitle,
     required this.pages,
     this.detail,
+    this.notice,
     this.status,
     this.statusReason,
     this.statusAction,
@@ -83,6 +84,10 @@ class ReportDocument {
 
   /// A third header line with the contest details.
   final String? detail;
+
+  /// Advice about the sheet for the director, shown on screen above it and
+  /// never printed; `null` when there is none.
+  final String? notice;
 
   /// One widget per printed page, each sized to fit [ReportPageContext.bodySize].
   final List<Widget> pages;

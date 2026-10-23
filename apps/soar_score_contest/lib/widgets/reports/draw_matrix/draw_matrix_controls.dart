@@ -115,5 +115,31 @@ List<ReportControlGroup> drawMatrixControls(
         ],
       ],
     ),
+    if (context.facts.teamsEnabled ||
+        context.facts.numbersEnabled ||
+        context.facts.classesEnabled)
+      ReportControlGroup(
+        title: 'Columns',
+        children: [
+          if (context.facts.teamsEnabled)
+            ReportCheckOption(
+              label: 'Team',
+              value: options.teamChosen,
+              onChanged: (v) => toggle('team', v),
+            ),
+          if (context.facts.numbersEnabled)
+            ReportCheckOption(
+              label: 'Pilot number',
+              value: options.numberChosen,
+              onChanged: (v) => toggle('num', v),
+            ),
+          if (context.facts.classesEnabled)
+            ReportCheckOption(
+              label: 'Pilot class',
+              value: options.classChosen,
+              onChanged: (v) => toggle('cls', v),
+            ),
+        ],
+      ),
   ];
 }

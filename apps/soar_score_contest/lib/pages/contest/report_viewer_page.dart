@@ -361,6 +361,16 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
         ),
       );
     }
+    if (document?.notice case final notice?) {
+      banners.add(
+        ViewerBanner(
+          kind: ViewerBannerKind.info,
+          icon: Icons.view_column,
+          lead: 'Crowded.',
+          text: notice,
+        ),
+      );
+    }
     if (controller.outdated) {
       banners.add(
         ViewerBanner(

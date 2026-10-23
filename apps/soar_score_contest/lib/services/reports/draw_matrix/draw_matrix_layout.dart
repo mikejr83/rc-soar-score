@@ -80,6 +80,7 @@ class DrawMatrixLayout {
     required this.columns,
     required this.style,
     required this.tableWidth,
+    required this.wrappedColumns,
   });
 
   /// Plans the pages of [data] for [options] in a body of [body].
@@ -139,19 +140,22 @@ class DrawMatrixLayout {
       used += height;
     }
 
+    // Every column is measured, not only the ones expected to wrap: a cell
+    // that sets taller than planned would push the page's last rows off it.
+    final memo = <(String, double), int>{};
+    final wrapped = <DrawMatrixColumnId>{};
     int linesOf(DrawMatrixPilot pilot) {
       var lines = 1;
       for (final column in columns) {
-        if (column.wraps) {
-          lines = math.max(
-            lines,
-            count(
-              column.textOf(pilot),
-              column.width - 2 * style.padX,
-              style.fontSize,
-            ),
-          );
+        final text = column.textOf(pilot);
+        final cell = memo.putIfAbsent((
+          text,
+          column.width,
+        ), () => count(text, column.width - 2 * style.padX, style.fontSize));
+        if (cell > 1 && column.id != DrawMatrixColumnId.name) {
+          wrapped.add(column.id);
         }
+        lines = math.max(lines, cell);
       }
       return lines;
     }
@@ -220,6 +224,7 @@ class DrawMatrixLayout {
       columns: columns,
       style: style,
       tableWidth: tableWidth,
+      wrappedColumns: wrapped,
     );
   }
 
@@ -229,6 +234,20 @@ class DrawMatrixLayout {
 
   /// The width of one table.
   final double tableWidth;
+
+  /// The columns, other than the pilot's, whose text wraps onto a second line
+  /// for at least one pilot.
+  final Set<DrawMatrixColumnId> wrappedColumns;
+
+  /// The pilot column is narrower than this and a long name wraps.
+  static const double comfortableName = 170;
+
+  /// The columns ask for more room than the page has: rows wrap onto a second
+  /// line, or the pilot column is squeezed. Turning a column off helps.
+  bool get crowded =>
+      wrappedColumns.isNotEmpty ||
+      columns.firstWhere((c) => c.id == DrawMatrixColumnId.name).width <
+          comfortableName;
 
   /// The default text meter: [text] set in the sheet's type on one line.
   static double measuredWidth(

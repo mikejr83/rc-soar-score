@@ -7,7 +7,7 @@ import '../viewer/report_spec.dart';
 /// map (and so from the URL) with the contest's facts.
 ///
 /// Filter keys: `from` and `to` (an inclusive round range, all drawn rounds
-/// when absent), `cmp` (compact mode), `inf` (additional pilot info) and, for
+/// when absent), `cmp` (compact mode), `team`, `num` and `cls` (the contest columns), `inf` (additional pilot info) and, for
 /// that, `club`, `fai` and `nat`. A key the URL leaves out takes its default.
 class DrawMatrixOptions {
   DrawMatrixOptions._({
@@ -18,6 +18,9 @@ class DrawMatrixOptions {
     required this.planned,
     required this.rounds,
     required this.compact,
+    required this.teamChosen,
+    required this.numberChosen,
+    required this.classChosen,
     required this.additionalChosen,
     required this.club,
     required this.fai,
@@ -58,6 +61,9 @@ class DrawMatrixOptions {
           if (round >= from && round <= to) round,
       ],
       compact: on('cmp', false),
+      teamChosen: on('team', true),
+      numberChosen: on('num', true),
+      classChosen: on('cls', true),
       additionalChosen: on('inf', false),
       club: on('club', true),
       fai: on('fai', true),
@@ -91,6 +97,13 @@ class DrawMatrixOptions {
 
   /// Two small-type columns per page.
   final bool compact;
+
+  /// The contest columns the director keeps: Team, Pilot number and Pilot
+  /// class, each only when the contest uses it. All start on; turning one off
+  /// gives the pilot column room.
+  final bool teamChosen;
+  final bool numberChosen;
+  final bool classChosen;
 
   /// The director's choice, kept while compact mode makes it unavailable.
   final bool additionalChosen;

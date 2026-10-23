@@ -178,6 +178,39 @@ void main() {
     expect(layout.pages, hasLength(1));
   });
 
+  group('crowding', () {
+    test('a roomy sheet is not crowded', () {
+      final layout = plan(syntheticDraw());
+      expect(layout.crowded, isFalse);
+      expect(layout.wrappedColumns, isEmpty);
+    });
+
+    test('a cell that wraps makes its row taller, whatever the column', () {
+      final layout = plan(
+        syntheticDraw(className: 'Sportsman', rounds: 1),
+        classes: true,
+        lines: (text, width, fontSize) => text == 'Sportsman' ? 2 : 1,
+      );
+      final rows = items(layout).whereType<DrawMatrixPilotRow>();
+      expect(rows.every((r) => r.lines == 2), isTrue);
+      expect(layout.wrappedColumns, {DrawMatrixColumnId.className});
+      expect(layout.crowded, isTrue);
+    });
+
+    test('a long name wrapping alone is not crowding', () {
+      final layout = plan(
+        syntheticDraw(rounds: 1),
+        lines: (text, width, fontSize) => text.startsWith('Pilot') ? 2 : 1,
+      );
+      expect(layout.crowded, isFalse);
+    });
+
+    test('a squeezed pilot column is crowded', () {
+      final layout = plan(syntheticDraw(), body: const Size(220, 860));
+      expect(layout.crowded, isTrue);
+    });
+  });
+
   group('columns', () {
     List<DrawMatrixColumnId> ids(DrawMatrixLayout layout) =>
         layout.columns.map((c) => c.id).toList();
