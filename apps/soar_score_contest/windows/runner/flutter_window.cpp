@@ -65,19 +65,6 @@ FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
   }
 
   switch (message) {
-    case WM_CLOSE:
-      // Let Dart warn about unsaved edits first. The close is held back until
-      // it answers, then replayed with |close_confirmed_| set.
-      if (!close_confirmed_ && title_channel_) {
-        title_channel_->RequestClose([this, hwnd](bool allow) {
-          if (allow) {
-            close_confirmed_ = true;
-            PostMessage(hwnd, WM_CLOSE, 0, 0);
-          }
-        });
-        return 0;
-      }
-      break;
     case WM_FONTCHANGE:
       flutter_controller_->engine()->ReloadSystemFonts();
       break;

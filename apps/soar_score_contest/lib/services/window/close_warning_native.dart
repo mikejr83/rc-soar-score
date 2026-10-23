@@ -1,23 +1,19 @@
-import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
+import 'dart:ui' show AppExitResponse;
+
+import 'package:flutter/widgets.dart';
 
 import '../../widgets/unsaved_changes_guard.dart';
-import 'window_title_channel.dart';
 
-/// Answers the Windows runner when the user closes the window.
+/// Asks before the desktop window closes while a guarded page has unsaved
+/// edits.
 ///
-/// On `WM_CLOSE` the runner (`windows/runner/window_title_channel.cpp`) calls
-/// `confirmClose` on the `soar_score/window` channel and closes only when this
-/// returns `true`. A page with unsaved edits asks the user with its own
-/// discard dialog. Other native platforms have no runner hook and do nothing.
+/// The Flutter engine turns a window close (Windows, `WM_CLOSE`) into a
+/// cancelable exit request. A page with unsaved edits asks the user with its
+/// own discard dialog, and answering "keep editing" cancels the close.
 void installCloseWarning() {
-  if (defaultTargetPlatform != TargetPlatform.windows) {
-    return;
-  }
-  WindowTitleChannel.channel.setMethodCallHandler((call) async {
-    if (call.method != 'confirmClose') {
-      throw MissingPluginException(call.method);
-    }
-    return UnsavedChangesGuard.confirmCloseAll();
-  });
+  AppLifecycleListener(
+    onExitRequested: () async => await UnsavedChangesGuard.confirmCloseAll()
+        ? AppExitResponse.exit
+        : AppExitResponse.cancel,
+  );
 }

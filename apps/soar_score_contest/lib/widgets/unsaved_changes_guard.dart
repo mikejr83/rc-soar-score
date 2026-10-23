@@ -21,14 +21,36 @@ class UnsavedChangesGuard {
 
   /// Asks every attached page whether the app may close, stopping at the first
   /// that refuses. Pages without unsaved edits answer without asking.
-  static Future<bool> confirmCloseAll() async {
-    for (final guard in _attached.toList()) {
-      if (!await guard.confirmLeave()) {
-        return false;
+  static Future<bool> confirmCloseAll() => _closeInFlight ??= _askAllPages()
+      .whenComplete(() => _closeInFlight = null);
+
+  /// A repeated close request while the user is still answering joins the
+  /// question already on screen instead of stacking a second dialog.
+  static Future<bool>? _closeInFlight;
+
+  static Future<bool> _askAllPages() async {
+    _closingApp = true;
+    try {
+      for (final guard in _attached.toList()) {
+        if (!await guard.confirmLeave()) {
+          return false;
+        }
       }
+      return true;
+    } finally {
+      _closingApp = false;
     }
-    return true;
   }
+
+  static bool _closingApp = false;
+
+  /// Whether the question being asked is about closing the whole app (the
+  /// Windows window) rather than moving to another page. Pages use it to word
+  /// their dialog for the close.
+  static bool get closingApp => _closingApp;
+
+  /// Dialog title shared by every page when the app is closing.
+  static const closeTitle = 'Close RC Soar Score?';
 
   Future<bool> Function()? _confirm;
   bool Function()? _hasChanges;

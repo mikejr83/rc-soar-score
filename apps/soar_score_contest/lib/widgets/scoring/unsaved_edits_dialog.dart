@@ -6,20 +6,21 @@ enum UnsavedChoice { save, discard, stay }
 Future<UnsavedChoice> askUnsavedEdits(
   BuildContext context, {
   required int rows,
+  bool closingApp = false,
 }) async {
   final choice = await showDialog<UnsavedChoice>(
     context: context,
     builder: (context) => AlertDialog(
-      title: const Text('Unsaved scores'),
+      title: Text(closingApp ? 'Close RC Soar Score?' : 'Unsaved scores'),
       content: Text(
         '$rows ${rows == 1 ? 'row has' : 'rows have'} scores that are not '
-        'saved. Save them before you leave this group?',
+        'saved. Save them before you ${closingApp ? 'close the app' : 'leave this group'}?',
       ),
       actions: [
         TextButton(
           key: const ValueKey('unsaved-stay'),
           onPressed: () => Navigator.of(context).pop(UnsavedChoice.stay),
-          child: const Text('Stay'),
+          child: Text(closingApp ? 'Keep open' : 'Stay'),
         ),
         TextButton(
           key: const ValueKey('unsaved-discard'),

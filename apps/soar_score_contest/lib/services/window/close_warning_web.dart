@@ -1,5 +1,4 @@
 import 'dart:js_interop';
-import 'dart:js_interop_unsafe';
 
 import 'package:web/web.dart' as web;
 
@@ -17,7 +16,7 @@ void installCloseWarning() {
       if (UnsavedChangesGuard.anyUnsavedChanges) {
         event.preventDefault();
         // Older browsers want `returnValue` set before they prompt.
-        (event as JSObject).setProperty('returnValue'.toJS, ''.toJS);
+        (event as web.BeforeUnloadEvent).returnValue = 'Unsaved changes';
       }
     }).toJS,
   );

@@ -32,10 +32,6 @@ class FlutterWindow : public Win32Window {
 
   // Applies titles from Dart to this window's title bar.
   std::unique_ptr<WindowTitleChannel> title_channel_;
-
-  // Set once Dart has agreed to the close, so the repeated WM_CLOSE goes on to
-  // destroy the window.
-  bool close_confirmed_ = false;
 };
 
 #endif  // RUNNER_FLUTTER_WINDOW_H_

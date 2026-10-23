@@ -140,16 +140,19 @@ class _ContestConfigurationPageState extends State<ContestConfigurationPage> {
     if (draft == null || !draft.dirty || _data?.readOnly == true) {
       return true;
     }
+    final closing = UnsavedChangesGuard.closingApp;
     final leave = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         icon: const Icon(Icons.edit_note),
-        title: const Text('Leave without saving?'),
+        title: Text(
+          closing ? UnsavedChangesGuard.closeTitle : 'Leave without saving?',
+        ),
         content: Text(
           'You have ${draft.changes.length} unsaved '
           'change${draft.changes.length == 1 ? '' : 's'} in '
-          '${ReadinessSummary.lowerList(_changedSections(draft))}. Leaving '
-          'discards them.',
+          '${ReadinessSummary.lowerList(_changedSections(draft))}. '
+          '${closing ? 'Closing the app' : 'Leaving'} discards them.',
         ),
         actions: [
           TextButton(
@@ -163,7 +166,7 @@ class _ContestConfigurationPageState extends State<ContestConfigurationPage> {
               foregroundColor: Theme.of(context).colorScheme.onError,
             ),
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Discard and leave'),
+            child: Text(closing ? 'Close and discard' : 'Discard and leave'),
           ),
         ],
       ),
