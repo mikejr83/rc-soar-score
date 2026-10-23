@@ -30,6 +30,29 @@ class AppLocalizationsEn extends AppLocalizations {
       'The theme could not be saved. It applies until you close the app.';
 
   @override
+  String get textSizeHeading => 'Text size';
+
+  @override
+  String get textSizeDescription =>
+      'Make text larger on this device. This is saved for your account and is not shared with other devices. Your device\'s own text size setting still applies on top.';
+
+  @override
+  String get textSizeDefault => 'Default';
+
+  @override
+  String get textSizeLarge => 'Large';
+
+  @override
+  String get textSizeExtraLarge => 'Extra large';
+
+  @override
+  String get textSizePreview => 'Sample: Round 3, Group B, Pilot 12';
+
+  @override
+  String get textSizeSaveFailed =>
+      'The text size could not be saved. It applies until you close the app.';
+
+  @override
   String get panelsHeading => 'Panels';
 
   @override

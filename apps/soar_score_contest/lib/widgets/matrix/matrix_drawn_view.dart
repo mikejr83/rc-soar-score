@@ -146,44 +146,61 @@ class _MatrixDrawnViewState extends State<MatrixDrawnView> {
                     label: live,
                     child: const SizedBox.shrink(),
                   ),
-                  if (drift.isNotEmpty)
-                    MatrixBanner(
-                      kind: MatrixBannerKind.warning,
-                      icon: Icons.info,
-                      title: 'Configuration changed since this draw',
-                      body:
-                          '${drift.join(' ')} The matrix is unchanged. '
-                          'Applying these changes needs a redraw, which comes '
-                          'in a later release.',
-                      actions: [
-                        PageBannerAction(
-                          'Open Configuration',
-                          widget.onOpenConfiguration,
-                          emphasis: PageBannerEmphasis.outlined,
-                        ),
-                      ],
+                  // Larger text can make these taller than the screen: they
+                  // scroll within half of it so the grid keeps the rest.
+                  ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxHeight: constraints.maxHeight * .5,
                     ),
-                  FairnessPanel(
-                    revision: revision,
-                    hasLanes: _model.hasLanes,
-                    configurationRevision: data.configuration?.revisionNumber,
-                    startCollapsed: narrow,
-                  ),
-                  FindFilterBar(
-                    search: _search,
-                    matches: matches,
-                    markers: data.markers,
-                    teamSizes: teamSizes,
-                    teamFilter: _teamFilter,
-                    showNumbers: data.showNumbers,
-                    onQuery: (_) => setState(() {}),
-                    onJump: () {
-                      final first = _firstMatch;
-                      if (first != null) {
-                        _grid.jumpTo(round: first.$1, group: first.$2);
-                      }
-                    },
-                    onTeam: (team) => setState(() => _teamFilter = team),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        spacing: 12,
+                        children: [
+                          if (drift.isNotEmpty)
+                            MatrixBanner(
+                              kind: MatrixBannerKind.warning,
+                              icon: Icons.info,
+                              title: 'Configuration changed since this draw',
+                              body:
+                                  '${drift.join(' ')} The matrix is unchanged. '
+                                  'Applying these changes needs a redraw, which comes '
+                                  'in a later release.',
+                              actions: [
+                                PageBannerAction(
+                                  'Open Configuration',
+                                  widget.onOpenConfiguration,
+                                  emphasis: PageBannerEmphasis.outlined,
+                                ),
+                              ],
+                            ),
+                          FairnessPanel(
+                            revision: revision,
+                            hasLanes: _model.hasLanes,
+                            configurationRevision:
+                                data.configuration?.revisionNumber,
+                            startCollapsed: narrow,
+                          ),
+                          FindFilterBar(
+                            search: _search,
+                            matches: matches,
+                            markers: data.markers,
+                            teamSizes: teamSizes,
+                            teamFilter: _teamFilter,
+                            showNumbers: data.showNumbers,
+                            onQuery: (_) => setState(() {}),
+                            onJump: () {
+                              final first = _firstMatch;
+                              if (first != null) {
+                                _grid.jumpTo(round: first.$1, group: first.$2);
+                              }
+                            },
+                            onTeam: (team) =>
+                                setState(() => _teamFilter = team),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                   Expanded(
                     child: Row(

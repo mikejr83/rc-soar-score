@@ -15,6 +15,7 @@ import 'services/connectivity/app_connectivity.dart';
 import 'services/connectivity/reachability_forwarder.dart';
 import 'services/collapsible_areas/collapsible_areas_controller.dart';
 import 'services/window/close_warning.dart';
+import 'services/text_size/text_size_controller.dart';
 import 'services/theme/theme_controller.dart';
 
 final _logger = Logger('Main');
@@ -66,6 +67,11 @@ Future<void> _runContestApp(AppBootstrap appBootstrap) async {
     account: appBootstrap.uiAccount,
   );
   await theme.load();
+  final textSize = TextSizeController(
+    store: appBootstrap.localUiStore,
+    account: appBootstrap.uiAccount,
+  );
+  await textSize.load();
   final areas = CollapsibleAreasController(
     store: appBootstrap.localUiStore,
     account: appBootstrap.uiAccount,
@@ -79,6 +85,7 @@ Future<void> _runContestApp(AppBootstrap appBootstrap) async {
       bootstrap: appBootstrap,
       connectivity: connectivity,
       themeController: theme,
+      textSizeController: textSize,
       collapsibleAreas: areas,
     ),
   );

@@ -130,6 +130,48 @@ abstract class AppLocalizations {
   /// **'The theme could not be saved. It applies until you close the app.'**
   String get themeSaveFailed;
 
+  /// Heading of the Settings card that picks how large text is.
+  ///
+  /// In en, this message translates to:
+  /// **'Text size'**
+  String get textSizeHeading;
+
+  /// Explains the Text size card on the Settings page.
+  ///
+  /// In en, this message translates to:
+  /// **'Make text larger on this device. This is saved for your account and is not shared with other devices. Your device\'s own text size setting still applies on top.'**
+  String get textSizeDescription;
+
+  /// Text size choice that keeps the app's own sizes.
+  ///
+  /// In en, this message translates to:
+  /// **'Default'**
+  String get textSizeDefault;
+
+  /// Text size choice for somewhat larger text.
+  ///
+  /// In en, this message translates to:
+  /// **'Large'**
+  String get textSizeLarge;
+
+  /// Text size choice for the largest text.
+  ///
+  /// In en, this message translates to:
+  /// **'Extra large'**
+  String get textSizeExtraLarge;
+
+  /// A line of sample text on the Text size card, shown at the chosen size.
+  ///
+  /// In en, this message translates to:
+  /// **'Sample: Round 3, Group B, Pilot 12'**
+  String get textSizePreview;
+
+  /// Snackbar shown when the chosen text size could not be stored on the device.
+  ///
+  /// In en, this message translates to:
+  /// **'The text size could not be saved. It applies until you close the app.'**
+  String get textSizeSaveFailed;
+
   /// Heading of the Settings card that resets hidden or minimized panels.
   ///
   /// In en, this message translates to:
