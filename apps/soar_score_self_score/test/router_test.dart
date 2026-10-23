@@ -9,16 +9,19 @@ void main() {
     addTearDown(tester.view.reset);
     await tester.pumpWidget(MaterialApp.router(routerConfig: router));
 
-    router.go('/contests/c1');
+    router.go('/contests/spring-open');
     await tester.pumpAndSettle();
-    expect(router.routeInformationProvider.value.uri.path, '/contests/c1/team');
+    expect(
+      router.routeInformationProvider.value.uri.path,
+      '/contests/spring-open/team',
+    );
     expect(find.text('Team overview'), findsOneWidget);
 
-    router.go('/contests/c1/results');
+    router.go('/contests/spring-open/results');
     await tester.pumpAndSettle();
     expect(find.text('Overall, pilots'), findsOneWidget);
 
-    router.go('/contests/c1/results?round=3');
+    router.go('/contests/spring-open/results?round=3');
     await tester.pumpAndSettle();
     expect(
       find.textContaining('viewing results as of round 3', findRichText: true),
@@ -26,7 +29,7 @@ void main() {
     );
     expect(find.text('4th'), findsOneWidget);
 
-    router.go('/contests/c1/pilots/12');
+    router.go('/contests/spring-open/pilots/12');
     await tester.pumpAndSettle();
     expect(find.text('Next to score'), findsOneWidget);
     expect(find.text('Enter'), findsOneWidget);
@@ -36,12 +39,12 @@ void main() {
       findsWidgets,
     );
 
-    router.go('/contests/c1/pilots/12/rounds/4');
+    router.go('/contests/spring-open/pilots/12/rounds/4');
     await tester.pumpAndSettle();
     expect(find.text('Time flown'), findsOneWidget);
     expect(find.text('All rounds for Jane Smith'), findsOneWidget);
 
-    router.go('/contests/c1/pilots/12/rounds/4/group');
+    router.go('/contests/spring-open/pilots/12/rounds/4/group');
     await tester.pumpAndSettle();
     expect(find.text('Zero: out of bounds'), findsOneWidget);
     expect(find.text('No score yet'), findsOneWidget);

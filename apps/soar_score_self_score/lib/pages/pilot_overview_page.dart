@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../models/pilot_round.dart';
-import '../models/sample_data.dart';
+import '../data/self_score_scope.dart';
+import '../models/pilot_overview.dart';
 import '../router.dart';
 import '../widgets/connection_indicator.dart';
+import '../widgets/loadable_scaffold.dart';
 import '../widgets/pilot_round_card.dart';
 import '../widgets/self_score_app_bar.dart';
 import '../widgets/status_chip.dart';
@@ -53,105 +54,99 @@ class PilotOverviewPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final repository = context.repository;
     final theme = Theme.of(context);
     final muted = theme.colorScheme.onSurfaceVariant;
-    final name = SampleData.pilotNameOf(pilotId);
-    final rounds = SampleData.pilotRounds;
-    final nextRound = rounds
-        .firstWhere(
-          (round) => round.status == PilotRoundStatus.nextToScore,
-          orElse: () => rounds.last,
-        )
-        .number;
-    return Scaffold(
-      appBar: SelfScoreAppBar(
-        title: '$name, pilot $pilotId',
-        contextLine: '${SampleData.contestName} · ${SampleData.teamName}',
+    return LoadableScaffold<PilotOverview>(
+      load: () => repository.pilotOverview(contestId, pilotId),
+      reloadKey: (repository, contestId, pilotId),
+      appBar: (context, data) => SelfScoreAppBar(
+        title: data == null
+            ? 'Pilot overview'
+            : '${data.pilotName}, pilot ${data.pilotNumber}',
+        contextLine: data == null
+            ? null
+            : [data.contestName, ?data.teamName].join(' · '),
         onBack: () => context.go(teamPath(contestId)),
         backLabel: 'Back to pilots',
         actions: const [ConnectionIndicator()],
         showAccount: false,
       ),
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const StatusChip(
-                  label: 'Scoring open',
-                  icon: Icons.lock_open_outlined,
-                ),
-                Text(
-                  '${rounds.length} rounds',
-                  style: theme.textTheme.bodyMedium?.copyWith(color: muted),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'Find your group and lane for each round. Score a round in the '
-              'order it is listed.',
-              style: theme.textTheme.bodyMedium?.copyWith(color: muted),
-            ),
-            const SizedBox(height: 12),
-            for (final round in rounds) ...[
-              PilotRoundCard(
-                round: round,
-                nextRound: nextRound,
-                onEnter: () => context.push(
-                  scoreEntryPath(contestId, pilotId, '${round.number}'),
-                ),
-                // The read-only score view is not built; the group results
-                // show the submitted values for the round.
-                onView: () => context.push(
-                  groupResultsPath(contestId, pilotId, '${round.number}'),
-                ),
+      builder: (context, data) => ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const StatusChip(
+                label: 'Scoring open',
+                icon: Icons.lock_open_outlined,
               ),
-              const SizedBox(height: 8),
+              Text(
+                '${data.rounds.length} rounds',
+                style: theme.textTheme.bodyMedium?.copyWith(color: muted),
+              ),
             ],
-            const Divider(height: 32),
-            OutlinedButton.icon(
-              style: OutlinedButton.styleFrom(
-                minimumSize: const Size.fromHeight(44),
-                side: BorderSide(
-                  color: theme.colorScheme.onSurface,
-                  width: 1.5,
-                ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Find your group and lane for each round. Score a round in the '
+            'order it is listed.',
+            style: theme.textTheme.bodyMedium?.copyWith(color: muted),
+          ),
+          const SizedBox(height: 12),
+          for (final round in data.rounds) ...[
+            PilotRoundCard(
+              round: round,
+              nextRound: data.nextRound,
+              onEnter: () => context.push(
+                scoreEntryPath(contestId, pilotId, '${round.number}'),
               ),
-              onPressed: () => _notYet(
-                context,
-                'Invitation links arrive with the invitations feature (#141).',
+              // The read-only score view is not built; the group results
+              // show the submitted values for the round.
+              onView: () => context.push(
+                groupResultsPath(contestId, pilotId, '${round.number}'),
               ),
-              icon: const Icon(Icons.link, size: 20),
-              label: const Text('Copy invitation link'),
             ),
             const SizedBox(height: 8),
-            TextButton(
-              style: TextButton.styleFrom(
-                minimumSize: const Size.fromHeight(44),
-                alignment: Alignment.centerLeft,
-                foregroundColor: theme.colorScheme.primary,
-              ),
-              onPressed: () => context.push(resultsPath(contestId)),
-              child: const Text('Current results'),
-            ),
-            const SizedBox(height: 8),
-            TextButton.icon(
-              style: TextButton.styleFrom(
-                minimumSize: const Size.fromHeight(44),
-                foregroundColor: theme.colorScheme.onSurface,
-              ),
-              onPressed: () => _confirmRetire(context, name),
-              icon: const Icon(Icons.person_off_outlined, size: 20),
-              label: const Text(
-                'Retire pilot',
-                style: TextStyle(decoration: TextDecoration.underline),
-              ),
-            ),
           ],
-        ),
+          const Divider(height: 32),
+          OutlinedButton.icon(
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size.fromHeight(44),
+              side: BorderSide(color: theme.colorScheme.onSurface, width: 1.5),
+            ),
+            onPressed: () => _notYet(
+              context,
+              'Invitation links arrive with the invitations feature (#141).',
+            ),
+            icon: const Icon(Icons.link, size: 20),
+            label: const Text('Copy invitation link'),
+          ),
+          const SizedBox(height: 8),
+          TextButton(
+            style: TextButton.styleFrom(
+              minimumSize: const Size.fromHeight(44),
+              alignment: Alignment.centerLeft,
+              foregroundColor: theme.colorScheme.primary,
+            ),
+            onPressed: () => context.push(resultsPath(contestId)),
+            child: const Text('Current results'),
+          ),
+          const SizedBox(height: 8),
+          TextButton.icon(
+            style: TextButton.styleFrom(
+              minimumSize: const Size.fromHeight(44),
+              foregroundColor: theme.colorScheme.onSurface,
+            ),
+            onPressed: () => _confirmRetire(context, data.pilotName),
+            icon: const Icon(Icons.person_off_outlined, size: 20),
+            label: const Text(
+              'Retire pilot',
+              style: TextStyle(decoration: TextDecoration.underline),
+            ),
+          ),
+        ],
       ),
     );
   }

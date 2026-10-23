@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_self_score/data/sample_data.dart';
+import 'package:soar_score_self_score/data/sample_self_score_repository.dart';
+import 'package:soar_score_self_score/data/self_score_scope.dart';
 import 'package:soar_score_self_score/models/landing_result.dart';
 import 'package:soar_score_self_score/pages/score_entry_page.dart';
 import 'package:soar_score_self_score/services/landing_search.dart';
@@ -14,17 +17,20 @@ Future<void> _pump(WidgetTester tester, List<LandingResult>? table) async {
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
   await tester.pumpWidget(
-    MaterialApp(
-      home: table == null
-          ? const ScoreEntryPage(contestId: 'c', pilotId: '12', roundId: '4')
-          : ScoreEntryPage(
-              contestId: 'c',
-              pilotId: '12',
-              roundId: '4',
-              landingTable: table,
-            ),
+    SelfScoreScope(
+      repository: table == null
+          ? const SampleSelfScoreRepository()
+          : SampleSelfScoreRepository(landingTable: table),
+      child: const MaterialApp(
+        home: ScoreEntryPage(
+          contestId: SampleData.contestId,
+          pilotId: '12',
+          roundId: '4',
+        ),
+      ),
     ),
   );
+  await tester.pumpAndSettle();
 }
 
 void main() {

@@ -14,7 +14,9 @@ class ContestCard extends StatelessWidget {
 
   final String name;
   final String dates;
-  final String next;
+
+  /// The participant's next round; the row is hidden when null.
+  final String? next;
   final VoidCallback onTap;
 
   @override
@@ -56,25 +58,29 @@ class ContestCard extends StatelessWidget {
                   ),
                 ],
               ),
-              const Divider(height: 28),
-              Row(
-                children: [
-                  Expanded(
-                    child: Text.rich(
-                      TextSpan(
-                        text: 'Next: ',
-                        children: [
-                          TextSpan(
-                            text: next,
-                            style: const TextStyle(fontWeight: FontWeight.w700),
-                          ),
-                        ],
+              if (next != null) ...[
+                const Divider(height: 28),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text.rich(
+                        TextSpan(
+                          text: 'Next: ',
+                          children: [
+                            TextSpan(
+                              text: next!,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                  Icon(Icons.chevron_right, color: muted),
-                ],
-              ),
+                    Icon(Icons.chevron_right, color: muted),
+                  ],
+                ),
+              ],
             ],
           ),
         ),

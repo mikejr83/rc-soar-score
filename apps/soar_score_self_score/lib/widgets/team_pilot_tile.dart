@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../models/team_pilot.dart';
 import 'status_chip.dart';
-
-/// Where a team pilot stands in the running order.
-enum TeamPilotState { upNow, upNext, justFlown, retired, scheduled }
 
 /// One pilot on the team overview: name, flight slot and what is needed.
 class TeamPilotTile extends StatelessWidget {

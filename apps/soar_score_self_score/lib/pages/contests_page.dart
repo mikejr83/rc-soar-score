@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../models/sample_data.dart';
+import '../data/self_score_scope.dart';
+import '../models/contests_view.dart';
 import '../router.dart';
 import '../widgets/connection_indicator.dart';
 import '../widgets/contest_card.dart';
 import '../widgets/is_this_you_card.dart';
+import '../widgets/loadable_scaffold.dart';
 import '../widgets/self_score_app_bar.dart';
 
 /// The signed-in person's contests, with the "Is this you?" match prompt.
@@ -14,41 +16,48 @@ class ContestsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final repository = context.repository;
     final theme = Theme.of(context);
-    return Scaffold(
-      appBar: const SelfScoreAppBar(
+    final muted = theme.colorScheme.onSurfaceVariant;
+    return LoadableScaffold<ContestsView>(
+      load: repository.contests,
+      reloadKey: repository,
+      appBar: (context, data) => const SelfScoreAppBar(
         title: 'Contests',
-        contextLine: SampleData.contestName,
         actions: [ConnectionIndicator()],
       ),
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            const IsThisYouCard(
-              message:
-                  'Your email matches ${SampleData.pilotName}, pilot 12, in '
-                  '${SampleData.contestName}.',
-            ),
+      builder: (context, data) => ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          if (data.matchPrompt != null) ...[
+            IsThisYouCard(message: data.matchPrompt!),
             const SizedBox(height: 16),
-            Text('Your contests', style: theme.textTheme.headlineMedium),
-            const SizedBox(height: 8),
-            ContestCard(
-              name: SampleData.contestName,
-              dates: 'Sat 10 Oct 2026 to Sun 11 Oct 2026',
-              next: 'Round 4, Group B, lane 2',
-              onTap: () => context.go(contestPath(SampleData.contestId)),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Open the link your contest director sent you to add a contest '
-              'here.',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
           ],
-        ),
+          Text('Your contests', style: theme.textTheme.headlineMedium),
+          const SizedBox(height: 8),
+          if (data.contests.isEmpty)
+            Text(
+              'You are not in a contest yet. Open the link your contest '
+              'director sent you.',
+              style: theme.textTheme.bodyLarge?.copyWith(color: muted),
+            )
+          else
+            for (final contest in data.contests) ...[
+              ContestCard(
+                name: contest.name,
+                dates: contest.dates,
+                next: contest.next,
+                onTap: () => context.go(contestPath(contest.id)),
+              ),
+              const SizedBox(height: 8),
+            ],
+          const SizedBox(height: 8),
+          Text(
+            'Open the link your contest director sent you to add a contest '
+            'here.',
+            style: theme.textTheme.bodyMedium?.copyWith(color: muted),
+          ),
+        ],
       ),
     );
   }

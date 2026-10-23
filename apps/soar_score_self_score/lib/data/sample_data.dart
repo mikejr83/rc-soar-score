@@ -1,10 +1,10 @@
-import 'group_result_row.dart';
-import 'landing_result.dart';
-import 'pilot_round.dart';
-import 'results_snapshot.dart';
+import '../models/group_result_row.dart';
+import '../models/landing_result.dart';
+import '../models/pilot_round.dart';
+import '../models/results_snapshot.dart';
 
-/// Placeholder content until the self-scoring API exists. The pages read
-/// these constants so the layout can be reviewed on real-looking data.
+/// Placeholder content until the self-scoring API exists. Only
+/// `SampleSelfScoreRepository` reads it; pages go through the repository.
 abstract final class SampleData {
   static const contestId = 'spring-open';
   static const contestName = 'Spring Open';
@@ -137,7 +137,7 @@ abstract final class SampleData {
     ),
   ];
 
-  static const _teams = [
+  static const teamStandings = [
     StandingLine(place: '1', name: 'Team Osprey', score: '412'),
     StandingLine(place: '2', name: teamName, score: '398', isYou: true),
     StandingLine(place: '3', name: 'Team Merlin', score: '371'),
@@ -148,7 +148,7 @@ abstract final class SampleData {
       round: 4,
       ordinal: '3rd',
       score: '2,184',
-      teams: _teams,
+      teams: teamStandings,
       pilots: [
         StandingLine(place: '1', name: 'Li Wei', score: '2,231'),
         StandingLine(place: '2', name: 'Tom Reid', score: '2,207'),
@@ -166,7 +166,7 @@ abstract final class SampleData {
       round: 3,
       ordinal: '4th',
       score: '1,702',
-      teams: _teams,
+      teams: teamStandings,
       pilots: [
         StandingLine(place: '1', name: 'Tom Reid', score: '1,788'),
         StandingLine(place: '2', name: 'Li Wei', score: '1,745'),

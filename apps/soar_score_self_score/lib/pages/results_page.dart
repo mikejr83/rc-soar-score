@@ -1,212 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:soar_score_ui/soar_score_ui.dart';
 
-import '../models/results_snapshot.dart';
-import '../models/sample_data.dart';
+import '../data/self_score_scope.dart';
+import '../models/results_view.dart';
 import '../router.dart';
 import '../widgets/connection_indicator.dart';
-import '../widgets/earlier_round_banner.dart';
+import '../widgets/loadable_scaffold.dart';
+import '../widgets/results_body.dart';
 import '../widgets/self_score_app_bar.dart';
-import '../widgets/standings_table.dart';
-import '../widgets/status_chip.dart';
 
-/// Where the pilot stands as of a round: their place and score, then the
-/// overall tables. [asOfRound] null means the latest round; an earlier round
-/// shows a banner with a way back to the latest.
-class ResultsPage extends StatefulWidget {
+/// Where the pilot stands as of a round. [asOfRound] null means the latest
+/// round; an earlier round shows a banner with a way back to the latest.
+class ResultsPage extends StatelessWidget {
   const ResultsPage({required this.contestId, this.asOfRound, super.key});
 
   final String contestId;
   final int? asOfRound;
 
   @override
-  State<ResultsPage> createState() => _ResultsPageState();
-}
-
-class _ResultsPageState extends State<ResultsPage> {
-  bool _teams = false;
-
-  ResultsSnapshot get _snapshot =>
-      SampleData.results[widget.asOfRound ?? SampleData.latestRound] ??
-      SampleData.results[SampleData.latestRound]!;
-
-  bool get _isLatest => _snapshot.round == SampleData.latestRound;
-
-  List<StandingsRow> _rows(List<StandingLine> lines) => [
-    for (final line in lines)
-      StandingsRow(
-        place: line.place,
-        name: line.name,
-        score: line.score,
-        isYou: line.isYou,
-        youLabel: _teams ? '(your team)' : '(you)',
-        tied: line.tied,
-      ),
-  ];
-
-  @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    final muted = scheme.onSurfaceVariant;
-    final snapshot = _snapshot;
-    final round = snapshot.round;
-    return Scaffold(
-      appBar: SelfScoreAppBar(
+    final repository = context.repository;
+    return LoadableScaffold<ResultsView>(
+      load: () => repository.results(contestId, asOfRound: asOfRound),
+      reloadKey: (repository, contestId, asOfRound),
+      appBar: (context, data) => SelfScoreAppBar(
         title: 'Results',
-        contextLine: SampleData.contestName,
-        onBack: () => context.canPop()
-            ? context.pop()
-            : context.go(teamPath(widget.contestId)),
+        contextLine: data?.contestName,
+        onBack: () =>
+            context.canPop() ? context.pop() : context.go(teamPath(contestId)),
         backLabel: 'Back',
         actions: const [ConnectionIndicator()],
         showAccount: false,
       ),
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            if (!_isLatest) ...[
-              EarlierRoundBanner(
-                round: round,
-                latest: SampleData.latestRound,
-                onSeeLatest: () => context.go(resultsPath(widget.contestId)),
-              ),
-              const SizedBox(height: 16),
-            ],
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const StatusChip(
-                  label: 'Preliminary',
-                  icon: Icons.pending_outlined,
-                ),
-                Text(
-                  _isLatest
-                      ? 'As of round $round · latest'
-                      : 'As of round $round',
-                  style: theme.textTheme.bodyMedium?.copyWith(color: muted),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      _isLatest ? 'You are' : 'You were',
-                      style: theme.textTheme.bodyMedium?.copyWith(color: muted),
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.baseline,
-                      textBaseline: TextBaseline.alphabetic,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Semantics(
-                          label: '${snapshot.ordinal} place',
-                          excludeSemantics: true,
-                          child: Text(
-                            snapshot.ordinal,
-                            style: BrandTypography.stencilHero.copyWith(
-                              fontSize: 56,
-                              color: scheme.primary,
-                            ),
-                          ),
-                        ),
-                        Text(
-                          snapshot.score,
-                          style: BrandTypography.numbers.copyWith(
-                            fontSize: 40,
-                            height: 1,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Your group score. You ${_isLatest ? 'are' : 'were'} '
-                      '${snapshot.ordinal} after round $round.',
-                      style: theme.textTheme.bodyMedium?.copyWith(color: muted),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            DecoratedBox(
-              decoration: BoxDecoration(
-                color: scheme.surfaceContainerHigh,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: scheme.outlineVariant),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 12,
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Icon(Icons.pause_circle_outline, size: 20),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Semantics(
-                        liveRegion: true,
-                        child: Text(
-                          'Standings are held at round ${SampleData.heldRound}. '
-                          'The director is hiding overall results while scores '
-                          'are checked.',
-                          style: theme.textTheme.bodyMedium,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            SegmentedButton<bool>(
-              showSelectedIcon: false,
-              style: SegmentedButton.styleFrom(
-                minimumSize: const Size.fromHeight(48),
-              ),
-              segments: const [
-                ButtonSegment(value: false, label: Text('Pilots')),
-                ButtonSegment(value: true, label: Text('Teams')),
-              ],
-              selected: {_teams},
-              onSelectionChanged: (value) =>
-                  setState(() => _teams = value.first),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              '${_teams ? 'Overall, teams' : 'Overall, pilots'}'
-              '${_isLatest ? '' : ', as of round $round'}',
-              style: theme.textTheme.headlineMedium,
-            ),
-            const SizedBox(height: 8),
-            StandingsTable(
-              nameHeader: _teams ? 'Team' : 'Pilot',
-              rows: _rows(_teams ? snapshot.teams : snapshot.pilots),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              _isLatest
-                  ? 'Scores are preliminary and can change until the director '
-                        'marks results official.'
-                  : 'Results as of round $round are preliminary. A review that '
-                        'changes round $round updates this page.',
-              style: theme.textTheme.bodyMedium?.copyWith(color: muted),
-            ),
-          ],
-        ),
-      ),
+      builder: (context, data) => ResultsBody(contestId: contestId, data: data),
     );
   }
 }

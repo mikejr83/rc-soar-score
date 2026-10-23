@@ -205,7 +205,7 @@ Documentation, help and support routes are registered in `lib/docs_routes.dart` 
 
 Routes follow `plan/ui/participant-scoring/participant-scoring.md`. Not built yet: the invitation handler (`/invitations/{credential}`). Contest entry sends everyone to the team overview until role routing exists (#142). On the pilot overview, View opens the group results for the round until the read-only score view exists; Copy invitation link and Retire are not connected to the API. The path helpers are at the top of `router.dart`.
 
-The pages read placeholder data from `models/sample_data.dart` until the self-scoring API exists. The landing field picks its control by table size (`widgets/landing_control.dart`: sheet up to 20 results, autocomplete above); see `plan/ui/participant-scoring/landing-control-decision.md`.
+Pages read through `SelfScoreRepository` (`data/self_score_repository.dart`, provided by `SelfScoreScope`) and load with `LoadableScaffold` (loading, error and Retry states). Until the self-scoring API exists the app uses `SampleSelfScoreRepository`, backed by `data/sample_data.dart`; the API-backed repository replaces it in `main.dart` without changing a page. The landing field picks its control by table size (`widgets/landing_control.dart`: sheet up to 20 results, autocomplete above); see `plan/ui/participant-scoring/landing-control-decision.md`.
 
 ### Server (`soar_score_server`)
 

@@ -3,6 +3,8 @@ import 'package:soar_score_api/soar_score_api.dart';
 
 import 'api_client_provider.dart';
 import 'app.dart';
+import 'data/sample_self_score_repository.dart';
+import 'data/self_score_scope.dart';
 
 void main() {
   const String defaultUrl = 'http://localhost:8080';
@@ -12,5 +14,14 @@ void main() {
   final baseUrl = configuredUrl.isEmpty ? defaultUrl : configuredUrl;
   final client = ApiClient(baseUrl: Uri.parse(baseUrl));
 
-  runApp(ApiClientInherited(client: client, child: const SelfScoreApp()));
+  // The sample repository stands in until the API-backed one exists.
+  runApp(
+    ApiClientInherited(
+      client: client,
+      child: const SelfScoreScope(
+        repository: SampleSelfScoreRepository(),
+        child: SelfScoreApp(),
+      ),
+    ),
+  );
 }
