@@ -28,6 +28,7 @@ DrawMatrixData syntheticDraw({
   List<int> groupSizes = const [8, 8, 7, 7],
   bool lanes = true,
   String Function(int pilot)? name,
+  String? className,
 }) {
   var next = 0;
   return DrawMatrixData(
@@ -46,6 +47,7 @@ DrawMatrixData syntheticDraw({
                       name: (name ?? (n) => 'Pilot $n')(next++),
                       lane: lanes ? k + 1 : null,
                       number: 100 + k,
+                      className: className,
                     ),
                 ],
               ),

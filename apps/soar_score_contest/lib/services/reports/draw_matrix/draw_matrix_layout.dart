@@ -94,6 +94,7 @@ class DrawMatrixLayout {
     required bool numbers,
     required bool classes,
     DrawMatrixLineCounter? lineCounter,
+    DrawMatrixTextMeter? textMeter,
   }) {
     final style = options.compact
         ? DrawMatrixStyle.compact
@@ -106,6 +107,12 @@ class DrawMatrixLayout {
       options: options,
       style: style,
       width: tableWidth,
+      pilots: [
+        for (final round in data.rounds)
+          if (options.rounds.contains(round.ordinal))
+            for (final group in round.groups) ...group.pilots,
+      ],
+      meter: textMeter ?? measuredWidth,
       lanes: data.hasLanes,
       teams: teams,
       numbers: numbers,
@@ -222,6 +229,29 @@ class DrawMatrixLayout {
 
   /// The width of one table.
   final double tableWidth;
+
+  /// The default text meter: [text] set in the sheet's type on one line.
+  static double measuredWidth(
+    String text,
+    double fontSize, {
+    bool bold = false,
+  }) {
+    final painter = TextPainter(
+      text: TextSpan(
+        text: text,
+        style: TextStyle(
+          fontSize: fontSize,
+          fontWeight: bold ? FontWeight.w700 : null,
+          fontFamilyFallback: _fonts,
+          fontFeatures: const [FontFeature.tabularFigures()],
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    final width = painter.width;
+    painter.dispose();
+    return width;
+  }
 
   /// The default line counter: [text] set in the sheet's type, wrapped at
   /// [width] px.

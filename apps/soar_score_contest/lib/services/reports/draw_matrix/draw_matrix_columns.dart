@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'draw_matrix_data.dart';
 import 'draw_matrix_options.dart';
 import 'draw_matrix_style.dart';
@@ -14,6 +16,13 @@ enum DrawMatrixColumnId {
   national,
 }
 
+/// How wide [text] sets in the sheet's type at [fontSize] px.
+typedef DrawMatrixTextMeter = double Function(
+  String text,
+  double fontSize, {
+  bool bold,
+});
+
 /// One column of the table: its heading, width and how its text sits.
 class DrawMatrixColumn {
   const DrawMatrixColumn({
@@ -29,7 +38,7 @@ class DrawMatrixColumn {
   final double width;
   final bool alignRight;
 
-  /// Text may run to more than one line; a fixed numeric column does not.
+  /// Text may run to more than one line.
   final bool wraps;
 
   /// What [pilot] shows in this column; empty when they have no value.
@@ -44,102 +53,92 @@ class DrawMatrixColumn {
     DrawMatrixColumnId.national => pilot.nationalId ?? '',
   };
 
+  /// The room the pilot column keeps however much the others ask for.
+  static const double minNameWidth = 140;
+
+  /// The least a team or club column is squeezed to before the pilot column
+  /// gives way.
+  static const double minWrapWidth = 64;
+
   /// Chooses the columns for a table [width] px wide. A column that does not
-  /// apply is left out and the pilot column takes the room.
+  /// apply is left out.
   ///
-  /// Lane, number, class and the IDs have fixed widths. Pilot, team and club
-  /// share what is left (3 : 1.5 : 1.8); team and club stop at their widest
-  /// useful size and hand the surplus on.
+  /// Every column but the pilot's shrinks to fit its widest value (or its
+  /// heading) in [pilots], so a class like "Sportsman" never wraps; the pilot
+  /// column takes everything that is left. Team and club stop at a widest
+  /// useful size and wrap past it. If the others leave the pilot column less
+  /// than [minNameWidth], team and club give way first.
   static List<DrawMatrixColumn> plan({
     required DrawMatrixOptions options,
     required DrawMatrixStyle style,
     required double width,
+    required Iterable<DrawMatrixPilot> pilots,
+    required DrawMatrixTextMeter meter,
     required bool lanes,
     required bool teams,
     required bool numbers,
     required bool classes,
   }) {
-    final fixed = <DrawMatrixColumnId, double>{};
-    final flex = <DrawMatrixColumnId, ({double share, double? max})>{};
-    final order = <DrawMatrixColumnId>[];
-    final titles = <DrawMatrixColumnId, String>{};
-    void addFixed(DrawMatrixColumnId id, String title, double w) {
-      fixed[id] = w;
-      order.add(id);
-      titles[id] = title;
-    }
-
-    void addFlex(
-      DrawMatrixColumnId id,
-      String title,
-      double share,
-      double? max,
-    ) {
-      flex[id] = (share: share, max: max);
-      order.add(id);
-      titles[id] = title;
-    }
-
-    if (lanes) addFixed(DrawMatrixColumnId.lane, 'Lane', style.laneWidth);
-    addFlex(DrawMatrixColumnId.name, 'Pilot', 3, null);
-    if (teams) {
-      if (style.teamFixed case final w?) {
-        addFixed(DrawMatrixColumnId.team, 'Team', w);
-      } else {
-        addFlex(DrawMatrixColumnId.team, 'Team', 1.5, style.teamMax);
-      }
-    }
-    if (numbers) addFixed(DrawMatrixColumnId.number, 'No.', style.numberWidth);
-    if (classes) {
-      addFixed(DrawMatrixColumnId.className, 'Class', style.classWidth);
-    }
-    if (options.showClub) {
-      addFlex(DrawMatrixColumnId.club, 'Club', 1.8, style.clubMax);
-    }
-    if (options.showFai) addFixed(DrawMatrixColumnId.fai, 'FAI ID', 92);
-    if (options.showNational) {
-      addFixed(DrawMatrixColumnId.national, 'National ID', 108);
-    }
-
-    var room = width - fixed.values.fold(0.0, (a, b) => a + b);
-    final open = [...flex.keys];
-    // A column held at its maximum gives the rest back to the others.
-    var again = true;
-    final widths = <DrawMatrixColumnId, double>{};
-    while (again) {
-      again = false;
-      final total = open.fold(0.0, (a, id) => a + flex[id]!.share);
-      for (final id in open) {
-        final max = flex[id]!.max;
-        if (max != null && room * flex[id]!.share / total > max) {
-          widths[id] = max;
-          room -= max;
-          open.remove(id);
-          again = true;
-          break;
-        }
-      }
-    }
-    final total = open.fold(0.0, (a, id) => a + flex[id]!.share);
-    var used = 0.0;
-    for (var i = 0; i < open.length; i++) {
-      final id = open[i];
-      final w = i == open.length - 1
-          ? room - used
-          : (room * flex[id]!.share / total).floorToDouble();
-      widths[id] = w;
-      used += w;
-    }
-    return [
-      for (final id in order)
+    final titles = <DrawMatrixColumnId, String>{
+      if (lanes) DrawMatrixColumnId.lane: 'Lane',
+      DrawMatrixColumnId.name: 'Pilot',
+      if (teams) DrawMatrixColumnId.team: 'Team',
+      if (numbers) DrawMatrixColumnId.number: 'No.',
+      if (classes) DrawMatrixColumnId.className: 'Class',
+      if (options.showClub) DrawMatrixColumnId.club: 'Club',
+      if (options.showFai) DrawMatrixColumnId.fai: 'FAI ID',
+      if (options.showNational) DrawMatrixColumnId.national: 'National ID',
+    };
+    // The columns that may wrap past a widest useful size.
+    final caps = {
+      DrawMatrixColumnId.team: style.teamFixed ?? style.teamMax,
+      DrawMatrixColumnId.club: style.clubMax,
+    };
+    DrawMatrixColumn shell(DrawMatrixColumnId id, {double w = 0}) =>
         DrawMatrixColumn(
           id: id,
           title: titles[id]!,
-          width: fixed[id] ?? widths[id]!,
+          width: w,
           alignRight:
               id == DrawMatrixColumnId.lane || id == DrawMatrixColumnId.number,
-          wraps: flex.containsKey(id) || id == DrawMatrixColumnId.team,
-        ),
-    ];
+          wraps: id == DrawMatrixColumnId.name || caps.containsKey(id),
+        );
+
+    final widths = <DrawMatrixColumnId, double>{};
+    for (final id in titles.keys) {
+      if (id == DrawMatrixColumnId.name) {
+        continue;
+      }
+      final column = shell(id);
+      var widest = meter(column.title, style.headFont, bold: true);
+      final seen = <String>{};
+      for (final pilot in pilots) {
+        final text = column.textOf(pilot);
+        if (text.isNotEmpty && seen.add(text)) {
+          widest = math.max(
+            widest,
+            meter(text, style.fontSize, bold: id == DrawMatrixColumnId.lane),
+          );
+        }
+      }
+      // A little slack so a rounding difference never wraps the last letter.
+      final fit = (widest + 2 * style.padX + 2).ceilToDouble();
+      widths[id] = caps[id] == null ? fit : math.min(fit, caps[id]!);
+    }
+
+    var others = widths.values.fold(0.0, (a, b) => a + b);
+    var shortfall = minNameWidth - (width - others);
+    for (final id in caps.keys) {
+      if (shortfall <= 0 || !widths.containsKey(id)) {
+        continue;
+      }
+      final give = math.min(shortfall, math.max(0, widths[id]! - minWrapWidth));
+      widths[id] = widths[id]! - give;
+      shortfall -= give;
+    }
+    others = widths.values.fold(0.0, (a, b) => a + b);
+    widths[DrawMatrixColumnId.name] = math.max(0, width - others);
+
+    return [for (final id in titles.keys) shell(id, w: widths[id]!)];
   }
 }

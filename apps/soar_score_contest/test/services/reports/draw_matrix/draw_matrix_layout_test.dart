@@ -15,11 +15,16 @@ void main() {
   // One line per cell, whatever the text.
   int oneLine(String text, double width, double fontSize) => 1;
 
+  // Eight pixels a character, whatever the type.
+  double eight(String text, double fontSize, {bool bold = false}) =>
+      text.length * 8;
+
   DrawMatrixLayout plan(
     DrawMatrixData data, {
     Map<String, String> filters = const {},
     DrawMatrixLineCounter? lines,
     Size body = _body,
+    bool classes = false,
   }) {
     return DrawMatrixLayout.plan(
       data: data,
@@ -30,8 +35,9 @@ void main() {
       body: body,
       teams: false,
       numbers: true,
-      classes: false,
+      classes: classes,
       lineCounter: lines ?? oneLine,
+      textMeter: eight,
     );
   }
 
@@ -188,7 +194,8 @@ void main() {
     test('no lanes, no Lane column; the pilot column takes the room', () {
       final layout = plan(syntheticDraw(lanes: false));
       expect(ids(layout), [DrawMatrixColumnId.name, DrawMatrixColumnId.number]);
-      expect(layout.columns.first.width, _body.width - 50);
+      final number = layout.columns.last.width;
+      expect(layout.columns.first.width, _body.width - number);
     });
 
     test('the columns fill the table exactly', () {
@@ -201,6 +208,40 @@ void main() {
         final total = layout.columns.fold(0.0, (sum, c) => sum + c.width);
         expect(total, layout.tableWidth, reason: '$filters');
       }
+    });
+
+    test(
+      'every column but the pilot shrinks to fit; the pilot takes the rest',
+      () {
+        final layout = plan(
+          syntheticDraw(className: 'Sportsman'),
+          classes: true,
+        );
+        double width(DrawMatrixColumnId id) =>
+            layout.columns.firstWhere((c) => c.id == id).width;
+        // 9 characters at 8 px, the cell padding and the slack.
+        expect(width(DrawMatrixColumnId.className), 9 * 8 + 12 + 2);
+        // "Lane" and "No." headings set bold at the heading size also fit.
+        expect(width(DrawMatrixColumnId.lane), 4 * 8 + 12 + 2);
+        final others = layout.columns
+            .where((c) => c.id != DrawMatrixColumnId.name)
+            .fold(0.0, (sum, c) => sum + c.width);
+        expect(width(DrawMatrixColumnId.name), layout.tableWidth - others);
+      },
+    );
+
+    test('a wide class pushes the other columns left, not onto two lines', () {
+      final plain = plan(syntheticDraw(className: 'Open'), classes: true);
+      final wide = plan(syntheticDraw(className: 'Sportsman'), classes: true);
+      double name(DrawMatrixLayout l) =>
+          l.columns.firstWhere((c) => c.id == DrawMatrixColumnId.name).width;
+      expect(name(wide), lessThan(name(plain)));
+      expect(
+        wide.columns
+            .firstWhere((c) => c.id == DrawMatrixColumnId.className)
+            .wraps,
+        isFalse,
+      );
     });
 
     test('additional info adds club, FAI ID and National ID after class', () {
