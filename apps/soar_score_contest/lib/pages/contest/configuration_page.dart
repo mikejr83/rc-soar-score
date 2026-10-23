@@ -543,11 +543,6 @@ class _ContestConfigurationPageState extends State<ContestConfigurationPage> {
     bool editable, {
     required bool inline,
   }) {
-    final theme = Theme.of(context);
-    final revision = data.configuration;
-    final saved = revision == null
-        ? 'No configuration saved yet'
-        : 'Configuration revision ${revision.revisionNumber}';
     return SingleChildScrollView(
       key: _scrollKey,
       controller: _scroll,

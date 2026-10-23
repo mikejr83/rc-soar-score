@@ -129,29 +129,6 @@ class ConfigurationSections extends StatelessWidget {
     );
   }
 
-  /// The revision the section's values are saved in: the contest's for the
-  /// details and the two contest controls, the configuration's for the rest.
-  Widget _revisionChip(BuildContext context, SectionId id) {
-    final contestLevel =
-        id == SectionId.details ||
-        id == SectionId.scoringAccess ||
-        id == SectionId.adminLock;
-    final number = contestLevel
-        ? data.contest.revision
-        : data.configuration?.revisionNumber;
-    return ConfigChip.neutral(
-      context,
-      icon: Icons.history,
-      text: number == null
-          ? 'Not saved yet'
-          : '${contestLevel ? 'Contest' : 'Config'} rev. $number',
-      tooltip: contestLevel
-          ? 'Saved with the contest, which is at revision ${data.contest.revision}'
-          : 'Saved with the contest configuration',
-      dense: false,
-    );
-  }
-
   Widget _disciplineChip(BuildContext context) {
     final houseRules = HouseRules.count(
       draft.catalog.disciplineSettings,
