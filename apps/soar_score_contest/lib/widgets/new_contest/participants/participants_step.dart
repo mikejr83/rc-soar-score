@@ -284,7 +284,7 @@ class _ParticipantsStepState extends State<ParticipantsStep> {
       height: 32,
       padding: const EdgeInsetsDirectional.only(start: 8, end: 12),
       decoration: BoxDecoration(
-        color: scheme.surfaceContainer,
+        color: scheme.tertiaryContainer,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(

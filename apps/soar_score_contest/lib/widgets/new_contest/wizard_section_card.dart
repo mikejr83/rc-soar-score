@@ -25,7 +25,6 @@ class WizardSectionCard extends StatelessWidget {
       child: Card(
         margin: EdgeInsets.zero,
         elevation: 1,
-        color: theme.colorScheme.surfaceContainerLow,
         child: Padding(
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
           child: Column(

@@ -111,7 +111,7 @@ class ParticipantsTable extends StatelessWidget {
       label: 'Contest participants',
       child: Container(
         decoration: BoxDecoration(
-          color: scheme.surfaceContainerLow,
+          color: scheme.secondaryContainer,
           border: Border.all(color: scheme.outlineVariant),
           borderRadius: BorderRadius.circular(12),
         ),

@@ -116,7 +116,6 @@ class ScoringStep extends StatelessWidget {
       child: Card(
         margin: EdgeInsets.zero,
         elevation: 1,
-        color: scheme.surfaceContainerLow,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [

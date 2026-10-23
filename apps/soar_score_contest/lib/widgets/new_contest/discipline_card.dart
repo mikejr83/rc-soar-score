@@ -41,7 +41,7 @@ class DisciplineCard extends StatelessWidget {
                 '${discipline.task}',
       excludeSemantics: true,
       child: Material(
-        color: supported ? scheme.surfaceContainerLow : Colors.transparent,
+        color: supported ? scheme.secondaryContainer : Colors.transparent,
         elevation: selected ? 1 : 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),

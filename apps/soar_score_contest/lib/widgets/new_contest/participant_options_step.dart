@@ -156,7 +156,7 @@ class _ParticipantOptionsStepState extends State<ParticipantOptionsStep> {
           child: Card(
             margin: EdgeInsets.zero,
             elevation: 1,
-            color: scheme.surfaceContainerLow,
+            // color: scheme.surfaceContainerLow,
             child: Column(
               children: [
                 for (final (index, option)
