@@ -28,10 +28,14 @@ GliderScoreImportResult  ->  ImportDraft   (this design)
 ImportDraft              ->  repositories  (follow-up, not this design)
 ```
 
-The reference database used for research is `S:\Shared\GliderScoreData.mdb`
-(37 comps, 158 pilots, 6,522 score rows, 10 named landing tables, 1,632
-landing-point rows). Its 28 tables are all accounted for in this document:
-either mapped (§5) or explicitly not mapped (§6).
+The reference databases used for research are `S:\Shared\GliderScoreData.mdb`
+(37 comps, 158 pilots, 6,522 score rows) and a second file analysed on
+2026-10-23 (DBVersion 6.78; 38 comps, 158 pilots, 651 comp-pilots, 6,584 score
+rows, 26 tables; no `State`, `Email`, `FAI_ID`, `OtherRegistration` columns in
+`Pilots`). GliderScore versions differ in columns, so the mapper treats every
+non-key column as optional. Its 26 tables are all accounted for in this
+document: either mapped (§5) or explicitly not mapped (§6). Findings from the
+second file are in `findings.md`.
 
 ## 2. Overall shape
 
@@ -124,13 +128,14 @@ F3L, F3K.
 | `F5B`         | — (no equivalent)        | `F5B`              | Out of scope; comp listed in warnings, not created                                                                       |
 | `Spd`         | — (no equivalent)        | `Spd`              | Speed competition; out of scope                                                                                          |
 | `Elec`        | — (no equivalent)        | (none)             | Out of scope                                                                                                             |
+| `F5L`         | — (no equivalent)        | `Dur`              | New in the analysed file (one comp, no scored rows); no Soar profile; comp listed in warnings, not created               |
 
-Reference-DB split: 37 comps = 30 mappable (23 F5J, 3 F3J, 3 DurGeneral,
-1 DurALES), 7 not imported (2 F3B, 1 F3K, 1 F3L, 1 F5B, 1 Spd, 1 Elec —
-table data not needed by the current app or no corresponding profile).
-The wizard shows supported comps as importable only when structural
-compatibility checks pass. Comps with unresolved representation conflicts
-are blocked with a reason; unsupported classes are skipped with a reason.
+Reference-DB split (analysed file): 38 comps = 30 mappable (23 F5J, 3 F3J,
+3 DurGeneral, 1 DurALES), 8 not imported (2 F3B, 1 F3K, 1 F3L, 1 F5B, 1 F5L,
+1 Spd, 1 Elec). The wizard shows supported comps as importable only when
+structural compatibility checks pass. Comps with unresolved representation
+conflicts are blocked with a reason; unsupported classes are skipped with a
+reason.
 
 The contests pin the **system** profile for that discipline type — no
 new profile versions are created. The imported values are stored on the
@@ -157,15 +162,15 @@ resolved).
 | `DropScoreOption`, `AssignHelpers`                                                                                            | —                           | Operational scoring/helper settings; no Soar counterpart. Not mapped                                                                                          |
 | `AudioProfileDT`, `AudioProfileAP`, `AudioProfileBT`                                                                          | —                           | Timer audio profiles; the current app does not consider timer audio. Not mapped (see §6)                                                                      |
 
-Contest state is not imported: an imported contest is historical, so the
-draft proposes `lifecycle_state: Completed` only through the import-specific
-pathway required by the persistence-compatibility section; the current entity
-lifecycle does not define a direct transition from creation to completion.
-It also proposes `scoring_access: Closed`,
-`admin_lock: Unlocked`, `owner_account_id` = the installing director (or null
-for the offline local account), and no results hiding. A comp whose scores
-are not all scored (some groups without rows) may only be completed through
-that pathway, with the missing source history explicitly warned about.
+Contest state: an imported contest is historical, but most comps are not
+finished (in the reference file 21 of 30 mappable comps have unscored rows,
+only 8 are fully scored). The draft proposes `lifecycle_state: Completed` only
+for a comp with no unscored non-retired rows, through the import-specific
+pathway required by the persistence-compatibility section; other comps import
+in the state the lifecycle allows for "rounds remain". It also proposes
+`scoring_access: Closed`, `admin_lock: Unlocked`, `owner_account_id` = the
+installing director (or null for the offline local account), and no results
+hiding.
 
 ### 5.2 Config tables -> first `ContestConfigurationRevision`
 
@@ -219,6 +224,7 @@ created — and stores the per-contest values on the first `ContestConfiguration
 | `durGroupsPerRound` / `disGroupsPerRound`                                  | — (round's `group_count`)                                                                       | all       | Built into each round in §5.5.2, not into the revision                                                                                                                                                                                                                                                             |
 | `durNbrOfLanes`                                                            | `lane_mode` / `lane_count`                                                                      | all `Dur` | `0` -> `lane_mode: None`; `> 0` -> `Random` with `lane_count` = the value. The reference DB contains 29 zero-lane rows, two rows with 2 lanes, and three rows with 6 lanes; lanes must be preserved rather than assumed absent.                                                                                    |
 | `durRefHeight`, `durPenaltyUpToRefHeight`, `durPenaltyOverRefHeight`       | `reference_launch_height`, `minor_penalty_per_meter`, `major_penalty_per_meter`                 | F5J       | System F5J profile field keys (resolved, §7 Q7); values as-is, stored on the config revision                                                                                                                                                                                                                       |
+| `F5JMotorRestartOption`                                                    | contest config `motor_restart_mode`                                                             | F5J       | 0 = Not Allowed (`not_allowed`), 1 = Allowed, zero cannot be dropped (`non_droppable`), 2 = Allowed, zero can be dropped (`allowed`); NULL in the oldest comps (setting did not exist; a restart flag never zeroed the flight, so keep the recorded scores)                                                        |
 | `durAllowBackToBack`, `durPilotsMin`, `disAllowBackToBack`, `disPilotsMin` | —                                                                                               | all       | GS operational draw details (comma-coded). No Soar option; kept as provenance, warning                                                                                                                                                                                                                             |
 | `durPilotsMax` / `disPilotsMax` / `f3kPilotsMax` / ...                     | —                                                                                               | all       | Group size is **derived** in Soar (from N and G); not stored. Ignored                                                                                                                                                                                                                                              |
 | `durDrawLocked` / `disDrawLocked` / ...                                    | —                                                                                               | all       | Live draw lock; not a setting. Not mapped (warning if set)                                                                                                                                                                                                                                                         |
@@ -246,7 +252,7 @@ all in-scope comps are not imported by default (see Persistence Compatibility).
 | `FAINumber`                   | `fai_number`                      | Empty or `0` -> null                                                                                                                                                                                                                                                                |
 | `State`                       | `state`                           | Verbatim (39 of 158 reference rows have a value)                                                                                                                                                                                                                                    |
 | `Email`                       | `email`                           | Verbatim (21 of 158 reference rows have a value)                                                                                                                                                                                                                                    |
-| `FAI_ID`, `OtherRegistration` | —                                 | 84 rows each carry a second registration id; no dedicated Soar field, provenance only. (Note `FAINumber` and these are separate columns)                                                                                                                                            |
+| `FAI_ID`, `OtherRegistration` | —                                 | Absent in newer or older GS versions (the analysed 6.78 file has no `State`, `Email`, `FAI_ID` or `OtherRegistration`); treat every non-key column as optional. When present: no dedicated Soar field, provenance only                                                              |
 | `UsualClass`                  | —                                 | Class is contest-specific; goes to `ContestParticipation.classification` when `classes_enabled` (§5.4)                                                                                                                                                                              |
 | `Filter`                      | —                                 | GS filtering flag; not mapped                                                                                                                                                                                                                                                       |
 
@@ -261,21 +267,21 @@ follow-up concern (matching/deduping, §8), not part of the draft contract.
 
 ### 5.4 `CompPilots` -> `ContestParticipation` + `Role` + `Team`/`TeamMembership` + `ContestModelLink`
 
-| GliderScore (`CompPilots`) | Soar Score                               | Rule / note                                                                                                                                                                                                                                                                                                                                                                     |
-| -------------------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `CompNo` + `PilotNo`       | `ContestParticipation.id` (minted)       | One participation per (comp, pilot)                                                                                                                                                                                                                                                                                                                                             |
-| `CompNo`                   | `contest_id`                             | From id map                                                                                                                                                                                                                                                                                                                                                                     |
-| `PilotNo`                  | `participant_profile_id`                 | From id map (shared profile)                                                                                                                                                                                                                                                                                                                                                    |
-| `Role`                     | `role_id` / `role_name` / `role_type`    | Mapped through `Roles` table: `Plt` -> system Pilot, `Hlp` -> system Helper, `TM` -> system Team Manager, `CD` -> NonFlier role created if absent, composite codes (`TM/Plt`, `CD/Plt`) unmappable (one role per participation) -> the pilot keeps `Pilot`, warning (§5.5.7)                                                                                                    |
-| `IsPilot`                  | guard                                    | `1` -> `role_type: Pilot`; `0` would mean a non-flier (not present in reference DB)                                                                                                                                                                                                                                                                                             |
-| `Retired`                  | `retired_at_round`                       | `1` -> retirement is known, but its effective round is not stored. The proposed round after the pilot's last scored round (or 1 if none) is only an approximation: because it changes scoring overlays, retain the boolean as provenance and require director review/confirmation before applying `retired_at_round`. Do not silently treat this inferred round as source fact. |
-| `StartNo`                  | `participant_number`                     | Only imported when `participant_numbers_enabled` is on; `0` -> allocate from the running sequence in (StartNo, PilotNo) order so numbers stay distinct (§5.4)                                                                                                                                                                                                                   |
-| `PilotClass`               | `classification`                         | Only when `classes_enabled` and the participation is a pilot                                                                                                                                                                                                                                                                                                                    |
-| `Team`                     | `team_id` + `TeamMembership`             | `0` -> no team. `> 0` -> a Team per (CompNo, Team). **No team names exist in GS** (there is no Teams table): names are generated ("Team 1", "Team 2", ...) with a warning; names are editable after import in the contest UI                                                                                                                                                    |
-| `OmitFromTeamScore`        | —                                        | No per-pilot exclusion in Soar team scoring; not mapped, warning when set                                                                                                                                                                                                                                                                                                       |
-| `DrawFreq`                 | —                                        | GS draw-frequency bookkeeping; not a Soar field. Not mapped                                                                                                                                                                                                                                                                                                                     |
-| `Model`                    | `ContestModelLink.model_name`            | One link per participation (invariant: one per participation). Created when present; `ModelData` -> `model_id` when it is not `-1`/empty (resolved, §7 Q11: reference file has all `-1`). `model_catalog_id` stays null: GS has no per-director catalog; `ModelNames` in the reference file is empty                                                                            |
-| `ModelData`                | `ContestModelLink.model_id` / provenance | `-1` / empty -> null; otherwise kept as external id string                                                                                                                                                                                                                                                                                                                      |
+| GliderScore (`CompPilots`) | Soar Score                               | Rule / note                                                                                                                                                                                                                                                                                          |
+| -------------------------- | ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `CompNo` + `PilotNo`       | `ContestParticipation.id` (minted)       | One participation per (comp, pilot)                                                                                                                                                                                                                                                                  |
+| `CompNo`                   | `contest_id`                             | From id map                                                                                                                                                                                                                                                                                          |
+| `PilotNo`                  | `participant_profile_id`                 | From id map (shared profile)                                                                                                                                                                                                                                                                         |
+| `Role`                     | `role_id` / `role_name` / `role_type`    | Mapped through `Roles` table: `Plt` -> system Pilot, `Hlp` -> system Helper, `TM` -> system Team Manager, `CD` -> NonFlier role created if absent, composite codes (`TM/Plt`, `CD/Plt`) unmappable (one role per participation) -> the pilot keeps `Pilot`, warning (§5.5.7)                         |
+| `IsPilot`                  | guard                                    | `1` -> `role_type: Pilot`; `0` would mean a non-flier (not present in reference DB)                                                                                                                                                                                                                  |
+| `Retired`                  | `retired_at_round`                       | `1` -> the round after the pilot's last `Updated = True` flight (1 if none); retired pilots' later rows exist as unscored placeholders and are not imported as assignments. Show the inferred round for confirmation (§7 Q10).                                                                       |
+| `StartNo`                  | `participant_number`                     | Only imported when `participant_numbers_enabled` is on; `0` -> allocate from the running sequence in (StartNo, PilotNo) order so numbers stay distinct (§5.4)                                                                                                                                        |
+| `PilotClass`               | `classification`                         | Only when `classes_enabled` and the participation is a pilot                                                                                                                                                                                                                                         |
+| `Team`                     | `team_id` + `TeamMembership`             | `0` -> no team. `> 0` -> a Team per (CompNo, Team). **No team names exist in GS** (there is no Teams table): names are generated ("Team 1", "Team 2", ...) with a warning; names are editable after import in the contest UI                                                                         |
+| `OmitFromTeamScore`        | —                                        | No per-pilot exclusion in Soar team scoring; not mapped, warning when set                                                                                                                                                                                                                            |
+| `DrawFreq`                 | —                                        | GS draw-frequency bookkeeping; not a Soar field. Not mapped                                                                                                                                                                                                                                          |
+| `Model`                    | `ContestModelLink.model_name`            | One link per participation (invariant: one per participation). Created when present; `ModelData` -> `model_id` when it is not `-1`/empty (resolved, §7 Q11: reference file has all `-1`). `model_catalog_id` stays null: GS has no per-director catalog; `ModelNames` in the reference file is empty |
+| `ModelData`                | `ContestModelLink.model_id` / provenance | `-1` / empty -> null; otherwise kept as external id string                                                                                                                                                                                                                                           |
 
 Participations of non-pilots (helpers, the CD) are created with the mapped
 role and `role_type: NonFlier`; they have no assignments or scores, matching
@@ -296,35 +302,25 @@ the same file; `RoleDraft` rows carry `display_name` and type for review.
 
 ### 5.5 `Scores` and the flight structure -> matrix, scores
 
-This is the heart of the import. **GliderScore has no draw or matrix
-table**: there is nothing in the `.mdb` that says "round 3 was drawn with
-these groups". Everything about the flight structure must be **reconstructed
-from the `Scores` rows themselves**. Consequences:
+This is the heart of the import. **GliderScore keeps the draw inside `Scores`:**
+a row exists for every drawn flight, with `Updated = False` and no data until it
+is scored. Whole future rounds, retired pilots' later rounds and pilots who did
+not fly are all present as unscored rows (reference file: 863 unscored F5J
+rows). So the matrix is the full draw, not a lower bound reconstructed from
+scored flights. What GS does not hold:
 
-- A pilot who was drawn but never flew has no assignment in the source score
-  rows and is not fabricated by the import. Empty regular groups are still
-  created from the configured group count (§5.5.2). The reconstructed matrix
-  remains a lower bound: every imported assignment has an observed score row,
-  but absent rows do not prove that no flight was drawn, flown, or scored.
-  Surface this uncertainty as a standing comp/round warning.
-- Group **size** (capacity) cannot be validated against a draw; it is
-  whatever the score rows imply.
-- Lane numbers are not in GS: every imported assignment has `lane: null` in
-  the reconstructed matrix. The contest's `lane_mode` still comes from
-  `durNbrOfLanes`; the reference DB proves this is not always `None` (two
-  contests use 2 lanes and three use 6). A nonzero source lane count therefore
-  requires a review decision about deterministic lane reconstruction, rather
-  than silently discarding the lane topology. If lanes cannot be reconstructed
-  from source rows, preserve the count in configuration/provenance and block
-  claims that the imported matrix is lane-equivalent.
+- Lane numbers: every imported assignment has `lane: null`; `lane_mode` still
+  comes from `durNbrOfLanes` (comps 15 and 16 use 6 lanes, comp 20 uses 2) and
+  lanes cannot be reconstructed from the source, so the count is preserved in
+  configuration/provenance and the matrix is not claimed lane-equivalent.
+- The draw seed and algorithm: placeholder seed, flagged in warnings.
 
 #### 5.5.1 `TaskNo` -> `MatrixRevision`
 
-`TaskNo` is a **global** task (draw) identifier in the `.mdb`, not
-per-comp: in the reference DB most single-task comps carry their own
-`CompNo` as task id, comp 3 has tasks 1, 2 and 3, and comp 6 has task 4.
-Multiple tasks in one comp mean successive draws (the later one extends or
-redraws the matrix). Mapping:
+`TaskNo` is not a global id: in the reference file 35 of 37 comps use a
+`TaskNo` different from their `CompNo`, most simply use 1, and only comp 3
+(F3B, skipped) has several tasks. Multiple tasks in one comp would mean
+successive draws. Mapping:
 
 - One `MatrixDraft` per distinct `(CompNo, TaskNo)` with score rows.
 - Task order is provisional source order, sorted by the smallest `RoundNo`
@@ -354,22 +350,15 @@ redraws the matrix). Mapping:
 | `disGroupsPerRound` / `durGroupsPerRound` / `f3kGroupsPerRound` (per class config) | `group_count`        | The config value for that comp; where observed groups exceed it, the maximum observed wins with a warning. Still create every regular RoundGroup from 1 through `group_count`, including groups with no score rows. |
 | `Comps.ScoresLocked`                                                               | `status`             | Imported rounds are all `Open` (final); lock state is not history                                                                                                                                                   |
 
-`matrix_revision_id` and `contest_id` come from the drafts above. The mapper
-must preserve the configured regular group count rather than infer a smaller
-schedule from observed rows. Empty groups and unobserved pilots/assignments are
-unknown source data, not proof that those groups were never drawn; report this
-uncertainty at comp/round level. Do not fabricate assignments for pilots with
-no score row.
+`matrix_revision_id` and `contest_id` come from the drafts above. Groups and
+assignments come from the observed rows, scored or not (§5.5.3).
 
 #### 5.5.3 `GroupNo` -> `RoundGroup`
 
-Create one regular `RoundGroup` for every group number from 1 through the
-round's `group_count`, including groups without rows; group numbers observed
-above `group_count` are not automatically treated as regular groups. Their
-meaning must be established by the re-flight mapping (§5.5.5). All groups have
-`status: Open`. A regular group with no observed score rows is retained with
-an explicit `unobserved` warning, not dropped or represented as a scored empty
-group.
+Create one `RoundGroup` per observed group number in the round. The configured
+`*GroupsPerRound` can be stale (the reference file has comps that configure
+fewer groups than the draw has), so the observed draw wins. All groups have
+`status: Open`; unscored flights inside them are pending placeholders (§5.5.4).
 
 #### 5.5.4 `Scores` rows -> `MatrixAssignment` + `ScorePlaceholder` + `ScoreAttempt` + `OfficialScore`
 
@@ -377,26 +366,26 @@ Each `Scores` row is one flight. Its position in the matrix is keyed by
 `(CompNo, TaskNo, RoundNo, GroupNo, PilotNo)`, and the row's own fields
 distinguish the flight:
 
-| GliderScore (`Scores`)                          | Soar Score                                  | Rule / note                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| ----------------------------------------------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| —                                               | `MatrixAssignment` (minted)                 | One per (comp, task, round, group, pilot, re-flight) flight; built even for pilots who have other rows so all flown flights of a pilot are present                                                                                                                                                                                                                                                                                                                                                                                               |
-| `PilotNo`                                       | `contest_participation_id`                  | From id map                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `RoundNo`, `GroupNo`                            | `scheduled_round_id`, `group`               | Scheduled = where it flew. For the original flight `credited_round_id` = `scheduled_round_id`                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `OriginalRoundNo`                               | `credited_round_id`                         | Differs from `RoundNo` exactly when GS recorded a moved flight. Product decision Q13 keeps the flight in its actual flight round and credits `OriginalRoundNo`; this conflicts with the current `Original` invariant and is draft-only until Persistence Compatibility defines a valid persisted representation. Do not synthesize a source assignment or silently coerce the row.                                                                                                                                                               |
-| `ReFlightNo`                                    | re-flight handling                          | `0` -> regular flight (`ReflightNo=1`, `2`, ... become `Reflight` assignments under a ReFlight, §5.5.5)                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `SeqNo`                                         | `flight_sequence`                           | Verbatim: GS already numbers attempts 1..n per (group, pilot); re-flights take the next sequence, matching the Soar rule                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| `DrawFreq`                                      | —                                           | Provenance only                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| `Helper`                                        | `ScoreAttempt.actor_id` hint                | GS helper id (the scorer). No matching Soar account exists: the attempt is filed under the importing director with authority `Director`, and the helper id is kept in `raw_components` as provenance (§7 Q14)                                                                                                                                                                                                                                                                                                                                    |
-| `Updated`                                       | —                                           | GS re-entry marker; last row wins if duplicated (see validation below)                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| `Landing`                                       | landing selection                           | `0`/absent -> no landing. Otherwise the value may be a distance in metres **or entered points**, depending on the selected GS table: distance tables (for example `F3J Enter Dist`, `F5J Enter Distance`) use metres, while `Enter Points` tables use points. Determine the encoding from `Dur.durLndg`/`LndgNames` and compare awarded points before resolving. Resolve only against a semantically matching contest table (§5.5.6) to the selected `LandingResult.id`; ambiguous encoding/match requires review and blocks exact-score claims. |
-| `Time1Mins`/`Time1Secs`/`Time2Mins`/`Time2Secs` | `raw_components.duration_sec` (+ raw split) | Primary duration = first nonzero pair; raw min/sec pairs kept in `raw_components` verbatim so both timers are preserved                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `Laps`                                          | `raw_components.laps`                       | Lap count (lap-based disciplines); not part of Soar core components, kept in the raw JSON                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `FlightScoreDeduction`                          | `raw_components.flight_score_deduction`     | Already baked into GS `RawScore` (OLS deduction coefficient < 0 in all 23 F5J comps); kept raw-only as provenance, **not** mapped to `flight_penalty` (would double-apply). See §7 Q16, resolved                                                                                                                                                                                                                                                                                                                                                 |
-| `Penalty`                                       | `OfficialScore.components.flight_penalty`   | Non-zero values are small round penalties (reference: 100 and 300 points) -> mapped as the per-flight `flight_penalty` integer                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `RawScore`                                      | (validation target)                         | GS's computed flight score. **Not stored** by the import (Soar derived values live in FlightResult, which the calculator recomputes). Kept in `raw_components` and used to validate the recomputed result (§7.1)                                                                                                                                                                                                                                                                                                                                 |
-| `NormalisedScore`                               | (validation target)                         | As above, for the group score; comparison requires an independently established GS-counted flight (Which GS Flight Counts)                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `F5JMotorReStarted`                             | `raw_components.motor_restarted`            | F5J-only per-flight flag, kept in raw JSON (resolved, §7 Q7)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `LandingOver75m`, `ScoresChecked`               | —                                           | GS bookkeeping; provenance only                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| GliderScore (`Scores`)                                | Soar Score                                              | Rule / note                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| ----------------------------------------------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| —                                                     | `MatrixAssignment` (minted)                             | One per (comp, task, round, group, pilot, re-flight) flight; built even for pilots who have other rows so all flown flights of a pilot are present                                                                                                                                                                                                                                                                                                                                                                                               |
+| `PilotNo`                                             | `contest_participation_id`                              | From id map                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `RoundNo`, `GroupNo`                                  | `scheduled_round_id`, `group`                           | Scheduled = where it flew. For the original flight `credited_round_id` = `scheduled_round_id`                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `OriginalRoundNo`                                     | `credited_round_id`                                     | Differs from `RoundNo` exactly when GS recorded a moved flight. Product decision Q13 keeps the flight in its actual flight round and credits `OriginalRoundNo`; this conflicts with the current `Original` invariant and is draft-only until Persistence Compatibility defines a valid persisted representation. Do not synthesize a source assignment or silently coerce the row.                                                                                                                                                               |
+| `ReFlightNo`                                          | re-flight handling                                      | `0` -> regular flight (`ReflightNo=1`, `2`, ... become `Reflight` assignments under a ReFlight, §5.5.5)                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `SeqNo`                                               | — (provenance)                                          | The pilot's slot in the group (1..n, identical across a pilot's re-flight rows, a few repeats); not an attempt counter, and not `flight_sequence`.                                                                                                                                                                                                                                                                                                                                                                                               |
+| `DrawFreq`                                            | —                                                       | Provenance only                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `Helper`                                              | `ScoreAttempt.actor_id` hint                            | GS helper id (the scorer). No matching Soar account exists: the attempt is filed under the importing director with authority `Director`, and the helper id is kept in `raw_components` as provenance (§7 Q14)                                                                                                                                                                                                                                                                                                                                    |
+| `Updated`                                             | placeholder vs scored                                   | `False` = drawn, not yet scored (no data in the row); `True` = scored. Not a re-entry marker. See §5.5.                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `Landing`                                             | landing selection                                       | `0`/absent -> no landing. Otherwise the value may be a distance in metres **or entered points**, depending on the selected GS table: distance tables (for example `F3J Enter Dist`, `F5J Enter Distance`) use metres, while `Enter Points` tables use points. Determine the encoding from `Dur.durLndg`/`LndgNames` and compare awarded points before resolving. Resolve only against a semantically matching contest table (§5.5.6) to the selected `LandingResult.id`; ambiguous encoding/match requires review and blocks exact-score claims. |
+| `Time1Mins` (+ `Time1Secs`, `Time2Mins`, `Time2Secs`) | `time_flown` (`raw_components.duration_sec`)            | `Time1Mins` holds the flight time packed as `M:SS` (minutes*100 + seconds, e.g. 958 is 9:58; with timing decimals the value carries a fraction, e.g. 952.4). The other three fields are 0 outside F3B, F3K and F5B. Decode with `(v ~/ 100) * 60 + (v % 100)`; keep the raw value in `raw_components`.                                                                                                                                                                                                                                           |
+| `Laps`                                                | `raw_components.laps`                                   | Lap count (lap-based disciplines); not part of Soar core components, kept in the raw JSON                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `FlightScoreDeduction`                                | `launch_height` (F5J)                                   | F5J launch height in metres; the height penalty is computed by Soar. See §7 Q16 (corrected). For other classes the meaning differs and belongs to the discipline mapping.                                                                                                                                                                                                                                                                                                                                                                        |
+| `Penalty`                                             | `OfficialScore.components.flight_penalty`               | Non-zero values are small round penalties (reference: 100 and 300 points) -> mapped as the per-flight `flight_penalty` integer                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `RawScore`                                            | (validation target)                                     | GS's computed flight score. **Not stored** by the import (Soar derived values live in FlightResult, which the calculator recomputes). Kept in `raw_components` and used to validate the recomputed result (§7.1)                                                                                                                                                                                                                                                                                                                                 |
+| `NormalisedScore`                                     | (validation target)                                     | As above, for the group score; comparison requires an independently established GS-counted flight (Which GS Flight Counts)                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `F5JMotorReStarted`                                   | `motor_restart` flag + `raw_components.motor_restarted` | Soar's calculator ignores the other components when the flag is set, so the components can be stored beside it. Applies only when the comp's `Dur.F5JMotorRestartOption` is 1 or 2; NULL (oldest comps) means the flag never zeroed the flight: keep it as provenance only. Option maps 0 to `not_allowed`, 1 to `non_droppable`, 2 to `allowed` (droppable) on the contest config (§5.2).                                                                                                                                                       |
+| `LandingOver75m`, `ScoresChecked`                     | —                                                       | GS bookkeeping; provenance only                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 
 Per flight, the import creates **four** linked records (all ids minted per the
 §3 key):
@@ -427,6 +416,9 @@ Per flight, the import creates **four** linked records (all ids minted per the
    `glidersource` key for provenance. `reason`: "imported from
    GliderScore `.mdb` (RawScore=N)". `set_at` = the import instant (no better
    source; §7 Q18, resolved), `set_by` = importing director.
+   Rows with `Updated = False` produce a `MatrixAssignment` and a pending
+   `ScorePlaceholder` only (no attempt, no official score); items 2 to 4 apply to
+   `Updated = True` rows.
 
 `FlightResult` is **not** part of the draft: it is derived data the Soar
 calculator recomputes from the attempt/official components, the imported
@@ -438,8 +430,9 @@ engine, so exact equality is not required (Validation Report).
 
 Row duplicates: the reference file has no duplicate
 `(comp, task, round, group, pilot, re-flight)` keys, but the mapper must be
-total over the input: if a key repeats (GS `Updated` re-entries), the **last**
-row in file order wins and a warning is emitted.
+total over the input: if a key repeats, the **last** row in file order wins and a
+warning is emitted (`Updated` is the scored/unscored marker, not a re-entry
+marker).
 
 #### 5.5.5 Re-flights
 
@@ -449,6 +442,13 @@ Evidence from the reference DB: comp 3 task 2 round 2 group 6 has both a
 complete `ReFlightNo=0` set and a complete `ReFlightNo=1` set for all four
 pilots (whole-group re-flight); other groups have only some pilots with
 `ReFlightNo=1` (individual re-flights).
+**Decided and observed (reference file).** All F5J re-flights in the file (comp
+21 round 8 group 2, comp 22 round 2 group 2) are whole-group, `ReFlightNo = 1`,
+same `GroupNo`, same pilots, same `SeqNo`. A pilot who did not re-fly has an
+identical carried-over row. Roles are decided: a pilot with no score in the
+original flight is `Awarded`, everyone else in the group is `GroupMember`
+(Mike, 2026-10-23); the re-flight set normalises separately from the original.
+The draft semantics below stay for files that have subset re-flights.
 
 Mapping rules (draft semantics; persistence constraints follow):
 
@@ -484,9 +484,9 @@ ReFlightNo)` with rows; `sequence` = the re-flight number. Source rows
   defaulting every pilot to `Awarded`.
 - The proposed `MatrixAssignment` rows: type `Reflight`,
   `re_flight_id` set, `source_assignment_id` = the pilot's `Original`
-  assignment in the same credited round, `flight_sequence` = the GS
-  `SeqNo` (already next-in-order per pilot), `credited_round_id` = original
-  round.
+  assignment in the same credited round, `flight_sequence` = the next
+  free sequence for that pilot (`SeqNo` is the pilot's group slot, not a
+  sequence), `credited_round_id` = original round.
 - Soar's which-flight-counts rule (discipline result selection) reads the
   re-flight roles and picks the official result; the draft does **not** pick.
   Preserve all observed flight scores. The calculator may compute Soar's
@@ -511,6 +511,16 @@ reconstructed as a `LandingTable` (the name from `LndgNames.Name`), each
 | `Distance`  | `display_value`              | `"<distance> m"`                                                      |
 | `Points`    | `point_value`                | Verbatim (int in all reference rows)                                  |
 | (row order) | `ordinal_position`           | Sorted ascending by distance, 1-based                                 |
+
+**Soar entry keys.** Soar's system tables use keys such as `points_50`,
+`within_7m` and `over_10m`, not the distance string. Matching therefore goes
+GS value to points (by the table's input unit) to the Soar entry. In the
+reference file every landing value of every mappable comp resolves in its own
+table (0 unresolved), 22 of 23 F5J comps use GS table 9 ("F5J Enter Points")
+which equals Soar's F5J Standard Landing Table, comp 10 uses table 5 (distance)
+which equals the F5J Distance Table, F3J comps use tables 2 and 3 (the F3J
+distance and standard tables), and two DurGeneral comps (tables 2 and 6) have no
+Thermal system equivalent and need the reconstructed table.
 
 `input_unit` is `meters` only for reconstructed distance-entry tables. For GS
 tables whose name indicates entered points (`Enter Points`, `Pts`), the
@@ -649,11 +659,11 @@ guess or an explicit skip in this design, not a silent one.
    Soar option; imported-flight penalties come solely from
    `Scores.Penalty` and the reference-height fields (§5.5.4). Decision: kept
    in `raw_components` as provenance, no effect on imported scores.
-10. **`Retired` effective round (unresolved).** GS has a boolean, no round.
-    The proposed round after the pilot's last scored round (1 if none) is a
-    reviewable approximation, not source fact. Retain the raw boolean and
-    require confirmation before applying the Soar retirement overlay, since
-    the inferred round changes standings.
+10. **`Retired` effective round (resolved from the reference file).** Retired
+    pilots keep rows after retirement with `Updated = False`, so
+    `retired_at_round` is the round after the pilot's last `Updated = True`
+    flight (round 1 if none). Show the inferred round for confirmation; for
+    the 33 retired pilots in the file the rule gives a clear round.
 11. **`ModelData` (resolved, data-backed).** Meaning of the coded model data
     for `ContestModelLink.model_id`. Inspected `CompPilots.ModelData` in the
     reference database: **all 620 rows are `-1`**, so no model data to
@@ -700,21 +710,19 @@ guess or an explicit skip in this design, not a silent one.
     surfaces divergence). Units need no separate rule — the match decides
     them; the reconstructed table uses `meters` or `points` according to the
     selected GS table, never from the `Distance` column name alone.
-16. **`FlightScoreDeduction` (resolved).** GS's per-flight deduction (values
-    1-340 in reference; 2,672 non-zero rows) is **already baked into GS's
-    `RawScore`**: an OLS fit of `RawScore` on (time, landing, deduction) over
-    the 23 F5J comps gives a consistently negative deduction coefficient in
-    every comp (mean ≈ -0.56, range -0.38…-1.18), so a higher deduction
-    already lowers the GS raw score. Soar's `flight_penalty` is an entered,
-    per-flight deduction, so mapping `FlightScoreDeduction` into it would
-    double-apply the deduction (Soar would deduct it again on top of the
-    re-derived raw score). Decision: **kept in `raw_components` only**
-    (provenance); `flight_penalty` maps solely from `Scores.Penalty` (the
-    100/300 round penalties, which never overlap `FlightScoreDeduction` — 0
-    rows carry both). The residual that Soar's re-derived raw score will
-    diverge from GS `RawScore` by is the difference between GS's baked-in
-    deduction and Soar's reference-height/landing re-derived penalty —
-    surfaced per-flight as a delta by the §7.1 review, not a score-delta gate.
+16. **`FlightScoreDeduction` (resolved, corrected).** For F5J this field is the
+    **launch height in metres**, not a baked-in deduction. With the decoded
+    time, the landing points, the height penalty (0.5 pt/m up to
+    `durRefHeight`, 3 pt/m above, the `Dur` settings) and `Scores.Penalty`,
+    all 2,648 scored F5J rows of the reference file reproduce `RawScore`
+    exactly (the earlier OLS coefficient of about -0.56 was this piecewise
+    penalty seen through a linear fit). Soar's F5J profile requires
+    `launch_height` and computes the penalty itself, so map
+    `FlightScoreDeduction` to `launch_height`. Dropping it, as the first draft
+    proposed, would remove the penalty from every F5J flight. For other
+    classes the field means something else (F3J: a point deduction), so its
+    meaning depends on the class. `Penalty` (100/300) maps to `flight_penalty`
+    as before.
 17. **Validation report (score deltas are review-only; selection evidence
     unresolved).** GS `RawScore` / `NormalisedScore` vs the Soar
     calculator: the imported configuration is an approximation, so score
@@ -737,76 +745,63 @@ dropping, or fabricating history.
 
 ### Flight placement and sequence
 
-- **Moved credit (`OriginalRoundNo`).** The selected product mapping keeps the
-  flight in its flown round and credits another round. Current `Original`
-  requires scheduled and credited rounds to match; `Moved` requires a source
-  assignment and a reset rather than transfer of an accepted score. GliderScore
-  does not establish the source slot or director action. Persistence is blocked
-  for these rows until an import-compatible historical representation is
-  specified. Do not invent a source assignment or change the source flight's
-  credited round to make the row fit.
-- **Flight sequence and original assignments.** Current `Original` requires
-  `flight_sequence: 1`, while the draft copies `Scores.SeqNo` verbatim and the
-  reference rows can include repeated flights. Specify whether `SeqNo` is
-  attempt order, re-flight order, or a broader GS sequence; map it only to a
-  field whose Soar invariant it satisfies. Distinct GS score rows must remain
-  distinguishable even when Soar's assignment sequence cannot represent the
-  source value. Validate this before generating assignments.
-- **Task revisions.** Current `MatrixRevision` is a linear chain of extensions
-  or tail redraws. A tail redraw replaces every round from its first round to
-  the end, and at most one current round exists per ordinal. One revision per
-  `(CompNo, TaskNo)` plus “later task wins” is insufficient when source task
-  ranges partially overlap, have gaps, or end before earlier task ranges.
-  Define a deterministic projection that assigns valid `previous_revision_id`,
-  revision ranges, current/superseded rounds, and score history for partial
-  overlap and gaps. Product decision Q12-B1 governs duplicate task-number
-  handling; it does not by itself authorize violating these matrix invariants.
-  Reject unresolved overlap shapes instead of claiming they are represented.
-- **Unobserved matrix entries.** Build regular groups 1 through each round's
-  `group_count`. Missing score rows do not establish that a group or pilot was
-  never drawn. Do not fabricate assignments, but report empty groups and
-  unknown assignments separately. Clarify whether missing assignments make
-  the reconstructed round a lower-bound schedule and how that affects
-  completeness and the director's interpretation of a completed import.
+- **Moved credit (`OriginalRoundNo`).** One row in the whole reference file
+  (comp 4, DurGeneral, round 13 credited to 12) and none in any F5J comp.
+  Current `Original` requires scheduled and credited rounds to match, so a
+  comp with such a row is refused (or that flight is) with a reason until an
+  import-compatible historical representation is specified. Do not invent a
+  source assignment or change the credited round to make the row fit.
+- **Flight sequence and original assignments.** Resolved: `Scores.SeqNo` is the
+  pilot's slot in the group (1..n, identical across re-flight rows), not an
+  attempt counter. It maps to no `flight_sequence` (an `Original` is
+  sequence 1); keep it as provenance.
+- **Task revisions.** Not observed for any mappable class in the reference
+  file: only comp 3 (F3B, skipped) has several tasks. `TaskNo` is per comp in
+  practice (35 of 37 comps), not a global id. Keep the refusal rule: a file
+  with partially overlapping or gapped task ranges is refused for that comp
+  with a reason, and no projection is built until a real file needs one.
+- **Unobserved matrix entries.** Superseded: `Scores` holds a row for every
+  drawn flight, with `Updated = False` while unscored, so the matrix is the
+  full draw, not a lower bound. Use the observed groups per round; the
+  configured `*GroupsPerRound` can be stale (7 comps in the reference file).
+  Build the groups and assignments from all rows, scored or not.
 
 ### Re-flight lifecycle and result semantics
 
-- `ReFlightParticipant.role` is scoring-significant. Use `Awarded` only for a
-  pilot known to have been entitled to the extra chance, and `GroupMember` for
-  other pilots in a whole-group re-flight. `ReFlightNo` identifies an
-  additional flight but does not prove those roles or the lifecycle history.
-  Establish the awarded set from independently documented GS semantics; if
-  it cannot be established, record the role as unresolved in the draft and
-  block persistence of that re-flight.
-- Preserve product decision Q12-A1 for describing subset re-flights as
-  `MoveToGroup` to the same group, but do not persist it unless the current
-  MoveToGroup open-spot and team-protection invariants are satisfied. Verify
-  `source_assignment_id`, next sequence, assignment uniqueness, group
-  capacity, and the required `RoundGroup`. Whole-group re-flights need a
-  post-regular group under current Soar rules; GS's same-group number cannot
-  be copied there without changing the source history. The representation
-  conflict blocks affected re-flights until resolved.
-- The validation report must not infer GS selection with Soar's selection
-  rule. Determine counted-flight behavior from independent GliderScore
-  documentation, fields, or a validated reference experiment; otherwise mark
-  selection unknown and group-score comparison not assessable (Which GS Flight Counts).
+- `ReFlightParticipant.role` is scoring-significant. Decided (Mike,
+  2026-10-23): a pilot with no score in the original flight is `Awarded`;
+  every other pilot of the re-flown group is `GroupMember`. GS stores no
+  "granted" field, so the importer applies this rule and lists the roles in
+  the review warnings. All three F5J re-flights in the reference file
+  (comp 21 round 8 group 2, comp 22 round 2 group 2) are whole-group
+  re-flights.
+- Whole-group re-flights need a post-regular group under current Soar rules;
+  GS's same-group number cannot be copied there without changing the source
+  history. This representation decision (D5) remains open and blocks affected
+  re-flights until resolved. Subset (`MoveToGroup`) re-flights are not
+  observed in the reference file for any mappable class; keep the refusal
+  rule for files that have them.
+- The validation report uses the counted-flight rule in Which GS Flight Counts.
 
 ### Score facts and persistence pathway
 
-- Define the mapping for zero outcomes and required zero-reason codes. State
-  how zero duration, no landing, `Penalty`, motor restart, absent values, and
-  any GS status/flags distinguish a scored zero from an unentered or retired
-  round. A row that cannot supply a Soar-required reason is unresolved; do not
-  synthesize a reason without identifying it as an import approximation.
-
-  The reference DB makes this a material issue: 2,861 of 6,522 `Scores` rows
-  have `RawScore=0`, including rows with a recorded time in some comps and
-  rows with no time in others. Therefore `RawScore=0`, zero duration, absent
-  landing, `ScoresChecked`, and `Retired` must not be used individually as a
-  universal zero-reason classifier. The mapper needs a documented precedence
-  table (explicit source status first, then did-not-launch/no-score evidence,
-  then scored-zero) and must mark unresolved rows for review rather than
-  persisting an invented reason.
+- Zero outcomes follow a precedence table, now backed by the reference file
+  (`Updated` is `False` for a drawn, unscored flight):
+  1. `Updated = False`: pending `ScorePlaceholder`, no attempt, no official
+     score. Not a zero outcome.
+  2. `F5JMotorReStarted = 1` and the comp's restart option is 1 or 2: zero with
+     reason `motor_restart` (components may be stored beside the flag; Soar's
+     calculator ignores them). Option NULL (oldest comps): the flag never
+     zeroed the flight; import the recorded score and keep the flag as
+     provenance with a warning.
+  3. `Updated = True` with no time, landing or height: explicit zero. GS gives
+     no reason (did not launch, crash); use one documented
+     import-approximation reason, marked as such.
+  4. `Updated = True` with time and height recorded and `RawScore = 0`: the
+     height penalty exceeded the flight score and the floor produced 0;
+     import the components and let the calculator reproduce the zero.
+     Reference file, F5J: 863 placeholders, 187 explicit zeros, 69 restart zeros,
+     4 floored zeros.
 
 - Specify whether import uses normal score acceptance and officialization or
   a dedicated import pathway. Give the exact record sequence and values for
@@ -840,13 +835,14 @@ dropping, or fabricating history.
   roles that cannot map to one role, retain the raw source value and expose
   the degraded role in review rather than presenting the fallback Pilot role
   as exact.
-- Imported contests are historical and proposed as `Completed`, but the
-  lifecycle model describes `Created -> Configuring -> Ready -> Running ->
-Completed`; completion normally follows accepted scores. Specify the
-  import-specific transition/audit event and whether absent score rows mean
-  incomplete source history. If the model has no supported import transition,
-  persistence is blocked; do not directly assign `Completed` without a
-  documented pathway.
+- Imported contests keep an honest lifecycle state. The reference file shows
+  most comps are not finished: 21 of the 30 mappable comps have drawn but
+  unscored rows (whole future rounds, retired pilots' later rounds, pilots who
+  did not fly), and only 8 are fully scored. A comp is `Completed` only when
+  no non-retired pilot has an unscored row, through a documented
+  import-specific transition and audit event; otherwise it imports in the
+  state the lifecycle allows for "rounds remain". If the model has no
+  supported import transition, persistence is blocked.
 
 ### Landing equivalence and validation statuses
 
@@ -884,12 +880,12 @@ or flight.
 For every imported comp, and every flight the Soar calculator produces a
 `FlightResult` for:
 
-| Check               | GS side (from `raw_components` of the official score)                                                                                                                        | Soar side (the recomputed `FlightResult`)                                    |
-| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| Raw score delta     | `RawScore` of the same flight, as recorded (its `FlightScoreDeduction` is already inside it — Q16 — so the delta is expected to absorb that; see Known Approximation Causes) | `raw_points`                                                                 |
-| Group score delta   | `NormalisedScore` of the independently established GS-counted flight (see Which GS Flight Counts), or not assessable                                                         | `group_score` of the Soar-selected flight for that credited round and pilot  |
-| Selection agreement | independently established GS-counted flight (see Which GS Flight Counts), or unknown                                                                                         | the flight with `is_selected: true` for the same pilot and credited round    |
-| Landing consistency | the raw `Landing` value and the pinned table's resolution for that row (§5.5.6)                                                                                              | `landing_points`, and null when the row resolved to no landing (warning row) |
+| Check               | GS side (from `raw_components` of the official score)                                                                                    | Soar side (the recomputed `FlightResult`)                                    |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| Raw score delta     | `RawScore` of the same flight, as recorded (F5J: exactly reproducible, so the delta is expected to be 0; see Known Approximation Causes) | `raw_points`                                                                 |
+| Group score delta   | `NormalisedScore` of the independently established GS-counted flight (see Which GS Flight Counts), or not assessable                     | `group_score` of the Soar-selected flight for that credited round and pilot  |
+| Selection agreement | independently established GS-counted flight (see Which GS Flight Counts), or unknown                                                     | the flight with `is_selected: true` for the same pilot and credited round    |
+| Landing consistency | the raw `Landing` value and the pinned table's resolution for that row (§5.5.6)                                                          | `landing_points`, and null when the row resolved to no landing (warning row) |
 
 The two score deltas are tracked separately because they fail for different
 reasons: `raw_delta` tracks the per-flight scoring approximation,
@@ -898,10 +894,10 @@ population (re-flights in the group, retired pilots).
 
 ### Tolerance Bands and Status
 
-The configuration import is an approximation of GS's own rules engine
-(the FlightScoreDeduction decision documents one such delta: GS's baked-in `FlightScoreDeduction` vs
-Soar's reference-height/landing re-derived penalty), so raw exactness is not
-the bar. Each row gets separate `mappingStatus`, `rawStatus`, `groupStatus`,
+For F5J the raw score is exactly reproducible (Q16), so a non-zero raw delta
+is a mapping bug. For F3J, Thermal and ALES the configuration import is an
+approximation until their rules are mapped, so raw exactness is not yet the
+bar. Each row gets separate `mappingStatus`, `rawStatus`, `groupStatus`,
 and `selectionStatus` values. Apply the first matching rule independently to
 the raw and group comparisons:
 
@@ -929,36 +925,35 @@ the raw and group comparisons:
 - `selectionStatus: unknown` — multiple GS flights exist and independent
   evidence does not establish which one counted.
 
-Tolerance values (proposed defaults, owned by the wizard/persistence step;
-tune them after the first reference-DB run):
+Tolerance values (proposed defaults, owned by the wizard/persistence step):
 
-- `rawTol = 0.005` — a raw delta is exact if it vanishes to a tenth of a
-  point. Proposed default; confirm against the reference DB's `RawScore`
-  precision on the first run and adjust.
+- `rawTol = 0.005` for F5J. The reference-file run reproduced every scored F5J
+  `RawScore` exactly, so any F5J raw delta above rounding is a mapping bug.
+  Other disciplines keep their own provisional tolerance until their rules
+  are mapped.
 - `groupTol` = one unit in the last displayed decimal place of
-  `GroupScoreOption` — the same `GroupScoreDecimals` drives both sides'
-  rounding, and both sides round once, so exact normalization should land
-  within a ulp of that place.
+  `GroupScoreDecimals`; both sides round once.
 
-Rationale: GS `RawScore` already includes deduction, penalty, and landing
-effects, Soar `raw_points` includes the discipline raw score plus landing
-bonus minus penalties, and both are never below zero — the magnitudes are on
-the same scale, so a fixed point tolerance is stable across comps.
+Rationale: GS `RawScore` is flight time capped at working time, plus landing
+points, minus the F5J height penalty, minus `Scores.Penalty`, floored at 0;
+Soar `raw_points` is the same recipe, so a fixed point tolerance is stable.
 
 ### Which GS Flight Counts
 
-GliderScore records no explicit per-flight counted flag; `RawScore` and
-`NormalisedScore` exist on every row, including re-flights that were not
-counted. Do not infer the GS-counted flight using Soar's selection rule: that
-makes selection agreement circular and can report agreement by construction.
-For a credited round with one GS flight, that row is trivially the only
-candidate. With multiple flights, mark the GS-counted flight and selection
-agreement `unknown` unless an independently validated GS rule or source field
-establishes it. Group-score comparison is `not_assessable` when the counted
-GS row cannot be identified. Re-flight selection behavior must be established
-from independent evidence before it is used as a validation oracle. An
-unflown retirement (no GS row, no Soar flight) takes no per-flight report row
-(Row Shape).
+GliderScore records no explicit per-flight counted flag, but the rule is known
+(Mike, 2026-10-23): for a re-flown group the pilot the re-flight was granted
+for gets the re-flight score, and every other pilot in that group gets the
+better of the two flights, which is Soar's `Awarded` / `GroupMember` rule.
+The granted pilot is not recorded in GS; the importer treats a pilot with no
+score in the original flight as `Awarded` and everyone else in the group as
+`GroupMember`, and lists the assignments in the review warnings. For a credited
+round with one flight, that row is the only candidate. The counted-flight
+target for the group-score comparison is therefore known and the selection
+status is `agrees` / `mismatch`, not `unknown`, whenever the roles above are
+used (the roles are an inference, so a mismatch in a re-flown group is first
+suspected as a role mistake). Each flight set normalises on its own
+(`NormalisedScore = RawScore / max RawScore in the set * 1000`, true on all
+4,525 mappable rows of the reference file with group score option 1).
 
 ### Row Shape
 
@@ -1006,18 +1001,17 @@ the director asks for it.
 
 ### Known Approximation Causes
 
-The report's job is triage. Expected delta families, in the order the
-director should look: (1) two different raw-score recipes — GS `RawScore`
-bakes flight points, landing points, `FlightScoreDeduction` (Q16), and its
-height effects into one figure, while Soar recomputes `raw_points` from its
-own flight points, landing bonus, reference-height penalty, and `Scores.Penalty`
-flight penalty; the residual is exactly that difference, and the deduction
-in `raw_components` plus the §5.5.4 height fields are where to look first on
-a red raw row; (2) landing rows resolved to no landing by the §5.5.6
-partial-match fallback; (3) group deltas where the group carried re-flights
-or a retired pilot (normalization population); (4) a genuinely wrong
-mapping (comp class, config field, or duration) — these should be rare and
-are the rows to fix.
+Revised after the reference-file run (see findings.md): for F5J
+the raw score is exactly reproducible. Decoded time (packed `M:SS`), the
+landing points, `FlightScoreDeduction` as launch height under the 0.5 / 3
+points-per-metre penalty, and `Scores.Penalty` reproduce `RawScore` on all
+2,648 scored F5J rows. A non-zero F5J raw delta is therefore a mapping bug,
+not an approximation. Deltas are expected only for (1) F3J, Thermal and ALES
+rows, whose over-time and deduction rules differ and belong to the discipline
+tickets, (2) landing rows resolved to no landing by the partial-match
+fallback, (3) group deltas where the group carried re-flights or a retired
+pilot (normalization population), and (4) a genuinely wrong mapping (comp
+class, config field, or time decoding).
 
 ## 8. What this is not
 
