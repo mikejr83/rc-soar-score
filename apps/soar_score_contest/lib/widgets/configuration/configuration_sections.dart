@@ -116,7 +116,6 @@ class ConfigurationSections extends StatelessWidget {
       extraChips: [
         // The roster is counted from participation records, which have
         // revisions of their own, so it has no single revision to show.
-        if (id != SectionId.participants) _revisionChip(context, id),
         if (id == SectionId.discipline) _disciplineChip(context),
         if (id == SectionId.participants)
           ConfigChip.neutral(
@@ -127,29 +126,6 @@ class ConfigurationSections extends StatelessWidget {
           ),
       ],
       children: children,
-    );
-  }
-
-  /// The revision the section's values are saved in: the contest's for the
-  /// details and the two contest controls, the configuration's for the rest.
-  Widget _revisionChip(BuildContext context, SectionId id) {
-    final contestLevel =
-        id == SectionId.details ||
-        id == SectionId.scoringAccess ||
-        id == SectionId.adminLock;
-    final number = contestLevel
-        ? data.contest.revision
-        : data.configuration?.revisionNumber;
-    return ConfigChip.neutral(
-      context,
-      icon: Icons.history,
-      text: number == null
-          ? 'Not saved yet'
-          : '${contestLevel ? 'Contest' : 'Config'} rev. $number',
-      tooltip: contestLevel
-          ? 'Saved with the contest, which is at revision ${data.contest.revision}'
-          : 'Saved with the contest configuration',
-      dense: false,
     );
   }
 

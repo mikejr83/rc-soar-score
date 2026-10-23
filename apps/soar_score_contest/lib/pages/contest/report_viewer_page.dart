@@ -186,18 +186,11 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
 
   List<Widget> _pages(ReportDocument document) {
     final controller = _controller!;
-    final facts = controller.facts!;
     final count = document.pages.length;
     final stamp = DateFormat('d MMM y, HH:mm').format(_generated);
     // No calculation version is shown: the contest data the app reads carries
     // none (only a published projection does), and a report is built from the
-    // current inputs. The matrix and configuration revisions identify the
-    // data state.
-    final revisions = [
-      if (facts.matrixRevision != null) 'Matrix rev ${facts.matrixRevision}',
-      if (facts.configurationRevision != null)
-        'Config rev ${facts.configurationRevision}',
-    ];
+    // current inputs.
     return [
       for (var i = 0; i < count; i++)
         ReportSheetPage(
@@ -208,7 +201,7 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
           reportName: widget.report!.title,
           pageNumber: i + 1,
           pageCount: count,
-          generated: ['Generated $stamp', ...revisions].join(' · '),
+          generated: 'Generated $stamp',
           status: document.status,
           body: document.pages[i],
         ),
