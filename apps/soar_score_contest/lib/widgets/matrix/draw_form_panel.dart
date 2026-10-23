@@ -10,6 +10,7 @@ import 'draw_advanced_section.dart';
 import 'draw_config_rows.dart';
 import 'draw_number_field.dart';
 import 'group_size_preview.dart';
+import '../page_states/page_banner.dart';
 import 'matrix_banner.dart';
 
 /// The empty state and the first-draw form (mode 1 of the matrix page).
@@ -120,14 +121,11 @@ class DrawFormPanel extends StatelessWidget {
                 'The matrix wasn’t drawn and the page hasn’t changed. Your '
                 'values are kept.',
             actions: [
-              FilledButton(
+              PageBannerAction(
+                'Try again',
+                onDraw,
+                emphasis: PageBannerEmphasis.filled,
                 key: const ValueKey('try-again'),
-                onPressed: onDraw,
-                style: FilledButton.styleFrom(
-                  backgroundColor: scheme.error,
-                  foregroundColor: scheme.onError,
-                ),
-                child: const Text('Try again'),
               ),
             ],
           ),
@@ -141,10 +139,11 @@ class DrawFormPanel extends StatelessWidget {
                 'contest can no longer be drawn. Reload to see the current '
                 'state. Your values stay until you reload.',
             actions: [
-              FilledButton(
+              PageBannerAction(
+                'Reload',
+                onReload,
+                emphasis: PageBannerEmphasis.filled,
                 key: const ValueKey('reload'),
-                onPressed: onReload,
-                child: const Text('Reload'),
               ),
             ],
           ),

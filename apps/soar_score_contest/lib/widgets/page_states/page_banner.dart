@@ -9,7 +9,16 @@ enum PageBannerKind {
   alert(SemanticsRole.alert),
 
   /// Something the director should know (role status).
-  status(SemanticsRole.status);
+  status(SemanticsRole.status),
+
+  /// Explains what the page is doing or why (role status).
+  info(SemanticsRole.status),
+
+  /// A quiet note that is not about anything wrong (role status).
+  neutral(SemanticsRole.status),
+
+  /// Something went through (role status).
+  success(SemanticsRole.status);
 
   const PageBannerKind(this.role);
 
@@ -23,25 +32,60 @@ enum PageBannerKind {
       web ? (role: role, liveRegion: false) : (role: null, liveRegion: true);
 }
 
+/// Whether a banner is a full-width band above a page or a rounded card
+/// inside its content.
+enum PageBannerShape { band, card }
+
+/// How strongly a [PageBannerAction] is drawn.
+enum PageBannerEmphasis { text, outlined, filled }
+
+/// A button in a [PageBanner].
+class PageBannerAction {
+  const PageBannerAction(
+    this.label,
+    this.onPressed, {
+    this.emphasis = PageBannerEmphasis.text,
+    this.key,
+  });
+
+  final String label;
+  final VoidCallback? onPressed;
+  final PageBannerEmphasis emphasis;
+  final Key? key;
+}
+
 /// A banner above a page's content. It adds to the page and never replaces
 /// it (use a `PageStateView` for that). An icon and text carry the meaning,
 /// not colour alone.
+///
+/// This is the one banner layout of the contest app: an icon, an optional
+/// bold [title], the [text], an optional [child] (such as links) and any
+/// number of buttons. Page-specific banners wrap it with their own copy and
+/// keys rather than drawing their own.
 class PageBanner extends StatelessWidget {
   const PageBanner({
     super.key,
     required this.kind,
     required this.icon,
     required this.text,
+    this.title,
+    this.shape = PageBannerShape.band,
     this.actionLabel,
     this.onAction,
     this.secondaryLabel,
     this.onSecondary,
+    this.actions = const [],
+    this.child,
     this.textKey,
   });
 
   final PageBannerKind kind;
   final IconData icon;
   final String text;
+
+  /// A bold line above [text]; none when `null`.
+  final String? title;
+  final PageBannerShape shape;
 
   /// The label of the banner's one action; no action when `null`.
   final String? actionLabel;
@@ -51,72 +95,125 @@ class PageBanner extends StatelessWidget {
   final String? secondaryLabel;
   final VoidCallback? onSecondary;
 
+  /// More buttons, after the two above, for the pages that need them.
+  final List<PageBannerAction> actions;
+
+  /// Content under the text, such as links to fields.
+  final Widget? child;
+
   /// Key of the banner's text, for tests that read the message.
   final Key? textKey;
+
+  (Color, Color) _colors(ColorScheme scheme) => switch (kind) {
+    PageBannerKind.alert => (scheme.errorContainer, scheme.onErrorContainer),
+    PageBannerKind.status => (
+      scheme.tertiaryContainer,
+      scheme.onTertiaryContainer,
+    ),
+    PageBannerKind.info => (scheme.primaryContainer, scheme.onPrimaryContainer),
+    PageBannerKind.neutral => (scheme.surfaceContainer, scheme.onSurface),
+    PageBannerKind.success => (
+      scheme.secondaryContainer,
+      scheme.onSecondaryContainer,
+    ),
+  };
+
+  Widget _button(
+    PageBannerAction action,
+    ColorScheme scheme,
+    Color foreground,
+  ) => switch (action.emphasis) {
+    PageBannerEmphasis.text => TextButton(
+      key: action.key,
+      onPressed: action.onPressed,
+      style: TextButton.styleFrom(foregroundColor: foreground),
+      child: Text(action.label),
+    ),
+    PageBannerEmphasis.outlined => OutlinedButton(
+      key: action.key,
+      onPressed: action.onPressed,
+      style: OutlinedButton.styleFrom(
+        foregroundColor: foreground,
+        side: BorderSide(color: foreground),
+      ),
+      child: Text(action.label),
+    ),
+    PageBannerEmphasis.filled => FilledButton(
+      key: action.key,
+      onPressed: action.onPressed,
+      style: kind == PageBannerKind.alert
+          ? FilledButton.styleFrom(
+              backgroundColor: scheme.error,
+              foregroundColor: scheme.onError,
+            )
+          : null,
+      child: Text(action.label),
+    ),
+  };
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final isAlert = kind == PageBannerKind.alert;
-    final background = isAlert
-        ? scheme.errorContainer
-        : scheme.tertiaryContainer;
-    final foreground = isAlert
-        ? scheme.onErrorContainer
-        : scheme.onTertiaryContainer;
+    final (background, foreground) = _colors(scheme);
+    final textStyle = theme.textTheme.bodyMedium?.copyWith(color: foreground);
     final label = actionLabel;
+    final secondary = secondaryLabel;
     final semantics = kind.semantics(web: kIsWeb);
+    final card = shape == PageBannerShape.card;
+    final buttons = [
+      if (label != null) PageBannerAction(label, onAction),
+      if (secondary != null) PageBannerAction(secondary, onSecondary),
+      ...actions,
+    ];
+    final content = Padding(
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: card ? 14 : 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 2),
+            child: Icon(icon, size: 20, color: foreground),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Wrap(
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 12,
+              runSpacing: 8,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (title != null)
+                      Text(
+                        title!,
+                        style: textStyle?.copyWith(fontWeight: FontWeight.w500),
+                      ),
+                    if (text.isNotEmpty)
+                      Text(text, key: textKey, style: textStyle),
+                    ?child,
+                  ],
+                ),
+                for (final action in buttons)
+                  _button(action, scheme, foreground),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
     return Semantics(
       container: true,
       role: semantics.role,
       liveRegion: semantics.liveRegion,
       child: Material(
         color: background,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(top: 2),
-                child: Icon(icon, size: 20, color: foreground),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Wrap(
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  spacing: 12,
-                  children: [
-                    Text(
-                      text,
-                      key: textKey,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: foreground,
-                      ),
-                    ),
-                    if (label != null)
-                      TextButton(
-                        onPressed: onAction,
-                        style: TextButton.styleFrom(
-                          foregroundColor: foreground,
-                        ),
-                        child: Text(label),
-                      ),
-                    if (secondaryLabel != null)
-                      TextButton(
-                        onPressed: onSecondary,
-                        style: TextButton.styleFrom(
-                          foregroundColor: foreground,
-                        ),
-                        child: Text(secondaryLabel!),
-                      ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
+        shape: card
+            ? RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))
+            : null,
+        child: content,
       ),
     );
   }
