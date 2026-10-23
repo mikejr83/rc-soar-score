@@ -2,15 +2,11 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:intl/intl.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/exchange/contest_exchange.dart';
-
-/// What the director is told about a file that is not encrypted.
-const exportNotice =
-    'The file is not encrypted. Anyone who has it can read the contest. '
-    'Send it only to people you trust.';
+import '../../services/preferences/director_time.dart';
 
 /// Asks how to export [contest], saves the file where the director chooses
 /// and says so. Does nothing when the build has no exchange.
@@ -18,6 +14,7 @@ Future<void> exportContest(BuildContext context, Contest contest) async {
   final exchange = ContestExchange.current;
   if (exchange == null) return;
   final messenger = ScaffoldMessenger.of(context);
+  final l10n = AppLocalizations.of(context);
   final redact = await showDialog<bool>(
     context: context,
     builder: (_) => _ExportDialog(contest: contest),
@@ -28,14 +25,12 @@ Future<void> exportContest(BuildContext context, Contest contest) async {
     export = await exchange.export(contest.id, redact: redact);
   } on ExchangeFailure catch (e) {
     messenger.showSnackBar(
-      SnackBar(
-        content: Text('The contest could not be exported. ${e.message}'),
-      ),
+      SnackBar(content: Text(l10n.exportFailedWithReason(e.message))),
     );
     return;
   } on Exception {
     messenger.showSnackBar(
-      const SnackBar(content: Text('The contest could not be exported.')),
+      SnackBar(content: Text(l10n.exportFailed)),
     );
     return;
   }
@@ -45,35 +40,31 @@ Future<void> exportContest(BuildContext context, Contest contest) async {
       export.bytes,
     );
     if (name != null) {
-      messenger.showSnackBar(SnackBar(content: Text('Saved $name')));
+      messenger.showSnackBar(SnackBar(content: Text(l10n.exportSaved(name))));
     }
   } on PlatformException catch (e) {
     messenger.showSnackBar(
       SnackBar(
-        content: Text(
-          'The contest could not be saved to a file. ${_describe(e)}',
-        ),
+        content: Text(l10n.exportFileSaveFailed(_describe(e, l10n))),
       ),
     );
   } on FileSystemException catch (e) {
     messenger.showSnackBar(
       SnackBar(
-        content: Text(
-          'The contest could not be saved to a file. ${_describe(e)}',
-        ),
+        content: Text(l10n.exportFileSaveFailed(_describe(e, l10n))),
       ),
     );
   }
 }
 
 /// A sentence for a failure of the system file dialogs or the file system.
-String _describe(Exception error) => switch (error) {
+String _describe(Exception error, AppLocalizations l10n) => switch (error) {
   PlatformException(:final message?) when message.isNotEmpty => message,
   FileSystemException(:final message, :final osError) =>
-    osError?.message.isNotEmpty == true
-        ? '$message (${osError!.message})'
-        : message,
-  _ => 'Choose another place and try again.',
+      osError?.message.isNotEmpty == true
+          ? '$message (${osError!.message})'
+          : message,
+  _ => l10n.fileOperationRetryHint,
 };
 
 class _ExportDialog extends StatefulWidget {
@@ -89,53 +80,50 @@ class _ExportDialogState extends State<_ExportDialog> {
   bool _redact = true;
 
   @override
-  Widget build(BuildContext context) => AlertDialog(
-    key: const ValueKey('export-dialog'),
-    title: Text('Export ${widget.contest.name}'),
-    content: SizedBox(
-      width: 440,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Saves the whole contest to a .rcsoar file, for support or as a '
-            'backup. Nothing is sent anywhere.',
-          ),
-          const SizedBox(height: 12),
-          CheckboxListTile(
-            key: const ValueKey('export-redact'),
-            contentPadding: EdgeInsets.zero,
-            controlAffinity: ListTileControlAffinity.leading,
-            value: _redact,
-            onChanged: (value) => setState(() => _redact = value ?? true),
-            title: const Text('Remove email addresses'),
-            subtitle: const Text(
-              'Turn this off for a full backup. Names, clubs and scores are '
-              'kept either way.',
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return AlertDialog(
+      key: const ValueKey('export-dialog'),
+      title: Text(l10n.exportDialogTitle(widget.contest.name)),
+      content: SizedBox(
+        width: 440,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(l10n.exportDialogDescription),
+            const SizedBox(height: 12),
+            CheckboxListTile(
+              key: const ValueKey('export-redact'),
+              contentPadding: EdgeInsets.zero,
+              controlAffinity: ListTileControlAffinity.leading,
+              value: _redact,
+              onChanged: (value) => setState(() => _redact = value ?? true),
+              title: Text(l10n.exportRedactionTitle),
+              subtitle: Text(l10n.exportRedactionSubtitle),
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            exportNotice,
-            key: const ValueKey('export-notice'),
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-        ],
+            const SizedBox(height: 8),
+            Text(
+              l10n.exportNotice,
+              key: const ValueKey('export-notice'),
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ],
+        ),
       ),
-    ),
-    actions: [
-      TextButton(
-        onPressed: () => Navigator.pop(context),
-        child: const Text('Cancel'),
-      ),
-      FilledButton(
-        key: const ValueKey('export-save'),
-        onPressed: () => Navigator.pop(context, _redact),
-        child: const Text('Save file…'),
-      ),
-    ],
-  );
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(l10n.cancelButton),
+        ),
+        FilledButton(
+          key: const ValueKey('export-save'),
+          onPressed: () => Navigator.pop(context, _redact),
+          child: Text(l10n.exportSaveButton),
+        ),
+      ],
+    );
+  }
 }
 
 /// Asks for a contest file, shows what importing it would do and imports it
@@ -145,17 +133,18 @@ Future<ExchangeImported?> importContest(BuildContext context) async {
   final exchange = ContestExchange.current;
   if (exchange == null) return null;
   final messenger = ScaffoldMessenger.of(context);
+  final l10n = AppLocalizations.of(context);
   final ChosenExchangeFile? chosen;
   try {
     chosen = await ExchangeFiles.current.choose();
   } on PlatformException catch (e) {
     messenger.showSnackBar(
-      SnackBar(content: Text('The file could not be opened. ${_describe(e)}')),
+      SnackBar(content: Text(l10n.importOpenFailed(_describe(e, l10n)))),
     );
     return null;
   } on FileSystemException catch (e) {
     messenger.showSnackBar(
-      SnackBar(content: Text('The file could not be opened. ${_describe(e)}')),
+      SnackBar(content: Text(l10n.importOpenFailed(_describe(e, l10n)))),
     );
     return null;
   }
@@ -166,7 +155,7 @@ Future<ExchangeImported?> importContest(BuildContext context) async {
   } on ExchangeFailure catch (e) {
     messenger.showSnackBar(
       SnackBar(
-        content: Text('${chosen.name} cannot be imported. ${e.message}'),
+        content: Text(l10n.importFileRefused(chosen.name, e.message)),
       ),
     );
     return null;
@@ -181,22 +170,11 @@ Future<ExchangeImported?> importContest(BuildContext context) async {
     return await exchange.import(chosen.bytes, mode, fileName: chosen.name);
   } on ExchangeFailure catch (e) {
     messenger.showSnackBar(
-      SnackBar(content: Text('The contest was not imported. ${e.message}')),
+      SnackBar(content: Text(l10n.importFailed(e.message))),
     );
     return null;
   }
 }
-
-/// The notice that goes with each way of holding an imported contest.
-String importModeNotice(ExchangeImportMode mode) => switch (mode) {
-  ExchangeImportMode.inspection =>
-    'Kept on this computer only. Nothing you do with it is sent to the '
-        'service, whoever is signed in.',
-  ExchangeImportMode.editable =>
-    'Owned by the account in use, like a contest made here. The original '
-        'installation may still run the contest until it is moved here, and '
-        'sync can be refused until then.',
-};
 
 class _ImportDialog extends StatefulWidget {
   const _ImportDialog({required this.preview});
@@ -210,21 +188,41 @@ class _ImportDialog extends StatefulWidget {
 class _ImportDialogState extends State<_ImportDialog> {
   late ExchangeImportMode? _mode = widget.preview.available.firstOrNull;
 
-  static const _titles = {
-    ExchangeImportMode.inspection: 'Open as a local copy for inspection',
-    ExchangeImportMode.editable: 'Import as an editable copy',
-  };
-
   @override
   Widget build(BuildContext context) {
     final preview = widget.preview;
     final theme = Theme.of(context);
-    final exported = DateFormat.yMMMd().add_jm().format(
-      preview.exportedAt.toLocal(),
-    );
+    final l10n = AppLocalizations.of(context);
+    final exported = DirectorTime.of(context)(preview.exportedAt);
+    final participants = preview.counts['participants'] ?? 0;
+    final rounds = preview.counts['rounds'] ?? 0;
+    final scores = preview.counts['scores'] ?? 0;
+    final source = preview.sourceLabel;
+    final String summary;
+    if (source == null) {
+      summary = preview.redacted
+          ? l10n.importPreviewRedacted(exported, participants, rounds, scores)
+          : l10n.importPreviewIncluded(exported, participants, rounds, scores);
+    } else {
+      summary = preview.redacted
+          ? l10n.importPreviewRedactedFromSource(
+              exported,
+              source,
+              participants,
+              rounds,
+              scores,
+            )
+          : l10n.importPreviewIncludedFromSource(
+              exported,
+              source,
+              participants,
+              rounds,
+              scores,
+            );
+    }
     return AlertDialog(
       key: const ValueKey('import-dialog'),
-      title: Text('Import ${preview.contestName}'),
+      title: Text(l10n.importDialogTitle(preview.contestName)),
       content: SizedBox(
         width: 480,
         child: SingleChildScrollView(
@@ -232,14 +230,7 @@ class _ImportDialogState extends State<_ImportDialog> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Exported $exported'
-                '${preview.sourceLabel == null ? '' : ' from ${preview.sourceLabel}'}. '
-                '${preview.counts['participants'] ?? 0} participants, '
-                '${preview.counts['rounds'] ?? 0} rounds, '
-                '${preview.counts['scores'] ?? 0} scores. '
-                '${preview.redacted ? 'Email addresses were removed.' : 'Email addresses are included.'}',
-              ),
+              Text(summary),
               const SizedBox(height: 12),
               for (final refusal in preview.refusals)
                 Padding(
@@ -258,7 +249,7 @@ class _ImportDialogState extends State<_ImportDialog> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       for (final mode in ExchangeImportMode.values)
-                        _option(mode, preview, theme),
+                        _option(mode, preview, l10n),
                     ],
                   ),
                 ),
@@ -269,14 +260,14 @@ class _ImportDialogState extends State<_ImportDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: Text(l10n.cancelButton),
         ),
         FilledButton(
           key: const ValueKey('import-confirm'),
           onPressed: preview.canImport && _mode != null
               ? () => Navigator.pop(context, _mode)
               : null,
-          child: const Text('Import'),
+          child: Text(l10n.importConfirmButton),
         ),
       ],
     );
@@ -285,19 +276,27 @@ class _ImportDialogState extends State<_ImportDialog> {
   Widget _option(
     ExchangeImportMode mode,
     ExchangePreview preview,
-    ThemeData theme,
+    AppLocalizations l10n,
   ) {
     final reason = preview.unavailable[mode];
     final enabled = preview.available.contains(mode);
+    final (title, notice) = switch (mode) {
+      ExchangeImportMode.inspection => (
+        l10n.importModeInspectionTitle,
+        l10n.importModeInspectionNotice,
+      ),
+      ExchangeImportMode.editable => (
+        l10n.importModeEditableTitle,
+        l10n.importModeEditableNotice,
+      ),
+    };
     return RadioListTile<ExchangeImportMode>(
       key: ValueKey('import-mode-${mode.name}'),
       contentPadding: EdgeInsets.zero,
       value: mode,
       enabled: enabled,
-      title: Text(_titles[mode]!),
-      subtitle: Text(
-        reason != null && !enabled ? reason : importModeNotice(mode),
-      ),
+      title: Text(title),
+      subtitle: Text(reason != null && !enabled ? reason : notice),
     );
   }
 }

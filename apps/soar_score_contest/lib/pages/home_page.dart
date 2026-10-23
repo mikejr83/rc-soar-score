@@ -5,6 +5,7 @@ import 'package:soar_score_core/soar_score_core.dart';
 
 import '../api_client_provider.dart';
 import '../contest_draft_provider.dart';
+import '../l10n/app_localizations.dart';
 import '../router.dart';
 import '../services/contest_open_action.dart';
 import '../services/exchange/contest_exchange.dart';
@@ -63,6 +64,7 @@ class _HomePageState extends State<HomePage> {
   /// Imports a file and shows the imported contest, selected.
   Future<void> _import() async {
     final messenger = ScaffoldMessenger.of(context);
+    final l10n = AppLocalizations.of(context);
     final imported = await importContest(context);
     if (imported == null || !mounted) return;
     final contests = _load();
@@ -75,8 +77,8 @@ class _HomePageState extends State<HomePage> {
       SnackBar(
         content: Text(
           imported.mode == ExchangeImportMode.inspection
-              ? 'Imported as a local copy. It is not synced.'
-              : 'Imported as an editable copy.',
+              ? l10n.importDoneInspection
+              : l10n.importDoneEditable,
         ),
       ),
     );
@@ -86,7 +88,7 @@ class _HomePageState extends State<HomePage> {
     key: const ValueKey('import-contest'),
     onPressed: _import,
     icon: const Icon(Icons.file_upload_outlined, size: 18),
-    label: const Text('Import contest…'),
+    label: Text(AppLocalizations.of(context).importButton),
   );
 
   void _retry() {

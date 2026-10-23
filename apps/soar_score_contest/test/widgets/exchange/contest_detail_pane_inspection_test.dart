@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/l10n/app_localizations.dart';
+import 'package:soar_score_contest/l10n/app_localizations_en.dart';
 import 'package:soar_score_contest/widgets/contest_detail_pane.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 void main() {
+  final l10n = AppLocalizationsEn();
   final contest = Contest(
     id: Id.create(),
     name: 'Autumn Meet',
@@ -20,6 +23,8 @@ void main() {
     VoidCallback? onExport,
   }) => tester.pumpWidget(
     MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       home: Scaffold(
         body: ContestDetailPane(
           contest: contest,
@@ -34,7 +39,8 @@ void main() {
   testWidgets('an inspection copy is labelled and explained', (tester) async {
     await pump(tester, inspection: true);
 
-    expect(find.text('Imported copy, not synced'), findsOneWidget);
+    expect(find.text(l10n.inspectionChipLabel), findsOneWidget);
+    expect(find.text(l10n.inspectionNotice), findsOneWidget);
     expect(find.byKey(const ValueKey('inspection-notice')), findsOneWidget);
   });
 

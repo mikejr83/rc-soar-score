@@ -91,5 +91,234 @@
   "preferencesNeedSignIn": "Sign in to keep this on your account. It applies until you close the app.",
   "@preferencesNeedSignIn": {
     "description": "Snackbar shown when a preference was changed while signed out, so it cannot be stored on an account."
+  },
+  "fileOperationRetryHint": "Choose another place and try again.",
+  "@fileOperationRetryHint": {
+    "description": "Shown when a contest file could not be saved or opened and no system error message is available."
+  },
+  "cancelButton": "Cancel",
+  "@cancelButton": {
+    "description": "Button that closes the export or import dialog without acting."
+  },
+  "exportContestButton": "Export…",
+  "@exportContestButton": {
+    "description": "Button on the contest detail pane that exports the contest to a file."
+  },
+  "exportDialogTitle": "Export {name}",
+  "@exportDialogTitle": {
+    "description": "Title of the export dialog, with the name of the contest.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "exportDialogDescription": "Saves the whole contest to a .rcsoar file, for support or as a backup. Nothing is sent anywhere.",
+  "@exportDialogDescription": {
+    "description": "Explains what the export dialog saves."
+  },
+  "exportRedactionTitle": "Remove email addresses",
+  "@exportRedactionTitle": {
+    "description": "Checkbox that removes email addresses from the exported file."
+  },
+  "exportRedactionSubtitle": "Turn this off for a full backup. Names, clubs and scores are kept either way.",
+  "@exportRedactionSubtitle": {
+    "description": "Explains the effect of the redaction checkbox."
+  },
+  "exportNotice": "The file is not encrypted. Anyone who has it can read the contest. Send it only to people you trust.",
+  "@exportNotice": {
+    "description": "Warning in the export dialog that the file is not encrypted."
+  },
+  "exportSaveButton": "Save file…",
+  "@exportSaveButton": {
+    "description": "Button that exports the contest and saves it to a file."
+  },
+  "exportSaved": "Saved {name}",
+  "@exportSaved": {
+    "description": "Snackbar shown after the contest file was saved, with the file name.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "exportFailed": "The contest could not be exported.",
+  "@exportFailed": {
+    "description": "Snackbar shown when exporting failed and no reason is available."
+  },
+  "exportFailedWithReason": "The contest could not be exported. {reason}",
+  "@exportFailedWithReason": {
+    "description": "Snackbar shown when exporting failed, with the reason.",
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "exportFileSaveFailed": "The contest could not be saved to a file. {reason}",
+  "@exportFileSaveFailed": {
+    "description": "Snackbar shown when the chosen file dialog or file system failed, with the reason.",
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "importButton": "Import contest…",
+  "@importButton": {
+    "description": "Button on the contests page that imports a contest file."
+  },
+  "importOpenFailed": "The file could not be opened. {reason}",
+  "@importOpenFailed": {
+    "description": "Snackbar shown when the chosen file could not be opened, with the reason.",
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "importFileRefused": "{name} cannot be imported. {reason}",
+  "@importFileRefused": {
+    "description": "Snackbar shown when the file is not a contest file, with its name and the reason.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "importFailed": "The contest was not imported. {reason}",
+  "@importFailed": {
+    "description": "Snackbar shown when the import was refused, with the reason.",
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "importDialogTitle": "Import {name}",
+  "@importDialogTitle": {
+    "description": "Title of the import dialog, with the name of the contest in the file.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "importConfirmButton": "Import",
+  "@importConfirmButton": {
+    "description": "Button that imports the contest in the chosen mode."
+  },
+  "importPreviewRedactedFromSource": "Exported {exportedAt} from {source}. {participants, plural, one{1 participant} other{{participants} participants}}, {rounds, plural, one{1 round} other{{rounds} rounds}}, {scores, plural, one{1 score} other{{scores} scores}}. Email addresses were removed.",
+  "@importPreviewRedactedFromSource": {
+    "description": "Import dialog summary of the file, exported on the given date by the given source, with contact details removed.",
+    "placeholders": {
+      "exportedAt": {
+        "type": "String"
+      },
+      "source": {
+        "type": "String"
+      },
+      "participants": {
+        "type": "num"
+      },
+      "rounds": {
+        "type": "num"
+      },
+      "scores": {
+        "type": "num"
+      }
+    }
+  },
+  "importPreviewRedacted": "Exported {exportedAt}. {participants, plural, one{1 participant} other{{participants} participants}}, {rounds, plural, one{1 round} other{{rounds} rounds}}, {scores, plural, one{1 score} other{{scores} scores}}. Email addresses were removed.",
+  "@importPreviewRedacted": {
+    "description": "Import dialog summary of the file, exported on the given date with no source, with contact details removed.",
+    "placeholders": {
+      "exportedAt": {
+        "type": "String"
+      },
+      "participants": {
+        "type": "num"
+      },
+      "rounds": {
+        "type": "num"
+      },
+      "scores": {
+        "type": "num"
+      }
+    }
+  },
+  "importPreviewIncludedFromSource": "Exported {exportedAt} from {source}. {participants, plural, one{1 participant} other{{participants} participants}}, {rounds, plural, one{1 round} other{{rounds} rounds}}, {scores, plural, one{1 score} other{{scores} scores}}. Email addresses are included.",
+  "@importPreviewIncludedFromSource": {
+    "description": "Import dialog summary of the file, exported on the given date by the given source, with contact details kept.",
+    "placeholders": {
+      "exportedAt": {
+        "type": "String"
+      },
+      "source": {
+        "type": "String"
+      },
+      "participants": {
+        "type": "num"
+      },
+      "rounds": {
+        "type": "num"
+      },
+      "scores": {
+        "type": "num"
+      }
+    }
+  },
+  "importPreviewIncluded": "Exported {exportedAt}. {participants, plural, one{1 participant} other{{participants} participants}}, {rounds, plural, one{1 round} other{{rounds} rounds}}, {scores, plural, one{1 score} other{{scores} scores}}. Email addresses are included.",
+  "@importPreviewIncluded": {
+    "description": "Import dialog summary of the file, exported on the given date with no source, with contact details kept.",
+    "placeholders": {
+      "exportedAt": {
+        "type": "String"
+      },
+      "participants": {
+        "type": "num"
+      },
+      "rounds": {
+        "type": "num"
+      },
+      "scores": {
+        "type": "num"
+      }
+    }
+  },
+  "importModeInspectionTitle": "Open as a local copy for inspection",
+  "@importModeInspectionTitle": {
+    "description": "Import mode that keeps a contest on this computer only."
+  },
+  "importModeInspectionNotice": "Kept on this computer only. Nothing you do with it is sent to the service, whoever is signed in.",
+  "@importModeInspectionNotice": {
+    "description": "Explains the inspection import mode."
+  },
+  "importModeEditableTitle": "Import as an editable copy",
+  "@importModeEditableTitle": {
+    "description": "Import mode that owns the contest in the account in use."
+  },
+  "importModeEditableNotice": "Owned by the account in use, like a contest made here. The original installation may still run the contest until it is moved here, and sync can be refused until then.",
+  "@importModeEditableNotice": {
+    "description": "Explains the editable import mode."
+  },
+  "importDoneInspection": "Imported as a local copy. It is not synced.",
+  "@importDoneInspection": {
+    "description": "Snackbar shown after a contest was imported as an inspection copy."
+  },
+  "importDoneEditable": "Imported as an editable copy.",
+  "@importDoneEditable": {
+    "description": "Snackbar shown after a contest was imported as an editable copy."
+  },
+  "inspectionChipLabel": "Imported copy, not synced",
+  "@inspectionChipLabel": {
+    "description": "Chip on the contest detail pane marking an imported inspection copy."
+  },
+  "inspectionNotice": "This contest was imported for inspection. It stays on this computer: nothing in it is sent to the service, whoever is signed in.",
+  "@inspectionNotice": {
+    "description": "Notice on the contest detail pane of an imported inspection copy."
   }
 }

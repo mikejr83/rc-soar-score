@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_contest/api_client_provider.dart';
+import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_contest/pages/home_page.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
@@ -20,7 +21,11 @@ Contest _contest(String name, {int day = 17}) => Contest(
 );
 
 Widget _app(ApiClient? client) {
-  const page = MaterialApp(home: Scaffold(body: HomePage()));
+  final page = MaterialApp(
+    home: const Scaffold(body: HomePage()),
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
+  );
   return client == null
       ? page
       : ApiClientInherited(client: client, child: page);
