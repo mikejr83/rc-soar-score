@@ -9,6 +9,7 @@ class ReportCheckOption extends StatelessWidget {
     required this.value,
     required this.onChanged,
     this.help,
+    this.enabled = true,
   });
 
   final String label;
@@ -16,12 +17,15 @@ class ReportCheckOption extends StatelessWidget {
   final ValueChanged<bool> onChanged;
   final String? help;
 
+  /// A disabled option keeps its value on show.
+  final bool enabled;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return CheckboxListTile(
       value: value,
-      onChanged: (checked) => onChanged(checked ?? false),
+      onChanged: enabled ? (checked) => onChanged(checked ?? false) : null,
       controlAffinity: ListTileControlAffinity.leading,
       contentPadding: EdgeInsets.zero,
       dense: true,
@@ -38,8 +42,66 @@ class ReportCheckOption extends StatelessWidget {
   }
 }
 
+/// A labelled switch with a line of help, for an option that turns a whole
+/// feature on. When it cannot be changed, [help] says why; it reads in full
+/// strength with a block icon, so the reason does not rely on a tooltip.
+class ReportSwitchOption extends StatelessWidget {
+  const ReportSwitchOption({
+    super.key,
+    required this.label,
+    required this.value,
+    required this.onChanged,
+    this.help,
+    this.enabled = true,
+  });
+
+  final String label;
+  final bool value;
+  final ValueChanged<bool> onChanged;
+  final String? help;
+  final bool enabled;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return SwitchListTile(
+      value: value,
+      onChanged: enabled ? onChanged : null,
+      contentPadding: EdgeInsets.zero,
+      dense: true,
+      title: Text(label),
+      subtitle: help == null
+          ? null
+          : Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: 4,
+              children: [
+                if (!enabled)
+                  Icon(
+                    Icons.block,
+                    size: 14,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                Expanded(
+                  child: Text(
+                    help!,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: enabled
+                          ? theme.colorScheme.onSurfaceVariant
+                          : theme.colorScheme.onSurface,
+                      fontWeight: enabled ? null : FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+    );
+  }
+}
+
 /// A labelled dropdown of [items] (value to label), for a report's filters.
-/// [errorText] marks it invalid with text, not colour alone.
+/// [errorText] marks it invalid with text, not colour alone. Items in
+/// [disabled] are listed but cannot be chosen.
 class ReportDropdown extends StatelessWidget {
   const ReportDropdown({
     super.key,
@@ -48,6 +110,7 @@ class ReportDropdown extends StatelessWidget {
     required this.items,
     required this.onChanged,
     this.errorText,
+    this.disabled = const {},
   });
 
   final String label;
@@ -55,6 +118,7 @@ class ReportDropdown extends StatelessWidget {
   final Map<String, String> items;
   final ValueChanged<String> onChanged;
   final String? errorText;
+  final Set<String> disabled;
 
   @override
   Widget build(BuildContext context) => DropdownButtonFormField<String>(
@@ -71,7 +135,11 @@ class ReportDropdown extends StatelessWidget {
     ),
     items: [
       for (final entry in items.entries)
-        DropdownMenuItem(value: entry.key, child: Text(entry.value)),
+        DropdownMenuItem(
+          value: entry.key,
+          enabled: !disabled.contains(entry.key),
+          child: Text(entry.value),
+        ),
     ],
     onChanged: (chosen) {
       if (chosen != null) {
