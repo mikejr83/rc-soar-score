@@ -81,7 +81,10 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
       round: widget.round,
       group: widget.group,
     )..addListener(_changed);
-    widget.guard?.attach(_confirmLeave);
+    widget.guard?.attach(
+      _confirmLeave,
+      hasChanges: () => _controller?.hasUnsaved ?? false,
+    );
     _controller!.load();
   }
 

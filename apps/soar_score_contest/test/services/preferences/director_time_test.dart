@@ -31,10 +31,7 @@ void main() {
 
     // The zone text is the device's own name, and some devices give a full
     // phrase ("Eastern Daylight Time"), not just an abbreviation.
-    expect(
-      text,
-      matches(r'^\d{1,2}/\d{1,2}/2026 \d{2}:\d{2} \S+( \S+)*$'),
-    );
+    expect(text, matches(r'^\d{1,2}/\d{1,2}/2026 \d{2}:\d{2} \S+( \S+)*$'));
   });
 
   test('an unknown zone falls back to the device', () {

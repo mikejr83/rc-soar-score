@@ -111,7 +111,10 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
   @override
   void initState() {
     super.initState();
-    widget.guard?.attach(_confirmLeave);
+    widget.guard?.attach(
+      _confirmLeave,
+      hasChanges: () => _created == null && !_creating && _unsaved,
+    );
   }
 
   @override

@@ -14,6 +14,7 @@ import 'platform/bootstrap.dart' as bootstrap;
 import 'services/connectivity/app_connectivity.dart';
 import 'services/connectivity/reachability_forwarder.dart';
 import 'services/collapsible_areas/collapsible_areas_controller.dart';
+import 'services/window/close_warning.dart';
 import 'services/theme/theme_controller.dart';
 
 final _logger = Logger('Main');
@@ -22,6 +23,7 @@ Future<void> main() async {
   configureLogging(level: Level.FINER, format: LogFormat.text);
 
   WidgetsFlutterBinding.ensureInitialized();
+  installCloseWarning();
 
   try {
     _logger.info('Starting Soar Score Contest App');

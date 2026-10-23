@@ -1,5 +1,6 @@
 #include "window_title_channel.h"
 
+#include <flutter/method_result_functions.h>
 #include <flutter/standard_method_codec.h>
 
 #include <string>
@@ -47,4 +48,26 @@ WindowTitleChannel::WindowTitleChannel(flutter::BinaryMessenger* messenger,
         SetWindowText(window_, Utf16FromUtf8(*title).c_str());
         result->Success();
       });
+}
+
+bool WindowTitleChannel::RequestClose(std::function<void(bool allow)> on_answer) {
+  if (close_pending_) {
+    return false;
+  }
+  close_pending_ = true;
+  auto finish = [this, on_answer](bool allow) {
+    close_pending_ = false;
+    on_answer(allow);
+  };
+  channel_->InvokeMethod(
+      "confirmClose", nullptr,
+      std::make_unique<flutter::MethodResultFunctions<flutter::EncodableValue>>(
+          [finish](const flutter::EncodableValue* value) {
+            const bool* allow = value ? std::get_if<bool>(value) : nullptr;
+            finish(allow == nullptr || *allow);
+          },
+          [finish](const std::string&, const std::string&,
+                   const flutter::EncodableValue*) { finish(true); },
+          [finish]() { finish(true); }));
+  return true;
 }

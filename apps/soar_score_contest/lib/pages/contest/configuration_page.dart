@@ -72,7 +72,10 @@ class _ContestConfigurationPageState extends State<ContestConfigurationPage> {
   @override
   void initState() {
     super.initState();
-    widget.guard?.attach(_confirmLeave);
+    widget.guard?.attach(
+      _confirmLeave,
+      hasChanges: () => (_draft?.dirty ?? false) && _data?.readOnly != true,
+    );
     _scroll.addListener(_followScroll);
   }
 

@@ -62,7 +62,7 @@ class _LandingEditorPageState extends State<LandingEditorPage> {
           ),
       ];
     }
-    widget.guard?.attach(_confirmDiscard);
+    widget.guard?.attach(_confirmDiscard, hasChanges: () => _dirty);
     _name.addListener(_markDirty);
     for (final row in _rows) {
       _watch(row);

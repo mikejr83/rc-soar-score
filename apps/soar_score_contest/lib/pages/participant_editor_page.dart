@@ -91,7 +91,10 @@ class _ParticipantEditorPageState extends State<ParticipantEditorPage> {
   @override
   void initState() {
     super.initState();
-    widget.guard?.attach(_confirmDiscard);
+    widget.guard?.attach(
+      _confirmDiscard,
+      hasChanges: () => _controller != null && _c.dirty,
+    );
     for (final field in ParticipantField.values) {
       _texts[field]!.addListener(() => _typed(field));
       _focus[field]!.addListener(() {
