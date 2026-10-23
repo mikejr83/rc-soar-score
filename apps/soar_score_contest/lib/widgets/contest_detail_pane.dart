@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../l10n/app_localizations.dart';
 import '../services/contest_open_action.dart';
 import 'contest_list.dart';
 import 'contest_status_chip.dart';
@@ -33,6 +34,7 @@ class ContestDetailPane extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
     final location = [
       contest.city,
       contest.state,
@@ -66,7 +68,7 @@ class ContestDetailPane extends StatelessWidget {
                         Chip(
                           key: const ValueKey('inspection-label'),
                           avatar: const Icon(Icons.cloud_off, size: 16),
-                          label: const Text('Imported copy, not synced'),
+                          label: Text(l10n.inspectionChipLabel),
                           visualDensity: VisualDensity.compact,
                         ),
                     ],
@@ -80,7 +82,7 @@ class ContestDetailPane extends StatelessWidget {
                 key: const ValueKey('export-contest'),
                 onPressed: onExport,
                 icon: const Icon(Icons.file_download_outlined, size: 18),
-                label: const Text('Export…'),
+                label: Text(l10n.exportContestButton),
               ),
               const SizedBox(width: 8),
             ],
@@ -96,9 +98,7 @@ class ContestDetailPane extends StatelessWidget {
         if (inspection) ...[
           const SizedBox(height: 16),
           Text(
-            'This contest was imported for inspection. It stays on this '
-            'computer: nothing in it is sent to the service, whoever is '
-            'signed in.',
+            l10n.inspectionNotice,
             key: const ValueKey('inspection-notice'),
             style: theme.textTheme.bodyMedium,
           ),

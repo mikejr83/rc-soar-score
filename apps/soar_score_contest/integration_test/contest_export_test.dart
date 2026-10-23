@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
+import 'package:soar_score_contest/l10n/app_localizations_en.dart';
 
 import 'support/exchange_files.dart';
 import 'support/interact.dart';
@@ -34,10 +35,16 @@ void main() {
           .value,
       isTrue,
     );
-    expect(find.textContaining('not encrypted'), findsOneWidget);
+    expect(
+      find.text(AppLocalizationsEn().exportNotice),
+      findsOneWidget,
+    );
 
     await tapVisible(tester, find.byKey(const ValueKey('export-save')));
-    await pumpUntilFound(tester, find.text('Saved $_contest.rcsoar'));
+    await pumpUntilFound(
+      tester,
+      find.text(AppLocalizationsEn().exportSaved('$_contest.rcsoar')),
+    );
 
     expect(saved.keys, ['$_contest.rcsoar']);
     final text = utf8.decode(saved.values.single);

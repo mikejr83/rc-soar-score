@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
+import 'package:soar_score_contest/l10n/app_localizations_en.dart';
 
 import 'support/exchange_files.dart';
 import 'support/interact.dart';
@@ -24,7 +25,10 @@ void main() {
       tester,
       find.byKey(const ValueKey('inspection-label')),
     );
-    expect(find.text('Imported copy, not synced'), findsOneWidget);
+    expect(
+      find.text(AppLocalizationsEn().inspectionChipLabel),
+      findsOneWidget,
+    );
     expect(find.byKey(const ValueKey('inspection-notice')), findsOneWidget);
 
     // The demo contests are not labelled.

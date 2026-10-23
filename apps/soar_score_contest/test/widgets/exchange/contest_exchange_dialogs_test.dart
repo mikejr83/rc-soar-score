@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/l10n/app_localizations.dart';
+import 'package:soar_score_contest/l10n/app_localizations_en.dart';
 import 'package:soar_score_contest/services/exchange/contest_exchange.dart';
 import 'package:soar_score_contest/widgets/exchange/contest_exchange_dialogs.dart';
 import 'package:soar_score_core/soar_score_core.dart';
@@ -53,6 +55,8 @@ ExchangePreview _preview({
 );
 
 void main() {
+  final l10n = AppLocalizationsEn();
+
   ExchangeFiles failingWith(Exception error, {bool onSave = true}) =>
       ExchangeFiles(
         choose: () async => onSave
@@ -92,6 +96,8 @@ void main() {
 
   Future<void> pumpPage(WidgetTester tester) => tester.pumpWidget(
     MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       home: Scaffold(
         body: Builder(
           builder: (context) => Column(
@@ -120,7 +126,7 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('go-export')));
     await tester.pumpAndSettle();
 
-    expect(find.text(exportNotice), findsOneWidget);
+    expect(find.text(l10n.exportNotice), findsOneWidget);
     expect(
       tester
           .widget<CheckboxListTile>(find.byKey(const ValueKey('export-redact')))
@@ -133,7 +139,7 @@ void main() {
 
     expect(exchange.exports, [true]);
     expect(saved, ['Meet.rcsoar']);
-    expect(find.text('Saved Meet.rcsoar'), findsOneWidget);
+    expect(find.text(l10n.exportSaved('Meet.rcsoar')), findsOneWidget);
   });
 
   testWidgets('export can keep email addresses for a full backup', (
@@ -153,7 +159,7 @@ void main() {
     await pumpPage(tester);
     await tester.tap(find.byKey(const ValueKey('go-export')));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Cancel'));
+    await tester.tap(find.text(l10n.cancelButton));
     await tester.pumpAndSettle();
 
     expect(exchange.exports, isEmpty);
@@ -168,14 +174,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.textContaining('12 participants'), findsOneWidget);
-    expect(
-      find.text(importModeNotice(ExchangeImportMode.inspection)),
-      findsOneWidget,
-    );
-    expect(
-      find.text(importModeNotice(ExchangeImportMode.editable)),
-      findsOneWidget,
-    );
+    expect(find.text(l10n.importModeInspectionNotice), findsOneWidget);
+    expect(find.text(l10n.importModeEditableNotice), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('import-confirm')));
     await tester.pumpAndSettle();
@@ -248,7 +248,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      find.textContaining('notes.rcsoar cannot be imported'),
+      find.text(
+        l10n.importFileRefused('notes.rcsoar', 'It is not a contest file.'),
+      ),
       findsOneWidget,
     );
     expect(find.byKey(const ValueKey('import-dialog')), findsNothing);
@@ -265,7 +267,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      find.textContaining('could not be saved to a file. Cannot create file'),
+      find.text(l10n.exportFileSaveFailed('Cannot create file')),
       findsOneWidget,
     );
   });
@@ -295,7 +297,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      find.textContaining('The file could not be opened. Cannot open file'),
+      find.text(l10n.importOpenFailed('Cannot open file')),
       findsOneWidget,
     );
     expect(find.byKey(const ValueKey('import-dialog')), findsNothing);
@@ -311,8 +313,8 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('export-save')));
     await tester.pumpAndSettle();
 
-    expect(find.text('The contest could not be exported.'), findsOneWidget);
-    expect(find.textContaining('saved to a file'), findsNothing);
+    expect(find.text(l10n.exportFailed), findsOneWidget);
+    expect(find.textContaining(l10n.exportFileSaveFailed('')), findsNothing);
     expect(saved, isEmpty);
   });
 }

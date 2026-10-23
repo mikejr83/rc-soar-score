@@ -231,6 +231,214 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sign in to keep this on your account. It applies until you close the app.'**
   String get preferencesNeedSignIn;
+
+  /// Shown when a contest file could not be saved or opened and no system error message is available.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose another place and try again.'**
+  String get fileOperationRetryHint;
+
+  /// Button that closes the export or import dialog without acting.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancelButton;
+
+  /// Button on the contest detail pane that exports the contest to a file.
+  ///
+  /// In en, this message translates to:
+  /// **'Export…'**
+  String get exportContestButton;
+
+  /// Title of the export dialog, with the name of the contest.
+  ///
+  /// In en, this message translates to:
+  /// **'Export {name}'**
+  String exportDialogTitle(String name);
+
+  /// Explains what the export dialog saves.
+  ///
+  /// In en, this message translates to:
+  /// **'Saves the whole contest to a .rcsoar file, for support or as a backup. Nothing is sent anywhere.'**
+  String get exportDialogDescription;
+
+  /// Checkbox that removes email addresses from the exported file.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove email addresses'**
+  String get exportRedactionTitle;
+
+  /// Explains the effect of the redaction checkbox.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn this off for a full backup. Names, clubs and scores are kept either way.'**
+  String get exportRedactionSubtitle;
+
+  /// Warning in the export dialog that the file is not encrypted.
+  ///
+  /// In en, this message translates to:
+  /// **'The file is not encrypted. Anyone who has it can read the contest. Send it only to people you trust.'**
+  String get exportNotice;
+
+  /// Button that exports the contest and saves it to a file.
+  ///
+  /// In en, this message translates to:
+  /// **'Save file…'**
+  String get exportSaveButton;
+
+  /// Snackbar shown after the contest file was saved, with the file name.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved {name}'**
+  String exportSaved(String name);
+
+  /// Snackbar shown when exporting failed and no reason is available.
+  ///
+  /// In en, this message translates to:
+  /// **'The contest could not be exported.'**
+  String get exportFailed;
+
+  /// Snackbar shown when exporting failed, with the reason.
+  ///
+  /// In en, this message translates to:
+  /// **'The contest could not be exported. {reason}'**
+  String exportFailedWithReason(String reason);
+
+  /// Snackbar shown when the chosen file dialog or file system failed, with the reason.
+  ///
+  /// In en, this message translates to:
+  /// **'The contest could not be saved to a file. {reason}'**
+  String exportFileSaveFailed(String reason);
+
+  /// Button on the contests page that imports a contest file.
+  ///
+  /// In en, this message translates to:
+  /// **'Import contest…'**
+  String get importButton;
+
+  /// Snackbar shown when the chosen file could not be opened, with the reason.
+  ///
+  /// In en, this message translates to:
+  /// **'The file could not be opened. {reason}'**
+  String importOpenFailed(String reason);
+
+  /// Snackbar shown when the file is not a contest file, with its name and the reason.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} cannot be imported. {reason}'**
+  String importFileRefused(String name, String reason);
+
+  /// Snackbar shown when the import was refused, with the reason.
+  ///
+  /// In en, this message translates to:
+  /// **'The contest was not imported. {reason}'**
+  String importFailed(String reason);
+
+  /// Title of the import dialog, with the name of the contest in the file.
+  ///
+  /// In en, this message translates to:
+  /// **'Import {name}'**
+  String importDialogTitle(String name);
+
+  /// Button that imports the contest in the chosen mode.
+  ///
+  /// In en, this message translates to:
+  /// **'Import'**
+  String get importConfirmButton;
+
+  /// Import dialog summary of the file, exported on the given date by the given source, with contact details removed.
+  ///
+  /// In en, this message translates to:
+  /// **'Exported {exportedAt} from {source}. {participants} participants, {rounds} rounds, {scores} scores. Email addresses were removed.'**
+  String importPreviewRedactedFromSource(
+    String exportedAt,
+    String source,
+    int participants,
+    int rounds,
+    int scores,
+  );
+
+  /// Import dialog summary of the file, exported on the given date with no source, with contact details removed.
+  ///
+  /// In en, this message translates to:
+  /// **'Exported {exportedAt}. {participants} participants, {rounds} rounds, {scores} scores. Email addresses were removed.'**
+  String importPreviewRedacted(
+    String exportedAt,
+    int participants,
+    int rounds,
+    int scores,
+  );
+
+  /// Import dialog summary of the file, exported on the given date by the given source, with contact details kept.
+  ///
+  /// In en, this message translates to:
+  /// **'Exported {exportedAt} from {source}. {participants} participants, {rounds} rounds, {scores} scores. Email addresses are included.'**
+  String importPreviewIncludedFromSource(
+    String exportedAt,
+    String source,
+    int participants,
+    int rounds,
+    int scores,
+  );
+
+  /// Import dialog summary of the file, exported on the given date with no source, with contact details kept.
+  ///
+  /// In en, this message translates to:
+  /// **'Exported {exportedAt}. {participants} participants, {rounds} rounds, {scores} scores. Email addresses are included.'**
+  String importPreviewIncluded(
+    String exportedAt,
+    int participants,
+    int rounds,
+    int scores,
+  );
+
+  /// Import mode that keeps a contest on this computer only.
+  ///
+  /// In en, this message translates to:
+  /// **'Open as a local copy for inspection'**
+  String get importModeInspectionTitle;
+
+  /// Explains the inspection import mode.
+  ///
+  /// In en, this message translates to:
+  /// **'Kept on this computer only. Nothing you do with it is sent to the service, whoever is signed in.'**
+  String get importModeInspectionNotice;
+
+  /// Import mode that owns the contest in the account in use.
+  ///
+  /// In en, this message translates to:
+  /// **'Import as an editable copy'**
+  String get importModeEditableTitle;
+
+  /// Explains the editable import mode.
+  ///
+  /// In en, this message translates to:
+  /// **'Owned by the account in use, like a contest made here. The original installation may still run the contest until it is moved here, and sync can be refused until then.'**
+  String get importModeEditableNotice;
+
+  /// Snackbar shown after a contest was imported as an inspection copy.
+  ///
+  /// In en, this message translates to:
+  /// **'Imported as a local copy. It is not synced.'**
+  String get importDoneInspection;
+
+  /// Snackbar shown after a contest was imported as an editable copy.
+  ///
+  /// In en, this message translates to:
+  /// **'Imported as an editable copy.'**
+  String get importDoneEditable;
+
+  /// Chip on the contest detail pane marking an imported inspection copy.
+  ///
+  /// In en, this message translates to:
+  /// **'Imported copy, not synced'**
+  String get inspectionChipLabel;
+
+  /// Notice on the contest detail pane of an imported inspection copy.
+  ///
+  /// In en, this message translates to:
+  /// **'This contest was imported for inspection. It stays on this computer: nothing in it is sent to the service, whoever is signed in.'**
+  String get inspectionNotice;
 }
 
 class _AppLocalizationsDelegate
