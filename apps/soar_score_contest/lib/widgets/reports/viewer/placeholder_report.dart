@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../services/reports/report_kind.dart';
 import '../../../services/reports/viewer/page_setup.dart';
 import 'paper_style.dart';
+import '../draw_matrix/draw_matrix_report.dart';
 import '../standings/standings_report.dart';
 import 'report_definition.dart';
 
@@ -80,5 +81,6 @@ class PlaceholderReport extends ReportDefinition {
 /// built.
 ReportDefinition reportDefinitionFor(ReportKind kind) => switch (kind) {
   ReportKind.standings => const StandingsReport(),
+  ReportKind.matrix => const DrawMatrixReport(),
   _ => PlaceholderReport(kind),
 };

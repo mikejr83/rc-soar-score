@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
@@ -44,6 +45,24 @@ void main() {
     await pumpUntilFound(tester, find.text('Reports are built from'));
     await tapVisible(tester, find.byKey(const ValueKey('report-open-matrix')));
     await pumpUntilFound(tester, find.byKey(const ValueKey('viewer-title')));
+
+    // The sheet is the Draw Matrix itself: rounds, groups and pilots, and
+    // compact mode takes the dependent Additional pilot info option away.
+    await pumpUntilFound(
+      tester,
+      find.textContaining('Group A', findRichText: true),
+    );
+    expect(find.text('Flight Matrix - $_contest'), findsWidgets);
+    await tapVisible(
+      tester,
+      find.widgetWithText(SwitchListTile, 'Compact mode'),
+    );
+    expect(find.text('Not available in compact mode'), findsOneWidget);
+    await tapVisible(
+      tester,
+      find.widgetWithText(SwitchListTile, 'Compact mode'),
+    );
+    expect(find.text('Not available in compact mode'), findsNothing);
 
     // Print hands a PDF to the print dialog and says so.
     await tapVisible(tester, find.byKey(const ValueKey('viewer-print')));
