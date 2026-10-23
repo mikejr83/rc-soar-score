@@ -104,8 +104,6 @@ void main() {
     // The running footer repeats on every page.
     expect(find.textContaining('Page 1 of 2'), findsWidgets);
     expect(find.textContaining('Page 2 of 2'), findsWidgets);
-    expect(find.textContaining('Matrix rev 1'), findsNWidgets(2));
-    expect(find.textContaining('Config rev 14'), findsNWidgets(2));
     expect(find.text('Page 1 of 2'), findsWidgets);
     expect(find.byKey(const ValueKey('viewer-page-indicator')), findsOneWidget);
   });

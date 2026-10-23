@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../page_states/page_banner.dart';
+
 /// How a [WizardBanner] reads: errors block, warnings advise, info explains.
 enum WizardBannerTone { error, warning, info, success }
 
@@ -27,8 +29,8 @@ class WizardBannerAction {
 /// A banner at the top of a wizard step: the validation summary (with links
 /// to each field), a failed save, or a step-wide note.
 ///
-/// Errors are announced as alerts (live region); the tone is also carried by
-/// the icon and the title text, not color alone.
+/// Errors are announced as alerts; the tone is also carried by the icon and
+/// the title text, not color alone.
 class WizardBanner extends StatelessWidget {
   const WizardBanner({
     super.key,
@@ -50,105 +52,45 @@ class WizardBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    final (Color background, Color foreground) = switch (tone) {
-      WizardBannerTone.error => (
-        scheme.errorContainer,
-        scheme.onErrorContainer,
-      ),
-      WizardBannerTone.warning => (
-        scheme.tertiaryContainer,
-        scheme.onTertiaryContainer,
-      ),
-      WizardBannerTone.info => (scheme.surfaceContainer, scheme.onSurface),
-      WizardBannerTone.success => (
-        scheme.secondaryContainer,
-        scheme.onSecondaryContainer,
-      ),
+    final foreground = switch (tone) {
+      WizardBannerTone.error => theme.colorScheme.onErrorContainer,
+      WizardBannerTone.warning => theme.colorScheme.onTertiaryContainer,
+      WizardBannerTone.info => theme.colorScheme.onSurface,
+      WizardBannerTone.success => theme.colorScheme.onSecondaryContainer,
     };
     final textStyle = theme.textTheme.bodyMedium?.copyWith(color: foreground);
-    return Semantics(
-      container: true,
-      liveRegion: tone == WizardBannerTone.error,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        decoration: BoxDecoration(
-          color: background,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Wrap(
-          spacing: 12,
-          runSpacing: 8,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          children: [
-            ConstrainedBox(
-              constraints: const BoxConstraints(minWidth: 280),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(icon, color: foreground, fill: 1),
-                  const SizedBox(width: 12),
-                  Flexible(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          title,
-                          style: textStyle?.copyWith(
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        if (body != null) ...[
-                          const SizedBox(height: 4),
-                          Text(body!, style: textStyle),
-                        ],
-                        for (final link in links)
-                          _BannerLink(
-                            link: link,
-                            style: textStyle,
-                            color: foreground,
-                          ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+    return PageBanner(
+      kind: switch (tone) {
+        WizardBannerTone.error => PageBannerKind.alert,
+        WizardBannerTone.warning => PageBannerKind.status,
+        WizardBannerTone.info => PageBannerKind.neutral,
+        WizardBannerTone.success => PageBannerKind.success,
+      },
+      shape: PageBannerShape.card,
+      icon: icon,
+      title: title,
+      text: body ?? '',
+      actions: [
+        for (final (index, action) in actions.indexed)
+          PageBannerAction(
+            action.label,
+            action.onPressed,
+            key: action.key,
+            emphasis: index == 0
+                ? PageBannerEmphasis.filled
+                : PageBannerEmphasis.outlined,
+          ),
+      ],
+      child: links.isEmpty
+          ? null
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                for (final link in links)
+                  _BannerLink(link: link, style: textStyle, color: foreground),
+              ],
             ),
-            if (actions.isNotEmpty)
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  for (final (index, action) in actions.indexed)
-                    if (index == 0)
-                      FilledButton(
-                        key: action.key,
-                        style: tone == WizardBannerTone.error
-                            ? FilledButton.styleFrom(
-                                backgroundColor: scheme.error,
-                                foregroundColor: scheme.onError,
-                              )
-                            : null,
-                        onPressed: action.onPressed,
-                        child: Text(action.label),
-                      )
-                    else
-                      OutlinedButton(
-                        key: action.key,
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: foreground,
-                          side: BorderSide(color: foreground),
-                        ),
-                        onPressed: action.onPressed,
-                        child: Text(action.label),
-                      ),
-                ],
-              ),
-          ],
-        ),
-      ),
     );
   }
 }

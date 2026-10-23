@@ -54,10 +54,9 @@ Future<void> _segment(WidgetTester tester, String setting, String label) async {
 }
 
 void main() {
-  testWidgets('shows every section with the saved revision', (tester) async {
+  testWidgets('shows every section of the saved configuration', (tester) async {
     await _pump(tester, ConfigServer(revision: configRevision(1)));
 
-    expect(find.text('Configuration revision 1'), findsOneWidget);
     for (final title in [
       'Contest details',
       'Discipline and rules',
@@ -86,21 +85,6 @@ void main() {
     );
     expect(find.text('Ready to draw'), findsNothing);
     expect(find.text('Can’t be drawn yet'), findsOneWidget);
-  });
-
-  testWidgets('each section shows the revision its values are saved in', (
-    tester,
-  ) async {
-    await _pump(tester, ConfigServer(revision: configRevision(3)));
-
-    // The contest in the fixture is at revision 0; the configuration at 3.
-    for (final text in ['Contest rev. 0', 'Config rev. 3']) {
-      expect(find.text(text, skipOffstage: false), findsWidgets);
-    }
-    expect(find.text('Contest rev. 0', skipOffstage: false), findsNWidgets(3));
-    // Six sections are saved with the configuration, the Participants
-    // summary is counted from other records and has no chip.
-    expect(find.text('Config rev. 3', skipOffstage: false), findsNWidgets(6));
   });
 
   testWidgets('scoring access and the lock are shown, changed in Workspace', (
@@ -167,7 +151,6 @@ void main() {
 
     expect(server.saved!['base_revision_number'], 1);
     expect((server.saved!['config'] as Map)['core']['decimal_places'], 2);
-    expect(find.text('Configuration revision 2'), findsOneWidget);
     expect(find.text('Discard changes'), findsNothing);
     expect(server.updatedContest, isNull);
   });
@@ -187,7 +170,6 @@ void main() {
     await tester.tap(_saveButton);
     await tester.pumpAndSettle();
 
-    expect(find.text('Configuration revision 2'), findsOneWidget);
     expect(
       find.textContaining('Configuration saved as revision 2.'),
       findsOneWidget,

@@ -37,7 +37,6 @@ class ConfigSectionCard extends StatelessWidget {
       label: id.title,
       child: Card(
         margin: EdgeInsets.zero,
-        color: scheme.surfaceContainerLow,
         child: Padding(
           padding: const EdgeInsets.fromLTRB(24, 20, 24, 8),
           child: Column(
