@@ -20,6 +20,7 @@ import '../../services/reports/viewer/report_spec.dart';
 import '../../services/reports/viewer/report_view_params.dart';
 import '../../services/reports/viewer/report_viewer_controller.dart';
 import '../../widgets/app_window_title.dart';
+import '../../widgets/page_states/page_banner.dart';
 import '../../widgets/reports/viewer/placeholder_report.dart';
 import '../../widgets/reports/viewer/report_definition.dart';
 import '../../widgets/reports/viewer/report_sheet_area.dart';
@@ -351,9 +352,10 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
           text: document?.statusReason ?? 'Some scores are not final.',
           actions: [
             if (action != null)
-              OutlinedButton(
-                onPressed: () => _openAction(action),
-                child: Text(action.label),
+              PageBannerAction(
+                action.label,
+                () => _openAction(action),
+                emphasis: PageBannerEmphasis.outlined,
               ),
           ],
         ),
@@ -369,10 +371,11 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
               'Scores, the matrix or the configuration changed after this '
               'report was produced. The sheet hasn’t changed.',
           actions: [
-            FilledButton(
+            PageBannerAction(
+              'Refresh',
+              controller.refreshing ? null : controller.refresh,
+              emphasis: PageBannerEmphasis.filled,
               key: const ValueKey('viewer-refresh'),
-              onPressed: controller.refreshing ? null : controller.refresh,
-              child: const Text('Refresh'),
             ),
           ],
         ),
@@ -395,10 +398,11 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
           lead: 'Couldn’t load the scores for these rounds.',
           text: 'The sheet still shows the last rounds that loaded.',
           actions: [
-            FilledButton(
+            PageBannerAction(
+              'Try again',
+              controller.retryData,
+              emphasis: PageBannerEmphasis.filled,
               key: const ValueKey('viewer-retry-data'),
-              onPressed: controller.retryData,
-              child: const Text('Try again'),
             ),
           ],
         ),
@@ -414,11 +418,16 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
               'The system reported a printer error. Your filters and options '
               'are unchanged.',
           actions: [
-            OutlinedButton(
-              onPressed: _savePdf,
-              child: const Text('Save as PDF'),
+            PageBannerAction(
+              'Save as PDF',
+              _savePdf,
+              emphasis: PageBannerEmphasis.outlined,
             ),
-            FilledButton(onPressed: _print, child: const Text('Try again')),
+            PageBannerAction(
+              'Try again',
+              _print,
+              emphasis: PageBannerEmphasis.filled,
+            ),
           ],
         ),
       );
@@ -437,10 +446,11 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
               : 'Copy the link and open it on a browser that can print.',
           actions: [
             if (!caps.canSavePdf)
-              FilledButton(
-                onPressed: () =>
+              PageBannerAction(
+                'Copy link',
+                () =>
                     Clipboard.setData(ClipboardData(text: Uri.base.toString())),
-                child: const Text('Copy link'),
+                emphasis: PageBannerEmphasis.filled,
               ),
           ],
         ),

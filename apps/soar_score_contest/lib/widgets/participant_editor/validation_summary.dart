@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../services/participants/participant_field.dart';
+import '../page_states/page_banner.dart';
 import 'editor_banner.dart';
 
 /// Lists the fields that stopped a save, each one a button that moves focus
@@ -17,20 +18,19 @@ class ValidationSummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
+    final foreground = Theme.of(context).colorScheme.onErrorContainer;
     final count = problems.length;
     return EditorBanner(
+      kind: PageBannerKind.alert,
       icon: Icons.error,
       title: count == 1
           ? '1 field needs attention'
           : '$count fields need attention',
       body: 'Nothing was saved. Your entries are kept.',
-      background: scheme.errorContainer,
-      foreground: scheme.onErrorContainer,
       child: Align(
         alignment: Alignment.centerLeft,
         child: Padding(
-          padding: const EdgeInsets.only(left: 36, top: 8),
+          padding: const EdgeInsets.only(top: 8),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -39,7 +39,7 @@ class ValidationSummary extends StatelessWidget {
                 TextButton(
                   onPressed: () => onGoTo(field),
                   style: TextButton.styleFrom(
-                    foregroundColor: scheme.onErrorContainer,
+                    foregroundColor: foreground,
                     minimumSize: const Size(0, 32),
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                   ),

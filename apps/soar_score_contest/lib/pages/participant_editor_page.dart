@@ -341,7 +341,6 @@ class _ParticipantEditorPageState extends State<ParticipantEditorPage> {
     final c = _c;
     final edit = !c.creating;
     final loaded = c.loaded;
-    final scheme = Theme.of(context).colorScheme;
     final attention = c.attention;
     return SingleChildScrollView(
       controller: _scroll,
@@ -388,8 +387,7 @@ class _ParticipantEditorPageState extends State<ParticipantEditorPage> {
                   icon: Icons.error,
                   title: 'Couldn’t save',
                   body: c.error,
-                  background: scheme.errorContainer,
-                  foreground: scheme.onErrorContainer,
+                  kind: PageBannerKind.alert,
                   actions: [
                     EditorBannerAction(
                       'Try again',
@@ -398,7 +396,7 @@ class _ParticipantEditorPageState extends State<ParticipantEditorPage> {
                     ),
                   ],
                   child: const Padding(
-                    padding: EdgeInsets.only(left: 36, top: 4),
+                    padding: EdgeInsets.only(top: 4),
                     child: Text(
                       'Nothing was saved and your entries are kept, so it’s '
                       'safe to try again.',
@@ -408,7 +406,7 @@ class _ParticipantEditorPageState extends State<ParticipantEditorPage> {
                 const SizedBox(height: 20),
               ],
               if (c.phase == EditorPhase.stale) ...[
-                _staleBanner(scheme),
+                _staleBanner(),
                 const SizedBox(height: 20),
               ],
               if (c.phase == EditorPhase.review && c.review != null) ...[
@@ -436,7 +434,7 @@ class _ParticipantEditorPageState extends State<ParticipantEditorPage> {
                 const SizedBox(height: 20),
               ],
               if (c.keptFrom != null) ...[
-                _keptNotice(scheme),
+                _keptNotice(),
                 const SizedBox(height: 20),
               ],
               ParticipantFormSections(
@@ -468,7 +466,7 @@ class _ParticipantEditorPageState extends State<ParticipantEditorPage> {
     );
   }
 
-  Widget _staleBanner(ColorScheme scheme) {
+  Widget _staleBanner() {
     final names = _c.staleFields.map((f) => f.label).toList();
     final changed = switch (names.length) {
       0 => null,
@@ -483,8 +481,7 @@ class _ParticipantEditorPageState extends State<ParticipantEditorPage> {
           ? _c.error
           : '$changed ${names.length == 1 ? 'was' : 'were'} changed '
                 'elsewhere. Nothing was saved, and your edits are kept.',
-      background: scheme.tertiaryContainer,
-      foreground: scheme.onTertiaryContainer,
+      kind: PageBannerKind.status,
       actions: [
         EditorBannerAction(
           'Reload their version',
@@ -501,12 +498,11 @@ class _ParticipantEditorPageState extends State<ParticipantEditorPage> {
     );
   }
 
-  Widget _keptNotice(ColorScheme scheme) => EditorBanner(
+  Widget _keptNotice() => EditorBanner(
     key: const ValueKey('kept-values'),
     icon: Icons.content_copy,
     title: 'Club and location kept from ${_c.keptFrom}.',
-    background: scheme.secondaryContainer,
-    foreground: scheme.onSecondaryContainer,
+    kind: PageBannerKind.success,
     actions: [EditorBannerAction('Clear them', _c.clearKept)],
   );
 

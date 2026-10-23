@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../../sync/sync_summary_builder.dart';
+import '../../page_states/page_banner.dart';
 import 'viewer_banner.dart';
 
 /// The sheet was produced from this device's data. Says how many changes have
@@ -32,9 +33,10 @@ class ViewerOfflineBanner extends StatelessWidget {
                   'synced.',
         actions: [
           if (sync.available)
-            OutlinedButton(
-              onPressed: onOpenSync,
-              child: const Text('Open Sync'),
+            PageBannerAction(
+              'Open Sync',
+              onOpenSync,
+              emphasis: PageBannerEmphasis.outlined,
             ),
         ],
       );
