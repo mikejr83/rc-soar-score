@@ -33,10 +33,33 @@ final class ReportEmpty extends ReportCheck {
   final String body;
 }
 
+/// What a report's `loadData` answers: the data its sheet is built from, that
+/// the server has none yet, or that these filters need none.
+///
+/// A report with data of its own extends `DataReportDefinition<D>` and answers
+/// with a `ReportLoad<D>`, so it never casts or null-checks what the viewer
+/// hands back.
+sealed class ReportLoad<D extends Object> {
+  const ReportLoad();
+}
+
+/// The data for the filters asked about.
+final class ReportLoaded<D extends Object> extends ReportLoad<D> {
+  const ReportLoaded(this.data);
+
+  final D data;
+}
+
+/// The filters select nothing to read, for example an empty round range. The
+/// report's `check` explains why; there is no sheet.
+final class ReportNothingToLoad extends ReportLoad<Never> {
+  const ReportNothingToLoad();
+}
+
 /// What a report's `loadData` returns when the server has nothing to build the
 /// sheet from yet. The viewer shows [title] and [body] in place of the sheet,
 /// with a link to [actionLabel]'s page, instead of an error.
-class ReportNoData {
+final class ReportNoData extends ReportLoad<Never> {
   const ReportNoData({
     required this.title,
     required this.body,
@@ -97,7 +120,8 @@ abstract class ReportSpec {
 
   /// Reads the data [dataKey] names. Failures are thrown; the viewer keeps the
   /// last good sheet and offers a retry.
-  Future<Object?> loadData(ReportDataRequest request) async => null;
+  Future<ReportLoad<Object>> loadData(ReportDataRequest request) async =>
+      const ReportNothingToLoad();
 
   /// The filters in a few words, for the collapsed bar ("Rounds 1–6").
   String filterSummary(Map<String, String> filters, ReportsFacts facts) => '';

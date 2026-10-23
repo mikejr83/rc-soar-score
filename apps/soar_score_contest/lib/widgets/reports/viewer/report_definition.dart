@@ -105,3 +105,32 @@ abstract class ReportDefinition extends ReportSpec {
 
   ReportDocument build(ReportPageContext context);
 }
+
+/// A report that reads data of its own, typed as [D]. It answers
+/// [loadData] with a `ReportLoad<D>` and builds from a [D], so the one place
+/// that checks what the viewer holds is here and not in every report.
+///
+/// The viewer builds only when the data is loaded, so [buildWith] is never
+/// called without it.
+abstract class DataReportDefinition<D extends Object> extends ReportDefinition {
+  const DataReportDefinition();
+
+  @override
+  Future<ReportLoad<D>> loadData(ReportDataRequest request);
+
+  /// The report's pages from its [data].
+  ReportDocument buildWith(ReportPageContext context, D data);
+
+  /// What stands in when the viewer has no [D] yet (it does not build then).
+  ReportDocument buildWithout(ReportPageContext context) => ReportDocument(
+    title: '${kind.title} - ${context.facts.contest.name}',
+    subtitle: 'Nothing to show',
+    pages: const [SizedBox.shrink()],
+  );
+
+  @override
+  ReportDocument build(ReportPageContext context) => switch (context.data) {
+    final D data => buildWith(context, data),
+    _ => buildWithout(context),
+  };
+}
