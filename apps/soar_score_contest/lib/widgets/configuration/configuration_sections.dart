@@ -116,7 +116,6 @@ class ConfigurationSections extends StatelessWidget {
       extraChips: [
         // The roster is counted from participation records, which have
         // revisions of their own, so it has no single revision to show.
-        if (id != SectionId.participants) _revisionChip(context, id),
         if (id == SectionId.discipline) _disciplineChip(context),
         if (id == SectionId.participants)
           ConfigChip.neutral(
