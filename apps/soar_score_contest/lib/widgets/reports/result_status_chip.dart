@@ -60,10 +60,12 @@ class ResultStatusChip extends StatelessWidget {
           children: [
             Icon(icon(status), size: compact ? 16 : 18, color: foreground),
             const SizedBox(width: 4),
-            Text(
-              status.label,
-              style: Theme.of(context).textTheme.labelLarge
-                  ?.copyWith(color: foreground, fontWeight: FontWeight.w500),
+            Flexible(
+              child: Text(
+                status.label,
+                style: Theme.of(context).textTheme.labelLarge
+                    ?.copyWith(color: foreground, fontWeight: FontWeight.w500),
+              ),
             ),
           ],
         ),

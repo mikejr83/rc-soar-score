@@ -7,6 +7,8 @@ import 'package:soar_score_contest/services/collapsible_areas/collapsible_area.d
 import 'package:soar_score_contest/services/collapsible_areas/collapsible_areas_controller.dart';
 import 'package:soar_score_contest/l10n/app_localizations_en.dart';
 import 'package:soar_score_contest/services/preferences/preferences_controller.dart';
+import 'package:soar_score_contest/services/text_size/text_size.dart';
+import 'package:soar_score_contest/services/text_size/text_size_controller.dart';
 import 'package:soar_score_contest/services/theme/theme_controller.dart';
 import 'package:soar_score_ui_storage/soar_score_ui_storage.dart';
 
@@ -19,6 +21,7 @@ Future<void> _pumpSettings(
   WidgetTester tester,
   LocalUiStore store, {
   ThemeController? controller,
+  TextSizeController? textSize,
   CollapsibleAreasController? areas,
   PreferencesController? locale,
 }) async {
@@ -30,6 +33,7 @@ Future<void> _pumpSettings(
       bootstrap: FakeBootstrap(store),
       routerInitialLocation: settingsPath,
       themeController: controller,
+      textSizeController: textSize,
       collapsibleAreas: areas,
       preferences: locale,
     ),
@@ -38,6 +42,7 @@ Future<void> _pumpSettings(
 }
 
 void main() {
+  _textSizeTests();
   testWidgets('the preferred locale is the one the app shows', (tester) async {
     final locale = PreferencesController()..setLocale('en-US');
     await _pumpSettings(
@@ -150,6 +155,97 @@ void main() {
       find.text(AppLocalizationsEn().panelsResetSaveFailed),
       findsOneWidget,
     );
+  });
+}
+
+double _bodyFontPx(WidgetTester tester) =>
+    MediaQuery.textScalerOf(tester.element(find.byType(SettingsPage)))
+        .scale(10);
+
+Set<TextSize> _selectedSize(WidgetTester tester) => tester
+    .widget<SegmentedButton<TextSize>>(
+      find.byKey(const ValueKey('text-size-control')),
+    )
+    .selected;
+
+void _textSizeTests() {
+  testWidgets('the text size control starts on Default', (tester) async {
+    await _pumpSettings(tester, BackendLocalUiStore(MemoryLocalUiBackend()));
+
+    expect(_selectedSize(tester), {TextSize.standard});
+    expect(_bodyFontPx(tester), 10);
+  });
+
+  for (final (label, size) in [
+    ('Large', TextSize.large),
+    ('Extra large', TextSize.extraLarge),
+  ]) {
+    testWidgets('choosing $label scales the text across the app', (
+      tester,
+    ) async {
+      await _pumpSettings(tester, BackendLocalUiStore(MemoryLocalUiBackend()));
+      final before = tester.getSize(
+        find.byKey(const ValueKey('text-size-preview')),
+      );
+
+      await tester.tap(
+        find.descendant(
+          of: find.byKey(const ValueKey('text-size-control')),
+          matching: find.text(label),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(_selectedSize(tester), {size});
+      expect(_bodyFontPx(tester), size.factor * 10);
+      expect(
+        tester.getSize(find.byKey(const ValueKey('text-size-preview'))).height,
+        greaterThan(before.height),
+      );
+    });
+  }
+
+  testWidgets('the device text scale still counts on top of the choice', (
+    tester,
+  ) async {
+    tester.platformDispatcher.textScaleFactorTestValue = 1.2;
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    final controller = TextSizeController();
+    addTearDown(controller.dispose);
+    await controller.setSize(TextSize.large);
+    await _pumpSettings(
+      tester,
+      BackendLocalUiStore(MemoryLocalUiBackend()),
+      textSize: controller,
+    );
+
+    expect(_bodyFontPx(tester), closeTo(15, 1e-9));
+  });
+
+  testWidgets('a failed text size save is reported and the size applies', (
+    tester,
+  ) async {
+    await _pumpSettings(tester, _FailingStore());
+
+    await tester.tap(find.text('Large'));
+    await tester.pumpAndSettle();
+
+    expect(_bodyFontPx(tester), 12.5);
+    expect(find.text(AppLocalizationsEn().textSizeSaveFailed), findsOneWidget);
+  });
+
+  testWidgets('the text size is remembered by a fresh app on the same store', (
+    tester,
+  ) async {
+    final store = BackendLocalUiStore(MemoryLocalUiBackend());
+    await _pumpSettings(tester, store);
+    await tester.tap(find.text('Extra large'));
+    await tester.pumpAndSettle();
+
+    await tester.pumpWidget(const SizedBox());
+    await _pumpSettings(tester, store);
+
+    expect(_selectedSize(tester), {TextSize.extraLarge});
   });
 }
 

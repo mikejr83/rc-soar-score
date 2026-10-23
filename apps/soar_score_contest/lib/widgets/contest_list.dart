@@ -144,24 +144,29 @@ class _DateBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    // 48 square at the default text size, and growing with the text.
+    final side = MediaQuery.textScalerOf(context).scale(48);
     return Container(
-      width: 48,
-      height: 48,
+      width: side,
+      height: side,
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            DateFormat.MMM().format(date).toUpperCase(),
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: theme.colorScheme.primary,
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              DateFormat.MMM().format(date).toUpperCase(),
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: theme.colorScheme.primary,
+              ),
             ),
-          ),
-          Text('${date.day}', style: theme.textTheme.titleMedium),
-        ],
+            Text('${date.day}', style: theme.textTheme.titleMedium),
+          ],
+        ),
       ),
     );
   }

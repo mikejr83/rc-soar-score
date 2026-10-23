@@ -18,8 +18,11 @@ import 'local_ui_store_provider.dart';
 import 'platform/app_bootstrap.dart';
 import 'router.dart';
 import 'services/collapsible_areas/collapsible_areas_controller.dart';
+import 'services/text_size/preferred_text_scaler.dart';
+import 'services/text_size/text_size_controller.dart';
 import 'services/theme/theme_controller.dart';
 import 'collapsible_areas_provider.dart';
+import 'text_size_controller_provider.dart';
 import 'theme_controller_provider.dart';
 import 'ui_account_provider.dart';
 import 'services/connectivity/app_connectivity.dart';
@@ -34,6 +37,7 @@ class SoarScoreContestApp extends StatefulWidget {
     this.appMode,
     this.routerInitialLocation = landingPath,
     this.themeController,
+    this.textSizeController,
     this.collapsibleAreas,
     this.preferences,
     this.extraLocalizationDelegates = const [],
@@ -63,6 +67,11 @@ class SoarScoreContestApp extends StatefulWidget {
   /// theme. When `null` the app makes one from the bootstrap's store and loads
   /// it after the first frame.
   final ThemeController? themeController;
+
+  /// The text size controller, already loaded so the first frame has the right
+  /// size. When `null` the app makes one from the bootstrap's store and loads
+  /// it after the first frame.
+  final TextSizeController? textSizeController;
 
   /// The remembered hidden and minimized areas, already loaded so panels do
   /// not flip after the first frame. When `null` the app makes one from the
@@ -94,6 +103,8 @@ class _SoarScoreContestAppState extends State<SoarScoreContestApp> {
   late final GoRouter _router;
   late final ThemeController _theme;
   late final bool _ownsTheme;
+  late final TextSizeController _textSize;
+  late final bool _ownsTextSize;
   late final CollapsibleAreasController _areas;
   late final bool _ownsAreas;
   late final PreferencesController _preferences;
@@ -132,6 +143,15 @@ class _SoarScoreContestAppState extends State<SoarScoreContestApp> {
           account: widget.bootstrap?.uiAccount,
         );
     if (_ownsTheme) unawaited(_theme.load());
+    final givenTextSize = widget.textSizeController;
+    _ownsTextSize = givenTextSize == null;
+    _textSize =
+        givenTextSize ??
+        TextSizeController(
+          store: widget.bootstrap?.localUiStore,
+          account: widget.bootstrap?.uiAccount,
+        );
+    if (_ownsTextSize) unawaited(_textSize.load());
     final givenAreas = widget.collapsibleAreas;
     _ownsAreas = givenAreas == null;
     _areas =
@@ -174,6 +194,7 @@ class _SoarScoreContestAppState extends State<SoarScoreContestApp> {
     }
     _router.dispose();
     if (_ownsTheme) _theme.dispose();
+    if (_ownsTextSize) _textSize.dispose();
     if (_ownsAreas) _areas.dispose();
     if (_ownsPreferences) _preferences.dispose();
     _draftStore.dispose();
@@ -183,7 +204,7 @@ class _SoarScoreContestAppState extends State<SoarScoreContestApp> {
   @override
   Widget build(BuildContext context) {
     Widget app = ListenableBuilder(
-      listenable: Listenable.merge([_theme, _preferences]),
+      listenable: Listenable.merge([_theme, _textSize, _preferences]),
       builder: (context, _) => MaterialApp.router(
         title: SoarScoreContestApp.title,
         debugShowCheckedModeBanner: false,
@@ -191,6 +212,18 @@ class _SoarScoreContestAppState extends State<SoarScoreContestApp> {
         darkTheme: ContestAppTheme.darkTheme,
         themeMode: _theme.mode,
         routerConfig: _router,
+        builder: (context, child) {
+          final media = MediaQuery.of(context);
+          return MediaQuery(
+            data: media.copyWith(
+              textScaler: PreferredTextScaler.of(
+                media.textScaler,
+                _textSize.size,
+              ),
+            ),
+            child: child ?? const SizedBox.shrink(),
+          );
+        },
         locale: _preferences.locale,
         localizationsDelegates: [
           ...widget.extraLocalizationDelegates,
@@ -204,6 +237,7 @@ class _SoarScoreContestAppState extends State<SoarScoreContestApp> {
     );
     app = PreferencesControllerInherited(controller: _preferences, child: app);
     app = ThemeControllerInherited(controller: _theme, child: app);
+    app = TextSizeControllerInherited(controller: _textSize, child: app);
     app = CollapsibleAreasInherited(controller: _areas, child: app);
     app = ContestDraftInherited(store: _draftStore, child: app);
     final bootstrap = widget.bootstrap;

@@ -387,64 +387,76 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
     }
     final rows = c.rows;
     final check = c.check;
-    return Column(
-      children: [
-        ScoringToolbar(
-          controller: c,
-          onOpen: _go,
-          onSaveAll: _saveAll,
-          onGroupHistory: _showGroupHistory,
-        ),
-        ScoringContextStrip(controller: c),
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                if (c.recalculationWarning != null)
-                  MaterialBanner(
-                    key: const ValueKey('scoring-recalculation-warning'),
-                    content: Text(c.recalculationWarning!),
-                    leading: const Icon(Icons.warning_amber),
-                    actions: [
-                      TextButton(
-                        onPressed: c.refresh,
-                        child: const Text('Refresh'),
-                      ),
-                    ],
+    return LayoutBuilder(
+      builder: (context, constraints) => Column(
+        children: [
+          // Larger text can make these taller than a short screen: they
+          // scroll within 40% of it so the scores keep the rest.
+          ConstrainedBox(
+            constraints: BoxConstraints(maxHeight: constraints.maxHeight * .4),
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  ScoringToolbar(
+                    controller: c,
+                    onOpen: _go,
+                    onSaveAll: _saveAll,
+                    onGroupHistory: _showGroupHistory,
                   ),
-                if (c.loadError != null)
-                  ScoringRefreshFailedBanner(
-                    error: c.loadError!,
-                    onRetry: c.refresh,
-                  ),
-                if (check != null)
-                  ScoreCheckPanel(
-                    result: check,
-                    onJump: _jump,
-                    onClose: c.clearCheck,
-                  ),
-                Expanded(
-                  child: rows.isEmpty
-                      ? const PageStateView.empty(
-                          key: ValueKey('scoring-empty-group'),
-                          title: 'No pilots in this group.',
-                          body:
-                              'Every pilot assigned here is absent or retired.',
-                        )
-                      : LayoutBuilder(
-                          builder: (context, box) {
-                            final mode = ScoreGridMode.of(box.maxWidth);
-                            return _table(c, rows, mode);
-                          },
-                        ),
-                ),
-              ],
+                  ScoringContextStrip(controller: c),
+                ],
+              ),
             ),
           ),
-        ),
-      ],
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (c.recalculationWarning != null)
+                    MaterialBanner(
+                      key: const ValueKey('scoring-recalculation-warning'),
+                      content: Text(c.recalculationWarning!),
+                      leading: const Icon(Icons.warning_amber),
+                      actions: [
+                        TextButton(
+                          onPressed: c.refresh,
+                          child: const Text('Refresh'),
+                        ),
+                      ],
+                    ),
+                  if (c.loadError != null)
+                    ScoringRefreshFailedBanner(
+                      error: c.loadError!,
+                      onRetry: c.refresh,
+                    ),
+                  if (check != null)
+                    ScoreCheckPanel(
+                      result: check,
+                      onJump: _jump,
+                      onClose: c.clearCheck,
+                    ),
+                  Expanded(
+                    child: rows.isEmpty
+                        ? const PageStateView.empty(
+                            key: ValueKey('scoring-empty-group'),
+                            title: 'No pilots in this group.',
+                            body: 'Every pilot assigned here is absent or retired.',
+                          )
+                        : LayoutBuilder(
+                            builder: (context, box) {
+                              final mode = ScoreGridMode.of(box.maxWidth);
+                              return _table(c, rows, mode);
+                            },
+                          ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 

@@ -24,6 +24,34 @@
   "@themeSaveFailed": {
     "description": "Snackbar shown when the chosen theme could not be stored on the device."
   },
+  "textSizeHeading": "Text size",
+  "@textSizeHeading": {
+    "description": "Heading of the Settings card that picks how large text is."
+  },
+  "textSizeDescription": "Make text larger on this device. This is saved for your account and is not shared with other devices. Your device's own text size setting still applies on top.",
+  "@textSizeDescription": {
+    "description": "Explains the Text size card on the Settings page."
+  },
+  "textSizeDefault": "Default",
+  "@textSizeDefault": {
+    "description": "Text size choice that keeps the app's own sizes."
+  },
+  "textSizeLarge": "Large",
+  "@textSizeLarge": {
+    "description": "Text size choice for somewhat larger text."
+  },
+  "textSizeExtraLarge": "Extra large",
+  "@textSizeExtraLarge": {
+    "description": "Text size choice for the largest text."
+  },
+  "textSizePreview": "Sample: Round 3, Group B, Pilot 12",
+  "@textSizePreview": {
+    "description": "A line of sample text on the Text size card, shown at the chosen size."
+  },
+  "textSizeSaveFailed": "The text size could not be saved. It applies until you close the app.",
+  "@textSizeSaveFailed": {
+    "description": "Snackbar shown when the chosen text size could not be stored on the device."
+  },
   "panelsHeading": "Panels",
   "@panelsHeading": {
     "description": "Heading of the Settings card that resets hidden or minimized panels."
