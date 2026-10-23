@@ -3,6 +3,7 @@ import 'landing_result.dart';
 /// Placeholder content until the self-scoring API exists. The pages read
 /// these constants so the layout can be reviewed on real-looking data.
 abstract final class SampleData {
+  static const contestId = 'spring-open';
   static const contestName = 'Spring Open';
   static const pilotName = 'Jane Smith';
   static const teamName = 'Team Kestrel';

@@ -37,7 +37,7 @@ class ContestsPage extends StatelessWidget {
               name: SampleData.contestName,
               dates: 'Sat 10 Oct 2026 to Sun 11 Oct 2026',
               next: 'Round 4, Group B, lane 2',
-              onTap: () => context.go(teamPath),
+              onTap: () => context.go(contestPath(SampleData.contestId)),
             ),
             const SizedBox(height: 16),
             Text(

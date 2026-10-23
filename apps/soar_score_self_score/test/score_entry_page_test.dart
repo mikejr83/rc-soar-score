@@ -16,8 +16,13 @@ Future<void> _pump(WidgetTester tester, List<LandingResult>? table) async {
   await tester.pumpWidget(
     MaterialApp(
       home: table == null
-          ? const ScoreEntryPage()
-          : ScoreEntryPage(landingTable: table),
+          ? const ScoreEntryPage(contestId: 'c', pilotId: '12', roundId: '4')
+          : ScoreEntryPage(
+              contestId: 'c',
+              pilotId: '12',
+              roundId: '4',
+              landingTable: table,
+            ),
     ),
   );
 }

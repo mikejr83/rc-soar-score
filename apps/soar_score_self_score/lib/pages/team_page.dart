@@ -11,7 +11,9 @@ import '../widgets/team_pilot_tile.dart';
 /// The helper's view of their team: who flies next, who needs a score, and
 /// where the team stands.
 class TeamPage extends StatelessWidget {
-  const TeamPage({super.key});
+  const TeamPage({required this.contestId, super.key});
+
+  final String contestId;
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +60,8 @@ class TeamPage extends StatelessWidget {
               pilotNumber: 3,
               slot: 'Round 3 · Group A · Lane 2',
               state: TeamPilotState.justFlown,
-              onEnterScore: () => context.push(scoresPath),
+              onEnterScore: () =>
+                  context.push(scoreEntryPath(contestId, '3', '3')),
             ),
             const SizedBox(height: 8),
             const TeamPilotTile(
@@ -136,7 +139,7 @@ class TeamPage extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             OutlinedButton(
-              onPressed: () => context.push(resultsPath),
+              onPressed: () => context.push(resultsPath(contestId)),
               child: const Text('See all results'),
             ),
           ],

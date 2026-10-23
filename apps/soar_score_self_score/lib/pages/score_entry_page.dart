@@ -16,10 +16,17 @@ import '../widgets/status_chip.dart';
 /// read-only and the button goes away.
 class ScoreEntryPage extends StatefulWidget {
   const ScoreEntryPage({
+    required this.contestId,
+    required this.pilotId,
+    required this.roundId,
     this.landingTable = SampleData.landingTable,
     this.allowsMotorRestart = true,
     super.key,
   });
+
+  final String contestId;
+  final String pilotId;
+  final String roundId;
 
   /// The contest's landing table; its size picks the landing control.
   final List<LandingResult> landingTable;
@@ -145,7 +152,9 @@ class _ScoreEntryPageState extends State<ScoreEntryPage> {
       appBar: SelfScoreAppBar(
         title: '${SampleData.pilotName}, pilot 12',
         contextLine: 'Round 4 · Group B · Lane 1',
-        onBack: () => context.canPop() ? context.pop() : context.go(teamPath),
+        onBack: () => context.canPop()
+            ? context.pop()
+            : context.go(teamPath(widget.contestId)),
         backLabel: 'Back to Team overview',
         actions: const [ConnectionIndicator()],
         showAccount: false,
@@ -306,7 +315,7 @@ class _ScoreEntryPageState extends State<ScoreEntryPage> {
                 style: OutlinedButton.styleFrom(
                   minimumSize: const Size.fromHeight(48),
                 ),
-                onPressed: () => context.go(teamPath),
+                onPressed: () => context.go(teamPath(widget.contestId)),
                 child: const Text('Back to Team overview'),
               ),
             ],

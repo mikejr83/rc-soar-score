@@ -11,7 +11,9 @@ import '../widgets/status_chip.dart';
 
 /// Where the pilot stands: their place and score, then the overall tables.
 class ResultsPage extends StatefulWidget {
-  const ResultsPage({super.key});
+  const ResultsPage({required this.contestId, super.key});
+
+  final String contestId;
 
   @override
   State<ResultsPage> createState() => _ResultsPageState();
@@ -54,7 +56,9 @@ class _ResultsPageState extends State<ResultsPage> {
       appBar: SelfScoreAppBar(
         title: 'Results',
         contextLine: SampleData.contestName,
-        onBack: () => context.canPop() ? context.pop() : context.go(teamPath),
+        onBack: () => context.canPop()
+            ? context.pop()
+            : context.go(teamPath(widget.contestId)),
         backLabel: 'Back',
         actions: const [ConnectionIndicator()],
         showAccount: false,
