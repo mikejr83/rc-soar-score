@@ -51,15 +51,16 @@ class _ScoreEntryPageState extends State<ScoreEntryPage> {
     super.dispose();
   }
 
-  /// Out of bounds and motor restart zero time, height and landing.
-  bool get _zeroed => _outOfBounds || _motorRestart;
+  /// Out of bounds, motor restart and no altitude recorded each score the
+  /// flight as zero, so time, height and landing are cleared and disabled.
+  bool get _zeroed => _outOfBounds || _motorRestart || _noAltitude;
 
   FlightTimeInput get _timeInput => FlightTimeInput.parse(_time.text);
   int? get _heightValue => int.tryParse(_height.text.trim());
   int? get _penaltyValue => int.tryParse(_penalty.text.trim());
 
   String? get _heightError {
-    if (_zeroed || _noAltitude || _height.text.trim().isEmpty) return null;
+    if (_zeroed || _height.text.trim().isEmpty) return null;
     final value = _heightValue;
     return value == null || value <= 0
         ? 'Enter whole metres above zero.'
@@ -77,29 +78,40 @@ class _ScoreEntryPageState extends State<ScoreEntryPage> {
     }
     if (_zeroed) return true;
     if (!_timeInput.isValid) return false;
-    if (!_noAltitude && (_heightValue ?? 0) <= 0) return false;
+    if ((_heightValue ?? 0) <= 0) return false;
     return _lateLanding || _landing != null;
   }
 
   String get _summary {
-    if (_zeroed) return 'Zero flight · no penalty';
+    // Penalty is rare, so it is named only when one is entered.
+    final penalty = (_penaltyValue ?? 0) > 0 ? 'Penalty entered' : null;
+    if (_zeroed) {
+      return ['Zero for the flight: $_zeroReason', ?penalty].join(' · ');
+    }
     final parts = <String>[
       if (_timeInput.seconds case final seconds?)
         FlightTimeInput.format(seconds),
-      if (!_noAltitude && _heightValue != null) '$_heightValue m',
+      if (_heightValue != null) '$_heightValue m',
       if (_lateLanding)
         'late landing'
       else if (_landing != null)
         'landing ${_landing!.points}',
-      (_penaltyValue ?? 0) > 0 ? 'penalty $_penaltyValue' : 'no penalty',
+      ?penalty,
     ];
     return parts.join(' · ');
   }
 
-  void _setZeroing({bool? outOfBounds, bool? motorRestart}) {
+  String get _zeroReason => [
+    if (_outOfBounds) 'out of bounds',
+    if (_motorRestart) 'motor restart',
+    if (_noAltitude) 'no altitude recorded',
+  ].join(', ');
+
+  void _setZeroing({bool? outOfBounds, bool? motorRestart, bool? noAltitude}) {
     setState(() {
       _outOfBounds = outOfBounds ?? _outOfBounds;
       _motorRestart = motorRestart ?? _motorRestart;
+      _noAltitude = noAltitude ?? _noAltitude;
       if (_zeroed) {
         _time.clear();
         _height.clear();
@@ -115,8 +127,8 @@ class _ScoreEntryPageState extends State<ScoreEntryPage> {
 
   String? get _landingReason {
     if (_zeroed) {
-      return 'Landing is not scored when out of bounds or after a motor '
-          'restart.';
+      return 'The flight scores zero ($_zeroReason), so landing is not '
+          'scored.';
     }
     if (_lateLanding) return 'Late landing is on, so landing is cleared.';
     return null;
@@ -168,11 +180,11 @@ class _ScoreEntryPageState extends State<ScoreEntryPage> {
             EntryNumberField(
               label: 'Launch height (m)',
               controller: _height,
-              enabled: editable && !_zeroed && !_noAltitude,
+              enabled: editable && !_zeroed,
               onChanged: (_) => setState(() {}),
               errorText: _heightError,
-              hint: _noAltitude
-                  ? 'No altitude recorded, so no height is needed.'
+              hint: _zeroed
+                  ? 'The flight scores zero, so no height is needed.'
                   : 'Whole metres. Zero is not valid.',
             ),
             const SizedBox(height: 18),
@@ -219,12 +231,10 @@ class _ScoreEntryPageState extends State<ScoreEntryPage> {
             ),
             EntryToggleRow(
               label: 'No altitude recorded',
+              hint: 'Time, height and landing are zeroed.',
               value: _noAltitude,
-              onChanged: editable && !_zeroed
-                  ? (value) => setState(() {
-                      _noAltitude = value;
-                      if (value) _height.clear();
-                    })
+              onChanged: editable
+                  ? (value) => _setZeroing(noAltitude: value)
                   : null,
             ),
             const SizedBox(height: 18),

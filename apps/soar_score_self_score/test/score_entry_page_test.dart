@@ -44,10 +44,7 @@ void main() {
     await tester.tap(find.text('Good'));
     await tester.pumpAndSettle();
 
-    expect(
-      find.text('6:30.4 · 45 m · landing 50 · no penalty'),
-      findsOneWidget,
-    );
+    expect(find.text('6:30.4 · 45 m · landing 50'), findsOneWidget);
   });
 
   testWidgets('late landing clears and disables landing', (tester) async {
@@ -65,6 +62,48 @@ void main() {
       find.text('Late landing is on, so landing is cleared.'),
       findsOneWidget,
     );
+  });
+
+  testWidgets('no altitude zeroes the flight and disables the fields', (
+    tester,
+  ) async {
+    await _pump(tester, null);
+    await tester.enterText(find.byType(TextField).at(0), '630');
+    await tester.tap(
+      find.widgetWithText(SwitchListTile, 'No altitude recorded'),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('Zero for the flight: no altitude recorded'),
+      findsOneWidget,
+    );
+    expect(
+      tester.widget<TextField>(find.byType(TextField).at(0)).enabled,
+      false,
+    );
+    expect(
+      tester.widget<TextField>(find.byType(TextField).at(1)).enabled,
+      false,
+    );
+    expect(find.text('Choose landing'), findsOneWidget);
+
+    await tester.tap(
+      find.widgetWithText(SwitchListTile, 'No altitude recorded'),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      tester.widget<TextField>(find.byType(TextField).at(0)).enabled,
+      true,
+    );
+  });
+
+  testWidgets('penalty is named only when entered', (tester) async {
+    await _pump(tester, null);
+    expect(find.textContaining('enalty entered'), findsNothing);
+    await tester.enterText(find.byType(TextField).at(2), '50');
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Penalty entered'), findsOneWidget);
   });
 
   testWidgets('large table: autocomplete selects one result', (tester) async {
