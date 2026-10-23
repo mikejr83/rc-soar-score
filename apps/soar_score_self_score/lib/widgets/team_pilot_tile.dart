@@ -13,6 +13,7 @@ class TeamPilotTile extends StatelessWidget {
     required this.slot,
     required this.state,
     this.onEnterScore,
+    this.onTap,
     super.key,
   });
 
@@ -20,6 +21,9 @@ class TeamPilotTile extends StatelessWidget {
   final int pilotNumber;
   final String slot;
   final TeamPilotState state;
+
+  /// Opens the pilot overview.
+  final VoidCallback? onTap;
 
   /// Shown on a just-flown pilot that has no score yet.
   final VoidCallback? onEnterScore;
@@ -66,62 +70,67 @@ class TeamPilotTile extends StatelessWidget {
             width: state == TeamPilotState.upNow ? 2 : 1,
           ),
         ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          name,
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w700,
-                            color: retired ? muted : null,
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            name,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w700,
+                              color: retired ? muted : null,
+                            ),
                           ),
-                        ),
-                        Text(
-                          'Pilot $pilotNumber',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: muted,
+                          Text(
+                            'Pilot $pilotNumber',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: muted,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                  ?chip,
-                ],
-              ),
-              const SizedBox(height: 6),
-              if (retired)
-                Text(
-                  'Not flying. Future rounds count as zero.',
-                  style: theme.textTheme.bodySmall?.copyWith(color: muted),
-                )
-              else
-                Text(slot, style: theme.textTheme.bodyMedium),
-              if (onEnterScore != null) ...[
+                    ?chip,
+                    if (onTap != null) Icon(Icons.chevron_right, color: muted),
+                  ],
+                ),
                 const SizedBox(height: 6),
-                Text(
-                  'No score entered yet for this flight.',
-                  style: theme.textTheme.bodySmall?.copyWith(color: muted),
-                ),
-                const SizedBox(height: 8),
-                OutlinedButton.icon(
-                  style: OutlinedButton.styleFrom(
-                    minimumSize: const Size(0, 44),
-                    side: BorderSide(color: scheme.onSurface, width: 1.5),
+                if (retired)
+                  Text(
+                    'Not flying. Future rounds count as zero.',
+                    style: theme.textTheme.bodySmall?.copyWith(color: muted),
+                  )
+                else
+                  Text(slot, style: theme.textTheme.bodyMedium),
+                if (onEnterScore != null) ...[
+                  const SizedBox(height: 6),
+                  Text(
+                    'No score entered yet for this flight.',
+                    style: theme.textTheme.bodySmall?.copyWith(color: muted),
                   ),
-                  onPressed: onEnterScore,
-                  icon: const Icon(Icons.edit_outlined, size: 20),
-                  label: const Text('Enter score'),
-                ),
+                  const SizedBox(height: 8),
+                  OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size(0, 44),
+                      side: BorderSide(color: scheme.onSurface, width: 1.5),
+                    ),
+                    onPressed: onEnterScore,
+                    icon: const Icon(Icons.edit_outlined, size: 20),
+                    label: const Text('Enter score'),
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
         ),
       ),

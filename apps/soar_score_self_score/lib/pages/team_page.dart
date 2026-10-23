@@ -41,18 +41,19 @@ class TeamPage extends StatelessWidget {
             Text('Pilots', style: theme.textTheme.titleLarge),
             const SizedBox(height: 8),
             TeamPilotTile(
-              name: SampleData.pilotName,
+              name: 'Jane Smith',
               pilotNumber: 12,
               slot: 'Round 4 · Group B · Lane 1',
               state: TeamPilotState.upNow,
-              onEnterScore: null,
+              onTap: () => context.push(pilotPath(contestId, '12')),
             ),
             const SizedBox(height: 8),
-            const TeamPilotTile(
+            TeamPilotTile(
               name: 'Tom Reid',
               pilotNumber: 7,
               slot: 'Round 4 · Group C · Lane 3',
               state: TeamPilotState.upNext,
+              onTap: () => context.push(pilotPath(contestId, '7')),
             ),
             const SizedBox(height: 8),
             TeamPilotTile(
@@ -60,29 +61,33 @@ class TeamPage extends StatelessWidget {
               pilotNumber: 3,
               slot: 'Round 3 · Group A · Lane 2',
               state: TeamPilotState.justFlown,
+              onTap: () => context.push(pilotPath(contestId, '3')),
               onEnterScore: () =>
                   context.push(scoreEntryPath(contestId, '3', '3')),
             ),
             const SizedBox(height: 8),
-            const TeamPilotTile(
+            TeamPilotTile(
               name: 'Sam Park',
               pilotNumber: 21,
               slot: '',
               state: TeamPilotState.retired,
+              onTap: () => context.push(pilotPath(contestId, '21')),
             ),
             const SizedBox(height: 8),
-            const TeamPilotTile(
+            TeamPilotTile(
               name: 'Li Wei',
               pilotNumber: 15,
               slot: 'Round 5 · Group D · Lane 4',
               state: TeamPilotState.scheduled,
+              onTap: () => context.push(pilotPath(contestId, '15')),
             ),
             const SizedBox(height: 8),
-            const TeamPilotTile(
+            TeamPilotTile(
               name: 'Kate Brooks',
               pilotNumber: 9,
               slot: 'Round 5 · Group D · Lane 2',
               state: TeamPilotState.scheduled,
+              onTap: () => context.push(pilotPath(contestId, '9')),
             ),
             const SizedBox(height: 10),
             Row(

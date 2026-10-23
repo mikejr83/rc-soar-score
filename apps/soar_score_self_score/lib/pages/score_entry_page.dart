@@ -5,7 +5,6 @@ import '../models/landing_result.dart';
 import '../models/sample_data.dart';
 import '../router.dart';
 import '../services/flight_time_input.dart';
-import '../widgets/connection_indicator.dart';
 import '../widgets/entry/entry_number_field.dart';
 import '../widgets/entry/entry_toggle_row.dart';
 import '../widgets/landing_control.dart';
@@ -127,6 +126,11 @@ class _ScoreEntryPageState extends State<ScoreEntryPage> {
     });
   }
 
+  int get _round => int.tryParse(widget.roundId) ?? 1;
+
+  void _goToRound(int round) =>
+      context.go(scoreEntryPath(widget.contestId, widget.pilotId, '$round'));
+
   void _submit() {
     if (!_canSubmit) return;
     setState(() => _submitted = true);
@@ -150,19 +154,52 @@ class _ScoreEntryPageState extends State<ScoreEntryPage> {
     final editable = !_submitted;
     return Scaffold(
       appBar: SelfScoreAppBar(
-        title: '${SampleData.pilotName}, pilot 12',
-        contextLine: 'Round 4 · Group B · Lane 1',
-        onBack: () => context.canPop()
-            ? context.pop()
-            : context.go(teamPath(widget.contestId)),
-        backLabel: 'Back to Team overview',
-        actions: const [ConnectionIndicator()],
+        title:
+            '${SampleData.pilotNameOf(widget.pilotId)}, pilot ${widget.pilotId}',
+        contextLine: 'Round ${widget.roundId} · Group B · Lane 1',
+        onBack: () => context.go(pilotPath(widget.contestId, widget.pilotId)),
+        backLabel: 'Back to pilot overview',
+        actions: [
+          IconButton(
+            tooltip: 'Previous round',
+            onPressed: _round > 1 ? () => _goToRound(_round - 1) : null,
+            icon: const Icon(Icons.chevron_left),
+          ),
+          IconButton(
+            tooltip: 'Next round',
+            onPressed: _round < SampleData.pilotRounds.length
+                ? () => _goToRound(_round + 1)
+                : null,
+            icon: const Icon(Icons.chevron_right),
+          ),
+        ],
         showAccount: false,
       ),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
+            TextButton.icon(
+              style: TextButton.styleFrom(
+                minimumSize: const Size(0, 44),
+                alignment: Alignment.centerLeft,
+                foregroundColor: scheme.primary,
+              ),
+              onPressed: () =>
+                  context.go(pilotPath(widget.contestId, widget.pilotId)),
+              icon: const Icon(Icons.format_list_bulleted, size: 20),
+              label: Text(
+                'All rounds for ${SampleData.pilotNameOf(widget.pilotId)}',
+              ),
+            ),
+            Text(
+              'Rounds you have scored show View. Submitted scores are '
+              'read-only. Review requests are made from View.',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: scheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 16),
             if (_submitted) ...[
               const Align(
                 alignment: Alignment.centerLeft,
@@ -315,8 +352,14 @@ class _ScoreEntryPageState extends State<ScoreEntryPage> {
                 style: OutlinedButton.styleFrom(
                   minimumSize: const Size.fromHeight(48),
                 ),
-                onPressed: () => context.go(teamPath(widget.contestId)),
-                child: const Text('Back to Team overview'),
+                onPressed: () => context.go(
+                  groupResultsPath(
+                    widget.contestId,
+                    widget.pilotId,
+                    widget.roundId,
+                  ),
+                ),
+                child: const Text('See group results'),
               ),
             ],
           ],

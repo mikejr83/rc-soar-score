@@ -5,7 +5,7 @@ Participant self-scoring web app: pilots enter their own scores for a contest.
 ## Structure
 
 - `lib/main.dart`, `lib/app.dart` — entry point and app widget
-- `lib/router.dart` — go_router routes per `plan/ui/participant-scoring/participant-scoring.md` (`/`, `/contests`, `/contests/:id/team`, `.../results`, `.../pilots/:pilotId/rounds/:roundId`)
+- `lib/router.dart` — go_router routes per `plan/ui/participant-scoring/participant-scoring.md`; see the self-score page map in the root `AGENTS.md`
 - `lib/pages/` — one file per page
 - `lib/widgets/` — page widgets; `landing_control.dart` picks sheet or autocomplete by landing-table size
 - `lib/models/`, `lib/services/` — placeholder data and pure logic (time parsing, landing search)

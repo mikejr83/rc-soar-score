@@ -2,18 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:soar_score_ui/soar_score_ui.dart';
 
+import '../models/results_snapshot.dart';
 import '../models/sample_data.dart';
 import '../router.dart';
 import '../widgets/connection_indicator.dart';
+import '../widgets/earlier_round_banner.dart';
 import '../widgets/self_score_app_bar.dart';
 import '../widgets/standings_table.dart';
 import '../widgets/status_chip.dart';
 
-/// Where the pilot stands: their place and score, then the overall tables.
+/// Where the pilot stands as of a round: their place and score, then the
+/// overall tables. [asOfRound] null means the latest round; an earlier round
+/// shows a banner with a way back to the latest.
 class ResultsPage extends StatefulWidget {
-  const ResultsPage({required this.contestId, super.key});
+  const ResultsPage({required this.contestId, this.asOfRound, super.key});
 
   final String contestId;
+  final int? asOfRound;
 
   @override
   State<ResultsPage> createState() => _ResultsPageState();
@@ -22,29 +27,22 @@ class ResultsPage extends StatefulWidget {
 class _ResultsPageState extends State<ResultsPage> {
   bool _teams = false;
 
-  static const _pilots = [
-    StandingsRow(place: '1', name: 'Li Wei', score: '2,231'),
-    StandingsRow(place: '2', name: 'Tom Reid', score: '2,207'),
-    StandingsRow(
-      place: '3',
-      name: SampleData.pilotName,
-      score: '2,184',
-      isYou: true,
-    ),
-    StandingsRow(place: '3=', name: 'Ana Lopez', score: '2,184', tied: true),
-    StandingsRow(place: '5', name: 'Kate Brooks', score: '2,096'),
-  ];
+  ResultsSnapshot get _snapshot =>
+      SampleData.results[widget.asOfRound ?? SampleData.latestRound] ??
+      SampleData.results[SampleData.latestRound]!;
 
-  static const _teamRows = [
-    StandingsRow(place: '1', name: 'Team Osprey', score: '412'),
-    StandingsRow(
-      place: '2',
-      name: SampleData.teamName,
-      score: '398',
-      isYou: true,
-      youLabel: '(your team)',
-    ),
-    StandingsRow(place: '3', name: 'Team Merlin', score: '371'),
+  bool get _isLatest => _snapshot.round == SampleData.latestRound;
+
+  List<StandingsRow> _rows(List<StandingLine> lines) => [
+    for (final line in lines)
+      StandingsRow(
+        place: line.place,
+        name: line.name,
+        score: line.score,
+        isYou: line.isYou,
+        youLabel: _teams ? '(your team)' : '(you)',
+        tied: line.tied,
+      ),
   ];
 
   @override
@@ -52,6 +50,8 @@ class _ResultsPageState extends State<ResultsPage> {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final muted = scheme.onSurfaceVariant;
+    final snapshot = _snapshot;
+    final round = snapshot.round;
     return Scaffold(
       appBar: SelfScoreAppBar(
         title: 'Results',
@@ -67,6 +67,14 @@ class _ResultsPageState extends State<ResultsPage> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
+            if (!_isLatest) ...[
+              EarlierRoundBanner(
+                round: round,
+                latest: SampleData.latestRound,
+                onSeeLatest: () => context.go(resultsPath(widget.contestId)),
+              ),
+              const SizedBox(height: 16),
+            ],
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -75,7 +83,9 @@ class _ResultsPageState extends State<ResultsPage> {
                   icon: Icons.pending_outlined,
                 ),
                 Text(
-                  'After round 4',
+                  _isLatest
+                      ? 'As of round $round · latest'
+                      : 'As of round $round',
                   style: theme.textTheme.bodyMedium?.copyWith(color: muted),
                 ),
               ],
@@ -88,7 +98,7 @@ class _ResultsPageState extends State<ResultsPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'You are',
+                      _isLatest ? 'You are' : 'You were',
                       style: theme.textTheme.bodyMedium?.copyWith(color: muted),
                     ),
                     const SizedBox(height: 4),
@@ -98,10 +108,10 @@ class _ResultsPageState extends State<ResultsPage> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Semantics(
-                          label: '3rd place',
+                          label: '${snapshot.ordinal} place',
                           excludeSemantics: true,
                           child: Text(
-                            '3rd',
+                            snapshot.ordinal,
                             style: BrandTypography.stencilHero.copyWith(
                               fontSize: 56,
                               color: scheme.primary,
@@ -109,7 +119,7 @@ class _ResultsPageState extends State<ResultsPage> {
                           ),
                         ),
                         Text(
-                          '2,184',
+                          snapshot.score,
                           style: BrandTypography.numbers.copyWith(
                             fontSize: 40,
                             height: 1,
@@ -120,7 +130,8 @@ class _ResultsPageState extends State<ResultsPage> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Your group score. You are 3rd after round 4.',
+                      'Your group score. You ${_isLatest ? 'are' : 'were'} '
+                      '${snapshot.ordinal} after round $round.',
                       style: theme.textTheme.bodyMedium?.copyWith(color: muted),
                     ),
                   ],
@@ -148,8 +159,9 @@ class _ResultsPageState extends State<ResultsPage> {
                       child: Semantics(
                         liveRegion: true,
                         child: Text(
-                          'Standings are held at round 4. The director is '
-                          'hiding overall results while scores are checked.',
+                          'Standings are held at round ${SampleData.heldRound}. '
+                          'The director is hiding overall results while scores '
+                          'are checked.',
                           style: theme.textTheme.bodyMedium,
                         ),
                       ),
@@ -174,18 +186,22 @@ class _ResultsPageState extends State<ResultsPage> {
             ),
             const SizedBox(height: 16),
             Text(
-              _teams ? 'Overall, teams' : 'Overall, pilots',
+              '${_teams ? 'Overall, teams' : 'Overall, pilots'}'
+              '${_isLatest ? '' : ', as of round $round'}',
               style: theme.textTheme.headlineMedium,
             ),
             const SizedBox(height: 8),
             StandingsTable(
               nameHeader: _teams ? 'Team' : 'Pilot',
-              rows: _teams ? _teamRows : _pilots,
+              rows: _rows(_teams ? snapshot.teams : snapshot.pilots),
             ),
             const SizedBox(height: 16),
             Text(
-              'Scores are preliminary and can change until the director marks '
-              'results official.',
+              _isLatest
+                  ? 'Scores are preliminary and can change until the director '
+                        'marks results official.'
+                  : 'Results as of round $round are preliminary. A review that '
+                        'changes round $round updates this page.',
               style: theme.textTheme.bodyMedium?.copyWith(color: muted),
             ),
           ],

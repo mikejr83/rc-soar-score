@@ -18,8 +18,33 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Overall, pilots'), findsOneWidget);
 
+    router.go('/contests/c1/results?round=3');
+    await tester.pumpAndSettle();
+    expect(
+      find.textContaining('viewing results as of round 3', findRichText: true),
+      findsOneWidget,
+    );
+    expect(find.text('4th'), findsOneWidget);
+
+    router.go('/contests/c1/pilots/12');
+    await tester.pumpAndSettle();
+    expect(find.text('Next to score'), findsOneWidget);
+    expect(find.text('Enter'), findsOneWidget);
+    expect(find.text('View'), findsNWidgets(3));
+    expect(
+      find.text('Score round 4 first. Rounds open in order.'),
+      findsWidgets,
+    );
+
     router.go('/contests/c1/pilots/12/rounds/4');
     await tester.pumpAndSettle();
     expect(find.text('Time flown'), findsOneWidget);
+    expect(find.text('All rounds for Jane Smith'), findsOneWidget);
+
+    router.go('/contests/c1/pilots/12/rounds/4/group');
+    await tester.pumpAndSettle();
+    expect(find.text('Zero: out of bounds'), findsOneWidget);
+    expect(find.text('No score yet'), findsOneWidget);
+    expect(find.text('(you)'), findsOneWidget);
   });
 }

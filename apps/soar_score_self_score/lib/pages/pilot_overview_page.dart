@@ -1,0 +1,158 @@
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+
+import '../models/pilot_round.dart';
+import '../models/sample_data.dart';
+import '../router.dart';
+import '../widgets/connection_indicator.dart';
+import '../widgets/pilot_round_card.dart';
+import '../widgets/self_score_app_bar.dart';
+import '../widgets/status_chip.dart';
+
+/// One round card per round for a pilot, with the pilot's actions. A helper
+/// reaches it from the team overview and sees what the pilot would see.
+class PilotOverviewPage extends StatelessWidget {
+  const PilotOverviewPage({
+    required this.contestId,
+    required this.pilotId,
+    super.key,
+  });
+
+  final String contestId;
+  final String pilotId;
+
+  Future<void> _confirmRetire(BuildContext context, String name) async {
+    final retire = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Retire $name?'),
+        content: const Text(
+          'Future and unscored rounds count as zero, and score entry will '
+          'be locked. The contest director can reinstate the pilot.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Retire pilot'),
+          ),
+        ],
+      ),
+    );
+    if (retire == true && context.mounted) {
+      _notYet(context, 'Retiring a pilot is not connected yet (#146).');
+    }
+  }
+
+  void _notYet(BuildContext context, String message) =>
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(message)));
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final muted = theme.colorScheme.onSurfaceVariant;
+    final name = SampleData.pilotNameOf(pilotId);
+    final rounds = SampleData.pilotRounds;
+    final nextRound = rounds
+        .firstWhere(
+          (round) => round.status == PilotRoundStatus.nextToScore,
+          orElse: () => rounds.last,
+        )
+        .number;
+    return Scaffold(
+      appBar: SelfScoreAppBar(
+        title: '$name, pilot $pilotId',
+        contextLine: '${SampleData.contestName} · ${SampleData.teamName}',
+        onBack: () => context.go(teamPath(contestId)),
+        backLabel: 'Back to pilots',
+        actions: const [ConnectionIndicator()],
+        showAccount: false,
+      ),
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const StatusChip(
+                  label: 'Scoring open',
+                  icon: Icons.lock_open_outlined,
+                ),
+                Text(
+                  '${rounds.length} rounds',
+                  style: theme.textTheme.bodyMedium?.copyWith(color: muted),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Find your group and lane for each round. Score a round in the '
+              'order it is listed.',
+              style: theme.textTheme.bodyMedium?.copyWith(color: muted),
+            ),
+            const SizedBox(height: 12),
+            for (final round in rounds) ...[
+              PilotRoundCard(
+                round: round,
+                nextRound: nextRound,
+                onEnter: () => context.push(
+                  scoreEntryPath(contestId, pilotId, '${round.number}'),
+                ),
+                // The read-only score view is not built; the group results
+                // show the submitted values for the round.
+                onView: () => context.push(
+                  groupResultsPath(contestId, pilotId, '${round.number}'),
+                ),
+              ),
+              const SizedBox(height: 8),
+            ],
+            const Divider(height: 32),
+            OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size.fromHeight(44),
+                side: BorderSide(
+                  color: theme.colorScheme.onSurface,
+                  width: 1.5,
+                ),
+              ),
+              onPressed: () => _notYet(
+                context,
+                'Invitation links arrive with the invitations feature (#141).',
+              ),
+              icon: const Icon(Icons.link, size: 20),
+              label: const Text('Copy invitation link'),
+            ),
+            const SizedBox(height: 8),
+            TextButton(
+              style: TextButton.styleFrom(
+                minimumSize: const Size.fromHeight(44),
+                alignment: Alignment.centerLeft,
+                foregroundColor: theme.colorScheme.primary,
+              ),
+              onPressed: () => context.push(resultsPath(contestId)),
+              child: const Text('Current results'),
+            ),
+            const SizedBox(height: 8),
+            TextButton.icon(
+              style: TextButton.styleFrom(
+                minimumSize: const Size.fromHeight(44),
+                foregroundColor: theme.colorScheme.onSurface,
+              ),
+              onPressed: () => _confirmRetire(context, name),
+              icon: const Icon(Icons.person_off_outlined, size: 20),
+              label: const Text(
+                'Retire pilot',
+                style: TextStyle(decoration: TextDecoration.underline),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

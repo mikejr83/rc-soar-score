@@ -192,16 +192,18 @@ Documentation, help and support routes are registered in `lib/docs_routes.dart` 
 
 ### Self-scoring app (`soar_score_self_score`)
 
-| Name people use                                | Route                                                  | Source (`lib/`)               |
-| ---------------------------------------------- | ------------------------------------------------------ | ----------------------------- |
-| Landing page (Sign in / Sign up)               | `/`                                                    | `pages/home_page.dart`        |
-| Contests list, "Is this you?"                  | `/contests`                                            | `pages/contests_page.dart`    |
-| Contest entry (redirects to the team overview) | `/contests/:contestId`                                 | `router.dart`                 |
-| Team overview (helper view, team standings)    | `/contests/:contestId/team`                            | `pages/team_page.dart`        |
-| Score entry (F5J form, landing sheet/combobox) | `/contests/:contestId/pilots/:pilotId/rounds/:roundId` | `pages/score_entry_page.dart` |
-| Results (place, score, pilots and teams)       | `/contests/:contestId/results`                         | `pages/results_page.dart`     |
+| Name people use                                | Route                                                        | Source (`lib/`)                  |
+| ---------------------------------------------- | ------------------------------------------------------------ | -------------------------------- |
+| Landing page (Sign in / Sign up)               | `/`                                                          | `pages/home_page.dart`           |
+| Contests list, "Is this you?"                  | `/contests`                                                  | `pages/contests_page.dart`       |
+| Contest entry (redirects to the team overview) | `/contests/:contestId`                                       | `router.dart`                    |
+| Team overview (helper view, team standings)    | `/contests/:contestId/team`                                  | `pages/team_page.dart`           |
+| Pilot overview (round cards, retire)           | `/contests/:contestId/pilots/:pilotId`                       | `pages/pilot_overview_page.dart` |
+| Score entry (F5J form, landing sheet/combobox) | `/contests/:contestId/pilots/:pilotId/rounds/:roundId`       | `pages/score_entry_page.dart`    |
+| Group results (not in the spec's route table)  | `/contests/:contestId/pilots/:pilotId/rounds/:roundId/group` | `pages/group_results_page.dart`  |
+| Results (latest, or `?round=N` as of a round)  | `/contests/:contestId/results`                               | `pages/results_page.dart`        |
 
-Routes follow `plan/ui/participant-scoring/participant-scoring.md`. Not built yet: the invitation handler (`/invitations/{credential}`) and the pilot overview (`/contests/:contestId/pilots/:pilotId`); contest entry sends everyone to the team overview until the pilot overview exists. The path helpers are at the top of `router.dart`.
+Routes follow `plan/ui/participant-scoring/participant-scoring.md`. Not built yet: the invitation handler (`/invitations/{credential}`). Contest entry sends everyone to the team overview until role routing exists (#142). On the pilot overview, View opens the group results for the round until the read-only score view exists; Copy invitation link and Retire are not connected to the API. The path helpers are at the top of `router.dart`.
 
 The pages read placeholder data from `models/sample_data.dart` until the self-scoring API exists. The landing field picks its control by table size (`widgets/landing_control.dart`: sheet up to 20 results, autocomplete above); see `plan/ui/participant-scoring/landing-control-decision.md`.
 

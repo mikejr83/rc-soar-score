@@ -1,7 +1,9 @@
 import 'package:go_router/go_router.dart';
 
 import 'pages/contests_page.dart';
+import 'pages/group_results_page.dart';
 import 'pages/home_page.dart';
+import 'pages/pilot_overview_page.dart';
 import 'pages/results_page.dart';
 import 'pages/score_entry_page.dart';
 import 'pages/team_page.dart';
@@ -12,11 +14,17 @@ const contestsPath = '/contests';
 
 String contestPath(String contestId) => '/contests/$contestId';
 String teamPath(String contestId) => '/contests/$contestId/team';
-String resultsPath(String contestId) => '/contests/$contestId/results';
+String resultsPath(String contestId, {int? asOfRound}) =>
+    '/contests/$contestId/results${asOfRound == null ? '' : '?round=$asOfRound'}';
 String pilotPath(String contestId, String pilotId) =>
     '/contests/$contestId/pilots/$pilotId';
 String scoreEntryPath(String contestId, String pilotId, String roundId) =>
     '/contests/$contestId/pilots/$pilotId/rounds/$roundId';
+
+/// Group results for a round. Not in the spec's route table; the spec shows
+/// them under score entry, and this gives them an address.
+String groupResultsPath(String contestId, String pilotId, String roundId) =>
+    '${scoreEntryPath(contestId, pilotId, roundId)}/group';
 
 final router = GoRouter(
   routes: [
@@ -42,16 +50,39 @@ final router = GoRouter(
             ),
             GoRoute(
               path: 'results',
-              builder: (context, state) =>
-                  ResultsPage(contestId: state.pathParameters['contestId']!),
+              builder: (context, state) => ResultsPage(
+                contestId: state.pathParameters['contestId']!,
+                asOfRound: int.tryParse(
+                  state.uri.queryParameters['round'] ?? '',
+                ),
+              ),
             ),
             GoRoute(
-              path: 'pilots/:pilotId/rounds/:roundId',
-              builder: (context, state) => ScoreEntryPage(
+              path: 'pilots/:pilotId',
+              builder: (context, state) => PilotOverviewPage(
                 contestId: state.pathParameters['contestId']!,
                 pilotId: state.pathParameters['pilotId']!,
-                roundId: state.pathParameters['roundId']!,
               ),
+              routes: [
+                GoRoute(
+                  path: 'rounds/:roundId',
+                  builder: (context, state) => ScoreEntryPage(
+                    contestId: state.pathParameters['contestId']!,
+                    pilotId: state.pathParameters['pilotId']!,
+                    roundId: state.pathParameters['roundId']!,
+                  ),
+                  routes: [
+                    GoRoute(
+                      path: 'group',
+                      builder: (context, state) => GroupResultsPage(
+                        contestId: state.pathParameters['contestId']!,
+                        pilotId: state.pathParameters['pilotId']!,
+                        roundId: state.pathParameters['roundId']!,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ],
         ),
