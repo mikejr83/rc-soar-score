@@ -2,11 +2,11 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:intl/intl.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../services/exchange/contest_exchange.dart';
+import '../../services/preferences/director_time.dart';
 
 /// Asks how to export [contest], saves the file where the director chooses
 /// and says so. Does nothing when the build has no exchange.
@@ -193,9 +193,7 @@ class _ImportDialogState extends State<_ImportDialog> {
     final preview = widget.preview;
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context);
-    final exported = DateFormat.yMMMd().add_jm().format(
-      preview.exportedAt.toLocal(),
-    );
+    final exported = DirectorTime.of(context)(preview.exportedAt);
     final participants = preview.counts['participants'] ?? 0;
     final rounds = preview.counts['rounds'] ?? 0;
     final scores = preview.counts['scores'] ?? 0;
@@ -282,12 +280,16 @@ class _ImportDialogState extends State<_ImportDialog> {
   ) {
     final reason = preview.unavailable[mode];
     final enabled = preview.available.contains(mode);
-    final title = mode == ExchangeImportMode.inspection
-        ? l10n.importModeInspectionTitle
-        : l10n.importModeEditableTitle;
-    final notice = mode == ExchangeImportMode.inspection
-        ? l10n.importModeInspectionNotice
-        : l10n.importModeEditableNotice;
+    final (title, notice) = switch (mode) {
+      ExchangeImportMode.inspection => (
+        l10n.importModeInspectionTitle,
+        l10n.importModeInspectionNotice,
+      ),
+      ExchangeImportMode.editable => (
+        l10n.importModeEditableTitle,
+        l10n.importModeEditableNotice,
+      ),
+    };
     return RadioListTile<ExchangeImportMode>(
       key: ValueKey('import-mode-${mode.name}'),
       contentPadding: EdgeInsets.zero,

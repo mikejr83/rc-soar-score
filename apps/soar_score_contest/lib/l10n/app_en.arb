@@ -211,7 +211,7 @@
   "@importConfirmButton": {
     "description": "Button that imports the contest in the chosen mode."
   },
-  "importPreviewRedactedFromSource": "Exported {exportedAt} from {source}. {participants} participants, {rounds} rounds, {scores} scores. Email addresses were removed.",
+  "importPreviewRedactedFromSource": "Exported {exportedAt} from {source}. {participants, plural, one{1 participant} other{{participants} participants}}, {rounds, plural, one{1 round} other{{rounds} rounds}}, {scores, plural, one{1 score} other{{scores} scores}}. Email addresses were removed.",
   "@importPreviewRedactedFromSource": {
     "description": "Import dialog summary of the file, exported on the given date by the given source, with contact details removed.",
     "placeholders": {
@@ -222,17 +222,17 @@
         "type": "String"
       },
       "participants": {
-        "type": "int"
+        "type": "num"
       },
       "rounds": {
-        "type": "int"
+        "type": "num"
       },
       "scores": {
-        "type": "int"
+        "type": "num"
       }
     }
   },
-  "importPreviewRedacted": "Exported {exportedAt}. {participants} participants, {rounds} rounds, {scores} scores. Email addresses were removed.",
+  "importPreviewRedacted": "Exported {exportedAt}. {participants, plural, one{1 participant} other{{participants} participants}}, {rounds, plural, one{1 round} other{{rounds} rounds}}, {scores, plural, one{1 score} other{{scores} scores}}. Email addresses were removed.",
   "@importPreviewRedacted": {
     "description": "Import dialog summary of the file, exported on the given date with no source, with contact details removed.",
     "placeholders": {
@@ -240,17 +240,17 @@
         "type": "String"
       },
       "participants": {
-        "type": "int"
+        "type": "num"
       },
       "rounds": {
-        "type": "int"
+        "type": "num"
       },
       "scores": {
-        "type": "int"
+        "type": "num"
       }
     }
   },
-  "importPreviewIncludedFromSource": "Exported {exportedAt} from {source}. {participants} participants, {rounds} rounds, {scores} scores. Email addresses are included.",
+  "importPreviewIncludedFromSource": "Exported {exportedAt} from {source}. {participants, plural, one{1 participant} other{{participants} participants}}, {rounds, plural, one{1 round} other{{rounds} rounds}}, {scores, plural, one{1 score} other{{scores} scores}}. Email addresses are included.",
   "@importPreviewIncludedFromSource": {
     "description": "Import dialog summary of the file, exported on the given date by the given source, with contact details kept.",
     "placeholders": {
@@ -261,17 +261,17 @@
         "type": "String"
       },
       "participants": {
-        "type": "int"
+        "type": "num"
       },
       "rounds": {
-        "type": "int"
+        "type": "num"
       },
       "scores": {
-        "type": "int"
+        "type": "num"
       }
     }
   },
-  "importPreviewIncluded": "Exported {exportedAt}. {participants} participants, {rounds} rounds, {scores} scores. Email addresses are included.",
+  "importPreviewIncluded": "Exported {exportedAt}. {participants, plural, one{1 participant} other{{participants} participants}}, {rounds, plural, one{1 round} other{{rounds} rounds}}, {scores, plural, one{1 score} other{{scores} scores}}. Email addresses are included.",
   "@importPreviewIncluded": {
     "description": "Import dialog summary of the file, exported on the given date with no source, with contact details kept.",
     "placeholders": {
@@ -279,13 +279,13 @@
         "type": "String"
       },
       "participants": {
-        "type": "int"
+        "type": "num"
       },
       "rounds": {
-        "type": "int"
+        "type": "num"
       },
       "scores": {
-        "type": "int"
+        "type": "num"
       }
     }
   },

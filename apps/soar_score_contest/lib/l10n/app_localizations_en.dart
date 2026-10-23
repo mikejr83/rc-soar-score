@@ -167,42 +167,114 @@ class AppLocalizationsEn extends AppLocalizations {
   String importPreviewRedactedFromSource(
     String exportedAt,
     String source,
-    int participants,
-    int rounds,
-    int scores,
+    num participants,
+    num rounds,
+    num scores,
   ) {
-    return 'Exported $exportedAt from $source. $participants participants, $rounds rounds, $scores scores. Email addresses were removed.';
+    String _temp0 = intl.Intl.pluralLogic(
+      participants,
+      locale: localeName,
+      other: '$participants participants',
+      one: '1 participant',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      rounds,
+      locale: localeName,
+      other: '$rounds rounds',
+      one: '1 round',
+    );
+    String _temp2 = intl.Intl.pluralLogic(
+      scores,
+      locale: localeName,
+      other: '$scores scores',
+      one: '1 score',
+    );
+    return 'Exported $exportedAt from $source. $_temp0, $_temp1, $_temp2. Email addresses were removed.';
   }
 
   @override
   String importPreviewRedacted(
     String exportedAt,
-    int participants,
-    int rounds,
-    int scores,
+    num participants,
+    num rounds,
+    num scores,
   ) {
-    return 'Exported $exportedAt. $participants participants, $rounds rounds, $scores scores. Email addresses were removed.';
+    String _temp0 = intl.Intl.pluralLogic(
+      participants,
+      locale: localeName,
+      other: '$participants participants',
+      one: '1 participant',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      rounds,
+      locale: localeName,
+      other: '$rounds rounds',
+      one: '1 round',
+    );
+    String _temp2 = intl.Intl.pluralLogic(
+      scores,
+      locale: localeName,
+      other: '$scores scores',
+      one: '1 score',
+    );
+    return 'Exported $exportedAt. $_temp0, $_temp1, $_temp2. Email addresses were removed.';
   }
 
   @override
   String importPreviewIncludedFromSource(
     String exportedAt,
     String source,
-    int participants,
-    int rounds,
-    int scores,
+    num participants,
+    num rounds,
+    num scores,
   ) {
-    return 'Exported $exportedAt from $source. $participants participants, $rounds rounds, $scores scores. Email addresses are included.';
+    String _temp0 = intl.Intl.pluralLogic(
+      participants,
+      locale: localeName,
+      other: '$participants participants',
+      one: '1 participant',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      rounds,
+      locale: localeName,
+      other: '$rounds rounds',
+      one: '1 round',
+    );
+    String _temp2 = intl.Intl.pluralLogic(
+      scores,
+      locale: localeName,
+      other: '$scores scores',
+      one: '1 score',
+    );
+    return 'Exported $exportedAt from $source. $_temp0, $_temp1, $_temp2. Email addresses are included.';
   }
 
   @override
   String importPreviewIncluded(
     String exportedAt,
-    int participants,
-    int rounds,
-    int scores,
+    num participants,
+    num rounds,
+    num scores,
   ) {
-    return 'Exported $exportedAt. $participants participants, $rounds rounds, $scores scores. Email addresses are included.';
+    String _temp0 = intl.Intl.pluralLogic(
+      participants,
+      locale: localeName,
+      other: '$participants participants',
+      one: '1 participant',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      rounds,
+      locale: localeName,
+      other: '$rounds rounds',
+      one: '1 round',
+    );
+    String _temp2 = intl.Intl.pluralLogic(
+      scores,
+      locale: localeName,
+      other: '$scores scores',
+      one: '1 score',
+    );
+    return 'Exported $exportedAt. $_temp0, $_temp1, $_temp2. Email addresses are included.';
   }
 
   @override

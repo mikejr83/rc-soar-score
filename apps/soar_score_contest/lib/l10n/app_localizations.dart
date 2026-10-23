@@ -349,47 +349,47 @@ abstract class AppLocalizations {
   /// Import dialog summary of the file, exported on the given date by the given source, with contact details removed.
   ///
   /// In en, this message translates to:
-  /// **'Exported {exportedAt} from {source}. {participants} participants, {rounds} rounds, {scores} scores. Email addresses were removed.'**
+  /// **'Exported {exportedAt} from {source}. {participants, plural, one{1 participant} other{{participants} participants}}, {rounds, plural, one{1 round} other{{rounds} rounds}}, {scores, plural, one{1 score} other{{scores} scores}}. Email addresses were removed.'**
   String importPreviewRedactedFromSource(
     String exportedAt,
     String source,
-    int participants,
-    int rounds,
-    int scores,
+    num participants,
+    num rounds,
+    num scores,
   );
 
   /// Import dialog summary of the file, exported on the given date with no source, with contact details removed.
   ///
   /// In en, this message translates to:
-  /// **'Exported {exportedAt}. {participants} participants, {rounds} rounds, {scores} scores. Email addresses were removed.'**
+  /// **'Exported {exportedAt}. {participants, plural, one{1 participant} other{{participants} participants}}, {rounds, plural, one{1 round} other{{rounds} rounds}}, {scores, plural, one{1 score} other{{scores} scores}}. Email addresses were removed.'**
   String importPreviewRedacted(
     String exportedAt,
-    int participants,
-    int rounds,
-    int scores,
+    num participants,
+    num rounds,
+    num scores,
   );
 
   /// Import dialog summary of the file, exported on the given date by the given source, with contact details kept.
   ///
   /// In en, this message translates to:
-  /// **'Exported {exportedAt} from {source}. {participants} participants, {rounds} rounds, {scores} scores. Email addresses are included.'**
+  /// **'Exported {exportedAt} from {source}. {participants, plural, one{1 participant} other{{participants} participants}}, {rounds, plural, one{1 round} other{{rounds} rounds}}, {scores, plural, one{1 score} other{{scores} scores}}. Email addresses are included.'**
   String importPreviewIncludedFromSource(
     String exportedAt,
     String source,
-    int participants,
-    int rounds,
-    int scores,
+    num participants,
+    num rounds,
+    num scores,
   );
 
   /// Import dialog summary of the file, exported on the given date with no source, with contact details kept.
   ///
   /// In en, this message translates to:
-  /// **'Exported {exportedAt}. {participants} participants, {rounds} rounds, {scores} scores. Email addresses are included.'**
+  /// **'Exported {exportedAt}. {participants, plural, one{1 participant} other{{participants} participants}}, {rounds, plural, one{1 round} other{{rounds} rounds}}, {scores, plural, one{1 score} other{{scores} scores}}. Email addresses are included.'**
   String importPreviewIncluded(
     String exportedAt,
-    int participants,
-    int rounds,
-    int scores,
+    num participants,
+    num rounds,
+    num scores,
   );
 
   /// Import mode that keeps a contest on this computer only.
