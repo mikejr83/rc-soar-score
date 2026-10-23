@@ -111,7 +111,10 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
   @override
   void initState() {
     super.initState();
-    widget.guard?.attach(_confirmLeave);
+    widget.guard?.attach(
+      _confirmLeave,
+      hasChanges: () => _created == null && !_creating && _unsaved,
+    );
   }
 
   @override
@@ -293,10 +296,11 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
       return false;
     }
     if (_unsaved) {
+      final closing = UnsavedChangesGuard.closingApp;
       final leave = await showWizardConfirmDialog(
         context,
         icon: Icons.logout,
-        title: 'Leave new contest?',
+        title: closing ? UnsavedChangesGuard.closeTitle : 'Leave new contest?',
         body:
             'Your draft is kept on this device. You can finish it '
             'later from Contests.',
@@ -305,7 +309,7 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
             : 'Fields with errors on this step need fixing before the '
                   'contest can be created.',
         cancelLabel: 'Keep editing',
-        confirmLabel: 'Leave',
+        confirmLabel: closing ? 'Close' : 'Leave',
       );
       if (!leave) {
         return false;

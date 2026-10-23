@@ -62,7 +62,7 @@ class _LandingEditorPageState extends State<LandingEditorPage> {
           ),
       ];
     }
-    widget.guard?.attach(_confirmDiscard);
+    widget.guard?.attach(_confirmDiscard, hasChanges: () => _dirty);
     _name.addListener(_markDirty);
     for (final row in _rows) {
       _watch(row);
@@ -176,7 +176,16 @@ class _LandingEditorPageState extends State<LandingEditorPage> {
     if (!_dirty) {
       return true;
     }
-    return confirmDiscard(context);
+    final closing = UnsavedChangesGuard.closingApp;
+    return confirmDiscard(
+      context,
+      title: closing ? UnsavedChangesGuard.closeTitle : 'Discard changes?',
+      body: closing
+          ? 'Closing the app will lose your unsaved changes to this landing '
+                'table.'
+          : 'Your unsaved changes will be lost.',
+      discardLabel: closing ? 'Close and discard' : 'Discard',
+    );
   }
 
   Future<void> _cancel() async {

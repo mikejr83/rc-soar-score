@@ -44,6 +44,7 @@ dependencies:
   path_provider: ^2.1.5
   shelf: ^1.4.2
   url_launcher: ^6.3.2
+  web: ^1.1.1
   soar_score_api:
     path: ../../packages/soar_score_api
   soar_score_api_handlers:

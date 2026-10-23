@@ -91,7 +91,10 @@ class _ParticipantEditorPageState extends State<ParticipantEditorPage> {
   @override
   void initState() {
     super.initState();
-    widget.guard?.attach(_confirmDiscard);
+    widget.guard?.attach(
+      _confirmDiscard,
+      hasChanges: () => _controller != null && _c.dirty,
+    );
     for (final field in ParticipantField.values) {
       _texts[field]!.addListener(() => _typed(field));
       _focus[field]!.addListener(() {
@@ -208,11 +211,19 @@ class _ParticipantEditorPageState extends State<ParticipantEditorPage> {
     if (_controller == null || !_c.dirty) {
       return true;
     }
+    final closing = UnsavedChangesGuard.closingApp;
     final discard = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Discard changes?'),
-        content: const Text('Your unsaved changes will be lost.'),
+        title: Text(
+          closing ? UnsavedChangesGuard.closeTitle : 'Discard changes?',
+        ),
+        content: Text(
+          closing
+              ? 'Closing the app will lose your unsaved changes to this '
+                    'participant.'
+              : 'Your unsaved changes will be lost.',
+        ),
         actions: [
           TextButton(
             autofocus: true,
@@ -221,7 +232,7 @@ class _ParticipantEditorPageState extends State<ParticipantEditorPage> {
           ),
           FilledButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Discard'),
+            child: Text(closing ? 'Close and discard' : 'Discard'),
           ),
         ],
       ),

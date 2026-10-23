@@ -81,7 +81,10 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
       round: widget.round,
       group: widget.group,
     )..addListener(_changed);
-    widget.guard?.attach(_confirmLeave);
+    widget.guard?.attach(
+      _confirmLeave,
+      hasChanges: () => _controller?.hasUnsaved ?? false,
+    );
     _controller!.load();
   }
 
@@ -149,7 +152,11 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
   Future<bool> _resolveUnsaved() async {
     final c = _controller!;
     if (!c.hasUnsaved) return true;
-    final choice = await askUnsavedEdits(context, rows: c.dirtyCount);
+    final choice = await askUnsavedEdits(
+      context,
+      rows: c.dirtyCount,
+      closingApp: UnsavedChangesGuard.closingApp,
+    );
     switch (choice) {
       case UnsavedChoice.stay:
         return false;
