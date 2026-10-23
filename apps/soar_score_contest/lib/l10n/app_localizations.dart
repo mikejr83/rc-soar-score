@@ -481,6 +481,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This contest was imported for inspection. It stays on this computer: nothing in it is sent to the service, whoever is signed in.'**
   String get inspectionNotice;
+
+  /// Label of the round entry in the contest status panel.
+  ///
+  /// In en, this message translates to:
+  /// **'Round'**
+  String get shellRoundLabel;
+
+  /// Round entry value: the round being scored out of the total.
+  ///
+  /// In en, this message translates to:
+  /// **'{round} of {total}'**
+  String shellRoundValue(int round, int total);
+
+  /// Round entry value with the group being scored, shown by its letter.
+  ///
+  /// In en, this message translates to:
+  /// **'{round} of {total}, group {group}'**
+  String shellRoundGroupValue(int round, int total, String group);
+
+  /// Round entry value when a drawn contest has no scores yet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not started'**
+  String get shellRoundNotStarted;
+
+  /// Round entry value when the contest is completed.
+  ///
+  /// In en, this message translates to:
+  /// **'Finished'**
+  String get shellRoundFinished;
+
+  /// Accessible name of the round entry button.
+  ///
+  /// In en, this message translates to:
+  /// **'{label}: {value}. Go to scoring'**
+  String shellRoundSemantics(String label, String value);
 }
 
 class _AppLocalizationsDelegate

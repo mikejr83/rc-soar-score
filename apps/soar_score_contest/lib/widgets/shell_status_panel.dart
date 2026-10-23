@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../l10n/app_localizations.dart';
+import '../services/workspace/shell_round_item.dart';
 import '../services/workspace/workspace_control_target.dart';
 import 'contest_status_chip.dart';
 
@@ -16,10 +18,19 @@ class ShellStatusPanel extends StatelessWidget {
     super.key,
     required this.contest,
     this.onOpen,
+    this.round,
+    this.onOpenRound,
     this.trailing,
   });
 
   final Contest contest;
+
+  /// The round being scored, when known; the panel shows no round entry when
+  /// `null`.
+  final ShellRoundItem? round;
+
+  /// Called when the round entry is chosen, to open the scoring page.
+  final ValueChanged<ShellRoundItem>? onOpenRound;
 
   /// An extra entry after the contest's values, for example the sync status.
   final Widget? trailing;
@@ -36,6 +47,9 @@ class ShellStatusPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final locked = contest.adminLock == AdminLock.locked;
+    final round = this.round;
+    final l10n = round == null ? null : AppLocalizations.of(context);
+    final openRound = onOpenRound;
     final scoringOpen = contest.scoringAccess == ScoringAccess.open;
     return Semantics(
       container: true,
@@ -69,6 +83,19 @@ class ShellStatusPanel extends StatelessWidget {
               icon: locked ? Icons.lock : Icons.lock_open,
               value: locked ? 'Locked' : 'Unlocked',
             ),
+            if (round != null)
+              _Item(
+                key: const ValueKey('shell-round-status'),
+                label: l10n!.shellRoundLabel,
+                onTap: openRound == null ? null : () => openRound(round),
+                theme: theme,
+                icon: Icons.format_list_numbered,
+                value: _roundValue(l10n, round),
+                semanticsLabel: l10n.shellRoundSemantics(
+                  l10n.shellRoundLabel,
+                  _roundValue(l10n, round),
+                ),
+              ),
             ?trailing,
           ],
         ),
@@ -77,8 +104,24 @@ class ShellStatusPanel extends StatelessWidget {
   }
 }
 
+String _roundValue(AppLocalizations l10n, ShellRoundItem item) =>
+    switch (item.kind) {
+      ShellRoundKind.notStarted => l10n.shellRoundNotStarted,
+      ShellRoundKind.finished => l10n.shellRoundFinished,
+      ShellRoundKind.inProgress =>
+        item.groupLetter == null
+            ? l10n.shellRoundValue(item.round!, item.total!)
+            : l10n.shellRoundGroupValue(
+                item.round!,
+                item.total!,
+                item.groupLetter!,
+              ),
+    };
+
 class _Item extends StatelessWidget {
   const _Item({
+    super.key,
+    this.semanticsLabel,
     required this.label,
     required this.value,
     required this.icon,
@@ -87,6 +130,9 @@ class _Item extends StatelessWidget {
   });
 
   final String label;
+
+  /// Overrides the accessible name of the button.
+  final String? semanticsLabel;
 
   /// The value as text, for the accessible name.
   final String value;
@@ -121,7 +167,9 @@ class _Item extends StatelessWidget {
     }
     return Semantics(
       button: true,
-      label: '$label: $value. Go to the ${label.toLowerCase()} control',
+      label:
+          semanticsLabel ??
+          '$label: $value. Go to the ${label.toLowerCase()} control',
       excludeSemantics: true,
       onTap: onTap,
       child: InkWell(
