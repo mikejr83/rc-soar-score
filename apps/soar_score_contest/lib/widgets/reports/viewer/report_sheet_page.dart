@@ -182,30 +182,37 @@ class _Footer extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text.rich(
-                TextSpan(
-                  children: [
-                    TextSpan(
-                      text: reportName,
-                      style: const TextStyle(fontWeight: FontWeight.w700),
-                    ),
-                    TextSpan(text: ' · Page $pageNumber of $pageCount'),
-                  ],
-                ),
-                style: small,
-              ),
+              // The two sides share the room equally, so the generated time
+              // sits in the middle of the page whatever the sides say.
               Expanded(
-                child: Text(
-                  generated,
-                  textAlign: TextAlign.center,
-                  style: small,
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: reportName,
+                          style: const TextStyle(fontWeight: FontWeight.w700),
+                        ),
+                        TextSpan(text: ' · Page $pageNumber of $pageCount'),
+                      ],
+                    ),
+                    style: small,
+                  ),
                 ),
               ),
-              if (statusWord != null)
-                Text(
-                  statusWord!,
-                  style: small.copyWith(fontWeight: FontWeight.w700),
+              Text(generated, textAlign: TextAlign.center, style: small),
+              Expanded(
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: statusWord == null
+                      ? const SizedBox.shrink()
+                      : Text(
+                          statusWord!,
+                          style: small.copyWith(fontWeight: FontWeight.w700),
+                        ),
                 ),
+              ),
             ],
           ),
         ),
