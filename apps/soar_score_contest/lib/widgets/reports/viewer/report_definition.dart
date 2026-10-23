@@ -72,6 +72,7 @@ class ReportDocument {
     required this.subtitle,
     required this.pages,
     this.detail,
+    this.notice,
     this.status,
     this.statusReason,
     this.statusAction,
@@ -83,6 +84,10 @@ class ReportDocument {
 
   /// A third header line with the contest details.
   final String? detail;
+
+  /// Advice about the sheet for the director, shown on screen above it and
+  /// never printed; `null` when there is none.
+  final String? notice;
 
   /// One widget per printed page, each sized to fit [ReportPageContext.bodySize].
   final List<Widget> pages;
@@ -104,4 +109,33 @@ abstract class ReportDefinition extends ReportSpec {
   List<ReportControlGroup> controls(ReportControlsContext context);
 
   ReportDocument build(ReportPageContext context);
+}
+
+/// A report that reads data of its own, typed as [D]. It answers
+/// [loadData] with a `ReportLoad<D>` and builds from a [D], so the one place
+/// that checks what the viewer holds is here and not in every report.
+///
+/// The viewer builds only when the data is loaded, so [buildWith] is never
+/// called without it.
+abstract class DataReportDefinition<D extends Object> extends ReportDefinition {
+  const DataReportDefinition();
+
+  @override
+  Future<ReportLoad<D>> loadData(ReportDataRequest request);
+
+  /// The report's pages from its [data].
+  ReportDocument buildWith(ReportPageContext context, D data);
+
+  /// What stands in when the viewer has no [D] yet (it does not build then).
+  ReportDocument buildWithout(ReportPageContext context) => ReportDocument(
+    title: '${kind.title} - ${context.facts.contest.name}',
+    subtitle: 'Nothing to show',
+    pages: const [SizedBox.shrink()],
+  );
+
+  @override
+  ReportDocument build(ReportPageContext context) => switch (context.data) {
+    final D data => buildWith(context, data),
+    _ => buildWithout(context),
+  };
 }

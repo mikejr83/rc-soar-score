@@ -23,7 +23,7 @@ import 'standings_page_body.dart';
 /// results API; the sheet never recalculates them. The viewer asks this report
 /// for its filters, options and pages; the report asks the API for the data
 /// those filters need, and only again when the rounds shown change.
-class StandingsReport extends ReportDefinition {
+class StandingsReport extends DataReportDefinition<StandingsReportData> {
   const StandingsReport();
 
   @override
@@ -63,18 +63,22 @@ class StandingsReport extends ReportDefinition {
   }
 
   @override
-  Future<Object?> loadData(ReportDataRequest request) async {
+  Future<ReportLoad<StandingsReportData>> loadData(
+    ReportDataRequest request,
+  ) async {
     final options = StandingsOptions.of(request.filters, request.facts);
     if (options.to < 1 || options.to < options.from) {
-      return null;
+      return const ReportNothingToLoad();
     }
     try {
-      return await StandingsReportData.load(
-        request.client,
-        request.contestId,
-        rounds: options.rounds,
-        asOf: options.to,
-        withDetails: options.details,
+      return ReportLoaded(
+        await StandingsReportData.load(
+          request.client,
+          request.contestId,
+          rounds: options.rounds,
+          asOf: options.to,
+          withDetails: options.details,
+        ),
       );
     } on NoStoredStandings catch (none) {
       return ReportNoData(
@@ -96,18 +100,20 @@ class StandingsReport extends ReportDefinition {
       );
 
   @override
-  ReportDocument build(ReportPageContext context) {
+  ReportDocument buildWithout(ReportPageContext context) => ReportDocument(
+    title: 'Overall Results - ${context.facts.contest.name}',
+    subtitle: 'No standings to show',
+    pages: [const SizedBox.shrink()],
+  );
+
+  @override
+  ReportDocument buildWith(
+    ReportPageContext context,
+    StandingsReportData data,
+  ) {
     final facts = context.facts;
     final options = StandingsOptions.of(context.filters, facts);
-    final data = context.data;
     final contest = facts.contest;
-    if (data is! StandingsReportData) {
-      return ReportDocument(
-        title: 'Overall Results - ${contest.name}',
-        subtitle: 'No standings to show',
-        pages: [const SizedBox.shrink()],
-      );
-    }
     final table = StandingsTable.build(
       facts: facts,
       options: options,

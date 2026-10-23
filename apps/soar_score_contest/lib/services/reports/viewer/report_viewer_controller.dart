@@ -300,7 +300,11 @@ class ReportViewerController extends ChangeNotifier {
       if (token != _dataToken || _disposed) {
         return false;
       }
-      _data = data;
+      _data = switch (data) {
+        ReportLoaded(:final data) => data,
+        final ReportNoData none => none,
+        ReportNothingToLoad() => null,
+      };
       _dataKey = key;
       if (candidate != null) {
         _facts = candidate;
