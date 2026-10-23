@@ -7,6 +7,7 @@ import '../../services/matrix/matrix_grid_model.dart';
 import '../../services/matrix/matrix_page_data.dart';
 import 'fairness_panel.dart';
 import 'find_filter_bar.dart';
+import '../page_states/page_banner.dart';
 import 'matrix_banner.dart';
 import 'matrix_grid.dart';
 import 'pilot_panel.dart';
@@ -155,9 +156,10 @@ class _MatrixDrawnViewState extends State<MatrixDrawnView> {
                           'Applying these changes needs a redraw, which comes '
                           'in a later release.',
                       actions: [
-                        OutlinedButton(
-                          onPressed: widget.onOpenConfiguration,
-                          child: const Text('Open Configuration'),
+                        PageBannerAction(
+                          'Open Configuration',
+                          widget.onOpenConfiguration,
+                          emphasis: PageBannerEmphasis.outlined,
                         ),
                       ],
                     ),
