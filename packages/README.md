@@ -21,12 +21,12 @@ The [Soar Score](https://soar-score.ai) RC sailplane soaring contest scoring sui
 
 ## UI Layer
 
-- [`soar_score_ui`](./soar_score_ui/README.md) — Shared Flutter UI package with reusable widgets and shared theme tokens. Used by both `soar_score_contest` and `soar_score_public` apps. No data access.
+- [`soar_score_ui`](./soar_score_ui/README.md) — Shared Flutter UI package with reusable widgets and shared theme tokens. Used by the `soar_score_contest` and `soar_score_self_score` apps; the public site (`soar_score_web`, Next.js) copies its fonts and logos. No data access.
 
 ## Architecture overview
 
 ```text
-Flutter Apps (soar_score_contest, soar_score_public)
+Flutter Apps (soar_score_contest, soar_score_self_score)
          ↓
 soar_score_ui (shared Flutter widgets + theme)
          ↓
