@@ -48,7 +48,7 @@ class ViewerToolbar extends StatelessWidget {
     );
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
+        color: theme.colorScheme.secondaryContainer,
         border: Border(
           bottom: BorderSide(color: theme.colorScheme.outlineVariant),
         ),
