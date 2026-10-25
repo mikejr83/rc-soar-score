@@ -8,6 +8,7 @@ import 'contest_name_loader.dart';
 import 'contest_status_bar.dart';
 import 'shell_destinations.dart';
 import 'shell_header.dart';
+import 'shell_round_loader.dart';
 import 'shell_rail.dart';
 import 'shell_status_panel.dart';
 import 'sync/shell_sync_status.dart';
@@ -84,11 +85,28 @@ class _ContestShellState extends State<ContestShell> {
                           ShellHeader(path: path, contestName: contest?.name),
                           const Divider(height: 1, thickness: 1),
                           if (contest != null) ...[
-                            ShellStatusPanel(
+                            ShellRoundLoader(
                               contest: contest,
-                              trailing: ShellSyncStatus(contest: contest),
-                              onOpen: (target) =>
-                                  _openControl(contest.id.value, target),
+                              path: path,
+                              builder: (context, round, refreshing) =>
+                                  ShellStatusPanel(
+                                    contest: contest,
+                                    trailing: ShellSyncStatus(contest: contest),
+                                    onOpen: (target) =>
+                                        _openControl(contest.id.value, target),
+                                    round: round,
+                                    // The value is stale while it reloads: show
+                                    // it, but do not link to it.
+                                    onOpenRound: refreshing
+                                        ? null
+                                        : (item) => context.go(
+                                            contestScoringPath(
+                                              contest.id.value,
+                                              round: item.round,
+                                              group: item.group,
+                                            ),
+                                          ),
+                                  ),
                             ),
                             const Divider(height: 1, thickness: 1),
                           ],
