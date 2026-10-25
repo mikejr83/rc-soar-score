@@ -272,9 +272,10 @@ flutter run -d windows
 ```
 
 ```bash
-# Public results site
-cd apps/soar_score_public
-flutter run -d chrome
+# Public site (Next.js; needs Node.js 24 and npm)
+cd apps/soar_score_web
+npm install
+npm run dev
 ```
 
 ```bash

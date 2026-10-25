@@ -1,0 +1,180 @@
+.hero {
+  position: relative;
+  overflow: hidden;
+  background: var(--panel-bg);
+  color: var(--panel-text);
+  border-bottom: 1px solid var(--panel-line);
+}
+
+.seams {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.inner {
+  position: relative;
+  display: grid;
+  gap: 40px;
+  padding-block: clamp(48px, 9vw, 112px) clamp(64px, 10vw, 128px);
+  align-items: center;
+}
+
+.copy {
+  display: grid;
+  gap: 20px;
+}
+.copy .eyebrow {
+  color: var(--panel-muted);
+}
+.copy .eyebrow b {
+  color: var(--panel-accent);
+}
+
+.title {
+  max-width: 14ch;
+  color: var(--panel-text);
+}
+
+.lede {
+  font-size: clamp(17px, 2vw, 20px);
+  line-height: 1.5;
+  color: var(--panel-muted);
+  max-width: 54ch;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin: 20px 0 0;
+  padding-top: 20px;
+  border-top: 1px solid var(--panel-line);
+}
+.facts dt {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--panel-muted);
+}
+.facts dd {
+  margin: 4px 0 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.instrument {
+  padding-bottom: 24px;
+}
+
+.scrollHint {
+  position: absolute;
+  left: 50%;
+  bottom: 18px;
+  width: 22px;
+  height: 36px;
+  margin-left: -11px;
+  border: 1.5px solid var(--panel-line);
+  border-radius: 12px;
+}
+.scrollHint span {
+  position: absolute;
+  left: 50%;
+  top: 7px;
+  width: 3px;
+  height: 7px;
+  margin-left: -1.5px;
+  border-radius: 2px;
+  background: var(--panel-accent);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .scrollHint span {
+    animation: hint 1.8s ease-in-out infinite;
+  }
+  .copy > * {
+    animation: rise 800ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+  .copy > :nth-child(2) {
+    animation-delay: 80ms;
+  }
+  .copy > :nth-child(3) {
+    animation-delay: 160ms;
+  }
+  .copy > :nth-child(4) {
+    animation-delay: 240ms;
+  }
+  .copy > :nth-child(5) {
+    animation-delay: 320ms;
+  }
+  @supports (animation-timeline: scroll()) {
+    .scrollHint {
+      animation: fade linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 30vh;
+    }
+  }
+}
+
+@keyframes hint {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  60% {
+    transform: translateY(12px);
+    opacity: 0;
+  }
+}
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes fade {
+  to {
+    opacity: 0;
+  }
+}
+
+@media (min-width: 840px) {
+  .inner {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+    gap: 48px;
+  }
+  .instrument {
+    padding-bottom: 0;
+  }
+}
+
+@media (max-width: 520px) {
+  .facts {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .facts div {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: baseline;
+  }
+  .facts dd {
+    margin: 0;
+    text-align: right;
+  }
+}

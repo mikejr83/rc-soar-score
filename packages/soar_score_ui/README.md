@@ -1,6 +1,6 @@
 # soar_score_ui
 
-Shared Flutter UI package for the Soar Score RC sailplane scoring suite. Provides reusable widgets, composite components, and shared theme tokens used by the `soar_score_contest` and `soar_score_public` Flutter web apps.
+Shared Flutter UI package for the Soar Score RC sailplane scoring suite. Provides reusable widgets, composite components, and shared theme tokens used by the `soar_score_contest` and `soar_score_self_score` Flutter apps. The public site (`apps/soar_score_web`, Next.js) copies the fonts and logos from this package's `assets/`.
 
 This package contains presentational-only widgets with no state or data access logic. It depends on `soar_score_core` for domain types used in widget parameters.
 

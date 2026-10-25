@@ -1,0 +1,426 @@
+/* Results pages: the contest list, the contest header and the tables. One
+   module for the whole area; every class is prefixed by its component. */
+
+/* Page frame */
+.page {
+  padding-block: clamp(24px, 4vw, 48px) clamp(48px, 6vw, 80px);
+}
+.pageHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px 24px;
+  margin-bottom: 20px;
+}
+.pageHead h1 {
+  font-size: clamp(30px, 4vw, 40px);
+  margin-top: 8px;
+}
+.summary {
+  color: var(--text-muted);
+  margin-top: 6px;
+}
+.summary b {
+  color: var(--text);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.message {
+  padding: 24px;
+  color: var(--text-muted);
+}
+.failed {
+  display: grid;
+  gap: 12px;
+  justify-items: start;
+  padding: 24px;
+}
+
+/* Filters */
+.filters {
+  margin-bottom: 20px;
+}
+.filters summary {
+  cursor: pointer;
+  list-style: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 15px;
+}
+.filters summary::-webkit-details-marker {
+  display: none;
+}
+.filters[open] summary {
+  margin-bottom: 12px;
+}
+.count {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--deep-orange);
+  color: var(--white);
+  font-size: 12px;
+  display: inline-grid;
+  place-items: center;
+}
+.filterGrid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: end;
+}
+.filterGrid > :nth-child(1),
+.filterGrid > :nth-child(2) {
+  grid-column: 1 / -1;
+}
+@media (min-width: 840px) {
+  .filters summary {
+    display: none;
+  }
+  .filters:not([open]) .filterGrid {
+    display: grid;
+  }
+  .filterGrid {
+    grid-template-columns: 1.4fr 1.4fr 1fr 1fr auto;
+  }
+  .filterGrid > :nth-child(1),
+  .filterGrid > :nth-child(2) {
+    grid-column: auto;
+  }
+}
+
+/* Contest list */
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+.list li + li {
+  border-top: 1px solid var(--line);
+}
+.row {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-areas:
+    "date status"
+    "name name"
+    "venue venue";
+  gap: 2px 12px;
+  padding: 14px 16px;
+  color: inherit;
+  text-decoration: none;
+}
+.row:hover {
+  background: var(--surface-2);
+  color: inherit;
+}
+.rowDate {
+  grid-area: date;
+  font-size: 13px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+.rowName {
+  grid-area: name;
+  font-family: var(--font-display), var(--font-body), sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 1.2;
+}
+.rowVenue {
+  grid-area: venue;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+.rowStatus {
+  grid-area: status;
+  justify-self: end;
+}
+@media (min-width: 840px) {
+  .row {
+    grid-template-columns: 120px 3fr 2fr auto;
+    grid-template-areas: "date name venue status";
+    align-items: center;
+    gap: 16px;
+  }
+  .rowDate,
+  .rowVenue {
+    font-size: 15px;
+  }
+}
+
+/* Contest header */
+.header {
+  display: grid;
+  gap: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+}
+.header::before {
+  /* the working-time pie, faint, top right */
+  content: "";
+  position: absolute;
+  right: -40px;
+  top: -40px;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: conic-gradient(var(--brand-orange) 0 270deg, transparent 270deg);
+  opacity: 0.07;
+  pointer-events: none;
+}
+.headerTop {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px 16px;
+}
+.header h1 {
+  font-size: clamp(26px, 4vw, 36px);
+}
+.headerMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  color: var(--text-muted);
+  font-size: 15px;
+}
+.headerMeta b {
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* View bar: title, tabs and the round selector */
+.viewBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 24px;
+  margin-bottom: 16px;
+}
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.tabs a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
+}
+.tabs a:hover {
+  border-color: var(--text);
+  color: var(--text);
+}
+.tabs a[aria-current="page"] {
+  background: var(--text);
+  color: var(--bg);
+  border-color: var(--text);
+}
+
+.selector {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.selector button {
+  width: 40px;
+  height: 40px;
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+.selector button:hover:not(:disabled) {
+  border-color: var(--text);
+}
+.selector button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.selector button svg {
+  width: 18px;
+  height: 18px;
+}
+.selector select {
+  min-height: 40px;
+  padding: 0 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  font-weight: 600;
+}
+
+/* Tables */
+.scroller {
+  overflow-x: auto;
+  /* Without this Chrome adds the table's width to the page's scrollable
+     overflow on a phone, so the page itself scrolls sideways. */
+  contain: paint;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.table {
+  width: 100%;
+  min-width: max-content;
+  font-size: 15px;
+}
+.table th,
+.table td {
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+  vertical-align: middle;
+}
+.table thead th {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  background: var(--surface-2);
+}
+.table tbody tr:last-child td {
+  border-bottom: 0;
+}
+.table tbody tr:hover td {
+  background: color-mix(in srgb, var(--surface-2) 50%, var(--surface));
+}
+.numCol {
+  text-align: right !important;
+  font-variant-numeric: tabular-nums;
+}
+.place {
+  font-family: var(--font-accent), var(--font-display), sans-serif;
+  font-size: 20px;
+  line-height: 1;
+  letter-spacing: 0.02em;
+}
+.tie {
+  font-family: var(--font-body), sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--accent);
+}
+.sticky {
+  position: sticky;
+  background: var(--surface);
+  z-index: 1;
+}
+.table thead .sticky {
+  background: var(--surface-2);
+  z-index: 2;
+}
+.stickyEdge {
+  box-shadow: 1px 0 0 var(--line);
+}
+.struck {
+  text-decoration: line-through;
+  text-decoration-thickness: 1.5px;
+  color: var(--text-muted);
+}
+.scoreLink {
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px dotted var(--line-strong);
+}
+.scoreLink:hover {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+.highlight td {
+  background: var(--selected-row) !important;
+}
+.teamRow td {
+  font-weight: 600;
+  border-top: 2px solid var(--line-strong);
+}
+.teamName {
+  font-family: var(--font-display), var(--font-body), sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+}
+
+/* Flight groups */
+.group {
+  margin-bottom: 28px;
+}
+.groupHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 14px;
+  margin-bottom: 10px;
+}
+.groupHead h2 {
+  font-size: clamp(26px, 4vw, 32px);
+}
+.groupHead .stencil {
+  font-size: clamp(26px, 4vw, 32px);
+  color: var(--accent);
+}
+
+/* Skeleton */
+.skeleton {
+  display: grid;
+  gap: 16px;
+}
+.bone {
+  border-radius: var(--radius-sm);
+  background: linear-gradient(90deg, var(--surface-2) 25%, var(--surface) 50%, var(--surface-2) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* Not found / not visible */
+.notice {
+  max-width: 620px;
+  display: grid;
+  gap: 14px;
+  padding: clamp(20px, 4vw, 32px);
+}
+.notice ul {
+  margin: 0;
+  padding-left: 20px;
+  display: grid;
+  gap: 6px;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 6px;
+}

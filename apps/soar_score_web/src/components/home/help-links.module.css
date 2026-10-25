@@ -1,0 +1,73 @@
+.help {
+  border-top: 1px solid var(--line);
+}
+
+.head {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 16px;
+}
+
+.topic {
+  display: grid;
+  gap: 8px;
+  padding: 20px 56px 20px 20px;
+  height: 100%;
+  color: var(--text);
+  text-decoration: none;
+  position: relative;
+  transition:
+    border-color 120ms ease,
+    transform 160ms ease;
+}
+.topic:hover {
+  border-color: var(--text);
+  color: var(--text);
+  transform: translateY(-2px);
+}
+
+.title {
+  font-family: var(--font-display), sans-serif;
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 1.15;
+}
+
+.copy {
+  font-size: 15px;
+  color: var(--text-muted);
+}
+
+.arrow {
+  position: absolute;
+  right: 20px;
+  top: 20px;
+  font-size: 22px;
+  color: var(--text-muted);
+  transition: transform 160ms ease;
+}
+.topic:hover .arrow {
+  transform: translateX(4px);
+  color: var(--accent);
+}
+
+.support {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+@media (min-width: 640px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

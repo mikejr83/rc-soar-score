@@ -16,13 +16,14 @@ Per-project files should NOT override:
 
 ## Project Overview
 
-Soar Score is an RC sailplane soaring contest scoring and management suite. It consists of multiple Flutter and Dart applications and shared packages, all managed by Melos in a Dart monorepo.
+Soar Score is an RC sailplane soaring contest scoring and management suite. It consists of multiple Flutter and Dart applications and shared packages, all managed by Melos in a Dart monorepo, plus the public web site, a Next.js app in `apps/soar_score_web` (ADR 0005).
 
 **Tech Stack:**
 
 - Flutter
 - Dart
 - Melos
+- Node.js 24 and npm (public site only)
 
 ## Environment Setup
 
@@ -57,6 +58,7 @@ Soar Score is an RC sailplane soaring contest scoring and management suite. It c
 
 - GitHub Actions workflow in `.github/workflows/ci.yml` (owned by ticket 011)
 - Runs on push/PR to `master`
+- The public site (`apps/soar_score_web`, Next.js) has its own `public-site` job: `npm ci`, lint, test, build. Melos does not manage it.
 - Documentation-only changes skip the workflow entirely (`paths-ignore` covers `plan/**`, `docs/**`, `**/*.md`, `LICENSE`, `.prettierrc`, `.prettierignore`, `.gitignore`, `.mcp.json`, `.agents/**`, `.kilo/**`, `.vscode/**`, `.github/CODEOWNERS`, `.github/ISSUE_TEMPLATE/**`). A docs-only PR showing no checks is expected, not a CI problem.
 - Steps: install deps → analyze → test → build
 
@@ -160,35 +162,35 @@ Notes:
 - The "Sync" rail entry and the sync item in the status panel appear only in builds that synchronize (native). Screens reach sync through `AppSync` (`services/sync/`), never the sync package. A refused change or open conflict adds a row to the workspace needs-attention list that links to the sync page. The sync page also lists the open conflicts and decides each in a dialog (`widgets/sync/conflict_resolve_dialog.dart`).
 - Opening a contest from the list goes through `ContestOpenAction` / `contestOpenPath`, which picks the page by contest state.
 
-### Public site (`soar_score_public`)
+### Public site (`soar_score_web`)
 
-Every route renders inside the site shell (`widgets/site_shell.dart`: header with logo, app name and navigation, footer) via a go_router `ShellRoute`; unknown routes show `pages/site/not_found_page.dart` (router `errorBuilder`). `/results` redirects to `/results/contests`.
+A Next.js app (App Router, TypeScript; ADR 0005), not Flutter: marketing and information, docs and help, support, and the published results. Routes are files under `src/app/`; every route renders inside the root layout's header and footer (`src/components/site-header.tsx`, `site-footer.tsx`); unknown routes show `src/app/not-found.tsx`. `next.config.ts` redirects `/results` to `/results/contests` and `/help` to `/docs`. Run with `npm run dev` in `apps/soar_score_web` (see its `AGENTS.md`).
 
-| Name people use                                                       | Route                                                                                 | Source (`lib/`)                                                              |
+| Name people use                                                       | Route                                                                                 | Source (`src/app/`)                                                          |
 | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| Site home, landing, homepage                                          | `/`                                                                                   | `pages/site/landing_page.dart`                                               |
-| Contests, contest search (`?name=&venue=&from=&to=` filters)          | `/results/contests`                                                                   | `pages/results/results_page.dart`, `widgets/results/`                        |
-| Not found (not a route)                                               | none                                                                                  | `pages/site/not_found_page.dart`                                             |
-| Contest results, overall individual results (as of a round)           | `/results/contests/:contestId`, `/results/contests/:contestId/rounds/:roundNumber`    | `pages/results/contest_page.dart`, `widgets/results/`                        |
-| Team scores, team results (as of a round)                             | `/results/contests/:contestId/teams/results`, `.../teams/results/rounds/:roundNumber` | `pages/results/contest_page.dart`, `widgets/results/team_results_table.dart` |
-| Flight group scores, groups of a round (`?pilot=` scrolls to a pilot) | `/results/contests/:contestId/rounds/:roundNumber/flight-groups`                      | `pages/results/contest_page.dart`, `widgets/results/flight_group_table.dart` |
-| Contest not found (unknown or delisted, shown in place)               | none                                                                                  | `pages/results/contest_not_found_page.dart`                                  |
-| Contest not visible (pending or private, re-checks every 15 minutes)  | none                                                                                  | `pages/results/contest_not_visible_page.dart`                                |
+| Site home, landing, homepage                                          | `/`                                                                                   | `page.tsx`, sections in `src/components/home/`                               |
+| Contests, contest search (`?name=&venue=&from=&to=` filters)          | `/results/contests`                                                                   | `results/contests/page.tsx`, `src/components/results/`                       |
+| Not found (not a route)                                               | none                                                                                  | `not-found.tsx`                                                              |
+| Contest results, overall individual results (as of a round)           | `/results/contests/:contestId`, `/results/contests/:contestId/rounds/:roundNumber`    | `results/contests/[contestId]/page.tsx`, `.../rounds/[roundNumber]/page.tsx` |
+| Team scores, team results (as of a round)                             | `/results/contests/:contestId/teams/results`, `.../teams/results/rounds/:roundNumber` | `results/contests/[contestId]/teams/results/...`                             |
+| Flight group scores, groups of a round (`?pilot=` scrolls to a pilot) | `/results/contests/:contestId/rounds/:roundNumber/flight-groups`                      | `results/contests/[contestId]/rounds/[roundNumber]/flight-groups/page.tsx`   |
+| Contest not found (unknown or delisted, shown in place)               | none                                                                                  | `src/components/results/contest-not-found.tsx`                               |
+| Contest not visible (pending or private, re-checks every 15 minutes)  | none                                                                                  | `src/components/results/contest-not-visible.tsx`                             |
 
-Contest routes live in `lib/contest_routes.dart` (`contestRoutes`, `contestResultsPath`, `contestTeamResultsPath`, `contestFlightGroupsPath`); the `:contestId` segment carries the publication id. All contest views are one `ContestPage` (`view` picks `ContestView.overall`, `teams` or `flightGroups`) under one page key, so moving between views or rounds keeps the loaded contest. The round selector (`widgets/results/round_selector.dart`) is shared by every view; a round header or round score in the overall and team tables opens that round's flight groups. A team-less contest's team route redirects to the contest root. Parsed view models live in `lib/models/results/`; widgets never read the raw projection maps. The flight-group table reads the provisional `raw_components` (#456) and `reflight` (#457) score keys and hides those columns until the server emits them.
+The contest views share `results/contests/[contestId]/layout.tsx`, a client provider that loads the publication once per contest, so moving between views or rounds keeps the loaded contest. Parsed models live in `src/lib/results/` (`published-contest.ts`, `contest-summary.ts`, `contest-filters.ts`, `paths.ts`); components never read the raw projection maps. The flight-group table reads the provisional `raw_components` (#456) and `reflight` (#457) score keys and hides those columns until the server emits them.
 
-Documentation, help and support routes are registered in `lib/docs_routes.dart` (spec: `plan/ui/public-site/docs-help.md`, `support.md`). `/help` only redirects to `/docs`.
+Documentation, help and support (spec: `plan/ui/public-site/docs-help.md`, `support.md`) share `docs/layout.tsx` (sidebar navigation from `src/components/docs/topics.ts`). Content is draft copy pending #165 and carries a note saying so.
 
-| Name people use                                    | Route                                       | Source (`lib/`)                            |
-| -------------------------------------------------- | ------------------------------------------- | ------------------------------------------ |
-| Docs landing, help landing                         | `/docs` (`/help` redirects here)            | `pages/docs/docs_landing_page.dart`        |
-| Contest Director Getting Started, competition help | `/docs/competitions`                        | `pages/docs/competitions_page.dart`        |
-| Help Me Enter My Score, participant scoring help   | `/docs/participant-scoring`                 | `pages/docs/participant_scoring_page.dart` |
-| F5J score entry quick reference                    | `/docs/participant-scoring/disciplines/f5j` | `pages/docs/f5j_scoring_page.dart`         |
-| I Need An Account?, user account help              | `/docs/user-accounts`                       | `pages/docs/user_accounts_page.dart`       |
-| Finding Contests and Results, public contests help | `/docs/contests-and-scores`                 | `pages/docs/contests_and_scores_page.dart` |
-| Docs not found (any unknown route under `/docs`)   | `/docs/not-found`                           | `pages/docs/docs_not_found_page.dart`      |
-| Support, request support                           | `/support`                                  | `pages/support/support_page.dart`          |
+| Name people use                                    | Route                                       | Source (`src/app/`)                                    |
+| -------------------------------------------------- | ------------------------------------------- | ------------------------------------------------------ |
+| Docs landing, help landing                         | `/docs` (`/help` redirects here)            | `docs/page.tsx`                                        |
+| Contest Director Getting Started, competition help | `/docs/competitions`                        | `docs/competitions/page.tsx`                           |
+| Help Me Enter My Score, participant scoring help   | `/docs/participant-scoring`                 | `docs/participant-scoring/page.tsx`                    |
+| F5J score entry quick reference                    | `/docs/participant-scoring/disciplines/f5j` | `docs/participant-scoring/disciplines/f5j/page.tsx`    |
+| I Need An Account?, user account help              | `/docs/user-accounts`                       | `docs/user-accounts/page.tsx`                          |
+| Finding Contests and Results, public contests help | `/docs/contests-and-scores`                 | `docs/contests-and-scores/page.tsx`                    |
+| Docs not found (any unknown route under `/docs`)   | `/docs/not-found`                           | `docs/not-found/page.tsx` (`docs/[...rest]` redirects) |
+| Support, request support                           | `/support`                                  | `support/page.tsx`, `src/components/support/`          |
 
 ### Self-scoring app (`soar_score_self_score`)
 

@@ -1,0 +1,291 @@
+/* Reading layout and article typography for /docs and /support. */
+
+.layout {
+  display: grid;
+  gap: 32px;
+  padding-block: clamp(32px, 5vw, 56px);
+}
+
+@media (min-width: 840px) {
+  .layout {
+    grid-template-columns: 240px minmax(0, 1fr);
+    gap: 56px;
+    align-items: start;
+  }
+  .sidebar {
+    position: sticky;
+    top: calc(var(--header-h) + 24px);
+  }
+  .sidebar details summary {
+    display: none;
+  }
+}
+
+.sidebar details summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+}
+.sidebar details summary::-webkit-details-marker {
+  display: none;
+}
+.sidebar details summary::after {
+  content: "+";
+  font-weight: 800;
+}
+.sidebar details[open] summary::after {
+  content: "–";
+}
+
+.navList {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 2px;
+}
+.navList a {
+  display: block;
+  padding: 10px 12px;
+  border-left: 2px solid var(--line);
+  color: var(--text);
+  text-decoration: none;
+  font-size: 15px;
+}
+.navList a:hover {
+  border-left-color: var(--line-strong);
+  color: var(--accent);
+}
+.navList a[aria-current="page"] {
+  border-left-color: var(--accent-graphic);
+  font-weight: 700;
+}
+.navGroup {
+  margin-top: 20px;
+}
+
+/* Article */
+
+.article {
+  min-width: 0;
+}
+.article > * {
+  max-width: var(--measure);
+}
+.article h1 {
+  margin-top: 8px;
+}
+.article .lede {
+  margin-top: 16px;
+}
+.article h2 {
+  font-size: clamp(24px, 3vw, 30px);
+  margin-top: 56px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+}
+.article h3 {
+  font-size: 20px;
+  margin-top: 32px;
+}
+.article h2 + p,
+.article h3 + p,
+.article h2 + ul,
+.article h3 + ul,
+.article h2 + ol,
+.article h3 + ol {
+  margin-top: 12px;
+}
+.article p + p,
+.article p + ul,
+.article p + ol,
+.article ul + p,
+.article ol + p {
+  margin-top: 14px;
+}
+.article ul,
+.article ol {
+  padding-left: 22px;
+  margin: 0;
+}
+.article li + li {
+  margin-top: 6px;
+}
+.article ol li::marker {
+  font-weight: 700;
+  color: var(--accent);
+}
+.article table {
+  width: 100%;
+  margin-top: 16px;
+  font-size: 15px;
+}
+.article th,
+.article td {
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+.article th {
+  background: var(--surface-2);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.article dl {
+  margin: 12px 0 0;
+  display: grid;
+  gap: 10px;
+}
+.article dt {
+  font-weight: 700;
+}
+.article dd {
+  margin: 2px 0 0;
+  color: var(--text-muted);
+}
+
+/* Draft marker, callouts, figure placeholders */
+
+.draft {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 20px;
+  padding: 6px 12px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 999px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.callout {
+  margin-top: 20px;
+  padding: 16px 18px;
+  border-left: 3px solid var(--accent-graphic);
+  background: var(--surface);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+.callout .eyebrow {
+  margin-bottom: 6px;
+}
+
+.figure {
+  margin: 20px 0 0;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--surface);
+  overflow: hidden;
+}
+.figureBox {
+  aspect-ratio: 9 / 14;
+  max-height: 320px;
+  width: 100%;
+  display: grid;
+  place-items: center;
+  background:
+    linear-gradient(var(--line) 1px, transparent 1px) 0 0 / 24px 24px,
+    linear-gradient(90deg, var(--line) 1px, transparent 1px) 0 0 / 24px 24px;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.figure--wide .figureBox {
+  aspect-ratio: 16 / 9;
+}
+.figure figcaption {
+  padding: 10px 14px;
+  font-size: 14px;
+  color: var(--text-muted);
+  border-top: 1px solid var(--line);
+}
+
+/* Topic cards (landing and docs not-found) */
+
+.cards {
+  list-style: none;
+  margin: 20px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  max-width: none;
+}
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 132px;
+  padding: 16px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  color: var(--text);
+  text-decoration: none;
+  transition: border-color 120ms ease;
+}
+.card:hover {
+  border-color: var(--text);
+  color: var(--text);
+}
+.card strong {
+  font-family: var(--font-display), var(--font-body), sans-serif;
+  font-size: 18px;
+  line-height: 1.2;
+}
+.card span {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+.card .eyebrow {
+  font-size: 11px;
+}
+
+.faq {
+  margin-top: 16px;
+}
+.faq details {
+  border-top: 1px solid var(--line);
+}
+.faq details:last-child {
+  border-bottom: 1px solid var(--line);
+}
+.faq summary {
+  cursor: pointer;
+  padding: 14px 0;
+  font-weight: 700;
+  font-family: var(--font-display), var(--font-body), sans-serif;
+  font-size: 17px;
+}
+.faq details p {
+  padding-bottom: 16px;
+  color: var(--text-muted);
+}
+
+.trouble {
+  margin-top: 32px;
+  padding: 24px;
+  max-width: none;
+}
+.trouble h2 {
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+.trouble p {
+  margin-top: 10px;
+  max-width: var(--measure);
+}
+.trouble .btn {
+  margin-top: 16px;
+}

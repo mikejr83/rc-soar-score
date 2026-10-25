@@ -1,0 +1,48 @@
+.cta {
+  position: relative;
+  overflow: hidden;
+  background: var(--panel-bg);
+  color: var(--panel-text);
+  border-top: 1px solid var(--panel-line);
+  padding-block: clamp(56px, 9vw, 112px);
+}
+
+.seams {
+  position: absolute;
+  inset: 0;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.inner {
+  position: relative;
+  display: grid;
+  gap: 16px;
+  justify-items: center;
+  text-align: center;
+}
+
+.round {
+  font-size: clamp(14px, 2vw, 18px);
+  color: var(--panel-muted);
+  letter-spacing: 0.3em;
+}
+
+.title {
+  color: var(--panel-text);
+  max-width: 16ch;
+}
+
+.lede {
+  color: var(--panel-muted);
+  font-size: clamp(16px, 2vw, 19px);
+  max-width: 48ch;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 12px;
+}

@@ -25,7 +25,7 @@ Phone and desktop matter equally. Results tables are the hard part: they must be
 
 ## The shell
 
-A header, a page body and a footer shared by every page (`apps/soar_score_public/lib/widgets/site_shell.dart`).
+A header, a page body and a footer shared by every page (`apps/soar_score_web/src/components/site-header.tsx` and `site-footer.tsx`; this brief predates the Next.js port, ADR 0005).
 
 - **Header:** logo slot, wordmark, and the navigation: Home, Contests, Docs, Help, and a **Login** entry that links out to the contest administration app (the public site has no sign-in of its own). On compact widths the navigation collapses; propose the pattern (bottom bar, drawer or menu) and say why. Contests is the entry people use most; it should be reachable in one tap on a phone.
 - **Footer:** small, with links to Docs, Support and the contest administration app, and room for a copyright line.

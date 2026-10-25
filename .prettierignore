@@ -25,6 +25,11 @@ web/
 # Dependencies and lockfiles
 node_modules/
 pubspec.lock
+package-lock.json
+
+# Next.js build output
+.next/
+out/
 
 # Agents
 .agents/skills/

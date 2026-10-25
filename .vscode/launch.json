@@ -91,22 +91,6 @@
       ],
       "console": "debugConsole"
     },
-    {
-      "name": "soar_score_public (Web)",
-      "type": "dart",
-      "request": "launch",
-      "program": "lib/main.dart",
-      "cwd": "apps/soar_score_public",
-      "args": [
-        "-d",
-        "chrome",
-        "--web-port",
-        "8092",
-        "--web-hostname",
-        "127.0.0.1"
-      ],
-      "console": "debugConsole"
-    }
   ],
   "compounds": [
     {
