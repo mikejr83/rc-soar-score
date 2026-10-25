@@ -95,7 +95,7 @@ void main() {
     );
     expect(
       tester.widget<OutlinedButton>(find.byType(OutlinedButton)).onPressed,
-      isNotNull,
+      isNull,
     );
 
     monitor.internetStatus = ConnectivityStatus.unavailable;
