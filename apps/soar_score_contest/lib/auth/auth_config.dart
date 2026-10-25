@@ -15,7 +15,7 @@ class Auth0Config {
   /// Development tenant. The region part of the domain (`us`) is an
   /// assumption; confirm it on the tenant's Settings page and override with
   /// `AUTH0_DOMAIN` when it differs.
-  static const String defaultDomain = 'dev-2qpi7354ddlhe45g.us.auth0.com';
+  static const String defaultDomain = 'login.rcsoarscore.com';
 
   /// Client ID of the Auth0 application the web build signs in with.
   static const String defaultWebClientId = 'ALL8oKywE1J31NEKvcaypfSeZSsoDXII';
