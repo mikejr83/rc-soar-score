@@ -385,7 +385,7 @@ class _LandingPageState extends State<LandingPage> {
                             TextButton.icon(
                               onPressed: () => _openExternalLink(
                                 context,
-                                'https://example.com/help',
+                                'https://rcsoarscore.com/docs',
                                 'Help',
                               ),
                               icon: const Icon(Icons.open_in_new, size: 16),
@@ -394,7 +394,7 @@ class _LandingPageState extends State<LandingPage> {
                             TextButton.icon(
                               onPressed: () => _openExternalLink(
                                 context,
-                                'https://example.com/public',
+                                'https://rcsoarscore.com/results/contests',
                                 'Public contest site',
                               ),
                               icon: const Icon(Icons.open_in_new, size: 16),
