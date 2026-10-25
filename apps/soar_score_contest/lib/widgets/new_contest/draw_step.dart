@@ -42,7 +42,6 @@ class DrawStep extends StatelessWidget {
       child: Card(
         margin: EdgeInsets.zero,
         elevation: 1,
-        color: scheme.surfaceContainerLow,
         child: Padding(
           padding: padding ?? const EdgeInsets.fromLTRB(20, 16, 20, 20),
           child: child,

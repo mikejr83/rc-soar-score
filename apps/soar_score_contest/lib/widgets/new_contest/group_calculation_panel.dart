@@ -62,7 +62,7 @@ class GroupCalculationPanel extends StatelessWidget {
         key: const ValueKey('group-calculation'),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: scheme.surfaceContainer,
+          color: scheme.secondaryContainer,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(

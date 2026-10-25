@@ -14,7 +14,7 @@ server only verifies tokens against the tenant's public keys.
 | Setting            | Development value                                        |
 | ------------------ | -------------------------------------------------------- |
 | Tenant             | `dev-2qpi7354ddlhe45g`                                   |
-| Tenant domain      | `dev-2qpi7354ddlhe45g.us.auth0.com` (confirm region)     |
+| Tenant domain      | `login.rcsoarscore.com`                                  |
 | API identifier     | `https://soar-score.com/server`                          |
 | Web client ID      | `ALL8oKywE1J31NEKvcaypfSeZSsoDXII`                       |
 | Windows client ID  | `3FdIOOxNr4DF4iT8BDaqKWc9NabpEKbz`                       |

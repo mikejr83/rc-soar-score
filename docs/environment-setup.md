@@ -168,7 +168,7 @@ A minimal local `.env` at the repo root:
 
 ```dotenv
 POSTGRES_PASSWORD=choose-a-local-password
-AUTH0_DOMAIN=dev-2qpi7354ddlhe45g.us.auth0.com
+AUTH0_DOMAIN=login.rcsoarscore.com
 API_AUDIENCE=https://soar-score.com/server
 ```
 

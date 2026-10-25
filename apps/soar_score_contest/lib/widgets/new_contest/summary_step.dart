@@ -332,7 +332,6 @@ class _SectionCard extends StatelessWidget {
         key: ValueKey('summary-${section.title}'),
         margin: EdgeInsets.zero,
         elevation: 1,
-        color: scheme.surfaceContainerLow,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
           side: issue == null
