@@ -327,4 +327,28 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get inspectionNotice =>
       'This contest was imported for inspection. It stays on this computer: nothing in it is sent to the service, whoever is signed in.';
+
+  @override
+  String get shellRoundLabel => 'Round';
+
+  @override
+  String shellRoundValue(int round, int total) {
+    return '$round of $total';
+  }
+
+  @override
+  String shellRoundGroupValue(int round, int total, String group) {
+    return '$round of $total, group $group';
+  }
+
+  @override
+  String get shellRoundNotStarted => 'Not started';
+
+  @override
+  String get shellRoundFinished => 'Finished';
+
+  @override
+  String shellRoundSemantics(String label, String value) {
+    return '$label: $value. Go to scoring';
+  }
 }

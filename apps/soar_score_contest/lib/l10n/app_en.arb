@@ -348,5 +348,42 @@
   "inspectionNotice": "This contest was imported for inspection. It stays on this computer: nothing in it is sent to the service, whoever is signed in.",
   "@inspectionNotice": {
     "description": "Notice on the contest detail pane of an imported inspection copy."
+  },
+  "shellRoundLabel": "Round",
+  "@shellRoundLabel": {
+    "description": "Label of the round entry in the contest status panel."
+  },
+  "shellRoundValue": "{round} of {total}",
+  "@shellRoundValue": {
+    "description": "Round entry value: the round being scored out of the total.",
+    "placeholders": {
+      "round": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "shellRoundGroupValue": "{round} of {total}, group {group}",
+  "@shellRoundGroupValue": {
+    "description": "Round entry value with the group being scored, shown by its letter.",
+    "placeholders": {
+      "round": {"type": "int"},
+      "total": {"type": "int"},
+      "group": {"type": "String"}
+    }
+  },
+  "shellRoundNotStarted": "Not started",
+  "@shellRoundNotStarted": {
+    "description": "Round entry value when a drawn contest has no scores yet."
+  },
+  "shellRoundFinished": "Finished",
+  "@shellRoundFinished": {
+    "description": "Round entry value when the contest is completed."
+  },
+  "shellRoundSemantics": "{label}: {value}. Go to scoring",
+  "@shellRoundSemantics": {
+    "description": "Accessible name of the round entry button.",
+    "placeholders": {
+      "label": {"type": "String"},
+      "value": {"type": "String"}
+    }
   }
 }
