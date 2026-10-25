@@ -12,7 +12,12 @@ installer, and it is not signed yet.
 4. Windows SmartScreen may say "Windows protected your PC" because the app is
    not signed. Click **More info**, then **Run anyway**.
 
-Choose **Continue offline** on the first screen. Sign-in is not part of the
+Every time the app opens it shows an alpha warning (contest data may need to be
+reset in a later release, check the scoring by hand, self-scoring and results
+sharing are not finished). Tick the acknowledgement and choose **Continue** to
+use the app.
+
+Then choose **Continue offline** on the first screen. Sign-in is not part of the
 alpha zip.
 
 ## Where your data lives
@@ -32,6 +37,7 @@ Your contests are kept. The version shows at the bottom of the settings menu
 Run this on a Windows machine that has never had the app:
 
 - [ ] Unzip, run the exe, get past SmartScreen
+- [ ] The alpha warning shows; Continue stays off until the box is ticked
 - [ ] Continue offline, create a contest, close the app
 - [ ] Unzip a newer build over the old folder, reopen: the contest is still there
 - [ ] The version in the menu matches the release

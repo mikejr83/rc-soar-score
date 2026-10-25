@@ -11,6 +11,7 @@ import 'platform/app_bootstrap.dart';
 // web bootstrap. Both branches expose the same `start()` entry point.
 // Ticket 018.
 import 'platform/bootstrap.dart' as bootstrap;
+import 'services/alpha_notice/alpha_notice_mode.dart';
 import 'services/connectivity/app_connectivity.dart';
 import 'services/connectivity/reachability_forwarder.dart';
 import 'services/collapsible_areas/collapsible_areas_controller.dart';
@@ -87,6 +88,7 @@ Future<void> _runContestApp(AppBootstrap appBootstrap) async {
       themeController: theme,
       textSizeController: textSize,
       collapsibleAreas: areas,
+      alphaNotice: showAlphaNotice,
     ),
   );
 }

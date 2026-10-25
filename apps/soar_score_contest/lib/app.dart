@@ -18,7 +18,9 @@ import 'local_ui_store_provider.dart';
 import 'platform/app_bootstrap.dart';
 import 'router.dart';
 import 'services/collapsible_areas/collapsible_areas_controller.dart';
+import 'services/alpha_notice/alpha_notice_mode.dart';
 import 'services/text_size/preferred_text_scaler.dart';
+import 'widgets/alpha_notice_gate.dart';
 import 'services/text_size/text_size_controller.dart';
 import 'services/theme/theme_controller.dart';
 import 'collapsible_areas_provider.dart';
@@ -40,6 +42,7 @@ class SoarScoreContestApp extends StatefulWidget {
     this.textSizeController,
     this.collapsibleAreas,
     this.preferences,
+    this.alphaNotice = false,
     this.extraLocalizationDelegates = const [],
     this.extraSupportedLocales = const [],
   });
@@ -81,6 +84,10 @@ class SoarScoreContestApp extends StatefulWidget {
   /// The preferred locale, already loaded. When `null` the app makes one from
   /// the bootstrap's account preferences and loads it after the first frame.
   final PreferencesController? preferences;
+
+  /// Whether to cover the app with the alpha release warning until it is
+  /// acknowledged. `main` passes [showAlphaNotice]; tests opt in.
+  final bool alphaNotice;
 
   /// Delegates tried before the app's own, so a test can add a locale the app
   /// does not ship and watch Flutter resolve to it.
@@ -221,7 +228,10 @@ class _SoarScoreContestAppState extends State<SoarScoreContestApp> {
                 _textSize.size,
               ),
             ),
-            child: child ?? const SizedBox.shrink(),
+            child: AlphaNoticeGate(
+              enabled: widget.alphaNotice,
+              child: child ?? const SizedBox.shrink(),
+            ),
           );
         },
         locale: _preferences.locale,
