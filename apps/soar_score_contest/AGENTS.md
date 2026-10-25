@@ -25,7 +25,7 @@ Contest management application for directors, pilots, and helpers. Runs on web a
 
 - Offline-aware: UI must not assume connectivity (see `plan/architecture-requirements/offline-usage.md`). Show pending-changes state, provide manual sync trigger.
 - The web build stores no contest data in the browser (IndexedDB is limited to preferences and front-end functionality). The native build syncs on connect, then writes locally first and immediately through the remote API.
-- Routing constructs are shared with `soar_score_public` via `soar_score_ui`.
+- Routing constructs are shared with `soar_score_self_score` via `soar_score_ui`; the public site is a separate Next.js app (`soar_score_web`).
 - Mobile-first responsive layouts (see `plan/architecture-requirements/responsive-design.md`).
 
 ## Testing

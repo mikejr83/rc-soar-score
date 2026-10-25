@@ -67,7 +67,7 @@ RC Soar Score is structured as a Dart/Flutter monorepo managed with [Melos](http
 soar-score/
 ├── apps/                        # End-user applications and backend service
 │   ├── soar_score_contest/      # Contest director management app (Flutter Web / Desktop)
-│   ├── soar_score_public/       # Public site & results portal (Flutter Web)
+│   ├── soar_score_web/          # Public site, docs & results portal (Next.js)
 │   ├── soar_score_self_score/   # Mobile self-scoring app for pilots (Flutter Web/Mobile)
 │   └── soar_score_server/       # Shelf-based backend REST API service (Dart)
 ├── packages/                    # Shared Dart & Flutter packages
@@ -83,7 +83,7 @@ soar-score/
 ### Applications (`apps/`)
 
 - [`soar_score_contest`](apps/soar_score_contest/): The contest director's command center. Used to configure contests, manage pilots, execute matrix draws, oversee official scoring, handle disputes, and manage offline/online synchronization. Runs on laptops and tablets (Flutter Web / Windows desktop shell).
-- [`soar_score_public`](apps/soar_score_public/): Public web site for soaring enthusiasts. Displays live scoring projections, official results, flight stats, and contest archives.
+- [`soar_score_web`](apps/soar_score_web/): Public web site (Next.js, TypeScript). Product information, documentation and help, support, and the published contest results.
 - [`soar_score_self_score`](apps/soar_score_self_score/): Lightweight, mobile-optimized Flutter web interface designed for pilots and helpers entering flight scores directly from the field.
 - [`soar_score_server`](apps/soar_score_server/): Dart backend server using [Shelf](https://pub.dev/packages/shelf). Validates Auth0 OIDC JWTs, handles REST API endpoints, orchestrates data sync, and serves public contest projections.
 
@@ -98,7 +98,7 @@ soar-score/
 ### Layer Diagram
 
 ```plaintext
-Flutter Apps (soar_score_contest, soar_score_public, soar_score_self_score)
+Flutter Apps (soar_score_contest, soar_score_self_score)
          │
          ▼
 soar_score_ui (shared Flutter widgets & tokens)
@@ -208,11 +208,12 @@ flutter run -d windows --dart-define=SOAR_SCORE_DEMO=true
 - The defines are ignored in release builds and have no effect on web builds or the server.
 - In VS Code, use the launch configurations **soar_score_contest (Windows, demo data)** and **(Windows, fresh demo data)**, or the tasks **contest app: run with demo data (Windows)** and **contest app: run with fresh demo data (Windows)**.
 
-#### Public Results Site
+#### Public Site
 
 ```bash
-cd apps/soar_score_public
-flutter run -d chrome
+cd apps/soar_score_web
+npm install
+npm run dev
 ```
 
 #### Participant Self-Scoring App

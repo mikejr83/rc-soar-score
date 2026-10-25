@@ -1,0 +1,93 @@
+.frame {
+  position: relative;
+  width: min(100%, 420px);
+  margin-inline: auto;
+  filter: drop-shadow(0 30px 50px rgb(0 0 0 / 0.45));
+}
+
+.svg {
+  width: 100%;
+  height: auto;
+}
+
+.label {
+  font-family: var(--font-body), sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  fill: #b8b3ad;
+}
+
+.readout {
+  font-family: var(--font-accent), var(--font-display), sans-serif;
+  font-size: 30px;
+  fill: #f3f2f2;
+  letter-spacing: 0.04em;
+}
+
+.plate {
+  position: absolute;
+  left: 50%;
+  bottom: -18px;
+  transform: translateX(-50%);
+  background: var(--panel-surface);
+  border: 1px solid var(--panel-line);
+  border-radius: 999px;
+  padding: 8px 16px;
+  white-space: nowrap;
+}
+/* One orange element per area: the sweep has it, so the plate stays muted. */
+.plate :global(.eyebrow) b {
+  color: var(--panel-muted);
+}
+
+/* The sweep fills to 62 of 100 on load, the hand follows. */
+.sweep {
+  stroke-dasharray: 62 100;
+  stroke-dashoffset: 0;
+}
+.hand {
+  transform-origin: 160px 160px;
+  transform: rotate(223deg);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .sweep {
+    animation: sweep 2.6s cubic-bezier(0.2, 0.7, 0.1, 1) both;
+  }
+  .hand {
+    animation: hand 2.6s cubic-bezier(0.2, 0.7, 0.1, 1) both;
+  }
+
+  /* Scroll-linked drift of the whole instrument as the hero leaves. */
+  @supports (animation-timeline: scroll()) {
+    .frame {
+      animation: drift linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 80vh;
+    }
+  }
+}
+
+@keyframes sweep {
+  from {
+    stroke-dasharray: 0 100;
+  }
+  to {
+    stroke-dasharray: 62 100;
+  }
+}
+@keyframes hand {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(223deg);
+  }
+}
+@keyframes drift {
+  to {
+    transform: translateY(80px) rotate(-4deg) scale(0.92);
+    opacity: 0.4;
+  }
+}
