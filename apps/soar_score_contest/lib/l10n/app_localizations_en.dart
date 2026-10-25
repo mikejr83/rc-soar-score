@@ -351,4 +351,34 @@ class AppLocalizationsEn extends AppLocalizations {
   String shellRoundSemantics(String label, String value) {
     return '$label: $value. Go to scoring';
   }
+
+  @override
+  String get alphaNoticeTitle => 'Alpha release';
+
+  @override
+  String get alphaNoticeIntro =>
+      'RC Soar Score is an early release. Please read this before you continue.';
+
+  @override
+  String get alphaNoticeStorage =>
+      'Contest directors should not expect this application to store contest data for the long term. The next release may require the database to be reset.';
+
+  @override
+  String get alphaNoticeScoring =>
+      'The scoring system should be correct, but manual checks should be performed.';
+
+  @override
+  String get alphaNoticeMissing =>
+      'Major functionality such as pilot self-scoring and contest results sharing has not been completed.';
+
+  @override
+  String get alphaNoticePrimary =>
+      'The software is still in an early release and should not be your primary method for tracking a contest and scoring.';
+
+  @override
+  String get alphaNoticeAcknowledge =>
+      'I understand this, and I will not hold the application developers responsible.';
+
+  @override
+  String get alphaNoticeContinue => 'Continue';
 }

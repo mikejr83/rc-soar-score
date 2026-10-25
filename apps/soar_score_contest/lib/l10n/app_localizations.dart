@@ -517,6 +517,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{label}: {value}. Go to scoring'**
   String shellRoundSemantics(String label, String value);
+
+  /// Heading of the warning shown each time the app opens in an alpha build.
+  ///
+  /// In en, this message translates to:
+  /// **'Alpha release'**
+  String get alphaNoticeTitle;
+
+  /// Opening line of the alpha release warning.
+  ///
+  /// In en, this message translates to:
+  /// **'RC Soar Score is an early release. Please read this before you continue.'**
+  String get alphaNoticeIntro;
+
+  /// Alpha warning: contest data may be lost.
+  ///
+  /// In en, this message translates to:
+  /// **'Contest directors should not expect this application to store contest data for the long term. The next release may require the database to be reset.'**
+  String get alphaNoticeStorage;
+
+  /// Alpha warning: results need manual checking.
+  ///
+  /// In en, this message translates to:
+  /// **'The scoring system should be correct, but manual checks should be performed.'**
+  String get alphaNoticeScoring;
+
+  /// Alpha warning: features that are not finished.
+  ///
+  /// In en, this message translates to:
+  /// **'Major functionality such as pilot self-scoring and contest results sharing has not been completed.'**
+  String get alphaNoticeMissing;
+
+  /// Alpha warning: do not rely on the app alone.
+  ///
+  /// In en, this message translates to:
+  /// **'The software is still in an early release and should not be your primary method for tracking a contest and scoring.'**
+  String get alphaNoticePrimary;
+
+  /// Label of the checkbox that must be ticked to continue past the alpha warning.
+  ///
+  /// In en, this message translates to:
+  /// **'I understand this, and I will not hold the application developers responsible.'**
+  String get alphaNoticeAcknowledge;
+
+  /// Button that closes the alpha warning once the checkbox is ticked.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get alphaNoticeContinue;
 }
 
 class _AppLocalizationsDelegate
