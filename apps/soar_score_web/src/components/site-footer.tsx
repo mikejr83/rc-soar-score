@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import {
+  companyName,
   contestAppUrl,
   repositoryUrl,
   selfScoreAppUrl,
@@ -61,7 +62,7 @@ export function SiteFooter() {
         </nav>
 
         <p className={styles.legal}>
-          © {new Date().getFullYear()} {siteName}. Published results are a
+          © {new Date().getFullYear()} {companyName}, Mike Gardner. Site design credits: Mason Beard. Published results are a
           public record; see a contest director to correct a score.
         </p>
       </div>

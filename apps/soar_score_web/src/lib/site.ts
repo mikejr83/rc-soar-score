@@ -6,6 +6,7 @@
  * variables, read at build time.
  */
 
+export const companyName = "Laminar Stack";
 export const siteName = "RC Soar Score";
 export const tagline = "RC glider contest scoring";
 
