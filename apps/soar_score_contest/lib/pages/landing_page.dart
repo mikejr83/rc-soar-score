@@ -175,38 +175,41 @@ class _LandingPageState extends State<LandingPage> {
       return _signedInArea(session);
     }
 
-    Widget buttons(bool internetAvailable, bool apiAvailable) => Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        if (session?.endedReason != null) ...[
-          Text(
-            session!.endedReason!,
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyMedium,
+    Widget buttons(bool internetAvailable, bool apiAvailable) {
+      final authUsable = internetAvailable && apiAvailable;
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (session?.endedReason != null) ...[
+            Text(
+              session!.endedReason!,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 12),
+          ],
+          FilledButton.icon(
+            onPressed: authUsable
+                ? () => session == null
+                      ? showNotWiredUpDialog(context, 'Sign in')
+                      : _signIn(context, session)
+                : null,
+            icon: const Icon(Icons.login),
+            label: const Text('Sign in'),
           ),
           const SizedBox(height: 12),
+          OutlinedButton.icon(
+            onPressed: authUsable
+                ? () => session == null
+                      ? showNotWiredUpDialog(context, 'Create account')
+                      : _signIn(context, session, createAccount: true)
+                : null,
+            icon: const Icon(Icons.person_add_alt_1),
+            label: const Text('Create account'),
+          ),
         ],
-        FilledButton.icon(
-          onPressed: internetAvailable && apiAvailable
-              ? () => session == null
-                    ? showNotWiredUpDialog(context, 'Sign in')
-                    : _signIn(context, session)
-              : null,
-          icon: const Icon(Icons.login),
-          label: const Text('Sign in'),
-        ),
-        const SizedBox(height: 12),
-        OutlinedButton.icon(
-          onPressed: internetAvailable
-              ? () => session == null
-                    ? showNotWiredUpDialog(context, 'Create account')
-                    : _signIn(context, session, createAccount: true)
-              : null,
-          icon: const Icon(Icons.person_add_alt_1),
-          label: const Text('Create account'),
-        ),
-      ],
-    );
+      );
+    }
 
     final Widget normal = monitor == null
         ? buttons(false, false)
