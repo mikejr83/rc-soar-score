@@ -14,21 +14,18 @@ const env = (name: string, fallback: string) =>
   process.env[name]?.trim() || fallback;
 
 /** The API server; the results pages read `/public/publications` from it. */
-export const apiBaseUrl = env(
-  "NEXT_PUBLIC_SOAR_SCORE_API_BASE_URL",
-  "http://localhost:8080",
-);
+export const apiBaseUrl = '/api';
 
 /** The contest administration app. Login and registration go here (#464). */
 export const contestAppUrl = env(
   "NEXT_PUBLIC_CONTEST_APP_URL",
-  "https://app.rc-soar-score.com/",
+  "https://app.rcsoarscore.com/",
 );
 
 /** The participant self-scoring app. */
 export const selfScoreAppUrl = env(
   "NEXT_PUBLIC_SELF_SCORE_APP_URL",
-  "https://score.rc-soar-score.com/",
+  "https://score.rcsoarscore.com/",
 );
 
 /** The offline (Windows) application download. TODO(#222): the release page. */
