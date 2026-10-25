@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
@@ -102,6 +103,17 @@ abstract class ReportSpec {
 
   /// The orientation the report starts with; the director can change it.
   PageOrientation get defaultOrientation => PageOrientation.landscape;
+
+  /// The page setup offers no orientation: the report prints one way only.
+  bool get fixedOrientation => false;
+
+  /// Whether the frame's running header and footer surround each page. A
+  /// report cut apart after printing draws its own on every card.
+  bool get hasRunningFrame => true;
+
+  /// Tells the viewer when something inside [data] changes by itself, for
+  /// example an invitation being sent, so the sheet and banners redraw.
+  Listenable? changesOf(Object? data) => null;
 
   /// Whether the report is built from scores and so carries a result status.
   bool get dependsOnScores => false;

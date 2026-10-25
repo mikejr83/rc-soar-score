@@ -20,6 +20,7 @@ class ViewerPanelGroups extends StatelessWidget {
     required this.onPreview,
     required this.defaultOrientation,
     this.columns = 1,
+    this.showOrientation = true,
   });
 
   /// The report's own groups (Filter, Options).
@@ -32,6 +33,9 @@ class ViewerPanelGroups extends StatelessWidget {
   final ValueChanged<bool> onPreview;
   final PageOrientation defaultOrientation;
   final int columns;
+
+  /// False for a report that prints one way only.
+  final bool showOrientation;
 
   @override
   Widget build(BuildContext context) {
@@ -57,14 +61,15 @@ class ViewerPanelGroups extends StatelessWidget {
               system: PlatformDispatcher.instance.locale,
             ),
           ),
-          _Segments<PageOrientation>(
-            label: 'Orientation',
-            values: PageOrientation.values,
-            selected: setup.orientation,
-            text: (orientation) => orientation.label,
-            onChanged: onOrientation,
-            help: 'This report’s default is ${defaultOrientation.label}.',
-          ),
+          if (showOrientation)
+            _Segments<PageOrientation>(
+              label: 'Orientation',
+              values: PageOrientation.values,
+              selected: setup.orientation,
+              text: (orientation) => orientation.label,
+              onChanged: onOrientation,
+              help: 'This report’s default is ${defaultOrientation.label}.',
+            ),
           SwitchListTile(
             key: const ValueKey('viewer-preview-switch'),
             value: preview,

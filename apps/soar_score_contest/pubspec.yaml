@@ -69,6 +69,7 @@ dependencies:
   package_info_plus: ^10.2.2
   pdf: ^3.13.1
   printing: ^5.15.1
+  qr: ^3.0.2
   file_selector: ^1.1.0
 
 dev_dependencies:

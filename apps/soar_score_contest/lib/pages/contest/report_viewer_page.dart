@@ -178,9 +178,14 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
         facts: facts,
         filters: controller.sheetFilters,
         setup: setup,
-        bodySize: SheetLayout.bodySize(setup),
+        bodySize: _definition!.hasRunningFrame
+            ? SheetLayout.bodySize(setup)
+            : SheetLayout.bareBodySize(setup),
         preview: controller.params.preview,
         data: controller.data,
+        online:
+            appConnectivityOf(context)?.internetStatus !=
+            ConnectivityStatus.unavailable,
       ),
     );
   }
@@ -192,6 +197,18 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
     // No calculation version is shown: the contest data the app reads carries
     // none (only a published projection does), and a report is built from the
     // current inputs.
+    if (!_definition!.hasRunningFrame) {
+      return [
+        for (var i = 0; i < count; i++)
+          ReportBarePage(
+            setup: controller.setup,
+            reportName: widget.report!.title,
+            pageNumber: i + 1,
+            pageCount: count,
+            body: document.pages[i],
+          ),
+      ];
+    }
     return [
       for (var i = 0; i < count; i++)
         ReportSheetPage(
@@ -229,21 +246,40 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
       ),
   ];
 
-  void _print() {
+  /// Lets the report remind the director before printing (for example that
+  /// some cards have no QR code). Answers whether to go on.
+  Future<bool> _confirmPrint() async {
+    final gate = _document()?.beforePrint;
+    if (gate == null) {
+      return true;
+    }
+    final go = await gate(context);
+    return go && mounted;
+  }
+
+  Future<void> _print() async {
     final controller = _controller!;
     if (controller.busy ||
         !controller.hasSheet ||
         !controller.printer.capabilities.canPrint) {
       return;
     }
+    if (!await _confirmPrint()) {
+      return;
+    }
+    // The pages are built after the reminder: sending invitations from it adds
+    // QR codes to the cards.
     controller.print(_printTitle, _printPages());
   }
 
-  void _savePdf() {
+  Future<void> _savePdf() async {
     final controller = _controller!;
     if (controller.busy ||
         !controller.hasSheet ||
         !controller.printer.capabilities.canSavePdf) {
+      return;
+    }
+    if (!await _confirmPrint()) {
       return;
     }
     controller.savePdf(_printTitle, _printPages());
@@ -312,6 +348,7 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
           check: controller.check,
           setFilter: controller.setFilter,
           setFilters: controller.setFilters,
+          setup: setup,
         ),
       ),
       setup: setup,
@@ -322,6 +359,7 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
       onPreview: controller.setPreview,
       defaultOrientation: _definition!.defaultOrientation,
       columns: columns,
+      showOrientation: !_definition!.fixedOrientation,
     );
   }
 
@@ -358,6 +396,36 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
                 emphasis: PageBannerEmphasis.outlined,
               ),
           ],
+        ),
+      );
+    }
+    for (final banner in document?.banners ?? const <ReportBanner>[]) {
+      banners.add(
+        ViewerBanner(
+          key: banner.key,
+          kind: banner.kind,
+          icon: banner.icon,
+          lead: banner.lead,
+          text: banner.text,
+          actions: [
+            for (final action in banner.actions)
+              PageBannerAction(
+                action.label,
+                action.onPressed == null
+                    ? null
+                    : () => action.onPressed!(context),
+                emphasis: action.filled
+                    ? PageBannerEmphasis.filled
+                    : PageBannerEmphasis.outlined,
+                key: action.key,
+              ),
+          ],
+          child: banner.busy
+              ? const Padding(
+                  padding: EdgeInsets.only(top: 8),
+                  child: LinearProgressIndicator(),
+                )
+              : null,
         ),
       );
     }
@@ -545,6 +613,20 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
 
   @override
   Widget build(BuildContext context) {
+    final controller = _controller;
+    final changes = widget.report == null
+        ? null
+        : _definition?.changesOf(controller?.data);
+    if (changes == null) {
+      return _buildPage(context);
+    }
+    return ListenableBuilder(
+      listenable: changes,
+      builder: (context, _) => _buildPage(context),
+    );
+  }
+
+  Widget _buildPage(BuildContext context) {
     final report = widget.report;
     if (report == null) {
       return Scaffold(
