@@ -28,15 +28,15 @@ The list is the same list as step 4 of the New Contest Wizard ([new-contest-wiza
 
 - One participation per person per contest. A person can't be added twice. Name and email are read from the director's reusable profile and are never copied or edited here. **Editing a row never changes the reusable profile.** Say this once, quietly, where it matters (for example in the edit control's help text).
 - **Email is shown as a status** ("Has email", "None", "Private") and never as text unless the viewer may see it.
-- Columns appear only for the options enabled on the contest: Team, Pilot no., Class, Role, Model name, Model ID. Name is always shown. A disabled option's column and control are absent, not greyed.
+- Columns appear only for the options enabled on the contest: Team, Pilot no., Class, Role, Models. Name is always shown. A disabled option's column and control are absent, not greyed.
 - **Roles:** default `Pilot`. Non-flying roles (timers, helpers, officials) get no score rows and no draw assignments, and may still be on a team. Once a pilot has flights in the matrix, they **cannot be changed to a non-flying role**: the option is disabled with the reason beside it.
 - **Class** is shown in title case and matched ignoring case. A non-flying role has no class; changing a pilot to a non-flying role clears the class, so confirm first.
 - **Team** uses existing team names plus free text, matched ignoring case. A blank name means no team. A new name creates the team.
 - **Participant numbers are never editable here.** Before the first draw, show a provisional number with a label ("Provisional"); after the draw, the allocated number without the label. A person added after the draw has no number until they are placed ("Assigned when placed").
-- **Class and model data are optional in practice.** Missing class or model data never blocks the draw or opening scoring (Mike, 2026-10-26; this matters mainly for large regional contests that don't use them). Show a quiet, informational note listing who is missing what, never an error.
+- **Class and model data are optional in practice.** Missing class or model data never blocks the draw or opening scoring (Mike, 2026-10-26; this matters mainly for large regional contests that don't use them). A pilot with no model, or no class, gets a quiet notice, never an error. It also never blocks creating the contest or adding a participant later. Non-fliers have no models and no notice.
 - The only hard rule is **at least 2 scoring pilots** before a draw. Fewer than 2 shows an error-tone banner; exactly 2 shows a warning ("With fewer than 3 pilots, use 1 group per round."); 3 or more show nothing.
 - **Removal:** removes the person from this contest only; the reusable profile stays. It is **refused** when the person has flight assignments or scores, with an explanation and a pointer to retire the pilot in Scoring instead. Retirement itself is not designed here.
-- **Model name and ID are not storable yet** (follow-up issue #594). Design the two cells so they can be enabled later; until then they show read-only "Not recorded".
+- **Models are a list per pilot, not two fields.** A model belongs to the person's profile and is reusable across contests; a pilot can enter one or more in this contest (data model: `model_catalog.md`, `contest_model_link.md`). Each model has a name, an optional manufacturer, an optional model ID the contestant applied, and an optional contest ID the director applied (for example a serial number). The row shows the models as a count or short list (for example "2 models") with a way to add or edit them in a small panel or popover; do not add a column per field. Models are not storable yet (follow-up issue #594); design the cell so it can be enabled later, and until then it is read-only "Not recorded".
 
 ## Page layout
 
@@ -53,7 +53,7 @@ Page title "Participants", a count line ("12 pilots, 2 non-flying"), and the ban
 
 ### The list
 
-A table with a pinned header on wide windows; stacked cards on narrow ones. Columns: select checkbox, Name (with team avatar when teams are on), Email status, Role, Class, Team, Pilot no., Model name, Model ID. At least 24 rows must fit and scroll comfortably; expect 10 to 80 participants. Each row shows its own state: unchanged, changed (unsaved), saving, failed with message, not removable with reason.
+A table with a pinned header on wide windows; stacked cards on narrow ones. Columns: select checkbox, Name (with team avatar when teams are on), Email status, Role, Class, Team, Pilot no., Models. At least 24 rows must fit and scroll comfortably; expect 10 to 80 participants. Each row shows its own state: unchanged, changed (unsaved), saving, failed with message, not removable with reason.
 
 Inline cell editing as in the wizard: Class as free text with suggestions, Team as a combobox with "Create team 'X'", Role as a select. Keyboard: arrow keys move between cells, Enter commits a cell, Esc reverts it. Bulk edit of the selected rows' team or class, as in the wizard's bulk bar.
 
@@ -67,7 +67,7 @@ Show a recalculation warning after saving a change that can affect scores (for e
 
 1. Fewer than 2 scoring pilots: error tone, "Add at least 2 scoring pilots before the draw." with the Add participant action.
 2. Exactly 2 scoring pilots: warning tone.
-3. Missing class or model data: informational, lists people and the missing field ("Ana Silva: class. Ben Ortiz: model"), each with a link that focuses the cell. Never blocking.
+3. Missing class or model data: informational, lists people and the missing field ("Ana Silva: class. Ben Ortiz: no models"), each with a link that focuses the cell. Never blocking.
 4. Read-only (see below).
 5. Late add (see below).
 
@@ -112,4 +112,4 @@ Light theme first.
 
 - Where the Save control sits (toolbar or sticky at the bottom). It must follow the Matrix page's draw action pattern; say where it goes and why.
 - How to show per-row failure on the stacked card layout without making the card hard to scan.
-- Model cells: how "Not recorded" differs from "Missing" so it doesn't read as an error before #594 lands.
+- Model cells: how the model list and its add/edit panel look and work on a narrow card, and how "Not recorded" differs from "Missing" so it doesn't read as an error before #594 lands.
