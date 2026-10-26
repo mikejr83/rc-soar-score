@@ -110,9 +110,12 @@ Future<bool> _layoutPdf(ReportPrintJob job, Uint8List pdf) =>
       name: job.title,
       format: RasterReportPdfBuilder.pdfPageFormat(job.setup),
       onLayout: (_) async => pdf,
-      // Windows: the full print dialog, whose Preferences button reaches the
-      // printer's own options (double-sided, colour or black and white).
-      windowsModernDialog: true,
+      // Windows: the classic Print Setup dialog, not the newer one. The newer
+      // dialog ignores the paper size and orientation we ask for and starts
+      // from the printer's defaults (A4, portrait on a Canon laser), so a
+      // Letter landscape sheet printed on the wrong paper. The classic one
+      // honours them, and its Properties button reaches the printer's own
+      // options (double-sided, colour or black and white).
     );
 
 /// The browser downloads the file; a desktop build asks where to put it.
