@@ -565,6 +565,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Continue'**
   String get alphaNoticeContinue;
+
+  /// Name of the status bar indicator for the storage on this device, and title of its detail dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Local storage'**
+  String get storageIndicatorName;
+
+  /// Local storage status: it can be read.
+  ///
+  /// In en, this message translates to:
+  /// **'Available'**
+  String get storageStatusAvailable;
+
+  /// Local storage status: a check is running.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking'**
+  String get storageStatusChecking;
+
+  /// Local storage status: it could not be read.
+  ///
+  /// In en, this message translates to:
+  /// **'Unavailable'**
+  String get storageStatusUnavailable;
+
+  /// Tooltip and accessible text of the storage indicator.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}: {status}'**
+  String storageIndicatorTooltip(String name, String status);
+
+  /// Status line of the storage detail dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Status: {status}'**
+  String storageDetailStatus(String status);
+
+  /// Line of the storage detail dialog with when the storage last answered.
+  ///
+  /// In en, this message translates to:
+  /// **'Last observed: {time}'**
+  String storageDetailLastObserved(String time);
+
+  /// Shown instead of a time when the storage has not answered yet.
+  ///
+  /// In en, this message translates to:
+  /// **'Never'**
+  String get storageNeverObserved;
+
+  /// Explains the storage detail dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Where this device keeps contests and scores. When it is unavailable, changes cannot be saved.'**
+  String get storageDetailNote;
+
+  /// Line of the storage detail dialog with why the last check failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Error: {error}'**
+  String storageDetailError(String error);
+
+  /// Button of the storage detail dialog that checks the storage again.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry now'**
+  String get storageRetry;
+
+  /// Button that closes the storage detail dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get storageDetailClose;
+
+  /// Title of the warning shown before an action that would lose changes that have not reached the service.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes have not synced'**
+  String get unsyncedWarningTitle;
+
+  /// Body of the unsynced-changes warning.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 change has} other{{count} changes have}} not been sent to the service. If you continue, {count, plural, =1{it} other{they}} cannot be recovered.'**
+  String unsyncedWarningBody(int count);
+
+  /// Button of the unsynced-changes warning that goes on with the action.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue anyway'**
+  String get unsyncedWarningContinue;
+
+  /// Button of the unsynced-changes warning that stops the action.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get unsyncedWarningCancel;
 }
 
 class _AppLocalizationsDelegate

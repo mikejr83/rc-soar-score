@@ -28,6 +28,8 @@ import 'text_size_controller_provider.dart';
 import 'theme_controller_provider.dart';
 import 'ui_account_provider.dart';
 import 'services/connectivity/app_connectivity.dart';
+import 'services/storage/storage_monitor.dart';
+import 'storage_provider.dart';
 import 'services/new_contest/contest_draft_store.dart';
 import 'services/new_contest/local_ui_draft_persistence.dart';
 
@@ -36,6 +38,7 @@ class SoarScoreContestApp extends StatefulWidget {
     super.key,
     this.bootstrap,
     this.connectivity,
+    this.storage,
     this.appMode,
     this.routerInitialLocation = landingPath,
     this.themeController,
@@ -57,6 +60,10 @@ class SoarScoreContestApp extends StatefulWidget {
   /// internet and remote API indicators. `null` (tests without a bootstrap)
   /// renders the tree exactly as the app did before the indicators existed.
   final AppConnectivity? connectivity;
+
+  /// The app-scoped local storage monitor behind the status bar's storage
+  /// indicator; `null` (tests) shows no indicator.
+  final StorageMonitor? storage;
 
   /// The app-scoped application mode notifier tracking offline mode (native
   /// desktop only). Unused and tree-shaken out on web.
@@ -196,6 +203,7 @@ class _SoarScoreContestAppState extends State<SoarScoreContestApp> {
     // The monitor owns a periodic poll timer and a connectivity stream
     // subscription; both are cancelled by dispose.
     widget.connectivity?.dispose();
+    widget.storage?.dispose();
     if (_ownsAppMode) {
       _appMode?.dispose();
     }
@@ -267,6 +275,10 @@ class _SoarScoreContestAppState extends State<SoarScoreContestApp> {
     final connectivity = widget.connectivity;
     if (connectivity != null) {
       app = AppConnectivityInherited(monitor: connectivity, child: app);
+    }
+    final storage = widget.storage;
+    if (storage != null) {
+      app = StorageMonitorInherited(monitor: storage, child: app);
     }
     final appMode = _appMode;
     if (!kIsWeb && appMode != null) {

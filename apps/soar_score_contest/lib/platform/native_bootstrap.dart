@@ -96,6 +96,10 @@ class NativeBootstrap extends AppBootstrap {
   }
 
   @override
+  Future<void> checkStorage() =>
+      LocalAccountRepository(_server.database).preferences();
+
+  @override
   AuthSession get authSession => _auth;
 
   @override

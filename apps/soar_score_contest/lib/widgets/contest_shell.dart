@@ -11,7 +11,6 @@ import 'shell_header.dart';
 import 'shell_round_loader.dart';
 import 'shell_rail.dart';
 import 'shell_status_panel.dart';
-import 'sync/shell_sync_status.dart';
 import 'workspace/workspace_focus_link.dart';
 
 /// The persistent contest-administration shell (Material 3 rail-first
@@ -91,7 +90,6 @@ class _ContestShellState extends State<ContestShell> {
                               builder: (context, round, refreshing) =>
                                   ShellStatusPanel(
                                     contest: contest,
-                                    trailing: ShellSyncStatus(contest: contest),
                                     onOpen: (target) =>
                                         _openControl(contest.id.value, target),
                                     round: round,
@@ -122,7 +120,7 @@ class _ContestShellState extends State<ContestShell> {
                   ],
                 ),
               ),
-              const ContestStatusBar(),
+              ContestStatusBar(contest: contest),
             ],
           ),
         ),

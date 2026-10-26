@@ -1,10 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/app_sync_provider.dart';
 import 'package:soar_score_contest/connectivity_provider.dart';
+import 'package:soar_score_contest/l10n/app_localizations.dart';
+import 'package:soar_score_contest/services/storage/storage_monitor.dart';
+import 'package:soar_score_contest/services/sync/app_sync_state.dart';
+import 'package:soar_score_contest/services/sync/sync_scope_summary.dart';
+import 'package:soar_score_contest/storage_provider.dart';
+import 'package:soar_score_core/soar_score_core.dart';
 import 'package:soar_score_contest/widgets/connectivity_indicator.dart';
 import 'package:soar_score_contest/widgets/contest_status_bar.dart';
 
 import '../support/fake_app_connectivity.dart';
+import '../support/fake_app_sync.dart';
 
 /// Hosts the status bar at the bottom of a page, the way the shell does,
 /// optionally below a connectivity provider.
@@ -74,5 +82,99 @@ void main() {
     await tester.pumpWidget(_host(monitor: monitor));
 
     expect(_indicatorKinds(tester), [ConnectivityIndicatorKind.api]);
+  });
+
+  _syncAndStorage();
+}
+
+Contest _contest() => Contest(
+  id: Id.parse('019c0000-0000-7000-8000-000000000020'),
+  name: 'Spring Meet',
+  startDateTime: DateTime.utc(2026, 4, 15, 10),
+  endDateTime: DateTime.utc(2026, 4, 16, 20),
+  timezone: 'America/Denver',
+  createdAt: DateTime.utc(2026, 4),
+  updatedAt: DateTime.utc(2026, 4),
+);
+
+Widget _frame(Contest? contest, {FakeAppSync? sync, StorageMonitor? storage}) {
+  Widget app = MaterialApp(
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
+    home: Scaffold(
+      body: Column(
+        children: [
+          const Expanded(child: SizedBox.shrink()),
+          ContestStatusBar(contest: contest),
+        ],
+      ),
+    ),
+  );
+  if (storage != null) {
+    app = StorageMonitorInherited(monitor: storage, child: app);
+  }
+  return AppSyncInherited(sync: sync ?? FakeAppSync(), child: app);
+}
+
+// ---- sync and storage ----
+void _syncAndStorage() {
+  testWidgets('shows the storage indicator before the connectivity chips', (
+    tester,
+  ) async {
+    final storage = StorageMonitor(probe: () async {}, pollInterval: null);
+    addTearDown(storage.dispose);
+    await tester.pumpWidget(_frame(null, storage: storage));
+    await tester.pump();
+
+    expect(find.text('Local storage · Available'), findsOneWidget);
+  });
+
+  testWidgets('shows the contest\'s pending changes and last sync in the bar', (
+    tester,
+  ) async {
+    final contest = _contest();
+    final sync = FakeAppSync(
+      state: AppSyncState(
+        scopes: {
+          ContestScopeKey(contest.id): SyncScopeSummary(
+            pendingChanges: 3,
+            lastSyncedAt: DateTime.utc(2026, 4, 15, 18, 2),
+          ),
+        },
+      ),
+    );
+    await tester.pumpWidget(_frame(contest, sync: sync));
+    await tester.pump();
+
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('contest-status-bar')),
+        matching: find.textContaining('3 pending'),
+      ),
+      findsOneWidget,
+    );
+    expect(find.textContaining('Synced '), findsOneWidget);
+  });
+
+  testWidgets('says Local only for a contest with no account', (tester) async {
+    final contest = _contest();
+    final sync = FakeAppSync(
+      state: AppSyncState(
+        scopes: {
+          ContestScopeKey(contest.id): const SyncScopeSummary(localOnly: true),
+        },
+      ),
+    );
+    await tester.pumpWidget(_frame(contest, sync: sync));
+    await tester.pump();
+
+    expect(find.text('Local only'), findsOneWidget);
+  });
+
+  testWidgets('shows no sync entry outside a contest', (tester) async {
+    await tester.pumpWidget(_frame(null));
+    await tester.pump();
+
+    expect(find.byKey(const ValueKey('shell-sync-status')), findsNothing);
   });
 }

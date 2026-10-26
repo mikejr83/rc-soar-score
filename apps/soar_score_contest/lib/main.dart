@@ -14,6 +14,7 @@ import 'platform/bootstrap.dart' as bootstrap;
 import 'services/alpha_notice/alpha_notice_mode.dart';
 import 'services/connectivity/app_connectivity.dart';
 import 'services/connectivity/reachability_forwarder.dart';
+import 'services/storage/storage_monitor.dart';
 import 'services/collapsible_areas/collapsible_areas_controller.dart';
 import 'services/window/close_warning.dart';
 import 'services/text_size/text_size_controller.dart';
@@ -61,6 +62,7 @@ Future<void> _runContestApp(AppBootstrap appBootstrap) async {
   // the app without a bootstrap simply get no monitor (D5).
   final connectivity = AppConnectivity(client: appBootstrap.remoteApiClient);
   forwardReachability(connectivity, appBootstrap);
+  final storage = StorageMonitor(probe: appBootstrap.checkStorage);
 
   // Load the saved theme first so the first frame already has it.
   final theme = ThemeController(
@@ -85,6 +87,7 @@ Future<void> _runContestApp(AppBootstrap appBootstrap) async {
     SoarScoreContestApp(
       bootstrap: appBootstrap,
       connectivity: connectivity,
+      storage: storage,
       themeController: theme,
       textSizeController: textSize,
       collapsibleAreas: areas,

@@ -51,6 +51,10 @@ abstract class AppBootstrap {
   /// nothing.
   Future<void> savePreferences(core.AccountPreferences preferences) async {}
 
+  /// Reads something small from the local storage and throws when it cannot
+  /// be read. The default has no storage to check and succeeds.
+  Future<void> checkStorage() async {}
+
   /// Tells the platform that the remote API became reachable (or not).
   ///
   /// The native build uses it to resume synchronization; the web build has
