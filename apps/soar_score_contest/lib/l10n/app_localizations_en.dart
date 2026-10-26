@@ -452,4 +452,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get unsyncedWarningCancel => 'Cancel';
+
+  @override
+  String drawProgress(int percent, int seed, int seedCount) {
+    return 'Drawing the matrix: $percent% (seed $seed of $seedCount)';
+  }
+
+  @override
+  String get drawProgressStarting => 'Starting the draw…';
+
+  @override
+  String get drawRunningNote =>
+      'You can cancel the draw. Nothing changes until it finishes.';
+
+  @override
+  String get drawCancelButton => 'Cancel draw';
+
+  @override
+  String get drawCancelling => 'Cancelling…';
+
+  @override
+  String get drawCancelled => 'Draw cancelled. Nothing was changed.';
 }

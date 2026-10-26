@@ -661,6 +661,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Cancel'**
   String get unsyncedWarningCancel;
+
+  /// Progress line under the Draw matrix button while a draw runs, with the percent done and which seed is being improved.
+  ///
+  /// In en, this message translates to:
+  /// **'Drawing the matrix: {percent}% (seed {seed} of {seedCount})'**
+  String drawProgress(int percent, int seed, int seedCount);
+
+  /// Progress line shown before the server has reported any progress of a draw.
+  ///
+  /// In en, this message translates to:
+  /// **'Starting the draw…'**
+  String get drawProgressStarting;
+
+  /// Hint beside the progress of a running draw.
+  ///
+  /// In en, this message translates to:
+  /// **'You can cancel the draw. Nothing changes until it finishes.'**
+  String get drawRunningNote;
+
+  /// Button that stops a running matrix draw.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel draw'**
+  String get drawCancelButton;
+
+  /// Label of the cancel button after it was pressed, until the draw stopped.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelling…'**
+  String get drawCancelling;
+
+  /// Snackbar shown after a matrix draw was cancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Draw cancelled. Nothing was changed.'**
+  String get drawCancelled;
 }
 
 class _AppLocalizationsDelegate

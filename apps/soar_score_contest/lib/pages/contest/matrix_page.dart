@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:soar_score_api/soar_score_api.dart';
@@ -5,6 +7,7 @@ import 'package:soar_score_core/soar_score_core.dart';
 
 import '../../api_client_provider.dart';
 import '../../contest_draft_provider.dart';
+import '../../l10n/app_localizations.dart';
 import '../../router.dart';
 import '../../services/configuration/configuration_problem.dart';
 import '../../services/configuration/draw_readiness.dart';
@@ -44,6 +47,17 @@ class _MatrixPageState extends State<MatrixPage> {
   Id? _requestId;
   String? _requestKey;
 
+  /// What the server says about the draw being sent, polled while [_busy].
+  DrawStatusDto? _progress;
+  Timer? _poll;
+  Future<void> Function()? _tickNow;
+  bool _polling = false;
+
+  /// Whether Cancel was pressed for the draw being sent.
+  bool _cancelRequested = false;
+
+  static const Duration _pollEvery = Duration(milliseconds: 400);
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -52,6 +66,7 @@ class _MatrixPageState extends State<MatrixPage> {
 
   @override
   void dispose() {
+    _poll?.cancel();
     _form?.dispose();
     super.dispose();
   }
@@ -200,11 +215,13 @@ class _MatrixPageState extends State<MatrixPage> {
       seedCount: DrawFormController.optionalNumber(form.seedCount),
     );
     setState(() => _busy = true);
+    _watch(client, data.contest.id, request.id);
     try {
       final drawn = await client.drawMatrix(data.contest.id, request);
       if (!mounted) {
         return;
       }
+      _unwatch();
       // The draw assigns pilot numbers, so reload to show them.
       MatrixPageData fresh;
       try {
@@ -222,6 +239,7 @@ class _MatrixPageState extends State<MatrixPage> {
       ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(content: Text('Matrix drawn.')));
     } on ApiNetworkError {
+      _unwatch();
       if (mounted) {
         setState(() {
           _busy = false;
@@ -229,10 +247,22 @@ class _MatrixPageState extends State<MatrixPage> {
         });
       }
     } on ApiHttpError catch (error) {
+      _unwatch();
       if (mounted) {
+        final cancelled = error.error?.code == 'draw_cancelled';
+        if (cancelled) {
+          // The next draw is a new request.
+          _requestId = null;
+          _requestKey = null;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(AppLocalizations.of(context).drawCancelled)),
+          );
+        }
         setState(() {
           _busy = false;
-          if (error.statusCode == 409) {
+          if (cancelled) {
+            // Nothing to show: the form and the page are as they were.
+          } else if (error.statusCode == 409) {
             _conflict = true;
           } else {
             _rejection = apiErrorText(error);
@@ -240,6 +270,7 @@ class _MatrixPageState extends State<MatrixPage> {
         });
       }
     } on Object catch (error) {
+      _unwatch();
       if (mounted) {
         setState(() {
           _busy = false;
@@ -247,6 +278,53 @@ class _MatrixPageState extends State<MatrixPage> {
         });
       }
     }
+  }
+
+  /// Starts asking the server how far the draw [drawId] has come.
+  void _watch(ApiClient client, Id contestId, Id drawId) {
+    _poll?.cancel();
+    _progress = null;
+    _cancelRequested = false;
+    _tickNow = () => _tick(client, contestId, drawId);
+    _poll = Timer.periodic(_pollEvery, (_) => _tickNow!());
+  }
+
+  void _unwatch() {
+    _poll?.cancel();
+    _poll = null;
+    _tickNow = null;
+    _progress = null;
+    _cancelRequested = false;
+  }
+
+  /// One poll. After Cancel it asks again to cancel instead, until the server
+  /// knows the draw: the draw request may not have reached the draw engine
+  /// when Cancel was pressed.
+  Future<void> _tick(ApiClient client, Id contestId, Id drawId) async {
+    if (_polling) {
+      return;
+    }
+    _polling = true;
+    try {
+      final status = _cancelRequested
+          ? await client.cancelDraw(contestId, drawId)
+          : await client.drawStatus(contestId, drawId);
+      if (mounted && _busy && status != null) {
+        setState(() => _progress = status);
+      }
+    } on Object {
+      // A missed report is not a failure; the draw request has the outcome.
+    } finally {
+      _polling = false;
+    }
+  }
+
+  void _cancel() {
+    if (!_busy || _cancelRequested) {
+      return;
+    }
+    setState(() => _cancelRequested = true);
+    _tickNow?.call();
   }
 
   Id _idFor(String key) {
@@ -285,6 +363,9 @@ class _MatrixPageState extends State<MatrixPage> {
               data: data,
               controller: form,
               busy: _busy,
+              progress: _progress,
+              cancelling: _cancelRequested,
+              onCancel: _cancel,
               blocker: _blocker(data),
               rejection: _rejection,
               networkFailure: _networkFailure,

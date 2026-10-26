@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../../services/configuration/draw_readiness.dart';
@@ -28,6 +29,9 @@ class DrawFormPanel extends StatelessWidget {
     required this.onOpenConfiguration,
     required this.onFix,
     required this.onReload,
+    this.progress,
+    this.cancelling = false,
+    this.onCancel,
     this.rejection,
     this.networkFailure = false,
     this.conflict = false,
@@ -41,6 +45,12 @@ class DrawFormPanel extends StatelessWidget {
   final VoidCallback onOpenConfiguration;
   final void Function(BlockerFix fix) onFix;
   final VoidCallback onReload;
+
+  /// The running draw's progress, and the way to cancel it (see
+  /// [DrawActionRow]).
+  final DrawStatusDto? progress;
+  final bool cancelling;
+  final VoidCallback? onCancel;
 
   /// The server's message when it rejected the draw's settings.
   final String? rejection;
@@ -287,6 +297,9 @@ class DrawFormPanel extends StatelessWidget {
                       : null,
                   onDraw: onDraw,
                   onFix: onFix,
+                  progress: progress,
+                  cancelling: cancelling,
+                  onCancel: onCancel,
                 ),
               ],
             ),

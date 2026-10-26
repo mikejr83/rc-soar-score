@@ -18,6 +18,7 @@ import '../../repositories/mutation_metadata.dart';
 import '../../repositories/repository.dart';
 import 'basic_draw.dart';
 import 'draw_engine.dart';
+import 'draw_job.dart';
 import 'draw_optimizer.dart';
 import 'matrix_draw_builder.dart';
 import 'matrix_service.dart';
@@ -36,14 +37,23 @@ class MatrixRedrawService {
     DateTime Function()? clock,
     Id Function()? newId,
     int Function()? newSeed,
+    DrawRunner? runner,
+    DrawJobs? jobs,
   }) : _clock = clock ?? DateTime.now,
        _newId = newId ?? Id.create,
-       _newSeed = newSeed ?? MatrixService.secureSeed;
+       _newSeed = newSeed ?? MatrixService.secureSeed,
+       _runner = runner ?? const InProcessDrawRunner(),
+       jobs = jobs ?? DrawJobs();
 
   final Repository repository;
   final DateTime Function() _clock;
   final Id Function() _newId;
   final int Function() _newSeed;
+  final DrawRunner _runner;
+
+  /// The draws running or lately run, by revision id (see
+  /// [MatrixService.jobs]).
+  final DrawJobs jobs;
 
   /// Draws [rounds] rounds of [groupsPerRound] groups each from round
   /// [firstRound] on, as revision [id], and returns the current matrix.
@@ -174,16 +184,20 @@ class MatrixRedrawService {
     final history = await _history(kept, participations, teamOf);
 
     final requestedSeed = randomSeed ?? _newSeed();
-    final drawn = const DrawEngine().generate(
-      pilots: pilots,
-      rounds: rounds,
-      groupsPerRound: groupsPerRound,
-      teamProtection: options.teamProtection,
-      laneMode: options.laneMode,
-      seed: requestedSeed,
-      seedCount: seedCount,
-      attemptsPerRound: attemptsPerRound,
-      history: history,
+    final drawn = await jobs.run(
+      id,
+      _runner,
+      DrawSpec(
+        pilots: pilots,
+        rounds: rounds,
+        groupsPerRound: groupsPerRound,
+        teamProtection: options.teamProtection,
+        laneMode: options.laneMode,
+        seed: requestedSeed,
+        seedCount: seedCount,
+        attemptsPerRound: attemptsPerRound,
+        history: history,
+      ),
     );
 
     final extension = firstRound == lastRound + 1;

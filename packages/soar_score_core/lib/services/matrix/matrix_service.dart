@@ -18,6 +18,7 @@ import '../../enums/draw_mode.dart';
 import 'basic_draw.dart';
 import '../../models/matrix/current_matrix.dart';
 import 'draw_engine.dart';
+import 'draw_job.dart';
 import 'draw_optimizer.dart';
 import 'matrix_draw_builder.dart';
 
@@ -34,9 +35,13 @@ class MatrixService {
     DateTime Function()? clock,
     Id Function()? newId,
     int Function()? newSeed,
+    DrawRunner? runner,
+    DrawJobs? jobs,
   }) : _clock = clock ?? DateTime.now,
        _newId = newId ?? Id.create,
-       _newSeed = newSeed ?? secureSeed;
+       _newSeed = newSeed ?? secureSeed,
+       _runner = runner ?? const InProcessDrawRunner(),
+       jobs = jobs ?? DrawJobs();
 
   /// Names the draw engine on every revision. A change to how pilots are
   /// dealt needs a new version, so an old draw can still be reproduced.
@@ -46,6 +51,11 @@ class MatrixService {
   final DateTime Function() _clock;
   final Id Function() _newId;
   final int Function() _newSeed;
+  final DrawRunner _runner;
+
+  /// The draws running or lately run, by revision id: how far each has come,
+  /// and the way to cancel one.
+  final DrawJobs jobs;
 
   /// A fresh 32-bit seed for a draw that was not given one.
   static int secureSeed() => Random.secure().nextInt(0x100000000);
@@ -122,6 +132,7 @@ class MatrixService {
   /// `Configuring` to `Ready`.
   ///
   /// Throws:
+  /// - `DrawCancelledError` when the draw was cancelled through [jobs];
   /// - `EntityNotFoundError` for an unknown contest;
   /// - `AlreadyStoredError` when [id] belongs to another contest's revision;
   /// - `ContestStateError` when the contest is not `Configuring` (a first
@@ -203,15 +214,21 @@ class MatrixService {
     }
 
     final requestedSeed = randomSeed ?? _newSeed();
-    final drawn = const DrawEngine().generate(
-      pilots: pilots,
-      rounds: rounds,
-      groupsPerRound: groupsPerRound,
-      teamProtection: options.teamProtection,
-      laneMode: options.laneMode,
-      seed: requestedSeed,
-      seedCount: seedCount,
-      attemptsPerRound: attemptsPerRound,
+    // The draw is made before anything is stored, so a cancelled draw leaves
+    // the contest as it was.
+    final drawn = await jobs.run(
+      id,
+      _runner,
+      DrawSpec(
+        pilots: pilots,
+        rounds: rounds,
+        groupsPerRound: groupsPerRound,
+        teamProtection: options.teamProtection,
+        laneMode: options.laneMode,
+        seed: requestedSeed,
+        seedCount: seedCount,
+        attemptsPerRound: attemptsPerRound,
+      ),
     );
 
     final now = _clock();

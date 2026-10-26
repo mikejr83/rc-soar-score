@@ -15,6 +15,7 @@ class HandlerHarness {
     bool publishingEnabled = false,
     RecalculationService? recalculation,
     GliderScoreImportRunner? gliderScoreImport,
+    DrawRunner? drawRunner,
   }) : contests = StubContestRepository() {
     repository = StubRepository(contests);
     handler = buildApiHandler(
@@ -26,6 +27,7 @@ class HandlerHarness {
       publishingEnabled: publishingEnabled,
       recalculation: recalculation,
       gliderScoreImport: gliderScoreImport,
+      drawRunner: drawRunner,
     );
   }
 

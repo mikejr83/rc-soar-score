@@ -33,13 +33,15 @@ class DrawOptimizer {
   /// Cooling steps. The temperature falls by [_ratio] 65,536ths at each, from
   /// [_startTemperature256] to about 1/256, which is the floor: the run
   /// always uses its whole budget.
-  static const int _levels = 100;
+  static const int levels = 100;
   static const int _ratio = 61582;
   static const int _startTemperature256 = 512; // T0 = 2.0
 
   /// [start] improved. [pilots] lists every pilot of [start] once. [history]
   /// holds the rounds before [start], which the improved rounds continue;
-  /// they are not changed, but their meetings count.
+  /// they are not changed, but their meetings count. [onLevel] hears each
+  /// cooling step as it starts, 0 up to [levels]; it only watches, so the
+  /// draw is the same with or without it.
   List<List<List<DrawSlot>>> improve({
     required List<DrawPilot> pilots,
     required List<List<List<DrawSlot>>> start,
@@ -49,6 +51,7 @@ class DrawOptimizer {
     int iterationsPerPlacement = defaultIterationsPerPlacement,
     int unmetWeight = defaultUnmetWeight,
     List<List<List<DrawSlot>>> history = const [],
+    void Function(int level)? onLevel,
   }) {
     final n = pilots.length;
     final roundCount = start.length;
@@ -90,6 +93,7 @@ class DrawOptimizer {
         random: random,
         iterations: iterationsPerPlacement * n * roundCount,
         unmetWeight: unmetWeight,
+        onLevel: onLevel,
       );
     }
     if (laneMode == LaneMode.random) {
@@ -140,6 +144,7 @@ class DrawOptimizer {
     required SeededRandom random,
     required int iterations,
     required int unmetWeight,
+    required void Function(int level)? onLevel,
   }) {
     final roundCount = groups.length;
     final groupCount = groups.first.length;
@@ -156,9 +161,12 @@ class DrawOptimizer {
     }
 
     final table = AcceptanceTable.instance;
-    final perLevel = iterations ~/ _levels > 0 ? iterations ~/ _levels : 1;
+    final perLevel = iterations ~/ levels > 0 ? iterations ~/ levels : 1;
     var temperature = _startTemperature256;
     for (var i = 0; i < iterations; i++) {
+      if (onLevel != null && i % perLevel == 0) {
+        onLevel(i ~/ perLevel < levels ? i ~/ perLevel : levels);
+      }
       if (i > 0 && i % perLevel == 0 && temperature > 1) {
         temperature = (temperature * _ratio + 32768) ~/ 65536;
         if (temperature < 1) temperature = 1;

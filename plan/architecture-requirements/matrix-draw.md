@@ -152,7 +152,7 @@ The draw engine **constructs a valid draw, then improves it across all rounds** 
 
 ### 4.5. Running Time
 
-A polish pass took 4 to 9 seconds in Python in the benchmark, and several seeds multiply that. The draw runs off the UI thread (an isolate on native, a worker on web) with progress and a cancel button.
+A polish pass took 4 to 9 seconds in Python in the benchmark, and several seeds multiply that. The draw runs off the UI thread with progress and a cancel button (#609). The server that answers the draw request runs the optimizer on an isolate of its own: the app's embedded server on native, so the UI isolate stays free, and the hosted server on web, where the browser never runs the optimizer, so a web worker is not needed. `GET /contests/{id}/matrix/draws/{drawId}` reports the percent and the seed being improved, and `DELETE` on the same path cancels by ending the isolate. A cancelled draw fails with 409 `draw_cancelled` before anything is stored, so the prior matrix is untouched. Progress and cancel only watch and stop the run; the seed alone decides the matrix, whichever isolate runs it.
 
 ### 4.6. Implementation Status (`optimized-1`)
 
@@ -174,7 +174,7 @@ Measured on teams of 3 to 4 (30 pilots, 5 groups, 16 rounds) and teams of 3 to 5
 | Construction and improvement, 3 seeds  | 0.418     | 0.696     |
 | GliderScore (recorded in the research) | 0.445     | 0.710     |
 
-The team layouts are close to, not the same as, the research layouts, so the comparison is directional. A draw took about 0.2 s (30 pilots, 3 seeds) and 0.8 s (63 pilots, 3 seeds) on a development machine. Still to do under #137: running off the UI thread with progress and cancel, the back-to-back constraint, and a benchmark harness in the repository.
+The team layouts are close to, not the same as, the research layouts, so the comparison is directional. A draw took about 0.2 s (30 pilots, 3 seeds) and 0.8 s (63 pilots, 3 seeds) on a development machine. Still to do under #137: the back-to-back constraint and a benchmark harness in the repository. Running off the UI thread with progress and cancel is done (#609).
 
 ---
 

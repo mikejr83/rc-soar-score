@@ -497,5 +497,34 @@
   "unsyncedWarningCancel": "Cancel",
   "@unsyncedWarningCancel": {
     "description": "Button of the unsynced-changes warning that stops the action."
+  },
+  "drawProgress": "Drawing the matrix: {percent}% (seed {seed} of {seedCount})",
+  "@drawProgress": {
+    "description": "Progress line under the Draw matrix button while a draw runs, with the percent done and which seed is being improved.",
+    "placeholders": {
+      "percent": {"type": "int"},
+      "seed": {"type": "int"},
+      "seedCount": {"type": "int"}
+    }
+  },
+  "drawProgressStarting": "Starting the draw…",
+  "@drawProgressStarting": {
+    "description": "Progress line shown before the server has reported any progress of a draw."
+  },
+  "drawRunningNote": "You can cancel the draw. Nothing changes until it finishes.",
+  "@drawRunningNote": {
+    "description": "Hint beside the progress of a running draw."
+  },
+  "drawCancelButton": "Cancel draw",
+  "@drawCancelButton": {
+    "description": "Button that stops a running matrix draw."
+  },
+  "drawCancelling": "Cancelling…",
+  "@drawCancelling": {
+    "description": "Label of the cancel button after it was pressed, until the draw stopped."
+  },
+  "drawCancelled": "Draw cancelled. Nothing was changed.",
+  "@drawCancelled": {
+    "description": "Snackbar shown after a matrix draw was cancelled."
   }
 }

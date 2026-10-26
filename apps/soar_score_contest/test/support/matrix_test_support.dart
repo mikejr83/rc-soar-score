@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -8,6 +9,7 @@ import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_contest/api_client_provider.dart';
 import 'package:soar_score_contest/collapsible_areas_provider.dart';
 import 'package:soar_score_contest/contest_draft_provider.dart';
+import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_contest/services/collapsible_areas/collapsible_areas_controller.dart';
 import 'package:soar_score_contest/services/new_contest/contest_draft_store.dart';
 import 'package:soar_score_contest/pages/contest/matrix_page.dart';
@@ -228,6 +230,17 @@ class MatrixServer {
   /// The bodies of the draws received.
   final List<Map<String, dynamic>> draws = [];
 
+  /// While set, a draw waits here instead of answering, reporting
+  /// [drawPercent] to anyone who asks; completing it lets the draw finish.
+  /// Cancelling the draw answers it 409 `draw_cancelled`.
+  Completer<void>? holdDraw;
+  int drawPercent = 40;
+
+  /// How often the draw was asked for its progress, and cancelled.
+  int statusRequests = 0;
+  int cancelRequests = 0;
+  Completer<void>? _cancelled;
+
   /// The round each pilot (1 to 4) retired at.
   final Map<int, int> retirements = {};
 
@@ -252,8 +265,49 @@ class MatrixServer {
       throw http.ClientException('offline', request.url);
     }
     final path = request.url.path;
+    final status = RegExp(r'/matrix/draws/([^/]+)$').firstMatch(path);
+    if (status != null) {
+      final id = status.group(1)!;
+      final running = holdDraw != null && !holdDraw!.isCompleted;
+      if (request.method == 'DELETE') {
+        cancelRequests++;
+        if (!running) {
+          return _json({
+            'error': {'code': 'not_found', 'message': 'no such draw'},
+          }, 404);
+        }
+        _cancelled?.complete();
+      } else {
+        statusRequests++;
+        if (!running) {
+          return _json({
+            'error': {'code': 'not_found', 'message': 'no such draw'},
+          }, 404);
+        }
+      }
+      return _json({
+        'id': id,
+        'state': request.method == 'DELETE' ? 'cancelled' : 'running',
+        'percent': drawPercent,
+        'seed': 2,
+        'seed_count': 3,
+      });
+    }
     if (request.method == 'POST' && path.endsWith('/matrix/draws')) {
       draws.add(jsonDecode(request.body) as Map<String, dynamic>);
+      final hold = holdDraw;
+      if (hold != null) {
+        _cancelled = Completer<void>();
+        await Future.any([hold.future, _cancelled!.future]);
+        if (_cancelled!.isCompleted) {
+          return _json({
+            'error': {
+              'code': 'draw_cancelled',
+              'message': 'the draw was cancelled; nothing was changed',
+            },
+          }, 409);
+        }
+      }
       if (drawStatus != 200) {
         return _json({
           'error': {'code': 'rejected', 'message': drawError},
@@ -343,6 +397,8 @@ Future<void> pumpMatrixPage(
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
   Widget page = const MaterialApp(
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
     home: Scaffold(body: MatrixPage(contestId: matrixContestId)),
   );
   if (areas != null) {

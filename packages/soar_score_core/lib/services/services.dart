@@ -16,6 +16,7 @@ export 'matrix/acceptance_table.dart';
 export 'matrix/assignment_move_service.dart';
 export 'matrix/basic_draw.dart';
 export 'matrix/draw_engine.dart';
+export 'matrix/draw_job.dart';
 export 'matrix/draw_fairness.dart';
 export 'matrix/draw_optimizer.dart';
 export 'matrix/lane_stats.dart';

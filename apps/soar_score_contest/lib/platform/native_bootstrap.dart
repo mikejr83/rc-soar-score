@@ -5,6 +5,8 @@ import 'package:logging/logging.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:soar_score_api/soar_score_api.dart';
+import 'package:soar_score_api_handlers/soar_score_api_handlers.dart'
+    show DelayedDrawRunner, IsolateDrawRunner;
 import 'package:soar_score_core/soar_score_core.dart' as core;
 import 'package:soar_score_data/soar_score_data.dart';
 import 'package:soar_score_ui_storage/soar_score_ui_storage.dart';
@@ -161,6 +163,12 @@ class NativeBootstrap extends AppBootstrap {
   static const bool demoReset =
       demo && bool.fromEnvironment('SOAR_SCORE_DEMO_RESET');
 
+  /// Whether matrix draws are held for a few seconds, so an end-to-end
+  /// journey can see their progress and cancel one:
+  /// `--dart-define=SOAR_SCORE_E2E_SLOW_DRAW=true`, demo builds only.
+  static const bool slowDraws =
+      demo && bool.fromEnvironment('SOAR_SCORE_E2E_SLOW_DRAW');
+
   /// Starts the embedded API server and returns the client for it.
   static Future<AppBootstrap> start() async {
     const String rawUrl = String.fromEnvironment('SOAR_SCORE_API_BASE_URL');
@@ -171,7 +179,13 @@ class NativeBootstrap extends AppBootstrap {
       _logger.info('Resetting demo database');
       await deleteDatabaseFiles(database);
     }
-    final server = await startEmbeddedServer(database, seedDemo: demo);
+    final server = await startEmbeddedServer(
+      database,
+      seedDemo: demo,
+      drawRunner: slowDraws
+          ? const DelayedDrawRunner(IsolateDrawRunner())
+          : null,
+    );
     _logger.info('Embedded API server listening on ${server.baseUrl}');
     ContestExchange.current = NativeContestExchange(server);
     if (demo) {

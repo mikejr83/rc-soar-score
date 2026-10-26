@@ -67,6 +67,48 @@ void main() {
     });
   });
 
+  Map<String, Object?> running() => {
+    'id': revisionId.value,
+    'state': 'running',
+    'percent': 40,
+    'seed': 2,
+    'seed_count': 3,
+  };
+
+  test('drawStatus GETs how far a draw has come', () async {
+    final client = clientFor((_) => body(running()));
+
+    final status = await client.drawStatus(contestId, revisionId);
+
+    expect(seen.method, 'GET');
+    expect(seen.url.path, '$matrixPath/draws/${revisionId.value}');
+    expect(status!.running, isTrue);
+    expect(status.percent, 40);
+    expect(status.seed, 2);
+    expect(status.seedCount, 3);
+  });
+
+  test('cancelDraw DELETEs the draw and returns its status', () async {
+    final client = clientFor((_) => body({...running(), 'state': 'cancelled'}));
+
+    final status = await client.cancelDraw(contestId, revisionId);
+
+    expect(seen.method, 'DELETE');
+    expect(seen.url.path, '$matrixPath/draws/${revisionId.value}');
+    expect(status!.state, DrawJobState.cancelled);
+  });
+
+  test('a draw the server does not know is null', () async {
+    final client = clientFor(
+      (_) => body({
+        'error': {'code': 'not_found', 'message': 'no such draw'},
+      }, 404),
+    );
+
+    expect(await client.drawStatus(contestId, revisionId), isNull);
+    expect(await client.cancelDraw(contestId, revisionId), isNull);
+  });
+
   test('a conflict is an ApiHttpError', () async {
     final client = clientFor(
       (_) => body({
