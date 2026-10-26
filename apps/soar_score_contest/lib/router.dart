@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:soar_score_api/soar_score_api.dart';
+import 'package:soar_score_contest/widgets/page_surface.dart';
 import 'package:soar_score_contest/pages/contest/participants_page.dart';
 import 'package:soar_score_contest/pages/contest/report_viewer_page.dart';
 import 'package:soar_score_contest/services/reports/viewer/report_printers.dart';
@@ -186,39 +187,39 @@ GoRouter buildAppRouter({
         builder: (context, state, child) =>
             ContestShell(state: state, child: child),
         routes: [
-          GoRoute(
+          _shellRoute(
             path: homePath,
             name: 'home',
             builder: (context, state) => const HomePage(),
           ),
-          GoRoute(
+          _shellRoute(
             path: participantsPath,
             name: 'participants',
             builder: (context, state) => const ParticipantsPage(),
           ),
-          GoRoute(
+          _shellRoute(
             path: rolesPath,
             name: 'roles',
             builder: (context, state) => RolesPage(
               createRequested: state.uri.queryParameters['new'] == '1',
             ),
           ),
-          GoRoute(
+          _shellRoute(
             path: settingsPath,
             name: 'settings',
             builder: (context, state) => const SettingsPage(),
           ),
-          GoRoute(
+          _shellRoute(
             path: '$contestsPath/:contestId/settings',
             name: 'contestSettings',
             builder: (context, state) => const SettingsPage(),
           ),
-          GoRoute(
+          _shellRoute(
             path: landingsPath,
             name: 'landings',
             builder: (context, state) => const LandingsPage(),
           ),
-          GoRoute(
+          _shellRoute(
             path: newLandingPath,
             name: 'newLanding',
             builder: (context, state) => LandingEditorPage(
@@ -229,14 +230,14 @@ GoRouter buildAppRouter({
             ),
             onExit: (context, state) => editorGuard.confirmLeave(),
           ),
-          GoRoute(
+          _shellRoute(
             path: newParticipantPath,
             name: 'newParticipant',
             builder: (context, state) =>
                 ParticipantEditorPage(guard: editorGuard),
             onExit: (context, state) => editorGuard.confirmLeave(),
           ),
-          GoRoute(
+          _shellRoute(
             path: '$participantsPath/:participantId',
             name: 'editParticipant',
             builder: (context, state) => ParticipantEditorPage(
@@ -245,14 +246,14 @@ GoRouter buildAppRouter({
             ),
             onExit: (context, state) => editorGuard.confirmLeave(),
           ),
-          GoRoute(
+          _shellRoute(
             path: newContestPath,
             name: 'newContest',
             builder: (context, state) =>
                 NewContestWizardPage(guard: wizardGuard),
             onExit: (context, state) => wizardGuard.confirmLeave(),
           ),
-          GoRoute(
+          _shellRoute(
             path: '$contestsPath/:contestId/configuration',
             name: 'contestConfiguration',
             builder: (context, state) => ContestConfigurationPage(
@@ -261,13 +262,13 @@ GoRouter buildAppRouter({
             ),
             onExit: (context, state) => configurationGuard.confirmLeave(),
           ),
-          GoRoute(
+          _shellRoute(
             path: '$contestsPath/:contestId/matrix',
             name: 'contestMatrix',
             builder: (context, state) =>
                 MatrixPage(contestId: state.pathParameters['contestId']!),
           ),
-          GoRoute(
+          _shellRoute(
             path: '$contestsPath/:contestId/workspace',
             name: 'contestWorkspace',
             builder: (context, state) => ContestWorkspacePage(
@@ -277,7 +278,7 @@ GoRouter buildAppRouter({
               ),
             ),
           ),
-          GoRoute(
+          _shellRoute(
             path: '$contestsPath/:contestId/scoring',
             name: 'contestScoring',
             builder: (context, state) => ContestScoringPage(
@@ -288,20 +289,20 @@ GoRouter buildAppRouter({
             ),
             onExit: (context, state) => scoringGuard.confirmLeave(),
           ),
-          GoRoute(
+          _shellRoute(
             path: '$contestsPath/:contestId/reports',
             name: 'contestReports',
             builder: (context, state) => ContestReportsPage(
               contestId: state.pathParameters['contestId']!,
             ),
           ),
-          GoRoute(
+          _shellRoute(
             path: '$contestsPath/:contestId/sync',
             name: 'contestSync',
             builder: (context, state) =>
                 ContestSyncPage(contestId: state.pathParameters['contestId']!),
           ),
-          GoRoute(
+          _shellRoute(
             path: '$contestsPath/:contestId/participants',
             name: 'contestParticipants',
             builder: (context, state) => ContestParticipantsPage(
@@ -313,6 +314,21 @@ GoRouter buildAppRouter({
     ],
   );
 }
+
+/// A page route inside the shell. Every shell page sits on a [PageSurface], so
+/// a click on empty background never reaches the navigator's modal barrier
+/// (which plays the system alert sound).
+GoRoute _shellRoute({
+  required String path,
+  required String name,
+  required GoRouterWidgetBuilder builder,
+  ExitCallback? onExit,
+}) => GoRoute(
+  path: path,
+  name: name,
+  builder: (context, state) => PageSurface(child: builder(context, state)),
+  onExit: onExit,
+);
 
 /// Navigation-guard seam (ticket 020).
 ///
