@@ -37,7 +37,7 @@ A configuration revision holds the **full resolved settings**, not only the dire
 | ----------------------------- | ----------------------------------------------- | ------------------ | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `teams_enabled`               | on or off                                       | off                | Structural    | Turns on teams                                                                                                                                                |
 | `team_pilot_count`            | integer, 1 or more                              | none               | Recalculating | Number of pilot scores counted for the team result. Required when `teams_enabled`. A team with fewer pilots counts them all                                   |
-| `team_protection`             | on or off                                       | off                | Structural    | Only valid when `teams_enabled`. Copied into the matrix revision's draw settings                                                                              |
+| `team_protection`             | on or off                                       | off                | Structural    | Only valid when `teams_enabled`, and not with `SeededManOnMan`. Copied into the matrix revision's draw settings                                                                              |
 | `roles_enabled`               | on or off                                       | off                | Structural    | Lets participants be given roles other than Pilot                                                                                                             |
 | `draw_mode`                   | `StandardManOnMan` or `SeededManOnMan`          | `StandardManOnMan` | Structural    | Copied into the draw settings as the configured mode                                                                                                          |
 | `preliminary_rounds`          | integer, 1 or more                              | 1                  | Structural    | Only valid for `SeededManOnMan`                                                                                                                               |
@@ -62,7 +62,7 @@ A configuration revision holds the **full resolved settings**, not only the dire
 
 ### Dependencies the service enforces
 
-- The team options need `teams_enabled`. `preliminary_rounds` and `intended_total_rounds` need `SeededManOnMan`.
+- The team options need `teams_enabled`. `preliminary_rounds` and `intended_total_rounds` need `SeededManOnMan`. `team_protection` and `SeededManOnMan` cannot be combined (decision #77): a seeded draw deals pilots by standing.
 - `decimal_places` is 0 to 3. `drop_after_rounds` is ascending with at most two entries.
 - The discipline field values must satisfy the validation of their `DisciplineConfigField` rows.
 

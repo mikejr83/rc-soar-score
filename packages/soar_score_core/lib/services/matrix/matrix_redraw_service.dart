@@ -7,6 +7,7 @@ import '../../enums/score_placeholder_state.dart';
 import '../../errors/contest_state_error.dart';
 import '../../errors/entity_not_found_error.dart';
 import '../../models/contest/contest.dart';
+import '../contest_results.dart';
 import '../../models/id.dart';
 import '../../models/matrix/current_matrix.dart';
 import '../../models/matrix/matrix_assignment.dart';
@@ -16,6 +17,7 @@ import '../../repositories/already_stored_error.dart';
 import '../../repositories/finalized_redraw.dart';
 import '../../repositories/mutation_metadata.dart';
 import '../../repositories/repository.dart';
+import '../results_service.dart';
 import 'basic_draw.dart';
 import 'draw_engine.dart';
 import 'draw_optimizer.dart';
@@ -23,6 +25,11 @@ import 'matrix_draw_builder.dart';
 import 'matrix_service.dart';
 
 /// Adds rounds to the matrix, or draws its unscored tail again.
+///
+/// In a `SeededManOnMan` contest the rounds up to `preliminary_rounds` are
+/// drawn as above; each later round is seeded by the standings after the
+/// round before it (leaders in the last group) and is drawn only once every
+/// score before it is official and the standings are current.
 ///
 /// Both are a new matrix revision that continues the rounds before it: pilots
 /// who already met are kept apart as they are in the first draw, and the
@@ -146,10 +153,25 @@ class MatrixRedrawService {
       );
     }
     final options = configuration.config.coreOptions;
-    if (options.drawMode != DrawMode.standardManOnMan) {
+    // A seeded contest draws rounds up to its preliminary count like a
+    // standard one; later rounds are seeded by the standings (see
+    // _requireStandings).
+    final preliminaryRounds = options.preliminaryRounds ?? 1;
+    final seededMode = options.drawMode == DrawMode.seededManOnMan;
+    final seeded = seededMode && firstRound > preliminaryRounds;
+    if (seededMode && !seeded && firstRound + rounds - 1 > preliminaryRounds) {
       throw ContestStateError(
-        'draw_mode_unsupported',
-        'only the standard man-on-man draw is available so far',
+        'seeded_rounds_need_standings',
+        'the preliminary rounds (1 to $preliminaryRounds) and the seeded '
+            'rounds are drawn separately: seeded rounds need the standings '
+            'after the preliminary scores',
+      );
+    }
+    if (seeded && rounds != 1) {
+      throw ContestStateError(
+        'one_seeded_round',
+        'a seeded round is drawn from the standings after the round before '
+            'it, so seeded rounds are drawn one at a time',
       );
     }
 
@@ -174,17 +196,43 @@ class MatrixRedrawService {
     final history = await _history(kept, participations, teamOf);
 
     final requestedSeed = randomSeed ?? _newSeed();
-    final drawn = const DrawEngine().generate(
-      pilots: pilots,
-      rounds: rounds,
-      groupsPerRound: groupsPerRound,
-      teamProtection: options.teamProtection,
-      laneMode: options.laneMode,
-      seed: requestedSeed,
-      seedCount: seedCount,
-      attemptsPerRound: attemptsPerRound,
-      history: history,
-    );
+    Map<String, Object?>? standings;
+    final DrawResult drawn;
+    if (seeded) {
+      final places = await _requireStandings(
+        contestId,
+        asOfRound: firstRound - 1,
+        kept: kept,
+        participations: participations,
+      );
+      standings = {
+        'as_of_round': firstRound - 1,
+        'places': {
+          for (final pilot in pilots)
+            pilot.participationId.value: places[pilot.participationId],
+        },
+      };
+      drawn = const DrawEngine().generateSeeded(
+        pilots: pilots,
+        places: places,
+        groupsPerRound: groupsPerRound,
+        laneMode: options.laneMode,
+        seed: requestedSeed,
+        history: history,
+      );
+    } else {
+      drawn = const DrawEngine().generate(
+        pilots: pilots,
+        rounds: rounds,
+        groupsPerRound: groupsPerRound,
+        teamProtection: options.teamProtection,
+        laneMode: options.laneMode,
+        seed: requestedSeed,
+        seedCount: seedCount,
+        attemptsPerRound: attemptsPerRound,
+        history: history,
+      );
+    }
 
     final extension = firstRound == lastRound + 1;
     final built = MatrixDrawBuilder(newId: _newId).build(
@@ -212,6 +260,8 @@ class MatrixRedrawService {
       reason: _blankToNull(reason) ?? _defaultReason(extension, firstRound),
       actorId: actorId,
       now: _clock(),
+      drawMode: seeded ? DrawMode.seededManOnMan : DrawMode.standardManOnMan,
+      seedingStandings: standings,
     );
 
     final newByOrdinal = {
@@ -233,6 +283,66 @@ class MatrixRedrawService {
 
   static String _defaultReason(bool extension, int firstRound) =>
       extension ? 'rounds added' : 'redraw from round $firstRound';
+
+  /// The places of the standings as of round [asOfRound], once every round
+  /// up to it (the [kept] ones) is fully scored and validated.
+  ///
+  /// Throws a `ContestStateError` when a pilot's score in those rounds is not
+  /// official yet, or the standings are missing, stale or preliminary.
+  Future<Map<Id, int>> _requireStandings(
+    Id contestId, {
+    required int asOfRound,
+    required List<Round> kept,
+    required List<ContestParticipation> participations,
+  }) async {
+    final retired = {
+      for (final p in participations)
+        if (p.isRetired) p.id,
+    };
+    var waiting = 0;
+    for (final round in kept) {
+      for (final assignment
+          in await repository.matrixAssignmentRepository.listLiveForRound(
+            round.id,
+          )) {
+        if (retired.contains(assignment.contestParticipationId)) continue;
+        final placeholder = await repository.scorePlaceholderRepository
+            .findForAssignment(assignment.id);
+        if (placeholder?.state != ScorePlaceholderState.official) waiting++;
+      }
+    }
+    if (waiting > 0) {
+      throw ContestStateError(
+        'scores_incomplete',
+        'a seeded round needs every score through round $asOfRound to be '
+            'official; $waiting ${waiting == 1 ? 'is' : 'are'} not yet',
+      );
+    }
+    final ContestResults results;
+    try {
+      results = await ResultsService(
+        repository,
+        clock: _clock,
+      ).read(contestId, asOfRound: asOfRound);
+    } on ArgumentError {
+      throw ContestStateError(
+        'standings_missing',
+        'recalculate the results before drawing a seeded round: there is no '
+            'standing as of round $asOfRound',
+      );
+    }
+    if (results.isStale || results.standings.any((s) => s.isPreliminary)) {
+      throw ContestStateError(
+        'standings_not_validated',
+        'recalculate the results before drawing a seeded round: the '
+            'standings as of round $asOfRound are stale or preliminary',
+      );
+    }
+    return {
+      for (final standing in results.standings)
+        standing.contestParticipationId: standing.place,
+    };
+  }
 
   static String? _blankToNull(String? text) {
     final trimmed = text?.trim();
