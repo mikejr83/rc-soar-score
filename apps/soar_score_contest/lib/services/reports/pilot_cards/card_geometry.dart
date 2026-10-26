@@ -16,7 +16,12 @@ abstract final class CardSpec {
 
   /// The QR square: this size when there is room, never below [qrMin].
   static const double qr = 25;
-  static const double qrMin = 18;
+
+  /// The floor is 22 mm because the invitation link
+  /// (`https://scoring.rcsoarscore.com/invitations/<id>`) needs a version 4 or
+  /// 5 code, whose modules are smaller than version 3's. With it, a landscape
+  /// quadrant holds 7 rounds four to a page on A4; 8 or more go two to a page.
+  static const double qrMin = 22;
 
   /// The QR code is version 3: 29 modules a side, with a quiet zone of four.
   static const int qrModules = 29;

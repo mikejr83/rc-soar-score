@@ -35,7 +35,7 @@ const _line = 'Gator Cup F5J · Lake Wales, Florida · 17–18 Oct 2026';
 
 void main() {
   group('how many rounds fit', () {
-    test('8 rounds fit four to a page on Letter, 14 need two', () {
+    test('7 rounds fit four to a page on Letter, 8 and 14 need two', () {
       final four = CardGeometry.of(PaperSize.letter, CardsPerPage.four);
       final two = CardGeometry.of(PaperSize.letter, CardsPerPage.two);
       final pilots = [_pilot(club: 'Gator Soaring Club')];
@@ -45,21 +45,22 @@ void main() {
         contestLine: _line,
         rounds: rounds,
       );
-      expect(fits(four, 8), isTrue);
+      expect(fits(four, 7), isTrue);
+      expect(fits(four, 8), isFalse);
       expect(fits(four, 14), isFalse);
       expect(fits(two, 14), isTrue);
     });
 
-    test('8 rounds also fit four to a page on A4', () {
+    test('A4 landscape holds 7 rounds four to a page, then goes to two', () {
       final pilots = [_pilot(club: 'Gator Soaring Club')];
       expect(
-        CardSizing.fitsAll(
+        CardSizing.maxRounds(
           geometry: CardGeometry.of(PaperSize.a4, CardsPerPage.four),
           pilots: pilots,
           contestLine: _line,
-          rounds: 8,
+          qr: true,
         ),
-        isTrue,
+        7,
       );
     });
 
@@ -103,7 +104,7 @@ void main() {
   });
 
   group('QR size', () {
-    test('is 25 mm when there is room and never below 18 mm', () {
+    test('is 25 mm when there is room and never below 22 mm', () {
       final geometry = CardGeometry.of(PaperSize.letter, CardsPerPage.four);
       final roomy = CardSizing.fit(
         geometry: geometry,
@@ -117,7 +118,7 @@ void main() {
         pilot: _pilot(),
         contestLine: _line,
         qr: true,
-        rounds: 8,
+        rounds: 7,
       );
       expect(roomy.qrSize, CardSpec.qr);
       expect(full.qrSize, inInclusiveRange(CardSpec.qrMin, CardSpec.qr));
@@ -267,11 +268,12 @@ void main() {
           choice: choice,
         );
 
-    test('automatic uses four for 8 rounds and two for 14', () {
+    test('automatic uses four for 7 rounds and two for 8 and 14', () {
       expect(
-        decide(8, CardsPerPageChoice.automatic).perPage,
+        decide(7, CardsPerPageChoice.automatic).perPage,
         CardsPerPage.four,
       );
+      expect(decide(8, CardsPerPageChoice.automatic).perPage, CardsPerPage.two);
       final fourteen = decide(14, CardsPerPageChoice.automatic);
       expect(fourteen.perPage, CardsPerPage.two);
       expect(fourteen.message, contains('14 rounds don’t fit four to a page'));
