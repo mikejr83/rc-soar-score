@@ -11,9 +11,8 @@ import 'package:test/test.dart';
 /// These exercise that `createServerHandler` wires the PostgreSQL database
 /// into the shared factory and serves the expected response. Because the
 /// deployed server is Postgres-backed, this suite skips when no instance is
-/// configured (`POSTGRES_PASSWORD` unset), matching the skip convention of
-/// `soar_score_data_postgres`'s integration tests. Route behavior itself
-/// (payloads, 404s, the auth seam) is covered in-process by
+/// configured (`DATABASE_URL` and `POSTGRES_PASSWORD` unset). Route behavior
+/// itself (payloads, 404s, the auth seam) is covered in-process by
 /// `soar_score_api_handlers`' own test suite.
 void main() {
   final config = PostgresConfig.fromEnvironment();
@@ -47,7 +46,7 @@ void main() {
       });
     },
     skip: config == null
-        ? 'no PostgreSQL instance configured (set POSTGRES_PASSWORD; see the test file doc comments in soar_score_data_postgres for local setup)'
+        ? 'no PostgreSQL instance configured (set DATABASE_URL or POSTGRES_PASSWORD for local setup)'
         : null,
   );
 }

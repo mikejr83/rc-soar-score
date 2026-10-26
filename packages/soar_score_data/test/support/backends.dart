@@ -5,7 +5,7 @@ import 'package:test/test.dart';
 enum Backend { sqlite, postgres }
 
 /// The PostgreSQL server to test against, from the environment; null when
-/// `POSTGRES_PASSWORD` is not set.
+/// neither `DATABASE_URL` nor `POSTGRES_PASSWORD` is set.
 PostgresConfig? get postgresConfig => PostgresConfig.fromEnvironment();
 
 /// Runs [body] once for every backend, each in its own group.
@@ -20,7 +20,7 @@ void forEachBackend(void Function(Backend backend) body) {
       backend.name,
       () => body(backend),
       skip: backend == Backend.postgres && postgresMissing
-          ? 'POSTGRES_PASSWORD is not set (see the README for a local server)'
+          ? 'no PostgreSQL instance configured (set DATABASE_URL or POSTGRES_PASSWORD; see the README for a local server)'
           : false,
     );
   }
@@ -33,7 +33,7 @@ void forPostgresOnly(void Function(Backend backend) body) {
     Backend.postgres.name,
     () => body(Backend.postgres),
     skip: postgresConfig == null
-        ? 'POSTGRES_PASSWORD is not set (see the README for a local server)'
+        ? 'no PostgreSQL instance configured (set DATABASE_URL or POSTGRES_PASSWORD; see the README for a local server)'
         : false,
   );
 }

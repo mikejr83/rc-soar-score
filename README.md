@@ -228,18 +228,22 @@ flutter run -d chrome
 The server reads its settings from environment variables and needs a
 PostgreSQL database:
 
-| Variable                                                                             | Meaning                        | Default                                           |
-| ------------------------------------------------------------------------------------ | ------------------------------ | ------------------------------------------------- |
-| `POSTGRES_PASSWORD`                                                                  | database password              | required                                          |
-| `POSTGRES_HOST`, `POSTGRES_PORT`, `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_SSLMODE` | database connection            | localhost, 5432, rc_soar_score, postgres, disable |
-| `PORT`                                                                               | listening port                 | 8080                                              |
-| `LOG_LEVEL`                                                                          | a `package:logging` level name | INFO                                              |
-| `LOG_FORMAT`                                                                         | `json` or `text`               | json                                              |
+| Variable                                                                             | Meaning                                                                                                       | Default                                           |
+| ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| `DATABASE_URL`                                                                       | libpq connection URL (`postgresql://user:password@host:port/db?sslmode=...`). Wins over `POSTGRES_*` when set | none, unless the `POSTGRES_*` variables are set   |
+| `POSTGRES_PASSWORD`                                                                  | database password                                                                                             | required, unless `DATABASE_URL` is set            |
+| `POSTGRES_HOST`, `POSTGRES_PORT`, `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_SSLMODE` | database connection                                                                                           | localhost, 5432, rc_soar_score, postgres, disable |
+| `PORT`                                                                               | listening port                                                                                                | 8080                                              |
+| `LOG_LEVEL`                                                                          | a `package:logging` level name                                                                                | INFO                                              |
+| `LOG_FORMAT`                                                                         | `json` or `text`                                                                                              | json                                              |
 
 ```bash
 cd apps/soar_score_server
 POSTGRES_PASSWORD=... dart run lib/main.dart
+DATABASE_URL='postgresql://user:password@host:5432/rc_soar_score?sslmode=require' dart run lib/main.dart
 ```
+
+The `DATABASE_URL` form is what host providers hand out (for example Neon), and when it is set it wins over the `POSTGRES_*` variables. An absent `sslmode` means `require` TLS.
 
 To run the server and a PostgreSQL database in containers (local development
 only; the compose file uses a throwaway password unless you set

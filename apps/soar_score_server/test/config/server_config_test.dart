@@ -1,4 +1,5 @@
 import 'package:logging/logging.dart';
+import 'package:postgres/postgres.dart';
 import 'package:soar_score_server/config/config_exception.dart';
 import 'package:soar_score_core/config/log_format.dart';
 import 'package:soar_score_server/config/server_config.dart';
@@ -23,6 +24,62 @@ void main() {
       expect(config.postgres.password, secret);
       expect(config.auth0Domain, 'tenant.us.auth0.com');
       expect(config.apiAudience, 'https://soar-score.com/server');
+    });
+
+    test('accepts a connection URL in place of the discrete variables', () {
+      final config = ServerConfig.parse({
+        'DATABASE_URL': 'postgresql://urluser:urlpw@ep-db.us-east-2.aws.neon.tech/neondb?sslmode=verify-full',
+        'AUTH0_DOMAIN': 'tenant.us.auth0.com',
+        'API_AUDIENCE': 'https://soar-score.com/server',
+      });
+
+      expect(config.postgres.host, 'ep-db.us-east-2.aws.neon.tech');
+      expect(config.postgres.port, 5432);
+      expect(config.postgres.database, 'neondb');
+      expect(config.postgres.user, 'urluser');
+      expect(config.postgres.password, 'urlpw');
+      expect(config.postgres.sslMode, SslMode.verifyFull);
+    });
+
+    test('lets the URL win when both URL and discrete variables are set', () {
+      final config = ServerConfig.parse({...minimal, 'DATABASE_URL': 'postgresql://urluser:urlpw@db:5433/soar?sslmode=disable'});
+
+      expect(config.postgres.host, 'db');
+      expect(config.postgres.port, 5433);
+      expect(config.postgres.database, 'soar');
+      expect(config.postgres.user, 'urluser');
+      expect(config.postgres.password, 'urlpw');
+      expect(config.postgres.sslMode, SslMode.disable);
+    });
+
+    test('requires a password when no URL is set', () {
+      expect(
+        () => ServerConfig.parse({
+          'AUTH0_DOMAIN': 'tenant.us.auth0.com',
+          'API_AUDIENCE': 'https://soar-score.com/server',
+        }),
+        throwsA(
+          isA<ConfigException>().having(
+            (e) => e.problems.join(),
+            'problems',
+            contains('DATABASE_URL or POSTGRES_PASSWORD is required'),
+          ),
+        ),
+      );
+    });
+
+    test('reports an invalid URL and does not fall back to the password', () {
+      try {
+        ServerConfig.parse({
+          'DATABASE_URL': 'mysql://u:p@h/db',
+          'AUTH0_DOMAIN': 'tenant.us.auth0.com',
+          'API_AUDIENCE': 'https://soar-score.com/server',
+        });
+        fail('expected a ConfigException');
+      } on ConfigException catch (e) {
+        expect(e.problems, hasLength(1));
+        expect(e.problems.first, contains('DATABASE_URL'));
+      }
     });
 
     test('allows no CORS origins by default', () {
@@ -112,12 +169,10 @@ void main() {
           'PORT': '70000',
           'LOG_LEVEL': 'loud',
           'LOG_FORMAT': 'xml',
-          'POSTGRES_PORT': 'abc',
-          'POSTGRES_SSLMODE': 'maybe',
         });
         fail('expected a ConfigException');
       } on ConfigException catch (e) {
-        expect(e.problems, hasLength(8));
+        expect(e.problems, hasLength(6));
         expect(
           e.problems.join('\n'),
           allOf([
@@ -126,12 +181,23 @@ void main() {
             contains('LOG_FORMAT'),
             contains('AUTH0_DOMAIN'),
             contains('API_AUDIENCE'),
-            contains('POSTGRES_PASSWORD'),
-            contains('POSTGRES_PORT'),
-            contains('POSTGRES_SSLMODE'),
+            contains('DATABASE_URL or POSTGRES_PASSWORD is required'),
           ]),
         );
       }
+    });
+
+    test('stays silent about the discrete variables when a URL is set', () {
+      final config = ServerConfig.parse({
+        'DATABASE_URL': 'postgresql://u:p@h/db',
+        'AUTH0_DOMAIN': 'tenant.us.auth0.com',
+        'API_AUDIENCE': 'https://soar-score.com/server',
+        'POSTGRES_PORT': '70000',
+        'POSTGRES_SSLMODE': 'maybe',
+      });
+      expect(config.postgres.host, 'h');
+      expect(config.postgres.port, 5432);
+      expect(config.postgres.sslMode, SslMode.require);
     });
 
     test('never prints the password', () {
@@ -144,6 +210,13 @@ void main() {
       } on ConfigException catch (e) {
         expect('$e', isNot(contains(secret)));
       }
+
+      final urlConfig = ServerConfig.parse({
+        'DATABASE_URL': 'postgresql://u:$secret@h/db',
+        'AUTH0_DOMAIN': 'tenant.us.auth0.com',
+        'API_AUDIENCE': 'https://soar-score.com/server',
+      });
+      expect(urlConfig.describe(), isNot(contains(secret)));
     });
   });
 }
