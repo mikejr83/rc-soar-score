@@ -110,6 +110,9 @@ Future<bool> _layoutPdf(ReportPrintJob job, Uint8List pdf) =>
       name: job.title,
       format: RasterReportPdfBuilder.pdfPageFormat(job.setup),
       onLayout: (_) async => pdf,
+      // Windows: the full print dialog, whose Preferences button reaches the
+      // printer's own options (double-sided, colour or black and white).
+      windowsModernDialog: true,
     );
 
 /// The browser downloads the file; a desktop build asks where to put it.

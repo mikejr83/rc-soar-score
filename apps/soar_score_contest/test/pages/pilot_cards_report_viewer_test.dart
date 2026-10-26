@@ -309,7 +309,7 @@ void main() {
       for (final view in tester.widgetList<QrCodeView>(find.byType(QrCodeView)))
         view.data,
     };
-    expect(links, {'https://www.rcsoarscore.com'});
+    expect(links, {'https://score.rcsoarscore.com'});
     expect(
       find.textContaining('No QR code.', findRichText: true),
       findsNothing,
@@ -464,6 +464,52 @@ void main() {
       await tester.pumpAndSettle();
       expect(printer.printed, hasLength(1));
       expect(find.byType(QrCodeView), findsNothing);
+    });
+
+    testWidgets('only the typed pages are sent to the printer', (tester) async {
+      PilotInvitationSources.current = const PlaceholderPilotInvitationSource();
+      final printer = FakeReportPrinter(ReportPrintResult.sent);
+      await _pump(
+        tester,
+        printer: printer,
+        params: const ReportViewParams(filters: {'up': 'two'}),
+      );
+      expect(find.text('Letter · Landscape · 2 pages'), findsOneWidget);
+
+      await tester.enterText(
+        find.byKey(const ValueKey('viewer-print-pages')),
+        '1',
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('1 of 2 pages will print.'), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('viewer-print')));
+      await tester.pumpAndSettle();
+
+      expect(printer.printed, hasLength(1));
+      expect(printer.printed.single.pages, hasLength(1));
+    });
+
+    testWidgets('a page that does not exist turns printing off', (
+      tester,
+    ) async {
+      final printer = FakeReportPrinter(ReportPrintResult.sent);
+      await _pump(
+        tester,
+        printer: printer,
+        params: const ReportViewParams(filters: {'up': 'two'}),
+      );
+
+      await tester.enterText(
+        find.byKey(const ValueKey('viewer-print-pages')),
+        '5',
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('Use page numbers from 1 to 2'), findsOne);
+      final print = tester.widget<ButtonStyleButton>(
+        find.byKey(const ValueKey('viewer-print')),
+      );
+      expect(print.onPressed, isNull);
     });
 
     testWidgets('Cancel in the reminder prints nothing', (tester) async {

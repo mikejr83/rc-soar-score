@@ -344,6 +344,10 @@ class ReportViewerController extends ChangeNotifier {
   void setPreview(bool preview) =>
       _setParams(_params.copyWith(preview: preview));
 
+  /// The pages to print or save, as typed; empty for every page.
+  void setPrintPages(String pages) =>
+      _setParams(_params.copyWith(printPages: pages));
+
   /// A fixed zoom, or `null` to fit the width.
   void setZoom(double? zoom) => _setParams(_params.copyWith(zoom: () => zoom));
 

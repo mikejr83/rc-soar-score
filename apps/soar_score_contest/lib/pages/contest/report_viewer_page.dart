@@ -15,6 +15,7 @@ import '../../services/reports/report_launcher.dart';
 import '../../services/reports/reports_facts.dart';
 import '../../services/reports/result_status.dart';
 import '../../services/reports/viewer/page_setup.dart';
+import '../../services/reports/viewer/print_page_range.dart';
 import '../../services/reports/viewer/report_print_result.dart';
 import '../../services/reports/viewer/report_spec.dart';
 import '../../services/reports/viewer/report_view_params.dart';
@@ -245,13 +246,28 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
   /// The sheet pages for the printer. They are painted off screen, outside
   /// this widget tree, so they carry the theme and localizations they would
   /// have here.
-  List<Widget> _printPages() => [
-    for (final page in _pages(_document()!))
-      Localizations.override(
-        context: context,
-        child: InheritedTheme.captureAll(context, page),
-      ),
-  ];
+  List<Widget> _printPages() {
+    final pages = _pages(_document()!);
+    final range = PrintPageRange.parse(
+      _controller!.params.printPages,
+      pages.length,
+    );
+    return [
+      for (final number in range.pages)
+        Localizations.override(
+          context: context,
+          child: InheritedTheme.captureAll(context, pages[number - 1]),
+        ),
+    ];
+  }
+
+  /// Whether the typed "Pages to print" is a range of this sheet's pages.
+  bool _rangeIsValid(ReportDocument? document) =>
+      document == null ||
+      PrintPageRange.parse(
+        _controller!.params.printPages,
+        document.pages.length,
+      ).isValid;
 
   /// Lets the report remind the director before printing (for example that
   /// some cards have no QR code). Answers whether to go on.
@@ -271,7 +287,7 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
         !controller.printer.capabilities.canPrint) {
       return;
     }
-    if (!await _confirmPrint()) {
+    if (!_rangeIsValid(_document()) || !await _confirmPrint()) {
       return;
     }
     // The pages are built after the reminder: sending invitations from it adds
@@ -286,7 +302,7 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
         !controller.printer.capabilities.canSavePdf) {
       return;
     }
-    if (!await _confirmPrint()) {
+    if (!_rangeIsValid(_document()) || !await _confirmPrint()) {
       return;
     }
     controller.savePdf(_printTitle, _printPages());
@@ -367,6 +383,9 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
       defaultOrientation: _definition!.defaultOrientation,
       columns: columns,
       showOrientation: !_definition!.fixedOrientation,
+      pageCount: _document()?.pages.length ?? 0,
+      printPages: controller.params.printPages,
+      onPrintPages: controller.setPrintPages,
     );
   }
 
@@ -660,8 +679,11 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
     final document = ready ? _document() : null;
     final caps = controller.printer.capabilities;
     final nothing = document == null;
-    final printEnabled = !nothing && !controller.busy && caps.canPrint;
-    final pdfEnabled = !nothing && !controller.busy && caps.canSavePdf;
+    final rangeOk = _rangeIsValid(document);
+    final printEnabled =
+        !nothing && !controller.busy && caps.canPrint && rangeOk;
+    final pdfEnabled =
+        !nothing && !controller.busy && caps.canSavePdf && rangeOk;
     final setup = controller.setup;
     final setupText = nothing
         ? 'Nothing to print'

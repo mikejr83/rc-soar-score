@@ -12,6 +12,7 @@ class ReportViewParams extends Equatable {
     this.orientation,
     this.preview = false,
     this.zoom,
+    this.printPages = '',
   });
 
   /// Reads the params from a URL query.
@@ -35,6 +36,7 @@ class ReportViewParams extends Equatable {
       orientation: pick(PageOrientation.values, query['orient']),
       preview: query['preview'] == '1',
       zoom: double.tryParse(query['zoom'] ?? ''),
+      printPages: query['pp'] ?? '',
     );
   }
 
@@ -55,18 +57,23 @@ class ReportViewParams extends Equatable {
   /// A fixed zoom; `null` fits the page to the width.
   final double? zoom;
 
+  /// The pages to print or save as typed (`2-4`); empty for every page.
+  final String printPages;
+
   ReportViewParams copyWith({
     Map<String, String>? filters,
     PaperSize? paper,
     PageOrientation? orientation,
     bool? preview,
     double? Function()? zoom,
+    String? printPages,
   }) => ReportViewParams(
     filters: filters ?? this.filters,
     paper: paper ?? this.paper,
     orientation: orientation ?? this.orientation,
     preview: preview ?? this.preview,
     zoom: zoom == null ? this.zoom : zoom(),
+    printPages: printPages ?? this.printPages,
   );
 
   /// The query that restores these params; empty values are left out.
@@ -77,8 +84,16 @@ class ReportViewParams extends Equatable {
     if (orientation != null) 'orient': orientation!.name,
     if (preview) 'preview': '1',
     if (zoom != null) 'zoom': '$zoom',
+    if (printPages.isNotEmpty) 'pp': printPages,
   };
 
   @override
-  List<Object?> get props => [filters, paper, orientation, preview, zoom];
+  List<Object?> get props => [
+    filters,
+    paper,
+    orientation,
+    preview,
+    zoom,
+    printPages,
+  ];
 }

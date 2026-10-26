@@ -66,7 +66,7 @@ class UnavailablePilotInvitationSource implements PilotInvitationSource {
 class PlaceholderPilotInvitationSource implements PilotInvitationSource {
   const PlaceholderPilotInvitationSource();
 
-  static const link = 'https://www.rcsoarscore.com';
+  static const link = 'https://score.rcsoarscore.com';
 
   @override
   Future<PilotInvitations> read(ApiClient client, Id contestId) async {

@@ -3,6 +3,7 @@ import 'dart:ui' show PlatformDispatcher;
 import 'package:flutter/material.dart';
 
 import '../../../services/reports/viewer/page_setup.dart';
+import '../../../services/reports/viewer/print_page_range.dart';
 import 'report_definition.dart';
 
 /// The Filter, Options and Page groups, in that order, each with a heading.
@@ -21,6 +22,9 @@ class ViewerPanelGroups extends StatelessWidget {
     required this.defaultOrientation,
     this.columns = 1,
     this.showOrientation = true,
+    this.pageCount = 0,
+    this.printPages = '',
+    this.onPrintPages,
   });
 
   /// The report's own groups (Filter, Options).
@@ -36,6 +40,11 @@ class ViewerPanelGroups extends StatelessWidget {
 
   /// False for a report that prints one way only.
   final bool showOrientation;
+
+  /// The pages the sheet has, for the "Pages to print" field; 0 hides it.
+  final int pageCount;
+  final String printPages;
+  final ValueChanged<String>? onPrintPages;
 
   @override
   Widget build(BuildContext context) {
@@ -69,6 +78,12 @@ class ViewerPanelGroups extends StatelessWidget {
               text: (orientation) => orientation.label,
               onChanged: onOrientation,
               help: 'This report’s default is ${defaultOrientation.label}.',
+            ),
+          if (pageCount > 0 && onPrintPages != null)
+            _PrintPagesField(
+              pageCount: pageCount,
+              text: printPages,
+              onChanged: onPrintPages!,
             ),
           SwitchListTile(
             key: const ValueKey('viewer-preview-switch'),
@@ -179,6 +194,62 @@ class _Segments<T> extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// "Pages to print": blank for every page, or numbers and ranges such as `1`
+/// or `2-4`. Print and Save as PDF send only those pages.
+class _PrintPagesField extends StatefulWidget {
+  const _PrintPagesField({
+    required this.pageCount,
+    required this.text,
+    required this.onChanged,
+  });
+
+  final int pageCount;
+  final String text;
+  final ValueChanged<String> onChanged;
+
+  @override
+  State<_PrintPagesField> createState() => _PrintPagesFieldState();
+}
+
+class _PrintPagesFieldState extends State<_PrintPagesField> {
+  late final TextEditingController _controller = TextEditingController(
+    text: widget.text,
+  );
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final range = PrintPageRange.parse(widget.text, widget.pageCount);
+    final count = range.pages.length;
+    return TextField(
+      key: const ValueKey('viewer-print-pages'),
+      controller: _controller,
+      onChanged: widget.onChanged,
+      decoration: InputDecoration(
+        labelText: 'Pages to print',
+        hintText: 'All ${widget.pageCount}',
+        border: const OutlineInputBorder(),
+        isDense: true,
+        errorText: range.error,
+        helperText: range.isValid
+            ? widget.text.trim().isEmpty
+                  ? 'All ${widget.pageCount} '
+                        '${widget.pageCount == 1 ? 'page' : 'pages'}. Type 1 or '
+                        '2-4 to print only some.'
+                  : '$count of ${widget.pageCount} '
+                        '${widget.pageCount == 1 ? 'page' : 'pages'} will print.'
+            : null,
+        helperMaxLines: 2,
       ),
     );
   }
