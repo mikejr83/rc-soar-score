@@ -228,7 +228,7 @@ class PilotCardView extends StatelessWidget {
     );
   }
 
-  /// The headings are 7 pt bold at full width, as on GliderScore's cards, and
+  /// The headings are 7 pt bold at full width and
   /// wrap onto two lines; the columns are wide enough for their longest word.
   Widget _heading(CardColumn column, {required bool first}) {
     final style = TextStyle(

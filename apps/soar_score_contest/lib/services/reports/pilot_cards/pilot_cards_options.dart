@@ -21,14 +21,14 @@ enum CardsPerPageChoice {
 
 /// How far the cards stay from the paper's edge. Printers cannot reach the
 /// edge: [standard] is a quarter inch, which the printers tried so far and
-/// common inkjets reach; [wide] matches the border GliderScore's printouts
-/// keep, for a printer that still cuts the edges off.
+/// common inkjets reach; [wide] is 10 mm, for a printer that still cuts the
+/// edges off.
 enum PrintMargin {
   standard('std', 'Standard', '6.35 mm (¼ in) from the paper’s edge.', 6.35),
   wide(
     'wide',
     'Wide',
-    '10 mm from the paper’s edge, as GliderScore prints.',
+    '10 mm from the paper’s edge, for a printer that cuts the cards off.',
     10,
   );
 
