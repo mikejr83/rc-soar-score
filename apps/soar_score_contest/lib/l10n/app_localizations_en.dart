@@ -381,4 +381,75 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get alphaNoticeContinue => 'Continue';
+
+  @override
+  String get storageIndicatorName => 'Local storage';
+
+  @override
+  String get storageStatusAvailable => 'Available';
+
+  @override
+  String get storageStatusChecking => 'Checking';
+
+  @override
+  String get storageStatusUnavailable => 'Unavailable';
+
+  @override
+  String storageIndicatorTooltip(String name, String status) {
+    return '$name: $status';
+  }
+
+  @override
+  String storageDetailStatus(String status) {
+    return 'Status: $status';
+  }
+
+  @override
+  String storageDetailLastObserved(String time) {
+    return 'Last observed: $time';
+  }
+
+  @override
+  String get storageNeverObserved => 'Never';
+
+  @override
+  String get storageDetailNote =>
+      'Where this device keeps contests and scores. When it is unavailable, changes cannot be saved.';
+
+  @override
+  String storageDetailError(String error) {
+    return 'Error: $error';
+  }
+
+  @override
+  String get storageRetry => 'Retry now';
+
+  @override
+  String get storageDetailClose => 'OK';
+
+  @override
+  String get unsyncedWarningTitle => 'Changes have not synced';
+
+  @override
+  String unsyncedWarningBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count changes have',
+      one: '1 change has',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'they',
+      one: 'it',
+    );
+    return '$_temp0 not been sent to the service. If you continue, $_temp1 cannot be recovered.';
+  }
+
+  @override
+  String get unsyncedWarningContinue => 'Continue anyway';
+
+  @override
+  String get unsyncedWarningCancel => 'Cancel';
 }

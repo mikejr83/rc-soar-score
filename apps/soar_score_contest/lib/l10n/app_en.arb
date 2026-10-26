@@ -417,5 +417,85 @@
   "alphaNoticeContinue": "Continue",
   "@alphaNoticeContinue": {
     "description": "Button that closes the alpha warning once the checkbox is ticked."
+  },
+  "storageIndicatorName": "Local storage",
+  "@storageIndicatorName": {
+    "description": "Name of the status bar indicator for the storage on this device, and title of its detail dialog."
+  },
+  "storageStatusAvailable": "Available",
+  "@storageStatusAvailable": {
+    "description": "Local storage status: it can be read."
+  },
+  "storageStatusChecking": "Checking",
+  "@storageStatusChecking": {
+    "description": "Local storage status: a check is running."
+  },
+  "storageStatusUnavailable": "Unavailable",
+  "@storageStatusUnavailable": {
+    "description": "Local storage status: it could not be read."
+  },
+  "storageIndicatorTooltip": "{name}: {status}",
+  "@storageIndicatorTooltip": {
+    "description": "Tooltip and accessible text of the storage indicator.",
+    "placeholders": {
+      "name": {"type": "String"},
+      "status": {"type": "String"}
+    }
+  },
+  "storageDetailStatus": "Status: {status}",
+  "@storageDetailStatus": {
+    "description": "Status line of the storage detail dialog.",
+    "placeholders": {
+      "status": {"type": "String"}
+    }
+  },
+  "storageDetailLastObserved": "Last observed: {time}",
+  "@storageDetailLastObserved": {
+    "description": "Line of the storage detail dialog with when the storage last answered.",
+    "placeholders": {
+      "time": {"type": "String"}
+    }
+  },
+  "storageNeverObserved": "Never",
+  "@storageNeverObserved": {
+    "description": "Shown instead of a time when the storage has not answered yet."
+  },
+  "storageDetailNote": "Where this device keeps contests and scores. When it is unavailable, changes cannot be saved.",
+  "@storageDetailNote": {
+    "description": "Explains the storage detail dialog."
+  },
+  "storageDetailError": "Error: {error}",
+  "@storageDetailError": {
+    "description": "Line of the storage detail dialog with why the last check failed.",
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "storageRetry": "Retry now",
+  "@storageRetry": {
+    "description": "Button of the storage detail dialog that checks the storage again."
+  },
+  "storageDetailClose": "OK",
+  "@storageDetailClose": {
+    "description": "Button that closes the storage detail dialog."
+  },
+  "unsyncedWarningTitle": "Changes have not synced",
+  "@unsyncedWarningTitle": {
+    "description": "Title of the warning shown before an action that would lose changes that have not reached the service."
+  },
+  "unsyncedWarningBody": "{count, plural, =1{1 change has} other{{count} changes have}} not been sent to the service. If you continue, {count, plural, =1{it} other{they}} cannot be recovered.",
+  "@unsyncedWarningBody": {
+    "description": "Body of the unsynced-changes warning.",
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "unsyncedWarningContinue": "Continue anyway",
+  "@unsyncedWarningContinue": {
+    "description": "Button of the unsynced-changes warning that goes on with the action."
+  },
+  "unsyncedWarningCancel": "Cancel",
+  "@unsyncedWarningCancel": {
+    "description": "Button of the unsynced-changes warning that stops the action."
   }
 }
