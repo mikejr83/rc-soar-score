@@ -11,6 +11,9 @@ class ReportPilot {
     this.team,
     this.className,
     this.retiredAtRound,
+    this.club,
+    this.faiId,
+    this.nationalId,
   });
 
   final Id participationId;
@@ -22,6 +25,19 @@ class ReportPilot {
 
   /// The first round the pilot no longer flies, or null.
   final int? retiredAtRound;
+
+  /// The pilot's club and identification numbers, when recorded.
+  final String? club;
+  final String? faiId;
+  final String? nationalId;
+
+  bool get isRetired => retiredAtRound != null;
+
+  /// "Elena Vargas"; a single name stands as it is.
+  String get givenSurname => [
+    firstName.trim(),
+    lastName.trim(),
+  ].where((part) => part.isNotEmpty).join(' ');
 
   /// "Vargas, Elena"; a single name stands as it is.
   String get listName {

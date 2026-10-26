@@ -5,6 +5,7 @@ import '../../../services/reports/reports_facts.dart';
 import '../../../services/reports/result_status.dart';
 import '../../../services/reports/viewer/page_setup.dart';
 import '../../../services/reports/viewer/report_spec.dart';
+import 'viewer_banner.dart';
 
 /// One titled group of controls in the filter and options panel. The viewer
 /// adds its own Page group after the report's.
@@ -23,6 +24,7 @@ class ReportControlsContext {
     required this.check,
     required this.setFilter,
     required this.setFilters,
+    this.setup = const PageSetup(PaperSize.letter, PageOrientation.landscape),
   });
 
   /// The filters in force, defaults included.
@@ -33,6 +35,10 @@ class ReportControlsContext {
   final ReportCheck check;
   final void Function(String key, String value) setFilter;
   final void Function(Map<String, String> changes) setFilters;
+
+  /// The paper and orientation in force, for a report whose options depend on
+  /// the page.
+  final PageSetup setup;
 }
 
 /// What a report builds its pages from.
@@ -44,6 +50,7 @@ class ReportPageContext {
     required this.bodySize,
     required this.preview,
     this.data,
+    this.online = true,
   });
 
   final ReportsFacts facts;
@@ -62,7 +69,55 @@ class ReportPageContext {
   /// What the report's `loadData` returned for [filters]; `null` for a report
   /// with no data of its own.
   final Object? data;
+
+  /// The device can reach the network; `false` when it is known not to.
+  final bool online;
 }
+
+/// A button on a [ReportBanner]. It gets a context so it can open a dialog.
+class ReportBannerAction {
+  const ReportBannerAction(
+    this.label,
+    this.onPressed, {
+    this.filled = false,
+    this.key,
+  });
+
+  final String label;
+
+  /// `null` shows the button disabled.
+  final void Function(BuildContext context)? onPressed;
+  final bool filled;
+  final Key? key;
+}
+
+/// A status line a report asks the viewer to show above the sheet. Screen
+/// only; it never prints.
+class ReportBanner {
+  const ReportBanner({
+    required this.kind,
+    required this.icon,
+    required this.lead,
+    required this.text,
+    this.actions = const [],
+    this.busy = false,
+    this.key,
+  });
+
+  final ViewerBannerKind kind;
+  final IconData icon;
+  final String lead;
+  final String text;
+  final List<ReportBannerAction> actions;
+
+  /// Work is under way: the banner shows an indeterminate progress bar.
+  final bool busy;
+  final Key? key;
+}
+
+/// Asked before Print or Save as PDF starts. Answers whether to go on; the
+/// report may show a dialog first.
+typedef ReportPrintGate = Future<bool> Function(BuildContext context);
 
 /// A report ready to draw: the running header, the page bodies and, for a
 /// report built from scores, its result status.
@@ -76,6 +131,8 @@ class ReportDocument {
     this.status,
     this.statusReason,
     this.statusAction,
+    this.banners = const [],
+    this.beforePrint,
   });
 
   /// The running header's title, for example "Overall Results - Gator Cup".
@@ -98,6 +155,12 @@ class ReportDocument {
   /// Why the status is not official, in one line, for the screen banner.
   final String? statusReason;
   final ReportAction? statusAction;
+
+  /// Status lines the report adds above the sheet.
+  final List<ReportBanner> banners;
+
+  /// A reminder shown before the system print dialog; `null` for none.
+  final ReportPrintGate? beforePrint;
 }
 
 /// A report the viewer can show: its controls and its pages, on top of the

@@ -29,9 +29,7 @@ Future<void> exportContest(BuildContext context, Contest contest) async {
     );
     return;
   } on Exception {
-    messenger.showSnackBar(
-      SnackBar(content: Text(l10n.exportFailed)),
-    );
+    messenger.showSnackBar(SnackBar(content: Text(l10n.exportFailed)));
     return;
   }
   try {
@@ -44,15 +42,11 @@ Future<void> exportContest(BuildContext context, Contest contest) async {
     }
   } on PlatformException catch (e) {
     messenger.showSnackBar(
-      SnackBar(
-        content: Text(l10n.exportFileSaveFailed(_describe(e, l10n))),
-      ),
+      SnackBar(content: Text(l10n.exportFileSaveFailed(_describe(e, l10n)))),
     );
   } on FileSystemException catch (e) {
     messenger.showSnackBar(
-      SnackBar(
-        content: Text(l10n.exportFileSaveFailed(_describe(e, l10n))),
-      ),
+      SnackBar(content: Text(l10n.exportFileSaveFailed(_describe(e, l10n)))),
     );
   }
 }
@@ -61,9 +55,9 @@ Future<void> exportContest(BuildContext context, Contest contest) async {
 String _describe(Exception error, AppLocalizations l10n) => switch (error) {
   PlatformException(:final message?) when message.isNotEmpty => message,
   FileSystemException(:final message, :final osError) =>
-      osError?.message.isNotEmpty == true
-          ? '$message (${osError!.message})'
-          : message,
+    osError?.message.isNotEmpty == true
+        ? '$message (${osError!.message})'
+        : message,
   _ => l10n.fileOperationRetryHint,
 };
 
@@ -154,9 +148,7 @@ Future<ExchangeImported?> importContest(BuildContext context) async {
     preview = await exchange.preview(chosen.bytes);
   } on ExchangeFailure catch (e) {
     messenger.showSnackBar(
-      SnackBar(
-        content: Text(l10n.importFileRefused(chosen.name, e.message)),
-      ),
+      SnackBar(content: Text(l10n.importFileRefused(chosen.name, e.message))),
     );
     return null;
   }

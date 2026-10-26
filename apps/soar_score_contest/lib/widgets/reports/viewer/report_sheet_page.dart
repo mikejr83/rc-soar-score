@@ -14,10 +14,57 @@ abstract final class SheetLayout {
   static const double headerHeight = 72;
   static const double footerHeight = 40;
 
+  /// What a report's page body can use when the page has no running header or
+  /// footer: the page inside its margins.
+  static Size bareBodySize(PageSetup setup, EdgeInsets margins) =>
+      Size(setup.width - margins.horizontal, setup.height - margins.vertical);
+
   /// What a report's page body can use.
   static Size bodySize(PageSetup setup) => Size(
     setup.width - 2 * marginX,
     setup.height - marginTop - headerHeight - footerHeight - marginBottom,
+  );
+}
+
+/// One printed page without the running header and footer, for a report that
+/// draws its own on every card. It keeps the page margins and the paper style.
+class ReportBarePage extends StatelessWidget {
+  const ReportBarePage({
+    super.key,
+    required this.setup,
+    required this.reportName,
+    required this.pageNumber,
+    required this.pageCount,
+    required this.body,
+    required this.margins,
+  });
+
+  final PageSetup setup;
+  final String reportName;
+  final int pageNumber;
+  final int pageCount;
+  final Widget body;
+
+  /// The blank border the printer cannot reach, as the report asks for it.
+  final EdgeInsets margins;
+
+  @override
+  Widget build(BuildContext context) => Theme(
+    data: PaperStyle.theme(),
+    child: DefaultTextStyle(
+      style: PaperStyle.body,
+      child: Semantics(
+        container: true,
+        label: '$reportName, page $pageNumber of $pageCount',
+        child: Container(
+          width: setup.width,
+          height: setup.height,
+          color: PaperStyle.paper,
+          padding: margins,
+          child: ClipRect(child: body),
+        ),
+      ),
+    ),
   );
 }
 

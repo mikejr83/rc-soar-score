@@ -16,10 +16,13 @@ enum ViewerLoad { loading, ready, unavailable, notFound }
 
 /// A short message with an optional action, shown as a snackbar.
 class ViewerNotice {
-  const ViewerNotice(this.message, {this.actionLabel});
+  const ViewerNotice(this.message, {this.actionLabel, this.pdf = false});
 
   final String message;
   final String? actionLabel;
+
+  /// The action tries a PDF save again, not a print.
+  final bool pdf;
 }
 
 /// The state behind the report viewer: the data, the filters, the page setup
@@ -344,6 +347,10 @@ class ReportViewerController extends ChangeNotifier {
   void setPreview(bool preview) =>
       _setParams(_params.copyWith(preview: preview));
 
+  /// The pages to print or save, as typed; empty for every page.
+  void setPrintPages(String pages) =>
+      _setParams(_params.copyWith(printPages: pages));
+
   /// A fixed zoom, or `null` to fit the width.
   void setZoom(double? zoom) => _setParams(_params.copyWith(zoom: () => zoom));
 
@@ -397,6 +404,7 @@ class ReportViewerController extends ChangeNotifier {
               ? 'Save cancelled. Nothing changed.'
               : 'Print cancelled. Nothing changed.',
           actionLabel: pdf ? 'Save again' : 'Print again',
+          pdf: pdf,
         );
       case ReportPrintResult.failed:
         _printFailed = true;

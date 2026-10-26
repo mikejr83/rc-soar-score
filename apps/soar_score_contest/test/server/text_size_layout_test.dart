@@ -8,6 +8,7 @@ import 'package:soar_score_contest/app.dart';
 import 'package:soar_score_contest/pages/contest/matrix_page.dart';
 import 'package:soar_score_contest/router.dart';
 import 'package:soar_score_contest/server/embedded_server.dart';
+import 'package:soar_score_contest/services/reports/report_kind.dart';
 import 'package:soar_score_contest/services/text_size/preferred_text_scaler.dart';
 import 'package:soar_score_contest/services/text_size/text_size.dart';
 import 'package:soar_score_contest/services/text_size/text_size_controller.dart';
@@ -93,6 +94,7 @@ void main() {
         'matrix': contestMatrixPath(id),
         'scoring': contestScoringPath(id, round: 1, group: 1),
         'reports': contestReportsPath(id),
+        'pilot scoring cards': contestReportPath(id, ReportKind.cards),
         'sync': contestSyncPath(id),
         'settings': settingsPath,
         'participants': participantsPath,

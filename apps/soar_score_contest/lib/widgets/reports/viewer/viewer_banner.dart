@@ -16,6 +16,7 @@ class ViewerBanner extends StatelessWidget {
     required this.lead,
     required this.text,
     this.actions = const [],
+    this.child,
   });
 
   final ViewerBannerKind kind;
@@ -25,6 +26,9 @@ class ViewerBanner extends StatelessWidget {
 
   /// Buttons, last one primary.
   final List<PageBannerAction> actions;
+
+  /// Extra content under the text, for example a progress bar.
+  final Widget? child;
 
   @override
   Widget build(BuildContext context) => PageBanner(
@@ -39,5 +43,6 @@ class ViewerBanner extends StatelessWidget {
     lead: lead,
     text: text,
     actions: actions,
+    child: child,
   );
 }

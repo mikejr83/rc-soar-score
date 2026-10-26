@@ -160,8 +160,16 @@ class ReportsFacts {
             team: data.showTeams ? teams[teamOf[p.id]]?.name : null,
             className: classes ? p.classification : null,
             retiredAtRound: p.retiredAtRound,
+            club: _text(profiles[p.participantProfileId]?.club),
+            faiId: _text(profiles[p.participantProfileId]?.faiNumber),
+            nationalId: _text(profiles[p.participantProfileId]?.nationalOrgId),
           ),
     ];
+  }
+
+  static String? _text(String? value) {
+    final text = value?.trim();
+    return text == null || text.isEmpty ? null : text;
   }
 
   static int _signature(ContestScores scores) => Object.hashAll([
