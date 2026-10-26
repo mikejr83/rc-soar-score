@@ -59,11 +59,34 @@ class UnavailablePilotInvitationSource implements PilotInvitationSource {
       Future.error(StateError(reason));
 }
 
+/// A placeholder until the API exists (#589): every pilot of the contest gets
+/// the same QR code, which opens the project's web site, so the cards can be
+/// seen and printed with a code. It is not an invitation: scanning it does not
+/// open a pilot's scoring page, and nothing can be sent.
+class PlaceholderPilotInvitationSource implements PilotInvitationSource {
+  const PlaceholderPilotInvitationSource();
+
+  static const link = 'https://www.rcsoarscore.com';
+
+  @override
+  Future<PilotInvitations> read(ApiClient client, Id contestId) async {
+    final participations = await client.participations(contestId);
+    return PilotInvitations(
+      links: {for (final p in participations) p.id.value: link},
+      sendUnavailableReason: UnavailablePilotInvitationSource.reason,
+    );
+  }
+
+  @override
+  Future<void> send(ApiClient client, Id contestId, List<Id> participations) =>
+      Future.error(StateError(UnavailablePilotInvitationSource.reason));
+}
+
 /// The source the cards use. Held here so an E2E journey or a test can swap
 /// it, as `ReportPrinters.current` does for the print dialogs.
 abstract final class PilotInvitationSources {
   static PilotInvitationSource current =
-      const UnavailablePilotInvitationSource();
+      const PlaceholderPilotInvitationSource();
 }
 
 /// Where sending invitations from the report stands.

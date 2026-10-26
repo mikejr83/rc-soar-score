@@ -99,8 +99,12 @@ Future<void> _pump(
 Finder get _cards => find.byType(PilotCardView);
 
 void main() {
-  tearDown(() {
+  setUp(() {
     PilotInvitationSources.current = const UnavailablePilotInvitationSource();
+  });
+
+  tearDown(() {
+    PilotInvitationSources.current = const PlaceholderPilotInvitationSource();
   });
 
   testWidgets('prints a card per pilot, by last name, with the draw rows', (
@@ -283,6 +287,24 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('cards-send-confirm')));
     await tester.pumpAndSettle();
     expect(find.byType(QrCodeView), findsNWidgets(4));
+  });
+
+  testWidgets('the placeholder source gives every pilot the project link', (
+    tester,
+  ) async {
+    PilotInvitationSources.current = const PlaceholderPilotInvitationSource();
+    await _pump(tester);
+
+    expect(find.byType(QrCodeView), findsNWidgets(4));
+    final links = {
+      for (final view in tester.widgetList<QrCodeView>(find.byType(QrCodeView)))
+        view.data,
+    };
+    expect(links, {'https://www.rcsoarscore.com'});
+    expect(
+      find.textContaining('No QR code.', findRichText: true),
+      findsNothing,
+    );
   });
 
   testWidgets('a QR code encodes the invitation link and stays pure black', (

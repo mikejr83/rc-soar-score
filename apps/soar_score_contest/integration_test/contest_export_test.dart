@@ -35,10 +35,7 @@ void main() {
           .value,
       isTrue,
     );
-    expect(
-      find.text(AppLocalizationsEn().exportNotice),
-      findsOneWidget,
-    );
+    expect(find.text(AppLocalizationsEn().exportNotice), findsOneWidget);
 
     await tapVisible(tester, find.byKey(const ValueKey('export-save')));
     await pumpUntilFound(

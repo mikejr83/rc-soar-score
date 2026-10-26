@@ -25,10 +25,7 @@ void main() {
       tester,
       find.byKey(const ValueKey('inspection-label')),
     );
-    expect(
-      find.text(AppLocalizationsEn().inspectionChipLabel),
-      findsOneWidget,
-    );
+    expect(find.text(AppLocalizationsEn().inspectionChipLabel), findsOneWidget);
     expect(find.byKey(const ValueKey('inspection-notice')), findsOneWidget);
 
     // The demo contests are not labelled.

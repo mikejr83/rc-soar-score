@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
+import 'package:soar_score_contest/services/reports/pilot_cards/pilot_invitations.dart';
 import 'package:soar_score_contest/services/reports/viewer/platform_report_printer.dart';
 import 'package:soar_score_contest/services/reports/viewer/report_printers.dart';
 
@@ -32,6 +33,13 @@ void main() {
       },
       saveFile: (fileName, pdf) async => fileName,
     );
+
+    // Without invitations no card has a QR code, which is what the print
+    // reminder below is about. (The app's own source is a placeholder that
+    // gives every card a code to the project's web site.)
+    final source = PilotInvitationSources.current;
+    addTearDown(() => PilotInvitationSources.current = source);
+    PilotInvitationSources.current = const UnavailablePilotInvitationSource();
 
     await openMainPage(tester);
     await openContest(tester, _contest);
