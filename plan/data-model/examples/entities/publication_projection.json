@@ -104,35 +104,35 @@
         "pilot_key": "p_7Hq2xK",
         "round": 1,
         "group_score": 1040.0,
-        "time_flown": 585,
+        "raw_components": { "time_flown": 585 },
         "landing_points": 40
       },
       {
         "pilot_key": "p_Kc8Zt2",
         "round": 1,
         "group_score": 1024.4,
-        "time_flown": 570,
+        "raw_components": { "time_flown": 570 },
         "landing_points": 50
       },
       {
         "pilot_key": "p_Xe6Ra1",
         "round": 1,
         "group_score": 948.1,
-        "time_flown": 540,
+        "raw_components": { "time_flown": 540 },
         "landing_points": 25
       },
       {
         "pilot_key": "p_Fs5Ny3",
         "round": 1,
         "group_score": 1045.0,
-        "time_flown": 597,
+        "raw_components": { "time_flown": 597 },
         "landing_points": 45
       },
       {
         "pilot_key": "p_Bd4Wm9",
         "round": 1,
         "group_score": 0.0,
-        "time_flown": 0,
+        "raw_components": { "time_flown": 0 },
         "landing_points": null,
         "zero_reason": "motor_restart"
       }
@@ -188,7 +188,16 @@
     "calculation_metadata": {
       "group_score_mode": "Time",
       "rounding_mode": "Round",
-      "decimal_places": 1
+      "decimal_places": 1,
+      "score_fields": [
+        {
+          "key": "time_flown",
+          "name": "Time Flown",
+          "type": "time",
+          "unit": null,
+          "precision": null
+        }
+      ]
     },
     "published_at": "2026-10-17T16:00:00Z",
     "published_by": "019c0000-0000-7000-8000-000000000001",

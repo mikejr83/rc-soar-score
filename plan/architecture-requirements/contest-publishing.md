@@ -26,7 +26,7 @@ The private contest remains the source of truth. Public data must never be merge
 
 The public projection must contain only data needed for public contest viewing. At minimum this includes contest identity and dates, host and location, discipline, participant display data, teams when applicable, matrix information, scores, rankings, and the publication status. Participant email addresses and other private director data must never be published.
 
-The projection must retain the calculation metadata needed to explain or reproduce displayed results, including the matrix revision, contest configuration revision, discipline rules version, and calculation version. Raw private inputs, audit history, pending mutations, and review-request details are not public unless a separate requirement explicitly permits them.
+The projection must retain the calculation metadata needed to explain or reproduce displayed results, including the matrix revision, contest configuration revision, discipline rules version, and calculation version. The raw score values the director shows on printed score sheets (flight time, launch height, and other entered or flagged score fields, but not landing-table ids or free text) are public, as `raw_components` on each score. Other raw private inputs, audit history, pending mutations, and review-request details are not public unless a separate requirement explicitly permits them.
 
 ## Visibility and update policy
 

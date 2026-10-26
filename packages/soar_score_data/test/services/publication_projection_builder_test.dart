@@ -123,6 +123,32 @@ void _tests(Backend backend) {
       expect([for (final p in pilots) (p! as Map)['place']], [1, 2, 3, 4]);
     });
 
+    test('each score carries the raw components the site labels', () async {
+      await scoreAndCalculate();
+
+      final projection = (await build()).projection;
+
+      final times = [
+        for (final score in projection.scores!)
+          ((score! as Map)['raw_components']! as Map)['time_flown'],
+      ];
+      expect(times, unorderedEquals([500, 540, 580, 590]));
+      for (final score in projection.scores!) {
+        // The landing is an id into a table; its points are already in the
+        // entry.
+        expect(
+          (score! as Map)['raw_components'],
+          allOf(containsPair('launch_height', 200), isNot(contains('landing'))),
+        );
+      }
+      final fields =
+          projection.calculationMetadata!['score_fields']! as List<Object?>;
+      final keys = [for (final f in fields) (f! as Map)['key']];
+      expect(keys, containsAll(['time_flown', 'launch_height']));
+      expect(keys, isNot(contains('landing')));
+      expect((fields.first! as Map).keys, containsAll(['name', 'type']));
+    });
+
     test('pilots are keyed and their details go to participant rows', () async {
       await scoreAndCalculate();
 
