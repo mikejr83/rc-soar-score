@@ -24,7 +24,9 @@ export class ScoreFields {
   format(key: string, value: unknown): string {
     if (value == null) return "-";
     const precision = this.byKey.get(key)?.precision;
-    return typeof value === "number" && precision !== undefined ? value.toFixed(precision) : String(value);
+    // `toFixed` throws outside 0 to 100, and the model only bounds precision below.
+    const usable = precision !== undefined && precision >= 0 && precision <= 100;
+    return typeof value === "number" && usable ? value.toFixed(precision) : String(value);
   }
 }
 
