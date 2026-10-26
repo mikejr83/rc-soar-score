@@ -76,7 +76,7 @@ The architectural and schema design decisions are resolved as follows:
 - **Publication retention, anonymous claiming, and invitation expiry**:
   - **Publication retention**: Published contest projections are retained indefinitely as a permanent public archive. Deleting a contest does not remove its publication. Removing a publication from public view requires a delist request decided by a system administrator.
   - **Anonymous contest claiming**: Contests published anonymously via a verified email can be claimed at any time in the future during the director's first-time login flow when creating/registering an account with that email.
-  - **Invitation expiry**: Magic URL email invitations expire 24 hours after contest completion. Field QR code tokens provide access for the entire contest duration and do not expire mid-contest unless explicitly revoked.
+  - **Invitation expiry**: Every invitation, emailed or printed as a QR code, expires 24 hours after contest completion and not earlier unless replaced or revoked. Using a link never ends it.
 
 - **Synchronization cursor storage, conflict resolution, and tombstone retention**:
   - **Sync cursor**: Monotonically increasing sequence stream per contest (`contest_mutation_seq`), and a separate sequence stream for a director's own data that belongs to no contest (participant profiles, roles, models, landing tables, presets). System data only comes down. Clients track their last acknowledged sequence (`last_synced_seq`) per stream.

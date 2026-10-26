@@ -42,23 +42,26 @@ Show a pilot with every field, a pilot with only a name, and a pilot with a very
 
 ### QR code
 
-If **participant scoring** is enabled for the contest (the docs call online scoring "participant scoring"), show a **QR code** on the card. The code is a **field QR invitation**: a separate invitation type from the emailed link, issued when participant scoring is enabled, **permanent for the contest** and not invalidated by printing, reprinting or an email invitation. It is for pilots who do not use email or did not receive it. Every reprint of a card shows the **same** code. It must be large enough for an inkjet in "document quality" to print without trouble, so scanning does not need high resolution:
+If the pilot has an **invitation** (the director issues invitations explicitly; this does not depend on participant scoring being open), show a **QR code** on the card. The code is the pilot's own **stable invitation link**, the same link an email would carry, active until the contest completes and not invalidated by printing or reprinting. It is for pilots who do not use email or did not receive it. Every reprint of a card shows the **same** code. It must be large enough for an inkjet in "document quality" to print without trouble, so scanning does not need high resolution:
 
 - State a **minimum size in millimetres** for the QR square (recommend at least 25 mm) and the quiet zone around it (at least four modules).
 - Pure black on white. No logo in the middle, no rounded styling, no colour.
 - A short caption beside it: "Scan to enter scores". **Do not print the link in text**; the code is the only way in.
-- Show the card **without** a QR code when participant scoring is closed, and **when the contest was organized offline and has not synchronized** (QR codes cannot be generated until it has; the panel says so with a link to the sync page). Say what takes its place so the layout does not collapse (recommended: the space is left to the scoring table, and the identity block expands).
+- Show the card **without** a QR code when the pilot has no invitation yet, and **when the contest was organized offline and has not synchronized** (QR codes cannot be generated until it has; the panel says so with a link to the sync page). Say what takes its place so the layout does not collapse (recommended: the space is left to the scoring table, and the identity block expands).
 
-### Closed participant scoring
+### No invitations yet
 
-When participant scoring is **Closed**, the cards cannot carry QR codes, because the invitations go out when it is opened. The report **reminds the director** and lets them open it right there, so they do not have to leave the report, open scoring elsewhere and come back. Design:
+Invitations are issued by an explicit director action ("Send invitations"), available once the contest is synchronized and Ready. Opening participant scoring does not issue or send them, and cards carry QR codes whenever invitations exist, even while scoring is Closed. When some or all pilots have no invitation, the report shows:
 
-- A **persistent banner** above the sheet (screen only): "Participant scoring is closed. These cards have no QR code. Open participant scoring to send invitations and print QR codes." With a button **"Open participant scoring"**. Text plus icon; not colour alone.
-- The **Print reminder.** Pressing Print (or Save as PDF) while it is Closed shows a **short dialog** before the system print dialog: "Participant scoring is closed, so these cards will print without QR codes." Three actions: **"Open participant scoring and print"** (the primary, recommended), **"Print without QR codes"**, and **Cancel**. It is a reminder, never a block: printing without QR codes stays possible.
-- **Opening is a contest state change with side effects**, so it has its own **confirmation** that says what will happen: "Participant scoring will open. Invitations will be sent to participants, and each card will carry a QR code." It names how many invitations will go out. It is the same Open action as on the workspace, with the same authority rule: if the user may not open it, the button is disabled with the reason in text and Print without QR codes remains.
-- **After opening**, the cards **regenerate with QR codes** in place, the banner turns into a short confirmation ("Participant scoring is open. QR codes added."), and the dialog's print continues if it started from "Open participant scoring and print". Show the opening, in progress and failed (invitations could not be issued: retry, and nothing printed with a QR code that is not valid) states.
-- When the contest is **offline and not synchronized**, opening is unavailable: the banner and dialog say so and link to the sync page; printing without QR codes remains.
-- Do not show the banner or the reminder when participant scoring is already open.
+- A **persistent banner** above the sheet (screen only), text plus icon:
+  - Online: "Some cards have no QR code. Send invitations to add them." With a button **"Send invitations"**.
+  - Offline but synchronized: "Connect to send invitations. QR codes already issued still print."
+  - Offline and never synchronized: "Sync this contest first to create QR codes", with a link to the sync page.
+- The **Print reminder** (dialog before the system print dialog) when cards would print without QR codes: "Some cards will print without QR codes." Actions: **"Send invitations and print"** (primary, online only), **"Print without QR codes"**, **Cancel**. It is a reminder, never a block.
+- **Sending is a side effect**, so it has its own confirmation that names how many invitations will go out. If the user may not send, the button is disabled with the reason in text.
+- **After sending**, the cards regenerate with QR codes in place and the banner becomes a short confirmation. Show sending, in progress and failed states (nothing prints with a QR code that is not valid).
+- When invitations exist but participant scoring is Closed, show no QR banner. A small note may say participants can see their draw but cannot submit until scoring opens.
+- Do not show the banner when every card has a QR code.
 
 ### Scoring table
 
@@ -129,7 +132,7 @@ The panel shows what the choices produce: **"12 cards · 3 pages"** (updated liv
 
 ## States
 
-Design: loading and generating (cards for 100 pilots take time; show progress and keep the panel usable); the normal report; participant scoring closed (the banner, the print reminder dialog, the open confirmation, opening, failed, and opened); no QR code when offline and unsynchronized; **retired pilots** (the option shown and hidden); too many rounds for a half page; Pre-fill enabled, disabled, and on; the empty pilot selection; a range with no rounds; the **configuration changed since the matrix was drawn** banner; out of date (a redraw or a pilot change happened while the tab was open — a banner with Refresh, never an automatic redraw of the cards); offline (QR codes still generate, the page says the link works once the card is scanned online).
+Design: loading and generating (cards for 100 pilots take time; show progress and keep the panel usable); the normal report; no invitations yet (the banner in its online, offline-synchronized and never-synchronized forms, the print reminder dialog, the send confirmation, sending, failed, and sent); no QR code when offline and unsynchronized; **retired pilots** (the option shown and hidden); too many rounds for a half page; Pre-fill enabled, disabled, and on; the empty pilot selection; a range with no rounds; the **configuration changed since the matrix was drawn** banner; out of date (a redraw or a pilot change happened while the tab was open — a banner with Refresh, never an automatic redraw of the cards); offline (QR codes still generate, the page says the link works once the card is scanned online).
 
 Also design the preview. On screen, the sheets are shown as pages with several cards each, at a zoom where a card is readable; the director can click a card to see it at full size. This click-to-enlarge is **screen only** and shown as such.
 
@@ -141,7 +144,7 @@ Also design the preview. On screen, the sheets are shown as pages with several c
 4. The **printed pages**: four-up and two-up on Letter and A4, the cut guides and crop marks, the safe-area margin, a "Card 1 of 2" continuation, the card footer.
 5. **Pre-fill**: disabled, enabled, off, on; and how pre-filled values read in black and white.
 6. The **pilot picker** and the round range, at expanded, medium and compact widths, with the live count.
-7. The **closed participant scoring flow**: the banner, the print reminder dialog, the open confirmation, and the result. All states listed above.
+7. The **no-invitations flow**: the banner, the print reminder dialog, the send confirmation, and the result. All states listed above.
 8. A short rationale covering printability on a household inkjet, the cards-per-page rule, the QR choices, the black-and-white distinctions, and any component or token additions.
 9. Questions and spec ambiguities. List them; don't silently resolve them.
 
@@ -154,14 +157,14 @@ These were open and are settled. Design to them.
 1. **Name format on the card title.** "Given Surname" in normal capitalization (not all capitals), unlike the lists, which use "Surname, Given".
 2. **Four-up versus two-up.** No fixed round count; the sizing decides. An 8-round F5J contest must fit four-up, using the current report's layout as a base.
 3. **No frequency or country on the card.**
-4. **QR condition.** The QR code shows when participant scoring is enabled for the contest. It is a permanent field QR invitation for the contest, not invalidated by reprinting, with the same code on every reprint. It is unavailable when the contest is organized offline and not synchronized.
+4. **QR condition.** The QR code shows when the pilot has an invitation, regardless of participant scoring access. It is the pilot's stable invitation link, not invalidated by reprinting, with the same code on every reprint. It is unavailable when the contest is organized offline and not synchronized.
 5. **No printed link.** The QR code is the only way in.
 6. **Continuation cards are tabled.** Multi-entry formats (F3K, F3B) are not in the initial release.
 7. **Timer and Validated** are both blank writable columns, usage set by the director. No signature block. No re-flight column.
 8. **Pre-fill** shows official and not-official values; an asterisk marks not official.
 9. **Retired pilots** are excluded by default; an unchecked option, shown only when the contest has retired pilots, adds them.
 10. **Card order** is alphabetical by last name.
-11. **Closed participant scoring.** Printing cards while it is Closed reminds the director, and the director can open participant scoring from the report (with a confirmation) so invitations go out and the QR codes print. Printing without QR codes remains possible.
+11. **No invitations yet.** Printing cards without invitations reminds the director, who can send invitations from the report (with a confirmation) so the QR codes print. Opening participant scoring is separate. Printing without QR codes remains possible.
 
 ## Questions to carry into the design
 

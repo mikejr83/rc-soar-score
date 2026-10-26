@@ -23,14 +23,14 @@
 | `id`                       | UUIDv7           | Yes      | -        | Primary key identifying the invitation                                                                                                       |
 | `contest_id`               | UUIDv7           | Yes      | -        | FK Contest (denormalized; must match the participation's contest)                                                                            |
 | `contest_participation_id` | UUIDv7           | Yes      | -        | FK ContestParticipation the invitation authorizes                                                                                            |
-| `type`                     | Enum             | Yes      | MagicURL | How the link was issued: `MagicURL` (emailed link) or `QRCode` (field token)                                                                 |
+| `type`                     | Enum             | Yes      | MagicURL | How the link was first issued: `MagicURL` (emailed) or `QRCode` (printed). The link, credential and expiry are the same for both; a participant has one Active invitation, whatever the channel                                                                 |
 | `protected_credential`     | String           | Yes      | -        | Protected representation of a high-entropy credential. The raw credential is never stored and never appears in logs or audit records         |
 | `invitation_revision`      | Integer          | Yes      | 1        | Monotonically increasing per participation. Only the latest non-revoked revision authorizes access                                           |
 | `state`                    | Enum             | Yes      | Active   | `Active`, `Replaced`, `Revoked`, or `Expired`                                                                                                |
 | `audience`                 | Enum             | Yes      | Pilot    | Target audience, taken from the participation's role type: `Pilot` or `Helper`                                                               |
 | `issued_by`                | UUIDv7           | Yes      | -        | FK Account of the director (or acting authority) who issued it                                                                               |
 | `issued_at`                | timestamptz      | Yes      | -        | Time the invitation was issued                                                                                                               |
-| `expires_at`               | timestamptz      | No       | null     | When access ends. Null for field QR tokens, which last the whole contest. For `MagicURL`, set to 24 hours after contest completion           |
+| `expires_at`               | timestamptz      | No       | null     | When access ends. Set to 24 hours after contest completion for every invitation, whatever its `type`; null until the contest completes           |
 | `first_used_at`            | timestamptz      | No       | null     | When the link was first opened successfully                                                                                                  |
 | `last_used_at`             | timestamptz      | No       | null     | When the link was last opened successfully. Informational; does not end access                                                               |
 | `revoked_at`               | timestamptz      | No       | null     | When the director revoked the invitation (non-null if state is Revoked)                                                                      |
@@ -50,7 +50,7 @@
 - A linked account whose participant link is confirmed reaches the participation without the credential while its invitation is `Active`. Opening it from the account's contest list sets `redeemed_by_account_id` if it is empty. One guest account exists per invitation; a second device acts as the same guest
 - A valid invitation is not permission by itself. Every read and mutation still checks lifecycle, scoring access, locks, retirement, assignment, and score state
 - Issuance is allowed only while the contest is `Configuring`, `Ready`, or `Running`, and never for `Created`, `Completed`, or deletion states
-- An invitation moves to `Expired` when `expires_at` passes. Magic URL invitations expire 24 hours after contest completion. Field QR tokens do not expire during the contest unless revoked
+- An invitation moves to `Expired` when `expires_at` passes. Every invitation, emailed or printed, expires 24 hours after contest completion (a read-only grace period for the overview and results). Nothing expires it earlier except replacing or revoking it; using it never does
 - Revoking or replacing an invitation does not invalidate scores already accepted under it
 - `client_mutation_id` is unique per contest, so issuance and revocation requests are safe to retry
 - `redeemed_by_account_id` is set once, at first redemption, and later re-pointed only by claiming a guest account
