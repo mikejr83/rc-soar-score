@@ -157,9 +157,16 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
         ..showSnackBar(
           SnackBar(
             content: Text(notice.message),
+            // A snack bar with an action stays until dismissed unless told
+            // otherwise; these messages are not worth a click to clear.
+            persist: false,
+            duration: const Duration(seconds: 8),
             action: notice.actionLabel == null
                 ? null
-                : SnackBarAction(label: notice.actionLabel!, onPressed: _print),
+                : SnackBarAction(
+                    label: notice.actionLabel!,
+                    onPressed: notice.pdf ? _savePdf : _print,
+                  ),
           ),
         );
     }

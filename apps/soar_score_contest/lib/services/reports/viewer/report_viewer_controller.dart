@@ -16,10 +16,13 @@ enum ViewerLoad { loading, ready, unavailable, notFound }
 
 /// A short message with an optional action, shown as a snackbar.
 class ViewerNotice {
-  const ViewerNotice(this.message, {this.actionLabel});
+  const ViewerNotice(this.message, {this.actionLabel, this.pdf = false});
 
   final String message;
   final String? actionLabel;
+
+  /// The action tries a PDF save again, not a print.
+  final bool pdf;
 }
 
 /// The state behind the report viewer: the data, the filters, the page setup
@@ -401,6 +404,7 @@ class ReportViewerController extends ChangeNotifier {
               ? 'Save cancelled. Nothing changed.'
               : 'Print cancelled. Nothing changed.',
           actionLabel: pdf ? 'Save again' : 'Print again',
+          pdf: pdf,
         );
       case ReportPrintResult.failed:
         _printFailed = true;

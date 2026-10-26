@@ -391,6 +391,35 @@ void main() {
       expect(printer.printed, hasLength(2));
     });
 
+    testWidgets('the cancelled message goes away by itself', (tester) async {
+      final printer = FakeReportPrinter(ReportPrintResult.cancelled);
+      await _pump(tester, _server(), printer: printer);
+
+      await tester.tap(find.byKey(const ValueKey('viewer-print')));
+      await tester.pumpAndSettle();
+      expect(find.text('Print cancelled. Nothing changed.'), findsOneWidget);
+
+      await tester.pump(const Duration(seconds: 9));
+      await tester.pumpAndSettle();
+      expect(find.text('Print cancelled. Nothing changed.'), findsNothing);
+    });
+
+    testWidgets('a cancelled save offers Save again, not Print again', (
+      tester,
+    ) async {
+      final printer = FakeReportPrinter(ReportPrintResult.cancelled);
+      await _pump(tester, _server(), printer: printer);
+
+      await tester.tap(find.byKey(const ValueKey('viewer-pdf')));
+      await tester.pumpAndSettle();
+      expect(find.text('Save cancelled. Nothing changed.'), findsOneWidget);
+
+      await tester.tap(find.text('Save again'));
+      await tester.pumpAndSettle();
+      expect(printer.saved, hasLength(2));
+      expect(printer.printed, isEmpty);
+    });
+
     testWidgets('a failure keeps the filters and offers Try again or PDF', (
       tester,
     ) async {
