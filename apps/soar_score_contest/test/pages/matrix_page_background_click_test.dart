@@ -10,6 +10,7 @@ import 'package:soar_score_contest/pages/contest/matrix_page.dart';
 import 'package:soar_score_contest/router.dart';
 import 'package:soar_score_contest/services/new_contest/contest_draft_store.dart';
 import 'package:soar_score_contest/widgets/contest_shell.dart';
+import 'package:soar_score_contest/widgets/page_surface.dart';
 
 import '../support/matrix_test_support.dart';
 
@@ -36,8 +37,11 @@ void main() {
           routes: [
             GoRoute(
               path: '$contestsPath/:contestId/matrix',
-              builder: (context, state) =>
-                  MatrixPage(contestId: state.pathParameters['contestId']!),
+              builder: (context, state) => PageSurface(
+                child: MatrixPage(
+                  contestId: state.pathParameters['contestId']!,
+                ),
+              ),
             ),
           ],
         ),

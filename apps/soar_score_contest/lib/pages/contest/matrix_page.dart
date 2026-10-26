@@ -258,52 +258,46 @@ class _MatrixPageState extends State<MatrixPage> {
   }
 
   @override
-  // The shell shows a page in a nested navigator whose modal barrier plays the
-  // system alert for any click no widget catches. The grid page is mostly
-  // gaps, so it takes every click itself (an opaque, transparent box).
-  Widget build(BuildContext context) => ColoredBox(
-    color: Colors.transparent,
-    child: FutureBuilder<MatrixPageData>(
-      future: _loading,
-      builder: (context, snapshot) {
-        final error = snapshot.error;
-        if (error != null && _data == null) {
-          return _Unavailable(error: error, onRetry: _retry);
-        }
-        final data = _data;
-        if (data == null) {
-          return const _Loading();
-        }
-        if (!data.matrix.isEmpty) {
-          return MatrixDrawnView(
-            data: data,
-            onOpenConfiguration: _openConfiguration,
-          );
-        }
-        final form = _form!;
-        return SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(24, 24, 24, 48),
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 880),
-              child: DrawFormPanel(
-                data: data,
-                controller: form,
-                busy: _busy,
-                blocker: _blocker(data),
-                rejection: _rejection,
-                networkFailure: _networkFailure,
-                conflict: _conflict,
-                onDraw: _draw,
-                onOpenConfiguration: _openConfiguration,
-                onFix: _fix,
-                onReload: _reload,
-              ),
+  Widget build(BuildContext context) => FutureBuilder<MatrixPageData>(
+    future: _loading,
+    builder: (context, snapshot) {
+      final error = snapshot.error;
+      if (error != null && _data == null) {
+        return _Unavailable(error: error, onRetry: _retry);
+      }
+      final data = _data;
+      if (data == null) {
+        return const _Loading();
+      }
+      if (!data.matrix.isEmpty) {
+        return MatrixDrawnView(
+          data: data,
+          onOpenConfiguration: _openConfiguration,
+        );
+      }
+      final form = _form!;
+      return SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(24, 24, 24, 48),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 880),
+            child: DrawFormPanel(
+              data: data,
+              controller: form,
+              busy: _busy,
+              blocker: _blocker(data),
+              rejection: _rejection,
+              networkFailure: _networkFailure,
+              conflict: _conflict,
+              onDraw: _draw,
+              onOpenConfiguration: _openConfiguration,
+              onFix: _fix,
+              onReload: _reload,
             ),
           ),
-        );
-      },
-    ),
+        ),
+      );
+    },
   );
 }
 
