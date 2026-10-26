@@ -8,7 +8,7 @@ Canonical documentation for the Soar Score data model. This folder is the source
 - [Follow-ups](follow-ups.md) - What the UI documents and tickets still need to change to match this model
 - [Contest Options](contest-options.md) - Every setting a director can make, where it is stored, its defaults, and when it can change
 - [Enumerations](enumerations.md) - Every enumeration field and its allowed values, generated from the entity documents (enumeration columns are also marked `enum` in the ERD)
-- [Entity Documentation](entities/) - Per-entity specifications (49 files)
+- [Entity Documentation](entities/) - Per-entity specifications (49 entities, plus the planned [ContestRoundModel](entities/contest_round_model.md))
 - [Entity JSON Examples](examples/entities/README.md) - One JSON file of example rows per entity, built on a shared scenario
 - [Reconciliation Status](reconciliation-findings.md) - What was reconciled with the architecture and business requirements, and what is still open
 
@@ -36,8 +36,9 @@ Canonical documentation for the Soar Score data model. This folder is the source
 | Team             | [entities/team.md](entities/team.md)                             | [teams-roles-models.md](../architecture-requirements/data/teams-roles-models.md) | Contest-scoped team: a name and its members                             |
 | TeamMembership   | [entities/team_membership.md](entities/team_membership.md)       | [teams-roles-models.md](../architecture-requirements/data/teams-roles-models.md) | Link between team and participation with team role                      |
 | ModelCatalog     | [entities/model_catalog.md](entities/model_catalog.md)           | [teams-roles-models.md](../architecture-requirements/data/teams-roles-models.md) | A model belonging to a participant profile, reusable across contests    |
-| ContestRoundModel | [entities/contest_round_model.md](entities/contest_round_model.md) | [teams-roles-models.md](../architecture-requirements/data/teams-roles-models.md) | Which of a pilot's models started a round (F3B; optional)                |
 | ContestModelLink | [entities/contest_model_link.md](entities/contest_model_link.md) | [teams-roles-models.md](../architecture-requirements/data/teams-roles-models.md) | A model a participant entered in a contest (none, one or several)       |
+
+_Planned, not yet in the catalog (no model, table or example until F3B): [ContestRoundModel](entities/contest_round_model.md), which records the model that started a round._
 
 ### Contest & Contest Configuration
 
