@@ -1,9 +1,12 @@
 import 'dart:math';
 
 import '../../enums/role_type.dart';
+import '../../enums/score_field_kind.dart';
+import '../../enums/score_field_type.dart';
 import '../../errors/contest_state_error.dart';
 import '../../errors/entity_not_found_error.dart';
 import '../../models/contest/contest.dart';
+import '../../models/discipline/discipline_score_field.dart';
 import '../../models/id.dart';
 import '../../models/matrix/matrix_revision.dart';
 import '../../models/matrix/round.dart';
@@ -90,6 +93,7 @@ class PublicationProjectionBuilder {
       );
     }
 
+    final scoreFields = _publicScoreFields(profile.scoreFields);
     final pilots = await _pilots(contestId, publicationId);
     final keyOf = {for (final p in pilots) p.participation.id: p.key};
     final rounds =
@@ -113,9 +117,13 @@ class PublicationProjectionBuilder {
       participants: [for (final p in pilots) p.entry(teams.keyByPilot[p.key])],
       teams: teams.entries,
       matrixInfo: await _matrixInfo(matrix, rounds, keyOf),
-      scores: await _scores(contestId, rounds, keyOf),
+      scores: await _scores(contestId, rounds, keyOf, scoreFields),
       standings: await _standings(contestId, keyOf, teams.keyById),
-      calculationMetadata: await _metadata(contestId, current.asOfRound),
+      calculationMetadata: await _metadata(
+        contestId,
+        current.asOfRound,
+        scoreFields,
+      ),
       publishedAt: _clock(),
       publishedBy: publishedBy,
       clientMutationId: clientMutationId,
@@ -267,30 +275,64 @@ class PublicationProjectionBuilder {
     ],
   };
 
+  /// The score fields whose raw values are published: what the scorer enters
+  /// or flags, as figures the site can label. A landing is an id into the
+  /// landing table (its points are already in the entry), a derived field is
+  /// not a raw input, and free text could carry anything.
+  List<DisciplineScoreField> _publicScoreFields(
+    Iterable<DisciplineScoreField> fields,
+  ) => [
+    for (final field in fields)
+      if (field.fieldKind != ScoreFieldKind.derived &&
+          field.fieldType != ScoreFieldType.landing &&
+          field.fieldType != ScoreFieldType.string)
+        field,
+  ];
+
+  /// Each entry carries `raw_components`: the official score's values for the
+  /// [fields], by field key, so the site can show flight time and the other
+  /// raw inputs. A field the scorer left out is absent.
   Future<List<Object?>> _scores(
     Id contestId,
     List<Round> rounds,
     Map<Id, String> keyOf,
-  ) async => [
-    for (final round in rounds)
+    List<DisciplineScoreField> fields,
+  ) async {
+    final official = <Id, Map<String, Object?>>{};
+    final entries = <Object?>[];
+    for (final round in rounds) {
       for (final flight in (await _results.round(
         contestId,
         round.ordinal,
-      )).flights)
-        if (keyOf[flight.participationId] != null)
-          {
-            'round': round.ordinal,
-            'group': flight.group,
-            'pilot_key': keyOf[flight.participationId],
-            'outcome': flight.result.outcome.name,
-            'raw_points': flight.result.rawPoints,
-            'landing_points': flight.result.landingPoints,
-            'penalty_points': flight.result.flightPenaltyPoints,
-            'group_score': flight.result.groupScore,
-            'selected': flight.result.isSelected,
-            'preliminary': flight.result.isPreliminary,
+      )).flights) {
+        if (keyOf[flight.participationId] == null) continue;
+        final placeholderId = flight.result.scorePlaceholderId;
+        final components = official[placeholderId] ??=
+            (await repository.officialScoreRepository.currentForPlaceholder(
+              placeholderId,
+            ))?.components ??
+            const {};
+        entries.add({
+          'round': round.ordinal,
+          'group': flight.group,
+          'pilot_key': keyOf[flight.participationId],
+          'outcome': flight.result.outcome.name,
+          'raw_points': flight.result.rawPoints,
+          'landing_points': flight.result.landingPoints,
+          'penalty_points': flight.result.flightPenaltyPoints,
+          'group_score': flight.result.groupScore,
+          'selected': flight.result.isSelected,
+          'preliminary': flight.result.isPreliminary,
+          'raw_components': {
+            for (final field in fields)
+              if (components[field.fieldKey] != null)
+                field.fieldKey: components[field.fieldKey],
           },
-  ];
+        });
+      }
+    }
+    return entries;
+  }
 
   Future<Map<String, Object?>> _standings(
     Id contestId,
@@ -366,7 +408,11 @@ class PublicationProjectionBuilder {
     return flights.isNotEmpty ? flights.first.calculationVersion : 'none';
   }
 
-  Future<Map<String, Object?>> _metadata(Id contestId, int? asOfRound) async {
+  Future<Map<String, Object?>> _metadata(
+    Id contestId,
+    int? asOfRound,
+    List<DisciplineScoreField> scoreFields,
+  ) async {
     final standings = await repository.participationStandingRepository
         .listForContest(contestId);
     final computedAt = standings.isEmpty
@@ -377,6 +423,16 @@ class PublicationProjectionBuilder {
     return {
       'as_of_round': asOfRound,
       'computed_at': computedAt == null ? null : formatUtcTimestamp(computedAt),
+      'score_fields': [
+        for (final field in scoreFields)
+          {
+            'key': field.fieldKey,
+            'name': field.name,
+            'type': field.fieldType.name,
+            'unit': field.unit,
+            'precision': field.precision,
+          },
+      ],
     };
   }
 
