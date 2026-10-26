@@ -29,7 +29,7 @@ export function formatDates(start?: Date, end?: Date): string {
   return `${day(start)} to ${day(end)}`;
 }
 
-/** `launch_height` reads as `Launch height` until #456 carries labels. */
+/** `launch_height` reads as `Launch height`; the fallback when the projection has no field name. */
 export function label(key: string): string {
   const words = key.replaceAll("_", " ");
   return words.charAt(0).toUpperCase() + words.slice(1);

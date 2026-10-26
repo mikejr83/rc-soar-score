@@ -102,7 +102,14 @@ export function fakePublication({
         },
       ],
     },
-    calculation: { as_of_round: 3, computed_at: "2026-10-11T22:00:00Z" },
+    calculation: {
+      as_of_round: 3,
+      computed_at: "2026-10-11T22:00:00Z",
+      score_fields: [
+        { key: "time_flown", name: "Time Flown", type: "time", unit: null, precision: null },
+        { key: "launch_height", name: "Launch Height", type: "int", unit: "m", precision: 0 },
+      ],
+    },
   };
 }
 

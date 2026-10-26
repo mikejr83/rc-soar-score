@@ -86,6 +86,15 @@ describe("flight groups", () => {
     expect(contest.flightGroupsOf(9)).toEqual([]);
   });
 
+  test("score fields label the raw columns and fall back to the key", () => {
+    const { scoreFields } = contest;
+    expect(scoreFields.label("launch_height")).toBe("Launch Height (m)");
+    expect(scoreFields.label("late_landing")).toBe("Late landing");
+    expect(scoreFields.format("launch_height", 200)).toBe("200");
+    expect(scoreFields.format("launch_height", null)).toBe("-");
+    expect(scoreFields.format("late_landing", true)).toBe("true");
+  });
+
   test("times format as minutes and seconds", () => {
     expect(formatTime(600)).toBe("10:00");
     expect(formatTime(598.8)).toBe("9:58.8");

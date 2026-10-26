@@ -428,7 +428,7 @@ class PublicationProjectionBuilder {
           {
             'key': field.fieldKey,
             'name': field.name,
-            'type': field.fieldType.name,
+            'type': field.toJson()['field_type'],
             'unit': field.unit,
             'precision': field.precision,
           },

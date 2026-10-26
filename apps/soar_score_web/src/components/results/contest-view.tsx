@@ -112,6 +112,7 @@ function Body({
               key={`${g.group}-${g.reflight ?? 0}`}
               group={g}
               hasLanding={hasLanding}
+              fields={contest.scoreFields}
               highlightPilotKey={pilotKey}
             />
           ))}

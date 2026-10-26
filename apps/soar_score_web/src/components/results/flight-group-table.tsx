@@ -1,8 +1,9 @@
-import { formatScore, formatTime, label } from "@/lib/results/format";
+import { formatScore, formatTime } from "@/lib/results/format";
 import {
   detailKeys,
   groupTitle,
   hasRawComponents,
+  type ScoreFields,
   timeKey,
   type FlightGroup,
 } from "@/lib/results/published-contest";
@@ -16,15 +17,17 @@ export const flightRowId = (group: FlightGroup, pilotKey: string) =>
 /**
  * One flight group headed by its number and re-flight label. Time and the
  * discipline details show only when the flights carry raw components
- * (#456); the landing column only when `hasLanding`.
+ * (#456), labelled from the projection's score fields; the landing column only when `hasLanding`.
  */
 export function FlightGroupTable({
   group,
   hasLanding,
+  fields,
   highlightPilotKey,
 }: {
   group: FlightGroup;
   hasLanding: boolean;
+  fields: ScoreFields;
   highlightPilotKey?: string;
 }) {
   const raw = hasRawComponents(group);
@@ -59,7 +62,7 @@ export function FlightGroupTable({
               )}
               {details.map((key) => (
                 <th key={key} scope="col" className={styles.numCol}>
-                  {label(key)}
+                  {fields.label(key)}
                 </th>
               ))}
               <th scope="col" className={styles.numCol}>
@@ -91,7 +94,7 @@ export function FlightGroupTable({
                   {hasLanding && <td className={num}>{formatScore(f.landingPoints)}</td>}
                   {details.map((key) => (
                     <td key={key} className={num}>
-                      {f.rawComponents[key] == null ? "-" : String(f.rawComponents[key])}
+                      {fields.format(key, f.rawComponents[key])}
                     </td>
                   ))}
                   <td className={num}>{formatScore(f.rawPoints)}</td>

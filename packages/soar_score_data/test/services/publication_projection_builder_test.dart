@@ -147,6 +147,13 @@ void _tests(Backend backend) {
       expect(keys, containsAll(['time_flown', 'launch_height']));
       expect(keys, isNot(contains('landing')));
       expect((fields.first! as Map).keys, containsAll(['name', 'type']));
+      // The type is the schema's serialized value, not the Dart enum name.
+      expect(
+        [for (final f in fields) (f! as Map)['type']],
+        everyElement(
+          isIn(['string', 'int', 'float', 'bool', 'enum', 'date', 'time']),
+        ),
+      );
     });
 
     test('pilots are keyed and their details go to participant rows', () async {
