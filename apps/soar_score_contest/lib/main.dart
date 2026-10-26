@@ -62,7 +62,9 @@ Future<void> _runContestApp(AppBootstrap appBootstrap) async {
   // the app without a bootstrap simply get no monitor (D5).
   final connectivity = AppConnectivity(client: appBootstrap.remoteApiClient);
   forwardReachability(connectivity, appBootstrap);
-  final storage = StorageMonitor(probe: appBootstrap.checkStorage);
+  final storage = appBootstrap.hasLocalStorage
+      ? StorageMonitor(probe: appBootstrap.checkStorage)
+      : null;
 
   // Load the saved theme first so the first frame already has it.
   final theme = ThemeController(

@@ -85,6 +85,7 @@ void main() {
   });
 
   _syncAndStorage();
+  _constrained();
 }
 
 Contest _contest() => Contest(
@@ -177,4 +178,49 @@ void _syncAndStorage() {
 
     expect(find.byKey(const ValueKey('shell-sync-status')), findsNothing);
   });
+}
+
+void _constrained() {
+  for (final (width, scale) in [(360.0, 1.0), (360.0, 2.0), (800.0, 2.0)]) {
+    testWidgets('fits every indicator at ${width}dp, text x$scale', (
+      tester,
+    ) async {
+      tester.view.physicalSize = Size(width, 700);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final contest = _contest();
+      final storage = StorageMonitor(probe: () async {}, pollInterval: null);
+      addTearDown(storage.dispose);
+      final sync = FakeAppSync(
+        state: AppSyncState(
+          scopes: {
+            ContestScopeKey(contest.id): SyncScopeSummary(
+              pendingChanges: 12,
+              rejectedChanges: 2,
+              lastSyncedAt: DateTime.utc(2026, 4, 15, 18, 2),
+            ),
+          },
+        ),
+      );
+      final monitor = FakeAppConnectivity();
+      addTearDown(monitor.dispose);
+      await tester.pumpWidget(
+        MediaQuery(
+          data: MediaQueryData(
+            size: Size(width, 700),
+            textScaler: TextScaler.linear(scale),
+          ),
+          child: AppConnectivityInherited(
+            monitor: monitor,
+            child: _frame(contest, sync: sync, storage: storage),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(tester.takeException(), isNull);
+      expect(find.text('Local storage · Available'), findsOneWidget);
+      expect(find.textContaining('12 pending'), findsOneWidget);
+    });
+  }
 }

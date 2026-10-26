@@ -16,6 +16,13 @@ void main() {
   ) async {
     await openMainPage(tester);
 
+    // The web build keeps nothing on the device, so it has no storage
+    // indicator and no sync entry.
+    if (kIsWeb) {
+      expect(find.byKey(const ValueKey('storage-chip')), findsNothing);
+      return;
+    }
+
     // The storage indicator is part of the bar on every shell page.
     final storage = find.byKey(const ValueKey('storage-chip'));
     await pumpUntilFound(tester, storage);
@@ -37,9 +44,6 @@ void main() {
       matching: find.byKey(const ValueKey('shell-sync-status')),
     );
     expect(sync, findsNothing);
-
-    // The web build does not synchronize, so it has no sync entry at all.
-    if (kIsWeb) return;
 
     // Inside a contest the bar tells the sync status and opens its details.
     await openContest(tester, _contest);

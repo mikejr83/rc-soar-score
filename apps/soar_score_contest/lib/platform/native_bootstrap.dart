@@ -96,6 +96,9 @@ class NativeBootstrap extends AppBootstrap {
   }
 
   @override
+  bool get hasLocalStorage => true;
+
+  @override
   Future<void> checkStorage() =>
       LocalAccountRepository(_server.database).preferences();
 

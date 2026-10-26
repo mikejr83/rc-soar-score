@@ -23,6 +23,9 @@ class ContestStatusBar extends StatelessWidget {
 
   static const String status = 'Ready';
 
+  /// The width, at the default text size, from which the bar fits one line.
+  static const double _singleLineWidth = 720;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -53,29 +56,55 @@ class ContestStatusBar extends StatelessWidget {
           top: BorderSide(color: theme.colorScheme.outlineVariant),
         ),
       ),
-      child: Row(
-        children: [
-          Semantics(
-            label: 'Application status',
-            value: status,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.check_circle,
-                  size: 16,
-                  color: theme.colorScheme.outline,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final left = Wrap(
+            spacing: 16,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              Semantics(
+                label: 'Application status',
+                value: status,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.check_circle,
+                      size: 16,
+                      color: theme.colorScheme.outline,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(status, style: theme.textTheme.bodySmall),
+                  ],
                 ),
-                const SizedBox(width: 8),
-                Text(status, style: theme.textTheme.bodySmall),
-              ],
-            ),
-          ),
-          const SizedBox(width: 16),
-          if (contest != null) ShellSyncStatus(contest: contest),
-          const Spacer(),
-          ...indicators,
-        ],
+              ),
+              if (contest != null) ShellSyncStatus(contest: contest),
+            ],
+          );
+          final right = Wrap(
+            alignment: WrapAlignment.end,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            runSpacing: 4,
+            children: indicators,
+          );
+          // One line when there is room; the groups stack, and wrap inside,
+          // in a narrow window or at a large text size.
+          final scale = MediaQuery.textScalerOf(context).scale(1);
+          if (constraints.maxWidth / scale < _singleLineWidth) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [left, right],
+            );
+          }
+          return Row(
+            children: [
+              Expanded(
+                child: Align(alignment: Alignment.centerLeft, child: left),
+              ),
+              ...indicators,
+            ],
+          );
+        },
       ),
     );
   }

@@ -61,10 +61,12 @@ class StorageIndicator extends StatelessWidget {
                   children: [
                     Icon(_icon(status), size: 16),
                     const SizedBox(width: 4),
-                    Text(
-                      '${l10n.storageIndicatorName} · $label',
-                      key: const ValueKey('storage-label'),
-                      style: Theme.of(context).textTheme.bodySmall,
+                    Flexible(
+                      child: Text(
+                        '${l10n.storageIndicatorName} · $label',
+                        key: const ValueKey('storage-label'),
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
                     ),
                   ],
                 ),
