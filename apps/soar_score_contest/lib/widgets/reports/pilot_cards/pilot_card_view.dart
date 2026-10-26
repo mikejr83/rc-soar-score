@@ -212,40 +212,46 @@ class PilotCardView extends StatelessWidget {
     );
   }
 
-  Widget _heading(CardColumn column, {required bool first}) => Container(
-    width: mmToPx(column.widthMm),
-    height: mmToPx(CardSpec.headingHeight),
-    padding: EdgeInsets.symmetric(horizontal: mmToPx(.4)),
-    alignment: Alignment.bottomCenter,
-    decoration: BoxDecoration(
-      border: Border(
-        left: first ? BorderSide.none : _rule,
-        bottom: BorderSide(width: ptToPx(1), color: PaperStyle.ink),
+  /// The headings are 7 pt bold at full width, as on GliderScore's cards, and
+  /// wrap onto two lines; the columns are wide enough for their longest word.
+  Widget _heading(CardColumn column, {required bool first}) {
+    final style = TextStyle(
+      fontSize: ptToPx(7),
+      height: 1.1,
+      fontWeight: FontWeight.w700,
+    );
+    return Container(
+      width: mmToPx(column.widthMm),
+      height: mmToPx(CardSpec.headingHeight),
+      padding: EdgeInsets.fromLTRB(mmToPx(.3), 0, mmToPx(.3), mmToPx(.7)),
+      alignment: Alignment.bottomCenter,
+      decoration: BoxDecoration(
+        border: Border(
+          left: first ? BorderSide.none : _rule,
+          bottom: BorderSide(width: ptToPx(1), color: PaperStyle.ink),
+        ),
       ),
-    ),
-    child: FittedBox(
-      fit: BoxFit.scaleDown,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            column.title,
-            maxLines: 1,
-            style: TextStyle(
-              fontSize: ptToPx(6.5),
-              fontWeight: FontWeight.w700,
-              height: 1.1,
-            ),
+      child: ClipRect(
+        child: OverflowBox(
+          alignment: Alignment.bottomCenter,
+          minHeight: 0,
+          maxHeight: double.infinity,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(column.title, textAlign: TextAlign.center, style: style),
+              if (column.unit.isNotEmpty)
+                Text(
+                  column.unit,
+                  textAlign: TextAlign.center,
+                  style: style.copyWith(fontWeight: FontWeight.w400),
+                ),
+            ],
           ),
-          if (column.unit.isNotEmpty)
-            Text(
-              column.unit,
-              style: TextStyle(fontSize: ptToPx(6.5), height: 1.1),
-            ),
-        ],
+        ),
       ),
-    ),
-  );
+    );
+  }
 
   Widget _cell(
     CardColumn column,

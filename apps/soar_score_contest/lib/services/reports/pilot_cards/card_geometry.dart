@@ -12,7 +12,7 @@ double ptToPx(double pt) => pt * 4 / 3;
 /// The sizes that decide how a card is laid out, in millimetres.
 abstract final class CardSpec {
   /// The inset a card keeps at a cut line.
-  static const double inset = 3.5;
+  static const double inset = 2;
 
   /// The QR square: this size when there is room, never below [qrMin].
   static const double qr = 25;

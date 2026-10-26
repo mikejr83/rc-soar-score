@@ -74,15 +74,15 @@ abstract final class CardColumns {
   }) {
     final label = discipline?.toUpperCase();
     return [
-      const CardColumn(CardField.round, 'Round', '', 6.5, CardColumnKind.lead),
-      const CardColumn(CardField.group, 'Group', '', 6.5, CardColumnKind.lead),
+      const CardColumn(CardField.round, 'Round', '', 10, CardColumnKind.lead),
+      const CardColumn(CardField.group, 'Group', '', 10, CardColumnKind.lead),
       if (lanes)
-        const CardColumn(CardField.lane, 'Lane', '', 5.5, CardColumnKind.lead),
+        const CardColumn(CardField.lane, 'Lane', '', 7.5, CardColumnKind.lead),
       const CardColumn(
         CardField.time,
         'Time',
         'mm:ss',
-        11,
+        10,
         CardColumnKind.time,
         weight: 1,
       ),
@@ -90,7 +90,7 @@ abstract final class CardColumns {
         CardField.landing,
         'Landing',
         'pts',
-        8,
+        11,
         CardColumnKind.number,
         weight: 1,
       ),
@@ -99,15 +99,15 @@ abstract final class CardColumns {
           CardField.height,
           'Height',
           'm',
-          8,
+          10,
           CardColumnKind.number,
           weight: 1,
         ),
       const CardColumn(
         CardField.over75,
-        'Over 75 m',
+        'Over 75 m',
         '',
-        6.5,
+        12,
         CardColumnKind.tick,
       ),
       if (motorRestart && _withRestart.contains(label))
@@ -115,38 +115,36 @@ abstract final class CardColumns {
           CardField.restart,
           'Motor restart',
           '',
-          7,
+          12,
           CardColumnKind.tick,
         ),
       const CardColumn(
         CardField.penalty,
         'Penalty',
         'pts',
-        7.5,
+        12,
         CardColumnKind.number,
-        weight: 1,
       ),
       const CardColumn(
         CardField.timer,
         'Timer',
         '',
-        9.25,
+        15,
         CardColumnKind.initials,
-        weight: 1.5,
       ),
       const CardColumn(
         CardField.validated,
         'Validated',
         '',
-        9.25,
+        17,
         CardColumnKind.initials,
-        weight: 1.5,
       ),
     ];
   }
 
-  /// [columns] stretched to [widthMm]: the spare width goes to the writable
-  /// columns by weight.
+  /// [columns] stretched to [widthMm]: the spare width goes to the Time,
+  /// Landing and Height columns by weight. Penalty (about three digits), Timer
+  /// and Validated (initials) keep a fixed width.
   static List<CardColumn> fitted(List<CardColumn> columns, double widthMm) {
     final used = columns.fold(0.0, (sum, c) => sum + c.widthMm);
     final weights = columns.fold(0.0, (sum, c) => sum + c.weight);

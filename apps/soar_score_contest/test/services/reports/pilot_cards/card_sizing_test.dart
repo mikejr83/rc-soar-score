@@ -50,19 +50,16 @@ void main() {
       expect(fits(two, 14), isTrue);
     });
 
-    test('on A4 the shorter landscape sheet holds 7 rounds four-up', () {
-      // The design's open question: the same 8-round contest is four-up on
-      // Letter and two-up on A4, because the QR code would drop under 18 mm.
+    test('8 rounds also fit four to a page on A4', () {
       final pilots = [_pilot(club: 'Gator Soaring Club')];
-      final four = CardGeometry.of(PaperSize.a4, CardsPerPage.four);
       expect(
-        CardSizing.maxRounds(
-          geometry: four,
+        CardSizing.fitsAll(
+          geometry: CardGeometry.of(PaperSize.a4, CardsPerPage.four),
           pilots: pilots,
           contestLine: _line,
-          qr: true,
+          rounds: 8,
         ),
-        7,
+        isTrue,
       );
     });
 
@@ -205,7 +202,7 @@ void main() {
         'Time',
         'Landing',
         'Height',
-        'Over 75 m',
+        'Over 75 m',
         'Motor restart',
         'Penalty',
         'Timer',
@@ -220,7 +217,7 @@ void main() {
         'Lane',
         'Time',
         'Landing',
-        'Over 75 m',
+        'Over 75 m',
         'Penalty',
         'Timer',
         'Validated',
