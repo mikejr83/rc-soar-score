@@ -4,7 +4,7 @@
 **Purpose:** Authoritative contest-specific snapshot that links a participant profile to a contest with contest-specific class, role, number, team, and model information. Every person involved in a contest has one: pilots, helpers, team managers, and officials alike. Only participations with the Pilot role fly and receive scores.  
 **Identifier:** `id` (UUIDv7)  
 **Parent entity:** Contest  
-**Child entities:** MatrixAssignment, ScorePlaceholder, Invitation, ContestModelLink
+**Child entities:** MatrixAssignment, ScorePlaceholder, Invitation, ContestModelLink, ContestRoundModel
 
 ## Relationships
 
@@ -14,7 +14,7 @@
 - Parent of MatrixAssignment (flight assignments)
 - Parent of ScorePlaceholder (score records)
 - Parent of Invitation (contest invitation)
-- Parent of ContestModelLink (model used in contest)
+- Parent of ContestModelLink (the models the pilot entered in the contest: none, one, or several; non-fliers have none) and, for disciplines that need it, ContestRoundModel
 
 ## Fields/Properties
 

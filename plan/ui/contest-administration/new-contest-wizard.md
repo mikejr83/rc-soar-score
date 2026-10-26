@@ -39,7 +39,7 @@ The user selects the options that define contest-specific participant data:
 - Contest roles.
 - Pilot models.
 
-All options default to disabled unless copied from a source contest. If teams are enabled, the number of pilots counted for the team score is required and must be a positive integer. Team protection is available only when teams are enabled. If models are enabled, the later participant step requests model name and model ID for pilots.
+All options default to disabled unless copied from a source contest. If teams are enabled, the number of pilots counted for the team score is required and must be a positive integer. Team protection is available only when teams are enabled. If models are enabled, the later participant step lets the director add one or more models for each pilot. Models are optional.
 
 The step also displays whether the option changes participant selection requirements. Disabling an option removes only its new-contest draft values; it does not modify a source contest.
 
@@ -61,15 +61,15 @@ The UI identifies whether a result is local, remote, or already selected. It mus
 
 When teams are enabled, each pilot can be assigned to a team by name. Typing a new name creates the team. A pilot with no team name is unassigned, which is not an error. Team names are case-insensitive for matching and are normalized for comparison. A team control offers existing teams and a free-text value. The display may use a short avatar, but the full name must remain available as text or an accessible label.
 
-When classes are enabled, each pilot must have a class. Class names are compared case-insensitively and displayed in title case. Previously entered classes are offered as suggestions.
+When classes are enabled, each pilot can have a class. A pilot without one gets a notice and does not block continuation. Class names are compared case-insensitively and displayed in title case. Previously entered classes are offered as suggestions.
 
 When roles are enabled, new participants default to the immutable `Pilot` role. The role selector lists the configured roles. Non-flying roles do not receive score rows, but may be associated with a team and may enter team scores later when authorized.
 
-When models are enabled, the model name and model ID are collected for each scoring pilot. Participations have no place for them yet, so they are kept in the draft and not stored with the contest.
+When models are enabled, the director can add one or more models for each scoring pilot, from the models already on that person's profile or by typing a new one. A model has a name, an optional manufacturer, an optional model ID the contestant applied, and an optional contest ID the director applied (for example a serial number). Non-flying participants get no models. A pilot with no model shows a notice on the row and in the step summary; it never blocks continuation, creating the contest, the draw, or adding participants later. Until the model API exists (#594) models are kept in the draft and not stored with the contest.
 
 Pilot numbers are assigned at the first draw, not in this wizard. The wizard may preview the expected numbering but must label it as provisional.
 
-The contest requires at least two scoring pilots. Fewer than three pilots shows a warning that groups per round should normally be set to one; it does not by itself block continuation. The step blocks continuation when required class, team, role, model, or other configured participant data is missing.
+The contest requires at least two scoring pilots. Fewer than three pilots shows a warning that groups per round should normally be set to one; it does not by itself block continuation. The step does not block continuation for a missing class or model. Missing team, role or other configured participant data is handled as before.
 
 ## Step 5: Scoring and publication defaults
 

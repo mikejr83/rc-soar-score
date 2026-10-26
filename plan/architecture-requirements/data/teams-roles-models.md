@@ -14,4 +14,8 @@ The number of pilot totals used for the team result is a contest option, the sam
 
 ## Models
 
-A reusable model catalog record may be owned by a director or shared according to future policy. A contest model link snapshots the model name, manufacturer, model identifier, and contest-specific identifier for a pilot participation link. Historical scores reference the contest snapshot so later catalog edits do not rewrite contest history.
+A model belongs to a participant profile, so the same model can be used in several contests, and a profile can have any number of models. When a contest has models enabled, the director can add one or more models to each pilot in the contest; non-fliers have none. Each model a pilot enters in a contest is a contest model link, a snapshot of the model name, manufacturer and the contestant-applied model identifier, plus an identifier the contest director applied for that contest (for example a serial number or sticker showing that the model was certified before the contest). Later edits to the profile's model do not rewrite the contest's records.
+
+Model data is optional. A model-enabled contest in which a pilot has no model shows a notice. It never blocks creating the contest, drawing the matrix, adding a participant, opening scoring, entering scores or publishing, and no first-release scoring or draw rule reads it.
+
+Some disciplines need to know which model flew a round. In F3B a pilot flies Speed, Distance and Duration as separate flights in one round and must use the same model for all three, so the director can record which model started the round (ContestRoundModel). F3B is not part of the first release; the data model reserves the record so the discipline can be added without reworking models. The serial number check is a low-use feature for regional and world events.

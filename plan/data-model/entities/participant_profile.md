@@ -4,12 +4,13 @@
 **Purpose:** A contest director's own record of a person who takes part in their contests: reusable identity and contact details kept apart from contest-specific participation. A profile belongs to one director and is never shared with another director. Many participants never have an account and exist only as a profile.  
 **Identifier:** `id` (UUIDv7)  
 **Parent entity:** Account (the owning director)  
-**Child entities:** None
+**Child entities:** ModelCatalog
 
 ## Relationships
 
 - Belongs to the director's Account (`owner_account_id`)
 - Participates in zero or more of the director's contests through ContestParticipation
+- Has zero or more models (ModelCatalog, `participant_profile_id`), reusable across the profile's contests
 - May be linked to a participant's Account through [ParticipantAccountLink](participant_account_link.md) (backend only). The link relates the profile back to the person's account; it does not share the profile
 - May have been created by copying a [ParticipantDirectoryEntry](participant_directory_entry.md) the person offered, in which case the profile is an independent copy
 
