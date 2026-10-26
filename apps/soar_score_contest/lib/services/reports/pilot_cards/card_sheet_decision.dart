@@ -26,9 +26,10 @@ class CardSheetDecision {
     required String footer,
     required int rounds,
     required CardsPerPageChoice choice,
+    double margin = CardSpec.margin,
   }) {
-    final four = CardGeometry.of(paper, CardsPerPage.four);
-    final two = CardGeometry.of(paper, CardsPerPage.two);
+    final four = CardGeometry.of(paper, CardsPerPage.four, margin: margin);
+    final two = CardGeometry.of(paper, CardsPerPage.two, margin: margin);
     bool fits(CardGeometry g) => CardSizing.fitsAll(
       geometry: g,
       pilots: pilots,

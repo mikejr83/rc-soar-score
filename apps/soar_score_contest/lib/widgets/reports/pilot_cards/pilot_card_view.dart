@@ -293,7 +293,7 @@ class PilotCardView extends StatelessWidget {
         child = Text(
           text,
           style: TextStyle(
-            fontSize: ptToPx(10),
+            fontSize: ptToPx(8.5),
             fontWeight: FontWeight.w700,
             fontFeatures: const [FontFeature.tabularFigures()],
           ),

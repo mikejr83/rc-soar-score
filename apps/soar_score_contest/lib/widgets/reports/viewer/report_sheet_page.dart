@@ -16,8 +16,8 @@ abstract final class SheetLayout {
 
   /// What a report's page body can use when the page has no running header or
   /// footer: the page inside its margins.
-  static Size bareBodySize(PageSetup setup) =>
-      Size(setup.width - 2 * marginX, setup.height - marginTop - marginBottom);
+  static Size bareBodySize(PageSetup setup, EdgeInsets margins) =>
+      Size(setup.width - margins.horizontal, setup.height - margins.vertical);
 
   /// What a report's page body can use.
   static Size bodySize(PageSetup setup) => Size(
@@ -36,6 +36,7 @@ class ReportBarePage extends StatelessWidget {
     required this.pageNumber,
     required this.pageCount,
     required this.body,
+    required this.margins,
   });
 
   final PageSetup setup;
@@ -43,6 +44,9 @@ class ReportBarePage extends StatelessWidget {
   final int pageNumber;
   final int pageCount;
   final Widget body;
+
+  /// The blank border the printer cannot reach, as the report asks for it.
+  final EdgeInsets margins;
 
   @override
   Widget build(BuildContext context) => Theme(
@@ -56,12 +60,7 @@ class ReportBarePage extends StatelessWidget {
           width: setup.width,
           height: setup.height,
           color: PaperStyle.paper,
-          padding: const EdgeInsets.fromLTRB(
-            SheetLayout.marginX,
-            SheetLayout.marginTop,
-            SheetLayout.marginX,
-            SheetLayout.marginBottom,
-          ),
+          padding: margins,
           child: ClipRect(child: body),
         ),
       ),

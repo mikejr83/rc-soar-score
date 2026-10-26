@@ -49,6 +49,11 @@ class PilotCardsReport extends DataReportDefinition<PilotCardsData> {
   @override
   bool get hasRunningFrame => false;
 
+  /// The print margin on every side, so no printer cuts a card off.
+  @override
+  EdgeInsets barePageMargins(Map<String, String> filters, ReportsFacts facts) =>
+      EdgeInsets.all(mmToPx(PilotCardsOptions.of(filters, facts).margin.mm));
+
   @override
   Map<String, String> defaultFilters(ReportsFacts facts) =>
       PilotCardsOptions.defaults(facts);
@@ -91,6 +96,7 @@ class PilotCardsReport extends DataReportDefinition<PilotCardsData> {
     footer: _sizingFooter(options, facts),
     rounds: options.rounds.length,
     choice: options.perPage,
+    margin: options.margin.mm,
   );
 
   /// The longest footer the choices could produce, so the page layout is
@@ -169,7 +175,11 @@ class PilotCardsReport extends DataReportDefinition<PilotCardsData> {
     final contestLine = PilotCardsText.contestLine(facts.contest);
     final decision = _decision(options, facts, context.setup.paper);
     final perPage = decision.perPage ?? CardsPerPage.two;
-    final geometry = CardGeometry.of(context.setup.paper, perPage);
+    final geometry = CardGeometry.of(
+      context.setup.paper,
+      perPage,
+      margin: options.margin.mm,
+    );
     final columns = CardColumns.fitted(
       CardColumns.forContest(
         discipline: facts.disciplineLabel,

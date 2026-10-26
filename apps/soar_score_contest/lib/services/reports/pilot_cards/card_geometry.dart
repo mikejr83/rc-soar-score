@@ -44,10 +44,10 @@ abstract final class CardSpec {
   /// The caption beside the QR code.
   static const double captionWidth = 14;
 
-  /// The page margins of the shared sheet layout (16, 24 and 14 px).
-  static const double marginX = 16 / pxPerMm;
-  static const double marginTop = 24 / pxPerMm;
-  static const double marginBottom = 14 / pxPerMm;
+  /// The blank border on every side of the page: a quarter inch, which the
+  /// printers in use (a Canon laser among them) and common inkjets reach. The
+  /// shared sheet layout's 16 px sides and 14 px bottom were cut off.
+  static const double margin = 6.35;
 }
 
 /// How many cards a page holds.
@@ -67,24 +67,36 @@ class CardGeometry {
     required this.pageWidth,
     required this.pageHeight,
     required this.perPage,
+    required this.margin,
   });
 
-  factory CardGeometry.of(PaperSize paper, CardsPerPage perPage) {
+  factory CardGeometry.of(
+    PaperSize paper,
+    CardsPerPage perPage, {
+    double margin = CardSpec.margin,
+  }) {
     final (short, long) = switch (paper) {
       PaperSize.letter => (215.9, 279.4),
       PaperSize.a4 => (210.0, 297.0),
     };
-    return CardGeometry._(pageWidth: long, pageHeight: short, perPage: perPage);
+    return CardGeometry._(
+      pageWidth: long,
+      pageHeight: short,
+      perPage: perPage,
+      margin: margin,
+    );
   }
 
   final double pageWidth;
   final double pageHeight;
   final CardsPerPage perPage;
 
-  double get cardWidth => (pageWidth - 2 * CardSpec.marginX) / 2;
+  /// The blank border on every side of the page.
+  final double margin;
 
-  double get _areaHeight =>
-      pageHeight - CardSpec.marginTop - CardSpec.marginBottom;
+  double get cardWidth => (pageWidth - 2 * margin) / 2;
+
+  double get _areaHeight => pageHeight - 2 * margin;
 
   double get cardHeight =>
       perPage == CardsPerPage.four ? _areaHeight / 2 : _areaHeight;

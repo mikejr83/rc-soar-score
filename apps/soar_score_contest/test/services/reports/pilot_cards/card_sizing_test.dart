@@ -333,4 +333,43 @@ void main() {
       expect(four.cardHeight * 2, closeTo(two.cardHeight, 1e-9));
     });
   });
+
+  group('the print margin', () {
+    test('standard is a quarter inch on every side', () {
+      final g = CardGeometry.of(PaperSize.letter, CardsPerPage.four);
+      expect(g.margin, 6.35);
+      expect(g.cardWidth, closeTo((279.4 - 2 * 6.35) / 2, 1e-9));
+      expect(g.cardHeight, closeTo((215.9 - 2 * 6.35) / 2, 1e-9));
+    });
+
+    test('wide gives the page edge 10 mm and the cards less room', () {
+      final standard = CardGeometry.of(PaperSize.a4, CardsPerPage.four);
+      final wide = CardGeometry.of(
+        PaperSize.a4,
+        CardsPerPage.four,
+        margin: PrintMargin.wide.mm,
+      );
+      expect(wide.cardWidth, lessThan(standard.cardWidth));
+      expect(wide.cardHeight, lessThan(standard.cardHeight));
+    });
+
+    test('a wide margin can send 8 rounds to two per page', () {
+      CardSheetDecision decide(double margin) => CardSheetDecision.of(
+        paper: PaperSize.a4,
+        pilots: [_pilot()],
+        contestLine: _line,
+        footer: _footer,
+        rounds: 8,
+        choice: CardsPerPageChoice.automatic,
+        margin: margin,
+      );
+      expect(decide(PrintMargin.standard.mm).perPage, CardsPerPage.four);
+      expect(decide(PrintMargin.wide.mm).perPage, CardsPerPage.two);
+    });
+
+    test('an unknown key falls back to standard', () {
+      expect(PrintMargin.of('bogus'), PrintMargin.standard);
+      expect(PrintMargin.of('wide'), PrintMargin.wide);
+    });
+  });
 }

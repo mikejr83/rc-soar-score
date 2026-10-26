@@ -139,6 +139,29 @@ List<ReportControlGroup> pilotCardsControls(
           text: decision.message,
           isError: decision.tooMany,
         ),
+        const Divider(),
+        RadioGroup<String>(
+          groupValue: options.margin.key,
+          onChanged: (key) {
+            if (key != null) {
+              context.setFilter('mg', key);
+            }
+          },
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              for (final margin in PrintMargin.values)
+                RadioListTile<String>(
+                  key: ValueKey('cards-margin-${margin.key}'),
+                  value: margin.key,
+                  dense: true,
+                  contentPadding: EdgeInsets.zero,
+                  title: Text('${margin.label} margin'),
+                  subtitle: Text(margin.help),
+                ),
+            ],
+          ),
+        ),
         Semantics(
           liveRegion: true,
           child: Builder(

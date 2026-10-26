@@ -96,6 +96,15 @@ Future<void> _pump(
   await tester.pumpAndSettle();
 }
 
+String marginChoice(WidgetTester tester) => tester
+    .widget<RadioGroup<String>>(
+      find.ancestor(
+        of: find.byKey(const ValueKey('cards-margin-std')),
+        matching: find.byType(RadioGroup<String>),
+      ),
+    )
+    .groupValue!;
+
 Finder get _cards => find.byType(PilotCardView);
 
 void main() {
@@ -554,5 +563,22 @@ void main() {
       expect(find.byKey(const ValueKey('cards-reminder-dialog')), findsNothing);
       expect(printer.printed, hasLength(1));
     });
+  });
+
+  testWidgets('the print margin is chosen in the panel and kept in the URL', (
+    tester,
+  ) async {
+    await _pump(tester);
+    expect(marginChoice(tester), 'std');
+
+    // The panel is a long list: bring the margin choice into view.
+    // Dragging at the panel's padding scrolls it, not the pilot list inside.
+    await tester.dragFrom(const Offset(6, 600), const Offset(0, -700));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('cards-margin-wide')));
+    await tester.pumpAndSettle();
+
+    expect(marginChoice(tester), 'wide');
+    expect(_cards, findsNWidgets(4));
   });
 }

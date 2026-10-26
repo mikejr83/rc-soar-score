@@ -19,13 +19,38 @@ enum CardsPerPageChoice {
       values.firstWhere((choice) => choice.key == key, orElse: () => automatic);
 }
 
+/// How far the cards stay from the paper's edge. Printers cannot reach the
+/// edge: [standard] is a quarter inch, which the printers tried so far and
+/// common inkjets reach; [wide] matches the border GliderScore's printouts
+/// keep, for a printer that still cuts the edges off.
+enum PrintMargin {
+  standard('std', 'Standard', '6.35 mm (¼ in) from the paper’s edge.', 6.35),
+  wide(
+    'wide',
+    'Wide',
+    '10 mm from the paper’s edge, as GliderScore prints.',
+    10,
+  );
+
+  const PrintMargin(this.key, this.label, this.help, this.mm);
+
+  final String key;
+  final String label;
+  final String help;
+  final double mm;
+
+  static PrintMargin of(String? key) =>
+      values.firstWhere((m) => m.key == key, orElse: () => standard);
+}
+
 /// The filters and options of the Pilot Scoring Cards, read from the viewer's
 /// filter map (and so from the URL) with the contest's facts.
 ///
 /// Filter keys: `from` and `to` (an inclusive round range, as in the Draw
 /// Matrix), `ret` (include retired pilots), `pilots` (the participation ids
 /// that get a card, comma separated, `none`, or `all`; all when absent), `pre`
-/// (Pre-fill) and `up` (`auto`, `four` or `two`).
+/// (Pre-fill), `up` (`auto`, `four` or `two`) and `mg` (the print margin,
+/// `std` or `wide`).
 class PilotCardsOptions {
   PilotCardsOptions._({
     required this.range,
@@ -33,6 +58,7 @@ class PilotCardsOptions {
     required this.chosen,
     required this.prefillChosen,
     required this.perPage,
+    required this.margin,
     required this.eligible,
     required this.hasScores,
   });
@@ -59,6 +85,7 @@ class PilotCardsOptions {
       chosen: chosen,
       prefillChosen: filters['pre'] == '1',
       perPage: CardsPerPageChoice.of(filters['up']),
+      margin: PrintMargin.of(filters['mg']),
       eligible: eligible,
       hasScores: facts.hasScores,
     );
@@ -86,6 +113,7 @@ class PilotCardsOptions {
   final Set<String>? chosen;
   final bool prefillChosen;
   final CardsPerPageChoice perPage;
+  final PrintMargin margin;
 
   /// The pilots the picker lists, by last name then given name.
   final List<ReportPilot> eligible;

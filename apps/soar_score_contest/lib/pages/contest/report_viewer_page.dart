@@ -180,7 +180,10 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
         setup: setup,
         bodySize: _definition!.hasRunningFrame
             ? SheetLayout.bodySize(setup)
-            : SheetLayout.bareBodySize(setup),
+            : SheetLayout.bareBodySize(
+                setup,
+                _definition!.barePageMargins(controller.sheetFilters, facts),
+              ),
         preview: controller.params.preview,
         data: controller.data,
         online:
@@ -201,6 +204,10 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
       return [
         for (var i = 0; i < count; i++)
           ReportBarePage(
+            margins: _definition!.barePageMargins(
+              controller.sheetFilters,
+              controller.facts!,
+            ),
             setup: controller.setup,
             reportName: widget.report!.title,
             pageNumber: i + 1,
