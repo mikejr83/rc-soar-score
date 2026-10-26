@@ -1,5 +1,34 @@
 import { venueOf } from "./contest-summary";
+import { label } from "./format";
 import type { JsonMap, PublicPublication } from "./publication";
+
+/** How the projection labels one raw score field (`calculation.score_fields`). */
+export interface ScoreFieldInfo {
+  name: string;
+  unit?: string;
+  precision?: number;
+}
+
+/** Labels and number formats for the raw score fields; falls back to the key. */
+export class ScoreFields {
+  constructor(private readonly byKey: Map<string, ScoreFieldInfo> = new Map()) {}
+
+  /** The field's name with its unit, or the key made readable. */
+  label(key: string): string {
+    const field = this.byKey.get(key);
+    if (!field) return label(key);
+    return field.unit ? `${field.name} (${field.unit})` : field.name;
+  }
+
+  /** A raw value at the field's precision; `-` when the scorer left it out. */
+  format(key: string, value: unknown): string {
+    if (value == null) return "-";
+    const precision = this.byKey.get(key)?.precision;
+    // `toFixed` throws outside 0 to 100, and the model only bounds precision below.
+    const usable = precision !== undefined && precision >= 0 && precision <= 100;
+    return typeof value === "number" && usable ? value.toFixed(precision) : String(value);
+  }
+}
 
 /** The contest identity the page header shows. */
 export interface ContestHeader {
@@ -108,10 +137,25 @@ export function contestHeaderFrom(contest: JsonMap, now: Date): ContestHeader {
 
 export const headerStatus = (h: ContestHeader) => (h.isCompleted ? "Completed" : "In progress");
 
+function scoreFieldsFrom(calculation: JsonMap | null | undefined): ScoreFields {
+  const byKey = new Map<string, ScoreFieldInfo>();
+  const fields = calculation?.score_fields;
+  for (const f of Array.isArray(fields) ? (fields as JsonMap[]) : []) {
+    if (typeof f?.key !== "string") continue;
+    byKey.set(f.key, {
+      name: str(f.name, label(f.key)),
+      unit: typeof f.unit === "string" ? f.unit : undefined,
+      precision: typeof f.precision === "number" ? f.precision : undefined,
+    });
+  }
+  return new ScoreFields(byKey);
+}
+
 /** A published contest parsed once; components read this, never the raw maps. */
 export class PublishedContest {
   readonly header: ContestHeader;
   readonly disciplineType: string;
+  readonly scoreFields: ScoreFields;
   private readonly participants = new Map<string, JsonMap>();
   private readonly scores = new Map<string, JsonMap>();
   private readonly flights = new Map<number, JsonMap[]>();
@@ -122,6 +166,7 @@ export class PublishedContest {
   constructor(dto: PublicPublication, now: Date = new Date()) {
     this.header = contestHeaderFrom(dto.contest, now);
     this.disciplineType = dto.discipline_type;
+    this.scoreFields = scoreFieldsFrom(dto.calculation);
     for (const p of dto.participants ?? []) this.participants.set(str(p.pilot_key), p);
     // One flight per pilot per round counts; a reflight replaces it. The
     // flight groups view shows every flight, so those are kept per round too.
@@ -253,7 +298,6 @@ export class PublishedContest {
       name: pilotName({ firstName: str(details.first_name), lastName: str(details.last_name) }),
       country: str(details.country),
       outcome: str(f.outcome),
-      // TODO(#456): `raw_components` is provisional until the server emits it.
       rawComponents: (f.raw_components as JsonMap | null | undefined) ?? {},
       landingPoints: num(f.landing_points),
       rawPoints: num(f.raw_points),

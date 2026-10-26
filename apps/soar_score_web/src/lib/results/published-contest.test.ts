@@ -3,7 +3,7 @@ import { describe, expect, test } from "vitest";
 import { fakePublication } from "./__fixtures__/fake-publication";
 import { formatTime } from "./format";
 import { contestFlightGroupsPath, contestTeamResultsPath } from "./paths";
-import { PublishedContest, detailKeys, groupTitle, hasRawComponents, headerStatus } from "./published-contest";
+import { PublishedContest, ScoreFields, detailKeys, groupTitle, hasRawComponents, headerStatus } from "./published-contest";
 
 const contest = new PublishedContest(fakePublication(), new Date(Date.UTC(2026, 9, 12)));
 
@@ -84,6 +84,26 @@ describe("flight groups", () => {
     expect(detailKeys(groups[2])).toEqual(["launch_height"]);
     expect(hasRawComponents(contest.flightGroupsOf(1)[0])).toBe(false);
     expect(contest.flightGroupsOf(9)).toEqual([]);
+  });
+
+  test("score fields label the raw columns and fall back to the key", () => {
+    const { scoreFields } = contest;
+    expect(scoreFields.label("launch_height")).toBe("Launch Height (m)");
+    expect(scoreFields.label("late_landing")).toBe("Late landing");
+    expect(scoreFields.format("launch_height", 200)).toBe("200");
+    expect(scoreFields.format("launch_height", null)).toBe("-");
+    expect(scoreFields.format("late_landing", true)).toBe("true");
+  });
+
+  test("a precision outside what toFixed accepts shows the value as is", () => {
+    const fields = new ScoreFields(
+      new Map([
+        ["huge", { name: "Huge", precision: 101 }],
+        ["edge", { name: "Edge", precision: 100 }],
+      ]),
+    );
+    expect(fields.format("huge", 1.5)).toBe("1.5");
+    expect(fields.format("edge", 1.5)).toHaveLength(102);
   });
 
   test("times format as minutes and seconds", () => {
