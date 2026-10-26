@@ -15,8 +15,9 @@ import 'package:soar_score_core/config/log_format.dart';
 /// | `AUTH0_DOMAIN` | Auth0 tenant domain, no scheme (`tenant.us.auth0.com`) | required |
 /// | `API_AUDIENCE` | API identifier access tokens must be issued for | required |
 /// | `CORS_ALLOWED_ORIGINS` | comma-separated browser origins allowed to call the API, such as `http://127.0.0.1:8091` | none |
-/// | `POSTGRES_PASSWORD` | database password | required |
-/// | `POSTGRES_HOST`, `POSTGRES_PORT`, `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_SSLMODE` | database connection | see [PostgresConfig] |
+/// | `DATABASE_URL` | a `postgresql://` connection URL (authority with password, database in the path, `sslmode` optional) | none — the URL wins over the discrete variables |
+/// | `POSTGRES_PASSWORD` | database password, when no `DATABASE_URL` is set | required |
+/// | `POSTGRES_HOST`, `POSTGRES_PORT`, `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_SSLMODE` | database connection, when no `DATABASE_URL` is set | see [PostgresConfig] |
 class ServerConfig {
   ServerConfig({
     required this.port,
@@ -36,6 +37,7 @@ class ServerConfig {
     'AUTH0_DOMAIN',
     'API_AUDIENCE',
     'CORS_ALLOWED_ORIGINS',
+    'DATABASE_URL',
     'POSTGRES_PASSWORD',
     'POSTGRES_HOST',
     'POSTGRES_PORT',
@@ -146,25 +148,37 @@ class ServerConfig {
       }
     }
 
-    if (value('POSTGRES_PASSWORD') == null) {
-      problems.add('POSTGRES_PASSWORD is required.');
-    }
-    final rawDbPort = value('POSTGRES_PORT');
-    if (rawDbPort != null) {
-      final parsed = int.tryParse(rawDbPort);
-      if (parsed == null || parsed < 1 || parsed > 65535) {
-        problems.add(
-          'POSTGRES_PORT must be a number from 1 to 65535, got "$rawDbPort".',
-        );
+    final rawDbUrl = value('DATABASE_URL');
+    var databaseConfigured = rawDbUrl != null;
+    if (databaseConfigured) {
+      try {
+        PostgresConfig.fromUrl(rawDbUrl);
+      } on ArgumentError catch (e) {
+        problems.add('DATABASE_URL ${e.message ?? e}');
       }
-    }
-    final rawSsl = value('POSTGRES_SSLMODE');
-    if (rawSsl != null &&
-        !{'disable', 'require', 'verifyFull'}.contains(rawSsl)) {
-      problems.add(
-        'POSTGRES_SSLMODE must be one of: disable, require, verifyFull, '
-        'got "$rawSsl".',
-      );
+    } else {
+      databaseConfigured = value('POSTGRES_PASSWORD') != null;
+      if (!databaseConfigured) {
+        problems.add('DATABASE_URL or POSTGRES_PASSWORD is required.');
+      } else {
+        final rawDbPort = value('POSTGRES_PORT');
+        if (rawDbPort != null) {
+          final parsed = int.tryParse(rawDbPort);
+          if (parsed == null || parsed < 1 || parsed > 65535) {
+            problems.add(
+              'POSTGRES_PORT must be a number from 1 to 65535, got "$rawDbPort".',
+            );
+          }
+        }
+        final rawSsl = value('POSTGRES_SSLMODE');
+        if (rawSsl != null &&
+            !{'disable', 'require', 'verifyFull'}.contains(rawSsl)) {
+          problems.add(
+            'POSTGRES_SSLMODE must be one of: disable, require, verifyFull, '
+            'got "$rawSsl".',
+          );
+        }
+      }
     }
 
     if (problems.isNotEmpty) {

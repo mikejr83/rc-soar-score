@@ -24,7 +24,7 @@ void main() {
       backend.name,
       () => _tests(backend),
       skip: backend == SliceBackend.postgres && postgresMissing
-          ? 'POSTGRES_PASSWORD is not set'
+          ? 'no PostgreSQL instance configured (set DATABASE_URL or POSTGRES_PASSWORD)'
           : false,
     );
   }

@@ -144,25 +144,27 @@ dart run build_runner build --delete-conflicting-outputs
 
 The server (`apps/soar_score_server`) needs a PostgreSQL database and the Auth0
 tenant it accepts tokens from. It exits at startup, listing every problem, if
-`POSTGRES_PASSWORD`, `AUTH0_DOMAIN` or `API_AUDIENCE` is not set.
+`DATABASE_URL` and `POSTGRES_PASSWORD` are not set, or if
+`AUTH0_DOMAIN` or `API_AUDIENCE` is not set.
 
 ### Environment variables
 
 The server loads variables from the process environment and from a `.env` file
 (`.env` and `.env.*` are git-ignored; never commit them).
 
-| Variable               | Default         | Purpose                                                                                                            |
-| ---------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `POSTGRES_PASSWORD`    | none (required) | Database password. Unset means "not configured".                                                                   |
-| `POSTGRES_HOST`        | `localhost`     | Database host.                                                                                                     |
-| `POSTGRES_PORT`        | `5432`          | Database port.                                                                                                     |
-| `POSTGRES_DB`          | `rc_soar_score` | Database name.                                                                                                     |
-| `POSTGRES_USER`        | `postgres`      | Database user.                                                                                                     |
-| `POSTGRES_SSLMODE`     | `disable`       | One of `disable`, `require`, `verifyFull`.                                                                         |
-| `PORT`                 | `8080`          | HTTP port the server listens on.                                                                                   |
-| `AUTH0_DOMAIN`         | none (required) | Auth0 tenant host name, no scheme (`tenant.us.auth0.com`).                                                         |
-| `API_AUDIENCE`         | none (required) | Expected JWT audience (`https://soar-score.com/server`).                                                           |
-| `CORS_ALLOWED_ORIGINS` | none            | Comma-separated browser origins allowed to call the API, e.g. `http://127.0.0.1:8091`. Empty adds no CORS headers. |
+| Variable               | Default         | Purpose                                                                                                                                                        |
+| ---------------------- | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URL`         | none            | Optional connection URL, `postgresql://user:password@host:port/db?sslmode=...`. Wins over the `POSTGRES_*` variables. A missing `sslmode` means `require` TLS. |
+| `POSTGRES_PASSWORD`    | none (required) | Database password, when no `DATABASE_URL` is set. Unset means "not configured".                                                                                |
+| `POSTGRES_HOST`        | `localhost`     | Database host, when no `DATABASE_URL` is set.                                                                                                                  |
+| `POSTGRES_PORT`        | `5432`          | Database port, when no `DATABASE_URL` is set.                                                                                                                  |
+| `POSTGRES_DB`          | `rc_soar_score` | Database name, when no `DATABASE_URL` is set.                                                                                                                  |
+| `POSTGRES_USER`        | `postgres`      | Database user, when no `DATABASE_URL` is set.                                                                                                                  |
+| `POSTGRES_SSLMODE`     | `disable`       | One of `disable`, `require`, `verifyFull`, when no `DATABASE_URL` is set.                                                                                      |
+| `PORT`                 | `8080`          | HTTP port the server listens on.                                                                                                                               |
+| `AUTH0_DOMAIN`         | none (required) | Auth0 tenant host name, no scheme (`tenant.us.auth0.com`).                                                                                                     |
+| `API_AUDIENCE`         | none (required) | Expected JWT audience (`https://soar-score.com/server`).                                                                                                       |
+| `CORS_ALLOWED_ORIGINS` | none            | Comma-separated browser origins allowed to call the API, e.g. `http://127.0.0.1:8091`. Empty adds no CORS headers.                                             |
 
 A minimal local `.env` at the repo root:
 
@@ -186,7 +188,7 @@ well; just set the matching `POSTGRES_*` variables.
 
 Handler tests (`dart test` in `apps/soar_score_server`) run in memory and do not
 need a database. Integration tests in `packages/soar_score_data` are skipped
-unless `POSTGRES_PASSWORD` is set.
+unless `DATABASE_URL` or `POSTGRES_PASSWORD` is set.
 
 ### Auth0
 
@@ -314,14 +316,14 @@ npx prettier --check "**/*.md"
 
 ## 7. Troubleshooting
 
-| Symptom                                              | Fix                                                                                                                                                                                                         |
-| ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `melos: command not found`                           | Add the pub cache `bin` directory to `PATH`, or use `dart run melos`.                                                                                                                                       |
-| `flutter --version` is not 3.47.x                    | `flutter channel stable && flutter upgrade`.                                                                                                                                                                |
-| Server prints `POSTGRES_PASSWORD is not set`         | Set it in `.env` or your shell, and make sure PostgreSQL is reachable.                                                                                                                                      |
-| Pub resolution error mentioning `.plugin_symlinks`   | Workspace globs are intentionally first-level only; do not widen `workspace:` in `pubspec.yaml`.                                                                                                            |
-| Missing `*.g.dart` files / undefined generated types | Run `dart run build_runner build --delete-conflicting-outputs` in the affected package.                                                                                                                     |
-| `flutter run -d windows` fails to build              | See section 4: the Windows build needs Visual Studio C++ (plus ATL), vcpkg with the plugin's native dependencies and `VCPKG_ROOT` set, and the `com.soarscore.contest` URL scheme. Re-run `flutter doctor`. |
+| Symptom                                                     | Fix                                                                                                                                                                                                         |
+| ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `melos: command not found`                                  | Add the pub cache `bin` directory to `PATH`, or use `dart run melos`.                                                                                                                                       |
+| `flutter --version` is not 3.47.x                           | `flutter channel stable && flutter upgrade`.                                                                                                                                                                |
+| Server says `DATABASE_URL or POSTGRES_PASSWORD is required` | Set one in `.env` or your shell, and make sure PostgreSQL is reachable.                                                                                                                                     |
+| Pub resolution error mentioning `.plugin_symlinks`          | Workspace globs are intentionally first-level only; do not widen `workspace:` in `pubspec.yaml`.                                                                                                            |
+| Missing `*.g.dart` files / undefined generated types        | Run `dart run build_runner build --delete-conflicting-outputs` in the affected package.                                                                                                                     |
+| `flutter run -d windows` fails to build                     | See section 4: the Windows build needs Visual Studio C++ (plus ATL), vcpkg with the plugin's native dependencies and `VCPKG_ROOT` set, and the `com.soarscore.contest` URL scheme. Re-run `flutter doctor`. |
 
 ## Further reading
 
