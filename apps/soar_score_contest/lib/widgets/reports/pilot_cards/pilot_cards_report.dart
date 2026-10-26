@@ -88,9 +88,26 @@ class PilotCardsReport extends DataReportDefinition<PilotCardsData> {
     paper: paper,
     pilots: options.selected,
     contestLine: PilotCardsText.contestLine(facts.contest),
+    footer: _sizingFooter(options, facts),
     rounds: options.rounds.length,
     choice: options.perPage,
   );
+
+  /// The longest footer the choices could produce, so the page layout is
+  /// decided before the scores are read and never changes with them: the date
+  /// is as wide as a date gets, and Pre-fill adds its note and legend.
+  String _sizingFooter(PilotCardsOptions options, ReportsFacts facts) {
+    final rounds = options.rounds;
+    return PilotCardsText.footer(
+      matrixRevision: facts.matrixRevision,
+      rounds: rounds,
+      drawn: options.range.drawn,
+      planned: options.range.planned,
+      scoredThrough: options.prefill && rounds.isNotEmpty ? rounds.last : null,
+      anyUnofficial: options.prefill,
+      printed: 'Printed 28 Sep 2026, 00:00',
+    );
+  }
 
   /// One read serves every range and option. A redraw or a score changes the
   /// key.
@@ -195,8 +212,8 @@ class PilotCardsReport extends DataReportDefinition<PilotCardsData> {
       planned: range.planned,
       scoredThrough: through,
       anyUnofficial: anyUnofficial,
+      printed: 'Printed ${DateFormat('d MMM y, HH:mm').format(DateTime.now())}',
     );
-    final printed = DateFormat('d MMM y, HH:mm').format(DateTime.now());
 
     final cards = <Widget>[
       for (var n = 0; n < selected.length; n++)
@@ -217,11 +234,11 @@ class PilotCardsReport extends DataReportDefinition<PilotCardsData> {
               geometry: geometry,
               pilot: selected[n],
               contestLine: contestLine,
+              footer: footer,
               qr: hasQr(selected[n]),
               rounds: rounds.length,
             ),
             footer: footer,
-            printed: 'Printed $printed',
             qrLink: hasQr(selected[n])
                 ? invitations.linkOf(selected[n].participationId)
                 : null,

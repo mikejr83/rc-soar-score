@@ -10,6 +10,7 @@ class CardIdentity {
     required this.nameSizePt,
     required this.nameLines,
     required this.details,
+    required this.footerHeightMm,
     required this.heightMm,
   });
 
@@ -20,6 +21,11 @@ class CardIdentity {
 
   /// The lines under the name: club, then IDs, class and team.
   final List<String> details;
+
+  /// The room the footer text takes at the bottom of the block.
+  final double footerHeightMm;
+
+  /// The whole block: contest line, name, details and footer text.
   final double heightMm;
 }
 
@@ -28,6 +34,7 @@ class CardIdentity {
 abstract final class CardSizing {
   static const double _contestLineSizePt = 7;
   static const double _detailSizePt = 7;
+  static const double _footerSizePt = 6;
   static const double _detailLineMm = 2.8;
   static const double _contestLineMm = 3.1;
 
@@ -69,6 +76,7 @@ abstract final class CardSizing {
     ReportPilot pilot,
     String contestLine,
     double widthMm,
+    String footer,
   ) {
     final name = pilot.givenSurname;
     var size = 18.0;
@@ -82,16 +90,23 @@ abstract final class CardSizing {
       (sum, line) => sum + lines(line, _detailSizePt, widthMm, .56),
     );
     final contestLines = lines(contestLine, _contestLineSizePt, widthMm, .56);
+    final footerMm = footer.isEmpty
+        ? 0.0
+        : lines(footer, _footerSizePt, widthMm, .56) *
+                  CardSpec.footerLineHeight +
+              .6;
     final height =
         contestLines * _contestLineMm +
         .5 +
         nameLines * size * .3528 * 1.1 +
         .6 +
-        detailLines * _detailLineMm;
+        detailLines * _detailLineMm +
+        footerMm;
     return CardIdentity(
       nameSizePt: size,
       nameLines: nameLines,
       details: details,
+      footerHeightMm: footerMm,
       heightMm: height,
     );
   }
@@ -101,6 +116,7 @@ abstract final class CardSizing {
     required CardGeometry geometry,
     required ReportPilot pilot,
     required String contestLine,
+    required String footer,
     required bool qr,
     required int rounds,
   }) {
@@ -109,14 +125,15 @@ abstract final class CardSizing {
         geometry.cardHeight -
         geometry.insetVertical -
         CardSpec.headingHeight -
-        CardSpec.footerHeight -
         2 * CardSpec.tableOutline -
         .3;
     final table = room - rounds * CardSpec.rowMin;
+    // The code and the quiet zone below it (four modules) share the block; the
+    // card's inset and the page edge supply the quiet zone on the other sides.
     final qrFit =
         table *
         CardSpec.qrModules /
-        (CardSpec.qrModules + 2 * CardSpec.quietModules);
+        (CardSpec.qrModules + CardSpec.quietModules);
     final size = qr
         ? math.max(CardSpec.qrMin, math.min(CardSpec.qr, qrFit))
         : 0.0;
@@ -125,6 +142,7 @@ abstract final class CardSizing {
       pilot,
       contestLine,
       width - (qr ? size + quiet + CardSpec.captionWidth : 0),
+      footer,
     );
     final top = math.max(identity.heightMm + 1, qr ? size + quiet : 0.0);
     final ok = (!qr || qrFit >= CardSpec.qrMin - 1e-6) && top <= table + 1e-6;
@@ -144,10 +162,12 @@ abstract final class CardSizing {
     required CardGeometry geometry,
     required List<ReportPilot> pilots,
     required String contestLine,
+    required String footer,
     required bool qr,
   }) {
     var n = 0;
-    while (n < 60 && _allFit(geometry, pilots, contestLine, qr, n + 1)) {
+    while (n < 60 &&
+        _allFit(geometry, pilots, contestLine, footer, qr, n + 1)) {
       n++;
     }
     return n;
@@ -157,6 +177,7 @@ abstract final class CardSizing {
     CardGeometry geometry,
     List<ReportPilot> pilots,
     String contestLine,
+    String footer,
     bool qr,
     int rounds,
   ) => pilots.every(
@@ -164,6 +185,7 @@ abstract final class CardSizing {
       geometry: geometry,
       pilot: pilot,
       contestLine: contestLine,
+      footer: footer,
       qr: qr,
       rounds: rounds,
     ).ok,
@@ -176,8 +198,9 @@ abstract final class CardSizing {
     required CardGeometry geometry,
     required List<ReportPilot> pilots,
     required String contestLine,
+    required String footer,
     required int rounds,
-  }) => _allFit(geometry, pilots, contestLine, true, rounds);
+  }) => _allFit(geometry, pilots, contestLine, footer, true, rounds);
 }
 
 /// The result of fitting one card.

@@ -20,7 +20,8 @@ abstract final class CardSpec {
   /// The floor is 22 mm because the invitation link
   /// (`https://scoring.rcsoarscore.com/invitations/<id>`) needs a version 4 or
   /// 5 code, whose modules are smaller than version 3's. With it, a landscape
-  /// quadrant holds 7 rounds four to a page on A4; 8 or more go two to a page.
+  /// quadrant holds 8 rounds four to a page on A4 and Letter (the code is 23 mm
+  /// on A4 with 8 rounds); 9 or more go two to a page.
   static const double qrMin = 22;
 
   /// The QR code is version 3: 29 modules a side, with a quiet zone of four.
@@ -35,7 +36,10 @@ abstract final class CardSpec {
   static const double tableOutline = 0.3528;
 
   static const double headingHeight = 6.5;
-  static const double footerHeight = 3.4;
+
+  /// The footer text sits in the top block, beside the QR code, in lines of
+  /// this height, so it costs the table no height of its own.
+  static const double footerLineHeight = 2.6;
 
   /// The caption beside the QR code.
   static const double captionWidth = 14;

@@ -31,11 +31,12 @@ ReportPilot _pilot({
   retiredAtRound: retiredAtRound,
 );
 
+const _footer = 'Matrix rev 3 · Rounds 1 to 8 · Printed 28 Sep 2026, 00:00';
 const _line = 'Gator Cup F5J · Lake Wales, Florida · 17–18 Oct 2026';
 
 void main() {
   group('how many rounds fit', () {
-    test('7 rounds fit four to a page on Letter, 8 and 14 need two', () {
+    test('8 rounds fit four to a page on Letter, 9 and 14 need two', () {
       final four = CardGeometry.of(PaperSize.letter, CardsPerPage.four);
       final two = CardGeometry.of(PaperSize.letter, CardsPerPage.two);
       final pilots = [_pilot(club: 'Gator Soaring Club')];
@@ -43,24 +44,26 @@ void main() {
         geometry: g,
         pilots: pilots,
         contestLine: _line,
+        footer: _footer,
         rounds: rounds,
       );
-      expect(fits(four, 7), isTrue);
-      expect(fits(four, 8), isFalse);
+      expect(fits(four, 8), isTrue);
+      expect(fits(four, 9), isFalse);
       expect(fits(four, 14), isFalse);
       expect(fits(two, 14), isTrue);
     });
 
-    test('A4 landscape holds 7 rounds four to a page, then goes to two', () {
+    test('A4 landscape holds 8 rounds four to a page, then goes to two', () {
       final pilots = [_pilot(club: 'Gator Soaring Club')];
       expect(
         CardSizing.maxRounds(
           geometry: CardGeometry.of(PaperSize.a4, CardsPerPage.four),
           pilots: pilots,
           contestLine: _line,
+          footer: _footer,
           qr: true,
         ),
-        7,
+        8,
       );
     });
 
@@ -69,6 +72,7 @@ void main() {
         geometry: CardGeometry.of(paper, CardsPerPage.four),
         pilots: [_pilot()],
         contestLine: _line,
+        footer: _footer,
         qr: true,
       );
       expect(most(PaperSize.a4), lessThanOrEqualTo(most(PaperSize.letter)));
@@ -91,12 +95,14 @@ void main() {
         geometry: geometry,
         pilots: [_pilot()],
         contestLine: _line,
+        footer: _footer,
         qr: true,
       );
       final withTall = CardSizing.maxRounds(
         geometry: geometry,
         pilots: [_pilot(), tall],
         contestLine: _line,
+        footer: _footer,
         qr: true,
       );
       expect(withTall, lessThanOrEqualTo(plain));
@@ -110,6 +116,7 @@ void main() {
         geometry: geometry,
         pilot: _pilot(),
         contestLine: _line,
+        footer: _footer,
         qr: true,
         rounds: 4,
       );
@@ -117,8 +124,9 @@ void main() {
         geometry: geometry,
         pilot: _pilot(),
         contestLine: _line,
+        footer: _footer,
         qr: true,
-        rounds: 7,
+        rounds: 8,
       );
       expect(roomy.qrSize, CardSpec.qr);
       expect(full.qrSize, inInclusiveRange(CardSpec.qrMin, CardSpec.qr));
@@ -132,6 +140,7 @@ void main() {
         geometry: geometry,
         pilot: _pilot(),
         contestLine: _line,
+        footer: _footer,
         qr: qr,
         rounds: 8,
       );
@@ -142,7 +151,7 @@ void main() {
 
   group('names', () {
     test('shrink to a floor of 14 pt, then wrap, and are never cut', () {
-      final short = CardSizing.identity(_pilot(), _line, 80);
+      final short = CardSizing.identity(_pilot(), _line, 80, _footer);
       expect(short.nameSizePt, 18);
       expect(short.nameLines, 1);
       final long = CardSizing.identity(
@@ -152,6 +161,7 @@ void main() {
         ),
         _line,
         80,
+        _footer,
       );
       expect(long.nameSizePt, 14);
       expect(long.nameLines, greaterThan(1));
@@ -264,16 +274,17 @@ void main() {
           paper: PaperSize.letter,
           pilots: [_pilot()],
           contestLine: _line,
+          footer: _footer,
           rounds: rounds,
           choice: choice,
         );
 
-    test('automatic uses four for 7 rounds and two for 8 and 14', () {
+    test('automatic uses four for 8 rounds and two for 9 and 14', () {
       expect(
-        decide(7, CardsPerPageChoice.automatic).perPage,
+        decide(8, CardsPerPageChoice.automatic).perPage,
         CardsPerPage.four,
       );
-      expect(decide(8, CardsPerPageChoice.automatic).perPage, CardsPerPage.two);
+      expect(decide(9, CardsPerPageChoice.automatic).perPage, CardsPerPage.two);
       final fourteen = decide(14, CardsPerPageChoice.automatic);
       expect(fourteen.perPage, CardsPerPage.two);
       expect(fourteen.message, contains('14 rounds don’t fit four to a page'));

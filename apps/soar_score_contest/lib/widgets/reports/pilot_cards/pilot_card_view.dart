@@ -23,7 +23,6 @@ class PilotCardView extends StatelessWidget {
     required this.contestLine,
     required this.fit,
     required this.footer,
-    required this.printed,
     this.qrLink,
     this.prefill = false,
     this.zoom = 1,
@@ -36,8 +35,9 @@ class PilotCardView extends StatelessWidget {
   final List<CardColumn> columns;
   final String contestLine;
   final CardFit fit;
+
+  /// The line that dates the card, set at the bottom of the top block.
   final String footer;
-  final String printed;
 
   /// The link the QR code carries; `null` prints the card without a code.
   final String? qrLink;
@@ -73,25 +73,18 @@ class PilotCardView extends StatelessWidget {
         child: DefaultTextStyle(
           style: PaperStyle.body.copyWith(height: 1.15),
           // The sizing rules leave room for everything; the clip only keeps a
-          // font that sets taller than measured from drawing over the footer.
-          child: Stack(
-            children: [
-              Positioned.fill(
-                child: ClipRect(
-                  child: OverflowBox(
-                    alignment: Alignment.topLeft,
-                    minHeight: 0,
-                    maxHeight: double.infinity,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [_top(), _table()],
-                    ),
-                  ),
-                ),
+          // font that sets taller than measured from running off the card.
+          child: ClipRect(
+            child: OverflowBox(
+              alignment: Alignment.topLeft,
+              minHeight: 0,
+              maxHeight: double.infinity,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [_top(), _table()],
               ),
-              Positioned(left: 0, right: 0, bottom: 0, child: _footer()),
-            ],
+            ),
           ),
         ),
       ),
@@ -115,46 +108,69 @@ class PilotCardView extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
-            child: ClipRect(
-              child: OverflowBox(
-                alignment: Alignment.topLeft,
-                minHeight: 0,
-                maxHeight: double.infinity,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      contestLine,
-                      style: TextStyle(fontSize: ptToPx(7), height: 3.1 / 2.47),
-                    ),
-                    SizedBox(height: mmToPx(.5)),
-                    Semantics(
-                      header: true,
-                      child: Text(
-                        pilot.givenSurname,
-                        style: TextStyle(
-                          fontSize: ptToPx(identity.nameSizePt),
-                          fontWeight: FontWeight.w700,
-                          height: 1.1,
-                        ),
+            child: Stack(
+              children: [
+                Positioned.fill(
+                  child: ClipRect(
+                    child: OverflowBox(
+                      alignment: Alignment.topLeft,
+                      minHeight: 0,
+                      maxHeight: double.infinity,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            contestLine,
+                            style: TextStyle(
+                              fontSize: ptToPx(7),
+                              height: 3.1 / 2.47,
+                            ),
+                          ),
+                          SizedBox(height: mmToPx(.5)),
+                          Semantics(
+                            header: true,
+                            child: Text(
+                              pilot.givenSurname,
+                              style: TextStyle(
+                                fontSize: ptToPx(identity.nameSizePt),
+                                fontWeight: FontWeight.w700,
+                                height: 1.1,
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: mmToPx(.6)),
+                          for (final line in identity.details)
+                            Text(
+                              line,
+                              style: TextStyle(
+                                fontSize: ptToPx(7),
+                                height: 2.8 / 2.47,
+                                fontWeight: line.startsWith('Retired')
+                                    ? FontWeight.w700
+                                    : FontWeight.w400,
+                              ),
+                            ),
+                        ],
                       ),
                     ),
-                    SizedBox(height: mmToPx(.6)),
-                    for (final line in identity.details)
-                      Text(
-                        line,
-                        style: TextStyle(
-                          fontSize: ptToPx(7),
-                          height: 2.8 / 2.47,
-                          fontWeight: line.startsWith('Retired')
-                              ? FontWeight.w700
-                              : FontWeight.w400,
-                        ),
-                      ),
-                  ],
+                  ),
                 ),
-              ),
+                // The footer dates the card: matrix revision, rounds covered
+                // and, with Pre-fill, how far the scores go.
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: Text(
+                    footer,
+                    style: TextStyle(
+                      fontSize: ptToPx(6),
+                      height: CardSpec.footerLineHeight / 2.12,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
           if (qr) ...[
@@ -365,29 +381,5 @@ class PilotCardView extends StatelessWidget {
     child: checked
         ? const Icon(Icons.check, size: 10, color: PaperStyle.ink)
         : null,
-  );
-
-  Widget _footer() => Container(
-    padding: EdgeInsets.only(top: mmToPx(.8)),
-    decoration: BoxDecoration(border: Border(top: _rule)),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Flexible(
-          child: Text(
-            footer,
-            maxLines: 1,
-            overflow: TextOverflow.clip,
-            style: TextStyle(fontSize: ptToPx(6), height: 2.6 / 2.12),
-          ),
-        ),
-        const SizedBox(width: 8),
-        Text(
-          printed,
-          maxLines: 1,
-          style: TextStyle(fontSize: ptToPx(6), height: 2.6 / 2.12),
-        ),
-      ],
-    ),
   );
 }

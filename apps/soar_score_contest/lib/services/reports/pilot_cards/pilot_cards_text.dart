@@ -20,7 +20,7 @@ abstract final class PilotCardsText {
     ].join(' · ');
   }
 
-  /// The card footer: the matrix revision and the rounds covered, so a card
+  /// The card footer, set in the top block beside the QR code: the matrix revision and the rounds covered, so a card
   /// printed before a redraw is recognisable as old. With Pre-fill on it adds
   /// how far the scores go and, when any value is not official, the legend.
   static String footer({
@@ -30,6 +30,7 @@ abstract final class PilotCardsText {
     required int planned,
     required int? scoredThrough,
     required bool anyUnofficial,
+    required String printed,
   }) {
     final range = rounds.isEmpty
         ? 'No rounds'
@@ -41,6 +42,7 @@ abstract final class PilotCardsText {
       if (planned > drawn) '$range ($drawn of $planned drawn)' else range,
       if (scoredThrough != null) 'Includes scores through round $scoredThrough',
       if (scoredThrough != null && anyUnofficial) '* not official',
+      printed,
     ].join(' · ');
   }
 }

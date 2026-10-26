@@ -23,6 +23,7 @@ class CardSheetDecision {
     required PaperSize paper,
     required List<ReportPilot> pilots,
     required String contestLine,
+    required String footer,
     required int rounds,
     required CardsPerPageChoice choice,
   }) {
@@ -32,12 +33,14 @@ class CardSheetDecision {
       geometry: g,
       pilots: pilots,
       contestLine: contestLine,
+      footer: footer,
       rounds: rounds,
     );
     int most(CardGeometry g) => CardSizing.maxRounds(
       geometry: g,
       pilots: pilots,
       contestLine: contestLine,
+      footer: footer,
       qr: true,
     );
     final fitsFour = fits(four);

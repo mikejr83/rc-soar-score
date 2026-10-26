@@ -90,8 +90,9 @@ void main() {
           planned: 4,
           scoredThrough: null,
           anyUnofficial: false,
+          printed: 'Printed 1 Jan 2026, 09:00',
         ),
-        'Matrix rev 3 · Rounds 1 to 4',
+        'Matrix rev 3 · Rounds 1 to 4 · Printed 1 Jan 2026, 09:00',
       );
     });
 
@@ -106,8 +107,9 @@ void main() {
             planned: 8,
             scoredThrough: null,
             anyUnofficial: false,
+            printed: 'Printed 1 Jan 2026, 09:00',
           ),
-          'Matrix rev 2 · Rounds 1 to 4 (4 of 8 drawn)',
+          'Matrix rev 2 · Rounds 1 to 4 (4 of 8 drawn) · Printed 1 Jan 2026, 09:00',
         );
       },
     );
@@ -121,9 +123,10 @@ void main() {
           planned: 8,
           scoredThrough: 3,
           anyUnofficial: true,
+          printed: 'Printed 1 Jan 2026, 09:00',
         ),
         'Matrix rev 2 · Round 3 · Includes scores through round 3 · '
-        '* not official',
+        '* not official · Printed 1 Jan 2026, 09:00',
       );
     });
   });
