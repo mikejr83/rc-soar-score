@@ -49,6 +49,10 @@ class BasicDraw {
   /// With [spreadMeetings] off, pilots are dealt without looking at who they
   /// have met and [attemptsPerRound] is ignored (a random valid draw, the
   /// baseline of the fairness score).
+  /// With [allowBackToBack] off, no pilot flies in the last group of one
+  /// round and the first group of the next, including the first new round
+  /// against the last round of [history]; an [ArgumentError] naming the
+  /// back-to-back constraint is thrown when no draw can satisfy it.
   /// [history] holds the rounds flown or kept before these ones. Pilots who
   /// are not in [pilots] (they retired) are ignored.
   /// Throws an [ArgumentError] when the settings cannot be met.
@@ -61,6 +65,7 @@ class BasicDraw {
     required SeededRandom random,
     int attemptsPerRound = defaultAttemptsPerRound,
     bool spreadMeetings = true,
+    bool allowBackToBack = true,
     List<List<List<DrawSlot>>> history = const [],
   }) {
     if (rounds < 1) {
@@ -113,6 +118,16 @@ class BasicDraw {
         }
       }
     }
+    // The pilots of the last group of the round before, who may not open
+    // the next round when back-to-back flights are off.
+    var blocked = <int>{};
+    if (!allowBackToBack && history.isNotEmpty && history.last.isNotEmpty) {
+      blocked = {
+        for (final slot in history.last.last)
+          if (position[slot.pilot.participationId] != null)
+            position[slot.pilot.participationId]!,
+      };
+    }
     final result = <List<List<DrawSlot>>>[];
     for (var round = 0; round < rounds; round++) {
       final groups = _round(
@@ -123,7 +138,9 @@ class BasicDraw {
         meetings,
         random,
         spreadMeetings,
+        blocked,
       );
+      if (!allowBackToBack) blocked = groups.last.toSet();
       for (final group in groups) {
         for (var i = 0; i < group.length; i++) {
           for (var j = i + 1; j < group.length; j++) {
@@ -139,6 +156,13 @@ class BasicDraw {
     }
     return result;
   }
+
+  /// The message of the error thrown when back-to-back flights are off and
+  /// no draw can avoid them.
+  static const String backToBackMessage =
+      'no draw can avoid back-to-back flights (a pilot in the last group of '
+      'one round and the first group of the next) with these groups; use '
+      'more groups or allow back-to-back flights';
 
   /// The most pilots any one team has among [pilots].
   static int largestTeam(List<DrawPilot> pilots) {
@@ -161,6 +185,7 @@ class BasicDraw {
     List<List<int>> meetings,
     SeededRandom random,
     bool spreadMeetings,
+    Set<int> blocked,
   ) {
     List<List<int>>? best;
     var bestCost = 0;
@@ -175,6 +200,7 @@ class BasicDraw {
         meetings,
         random,
         spreadMeetings,
+        blocked,
       );
       if (groups == null) {
         continue;
@@ -185,6 +211,9 @@ class BasicDraw {
         best = groups;
         bestCost = cost;
       }
+    }
+    if (best == null && blocked.isNotEmpty) {
+      throw ArgumentError(backToBackMessage);
     }
     if (best == null) {
       throw ArgumentError(
@@ -218,11 +247,20 @@ class BasicDraw {
     List<List<int>> meetings,
     SeededRandom random,
     bool spreadMeetings,
+    Set<int> blocked,
   ) {
     final base = pilots.length ~/ groupCount;
     final extra = pilots.length % groupCount;
     // Which groups take the extra pilot differs from build to build.
     final order = random.shuffle([for (var g = 0; g < groupCount; g++) g]);
+    // Group 1 takes no pilot of [blocked], so it must not take the extra
+    // pilot when that would leave too few others to fill it.
+    if (blocked.isNotEmpty &&
+        extra > 0 &&
+        pilots.length - blocked.length < base + 1) {
+      order.remove(0);
+      order.add(0);
+    }
     final capacity = List<int>.filled(groupCount, base);
     for (var i = 0; i < extra; i++) {
       capacity[order[i]]++;
@@ -243,8 +281,13 @@ class BasicDraw {
       return team == null ? 0 : teamSizes[team]!;
     }
 
+    // Pilots barred from group 1 are placed first, so they leave room for
+    // the others there.
+    int barred(int p) => blocked.contains(p) ? 1 : 0;
     final indexed = [for (var i = 0; i < queue.length; i++) (i, queue[i])]
       ..sort((a, b) {
+        final byBarred = barred(b.$2).compareTo(barred(a.$2));
+        if (byBarred != 0) return byBarred;
         final bySize = size(b.$2).compareTo(size(a.$2));
         return bySize != 0 ? bySize : a.$1.compareTo(b.$1);
       });
@@ -257,6 +300,7 @@ class BasicDraw {
       final candidates = <int>[];
       for (var g = 0; g < groupCount; g++) {
         if (capacity[g] - groups[g].length <= 0 ||
+            (g == 0 && blocked.contains(pilot)) ||
             (teamProtection && team != null && teamsIn[g].contains(team))) {
           continue;
         }

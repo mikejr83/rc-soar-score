@@ -9,6 +9,7 @@ void main() {
       expect(options.teamsEnabled, isFalse);
       expect(options.teamPilotCount, isNull);
       expect(options.teamProtection, isFalse);
+      expect(options.allowBackToBack, isTrue);
       expect(options.rolesEnabled, isFalse);
       expect(options.drawMode, DrawMode.standardManOnMan);
       expect(options.preliminaryRounds, isNull);
@@ -122,6 +123,18 @@ void main() {
           'team_pilot_count': 2,
         }).teamPilotCount,
         2,
+      );
+    });
+
+    test('read allow_back_to_back, on by default', () {
+      expect(
+        CoreOptions.fromMap(const {'allow_back_to_back': false})
+            .allowBackToBack,
+        isFalse,
+      );
+      expect(
+        () => CoreOptions.fromMap(const {'allow_back_to_back': 'no'}),
+        throwsArgumentError,
       );
     });
 

@@ -184,6 +184,7 @@ void main() {
       'teams_enabled',
       'team_pilot_count',
       'team_protection',
+      'allow_back_to_back',
       'roles_enabled',
       'draw_mode',
       'preliminary_rounds',
