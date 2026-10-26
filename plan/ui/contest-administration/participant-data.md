@@ -6,7 +6,7 @@ The participant editor manages a director-owned reusable participant record. It 
 
 Required fields are first name, last name, and email. Optional fields are club, FAI number, national organization ID, city, state/province, and country. Email is always marked private and is used for matching only; it is never included in a public contest projection.
 
-When editing a participant profile owned by a participant account, fields controlled by that participant are read-only. Contest-specific class, role, team, number, and model values are edited on the contest participant row, not on the reusable profile.
+When editing a participant profile owned by a participant account, fields controlled by that participant are read-only. Contest-specific class, role, team and number are edited on the contest participant row, not on the reusable profile. A profile also lists the person's models, which can be added or edited from the profile or from a contest participant row; the models a pilot enters in a contest are snapshotted on the row.
 
 ## Behavior
 

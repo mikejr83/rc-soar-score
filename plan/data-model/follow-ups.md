@@ -118,6 +118,12 @@ Where to look for the new rules:
 | `mvp-implementation/035` (domain models)                       | The entity inventory is now 48 entities, listed in the README. `RoundConfig`, `ScoreCalculationResult`, and `ContestPenalty` are gone; see the README for the new ones                                                                                                                                                        |
 | `mvp-implementation/036` (Drift schema)                        | Same inventory, plus the Sync Scope section, composite foreign keys, enums as text with check constraints, and `scoring_uuid` as a random v4. Derived results are read-only outside the calculator                                                                                                                            |
 
+## Models (decided 2026-10-26)
+
+- Models belong to a participant profile, many per person, and a pilot can enter one or more of them in a contest. Missing models are a notice and never block anything. `model_id` is the contestant-applied identifier and `contest_specific_identifier` the director-applied one (serial number); both are optional.
+- Code still has one `ContestModelLink` per participation, a required `model_id`, and a `ModelCatalog` owned by the director account only. Changing them is tracked in #594 and the round-model follow-up.
+- The GliderScore mapping plan (outside this folder) still says one link per participation; update it with the importer ticket.
+
 ## Questions the UI will force
 
 - How does the director "zero out" a cumulative penalty, and how is it displayed afterwards?

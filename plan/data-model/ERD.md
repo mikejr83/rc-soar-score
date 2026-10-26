@@ -163,10 +163,12 @@ erDiagram
     }
 
     MODEL_CATALOG {
-        uuid id                PK
-        uuid owner_account_id  FK
+        uuid id                      PK
+        uuid owner_account_id        FK
+        uuid participant_profile_id  FK
         text name
         text manufacturer
+        text model_id                "optional, contestant-applied"
         int  revision
     }
 
@@ -177,8 +179,17 @@ erDiagram
         uuid model_catalog_id            FK "optional"
         text model_name
         text manufacturer
-        text model_id
-        text contest_specific_identifier    "optional"
+        text model_id                       "optional, contestant-applied"
+        text contest_specific_identifier    "optional, director-applied"
+        int  revision
+    }
+
+    CONTEST_ROUND_MODEL {
+        uuid id                          PK
+        uuid contest_id                  FK
+        uuid contest_participation_id    FK
+        uuid round_id                    FK
+        uuid contest_model_link_id       FK
         int  revision
     }
 
@@ -734,6 +745,7 @@ erDiagram
     ACCOUNT ||--o{ PARTICIPANT_ACCOUNT_LINK : "linked via"
     ACCOUNT ||--o{ PARTICIPANT_PROFILE : "owns (director)"
     ACCOUNT ||--o{ MODEL_CATALOG : "owns (director)"
+    PARTICIPANT_PROFILE ||--o{ MODEL_CATALOG : "has models"
     ACCOUNT |o--o| PARTICIPANT_DIRECTORY_ENTRY : "offers"
     PARTICIPANT_PROFILE ||--o{ PARTICIPANT_ACCOUNT_LINK : "linked via"
     ACCOUNT ||--o{ CONTEST_CONFIGURATION_PRESET : "owns"
@@ -762,6 +774,9 @@ erDiagram
     PARTICIPANT_PROFILE ||--o{ CONTEST_PARTICIPATION : "profile for"
     CONTEST_PARTICIPATION ||--o{ CONTEST_MODEL_LINK : "enters models"
     MODEL_CATALOG |o--o{ CONTEST_MODEL_LINK : "catalog source"
+    CONTEST_PARTICIPATION ||--o{ CONTEST_ROUND_MODEL : "starting model per round"
+    ROUND ||--o{ CONTEST_ROUND_MODEL : "for round"
+    CONTEST_MODEL_LINK ||--o{ CONTEST_ROUND_MODEL : "model used"
     TEAM ||--o{ TEAM_MEMBERSHIP : "has members"
     CONTEST_PARTICIPATION ||--o| TEAM_MEMBERSHIP : "is member via"
     ROLE ||--o{ CONTEST_PARTICIPATION : "assigned to"
