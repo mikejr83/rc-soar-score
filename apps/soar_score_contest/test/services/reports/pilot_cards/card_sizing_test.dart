@@ -131,7 +131,7 @@ void main() {
       expect(roomy.qrSize, CardSpec.qr);
       expect(full.qrSize, inInclusiveRange(CardSpec.qrMin, CardSpec.qr));
       expect(full.ok, isTrue);
-      expect(full.quietZone, closeTo(full.qrSize * 4 / 29, 1e-9));
+      expect(full.quietZone, closeTo(full.qrSize * 4 / 37, 1e-9));
     });
 
     test('a card without a QR code gives the room to the rows', () {

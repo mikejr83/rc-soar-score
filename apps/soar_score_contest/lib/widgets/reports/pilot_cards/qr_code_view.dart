@@ -1,13 +1,16 @@
 import 'package:flutter/widgets.dart';
 import 'package:qr/qr.dart';
 
+import '../../../services/reports/pilot_cards/card_geometry.dart';
+
 /// A QR code of [data], square modules in pure black on white, with no logo
 /// and no styling, so a household inkjet in document quality prints it and a
 /// phone reads it at arm's length.
 ///
-/// The code is version 3 (29 modules a side) at error correction M while the
-/// data fits (about 42 bytes, room for a short invitation link); a longer link
-/// takes the smallest version that holds it. The quiet zone around the code is
+/// The code is version 5 (37 modules a side) at error correction M while the
+/// data fits (84 bytes, room for the invitation link); a longer link takes the
+/// smallest version that holds it. A shorter link is set in version 5 too, so
+/// the quiet zone the card reserves is always four modules. The quiet zone around the code is
 /// drawn by the caller.
 class QrCodeView extends StatelessWidget {
   const QrCodeView({
@@ -25,9 +28,11 @@ class QrCodeView extends StatelessWidget {
 
   static QrImage encode(String data) {
     try {
-      return QrImage(QrCode(3, QrErrorCorrectLevel.M)..addData(data));
+      return QrImage(
+        QrCode(CardSpec.qrVersion, QrErrorCorrectLevel.M)..addData(data),
+      );
     } on Exception {
-      // The data does not fit version 3: take the smallest version that does.
+      // The data does not fit version 5: take the smallest version that does.
       return QrImage(
         QrCode.fromData(data: data, errorCorrectLevel: QrErrorCorrectLevel.M),
       );

@@ -201,6 +201,26 @@ List<ReportBanner> invitationBanners({
           key: const ValueKey('cards-banner-failed'),
         ),
       ];
+    case InvitationPhase.sentNotLoaded:
+      return [
+        ReportBanner(
+          kind: ViewerBannerKind.info,
+          icon: Icons.sync_problem,
+          lead: 'Invitations were sent.',
+          text:
+              'The QR codes could not be loaded, so the cards do not show them '
+              'yet. Don’t send again: the invitations are already out.',
+          actions: [
+            ReportBannerAction(
+              'Load QR codes',
+              (_) => session.reload(),
+              filled: true,
+              key: const ValueKey('cards-banner-reload'),
+            ),
+          ],
+          key: const ValueKey('cards-banner-not-loaded'),
+        ),
+      ];
     case InvitationPhase.sent when missing.isEmpty:
       return [
         ReportBanner(

@@ -128,23 +128,32 @@ abstract final class CardSizing {
         2 * CardSpec.tableOutline -
         .3;
     final table = room - rounds * CardSpec.rowMin;
-    // The code and the quiet zone below it (four modules) share the block; the
-    // card's inset and the page edge supply the quiet zone on the other sides.
-    final qrFit =
-        table *
-        CardSpec.qrModules /
-        (CardSpec.qrModules + CardSpec.quietModules);
+    // The code needs four modules of white on every side. Below it that is
+    // reserved here; to its left, between it and the caption; to its right,
+    // after it. Above it the card's top edge or the page margin supplies it,
+    // except under a cut line (four-up, lower row), where the 2 mm inset falls
+    // short and the block grows by the difference.
+    const q = CardSpec.quietModules / CardSpec.qrModules;
+    final fitsAbove = table / (1 + q);
+    final cutAbove = geometry.perPage == CardsPerPage.four;
+    final qrFit = cutAbove && fitsAbove * q > CardSpec.inset
+        ? (table + CardSpec.inset) / (1 + 2 * q)
+        : fitsAbove;
     final size = qr
         ? math.max(CardSpec.qrMin, math.min(CardSpec.qr, qrFit))
         : 0.0;
-    final quiet = size * CardSpec.quietModules / CardSpec.qrModules;
+    final quiet = size * q;
+    final above = cutAbove ? math.max(0.0, quiet - CardSpec.inset) : 0.0;
     final identity = CardSizing.identity(
       pilot,
       contestLine,
-      width - (qr ? size + quiet + CardSpec.captionWidth : 0),
+      width - (qr ? size + 2 * quiet + CardSpec.captionWidth - 1.5 : 0),
       footer,
     );
-    final top = math.max(identity.heightMm + 1, qr ? size + quiet : 0.0);
+    final top = math.max(
+      identity.heightMm + 1,
+      qr ? above + size + quiet : 0.0,
+    );
     final ok = (!qr || qrFit >= CardSpec.qrMin - 1e-6) && top <= table + 1e-6;
     return CardFit(
       identity: identity,

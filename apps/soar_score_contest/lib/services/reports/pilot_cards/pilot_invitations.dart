@@ -90,7 +90,20 @@ abstract final class PilotInvitationSources {
 }
 
 /// Where sending invitations from the report stands.
-enum InvitationPhase { idle, sending, failed, sent }
+enum InvitationPhase {
+  idle,
+  sending,
+
+  /// Nothing was sent.
+  failed,
+
+  /// Sent, and the cards now have their QR codes.
+  sent,
+
+  /// Sent, but the invitations could not be read afterwards, so the cards do
+  /// not show the QR codes yet. Sending again would only repeat the emails.
+  sentNotLoaded,
+}
 
 /// The invitations of one open report and the send in progress. The report's
 /// banner, print reminder and cards read it, and it tells them when it changes.
@@ -125,16 +138,38 @@ class PilotInvitationSession extends ChangeNotifier {
     _set(InvitationPhase.sending);
     try {
       await source.send(client, contestId, participations);
+    } on Object {
+      if (!_disposed) {
+        _set(InvitationPhase.failed);
+      }
+      return false;
+    }
+    // The send worked. Reading the invitations back is a separate step: if it
+    // fails the invitations are still out, so this is not a failed send.
+    return _load(InvitationPhase.sent, InvitationPhase.sentNotLoaded);
+  }
+
+  /// Reads the invitations again after a send whose read-back failed.
+  Future<bool> reload() async {
+    if (sending) {
+      return false;
+    }
+    _set(InvitationPhase.sending);
+    return _load(InvitationPhase.sent, InvitationPhase.sentNotLoaded);
+  }
+
+  Future<bool> _load(InvitationPhase ok, InvitationPhase failed) async {
+    try {
       final fresh = await source.read(client, contestId);
       if (_disposed) {
         return false;
       }
       _invitations = fresh;
-      _set(InvitationPhase.sent);
+      _set(ok);
       return true;
     } on Object {
       if (!_disposed) {
-        _set(InvitationPhase.failed);
+        _set(failed);
       }
       return false;
     }

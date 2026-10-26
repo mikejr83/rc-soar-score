@@ -21,19 +21,29 @@ import '../support/workspace_facts_support.dart';
 /// Invitations for the pilots in [invited] (by participation id); sending adds
 /// the rest.
 class _FakeInvitations implements PilotInvitationSource {
-  _FakeInvitations({Set<String>? invited, this.fail = false})
-    : _invited = {...?invited};
+  _FakeInvitations({
+    Set<String>? invited,
+    this.fail = false,
+    this.failRead = false,
+  }) : _invited = {...?invited};
 
   final Set<String> _invited;
   bool fail;
+
+  /// Reading fails after the send worked.
+  bool failRead;
   int sends = 0;
   List<Id> lastSent = const [];
 
   @override
-  Future<PilotInvitations> read(ApiClient client, Id contestId) async =>
-      PilotInvitations(
-        links: {for (final id in _invited) id: 'https://soar.example/i/$id'},
-      );
+  Future<PilotInvitations> read(ApiClient client, Id contestId) async {
+    if (failRead && sends > 0) {
+      throw StateError('read failed');
+    }
+    return PilotInvitations(
+      links: {for (final id in _invited) id: 'https://soar.example/i/$id'},
+    );
+  }
 
   @override
   Future<void> send(
@@ -272,6 +282,60 @@ void main() {
       find.textContaining('No QR code.', findRichText: true),
       findsNothing,
     );
+  });
+
+  testWidgets(
+    'a send that worked but could not be read back is not a failure',
+    (tester) async {
+      final source = _FakeInvitations(failRead: true);
+      PilotInvitationSources.current = source;
+      await _pump(tester);
+
+      await tester.tap(find.byKey(const ValueKey('cards-banner-send')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('cards-send-confirm')));
+      await tester.pumpAndSettle();
+
+      expect(source.sends, 1);
+      expect(
+        find.textContaining('Invitations were sent.', findRichText: true),
+        findsOneWidget,
+      );
+      expect(
+        find.textContaining('could not be sent', findRichText: true),
+        findsNothing,
+      );
+      // Nothing offers to send again; the director can load the codes.
+      expect(find.byKey(const ValueKey('cards-banner-send')), findsNothing);
+      expect(find.byType(QrCodeView), findsNothing);
+
+      source.failRead = false;
+      await tester.tap(find.byKey(const ValueKey('cards-banner-reload')));
+      await tester.pumpAndSettle();
+
+      expect(source.sends, 1, reason: 'loading the codes sends nothing');
+      expect(find.byType(QrCodeView), findsNWidgets(4));
+    },
+  );
+
+  testWidgets('printing waits for the codes after a send that was not read', (
+    tester,
+  ) async {
+    final source = _FakeInvitations(failRead: true);
+    PilotInvitationSources.current = source;
+    final printer = FakeReportPrinter(ReportPrintResult.sent);
+    await _pump(tester, printer: printer);
+    await tester.tap(find.byKey(const ValueKey('cards-banner-send')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('cards-send-confirm')));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const ValueKey('viewer-print')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey('cards-reminder-dialog')), findsNothing);
+    expect(printer.printed, isEmpty);
+    expect(source.sends, 1);
   });
 
   testWidgets('a failed send adds nothing and offers a retry', (tester) async {

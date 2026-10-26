@@ -24,8 +24,12 @@ abstract final class CardSpec {
   /// on A4 with 8 rounds); 9 or more go two to a page.
   static const double qrMin = 22;
 
-  /// The QR code is version 3: 29 modules a side, with a quiet zone of four.
-  static const int qrModules = 29;
+  /// The QR code is always version 5 or larger (37 modules a side, room for
+  /// the invitation link), with a quiet zone of four modules on every side.
+  /// A shorter link is set in a version 5 symbol too, so the quiet zone is a
+  /// fixed fraction of the code's size.
+  static const int qrModules = 37;
+  static const int qrVersion = 5;
   static const int quietModules = 4;
 
   /// Writable rows: at least [rowMin], growing to [rowMax] when there is room.

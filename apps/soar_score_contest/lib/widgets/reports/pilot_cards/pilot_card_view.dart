@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../../../services/reports/pilot_cards/card_columns.dart';
@@ -190,8 +192,20 @@ class PilotCardView extends StatelessWidget {
                 ),
               ),
             ),
-            SizedBox(width: mmToPx(1.5)),
-            QrCodeView(data: qrLink!, size: mmToPx(fit.qrSize)),
+            // Four modules of white on every side of the code: here to its
+            // left, after it to its right, below it in the block, and above it
+            // where a cut line sits closer than that.
+            SizedBox(width: mmToPx(fit.quietZone)),
+            Padding(
+              padding: EdgeInsets.only(
+                top: mmToPx(
+                  insets.top > 0
+                      ? math.max(0.0, fit.quietZone - insets.top)
+                      : 0,
+                ),
+              ),
+              child: QrCodeView(data: qrLink!, size: mmToPx(fit.qrSize)),
+            ),
             SizedBox(width: mmToPx(fit.quietZone)),
           ],
         ],

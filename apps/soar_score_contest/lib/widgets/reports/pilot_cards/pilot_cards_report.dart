@@ -283,7 +283,9 @@ class PilotCardsReport extends DataReportDefinition<PilotCardsData> {
         online: context.online,
       ),
       beforePrint: (buildContext) async {
-        if (session.sending) {
+        // Sent but not loaded back: the cards lack codes the invitations
+        // already have. Printing now would offer to send them again.
+        if (session.sending || session.phase == InvitationPhase.sentNotLoaded) {
           return false;
         }
         if (missing.isEmpty || selected.isEmpty) {
