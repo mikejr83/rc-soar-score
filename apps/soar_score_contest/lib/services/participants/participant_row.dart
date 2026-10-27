@@ -14,16 +14,7 @@ enum ParticipantSource {
 }
 
 /// What a row's email cell says. The address itself is never shown.
-enum ParticipantEmailStatus {
-  has('Has email', 'Email on the profile'),
-  none('None', 'No email on the profile'),
-  private('Private', 'This person hasn’t allowed their email to be shown.');
-
-  const ParticipantEmailStatus(this.label, this.explanation);
-
-  final String label;
-  final String explanation;
-}
+enum ParticipantEmailStatus { has, none, private }
 
 /// What a participant row still needs before the contest can go on.
 enum ParticipantIssue {

@@ -91,4 +91,29 @@ void main() {
     expect(_inTable(find.text('Mike Gardner')), findsOneWidget);
     expect(_inTable(find.text('Gary Novak')), findsOneWidget);
   });
+
+  testWidgets('the search field matches an email without showing it', (
+    tester,
+  ) async {
+    final store = await storeAtStep4(
+      participants: [
+        row(0, classification: 'Open'),
+        row(1, classification: 'Open'),
+      ],
+    );
+    await pumpWizard(tester, respond: stepApi, store: store);
+
+    final email = store.draft.participants[1].email!;
+    await tester.enterText(
+      find.descendant(
+        of: find.byKey(const ValueKey('participant-search')),
+        matching: find.byType(TextField),
+      ),
+      email,
+    );
+    await tester.pumpAndSettle();
+    expect(_inTable(find.text('Gary Novak')), findsOneWidget);
+    expect(_inTable(find.text('Mike Gardner')), findsNothing);
+    expect(_inTable(find.textContaining('@')), findsNothing);
+  });
 }

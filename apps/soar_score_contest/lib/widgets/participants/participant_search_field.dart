@@ -3,8 +3,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/participants/participant_candidate.dart';
 import '../../services/participants/participant_row.dart';
+import 'participant_email_text.dart';
 
 /// Finds people by name or email to add to the contest.
 ///
@@ -225,7 +227,7 @@ class _ResultsMenu extends StatelessWidget {
     final remote = candidate.source == ParticipantSource.remote;
     final subtitle = [
       candidate.club ?? 'No club',
-      'Email: ${candidate.emailStatus.label}',
+      'Email: ${candidate.emailStatus.label(AppLocalizations.of(context))}',
     ].join(' · ');
     final (icon, label) = already
         ? (Icons.check, 'Already in this contest')

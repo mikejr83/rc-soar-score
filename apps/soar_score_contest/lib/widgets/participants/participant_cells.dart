@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/participants/participant_option.dart';
 import '../../services/participants/participant_row.dart';
 import 'cell_focus_registry.dart';
 import 'participant_editing.dart';
+import 'participant_email_text.dart';
 import 'participant_text_cell.dart';
 import 'team_cell.dart';
 
@@ -54,6 +56,7 @@ class ParticipantCells {
   /// it).
   Widget emailCell(BuildContext context, {bool prefix = false}) {
     final status = participant.emailStatus;
+    final l10n = AppLocalizations.of(context);
     final icon = switch (status) {
       ParticipantEmailStatus.has => Icons.mail_outline,
       ParticipantEmailStatus.none => Icons.unsubscribe_outlined,
@@ -62,14 +65,14 @@ class ParticipantCells {
     final theme = Theme.of(context);
     final color = theme.colorScheme.onSurfaceVariant;
     return Tooltip(
-      message: status.explanation,
+      message: status.explanation(l10n),
       child: Row(
         children: [
           Icon(icon, size: prefix ? 14 : 18, color: color),
           SizedBox(width: prefix ? 4 : 6),
           Flexible(
             child: Text(
-              prefix ? 'Email: ${status.label}' : status.label,
+              prefix ? 'Email: ${status.label(l10n)}' : status.label(l10n),
               overflow: TextOverflow.ellipsis,
               style: theme.textTheme.bodySmall?.copyWith(color: color),
             ),

@@ -201,12 +201,14 @@ class _ParticipantsStepState extends State<ParticipantsStep> {
   }
 
   /// Whether [participant] matches the text in the search field (name,
-  /// team, class or role), so the same field filters the list.
+  /// email, team, class or role), so the same field filters the list. An
+  /// email the person hides is never matched.
   bool _matchesQuery(DraftParticipant participant) {
     final query = _query.trim().toLowerCase();
     return query.isEmpty ||
         [
           participant.name,
+          if (participant.emailVisible) ?participant.email,
           participant.team,
           participant.classification,
           participant.roleName,
