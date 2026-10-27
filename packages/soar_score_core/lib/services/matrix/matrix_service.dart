@@ -187,10 +187,16 @@ class MatrixService {
       );
     }
     final CoreOptions options = configuration.config.coreOptions;
-    if (options.drawMode != DrawMode.standardManOnMan) {
+    // A seeded contest draws its preliminary rounds like a standard one; the
+    // seeded rounds follow once those are scored (see MatrixRedrawService).
+    final preliminaryRounds = options.preliminaryRounds ?? 1;
+    if (options.drawMode == DrawMode.seededManOnMan &&
+        rounds > preliminaryRounds) {
       throw ContestStateError(
-        'draw_mode_unsupported',
-        'only the standard man-on-man draw is available so far',
+        'seeded_rounds_need_standings',
+        'a seeded contest draws only its $preliminaryRounds preliminary '
+            'round${preliminaryRounds == 1 ? '' : 's'} first; the seeded '
+            'rounds are drawn after the preliminary scores are complete',
       );
     }
 

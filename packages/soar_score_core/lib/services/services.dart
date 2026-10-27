@@ -26,6 +26,7 @@ export 'matrix/matrix_draw_builder.dart';
 export 'matrix/matrix_redraw_service.dart';
 export 'matrix/matrix_service.dart';
 export 'matrix/matrix_slot_rules.dart';
+export 'matrix/seeded_draw.dart';
 export 'matrix/seeded_random.dart';
 export 'new_contest.dart';
 export 'landing_entry_input.dart';
