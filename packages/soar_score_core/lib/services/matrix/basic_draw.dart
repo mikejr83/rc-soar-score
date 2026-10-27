@@ -163,8 +163,7 @@ class BasicDraw {
   static const String backToBackMessage =
       'could not find a draw that avoids back-to-back flights (a pilot in '
       'the last group of one round and the first group of the next) with '
-      'these groups; use more groups or allow back-to-back flights'; use '
-      'more groups or allow back-to-back flights';
+      'these groups; use more groups or allow back-to-back flights';
 
   /// The most pilots any one team has among [pilots].
   static int largestTeam(List<DrawPilot> pilots) {
