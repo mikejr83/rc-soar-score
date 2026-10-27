@@ -49,7 +49,6 @@ class _Baseline {
   final double mad;
 
   static const double madTolerance = 0.10;
-  static const double varianceTolerance = 0.20;
 }
 
 const _layouts = [
@@ -242,31 +241,46 @@ T _median<T extends Comparable<Object>>(List<_Row> rows, T Function(_Row) key) {
   return values[values.length ~/ 2];
 }
 
+/// The baselines are medians over this many seeds (seeds 1 to N).
+const _baselineSeeds = 5;
+
+Never usage([String? problem]) {
+  if (problem != null) stderr.writeln(problem);
+  stderr.writeln(
+    'usage: dart run tool/draw_bench.dart [--layout c1|c4|c10|all] [--seeds N] [--check]',
+  );
+  exit(64);
+}
+
 void main(List<String> args) {
   var which = 'all';
-  var seeds = 5;
+  var seeds = _baselineSeeds;
   var check = false;
   for (var i = 0; i < args.length; i++) {
     switch (args[i]) {
       case '--layout':
+        if (i + 1 >= args.length) usage();
         which = args[++i];
       case '--seeds':
-        seeds = int.parse(args[++i]);
+        final value = i + 1 < args.length ? int.tryParse(args[++i]) : null;
+        if (value == null || value < 1) usage();
+        seeds = value;
       case '--check':
         check = true;
       default:
-        stderr.writeln(
-          'usage: dart run tool/draw_bench.dart [--layout c1|c4|c10|all] [--seeds N] [--check]',
-        );
-        exit(64);
+        usage();
     }
+  }
+  if (check && seeds != _baselineSeeds) {
+    usage(
+      '--check compares against baselines taken with $_baselineSeeds seeds',
+    );
   }
   final chosen = _layouts
       .where((l) => which == 'all' || l.name == which)
       .toList();
   if (chosen.isEmpty) {
-    stderr.writeln('unknown layout "$which"');
-    exit(64);
+    usage('unknown layout "$which"');
   }
 
   final failures = <String>[];
@@ -293,7 +307,7 @@ void main(List<String> args) {
       failures.add('${layout.name}: never-met pairs $unmet > ${b.unmet}');
     } else if (maxRepeat > b.maxRepeat) {
       failures.add('${layout.name}: max repeat $maxRepeat > ${b.maxRepeat}');
-    } else if (variance > b.variance * (1 + _Baseline.varianceTolerance)) {
+    } else if (variance > b.variance) {
       failures.add('${layout.name}: variance $variance > ${b.variance}');
     }
     if (mad > b.mad * (1 + _Baseline.madTolerance)) {
