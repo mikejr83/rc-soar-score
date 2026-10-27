@@ -21,7 +21,9 @@
 # a run needs no access to gstatic.com, which sandboxed networks block (the
 # page would stay blank until the test timed out).
 # A test file that runs longer than E2E_TEST_TIMEOUT seconds (default 300) is
-# stopped and counted as failed, so a hung browser cannot stall a run.
+# stopped and counted as failed, so a hung browser cannot stall a run. The
+# long contest_lifecycle_journey_test.dart gets 1200 seconds by default;
+# setting E2E_TEST_TIMEOUT overrides the limit for every file.
 set -eu
 device=windows
 test_file=
@@ -99,7 +101,13 @@ if [ "$device" = web ] || [ "$device" = chrome ]; then
     echo "E2E server did not start" >&2
     exit 1
   }
-  test_timeout="${E2E_TEST_TIMEOUT:-300}"
+  # Seconds a file may run: E2E_TEST_TIMEOUT for all files, else 1200 for the
+  # lifecycle journey and 300 for the rest.
+  timeout_for() {
+    if [ -n "${E2E_TEST_TIMEOUT:-}" ]; then echo "$E2E_TEST_TIMEOUT"
+    elif [ "$(basename "$1")" = contest_lifecycle_journey_test.dart ]; then echo 1200
+    else echo 300; fi
+  }
   if ! command -v "$chromedriver" >/dev/null 2>&1; then
     echo "chromedriver not found ('$chromedriver'). Run ./scripts/e2e-setup.sh to install Chrome and chromedriver, or set CHROMEDRIVER=<path>." >&2
     exit 1
@@ -118,12 +126,13 @@ if [ "$device" = web ] || [ "$device" = chrome ]; then
     echo "chromedriver did not answer on port $driver_port (is another one running?)." >&2
     exit 1
   fi
-  with_timeout=()
-  if command -v timeout >/dev/null 2>&1; then
-    with_timeout=(timeout --kill-after=10 "$test_timeout")
-  fi
   status=0
   for file in "${files[@]}"; do
+    test_timeout="$(timeout_for "$file")"
+    with_timeout=()
+    if command -v timeout >/dev/null 2>&1; then
+      with_timeout=(timeout --kill-after=10 "$test_timeout")
+    fi
     start_server
     "${with_timeout[@]+"${with_timeout[@]}"}" flutter drive --driver=test_driver/integration_test.dart --target="$file" \
       -d web-server --browser-name=chrome ${chrome_args[@]+"${chrome_args[@]}"} \
