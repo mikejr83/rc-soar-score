@@ -14,6 +14,7 @@ import '../../services/configuration/draw_readiness.dart';
 import '../../services/matrix/draw_form_check.dart';
 import '../../services/matrix/draw_form_controller.dart';
 import '../../services/matrix/matrix_page_data.dart';
+import '../../services/matrix/matrix_rounds_plan.dart';
 import '../../widgets/api_error_text.dart';
 import '../../widgets/matrix/draw_confirm_dialog.dart';
 import '../../widgets/matrix/draw_form_panel.dart';
@@ -22,12 +23,16 @@ import '../../widgets/page_states/page_states.dart';
 
 /// The matrix of one contest (`plan/ui/contest-administration/matrix.md`):
 /// the first-draw form until a matrix exists, then the grid with its
-/// fairness summary. A failed draw never changes the page or loses the form
-/// values.
+/// fairness summary. Rounds can then be added and the rounds without scores
+/// redrawn, in the same form. A failed draw never changes the page or loses
+/// the form values.
 class MatrixPage extends StatefulWidget {
-  const MatrixPage({super.key, required this.contestId});
+  const MatrixPage({super.key, required this.contestId, this.initialIntent});
 
   final String contestId;
+
+  /// The form to open once the matrix is loaded (the next-step card sets it).
+  final MatrixIntent? initialIntent;
 
   @override
   State<MatrixPage> createState() => _MatrixPageState();
@@ -41,6 +46,10 @@ class _MatrixPageState extends State<MatrixPage> {
   String? _rejection;
   bool _networkFailure = false;
   bool _conflict = false;
+
+  /// The add rounds or redraw form being shown, or `null` for the matrix.
+  MatrixIntent? _intent;
+  bool _initialApplied = false;
 
   /// The id of the draw request being sent. Repeating a request with the same
   /// id and numbers returns the matrix it drew, so a retry cannot draw twice.
@@ -64,12 +73,39 @@ class _MatrixPageState extends State<MatrixPage> {
   /// How many failed tries of Cancel in a row are shown to the director.
   static const int _cancelAttempts = 3;
 
+  /// The refusals of add rounds and redraw that mean the matrix or the
+  /// contest changed since the page loaded: the director reloads.
+  static const _changedCodes = {
+    'stale_matrix',
+    'rounds_have_scores',
+    'round_locked',
+    'group_locked',
+    'matrix_not_editable',
+    'contest_locked',
+    'no_matrix',
+  };
+
   static const Duration _pollEvery = Duration(milliseconds: 400);
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _loading ??= _load();
+  }
+
+  @override
+  void didUpdateWidget(MatrixPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // A link to the page that is already open (the next-step card).
+    final intent = widget.initialIntent;
+    final data = _data;
+    if (intent != null &&
+        intent != oldWidget.initialIntent &&
+        data != null &&
+        !data.matrix.isEmpty &&
+        !_busy) {
+      setState(() => _openForm(intent, data));
+    }
   }
 
   @override
@@ -92,7 +128,83 @@ class _MatrixPageState extends State<MatrixPage> {
     }
     final data = await MatrixPageData.load(client, id);
     _show(data);
+    if (!_initialApplied) {
+      _initialApplied = true;
+      final intent = widget.initialIntent;
+      if (intent != null && mounted) {
+        _openForm(intent, data);
+      }
+    }
     return data;
+  }
+
+  /// Why adding rounds and redrawing are off for the whole contest, or
+  /// `null`. [l10n] is `null` when only the yes or no is needed.
+  String? _actionBlock(MatrixPageData data, AppLocalizations? l10n) {
+    if (data.matrix.isEmpty) {
+      return '';
+    }
+    final contest = data.contest;
+    if (contest.adminLock == AdminLock.locked) {
+      return l10n?.matrixActionLocked ?? '';
+    }
+    if (contest.lifecycleState != LifecycleState.ready &&
+        contest.lifecycleState != LifecycleState.running) {
+      return l10n?.matrixActionNotEditable ?? '';
+    }
+    return null;
+  }
+
+  /// Opens the form for [intent], filled in from the current matrix.
+  void _openForm(MatrixIntent intent, MatrixPageData data) {
+    final plan = MatrixRoundsPlan.of(data.matrix);
+    // A link can ask for a form the buttons would show disabled.
+    if (_actionBlock(data, null) != null || !plan.allows(intent)) {
+      return;
+    }
+    final options = data.options;
+    final preliminary = options?.drawMode == DrawMode.seededManOnMan
+        ? options?.preliminaryRounds
+        : null;
+    final first = plan.firstRound(intent);
+    var rounds = intent == MatrixIntent.addRounds ? 1 : plan.unscoredRounds;
+    if (preliminary != null && intent == MatrixIntent.redraw) {
+      // Preliminary rounds are drawn together; a seeded round is drawn from
+      // the standings, one at a time.
+      rounds = first <= preliminary
+          ? (preliminary - first + 1).clamp(1, rounds < 1 ? 1 : rounds)
+          : 1;
+    } else if (preliminary != null && first > preliminary) {
+      rounds = 1;
+    }
+    final groups = intent == MatrixIntent.addRounds
+        ? plan.lastGroups
+        : plan.groupsPerRound;
+    _form?.dispose();
+    _form = DrawFormController()
+      ..rounds.text = '$rounds'
+      ..groups.text = '$groups'
+      ..addListener(_onForm);
+    _intent = intent;
+    _rejection = null;
+    _networkFailure = false;
+    _conflict = false;
+    _requestId = null;
+    _requestKey = null;
+  }
+
+  void _closeForm() {
+    if (_busy) {
+      return;
+    }
+    setState(() {
+      _intent = null;
+      _form?.dispose();
+      _form = null;
+      _rejection = null;
+      _networkFailure = false;
+      _conflict = false;
+    });
   }
 
   /// Makes [data] the shown data. The form is rebuilt only when it is
@@ -168,6 +280,7 @@ class _MatrixPageState extends State<MatrixPage> {
     configurationProblem: _configurationProblem(data),
     scoringPilots: data.scoringPilots,
     matrixDrawn: false,
+    forRounds: _intent != null,
   ).first;
 
   Future<void> _draw() async {
@@ -178,6 +291,8 @@ class _MatrixPageState extends State<MatrixPage> {
     }
     form.submitted = true;
     final options = data.options;
+    final intent = _intent;
+    final plan = intent == null ? null : MatrixRoundsPlan.of(data.matrix);
     final check = DrawFormCheck.evaluate(
       roundsText: form.rounds.text,
       groupsText: form.groups.text,
@@ -192,13 +307,35 @@ class _MatrixPageState extends State<MatrixPage> {
     if (!check.valid) {
       return;
     }
-    final confirmed = await confirmDraw(
-      context,
-      data: data,
-      rounds: check.rounds!,
-      sizes: check.sizes,
-      seeded: options?.drawMode == DrawMode.seededManOnMan,
-    );
+    final bool confirmed;
+    if (intent == null) {
+      confirmed = await confirmDraw(
+        context,
+        data: data,
+        rounds: check.rounds!,
+        sizes: check.sizes,
+        seeded: options?.drawMode == DrawMode.seededManOnMan,
+      );
+    } else {
+      final firstRound = plan!.firstRound(intent);
+      final preliminary = options?.drawMode == DrawMode.seededManOnMan
+          ? options?.preliminaryRounds
+          : null;
+      if (preliminary != null &&
+          firstRound > preliminary &&
+          check.rounds! > 1) {
+        // The form shows why.
+        return;
+      }
+      confirmed = await confirmRounds(
+        context,
+        data: data,
+        intent: intent,
+        firstRound: firstRound,
+        rounds: check.rounds!,
+        sizes: check.sizes,
+      );
+    }
     if (!confirmed || !mounted) {
       return;
     }
@@ -211,21 +348,47 @@ class _MatrixPageState extends State<MatrixPage> {
       return;
     }
     final form = _form!;
-    final request = DrawMatrixRequest(
-      id: _idFor(
-        '${check.rounds}/${check.groups}/${form.seed.text}/'
-        '${form.attempts.text}/${form.seedCount.text}',
-      ),
-      rounds: check.rounds!,
-      groupsPerRound: check.groups!,
-      randomSeed: DrawFormController.optionalNumber(form.seed),
-      attemptsPerRound: DrawFormController.optionalNumber(form.attempts),
-      seedCount: DrawFormController.optionalNumber(form.seedCount),
-    );
+    final intent = _intent;
+    final plan = intent == null ? null : MatrixRoundsPlan.of(data.matrix);
+    final key =
+        '$intent/${plan?.firstRound(intent!)}/'
+        '${data.matrix.revision?.revisionNumber}/${check.rounds}/${check.groups}/${form.seed.text}/'
+        '${form.attempts.text}/${form.seedCount.text}/${form.reason.text}';
+    final id = _idFor(key);
+    final reason = form.reason.text.trim();
     setState(() => _busy = true);
-    _watch(client, data.contest.id, request.id);
+    _watch(client, data.contest.id, id);
     try {
-      final drawn = await client.drawMatrix(data.contest.id, request);
+      final CurrentMatrix drawn;
+      if (intent == null) {
+        drawn = await client.drawMatrix(
+          data.contest.id,
+          DrawMatrixRequest(
+            id: id,
+            rounds: check.rounds!,
+            groupsPerRound: check.groups!,
+            randomSeed: DrawFormController.optionalNumber(form.seed),
+            attemptsPerRound: DrawFormController.optionalNumber(form.attempts),
+            seedCount: DrawFormController.optionalNumber(form.seedCount),
+          ),
+        );
+      } else {
+        // No seed typed: the server draws a fresh one, so a second redraw
+        // gives another matrix.
+        drawn = await client.redrawMatrix(
+          data.contest.id,
+          RedrawMatrixRequest(
+            id: id,
+            firstRound: plan!.firstRound(intent),
+            rounds: check.rounds!,
+            groupsPerRound: check.groups!,
+            randomSeed: DrawFormController.optionalNumber(form.seed),
+            attemptsPerRound: DrawFormController.optionalNumber(form.attempts),
+            seedCount: DrawFormController.optionalNumber(form.seedCount),
+            reason: reason.isEmpty ? null : reason,
+          ),
+        );
+      }
       if (!mounted) {
         return;
       }
@@ -240,12 +403,28 @@ class _MatrixPageState extends State<MatrixPage> {
       if (!mounted) {
         return;
       }
+      // The next request is a new one even with the same numbers.
+      _requestId = null;
+      _requestKey = null;
+      final l10n = AppLocalizations.of(context);
       setState(() {
         _busy = false;
         _data = fresh.matrix.isEmpty ? fresh.withMatrix(drawn) : fresh;
+        if (intent != null) {
+          _intent = null;
+          _form?.dispose();
+          _form = null;
+        }
       });
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Matrix drawn.')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(switch (intent) {
+            null => 'Matrix drawn.',
+            MatrixIntent.addRounds => l10n.matrixRoundsAdded,
+            MatrixIntent.redraw => l10n.matrixRoundsRedrawn,
+          }),
+        ),
+      );
     } on ApiNetworkError {
       _unwatch();
       if (mounted) {
@@ -270,7 +449,8 @@ class _MatrixPageState extends State<MatrixPage> {
           _busy = false;
           if (cancelled) {
             // Nothing to show: the form and the page are as they were.
-          } else if (error.statusCode == 409) {
+          } else if (error.statusCode == 409 &&
+              (intent == null || _changedCodes.contains(error.error?.code))) {
             _conflict = true;
           } else {
             _rejection = apiErrorText(error);
@@ -370,13 +550,21 @@ class _MatrixPageState extends State<MatrixPage> {
       if (data == null) {
         return const _Loading();
       }
-      if (!data.matrix.isEmpty) {
+      final form = _form;
+      if (!data.matrix.isEmpty && (_intent == null || form == null)) {
         return MatrixDrawnView(
           data: data,
           onOpenConfiguration: _openConfiguration,
+          plan: MatrixRoundsPlan.of(data.matrix),
+          actionBlock: _actionBlock(data, AppLocalizations.of(context)),
+          onAddRounds: () =>
+              setState(() => _openForm(MatrixIntent.addRounds, data)),
+          onRedraw: () => setState(() => _openForm(MatrixIntent.redraw, data)),
         );
       }
-      final form = _form!;
+      if (form == null) {
+        return const _Loading();
+      }
       return SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(24, 24, 24, 48),
         child: Center(
@@ -398,6 +586,9 @@ class _MatrixPageState extends State<MatrixPage> {
               onOpenConfiguration: _openConfiguration,
               onFix: _fix,
               onReload: _reload,
+              intent: _intent,
+              plan: _intent == null ? null : MatrixRoundsPlan.of(data.matrix),
+              onBack: _intent == null ? null : _closeForm,
             ),
           ),
         ),

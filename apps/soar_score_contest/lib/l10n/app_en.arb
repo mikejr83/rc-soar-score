@@ -530,5 +530,252 @@
   "drawCancelFailed": "Cancel could not reach the server. The draw is still running. Try Cancel again.",
   "@drawCancelFailed": {
     "description": "Shown beside the Cancel button when stopping a matrix draw failed several times in a row."
+  },
+  "matrixAddRoundsButton": "Add rounds",
+  "@matrixAddRoundsButton": {
+    "description": "Button on the Matrix page that adds rounds after the last one."
+  },
+  "matrixRedrawButton": "Redraw unscored rounds",
+  "@matrixRedrawButton": {
+    "description": "Button on the Matrix page that draws the rounds without scores again."
+  },
+  "matrixActionLocked": "Administration is locked. Unlock the contest to add or redraw rounds.",
+  "@matrixActionLocked": {
+    "description": "Why adding or redrawing rounds is off while the contest is locked."
+  },
+  "matrixActionNotEditable": "Rounds can be added or redrawn from the first draw until the contest is complete.",
+  "@matrixActionNotEditable": {
+    "description": "Why adding or redrawing rounds is off before the first draw or after completion."
+  },
+  "matrixRedrawAllScored": "Every round has scores, so there is nothing to redraw.",
+  "@matrixRedrawAllScored": {
+    "description": "Why Redraw unscored rounds is off when every round has a score."
+  },
+  "matrixRedrawRoundLocked": "Round {round} is locked. Unlock it before redrawing.",
+  "@matrixRedrawRoundLocked": {
+    "description": "Why Redraw unscored rounds is off when a round to replace is locked.",
+    "placeholders": {
+      "round": {"type": "int"}
+    }
+  },
+  "matrixRedrawGroupLocked": "A group of round {round} is locked. Unlock it before redrawing.",
+  "@matrixRedrawGroupLocked": {
+    "description": "Why Redraw unscored rounds is off when a group to replace is locked.",
+    "placeholders": {
+      "round": {"type": "int"}
+    }
+  },
+  "matrixAddTitle": "Add rounds",
+  "@matrixAddTitle": {
+    "description": "Heading of the form that adds rounds."
+  },
+  "matrixAddIntro": "The new rounds continue after round {last}. Pilots who already met are kept apart as in the first draw, and the fairness summary counts every round. Retired pilots are not drawn.",
+  "@matrixAddIntro": {
+    "description": "Intro of the add rounds form.",
+    "placeholders": {
+      "last": {"type": "int"}
+    }
+  },
+  "matrixRedrawTitle": "Redraw unscored rounds",
+  "@matrixRedrawTitle": {
+    "description": "Heading of the form that redraws the rounds without scores."
+  },
+  "matrixRedrawIntro": "Replaces the unscored {span}. Earlier rounds stay as they are and count toward who has met whom. Retired pilots are not drawn. Each redraw uses a new random seed unless you set one under Advanced.",
+  "@matrixRedrawIntro": {
+    "description": "Intro of the redraw form.",
+    "placeholders": {
+      "span": {"type": "String"}
+    }
+  },
+  "matrixRoundsToAdd": "Rounds to add",
+  "@matrixRoundsToAdd": {
+    "description": "Label of the rounds field when adding rounds."
+  },
+  "matrixRoundsToDraw": "Rounds to draw",
+  "@matrixRoundsToDraw": {
+    "description": "Label of the rounds field when redrawing."
+  },
+  "matrixAddRoundsNote": "Draws {span}.",
+  "@matrixAddRoundsNote": {
+    "description": "Note under the rounds field of the add rounds form.",
+    "placeholders": {
+      "span": {"type": "String"}
+    }
+  },
+  "matrixRedrawRoundsNote": "Draws {span} in place of the unscored rounds.",
+  "@matrixRedrawRoundsNote": {
+    "description": "Note under the rounds field of the redraw form.",
+    "placeholders": {
+      "span": {"type": "String"}
+    }
+  },
+  "matrixRedrawRoundsRemoved": "Draws {span}. {removed} will be removed.",
+  "@matrixRedrawRoundsRemoved": {
+    "description": "Note under the rounds field of the redraw form when fewer rounds are drawn than replaced; removed names the rounds that go.",
+    "placeholders": {
+      "span": {"type": "String"},
+      "removed": {"type": "String"}
+    }
+  },
+  "matrixGroupsFromRound": "From round {round} of the current matrix.",
+  "@matrixGroupsFromRound": {
+    "description": "Note under the groups field when it is filled from the current matrix.",
+    "placeholders": {
+      "round": {"type": "int"}
+    }
+  },
+  "matrixReasonLabel": "Reason (optional)",
+  "@matrixReasonLabel": {
+    "description": "Label of the optional reason field of the add rounds and redraw forms."
+  },
+  "matrixReasonHint": "Kept in the matrix history",
+  "@matrixReasonHint": {
+    "description": "Hint of the reason field."
+  },
+  "matrixBackToMatrix": "Back to matrix",
+  "@matrixBackToMatrix": {
+    "description": "Button that leaves the add rounds or redraw form."
+  },
+  "matrixAddAction": "Add rounds",
+  "@matrixAddAction": {
+    "description": "Submit button of the add rounds form."
+  },
+  "matrixAddActionBusy": "Adding rounds…",
+  "@matrixAddActionBusy": {
+    "description": "Submit button of the add rounds form while it works."
+  },
+  "matrixRedrawAction": "Redraw rounds",
+  "@matrixRedrawAction": {
+    "description": "Submit button of the redraw form."
+  },
+  "matrixRedrawActionBusy": "Redrawing rounds…",
+  "@matrixRedrawActionBusy": {
+    "description": "Submit button of the redraw form while it works."
+  },
+  "matrixAddConfirmTitle": "Add rounds?",
+  "@matrixAddConfirmTitle": {
+    "description": "Title of the confirmation before rounds are added."
+  },
+  "matrixRedrawConfirmTitle": "Redraw unscored rounds?",
+  "@matrixRedrawConfirmTitle": {
+    "description": "Title of the confirmation before rounds are redrawn."
+  },
+  "matrixConfirmAdds": "Adds {span}",
+  "@matrixConfirmAdds": {
+    "description": "Confirmation line naming the rounds that are added.",
+    "placeholders": {
+      "span": {"type": "String"}
+    }
+  },
+  "matrixConfirmReplaces": "Redraws {span}",
+  "@matrixConfirmReplaces": {
+    "description": "Confirmation line naming the rounds that are replaced.",
+    "placeholders": {
+      "span": {"type": "String"}
+    }
+  },
+  "matrixConfirmRevision": "Current matrix revision {revision}",
+  "@matrixConfirmRevision": {
+    "description": "Confirmation line with the revision of the matrix that is changed.",
+    "placeholders": {
+      "revision": {"type": "int"}
+    }
+  },
+  "matrixConfirmAddNote": "Rounds can be added again later. The new rounds can be redrawn until they have scores.",
+  "@matrixConfirmAddNote": {
+    "description": "Warning in the add rounds confirmation."
+  },
+  "matrixConfirmRedrawNote": "The replaced rounds can’t be restored. Rounds with scores are not touched.",
+  "@matrixConfirmRedrawNote": {
+    "description": "Warning in the redraw confirmation."
+  },
+  "matrixRoundsAdded": "Rounds added.",
+  "@matrixRoundsAdded": {
+    "description": "Snackbar after rounds were added."
+  },
+  "matrixRoundsRedrawn": "Rounds redrawn.",
+  "@matrixRoundsRedrawn": {
+    "description": "Snackbar after rounds were redrawn."
+  },
+  "matrixRoundsNetworkFailure": "The matrix wasn’t changed and the page hasn’t changed. Your values are kept.",
+  "@matrixRoundsNetworkFailure": {
+    "description": "Body of the banner when the server could not be reached while adding or redrawing rounds."
+  },
+  "matrixRoundsRejected": "The server did not change the matrix",
+  "@matrixRoundsRejected": {
+    "description": "Title of the banner when the server refused to add or redraw rounds."
+  },
+  "matrixRoundsConflict": "The matrix changed on the server. Reload to see the current state. Your values stay until you reload.",
+  "@matrixRoundsConflict": {
+    "description": "Body of the banner when adding or redrawing rounds met a newer matrix."
+  },
+  "matrixSeededStatusDone": "Seeded Man on Man: {rounds} preliminary rounds, all scored. A seeded round also needs official scores and current standings; the server checks this when you draw.",
+  "@matrixSeededStatusDone": {
+    "description": "Seeded contests: status line when the preliminary scores are complete.",
+    "placeholders": {
+      "rounds": {"type": "int"}
+    }
+  },
+  "matrixSeededStatusWaiting": "Seeded Man on Man: {rounds} preliminary rounds, {missing} flights still need a score. A seeded round can be drawn once they are official.",
+  "@matrixSeededStatusWaiting": {
+    "description": "Seeded contests: status line when preliminary scores are missing.",
+    "placeholders": {
+      "rounds": {"type": "int"},
+      "missing": {"type": "int"}
+    }
+  },
+  "matrixSeededOneRound": "Seeded rounds are drawn one at a time.",
+  "@matrixSeededOneRound": {
+    "description": "Error when more than one seeded round is asked for."
+  },
+  "matrixDriftBanner": "{differences} The matrix is unchanged. Redraw the unscored rounds to apply these changes; rounds with scores keep their draw.",
+  "@matrixDriftBanner": {
+    "description": "Body of the banner that says the contest configuration changed since the draw.",
+    "placeholders": {
+      "differences": {"type": "String"}
+    }
+  },
+  "matrixDriftBannerBlocked": "{differences} The matrix is unchanged. {reason}",
+  "@matrixDriftBannerBlocked": {
+    "description": "Body of the configuration-changed banner when redrawing is not possible.",
+    "placeholders": {
+      "differences": {"type": "String"},
+      "reason": {"type": "String"}
+    }
+  },
+  "matrixRoundSpan": "{count, plural, =1{round {first}} other{rounds {first} to {last}}}",
+  "@matrixRoundSpan": {
+    "description": "A round or a run of rounds, in the middle of a sentence.",
+    "placeholders": {
+      "count": {"type": "int"},
+      "first": {"type": "int"},
+      "last": {"type": "int"}
+    }
+  },
+  "matrixConfirmPilots": "{count} scoring pilots",
+  "@matrixConfirmPilots": {
+    "description": "Confirmation line with the number of pilots who are drawn.",
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "matrixConfirmGroups": "{groups} groups per round ({sizes} pilots)",
+  "@matrixConfirmGroups": {
+    "description": "Confirmation line with the groups of each drawn round and their sizes.",
+    "placeholders": {
+      "groups": {"type": "int"},
+      "sizes": {"type": "String"}
+    }
+  },
+  "matrixConfirmConfiguration": "Configuration revision {revision}",
+  "@matrixConfirmConfiguration": {
+    "description": "Confirmation line with the configuration revision; revision is a number or a dash.",
+    "placeholders": {
+      "revision": {"type": "String"}
+    }
+  },
+  "matrixConfirmCancel": "Cancel",
+  "@matrixConfirmCancel": {
+    "description": "Button that closes the add rounds or redraw confirmation without changing anything."
   }
 }

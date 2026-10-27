@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 
+import '../../matrix/matrix_rounds_plan.dart';
 import 'next_step_target.dart';
 
 /// A button on the next-step card.
@@ -9,6 +10,7 @@ class NextStepAction extends Equatable {
     required this.target,
     this.round,
     this.group,
+    this.matrixIntent,
     this.enabled = true,
     this.disabledNote,
     this.busyLabel,
@@ -24,6 +26,9 @@ class NextStepAction extends Equatable {
   /// For [NextStepTarget.scoring]: the group number (1 is group A).
   final int? group;
 
+  /// For [NextStepTarget.matrix]: the form to open, when there is one.
+  final MatrixIntent? matrixIntent;
+
   final bool enabled;
 
   /// Why the button is disabled, when it is.
@@ -38,6 +43,7 @@ class NextStepAction extends Equatable {
     target,
     round,
     group,
+    matrixIntent,
     enabled,
     disabledNote,
     busyLabel,

@@ -3,6 +3,7 @@ import 'package:soar_score_api/soar_score_api.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../services/configuration/draw_readiness.dart';
+import '../../services/matrix/matrix_rounds_plan.dart';
 
 /// The `Draw matrix` button, always visible, with the reason it is off beside
 /// it (icon, one sentence and a link to the fix). While a draw runs the
@@ -20,9 +21,14 @@ class DrawActionRow extends StatelessWidget {
     this.cancelling = false,
     this.cancelFailed = false,
     this.onCancel,
+    this.intent,
   });
 
   final bool busy;
+
+  /// Names the button for adding or redrawing rounds; `null` for the first
+  /// draw.
+  final MatrixIntent? intent;
   final DrawBlocker? blocker;
   final VoidCallback onDraw;
   final void Function(BlockerFix fix) onFix;
@@ -65,7 +71,13 @@ class DrawActionRow extends StatelessWidget {
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
               : const Icon(Icons.grid_view, size: 18),
-          label: Text(busy ? 'Drawing matrix…' : 'Draw matrix'),
+          label: Text(switch (intent) {
+            MatrixIntent.addRounds =>
+              busy ? l10n.matrixAddActionBusy : l10n.matrixAddAction,
+            MatrixIntent.redraw =>
+              busy ? l10n.matrixRedrawActionBusy : l10n.matrixRedrawAction,
+            null => busy ? 'Drawing matrix…' : 'Draw matrix',
+          }),
         ),
         if (reasonText != null)
           ConstrainedBox(

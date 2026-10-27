@@ -34,14 +34,21 @@ class DrawReadiness {
   /// [configurationProblem] says what is wrong with the configuration, or is
   /// `null` when it is usable. [scoringPilots] counts the pilots who fly (not
   /// non-fliers or retired pilots); [matrixDrawn] is true once a matrix
-  /// exists, which is redrawn from the matrix page instead.
+  /// exists, which is redrawn from the matrix page instead. [forRounds] is
+  /// for adding rounds or redrawing, which need a drawn matrix.
   factory DrawReadiness.evaluate({
     required Contest contest,
     required String? configurationProblem,
     required int scoringPilots,
     required bool matrixDrawn,
+    bool forRounds = false,
   }) => DrawReadiness([
-    if (contest.lifecycleState == LifecycleState.completed)
+    // Adding rounds and redrawing are allowed after the first draw, so the
+    // lifecycle and lock rules that only apply to the first draw are left
+    // out; the matrix page checks the ones that apply to rounds.
+    if (forRounds)
+      ...const <DrawBlocker>[]
+    else if (contest.lifecycleState == LifecycleState.completed)
       const DrawBlocker(
         icon: Icons.flag_outlined,
         text: 'The contest is completed. A completed contest can’t be drawn.',
@@ -62,7 +69,7 @@ class DrawReadiness {
         linkLabel: 'Open Workspace',
         fix: BlockerFix.workspace,
       ),
-    if (contest.adminLock == AdminLock.locked)
+    if (!forRounds && contest.adminLock == AdminLock.locked)
       const DrawBlocker(
         icon: Icons.lock_outline,
         text: 'The contest is locked, so the matrix can’t be drawn.',
@@ -85,7 +92,7 @@ class DrawReadiness {
         linkLabel: 'Add pilots in Participants',
         fix: BlockerFix.participants,
       ),
-    if (matrixDrawn)
+    if (matrixDrawn && !forRounds)
       const DrawBlocker(
         icon: Icons.grid_view,
         text: 'The matrix is already drawn.',

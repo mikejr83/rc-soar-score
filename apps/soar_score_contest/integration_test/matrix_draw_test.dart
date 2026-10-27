@@ -17,7 +17,7 @@ void main() {
     await openMainPage(tester);
 
     // "Front Range F5J Open" arrives drawn: the grid and fairness score show
-    // and there is nothing left to draw (redrawing is not built yet, #264).
+    // and there is nothing left to draw.
     await openContest(tester, 'Front Range F5J Open');
     await tapRail(tester, 'Matrix');
     await pumpUntilFound(tester, _fairness);
