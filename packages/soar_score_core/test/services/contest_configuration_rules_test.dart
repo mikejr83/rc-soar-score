@@ -137,6 +137,7 @@ void main() {
       for (final core in <Map<String, Object?>>[
         {},
         {'teams_enabled': true, 'team_pilot_count': 2, 'team_protection': true},
+        {'allow_back_to_back': false},
         {'teams_enabled': true, 'team_pilot_count': 2, 'roles_enabled': true},
         {
           'teams_enabled': true,

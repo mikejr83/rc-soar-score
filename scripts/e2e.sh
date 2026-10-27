@@ -147,6 +147,7 @@ status=0
 for file in "${files[@]}"; do
   e2e_args=(--dart-define=SOAR_SCORE_DEMO=true --dart-define=SOAR_SCORE_DEMO_RESET=true)
   [ "$(basename "$file")" = "signed_out_landing_journey_test.dart" ] && e2e_args+=(--dart-define=SOAR_SCORE_E2E_SIGNED_OUT=true)
+  [ "$(basename "$file")" = "matrix_draw_cancel_test.dart" ] && e2e_args+=(--dart-define=SOAR_SCORE_E2E_SLOW_DRAW=true)
   flutter test "$file" -d "$device" "${e2e_args[@]}" ${extra[@]+"${extra[@]}"} || status=1
 done
 exit $status

@@ -16,6 +16,7 @@ class HandlerHarness {
     bool publishingEnabled = false,
     RecalculationService? recalculation,
     GliderScoreImportRunner? gliderScoreImport,
+    DrawRunner? drawRunner,
     Set<Id> alsoVisibleOwners = const {},
     StubContestRepository? contests,
   }) : contests = contests ?? StubContestRepository() {
@@ -31,6 +32,7 @@ class HandlerHarness {
       publishingEnabled: publishingEnabled,
       recalculation: recalculation,
       gliderScoreImport: gliderScoreImport,
+      drawRunner: drawRunner,
     );
   }
 

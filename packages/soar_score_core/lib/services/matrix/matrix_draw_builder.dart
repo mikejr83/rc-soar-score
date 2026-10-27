@@ -35,7 +35,8 @@ class MatrixDrawBuilder {
   ///
   /// [drawConfig] adds to the stored draw settings (`groups_per_round`, the
   /// seed, the options the draw used); [previousRevisionId] is the revision a
-  /// later draw continues.
+  /// later draw continues. A seeded draw passes [drawMode] and the
+  /// [seedingStandings] it was tiered by, stored in the seeding snapshot.
   BuiltDraw build({
     required Id contestId,
     required Id id,
@@ -52,6 +53,8 @@ class MatrixDrawBuilder {
     required String reason,
     required Id actorId,
     required DateTime now,
+    DrawMode drawMode = DrawMode.standardManOnMan,
+    Map<String, Object?>? seedingStandings,
   }) {
     final revision = MatrixRevision(
       id: id,
@@ -60,7 +63,7 @@ class MatrixDrawBuilder {
       previousRevisionId: previousRevisionId,
       firstRound: firstRound,
       lastRound: firstRound + drawn.length - 1,
-      drawMode: DrawMode.standardManOnMan,
+      drawMode: drawMode,
       randomSeed: seed,
       algorithmVersion: algorithmVersion,
       drawConfig: {'groups_per_round': groupsPerRound, ...drawConfig},
@@ -72,6 +75,7 @@ class MatrixDrawBuilder {
               'team_id': pilot.teamId?.value,
             },
         ],
+        'standings': ?seedingStandings,
       },
       fairnessSummary: fairness,
       reason: reason,

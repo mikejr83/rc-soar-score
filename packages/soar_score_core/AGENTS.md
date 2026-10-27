@@ -11,6 +11,7 @@ Domain models, business logic, and scoring engine.
 - `lib/services/` — business service classes (scoring, ranking, the server-side sync acceptor)
 - `lib/errors/` — typed domain errors and the shared sync reason codes
 - `test/` — unit tests by family, mirroring `lib/`
+- `tool/` — developer tools kept out of the default test run: `draw_bench.dart` benchmarks the matrix draw (`scripts/draw-bench.sh --check`, or `.ps1`)
 
 ## Boundaries
 

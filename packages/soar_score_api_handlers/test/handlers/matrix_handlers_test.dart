@@ -297,15 +297,21 @@ void main() {
       );
     });
 
-    test('a draw mode other than standard man-on-man is a 409', () async {
+    test('a seeded contest first draws only its preliminary rounds', () async {
       await createContest();
-      await configure(core: {'draw_mode': 'SeededManOnMan'});
+      await configure(
+        core: {'draw_mode': 'SeededManOnMan', 'preliminary_rounds': 2},
+      );
       await addPilots(4);
 
-      final response = await draw();
+      final tooMany = await draw();
 
-      expect(response.statusCode, 409);
-      expect((await api.errorOf(response))['code'], 'draw_mode_unsupported');
+      expect(tooMany.statusCode, 409);
+      expect(
+        (await api.errorOf(tooMany))['code'],
+        'seeded_rounds_need_standings',
+      );
+      expect((await draw(rounds: 2)).statusCode, 201);
     });
 
     test('no pilots is a 400', () async {
@@ -407,6 +413,15 @@ void main() {
       );
 
       expect(two.ownerApi.repository.matrixRevisions.revisions, isEmpty);
+    });
+
+    test('a foreign director cannot read or cancel a draw', () async {
+      two.storeContest(Id.parse(_contestId));
+      const drawId = '019c0000-0000-7000-8000-000000000501';
+      final path = '/contests/$_contestId/matrix/draws/$drawId';
+
+      await two.expectDenied(two.outsiderApi, 'GET', path);
+      await two.expectDenied(two.outsiderApi, 'DELETE', path);
     });
   });
 }

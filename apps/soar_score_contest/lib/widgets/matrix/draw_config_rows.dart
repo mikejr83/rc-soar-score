@@ -24,6 +24,7 @@ class DrawConfigRows extends StatelessWidget {
     final options = data.options;
     final seeded = options?.drawMode == DrawMode.seededManOnMan;
     final protection = options?.teamProtection ?? false;
+    final backToBack = options?.allowBackToBack ?? true;
     final pilots = data.scoringPilots;
     final excluded = data.nonFlyingParticipants;
     final rows = <(IconData, String, String, String, bool)>[
@@ -47,6 +48,16 @@ class DrawConfigRows extends StatelessWidget {
             ? 'Only the ${options?.preliminaryRounds ?? 1} preliminary rounds '
                   'are drawn now.'
             : '',
+        true,
+      ),
+      (
+        Icons.swap_vert,
+        'Back-to-back flights',
+        backToBack ? 'Allowed' : 'Avoided',
+        backToBack
+            ? ''
+            : 'No pilot flies the last group of one round and the first '
+                  'group of the next.',
         true,
       ),
       (

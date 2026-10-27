@@ -1,7 +1,9 @@
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:soar_score_api_handlers/handlers/health_handler.dart';
+import 'package:soar_score_api_handlers/draw/isolate_draw_runner.dart';
 import 'package:soar_score_core/repositories/repository.dart';
+import 'package:soar_score_core/services/matrix/draw_job.dart';
 import 'package:soar_score_core/services/sync/sync_versions.dart';
 import 'package:soar_score_api_handlers/handlers/account_claim_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/account_preferences_handlers.dart';
@@ -32,6 +34,7 @@ createHandlers(
   RecalculationService? recalculation,
   SyncVersions? syncVersions,
   GliderScoreImportRunner? gliderScoreImport,
+  DrawRunner? drawRunner,
 }) {
   final router = Router()
     ..get(
@@ -47,7 +50,11 @@ createHandlers(
   addRoleRoutes(router, repository);
   addParticipationRoutes(router, repository, recalculation: recalculation);
   addTeamRoutes(router, repository);
-  addMatrixRoutes(router, repository);
+  addMatrixRoutes(
+    router,
+    repository,
+    drawRunner: drawRunner ?? const IsolateDrawRunner(),
+  );
   addScoreRoutes(
     router,
     repository,

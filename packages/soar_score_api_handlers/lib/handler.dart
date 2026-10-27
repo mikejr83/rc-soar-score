@@ -6,6 +6,7 @@ import 'package:soar_score_core/repositories/repository.dart';
 import 'package:soar_score_core/services/recalculation/recalculation_service.dart';
 import 'package:soar_score_core/services/sync/sync_versions.dart';
 import 'package:soar_score_core/import/glider_score_import_runner.dart';
+import 'package:soar_score_core/services/matrix/draw_job.dart';
 import 'package:logging/logging.dart';
 
 /// Auth layer for the `/api/v1` subtree.
@@ -52,6 +53,10 @@ final _logger = Logger('Handler');
 /// serve `POST /imports/gliderscore`; without it the route answers 503
 /// `import_unavailable`. Only the embedded instance wires it.
 ///
+/// [drawRunner] is where matrix draws run: an isolate of their own by
+/// default, so a long draw never stops the API from answering. Tests and the
+/// E2E servers pass another runner.
+///
 /// [corsAllowedOrigins] are the exact browser origins (for example
 /// `http://127.0.0.1:8091`) allowed to call the API cross-origin. Empty, the
 /// default, adds no CORS headers.
@@ -65,6 +70,7 @@ Handler buildApiHandler({
   bool publishingEnabled = false,
   RecalculationService? recalculation,
   GliderScoreImportRunner? gliderScoreImport,
+  DrawRunner? drawRunner,
   Set<String> corsAllowedOrigins = const {},
 }) {
   final handlers = createHandlers(
@@ -76,6 +82,7 @@ Handler buildApiHandler({
     recalculation: recalculation,
     syncVersions: SyncVersions.exactly(schemaRevision ?? 1),
     gliderScoreImport: gliderScoreImport,
+    drawRunner: drawRunner,
   );
   Handler api = handlers.apiHandler;
 
