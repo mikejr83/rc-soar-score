@@ -213,7 +213,18 @@ class BasicDraw {
       }
     }
     if (best == null && blocked.isNotEmpty) {
-      throw ArgumentError(backToBackMessage);
+      // Name back-to-back only when the round can be built without it.
+      final withoutIt = _tryRound(
+        pilots,
+        groupCount,
+        teamProtection,
+        meetings,
+        random,
+        spreadMeetings,
+      );
+      if (withoutIt) {
+        throw ArgumentError(backToBackMessage);
+      }
     }
     if (best == null) {
       throw ArgumentError(
@@ -222,6 +233,32 @@ class BasicDraw {
       );
     }
     return best;
+  }
+
+  /// Whether one round can be built at all, ignoring back-to-back flights.
+  bool _tryRound(
+    List<DrawPilot> pilots,
+    int groupCount,
+    bool teamProtection,
+    List<List<int>> meetings,
+    SeededRandom random,
+    bool spreadMeetings,
+  ) {
+    for (var tries = 0; tries < 50; tries++) {
+      if (_build(
+            pilots,
+            groupCount,
+            teamProtection,
+            meetings,
+            random,
+            spreadMeetings,
+            const {},
+          ) !=
+          null) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /// What a build adds to the sum of squared meeting counts: a pair that has
