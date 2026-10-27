@@ -16,6 +16,7 @@ import '../dto/create_participant_request.dart';
 import '../dto/create_role_request.dart';
 import '../dto/create_team_request.dart';
 import '../dto/draw_matrix_request.dart';
+import '../dto/draw_status_dto.dart';
 import '../dto/enter_score_request.dart';
 import '../dto/health_dto.dart';
 import '../dto/import_gliderscore_request.dart';
@@ -597,6 +598,40 @@ class ApiClient {
     final uri = _resolve('/api/v1/contests/${id.value}/matrix/draws');
     final response = await _send('POST', uri, body: request.toJson());
     return _decode<CurrentMatrix>(response, uri, CurrentMatrix.fromJson);
+  }
+
+  /// `GET /api/v1/contests/{id}/matrix/draws/{drawId}` — how far the draw
+  /// started with request id [drawId] has come, or `null` when the server
+  /// does not know that draw (it never started, or is long finished).
+  Future<DrawStatusDto?> drawStatus(Id contestId, Id drawId) async {
+    final uri = _resolve(
+      '/api/v1/contests/${contestId.value}/matrix/draws/${drawId.value}',
+    );
+    try {
+      final response = await _send('GET', uri);
+      return _decode<DrawStatusDto>(response, uri, DrawStatusDto.fromJson);
+    } on ApiHttpError catch (error) {
+      if (error.statusCode == 404) return null;
+      rethrow;
+    }
+  }
+
+  /// `DELETE /api/v1/contests/{id}/matrix/draws/{drawId}` — cancels the draw
+  /// started with request id [drawId] and returns its status, or `null` when
+  /// the server does not know it. The draw request then fails with status 409
+  /// and code `draw_cancelled`, and nothing about the contest changes. A draw
+  /// that has already finished is not undone.
+  Future<DrawStatusDto?> cancelDraw(Id contestId, Id drawId) async {
+    final uri = _resolve(
+      '/api/v1/contests/${contestId.value}/matrix/draws/${drawId.value}',
+    );
+    try {
+      final response = await _send('DELETE', uri);
+      return _decode<DrawStatusDto>(response, uri, DrawStatusDto.fromJson);
+    } on ApiHttpError catch (error) {
+      if (error.statusCode == 404) return null;
+      rethrow;
+    }
   }
 
   /// Moves the pilot of assignment [assignmentId] of contest [contestId] to

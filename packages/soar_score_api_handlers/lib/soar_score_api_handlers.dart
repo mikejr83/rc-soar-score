@@ -10,5 +10,7 @@ export 'auth/bearer_auth.dart';
 export 'auth/principal.dart';
 export 'auth/token_verifier.dart';
 export 'auth/user_profile.dart';
+export 'draw/delayed_draw_runner.dart';
+export 'draw/isolate_draw_runner.dart';
 export 'handler.dart';
 export 'middleware/middleware.dart';

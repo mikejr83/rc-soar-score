@@ -20,6 +20,7 @@ import '../../repositories/repository.dart';
 import '../results_service.dart';
 import 'basic_draw.dart';
 import 'draw_engine.dart';
+import 'draw_job.dart';
 import 'draw_optimizer.dart';
 import 'matrix_draw_builder.dart';
 import 'matrix_service.dart';
@@ -43,14 +44,23 @@ class MatrixRedrawService {
     DateTime Function()? clock,
     Id Function()? newId,
     int Function()? newSeed,
+    DrawRunner? runner,
+    DrawJobs? jobs,
   }) : _clock = clock ?? DateTime.now,
        _newId = newId ?? Id.create,
-       _newSeed = newSeed ?? MatrixService.secureSeed;
+       _newSeed = newSeed ?? MatrixService.secureSeed,
+       _runner = runner ?? const InProcessDrawRunner(),
+       jobs = jobs ?? DrawJobs();
 
   final Repository repository;
   final DateTime Function() _clock;
   final Id Function() _newId;
   final int Function() _newSeed;
+  final DrawRunner _runner;
+
+  /// The draws running or lately run, by revision id (see
+  /// [MatrixService.jobs]).
+  final DrawJobs jobs;
 
   /// Draws [rounds] rounds of [groupsPerRound] groups each from round
   /// [firstRound] on, as revision [id], and returns the current matrix.
@@ -221,17 +231,22 @@ class MatrixRedrawService {
         history: history,
       );
     } else {
-      drawn = const DrawEngine().generate(
-        pilots: pilots,
-        rounds: rounds,
-        groupsPerRound: groupsPerRound,
-        teamProtection: options.teamProtection,
-        laneMode: options.laneMode,
-        allowBackToBack: options.allowBackToBack,
-        seed: requestedSeed,
-        seedCount: seedCount,
-        attemptsPerRound: attemptsPerRound,
-        history: history,
+      drawn = await jobs.run(
+        contestId,
+        id,
+        _runner,
+        DrawSpec(
+          pilots: pilots,
+          rounds: rounds,
+          groupsPerRound: groupsPerRound,
+          teamProtection: options.teamProtection,
+          laneMode: options.laneMode,
+          allowBackToBack: options.allowBackToBack,
+          seed: requestedSeed,
+          seedCount: seedCount,
+          attemptsPerRound: attemptsPerRound,
+          history: history,
+        ),
       );
     }
 

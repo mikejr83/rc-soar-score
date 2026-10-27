@@ -4,6 +4,7 @@ import '../../enums/lane_mode.dart';
 import '../../models/id.dart';
 import 'basic_draw.dart';
 import 'draw_fairness.dart';
+import 'draw_job.dart';
 import 'draw_optimizer.dart';
 import 'lane_stats.dart';
 import 'matchup_stats.dart';
@@ -65,6 +66,10 @@ class DrawEngine {
   /// round and the first group of the next, also against the last round of
   /// [history].
   ///
+  /// [onProgress] hears how far the run has come, from 0 to 99 percent, as
+  /// each cooling step of each seed starts. It only watches: the draw is the
+  /// same with or without it.
+  ///
   /// Throws an [ArgumentError] when the settings cannot be met, as
   /// [BasicDraw.generate] does, and for a [seedCount] outside
   /// 1 to [maxSeedCount].
@@ -80,6 +85,7 @@ class DrawEngine {
     int attemptsPerRound = BasicDraw.defaultAttemptsPerRound,
     int iterationsPerPlacement = DrawOptimizer.defaultIterationsPerPlacement,
     List<List<List<DrawSlot>>> history = const [],
+    void Function(DrawProgress progress)? onProgress,
   }) {
     if (seedCount < 1 || seedCount > maxSeedCount) {
       throw ArgumentError.value(
@@ -101,7 +107,8 @@ class DrawEngine {
     LaneStats? bestLanes;
     var bestCost = 0.0;
     var bestSeed = seed;
-    for (final candidate in seeds) {
+    for (var seedIndex = 0; seedIndex < seeds.length; seedIndex++) {
+      final candidate = seeds[seedIndex];
       final random = SeededRandom(candidate);
       final built = const BasicDraw().generate(
         pilots: pilots,
@@ -123,6 +130,17 @@ class DrawEngine {
         iterationsPerPlacement: iterationsPerPlacement,
         allowBackToBack: allowBackToBack,
         history: history,
+        onLevel: onProgress == null
+            ? null
+            : (level) => onProgress(
+                DrawProgress(
+                  percent:
+                      (100 * (seedIndex * DrawOptimizer.levels + level)) ~/
+                      (seeds.length * DrawOptimizer.levels + 1),
+                  seed: seedIndex + 1,
+                  seedCount: seeds.length,
+                ),
+              ),
       );
       final all = [...history, ...improved];
       final stats = MatchupStats.of(all, teamProtection: teamProtection);
