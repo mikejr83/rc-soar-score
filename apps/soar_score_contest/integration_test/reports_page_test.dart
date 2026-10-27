@@ -6,81 +6,12 @@ import 'support/interact.dart';
 import 'support/launch_app.dart';
 import 'support/open_demo_contest.dart';
 
-/// A ready demo contest: a drawn matrix, nothing scored yet.
-const _contest = 'Front Range F5J Open';
-
-bool _enabled(WidgetTester tester, String report) =>
-    tester
-        .widget<ButtonStyleButton>(find.byKey(ValueKey('report-open-$report')))
-        .onPressed !=
-    null;
-
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('the Reports page lists the reports and their readiness', (
-    tester,
-  ) async {
-    await openMainPage(tester);
-    await openContest(tester, _contest);
-
-    await tapRail(tester, 'Reports');
-    await pumpUntilFound(tester, find.text('Reports are built from'));
-
-    // The strip says what the reports are built from.
-    expect(find.text('Lifecycle'), findsOneWidget);
-    expect(find.text('Scoring progress'), findsOneWidget);
-    expect(find.text('Standings produced now would be'), findsOneWidget);
-
-    // All four reports are listed under their groups.
-    expect(find.text('Results'), findsOneWidget);
-    expect(find.text('Documents to print'), findsOneWidget);
-    for (final title in [
-      'Overall Standings',
-      'Draw Matrix',
-      'Scoring Sheet',
-      'Pilot Scoring Cards',
-    ]) {
-      expect(find.text(title), findsOneWidget);
-    }
-
-    // The matrix is drawn but nothing is scored: the documents can be opened
-    // and the standings say why they cannot.
-    for (final report in ['matrix', 'sheet', 'cards']) {
-      expect(_enabled(tester, report), isTrue, reason: report);
-    }
-    expect(_enabled(tester, 'standings'), isFalse);
-    expect(find.text('No scores have been entered yet.'), findsOneWidget);
-
-    // The reason links to the page that fixes it.
-    await tapVisible(tester, find.text('Open Scoring'));
-    await pumpUntilFound(tester, find.textContaining('Round 1 of'));
-  });
-
-  // The viewer opens in place; the web E2E build uses `InPlaceReportLauncher`
-  // because a journey cannot drive a second browser tab.
-  testWidgets('Open shows the report viewer with a way back', (tester) async {
-    await openMainPage(tester);
-    await openContest(tester, _contest);
-    await tapRail(tester, 'Reports');
-    await pumpUntilFound(tester, find.text('Reports are built from'));
-
-    await tapVisible(tester, find.byKey(const ValueKey('report-open-matrix')));
-    await pumpUntilFound(tester, find.byKey(const ValueKey('viewer-title')));
-    expect(
-      tester.widget<Text>(find.byKey(const ValueKey('viewer-title'))).data,
-      'Draw Matrix',
-    );
-    // The paper sheet, its filter and page panel, and Print.
-    expect(find.textContaining('Page 1 of'), findsWidgets);
-    expect(find.text('Print'), findsWidgets);
-
-    await tapVisible(tester, find.byKey(const ValueKey('viewer-back')));
-    await pumpUntilFound(tester, find.text('Reports are built from'));
-  });
-
   // The Overall Standings report reads the stored results of a contest that is
-  // being scored.
+  // being scored. The readiness list and the Draw Matrix viewer are steps of
+  // the lifecycle journey (phase 4); this one moves there with phase 6.
   testWidgets('Overall Standings shows the standings and follows its options', (
     tester,
   ) async {

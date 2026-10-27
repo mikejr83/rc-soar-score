@@ -37,10 +37,3 @@ Future<void> flipToggle(WidgetTester tester, String key) => tapVisible(
   tester,
   find.descendant(of: settingField(key), matching: find.byType(Switch)),
 );
-
-/// The saved revision number shown at the top of the configuration page.
-int savedRevision(WidgetTester tester) {
-  final match = find.textContaining(RegExp(r'^Configuration revision \d+$'));
-  final text = (match.evaluate().first.widget as Text).data!;
-  return int.parse(text.split(' ').last);
-}

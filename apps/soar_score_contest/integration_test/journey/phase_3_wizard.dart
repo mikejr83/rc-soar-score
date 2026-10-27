@@ -57,15 +57,17 @@ Future<void> runWizardPhase(Journey journey, JourneyContext data) async {
     await enterIn(tester, find.byKey(const ValueKey('last-name')), person.last);
     await enterIn(tester, find.byKey(const ValueKey('email')), person.email);
     // The first tap can only move focus off the email field, which starts
-    // its check and shifts the layout; tap again until the editor closes.
+    // its check and shifts the layout; tap again if the editor is still open
+    // a few seconds later (a closing editor stays on screen for a moment).
     final save = find.byKey(const ValueKey('save-participant'));
-    for (
-      var attempt = 0;
-      attempt < 4 && save.evaluate().isNotEmpty;
-      attempt++
-    ) {
+    for (var attempt = 0; attempt < 3; attempt++) {
       await tapVisible(tester, save);
-      await tester.pump(const Duration(seconds: 1));
+      for (var i = 0; i < 15 && save.evaluate().isNotEmpty; i++) {
+        await tester.pump(const Duration(milliseconds: 200));
+      }
+      if (save.evaluate().isEmpty) {
+        break;
+      }
     }
     await pumpUntilGone(tester, save);
     await pumpUntilFound(
