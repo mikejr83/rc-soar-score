@@ -85,6 +85,19 @@ Future<void> runSetupPhase(Journey journey, JourneyContext data) async {
     () => inContest(() => _drawMatrix(tester, data)),
   );
   await journey.step(
+    'Matrix: a contest that arrives drawn shows its grid and no Draw action',
+    () async {
+      await goToMainPage(tester);
+      await openContest(tester, 'Front Range F5J Open');
+      await tapRail(tester, 'Matrix');
+      await pumpUntilFound(tester, _key('fairness-score'));
+      expect(find.text('Round 1'), findsOneWidget);
+      expect(find.text('Group A'), findsWidgets);
+      expect(_key('draw-button'), findsNothing);
+      expect(find.text('No matrix drawn yet'), findsNothing);
+    },
+  );
+  await journey.step(
     'Reports: readiness before the run',
     () => inContest(() async {
       await _openReports(tester);
@@ -112,6 +125,10 @@ Future<void> runSetupPhase(Journey journey, JourneyContext data) async {
       }
       expect(_reportEnabled(tester, 'standings'), isFalse);
       expect(find.text('No scores have been entered yet.'), findsOneWidget);
+
+      // The reason links to the page that fixes it.
+      await tapVisible(tester, find.text('Open Scoring'));
+      await pumpUntilFound(tester, find.textContaining('Round 1 of'));
     }),
   );
   await journey.step(
