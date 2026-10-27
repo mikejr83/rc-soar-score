@@ -55,6 +55,10 @@ class ContestActionRunner {
       ..showSnackBar(
         SnackBar(
           content: Text(done),
+          // A snack bar with an action stays until dismissed unless told
+          // otherwise; a confirmation is not worth a click to clear.
+          persist: false,
+          duration: const Duration(seconds: 8),
           action: undo == null
               ? null
               : SnackBarAction(
@@ -91,6 +95,10 @@ class ContestActionRunner {
       ..showSnackBar(
         SnackBar(
           content: Text(apiErrorText(error)),
+          // A snack bar with an action stays until dismissed unless told
+          // otherwise; a failure notice is not worth a click to clear.
+          persist: false,
+          duration: const Duration(seconds: 8),
           action: SnackBarAction(label: 'Refresh', onPressed: refresh),
         ),
       );
