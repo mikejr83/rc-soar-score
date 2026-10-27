@@ -78,12 +78,15 @@ class InPlaceReportLauncher extends PlatformReportLauncher {
   }
 }
 
-/// The launcher the Reports page and the report viewer use. The web build made
-/// for end-to-end tests (`SOAR_SCORE_E2E`, never a release build) swaps in
-/// [InPlaceReportLauncher]; a test can assign another.
+/// The launcher the Reports page and the report viewer use unless one is
+/// passed to them. The web build made for end-to-end tests (`SOAR_SCORE_E2E`,
+/// never a release build) opens reports in place with [InPlaceReportLauncher].
 abstract final class ReportLaunchers {
-  static ReportLauncher current =
-      const bool.fromEnvironment('SOAR_SCORE_E2E') && !kReleaseMode
-      ? const InPlaceReportLauncher()
-      : const PlatformReportLauncher();
+  static final ReportLauncher current = forBuild(
+    e2e: bool.fromEnvironment('SOAR_SCORE_E2E') && !kReleaseMode,
+  );
+
+  /// The launcher for a build that is, or is not, the end-to-end build.
+  static ReportLauncher forBuild({required bool e2e}) =>
+      e2e ? InPlaceReportLauncher() : PlatformReportLauncher();
 }

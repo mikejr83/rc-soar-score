@@ -20,7 +20,8 @@
 # A test file that runs longer than $env:E2E_TEST_TIMEOUT seconds (default 300)
 # is stopped and counted as failed, so a hung browser cannot stall a run. The
 # long contest_lifecycle_journey_test.dart gets 1200 seconds by default;
-# setting $env:E2E_TEST_TIMEOUT overrides the limit for every file.
+# setting $env:E2E_TEST_TIMEOUT overrides the limit for every file. These
+# limits apply to web runs only; a Windows (native) run has no timeout.
 
 param(
     [string]$Device = 'windows',

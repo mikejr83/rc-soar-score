@@ -38,8 +38,13 @@ void main() {
     expect(find.text('viewer back=1'), findsOneWidget);
   });
 
-  test('the default launcher is the platform one outside an E2E build', () {
-    expect(ReportLaunchers.current, isA<PlatformReportLauncher>());
+  test('only the E2E build opens reports in place', () {
+    expect(ReportLaunchers.forBuild(e2e: true), isA<InPlaceReportLauncher>());
+    expect(
+      ReportLaunchers.forBuild(e2e: false),
+      isNot(isA<InPlaceReportLauncher>()),
+    );
+    // This test run is not an E2E build.
     expect(ReportLaunchers.current, isNot(isA<InPlaceReportLauncher>()));
   });
 }
