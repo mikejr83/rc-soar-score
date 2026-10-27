@@ -41,6 +41,7 @@ extension DraftCopy on ContestDraft {
               drawMode: core.drawMode,
               laneMode: core.laneMode,
               teamProtection: core.teamProtection,
+              allowBackToBack: core.allowBackToBack,
               seededRounds: '${core.preliminaryRounds ?? 1}',
               rounds: core.intendedTotalRounds == null
                   ? null

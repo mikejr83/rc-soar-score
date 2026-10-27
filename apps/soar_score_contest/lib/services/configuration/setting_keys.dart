@@ -35,6 +35,7 @@ abstract final class SettingKeys {
   static const preliminaryRounds = 'preliminary_rounds';
   static const intendedTotalRounds = 'intended_total_rounds';
   static const teamProtection = 'team_protection';
+  static const allowBackToBack = 'allow_back_to_back';
   static const laneMode = 'lane_mode';
 
   static const publicUpdateMode = 'public_update_mode';
@@ -48,6 +49,7 @@ abstract final class SettingKeys {
   static const matrixKeys = {
     teams,
     teamProtection,
+    allowBackToBack,
     drawMode,
     preliminaryRounds,
     laneMode,

@@ -66,6 +66,7 @@ abstract final class ConfigurationValues {
       SettingKeys.preliminaryRounds: core.preliminaryRounds ?? '',
       SettingKeys.intendedTotalRounds: core.intendedTotalRounds ?? '',
       SettingKeys.teamProtection: core.teamProtection,
+      SettingKeys.allowBackToBack: core.allowBackToBack,
       SettingKeys.laneMode: core.laneMode.json,
       SettingKeys.publicUpdateMode: core.publicUpdateMode.json,
       SettingKeys.reviewRequests: core.reviewRequestsEnabled,
@@ -95,6 +96,7 @@ abstract final class ConfigurationValues {
       ..[SettingKeys.roles] = flag(SettingKeys.roles)
       ..[SettingKeys.drawMode] = draft[SettingKeys.drawMode]
       ..[SettingKeys.laneMode] = draft[SettingKeys.laneMode]
+      ..[SettingKeys.allowBackToBack] = flag(SettingKeys.allowBackToBack)
       ..[SettingKeys.groupScoreMode] = draft[SettingKeys.groupScoreMode]
       ..[SettingKeys.roundingMode] = draft[SettingKeys.roundingMode]
       ..[SettingKeys.decimalPlaces] = whole(SettingKeys.decimalPlaces)

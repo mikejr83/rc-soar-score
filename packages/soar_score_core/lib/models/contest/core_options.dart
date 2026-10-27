@@ -16,6 +16,7 @@ class CoreOptions extends Equatable {
     this.teamsEnabled = false,
     this.teamPilotCount,
     this.teamProtection = false,
+    this.allowBackToBack = true,
     this.rolesEnabled = false,
     this.drawMode = DrawMode.standardManOnMan,
     this.preliminaryRounds,
@@ -131,6 +132,7 @@ class CoreOptions extends Equatable {
       teamsEnabled: read('teams_enabled', asBool, false),
       teamPilotCount: readOptional('team_pilot_count', asInt),
       teamProtection: read('team_protection', asBool, false),
+      allowBackToBack: read('allow_back_to_back', asBool, true),
       rolesEnabled: read('roles_enabled', asBool, false),
       drawMode: drawMode,
       preliminaryRounds:
@@ -179,6 +181,7 @@ class CoreOptions extends Equatable {
     'teams_enabled',
     'team_pilot_count',
     'team_protection',
+    'allow_back_to_back',
     'roles_enabled',
     'draw_mode',
     'preliminary_rounds',
@@ -201,6 +204,10 @@ class CoreOptions extends Equatable {
   /// Pilot scores counted for the team result; required with teams.
   final int? teamPilotCount;
   final bool teamProtection;
+
+  /// Whether a pilot may fly in the last group of one round and the first
+  /// group of the next. When off, the draw never does that.
+  final bool allowBackToBack;
   final bool rolesEnabled;
   final DrawMode drawMode;
 
@@ -228,6 +235,7 @@ class CoreOptions extends Equatable {
     teamsEnabled,
     teamPilotCount,
     teamProtection,
+    allowBackToBack,
     rolesEnabled,
     drawMode,
     preliminaryRounds,
