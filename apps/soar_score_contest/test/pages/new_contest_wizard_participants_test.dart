@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:soar_score_contest/services/new_contest/participant_option.dart';
-import 'package:soar_score_contest/widgets/new_contest/participants/participant_card.dart';
-import 'package:soar_score_contest/widgets/new_contest/participants/participants_table.dart';
+import 'package:soar_score_contest/services/participants/participant_option.dart';
+import 'package:soar_score_contest/widgets/participants/participant_card.dart';
+import 'package:soar_score_contest/widgets/participants/participants_table.dart';
 
 import '../support/new_contest_test_support.dart';
 import '../support/participants_step_support.dart';
@@ -53,7 +53,7 @@ void main() {
       find.byKey(ValueKey('search-result-${stepProfiles[0].id.value}')),
     );
     expect(already.enabled, isFalse);
-    expect(find.text('Already added'), findsOneWidget);
+    expect(find.text('Already in this contest'), findsOneWidget);
   });
 
   testWidgets('a missing class blocks Next and the summary jumps to it; the '

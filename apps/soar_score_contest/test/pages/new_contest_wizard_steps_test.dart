@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:soar_score_contest/services/new_contest/participant_option.dart';
+import 'package:soar_score_contest/services/participants/participant_option.dart';
 import 'package:soar_score_contest/services/new_contest/wizard_discipline.dart';
 import 'package:soar_score_contest/widgets/new_contest/wizard_dot_stepper.dart';
 import 'package:soar_score_contest/widgets/new_contest/wizard_step_list.dart';

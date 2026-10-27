@@ -221,8 +221,7 @@ void main() {
     expect(mutations.last.actorId, owner);
   });
 
-  test(
-      'without its marker the rows are out of the lists and the contest '
+  test('without its marker the rows are out of the lists and the contest '
       'is not reachable', () async {
     await server.database.customStatement(
       "DELETE FROM audit_events WHERE entity_type = 'InspectionOwner'",

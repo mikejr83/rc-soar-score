@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
-import '../../../services/new_contest/participant_rules.dart';
+import '../../services/participants/participant_row.dart';
 import 'team_avatar.dart';
 
 /// The toolbar shown while rows are selected: set team, class or role for

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../services/new_contest/participant_rules.dart';
+import '../../services/participants/participant_row.dart';
 import 'team_avatar.dart';
 
 /// A choice in the team picker.

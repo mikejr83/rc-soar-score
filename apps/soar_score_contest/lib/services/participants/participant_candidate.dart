@@ -1,7 +1,7 @@
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../../widgets/participant_search.dart';
-import 'draft_participant.dart';
+import 'participant_row.dart';
 
 /// A person the participant search found.
 class ParticipantCandidate {
@@ -34,14 +34,16 @@ class ParticipantCandidate {
   /// person's permission; the email must not even reach the UI otherwise.
   final bool emailVisible;
 
-  /// A new Pilot row for this person.
-  DraftParticipant toParticipant() => DraftParticipant(
-    profileId: profileId,
-    name: name,
-    email: emailVisible ? email : null,
-    emailVisible: emailVisible,
-    source: source,
-  );
+  /// What the email cell says for this person.
+  ParticipantEmailStatus get emailStatus {
+    if (source == ParticipantSource.remote && !emailVisible) {
+      return ParticipantEmailStatus.private;
+    }
+    final address = email;
+    return address == null || address.isEmpty
+        ? ParticipantEmailStatus.none
+        : ParticipantEmailStatus.has;
+  }
 }
 
 /// Searches the remote participant directory. There is no directory

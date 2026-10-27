@@ -7,7 +7,7 @@ import 'package:soar_score_contest/services/new_contest/contest_creator.dart';
 import 'package:soar_score_contest/services/new_contest/contest_draft.dart';
 import 'package:soar_score_contest/services/new_contest/draft_participant.dart';
 import 'package:soar_score_contest/services/new_contest/draw_settings.dart';
-import 'package:soar_score_contest/services/new_contest/participant_option.dart';
+import 'package:soar_score_contest/services/participants/participant_option.dart';
 import 'package:soar_score_contest/services/new_contest/scoring_settings.dart';
 import 'package:soar_score_contest/services/new_contest/wizard_discipline.dart';
 import 'package:soar_score_core/soar_score_core.dart';
