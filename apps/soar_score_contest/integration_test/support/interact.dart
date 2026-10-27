@@ -18,14 +18,34 @@ Future<void> openMainPage(WidgetTester tester) async {
     ),
   );
   if (find.byType(LandingPage).evaluate().isNotEmpty) {
-    // Windows offers "Continue offline"; the web test build is signed in
-    // already (`E2eSignedInSession`) and offers "Continue".
-    final offline = find.text('Continue offline');
-    await tester.tap(
-      offline.evaluate().isNotEmpty ? offline : find.text('Continue'),
-    );
+    await continueFromLanding(tester);
   }
   await pumpUntilFound(tester, find.byType(HomePage));
+}
+
+/// Taps the landing page's way in. Windows offers "Continue offline"; the web
+/// test build is signed in already (`E2eSignedInSession`) and offers
+/// "Continue".
+Future<void> continueFromLanding(WidgetTester tester) async {
+  final offline = find.text('Continue offline');
+  await tester.tap(
+    offline.evaluate().isNotEmpty ? offline : find.text('Continue'),
+  );
+}
+
+/// Goes back to the main page (the contest list) from wherever the app is:
+/// the header's Contests crumb inside a contest, the rail's Contests entry
+/// elsewhere. Steps start with this so they never depend on where the
+/// previous step left the screen.
+Future<void> goToMainPage(WidgetTester tester) async {
+  final crumb = find.byKey(const ValueKey('breadcrumb-contests'));
+  if (crumb.evaluate().isNotEmpty) {
+    await tapVisible(tester, crumb);
+  } else {
+    await tapRail(tester, 'Contests');
+  }
+  await pumpUntilFound(tester, find.byType(HomePage));
+  await pumpUntilFound(tester, find.byKey(const ValueKey('create-contest')));
 }
 
 /// Scrolls [finder] into view, taps it and lets the app react.

@@ -314,7 +314,7 @@ Run the setup script once. It downloads Chrome for Testing and the chromedriver 
 ```bash
 ./scripts/e2e-setup.sh               # PowerShell: .\scripts\e2e-setup.ps1
 ./scripts/e2e-setup.sh --dry-run     # show what it would download
-./scripts/e2e.sh -d web -f offline_contest_journey_test.dart
+./scripts/e2e.sh -d web -f contest_lifecycle_journey_test.dart
 ```
 
 `--channel Beta` (or `-Channel`) and `--version <x.y.z.w>` (or `-Version`) pick another Chrome for Testing build. Re-run the script to update; old versions stay in `.e2e-tools/` until you delete it. On Linux, Chrome also needs its system libraries (on Debian or Ubuntu: `sudo apt-get install -y libnss3 libatk-bridge2.0-0 libgtk-3-0 libgbm1 libasound2`).

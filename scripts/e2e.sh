@@ -26,6 +26,9 @@
 # setting E2E_TEST_TIMEOUT overrides the limit for every file. These limits
 # apply to web runs only; a Windows (native) run has no timeout.
 set -eu
+# E2E_STOP_AFTER=<n> ends the lifecycle journey after phase n.
+stop_after=()
+[ -z "${E2E_STOP_AFTER:-}" ] || stop_after=(--dart-define=E2E_STOP_AFTER="$E2E_STOP_AFTER")
 device=windows
 test_file=
 extra=()
@@ -141,7 +144,7 @@ if [ "$device" = web ] || [ "$device" = chrome ]; then
       --dart-define=SOAR_SCORE_E2E=true \
       --dart-define=SOAR_SCORE_API_BASE_URL="http://localhost:$port" \
       $( [ "$(basename "$file")" = "signed_out_landing_journey_test.dart" ] && printf '%s' '--dart-define=SOAR_SCORE_E2E_SIGNED_OUT=true' ) \
-      ${extra[@]+"${extra[@]}"} || {
+      ${stop_after[@]+"${stop_after[@]}"} ${extra[@]+"${extra[@]}"} || {
         code=$?
         [ "$code" -eq 124 ] && echo "TIMEOUT: $file ran longer than ${test_timeout}s and was stopped." >&2
         status=1
@@ -158,6 +161,6 @@ for file in "${files[@]}"; do
   e2e_args=(--dart-define=SOAR_SCORE_DEMO=true --dart-define=SOAR_SCORE_DEMO_RESET=true)
   [ "$(basename "$file")" = "signed_out_landing_journey_test.dart" ] && e2e_args+=(--dart-define=SOAR_SCORE_E2E_SIGNED_OUT=true)
   [ "$(basename "$file")" = "matrix_draw_cancel_test.dart" ] && e2e_args+=(--dart-define=SOAR_SCORE_E2E_SLOW_DRAW=true)
-  flutter test "$file" -d "$device" "${e2e_args[@]}" ${extra[@]+"${extra[@]}"} || status=1
+  flutter test "$file" -d "$device" "${e2e_args[@]}" ${stop_after[@]+"${stop_after[@]}"} ${extra[@]+"${extra[@]}"} || status=1
 done
 exit $status

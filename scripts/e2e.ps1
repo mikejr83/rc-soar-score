@@ -104,6 +104,7 @@ if ($Device -in 'web', 'chrome') {
                     $flutterArgs += '--dart-define=SOAR_SCORE_E2E_SIGNED_OUT=true'
                 }
                 if ($Name) { $flutterArgs += @('--name', $Name) }
+                if ($env:E2E_STOP_AFTER) { $flutterArgs += "--dart-define=E2E_STOP_AFTER=$($env:E2E_STOP_AFTER)" }
                 $testTimeout = 300
                 if ($file.Name -eq 'contest_lifecycle_journey_test.dart') { $testTimeout = 1200 }
                 if ($env:E2E_TEST_TIMEOUT) { $testTimeout = [int]$env:E2E_TEST_TIMEOUT }
@@ -160,6 +161,7 @@ try {
             '--dart-define=SOAR_SCORE_DEMO_RESET=true'
         )
         if ($Name) { $flutterArgs += @('--name', $Name) }
+        if ($env:E2E_STOP_AFTER) { $flutterArgs += "--dart-define=E2E_STOP_AFTER=$($env:E2E_STOP_AFTER)" }
         if ($testFile.Name -eq 'signed_out_landing_journey_test.dart') {
             $flutterArgs += '--dart-define=SOAR_SCORE_E2E_SIGNED_OUT=true'
         }
