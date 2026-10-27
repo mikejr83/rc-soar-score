@@ -15,6 +15,27 @@
   gap: 14px;
   padding: 22px;
   box-shadow: var(--shadow);
+  /* Two screws on the body, a diagonal pair like the hero placards: bottom
+     left, and right just under the bezel. */
+  --screw: radial-gradient(circle, var(--dial) 2.2px, #5c5753 2.6px, transparent 3.4px);
+  background-image: var(--screw), var(--screw);
+  background-size: 9px 9px;
+  background-repeat: no-repeat;
+  background-position:
+    9px calc(100% - 9px),
+    calc(100% - 9px) 60px;
+}
+
+/* The title row carries the status beside the title, so every bezel stays the same height. */
+.titleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.titleRow h3 {
+  margin: 0;
 }
 
 .bezel {
@@ -36,11 +57,19 @@
 }
 
 .role {
-  font-size: 12px;
+  flex: 1;
+  font-size: 13px;
   font-weight: 800;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--panel-muted);
+}
+
+/* Not shipped yet: text plus icon beside the title, so it never reads as a feature. */
+.status {
+  background: var(--surface-2);
+  border-color: var(--line);
+  color: var(--text);
 }
 
 .copy {

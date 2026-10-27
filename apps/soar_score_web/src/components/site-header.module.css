@@ -12,6 +12,9 @@
   position: absolute;
   left: 16px;
   top: -100px;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   background: var(--panel-surface);
   color: var(--panel-text);
   padding: 8px 12px;

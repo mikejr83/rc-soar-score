@@ -61,12 +61,14 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: var(--night);
-    --surface: #262422;
-    --surface-2: #2e2b29;
+    /* Elevation is explicit: a card steps up from the night canvas, its edge
+       a clear hairline, and it keeps a shadow because tone alone is too close. */
+    --surface: #2b2927;
+    --surface-2: #35322f;
     --text: var(--paper);
     --text-muted: var(--muted-dark);
-    --line: #3a3735;
-    --line-strong: #58534e;
+    --line: #49443f;
+    --line-strong: #6a645d;
     --accent: var(--orange-on-dark);
     --accent-hover: #ff8257;
     --on-accent: var(--dial);
@@ -74,7 +76,7 @@
     --ok-bg: #173a27;
     --ok-fg: #b1f1ce;
     --selected-row: #3a2a22;
-    --shadow: none;
+    --shadow: 0 1px 2px rgb(0 0 0 / 0.35), 0 8px 24px -12px rgb(0 0 0 / 0.6);
   }
 }
 
@@ -98,6 +100,11 @@ body {
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--deep-orange);
+  color: var(--white);
 }
 
 h1,
@@ -203,6 +210,21 @@ code {
   max-width: var(--measure);
 }
 
+/* The leave-site arrow on links to the other apps and GitHub. */
+.ext-icon {
+  display: inline-block;
+  width: 0.8em;
+  height: 0.8em;
+  vertical-align: -0.05em;
+  margin-inline-start: 0.3em;
+  flex: none;
+}
+.btn .ext-icon {
+  width: 14px;
+  height: 14px;
+  margin-inline-start: 0;
+}
+
 .visually-hidden {
   position: absolute !important;
   width: 1px;
@@ -218,8 +240,8 @@ code {
 /* Type helpers from the kit */
 
 .eyebrow {
-  font-size: 12px;
-  line-height: 16px;
+  font-size: 13px;
+  line-height: 18px;
   font-weight: 800;
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -245,6 +267,7 @@ code {
 .lede {
   font-size: clamp(17px, 2vw, 20px);
   line-height: 1.5;
+  text-wrap: pretty;
   color: var(--text-muted);
   max-width: var(--measure);
 }
@@ -312,9 +335,8 @@ code {
 }
 
 .btn--sm {
-  min-height: 36px;
-  padding: 7px 12px;
-  font-size: 13px;
+  padding: 7px 14px;
+  font-size: 14px;
 }
 
 .btn svg {
@@ -336,6 +358,12 @@ code {
   color: var(--panel-text);
   border-radius: var(--radius);
   border: 1px solid var(--panel-line);
+}
+/* Keyboard focus on an always-dark surface: light mode maps --focus to ink,
+   which vanishes on the panel. */
+.panel,
+.seams-host {
+  --focus: var(--panel-accent);
 }
 .panel .eyebrow {
   color: var(--panel-muted);

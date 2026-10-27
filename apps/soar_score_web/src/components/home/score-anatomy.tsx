@@ -31,6 +31,7 @@ export function ScoreAnatomy() {
               </dt>
               <dd>
                 <span className={styles.bar} style={{ "--w": "95%" } as React.CSSProperties} />
+                <b className={styles.call}>Two seconds in hand.</b>{" "}
                 Points for every second flown, up to the working time; past it
                 and the penalty starts.
               </dd>
@@ -42,6 +43,7 @@ export function ScoreAnatomy() {
               </dt>
               <dd>
                 <span className={styles.bar} style={{ "--w": "62%" } as React.CSSProperties} />
+                <b className={styles.call}>On the spot.</b>{" "}
                 Bonus points by distance to the spot, from the contest&apos;s
                 landing table.
               </dd>
@@ -53,6 +55,7 @@ export function ScoreAnatomy() {
               </dt>
               <dd>
                 <span className={`${styles.bar} ${styles.barPenalty}`} style={{ "--w": "38%" } as React.CSSProperties} />
+                <b className={styles.call}>A low launch, cheaply bought.</b>{" "}
                 Half a point per metre of launch height, and three points a
                 metre above 200 m. Lower launches cost less.
               </dd>
@@ -69,9 +72,9 @@ export function ScoreAnatomy() {
           <p className="eyebrow">Your place after round 4</p>
           <p className={`stencil ${styles.big}`}>3rd</p>
           <p className={styles.score}>
-            <CountUp value={3941.8} decimals={1} className="num" /> pts
+            <CountUp value={2987.4} decimals={1} className="num" /> pts
           </p>
-          <p className={styles.behind}>45.6 points behind 1st. Best landing so far: 50.</p>
+          <p className={styles.behind}>Best three of four rounds count. 12.6 points behind 1st.</p>
           <ul className={styles.rounds} aria-label="Round scores">
             {[
               ["R1", "1000"],

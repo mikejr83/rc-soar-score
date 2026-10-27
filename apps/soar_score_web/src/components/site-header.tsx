@@ -2,12 +2,14 @@ import Link from "next/link";
 
 import { contestAppUrl, primaryNav, siteName } from "@/lib/site";
 
+import { ExternalLink } from "./external-link";
+
 import { BrandMark } from "./brand-logo";
 import styles from "./site-header.module.css";
 
 /**
  * The instrument-panel header shared by every page: the mark and name home
- * link, the primary navigation and the Login link out to the contest
+ * link, the primary navigation and the Sign in link out to the contest
  * administration app (the site has no sign-in of its own, #464).
  *
  * On a phone, Contests stays one tap away beside a native `<details>` menu
@@ -35,16 +37,13 @@ export function SiteHeader() {
               </li>
             ))}
           </ul>
-          <a
-            className={`btn btn--primary btn--sm ${styles.login}`}
+          <ExternalLink
+            className={`btn btn--ghost btn--sm btn--on-dark ${styles.login}`}
             href={contestAppUrl}
-            rel="noopener"
+            destination="the contest app"
           >
-            Login
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
-              <path d="M6 3h6v10H6M2 8h8M8 5l3 3-3 3" />
-            </svg>
-          </a>
+            Sign in
+          </ExternalLink>
         </nav>
 
         <div className={styles.compact}>
@@ -68,9 +67,9 @@ export function SiteHeader() {
                   </li>
                 ))}
                 <li>
-                  <a href={contestAppUrl} rel="noopener">
-                    Login / Registration
-                  </a>
+                  <ExternalLink href={contestAppUrl} destination="the contest app">
+                    Sign in or register
+                  </ExternalLink>
                 </li>
               </ul>
             </nav>

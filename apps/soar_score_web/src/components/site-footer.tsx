@@ -4,11 +4,11 @@ import {
   companyName,
   contestAppUrl,
   repositoryUrl,
-  selfScoreAppUrl,
   siteName,
   tagline,
 } from "@/lib/site";
 
+import { ExternalLink } from "./external-link";
 import { BrandMark } from "./brand-logo";
 import styles from "./site-footer.module.css";
 
@@ -43,19 +43,14 @@ export function SiteFooter() {
             <div className="eyebrow">Apps</div>
             <ul>
               <li>
-                <a href={contestAppUrl} rel="noopener">
+                <ExternalLink href={contestAppUrl} destination="the contest app">
                   Contest administration
-                </a>
+                </ExternalLink>
               </li>
               <li>
-                <a href={selfScoreAppUrl} rel="noopener">
-                  Enter my score
-                </a>
-              </li>
-              <li>
-                <a href={repositoryUrl} rel="noopener">
+                <ExternalLink href={repositoryUrl} destination="GitHub">
                   Source on GitHub
-                </a>
+                </ExternalLink>
               </li>
             </ul>
           </div>
@@ -63,7 +58,8 @@ export function SiteFooter() {
 
         <p className={styles.legal}>
           © {new Date().getFullYear()} {companyName}, Mike Gardner. Site design credits: Mason Beard. Published results are a
-          public record; see a contest director to correct a score.
+          public record. To correct a score, contact the contest director, or{" "}
+          <Link href="/support">request support</Link>.
         </p>
       </div>
     </footer>

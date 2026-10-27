@@ -31,8 +31,10 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className={`${display.variable} ${body.variable} ${accent.variable}`}>
+    <html lang="en" className={`no-js ${display.variable} ${body.variable} ${accent.variable}`} suppressHydrationWarning>
       <body style={{ minHeight: "100dvh", display: "flex", flexDirection: "column" }}>
+        {/* Scroll reveals hide content until JavaScript runs; without it, globals.css shows everything. */}
+        <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.remove('no-js')" }} />
         <SiteHeader />
         <main id="main" style={{ flex: 1 }}>
           {children}

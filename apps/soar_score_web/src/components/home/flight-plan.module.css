@@ -1,6 +1,8 @@
 .plan {
   position: relative;
-  overflow: hidden;
+  /* clip, not hidden: hidden makes the section a scroll container and the
+     view() timelines below would measure against it and never advance. */
+  overflow: clip;
   background: var(--panel-bg);
   color: var(--panel-text);
   border-block: 1px solid var(--panel-line);
@@ -29,6 +31,9 @@
 
 .route {
   position: relative;
+  /* The glider is an SVG group with no CSS box, so it cannot be a view()
+     subject of its own; it follows the route container's timeline instead. */
+  view-timeline-name: --plan-route;
 }
 
 .path {
@@ -45,19 +50,45 @@
 
 /* Inside the SVG, so the route and the glider share one coordinate system
    whatever the container width. */
+.track {
+  stroke-dasharray: 6 8;
+}
+
 .glider {
   offset-path: path("M0,100 C150,100 150,20 300,20 S450,100 600,100 S750,20 900,20 L1000,20");
   offset-distance: 100%;
-  offset-rotate: auto;
+  /* The glider's nose is at the shape's -x end, so turn it to face along the route. */
+  offset-rotate: auto 180deg;
 }
 
 .legs {
   list-style: none;
   margin: 0;
-  padding: 0;
+  padding: 0 0 0 28px;
   display: grid;
   gap: 24px;
-  counter-reset: leg;
+  position: relative;
+}
+/* Phone route: a dashed vertical track down the left with a waypoint per
+   leg; the glider rides it as the section scrolls through the viewport. */
+.legs::before {
+  content: "";
+  position: absolute;
+  left: 7px;
+  top: 0;
+  bottom: 0;
+  border-left: 2px dashed var(--panel-muted);
+  opacity: 0.7;
+}
+.legs::after {
+  content: "";
+  position: absolute;
+  left: -8px;
+  top: calc(100% - 32px);
+  width: 32px;
+  height: 32px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-32 -32 64 64'%3E%3Cpath transform='rotate(-90)' d='M-30,-2 L-2,-5 L30,-12 L30,-9 L0,-1 L-2,1 L30,5 L30,8 L-2,1 L-30,-1 Z' fill='%23ff6a33'/%3E%3C/svg%3E") center / contain no-repeat;
+  pointer-events: none;
 }
 
 .leg {
@@ -65,8 +96,18 @@
   display: grid;
   gap: 8px;
   padding: 18px 18px 18px 20px;
-  border-left: 2px solid var(--panel-line);
   background: linear-gradient(90deg, rgb(255 255 255 / 0.03), transparent);
+}
+.leg::before {
+  content: "";
+  position: absolute;
+  top: 22px;
+  left: -27px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--panel-bg);
+  border: 2px solid var(--panel-muted);
 }
 .leg h3 {
   font-size: 20px;
@@ -92,24 +133,21 @@
   .legs {
     grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 16px;
+    padding-left: 0;
+  }
+  .legs::before,
+  .legs::after {
+    display: none;
   }
   .leg {
-    border-left: 0;
     border-top: 2px solid var(--panel-line);
     padding: 18px 12px 0;
     background: none;
   }
   /* Each leg sits under its waypoint on the route. */
   .leg::before {
-    content: "";
-    position: absolute;
     top: -7px;
     left: 12px;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: var(--panel-bg);
-    border: 2px solid var(--panel-muted);
   }
 }
 
@@ -117,8 +155,8 @@
   @supports (animation-timeline: view()) and (offset-path: path("M0,0 L1,1")) {
     .glider {
       animation: fly linear both;
-      animation-timeline: view();
-      animation-range: entry 20% exit 60%;
+      animation-timeline: --plan-route;
+      animation-range: entry 0% exit 100%;
     }
     .path {
       stroke-dashoffset: 0;
@@ -126,6 +164,27 @@
       animation-timeline: view();
       animation-range: entry 20% exit 60%;
     }
+    /* Lift: the glider bobs in a thermal and the dashes march like moving air. */
+    .lift {
+      animation: bob 3.2s ease-in-out infinite;
+    }
+    .track {
+      animation: march 1.4s linear infinite;
+    }
+    .legs::after {
+      animation: descend linear both;
+      animation-timeline: view();
+      animation-range: entry 10% exit 70%;
+    }
+  }
+}
+
+@keyframes descend {
+  from {
+    top: 0;
+  }
+  to {
+    top: calc(100% - 32px);
   }
 }
 
@@ -135,6 +194,23 @@
   }
   to {
     offset-distance: 100%;
+  }
+}
+@keyframes bob {
+  0%,
+  100% {
+    transform: translateY(-3px) rotate(-1.5deg);
+  }
+  50% {
+    transform: translateY(3px) rotate(1.5deg);
+  }
+}
+@keyframes march {
+  from {
+    stroke-dashoffset: 14;
+  }
+  to {
+    stroke-dashoffset: 0;
   }
 }
 @keyframes dash {

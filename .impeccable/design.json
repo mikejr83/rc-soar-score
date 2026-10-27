@@ -1,0 +1,146 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-27T20:05:00Z",
+  "title": "Design System: RC Soar Score",
+  "extensions": {
+    "colorMeta": {
+      "wing-orange": { "role": "primary", "displayName": "Dayglo Wing Orange", "canonical": "#e8420c", "tonalRamp": ["#3a0f02", "#6b1d04", "#9e2c00", "#b83300", "#e8420c", "#ff6a33", "#ff9a75", "#ffd3c2"] },
+      "deep-orange": { "role": "primary", "displayName": "Deep Orange", "canonical": "#b83300", "tonalRamp": ["#3a0f02", "#6b1d04", "#9e2c00", "#b83300", "#e8420c", "#ff6a33", "#ff9a75", "#ffd3c2"] },
+      "orange-on-dark": { "role": "primary", "displayName": "Orange on Dark", "canonical": "#ff6a33", "tonalRamp": ["#3a0f02", "#6b1d04", "#9e2c00", "#b83300", "#e8420c", "#ff6a33", "#ff9a75", "#ffd3c2"] },
+      "night": { "role": "neutral", "displayName": "Night", "canonical": "#1c1b1a", "tonalRamp": ["#0c0b0b", "#1c1b1a", "#262422", "#2b2927", "#35322f", "#4a4643", "#605d5d", "#b8b3ad"] },
+      "dial": { "role": "neutral", "displayName": "Dial", "canonical": "#0c0b0b" },
+      "bezel": { "role": "neutral", "displayName": "Bezel", "canonical": "#4a4643" },
+      "ink": { "role": "neutral", "displayName": "Ink", "canonical": "#201e1d" },
+      "paper": { "role": "neutral", "displayName": "Paper", "canonical": "#f3f2f2", "tonalRamp": ["#201e1d", "#605d5d", "#b9b3aa", "#d6d2cc", "#e8e4dc", "#f3f2f2", "#f8f7f6", "#ffffff"] },
+      "muted-light": { "role": "neutral", "displayName": "Muted Light", "canonical": "#605d5d" },
+      "muted-dark": { "role": "neutral", "displayName": "Muted Dark", "canonical": "#b8b3ad" },
+      "hairline-light": { "role": "neutral", "displayName": "Hairline Light", "canonical": "#d6d2cc" },
+      "panel-line": { "role": "neutral", "displayName": "Panel Line", "canonical": "#3a3735" },
+      "ok-fg-light": { "role": "semantic", "displayName": "Completed Green", "canonical": "#0f4a2b" }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "The page headline, balanced wrapping." },
+      "headline": { "displayName": "Headline", "purpose": "Section titles." },
+      "title": { "displayName": "Title", "purpose": "Card and row titles." },
+      "lede": { "displayName": "Lede", "purpose": "The muted sentence under a heading, 65ch measure." },
+      "body": { "displayName": "Body", "purpose": "Copy; 15px inside cards." },
+      "label": { "displayName": "Label", "purpose": "Eyebrows, facts labels, role labels; uppercase, 13px floor." },
+      "stencil": { "displayName": "Stencil", "purpose": "One stencilled number or code per screen area." }
+    },
+    "shadows": [
+      { "name": "card-light", "value": "0 1px 2px rgb(12 11 11 / 0.06), 0 8px 24px -12px rgb(12 11 11 / 0.25)", "purpose": "Opt-in lift for station cards on paper." },
+      { "name": "card-dark", "value": "0 1px 2px rgb(0 0 0 / 0.35), 0 8px 24px -12px rgb(0 0 0 / 0.6)", "purpose": "The dark theme's card lift, because tone alone is too close." }
+    ],
+    "motion": [
+      { "name": "ease-settle", "value": "cubic-bezier(0.2, 0.7, 0.2, 1)", "purpose": "Scroll reveals: 600ms opacity, 700ms 18px rise." },
+      { "name": "ease-bar", "value": "cubic-bezier(0.2, 0.7, 0.1, 1)", "purpose": "Score bars growing in over 900ms." },
+      { "name": "ease-control", "value": "ease", "purpose": "120ms colour and border transitions on buttons." }
+    ],
+    "breakpoints": [
+      { "name": "phone-facts", "value": "520px" },
+      { "name": "desktop", "value": "840px" },
+      { "name": "wrap", "value": "1120px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The one orange action in an area; deep orange so white text passes 6.0:1.",
+      "html": "<a class=\"ds-btn ds-btn-primary\" href=\"#\">Find a contest</a>",
+      "css": ".ds-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 10px 18px; border-radius: 8px; border: 1px solid transparent; font-family: Archivo, system-ui, sans-serif; font-weight: 600; font-size: 15px; line-height: 20px; text-decoration: none; cursor: pointer; transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease, transform 120ms ease; } .ds-btn:active { transform: translateY(1px); } .ds-btn-primary { background: #b83300; color: #ffffff; } .ds-btn-primary:hover { background: #9e2c00; } .ds-btn-primary:focus-visible { outline: 2px solid #201e1d; outline-offset: 2px; }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Secondary action on paper: hairline border, ink text.",
+      "html": "<a class=\"ds-btn ds-btn-ghost\" href=\"#\">Run a contest <svg width=\"14\" height=\"14\" viewBox=\"0 0 16 16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" aria-hidden=\"true\"><path d=\"M5 3h8v8M13 3 3 13\"/></svg></a>",
+      "css": ".ds-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 10px 18px; border-radius: 8px; border: 1px solid transparent; font-family: Archivo, system-ui, sans-serif; font-weight: 600; font-size: 15px; line-height: 20px; text-decoration: none; cursor: pointer; transition: border-color 120ms ease, color 120ms ease, transform 120ms ease; } .ds-btn:active { transform: translateY(1px); } .ds-btn-ghost { background: transparent; color: #201e1d; border-color: #b9b3aa; } .ds-btn-ghost:hover { border-color: #201e1d; } .ds-btn-ghost:focus-visible { outline: 2px solid #201e1d; outline-offset: 2px; }"
+    },
+    {
+      "name": "Ghost Button on Dark",
+      "kind": "button",
+      "refersTo": "button-ghost-on-dark",
+      "description": "Secondary action on a night panel: paper text, panel-line border, orange focus.",
+      "html": "<div class=\"ds-night\"><a class=\"ds-btn ds-btn-on-dark\" href=\"#\">Run a contest</a></div>",
+      "css": ".ds-night { background: #1c1b1a; padding: 24px; border-radius: 12px; display: inline-block; } .ds-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 10px 18px; border-radius: 8px; border: 1px solid transparent; font-family: Archivo, system-ui, sans-serif; font-weight: 600; font-size: 15px; line-height: 20px; text-decoration: none; cursor: pointer; transition: border-color 120ms ease, color 120ms ease; } .ds-btn-on-dark { background: transparent; color: #f3f2f2; border-color: #3a3735; } .ds-btn-on-dark:hover { border-color: #f3f2f2; } .ds-btn-on-dark:focus-visible { outline: 2px solid #ff6a33; outline-offset: 2px; }"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Search and support fields: 44px, hairline, focus ring in the focus colour.",
+      "html": "<label class=\"ds-field\"><span class=\"ds-field-label\">Contest name</span><input class=\"ds-input\" type=\"text\" placeholder=\"Front Range Open\"></label>",
+      "css": ".ds-field { display: flex; flex-direction: column; gap: 6px; font-family: Archivo, system-ui, sans-serif; color: #201e1d; } .ds-field-label { font-size: 14px; font-weight: 600; } .ds-input { width: 100%; min-height: 44px; padding: 10px 12px; border-radius: 8px; border: 1px solid #b9b3aa; background: #ffffff; color: #201e1d; font: inherit; font-size: 16px; } .ds-input::placeholder { color: #605d5d; } .ds-input:focus-visible { outline: 2px solid #201e1d; outline-offset: 1px; border-color: #201e1d; }"
+    },
+    {
+      "name": "Status Chip",
+      "kind": "chip",
+      "refersTo": "pill-live",
+      "description": "Status is the word plus a drawn icon; colour is the third signal.",
+      "html": "<span class=\"ds-pill ds-pill-live\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 16 16\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M4 2.5v11l9-5.5z\"/></svg>In progress</span> <span class=\"ds-pill ds-pill-done\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 16 16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><path d=\"M3 8.5 6.5 12 13 4.5\"/></svg>Completed</span> <span class=\"ds-pill\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 16 16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" aria-hidden=\"true\"><circle cx=\"8\" cy=\"8\" r=\"6\"/><path d=\"M8 4.5V8l2.5 1.5\"/></svg>Coming</span>",
+      "css": ".ds-pill { display: inline-flex; align-items: center; gap: 6px; font-family: Archivo, system-ui, sans-serif; font-size: 13px; font-weight: 600; line-height: 20px; padding: 3px 10px 3px 8px; border-radius: 999px; white-space: nowrap; background: #e8e4dc; color: #201e1d; border: 1px solid #d6d2cc; } .ds-pill-live { background: #b83300; border-color: #b83300; color: #ffffff; } .ds-pill-done { background: #d8efe1; border-color: transparent; color: #0f4a2b; }"
+    },
+    {
+      "name": "Station Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "A card whose top strip is a night bezel with a stencil code and a role label.",
+      "html": "<article class=\"ds-card\"><div class=\"ds-bezel\"><span class=\"ds-stencil\">CD</span><span class=\"ds-role\">Contest director</span></div><h3 class=\"ds-title\">Contest administration</h3><p class=\"ds-copy\">Create the contest, draw the matrix, enter official scores and publish.</p></article>",
+      "css": ".ds-card { background: #ffffff; border: 1px solid #d6d2cc; border-radius: 12px; padding: 22px; max-width: 320px; font-family: Archivo, system-ui, sans-serif; color: #201e1d; box-shadow: 0 1px 2px rgb(12 11 11 / 0.06), 0 8px 24px -12px rgb(12 11 11 / 0.25); } .ds-bezel { display: flex; align-items: center; gap: 12px; margin: -22px -22px 6px; padding: 12px 18px; background: #1c1b1a; color: #f3f2f2; border-radius: 12px 12px 0 0; border-bottom: 1px solid #3a3735; } .ds-stencil { font-family: 'Saira Stencil One', 'League Spartan', sans-serif; font-size: 26px; line-height: 1; letter-spacing: 0.02em; } .ds-role { font-size: 13px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: #b8b3ad; } .ds-title { font-family: 'League Spartan', Archivo, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.08; margin: 12px 0 8px; } .ds-copy { margin: 0; font-size: 15px; line-height: 1.55; color: #605d5d; }"
+    },
+    {
+      "name": "Header Navigation",
+      "kind": "nav",
+      "refersTo": "panel",
+      "description": "The night strip shared by every page: wordmark, three links, a small ghost Sign in.",
+      "html": "<header class=\"ds-header\"><span class=\"ds-wordmark\"><span class=\"ds-rc\">RC</span> Soar Score</span><nav class=\"ds-nav\"><a href=\"#\">Contests</a><a href=\"#\">Documentation</a><a href=\"#\">Support</a><a class=\"ds-signin\" href=\"#\">Sign in</a></nav></header>",
+      "css": ".ds-header { display: flex; align-items: center; justify-content: space-between; gap: 24px; height: 64px; padding: 0 16px; background: #1c1b1a; color: #f3f2f2; font-family: Archivo, system-ui, sans-serif; border-bottom: 1px solid #3a3735; } .ds-wordmark { font-family: 'League Spartan', Archivo, sans-serif; font-weight: 800; font-size: 18px; letter-spacing: 0.02em; text-transform: uppercase; } .ds-rc { color: #ff6a33; } .ds-nav { display: flex; align-items: center; gap: 20px; } .ds-nav a { color: #f3f2f2; text-decoration: none; font-weight: 600; font-size: 15px; } .ds-nav a:hover { text-decoration: underline; text-underline-offset: 0.15em; } .ds-signin { display: inline-flex; align-items: center; min-height: 44px; padding: 7px 14px; border: 1px solid #3a3735; border-radius: 8px; font-size: 14px; } .ds-signin:hover { border-color: #f3f2f2; } .ds-nav a:focus-visible { outline: 2px solid #ff6a33; outline-offset: 2px; }"
+    },
+    {
+      "name": "Score Bar",
+      "kind": "custom",
+      "refersTo": "card",
+      "description": "A score component: label, tabular readout, 10px bar; a penalty fills from the right and is hatched.",
+      "html": "<dl class=\"ds-parts\"><div class=\"ds-part\"><dt><span>Landing</span><span class=\"ds-num\">35 cm · 50 pts</span></dt><dd><span class=\"ds-bar\" style=\"--w:62%\"></span>Bonus points by distance to the spot.</dd></div><div class=\"ds-part\"><dt><span>Launch height</span><span class=\"ds-num\">118 m · −59 pts</span></dt><dd><span class=\"ds-bar ds-bar-penalty\" style=\"--w:38%\"></span>Half a point per metre of launch height.</dd></div></dl>",
+      "css": ".ds-parts { margin: 0; display: grid; gap: 18px; max-width: 420px; font-family: Archivo, system-ui, sans-serif; color: #201e1d; } .ds-part { display: grid; gap: 6px; } .ds-part dt { display: flex; justify-content: space-between; gap: 12px; font-weight: 700; font-size: 15px; } .ds-num { font-variant-numeric: tabular-nums; font-weight: 500; color: #605d5d; } .ds-part dd { margin: 0; font-size: 15px; color: #605d5d; } .ds-bar { display: block; height: 10px; border-radius: 5px; background: #e8e4dc; margin-bottom: 8px; overflow: hidden; position: relative; } .ds-bar::after { content: ''; position: absolute; inset: 0; width: var(--w); background: #201e1d; border-radius: 5px; } .ds-bar-penalty::after { inset: 0 0 0 auto; background: repeating-linear-gradient(135deg, #605d5d 0 6px, transparent 6px 10px); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Cockpit Instrument Panel",
+    "overview": "RC Soar Score looks like the instruments a pilot trusts: a dark bezel, an engraved label, one orange needle, numbers that line up. The public site carries that panel onto the web. Dark sections are the instrument face (night black, hairline seams, an orange sweep); light sections are the paper the results are printed on. Nothing is decorative that costs legibility, because the real use scene is a phone in direct sun between flights.\n\nThe mood is purposeful, legible, outdoors. Density is comfortable rather than dense: generous section padding, tight groups inside cards, a 65ch reading measure. Colour is spent sparingly so the orange keeps its force as a pointer. The system must never read as a generic SaaS dashboard: no gradient text, no glass, no colour-only status, no stock illustration.",
+    "keyCharacteristics": [
+      "One Dayglo Wing Orange element per area of a screen; the rest is night, paper and ink.",
+      "Three faces with fixed jobs: League Spartan for headings, Archivo for everything you read or count, Saira Stencil One for one stencilled number or code per screen.",
+      "Always-dark instrument panels sit inside both light and dark themes.",
+      "Status is text plus a drawn icon, never colour alone.",
+      "Every animation respects reduced motion and nothing is hidden behind JavaScript."
+    ],
+    "rules": [
+      { "name": "The One Needle Rule", "body": "One orange element per area of a screen. A second orange in the same area is a second needle, and the reader no longer knows where to look.", "section": "colors" },
+      { "name": "The Small Text Rule", "body": "Small text on orange, and orange on light paper, uses Deep Orange. Wing Orange is for graphics and display sizes only.", "section": "colors" },
+      { "name": "The Panel Stays Dark Rule", "body": "Instrument panels are night black in both themes. Theme switching remaps the canvas and cards, never the panel.", "section": "colors" },
+      { "name": "The 13px Floor Rule", "body": "No label goes below 13px. Sunlight and sunglasses are the baseline, not the edge case.", "section": "typography" },
+      { "name": "The One Stencil Rule", "body": "Saira Stencil One appears once per screen area, for a number or a short code, never for a sentence.", "section": "typography" },
+      { "name": "The Hairline First Rule", "body": "Separate with a 1px line and a surface step before reaching for a shadow. Shadows exist only where tone cannot do the job.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do keep one orange element per area of a screen, and make it the thing to act on or read.",
+      "Do put the word next to every status icon and colour.",
+      "Do keep every label at 13px or above and every target at 44px or above.",
+      "Do draw icons as 16 or 24 unit stroke SVGs at 1.8 to 2px; one stroke family across the site.",
+      "Do use tabular numerals for anything counted or timed.",
+      "Do give every scroll animation a no-JavaScript and reduced-motion fallback that shows the content."
+    ],
+    "donts": [
+      "Don't retype the wordmark; use the logo files from the brand kit.",
+      "Don't put Wing Orange on small text or on light paper; use Deep Orange.",
+      "Don't add gradient text, glass blur, neon glows or stock illustration; the panel is matte.",
+      "Don't change a panel's night background when the theme changes.",
+      "Don't use colour alone to say in progress, completed, dropped, re-flight or penalty.",
+      "Don't add a second display face or a fourth font; the three faces are fixed by the kit."
+    ]
+  }
+}

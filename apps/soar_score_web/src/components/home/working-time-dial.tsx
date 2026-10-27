@@ -62,7 +62,7 @@ export function WorkingTimeDial() {
           WORKING TIME
         </text>
         <text x="160" y="258" textAnchor="middle" className={styles.readout}>
-          10:00
+          3:48
         </text>
 
         {/* The glider hand. */}

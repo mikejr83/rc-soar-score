@@ -39,6 +39,6 @@ export const repositoryUrl = "https://github.com/mikejr83/rc-soar-score";
 /** Header navigation, in order. Contests comes first on a phone. */
 export const primaryNav = [
   { href: "/results/contests", label: "Contests" },
-  { href: "/docs", label: "Docs" },
+  { href: "/docs", label: "Documentation" },
   { href: "/support", label: "Support" },
 ] as const;

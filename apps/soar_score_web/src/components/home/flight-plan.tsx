@@ -11,12 +11,12 @@ const legs = [
   {
     n: "02",
     title: "Register",
-    copy: "Add pilots from your own list or pull their details from the service. Build teams if the format has them.",
+    copy: "Add pilots and their details from your own list. Build teams if the format has them.",
   },
   {
     n: "03",
     title: "Draw the matrix",
-    copy: "Seeded man-on-man or a straight draw, printed as a flight matrix so every pilot knows their group.",
+    copy: "Seeded groups, so every pilot meets every rival about as often, or a straight draw. Printed as a flight matrix so each pilot knows their group.",
   },
   {
     n: "04",
@@ -26,18 +26,19 @@ const legs = [
   {
     n: "05",
     title: "Publish",
-    copy: "Standings go live on this site round by round. Hide overall results until the final flight if you want the drama.",
+    copy: "Standings go on this site round by round. Hide the overall results until the final flight if you want the drama.",
   },
 ] as const;
 
 /**
  * A contest day as a flight plan. The glider follows the route as the
- * section scrolls through the viewport (CSS scroll-driven animation); where
- * that is unsupported it rests at the end of the route.
+ * section scrolls through the viewport (CSS scroll-driven animation), bobbing
+ * as if in lift while the dashes march like moving air; where scroll
+ * timelines are unsupported it rests at the end of the route.
  */
 export function FlightPlan() {
   return (
-    <section className={`${styles.plan} section`} aria-labelledby="plan-title">
+    <section className={`${styles.plan} section seams-host`} aria-labelledby="plan-title">
       <div className={`seams ${styles.seams}`} aria-hidden="true" />
       <div className="wrap">
         <Reveal className={styles.head}>
@@ -50,17 +51,21 @@ export function FlightPlan() {
         <div className={styles.route}>
           <svg className={styles.path} viewBox="0 0 1000 120" preserveAspectRatio="none" aria-hidden="true">
             <path
+              className={styles.track}
               d="M0,100 C150,100 150,20 300,20 S450,100 600,100 S750,20 900,20 L1000,20"
               fill="none"
               stroke="currentColor"
               strokeWidth="2"
               strokeDasharray="6 8"
+              pathLength="1000"
             />
             <g className={styles.glider}>
-              <path
-                d="M-30,-2 L-2,-5 L30,-12 L30,-9 L0,-1 L-2,1 L30,5 L30,8 L-2,1 L-30,-1 Z"
-                fill="var(--panel-accent)"
-              />
+              <g className={styles.lift}>
+                <path
+                  d="M-30,-2 L-2,-5 L30,-12 L30,-9 L0,-1 L-2,1 L30,5 L30,8 L-2,1 L-30,-1 Z"
+                  fill="var(--panel-accent)"
+                />
+              </g>
             </g>
           </svg>
           <ol className={styles.legs}>
