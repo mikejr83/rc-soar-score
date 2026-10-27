@@ -391,4 +391,37 @@ void main() {
       expect(assignments, hasLength(18));
     });
   });
+
+  group('contest-scoped authorization', () {
+    late TwoAccountApi two;
+
+    setUp(() => two = TwoAccountApi(owner: _owner));
+
+    test('a foreign director cannot draw a contest', () async {
+      two.storeContest(Id.parse(_contestId));
+
+      await two.expectDenied(
+        two.outsiderApi,
+        'POST',
+        '/contests/$_contestId/matrix/draws',
+        body: {
+          'id': '019c0000-0000-7000-8000-000000000501',
+          'rounds': 1,
+          'groups_per_round': 1,
+          'random_seed': 7,
+        },
+      );
+
+      expect(two.ownerApi.repository.matrixRevisions.revisions, isEmpty);
+    });
+
+    test('a foreign director cannot read or cancel a draw', () async {
+      two.storeContest(Id.parse(_contestId));
+      const drawId = '019c0000-0000-7000-8000-000000000501';
+      final path = '/contests/$_contestId/matrix/draws/$drawId';
+
+      await two.expectDenied(two.outsiderApi, 'GET', path);
+      await two.expectDenied(two.outsiderApi, 'DELETE', path);
+    });
+  });
 }

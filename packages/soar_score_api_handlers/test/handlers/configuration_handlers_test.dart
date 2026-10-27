@@ -7,6 +7,7 @@ import 'package:test/test.dart';
 
 import '../stubs/stub_contest_repository.dart';
 import '../stubs/stub_repository.dart';
+import 'handler_test_support.dart';
 
 final _owner = Id.parse('019c0000-0000-7000-8000-000000000001');
 const _contestId = '019c0000-0000-7000-8000-000000000020';
@@ -211,6 +212,41 @@ void main() {
         ],
         [1, 2],
       );
+    });
+  });
+
+  group('contest-scoped authorization', () {
+    late TwoAccountApi two;
+
+    setUp(() {
+      two = TwoAccountApi(owner: _owner);
+      two.storeContest(Id.parse(_contestId));
+    });
+
+    test('a foreign director cannot read or save the configuration', () async {
+      await two.expectDenied(
+        two.outsiderApi,
+        'GET',
+        '/contests/$_contestId/configuration',
+      );
+      await two.expectDenied(
+        two.outsiderApi,
+        'GET',
+        '/contests/$_contestId/configuration/revisions',
+      );
+      await two.expectDenied(
+        two.outsiderApi,
+        'POST',
+        '/contests/$_contestId/configuration',
+        body: _body(),
+      );
+
+      final own = await two.ownerApi.send(
+        'POST',
+        '/contests/$_contestId/configuration',
+        body: _body(),
+      );
+      expect(own.statusCode, 201, reason: '${await json(own)}');
     });
   });
 }

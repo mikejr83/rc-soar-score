@@ -2,6 +2,7 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_api_handlers/auth/principal.dart';
+import 'package:soar_score_api_handlers/handlers/contest_authorization.dart';
 import 'package:soar_score_api_handlers/handlers/health_handler.dart';
 import 'package:soar_score_api_handlers/handlers/request_body.dart';
 import 'package:soar_score_api_handlers/handlers/write_metadata.dart';
@@ -21,8 +22,9 @@ void addTeamRoutes(Router router, Repository repository) {
   final service = TeamsService(repository);
 
   router.get('/contests/<id>/teams', (Request request, String id) async {
-    requirePrincipal(request);
-    final teams = await service.listTeams(Id.parse(id));
+    final contestId = Id.parse(id);
+    await requireContestDirector(request, repository, contestId);
+    final teams = await service.listTeams(contestId);
     return jsonResponse(<String, dynamic>{
       'teams': [for (final team in teams) team.toJson()],
     });
@@ -31,6 +33,7 @@ void addTeamRoutes(Router router, Repository repository) {
   router.post('/contests/<id>/teams', (Request request, String id) async {
     final principal = requirePrincipal(request);
     final contestId = Id.parse(id);
+    await requireContestDirector(request, repository, contestId);
     final body = await readJsonBody(request, CreateTeamRequest.fromJson);
 
     final team = await service.createTeam(
@@ -48,10 +51,12 @@ void addTeamRoutes(Router router, Repository repository) {
     String teamId,
   ) async {
     final principal = requirePrincipal(request);
+    final contestId = Id.parse(id);
+    await requireContestDirector(request, repository, contestId);
     final body = await readJsonBody(request, UpdateTeamRequest.fromJson);
 
     final team = await service.renameTeam(
-      Id.parse(id),
+      contestId,
       Id.parse(teamId),
       name: body.name,
       baseRevision: body.baseRevision,
@@ -66,8 +71,10 @@ void addTeamRoutes(Router router, Repository repository) {
     String teamId,
   ) async {
     final principal = requirePrincipal(request);
+    final contestId = Id.parse(id);
+    await requireContestDirector(request, repository, contestId);
     await service.deleteTeam(
-      Id.parse(id),
+      contestId,
       Id.parse(teamId),
       metadata: writeMetadata(principal),
     );
@@ -78,8 +85,9 @@ void addTeamRoutes(Router router, Repository repository) {
     Request request,
     String id,
   ) async {
-    requirePrincipal(request);
-    final memberships = await service.listMemberships(Id.parse(id));
+    final contestId = Id.parse(id);
+    await requireContestDirector(request, repository, contestId);
+    final memberships = await service.listMemberships(contestId);
     return jsonResponse(<String, dynamic>{
       'team_memberships': [
         for (final membership in memberships) membership.toJson(),
@@ -93,6 +101,7 @@ void addTeamRoutes(Router router, Repository repository) {
   ) async {
     final principal = requirePrincipal(request);
     final contestId = Id.parse(id);
+    await requireContestDirector(request, repository, contestId);
     final body = await readJsonBody(request, AddTeamMemberRequest.fromJson);
 
     final membership = await service.addMember(
@@ -111,8 +120,10 @@ void addTeamRoutes(Router router, Repository repository) {
     String membershipId,
   ) async {
     final principal = requirePrincipal(request);
+    final contestId = Id.parse(id);
+    await requireContestDirector(request, repository, contestId);
     await service.removeMember(
-      Id.parse(id),
+      contestId,
       Id.parse(membershipId),
       metadata: writeMetadata(principal),
     );

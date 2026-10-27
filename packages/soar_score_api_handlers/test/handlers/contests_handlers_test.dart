@@ -7,6 +7,7 @@ import 'package:test/test.dart';
 
 import '../stubs/stub_contest_repository.dart';
 import '../stubs/stub_repository.dart';
+import 'handler_test_support.dart';
 
 final _owner = Id.parse('019c0000-0000-7000-8000-000000000001');
 final _contestId = '019c0000-0000-7000-8000-000000000020';
@@ -330,6 +331,92 @@ void main() {
     test('an unknown contest is 404', () async {
       final response = await send('GET', '/contests/$_contestId/audit-events');
       expect(response.statusCode, 404);
+    });
+  });
+
+  group('contest-scoped authorization', () {
+    const contestAId = '019c0000-0000-7000-8000-000000000030';
+    const contestBId = '019c0000-0000-7000-8000-000000000031';
+    late TwoAccountApi two;
+
+    setUp(() {
+      two = TwoAccountApi();
+      two.storeContest(Id.parse(contestAId));
+      two.storeContest(Id.parse(contestBId), ownerAccountId: two.outsider);
+    });
+
+    test('a foreign director is refused, the owner still works', () async {
+      await two.expectDenied(two.outsiderApi, 'GET', '/contests/$contestAId');
+      await two.expectDenied(
+        two.outsiderApi,
+        'PUT',
+        '/contests/$contestAId',
+        body: {'base_revision': 0, 'name': 'Renamed', 'city': 'Boulder'},
+      );
+      await two.expectDenied(
+        two.outsiderApi,
+        'POST',
+        '/contests/$contestAId/actions',
+        body: {'action': 'lock', 'base_revision': 0},
+      );
+      await two.expectDenied(
+        two.outsiderApi,
+        'GET',
+        '/contests/$contestAId/audit-events',
+      );
+      final unknown = await two.outsiderApi.send(
+        'GET',
+        '/contests/019c0000-0000-7000-8000-0000000000ff',
+      );
+      expect(unknown.statusCode, 404);
+
+      final own = await two.ownerApi.send('GET', '/contests/$contestAId');
+      expect(own.statusCode, 200);
+      final locked = await two.ownerApi.send(
+        'POST',
+        '/contests/$contestAId/actions',
+        body: {'action': 'lock', 'base_revision': 0},
+      );
+      expect(locked.statusCode, 200);
+    });
+
+    test('the list shows a director\'s own contests only', () async {
+      final foreign = await two.outsiderApi.json(
+        await two.outsiderApi.send('GET', '/contests'),
+      );
+      final foreignIds = [
+        for (final c in foreign['contests']! as List)
+          (c as Map<String, Object?>)['id'] as String,
+      ];
+      expect(foreignIds, contains(contestBId));
+      expect(foreignIds, isNot(contains(contestAId)));
+
+      final own = await two.ownerApi.json(await two.ownerApi.send('GET', '/contests'));
+      final ownIds = [
+        for (final c in own['contests']! as List)
+          (c as Map<String, Object?>)['id'] as String,
+      ];
+      expect(ownIds, contains(contestAId));
+      expect(ownIds, isNot(contains(contestBId)));
+    });
+
+    test('alsoVisibleOwners adds a foreign contest to the list', () async {
+      final scoped = TwoAccountApi(
+        owner: two.owner,
+        outsider: two.outsider,
+        alsoVisibleOwners: {two.outsider},
+      );
+      scoped.storeContest(Id.parse(contestAId));
+      scoped.storeContest(Id.parse(contestBId), ownerAccountId: two.outsider);
+
+      final list = await scoped.ownerApi.json(
+        await scoped.ownerApi.send('GET', '/contests'),
+      );
+      final ids = [
+        for (final c in list['contests']! as List)
+          c as Map<String, Object?>,
+      ].map((c) => c['id'] as String);
+      expect(ids, containsAll([contestAId, contestBId]));
     });
   });
 

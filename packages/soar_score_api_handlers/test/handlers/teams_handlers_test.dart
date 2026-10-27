@@ -334,4 +334,34 @@ void main() {
       expect(api.repository.teamMemberships.memberships, isEmpty);
     });
   });
+
+  group('contest-scoped authorization', () {
+    late TwoAccountApi two;
+
+    setUp(() => two = TwoAccountApi(owner: _owner));
+
+    test('a foreign director cannot create teams or memberships', () async {
+      two.storeContest(Id.parse(_contestId));
+
+      await two.expectDenied(
+        two.outsiderApi,
+        'POST',
+        '/contests/$_contestId/teams',
+        body: {'id': _teamId, 'name': 'Team Red'},
+      );
+      await two.expectDenied(
+        two.outsiderApi,
+        'POST',
+        '/contests/$_contestId/team-memberships',
+        body: {
+          'id': _membershipId,
+          'team_id': _teamId,
+          'contest_participation_id': _pilotParticipation,
+        },
+      );
+
+      expect(two.ownerApi.repository.teams.teams, isEmpty);
+      expect(two.ownerApi.repository.teamMemberships.memberships, isEmpty);
+    });
+  });
 }

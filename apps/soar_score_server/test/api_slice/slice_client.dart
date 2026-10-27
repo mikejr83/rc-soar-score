@@ -20,7 +20,7 @@ enum SliceBackend { sqlite, postgres }
 /// tables exist. Every request acts as [director], whose account is stored
 /// first because publishing needs its profile.
 class SliceClient {
-  SliceClient._(this.database, this.director, this._handler, this._drop);
+  SliceClient._(this.database, this.director, this._drop);
 
   static Future<SliceClient> open(SliceBackend backend) async {
     final director = core.Id.create();
@@ -63,17 +63,23 @@ class SliceClient {
         updatedAt: now,
       ),
     );
-    final handler = createServerHandler(
-      database,
-      authMiddleware: fixedPrincipal(Principal(accountId: director)),
-    );
-    return SliceClient._(database, director, handler, drop);
+    return SliceClient._(database, director, drop);
   }
 
   final SoarScoreDatabase database;
   final core.Id director;
-  final Handler _handler;
   final Future<void> Function()? _drop;
+  final Map<core.Id, Handler> _handlers = {};
+
+  /// The handler stack acting as [principal], cached per principal. Every
+  /// request to [database] goes through it, so tests can act as two
+  /// accounts over the same database.
+  Handler handlerFor(core.Id principal) =>
+      _handlers.putIfAbsent(
+          principal, () => createServerHandler(
+            database,
+            authMiddleware: fixedPrincipal(Principal(accountId: principal)),
+          ));
 
   Future<void> close() async {
     await database.close();
@@ -88,8 +94,13 @@ class SliceClient {
   Future<SliceResponse> publicGet(String path) =>
       _call('GET', '/public$path', null);
 
-  Future<SliceResponse> _call(String method, String path, Object? body) async {
-    final response = await _handler(
+  Future<SliceResponse> _call(
+    String method,
+    String path,
+    Object? body, {
+    Handler? handler,
+  }) async {
+    final response = await (handler ?? handlerFor(director))(
       Request(
         method,
         Uri.parse('http://localhost$path'),
@@ -115,6 +126,33 @@ class SliceClient {
     final response = await send(method, path, body: body);
     expect(response.status, status, reason: '$method $path: ${response.body}');
     return response.body;
+  }
+
+  /// Sends [method] to `/api/v1[path]` acting as [principal].
+  Future<SliceResponse> actAs(
+    core.Id principal,
+    String method,
+    String path, {
+    Object? body,
+  }) {
+    return _call(method, '/api/v1$path', body, handler: handlerFor(principal));
+  }
+
+  /// Sent as [principal], [method] [path] must return the 403 `not_director`.
+  Future<void> expectForeignDenied(
+    core.Id principal,
+    String method,
+    String path, {
+    Object? body,
+  }) async {
+    final response = await actAs(principal, method, path, body: body);
+    expect(
+      response.status,
+      403,
+      reason: '$method $path as foreign account: ${response.body}',
+    );
+    final error = response.body['error']! as Map<String, Object?>;
+    expect(error['code'], 'not_director');
   }
 }
 

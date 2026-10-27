@@ -3,6 +3,7 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_api_handlers/auth/principal.dart';
+import 'package:soar_score_api_handlers/handlers/contest_authorization.dart';
 import 'package:soar_score_api_handlers/handlers/health_handler.dart';
 import 'package:soar_score_api_handlers/handlers/request_body.dart';
 import 'package:soar_score_api_handlers/handlers/write_metadata.dart';
@@ -48,8 +49,9 @@ void addScoreRoutes(
   final publicUpdates = PublicUpdateService(repository);
 
   router.get('/contests/<id>/scores', (Request request, String id) async {
-    requirePrincipal(request);
-    final scores = await service.list(Id.parse(id));
+    final contestId = Id.parse(id);
+    await requireContestDirector(request, repository, contestId);
+    final scores = await service.list(contestId);
     return jsonResponse(scores.toJson());
   });
 
@@ -58,11 +60,12 @@ void addScoreRoutes(
     String id,
     String assignmentId,
   ) async {
-    requirePrincipal(request);
+    final contestId = Id.parse(id);
+    await requireContestDirector(request, repository, contestId);
     _logger.fine(
       'Fetching score history for assignment $assignmentId in contest $id',
     );
-    final history = await service.history(Id.parse(id), Id.parse(assignmentId));
+    final history = await service.history(contestId, Id.parse(assignmentId));
     return jsonResponse(history.toJson());
   });
 
@@ -72,6 +75,8 @@ void addScoreRoutes(
     String assignmentId,
   ) async {
     final principal = requirePrincipal(request);
+    final contestId = Id.parse(id);
+    await requireContestDirector(request, repository, contestId);
     final body = await readJsonBody(request, EnterScoreRequest.fromJson);
 
     _logger.fine(
@@ -79,7 +84,7 @@ void addScoreRoutes(
     );
 
     var result = await service.enterOfficialScore(
-      Id.parse(id),
+      contestId,
       Id.parse(assignmentId),
       clientMutationId: body.clientMutationId,
       baseScoreRevision: body.baseScoreRevision,
@@ -88,9 +93,7 @@ void addScoreRoutes(
       actorId: principal.accountId,
       metadata: writeMetadata(principal),
     );
-    final warning = await recalculationService.recalculateAfterEntry(
-      Id.parse(id),
-    );
+    final warning = await recalculationService.recalculateAfterEntry(contestId);
     if (warning != null) {
       _logger.info(
         'Recalculation warning for assignment $assignmentId in contest $id: $warning',
@@ -113,7 +116,7 @@ void addScoreRoutes(
       );
       try {
         await publicUpdates.afterScoreEntry(
-          Id.parse(id),
+          contestId,
           assignmentId: Id.parse(assignmentId),
           entryMutationId: body.clientMutationId,
         );

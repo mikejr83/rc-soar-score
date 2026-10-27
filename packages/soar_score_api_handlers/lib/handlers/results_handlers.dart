@@ -1,6 +1,6 @@
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
-import 'package:soar_score_api_handlers/auth/principal.dart';
+import 'package:soar_score_api_handlers/handlers/contest_authorization.dart';
 import 'package:soar_score_api_handlers/handlers/health_handler.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 import 'package:logging/logging.dart';
@@ -22,7 +22,8 @@ void addResultsRoutes(Router router, Repository repository) {
   final service = ResultsService(repository);
 
   router.get('/contests/<id>/results', (Request request, String id) async {
-    requirePrincipal(request);
+    final contestId = Id.parse(id);
+    await requireContestDirector(request, repository, contestId);
 
     final asOfRound = request.url.queryParameters['asOfRound'];
     final round = asOfRound == null ? null : int.tryParse(asOfRound);
@@ -36,7 +37,7 @@ void addResultsRoutes(Router router, Repository repository) {
     if (asOfRound != null && round == null) {
       throw ArgumentError.value(asOfRound, 'asOfRound', 'not a round number');
     }
-    final results = await service.read(Id.parse(id), asOfRound: round);
+    final results = await service.read(contestId, asOfRound: round);
     return jsonResponse(results.toJson());
   });
 
@@ -45,12 +46,13 @@ void addResultsRoutes(Router router, Repository repository) {
     String id,
     String ordinal,
   ) async {
-    requirePrincipal(request);
+    final contestId = Id.parse(id);
+    await requireContestDirector(request, repository, contestId);
     final round = int.tryParse(ordinal);
     if (round == null) {
       throw ArgumentError.value(ordinal, 'ordinal', 'not a round number');
     }
-    final results = await service.round(Id.parse(id), round);
+    final results = await service.round(contestId, round);
     return jsonResponse(results.toJson());
   });
 
@@ -58,9 +60,10 @@ void addResultsRoutes(Router router, Repository repository) {
     Request request,
     String id,
   ) async {
-    requirePrincipal(request);
+    final contestId = Id.parse(id);
+    await requireContestDirector(request, repository, contestId);
     _logger.fine('Recalculating results for contest $id');
-    final results = await service.recalculate(Id.parse(id));
+    final results = await service.recalculate(contestId);
     return jsonResponse(results.toJson());
   });
 }
