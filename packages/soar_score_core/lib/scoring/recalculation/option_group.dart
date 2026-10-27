@@ -21,6 +21,7 @@ enum OptionGroup {
 const Map<String, OptionGroup> coreOptionGroups = {
   'teams_enabled': OptionGroup.structural,
   'team_protection': OptionGroup.structural,
+  'allow_back_to_back': OptionGroup.structural,
   'roles_enabled': OptionGroup.structural,
   'draw_mode': OptionGroup.structural,
   'preliminary_rounds': OptionGroup.structural,

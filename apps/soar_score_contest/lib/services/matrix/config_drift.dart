@@ -27,6 +27,12 @@ abstract final class ConfigDrift {
       options.teamProtection ? 'On' : 'Off',
       protection is bool ? (protection ? 'On' : 'Off') : null,
     );
+    final backToBack = drawn['allow_back_to_back'];
+    compare(
+      'Back-to-back flights',
+      options.allowBackToBack ? 'Allowed' : 'Avoided',
+      backToBack is bool ? (backToBack ? 'Allowed' : 'Avoided') : null,
+    );
     compare(
       'Draw mode',
       drawModeText(options.drawMode),

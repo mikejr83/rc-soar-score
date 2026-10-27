@@ -139,6 +139,17 @@ void main() {
     expect(draft.recalcChanges, isEmpty);
   });
 
+  test('back-to-back flights start on, outdate the matrix and are saved', () {
+    final draft = _draft(phase: ConfigPhase.drawn);
+    expect(draft[SettingKeys.allowBackToBack], isTrue);
+
+    draft.set(SettingKeys.allowBackToBack, false);
+
+    expect(draft.matrixChanges.single.def.key, SettingKeys.allowBackToBack);
+    final saved = ConfigurationValues.toSave(draft, configRevision(1));
+    expect(CoreOptions.fromMap(saved.config.core).allowBackToBack, isFalse);
+  });
+
   test('a scoring change while running recalculates, structure is fixed', () {
     final draft = _draft(phase: ConfigPhase.running)
       ..set(SettingKeys.decimalPlaces, 2);

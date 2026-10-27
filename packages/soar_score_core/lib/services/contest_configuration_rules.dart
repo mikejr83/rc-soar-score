@@ -70,6 +70,7 @@ abstract final class ContestConfigurationRules {
     final b = next.config.coreOptions;
     return a.teamsEnabled != b.teamsEnabled ||
         a.teamProtection != b.teamProtection ||
+        a.allowBackToBack != b.allowBackToBack ||
         a.drawMode != b.drawMode ||
         a.preliminaryRounds != b.preliminaryRounds ||
         a.laneMode != b.laneMode;
@@ -88,6 +89,7 @@ abstract final class ContestConfigurationRules {
 
     check('teams_enabled', a.teamsEnabled, b.teamsEnabled);
     check('team_protection', a.teamProtection, b.teamProtection);
+    check('allow_back_to_back', a.allowBackToBack, b.allowBackToBack);
     check('roles_enabled', a.rolesEnabled, b.rolesEnabled);
     check('draw_mode', a.drawMode, b.drawMode);
     check('preliminary_rounds', a.preliminaryRounds, b.preliminaryRounds);

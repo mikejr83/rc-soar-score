@@ -1,7 +1,7 @@
 # Draw Algorithm Review — GliderScore Comparison and Recommendations for `matrix-draw.md`
 
 Reviews [`plan/architecture-requirements/matrix-draw.md`](../../plan/architecture-requirements/matrix-draw.md)
-as of `8413c04`. The benchmark harness is [`draw_bench.py`](draw_bench.py) in this folder.
+as of `8413c04`. The benchmark harness is [`draw_bench.py`](draw_bench.py) in this folder. The Dart engine has its own port of the 30 and 63 pilot layouts, `packages/soar_score_core/tool/draw_bench.dart`, run with `scripts/draw-bench.sh [--check] [--layout c1|c4|c10|all] [--seeds N]` (or the `.ps1`). It prints MAD, never-met pairs, max repeat and variance, and `--check` fails when a layout drops below its stored baseline (30 pilots MAD about 0.42, 63 pilots about 0.70).
 
 ## Provenance and clean-room note
 
