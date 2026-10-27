@@ -158,10 +158,12 @@ class BasicDraw {
   }
 
   /// The message of the error thrown when back-to-back flights are off and
-  /// no draw can avoid them.
+  /// no draw that avoids them was found. The search is randomized and
+  /// bounded, so this does not prove that none exists.
   static const String backToBackMessage =
-      'no draw can avoid back-to-back flights (a pilot in the last group of '
-      'one round and the first group of the next) with these groups; use '
+      'could not find a draw that avoids back-to-back flights (a pilot in '
+      'the last group of one round and the first group of the next) with '
+      'these groups; use more groups or allow back-to-back flights'; use '
       'more groups or allow back-to-back flights';
 
   /// The most pilots any one team has among [pilots].
