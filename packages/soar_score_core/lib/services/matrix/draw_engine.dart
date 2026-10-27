@@ -1,11 +1,13 @@
 import 'dart:math' as math;
 
 import '../../enums/lane_mode.dart';
+import '../../models/id.dart';
 import 'basic_draw.dart';
 import 'draw_fairness.dart';
 import 'draw_optimizer.dart';
 import 'lane_stats.dart';
 import 'matchup_stats.dart';
+import 'seeded_draw.dart';
 import 'seeded_random.dart';
 
 /// A finished draw: the groups, the seed that made them, and how fair they
@@ -151,6 +153,44 @@ class DrawEngine {
       history: history,
     );
     return DrawResult(rounds: best, seed: bestSeed, fairness: fairness);
+  }
+
+  /// Draws one seeded round (`SeededManOnMan`) after [history]: pilots are
+  /// tiered by [places] (participation to place, 1 is the leader) and the
+  /// leaders fly in the last group. Team protection does not apply.
+  ///
+  /// There is nothing to optimize: the tiers fix who flies with whom, so the
+  /// seed only orders pilots of equal place and the lanes. The fairness
+  /// report covers [history] and the seeded round together.
+  DrawResult generateSeeded({
+    required List<DrawPilot> pilots,
+    required Map<Id, int> places,
+    required int groupsPerRound,
+    required LaneMode laneMode,
+    required int seed,
+    List<List<List<DrawSlot>>> history = const [],
+  }) {
+    final round = const SeededDraw().generate(
+      pilots: pilots,
+      places: places,
+      groupsPerRound: groupsPerRound,
+      laneMode: laneMode,
+      random: SeededRandom(seed),
+    );
+    final all = [...history, round];
+    final fairness = drawFairness(all, teamProtection: false);
+    fairness['fairness_score'] = _score(
+      MatchupStats.of(all, teamProtection: false),
+      LaneStats.of(all),
+      laneMode: laneMode,
+      pilots: pilots,
+      rounds: 1,
+      groupsPerRound: groupsPerRound,
+      teamProtection: false,
+      fairness: fairness,
+      history: history,
+    );
+    return DrawResult(rounds: [round], seed: seed, fairness: fairness);
   }
 
   /// The total cost `J`: the matchup penalty plus [laneWeight] times the

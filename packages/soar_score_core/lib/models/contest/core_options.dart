@@ -50,6 +50,12 @@ class CoreOptions extends Equatable {
       );
     }
     final seeded = drawMode == DrawMode.seededManOnMan;
+    if (seeded && teamProtection) {
+      throw ArgumentError(
+        'team_protection cannot be used with SeededManOnMan: a seeded draw '
+        'deals pilots by standing, so teammates cannot be kept apart',
+      );
+    }
     if (!seeded && (preliminaryRounds != null || intendedTotalRounds != null)) {
       throw ArgumentError(
         'preliminary_rounds and intended_total_rounds need SeededManOnMan',

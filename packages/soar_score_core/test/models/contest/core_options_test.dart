@@ -149,6 +149,32 @@ void main() {
       );
     });
 
+    test('seeded draw and team protection are forbidden together', () {
+      expect(
+        () => CoreOptions.fromMap(const {
+          'draw_mode': 'SeededManOnMan',
+          'teams_enabled': true,
+          'team_pilot_count': 2,
+          'team_protection': true,
+        }),
+        throwsA(
+          isA<ArgumentError>().having(
+            (e) => e.message,
+            'message',
+            contains('cannot be used with SeededManOnMan'),
+          ),
+        ),
+      );
+      expect(
+        CoreOptions.fromMap(const {
+          'draw_mode': 'SeededManOnMan',
+          'teams_enabled': true,
+          'team_pilot_count': 2,
+        }).drawMode,
+        DrawMode.seededManOnMan,
+      );
+    });
+
     test('seeded options need SeededManOnMan', () {
       expect(
         () => CoreOptions.fromMap(const {'preliminary_rounds': 2}),
