@@ -31,6 +31,7 @@ class DrawFormPanel extends StatelessWidget {
     required this.onReload,
     this.progress,
     this.cancelling = false,
+    this.cancelFailed = false,
     this.onCancel,
     this.rejection,
     this.networkFailure = false,
@@ -50,6 +51,7 @@ class DrawFormPanel extends StatelessWidget {
   /// [DrawActionRow]).
   final DrawStatusDto? progress;
   final bool cancelling;
+  final bool cancelFailed;
   final VoidCallback? onCancel;
 
   /// The server's message when it rejected the draw's settings.
@@ -299,6 +301,7 @@ class DrawFormPanel extends StatelessWidget {
                   onFix: onFix,
                   progress: progress,
                   cancelling: cancelling,
+                  cancelFailed: cancelFailed,
                   onCancel: onCancel,
                 ),
               ],

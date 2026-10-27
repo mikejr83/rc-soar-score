@@ -185,6 +185,7 @@ class MatrixRedrawService {
 
     final requestedSeed = randomSeed ?? _newSeed();
     final drawn = await jobs.run(
+      contestId,
       id,
       _runner,
       DrawSpec(

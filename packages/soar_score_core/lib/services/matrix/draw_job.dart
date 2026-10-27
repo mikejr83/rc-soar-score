@@ -148,7 +148,8 @@ class DrawJobStatus {
 
 /// The draws this server is running or ran lately, by the id of the matrix
 /// revision they make, so a client can ask how far one has come or cancel
-/// it.
+/// it. Each belongs to the contest it draws for: asking about it, or
+/// cancelling it, through another contest finds nothing.
 class DrawJobs {
   DrawJobs({this.keep = 50});
 
@@ -157,22 +158,34 @@ class DrawJobs {
 
   final Map<Id, _Job> _jobs = {};
 
-  /// The status of draw [id], or `null` when it is not known.
-  DrawJobStatus? status(Id id) => _jobs[id]?.status;
+  /// The status of draw [id] of contest [contestId], or `null` when it is
+  /// not known there.
+  DrawJobStatus? status(Id contestId, Id id) => _find(contestId, id)?.status;
 
-  /// Cancels draw [id] if it is still being drawn and returns its status
-  /// (`null` when unknown). A draw that has finished is not changed.
-  DrawJobStatus? cancel(Id id) {
-    final job = _jobs[id];
+  /// Cancels draw [id] of contest [contestId] if it is still being drawn and
+  /// returns its status (`null` when unknown there). A draw that has
+  /// finished is not changed.
+  DrawJobStatus? cancel(Id contestId, Id id) {
+    final job = _find(contestId, id);
     if (job == null) return null;
     if (job.state == DrawJobState.running) job.cancellation.cancel();
     return job.status;
   }
 
-  /// Runs [spec] on [runner] as draw [id]. Fails with a
+  _Job? _find(Id contestId, Id id) {
+    final job = _jobs[id];
+    return job != null && job.contestId == contestId ? job : null;
+  }
+
+  /// Runs [spec] on [runner] as draw [id] of contest [contestId]. Fails with a
   /// [DrawCancelledError] when cancelled, and with a [ContestStateError]
   /// (`draw_running`) when [id] is already being drawn.
-  Future<DrawResult> run(Id id, DrawRunner runner, DrawSpec spec) async {
+  Future<DrawResult> run(
+    Id contestId,
+    Id id,
+    DrawRunner runner,
+    DrawSpec spec,
+  ) async {
     if (_jobs[id]?.state == DrawJobState.running) {
       throw ContestStateError(
         'draw_running',
@@ -180,7 +193,7 @@ class DrawJobs {
       );
     }
     _jobs.remove(id);
-    final job = _jobs[id] = _Job(id);
+    final job = _jobs[id] = _Job(contestId, id);
     try {
       final result = await runner.run(
         spec,
@@ -213,8 +226,9 @@ class DrawJobs {
 }
 
 class _Job {
-  _Job(this.id);
+  _Job(this.contestId, this.id);
 
+  final Id contestId;
   final Id id;
   final DrawCancellation cancellation = DrawCancellation();
   DrawJobState state = DrawJobState.running;

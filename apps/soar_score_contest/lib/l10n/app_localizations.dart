@@ -697,6 +697,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Draw cancelled. Nothing was changed.'**
   String get drawCancelled;
+
+  /// Shown beside the Cancel button when stopping a matrix draw failed several times in a row.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel could not reach the server. The draw is still running. Try Cancel again.'**
+  String get drawCancelFailed;
 }
 
 class _AppLocalizationsDelegate

@@ -12,6 +12,9 @@ const _otherId = '019c0000-0000-7000-8000-000000000502';
 /// A runner that reports 40% and then waits for a cancel or [release].
 class _HeldRunner implements DrawRunner {
   final release = Completer<void>();
+
+  /// Whether a draw waits for [release] or a cancel; otherwise it just runs.
+  bool hold = true;
   final reported = Completer<void>();
 
   @override
@@ -20,6 +23,7 @@ class _HeldRunner implements DrawRunner {
     void Function(DrawProgress progress)? onProgress,
     DrawCancellation? cancellation,
   }) async {
+    if (!hold) return spec.generate();
     onProgress?.call(const DrawProgress(percent: 40, seed: 2, seedCount: 3));
     if (!reported.isCompleted) reported.complete();
     final cancelled = Completer<void>();
@@ -118,5 +122,62 @@ void main() {
       await api.send('GET', '/contests/$matrixTestContestId/matrix'),
     );
     expect(matrix['revision'], isNotNull);
+  });
+
+  test('another contest cannot read or cancel a draw', () async {
+    final runner = _HeldRunner();
+    final api = HandlerHarness(owner, drawRunner: runner);
+    await drawnContest(api, skipDraw: true);
+    const elsewhere = '019c0000-0000-7000-8000-000000000099';
+    final drawing = api.send(
+      'POST',
+      path,
+      body: {'id': _drawId, 'rounds': 3, 'groups_per_round': 2},
+    );
+    await runner.reported.future;
+
+    final other = '/contests/$elsewhere/matrix/draws/$_drawId';
+    expect((await api.send('GET', other)).statusCode, 404);
+    expect((await api.send('DELETE', other)).statusCode, 404);
+
+    // The draw itself was not cancelled.
+    expect(
+      (await api.json(await api.send('GET', '$path/$_drawId')))['state'],
+      'running',
+    );
+    runner.release.complete();
+    expect((await drawing).statusCode, 201);
+  });
+
+  test('cancelling a redraw leaves the existing matrix intact', () async {
+    final runner = _HeldRunner()..hold = false;
+    final api = HandlerHarness(owner, drawRunner: runner);
+    await drawnContest(api);
+    Future<Map<String, Object?>> matrix() async => api.json(
+      await api.send('GET', '/contests/$matrixTestContestId/matrix'),
+    );
+    final before = await matrix();
+
+    runner.hold = true;
+    final redrawing = api.send(
+      'POST',
+      '/contests/$matrixTestContestId/matrix/redraws',
+      body: {
+        'id': _otherId,
+        'first_round': 4,
+        'rounds': 2,
+        'groups_per_round': 2,
+      },
+    );
+    await runner.reported.future;
+    expect((await api.send('DELETE', '$path/$_otherId')).statusCode, 200);
+
+    final response = await redrawing;
+    expect(response.statusCode, 409);
+    expect((await api.errorOf(response))['code'], 'draw_cancelled');
+    final after = await matrix();
+    expect(after['revision'], before['revision']);
+    expect(after['rounds'], before['rounds']);
+    expect(after['assignments'], before['assignments']);
   });
 }

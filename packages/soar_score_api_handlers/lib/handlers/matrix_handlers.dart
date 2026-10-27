@@ -19,7 +19,7 @@ import 'package:soar_score_core/soar_score_core.dart';
 /// - `GET /contests/{id}/matrix/draws/{drawId}` says how far a draw has come
 ///   (404 when the server does not know it), and `DELETE` on the same path
 ///   cancels it, which fails the draw request with 409 `draw_cancelled` and
-///   changes nothing; {drawId} is the `id` of the draw's request;
+///   changes nothing; {drawId} is the `id` of the draw's request and must belong to the contest in the path (404 otherwise);
 /// - `POST /contests/{id}/matrix/assignments/{assignmentId}/moves` moves a
 ///   pilot to another group, lane or round, resetting a score already
 ///   entered for the old slot;
@@ -83,7 +83,7 @@ void addMatrixRoutes(
     String drawId,
   ) async {
     requirePrincipal(request);
-    final status = jobs.status(Id.parse(drawId));
+    final status = jobs.status(Id.parse(id), Id.parse(drawId));
     if (status == null) {
       throw EntityNotFoundError(entityType: 'Draw', entityId: Id.parse(drawId));
     }
@@ -96,7 +96,7 @@ void addMatrixRoutes(
     String drawId,
   ) async {
     requirePrincipal(request);
-    final status = jobs.cancel(Id.parse(drawId));
+    final status = jobs.cancel(Id.parse(id), Id.parse(drawId));
     if (status == null) {
       throw EntityNotFoundError(entityType: 'Draw', entityId: Id.parse(drawId));
     }

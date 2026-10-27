@@ -56,6 +56,14 @@ class _MatrixPageState extends State<MatrixPage> {
   /// Whether Cancel was pressed for the draw being sent.
   bool _cancelRequested = false;
 
+  /// Cancel could not reach the server on several tries in a row; the
+  /// director can press it again.
+  bool _cancelFailed = false;
+  int _cancelFailures = 0;
+
+  /// How many failed tries of Cancel in a row are shown to the director.
+  static const int _cancelAttempts = 3;
+
   static const Duration _pollEvery = Duration(milliseconds: 400);
 
   @override
@@ -295,6 +303,8 @@ class _MatrixPageState extends State<MatrixPage> {
     _tickNow = null;
     _progress = null;
     _cancelRequested = false;
+    _cancelFailed = false;
+    _cancelFailures = 0;
   }
 
   /// One poll. After Cancel it asks again to cancel instead, until the server
@@ -309,11 +319,20 @@ class _MatrixPageState extends State<MatrixPage> {
       final status = _cancelRequested
           ? await client.cancelDraw(contestId, drawId)
           : await client.drawStatus(contestId, drawId);
+      _cancelFailures = 0;
       if (mounted && _busy && status != null) {
         setState(() => _progress = status);
       }
     } on Object {
-      // A missed report is not a failure; the draw request has the outcome.
+      // A missed progress report is not a failure: the next poll asks again,
+      // and the draw request has the outcome. A cancel that keeps failing is
+      // shown, so the director can try again.
+      if (_cancelRequested && ++_cancelFailures >= _cancelAttempts && mounted) {
+        setState(() {
+          _cancelRequested = false;
+          _cancelFailed = true;
+        });
+      }
     } finally {
       _polling = false;
     }
@@ -323,7 +342,11 @@ class _MatrixPageState extends State<MatrixPage> {
     if (!_busy || _cancelRequested) {
       return;
     }
-    setState(() => _cancelRequested = true);
+    setState(() {
+      _cancelRequested = true;
+      _cancelFailed = false;
+      _cancelFailures = 0;
+    });
     _tickNow?.call();
   }
 
@@ -365,6 +388,7 @@ class _MatrixPageState extends State<MatrixPage> {
               busy: _busy,
               progress: _progress,
               cancelling: _cancelRequested,
+              cancelFailed: _cancelFailed,
               onCancel: _cancel,
               blocker: _blocker(data),
               rejection: _rejection,

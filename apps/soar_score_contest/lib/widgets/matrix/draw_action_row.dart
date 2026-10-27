@@ -18,6 +18,7 @@ class DrawActionRow extends StatelessWidget {
     this.reloadReason,
     this.progress,
     this.cancelling = false,
+    this.cancelFailed = false,
     this.onCancel,
   });
 
@@ -32,6 +33,9 @@ class DrawActionRow extends StatelessWidget {
 
   /// Whether Cancel was pressed and the draw has not stopped yet.
   final bool cancelling;
+
+  /// Cancel did not reach the server; it can be pressed again.
+  final bool cancelFailed;
 
   /// Cancels the running draw.
   final VoidCallback? onCancel;
@@ -147,9 +151,10 @@ class DrawActionRow extends StatelessWidget {
               ),
             ),
             Text(
-              l10n.drawRunningNote,
+              cancelFailed ? l10n.drawCancelFailed : l10n.drawRunningNote,
+              key: cancelFailed ? const ValueKey('draw-cancel-failed') : null,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: scheme.onSurfaceVariant,
+                color: cancelFailed ? scheme.error : scheme.onSurfaceVariant,
               ),
             ),
           ],

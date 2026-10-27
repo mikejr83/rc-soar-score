@@ -91,4 +91,29 @@ void main() {
     expect(server.draws.last['id'], isNot(server.draws.first['id']));
     expect(find.text('Round 1'), findsOneWidget);
   });
+
+  testWidgets('a Cancel that keeps failing says so and can be pressed again', (
+    tester,
+  ) async {
+    final server = await _startHeldDraw(tester);
+    server.cancelStatus = 503;
+    await _poll(tester);
+
+    await tester.ensureVisible(_cancel);
+    await tester.tap(_cancel);
+    for (var i = 0; i < 4; i++) {
+      await _poll(tester);
+    }
+
+    expect(server.cancelRequests, greaterThanOrEqualTo(3));
+    expect(find.byKey(const ValueKey('draw-cancel-failed')), findsOneWidget);
+    expect(find.text('Draw matrix'), findsNothing);
+    expect(tester.widget<OutlinedButton>(_cancel).onPressed, isNotNull);
+
+    server.cancelStatus = 200;
+    await tester.tap(_cancel);
+    await tester.pumpAndSettle();
+    expect(find.text('Draw cancelled. Nothing was changed.'), findsOneWidget);
+    expect(find.byKey(const ValueKey('draw-cancel-failed')), findsNothing);
+  });
 }

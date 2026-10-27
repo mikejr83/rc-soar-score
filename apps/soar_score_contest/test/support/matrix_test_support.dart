@@ -239,6 +239,9 @@ class MatrixServer {
   /// How often the draw was asked for its progress, and cancelled.
   int statusRequests = 0;
   int cancelRequests = 0;
+
+  /// Answers every cancel with this status when not 200.
+  int cancelStatus = 200;
   Completer<void>? _cancelled;
 
   /// The round each pilot (1 to 4) retired at.
@@ -271,6 +274,11 @@ class MatrixServer {
       final running = holdDraw != null && !holdDraw!.isCompleted;
       if (request.method == 'DELETE') {
         cancelRequests++;
+        if (cancelStatus != 200) {
+          return _json({
+            'error': {'code': 'unavailable', 'message': 'try later'},
+          }, cancelStatus);
+        }
         if (!running) {
           return _json({
             'error': {'code': 'not_found', 'message': 'no such draw'},

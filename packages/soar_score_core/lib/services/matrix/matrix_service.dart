@@ -217,6 +217,7 @@ class MatrixService {
     // The draw is made before anything is stored, so a cancelled draw leaves
     // the contest as it was.
     final drawn = await jobs.run(
+      contestId,
       id,
       _runner,
       DrawSpec(

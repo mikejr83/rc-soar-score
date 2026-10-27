@@ -473,4 +473,8 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get drawCancelled => 'Draw cancelled. Nothing was changed.';
+
+  @override
+  String get drawCancelFailed =>
+      'Cancel could not reach the server. The draw is still running. Try Cancel again.';
 }

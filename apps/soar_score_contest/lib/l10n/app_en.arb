@@ -526,5 +526,9 @@
   "drawCancelled": "Draw cancelled. Nothing was changed.",
   "@drawCancelled": {
     "description": "Snackbar shown after a matrix draw was cancelled."
+  },
+  "drawCancelFailed": "Cancel could not reach the server. The draw is still running. Try Cancel again.",
+  "@drawCancelFailed": {
+    "description": "Shown beside the Cancel button when stopping a matrix draw failed several times in a row."
   }
 }
