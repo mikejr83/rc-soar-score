@@ -83,7 +83,9 @@ if [ "$device" = web ] || [ "$device" = chrome ]; then
   [ -z "${CHROME_EXECUTABLE:-}" ] || chrome_args=(--chrome-binary="$CHROME_EXECUTABLE")
   server_pid=""
   driver_pid=""
+  echo_pid=""
   stop_server() {
+    if [ -n "$echo_pid" ]; then kill "$echo_pid" 2>/dev/null || true; echo_pid=""; fi
     if [ -n "$server_pid" ]; then kill "$server_pid" 2>/dev/null || true; wait "$server_pid" 2>/dev/null || true; fi
     server_pid=""
   }
@@ -97,7 +99,13 @@ if [ "$device" = web ] || [ "$device" = chrome ]; then
     (cd "$root/apps/soar_score_server" && exec dart run tool/e2e_server.dart --port "$port") >"$log" 2>&1 &
     server_pid=$!
     for _ in $(seq 1 120); do
-      grep -q E2E_SERVER_READY "$log" && return 0
+      if grep -q E2E_SERVER_READY "$log"; then
+        # A browser journey prints nothing live; it posts its progress to the
+        # server (`POST /__e2e/log`), whose `[E2E]` lines are echoed here.
+        tail -n +1 -f "$log" 2>/dev/null | grep --line-buffered '^\[E2E\]' &
+        echo_pid=$!
+        return 0
+      fi
       kill -0 "$server_pid" 2>/dev/null || break
       sleep 1
     done

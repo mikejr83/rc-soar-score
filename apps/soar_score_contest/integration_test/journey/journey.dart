@@ -1,13 +1,24 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:http/http.dart' as http;
 import 'package:integration_test/integration_test.dart';
 
 /// `--dart-define=E2E_STOP_AFTER=<phase number>` (or the `E2E_STOP_AFTER`
 /// environment variable of `scripts/e2e.sh` / `e2e.ps1`) ends the journey
 /// after that phase, so work on one phase does not wait for the later ones.
+const String _apiBase = String.fromEnvironment('SOAR_SCORE_API_BASE_URL');
+
 const String _stopAfterDefine = String.fromEnvironment('E2E_STOP_AFTER');
+
+/// `--dart-define=E2E_SCREENSHOTS=steps` (pass it after `--` to the scripts)
+/// saves a web screenshot after every step, to see how far a run that hangs
+/// or is stopped by the timeout got.
+const bool _screenshotEachStep =
+    String.fromEnvironment('E2E_SCREENSHOTS') == 'steps';
 
 /// A person the journey creates.
 typedef Person = ({String first, String last, String email});
@@ -108,6 +119,7 @@ class Journey {
     String title,
     Future<void> Function() body, {
     bool nativeOnly = false,
+    Duration timeout = const Duration(minutes: 4),
   }) async {
     final id = '$_phase.${++_stepInPhase}';
     if (nativeOnly && kIsWeb) {
@@ -117,7 +129,14 @@ class Journey {
     final started = _clock.elapsed;
     _note('  $id $title ...');
     try {
-      await body();
+      // A step that hangs (an await that never completes) would otherwise
+      // run into the whole file's timeout and say nothing about where.
+      await body().timeout(
+        timeout,
+        onTimeout: () => throw TimeoutException(
+          'step took longer than ${timeout.inSeconds}s',
+        ),
+      );
     } catch (error, stack) {
       final report = StringBuffer()
         ..writeln('Journey failed at step $id "$title"')
@@ -126,12 +145,17 @@ class Journey {
         ..writeln('  on screen: ${_screenTexts()}')
         ..writeln('Steps so far:')
         ..writeAll(_log.map((line) => '  $line\n'));
+      unawaited(_remote(report.toString().replaceAll('\n', ' | ')));
       await _screenshot('failed-step-$id');
       Error.throwWithStackTrace(TestFailure(report.toString()), stack);
+    }
+    if (_screenshotEachStep) {
+      await _screenshot('step-$id');
     }
     final took = (_clock.elapsed - started).inSeconds;
     _log[_log.length - 1] = '  $id $title: ok (${took}s)';
     debugPrint('[E2E] ${_log.last}');
+    unawaited(_remote(_log.last));
   }
 
   /// Prints the whole log and hands it to the web driver, which writes it to
@@ -148,6 +172,20 @@ class Journey {
   void _note(String line) {
     _log.add(line);
     debugPrint('[E2E] $line');
+    unawaited(_remote(line));
+  }
+
+  /// Sends [line] to the web E2E server's log (`POST /__e2e/log`), which the
+  /// scripts echo while the run is going. Best effort; native runs print live.
+  Future<void> _remote(String line) async {
+    if (_apiBase.isEmpty) {
+      return;
+    }
+    try {
+      await http
+          .post(Uri.parse('$_apiBase/__e2e/log'), body: line)
+          .timeout(const Duration(seconds: 5));
+    } catch (_) {}
   }
 
   String _route() {
