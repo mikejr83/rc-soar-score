@@ -299,6 +299,13 @@ class MatrixRedrawService {
       for (final p in participations)
         if (p.isRetired) p.id,
     };
+    final placeholders = {
+      for (final placeholder
+          in await repository.scorePlaceholderRepository.listForContest(
+            contestId,
+          ))
+        placeholder.assignmentId: placeholder,
+    };
     var waiting = 0;
     for (final round in kept) {
       for (final assignment
@@ -306,9 +313,10 @@ class MatrixRedrawService {
             round.id,
           )) {
         if (retired.contains(assignment.contestParticipationId)) continue;
-        final placeholder = await repository.scorePlaceholderRepository
-            .findForAssignment(assignment.id);
-        if (placeholder?.state != ScorePlaceholderState.official) waiting++;
+        if (placeholders[assignment.id]?.state !=
+            ScorePlaceholderState.official) {
+          waiting++;
+        }
       }
     }
     if (waiting > 0) {
@@ -324,7 +332,9 @@ class MatrixRedrawService {
         repository,
         clock: _clock,
       ).read(contestId, asOfRound: asOfRound);
-    } on ArgumentError {
+    } on ArgumentError catch (e) {
+      // ResultsService names the round argument when it has no such standing.
+      if (e.name != 'asOfRound') rethrow;
       throw ContestStateError(
         'standings_missing',
         'recalculate the results before drawing a seeded round: there is no '

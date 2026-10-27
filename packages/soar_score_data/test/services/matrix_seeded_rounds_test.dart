@@ -19,7 +19,7 @@ void _tests(Backend backend) {
     late Repository repository;
     late core.Id contestId;
     final actor = core.Id.create();
-    final now = DateTime.utc(2026, 10, 17, 15);
+    var now = DateTime.utc(2026, 10, 17, 15);
     var mutations = 0;
 
     core.MutationMetadata meta() => core.MutationMetadata(
@@ -30,6 +30,7 @@ void _tests(Backend backend) {
     );
 
     setUp(() async {
+      now = DateTime.utc(2026, 10, 17, 15);
       inst = await Installation.open(backend);
       await SystemDataSeeder(inst.db).seed();
       repository = Repository(inst.db);
@@ -71,8 +72,8 @@ void _tests(Backend backend) {
     // Raw scores are time + 50 (landing) - 100 (height penalty).
     const times = [500, 540, 580, 590];
 
-    Future<List<MatrixSlot>> scorePreliminary({int count = 4}) async {
-      final slots = await roundSlots(1);
+    Future<List<MatrixSlot>> scoreRound(int ordinal, {int count = 4}) async {
+      final slots = await roundSlots(ordinal);
       final scores = ScoresService(repository, clock: () => now);
       for (var i = 0; i < count; i++) {
         await scores.enterOfficialScore(
@@ -91,6 +92,9 @@ void _tests(Backend backend) {
       }
       return slots;
     }
+
+    Future<List<MatrixSlot>> scorePreliminary({int count = 4}) =>
+        scoreRound(1, count: count);
 
     test('the first draw covers only the preliminary rounds', () async {
       await expectLater(
@@ -219,6 +223,67 @@ void _tests(Backend backend) {
             (e) => e.code,
             'code',
             'seeded_rounds_need_standings',
+          ),
+        ),
+      );
+    });
+
+    test('a second seeded round uses the standings after the first', () async {
+      await scorePreliminary();
+      await ResultsService(repository, clock: () => now).recalculate(contestId);
+      await seededRound();
+
+      // Round 2 is not scored yet.
+      await expectLater(
+        seededRound(firstRound: 3),
+        throwsA(
+          isA<core.ContestStateError>().having(
+            (e) => e.code,
+            'code',
+            'scores_incomplete',
+          ),
+        ),
+      );
+
+      await scoreRound(2);
+      await ResultsService(repository, clock: () => now).recalculate(contestId);
+      final matrix = await seededRound(firstRound: 3);
+
+      expect(matrix.rounds.where((r) => r.ordinal == 3), hasLength(1));
+      expect(matrix.revision!.drawMode, core.DrawMode.seededManOnMan);
+      final standings =
+          matrix.revision!.seedingSnapshot['standings']!
+              as Map<String, Object?>;
+      expect(standings['as_of_round'], 2);
+    });
+
+    test('standings made stale by a later score are refused', () async {
+      final slots = await scorePreliminary();
+      await ResultsService(repository, clock: () => now).recalculate(contestId);
+
+      now = now.add(const Duration(minutes: 5));
+      await ScoresService(repository, clock: () => now).enterOfficialScore(
+        contestId,
+        slots[0].assignmentId,
+        clientMutationId: 'entry-${mutations++}',
+        baseScoreRevision: 1,
+        components: {
+          'time_flown': 595,
+          'launch_height': 200,
+          'landing': 'points_50',
+        },
+        reason: 'Timer misread',
+        actorId: actor,
+        metadata: meta(),
+      );
+
+      await expectLater(
+        seededRound(),
+        throwsA(
+          isA<core.ContestStateError>().having(
+            (e) => e.code,
+            'code',
+            'standings_not_validated',
           ),
         ),
       );
