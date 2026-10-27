@@ -36,11 +36,11 @@ enum ParticipantOption {
   models(
     title: 'Pilot models',
     icon: Icons.flight,
-    description: 'Record the model each pilot flies.',
-    effect: 'Adds required Model name and Model ID columns for scoring pilots.',
+    description: 'Record the models each pilot flies.',
+    effect: 'Adds a Models column for scoring pilots.',
     note:
-        'The Participants step will ask each scoring pilot for a model name '
-        'and model ID.',
+        'Model details can’t be recorded yet. The column says so until they '
+        'can.',
   );
 
   const ParticipantOption({

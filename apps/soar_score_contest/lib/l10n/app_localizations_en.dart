@@ -666,4 +666,23 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get matrixConfirmCancel => 'Cancel';
+
+  @override
+  String get participantEmailHas => 'Has email';
+
+  @override
+  String get participantEmailHasExplanation => 'Email on the profile';
+
+  @override
+  String get participantEmailNone => 'None';
+
+  @override
+  String get participantEmailNoneExplanation => 'No email on the profile';
+
+  @override
+  String get participantEmailPrivate => 'Private';
+
+  @override
+  String get participantEmailPrivateExplanation =>
+      'This person hasn’t allowed their email to be shown.';
 }

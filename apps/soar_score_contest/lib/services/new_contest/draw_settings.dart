@@ -1,7 +1,7 @@
 import 'package:soar_score_core/soar_score_core.dart';
 
 import 'contest_draft.dart';
-import 'participant_option.dart';
+import '../participants/participant_option.dart';
 import 'participant_rules.dart';
 
 /// The step 6 values. Numbers are kept as typed.

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../services/new_contest/participant_option.dart';
+import '../../services/participants/participant_option.dart';
 
 /// One participant option: what it is, how it changes the Participants
 /// step, and its switch. [details] shows under it while it is on.

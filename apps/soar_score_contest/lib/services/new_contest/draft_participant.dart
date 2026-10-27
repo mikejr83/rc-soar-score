@@ -1,18 +1,9 @@
 import 'package:soar_score_core/soar_score_core.dart';
 
-/// Where a selected participant's profile came from.
-enum ParticipantSource {
-  /// One of the director's own participant profiles. Its email was entered
-  /// by the director, so it is always shown.
-  local,
-
-  /// A profile found through the remote participant directory. Its email is
-  /// shown only when the person allows it.
-  remote,
-}
+import '../participants/participant_row.dart';
 
 /// A person selected for the new contest in the draft.
-class DraftParticipant {
+class DraftParticipant implements ParticipantRow {
   DraftParticipant({
     required this.profileId,
     required this.name,
@@ -24,11 +15,10 @@ class DraftParticipant {
     this.isPilot = true,
     this.classification = '',
     this.team = '',
-    this.model = '',
-    this.modelId = '',
   }) : roleId = roleId ?? SystemRoles.pilotId;
 
   final Id profileId;
+  @override
   final String name;
 
   /// The email address, if the profile has one.
@@ -39,22 +29,36 @@ class DraftParticipant {
 
   final ParticipantSource source;
 
+  @override
   final Id roleId;
+  @override
   final String roleName;
 
   /// Whether the participant has the `Pilot` role (non-flying roles get no
   /// score rows).
+  @override
   final bool isPilot;
 
+  @override
   final String classification;
 
   /// The team name; empty means not assigned to a team.
+  @override
   final String team;
 
-  /// The model name and ID (kept in the draft only; participations have no
-  /// place for them yet).
-  final String model;
-  final String modelId;
+  @override
+  String get rowId => profileId.value;
+
+  @override
+  ParticipantEmailStatus get emailStatus {
+    if (source == ParticipantSource.remote && !emailVisible) {
+      return ParticipantEmailStatus.private;
+    }
+    final address = email;
+    return address == null || address.isEmpty
+        ? ParticipantEmailStatus.none
+        : ParticipantEmailStatus.has;
+  }
 
   /// A participant for one of the director's own [profile]s, as a Pilot.
   factory DraftParticipant.fromProfile(ParticipantProfile profile) =>
@@ -68,8 +72,6 @@ class DraftParticipant {
     Role? role,
     String? classification,
     String? team,
-    String? model,
-    String? modelId,
   }) => DraftParticipant(
     profileId: profileId,
     name: name,
@@ -81,7 +83,12 @@ class DraftParticipant {
     isPilot: role == null ? isPilot : role.type == RoleType.pilot,
     classification: classification ?? this.classification,
     team: team ?? this.team,
-    model: model ?? this.model,
-    modelId: modelId ?? this.modelId,
   );
+
+  @override
+  DraftParticipant withEdits({
+    Role? role,
+    String? classification,
+    String? team,
+  }) => copyWith(role: role, classification: classification, team: team);
 }

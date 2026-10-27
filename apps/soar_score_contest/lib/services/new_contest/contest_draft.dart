@@ -2,7 +2,7 @@ import 'copy_mode.dart';
 import 'copy_source.dart';
 import 'draft_participant.dart';
 import 'draw_settings.dart';
-import 'participant_option.dart';
+import '../participants/participant_option.dart';
 import 'scoring_settings.dart';
 import 'wizard_discipline.dart';
 

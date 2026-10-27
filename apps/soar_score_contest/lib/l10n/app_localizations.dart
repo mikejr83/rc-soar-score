@@ -979,6 +979,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Cancel'**
   String get matrixConfirmCancel;
+
+  /// Email cell of a participant row: the profile has an email address.
+  ///
+  /// In en, this message translates to:
+  /// **'Has email'**
+  String get participantEmailHas;
+
+  /// Tooltip for the Has email status.
+  ///
+  /// In en, this message translates to:
+  /// **'Email on the profile'**
+  String get participantEmailHasExplanation;
+
+  /// Email cell of a participant row: the profile has no email address.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get participantEmailNone;
+
+  /// Tooltip for the None email status.
+  ///
+  /// In en, this message translates to:
+  /// **'No email on the profile'**
+  String get participantEmailNoneExplanation;
+
+  /// Email cell of a participant row: the person has not allowed their email to be shown.
+  ///
+  /// In en, this message translates to:
+  /// **'Private'**
+  String get participantEmailPrivate;
+
+  /// Tooltip for the Private email status.
+  ///
+  /// In en, this message translates to:
+  /// **'This person hasn’t allowed their email to be shown.'**
+  String get participantEmailPrivateExplanation;
 }
 
 class _AppLocalizationsDelegate

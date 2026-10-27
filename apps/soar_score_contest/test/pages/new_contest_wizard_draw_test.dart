@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_contest/services/new_contest/contest_draft_store.dart';
 import 'package:soar_score_contest/services/new_contest/draft_participant.dart';
 import 'package:soar_score_contest/services/new_contest/draw_settings.dart';
-import 'package:soar_score_contest/services/new_contest/participant_option.dart';
+import 'package:soar_score_contest/services/participants/participant_option.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../support/new_contest_test_support.dart';

@@ -5,7 +5,8 @@ import 'copy_mode.dart';
 import 'copy_source.dart';
 import 'draft_participant.dart';
 import 'draw_settings.dart';
-import 'participant_option.dart';
+import '../participants/participant_option.dart';
+import '../participants/participant_row.dart';
 import 'scoring_settings.dart';
 import 'wizard_discipline.dart';
 
@@ -145,8 +146,6 @@ class ContestDraftCodec {
     'is_pilot': p.isPilot,
     'classification': p.classification,
     'team': p.team,
-    'model': p.model,
-    'model_id': p.modelId,
   };
 
   static DraftParticipant _decodeParticipant(Map<String, Object?> map) =>
@@ -161,8 +160,6 @@ class ContestDraftCodec {
         isPilot: map['is_pilot']! as bool,
         classification: map['classification']! as String,
         team: map['team']! as String,
-        model: map['model']! as String,
-        modelId: map['model_id']! as String,
       );
 
   static Map<String, Object?> _encodeScoring(ScoringSettings s) => {

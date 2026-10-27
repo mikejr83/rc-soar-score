@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../services/new_contest/participant_rules.dart';
+import '../../services/participants/participant_row.dart';
 
 /// A short avatar for a team. The full name stays available as its tooltip
 /// and accessible label.

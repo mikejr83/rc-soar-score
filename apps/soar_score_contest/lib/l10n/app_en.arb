@@ -777,5 +777,29 @@
   "matrixConfirmCancel": "Cancel",
   "@matrixConfirmCancel": {
     "description": "Button that closes the add rounds or redraw confirmation without changing anything."
+  },
+  "participantEmailHas": "Has email",
+  "@participantEmailHas": {
+    "description": "Email cell of a participant row: the profile has an email address."
+  },
+  "participantEmailHasExplanation": "Email on the profile",
+  "@participantEmailHasExplanation": {
+    "description": "Tooltip for the Has email status."
+  },
+  "participantEmailNone": "None",
+  "@participantEmailNone": {
+    "description": "Email cell of a participant row: the profile has no email address."
+  },
+  "participantEmailNoneExplanation": "No email on the profile",
+  "@participantEmailNoneExplanation": {
+    "description": "Tooltip for the None email status."
+  },
+  "participantEmailPrivate": "Private",
+  "@participantEmailPrivate": {
+    "description": "Email cell of a participant row: the person has not allowed their email to be shown."
+  },
+  "participantEmailPrivateExplanation": "This person hasn’t allowed their email to be shown.",
+  "@participantEmailPrivateExplanation": {
+    "description": "Tooltip for the Private email status."
   }
 }

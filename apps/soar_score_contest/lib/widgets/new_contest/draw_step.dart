@@ -4,7 +4,7 @@ import 'package:soar_score_core/soar_score_core.dart';
 import '../../services/new_contest/contest_draft.dart';
 import '../../services/new_contest/draft_validation.dart';
 import '../../services/new_contest/draw_settings.dart';
-import '../../services/new_contest/participant_option.dart';
+import '../../services/participants/participant_option.dart';
 import 'group_calculation_panel.dart';
 import 'setting_row.dart';
 import 'wizard_number_field.dart';

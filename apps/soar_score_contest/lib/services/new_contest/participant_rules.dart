@@ -1,45 +1,7 @@
 import 'contest_draft.dart';
+import '../participants/participant_option.dart';
+import '../participants/participant_row.dart';
 import 'draft_participant.dart';
-import 'participant_option.dart';
-
-/// What a participant row still needs before the wizard can continue.
-enum ParticipantIssue {
-  classification('class', 'enter a class'),
-  model('model', 'add model details');
-
-  const ParticipantIssue(this.label, this.fix);
-
-  /// Short name for the row status (`Needs class`).
-  final String label;
-
-  /// What to do, for the validation summary (`enter a class`).
-  final String fix;
-}
-
-/// A team named in the draft, with how many participants are on it.
-class TeamSummary {
-  const TeamSummary(this.name, this.count);
-
-  final String name;
-  final int count;
-}
-
-/// `open class` → `Open Class`.
-String titleCase(String text) =>
-    text.trim().replaceAllMapped(RegExp(r'\S+'), (match) {
-      final word = match[0]!;
-      return word[0].toUpperCase() + word.substring(1).toLowerCase();
-    });
-
-/// Up to two initials for an avatar: `Flying Gators` → `FG`.
-String initials(String name) => name
-    .trim()
-    .split(RegExp(r'\s+'))
-    .where((word) => word.isNotEmpty)
-    .map((word) => word[0])
-    .take(2)
-    .join()
-    .toUpperCase();
 
 /// The step 4 rules over a draft's participants.
 extension ParticipantRules on ContestDraft {
@@ -51,8 +13,8 @@ extension ParticipantRules on ContestDraft {
   int get scoringCount => participants.where(isScoring).length;
 
   /// What [participant] still needs. Teams are optional (no name means
-  /// unassigned); class and model details are required for scoring pilots
-  /// when those options are on.
+  /// unassigned); a class is required for scoring pilots when classes are
+  /// on.
   List<ParticipantIssue> issuesOf(DraftParticipant participant) {
     if (!isScoring(participant)) {
       return const [];
@@ -61,10 +23,6 @@ extension ParticipantRules on ContestDraft {
       if (has(ParticipantOption.classes) &&
           participant.classification.trim().isEmpty)
         ParticipantIssue.classification,
-      if (has(ParticipantOption.models) &&
-          (participant.model.trim().isEmpty ||
-              participant.modelId.trim().isEmpty))
-        ParticipantIssue.model,
     ];
   }
 

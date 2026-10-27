@@ -6,18 +6,21 @@ import 'package:soar_score_core/soar_score_core.dart';
 import '../../../api_client_provider.dart';
 import '../../../pages/participant_editor_page.dart';
 import '../../../services/new_contest/contest_draft.dart';
+import '../../../services/new_contest/draft_candidate.dart';
+import '../../../services/new_contest/draft_list_rules.dart';
 import '../../../services/new_contest/draft_participant.dart';
 import '../../../services/new_contest/draft_validation.dart';
-import '../../../services/new_contest/participant_candidate.dart';
-import '../../../services/new_contest/participant_option.dart';
 import '../../../services/new_contest/participant_rules.dart';
+import '../../../services/participants/participant_candidate.dart';
+import '../../../services/participants/participant_option.dart';
+import '../../../services/participants/participant_row.dart';
+import '../../participants/bulk_edit_bar.dart';
+import '../../participants/cell_focus_registry.dart';
+import '../../participants/participant_card.dart';
+import '../../participants/participant_editing.dart';
+import '../../participants/participant_search_field.dart';
+import '../../participants/participants_table.dart';
 import '../wizard_banner.dart';
-import 'bulk_edit_bar.dart';
-import 'cell_focus_registry.dart';
-import 'participant_card.dart';
-import 'participant_editing.dart';
-import 'participant_search_field.dart';
-import 'participants_table.dart';
 
 /// Step 4: the people in the contest.
 ///
@@ -57,6 +60,7 @@ class _ParticipantsStepState extends State<ParticipantsStep> {
   final CellFocusRegistry _focus = CellFocusRegistry();
   final Set<String> _selected = {};
   bool _onlyFix = false;
+  String _query = '';
   List<ParticipantProfile>? _profiles;
   List<Role> _roles = [SystemRoles.pilot];
 
@@ -192,12 +196,23 @@ class _ParticipantsStepState extends State<ParticipantsStep> {
   void _focusIssue(DraftParticipant participant, ParticipantIssue issue) {
     final column = switch (issue) {
       ParticipantIssue.classification => ParticipantColumn.classification,
-      ParticipantIssue.model =>
-        participant.model.trim().isEmpty
-            ? ParticipantColumn.model
-            : ParticipantColumn.modelId,
     };
     _focus.node(participant.profileId.value, column).requestFocus();
+  }
+
+  /// Whether [participant] matches the text in the search field (name,
+  /// email, team, class or role), so the same field filters the list. An
+  /// email the person hides is never matched.
+  bool _matchesQuery(DraftParticipant participant) {
+    final query = _query.trim().toLowerCase();
+    return query.isEmpty ||
+        [
+          participant.name,
+          if (participant.emailVisible) ?participant.email,
+          participant.team,
+          participant.classification,
+          participant.roleName,
+        ].any((value) => value.toLowerCase().contains(query));
   }
 
   List<Widget> _banners() {
@@ -268,15 +283,16 @@ class _ParticipantsStepState extends State<ParticipantsStep> {
     _focus.retain(ids);
     final needing = draft.participantsNeedingFixes;
     final onlyFix = _onlyFix && needing.isNotEmpty;
-    final rows = onlyFix ? needing : participants;
+    final fixRows = onlyFix ? needing : participants;
+    final rows = fixRows.where(_matchesQuery).toList();
     _focus.rowOrder = [for (final p in rows) p.profileId.value];
     final editing = ParticipantEditing(
-      draft: draft,
+      rules: DraftListRules(draft),
       roles: _roles,
       focus: _focus,
       selected: _selected,
-      onToggleSelected: _toggle,
-      onUpdate: _update,
+      onToggleSelected: (row) => _toggle(row as DraftParticipant),
+      onUpdate: (row) => _update(row as DraftParticipant),
     );
     final scoring = draft.scoringCount;
 
@@ -311,6 +327,7 @@ class _ParticipantsStepState extends State<ParticipantsStep> {
               selected: ids,
               offline: widget.offline,
               remote: widget.remote,
+              onQueryChanged: (value) => setState(() => _query = value),
               onAdd: (candidate) {
                 _add(candidate.toParticipant());
                 widget.onMessage?.call('${candidate.name} added as Pilot.');
@@ -318,9 +335,9 @@ class _ParticipantsStepState extends State<ParticipantsStep> {
             );
             final add = SizedBox(
               height: 56,
-              child: OutlinedButton.icon(
+              child: FilledButton.icon(
                 key: const ValueKey('add-participant-new'),
-                style: OutlinedButton.styleFrom(
+                style: FilledButton.styleFrom(
                   padding: const EdgeInsetsDirectional.only(start: 16, end: 24),
                 ),
                 onPressed: () => unawaited(_addNew()),
@@ -409,8 +426,31 @@ class _ParticipantsStepState extends State<ParticipantsStep> {
               },
             ),
           ],
+          if (_query.trim().isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Text(
+              'Showing ${rows.length} of ${fixRows.length} matching '
+              '“${_query.trim()}”',
+              key: const ValueKey('participants-filter-note'),
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: scheme.onSurfaceVariant,
+              ),
+            ),
+          ],
           const SizedBox(height: 12),
-          if (widget.narrow)
+          if (rows.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 24),
+              child: Text(
+                'No one in this contest matches “${_query.trim()}”.',
+                key: const ValueKey('participants-filter-empty'),
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                ),
+              ),
+            )
+          else if (widget.narrow)
             Semantics(
               container: true,
               label: 'Contest participants',
