@@ -80,7 +80,7 @@ void main() {
     expect(recalculations, hasLength(1));
   });
 
-  test('a change that leaves the retirement alone does not', () async {
+  test('a class change recalculates the results too', () async {
     final api = await scoredContest(
       RecalculationService(RefusingResults(recalculations)),
     );
@@ -92,6 +92,26 @@ void main() {
         'base_revision': await revisionOf(api),
         'classification': 'Expert',
       },
+    );
+
+    expect(response.statusCode, 200);
+    expect(recalculations, hasLength(1));
+    expect(
+      (await api.json(response))['recalculation_warning'],
+      'Recalculation was refused after a participant change; the results '
+      'are stale',
+    );
+  });
+
+  test('a save that changes nothing does not recalculate', () async {
+    final api = await scoredContest(
+      RecalculationService(RefusingResults(recalculations)),
+    );
+
+    final response = await api.send(
+      'PUT',
+      '/contests/$_contestId/participations/${matrixTestParticipationId(2)}',
+      body: {'base_revision': await revisionOf(api)},
     );
 
     expect(response.statusCode, 200);

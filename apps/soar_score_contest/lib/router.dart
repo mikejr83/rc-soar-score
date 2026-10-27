@@ -140,6 +140,7 @@ GoRouter buildAppRouter({
   final wizardGuard = UnsavedChangesGuard();
   final configurationGuard = UnsavedChangesGuard();
   final scoringGuard = UnsavedChangesGuard();
+  final participantsGuard = UnsavedChangesGuard();
   return GoRouter(
     initialLocation: initialLocation,
     // Re-runs the guard when offline mode or the signed-in state changes.
@@ -314,7 +315,9 @@ GoRouter buildAppRouter({
             name: 'contestParticipants',
             builder: (context, state) => ContestParticipantsPage(
               contestId: state.pathParameters['contestId']!,
+              guard: participantsGuard,
             ),
+            onExit: (context, state) => participantsGuard.confirmLeave(),
           ),
         ],
       ),

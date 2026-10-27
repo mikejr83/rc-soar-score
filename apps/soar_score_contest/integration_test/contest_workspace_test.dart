@@ -83,7 +83,10 @@ void main() {
       tester,
       find.byKey(const ValueKey('checklist-row-pilots')),
     );
-    await pumpUntilFound(tester, find.textContaining('Contest ID:'));
+    await pumpUntilFound(
+      tester,
+      find.byKey(const ValueKey('participants-count')),
+    );
     expect(find.byKey(const ValueKey('progress-card')), findsNothing);
 
     await tapRail(tester, 'Workspace');

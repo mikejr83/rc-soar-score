@@ -42,7 +42,11 @@ void main() {
     });
 
     test('lets the URL win when both URL and discrete variables are set', () {
-      final config = ServerConfig.parse({...minimal, 'DATABASE_URL': 'postgresql://urluser:urlpw@db:5433/soar?sslmode=disable'});
+      final config = ServerConfig.parse({
+        ...minimal,
+        'DATABASE_URL':
+            'postgresql://urluser:urlpw@db:5433/soar?sslmode=disable',
+      });
 
       expect(config.postgres.host, 'db');
       expect(config.postgres.port, 5433);

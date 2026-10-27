@@ -10,7 +10,10 @@ void main() {
         'us-east-2.aws.neon.tech/neondb?sslmode=verify-full',
       );
 
-      expect(config.host, 'ep-quiet-dawn-ad5970d5-pooler.us-east-2.aws.neon.tech');
+      expect(
+        config.host,
+        'ep-quiet-dawn-ad5970d5-pooler.us-east-2.aws.neon.tech',
+      );
       expect(config.port, 5432);
       expect(config.database, 'neondb');
       expect(config.user, 'neondb_owner');
@@ -19,7 +22,9 @@ void main() {
     });
 
     test('accepts the postgres scheme and a host port', () {
-      final config = PostgresConfig.fromUrl('postgres://app:password@db:5433/soar');
+      final config = PostgresConfig.fromUrl(
+        'postgres://app:password@db:5433/soar',
+      );
 
       expect(config.host, 'db');
       expect(config.port, 5433);
@@ -30,10 +35,14 @@ void main() {
     });
 
     test('requires TLS unless the URL opts out', () {
-      expect(PostgresConfig.fromUrl('postgresql://u:p@h/db').sslMode,
-          SslMode.require);
-      expect(PostgresConfig.fromUrl('postgresql://u:p@h/db?sslmode=disable')
-          .sslMode, SslMode.disable);
+      expect(
+        PostgresConfig.fromUrl('postgresql://u:p@h/db').sslMode,
+        SslMode.require,
+      );
+      expect(
+        PostgresConfig.fromUrl('postgresql://u:p@h/db?sslmode=disable').sslMode,
+        SslMode.disable,
+      );
     });
 
     test('maps the libpq sslmode vocabulary', () {
@@ -47,9 +56,8 @@ void main() {
       };
       for (final entry in mapped.entries) {
         expect(
-          PostgresConfig.fromUrl(
-            'postgresql://u:p@h/db?sslmode=${entry.key}',
-          ).sslMode,
+          PostgresConfig.fromUrl('postgresql://u:p@h/db?sslmode=${entry.key}')
+              .sslMode,
           entry.value,
           reason: entry.key,
         );
@@ -76,8 +84,9 @@ void main() {
     });
 
     test('accepts a user without a password only via a query parameter', () {
-      final config =
-          PostgresConfig.fromUrl('postgresql://u@h/db?password=from-query');
+      final config = PostgresConfig.fromUrl(
+        'postgresql://u@h/db?password=from-query',
+      );
       expect(config.user, 'u');
       expect(config.password, 'from-query');
     });
@@ -86,21 +95,27 @@ void main() {
       expect(
         () => PostgresConfig.fromUrl('postgresql://u@h/db'),
         throwsA(
-          isA<ArgumentError>().having((e) => e.message.toString(), 'message',
-              isNot(contains('secret')),
-            ),
+          isA<ArgumentError>().having(
+            (e) => e.message.toString(),
+            'message',
+            isNot(contains('secret')),
+          ),
         ),
       );
     });
 
     test('rejects a URL without a database', () {
-      expect(() => PostgresConfig.fromUrl('postgresql://u:p@h'),
-          throwsA(isA<ArgumentError>()));
+      expect(
+        () => PostgresConfig.fromUrl('postgresql://u:p@h'),
+        throwsA(isA<ArgumentError>()),
+      );
     });
 
     test('rejects an unknown scheme', () {
-      expect(() => PostgresConfig.fromUrl('mysql://u:p@h/db'),
-          throwsA(isA<ArgumentError>()));
+      expect(
+        () => PostgresConfig.fromUrl('mysql://u:p@h/db'),
+        throwsA(isA<ArgumentError>()),
+      );
     });
 
     test('rejects an invalid port', () {
@@ -122,7 +137,9 @@ void main() {
 
     test('rejects a repeated query parameter', () {
       expect(
-        () => PostgresConfig.fromUrl('postgresql://u:p@h/db?sslmode=disable&sslmode=require'),
+        () => PostgresConfig.fromUrl(
+          'postgresql://u:p@h/db?sslmode=disable&sslmode=require',
+        ),
         throwsA(isA<ArgumentError>()),
       );
     });
@@ -138,13 +155,17 @@ void main() {
     });
 
     test('rejects an unrecognized query parameter', () {
-      expect(() => PostgresConfig.fromUrl('postgresql://u:p@h/db?keepalive=1'),
-          throwsA(isA<ArgumentError>()));
+      expect(
+        () => PostgresConfig.fromUrl('postgresql://u:p@h/db?keepalive=1'),
+        throwsA(isA<ArgumentError>()),
+      );
     });
 
     test('rejects a multi-host authority', () {
-      expect(() => PostgresConfig.fromUrl('postgresql://u:p@h1,h2/db'),
-          throwsA(isA<ArgumentError>()));
+      expect(
+        () => PostgresConfig.fromUrl('postgresql://u:p@h1,h2/db'),
+        throwsA(isA<ArgumentError>()),
+      );
     });
   });
 

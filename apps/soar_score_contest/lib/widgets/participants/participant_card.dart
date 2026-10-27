@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 
 import '../../services/participants/participant_option.dart';
 import '../../services/participants/participant_row.dart';
+import '../../services/participants/participant_row_style.dart';
 import 'participant_cells.dart';
 import 'participant_editing.dart';
+import 'participant_row_note_view.dart';
 
 /// One participant as a stacked card, for narrow windows: name, email and
 /// status on top, then a labelled field for each enabled column.
@@ -12,10 +14,12 @@ class ParticipantCard extends StatelessWidget {
     super.key,
     required this.editing,
     required this.participant,
+    this.selectable = true,
   });
 
   final ParticipantEditing editing;
   final ParticipantRow participant;
+  final bool selectable;
 
   static const double _minFieldWidth = 170;
 
@@ -24,6 +28,8 @@ class ParticipantCard extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final cells = ParticipantCells(editing, participant, height: 44);
+    final rowStyle = cells.style;
+    final note = rowStyle.note;
     final hasIssues = cells.issues.isNotEmpty;
     final label = theme.textTheme.bodySmall;
 
@@ -48,11 +54,11 @@ class ParticipantCard extends StatelessWidget {
           ParticipantOption.classes => [
             labelled(
               'Class *',
-              cells.classification(),
+              cells.classification(context),
               error: cells.issues.contains(ParticipantIssue.classification),
             ),
           ],
-          ParticipantOption.teams => [labelled('Team', cells.team())],
+          ParticipantOption.teams => [labelled('Team', cells.team(context))],
           ParticipantOption.pilotNumbers => [
             labelled('Pilot no.', cells.number(context)),
           ],
@@ -67,14 +73,33 @@ class ParticipantCard extends StatelessWidget {
       label: participant.name,
       child: Container(
         key: ValueKey('card-${participant.rowId}'),
-        padding: const EdgeInsets.fromLTRB(4, 8, 16, 16),
+        padding: EdgeInsets.fromLTRB(selectable ? 4 : 16, 8, 16, 16),
         decoration: BoxDecoration(
           color: cells.selected
               ? scheme.secondaryContainer
+              : rowStyle.highlighted && !rowStyle.hasChanges
+              ? scheme.primaryContainer
+              : rowStyle.hasChanges
+              ? Color.alphaBlend(
+                  scheme.primary.withValues(alpha: 0.07),
+                  scheme.surfaceContainerLow,
+                )
               : scheme.surfaceContainerLow,
           border: Border.all(
-            color: hasIssues ? scheme.error : scheme.outlineVariant,
-            width: hasIssues ? 2 : 1,
+            color: note?.tone == ParticipantNoteTone.error || hasIssues
+                ? scheme.error
+                : note != null
+                ? scheme.tertiary
+                : rowStyle.hasChanges || rowStyle.highlighted
+                ? scheme.primary
+                : scheme.outlineVariant,
+            width:
+                hasIssues ||
+                    note != null ||
+                    rowStyle.hasChanges ||
+                    rowStyle.highlighted
+                ? 2
+                : 1,
           ),
           borderRadius: BorderRadius.circular(12),
         ),
@@ -83,15 +108,17 @@ class ParticipantCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                SizedBox.square(dimension: 44, child: cells.checkbox()),
-                const SizedBox(width: 8),
+                if (selectable) ...[
+                  SizedBox.square(dimension: 44, child: cells.checkbox()),
+                  const SizedBox(width: 8),
+                ],
                 cells.avatar(context, size: 36),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(participant.name, style: theme.textTheme.bodyLarge),
+                      cells.nameBlock(context),
                       cells.emailCell(context, prefix: true),
                     ],
                   ),
@@ -120,6 +147,16 @@ class ParticipantCard extends StatelessWidget {
                       ],
                     );
                   },
+                ),
+              ),
+            ],
+            if (note != null) ...[
+              const SizedBox(height: 12),
+              Padding(
+                padding: const EdgeInsets.only(left: 12),
+                child: ParticipantRowNoteView(
+                  note: note,
+                  rowId: participant.rowId,
                 ),
               ),
             ],

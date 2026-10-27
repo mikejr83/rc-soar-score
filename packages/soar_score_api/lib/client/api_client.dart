@@ -555,8 +555,8 @@ class ApiClient {
   /// `POST /api/v1/contests/{id}/team-memberships` — puts a participant on a
   /// team.
   ///
-  /// A participant already on a team, or a pilot once a matrix is drawn, is
-  /// an [ApiHttpError] with status 409.
+  /// A participant already on a team is an [ApiHttpError] with status 409:
+  /// take them off first.
   Future<TeamMembership> addTeamMember(
     Id id,
     AddTeamMemberRequest request,

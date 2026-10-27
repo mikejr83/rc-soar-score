@@ -16,8 +16,9 @@ import '../repositories/stale_revision_error.dart';
 ///
 /// A team is a named grouping inside one contest. Membership joins a
 /// participation to a team, and a participation is on at most one team.
-/// Pilot membership is fixed once a matrix has been drawn, because the draw
-/// protects teammates from each other; non-fliers can join and leave freely.
+/// Membership can change after a matrix has been drawn, for pilots and
+/// non-fliers alike. The draw is not redone: the caller recalculates the
+/// team results.
 class TeamsService {
   TeamsService(this.repository);
 
@@ -112,8 +113,7 @@ class TeamsService {
   ///
   /// Idempotent on [id]. A participation already on a team, or the same id
   /// with other content, throws an [AlreadyStoredError]: remove the old
-  /// membership first. A pilot cannot join once a matrix has been drawn
-  /// ([ContestStateError]).
+  /// membership first.
   Future<TeamMembership> addMember(
     Id contestId, {
     required Id id,
@@ -123,10 +123,7 @@ class TeamsService {
   }) async {
     final contest = await _requireContest(contestId);
     await _requireTeam(contestId, teamId);
-    final participation = await _requireParticipation(
-      contestId,
-      participationId,
-    );
+    await _requireParticipation(contestId, participationId);
 
     final memberships = repository.teamMembershipRepository;
     final stored = await memberships.findById(id);
@@ -147,9 +144,6 @@ class TeamsService {
         entityId: existing.first.id,
       );
     }
-    if (participation.roleType == RoleType.pilot) {
-      await _requirePilotChangeAllowed(contestId, participationId);
-    }
     return memberships.save(
       TeamMembership(
         id: id,
@@ -162,8 +156,6 @@ class TeamsService {
   }
 
   /// Takes a member off its team.
-  ///
-  /// A pilot cannot leave once a matrix has been drawn ([ContestStateError]).
   Future<void> removeMember(
     Id contestId,
     Id id, {
@@ -173,14 +165,10 @@ class TeamsService {
     if (membership == null || membership.contestId != contestId) {
       throw EntityNotFoundError(entityType: 'TeamMembership', entityId: id);
     }
-    await _requirePilotChangeAllowed(
-      contestId,
-      membership.contestParticipationId,
-    );
     await repository.teamMembershipRepository.delete(id, metadata: metadata);
   }
 
-  /// Refuses a change to a pilot's team once a matrix exists.
+  /// Refuses deleting a team with pilots once a matrix exists.
   Future<void> _requirePilotChangeAllowed(
     Id contestId,
     Id participationId,
@@ -196,7 +184,7 @@ class TeamsService {
     if (matrix != null) {
       throw ContestStateError(
         'matrix_exists',
-        'pilot team membership is fixed once a matrix has been drawn',
+        'a team with pilots cannot be deleted once a matrix has been drawn',
       );
     }
   }

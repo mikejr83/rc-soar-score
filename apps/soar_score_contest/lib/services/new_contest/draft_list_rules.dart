@@ -33,6 +33,9 @@ class DraftListRules implements ParticipantListRules {
   /// The provisional pilot number: scoring pilots in list order. Numbers
   /// are assigned at the first draw.
   @override
+  String get numberHeader => 'Pilot no. (provisional)';
+
+  @override
   String numberLabel(ParticipantRow row) {
     if (!isScoring(row)) {
       return '—';

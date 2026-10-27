@@ -282,28 +282,26 @@ void main() {
       expect(participation.statusCode, 404);
     });
 
-    test('a pilot cannot join or leave after the draw', () async {
+    test('a pilot can leave and a pilot can join after the draw', () async {
       await addMember();
       drawMatrix();
 
+      final leave = await api.send(
+        'DELETE',
+        '/contests/$_contestId/team-memberships/$_membershipId',
+      );
       final join = await api.send(
         'POST',
         '/contests/$_contestId/team-memberships',
         body: {
           'id': '019c0000-0000-7000-8000-000000000403',
           'team_id': _teamId,
-          'contest_participation_id': _helperParticipation,
+          'contest_participation_id': _pilotParticipation,
         },
       );
-      final leave = await api.send(
-        'DELETE',
-        '/contests/$_contestId/team-memberships/$_membershipId',
-      );
 
-      // A helper (non-flier) may still join; the pilot may not leave.
+      expect(leave.statusCode, 204);
       expect(join.statusCode, 201);
-      expect(leave.statusCode, 409);
-      expect((await api.errorOf(leave))['code'], 'matrix_exists');
     });
 
     test('a non-flier can leave after the draw', () async {

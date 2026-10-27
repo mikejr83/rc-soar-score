@@ -128,10 +128,7 @@ void _tests(SliceBackend backend) {
       outsider,
       'POST',
       '/contests/$_contestId/teams',
-      body: {
-        'id': '019c0000-0000-7000-8000-000000000401',
-        'name': 'Team One',
-      },
+      body: {'id': '019c0000-0000-7000-8000-000000000401', 'name': 'Team One'},
     );
     await api.expectForeignDenied(
       outsider,
@@ -153,8 +150,7 @@ void _tests(SliceBackend backend) {
     final list = await api.actAs(outsider, 'GET', '/contests');
     expect(list.status, 200);
     final contestIds = {
-      for (final c in (list.body['contests']! as List).cast<Map>())
-        c['id'],
+      for (final c in (list.body['contests']! as List).cast<Map>()) c['id'],
     };
     expect(contestIds, isNot(contains(_contestId)));
   });
