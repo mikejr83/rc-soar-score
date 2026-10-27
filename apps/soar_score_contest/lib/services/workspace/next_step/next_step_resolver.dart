@@ -1,6 +1,7 @@
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../workspace_facts.dart';
+import '../../matrix/matrix_rounds_plan.dart';
 import 'completion_reminder.dart';
 import 'next_step.dart';
 import 'next_step_action.dart';
@@ -160,7 +161,7 @@ NextStep _build(NextStepKind kind, WorkspaceFacts f) {
           text: f.configDrift.join(' '),
           tone: NextStepTone.warning,
         ),
-        primary: NextStepActions.goToMatrix,
+        primary: NextStepActions.redrawUnscored,
       );
     case NextStepKind.startScoring:
       return NextStep(
@@ -209,6 +210,7 @@ NextStep _build(NextStepKind kind, WorkspaceFacts f) {
           label: 'Go to Matrix to draw round $round',
           target: NextStepTarget.matrix,
           round: round,
+          matrixIntent: MatrixIntent.addRounds,
         ),
       );
     case NextStepKind.completeAllScores:

@@ -13,6 +13,7 @@ import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_contest/services/collapsible_areas/collapsible_areas_controller.dart';
 import 'package:soar_score_contest/services/new_contest/contest_draft_store.dart';
 import 'package:soar_score_contest/pages/contest/matrix_page.dart';
+import 'package:soar_score_contest/services/matrix/matrix_rounds_plan.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 const String matrixContestId = '019c0000-0000-7000-8000-000000000017';
@@ -230,6 +231,14 @@ class MatrixServer {
   /// The bodies of the draws received.
   final List<Map<String, dynamic>> draws = [];
 
+  /// The bodies of the redraws (and round additions) received. A redraw is
+  /// answered 201 with the matrix as it stands, unless [redrawStatus] says
+  /// otherwise (then with [redrawCode] and [redrawError]).
+  final List<Map<String, dynamic>> redraws = [];
+  int redrawStatus = 201;
+  String redrawCode = 'rounds_have_scores';
+  String redrawError = 'round 1 already has scores';
+
   /// While set, a draw waits here instead of answering, reporting
   /// [drawPercent] to anyone who asks; completing it lets the draw finish.
   /// Cancelling the draw answers it 409 `draw_cancelled`.
@@ -300,6 +309,15 @@ class MatrixServer {
         'seed': 2,
         'seed_count': 3,
       });
+    }
+    if (request.method == 'POST' && path.endsWith('/matrix/redraws')) {
+      redraws.add(jsonDecode(request.body) as Map<String, dynamic>);
+      if (redrawStatus != 201) {
+        return _json({
+          'error': {'code': redrawCode, 'message': redrawError},
+        }, redrawStatus);
+      }
+      return _json((matrix ?? CurrentMatrix()).toJson(), 201);
     }
     if (request.method == 'POST' && path.endsWith('/matrix/draws')) {
       draws.add(jsonDecode(request.body) as Map<String, dynamic>);
@@ -400,14 +418,17 @@ Future<void> pumpMatrixPage(
   Size size = const Size(1280, 1100),
   ContestDraftStore? drafts,
   CollapsibleAreasController? areas,
+  MatrixIntent? intent,
 }) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
-  Widget page = const MaterialApp(
+  Widget page = MaterialApp(
     localizationsDelegates: AppLocalizations.localizationsDelegates,
     supportedLocales: AppLocalizations.supportedLocales,
-    home: Scaffold(body: MatrixPage(contestId: matrixContestId)),
+    home: Scaffold(
+      body: MatrixPage(contestId: matrixContestId, initialIntent: intent),
+    ),
   );
   if (areas != null) {
     page = CollapsibleAreasInherited(controller: areas, child: page);

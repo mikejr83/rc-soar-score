@@ -4,9 +4,8 @@ import '../../services/matrix/matrix_grid_model.dart';
 import '../../services/matrix/round_progress_view.dart';
 import 'matrix_colors.dart';
 
-/// The heading of a round column: its title, a dimmed placeholder for the
-/// round actions of a later release, its status (icon plus text) and the
-/// check that every scoring pilot flies exactly once.
+/// The heading of a round column: its title, its status (icon plus text) and
+/// the check that every scoring pilot flies exactly once.
 class RoundHeaderCell extends StatelessWidget {
   const RoundHeaderCell({
     super.key,
@@ -116,19 +115,6 @@ class RoundHeaderCell extends StatelessWidget {
                       ),
                   ],
                 ),
-              ),
-              IconButton(
-                onPressed: null,
-                tooltip: 'Round actions (redraw) · later release',
-                padding: EdgeInsets.zero,
-                style: IconButton.styleFrom(
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                constraints: const BoxConstraints.tightFor(
-                  width: 32,
-                  height: 32,
-                ),
-                icon: const Icon(Icons.more_vert, size: 20),
               ),
             ],
           ),

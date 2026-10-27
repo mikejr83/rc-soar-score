@@ -477,4 +477,175 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get drawCancelFailed =>
       'Cancel could not reach the server. The draw is still running. Try Cancel again.';
+
+  @override
+  String get matrixAddRoundsButton => 'Add rounds';
+
+  @override
+  String get matrixRedrawButton => 'Redraw unscored rounds';
+
+  @override
+  String get matrixActionLocked =>
+      'Administration is locked. Unlock the contest to add or redraw rounds.';
+
+  @override
+  String get matrixActionNotEditable =>
+      'Rounds can be added or redrawn from the first draw until the contest is complete.';
+
+  @override
+  String get matrixRedrawAllScored =>
+      'Every round has scores, so there is nothing to redraw.';
+
+  @override
+  String matrixRedrawRoundLocked(int round) {
+    return 'Round $round is locked. Unlock it before redrawing.';
+  }
+
+  @override
+  String matrixRedrawGroupLocked(int round) {
+    return 'A group of round $round is locked. Unlock it before redrawing.';
+  }
+
+  @override
+  String get matrixAddTitle => 'Add rounds';
+
+  @override
+  String matrixAddIntro(int last) {
+    return 'The new rounds continue after round $last. Pilots who already met are kept apart as in the first draw, and the fairness summary counts every round. Retired pilots are not drawn.';
+  }
+
+  @override
+  String get matrixRedrawTitle => 'Redraw unscored rounds';
+
+  @override
+  String matrixRedrawIntro(String span) {
+    return 'Replaces the unscored $span. Earlier rounds stay as they are and count toward who has met whom. Retired pilots are not drawn. Each redraw uses a new random seed unless you set one under Advanced.';
+  }
+
+  @override
+  String get matrixRoundsToAdd => 'Rounds to add';
+
+  @override
+  String get matrixRoundsToDraw => 'Rounds to draw';
+
+  @override
+  String matrixAddRoundsNote(String span) {
+    return 'Draws $span.';
+  }
+
+  @override
+  String matrixRedrawRoundsNote(String span) {
+    return 'Draws $span in place of the unscored rounds.';
+  }
+
+  @override
+  String matrixRedrawRoundsRemoved(String span, String removed) {
+    return 'Draws $span. $removed will be removed.';
+  }
+
+  @override
+  String matrixGroupsFromRound(int round) {
+    return 'From round $round of the current matrix.';
+  }
+
+  @override
+  String get matrixReasonLabel => 'Reason (optional)';
+
+  @override
+  String get matrixReasonHint => 'Kept in the matrix history';
+
+  @override
+  String get matrixBackToMatrix => 'Back to matrix';
+
+  @override
+  String get matrixAddAction => 'Add rounds';
+
+  @override
+  String get matrixAddActionBusy => 'Adding rounds…';
+
+  @override
+  String get matrixRedrawAction => 'Redraw rounds';
+
+  @override
+  String get matrixRedrawActionBusy => 'Redrawing rounds…';
+
+  @override
+  String get matrixAddConfirmTitle => 'Add rounds?';
+
+  @override
+  String get matrixRedrawConfirmTitle => 'Redraw unscored rounds?';
+
+  @override
+  String matrixConfirmAdds(String span) {
+    return 'Adds $span';
+  }
+
+  @override
+  String matrixConfirmReplaces(String span) {
+    return 'Redraws $span';
+  }
+
+  @override
+  String matrixConfirmRevision(int revision) {
+    return 'Current matrix revision $revision';
+  }
+
+  @override
+  String get matrixConfirmAddNote =>
+      'Rounds can be added again later. The new rounds can be redrawn until they have scores.';
+
+  @override
+  String get matrixConfirmRedrawNote =>
+      'The replaced rounds can’t be restored. Rounds with scores are not touched.';
+
+  @override
+  String get matrixRoundsAdded => 'Rounds added.';
+
+  @override
+  String get matrixRoundsRedrawn => 'Rounds redrawn.';
+
+  @override
+  String get matrixRoundsNetworkFailure =>
+      'The matrix wasn’t changed and the page hasn’t changed. Your values are kept.';
+
+  @override
+  String get matrixRoundsRejected => 'The server did not change the matrix';
+
+  @override
+  String get matrixRoundsConflict =>
+      'The matrix changed on the server. Reload to see the current state. Your values stay until you reload.';
+
+  @override
+  String matrixSeededStatusDone(int rounds) {
+    return 'Seeded Man on Man: $rounds preliminary rounds, all scored. A seeded round also needs official scores and current standings; the server checks this when you draw.';
+  }
+
+  @override
+  String matrixSeededStatusWaiting(int rounds, int missing) {
+    return 'Seeded Man on Man: $rounds preliminary rounds, $missing flights still need a score. A seeded round can be drawn once they are official.';
+  }
+
+  @override
+  String get matrixSeededOneRound => 'Seeded rounds are drawn one at a time.';
+
+  @override
+  String matrixDriftBanner(String differences) {
+    return '$differences The matrix is unchanged. Redraw the unscored rounds to apply these changes; rounds with scores keep their draw.';
+  }
+
+  @override
+  String matrixDriftBannerBlocked(String differences, String reason) {
+    return '$differences The matrix is unchanged. $reason';
+  }
+
+  @override
+  String matrixRoundSpan(int count, int first, int last) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'rounds $first to $last',
+      one: 'round $first',
+    );
+    return '$_temp0';
+  }
 }
