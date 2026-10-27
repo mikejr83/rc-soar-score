@@ -1,11 +1,14 @@
 import 'dart:math' as math;
 
 import '../../enums/lane_mode.dart';
+import '../../models/id.dart';
 import 'basic_draw.dart';
 import 'draw_fairness.dart';
+import 'draw_job.dart';
 import 'draw_optimizer.dart';
 import 'lane_stats.dart';
 import 'matchup_stats.dart';
+import 'seeded_draw.dart';
 import 'seeded_random.dart';
 
 /// A finished draw: the groups, the seed that made them, and how fair they
@@ -59,6 +62,14 @@ class DrawEngine {
   /// counts, and the fairness report covers [history] and the new rounds
   /// together.
   ///
+  /// With [allowBackToBack] off, no pilot flies in the last group of one
+  /// round and the first group of the next, also against the last round of
+  /// [history].
+  ///
+  /// [onProgress] hears how far the run has come, from 0 to 99 percent, as
+  /// each cooling step of each seed starts. It only watches: the draw is the
+  /// same with or without it.
+  ///
   /// Throws an [ArgumentError] when the settings cannot be met, as
   /// [BasicDraw.generate] does, and for a [seedCount] outside
   /// 1 to [maxSeedCount].
@@ -69,10 +80,12 @@ class DrawEngine {
     required bool teamProtection,
     required LaneMode laneMode,
     required int seed,
+    bool allowBackToBack = true,
     int seedCount = defaultSeedCount,
     int attemptsPerRound = BasicDraw.defaultAttemptsPerRound,
     int iterationsPerPlacement = DrawOptimizer.defaultIterationsPerPlacement,
     List<List<List<DrawSlot>>> history = const [],
+    void Function(DrawProgress progress)? onProgress,
   }) {
     if (seedCount < 1 || seedCount > maxSeedCount) {
       throw ArgumentError.value(
@@ -94,7 +107,8 @@ class DrawEngine {
     LaneStats? bestLanes;
     var bestCost = 0.0;
     var bestSeed = seed;
-    for (final candidate in seeds) {
+    for (var seedIndex = 0; seedIndex < seeds.length; seedIndex++) {
+      final candidate = seeds[seedIndex];
       final random = SeededRandom(candidate);
       final built = const BasicDraw().generate(
         pilots: pilots,
@@ -104,6 +118,7 @@ class DrawEngine {
         laneMode: laneMode,
         random: random,
         attemptsPerRound: attemptsPerRound,
+        allowBackToBack: allowBackToBack,
         history: history,
       );
       final improved = const DrawOptimizer().improve(
@@ -113,7 +128,19 @@ class DrawEngine {
         laneMode: laneMode,
         random: random,
         iterationsPerPlacement: iterationsPerPlacement,
+        allowBackToBack: allowBackToBack,
         history: history,
+        onLevel: onProgress == null
+            ? null
+            : (level) => onProgress(
+                DrawProgress(
+                  percent:
+                      (100 * (seedIndex * DrawOptimizer.levels + level)) ~/
+                      (seeds.length * DrawOptimizer.levels + 1),
+                  seed: seedIndex + 1,
+                  seedCount: seeds.length,
+                ),
+              ),
       );
       final all = [...history, ...improved];
       final stats = MatchupStats.of(all, teamProtection: teamProtection);
@@ -144,6 +171,44 @@ class DrawEngine {
       history: history,
     );
     return DrawResult(rounds: best, seed: bestSeed, fairness: fairness);
+  }
+
+  /// Draws one seeded round (`SeededManOnMan`) after [history]: pilots are
+  /// tiered by [places] (participation to place, 1 is the leader) and the
+  /// leaders fly in the last group. Team protection does not apply.
+  ///
+  /// There is nothing to optimize: the tiers fix who flies with whom, so the
+  /// seed only orders pilots of equal place and the lanes. The fairness
+  /// report covers [history] and the seeded round together.
+  DrawResult generateSeeded({
+    required List<DrawPilot> pilots,
+    required Map<Id, int> places,
+    required int groupsPerRound,
+    required LaneMode laneMode,
+    required int seed,
+    List<List<List<DrawSlot>>> history = const [],
+  }) {
+    final round = const SeededDraw().generate(
+      pilots: pilots,
+      places: places,
+      groupsPerRound: groupsPerRound,
+      laneMode: laneMode,
+      random: SeededRandom(seed),
+    );
+    final all = [...history, round];
+    final fairness = drawFairness(all, teamProtection: false);
+    fairness['fairness_score'] = _score(
+      MatchupStats.of(all, teamProtection: false),
+      LaneStats.of(all),
+      laneMode: laneMode,
+      pilots: pilots,
+      rounds: 1,
+      groupsPerRound: groupsPerRound,
+      teamProtection: false,
+      fairness: fairness,
+      history: history,
+    );
+    return DrawResult(rounds: [round], seed: seed, fairness: fairness);
   }
 
   /// The total cost `J`: the matchup penalty plus [laneWeight] times the

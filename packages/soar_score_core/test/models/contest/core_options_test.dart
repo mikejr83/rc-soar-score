@@ -9,6 +9,7 @@ void main() {
       expect(options.teamsEnabled, isFalse);
       expect(options.teamPilotCount, isNull);
       expect(options.teamProtection, isFalse);
+      expect(options.allowBackToBack, isTrue);
       expect(options.rolesEnabled, isFalse);
       expect(options.drawMode, DrawMode.standardManOnMan);
       expect(options.preliminaryRounds, isNull);
@@ -125,6 +126,18 @@ void main() {
       );
     });
 
+    test('read allow_back_to_back, on by default', () {
+      expect(
+        CoreOptions.fromMap(const {'allow_back_to_back': false})
+            .allowBackToBack,
+        isFalse,
+      );
+      expect(
+        () => CoreOptions.fromMap(const {'allow_back_to_back': 'no'}),
+        throwsArgumentError,
+      );
+    });
+
     test('team options are invalid without teams', () {
       expect(
         () => CoreOptions.fromMap(const {'team_protection': true}),
@@ -133,6 +146,32 @@ void main() {
       expect(
         () => CoreOptions.fromMap(const {'team_pilot_count': 2}),
         throwsArgumentError,
+      );
+    });
+
+    test('seeded draw and team protection are forbidden together', () {
+      expect(
+        () => CoreOptions.fromMap(const {
+          'draw_mode': 'SeededManOnMan',
+          'teams_enabled': true,
+          'team_pilot_count': 2,
+          'team_protection': true,
+        }),
+        throwsA(
+          isA<ArgumentError>().having(
+            (e) => e.message,
+            'message',
+            contains('cannot be used with SeededManOnMan'),
+          ),
+        ),
+      );
+      expect(
+        CoreOptions.fromMap(const {
+          'draw_mode': 'SeededManOnMan',
+          'teams_enabled': true,
+          'team_pilot_count': 2,
+        }).drawMode,
+        DrawMode.seededManOnMan,
       );
     });
 

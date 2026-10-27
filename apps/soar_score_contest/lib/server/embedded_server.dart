@@ -27,12 +27,20 @@ const String embeddedServerVersion = '0.1.0';
 /// request but `GET /health` must carry [secret] as a bearer token (see
 /// `embeddedGuard`).
 class EmbeddedServer {
-  EmbeddedServer._(this._databasePath, {required this.seedDemo});
+  EmbeddedServer._(
+    this._databasePath, {
+    required this.seedDemo,
+    this.drawRunner,
+  });
 
   final String _databasePath;
 
   /// Whether to fill an empty database with the demo data.
   final bool seedDemo;
+
+  /// Where matrix draws run; null is the API's default, an isolate of their
+  /// own.
+  final core.DrawRunner? drawRunner;
   late HttpServer _server;
 
   /// The per-launch bearer secret, held in memory only. The app's own client
@@ -115,6 +123,7 @@ class EmbeddedServer {
         guard: inspectionOwners,
       ),
       gliderScoreImport: GliderScoreImportProcessRunner(),
+      drawRunner: drawRunner,
     );
     final guarded = const Pipeline()
         .addMiddleware(embeddedGuard(secret: secret, port: () => port))
@@ -145,11 +154,20 @@ class EmbeddedServer {
 /// With [seedDemo], an empty database gets the example data of
 /// `DemoDataSeeder` (development only; the app passes it for the demo
 /// database).
+///
+/// [drawRunner] replaces where matrix draws run (the E2E builds slow them
+/// down so a journey can cancel one); by default each draw runs on an isolate
+/// of its own, so a long draw never freezes the app.
 Future<EmbeddedServer> startEmbeddedServer(
   String databasePath, {
   bool seedDemo = false,
+  core.DrawRunner? drawRunner,
 }) async {
-  final server = EmbeddedServer._(databasePath, seedDemo: seedDemo);
+  final server = EmbeddedServer._(
+    databasePath,
+    seedDemo: seedDemo,
+    drawRunner: drawRunner,
+  );
   await server.initializeDatabase();
   await server.initialize();
   return server;

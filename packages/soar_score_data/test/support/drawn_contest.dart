@@ -2,12 +2,15 @@ import 'package:soar_score_core/services/services.dart';
 import 'package:soar_score_core/soar_score_core.dart' as core;
 import 'package:soar_score_data/soar_score_data.dart';
 
-/// Creates, configures and draws an F5J contest of four pilots in two rounds
-/// of one group, owned by [actor].
+/// Creates, configures and draws an F5J contest of four pilots in [rounds]
+/// rounds of one group, owned by [actor]. [coreOptions] is the `core` part of
+/// the configuration.
 Future<core.Id> drawnContest(
   Repository repository,
   core.Id actor, {
   String mutationPrefix = 'setup',
+  int rounds = 2,
+  Map<String, Object?> coreOptions = const {},
 }) async {
   var n = 0;
   core.MutationMetadata meta() => core.MutationMetadata(
@@ -36,7 +39,7 @@ Future<core.Id> drawnContest(
       baseRevisionNumber: 0,
       disciplineProfileId: core.SystemDisciplineProfiles.f5jId,
       config: core.ContestConfig(
-        core: const {},
+        core: coreOptions,
         discipline: const {'working_time': 600},
       ),
     ),
@@ -67,7 +70,7 @@ Future<core.Id> drawnContest(
   await MatrixService(repository).drawFirst(
     contestId,
     id: core.Id.create(),
-    rounds: 2,
+    rounds: rounds,
     groupsPerRound: 1,
     randomSeed: 7,
     actorId: actor,

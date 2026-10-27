@@ -158,6 +158,9 @@ try {
         if ($testFile.Name -eq 'signed_out_landing_journey_test.dart') {
             $flutterArgs += '--dart-define=SOAR_SCORE_E2E_SIGNED_OUT=true'
         }
+        if ($testFile.Name -eq 'matrix_draw_cancel_test.dart') {
+            $flutterArgs += '--dart-define=SOAR_SCORE_E2E_SLOW_DRAW=true'
+        }
         for ($attempt = 1; $attempt -le 2; $attempt++) {
             Stop-App
             $output = & flutter @flutterArgs 2>&1 | Tee-Object -Variable lines |

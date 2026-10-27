@@ -274,6 +274,17 @@ class SettingCatalog {
         type: SettingType.toggle,
       ),
       const SettingDef(
+        key: SettingKeys.allowBackToBack,
+        section: SectionId.draw,
+        kind: SettingKind.structural,
+        label: 'Allow back-to-back flights',
+        help:
+            'A pilot may fly the last group of one round and the first group '
+            'of the next. When off, the draw never does that, and its '
+            'fairness decreases because fewer draws are possible.',
+        type: SettingType.toggle,
+      ),
+      const SettingDef(
         key: SettingKeys.laneMode,
         section: SectionId.draw,
         kind: SettingKind.structural,

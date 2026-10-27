@@ -19,6 +19,9 @@ import 'package:soar_score_data/soar_score_data.dart';
 /// prints `E2E_SERVER_READY <port>` once it listens; `scripts/e2e` waits for
 /// that line.
 ///
+/// Matrix draws are held for a few seconds (`DelayedDrawRunner`) so a journey
+/// can see their progress and cancel one.
+///
 /// `POST /__e2e/fail-next-write` makes the next write (any method but GET,
 /// HEAD and OPTIONS) answer 503 once, so a journey can check what the app
 /// does when a save fails and then succeeds on Retry. Test-only, like the
@@ -49,6 +52,9 @@ Future<void> main(List<String> args) async {
           schemaRevision: database.schemaVersion,
           repository: repository,
           authMiddleware: fixedPrincipal(Principal(accountId: localAccountId)),
+          // Draws are held a few seconds so a journey can see their progress
+          // and cancel one.
+          drawRunner: const DelayedDrawRunner(IsolateDrawRunner()),
         ),
       );
   final server = await shelf_io.serve(
