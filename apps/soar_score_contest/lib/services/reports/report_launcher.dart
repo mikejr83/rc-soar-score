@@ -64,3 +64,29 @@ class PlatformReportLauncher extends ReportLauncher {
   void openHere(BuildContext context, String path) =>
       context.go(inPlacePath(path));
 }
+
+/// Opens a path in this window, with a way back, on every platform. The
+/// end-to-end web build uses it because a journey cannot drive a second
+/// browser tab.
+class InPlaceReportLauncher extends PlatformReportLauncher {
+  const InPlaceReportLauncher();
+
+  @override
+  Future<LaunchOutcome> open(BuildContext context, String path) async {
+    openHere(context, path);
+    return LaunchOutcome.inPlace;
+  }
+}
+
+/// The launcher the Reports page and the report viewer use unless one is
+/// passed to them. The web build made for end-to-end tests (`SOAR_SCORE_E2E`,
+/// never a release build) opens reports in place with [InPlaceReportLauncher].
+abstract final class ReportLaunchers {
+  static final ReportLauncher current = forBuild(
+    e2e: bool.fromEnvironment('SOAR_SCORE_E2E') && !kReleaseMode,
+  );
+
+  /// The launcher for a build that is, or is not, the end-to-end build.
+  static ReportLauncher forBuild({required bool e2e}) =>
+      e2e ? InPlaceReportLauncher() : PlatformReportLauncher();
+}

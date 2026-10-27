@@ -18,7 +18,10 @@
 # apps/soar_score_server/tool/e2e_server.dart, a token-free API server on demo
 # data. Each test file gets a fresh server, hence fresh demo data.
 # A test file that runs longer than $env:E2E_TEST_TIMEOUT seconds (default 300)
-# is stopped and counted as failed, so a hung browser cannot stall a run.
+# is stopped and counted as failed, so a hung browser cannot stall a run. The
+# long contest_lifecycle_journey_test.dart gets 1200 seconds by default;
+# setting $env:E2E_TEST_TIMEOUT overrides the limit for every file. These
+# limits apply to web runs only; a Windows (native) run has no timeout.
 
 param(
     [string]$Device = 'windows',
@@ -47,7 +50,6 @@ if ($Device -in 'web', 'chrome') {
         if (-not $chrome) { $chrome = $paths['chrome'] }
     }
     if (-not $chromedriver) { $chromedriver = 'chromedriver' }
-    $testTimeout = if ($env:E2E_TEST_TIMEOUT) { [int]$env:E2E_TEST_TIMEOUT } else { 300 }
     if (-not (Get-Command $chromedriver -ErrorAction SilentlyContinue)) {
         throw "chromedriver not found ('$chromedriver'). Run .\scripts\e2e-setup.ps1 to install Chrome and chromedriver, or set `$env:CHROMEDRIVER."
     }
@@ -102,6 +104,9 @@ if ($Device -in 'web', 'chrome') {
                     $flutterArgs += '--dart-define=SOAR_SCORE_E2E_SIGNED_OUT=true'
                 }
                 if ($Name) { $flutterArgs += @('--name', $Name) }
+                $testTimeout = 300
+                if ($file.Name -eq 'contest_lifecycle_journey_test.dart') { $testTimeout = 1200 }
+                if ($env:E2E_TEST_TIMEOUT) { $testTimeout = [int]$env:E2E_TEST_TIMEOUT }
                 $flutter = Start-Process (Get-Command flutter).Source `
                     -ArgumentList $flutterArgs -NoNewWindow -PassThru
                 if (-not $flutter.WaitForExit($testTimeout * 1000)) {

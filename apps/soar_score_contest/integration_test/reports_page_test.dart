@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
@@ -58,11 +57,9 @@ void main() {
     await pumpUntilFound(tester, find.textContaining('Round 1 of'));
   });
 
-  // Native opens the viewer in place; the web opens a new tab, which a journey
-  // cannot drive, so this part is native-only.
-  testWidgets('Open shows the report viewer with a way back (native)', (
-    tester,
-  ) async {
+  // The viewer opens in place; the web E2E build uses `InPlaceReportLauncher`
+  // because a journey cannot drive a second browser tab.
+  testWidgets('Open shows the report viewer with a way back', (tester) async {
     await openMainPage(tester);
     await openContest(tester, _contest);
     await tapRail(tester, 'Reports');
@@ -80,41 +77,38 @@ void main() {
 
     await tapVisible(tester, find.byKey(const ValueKey('viewer-back')));
     await pumpUntilFound(tester, find.text('Reports are built from'));
-  }, skip: kIsWeb);
+  });
 
   // The Overall Standings report reads the stored results of a contest that is
-  // being scored. Native opens it in place; the web opens a new tab, which a
-  // journey cannot drive, so this journey is native-only.
-  testWidgets(
-    'Overall Standings shows the standings and follows its options (native)',
-    (tester) async {
-      await openMainPage(tester);
-      await openContest(tester, 'Mountain States Team F5J');
-      await tapRail(tester, 'Reports');
-      await pumpUntilFound(tester, find.text('Reports are built from'));
+  // being scored.
+  testWidgets('Overall Standings shows the standings and follows its options', (
+    tester,
+  ) async {
+    await openMainPage(tester);
+    await openContest(tester, 'Mountain States Team F5J');
+    await tapRail(tester, 'Reports');
+    await pumpUntilFound(tester, find.text('Reports are built from'));
 
-      await tapVisible(
-        tester,
-        find.byKey(const ValueKey('report-open-standings')),
-      );
-      await pumpUntilFound(tester, find.text('Rank'));
+    await tapVisible(
+      tester,
+      find.byKey(const ValueKey('report-open-standings')),
+    );
+    await pumpUntilFound(tester, find.text('Rank'));
 
-      // The heading, the columns and the pilots in their stored order.
-      expect(find.textContaining('Overall Results - '), findsWidgets);
-      expect(find.text('Total'), findsWidgets);
-      expect(find.text('R1'), findsWidgets);
-      expect(find.text('Raw'), findsNothing);
+    // The heading, the columns and the pilots in their stored order.
+    expect(find.textContaining('Overall Results - '), findsWidgets);
+    expect(find.text('Total'), findsWidgets);
+    expect(find.text('R1'), findsWidgets);
+    expect(find.text('Raw'), findsNothing);
 
-      // An option adds its column at once.
-      await tapVisible(
-        tester,
-        find.widgetWithText(CheckboxListTile, 'Raw score'),
-      );
-      await pumpUntilFound(tester, find.text('Raw'));
+    // An option adds its column at once.
+    await tapVisible(
+      tester,
+      find.widgetWithText(CheckboxListTile, 'Raw score'),
+    );
+    await pumpUntilFound(tester, find.text('Raw'));
 
-      await tapVisible(tester, find.byKey(const ValueKey('viewer-back')));
-      await pumpUntilFound(tester, find.text('Reports are built from'));
-    },
-    skip: kIsWeb,
-  );
+    await tapVisible(tester, find.byKey(const ValueKey('viewer-back')));
+    await pumpUntilFound(tester, find.text('Reports are built from'));
+  });
 }

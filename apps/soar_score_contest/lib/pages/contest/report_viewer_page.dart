@@ -51,7 +51,7 @@ class ReportViewerPage extends StatefulWidget {
     this.openedInPlace = false,
     this.definitionFor = reportDefinitionFor,
     required this.printer,
-    this.launcher = const PlatformReportLauncher(),
+    this.launcher,
     this.onParams,
     this.pollInterval = const Duration(seconds: 30),
     this.clock = DateTime.now,
@@ -70,7 +70,7 @@ class ReportViewerPage extends StatefulWidget {
   final bool openedInPlace;
   final ReportDefinitionFinder definitionFor;
   final ReportPrinter printer;
-  final ReportLauncher launcher;
+  final ReportLauncher? launcher;
 
   /// Called when the params change, so the URL can follow.
   final ValueChanged<ReportViewParams>? onParams;
@@ -317,7 +317,8 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
 
   void _goBack() => context.go(contestReportsPath(widget.contestId));
 
-  void _openPath(String path) => widget.launcher.open(context, path);
+  void _openPath(String path) =>
+      (widget.launcher ?? ReportLaunchers.current).open(context, path);
 
   void _openAction(ReportAction action) =>
       _openPath(switch (action.destination) {
