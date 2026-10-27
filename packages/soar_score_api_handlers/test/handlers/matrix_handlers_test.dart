@@ -385,4 +385,28 @@ void main() {
       expect(assignments, hasLength(18));
     });
   });
+
+  group('contest-scoped authorization', () {
+    late TwoAccountApi two;
+
+    setUp(() => two = TwoAccountApi(owner: _owner));
+
+    test('a foreign director cannot draw a contest', () async {
+      two.storeContest(Id.parse(_contestId));
+
+      await two.expectDenied(
+        two.outsiderApi,
+        'POST',
+        '/contests/$_contestId/matrix/draws',
+        body: {
+          'id': '019c0000-0000-7000-8000-000000000501',
+          'rounds': 1,
+          'groups_per_round': 1,
+          'random_seed': 7,
+        },
+      );
+
+      expect(two.ownerApi.repository.matrixRevisions.revisions, isEmpty);
+    });
+  });
 }

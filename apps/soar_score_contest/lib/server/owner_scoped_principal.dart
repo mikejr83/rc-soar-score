@@ -17,8 +17,9 @@ final _logger = Logger('OwnerScopedPrincipal');
 ///   browsed and edited as in any contest, and new rows belong to it.
 /// - On a single participant, role or landing table whose owner is an
 ///   inspection owner, the request acts as that owner.
-/// - The lists of those three also show the rows of every inspection owner
-///   (the principal's `alsoVisibleOwners`).
+/// - The lists of contests, participants, roles and landing tables also show
+///   the rows of every inspection owner (the principal's
+///   `alsoVisibleOwners`).
 ///
 /// A read error of the markers leaves the request acting as the account: it
 /// never acts as an owner it cannot show to be an inspection owner.
@@ -68,9 +69,9 @@ Handler Function(Handler) ownerScopedPrincipal({
     return null;
   }
 
-  /// Only the lists of participants, roles and landing tables show the rows
-  /// of inspection owners with the account's own; other requests need no
-  /// owner list.
+  /// The lists of contests, participants, roles and landing tables show the
+  /// rows of inspection owners with the account's own; other requests need
+  /// no owner list.
   bool listsAcrossOwners(Request request) {
     if (request.method != 'GET') return false;
     var segments = request.url.pathSegments;
@@ -78,7 +79,12 @@ Handler Function(Handler) ownerScopedPrincipal({
       segments = segments.sublist(2);
     }
     return segments.length == 1 &&
-        const {'participants', 'roles', 'landing-tables'}.contains(segments[0]);
+        const {
+          'contests',
+          'participants',
+          'roles',
+          'landing-tables',
+        }.contains(segments[0]);
   }
 
   Future<Principal> principalFor(Request request) async {

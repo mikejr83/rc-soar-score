@@ -18,6 +18,8 @@ const testIdentity = HealthDto(
   version: '0.1.0',
 );
 
+final testAccount = Id.parse('019c0000-0000-7000-8000-000000000090');
+
 void main() {
   late Handler handler;
 
@@ -27,6 +29,7 @@ void main() {
       displayName: testIdentity.displayName,
       version: testIdentity.version,
       repository: StubRepository(StubContestRepository()),
+      authMiddleware: fixedPrincipal(Principal(accountId: testAccount)),
     );
   });
 
@@ -55,6 +58,7 @@ void main() {
       startDateTime: DateTime.utc(2026, 10, 17, 14),
       endDateTime: DateTime.utc(2026, 10, 18, 22),
       timezone: 'America/Denver',
+      ownerAccountId: testAccount,
       createdAt: DateTime.utc(2026, 9),
       updatedAt: DateTime.utc(2026, 9),
     );
@@ -81,6 +85,7 @@ void main() {
         displayName: testIdentity.displayName,
         version: testIdentity.version,
         repository: StubRepository(repository),
+        authMiddleware: fixedPrincipal(Principal(accountId: testAccount)),
       );
 
       final response = await seeded(

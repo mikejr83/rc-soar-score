@@ -2,6 +2,7 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_api_handlers/auth/principal.dart';
+import 'package:soar_score_api_handlers/handlers/contest_authorization.dart';
 import 'package:soar_score_api_handlers/handlers/health_handler.dart';
 import 'package:soar_score_api_handlers/handlers/request_body.dart';
 import 'package:soar_score_api_handlers/handlers/write_metadata.dart';
@@ -39,8 +40,9 @@ void addParticipationRoutes(
     Request request,
     String id,
   ) async {
-    requirePrincipal(request);
-    final participations = await service.list(Id.parse(id));
+    final contestId = Id.parse(id);
+    await requireContestDirector(request, repository, contestId);
+    final participations = await service.list(contestId);
     return jsonResponse(<String, dynamic>{
       'participations': [
         for (final participation in participations) participation.toJson(),
@@ -54,6 +56,7 @@ void addParticipationRoutes(
   ) async {
     final principal = requirePrincipal(request);
     final contestId = Id.parse(id);
+    await requireContestDirector(request, repository, contestId);
     final body = await readJsonBody(request, AddParticipationRequest.fromJson);
 
     final participation = await service.add(
@@ -74,12 +77,13 @@ void addParticipationRoutes(
     String participationId,
   ) async {
     final principal = requirePrincipal(request);
+    final contestId = Id.parse(id);
+    await requireContestDirector(request, repository, contestId);
     final body = await readJsonBody(
       request,
       UpdateParticipationRequest.fromJson,
     );
 
-    final contestId = Id.parse(id);
     final before = (await service.list(contestId))
         .where((p) => p.id == Id.parse(participationId))
         .firstOrNull;
@@ -119,6 +123,7 @@ void addParticipationRoutes(
     String participationId,
   ) async {
     final principal = requirePrincipal(request);
+    await requireContestDirector(request, repository, Id.parse(id));
     await service.remove(
       Id.parse(id),
       Id.parse(participationId),

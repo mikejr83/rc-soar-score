@@ -401,4 +401,41 @@ void main() {
       expect(response.statusCode, 404);
     });
   });
+
+  group('contest-scoped authorization', () {
+    final outsider = Id.parse('019c0000-0000-7000-8000-000000000002');
+    late TwoAccountApi two;
+
+    setUp(() {
+      two = TwoAccountApi(owner: _owner, outsider: outsider);
+    });
+
+    test('a foreign director cannot read or enter a score', () async {
+      final slot = '019c0000-0000-7000-8000-000000000301';
+      two.storeContest(Id.parse(_contestId));
+
+      await two.expectDenied(
+        two.outsiderApi,
+        'GET',
+        '/contests/$_contestId/assignments/$slot/scores/history',
+      );
+      await two.expectDenied(
+        two.outsiderApi,
+        'POST',
+        '/contests/$_contestId/assignments/$slot/scores',
+        body: {
+          'client_mutation_id': 'entry-1',
+          'base_score_revision': 0,
+          'components': {'time_flown': 540},
+        },
+      );
+
+      expect(two.ownerApi.repository.scoreAttempts.stored, isEmpty);
+      final own = await two.ownerApi.send(
+        'GET',
+        '/contests/$_contestId/assignments/$slot/scores/history',
+      );
+      expect(own.statusCode, 404);
+    });
+  });
 }
