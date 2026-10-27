@@ -73,12 +73,39 @@ class _MatrixPageState extends State<MatrixPage> {
   /// How many failed tries of Cancel in a row are shown to the director.
   static const int _cancelAttempts = 3;
 
+  /// The refusals of add rounds and redraw that mean the matrix or the
+  /// contest changed since the page loaded: the director reloads.
+  static const _changedCodes = {
+    'stale_matrix',
+    'rounds_have_scores',
+    'round_locked',
+    'group_locked',
+    'matrix_not_editable',
+    'contest_locked',
+    'no_matrix',
+  };
+
   static const Duration _pollEvery = Duration(milliseconds: 400);
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _loading ??= _load();
+  }
+
+  @override
+  void didUpdateWidget(MatrixPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // A link to the page that is already open (the next-step card).
+    final intent = widget.initialIntent;
+    final data = _data;
+    if (intent != null &&
+        intent != oldWidget.initialIntent &&
+        data != null &&
+        !data.matrix.isEmpty &&
+        !_busy) {
+      setState(() => _openForm(intent, data));
+    }
   }
 
   @override
@@ -104,7 +131,7 @@ class _MatrixPageState extends State<MatrixPage> {
     if (!_initialApplied) {
       _initialApplied = true;
       final intent = widget.initialIntent;
-      if (intent != null && _actionBlock(data, null) == null) {
+      if (intent != null && mounted) {
         _openForm(intent, data);
       }
     }
@@ -131,19 +158,21 @@ class _MatrixPageState extends State<MatrixPage> {
   /// Opens the form for [intent], filled in from the current matrix.
   void _openForm(MatrixIntent intent, MatrixPageData data) {
     final plan = MatrixRoundsPlan.of(data.matrix);
+    // A link can ask for a form the buttons would show disabled.
+    if (_actionBlock(data, null) != null || !plan.allows(intent)) {
+      return;
+    }
     final options = data.options;
     final preliminary = options?.drawMode == DrawMode.seededManOnMan
         ? options?.preliminaryRounds
         : null;
-    final first = intent == MatrixIntent.addRounds
-        ? plan.lastRound + 1
-        : plan.firstUnscored;
+    final first = plan.firstRound(intent);
     var rounds = intent == MatrixIntent.addRounds ? 1 : plan.unscoredRounds;
     if (preliminary != null && intent == MatrixIntent.redraw) {
       // Preliminary rounds are drawn together; a seeded round is drawn from
       // the standings, one at a time.
       rounds = first <= preliminary
-          ? (preliminary - first + 1).clamp(1, rounds)
+          ? (preliminary - first + 1).clamp(1, rounds < 1 ? 1 : rounds)
           : 1;
     } else if (preliminary != null && first > preliminary) {
       rounds = 1;
@@ -288,9 +317,7 @@ class _MatrixPageState extends State<MatrixPage> {
         seeded: options?.drawMode == DrawMode.seededManOnMan,
       );
     } else {
-      final firstRound = intent == MatrixIntent.addRounds
-          ? plan!.lastRound + 1
-          : plan!.firstUnscored;
+      final firstRound = plan!.firstRound(intent);
       final preliminary = options?.drawMode == DrawMode.seededManOnMan
           ? options?.preliminaryRounds
           : null;
@@ -324,7 +351,8 @@ class _MatrixPageState extends State<MatrixPage> {
     final intent = _intent;
     final plan = intent == null ? null : MatrixRoundsPlan.of(data.matrix);
     final key =
-        '$intent/${check.rounds}/${check.groups}/${form.seed.text}/'
+        '$intent/${plan?.firstRound(intent!)}/'
+        '${data.matrix.revision?.revisionNumber}/${check.rounds}/${check.groups}/${form.seed.text}/'
         '${form.attempts.text}/${form.seedCount.text}/${form.reason.text}';
     final id = _idFor(key);
     final reason = form.reason.text.trim();
@@ -351,9 +379,7 @@ class _MatrixPageState extends State<MatrixPage> {
           data.contest.id,
           RedrawMatrixRequest(
             id: id,
-            firstRound: intent == MatrixIntent.addRounds
-                ? plan!.lastRound + 1
-                : plan!.firstUnscored,
+            firstRound: plan!.firstRound(intent),
             rounds: check.rounds!,
             groupsPerRound: check.groups!,
             randomSeed: DrawFormController.optionalNumber(form.seed),
@@ -424,7 +450,7 @@ class _MatrixPageState extends State<MatrixPage> {
           if (cancelled) {
             // Nothing to show: the form and the page are as they were.
           } else if (error.statusCode == 409 &&
-              (intent == null || error.error?.code == 'stale_matrix')) {
+              (intent == null || _changedCodes.contains(error.error?.code))) {
             _conflict = true;
           } else {
             _rejection = apiErrorText(error);

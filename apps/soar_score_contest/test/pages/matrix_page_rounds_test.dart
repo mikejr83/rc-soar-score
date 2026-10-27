@@ -197,7 +197,8 @@ void main() {
 
     testWidgets('a rejection keeps the form and the matrix', (tester) async {
       final server = _server()
-        ..redrawStatus = 409
+        ..redrawStatus = 400
+        ..redrawCode = 'invalid'
         ..redrawError =
             'round 1 already has scores; only rounds without '
             'scores can be redrawn';
@@ -216,6 +217,20 @@ void main() {
       await _tap(tester, find.byKey(const ValueKey('back-to-matrix')));
       expect(find.text('Round 2'), findsOneWidget);
       expect(_redraw, findsOneWidget);
+    });
+
+    testWidgets('scores that arrived meanwhile ask for a reload', (
+      tester,
+    ) async {
+      final server = _server()
+        ..redrawStatus = 409
+        ..redrawCode = 'rounds_have_scores';
+      await pumpMatrixPage(tester, server);
+      await _tap(tester, _redraw);
+      await _tap(tester, _submit);
+      await _tap(tester, _confirm);
+      expect(find.byKey(const ValueKey('reload')), findsOneWidget);
+      expect(_text(tester, 'draw-rounds'), '2');
     });
 
     testWidgets('a stale matrix asks for a reload and keeps the values', (
@@ -294,6 +309,21 @@ void main() {
     await pumpMatrixPage(tester, _server(), intent: MatrixIntent.redraw);
     expect(find.byKey(const ValueKey('draw-rounds')), findsOneWidget);
     expect(find.text('Rounds to draw'), findsOneWidget);
+  });
+
+  testWidgets('a link to a redraw that is not allowed shows the matrix', (
+    tester,
+  ) async {
+    await pumpMatrixPage(
+      tester,
+      _server(scored: (4, 4)),
+      intent: MatrixIntent.redraw,
+    );
+    expect(find.byKey(const ValueKey('draw-rounds')), findsNothing);
+    expect(
+      find.text('Every round has scores, so there is nothing to redraw.'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('the placeholders for later releases are gone', (tester) async {

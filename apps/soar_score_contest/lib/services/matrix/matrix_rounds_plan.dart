@@ -109,6 +109,14 @@ class MatrixRoundsPlan {
   final RedrawBlockKind? blockKind;
   final int? blockRound;
 
+  /// The round [intent] starts drawing at.
+  int firstRound(MatrixIntent intent) =>
+      intent == MatrixIntent.addRounds ? lastRound + 1 : firstUnscored;
+
+  /// Whether [intent] is allowed on the plan itself (adding always is).
+  bool allows(MatrixIntent intent) =>
+      intent == MatrixIntent.addRounds || blockKind == null;
+
   /// How many rounds a redraw replaces.
   int get unscoredRounds => lastRound - firstUnscored + 1;
 }

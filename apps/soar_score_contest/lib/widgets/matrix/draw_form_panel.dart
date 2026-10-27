@@ -92,11 +92,7 @@ class DrawFormPanel extends StatelessWidget {
     final plan = this.plan;
     final adding = intent == MatrixIntent.addRounds;
     final rounding = plan != null;
-    final firstRound = plan == null
-        ? 1
-        : adding
-        ? plan.lastRound + 1
-        : plan.firstUnscored;
+    final firstRound = plan == null ? 1 : plan.firstRound(intent!);
     final count = check.rounds ?? 0;
     final preliminary = seeded ? options?.preliminaryRounds : null;
     // Seeded rounds come from the standings, so they are drawn one at a time.

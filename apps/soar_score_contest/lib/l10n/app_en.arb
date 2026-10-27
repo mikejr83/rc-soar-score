@@ -751,5 +751,31 @@
       "first": {"type": "int"},
       "last": {"type": "int"}
     }
+  },
+  "matrixConfirmPilots": "{count} scoring pilots",
+  "@matrixConfirmPilots": {
+    "description": "Confirmation line with the number of pilots who are drawn.",
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "matrixConfirmGroups": "{groups} groups per round ({sizes} pilots)",
+  "@matrixConfirmGroups": {
+    "description": "Confirmation line with the groups of each drawn round and their sizes.",
+    "placeholders": {
+      "groups": {"type": "int"},
+      "sizes": {"type": "String"}
+    }
+  },
+  "matrixConfirmConfiguration": "Configuration revision {revision}",
+  "@matrixConfirmConfiguration": {
+    "description": "Confirmation line with the configuration revision; revision is a number or a dash.",
+    "placeholders": {
+      "revision": {"type": "String"}
+    }
+  },
+  "matrixConfirmCancel": "Cancel",
+  "@matrixConfirmCancel": {
+    "description": "Button that closes the add rounds or redraw confirmation without changing anything."
   }
 }

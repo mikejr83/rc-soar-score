@@ -955,6 +955,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =1{round {first}} other{rounds {first} to {last}}}'**
   String matrixRoundSpan(int count, int first, int last);
+
+  /// Confirmation line with the number of pilots who are drawn.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} scoring pilots'**
+  String matrixConfirmPilots(int count);
+
+  /// Confirmation line with the groups of each drawn round and their sizes.
+  ///
+  /// In en, this message translates to:
+  /// **'{groups} groups per round ({sizes} pilots)'**
+  String matrixConfirmGroups(int groups, String sizes);
+
+  /// Confirmation line with the configuration revision; revision is a number or a dash.
+  ///
+  /// In en, this message translates to:
+  /// **'Configuration revision {revision}'**
+  String matrixConfirmConfiguration(String revision);
+
+  /// Button that closes the add rounds or redraw confirmation without changing anything.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get matrixConfirmCancel;
 }
 
 class _AppLocalizationsDelegate

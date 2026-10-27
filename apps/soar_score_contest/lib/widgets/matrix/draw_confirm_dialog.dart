@@ -146,7 +146,7 @@ Future<bool> confirmRounds(
             children: [
               item(
                 Icons.groups_outlined,
-                '${data.scoringPilots} scoring pilots',
+                l10n.matrixConfirmPilots(data.scoringPilots),
               ),
               item(
                 Icons.replay,
@@ -158,12 +158,13 @@ Future<bool> confirmRounds(
               ),
               item(
                 Icons.grid_view,
-                '${sizes.length} groups per round (${sizes.join(', ')} pilots)',
+                l10n.matrixConfirmGroups(sizes.length, sizes.join(', ')),
               ),
               item(
                 Icons.history,
-                'Configuration revision '
-                '${data.configuration?.revisionNumber ?? '–'}',
+                l10n.matrixConfirmConfiguration(
+                  '${data.configuration?.revisionNumber ?? '–'}',
+                ),
               ),
               item(
                 Icons.layers_outlined,
@@ -206,7 +207,7 @@ Future<bool> confirmRounds(
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            child: Text(l10n.matrixConfirmCancel),
           ),
           FilledButton(
             key: const ValueKey('confirm-rounds'),

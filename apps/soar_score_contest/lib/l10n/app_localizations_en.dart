@@ -648,4 +648,22 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String matrixConfirmPilots(int count) {
+    return '$count scoring pilots';
+  }
+
+  @override
+  String matrixConfirmGroups(int groups, String sizes) {
+    return '$groups groups per round ($sizes pilots)';
+  }
+
+  @override
+  String matrixConfirmConfiguration(String revision) {
+    return 'Configuration revision $revision';
+  }
+
+  @override
+  String get matrixConfirmCancel => 'Cancel';
 }
