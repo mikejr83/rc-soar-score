@@ -41,6 +41,7 @@ class MatrixSummary {
       groupsPerRound: revision.drawConfig['groups_per_round'] as int?,
       drawnWith: {
         SettingKeys.teamProtection: revision.drawConfig['team_protection'],
+        SettingKeys.allowBackToBack: revision.drawConfig['allow_back_to_back'],
         SettingKeys.laneMode: revision.drawConfig['lane_mode'],
         SettingKeys.drawMode: revision.drawConfig['configured_draw_mode'],
       },

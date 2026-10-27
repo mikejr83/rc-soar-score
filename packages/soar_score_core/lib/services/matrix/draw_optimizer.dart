@@ -50,6 +50,7 @@ class DrawOptimizer {
     required SeededRandom random,
     int iterationsPerPlacement = defaultIterationsPerPlacement,
     int unmetWeight = defaultUnmetWeight,
+    bool allowBackToBack = true,
     List<List<List<DrawSlot>>> history = const [],
     void Function(int level)? onLevel,
   }) {
@@ -90,6 +91,7 @@ class DrawOptimizer {
         prior: prior,
         lanes: lanes,
         team: teamProtection ? team : null,
+        backToBack: !allowBackToBack,
         random: random,
         iterations: iterationsPerPlacement * n * roundCount,
         unmetWeight: unmetWeight,
@@ -141,6 +143,7 @@ class DrawOptimizer {
     required List<List<List<int>>> prior,
     required List<List<int>> lanes,
     required List<int>? team,
+    required bool backToBack,
     required SeededRandom random,
     required int iterations,
     required int unmetWeight,
@@ -204,6 +207,14 @@ class DrawOptimizer {
         }
       }
 
+      if (backToBack &&
+          (_opensAfterItsLast(groups, prior, r, b, x) ||
+              _opensAfterItsLast(groups, prior, r, a, y) ||
+              _closesBeforeItsFirst(groups, r, b, x) ||
+              _closesBeforeItsFirst(groups, r, a, y))) {
+        continue;
+      }
+
       var delta = 0;
       for (final q in ga) {
         if (q == x) continue;
@@ -249,6 +260,33 @@ class DrawOptimizer {
       lanes[r][x] = lanes[r][y];
       lanes[r][y] = lane;
     }
+  }
+
+  /// Whether moving [pilot] into group [to] of round [r] puts it in the
+  /// first group right after a round where it flew in the last one.
+  bool _opensAfterItsLast(
+    List<List<List<int>>> groups,
+    List<List<List<int>>> prior,
+    int r,
+    int to,
+    int pilot,
+  ) {
+    if (to != 0) return false;
+    final before = r > 0 ? groups[r - 1] : (prior.isEmpty ? null : prior.last);
+    if (before == null || before.isEmpty) return false;
+    return before.last.contains(pilot);
+  }
+
+  /// Whether moving [pilot] into group [to] of round [r], when that is the
+  /// last group, puts it right before a round where it flies in the first.
+  bool _closesBeforeItsFirst(
+    List<List<List<int>>> groups,
+    int r,
+    int to,
+    int pilot,
+  ) {
+    if (r + 1 >= groups.length || to != groups[r].length - 1) return false;
+    return groups[r + 1].first.contains(pilot);
   }
 
   /// Whether [pilot] has a teammate in [group], not counting [leaving].

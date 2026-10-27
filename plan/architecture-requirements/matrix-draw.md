@@ -174,7 +174,7 @@ Measured on teams of 3 to 4 (30 pilots, 5 groups, 16 rounds) and teams of 3 to 5
 | Construction and improvement, 3 seeds  | 0.418     | 0.696     |
 | GliderScore (recorded in the research) | 0.445     | 0.710     |
 
-The team layouts are close to, not the same as, the research layouts, so the comparison is directional. A draw took about 0.2 s (30 pilots, 3 seeds) and 0.8 s (63 pilots, 3 seeds) on a development machine. Still to do under #137: the back-to-back constraint and a benchmark harness in the repository. Running off the UI thread with progress and cancel is done (#609).
+The team layouts are close to, not the same as, the research layouts, so the comparison is directional. A draw took about 0.2 s (30 pilots, 3 seeds) and 0.8 s (63 pilots, 3 seeds) on a development machine. Still to do under #137: a benchmark harness in the repository. Running off the UI thread with progress and cancel is done (#609). The back-to-back constraint ([#607](https://github.com/mikejr83/rc-soar-score/issues/607)) is built: the basic draw places the pilots of the previous round's last group outside group 1, the optimizer refuses swaps that would break it, and redraws and added rounds check against the last kept round. The fairness score's random baseline stays unconstrained.
 
 ---
 
@@ -245,14 +245,14 @@ Every generated matrix revision produces a structured **Fairness Report** stored
 
 ### 7.1. Metric Summary Attributes
 
-| Metric | Description | Target |
+| Metric                      | Description                                                                                                                           | Target                                                                          |
 | :-------------------------- | :------------------------------------------------------------------------------------------------------------------------------------ | :------------------------------------------------------------------------------ | ----------------------------------------------------------- | ------------------------------------------ |
-| **Max Duplicate Matchups** | The maximum number of times any single feasible pair of pilots $(p_i, p_j)$ fly against each other. | $\le \lceil \mu \rceil + 1$ (Standard mode) |
-| **Matchup Distribution** | Histogram of feasible-pair matchup counts: `0 times`, `1 time`, `2 times`, `3+ times`. | Concentrated near $\lfloor \mu \rfloor$ and $\lceil \mu \rceil$ (Standard mode) |
-| **Unmet Opponent Count** | Number of **feasible** pilot pairs who never fly against each other ($c = 0$). Teammates under team protection are not counted. | Minimized given $R$ and $G$ |
-| **Mean Absolute Deviation** | Mean of $ | c - \mu | $ over feasible pairs, shown with the matchup distribution. | Approaching $2 f (1 - f)$, the lower bound |
-| **Lane Uniformity Index** | Standard deviation of lane usage across all pilots. | Approaching 0 |
-| **Overall Fairness Score** | Normalized score from $0\%$ to $100\%$ comparing achieved $J$ against $J_{\text{ideal}}$ (100%) and $J_{\text{worst}}$ (0%), see 7.2. | $\ge 90\%$ (Standard mode) |
+| **Max Duplicate Matchups**  | The maximum number of times any single feasible pair of pilots $(p_i, p_j)$ fly against each other.                                   | $\le \lceil \mu \rceil + 1$ (Standard mode)                                     |
+| **Matchup Distribution**    | Histogram of feasible-pair matchup counts: `0 times`, `1 time`, `2 times`, `3+ times`.                                                | Concentrated near $\lfloor \mu \rfloor$ and $\lceil \mu \rceil$ (Standard mode) |
+| **Unmet Opponent Count**    | Number of **feasible** pilot pairs who never fly against each other ($c = 0$). Teammates under team protection are not counted.       | Minimized given $R$ and $G$                                                     |
+| **Mean Absolute Deviation** | Mean of $                                                                                                                             | c - \mu                                                                         | $ over feasible pairs, shown with the matchup distribution. | Approaching $2 f (1 - f)$, the lower bound |
+| **Lane Uniformity Index**   | Standard deviation of lane usage across all pilots.                                                                                   | Approaching 0                                                                   |
+| **Overall Fairness Score**  | Normalized score from $0\%$ to $100\%$ comparing achieved $J$ against $J_{\text{ideal}}$ (100%) and $J_{\text{worst}}$ (0%), see 7.2. | $\ge 90\%$ (Standard mode)                                                      |
 
 ### 7.2. Fairness Score Scale
 

@@ -142,6 +142,7 @@ class ContestCreator {
       'teams_enabled': teams,
       'team_pilot_count': teams ? int.parse(draft.teamPilotCount.trim()) : null,
       'team_protection': teams && draw.teamProtection,
+      'allow_back_to_back': draw.allowBackToBack,
       'roles_enabled': draft.has(ParticipantOption.roles),
       'draw_mode': draw.drawMode.json,
       'preliminary_rounds': draw.seeded

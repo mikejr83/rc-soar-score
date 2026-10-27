@@ -60,6 +60,10 @@ class DrawEngine {
   /// counts, and the fairness report covers [history] and the new rounds
   /// together.
   ///
+  /// With [allowBackToBack] off, no pilot flies in the last group of one
+  /// round and the first group of the next, also against the last round of
+  /// [history].
+  ///
   /// [onProgress] hears how far the run has come, from 0 to 99 percent, as
   /// each cooling step of each seed starts. It only watches: the draw is the
   /// same with or without it.
@@ -74,6 +78,7 @@ class DrawEngine {
     required bool teamProtection,
     required LaneMode laneMode,
     required int seed,
+    bool allowBackToBack = true,
     int seedCount = defaultSeedCount,
     int attemptsPerRound = BasicDraw.defaultAttemptsPerRound,
     int iterationsPerPlacement = DrawOptimizer.defaultIterationsPerPlacement,
@@ -111,6 +116,7 @@ class DrawEngine {
         laneMode: laneMode,
         random: random,
         attemptsPerRound: attemptsPerRound,
+        allowBackToBack: allowBackToBack,
         history: history,
       );
       final improved = const DrawOptimizer().improve(
@@ -120,6 +126,7 @@ class DrawEngine {
         laneMode: laneMode,
         random: random,
         iterationsPerPlacement: iterationsPerPlacement,
+        allowBackToBack: allowBackToBack,
         history: history,
         onLevel: onProgress == null
             ? null

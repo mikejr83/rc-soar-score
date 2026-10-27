@@ -72,6 +72,7 @@ class DrawSpec {
     required this.seed,
     required this.seedCount,
     required this.attemptsPerRound,
+    this.allowBackToBack = true,
     this.history = const [],
   });
 
@@ -83,6 +84,7 @@ class DrawSpec {
   final int seed;
   final int seedCount;
   final int attemptsPerRound;
+  final bool allowBackToBack;
   final List<List<List<DrawSlot>>> history;
 
   /// Draws it here and now, on the calling isolate.
@@ -96,6 +98,7 @@ class DrawSpec {
         seed: seed,
         seedCount: seedCount,
         attemptsPerRound: attemptsPerRound,
+        allowBackToBack: allowBackToBack,
         iterationsPerPlacement: DrawOptimizer.defaultIterationsPerPlacement,
         history: history,
         onProgress: onProgress,
