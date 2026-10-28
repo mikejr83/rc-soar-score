@@ -3,6 +3,7 @@ import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../matrix/matrix_page_data.dart';
+import 'activity/activity_facts.dart';
 import 'publication_facts.dart';
 import 'transition_facts.dart';
 import 'workspace_fact_source.dart';
@@ -35,6 +36,7 @@ abstract final class WorkspaceFactsLoader {
       _publication(client, id, unavailable),
       _landingTables(client, unavailable),
       _transitions(client, contest, actingAccountId),
+      _activity(client, id, actingAccountId),
     ]);
     return WorkspaceFacts.derive(
       data: results[0]! as MatrixPageData,
@@ -42,6 +44,7 @@ abstract final class WorkspaceFactsLoader {
       publication: results[2]! as PublicationFacts,
       landingTables: results[3] as List<LandingTableView>?,
       transitions: results[4]! as TransitionFacts,
+      activity: results[5]! as ActivityFacts,
       unavailable: unavailable,
       isOffline: isOffline,
     );
@@ -82,6 +85,24 @@ abstract final class WorkspaceFactsLoader {
     } on Object catch (error) {
       _logger.warning('Could not read the audit trail of ${contest.id}', error);
       return TransitionFacts.unknown;
+    }
+  }
+
+  /// A failed read only marks the activity card as failed; the rest of the
+  /// page still loads.
+  static Future<ActivityFacts> _activity(
+    ApiClient client,
+    Id id,
+    String? actingAccountId,
+  ) async {
+    try {
+      return ActivityFacts.of(
+        await client.auditEvents(id, limit: ActivityFacts.readLimit),
+        actingAccountId: actingAccountId,
+      );
+    } on Object catch (error) {
+      _logger.warning('Could not read the activity of $id', error);
+      return ActivityFacts.unavailable;
     }
   }
 

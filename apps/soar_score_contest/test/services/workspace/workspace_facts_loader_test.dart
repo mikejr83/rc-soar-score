@@ -4,6 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:soar_score_api/soar_score_api.dart';
+import 'package:soar_score_contest/services/workspace/activity/activity_entry.dart';
+import 'package:soar_score_contest/services/workspace/activity/activity_facts.dart';
 import 'package:soar_score_contest/services/workspace/publication_facts.dart';
 import 'package:soar_score_contest/services/workspace/workspace_fact_source.dart';
 import 'package:soar_score_contest/services/workspace/workspace_facts.dart';
@@ -217,11 +219,42 @@ void main() {
       },
     );
 
-    test('an open, running contest does not read the trail', () async {
-      final requests = <String>[];
-      await _load(requests: requests);
+    test(
+      'an open, running contest reads the trail once, for activity',
+      () async {
+        final requests = <String>[];
+        await _load(requests: requests);
 
-      expect(requests.where((path) => path.endsWith('/audit-events')), isEmpty);
+        expect(
+          requests.where((path) => path.endsWith('/audit-events')),
+          hasLength(1),
+        );
+      },
+    );
+
+    test('the newest events become activity lines', () async {
+      final facts = await _load(
+        auditEvents: [
+          event('lock', '2026-10-18T15:00:00.000Z'),
+          event('openScoring', '2026-10-18T09:00:00.000Z'),
+        ],
+        actingAccountId: director,
+      );
+
+      expect(facts.activity.failed, isFalse);
+      expect(facts.activity.entries.map((e) => e.kind), [
+        ActivityKind.lock,
+        ActivityKind.openScoring,
+      ]);
+      expect(facts.activity.entries.every((e) => e.byYou), isTrue);
+    });
+
+    test('a failed audit read marks only the activity as failed', () async {
+      final facts = await _load(auditStatus: 500);
+
+      expect(facts.activity, ActivityFacts.unavailable);
+      expect(facts.unavailable, isEmpty);
+      expect(facts.hasMatrix, isTrue);
     });
   });
 }

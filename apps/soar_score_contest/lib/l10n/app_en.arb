@@ -357,17 +357,27 @@
   "@shellRoundValue": {
     "description": "Round entry value: the round being scored out of the total.",
     "placeholders": {
-      "round": {"type": "int"},
-      "total": {"type": "int"}
+      "round": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
   "shellRoundGroupValue": "{round} of {total}, group {group}",
   "@shellRoundGroupValue": {
     "description": "Round entry value with the group being scored, shown by its letter.",
     "placeholders": {
-      "round": {"type": "int"},
-      "total": {"type": "int"},
-      "group": {"type": "String"}
+      "round": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "group": {
+        "type": "String"
+      }
     }
   },
   "shellRoundNotStarted": "Not started",
@@ -382,8 +392,12 @@
   "@shellRoundSemantics": {
     "description": "Accessible name of the round entry button.",
     "placeholders": {
-      "label": {"type": "String"},
-      "value": {"type": "String"}
+      "label": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
     }
   },
   "alphaNoticeTitle": "Alpha release",
@@ -438,22 +452,30 @@
   "@storageIndicatorTooltip": {
     "description": "Tooltip and accessible text of the storage indicator.",
     "placeholders": {
-      "name": {"type": "String"},
-      "status": {"type": "String"}
+      "name": {
+        "type": "String"
+      },
+      "status": {
+        "type": "String"
+      }
     }
   },
   "storageDetailStatus": "Status: {status}",
   "@storageDetailStatus": {
     "description": "Status line of the storage detail dialog.",
     "placeholders": {
-      "status": {"type": "String"}
+      "status": {
+        "type": "String"
+      }
     }
   },
   "storageDetailLastObserved": "Last observed: {time}",
   "@storageDetailLastObserved": {
     "description": "Line of the storage detail dialog with when the storage last answered.",
     "placeholders": {
-      "time": {"type": "String"}
+      "time": {
+        "type": "String"
+      }
     }
   },
   "storageNeverObserved": "Never",
@@ -468,7 +490,9 @@
   "@storageDetailError": {
     "description": "Line of the storage detail dialog with why the last check failed.",
     "placeholders": {
-      "error": {"type": "String"}
+      "error": {
+        "type": "String"
+      }
     }
   },
   "storageRetry": "Retry now",
@@ -487,7 +511,9 @@
   "@unsyncedWarningBody": {
     "description": "Body of the unsynced-changes warning.",
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "unsyncedWarningContinue": "Continue anyway",
@@ -502,9 +528,15 @@
   "@drawProgress": {
     "description": "Progress line under the Draw matrix button while a draw runs, with the percent done and which seed is being improved.",
     "placeholders": {
-      "percent": {"type": "int"},
-      "seed": {"type": "int"},
-      "seedCount": {"type": "int"}
+      "percent": {
+        "type": "int"
+      },
+      "seed": {
+        "type": "int"
+      },
+      "seedCount": {
+        "type": "int"
+      }
     }
   },
   "drawProgressStarting": "Starting the draw…",
@@ -555,14 +587,18 @@
   "@matrixRedrawRoundLocked": {
     "description": "Why Redraw unscored rounds is off when a round to replace is locked.",
     "placeholders": {
-      "round": {"type": "int"}
+      "round": {
+        "type": "int"
+      }
     }
   },
   "matrixRedrawGroupLocked": "A group of round {round} is locked. Unlock it before redrawing.",
   "@matrixRedrawGroupLocked": {
     "description": "Why Redraw unscored rounds is off when a group to replace is locked.",
     "placeholders": {
-      "round": {"type": "int"}
+      "round": {
+        "type": "int"
+      }
     }
   },
   "matrixAddTitle": "Add rounds",
@@ -573,7 +609,9 @@
   "@matrixAddIntro": {
     "description": "Intro of the add rounds form.",
     "placeholders": {
-      "last": {"type": "int"}
+      "last": {
+        "type": "int"
+      }
     }
   },
   "matrixRedrawTitle": "Redraw unscored rounds",
@@ -584,7 +622,9 @@
   "@matrixRedrawIntro": {
     "description": "Intro of the redraw form.",
     "placeholders": {
-      "span": {"type": "String"}
+      "span": {
+        "type": "String"
+      }
     }
   },
   "matrixRoundsToAdd": "Rounds to add",
@@ -599,29 +639,39 @@
   "@matrixAddRoundsNote": {
     "description": "Note under the rounds field of the add rounds form.",
     "placeholders": {
-      "span": {"type": "String"}
+      "span": {
+        "type": "String"
+      }
     }
   },
   "matrixRedrawRoundsNote": "Draws {span} in place of the unscored rounds.",
   "@matrixRedrawRoundsNote": {
     "description": "Note under the rounds field of the redraw form.",
     "placeholders": {
-      "span": {"type": "String"}
+      "span": {
+        "type": "String"
+      }
     }
   },
   "matrixRedrawRoundsRemoved": "Draws {span}. {removed} will be removed.",
   "@matrixRedrawRoundsRemoved": {
     "description": "Note under the rounds field of the redraw form when fewer rounds are drawn than replaced; removed names the rounds that go.",
     "placeholders": {
-      "span": {"type": "String"},
-      "removed": {"type": "String"}
+      "span": {
+        "type": "String"
+      },
+      "removed": {
+        "type": "String"
+      }
     }
   },
   "matrixGroupsFromRound": "From round {round} of the current matrix.",
   "@matrixGroupsFromRound": {
     "description": "Note under the groups field when it is filled from the current matrix.",
     "placeholders": {
-      "round": {"type": "int"}
+      "round": {
+        "type": "int"
+      }
     }
   },
   "matrixReasonLabel": "Reason (optional)",
@@ -664,21 +714,27 @@
   "@matrixConfirmAdds": {
     "description": "Confirmation line naming the rounds that are added.",
     "placeholders": {
-      "span": {"type": "String"}
+      "span": {
+        "type": "String"
+      }
     }
   },
   "matrixConfirmReplaces": "Redraws {span}",
   "@matrixConfirmReplaces": {
     "description": "Confirmation line naming the rounds that are replaced.",
     "placeholders": {
-      "span": {"type": "String"}
+      "span": {
+        "type": "String"
+      }
     }
   },
   "matrixConfirmRevision": "Current matrix revision {revision}",
   "@matrixConfirmRevision": {
     "description": "Confirmation line with the revision of the matrix that is changed.",
     "placeholders": {
-      "revision": {"type": "int"}
+      "revision": {
+        "type": "int"
+      }
     }
   },
   "matrixConfirmAddNote": "Rounds can be added again later. The new rounds can be redrawn until they have scores.",
@@ -713,15 +769,21 @@
   "@matrixSeededStatusDone": {
     "description": "Seeded contests: status line when the preliminary scores are complete.",
     "placeholders": {
-      "rounds": {"type": "int"}
+      "rounds": {
+        "type": "int"
+      }
     }
   },
   "matrixSeededStatusWaiting": "Seeded Man on Man: {rounds} preliminary rounds, {missing} flights still need a score. A seeded round can be drawn once they are official.",
   "@matrixSeededStatusWaiting": {
     "description": "Seeded contests: status line when preliminary scores are missing.",
     "placeholders": {
-      "rounds": {"type": "int"},
-      "missing": {"type": "int"}
+      "rounds": {
+        "type": "int"
+      },
+      "missing": {
+        "type": "int"
+      }
     }
   },
   "matrixSeededOneRound": "Seeded rounds are drawn one at a time.",
@@ -732,46 +794,66 @@
   "@matrixDriftBanner": {
     "description": "Body of the banner that says the contest configuration changed since the draw.",
     "placeholders": {
-      "differences": {"type": "String"}
+      "differences": {
+        "type": "String"
+      }
     }
   },
   "matrixDriftBannerBlocked": "{differences} The matrix is unchanged. {reason}",
   "@matrixDriftBannerBlocked": {
     "description": "Body of the configuration-changed banner when redrawing is not possible.",
     "placeholders": {
-      "differences": {"type": "String"},
-      "reason": {"type": "String"}
+      "differences": {
+        "type": "String"
+      },
+      "reason": {
+        "type": "String"
+      }
     }
   },
   "matrixRoundSpan": "{count, plural, =1{round {first}} other{rounds {first} to {last}}}",
   "@matrixRoundSpan": {
     "description": "A round or a run of rounds, in the middle of a sentence.",
     "placeholders": {
-      "count": {"type": "int"},
-      "first": {"type": "int"},
-      "last": {"type": "int"}
+      "count": {
+        "type": "int"
+      },
+      "first": {
+        "type": "int"
+      },
+      "last": {
+        "type": "int"
+      }
     }
   },
   "matrixConfirmPilots": "{count} scoring pilots",
   "@matrixConfirmPilots": {
     "description": "Confirmation line with the number of pilots who are drawn.",
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "matrixConfirmGroups": "{groups} groups per round ({sizes} pilots)",
   "@matrixConfirmGroups": {
     "description": "Confirmation line with the groups of each drawn round and their sizes.",
     "placeholders": {
-      "groups": {"type": "int"},
-      "sizes": {"type": "String"}
+      "groups": {
+        "type": "int"
+      },
+      "sizes": {
+        "type": "String"
+      }
     }
   },
   "matrixConfirmConfiguration": "Configuration revision {revision}",
   "@matrixConfirmConfiguration": {
     "description": "Confirmation line with the configuration revision; revision is a number or a dash.",
     "placeholders": {
-      "revision": {"type": "String"}
+      "revision": {
+        "type": "String"
+      }
     }
   },
   "matrixConfirmCancel": "Cancel",
@@ -801,5 +883,87 @@
   "participantEmailPrivateExplanation": "This person hasn’t allowed their email to be shown.",
   "@participantEmailPrivateExplanation": {
     "description": "Tooltip for the Private email status."
+  },
+  "activityHeading": "Recent activity",
+  "@activityHeading": {
+    "description": "Heading of the workspace card that lists the latest events of the contest."
+  },
+  "activityViewAll": "View all",
+  "@activityViewAll": {
+    "description": "Disabled button on the Recent activity card that will open the full activity log."
+  },
+  "activityViewAllUnavailable": "The full activity log is not available yet.",
+  "@activityViewAllUnavailable": {
+    "description": "Note under the Recent activity list explaining the disabled View all button."
+  },
+  "activityEmpty": "Nothing has happened yet",
+  "@activityEmpty": {
+    "description": "Recent activity card text when the contest has no events."
+  },
+  "activityLoading": "Loading recent activity…",
+  "@activityLoading": {
+    "description": "Recent activity card text while the events load."
+  },
+  "activityFailed": "Recent activity could not be loaded.",
+  "@activityFailed": {
+    "description": "Recent activity card text when reading the events failed."
+  },
+  "activityRetry": "Retry",
+  "@activityRetry": {
+    "description": "Button on the Recent activity card that reads the events again."
+  },
+  "activityComplete": "{actor, select, you{You completed the contest. Participant scoring closed.} other{The contest was completed. Participant scoring closed.}}",
+  "@activityComplete": {
+    "description": "Recent activity line: the contest was completed. actor is \"you\" when the signed-in account did it.",
+    "placeholders": {
+      "actor": {
+        "type": "String"
+      }
+    }
+  },
+  "activityOpenScoring": "{actor, select, you{You opened participant scoring} other{Participant scoring was opened}}",
+  "@activityOpenScoring": {
+    "description": "Recent activity line: participant scoring was opened.",
+    "placeholders": {
+      "actor": {
+        "type": "String"
+      }
+    }
+  },
+  "activityCloseScoring": "{actor, select, you{You closed participant scoring} other{Participant scoring was closed}}",
+  "@activityCloseScoring": {
+    "description": "Recent activity line: participant scoring was closed.",
+    "placeholders": {
+      "actor": {
+        "type": "String"
+      }
+    }
+  },
+  "activityLock": "{actor, select, you{You locked administration} other{Administration was locked}}",
+  "@activityLock": {
+    "description": "Recent activity line: administration was locked.",
+    "placeholders": {
+      "actor": {
+        "type": "String"
+      }
+    }
+  },
+  "activityUnlock": "{actor, select, you{You unlocked administration} other{Administration was unlocked}}",
+  "@activityUnlock": {
+    "description": "Recent activity line: administration was unlocked.",
+    "placeholders": {
+      "actor": {
+        "type": "String"
+      }
+    }
+  },
+  "activityPublication": "{actor, select, you{You updated the published results} other{The published results were updated}}",
+  "@activityPublication": {
+    "description": "Recent activity line: the contest was published or its publication changed.",
+    "placeholders": {
+      "actor": {
+        "type": "String"
+      }
+    }
   }
 }

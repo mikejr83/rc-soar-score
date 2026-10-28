@@ -19,6 +19,7 @@ import '../../services/workspace/workspace_page_state.dart';
 import '../../services/workspace/workspace_section.dart';
 import '../../widgets/api_error_text.dart';
 import '../../widgets/contest_scope.dart';
+import '../../widgets/workspace/activity/recent_activity_section.dart';
 import '../../widgets/workspace/attention/attention_section.dart';
 import '../../widgets/workspace/checklist/setup_checklist_section.dart';
 import '../../widgets/workspace/controls/archive_control_card.dart';
@@ -433,6 +434,7 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
     WorkspaceSection.attention => AttentionSection(contest: contest),
     WorkspaceSection.progress => ProgressSection(contest: contest),
     WorkspaceSection.facts => WorkspaceFactsDetails(contest: contest),
+    WorkspaceSection.activity => RecentActivitySection(contest: contest),
     WorkspaceSection.controls => Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -450,7 +452,6 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
         ],
       ],
     ),
-    _ => null,
   };
 
   Widget? _controlContent(Contest contest, WorkspaceControl control) =>

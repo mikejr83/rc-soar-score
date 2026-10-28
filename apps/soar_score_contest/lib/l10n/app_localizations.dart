@@ -1015,6 +1015,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This person hasn’t allowed their email to be shown.'**
   String get participantEmailPrivateExplanation;
+
+  /// Heading of the workspace card that lists the latest events of the contest.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent activity'**
+  String get activityHeading;
+
+  /// Disabled button on the Recent activity card that will open the full activity log.
+  ///
+  /// In en, this message translates to:
+  /// **'View all'**
+  String get activityViewAll;
+
+  /// Note under the Recent activity list explaining the disabled View all button.
+  ///
+  /// In en, this message translates to:
+  /// **'The full activity log is not available yet.'**
+  String get activityViewAllUnavailable;
+
+  /// Recent activity card text when the contest has no events.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing has happened yet'**
+  String get activityEmpty;
+
+  /// Recent activity card text while the events load.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading recent activity…'**
+  String get activityLoading;
+
+  /// Recent activity card text when reading the events failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent activity could not be loaded.'**
+  String get activityFailed;
+
+  /// Button on the Recent activity card that reads the events again.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get activityRetry;
+
+  /// Recent activity line: the contest was completed. actor is "you" when the signed-in account did it.
+  ///
+  /// In en, this message translates to:
+  /// **'{actor, select, you{You completed the contest. Participant scoring closed.} other{The contest was completed. Participant scoring closed.}}'**
+  String activityComplete(String actor);
+
+  /// Recent activity line: participant scoring was opened.
+  ///
+  /// In en, this message translates to:
+  /// **'{actor, select, you{You opened participant scoring} other{Participant scoring was opened}}'**
+  String activityOpenScoring(String actor);
+
+  /// Recent activity line: participant scoring was closed.
+  ///
+  /// In en, this message translates to:
+  /// **'{actor, select, you{You closed participant scoring} other{Participant scoring was closed}}'**
+  String activityCloseScoring(String actor);
+
+  /// Recent activity line: administration was locked.
+  ///
+  /// In en, this message translates to:
+  /// **'{actor, select, you{You locked administration} other{Administration was locked}}'**
+  String activityLock(String actor);
+
+  /// Recent activity line: administration was unlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'{actor, select, you{You unlocked administration} other{Administration was unlocked}}'**
+  String activityUnlock(String actor);
+
+  /// Recent activity line: the contest was published or its publication changed.
+  ///
+  /// In en, this message translates to:
+  /// **'{actor, select, you{You updated the published results} other{The published results were updated}}'**
+  String activityPublication(String actor);
 }
 
 class _AppLocalizationsDelegate
