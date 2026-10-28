@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, type FormEvent } from "react";
 
 import styles from "./support-form.module.css";
@@ -224,6 +225,11 @@ export function SupportForm() {
 
       <p className="hint">
         Spam protection and delivery are not connected yet (#220).
+      </p>
+
+      <p className="hint">
+        We use these details only to answer your request. See the{" "}
+        <Link href="/privacy">Privacy Policy</Link>.
       </p>
 
       <div>
