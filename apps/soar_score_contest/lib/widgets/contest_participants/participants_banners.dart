@@ -20,6 +20,7 @@ List<Widget> participantBanners({
   required VoidCallback onUnlock,
   required VoidCallback onOpenMatrix,
   required VoidCallback onOpenScoring,
+  required VoidCallback onPlaceUnplaced,
   required ValueChanged<StoredParticipant> onShowClass,
 }) {
   final c = controller;
@@ -186,10 +187,12 @@ List<Widget> participantBanners({
         shape: PageBannerShape.card,
         title: '$names ${unplaced.length == 1 ? 'isn’t' : 'aren’t'} placed yet',
         text:
-            'Place them in a group from the Matrix page. A redraw is also '
-            'possible.',
-        actionLabel: 'Open Matrix',
-        onAction: onOpenMatrix,
+            'Put them in the last group of every round, or place them from the '
+            'Matrix page. A redraw is also possible.',
+        actionLabel: 'Place in all rounds',
+        onAction: onPlaceUnplaced,
+        secondaryLabel: 'Open Matrix',
+        onSecondary: onOpenMatrix,
       ),
     );
   }

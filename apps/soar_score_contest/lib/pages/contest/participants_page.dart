@@ -208,6 +208,16 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
     }
   }
 
+  /// Puts the pilots who are in the contest but in no group into every round,
+  /// for a page that was reloaded or a placement that failed.
+  Future<void> _placeUnplaced() async {
+    final c = _controller!;
+    for (final row in [...c.unplaced]) {
+      if (!mounted) return;
+      await c.placeInRounds(row);
+    }
+  }
+
   Future<void> _addNew() async {
     final c = _controller!;
     if (!c.canEdit) return;
@@ -339,6 +349,7 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
                               _goTo(contestMatrixPath(widget.contestId)),
                           onOpenScoring: () =>
                               _goTo(contestScoringPath(widget.contestId)),
+                          onPlaceUnplaced: _placeUnplaced,
                           onShowClass: (row) =>
                               _showRow(row, ParticipantColumn.classification),
                         )) ...[banner, const SizedBox(height: 12)],

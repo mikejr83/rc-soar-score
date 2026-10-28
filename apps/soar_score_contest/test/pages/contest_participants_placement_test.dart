@@ -144,6 +144,24 @@ void main() {
     expect(find.textContaining('not in the rounds yet'), findsOneWidget);
   });
 
+  testWidgets('the unplaced banner can place the pilot again', (tester) async {
+    final server = ParticipantsServer(
+      state: LifecycleState.running,
+      drawn: true,
+      withScores: true,
+    )..placementFailure = 409;
+    await pumpParticipantsPage(tester, server);
+    await _addPia(tester);
+    expect(server.placements, isEmpty);
+
+    server.placementFailure = null;
+    await tester.tap(find.text('Place in all rounds'));
+    await tester.pumpAndSettle();
+
+    expect(server.placements, hasLength(1));
+    expect(find.text('Pia Ward is in every round'), findsOneWidget);
+  });
+
   testWidgets('before the draw nothing is placed', (tester) async {
     final server = ParticipantsServer();
     await pumpParticipantsPage(tester, server);

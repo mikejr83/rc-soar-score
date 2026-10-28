@@ -172,6 +172,44 @@ void main() {
     }
   });
 
+  test('placing again finishes a zero that failed the first time', () async {
+    await drawnContest(api, pilots: 5);
+    await scoreRoundOne(5);
+    await joins(6);
+    await place(6);
+    // The state a failed second write leaves: placed, with no score.
+    final slot = await assignmentOfPilot(api, 6);
+    final stub = api.repository;
+    final placeholder = stub.scorePlaceholders.stored.firstWhere(
+      (p) => p.assignmentId.value == slot['id'],
+    );
+    stub.scoreAttempts.stored.removeWhere(
+      (s) => s.scorePlaceholderId == placeholder.id,
+    );
+    stub.officialScores.stored.removeWhere(
+      (s) => s.scorePlaceholderId == placeholder.id,
+    );
+    stub.scorePlaceholders.stored[stub.scorePlaceholders.stored.indexOf(
+      placeholder,
+    )] = ScorePlaceholder(
+      id: placeholder.id,
+      contestId: placeholder.contestId,
+      contestParticipationId: placeholder.contestParticipationId,
+      assignmentId: placeholder.assignmentId,
+    );
+
+    final again = await place(6);
+
+    expect(roundsOf(again)[0]['already_placed'], isTrue);
+    expect(roundsOf(again)[0]['zeroed'], isTrue);
+    expect(
+      stub.scorePlaceholders.stored
+          .firstWhere((p) => p.assignmentId == placeholder.assignmentId)
+          .state,
+      ScorePlaceholderState.official,
+    );
+  });
+
   test('only a pilot can be placed', () async {
     await drawnContest(api, pilots: 5);
     await joins(6, roleId: SystemRoles.helperId.value);

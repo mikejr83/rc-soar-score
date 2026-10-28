@@ -2,11 +2,13 @@ import 'package:equatable/equatable.dart';
 
 import '../../enums/lane_mode.dart';
 import '../../errors/contest_state_error.dart';
+import '../../enums/score_placeholder_state.dart';
 import '../../errors/entity_not_found_error.dart';
 import '../../models/id.dart';
 import '../../models/matrix/matrix_assignment.dart';
 import '../../models/matrix/round.dart';
 import '../../models/participants/contest_participation.dart';
+import '../../models/scores/score_placeholder.dart';
 import '../../repositories/mutation_metadata.dart';
 import '../../repositories/repository.dart';
 import '../contest_scores.dart';
@@ -152,6 +154,15 @@ class LatePlacementService {
             .coreOptions
             .laneMode;
 
+    // Only the round being placed changes while the loop runs, so the
+    // placeholders are read once.
+    final placeholders = {
+      for (final placeholder
+          in await repository.scorePlaceholderRepository.listForContest(
+            contestId,
+          ))
+        placeholder.assignmentId: placeholder,
+    };
     final results = <RoundPlacement>[];
     for (final round in rounds) {
       results.add(
@@ -159,6 +170,7 @@ class LatePlacementService {
           contestId,
           participation,
           participations,
+          placeholders,
           round,
           laneMode: laneMode ?? LaneMode.none,
           actorId: actorId,
@@ -173,6 +185,7 @@ class LatePlacementService {
     Id contestId,
     ContestParticipation participation,
     List<ContestParticipation> participations,
+    Map<Id, ScorePlaceholder> placeholders,
     Round round, {
     required LaneMode laneMode,
     required Id actorId,
@@ -180,16 +193,28 @@ class LatePlacementService {
   }) async {
     final rows = await _rules.assignmentsOfRound(round);
     final live = _rules.live(rows);
-    if (live.any((a) => a.contestParticipationId == participation.id)) {
-      return RoundPlacement(round: round.ordinal, alreadyPlaced: true);
+    final existing = live
+        .where((a) => a.contestParticipationId == participation.id)
+        .firstOrNull;
+    if (existing != null) {
+      // A zero that failed on an earlier call left the pilot in a scored round
+      // without a score: finish it, or the round would stay incomplete.
+      final repaired = await _repairZero(
+        contestId,
+        existing,
+        live,
+        placeholders,
+        participations,
+        round,
+        actorId: actorId,
+        metadata: metadata,
+      );
+      return RoundPlacement(
+        round: round.ordinal,
+        alreadyPlaced: true,
+        zeroed: repaired,
+      );
     }
-    final placeholders = {
-      for (final placeholder
-          in await repository.scorePlaceholderRepository.listForContest(
-            contestId,
-          ))
-        placeholder.assignmentId: placeholder,
-    };
     final progress = RoundProgress.count(
       round,
       live,
@@ -249,6 +274,42 @@ class LatePlacementService {
       round: round.ordinal,
       skippedReason: lastReason ?? 'no group could take the pilot',
     );
+  }
+
+  /// Enters the zero for [existing] when every other slot of the round is
+  /// scored and this one is not. Answers whether it did.
+  Future<bool> _repairZero(
+    Id contestId,
+    MatrixAssignment existing,
+    List<MatrixAssignment> live,
+    Map<Id, ScorePlaceholder> placeholders,
+    List<ContestParticipation> participations,
+    Round round, {
+    required Id actorId,
+    required MutationMetadata metadata,
+  }) async {
+    final own = placeholders[existing.id];
+    if (own == null || own.state != ScorePlaceholderState.notEntered) {
+      return false;
+    }
+    final others = RoundProgress.count(
+      round,
+      live.where((a) => a.id != existing.id),
+      placeholders: placeholders,
+      participations: {for (final p in participations) p.id: p},
+    );
+    if (!others.isComplete) return false;
+    await _scores.enterOfficialScore(
+      contestId,
+      existing.id,
+      clientMutationId: 'late-zero-${existing.id.value}',
+      baseScoreRevision: 0,
+      components: zeroComponents,
+      reason: 'Added after the round was scored',
+      actorId: actorId,
+      metadata: metadata.forPart('placement-zero-${round.id.value}'),
+    );
+    return true;
   }
 
   /// The lowest lane number nobody flies in [group], or the highest lane when

@@ -644,7 +644,8 @@ class ParticipantsController extends ChangeNotifier {
     } on Object catch (error) {
       message =
           '${row.name} is in the contest but not in the rounds yet: '
-          '${apiErrorTextOf(error)} Place them from the Matrix page.';
+          '${apiErrorTextOf(error)} Try Place in all rounds again, which is '
+          'safe to repeat, or place them from the Matrix page.';
     }
     await reload();
     notifyListeners();
