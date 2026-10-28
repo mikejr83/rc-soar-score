@@ -20,18 +20,25 @@
   padding-block: clamp(48px, 9vw, 112px) clamp(64px, 10vw, 128px);
   align-items: center;
 }
+/* Phone: the instrument leads, small enough that the headline and both
+   buttons share the first viewport with it. */
+@media (max-width: 839px) {
+  .inner {
+    padding-block: 28px 56px;
+    gap: 32px;
+  }
+  .instrument {
+    order: -1;
+    width: clamp(220px, 32vw, 280px);
+    margin-inline: auto;
+    padding-bottom: 16px;
+  }
+}
 
 .copy {
   display: grid;
   gap: 20px;
 }
-.copy .eyebrow {
-  color: var(--panel-muted);
-}
-.copy .eyebrow b {
-  color: var(--panel-accent);
-}
-
 .title {
   max-width: 14ch;
   color: var(--panel-text);
@@ -51,55 +58,70 @@
   margin-top: 8px;
 }
 
+/* The facts are instrument placards: a panel surface, a hairline and a screw in two corners, like the dial's bezel. */
 .facts {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
   margin: 20px 0 0;
-  padding-top: 20px;
-  border-top: 1px solid var(--panel-line);
+  padding-top: 4px;
+}
+.facts > div {
+  position: relative;
+  background: var(--panel-surface);
+  border: 1px solid var(--panel-line);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px 12px 16px;
+}
+.facts > div::before,
+.facts > div::after {
+  content: "";
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--dial);
+  box-shadow: inset 0 0 0 1px #5c5753;
+}
+.facts > div::before {
+  top: 6px;
+  left: 6px;
+}
+.facts > div::after {
+  right: 6px;
+  bottom: 6px;
 }
 .facts dt {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 800;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--panel-muted);
+  color: var(--panel-text);
 }
 .facts dd {
-  margin: 4px 0 0;
-  font-size: 14px;
+  margin: 2px 0 0;
+  font-size: 15px;
   font-weight: 600;
 }
 
 .instrument {
   padding-bottom: 24px;
+  perspective: 1200px;
 }
-
-.scrollHint {
-  position: absolute;
-  left: 50%;
-  bottom: 18px;
-  width: 22px;
-  height: 36px;
-  margin-left: -11px;
-  border: 1.5px solid var(--panel-line);
-  border-radius: 12px;
-}
-.scrollHint span {
-  position: absolute;
-  left: 50%;
-  top: 7px;
-  width: 3px;
-  height: 7px;
-  margin-left: -1.5px;
-  border-radius: 2px;
-  background: var(--panel-accent);
+.instrument > * {
+  transform-origin: 50% 60%;
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .scrollHint span {
-    animation: hint 1.8s ease-in-out infinite;
+  /* The instrument answers the hand: a 6 degree tilt and a faint orange halo on hover. */
+  .instrument > * {
+    transition:
+      transform 700ms cubic-bezier(0.2, 0.7, 0.2, 1),
+      filter 700ms ease;
+  }
+  .instrument:hover > * {
+    transform: rotateX(6deg) rotateY(-6deg) translateY(-4px);
+    filter: drop-shadow(0 30px 50px rgb(0 0 0 / 0.45)) drop-shadow(0 0 28px rgb(232 66 12 / 0.28));
   }
   .copy > * {
     animation: rise 800ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
@@ -116,26 +138,8 @@
   .copy > :nth-child(5) {
     animation-delay: 320ms;
   }
-  @supports (animation-timeline: scroll()) {
-    .scrollHint {
-      animation: fade linear both;
-      animation-timeline: scroll(root);
-      animation-range: 0 30vh;
-    }
-  }
 }
 
-@keyframes hint {
-  0%,
-  100% {
-    transform: translateY(0);
-    opacity: 1;
-  }
-  60% {
-    transform: translateY(12px);
-    opacity: 0;
-  }
-}
 @keyframes rise {
   from {
     opacity: 0;
@@ -146,13 +150,11 @@
     transform: none;
   }
 }
-@keyframes fade {
-  to {
-    opacity: 0;
-  }
-}
 
 @media (min-width: 840px) {
+  .facts {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
   .inner {
     grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
     gap: 48px;

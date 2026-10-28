@@ -36,6 +36,26 @@
   justify-items: start;
   padding: 24px;
 }
+/* First use: nothing published yet, so the list becomes the director's invitation. */
+.empty {
+  display: grid;
+  gap: 12px;
+  padding: clamp(24px, 4vw, 40px) 24px;
+}
+.empty h2 {
+  font-size: clamp(22px, 2.6vw, 28px);
+}
+.empty p {
+  max-width: 60ch;
+  color: var(--text-muted);
+  text-wrap: pretty;
+}
+.emptyActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 4px;
+}
 
 /* Filters */
 .filters {

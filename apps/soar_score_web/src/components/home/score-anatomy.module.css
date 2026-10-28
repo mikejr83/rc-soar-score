@@ -26,13 +26,19 @@
   font-weight: 700;
   font-size: 15px;
 }
-.part dt .num {
+.part dt :global(.num) {
   color: var(--text-muted);
 }
 .part dd {
   margin: 0;
-  font-size: 14px;
+  font-size: 15px;
   color: var(--text-muted);
+}
+
+/* A pilot's call on each part, in the product's voice, before the explanation. */
+.call {
+  font-weight: 700;
+  color: var(--text);
 }
 
 .bar {
@@ -53,7 +59,11 @@
   border-radius: 5px;
   transform-origin: left center;
 }
+/* A penalty is a subtraction: it fills from the right edge and grows leftwards,
+   so its width never reads as a bonus beside the two positive bars. */
 .barPenalty::after {
+  inset: 0 0 0 auto;
+  transform-origin: right center;
   background: repeating-linear-gradient(135deg, var(--text-muted) 0 6px, transparent 6px 10px);
 }
 
@@ -62,13 +72,14 @@
     transform: scaleX(0);
     transition: transform 900ms cubic-bezier(0.2, 0.7, 0.1, 1) 200ms;
   }
-  [data-inview] .bar::after {
+  [data-inview] .bar::after,
+  :global(html.no-js) .bar::after {
     transform: scaleX(1);
   }
 }
 
 .note {
-  font-size: 14px;
+  font-size: 15px;
   color: var(--text-muted);
   margin-top: 8px;
 }
@@ -79,10 +90,12 @@
   gap: 10px;
   position: relative;
   overflow: hidden;
+  isolation: isolate;
 }
 .place::before {
   content: "";
   position: absolute;
+  z-index: -1;
   right: -40px;
   top: -40px;
   width: 180px;
@@ -125,18 +138,18 @@
   font-size: 15px;
 }
 .roundLabel {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 800;
   letter-spacing: 0.14em;
   color: var(--panel-muted);
 }
-.dropped .num {
+.dropped :global(.num) {
   text-decoration: line-through;
   color: var(--panel-muted);
 }
 
 .example {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--panel-muted);
   letter-spacing: 0.08em;
   text-transform: uppercase;

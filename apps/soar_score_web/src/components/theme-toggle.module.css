@@ -1,0 +1,42 @@
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--panel-line);
+  background: none;
+  color: var(--panel-text);
+  cursor: pointer;
+}
+.toggle:hover {
+  background: var(--panel-surface);
+}
+.toggle svg {
+  width: 20px;
+  height: 20px;
+}
+:global(html.no-js) .toggle {
+  display: none;
+}
+
+/* Show the scheme you would switch to: the sun while dark, the moon while light. */
+.sun {
+  display: none;
+}
+:global(:root[data-theme="dark"]) .sun {
+  display: block;
+}
+:global(:root[data-theme="dark"]) .moon {
+  display: none;
+}
+@media (prefers-color-scheme: dark) {
+  :global(:root:not([data-theme="light"])) .sun {
+    display: block;
+  }
+  :global(:root:not([data-theme="light"])) .moon {
+    display: none;
+  }
+}

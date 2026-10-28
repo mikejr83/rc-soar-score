@@ -7,7 +7,7 @@ import { Stations } from "@/components/home/stations";
 
 /**
  * Homepage (plan/ui/public-site/homepage.md): what RC Soar Score is, the
- * three navigation elements (Contests, Documentation, Login) and the product
+ * three navigation elements (Contests, Documentation, Sign in) and the product
  * story, in the order a visitor asks the questions.
  */
 export default function HomePage() {

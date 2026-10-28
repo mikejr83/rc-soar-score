@@ -1,8 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
+import { ExternalLink } from "@/components/external-link";
 import { fetchPublicationSummaries } from "@/lib/results/api";
 import {
   filtersAreEmpty,
@@ -17,6 +19,7 @@ import {
   startsAfterComingSunday,
   type ContestSummary,
 } from "@/lib/results/contest-summary";
+import { contestAppUrl } from "@/lib/site";
 
 import { ContestRow } from "./contest-row";
 import { FilterBar } from "./filter-bar";
@@ -90,12 +93,25 @@ export function ContestSearch() {
       </p>
     );
     body =
-      listed.length === 0 ? (
-        <p className={`card ${styles.message}`}>
-          {visible.length === 0
-            ? "No contests have been published yet. Check back soon."
-            : "No contests match these filters."}
-        </p>
+      visible.length === 0 ? (
+        <div className={`card ${styles.empty}`}>
+          <h2>No contests published yet</h2>
+          <p>
+            Every contest a director publishes appears here: overall standings, team
+            scores and every flight group, as of any round, open to anyone without an
+            account. The first one could be yours.
+          </p>
+          <div className={styles.emptyActions}>
+            <ExternalLink href={contestAppUrl} className="btn btn--primary" destination="the contest app">
+              Run a contest
+            </ExternalLink>
+            <Link href="/docs/competitions" className="btn btn--ghost">
+              Contest Director Getting Started
+            </Link>
+          </div>
+        </div>
+      ) : listed.length === 0 ? (
+        <p className={`card ${styles.message}`}>No contests match these filters.</p>
       ) : (
         <ul className={`card ${styles.list}`}>
           {listed.map((c) => (
