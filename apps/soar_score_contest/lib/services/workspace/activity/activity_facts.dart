@@ -20,16 +20,16 @@ class ActivityFacts extends Equatable {
   /// How many lines the card shows.
   static const shown = 5;
 
-  /// How many events to ask for, so skipped ones do not leave the list short.
-  static const readLimit = 20;
-
-  /// Reads [events] (newest first, as the API returns them).
+  /// Reads [events], which may come from more than one read; they are put
+  /// newest first here.
   factory ActivityFacts.of(
     List<AuditEventDto> events, {
     String? actingAccountId,
   }) {
+    final newestFirst = [...events]
+      ..sort((a, b) => b.serverTimestamp.compareTo(a.serverTimestamp));
     final entries = <ActivityEntry>[];
-    for (final event in events) {
+    for (final event in newestFirst) {
       final kind = _kindOf(event);
       if (kind == null) {
         continue;

@@ -8,6 +8,9 @@ import '../../../services/workspace/activity/activity_facts.dart';
 /// The workspace's "what happened lately" card: the newest events, newest
 /// first, with who and when. Presentation only; `RecentActivitySection`
 /// reads the facts.
+/// The row width from which a line's time sits beside its text.
+const double _sideBySideWidth = 420;
+
 class RecentActivityCard extends StatelessWidget {
   const RecentActivityCard({
     super.key,
@@ -115,7 +118,7 @@ class RecentActivityCard extends StatelessWidget {
           // otherwise (a narrow window or large text).
           Expanded(
             child: LayoutBuilder(
-              builder: (context, box) => box.maxWidth >= 420
+              builder: (context, box) => box.maxWidth >= _sideBySideWidth
                   ? Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -184,6 +187,7 @@ class RecentActivityCard extends StatelessWidget {
 
   static String _text(BuildContext context, ActivityEntry entry) {
     final l10n = AppLocalizations.of(context);
+    // The ARB messages use ICU `select`: "you" or anything else ("other").
     final actor = entry.byYou ? 'you' : 'other';
     return switch (entry.kind) {
       ActivityKind.complete => l10n.activityComplete(actor),

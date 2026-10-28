@@ -6,7 +6,8 @@ import '../workspace_scope.dart';
 import 'recent_activity_card.dart';
 
 /// The recent-activity section of the workspace: reads the facts the page
-/// loaded and offers a retry when the facts or the audit read failed.
+/// loaded. A retry reloads all the workspace facts, not only the audit read,
+/// and a failed facts load shows the same failed state as a failed audit read.
 class RecentActivitySection extends StatelessWidget {
   const RecentActivitySection({super.key, required this.contest});
 

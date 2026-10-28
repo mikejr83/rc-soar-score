@@ -35,16 +35,16 @@ abstract final class WorkspaceFactsLoader {
       _scores(client, id, unavailable),
       _publication(client, id, unavailable),
       _landingTables(client, unavailable),
-      _transitions(client, contest, actingAccountId),
-      _activity(client, id, actingAccountId),
+      _audit(client, contest, actingAccountId),
     ]);
+    final audit = results[4]! as (TransitionFacts, ActivityFacts);
     return WorkspaceFacts.derive(
       data: results[0]! as MatrixPageData,
       scores: results[1] as ContestScores?,
       publication: results[2]! as PublicationFacts,
       landingTables: results[3] as List<LandingTableView>?,
-      transitions: results[4]! as TransitionFacts,
-      activity: results[5]! as ActivityFacts,
+      transitions: audit.$1,
+      activity: audit.$2,
       unavailable: unavailable,
       isOffline: isOffline,
     );
@@ -63,46 +63,41 @@ abstract final class WorkspaceFactsLoader {
     }
   }
 
-  static Future<TransitionFacts> _transitions(
+  /// Reads the audit trail once for the completion and lock facts and the
+  /// activity card: every state transition, plus the newest publication
+  /// events. Asking by action keeps other events (score edits, say) from
+  /// pushing the ones listed out of a limited read.
+  ///
+  /// A failed read leaves the transition facts unknown and marks the
+  /// activity as failed; the rest of the page still loads.
+  static Future<(TransitionFacts, ActivityFacts)> _audit(
     ApiClient client,
     Contest contest,
     String? actingAccountId,
   ) async {
-    final completed = contest.lifecycleState == LifecycleState.completed;
-    final locked = contest.adminLock == AdminLock.locked;
-    if (!completed && !locked) {
-      return TransitionFacts.unknown;
-    }
     try {
-      return TransitionFacts.of(
-        contest,
-        await client.auditEvents(
+      final (transitions, publications) = await (
+        client.auditEvents(contest.id, action: AuditAction.stateTransition),
+        client.auditEvents(
           contest.id,
-          action: AuditAction.stateTransition,
+          action: AuditAction.publicationAttempt,
+          limit: ActivityFacts.shown,
         ),
-        actingAccountId: actingAccountId,
+      ).wait;
+      return (
+        TransitionFacts.of(
+          contest,
+          transitions,
+          actingAccountId: actingAccountId,
+        ),
+        ActivityFacts.of([
+          ...transitions,
+          ...publications,
+        ], actingAccountId: actingAccountId),
       );
     } on Object catch (error) {
       _logger.warning('Could not read the audit trail of ${contest.id}', error);
-      return TransitionFacts.unknown;
-    }
-  }
-
-  /// A failed read only marks the activity card as failed; the rest of the
-  /// page still loads.
-  static Future<ActivityFacts> _activity(
-    ApiClient client,
-    Id id,
-    String? actingAccountId,
-  ) async {
-    try {
-      return ActivityFacts.of(
-        await client.auditEvents(id, limit: ActivityFacts.readLimit),
-        actingAccountId: actingAccountId,
-      );
-    } on Object catch (error) {
-      _logger.warning('Could not read the activity of $id', error);
-      return ActivityFacts.unavailable;
+      return (TransitionFacts.unknown, ActivityFacts.unavailable);
     }
   }
 

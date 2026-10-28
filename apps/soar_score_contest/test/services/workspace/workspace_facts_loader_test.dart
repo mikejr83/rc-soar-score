@@ -47,7 +47,15 @@ Future<WorkspaceFacts> _load({
       final path = request.url.path;
       if (path.endsWith('/audit-events')) {
         return auditStatus == 200
-            ? _json({'audit_events': auditEvents})
+            ? _json({
+                'audit_events': [
+                  for (final event in auditEvents)
+                    if (request.url.queryParameters['action'] == null ||
+                        request.url.queryParameters['action'] ==
+                            event['action'])
+                      event,
+                ],
+              })
             : _json({
                 'error': {'code': 'boom', 'message': 'Broken.'},
               }, auditStatus);
@@ -219,18 +227,15 @@ void main() {
       },
     );
 
-    test(
-      'an open, running contest reads the trail once, for activity',
-      () async {
-        final requests = <String>[];
-        await _load(requests: requests);
+    test('an open, running contest reads the trail once for transitions and activity', () async {
+      final requests = <String>[];
+      await _load(requests: requests);
 
-        expect(
-          requests.where((path) => path.endsWith('/audit-events')),
-          hasLength(1),
-        );
-      },
-    );
+      expect(
+        requests.where((path) => path.endsWith('/audit-events')),
+        hasLength(2),
+      );
+    });
 
     test('the newest events become activity lines', () async {
       final facts = await _load(
