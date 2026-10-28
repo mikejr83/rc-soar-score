@@ -81,8 +81,20 @@ class StubContestParticipationRepository
   Future<ContestParticipation> save(
     ContestParticipation participation, {
     required MutationMetadata metadata,
-    bool removeMatrixRows = false,
-  }) async {
+  }) async => (await _store(participation, 0)).participation;
+
+  @override
+  Future<({ContestParticipation participation, int matrixRowsRemoved})>
+  saveRemovingMatrixRows(
+    ContestParticipation participation, {
+    required MutationMetadata metadata,
+  }) => _store(participation, null);
+
+  /// Stores [participation]; with a null [removed] the matrix rows go too.
+  Future<({ContestParticipation participation, int matrixRowsRemoved})> _store(
+    ContestParticipation participation,
+    int? removed,
+  ) async {
     final current = participations[participation.id];
     if (current != null && current.revision != participation.revision) {
       throw StaleRevisionError(
@@ -92,19 +104,30 @@ class StubContestParticipationRepository
         storedRevision: current.revision,
       );
     }
-    if (removeMatrixRows) await this.removeMatrixRows?.call(participation.id);
+    final count =
+        removed ?? await removeMatrixRows?.call(participation.id) ?? 0;
     final stored = ContestParticipation.fromJson({
       ...participation.toJson(),
       'revision': current == null ? 0 : current.revision + 1,
     });
     participations[participation.id] = stored;
-    return stored;
+    return (participation: stored, matrixRowsRemoved: count);
   }
 
   @override
-  Future<bool> delete(Id id, {required MutationMetadata metadata}) async {
-    await removeMatrixRows?.call(id);
-    return participations.remove(id) != null;
+  Future<bool> delete(Id id, {required MutationMetadata metadata}) async =>
+      (await deleteRemovingMatrixRows(id, metadata: metadata)).deleted;
+
+  @override
+  Future<({bool deleted, int matrixRowsRemoved})> deleteRemovingMatrixRows(
+    Id id, {
+    required MutationMetadata metadata,
+  }) async {
+    final count = await removeMatrixRows?.call(id) ?? 0;
+    return (
+      deleted: participations.remove(id) != null,
+      matrixRowsRemoved: count,
+    );
   }
 }
 

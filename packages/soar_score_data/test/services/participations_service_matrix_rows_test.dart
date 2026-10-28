@@ -239,10 +239,9 @@ void _tests(Backend backend) {
       });
 
       await expectLater(
-        repository.contestParticipationRepository.save(
+        repository.contestParticipationRepository.saveRemovingMatrixRows(
           demoted,
           metadata: meta(),
-          removeMatrixRows: true,
         ),
         throwsA(isA<core.StaleRevisionError>()),
       );
@@ -260,10 +259,9 @@ void _tests(Backend backend) {
       ))!;
 
       await expectLater(
-        repository.contestParticipationRepository.save(
+        repository.contestParticipationRepository.saveRemovingMatrixRows(
           current,
           metadata: meta(),
-          removeMatrixRows: true,
         ),
         throwsA(isA<core.ContestStateError>()),
       );
@@ -271,8 +269,8 @@ void _tests(Backend backend) {
       expect(await rowsOf(pilot), hasLength(2));
     });
 
-    test('both ends of a move go together', () async {
-      final pilot = (await pilots()).first;
+    /// Gives [pilot] a third row, as another device's move would.
+    Future<void> addMovedRow(core.ContestParticipation pilot) async {
       final source = (await rowsOf(pilot)).first;
       final moved = core.MatrixAssignment.fromJson({
         ...source.toJson(),
@@ -297,6 +295,41 @@ void _tests(Backend backend) {
           metadata: meta(),
         ),
       );
+    }
+
+    test('removing counts the rows the transaction removed, including one '
+        'that appeared after the service looked', () async {
+      final pilot = (await pilots()).first;
+      final interleaved = _Interleaving(inst.db, () => addMovedRow(pilot));
+
+      final removed = await ParticipationsService(interleaved)
+          .remove(contestId, pilot.id, metadata: meta());
+
+      expect(removed, 3);
+      expect(await rowsOf(pilot), isEmpty);
+    });
+
+    test('demoting counts the rows the transaction removed, including one '
+        'that appeared after the service looked', () async {
+      final pilot = (await pilots()).first;
+      final interleaved = _Interleaving(inst.db, () => addMovedRow(pilot));
+
+      final result = await ParticipationsService(interleaved).update(
+        contestId,
+        actor,
+        pilot.id,
+        roleId: core.SystemRoles.helperId,
+        baseRevision: pilot.revision,
+        metadata: meta(),
+      );
+
+      expect(result.matrixRowsRemoved, 3);
+      expect(await rowsOf(pilot), isEmpty);
+    });
+
+    test('both ends of a move go together', () async {
+      final pilot = (await pilots()).first;
+      await addMovedRow(pilot);
 
       final removed = await service.remove(
         contestId,
@@ -308,4 +341,76 @@ void _tests(Backend backend) {
       expect(await rowsOf(pilot), isEmpty);
     });
   });
+}
+
+/// A repository whose participation changes first run [beforeChange], so a
+/// test can change the matrix after the service has read it and before the
+/// transaction that removes the rows.
+class _Interleaving extends Repository {
+  _Interleaving(super.database, Future<void> Function() beforeChange)
+    : _participations = _Hooked(
+        ContestParticipationRepository(
+          database,
+          stores: EntityStores.forDatabase(database),
+        ),
+        beforeChange,
+      );
+
+  final core.ContestParticipationRepository _participations;
+
+  @override
+  core.ContestParticipationRepository get contestParticipationRepository =>
+      _participations;
+}
+
+class _Hooked implements core.ContestParticipationRepository {
+  _Hooked(this._inner, this._beforeChange);
+
+  final core.ContestParticipationRepository _inner;
+  final Future<void> Function() _beforeChange;
+
+  @override
+  Future<core.ContestParticipation?> findById(core.Id id) =>
+      _inner.findById(id);
+
+  @override
+  Future<List<core.ContestParticipation>> listForContest(core.Id contestId) =>
+      _inner.listForContest(contestId);
+
+  @override
+  Future<List<core.ContestParticipation>> listForProfile(core.Id id) =>
+      _inner.listForProfile(id);
+
+  @override
+  Future<List<core.ContestParticipation>> listForRole(core.Id roleId) =>
+      _inner.listForRole(roleId);
+
+  @override
+  Future<core.ContestParticipation> save(
+    core.ContestParticipation participation, {
+    required core.MutationMetadata metadata,
+  }) => _inner.save(participation, metadata: metadata);
+
+  @override
+  Future<({core.ContestParticipation participation, int matrixRowsRemoved})>
+  saveRemovingMatrixRows(
+    core.ContestParticipation participation, {
+    required core.MutationMetadata metadata,
+  }) async {
+    await _beforeChange();
+    return _inner.saveRemovingMatrixRows(participation, metadata: metadata);
+  }
+
+  @override
+  Future<bool> delete(core.Id id, {required core.MutationMetadata metadata}) =>
+      _inner.delete(id, metadata: metadata);
+
+  @override
+  Future<({bool deleted, int matrixRowsRemoved})> deleteRemovingMatrixRows(
+    core.Id id, {
+    required core.MutationMetadata metadata,
+  }) async {
+    await _beforeChange();
+    return _inner.deleteRemovingMatrixRows(id, metadata: metadata);
+  }
 }

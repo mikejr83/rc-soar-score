@@ -63,7 +63,7 @@
 - A `Moved` row is created when a director moves a pilot to a different group, lane, or round slot, or resets a score entered in the wrong place by moving the pilot to the same slot.
 - A `Reflight` row is created when a re-flight is finalized.
 - A `LateAdd` row is created when a pilot is added after the draw, or when the director schedules a make-up flight for a missed round. If no group in the remaining rounds has an open spot, the pilot is not added and the director is told that no group is available. The application may offer to redraw the later unscored rounds, but only the director decides. It never redraws on its own, because printed matrix cards for the redrawn rounds would have to be reprinted. Cards for rounds that are not redrawn stay valid
-- Rows are never deleted. Moved-away rows remain as history and are marked superseded. Rows in a superseded round simply stop being current.
+- Rows are never deleted, except the departure case under Invariants and Constraints (a pilot with no scores who is removed or stops flying). Moved-away rows remain as history and are marked superseded. Rows in a superseded round simply stop being current.
 
 ## Privacy and Scope
 

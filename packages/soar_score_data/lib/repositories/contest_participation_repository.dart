@@ -35,35 +35,55 @@ class ContestParticipationRepository extends DriftRepository
   Future<core.ContestParticipation> save(
     core.ContestParticipation participation, {
     required core.MutationMetadata metadata,
-    bool removeMatrixRows = false,
+  }) => unitOfWork.run(
+    (context) => context.save(participation, metadata: metadata),
+  );
+
+  @override
+  Future<({core.ContestParticipation participation, int matrixRowsRemoved})>
+  saveRemovingMatrixRows(
+    core.ContestParticipation participation, {
+    required core.MutationMetadata metadata,
   }) => unitOfWork.run((context) async {
-    if (removeMatrixRows) {
-      await removeUnscoredMatrixRows(
-        context,
-        stores,
-        participation.id,
-        metadata,
-      );
-    }
-    return context.save(participation, metadata: metadata);
+    final removed = await removeUnscoredMatrixRows(
+      context,
+      stores,
+      participation.id,
+      metadata,
+    );
+    final saved = await context.save(participation, metadata: metadata);
+    return (participation: saved, matrixRowsRemoved: removed);
   });
 
   @override
-  Future<bool> delete(core.Id id, {required core.MutationMetadata metadata}) =>
-      unitOfWork.run((context) async {
-        final participation = await _store.find(id);
-        if (participation == null) return false;
-        await removeUnscoredMatrixRows(context, stores, id, metadata);
-        for (final membership in await _memberships.whereId(
-          'contest_participation_id',
-          id,
-        )) {
-          await context.delete(
-            membership,
-            metadata: metadata.forPart(membership.id.value),
-          );
-        }
-        await context.delete(participation, metadata: metadata);
-        return true;
-      });
+  Future<bool> delete(
+    core.Id id, {
+    required core.MutationMetadata metadata,
+  }) async => (await deleteRemovingMatrixRows(id, metadata: metadata)).deleted;
+
+  @override
+  Future<({bool deleted, int matrixRowsRemoved})> deleteRemovingMatrixRows(
+    core.Id id, {
+    required core.MutationMetadata metadata,
+  }) => unitOfWork.run((context) async {
+    final participation = await _store.find(id);
+    if (participation == null) return (deleted: false, matrixRowsRemoved: 0);
+    final removed = await removeUnscoredMatrixRows(
+      context,
+      stores,
+      id,
+      metadata,
+    );
+    for (final membership in await _memberships.whereId(
+      'contest_participation_id',
+      id,
+    )) {
+      await context.delete(
+        membership,
+        metadata: metadata.forPart(membership.id.value),
+      );
+    }
+    await context.delete(participation, metadata: metadata);
+    return (deleted: true, matrixRowsRemoved: removed);
+  });
 }
