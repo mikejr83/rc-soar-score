@@ -54,6 +54,7 @@ createHandlers(
     router,
     repository,
     drawRunner: drawRunner ?? const IsolateDrawRunner(),
+    recalculation: recalculation,
   );
   addScoreRoutes(
     router,

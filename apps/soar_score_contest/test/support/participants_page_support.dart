@@ -104,6 +104,19 @@ class ParticipantsServer {
   /// Fails every addition with this status when set.
   int? addFailure;
 
+  /// The participations put in the rounds, in order.
+  final List<Id> placements = [];
+
+  /// What placing a pilot answers for each round; two placed rounds unless
+  /// set.
+  List<Map<String, Object?>> placementRounds = [
+    {'round': 1, 'group': 2, 'lane': null, 'zeroed': false},
+    {'round': 2, 'group': 2, 'lane': null, 'zeroed': false},
+  ];
+
+  /// Fails every placement with this status when set.
+  int? placementFailure;
+
   /// Fails every team membership addition with this status when set.
   int? membershipAddFailure;
 
@@ -112,6 +125,9 @@ class ParticipantsServer {
 
   /// Makes every request fail like a lost connection.
   bool offline = false;
+
+  /// Every request that is not a read, as `METHOD path`.
+  final List<String> writes = [];
 
   /// A notice sent with every successful participation update.
   String? warning;
@@ -172,6 +188,7 @@ class ParticipantsServer {
     if (offline) throw http.ClientException('offline', request.url);
     final path = request.url.path;
     final method = request.method;
+    if (method != 'GET') writes.add('$method $path');
     if (method == 'GET' && readFailure != null) {
       return _error(readFailure!, 'internal_error', 'The server failed.');
     }
@@ -188,6 +205,9 @@ class ParticipantsServer {
     }
     if (participation != null && method == 'DELETE') {
       return _remove(Id.parse(participation.group(1)!));
+    }
+    if (path.endsWith('/matrix/late-placements') && method == 'POST') {
+      return _place(Id.parse(body['contest_participation_id']! as String));
     }
     if (path.endsWith('/teams') && method == 'POST') {
       teamCreations.add(body);
@@ -312,6 +332,26 @@ class ParticipantsServer {
     );
     _participations.add(added);
     return _json(added.toJson(), 201);
+  }
+
+  http.Response _place(Id id) {
+    if (placementFailure != null) {
+      return _error(placementFailure!, 'matrix_not_editable', 'Not editable.');
+    }
+    placements.add(id);
+    final index = _participations.indexWhere((p) => p.id == id);
+    final p = _participations[index];
+    final highest = _participations.fold<int>(
+      0,
+      (most, q) => q.participantNumber != null && q.participantNumber! > most
+          ? q.participantNumber!
+          : most,
+    );
+    _participations[index] = p.withParticipantNumber(highest + 1);
+    return _json({
+      'rounds': placementRounds,
+      'recalculation_warning': null,
+    }, 201);
   }
 
   http.Response _update(Id id, Map<String, dynamic> body) {

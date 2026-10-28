@@ -20,6 +20,7 @@ List<Widget> participantBanners({
   required VoidCallback onUnlock,
   required VoidCallback onOpenMatrix,
   required VoidCallback onOpenScoring,
+  required VoidCallback onPlaceUnplaced,
   required ValueChanged<StoredParticipant> onShowClass,
 }) {
   final c = controller;
@@ -139,6 +140,40 @@ List<Widget> participantBanners({
       ),
     );
   }
+  final placement = c.lastPlacement;
+  if (placement != null) {
+    final zeroed = placement.zeroedRounds;
+    final skipped = placement.skipped;
+    banners.add(
+      PageBanner(
+        key: const ValueKey('banner-placement'),
+        kind: skipped.isEmpty ? PageBannerKind.info : PageBannerKind.status,
+        icon: skipped.isEmpty ? Icons.grid_view : Icons.warning,
+        shape: PageBannerShape.card,
+        title: skipped.isEmpty
+            ? '${placement.name} is in every round'
+            : '${placement.name} is not in every round',
+        text: [
+          if (placement.result.placed.isNotEmpty)
+            '${placement.name} was added to the last group that could take '
+                'them in ${placement.result.placed.length} '
+                'round${placement.result.placed.length == 1 ? '' : 's'}.',
+          if (zeroed.isNotEmpty)
+            '${_rounds(zeroed)} ${zeroed.length == 1 ? 'was' : 'were'} '
+                'already scored, so they got a zero '
+                '${zeroed.length == 1 ? 'there' : 'in them'}. Correct the '
+                'scores in Scoring if needed.',
+          for (final skip in skipped) 'Round ${skip.round}: ${skip.reason}.',
+          if (skipped.isNotEmpty)
+            'Place them in those rounds from the Matrix page.',
+        ].join(' '),
+        actionLabel: skipped.isEmpty ? 'Open Scoring' : 'Open Matrix',
+        onAction: skipped.isEmpty ? onOpenScoring : onOpenMatrix,
+        secondaryLabel: 'Dismiss',
+        onSecondary: c.dismissPlacement,
+      ),
+    );
+  }
   final unplaced = c.unplaced;
   if (unplaced.isNotEmpty && !c.readOnly) {
     final names = ParticipantsController.andList([
@@ -152,10 +187,12 @@ List<Widget> participantBanners({
         shape: PageBannerShape.card,
         title: '$names ${unplaced.length == 1 ? 'isn’t' : 'aren’t'} placed yet',
         text:
-            'Place them in a group from the Matrix page. A redraw is also '
-            'possible.',
-        actionLabel: 'Open Matrix',
-        onAction: onOpenMatrix,
+            'Put them in the last group of every round, or place them from the '
+            'Matrix page. A redraw is also possible.',
+        actionLabel: 'Place in all rounds',
+        onAction: onPlaceUnplaced,
+        secondaryLabel: 'Open Matrix',
+        onSecondary: onOpenMatrix,
       ),
     );
   }
@@ -185,3 +222,8 @@ List<Widget> participantBanners({
   }
   return banners;
 }
+
+/// `[1, 2]` → `Rounds 1 and 2`; `[3]` → `Round 3`.
+String _rounds(List<int> rounds) => rounds.length == 1
+    ? 'Round ${rounds.single}'
+    : 'Rounds ${ParticipantsController.andList([for (final r in rounds) '$r'])}';

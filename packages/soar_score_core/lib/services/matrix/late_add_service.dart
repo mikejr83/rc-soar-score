@@ -55,6 +55,11 @@ class LateAddService {
   ///   taken, or a teammate is in the group;
   /// - `ArgumentError` for a blank [reason], a [group] outside the round, or
   ///   a [lane] that does not fit the contest's lane mode.
+  ///
+  /// With [flownRound] the round is already fully scored: the pilot is added
+  /// to a group that has flown, even a full one, in a lane that may be
+  /// shared, and without the team check, since the pilot will not fly it.
+  /// The caller gives the pilot a zero. A locked group is still refused.
   Future<CurrentMatrix> add(
     Id contestId, {
     required Id id,
@@ -66,6 +71,7 @@ class LateAddService {
     required String reason,
     required Id actorId,
     required MutationMetadata metadata,
+    bool flownRound = false,
   }) async {
     final contest = await _requireContest(contestId);
     final stored = await repository.matrixAssignmentRepository.findById(id);
@@ -157,13 +163,16 @@ class LateAddService {
       participationId: participationId,
       group: group,
       lane: lane,
+      flownRound: flownRound,
     );
-    await _rules.checkTeams(
-      contestId: contestId,
-      participationId: participationId,
-      live: live,
-      group: group,
-    );
+    if (!flownRound) {
+      await _rules.checkTeams(
+        contestId: contestId,
+        participationId: participationId,
+        live: live,
+        group: group,
+      );
+    }
 
     final lateAdd = MatrixAssignment(
       id: id,
@@ -220,6 +229,7 @@ class LateAddService {
     required Id participationId,
     required int group,
     required int? lane,
+    required bool flownRound,
   }) async {
     final inGroup = [
       for (final assignment in live)
@@ -238,6 +248,7 @@ class LateAddService {
         'group $group is locked; unlock it first',
       );
     }
+    if (flownRound) return;
     for (final assignment in inGroup) {
       final placeholder = await repository.scorePlaceholderRepository
           .findForAssignment(assignment.id);

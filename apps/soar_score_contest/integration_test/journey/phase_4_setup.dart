@@ -168,6 +168,44 @@ Future<void> runSetupPhase(Journey journey, JourneyContext data) async {
     },
   );
   await journey.step(
+    'Participants: a pilot added to a drawn contest is offered a redraw, '
+    'or put in every round',
+    () async {
+      await goToMainPage(tester);
+      // A demo contest that arrives drawn, ready and without scores.
+      await openContest(tester, 'Front Range F5J Open');
+      await tapRail(tester, 'Participants');
+      await pumpUntilFound(tester, _key('participants-count'));
+      final newcomer = data.roster.last;
+      final name = '${newcomer.first} ${newcomer.last}';
+      // Give the web input time to attach after the tap, or the first
+      // characters are lost.
+      final search = find.descendant(
+        of: _key('participant-search'),
+        matching: find.byType(TextField),
+      );
+      await tester.tap(search);
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.enterText(search, newcomer.last);
+      await tester.pump(const Duration(milliseconds: 300));
+      final result = find.widgetWithText(ListTile, name);
+      await pumpUntilFound(tester, result);
+      // Tap the menu row itself: scrolling to it first closes the menu.
+      await tester.tap(result);
+      await tester.pump(const Duration(milliseconds: 300));
+      await pumpUntilFound(tester, _key('add-participant-confirm'));
+      await tapVisible(tester, _key('add-participant-confirm'));
+
+      // No scores yet, so the director may redraw the matrix with them.
+      await pumpUntilFound(tester, find.text('Redraw the matrix with $name?'));
+      // Keeping the matrix puts them in the last group that can take them
+      // in every round.
+      await tapVisible(tester, _key('redraw-keep'));
+      await pumpUntilFound(tester, _key('banner-placement'));
+      expect(find.text(name), findsWidgets);
+    },
+  );
+  await journey.step(
     'Reports: readiness before the run',
     () => inContest(() async {
       await _openReports(tester);
