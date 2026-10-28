@@ -6,6 +6,7 @@ import '../api_failure.dart';
 import '../participants/participant_option.dart';
 import '../participants/participant_row_style.dart';
 import 'participants_page_data.dart';
+import 'placement_report.dart';
 import 'row_outcome.dart';
 import 'stored_list_rules.dart';
 import 'stored_participant.dart';
@@ -66,6 +67,13 @@ class ParticipantsController extends ChangeNotifier {
   /// What the last removal left behind.
   RemoveResult? lastRemoval;
 
+  /// Where the last pilot added after the draw was put in the rounds.
+  PlacementReport? lastPlacement;
+
+  /// Pilots who joined after the draw (added, or changed from a non-flying
+  /// role) and are not in the rounds yet, by participation id.
+  final Set<String> _toPlace = {};
+
   bool _disposed = false;
 
   @override
@@ -90,6 +98,9 @@ class ParticipantsController extends ChangeNotifier {
   bool get running => contest?.lifecycleState == LifecycleState.running;
 
   bool get drawn => data?.drawn ?? false;
+
+  /// Whether any pilot has a score in any round.
+  bool get hasScores => data?.hasScores ?? false;
 
   /// Whether the people can be edited, added and removed.
   bool get canEdit => !readOnly && !adminLocked;
@@ -375,6 +386,8 @@ class ParticipantsController extends ChangeNotifier {
       if (result.warning != null) warnings.add(result.warning!);
       if (result.failure == null) {
         ok++;
+        // A non-flier who became a pilot after the draw joins the rounds.
+        if (drawn && !saved.isPilot && draft.isPilot) _toPlace.add(id);
         if (running) touched.add(_recalcLabel(draft, changed));
         _states[id] = const RowState(RowOutcome.saved);
       } else {
@@ -564,9 +577,8 @@ class ParticipantsController extends ChangeNotifier {
       highlightId = rowId;
       query = '';
       final name = '${profile.firstName} ${profile.lastName}';
-      message = late
-          ? '$name added to the contest. Not placed yet.'
-          : '$name added to the contest.';
+      if (late) _toPlace.add(rowId);
+      message = '$name added to the contest.';
     } on Object catch (error) {
       failedAdd = profile;
       failedAddRole = role;
@@ -608,6 +620,39 @@ class ParticipantsController extends ChangeNotifier {
     }
     notifyListeners();
     return result;
+  }
+
+  /// The pilots to put in the rounds now, in list order; asking again returns
+  /// none until someone else joins.
+  List<StoredParticipant> takePendingPlacements() {
+    final pending = [
+      for (final row in _saved)
+        if (_toPlace.contains(row.rowId) && rules.isScoring(row)) row,
+    ];
+    _toPlace.clear();
+    return pending;
+  }
+
+  /// Puts [row] in the last group that can take them in every round, with a
+  /// zero in rounds already fully scored.
+  Future<void> placeInRounds(StoredParticipant row) async {
+    try {
+      final result = await client.placeInAllRounds(contestId, row.id);
+      lastPlacement = PlacementReport(name: row.name, result: result);
+      final warning = result.recalculationWarning;
+      if (warning != null) recalculationWarning = warning;
+    } on Object catch (error) {
+      message =
+          '${row.name} is in the contest but not in the rounds yet: '
+          '${apiErrorTextOf(error)} Place them from the Matrix page.';
+    }
+    await reload();
+    notifyListeners();
+  }
+
+  void dismissPlacement() {
+    lastPlacement = null;
+    notifyListeners();
   }
 
   void dismissRemoval() {

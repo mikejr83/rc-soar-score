@@ -187,6 +187,28 @@ void main() {
     });
   });
 
+  test('placeInAllRounds POSTs the pilot and decodes each round', () async {
+    final pilot = Id.parse('019c0000-0000-7000-8000-000000000206');
+    final client = clientFor(
+      (_) => body({
+        'rounds': [
+          {'round': 1, 'group': 2, 'lane': null, 'zeroed': true},
+          {'round': 2, 'skipped_reason': 'group 2 has no open spot'},
+        ],
+        'recalculation_warning': null,
+      }, 201),
+    );
+
+    final result = await client.placeInAllRounds(contestId, pilot);
+
+    expect(seen.method, 'POST');
+    expect(seen.url.path, '$matrixPath/late-placements');
+    expect(jsonDecode(seen.body), {'contest_participation_id': pilot.value});
+    expect(result.placed.single.round, 1);
+    expect(result.zeroed.single.round, 1);
+    expect(result.skipped.single.skippedReason, 'group 2 has no open spot');
+  });
+
   test('redrawMatrix POSTs the request and decodes the matrix', () async {
     final client = clientFor((_) => body(CurrentMatrix().toJson(), 201));
     final newId = Id.parse('019c0000-0000-7000-8000-000000000603');

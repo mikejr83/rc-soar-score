@@ -327,4 +327,47 @@ void main() {
     expect(find.text('Results are recalculated'), findsOneWidget);
     expect(find.textContaining('team change; stale'), findsOneWidget);
   });
+
+  testWidgets('editing a row never writes to the reusable profile', (
+    tester,
+  ) async {
+    final server = ParticipantsServer();
+    await pumpParticipantsPage(tester, server);
+    await _type(tester, _field('class', 1), 'Expert');
+    await _type(tester, _field('team', 2), 'lake wings');
+    await _pickRole(tester, 3, 'Helper');
+    await tester.tap(find.byKey(const ValueKey('confirm-role-change')));
+    await tester.pumpAndSettle();
+
+    await tester.tap(_save());
+    await tester.pumpAndSettle();
+
+    expect(server.writes, isNotEmpty);
+    // Only participations, teams and memberships change; the profile
+    // routes (`/participants`) are never written.
+    expect(
+      server.writes.where((w) => RegExp(r'/participants(/|$)').hasMatch(w)),
+      isEmpty,
+    );
+  });
+
+  testWidgets('a banner going away does not lose the typed search text', (
+    tester,
+  ) async {
+    await pumpParticipantsPage(tester, ParticipantsServer());
+    final search = find.descendant(
+      of: find.byKey(const ValueKey('participant-search')),
+      matching: find.byType(TextField),
+    );
+    await tester.enterText(search, 'park');
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('banner-missing-class')), findsOneWidget);
+
+    // Giving the pilot a class removes the missing-class banner.
+    await _type(tester, _field('class', 4), 'Open');
+
+    expect(find.byKey(const ValueKey('banner-missing-class')), findsNothing);
+    expect(_text(tester, search), 'park');
+    expect(find.text('Di Park'), findsOneWidget);
+  });
 }

@@ -22,6 +22,8 @@ export 'matrix/draw_optimizer.dart';
 export 'matrix/lane_stats.dart';
 export 'matrix/matchup_stats.dart';
 export 'matrix/late_add_service.dart';
+export 'matrix/late_placement_result.dart';
+export 'matrix/late_placement_service.dart';
 export 'matrix/matrix_draw_builder.dart';
 export 'matrix/matrix_redraw_service.dart';
 export 'matrix/matrix_service.dart';

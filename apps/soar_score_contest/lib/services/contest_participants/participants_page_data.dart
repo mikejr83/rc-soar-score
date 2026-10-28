@@ -50,6 +50,9 @@ class ParticipantsPageData {
   /// Whether a matrix has been drawn.
   bool get drawn => !base.matrix.isEmpty;
 
+  /// Whether any pilot has a score in any round.
+  bool get hasScores => _withScores.isNotEmpty;
+
   /// Whether the pilot of [participation] has a score in any round.
   bool hasFlights(Id participation) => _withScores.contains(participation);
 

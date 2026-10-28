@@ -27,6 +27,9 @@ import 'package:soar_score_core/soar_score_core.dart';
 /// - `POST /contests/{id}/matrix/late-adds` places a pilot who joined after
 ///   the draw, or who is making up a missed round, in a group with an open
 ///   spot;
+/// - `POST /contests/{id}/matrix/late-placements` puts a pilot who joined
+///   after the draw in the last group that can take them in every round, with
+///   a zero score in rounds that are already fully scored;
 /// - `POST /contests/{id}/matrix/redraws` adds rounds to the matrix or draws
 ///   its unscored tail again, as a new matrix revision.
 ///
@@ -39,11 +42,15 @@ void addMatrixRoutes(
   Router router,
   Repository repository, {
   DrawRunner drawRunner = const IsolateDrawRunner(),
+  RecalculationService? recalculation,
 }) {
   final jobs = DrawJobs();
   final service = MatrixService(repository, runner: drawRunner, jobs: jobs);
   final moves = AssignmentMoveService(repository);
   final lateAdds = LateAddService(repository);
+  final placements = LatePlacementService(repository);
+  final recalculationService =
+      recalculation ?? RecalculationService(ResultsService(repository));
   final redraws = MatrixRedrawService(
     repository,
     runner: drawRunner,
@@ -156,6 +163,40 @@ void addMatrixRoutes(
       metadata: writeMetadata(principal),
     );
     return jsonResponse(matrix.toJson(), statusCode: 201);
+  });
+
+  router.post('/contests/<id>/matrix/late-placements', (
+    Request request,
+    String id,
+  ) async {
+    final principal = requirePrincipal(request);
+    final contestId = Id.parse(id);
+    await requireContestDirector(request, repository, contestId);
+    final participationId = await readJsonBody(
+      request,
+      (json) => Id.parse(json['contest_participation_id']! as String),
+    );
+
+    final rounds = await placements.placeInAllRounds(
+      contestId,
+      participationId,
+      actorId: principal.accountId,
+      metadata: writeMetadata(principal),
+    );
+    // A zero score changes the results.
+    final warning = rounds.any((round) => round.zeroed)
+        ? await recalculationService.recalculateAfterEntry(
+            contestId,
+            cause: 'a pilot added after the round was scored',
+          )
+        : null;
+    return jsonResponse(
+      LatePlacementResult(
+        rounds: rounds,
+        recalculationWarning: warning,
+      ).toJson(),
+      statusCode: 201,
+    );
   });
 
   router.post('/contests/<id>/matrix/redraws', (

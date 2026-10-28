@@ -847,6 +847,33 @@ class ApiClient {
     return _decode<CurrentMatrix>(response, uri, CurrentMatrix.fromJson);
   }
 
+  /// `POST /api/v1/contests/{id}/matrix/late-placements` — puts a pilot who
+  /// joined after the draw in every round: the last group that can take them,
+  /// and a zero score in a round that is already fully scored.
+  ///
+  /// A round no group can take the pilot in is reported in the result, not
+  /// failed. Repeating the call places nobody twice. A contest with no matrix,
+  /// a locked one, or a participation that is not an active pilot is an
+  /// [ApiHttpError] with status 409.
+  Future<LatePlacementResult> placeInAllRounds(
+    Id contestId,
+    Id participationId,
+  ) async {
+    final uri = _resolve(
+      '/api/v1/contests/${contestId.value}/matrix/late-placements',
+    );
+    final response = await _send(
+      'POST',
+      uri,
+      body: {'contest_participation_id': participationId.value},
+    );
+    return _decode<LatePlacementResult>(
+      response,
+      uri,
+      LatePlacementResult.fromJson,
+    );
+  }
+
   /// Adds rounds to the matrix of contest [contestId], or draws its unscored
   /// tail again, and returns the current matrix.
   ///

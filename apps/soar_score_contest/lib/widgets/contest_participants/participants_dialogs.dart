@@ -112,6 +112,43 @@ class _AddDialogState extends State<_AddDialog> {
   }
 }
 
+/// After adding [name] to a drawn contest that has no scores yet: offers to
+/// draw the matrix again with them in it. `true` redraws (the page opens the
+/// Matrix page's redraw), `false` or dismissing keeps the matrix and puts
+/// them in the last group of every round.
+Future<bool> askRedrawWith(BuildContext context, {required String name}) async {
+  final redraw = await showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      icon: const Icon(Icons.grid_view),
+      title: Text('Redraw the matrix with $name?'),
+      content: SizedBox(
+        width: 460,
+        child: Text(
+          'No scores have been entered, so the matrix can be drawn again to '
+          'include $name fairly. Or keep the matrix as it is: $name is then '
+          'added to the last group of every round, within the contest’s '
+          'group sizes and team protection.',
+          key: const ValueKey('redraw-offer-body'),
+        ),
+      ),
+      actions: [
+        TextButton(
+          key: const ValueKey('redraw-keep'),
+          onPressed: () => Navigator.of(context).pop(false),
+          child: const Text('Keep the matrix'),
+        ),
+        FilledButton(
+          key: const ValueKey('redraw-with'),
+          onPressed: () => Navigator.of(context).pop(true),
+          child: const Text('Redraw'),
+        ),
+      ],
+    ),
+  );
+  return redraw ?? false;
+}
+
 /// Asks before a pilot becomes non-flying, which clears their class.
 Future<bool> confirmNonFlying(
   BuildContext context, {

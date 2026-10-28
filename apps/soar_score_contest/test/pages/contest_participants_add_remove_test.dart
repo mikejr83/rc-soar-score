@@ -65,32 +65,6 @@ void main() {
       expect(find.text('5 · provisional'), findsOneWidget);
     });
 
-    testWidgets('after the draw a pilot is a late add, not placed yet', (
-      tester,
-    ) async {
-      final server = ParticipantsServer(
-        state: LifecycleState.running,
-        drawn: true,
-      );
-      await pumpParticipantsPage(tester, server);
-
-      await _searchAndPick(tester, 'pia', 'Pia Ward');
-      expect(find.text('Add after the draw?'), findsOneWidget);
-      expect(
-        find.textContaining('The draw has already been made.'),
-        findsOneWidget,
-      );
-      await tester.tap(find.byKey(const ValueKey('add-participant-confirm')));
-      await tester.pumpAndSettle();
-
-      expect(
-        find.text('Pia Ward added to the contest. Not placed yet.'),
-        findsOneWidget,
-      );
-      expect(find.text('Not placed yet'), findsWidgets);
-      expect(find.text('Pia Ward isn’t placed yet'), findsOneWidget);
-    });
-
     testWidgets('a non-flying role chosen first skips the late-add warning', (
       tester,
     ) async {
@@ -112,6 +86,9 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(server.additions.single['role_id'], SystemRoles.helperId.value);
+      // A non-flier is not put in the rounds, and nothing is offered.
+      expect(server.placements, isEmpty);
+      expect(find.textContaining('Redraw the matrix'), findsNothing);
     });
 
     testWidgets('cancelling the dialog adds nobody', (tester) async {

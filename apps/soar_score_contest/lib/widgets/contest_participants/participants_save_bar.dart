@@ -16,9 +16,13 @@ class ParticipantsSaveBar extends StatelessWidget {
     super.key,
     required this.controller,
     required this.onShowRow,
+    required this.onSave,
   });
 
   final ParticipantsController controller;
+
+  /// Saves the changed rows.
+  final VoidCallback onSave;
 
   /// Moves focus to a row that needs attention.
   final ValueChanged<StoredParticipant> onShowRow;
@@ -155,7 +159,7 @@ class ParticipantsSaveBar extends StatelessWidget {
                         ),
                       FilledButton.icon(
                         key: const ValueKey('save-participants'),
-                        onPressed: off ? null : c.save,
+                        onPressed: off ? null : onSave,
                         icon: busy
                             ? const SizedBox.square(
                                 dimension: 18,

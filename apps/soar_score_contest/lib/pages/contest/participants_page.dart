@@ -7,6 +7,7 @@ import '../../router.dart';
 import '../../services/contest_participants/participants_controller.dart';
 import '../../services/contest_participants/participants_row_styles.dart';
 import '../../services/contest_participants/stored_participant.dart';
+import '../../services/matrix/matrix_rounds_plan.dart';
 import '../../services/participants/participant_option.dart';
 import '../../services/participants/participant_row.dart';
 import '../../widgets/contest_participants/participants_banners.dart';
@@ -175,7 +176,36 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
       if (choice == null || !mounted) return;
       role = choice.role;
     }
-    await c.add(profile, role: role);
+    if (await c.add(profile, role: role)) await _placeNewPilots();
+  }
+
+  /// Saves the changed rows, then puts anyone who became a pilot in the
+  /// rounds.
+  Future<void> _save() async {
+    final c = _controller!;
+    await c.save();
+    if (mounted) await _placeNewPilots();
+  }
+
+  /// A pilot who joined a drawn contest is put in the last group of every
+  /// round. With no scores yet the director may redraw the matrix with them
+  /// instead; declining keeps the matrix and places them anyway.
+  Future<void> _placeNewPilots() async {
+    final c = _controller!;
+    for (final row in c.takePendingPlacements()) {
+      if (!mounted) return;
+      if (!c.hasScores) {
+        final redraw = await askRedrawWith(context, name: row.name);
+        if (!mounted) return;
+        if (redraw) {
+          context.go(
+            contestMatrixPath(widget.contestId, intent: MatrixIntent.redraw),
+          );
+          return;
+        }
+      }
+      await c.placeInRounds(row);
+    }
   }
 
   Future<void> _addNew() async {
@@ -279,31 +309,43 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     ParticipantsHeader(
+                      key: const ValueKey('participants-header'),
                       controller: c,
                       onOpenConfiguration: () => context.go(
                         contestConfigurationPath(widget.contestId),
                       ),
                     ),
                     const SizedBox(height: 16),
-                    for (final banner in participantBanners(
-                      controller: c,
-                      onAdd: _addNew,
-                      onRetryAdd: () {
-                        final profile = c.failedAdd;
-                        if (profile != null) {
-                          _addProfile(profile, retryRole: c.failedAddRole);
-                        }
-                      },
-                      onUnlock: () =>
-                          context.go(contestWorkspacePath(widget.contestId)),
-                      onOpenMatrix: () =>
-                          _goTo(contestMatrixPath(widget.contestId)),
-                      onOpenScoring: () =>
-                          _goTo(contestScoringPath(widget.contestId)),
-                      onShowClass: (row) =>
-                          _showRow(row, ParticipantColumn.classification),
-                    )) ...[banner, const SizedBox(height: 12)],
+                    // One keyed child, so a banner coming or going never moves
+                    // the toolbar and list to another position, which would
+                    // rebuild them and lose typed text and focus.
+                    Column(
+                      key: const ValueKey('participant-banners'),
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        for (final banner in participantBanners(
+                          controller: c,
+                          onAdd: _addNew,
+                          onRetryAdd: () {
+                            final profile = c.failedAdd;
+                            if (profile != null) {
+                              _addProfile(profile, retryRole: c.failedAddRole);
+                            }
+                          },
+                          onUnlock: () => context.go(
+                            contestWorkspacePath(widget.contestId),
+                          ),
+                          onOpenMatrix: () =>
+                              _goTo(contestMatrixPath(widget.contestId)),
+                          onOpenScoring: () =>
+                              _goTo(contestScoringPath(widget.contestId)),
+                          onShowClass: (row) =>
+                              _showRow(row, ParticipantColumn.classification),
+                        )) ...[banner, const SizedBox(height: 12)],
+                      ],
+                    ),
                     ParticipantsToolbar(
+                      key: const ValueKey('participants-toolbar'),
                       controller: c,
                       narrow: narrow,
                       onAddNew: _addNew,
@@ -311,7 +353,11 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
                       onRemove: _removeSelected,
                     ),
                     const SizedBox(height: 16),
-                    ..._list(c, editing, visible, narrow),
+                    Column(
+                      key: const ValueKey('participants-list'),
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: _list(c, editing, visible, narrow),
+                    ),
                   ],
                 ),
               );
@@ -321,6 +367,7 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
         if (!c.readOnly)
           ParticipantsSaveBar(
             controller: c,
+            onSave: _save,
             onShowRow: (row) => _showRow(
               row,
               c.rules.issuesOf(row).isNotEmpty
@@ -378,6 +425,7 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
     return [
       if (c.selection.isNotEmpty && !c.readOnly) ...[
         BulkEditBar(
+          key: const ValueKey('participants-bulk-bar'),
           count: c.selection.length,
           onClear: c.clearSelection,
           onRemove: c.canEdit && !c.selectionHasFlights
@@ -415,6 +463,7 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
         )
       else if (narrow)
         Semantics(
+          key: const ValueKey('participants-cards'),
           container: true,
           label: 'Contest participants',
           child: Column(
@@ -433,6 +482,7 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
         )
       else
         ParticipantsTable(
+          key: const ValueKey('participants-table'),
           editing: editing,
           rows: visible,
           selectable: !c.readOnly,
