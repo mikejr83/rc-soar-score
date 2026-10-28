@@ -289,4 +289,27 @@ void main() {
       expect(response.statusCode, 409);
     });
   });
+
+  group('contest-scoped authorization', () {
+    late TwoAccountApi two;
+
+    setUp(() {
+      two = TwoAccountApi(owner: _owner);
+      two.storeContest(Id.parse(_contestId));
+    });
+
+    test('a foreign director cannot recalculate', () async {
+      await two.expectDenied(
+        two.outsiderApi,
+        'POST',
+        '/contests/$_contestId/results/recalculation',
+      );
+
+      final own = await two.ownerApi.send(
+        'POST',
+        '/contests/$_contestId/results/recalculation',
+      );
+      expect(own.statusCode, 409);
+    });
+  });
 }

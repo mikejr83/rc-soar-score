@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../../services/new_contest/draft_participant.dart';
-import '../../../services/new_contest/participant_option.dart';
+import '../../services/participants/participant_option.dart';
+import '../../services/participants/participant_row.dart';
 import 'participant_cells.dart';
 import 'participant_editing.dart';
 
@@ -30,7 +30,7 @@ class ParticipantsTable extends StatelessWidget {
   final ParticipantEditing editing;
 
   /// The rows to show (all, or only those needing fixes).
-  final List<DraftParticipant> rows;
+  final List<ParticipantRow> rows;
 
   final VoidCallback onToggleAll;
 
@@ -82,8 +82,12 @@ class ParticipantsTable extends StatelessWidget {
           ),
         ],
         ParticipantOption.models => [
-          _Column('Model *', 140, 0, (context, cells) => cells.model()),
-          _Column('Model ID *', 100, 0, (context, cells) => cells.modelId()),
+          _Column(
+            'Models',
+            150,
+            0,
+            (context, cells) => cells.modelsCell(context),
+          ),
         ],
       },
     _Column('Status', 110, 0, (context, cells) => cells.status(context)),
@@ -103,8 +107,8 @@ class ParticipantsTable extends StatelessWidget {
     final totalFlex = columns.fold<double>(0, (sum, c) => sum + c.flex);
     final all =
         rows.isNotEmpty &&
-        rows.every((p) => editing.selected.contains(p.profileId.value));
-    final some = rows.any((p) => editing.selected.contains(p.profileId.value));
+        rows.every((p) => editing.selected.contains(p.rowId));
+    final some = rows.any((p) => editing.selected.contains(p.rowId));
 
     return Semantics(
       container: true,
@@ -186,7 +190,7 @@ class ParticipantsTable extends StatelessWidget {
                     () {
                       final cells = ParticipantCells(editing, participant);
                       return line(
-                        key: ValueKey('row-${participant.profileId.value}'),
+                        key: ValueKey('row-${participant.rowId}'),
                         color: cells.selected
                             ? scheme.onSurface.withValues(alpha: 0.08)
                             : null,

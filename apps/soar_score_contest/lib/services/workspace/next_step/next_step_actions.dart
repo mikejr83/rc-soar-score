@@ -1,4 +1,5 @@
 import 'next_step_action.dart';
+import '../../matrix/matrix_rounds_plan.dart';
 import 'next_step_target.dart';
 
 /// The buttons the steps share.
@@ -16,6 +17,13 @@ abstract final class NextStepActions {
   static const goToMatrix = NextStepAction(
     label: 'Go to Matrix',
     target: NextStepTarget.matrix,
+  );
+
+  /// Opens the Matrix page at the form that redraws the unscored rounds.
+  static const redrawUnscored = NextStepAction(
+    label: 'Go to Matrix',
+    target: NextStepTarget.matrix,
+    matrixIntent: MatrixIntent.redraw,
   );
 
   static const unlock = NextStepAction(

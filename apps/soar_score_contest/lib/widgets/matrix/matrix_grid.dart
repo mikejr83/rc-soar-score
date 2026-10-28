@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/matrix/draw_form_check.dart';
 import '../../services/matrix/matrix_grid_model.dart';
 import '../../services/matrix/team_marker.dart';
@@ -30,12 +31,16 @@ class MatrixGrid extends StatefulWidget {
     required this.onSelect,
     required this.controller,
     this.dropAfterRounds = const [],
+    this.onAddRounds,
   });
 
   final MatrixGridModel model;
 
   /// The rounds after which the contest drops a round score.
   final List<int> dropAfterRounds;
+
+  /// Opens the add rounds form; `null` leaves the button off.
+  final VoidCallback? onAddRounds;
   final TeamMarkers markers;
   final Id? selected;
   final String query;
@@ -267,16 +272,14 @@ class _MatrixGridState extends State<MatrixGrid> {
                 padding: const EdgeInsets.all(12),
                 alignment: Alignment.topLeft,
                 color: scheme.surfaceContainer,
-                child: Tooltip(
-                  message: 'Add rounds · coming in a later release',
-                  child: OutlinedButton.icon(
-                    onPressed: null,
-                    icon: const Icon(Icons.add, size: 18),
-                    label: const Text(
-                      'Add rounds',
-                      maxLines: 1,
-                      softWrap: false,
-                    ),
+                child: OutlinedButton.icon(
+                  key: const ValueKey('grid-add-rounds'),
+                  onPressed: widget.onAddRounds,
+                  icon: const Icon(Icons.add, size: 18),
+                  label: Text(
+                    AppLocalizations.of(context).matrixAddRoundsButton,
+                    maxLines: 1,
+                    softWrap: false,
                   ),
                 ),
               ),

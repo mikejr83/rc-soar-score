@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/matrix/config_drift.dart';
 import '../../services/matrix/matrix_grid_model.dart';
 import '../../services/matrix/matrix_page_data.dart';
+import '../../services/matrix/matrix_rounds_plan.dart';
 import 'fairness_panel.dart';
 import 'find_filter_bar.dart';
 import '../page_states/page_banner.dart';
@@ -13,17 +15,30 @@ import 'matrix_grid.dart';
 import 'pilot_panel.dart';
 
 /// The page once a matrix exists (mode 2): the configuration-changed
-/// notice, the fairness summary, find and filter, the grid and the pilot
-/// panel. There is no primary action; the page is for reading.
+/// notice, the add rounds and redraw buttons, the fairness summary, find and
+/// filter, the grid and the pilot panel.
 class MatrixDrawnView extends StatefulWidget {
   const MatrixDrawnView({
     super.key,
     required this.data,
     required this.onOpenConfiguration,
+    required this.plan,
+    required this.onAddRounds,
+    required this.onRedraw,
+    this.actionBlock,
   });
 
   final MatrixPageData data;
   final VoidCallback onOpenConfiguration;
+  final MatrixRoundsPlan plan;
+
+  /// Open the add rounds and redraw forms.
+  final VoidCallback onAddRounds;
+  final VoidCallback onRedraw;
+
+  /// Why both actions are off for the whole contest (administration locked,
+  /// or the contest is not in a state that allows them), or `null`.
+  final String? actionBlock;
 
   @override
   State<MatrixDrawnView> createState() => _MatrixDrawnViewState();
@@ -79,6 +94,40 @@ class _MatrixDrawnViewState extends State<MatrixDrawnView> {
     return null;
   }
 
+  /// Why redrawing the unscored rounds is not possible, or `null`.
+  String? _redrawBlock(AppLocalizations l10n) {
+    final plan = widget.plan;
+    return switch (plan.blockKind) {
+      null => null,
+      RedrawBlockKind.allScored => l10n.matrixRedrawAllScored,
+      RedrawBlockKind.roundLocked => l10n.matrixRedrawRoundLocked(
+        plan.blockRound!,
+      ),
+      RedrawBlockKind.groupLocked => l10n.matrixRedrawGroupLocked(
+        plan.blockRound!,
+      ),
+    };
+  }
+
+  /// The preliminary-round status of a seeded contest, or `null`.
+  String? _seededStatus(AppLocalizations l10n) {
+    final options = widget.data.options;
+    final preliminary = options?.preliminaryRounds;
+    if (options?.drawMode != DrawMode.seededManOnMan || preliminary == null) {
+      return null;
+    }
+    var missing = 0;
+    for (final round in _model.rounds) {
+      if (round.ordinal <= preliminary) {
+        final progress = round.progress;
+        missing += progress.total - progress.scored;
+      }
+    }
+    return missing == 0
+        ? l10n.matrixSeededStatusDone(preliminary)
+        : l10n.matrixSeededStatusWaiting(preliminary, missing);
+  }
+
   @override
   Widget build(BuildContext context) {
     final data = widget.data;
@@ -87,6 +136,8 @@ class _MatrixDrawnViewState extends State<MatrixDrawnView> {
       revision: revision,
       options: data.options,
     );
+    final l10n = AppLocalizations.of(context);
+    final redrawBlock = widget.actionBlock ?? _redrawBlock(l10n);
     final query = _search.text;
     final matches = _model.pilots.where((p) => p.matches(query)).length;
     final teamSizes = <Id, int>{};
@@ -124,6 +175,7 @@ class _MatrixDrawnViewState extends State<MatrixDrawnView> {
           teamFilter: _teamFilter,
           onSelect: _select,
           controller: _grid,
+          onAddRounds: widget.actionBlock == null ? widget.onAddRounds : null,
         );
         return CallbackShortcuts(
           bindings: {
@@ -162,11 +214,20 @@ class _MatrixDrawnViewState extends State<MatrixDrawnView> {
                               kind: MatrixBannerKind.warning,
                               icon: Icons.info,
                               title: 'Configuration changed since this draw',
-                              body:
-                                  '${drift.join(' ')} The matrix is unchanged. '
-                                  'Applying these changes needs a redraw, which comes '
-                                  'in a later release.',
+                              body: redrawBlock == null
+                                  ? l10n.matrixDriftBanner(drift.join(' '))
+                                  : l10n.matrixDriftBannerBlocked(
+                                      drift.join(' '),
+                                      redrawBlock,
+                                    ),
                               actions: [
+                                if (redrawBlock == null)
+                                  PageBannerAction(
+                                    l10n.matrixRedrawButton,
+                                    widget.onRedraw,
+                                    emphasis: PageBannerEmphasis.filled,
+                                    key: const ValueKey('banner-redraw'),
+                                  ),
                                 PageBannerAction(
                                   'Open Configuration',
                                   widget.onOpenConfiguration,
@@ -174,6 +235,19 @@ class _MatrixDrawnViewState extends State<MatrixDrawnView> {
                                 ),
                               ],
                             ),
+                          _ActionBar(
+                            adding: widget.actionBlock == null
+                                ? widget.onAddRounds
+                                : null,
+                            redraw: redrawBlock == null
+                                ? widget.onRedraw
+                                : null,
+                            reason: redrawBlock,
+                            seeded:
+                                data.options?.drawMode ==
+                                DrawMode.seededManOnMan,
+                            status: _seededStatus(l10n),
+                          ),
                           FairnessPanel(
                             revision: revision,
                             hasLanes: _model.hasLanes,
@@ -238,6 +312,86 @@ class _MatrixDrawnViewState extends State<MatrixDrawnView> {
           ),
         );
       },
+    );
+  }
+}
+
+/// The Add rounds and Redraw unscored rounds buttons. A button that is not
+/// allowed is shown disabled, with the reason beside it.
+class _ActionBar extends StatelessWidget {
+  const _ActionBar({
+    required this.adding,
+    required this.redraw,
+    required this.reason,
+    required this.seeded,
+    required this.status,
+  });
+
+  final VoidCallback? adding;
+  final VoidCallback? redraw;
+  final String? reason;
+  final bool seeded;
+  final String? status;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final scheme = Theme.of(context).colorScheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: 8,
+      children: [
+        Wrap(
+          spacing: 12,
+          runSpacing: 8,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            OutlinedButton.icon(
+              key: const ValueKey('add-rounds'),
+              onPressed: adding,
+              icon: const Icon(Icons.add, size: 18),
+              label: Text(l10n.matrixAddRoundsButton),
+            ),
+            OutlinedButton.icon(
+              key: const ValueKey('redraw-rounds'),
+              onPressed: redraw,
+              icon: const Icon(Icons.shuffle, size: 18),
+              label: Text(l10n.matrixRedrawButton),
+            ),
+            if (reason != null)
+              Semantics(
+                liveRegion: true,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: 6,
+                  children: [
+                    Icon(
+                      Icons.info_outline,
+                      size: 18,
+                      color: scheme.onSurfaceVariant,
+                    ),
+                    Flexible(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 520),
+                        child: Text(
+                          reason!,
+                          key: const ValueKey('redraw-reason-text'),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ],
+        ),
+        if (seeded && status != null)
+          Text(
+            status!,
+            key: const ValueKey('seeded-status'),
+            style: Theme.of(context).textTheme.bodySmall
+                ?.copyWith(color: scheme.onSurfaceVariant),
+          ),
+      ],
     );
   }
 }

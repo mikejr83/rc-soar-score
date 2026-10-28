@@ -703,6 +703,318 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Cancel could not reach the server. The draw is still running. Try Cancel again.'**
   String get drawCancelFailed;
+
+  /// Button on the Matrix page that adds rounds after the last one.
+  ///
+  /// In en, this message translates to:
+  /// **'Add rounds'**
+  String get matrixAddRoundsButton;
+
+  /// Button on the Matrix page that draws the rounds without scores again.
+  ///
+  /// In en, this message translates to:
+  /// **'Redraw unscored rounds'**
+  String get matrixRedrawButton;
+
+  /// Why adding or redrawing rounds is off while the contest is locked.
+  ///
+  /// In en, this message translates to:
+  /// **'Administration is locked. Unlock the contest to add or redraw rounds.'**
+  String get matrixActionLocked;
+
+  /// Why adding or redrawing rounds is off before the first draw or after completion.
+  ///
+  /// In en, this message translates to:
+  /// **'Rounds can be added or redrawn from the first draw until the contest is complete.'**
+  String get matrixActionNotEditable;
+
+  /// Why Redraw unscored rounds is off when every round has a score.
+  ///
+  /// In en, this message translates to:
+  /// **'Every round has scores, so there is nothing to redraw.'**
+  String get matrixRedrawAllScored;
+
+  /// Why Redraw unscored rounds is off when a round to replace is locked.
+  ///
+  /// In en, this message translates to:
+  /// **'Round {round} is locked. Unlock it before redrawing.'**
+  String matrixRedrawRoundLocked(int round);
+
+  /// Why Redraw unscored rounds is off when a group to replace is locked.
+  ///
+  /// In en, this message translates to:
+  /// **'A group of round {round} is locked. Unlock it before redrawing.'**
+  String matrixRedrawGroupLocked(int round);
+
+  /// Heading of the form that adds rounds.
+  ///
+  /// In en, this message translates to:
+  /// **'Add rounds'**
+  String get matrixAddTitle;
+
+  /// Intro of the add rounds form.
+  ///
+  /// In en, this message translates to:
+  /// **'The new rounds continue after round {last}. Pilots who already met are kept apart as in the first draw, and the fairness summary counts every round. Retired pilots are not drawn.'**
+  String matrixAddIntro(int last);
+
+  /// Heading of the form that redraws the rounds without scores.
+  ///
+  /// In en, this message translates to:
+  /// **'Redraw unscored rounds'**
+  String get matrixRedrawTitle;
+
+  /// Intro of the redraw form.
+  ///
+  /// In en, this message translates to:
+  /// **'Replaces the unscored {span}. Earlier rounds stay as they are and count toward who has met whom. Retired pilots are not drawn. Each redraw uses a new random seed unless you set one under Advanced.'**
+  String matrixRedrawIntro(String span);
+
+  /// Label of the rounds field when adding rounds.
+  ///
+  /// In en, this message translates to:
+  /// **'Rounds to add'**
+  String get matrixRoundsToAdd;
+
+  /// Label of the rounds field when redrawing.
+  ///
+  /// In en, this message translates to:
+  /// **'Rounds to draw'**
+  String get matrixRoundsToDraw;
+
+  /// Note under the rounds field of the add rounds form.
+  ///
+  /// In en, this message translates to:
+  /// **'Draws {span}.'**
+  String matrixAddRoundsNote(String span);
+
+  /// Note under the rounds field of the redraw form.
+  ///
+  /// In en, this message translates to:
+  /// **'Draws {span} in place of the unscored rounds.'**
+  String matrixRedrawRoundsNote(String span);
+
+  /// Note under the rounds field of the redraw form when fewer rounds are drawn than replaced; removed names the rounds that go.
+  ///
+  /// In en, this message translates to:
+  /// **'Draws {span}. {removed} will be removed.'**
+  String matrixRedrawRoundsRemoved(String span, String removed);
+
+  /// Note under the groups field when it is filled from the current matrix.
+  ///
+  /// In en, this message translates to:
+  /// **'From round {round} of the current matrix.'**
+  String matrixGroupsFromRound(int round);
+
+  /// Label of the optional reason field of the add rounds and redraw forms.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason (optional)'**
+  String get matrixReasonLabel;
+
+  /// Hint of the reason field.
+  ///
+  /// In en, this message translates to:
+  /// **'Kept in the matrix history'**
+  String get matrixReasonHint;
+
+  /// Button that leaves the add rounds or redraw form.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to matrix'**
+  String get matrixBackToMatrix;
+
+  /// Submit button of the add rounds form.
+  ///
+  /// In en, this message translates to:
+  /// **'Add rounds'**
+  String get matrixAddAction;
+
+  /// Submit button of the add rounds form while it works.
+  ///
+  /// In en, this message translates to:
+  /// **'Adding rounds…'**
+  String get matrixAddActionBusy;
+
+  /// Submit button of the redraw form.
+  ///
+  /// In en, this message translates to:
+  /// **'Redraw rounds'**
+  String get matrixRedrawAction;
+
+  /// Submit button of the redraw form while it works.
+  ///
+  /// In en, this message translates to:
+  /// **'Redrawing rounds…'**
+  String get matrixRedrawActionBusy;
+
+  /// Title of the confirmation before rounds are added.
+  ///
+  /// In en, this message translates to:
+  /// **'Add rounds?'**
+  String get matrixAddConfirmTitle;
+
+  /// Title of the confirmation before rounds are redrawn.
+  ///
+  /// In en, this message translates to:
+  /// **'Redraw unscored rounds?'**
+  String get matrixRedrawConfirmTitle;
+
+  /// Confirmation line naming the rounds that are added.
+  ///
+  /// In en, this message translates to:
+  /// **'Adds {span}'**
+  String matrixConfirmAdds(String span);
+
+  /// Confirmation line naming the rounds that are replaced.
+  ///
+  /// In en, this message translates to:
+  /// **'Redraws {span}'**
+  String matrixConfirmReplaces(String span);
+
+  /// Confirmation line with the revision of the matrix that is changed.
+  ///
+  /// In en, this message translates to:
+  /// **'Current matrix revision {revision}'**
+  String matrixConfirmRevision(int revision);
+
+  /// Warning in the add rounds confirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Rounds can be added again later. The new rounds can be redrawn until they have scores.'**
+  String get matrixConfirmAddNote;
+
+  /// Warning in the redraw confirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'The replaced rounds can’t be restored. Rounds with scores are not touched.'**
+  String get matrixConfirmRedrawNote;
+
+  /// Snackbar after rounds were added.
+  ///
+  /// In en, this message translates to:
+  /// **'Rounds added.'**
+  String get matrixRoundsAdded;
+
+  /// Snackbar after rounds were redrawn.
+  ///
+  /// In en, this message translates to:
+  /// **'Rounds redrawn.'**
+  String get matrixRoundsRedrawn;
+
+  /// Body of the banner when the server could not be reached while adding or redrawing rounds.
+  ///
+  /// In en, this message translates to:
+  /// **'The matrix wasn’t changed and the page hasn’t changed. Your values are kept.'**
+  String get matrixRoundsNetworkFailure;
+
+  /// Title of the banner when the server refused to add or redraw rounds.
+  ///
+  /// In en, this message translates to:
+  /// **'The server did not change the matrix'**
+  String get matrixRoundsRejected;
+
+  /// Body of the banner when adding or redrawing rounds met a newer matrix.
+  ///
+  /// In en, this message translates to:
+  /// **'The matrix changed on the server. Reload to see the current state. Your values stay until you reload.'**
+  String get matrixRoundsConflict;
+
+  /// Seeded contests: status line when the preliminary scores are complete.
+  ///
+  /// In en, this message translates to:
+  /// **'Seeded Man on Man: {rounds} preliminary rounds, all scored. A seeded round also needs official scores and current standings; the server checks this when you draw.'**
+  String matrixSeededStatusDone(int rounds);
+
+  /// Seeded contests: status line when preliminary scores are missing.
+  ///
+  /// In en, this message translates to:
+  /// **'Seeded Man on Man: {rounds} preliminary rounds, {missing} flights still need a score. A seeded round can be drawn once they are official.'**
+  String matrixSeededStatusWaiting(int rounds, int missing);
+
+  /// Error when more than one seeded round is asked for.
+  ///
+  /// In en, this message translates to:
+  /// **'Seeded rounds are drawn one at a time.'**
+  String get matrixSeededOneRound;
+
+  /// Body of the banner that says the contest configuration changed since the draw.
+  ///
+  /// In en, this message translates to:
+  /// **'{differences} The matrix is unchanged. Redraw the unscored rounds to apply these changes; rounds with scores keep their draw.'**
+  String matrixDriftBanner(String differences);
+
+  /// Body of the configuration-changed banner when redrawing is not possible.
+  ///
+  /// In en, this message translates to:
+  /// **'{differences} The matrix is unchanged. {reason}'**
+  String matrixDriftBannerBlocked(String differences, String reason);
+
+  /// A round or a run of rounds, in the middle of a sentence.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{round {first}} other{rounds {first} to {last}}}'**
+  String matrixRoundSpan(int count, int first, int last);
+
+  /// Confirmation line with the number of pilots who are drawn.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} scoring pilots'**
+  String matrixConfirmPilots(int count);
+
+  /// Confirmation line with the groups of each drawn round and their sizes.
+  ///
+  /// In en, this message translates to:
+  /// **'{groups} groups per round ({sizes} pilots)'**
+  String matrixConfirmGroups(int groups, String sizes);
+
+  /// Confirmation line with the configuration revision; revision is a number or a dash.
+  ///
+  /// In en, this message translates to:
+  /// **'Configuration revision {revision}'**
+  String matrixConfirmConfiguration(String revision);
+
+  /// Button that closes the add rounds or redraw confirmation without changing anything.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get matrixConfirmCancel;
+
+  /// Email cell of a participant row: the profile has an email address.
+  ///
+  /// In en, this message translates to:
+  /// **'Has email'**
+  String get participantEmailHas;
+
+  /// Tooltip for the Has email status.
+  ///
+  /// In en, this message translates to:
+  /// **'Email on the profile'**
+  String get participantEmailHasExplanation;
+
+  /// Email cell of a participant row: the profile has no email address.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get participantEmailNone;
+
+  /// Tooltip for the None email status.
+  ///
+  /// In en, this message translates to:
+  /// **'No email on the profile'**
+  String get participantEmailNoneExplanation;
+
+  /// Email cell of a participant row: the person has not allowed their email to be shown.
+  ///
+  /// In en, this message translates to:
+  /// **'Private'**
+  String get participantEmailPrivate;
+
+  /// Tooltip for the Private email status.
+  ///
+  /// In en, this message translates to:
+  /// **'This person hasn’t allowed their email to be shown.'**
+  String get participantEmailPrivateExplanation;
 }
 
 class _AppLocalizationsDelegate

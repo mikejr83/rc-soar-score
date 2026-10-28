@@ -2,7 +2,7 @@ import 'package:intl/intl.dart';
 
 import 'contest_draft.dart';
 import 'draw_settings.dart';
-import 'participant_option.dart';
+import '../participants/participant_option.dart';
 import 'participant_rules.dart';
 import 'scoring_settings.dart';
 

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:soar_score_contest/services/new_contest/copy_mode.dart';
-import 'package:soar_score_contest/services/new_contest/participant_option.dart';
+import 'package:soar_score_contest/services/participants/participant_option.dart';
 import 'package:soar_score_contest/services/new_contest/wizard_discipline.dart';
 
 import '../support/new_contest_test_support.dart';

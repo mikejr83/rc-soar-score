@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../services/new_contest/contest_draft.dart';
 import '../../services/new_contest/draft_validation.dart';
-import '../../services/new_contest/participant_option.dart';
+import '../../services/participants/participant_option.dart';
 import 'participant_option_tile.dart';
 
 /// Step 3: the options that define contest-specific participant data. Each
@@ -141,10 +141,8 @@ class _ParticipantOptionsStepState extends State<ParticipantOptionsStep> {
         (Icons.diversity_3, 'Team', 'optional'),
       if (draft.has(ParticipantOption.pilotNumbers))
         (Icons.pin_outlined, 'Pilot no.', 'provisional'),
-      if (draft.has(ParticipantOption.models)) ...[
-        (Icons.flight, 'Model name', 'required'),
-        (Icons.tag, 'Model ID', 'required'),
-      ],
+      if (draft.has(ParticipantOption.models))
+        (Icons.flight, 'Models', 'not recorded yet'),
     ];
 
     return Column(

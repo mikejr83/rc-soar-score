@@ -330,4 +330,33 @@ void main() {
       expect(api.repository.participations.participations, hasLength(1));
     });
   });
+
+  group('contest-scoped authorization', () {
+    late TwoAccountApi two;
+
+    setUp(() => two = TwoAccountApi(owner: _owner));
+
+    test('a foreign director cannot add, edit or remove participants', () async {
+      two.storeContest(Id.parse(_contestId));
+
+      await two.expectDenied(
+        two.outsiderApi,
+        'POST',
+        '/contests/$_contestId/participations',
+        body: {
+          'id': _participationId,
+          'participant_profile_id': _profileId,
+        },
+      );
+      await two.expectDenied(
+        two.outsiderApi,
+        'PUT',
+        path(),
+        body: {'base_revision': 0},
+      );
+      await two.expectDenied(two.outsiderApi, 'DELETE', path());
+
+      expect(two.ownerApi.repository.participations.participations, isEmpty);
+    });
+  });
 }

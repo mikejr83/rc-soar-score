@@ -23,16 +23,13 @@ import '../../widgets/workspace/states/workspace_not_found_view.dart';
 /// a strip saying what reports are built from, then a card for each report
 /// that can be produced, grouped as results and documents to print.
 class ContestReportsPage extends StatefulWidget {
-  const ContestReportsPage({
-    super.key,
-    required this.contestId,
-    this.launcher = const PlatformReportLauncher(),
-  });
+  const ContestReportsPage({super.key, required this.contestId, this.launcher});
 
   final String contestId;
 
-  /// Opens a report in its own tab (web) or in place (native).
-  final ReportLauncher launcher;
+  /// Opens a report in its own tab (web) or in place (native);
+  /// [ReportLaunchers.current] unless a test passes one.
+  final ReportLauncher? launcher;
 
   @override
   State<ContestReportsPage> createState() => _ContestReportsPageState();
@@ -81,7 +78,10 @@ class _ContestReportsPageState extends State<ContestReportsPage> {
       contestReportPath(widget.contestId, kind);
 
   Future<void> _open(ReportKind kind) async {
-    final outcome = await widget.launcher.open(context, _viewerPath(kind));
+    final outcome = await (widget.launcher ?? ReportLaunchers.current).open(
+      context,
+      _viewerPath(kind),
+    );
     if (!mounted) {
       return;
     }
@@ -107,7 +107,10 @@ class _ContestReportsPageState extends State<ContestReportsPage> {
   }
 
   void _openHere(ReportKind kind) =>
-      widget.launcher.openHere(context, _viewerPath(kind));
+      (widget.launcher ?? ReportLaunchers.current).openHere(
+        context,
+        _viewerPath(kind),
+      );
 
   void _retry() {
     final loading = _load();

@@ -221,8 +221,8 @@ void main() {
     expect(mutations.last.actorId, owner);
   });
 
-  test('without its marker the rows are out of the lists but the contest '
-      'still opens', () async {
+  test('without its marker the rows are out of the lists and the contest '
+      'is not reachable', () async {
     await server.database.customStatement(
       "DELETE FROM audit_events WHERE entity_type = 'InspectionOwner'",
     );
@@ -231,6 +231,9 @@ void main() {
     final profiles = await client.participants();
 
     expect(profiles.where((p) => p.ownerAccountId == owner), isEmpty);
-    expect((await client.contest(inspected.id)).id, inspected.id);
+    await expectLater(
+      client.contest(inspected.id),
+      throwsA(isA<ApiHttpError>().having((e) => e.statusCode, 'status', 403)),
+    );
   });
 }

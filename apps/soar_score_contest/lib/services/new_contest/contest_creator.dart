@@ -4,10 +4,10 @@ import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import 'contest_draft.dart';
-import 'draft_participant.dart';
 import 'draft_validation.dart';
 import 'draw_settings.dart';
-import 'participant_option.dart';
+import '../participants/participant_option.dart';
+import '../participants/participant_row.dart';
 import 'participant_rules.dart';
 import 'time_zones.dart';
 
@@ -42,8 +42,8 @@ class CreationIds {
 /// score is created. Each request uses ids from [CreationIds], and steps
 /// that already happened are skipped, so retrying after a failure is safe.
 ///
-/// Model names and IDs are not sent: participations have no place for them
-/// yet. Remote profiles can't be added until remote search exists.
+/// Models are not sent: participations have no place for them yet (#594).
+/// Remote profiles can't be added until remote search exists.
 class ContestCreator {
   ContestCreator(this.client);
 

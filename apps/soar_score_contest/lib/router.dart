@@ -22,6 +22,7 @@ import 'pages/landing_editor_page.dart';
 import 'pages/landings_page.dart';
 import 'pages/landing_page.dart';
 import 'pages/contest/matrix_page.dart';
+import 'services/matrix/matrix_rounds_plan.dart';
 import 'pages/new_contest_wizard_page.dart';
 import 'pages/participant_editor_page.dart';
 import 'pages/participants_page.dart';
@@ -122,7 +123,9 @@ String contestReportPath(String contestId, ReportKind kind) =>
 String contestSyncPath(String contestId) => '$contestsPath/$contestId/sync';
 
 /// The matrix page of the contest with [contestId].
-String contestMatrixPath(String contestId) => '$contestsPath/$contestId/matrix';
+String contestMatrixPath(String contestId, {MatrixIntent? intent}) =>
+    '$contestsPath/$contestId/matrix'
+    '${intent == null ? '' : '?action=${intent.query}'}';
 
 /// Builds the app router. [appMode], [auth] and [identityCheck] are test-only
 /// seams; the app leaves them null.
@@ -265,8 +268,12 @@ GoRouter buildAppRouter({
           _shellRoute(
             path: '$contestsPath/:contestId/matrix',
             name: 'contestMatrix',
-            builder: (context, state) =>
-                MatrixPage(contestId: state.pathParameters['contestId']!),
+            builder: (context, state) => MatrixPage(
+              contestId: state.pathParameters['contestId']!,
+              initialIntent: MatrixIntent.fromQuery(
+                state.uri.queryParameters['action'],
+              ),
+            ),
           ),
           _shellRoute(
             path: '$contestsPath/:contestId/workspace',

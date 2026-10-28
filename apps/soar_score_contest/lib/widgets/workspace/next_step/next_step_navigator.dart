@@ -9,7 +9,7 @@ import '../../not_wired_up_dialog.dart';
 /// Where each next-step button goes.
 ///
 /// One entry per target, so the ticket that builds a destination changes one
-/// line: #121 participants, #125 publish and #264 the matrix round. The
+/// line: #121 participants and #125 publish. The
 /// in-place targets ([NextStepTarget.openScoring],
 /// [NextStepTarget.unlock], [NextStepTarget.completeDialog] and
 /// [NextStepTarget.dismissSuggestion]) are handled by the card.
@@ -33,8 +33,7 @@ abstract final class NextStepNavigator {
       case NextStepTarget.configuration:
         context.go(contestConfigurationPath(contestId));
       case NextStepTarget.matrix:
-        // The round to draw is ignored until #264.
-        context.go(contestMatrixPath(contestId));
+        context.go(contestMatrixPath(contestId, intent: action.matrixIntent));
       case NextStepTarget.participants:
         // The system Participants manager, until #121 selects per contest.
         context.go(participantsPath);

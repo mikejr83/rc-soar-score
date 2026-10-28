@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 
-/// The text the first-draw form holds, shared by the form and the page that
+/// The text the draw form holds (the first draw, add rounds and redraw),
+/// shared by the form and the page that
 /// sends the draw. Values are kept as typed so a failed draw loses nothing.
 class DrawFormController extends ChangeNotifier {
   DrawFormController({
@@ -12,8 +13,16 @@ class DrawFormController extends ChangeNotifier {
        groups = TextEditingController(text: configuredGroups?.toString()),
        seed = TextEditingController(),
        attempts = TextEditingController(text: '$defaultAttempts'),
-       seedCount = TextEditingController(text: '$defaultSeedCount') {
-    for (final controller in [rounds, groups, seed, attempts, seedCount]) {
+       seedCount = TextEditingController(text: '$defaultSeedCount'),
+       reason = TextEditingController() {
+    for (final controller in [
+      rounds,
+      groups,
+      seed,
+      attempts,
+      seedCount,
+      reason,
+    ]) {
       controller.addListener(notifyListeners);
     }
   }
@@ -35,6 +44,9 @@ class DrawFormController extends ChangeNotifier {
   final TextEditingController seed;
   final TextEditingController attempts;
   final TextEditingController seedCount;
+
+  /// The optional reason of an add rounds or redraw request.
+  final TextEditingController reason;
 
   /// Set once the director has asked to draw, so empty fields are errors.
   bool get submitted => _submitted;
@@ -62,7 +74,14 @@ class DrawFormController extends ChangeNotifier {
 
   @override
   void dispose() {
-    for (final controller in [rounds, groups, seed, attempts, seedCount]) {
+    for (final controller in [
+      rounds,
+      groups,
+      seed,
+      attempts,
+      seedCount,
+      reason,
+    ]) {
       controller.dispose();
     }
     super.dispose();

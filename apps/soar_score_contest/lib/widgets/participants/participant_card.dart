@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../../services/new_contest/draft_participant.dart';
-import '../../../services/new_contest/participant_option.dart';
-import '../../../services/new_contest/participant_rules.dart';
+import '../../services/participants/participant_option.dart';
+import '../../services/participants/participant_row.dart';
 import 'participant_cells.dart';
 import 'participant_editing.dart';
 
@@ -16,7 +15,7 @@ class ParticipantCard extends StatelessWidget {
   });
 
   final ParticipantEditing editing;
-  final DraftParticipant participant;
+  final ParticipantRow participant;
 
   static const double _minFieldWidth = 170;
 
@@ -58,16 +57,7 @@ class ParticipantCard extends StatelessWidget {
             labelled('Pilot no.', cells.number(context)),
           ],
           ParticipantOption.models => [
-            labelled(
-              'Model *',
-              cells.model(),
-              error: cells.issues.contains(ParticipantIssue.model),
-            ),
-            labelled(
-              'Model ID *',
-              cells.modelId(),
-              error: cells.issues.contains(ParticipantIssue.model),
-            ),
+            labelled('Models', cells.modelsCell(context)),
           ],
         },
     ];
@@ -76,7 +66,7 @@ class ParticipantCard extends StatelessWidget {
       container: true,
       label: participant.name,
       child: Container(
-        key: ValueKey('card-${participant.profileId.value}'),
+        key: ValueKey('card-${participant.rowId}'),
         padding: const EdgeInsets.fromLTRB(4, 8, 16, 16),
         decoration: BoxDecoration(
           color: cells.selected

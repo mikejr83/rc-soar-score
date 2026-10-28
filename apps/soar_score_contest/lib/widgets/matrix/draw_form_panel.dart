@@ -5,7 +5,9 @@ import 'package:soar_score_core/soar_score_core.dart';
 import '../../services/configuration/draw_readiness.dart';
 import '../../services/matrix/draw_form_check.dart';
 import '../../services/matrix/draw_form_controller.dart';
+import '../../l10n/app_localizations.dart';
 import '../../services/matrix/matrix_page_data.dart';
+import '../../services/matrix/matrix_rounds_plan.dart';
 import 'draw_action_row.dart';
 import 'draw_advanced_section.dart';
 import 'draw_config_rows.dart';
@@ -13,6 +15,7 @@ import 'draw_number_field.dart';
 import 'group_size_preview.dart';
 import '../page_states/page_banner.dart';
 import 'matrix_banner.dart';
+import 'round_span.dart';
 
 /// The empty state and the first-draw form (mode 1 of the matrix page).
 ///
@@ -36,6 +39,9 @@ class DrawFormPanel extends StatelessWidget {
     this.rejection,
     this.networkFailure = false,
     this.conflict = false,
+    this.intent,
+    this.plan,
+    this.onBack,
   });
 
   final MatrixPageData data;
@@ -59,6 +65,14 @@ class DrawFormPanel extends StatelessWidget {
   final bool networkFailure;
   final bool conflict;
 
+  /// Set when the form adds rounds to, or redraws rounds of, a drawn matrix
+  /// ([plan] describes it); `null` for the first draw.
+  final MatrixIntent? intent;
+  final MatrixRoundsPlan? plan;
+
+  /// Leaves the form for the matrix (add rounds and redraw only).
+  final VoidCallback? onBack;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -74,14 +88,30 @@ class DrawFormPanel extends StatelessWidget {
       minimumGroups: minimum,
       submitted: controller.submitted,
     );
+    final l10n = AppLocalizations.of(context);
+    final plan = this.plan;
+    final adding = intent == MatrixIntent.addRounds;
+    final rounding = plan != null;
+    final firstRound = plan == null ? 1 : plan.firstRound(intent!);
+    final count = check.rounds ?? 0;
+    final preliminary = seeded ? options?.preliminaryRounds : null;
+    // Seeded rounds come from the standings, so they are drawn one at a time.
+    final roundsError =
+        check.roundsError ??
+        (rounding &&
+                preliminary != null &&
+                firstRound > preliminary &&
+                count > 1
+            ? l10n.matrixSeededOneRound
+            : null);
     final groupsError = rejection != null
         ? 'Server: $rejection'
         : check.groupsError;
     final problems = [
-      if (check.roundsError != null)
+      if (roundsError != null)
         (
           '${seeded ? 'Preliminary seeded rounds' : 'Number of rounds'}: '
-              '${check.roundsError}',
+              '$roundsError',
           controller.rounds,
         ),
       if (groupsError != null)
@@ -102,7 +132,7 @@ class DrawFormPanel extends StatelessWidget {
         'Differs from the suggested value ($configured). Changing it here '
         'doesn’t change the contest configuration.';
 
-    final roundsNote =
+    final firstRoundsNote =
         DrawFormController.isEdited(controller.rounds.text, configuredRounds)
         ? edited(configuredRounds)
         : note(
@@ -112,26 +142,60 @@ class DrawFormPanel extends StatelessWidget {
                 ? '$configuredRounds preliminary seeded rounds'
                 : '$configuredRounds rounds',
           );
-    final groupsNote = controller.groupsEdited
+    final firstGroupsNote = controller.groupsEdited
         ? edited(controller.configuredGroups)
         : note(
             controller.configuredGroups,
             controller.groupsSource,
             '${controller.configuredGroups} groups per round',
           );
+    final lastNew = firstRound + count - 1;
+    final roundsNote = plan == null
+        ? firstRoundsNote
+        : count < 1
+        ? ''
+        : adding
+        ? l10n.matrixAddRoundsNote(roundSpan(l10n, firstRound, lastNew))
+        : count < plan.unscoredRounds
+        ? l10n.matrixRedrawRoundsRemoved(
+            roundSpan(l10n, firstRound, lastNew),
+            roundSpan(l10n, lastNew + 1, plan.lastRound),
+          )
+        : l10n.matrixRedrawRoundsNote(roundSpan(l10n, firstRound, lastNew));
+    final groupsNote = plan == null
+        ? firstGroupsNote
+        : l10n.matrixGroupsFromRound(
+            adding ? plan.lastRound : plan.firstUnscored,
+          );
+    final roundsLabel = rounding
+        ? (adding ? l10n.matrixRoundsToAdd : l10n.matrixRoundsToDraw)
+        : seeded
+        ? 'Preliminary seeded rounds'
+        : 'Number of rounds';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       spacing: 20,
       children: [
+        if (onBack != null)
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              key: const ValueKey('back-to-matrix'),
+              onPressed: busy ? null : onBack,
+              icon: const Icon(Icons.arrow_back, size: 18),
+              label: Text(l10n.matrixBackToMatrix),
+            ),
+          ),
         if (networkFailure)
           MatrixBanner(
             kind: MatrixBannerKind.error,
             icon: Icons.cloud_off,
             title: 'Couldn’t reach the server',
-            body:
-                'The matrix wasn’t drawn and the page hasn’t changed. Your '
-                'values are kept.',
+            body: rounding
+                ? l10n.matrixRoundsNetworkFailure
+                : 'The matrix wasn’t drawn and the page hasn’t changed. Your '
+                      'values are kept.',
             actions: [
               PageBannerAction(
                 'Try again',
@@ -146,10 +210,11 @@ class DrawFormPanel extends StatelessWidget {
             kind: MatrixBannerKind.warning,
             icon: Icons.sync_problem,
             title: 'This contest changed on the server',
-            body:
-                'A matrix has already been drawn for this contest, or the '
-                'contest can no longer be drawn. Reload to see the current '
-                'state. Your values stay until you reload.',
+            body: rounding
+                ? l10n.matrixRoundsConflict
+                : 'A matrix has already been drawn for this contest, or the '
+                      'contest can no longer be drawn. Reload to see the '
+                      'current state. Your values stay until you reload.',
             actions: [
               PageBannerAction(
                 'Reload',
@@ -179,13 +244,28 @@ class DrawFormPanel extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'No matrix drawn yet',
+                      plan == null
+                          ? 'No matrix drawn yet'
+                          : adding
+                          ? l10n.matrixAddTitle
+                          : l10n.matrixRedrawTitle,
                       style: theme.textTheme.titleMedium,
                     ),
                     Text(
-                      'No flight matrix has been drawn for this contest. For '
-                      'now, drawing is a one-time action. Redrawing comes in '
-                      'a later release.',
+                      plan == null
+                          ? 'No flight matrix has been drawn for this contest. '
+                                'Draw the first matrix here; afterwards you can '
+                                'add rounds and redraw the rounds without '
+                                'scores.'
+                          : adding
+                          ? l10n.matrixAddIntro(plan.lastRound)
+                          : l10n.matrixRedrawIntro(
+                              roundSpan(
+                                l10n,
+                                plan.firstUnscored,
+                                plan.lastRound,
+                              ),
+                            ),
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: scheme.onSurfaceVariant,
                       ),
@@ -203,17 +283,20 @@ class DrawFormPanel extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               spacing: 20,
               children: [
-                Text(
-                  'Draw the first matrix',
-                  style: theme.textTheme.titleMedium,
-                ),
+                if (plan == null)
+                  Text(
+                    'Draw the first matrix',
+                    style: theme.textTheme.titleMedium,
+                  ),
                 if (problems.isNotEmpty &&
                     (rejection != null || controller.submitted))
                   MatrixBanner(
                     kind: MatrixBannerKind.error,
                     icon: Icons.error_outline,
                     title: rejection != null
-                        ? 'The server rejected the draw'
+                        ? (rounding
+                              ? l10n.matrixRoundsRejected
+                              : 'The server rejected the draw')
                         : 'Fix ${problems.length} field'
                               '${problems.length == 1 ? '' : 's'} before drawing',
                     body:
@@ -238,13 +321,11 @@ class DrawFormPanel extends StatelessWidget {
                                 width: 330,
                                 child: DrawNumberField(
                                   fieldKey: const ValueKey('draw-rounds'),
-                                  label: seeded
-                                      ? 'Preliminary seeded rounds'
-                                      : 'Number of rounds',
+                                  label: roundsLabel,
                                   controller: controller.rounds,
                                   note: roundsNote,
-                                  error: check.roundsError,
-                                  edited: controller.roundsEdited,
+                                  error: roundsError,
+                                  edited: !rounding && controller.roundsEdited,
                                   resetLabel: 'Reset to $configuredRounds',
                                   onReset: () => controller.rounds.text =
                                       '$configuredRounds',
@@ -260,7 +341,7 @@ class DrawFormPanel extends StatelessWidget {
                                   note: groupsNote,
                                   error: groupsError,
                                   warning: check.groupsWarning,
-                                  edited: controller.groupsEdited,
+                                  edited: !rounding && controller.groupsEdited,
                                   resetLabel:
                                       'Reset to ${controller.configuredGroups}',
                                   onReset: () => controller.groups.text =
@@ -284,6 +365,16 @@ class DrawFormPanel extends StatelessWidget {
                             data: data,
                             onOpenConfiguration: onOpenConfiguration,
                           ),
+                          if (rounding)
+                            TextField(
+                              key: const ValueKey('draw-reason'),
+                              controller: controller.reason,
+                              decoration: InputDecoration(
+                                labelText: l10n.matrixReasonLabel,
+                                hintText: l10n.matrixReasonHint,
+                                border: const OutlineInputBorder(),
+                              ),
+                            ),
                           DrawAdvancedSection(controller: controller),
                         ],
                       ),
@@ -292,6 +383,7 @@ class DrawFormPanel extends StatelessWidget {
                 ),
                 Divider(color: scheme.outlineVariant),
                 DrawActionRow(
+                  intent: intent,
                   busy: busy,
                   blocker: blocker,
                   reloadReason: conflict

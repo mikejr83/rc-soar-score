@@ -1,79 +1,87 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:integration_test/integration_test.dart';
 
-import 'support/interact.dart';
-import 'support/launch_app.dart';
-import 'support/participant_extras.dart';
-import 'support/participant_form.dart';
+import '../support/interact.dart';
+import '../support/launch_app.dart';
+import '../support/participant_extras.dart';
+import '../support/participant_form.dart';
+import 'journey.dart';
 
-/// A new person: first name, last name, email, club, city and state.
-typedef _Person = (String, String, String, String, String, String);
+/// Phase 2: the participants manager and editor, ending with a roster of new
+/// people the wizard uses later.
+Future<void> runParticipantsPhase(Journey journey, JourneyContext data) async {
+  final tester = journey.tester;
+  final zoeEmail = data.roster.first.email;
 
-const List<_Person> _people = [
-  (
-    'Zoe',
-    'Whitfield',
-    'zoe.whitfield@e2e.example',
-    'E2E Soaring',
-    'Golden',
-    'CO',
-  ),
-  ('Milo', 'Okafor', 'milo.okafor@e2e.example', 'E2E Soaring', 'Boulder', 'CO'),
-];
-
-/// Zoe is added first and is the person the later steps look up and repeat.
-const String _zoeEmail = 'zoe.whitfield@e2e.example';
-
-void main() {
-  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
-
-  // One journey for the whole participants manager and editor. The Windows
-  // app allows a single instance, so each test file costs a full launch; the
-  // steps below share one launch and use different people so they do not
-  // depend on each other. A failure points at the step function in the trace.
-  testWidgets('the participants manager and editor', (tester) async {
-    await openMainPage(tester);
+  Future<void> inManager(Future<void> Function() body) async {
+    await goToMainPage(tester);
     await openParticipantsManager(tester);
+    await body();
+  }
 
-    await _addNewParticipants(tester);
-    await _searchByEmail(tester);
-    await _editExistingParticipant(tester);
-    await _repeatedEmailCannotBeCreated(tester);
-    await _leavingWithChangesAsksFirst(tester);
-    await _deleteAsksFirst(tester);
-  });
+  await journey.step(
+    'New participants are added and show their details',
+    () => inManager(() => _addNewParticipants(tester, data.roster)),
+  );
+  await journey.step(
+    'Search finds a person by email',
+    () => inManager(() => _searchByEmail(tester, zoeEmail)),
+  );
+  await journey.step(
+    'An existing participant is edited',
+    () => inManager(() => _editExistingParticipant(tester)),
+  );
+  await journey.step(
+    'A repeated email cannot be created',
+    () => inManager(() => _repeatedEmailCannotBeCreated(tester, zoeEmail)),
+  );
+  await journey.step(
+    'Leaving the editor with changes asks first',
+    () => inManager(() => _leavingWithChangesAsksFirst(tester)),
+  );
+  await journey.step(
+    'Delete asks first',
+    () => inManager(() => _deleteAsksFirst(tester)),
+  );
 }
 
 /// New participants are added in the manager and show their details.
-Future<void> _addNewParticipants(WidgetTester tester) async {
-  for (final (first, last, email, club, city, state) in _people) {
+Future<void> _addNewParticipants(
+  WidgetTester tester,
+  List<Person> people,
+) async {
+  const club = 'E2E Soaring';
+  for (final person in people) {
     await tapVisible(tester, find.byKey(const ValueKey('add-participant')));
     await pumpUntilFound(tester, find.byKey(const ValueKey('first-name')));
 
-    await enterIn(tester, find.byKey(const ValueKey('first-name')), first);
-    await enterIn(tester, find.byKey(const ValueKey('last-name')), last);
-    await enterIn(tester, find.byKey(const ValueKey('email')), email);
+    await enterIn(
+      tester,
+      find.byKey(const ValueKey('first-name')),
+      person.first,
+    );
+    await enterIn(tester, find.byKey(const ValueKey('last-name')), person.last);
+    await enterIn(tester, find.byKey(const ValueKey('email')), person.email);
     await enterIn(tester, editorField('Club'), club);
-    await enterIn(tester, editorField('City'), city);
-    await enterIn(tester, editorField('State/province'), state);
+    await enterIn(tester, editorField('City'), 'Golden');
+    await enterIn(tester, editorField('State/province'), 'CO');
     await saveParticipant(tester);
   }
 
-  for (final (first, last, email, club, _, _) in _people) {
-    await searchParticipants(tester, last);
-    final row = participantRow('$first $last');
+  for (final person in people) {
+    await searchParticipants(tester, person.last);
+    final row = participantRow('${person.first} ${person.last}');
     await pumpUntilFound(tester, row);
     await tapVisible(tester, row);
-    await pumpUntilFound(tester, find.text(email));
+    await pumpUntilFound(tester, find.text(person.email));
     expect(find.text(club), findsWidgets);
   }
 }
 
 /// The search finds a person by email, by part of it, and finds nobody for
 /// an unknown one.
-Future<void> _searchByEmail(WidgetTester tester) async {
-  await searchParticipants(tester, _zoeEmail);
+Future<void> _searchByEmail(WidgetTester tester, String zoeEmail) async {
+  await searchParticipants(tester, zoeEmail);
   await pumpUntilFound(tester, participantRow('Zoe Whitfield'));
 
   await searchParticipants(tester, 'zoe.whitfield');
@@ -123,13 +131,11 @@ Future<void> _editExistingParticipant(WidgetTester tester) async {
 
 /// A second person with an existing email stops at the decision: use the
 /// existing person, or change the email. No separate profile can be made.
-Future<void> _repeatedEmailCannotBeCreated(WidgetTester tester) async {
-  await fillNewParticipant(
-    tester,
-    first: 'E2E',
-    last: 'Twin',
-    email: _zoeEmail,
-  );
+Future<void> _repeatedEmailCannotBeCreated(
+  WidgetTester tester,
+  String zoeEmail,
+) async {
+  await fillNewParticipant(tester, first: 'E2E', last: 'Twin', email: zoeEmail);
   await tapVisible(tester, find.byKey(const ValueKey('save-participant')));
   await pumpUntilFound(tester, find.byKey(const ValueKey('duplicate-notice')));
   expect(find.text('Someone with this email already exists'), findsOneWidget);
@@ -152,7 +158,7 @@ Future<void> _repeatedEmailCannotBeCreated(WidgetTester tester) async {
         .widget<TextField>(find.byKey(const ValueKey('email')))
         .controller!
         .text,
-    _zoeEmail,
+    zoeEmail,
   );
   // Nothing changed, so there is no bar to cancel from; leave by the rail.
   await tapRail(tester, 'Participants');
@@ -161,12 +167,7 @@ Future<void> _repeatedEmailCannotBeCreated(WidgetTester tester) async {
   await pumpUntilFound(tester, find.text('No participants match.'));
 
   // Change the email goes back to the form; a different email saves.
-  await fillNewParticipant(
-    tester,
-    first: 'E2E',
-    last: 'Twin',
-    email: _zoeEmail,
-  );
+  await fillNewParticipant(tester, first: 'E2E', last: 'Twin', email: zoeEmail);
   await tapVisible(tester, find.byKey(const ValueKey('save-participant')));
   await pumpUntilFound(tester, find.byKey(const ValueKey('duplicate-notice')));
   await tapVisible(tester, find.byKey(const ValueKey('change-email')));

@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:soar_score_contest/services/reports/pilot_cards/pilot_invitations.dart';
@@ -9,7 +8,6 @@ import 'package:soar_score_contest/services/reports/viewer/report_printers.dart'
 import 'support/interact.dart';
 import 'support/launch_app.dart';
 import 'support/open_demo_contest.dart';
-import 'support/pump_until_gone.dart';
 
 /// A ready demo contest: a drawn matrix, nothing scored yet.
 const _contest = 'Front Range F5J Open';
@@ -20,7 +18,7 @@ void main() {
   // The viewer opens in place on native and in a new tab on the web, which a
   // journey cannot drive, so this journey is native-only (like
   // `report_printing_test.dart`).
-  testWidgets('Pilot Scoring Cards: filter, QR reminder, print (native)', (
+  testWidgets('Pilot Scoring Cards: QR reminder and print (native)', (
     tester,
   ) async {
     final printed = <Uint8List>[];
@@ -48,19 +46,8 @@ void main() {
     await tapVisible(tester, find.byKey(const ValueKey('report-open-cards')));
     await pumpUntilFound(tester, find.byKey(const ValueKey('viewer-title')));
 
-    // A card per pilot, landscape only, with the live count in the panel.
+    // The cards themselves are checked in the lifecycle journey (phase 4).
     await pumpUntilFound(tester, find.byKey(const ValueKey('cards-summary')));
-    expect(find.text('Orientation'), findsNothing);
-    final summary = tester.widget<Text>(
-      find.byKey(const ValueKey('cards-summary')),
-    );
-    expect(summary.data, matches(r'^\d+ cards? · \d+ pages?$'));
-
-    // Choosing no pilots leaves nothing to print and says so.
-    await tapVisible(tester, find.byKey(const ValueKey('cards-select-none')));
-    await pumpUntilFound(tester, find.text('No pilots selected'));
-    await tapVisible(tester, find.byKey(const ValueKey('cards-select-all')));
-    await pumpUntilGone(tester, find.text('No pilots selected'));
 
     // No invitation exists yet, so Print reminds about the missing QR codes.
     // Printing without them stays possible.

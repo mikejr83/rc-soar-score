@@ -43,6 +43,7 @@ Future<void> main(List<String> args) async {
 
   final handler = const Pipeline()
       .addMiddleware(_cors())
+      .addMiddleware(_journeyLog())
       .addMiddleware(_failNextWrite())
       .addHandler(
         buildApiHandler(
@@ -93,6 +94,18 @@ Middleware _cors() =>
       }
       final response = await inner(request);
       return response.change(headers: _corsHeaders);
+    };
+
+/// `POST /__e2e/log` prints its body as a line starting `[E2E]`, so a journey
+/// that runs in the browser (and prints nothing live) can show its progress
+/// in this server's output; `scripts/e2e.sh` echoes those lines.
+Middleware _journeyLog() =>
+    (inner) => (request) async {
+      if (request.method == 'POST' && request.url.path == '__e2e/log') {
+        stdout.writeln('[E2E] ${(await request.readAsString()).trim()}');
+        return Response.ok('logged');
+      }
+      return inner(request);
     };
 
 /// See `POST /__e2e/fail-next-write` in the library comment.

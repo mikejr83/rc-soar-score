@@ -2,8 +2,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_contest/services/new_contest/contest_draft.dart';
 import 'package:soar_score_contest/services/new_contest/draft_participant.dart';
 import 'package:soar_score_contest/services/new_contest/draft_validation.dart';
-import 'package:soar_score_contest/services/new_contest/participant_option.dart';
+import 'package:soar_score_contest/services/participants/participant_option.dart';
 import 'package:soar_score_contest/services/new_contest/participant_rules.dart';
+import 'package:soar_score_contest/services/participants/participant_row.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 DraftParticipant _p(
@@ -11,8 +12,6 @@ DraftParticipant _p(
   String classification = '',
   String team = '',
   bool pilot = true,
-  String model = '',
-  String modelId = '',
 }) {
   final base = DraftParticipant(
     profileId: Id.parse('019c0000-0000-7000-8000-0000000000$n'),
@@ -22,8 +21,6 @@ DraftParticipant _p(
     role: pilot ? null : SystemRoles.helper,
     classification: classification,
     team: team,
-    model: model,
-    modelId: modelId,
   );
 }
 
@@ -45,13 +42,9 @@ void main() {
     expect(draft.copyWith(options: {ParticipantOption.roles}).scoringCount, 1);
   });
 
-  test('scoring pilots need a class and model details when those are on', () {
+  test('scoring pilots need a class when classes are on', () {
     final draft = _draft(
-      [
-        _p(11, classification: 'Open', model: 'Supra', modelId: 'A1'),
-        _p(12, model: 'Supra'),
-        _p(13, pilot: false),
-      ],
+      [_p(11, classification: 'Open'), _p(12), _p(13, pilot: false)],
       options: {
         ParticipantOption.classes,
         ParticipantOption.models,
@@ -59,9 +52,9 @@ void main() {
       },
     );
     expect(draft.issuesOf(draft.participants[0]), isEmpty);
+    // Models can't be recorded yet, so they never hold a pilot back.
     expect(draft.issuesOf(draft.participants[1]), [
       ParticipantIssue.classification,
-      ParticipantIssue.model,
     ]);
     // Non-flying roles are not scored, so they need neither.
     expect(draft.issuesOf(draft.participants[2]), isEmpty);

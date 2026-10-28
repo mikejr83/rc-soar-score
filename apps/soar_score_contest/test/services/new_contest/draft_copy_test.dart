@@ -3,7 +3,7 @@ import 'package:soar_score_contest/services/new_contest/contest_draft.dart';
 import 'package:soar_score_contest/services/new_contest/copy_mode.dart';
 import 'package:soar_score_contest/services/new_contest/copy_source.dart';
 import 'package:soar_score_contest/services/new_contest/draft_copy.dart';
-import 'package:soar_score_contest/services/new_contest/participant_option.dart';
+import 'package:soar_score_contest/services/participants/participant_option.dart';
 import 'package:soar_score_contest/services/new_contest/wizard_discipline.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 

@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
@@ -10,10 +9,8 @@ import 'support/open_demo_contest.dart';
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  // The web opens a report in a new tab, which a journey cannot drive, so
-  // this journey is native-only.
   testWidgets(
-    'a completed contest has no Provisional option in Overall Standings (native)',
+    'a completed contest has no Provisional option in Overall Standings',
     (tester) async {
       await openMainPage(tester);
       await openContest(tester, 'Autumn F5J Classic');
@@ -37,6 +34,5 @@ void main() {
         findsNothing,
       );
     },
-    skip: kIsWeb,
   );
 }

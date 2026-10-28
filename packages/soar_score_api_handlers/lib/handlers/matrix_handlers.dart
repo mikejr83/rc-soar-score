@@ -3,6 +3,7 @@ import 'package:shelf_router/shelf_router.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_api_handlers/auth/principal.dart';
 import 'package:soar_score_api_handlers/draw/isolate_draw_runner.dart';
+import 'package:soar_score_api_handlers/handlers/contest_authorization.dart';
 import 'package:soar_score_api_handlers/handlers/health_handler.dart';
 import 'package:soar_score_api_handlers/handlers/request_body.dart';
 import 'package:soar_score_api_handlers/handlers/write_metadata.dart';
@@ -50,8 +51,9 @@ void addMatrixRoutes(
   );
 
   router.get('/contests/<id>/matrix', (Request request, String id) async {
-    requirePrincipal(request);
-    final matrix = await service.current(Id.parse(id));
+    final contestId = Id.parse(id);
+    await requireContestDirector(request, repository, contestId);
+    final matrix = await service.current(contestId);
     return jsonResponse(matrix.toJson());
   });
 
@@ -60,10 +62,12 @@ void addMatrixRoutes(
     String id,
   ) async {
     final principal = requirePrincipal(request);
+    final contestId = Id.parse(id);
+    await requireContestDirector(request, repository, contestId);
     final body = await readJsonBody(request, DrawMatrixRequest.fromJson);
 
     final matrix = await service.drawFirst(
-      Id.parse(id),
+      contestId,
       id: body.id,
       rounds: body.rounds,
       groupsPerRound: body.groupsPerRound,
@@ -82,8 +86,9 @@ void addMatrixRoutes(
     String id,
     String drawId,
   ) async {
-    requirePrincipal(request);
-    final status = jobs.status(Id.parse(id), Id.parse(drawId));
+    final contestId = Id.parse(id);
+    await requireContestDirector(request, repository, contestId);
+    final status = jobs.status(contestId, Id.parse(drawId));
     if (status == null) {
       throw EntityNotFoundError(entityType: 'Draw', entityId: Id.parse(drawId));
     }
@@ -95,8 +100,9 @@ void addMatrixRoutes(
     String id,
     String drawId,
   ) async {
-    requirePrincipal(request);
-    final status = jobs.cancel(Id.parse(id), Id.parse(drawId));
+    final contestId = Id.parse(id);
+    await requireContestDirector(request, repository, contestId);
+    final status = jobs.cancel(contestId, Id.parse(drawId));
     if (status == null) {
       throw EntityNotFoundError(entityType: 'Draw', entityId: Id.parse(drawId));
     }
@@ -109,10 +115,12 @@ void addMatrixRoutes(
     String assignmentId,
   ) async {
     final principal = requirePrincipal(request);
+    final contestId = Id.parse(id);
+    await requireContestDirector(request, repository, contestId);
     final body = await readJsonBody(request, MoveAssignmentRequest.fromJson);
 
     final matrix = await moves.move(
-      Id.parse(id),
+      contestId,
       Id.parse(assignmentId),
       id: body.id,
       scheduledRoundId: body.scheduledRoundId,
@@ -131,10 +139,12 @@ void addMatrixRoutes(
     String id,
   ) async {
     final principal = requirePrincipal(request);
+    final contestId = Id.parse(id);
+    await requireContestDirector(request, repository, contestId);
     final body = await readJsonBody(request, LateAddRequest.fromJson);
 
     final matrix = await lateAdds.add(
-      Id.parse(id),
+      contestId,
       id: body.id,
       participationId: body.contestParticipationId,
       scheduledRoundId: body.scheduledRoundId,
@@ -153,10 +163,12 @@ void addMatrixRoutes(
     String id,
   ) async {
     final principal = requirePrincipal(request);
+    final contestId = Id.parse(id);
+    await requireContestDirector(request, repository, contestId);
     final body = await readJsonBody(request, RedrawMatrixRequest.fromJson);
 
     final matrix = await redraws.redraw(
-      Id.parse(id),
+      contestId,
       id: body.id,
       firstRound: body.firstRound,
       rounds: body.rounds,

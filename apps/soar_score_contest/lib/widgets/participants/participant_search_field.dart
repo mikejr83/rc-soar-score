@@ -3,9 +3,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
-import '../../../services/new_contest/draft_participant.dart';
-import '../../../services/new_contest/participant_candidate.dart';
-import '../../../services/new_contest/participant_rules.dart';
+import '../../l10n/app_localizations.dart';
+import '../../services/participants/participant_candidate.dart';
+import '../../services/participants/participant_row.dart';
+import 'participant_email_text.dart';
 
 /// Finds people by name or email to add to the contest.
 ///
@@ -20,6 +21,7 @@ class ParticipantSearchField extends StatefulWidget {
     required this.onAdd,
     required this.offline,
     this.remote,
+    this.onQueryChanged,
   });
 
   /// The director's own profiles, or `null` while they load.
@@ -31,6 +33,9 @@ class ParticipantSearchField extends StatefulWidget {
   final ValueChanged<ParticipantCandidate> onAdd;
   final bool offline;
   final RemoteParticipantSearch? remote;
+
+  /// Called as the text changes, so the page can filter its list with it.
+  final ValueChanged<String>? onQueryChanged;
 
   static const String localLabel = 'Your profiles';
 
@@ -96,14 +101,31 @@ class _ParticipantSearchFieldState extends State<ParticipantSearchField> {
             }
             widget.onAdd(candidate);
             _controller.clear();
+            widget.onQueryChanged?.call('');
           },
           fieldViewBuilder: (context, controller, focusNode, onSubmit) =>
               SearchBar(
                 key: const ValueKey('participant-search'),
                 controller: controller,
                 focusNode: focusNode,
-                hintText: 'Find people by name or email',
+                hintText: 'Enter a name or email to search or filter',
                 leading: const Icon(Icons.person_search),
+                trailing: [
+                  ValueListenableBuilder(
+                    valueListenable: controller,
+                    builder: (context, value, _) => value.text.isEmpty
+                        ? const SizedBox.shrink()
+                        : IconButton(
+                            tooltip: 'Clear search',
+                            icon: const Icon(Icons.close),
+                            onPressed: () {
+                              controller.clear();
+                              widget.onQueryChanged?.call('');
+                            },
+                          ),
+                  ),
+                ],
+                onChanged: (value) => widget.onQueryChanged?.call(value),
                 elevation: const WidgetStatePropertyAll(0),
                 backgroundColor: WidgetStatePropertyAll(
                   scheme.surfaceContainerHighest,
@@ -115,8 +137,8 @@ class _ParticipantSearchFieldState extends State<ParticipantSearchField> {
             options: options.toList(),
             selected: widget.selected,
             header: _searchesRemote
-                ? 'Remote and your profiles'
-                : ParticipantSearchField.localLabel,
+                ? 'Add from remote and your profiles'
+                : 'Add from saved profiles',
             onSelected: onSelected,
           ),
         ),
@@ -203,14 +225,12 @@ class _ResultsMenu extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final already = selected.contains(candidate.profileId.value);
     final remote = candidate.source == ParticipantSource.remote;
-    final email = candidate.emailVisible ? candidate.email : null;
     final subtitle = [
-      ?candidate.club,
-      ?email,
-      if (remote && !candidate.emailVisible) 'Email hidden',
+      candidate.club ?? 'No club',
+      'Email: ${candidate.emailStatus.label(AppLocalizations.of(context))}',
     ].join(' · ');
     final (icon, label) = already
-        ? (Icons.check, 'Already added')
+        ? (Icons.check, 'Already in this contest')
         : remote
         ? (Icons.cloud_outlined, 'Remote')
         : (Icons.person_outline, ParticipantSearchField.localLabel);
@@ -226,7 +246,7 @@ class _ResultsMenu extends StatelessWidget {
           child: Text(initials(candidate.name)),
         ),
         title: Text(candidate.name),
-        subtitle: subtitle.isEmpty ? null : Text(subtitle),
+        subtitle: Text(subtitle),
         trailing: Chip(
           avatar: Icon(icon, size: 16),
           label: Text(label),

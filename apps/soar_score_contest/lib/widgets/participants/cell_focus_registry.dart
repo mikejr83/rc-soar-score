@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 /// An editable column in the participant rows.
-enum ParticipantColumn { role, classification, team, model, modelId }
+enum ParticipantColumn { role, classification, team }
 
 /// Focus nodes for the participant cells, so the validation summary can
 /// jump to a cell and Enter can move to the same column in the next row.

@@ -4,7 +4,7 @@ import 'contest_draft.dart';
 import 'copy_mode.dart';
 import 'copy_source.dart';
 import 'draft_participant.dart';
-import 'participant_option.dart';
+import '../participants/participant_option.dart';
 import 'scoring_settings.dart';
 
 /// Copying from a source contest into the draft.

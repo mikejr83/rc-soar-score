@@ -3,6 +3,7 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_api_handlers/auth/principal.dart';
+import 'package:soar_score_api_handlers/handlers/contest_authorization.dart';
 import 'package:soar_score_api_handlers/handlers/health_handler.dart';
 import 'package:soar_score_api_handlers/handlers/request_body.dart';
 import 'package:soar_score_api_handlers/middleware/request_id.dart';
@@ -43,7 +44,9 @@ void addConfigurationRoutes(
     Request request,
     String id,
   ) async {
-    final revision = await service.latest(Id.parse(id));
+    final contestId = Id.parse(id);
+    await requireContestDirector(request, repository, contestId);
+    final revision = await service.latest(contestId);
     return jsonResponse(revision.toJson());
   });
 
@@ -51,7 +54,9 @@ void addConfigurationRoutes(
     Request request,
     String id,
   ) async {
-    final revisions = await service.revisions(Id.parse(id));
+    final contestId = Id.parse(id);
+    await requireContestDirector(request, repository, contestId);
+    final revisions = await service.revisions(contestId);
     return jsonResponse(<String, dynamic>{
       'revisions': [for (final revision in revisions) revision.toJson()],
     });
@@ -63,6 +68,7 @@ void addConfigurationRoutes(
   ) async {
     final principal = requirePrincipal(request);
     final contestId = Id.parse(id);
+    await requireContestDirector(request, repository, contestId);
     final body = await readJsonBody(request, SaveConfigurationRequest.fromJson);
 
     final saved = await service.save(

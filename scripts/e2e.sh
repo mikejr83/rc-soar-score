@@ -21,8 +21,14 @@
 # a run needs no access to gstatic.com, which sandboxed networks block (the
 # page would stay blank until the test timed out).
 # A test file that runs longer than E2E_TEST_TIMEOUT seconds (default 300) is
-# stopped and counted as failed, so a hung browser cannot stall a run.
+# stopped and counted as failed, so a hung browser cannot stall a run. The
+# long contest_lifecycle_journey_test.dart gets 1200 seconds by default;
+# setting E2E_TEST_TIMEOUT overrides the limit for every file. These limits
+# apply to web runs only; a Windows (native) run has no timeout.
 set -eu
+# E2E_STOP_AFTER=<n> ends the lifecycle journey after phase n.
+stop_after=()
+[ -z "${E2E_STOP_AFTER:-}" ] || stop_after=(--dart-define=E2E_STOP_AFTER="$E2E_STOP_AFTER")
 device=windows
 test_file=
 extra=()
@@ -77,7 +83,9 @@ if [ "$device" = web ] || [ "$device" = chrome ]; then
   [ -z "${CHROME_EXECUTABLE:-}" ] || chrome_args=(--chrome-binary="$CHROME_EXECUTABLE")
   server_pid=""
   driver_pid=""
+  echo_pid=""
   stop_server() {
+    if [ -n "$echo_pid" ]; then kill "$echo_pid" 2>/dev/null || true; echo_pid=""; fi
     if [ -n "$server_pid" ]; then kill "$server_pid" 2>/dev/null || true; wait "$server_pid" 2>/dev/null || true; fi
     server_pid=""
   }
@@ -91,7 +99,13 @@ if [ "$device" = web ] || [ "$device" = chrome ]; then
     (cd "$root/apps/soar_score_server" && exec dart run tool/e2e_server.dart --port "$port") >"$log" 2>&1 &
     server_pid=$!
     for _ in $(seq 1 120); do
-      grep -q E2E_SERVER_READY "$log" && return 0
+      if grep -q E2E_SERVER_READY "$log"; then
+        # A browser journey prints nothing live; it posts its progress to the
+        # server (`POST /__e2e/log`), whose `[E2E]` lines are echoed here.
+        tail -n +1 -f "$log" 2>/dev/null | grep --line-buffered '^\[E2E\]' &
+        echo_pid=$!
+        return 0
+      fi
       kill -0 "$server_pid" 2>/dev/null || break
       sleep 1
     done
@@ -99,7 +113,13 @@ if [ "$device" = web ] || [ "$device" = chrome ]; then
     echo "E2E server did not start" >&2
     exit 1
   }
-  test_timeout="${E2E_TEST_TIMEOUT:-300}"
+  # Seconds a file may run: E2E_TEST_TIMEOUT for all files, else 1200 for the
+  # lifecycle journey and 300 for the rest.
+  timeout_for() {
+    if [ -n "${E2E_TEST_TIMEOUT:-}" ]; then echo "$E2E_TEST_TIMEOUT"
+    elif [ "$(basename "$1")" = contest_lifecycle_journey_test.dart ]; then echo 1200
+    else echo 300; fi
+  }
   if ! command -v "$chromedriver" >/dev/null 2>&1; then
     echo "chromedriver not found ('$chromedriver'). Run ./scripts/e2e-setup.sh to install Chrome and chromedriver, or set CHROMEDRIVER=<path>." >&2
     exit 1
@@ -118,12 +138,13 @@ if [ "$device" = web ] || [ "$device" = chrome ]; then
     echo "chromedriver did not answer on port $driver_port (is another one running?)." >&2
     exit 1
   fi
-  with_timeout=()
-  if command -v timeout >/dev/null 2>&1; then
-    with_timeout=(timeout --kill-after=10 "$test_timeout")
-  fi
   status=0
   for file in "${files[@]}"; do
+    test_timeout="$(timeout_for "$file")"
+    with_timeout=()
+    if command -v timeout >/dev/null 2>&1; then
+      with_timeout=(timeout --kill-after=10 "$test_timeout")
+    fi
     start_server
     "${with_timeout[@]+"${with_timeout[@]}"}" flutter drive --driver=test_driver/integration_test.dart --target="$file" \
       -d web-server --browser-name=chrome ${chrome_args[@]+"${chrome_args[@]}"} \
@@ -131,7 +152,7 @@ if [ "$device" = web ] || [ "$device" = chrome ]; then
       --dart-define=SOAR_SCORE_E2E=true \
       --dart-define=SOAR_SCORE_API_BASE_URL="http://localhost:$port" \
       $( [ "$(basename "$file")" = "signed_out_landing_journey_test.dart" ] && printf '%s' '--dart-define=SOAR_SCORE_E2E_SIGNED_OUT=true' ) \
-      ${extra[@]+"${extra[@]}"} || {
+      ${stop_after[@]+"${stop_after[@]}"} ${extra[@]+"${extra[@]}"} || {
         code=$?
         [ "$code" -eq 124 ] && echo "TIMEOUT: $file ran longer than ${test_timeout}s and was stopped." >&2
         status=1
@@ -148,6 +169,6 @@ for file in "${files[@]}"; do
   e2e_args=(--dart-define=SOAR_SCORE_DEMO=true --dart-define=SOAR_SCORE_DEMO_RESET=true)
   [ "$(basename "$file")" = "signed_out_landing_journey_test.dart" ] && e2e_args+=(--dart-define=SOAR_SCORE_E2E_SIGNED_OUT=true)
   [ "$(basename "$file")" = "matrix_draw_cancel_test.dart" ] && e2e_args+=(--dart-define=SOAR_SCORE_E2E_SLOW_DRAW=true)
-  flutter test "$file" -d "$device" "${e2e_args[@]}" ${extra[@]+"${extra[@]}"} || status=1
+  flutter test "$file" -d "$device" "${e2e_args[@]}" ${stop_after[@]+"${stop_after[@]}"} ${extra[@]+"${extra[@]}"} || status=1
 done
 exit $status

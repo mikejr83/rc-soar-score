@@ -2,6 +2,7 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_api_handlers/auth/principal.dart';
+import 'package:soar_score_api_handlers/handlers/contest_authorization.dart';
 import 'package:soar_score_api_handlers/handlers/health_handler.dart';
 import 'package:soar_score_api_handlers/handlers/request_body.dart';
 import 'package:soar_score_api_handlers/handlers/write_metadata.dart';
@@ -23,15 +24,23 @@ void addContestRoutes(Router router, Repository repository) {
   final service = ContestsService(repository);
 
   router.get('/contests', (Request request) async {
+    final principal = requirePrincipal(request);
     final contests = await service.getContests();
 
     return jsonResponse(<String, dynamic>{
-      'contests': [for (final contest in contests) contest.toJson()],
+      'contests': [
+        for (final contest in contests)
+          if (contest.ownerAccountId == principal.accountId ||
+              principal.alsoVisibleOwners.contains(contest.ownerAccountId))
+            contest.toJson(),
+      ],
     });
   });
 
   router.get('/contests/<id>', (Request request, String id) async {
-    final contest = await service.getContest(Id.parse(id));
+    final contestId = Id.parse(id);
+    await requireContestDirector(request, repository, contestId);
+    final contest = await service.getContest(contestId);
     return jsonResponse(contest.toJson());
   });
 
@@ -62,6 +71,7 @@ void addContestRoutes(Router router, Repository repository) {
   router.put('/contests/<id>', (Request request, String id) async {
     final principal = requirePrincipal(request);
     final contestId = Id.parse(id);
+    await requireContestDirector(request, repository, contestId);
     final body = await readJsonBody(request, UpdateContestRequest.fromJson);
 
     final contest = await service.updateContest(
@@ -84,6 +94,7 @@ void addContestRoutes(Router router, Repository repository) {
   router.post('/contests/<id>/actions', (Request request, String id) async {
     final principal = requirePrincipal(request);
     final contestId = Id.parse(id);
+    await requireContestDirector(request, repository, contestId);
     final body = await readJsonBody(request, ContestActionRequest.fromJson);
 
     final contest = await service.applyAction(
@@ -95,7 +106,8 @@ void addContestRoutes(Router router, Repository repository) {
     return jsonResponse(contest.toJson());
   });
   router.get('/contests/<id>/audit-events', (Request request, String id) async {
-    requirePrincipal(request);
+    final contestId = Id.parse(id);
+    await requireContestDirector(request, repository, contestId);
     final query = request.url.queryParameters;
 
     final actionText = query['action'];
@@ -112,7 +124,7 @@ void addContestRoutes(Router router, Repository repository) {
     }
 
     final events = await service.auditEvents(
-      Id.parse(id),
+      contestId,
       action: action,
       limit: limit,
     );
