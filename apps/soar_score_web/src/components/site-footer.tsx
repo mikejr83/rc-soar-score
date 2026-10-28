@@ -4,12 +4,10 @@ import {
   companyName,
   contestAppUrl,
   repositoryUrl,
-  siteName,
-  tagline,
 } from "@/lib/site";
 
 import { ExternalLink } from "./external-link";
-import { BrandMark } from "./brand-logo";
+import { BrandLockup } from "./brand-logo";
 import styles from "./site-footer.module.css";
 
 export function SiteFooter() {
@@ -17,11 +15,7 @@ export function SiteFooter() {
     <footer className={styles.footer}>
       <div className={`wrap ${styles.inner}`}>
         <div className={styles.brand}>
-          <BrandMark size={32} decorative />
-          <div>
-            <div className={styles.name}>{siteName}</div>
-            <div className={styles.tagline}>{tagline}</div>
-          </div>
+          <BrandLockup height={184} className={styles.lockup} />
         </div>
 
         <nav aria-label="Footer" className={styles.cols}>

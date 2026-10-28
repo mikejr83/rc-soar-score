@@ -1,4 +1,11 @@
 .header {
+  /* The header stays night in both themes, so the dark lockup is always right. */
+  --panel-bg: var(--night);
+  --panel-surface: #262422;
+  --panel-text: var(--paper);
+  --panel-muted: var(--muted-dark);
+  --panel-line: #3a3735;
+  --panel-accent: var(--orange-on-dark);
   position: sticky;
   top: 0;
   z-index: 50;
@@ -44,7 +51,7 @@
 
 .lockup {
   display: block;
-  height: 40px;
+  height: 44px;
   width: auto;
 }
 
@@ -154,6 +161,6 @@
 
 @media (max-width: 379px) {
   .lockup {
-    height: 30px;
+    height: 34px;
   }
 }

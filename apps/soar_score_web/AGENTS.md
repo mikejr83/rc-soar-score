@@ -19,7 +19,7 @@ The public web site: product marketing and information, documentation and help, 
 ## Rules
 
 - **Read-only.** The site never writes contest data; it reads `GET /public/publications` and `GET /public/publications/{id}` only.
-- **Brand.** One orange element per area of a screen; small text on orange uses deep orange (`--deep-orange`), the brand orange is for graphics and large headings. Never retype the wordmark; use the logo files. Status is always text plus an icon, never colour alone.
+- **Brand.** One orange element per area of a screen; small text on orange uses deep orange (`--deep-orange`), the brand orange is for graphics and large headings. Never retype the wordmark; use the logo files (`BrandLockup compact` below about 120px, where the lockup's tagline line is unreadable; the full lockup in the footer). The panel tokens follow the theme; the header pins the night values and the dial stays black. Status is always text plus an icon, never colour alone.
 - **Motion.** Every animation sits under `prefers-reduced-motion: no-preference` or is cancelled by the global reduce rule; scroll-driven CSS animations are wrapped in `@supports (animation-timeline: ...)` with a static fallback. Content is never hidden behind an animation without JavaScript.
 - **Results behaviour** follows `plan/ui/public-site/*.md`. Rounds, ties (`2=`), dropped rounds, re-flights, the coming-Sunday rule, the 30-day summary and the not-visible re-check are the Flutter pages' rules; change them in `lib/results` with a test.
 - Keep files small and single-purpose; one route per file, shared bits in `components/`.

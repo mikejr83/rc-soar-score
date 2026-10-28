@@ -40,13 +40,14 @@
   --ok-fg: #0f4a2b;
   --selected-row: #fdebe3;
 
-  /* Panels that are always dark (the instrument panel). */
-  --panel-bg: var(--night);
-  --panel-surface: #262422;
-  --panel-text: var(--paper);
-  --panel-muted: var(--muted-dark);
-  --panel-line: #3a3735;
-  --panel-accent: var(--orange-on-dark);
+  /* Panel sections (the instrument panel): night in the dark theme, scribed
+     aluminium in the light one. The header pins the night values itself. */
+  --panel-bg: var(--table-head-light);
+  --panel-surface: var(--white);
+  --panel-text: var(--ink);
+  --panel-muted: var(--muted-light);
+  --panel-line: #cdc7bd;
+  --panel-accent: var(--deep-orange);
 
   --radius: 12px;
   --radius-sm: 8px;
@@ -59,6 +60,12 @@
 }
 
 @media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .only-light {
+    display: none;
+  }
+  :root:not([data-theme="light"]) .only-dark {
+    display: block;
+  }
   :root:not([data-theme="light"]) {
     --bg: var(--night);
     /* Elevation is explicit: a card steps up from the night canvas, its edge
@@ -77,12 +84,27 @@
     --ok-fg: #b1f1ce;
     --selected-row: #3a2a22;
     --shadow: 0 1px 2px rgb(0 0 0 / 0.35), 0 8px 24px -12px rgb(0 0 0 / 0.6);
+    --panel-bg: var(--night);
+    --panel-surface: #262422;
+    --panel-text: var(--paper);
+    --panel-muted: var(--muted-dark);
+    --panel-line: #3a3735;
+    --panel-accent: var(--orange-on-dark);
   }
 }
 /* The theme switch sets data-theme; the inline script in layout.tsx
    restores it before paint. Without it the OS scheme applies. */
+.only-dark {
+  display: none;
+}
 :root[data-theme="light"] {
   color-scheme: light;
+}
+:root[data-theme="dark"] .only-light {
+  display: none;
+}
+:root[data-theme="dark"] .only-dark {
+  display: block;
 }
 :root[data-theme="dark"] {
   color-scheme: dark;
@@ -103,6 +125,12 @@
     --ok-fg: #b1f1ce;
     --selected-row: #3a2a22;
     --shadow: 0 1px 2px rgb(0 0 0 / 0.35), 0 8px 24px -12px rgb(0 0 0 / 0.6);
+    --panel-bg: var(--night);
+    --panel-surface: #262422;
+    --panel-text: var(--paper);
+    --panel-muted: var(--muted-dark);
+    --panel-line: #3a3735;
+    --panel-accent: var(--orange-on-dark);
 }
 
 *,
@@ -510,7 +538,7 @@ select.input {
   }
 }
 
-/* Panel seams: the hairline grid of an instrument panel, used behind dark
+/* Panel seams: the hairline grid of an instrument panel, used behind panel
    sections. Decorative only. */
 .seams {
   background-image:

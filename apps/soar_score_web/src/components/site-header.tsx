@@ -24,7 +24,7 @@ export function SiteHeader() {
       </a>
       <div className={`wrap ${styles.inner}`}>
         <Link href="/" className={styles.home} aria-label={`${siteName} home`}>
-          <BrandLockup height={40} onDark priority className={styles.lockup} />
+          <BrandLockup height={44} onDark compact priority className={styles.lockup} />
         </Link>
 
         <nav className={styles.nav} aria-label="Primary">

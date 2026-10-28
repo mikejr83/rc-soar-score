@@ -121,7 +121,7 @@
     "rules": [
       { "name": "The One Needle Rule", "body": "One orange element per area of a screen. A second orange in the same area is a second needle, and the reader no longer knows where to look.", "section": "colors" },
       { "name": "The Small Text Rule", "body": "Small text on orange, and orange on light paper, uses Deep Orange. Wing Orange is for graphics and display sizes only.", "section": "colors" },
-      { "name": "The Panel Stays Dark Rule", "body": "Instrument panels are night black in both themes. Theme switching remaps the canvas and cards, never the panel.", "section": "colors" },
+      { "name": "The Panel Follows Daylight Rule", "body": "Instrument panels are night black in the dark theme and scribed aluminium in the light one. The header stays night in both; the dial face stays black glass.", "section": "colors" },
       { "name": "The 13px Floor Rule", "body": "No label goes below 13px. Sunlight and sunglasses are the baseline, not the edge case.", "section": "typography" },
       { "name": "The One Stencil Rule", "body": "Saira Stencil One appears once per screen area, for a number or a short code, never for a sentence.", "section": "typography" },
       { "name": "The Hairline First Rule", "body": "Separate with a 1px line and a surface step before reaching for a shadow. Shadows exist only where tone cannot do the job.", "section": "elevation" }

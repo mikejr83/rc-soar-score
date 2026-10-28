@@ -173,7 +173,7 @@ A night-black panel, warm paper, and a single high-visibility orange, with muted
 
 **The Small Text Rule.** Small text on orange, and orange on light paper, uses Deep Orange. Wing Orange is for graphics and display sizes only.
 
-**The Panel Stays Dark Rule.** Instrument panels are night black in both themes. Theme switching remaps the canvas and cards, never the panel.
+**The Panel Follows Daylight Rule.** Instrument panels are night black in the dark theme and scribed aluminium (table-head beige, hairline seams, ink text, deep orange) in the light one. The header stays night in both, so the dark lockup is always right, and the dial face stays black glass in any light.
 
 ## Typography
 

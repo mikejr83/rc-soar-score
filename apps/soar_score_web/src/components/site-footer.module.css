@@ -10,20 +10,12 @@
   padding-block: 40px 48px;
 }
 
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.name {
-  font-family: var(--font-display), var(--font-body), sans-serif;
-  font-weight: 800;
-  font-size: 18px;
-  text-transform: uppercase;
-}
-.tagline {
-  font-size: 13px;
-  color: var(--text-muted);
+/* The full lockup, tagline included: 640px wide on desktop, the width of the
+   column on a phone. */
+.lockup {
+  display: block;
+  width: min(100%, 640px);
+  height: auto;
 }
 
 .cols {
