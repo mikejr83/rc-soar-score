@@ -619,10 +619,7 @@ class ApiClient {
   ///
   /// A contest or revision that does not exist, or a revision that belongs
   /// to a different contest, is an [ApiHttpError] with status 404.
-  Future<CurrentMatrix> matrixRevision(
-    Id id,
-    Id revisionId,
-  ) async {
+  Future<CurrentMatrix> matrixRevision(Id id, Id revisionId) async {
     final uri = _resolve(
       '/api/v1/contests/${id.value}/matrix/revisions/${revisionId.value}',
     );
@@ -893,8 +890,39 @@ class ApiClient {
     RedrawMatrixRequest request,
   ) async {
     final uri = _resolve('/api/v1/contests/${contestId.value}/matrix/redraws');
-    final response = await _send('POST', uri, body: request.toJson());
+    // The body's `preview` is forced off, so the answer is a matrix even when
+    // the request was built for a preview.
+    final response = await _send(
+      'POST',
+      uri,
+      body: {...request.toJson(), 'preview': false},
+    );
     return _decode<CurrentMatrix>(response, uri, CurrentMatrix.fromJson);
+  }
+
+  /// Runs [request]'s redraw without storing it and returns what it would
+  /// store: the seed that draws the candidate, its fairness report and
+  /// whether it beats the current matrix's.
+  ///
+  /// Sends [request] with `preview` set, so the answer is the preview, not a
+  /// matrix. A redraw with an id already stored on the contest is an
+  /// [ApiHttpError] with status 409; the same state errors as [redrawMatrix]
+  /// apply.
+  ///
+  /// Requires a server that knows the `preview` key: an older server ignores
+  /// it and stores an ordinary redraw, whose matrix answer fails to decode as
+  /// a [RedrawPreview].
+  Future<RedrawPreview> previewRedraw(
+    Id contestId,
+    RedrawMatrixRequest request,
+  ) async {
+    final uri = _resolve('/api/v1/contests/${contestId.value}/matrix/redraws');
+    final response = await _send(
+      'POST',
+      uri,
+      body: {...request.toJson(), 'preview': true},
+    );
+    return _decode<RedrawPreview>(response, uri, RedrawPreview.fromJson);
   }
 
   /// `GET /api/v1/sync/info` — the version ranges the service accepts.

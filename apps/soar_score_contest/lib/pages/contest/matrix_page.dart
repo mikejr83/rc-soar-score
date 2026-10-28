@@ -386,6 +386,8 @@ class _MatrixPageState extends State<MatrixPage> {
             attemptsPerRound: DrawFormController.optionalNumber(form.attempts),
             seedCount: DrawFormController.optionalNumber(form.seedCount),
             reason: reason.isEmpty ? null : reason,
+            // A confirm is drawn from the revision the form shows.
+            baseMatrixRevision: data.matrix.revision!.revisionNumber,
           ),
         );
       }

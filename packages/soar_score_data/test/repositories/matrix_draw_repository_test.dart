@@ -9,6 +9,7 @@ import '../support/fixtures.dart';
 
 void main() {
   forEachBackend(_tests);
+  forPostgresOnly(_concurrentRedrawTests);
   _drawTests();
 }
 
@@ -208,7 +209,11 @@ void _tests(Backend backend) {
         ],
       );
 
-      await repo.appendRedraw(redraw, metadata: metadata());
+      await repo.appendRedraw(
+        redraw,
+        expectedBaseRevision: 1,
+        metadata: metadata(),
+      );
 
       final rounds = await repository.roundRepository.listForContest(
         example.contestId,
@@ -253,11 +258,37 @@ void _tests(Backend backend) {
         ],
       );
 
-      await repo.appendRedraw(redraw, metadata: metadata());
+      await repo.appendRedraw(
+        redraw,
+        expectedBaseRevision: 1,
+        metadata: metadata(),
+      );
 
       final stored = (await repository.roundRepository.findById(replaced.id))!;
       expect(stored.isCurrent, isFalse);
       expect(stored.status, core.RoundStatus.cancelled);
+    });
+
+    test('appendRedraw is refused when the matrix moved on', () async {
+      // A draw makes revision 2 the newest.
+      await repo.appendDraw(newDraw(), metadata: metadata());
+      final draw = newDraw();
+      final redraw = core.FinalizedRedraw(
+        draw: draw,
+        placeholders: const [],
+        numberedParticipations: const [],
+        replacedRounds: const [],
+      );
+
+      await expectLater(
+        repo.appendRedraw(
+          redraw,
+          expectedBaseRevision: 1,
+          metadata: metadata(),
+        ),
+        throwsA(isA<core.ContestStateError>()),
+      );
+      expect(await repo.findById(draw.revision.id), isNull);
     });
 
     test('appendFinalizedDraw stores nothing when a placeholder is '
@@ -291,6 +322,160 @@ void _tests(Backend backend) {
       ]);
       expect(await repo.latestForContest(example.contestId), draw.revision);
       expect(await repo.latestForContest(core.Id.create()), isNull);
+    });
+  });
+}
+
+/// Two redraws that read the same newest revision and race for the successor
+/// need two connections to happen at the same time, so this runs where
+/// [Installation.reopen] gives a second connection: PostgreSQL.
+void _concurrentRedrawTests(Backend backend) {
+  group('concurrent redraws', () {
+    late Installation inst;
+    late Installation peer;
+    late Repository repository;
+    late core.Repository peerRepo;
+
+    setUp(() async {
+      inst = await Installation.open(backend, profile: DatabaseProfile.server);
+      await loadExamples(inst);
+      repository = Repository(inst.db);
+      peer = await inst.reopen();
+      peerRepo = Repository(peer.db);
+    });
+    tearDown(() async {
+      await peer.close();
+      await inst.close();
+    });
+
+    final example = core.MatrixRevision.fromJson(
+      exampleRows('matrix_revision').single,
+    );
+
+    /// A finalized redraw from [base], with its own fresh ids: the successor
+    /// revision, one new round, group and assignment, and a placeholder.
+    Future<core.FinalizedRedraw> newRedraw(core.MatrixRevision base) async {
+      final revision = core.MatrixRevision.fromJson({
+        ...exampleRows('matrix_revision').single,
+        'id': core.Id.create().value,
+        'revision_number': base.revisionNumber + 1,
+        'previous_revision_id': base.id.value,
+        'finalized_by': '019c0000-0000-7000-8000-000000000001',
+        'finalized_at': '2026-10-17T16:00:00Z',
+      });
+      final round = core.Round.fromJson({
+        ...exampleRows('round').first,
+        'id': core.Id.create().value,
+        'matrix_revision_id': revision.id.value,
+        'ordinal': base.lastRound + 1,
+        'revision': 0,
+      });
+      final group = core.RoundGroup.fromJson({
+        ...exampleRows('round_group').first,
+        'id': core.Id.create().value,
+        'round_id': round.id.value,
+        'revision': 0,
+      });
+      final entry = core.MatrixAssignment.fromJson({
+        ...exampleRows('matrix_assignment').first,
+        'id': core.Id.create().value,
+        'matrix_revision_id': revision.id.value,
+        'scheduled_round_id': round.id.value,
+        'credited_round_id': round.id.value,
+      });
+      final participation = (await repository.contestParticipationRepository
+          .findById(entry.contestParticipationId))!;
+      return core.FinalizedRedraw(
+        draw: core.MatrixDraw(
+          revision: revision,
+          rounds: [round],
+          groups: [group],
+          assignments: [entry],
+        ),
+        placeholders: [
+          core.ScorePlaceholder(
+            id: core.Id.create(),
+            contestId: example.contestId,
+            contestParticipationId: participation.id,
+            assignmentId: entry.id,
+          ),
+        ],
+        numberedParticipations: const [],
+        replacedRounds: const [],
+      );
+    }
+
+    test('a redraw that loses a race for the successor stores nothing', () async {
+      final base = (await repository.matrixRevisionRepository.latestForContest(
+        example.contestId,
+      ))!;
+      final one = await newRedraw(base);
+      final two = await newRedraw(base);
+      // Both read [base] and both claim revision base + 1: the successor index
+      // lets exactly one commit, and the other is rolled back. Each outcome is
+      // the stored redraw (a [core.FinalizedRedraw]) or the error the call
+      // threw.
+      final first = repository.matrixRevisionRepository
+          .appendRedraw(
+            one,
+            expectedBaseRevision: base.revisionNumber,
+            metadata: metadata(),
+          )
+          .then<Object>((redraw) => redraw, onError: (Object error) => error);
+      final second = peerRepo.matrixRevisionRepository
+          .appendRedraw(
+            two,
+            expectedBaseRevision: base.revisionNumber,
+            metadata: metadata(),
+          )
+          .then<Object>((redraw) => redraw, onError: (Object error) => error);
+      final outcomes = await Future.wait([first, second]);
+      final winnerIndex = outcomes.indexWhere(
+        (outcome) => outcome is core.FinalizedRedraw,
+      );
+      expect(winnerIndex, isNot(-1), reason: 'a redraw must win the race');
+      expect(
+        outcomes.where((outcome) => outcome is! core.FinalizedRedraw).length,
+        1,
+        reason: 'exactly one redraw is refused',
+      );
+      final winner = outcomes[winnerIndex] as core.FinalizedRedraw;
+      final loserIndex = winnerIndex == 0 ? 1 : 0;
+      final loserRedraw = loserIndex == 0 ? one : two;
+      final loserError = outcomes[loserIndex] as core.ContestStateError;
+      expect(loserError.code, 'stale_matrix');
+
+      // The loser stored none of its rows; the winner is the newest revision.
+      for (final repo in [
+        repository.matrixRevisionRepository,
+        peerRepo.matrixRevisionRepository,
+      ]) {
+        expect(await repo.findById(loserRedraw.draw.revision.id), isNull);
+      }
+      expect(
+        await repository.roundRepository.listForRevision(
+          loserRedraw.draw.revision.id,
+        ),
+        isEmpty,
+      );
+      expect(
+        await repository.matrixAssignmentRepository.listForRevision(
+          loserRedraw.draw.revision.id,
+        ),
+        isEmpty,
+      );
+      expect(
+        await repository.matrixRevisionRepository.findById(
+          winner.draw.revision.id,
+        ),
+        winner.draw.revision,
+      );
+      expect(
+        (await repository.matrixRevisionRepository.latestForContest(
+          example.contestId,
+        ))!.id,
+        winner.draw.revision.id,
+      );
     });
   });
 }

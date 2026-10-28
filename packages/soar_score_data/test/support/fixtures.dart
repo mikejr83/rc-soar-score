@@ -13,7 +13,13 @@ import 'backends.dart';
 /// database on the configured server, dropped by [close], and uses the server
 /// profile.
 class Installation {
-  Installation._(this.backend, this.db, this.stores, this._dropDatabase) {
+  Installation._(
+    this.backend,
+    this.db,
+    this.stores,
+    this._databaseName,
+    this._dropDatabase,
+  ) {
     unitOfWork = DriftUnitOfWork(
       db,
       stores,
@@ -38,7 +44,13 @@ class Installation {
           NativeDatabase.memory(),
           profile: profile ?? DatabaseProfile.native,
         );
-        return Installation._(backend, db, EntityStores.forDatabase(db), null);
+        return Installation._(
+          backend,
+          db,
+          EntityStores.forDatabase(db),
+          null,
+          null,
+        );
       case Backend.postgres:
         final config = postgresConfig!;
         final name =
@@ -57,6 +69,7 @@ class Installation {
           backend,
           db,
           EntityStores.forDatabase(db),
+          name,
           () async {
             await admin.execute('DROP DATABASE "$name" WITH (FORCE)');
             await admin.close();
@@ -68,6 +81,7 @@ class Installation {
   final Backend backend;
   final SoarScoreDatabase db;
   final EntityStores stores;
+  final String? _databaseName;
   final Future<void> Function()? _dropDatabase;
   late final DriftUnitOfWork unitOfWork;
   late final DriftReplicatedChangeApplier applier;
@@ -95,6 +109,29 @@ class Installation {
   Future<int> count(String table) async =>
       (await db.customSelect('SELECT COUNT(*) AS n FROM $table').getSingle())
           .read<int>('n');
+
+  /// Opens another connection to this installation's database, for concurrent
+  /// access in a test. On PostgreSQL that is a fresh connection to the same
+  /// (server-profile) database; on SQLite a fresh in-memory SQLite is empty,
+  /// so it is not a peer and this throws.
+  Future<Installation> reopen() async {
+    if (backend != Backend.postgres || _databaseName == null) {
+      throw UnsupportedError(
+        'reopen is available only on a PostgreSQL installation',
+      );
+    }
+    final db = SoarScoreDatabase(
+      postgresConfig!.named(_databaseName).toPgDatabase(),
+      profile: DatabaseProfile.server,
+    );
+    return Installation._(
+      backend,
+      db,
+      EntityStores.forDatabase(db),
+      _databaseName,
+      null,
+    );
+  }
 }
 
 var _requests = 0;

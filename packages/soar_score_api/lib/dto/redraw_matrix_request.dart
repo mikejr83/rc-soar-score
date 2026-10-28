@@ -12,6 +12,12 @@ part 'redraw_matrix_request.g.dart';
 /// caller generates [id] (a UUIDv7), so repeating the request returns the
 /// matrix it drew. [randomSeed], [attemptsPerRound] and [seedCount] are as in
 /// [DrawMatrixRequest]. [reason] is optional.
+///
+/// [baseMatrixRevision] is the number of the latest revision the caller drew
+/// from; when it is no longer the newest, the redraw is refused with
+/// `stale_matrix` before anything is drawn. [preview] runs the same draw but
+/// stores nothing and answers the fairness of the candidate instead of the
+/// matrix.
 @JsonSerializable(
   checked: true,
   fieldRename: FieldRename.snake,
@@ -28,6 +34,8 @@ class RedrawMatrixRequest {
     this.attemptsPerRound,
     this.seedCount,
     this.reason,
+    required this.baseMatrixRevision,
+    this.preview,
   });
 
   factory RedrawMatrixRequest.fromJson(Map<String, dynamic> json) =>
@@ -41,6 +49,10 @@ class RedrawMatrixRequest {
   final int? attemptsPerRound;
   final int? seedCount;
   final String? reason;
+  final int baseMatrixRevision;
+
+  /// Whether to draw without persisting and answer a [RedrawPreview].
+  final bool? preview;
 
   Map<String, dynamic> toJson() => _$RedrawMatrixRequestToJson(this);
 }

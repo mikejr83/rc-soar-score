@@ -33,6 +33,7 @@ void main() {
       'attempts_per_round': 5,
       'seed_count': 2,
       'reason': 'rounds added',
+      'base_matrix_revision': 1,
     },
   );
 
