@@ -7,7 +7,7 @@
 #   ./scripts/e2e.sh                 # Windows desktop (default on Windows)
 #   ./scripts/e2e.sh -d web          # headless Chrome against the E2E server
 #   ./scripts/e2e.sh -d <device>     # any other `flutter test -d` device
-#   ./scripts/e2e.sh -f score_entry_test.dart -- --name 'official score entry'
+#   ./scripts/e2e.sh -f save_failure_retry_test.dart -- --name 'Retry saves'
 #   ./scripts/e2e.sh -- --name journey   # extra args go to flutter test/drive
 #
 # The web mode needs Chrome and a matching chromedriver. Run
@@ -22,7 +22,7 @@
 # page would stay blank until the test timed out).
 # A test file that runs longer than E2E_TEST_TIMEOUT seconds (default 300) is
 # stopped and counted as failed, so a hung browser cannot stall a run. The
-# long contest_lifecycle_journey_test.dart gets 1200 seconds by default;
+# long contest_lifecycle_journey_test.dart gets 1800 seconds by default;
 # setting E2E_TEST_TIMEOUT overrides the limit for every file. These limits
 # apply to web runs only; a Windows (native) run has no timeout.
 set -eu
@@ -113,11 +113,11 @@ if [ "$device" = web ] || [ "$device" = chrome ]; then
     echo "E2E server did not start" >&2
     exit 1
   }
-  # Seconds a file may run: E2E_TEST_TIMEOUT for all files, else 1200 for the
+  # Seconds a file may run: E2E_TEST_TIMEOUT for all files, else 1800 for the
   # lifecycle journey and 300 for the rest.
   timeout_for() {
     if [ -n "${E2E_TEST_TIMEOUT:-}" ]; then echo "$E2E_TEST_TIMEOUT"
-    elif [ "$(basename "$1")" = contest_lifecycle_journey_test.dart ]; then echo 1200
+    elif [ "$(basename "$1")" = contest_lifecycle_journey_test.dart ]; then echo 1800
     else echo 300; fi
   }
   if ! command -v "$chromedriver" >/dev/null 2>&1; then

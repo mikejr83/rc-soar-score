@@ -165,6 +165,10 @@ Future<void> runSetupPhase(Journey journey, JourneyContext data) async {
       await pumpUntilFound(tester, find.text('No pilots selected'));
       await tapVisible(tester, _key('cards-select-all'));
       await pumpUntilGone(tester, find.text('No pilots selected'));
+
+      // The viewer has no shell, so leave it for the next step.
+      await tapVisible(tester, _key('viewer-back'));
+      await pumpUntilFound(tester, find.text('Reports are built from'));
     }),
   );
 }

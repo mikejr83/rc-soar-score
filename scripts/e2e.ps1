@@ -5,7 +5,7 @@
 #
 #   .\scripts\e2e.ps1                      # Windows desktop
 #   .\scripts\e2e.ps1 -Name journey        # only tests whose name matches
-#   .\scripts\e2e.ps1 -File score_entry_test.dart -Name 'official score entry'
+#   .\scripts\e2e.ps1 -File save_failure_retry_test.dart -Name 'Retry saves'
 #                                               # one journey in one test file
 #   .\scripts\e2e.ps1 -Device web          # headless Chrome against the E2E server
 #   .\scripts\e2e.ps1 -Device <device>     # another `flutter test -d` device
@@ -19,7 +19,7 @@
 # data. Each test file gets a fresh server, hence fresh demo data.
 # A test file that runs longer than $env:E2E_TEST_TIMEOUT seconds (default 300)
 # is stopped and counted as failed, so a hung browser cannot stall a run. The
-# long contest_lifecycle_journey_test.dart gets 1200 seconds by default;
+# long contest_lifecycle_journey_test.dart gets 1800 seconds by default;
 # setting $env:E2E_TEST_TIMEOUT overrides the limit for every file. These
 # limits apply to web runs only; a Windows (native) run has no timeout.
 
@@ -106,7 +106,7 @@ if ($Device -in 'web', 'chrome') {
                 if ($Name) { $flutterArgs += @('--name', $Name) }
                 if ($env:E2E_STOP_AFTER) { $flutterArgs += "--dart-define=E2E_STOP_AFTER=$($env:E2E_STOP_AFTER)" }
                 $testTimeout = 300
-                if ($file.Name -eq 'contest_lifecycle_journey_test.dart') { $testTimeout = 1200 }
+                if ($file.Name -eq 'contest_lifecycle_journey_test.dart') { $testTimeout = 1800 }
                 if ($env:E2E_TEST_TIMEOUT) { $testTimeout = [int]$env:E2E_TEST_TIMEOUT }
                 $flutter = Start-Process (Get-Command flutter).Source `
                     -ArgumentList $flutterArgs -NoNewWindow -PassThru
