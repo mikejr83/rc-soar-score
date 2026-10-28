@@ -125,9 +125,9 @@ class MatrixService {
   /// Throws an [EntityNotFoundError] when the contest does not exist.
   Future<List<MatrixRevision>> revisions(Id contestId) async {
     await _requireContest(contestId);
-    final all = await repository
-        .matrixRevisionRepository
-        .listForContest(contestId);
+    final all = await repository.matrixRevisionRepository.listForContest(
+      contestId,
+    );
     return all.reversed.toList();
   }
 
@@ -141,8 +141,9 @@ class MatrixService {
   /// not exist, or the revision belongs to a different contest.
   Future<CurrentMatrix> revision(Id contestId, Id revisionId) async {
     await _requireContest(contestId);
-    final revision =
-        await repository.matrixRevisionRepository.findById(revisionId);
+    final revision = await repository.matrixRevisionRepository.findById(
+      revisionId,
+    );
     if (revision == null || revision.contestId != contestId) {
       throw EntityNotFoundError(
         entityType: 'MatrixRevision',
@@ -154,12 +155,15 @@ class MatrixService {
     final groups = (await repository.roundGroupRepository.listForContest(
       contestId,
     )).where((group) => roundIds.contains(group.roundId));
-    final assignments = (await repository
-        .matrixAssignmentRepository
-        .listForRevision(revisionId))
-        .where((assignment) =>
-            assignment.assignmentType == AssignmentType.original)
-        .toList();
+    final assignments =
+        (await repository.matrixAssignmentRepository.listForRevision(
+              revisionId,
+            ))
+            .where(
+              (assignment) =>
+                  assignment.assignmentType == AssignmentType.original,
+            )
+            .toList();
     return CurrentMatrix(
       revision: revision,
       rounds: rounds,

@@ -206,6 +206,42 @@ Future<void> runSetupPhase(Journey journey, JourneyContext data) async {
     },
   );
   await journey.step(
+    'Participants: removing an unscored pilot from a drawn contest takes '
+    'them out of the draw and says it needs redoing',
+    () async {
+      await goToMainPage(tester);
+      await openContest(tester, 'Front Range F5J Open');
+      await tapRail(tester, 'Participants');
+      await pumpUntilFound(tester, _key('participants-count'));
+      // The previous step put this pilot in every round; they have no scores.
+      final newcomer = data.roster.last;
+      final name = '${newcomer.first} ${newcomer.last}';
+      await pumpUntilFound(tester, find.text(name));
+      await tapVisible(
+        tester,
+        find.byWidgetPredicate(
+          (w) => w is Checkbox && w.semanticLabel == 'Select $name',
+        ),
+      );
+      await tapVisible(tester, _key('remove-participants'));
+      await pumpUntilFound(tester, _key('confirm-remove-draw'));
+      expect(
+        find.textContaining('Their places in it are removed too'),
+        findsOneWidget,
+      );
+      await tapVisible(tester, _key('confirm-remove'));
+
+      await pumpUntilFound(tester, _key('banner-redo-draw'));
+      expect(find.text('The draw needs redoing'), findsOneWidget);
+      expect(find.textContaining('$name was in the draw'), findsOneWidget);
+      await pumpUntilGone(tester, find.text(name));
+
+      // The notice leads to the Matrix page's redraw.
+      await tapVisible(tester, find.text('Redo the draw'));
+      await pumpUntilFound(tester, find.text('Redraw unscored rounds'));
+    },
+  );
+  await journey.step(
     'Reports: readiness before the run',
     () => inContest(() async {
       await _openReports(tester);

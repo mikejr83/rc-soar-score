@@ -2,6 +2,7 @@ import 'package:drift/drift.dart' show Variable;
 import 'package:soar_score_core/soar_score_core.dart' as core;
 
 import '../database.dart';
+import 'assignment_markers.dart';
 import 'entity_stores.dart';
 import 'mutation_payload.dart';
 import 'sql_placeholders.dart';
@@ -196,6 +197,38 @@ class _Context implements core.WriteContext {
     await _recordMutation(
       entityType: table.entityType,
       entityId: table.id,
+      scope: scope,
+      baseRevision: null,
+      metadata: metadata,
+      payload: deletePayload(),
+    );
+  }
+
+  @override
+  Future<void> removeAssignment(
+    core.MatrixAssignment assignment, {
+    required core.MutationMetadata metadata,
+  }) async {
+    final store = _uow._stores.of('MatrixAssignment');
+    final stored = await store.findJson(assignment.id);
+    if (stored == null) return;
+    final scope = _scopeOf(assignment, stored);
+    // The marker's foreign key is deferred, so the row can go first.
+    await store.remove(assignment.id);
+    await clearSupersededMarkers(_uow._db, assignment.id);
+    await _uow._tombstones.upsert(
+      core.Tombstone(
+        id: _uow._newId(),
+        contestId: scope.contestId,
+        ownerAccountId: scope.ownerAccountId,
+        entityType: assignment.entityType,
+        entityId: assignment.id,
+        deletedAt: _uow._clock(),
+      ).toJson(),
+    );
+    await _recordMutation(
+      entityType: assignment.entityType,
+      entityId: assignment.id,
       scope: scope,
       baseRevision: null,
       metadata: metadata,

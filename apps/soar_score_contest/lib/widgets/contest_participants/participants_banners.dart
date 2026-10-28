@@ -10,6 +10,8 @@ import '../page_states/page_banner.dart';
 /// - fewer than 2 scoring pilots before the draw (error), or exactly 2
 ///   (warning);
 /// - an add or a removal that did not go through;
+/// - people who left the draw (removed, or made non-flying, with no scores):
+///   the draw needs redoing;
 /// - results recalculated after a change in a running contest;
 /// - people added since the draw who are not in a group yet;
 /// - scoring pilots with no class (when classes are on).
@@ -20,6 +22,7 @@ List<Widget> participantBanners({
   required VoidCallback onUnlock,
   required VoidCallback onOpenMatrix,
   required VoidCallback onOpenScoring,
+  required VoidCallback onRedoDraw,
   required VoidCallback onPlaceUnplaced,
   required ValueChanged<StoredParticipant> onShowClass,
 }) {
@@ -120,6 +123,28 @@ List<Widget> participantBanners({
         onAction: onOpenScoring,
         secondaryLabel: 'Dismiss',
         onSecondary: c.dismissRemoval,
+      ),
+    );
+  }
+  if (c.leftTheDraw.isNotEmpty) {
+    final names = ParticipantsController.andList(c.leftTheDraw);
+    banners.add(
+      PageBanner(
+        key: const ValueKey('banner-redo-draw'),
+        kind: PageBannerKind.status,
+        icon: Icons.grid_view,
+        shape: PageBannerShape.card,
+        title: 'The draw needs redoing',
+        text:
+            '$names ${c.leftTheDraw.length == 1 ? 'was' : 'were'} in the '
+            'draw and ${c.leftTheDraw.length == 1 ? 'has' : 'have'} no scores, '
+            'so their places were '
+            'removed from it. The groups are not balanced for the pilots '
+            'who are left until the matrix is drawn again.',
+        actionLabel: 'Redo the draw',
+        onAction: onRedoDraw,
+        secondaryLabel: 'Dismiss',
+        onSecondary: c.dismissLeftTheDraw,
       ),
     );
   }

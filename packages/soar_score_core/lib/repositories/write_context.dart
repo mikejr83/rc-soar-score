@@ -29,6 +29,18 @@ abstract interface class WriteContext {
     required MutationMetadata metadata,
   });
 
+  /// Removes [assignment] and records a `Tombstone` and a `MutationRecord`.
+  ///
+  /// Assignments are append-only, so this is for one case: a pilot with no
+  /// scores leaves the contest (or stops flying) after the draw and their
+  /// matrix rows go with them. The matrix revision is not changed. Does
+  /// nothing when the assignment is not stored. The caller removes the
+  /// assignment's score placeholder first.
+  Future<void> removeAssignment(
+    MatrixAssignment assignment, {
+    required MutationMetadata metadata,
+  });
+
   /// Stores a new director-owned landing [table] with its entries and records
   /// one `MutationRecord` whose payload carries the entries too.
   ///

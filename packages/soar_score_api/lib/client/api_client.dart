@@ -465,7 +465,9 @@ class ApiClient {
   /// `PUT /api/v1/contests/{id}/participations/{participationId}` — changes
   /// the role, classification or retirement of a participation. A changed
   /// retirement recalculates the results; when that fails the answer carries
-  /// [ParticipationUpdateResult.recalculationWarning].
+  /// [ParticipationUpdateResult.recalculationWarning]. A pilot with no scores
+  /// who becomes a non-flier gives up their matrix rows
+  /// ([ParticipationUpdateResult.matrixRowsRemoved]).
   Future<ParticipationUpdateResult> updateParticipation(
     Id id,
     Id participationId,
@@ -485,13 +487,23 @@ class ApiClient {
   /// `DELETE /api/v1/contests/{id}/participations/{participationId}` —
   /// removes a participant from the contest.
   ///
-  /// One with flight assignments is an [ApiHttpError] with status 409.
-  Future<void> removeParticipation(Id id, Id participationId) async {
-    await _send(
-      'DELETE',
-      _resolve(
-        '/api/v1/contests/${id.value}/participations/${participationId.value}',
-      ),
+  /// A pilot with matrix rows but no scores leaves with them
+  /// ([ParticipationRemoveResult.matrixRowsRemoved]); the draw then needs
+  /// redoing. One with a score is an [ApiHttpError] with status 409 and code
+  /// `has_scores`.
+  Future<ParticipationRemoveResult> removeParticipation(
+    Id id,
+    Id participationId,
+  ) async {
+    final uri = _resolve(
+      '/api/v1/contests/${id.value}/participations/${participationId.value}',
+    );
+    final response = await _send('DELETE', uri);
+    if (response.bodyBytes.isEmpty) return const ParticipationRemoveResult();
+    return _decode<ParticipationRemoveResult>(
+      response,
+      uri,
+      ParticipationRemoveResult.fromJson,
     );
   }
 
@@ -619,10 +631,7 @@ class ApiClient {
   ///
   /// A contest or revision that does not exist, or a revision that belongs
   /// to a different contest, is an [ApiHttpError] with status 404.
-  Future<CurrentMatrix> matrixRevision(
-    Id id,
-    Id revisionId,
-  ) async {
+  Future<CurrentMatrix> matrixRevision(Id id, Id revisionId) async {
     final uri = _resolve(
       '/api/v1/contests/${id.value}/matrix/revisions/${revisionId.value}',
     );

@@ -56,6 +56,11 @@ class ParticipantsPageData {
   /// Whether the pilot of [participation] has a score in any round.
   bool hasFlights(Id participation) => _withScores.contains(participation);
 
+  /// Whether the matrix has a place for the pilot of [participation].
+  bool hasMatrixRows(Id participation) => base.matrix.assignments.any(
+    (assignment) => assignment.contestParticipationId == participation,
+  );
+
   /// The options turned on for the contest. Without a saved configuration
   /// nothing optional is on.
   Set<ParticipantOption> get options {

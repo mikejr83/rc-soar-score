@@ -126,22 +126,24 @@ void main() {
   });
 
   test('matrixRevisions GETs the list and decodes the summaries', () async {
-    final client = clientFor((_) => body({
-      'revisions': [
-        {
-          'id': revisionId.value,
-          'revision_number': 1,
-          'created_at': '2026-10-17T14:00:00.000Z',
-          'reason': 'initial draw',
-          'created_by': contestId.value,
-          'first_round': 1,
-          'last_round': 3,
-          'algorithm_version': '1.0.0',
-          'random_seed': 7,
-          'fairness_score': 0.15,
-        },
-      ],
-    }));
+    final client = clientFor(
+      (_) => body({
+        'revisions': [
+          {
+            'id': revisionId.value,
+            'revision_number': 1,
+            'created_at': '2026-10-17T14:00:00.000Z',
+            'reason': 'initial draw',
+            'created_by': contestId.value,
+            'first_round': 1,
+            'last_round': 3,
+            'algorithm_version': '1.0.0',
+            'random_seed': 7,
+            'fairness_score': 0.15,
+          },
+        ],
+      }),
+    );
 
     final revisions = await client.matrixRevisions(contestId);
 
@@ -157,10 +159,7 @@ void main() {
     expect(revisions.first.algorithmVersion, '1.0.0');
     expect(revisions.first.randomSeed, 7);
     expect(revisions.first.fairnessScore, 0.15);
-    expect(
-      revisions.first.createdAt,
-      DateTime.utc(2026, 10, 17, 14),
-    );
+    expect(revisions.first.createdAt, DateTime.utc(2026, 10, 17, 14));
   });
 
   test('matrixRevisions is an empty list before a draw', () async {
@@ -175,20 +174,14 @@ void main() {
     final matrix = await client.matrixRevision(contestId, revisionId);
 
     expect(seen.method, 'GET');
-    expect(
-      seen.url.path,
-      '$matrixPath/revisions/${revisionId.value}',
-    );
+    expect(seen.url.path, '$matrixPath/revisions/${revisionId.value}');
     expect(matrix.isEmpty, isTrue);
   });
 
   test('a revision the server does not know is an ApiHttpError 404', () async {
     final client = clientFor(
       (_) => body({
-        'error': {
-          'code': 'not_found',
-          'message': 'no such matrix revision',
-        },
+        'error': {'code': 'not_found', 'message': 'no such matrix revision'},
       }, 404),
     );
 

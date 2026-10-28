@@ -421,7 +421,10 @@ class MutationProcessor {
 
   Future<MutationResult> _delete(_Step s) async {
     final stored = s.stored;
-    if (s.kind.shape == SyncEntityShape.appendOnly) {
+    // An unscored pilot's matrix rows go with them when they leave the
+    // contest or stop flying after the draw.
+    if (s.kind.shape == SyncEntityShape.appendOnly &&
+        s.m.entityType != 'MatrixAssignment') {
       return _log.reject(
         s.tx,
         s.ctx,

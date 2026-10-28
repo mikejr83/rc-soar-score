@@ -116,38 +116,38 @@ void main() {
   });
 
   group('reading a revision', () {
-    test('returns one superseded revision with its original assignments',
-        () async {
-      await drawn();
-      final before = await api.json(
-        await api.send('GET', '/contests/$_contestId/matrix'),
-      );
-      await redraw();
+    test(
+      'returns one superseded revision with its original assignments',
+      () async {
+        await drawn();
+        final before = await api.json(
+          await api.send('GET', '/contests/$_contestId/matrix'),
+        );
+        await redraw();
 
-      final body = await readRevision(_firstRevisionId);
-      expect((body['revision'] as Map)['id'], _firstRevisionId);
-      final roundIds = {
-        for (final r in (body['rounds'] as List).cast<Map>()) r['id'],
-      };
-      // Only the first revision's rounds, not the added ones.
-      expect(roundIds, hasLength(3));
-      // Each group belongs to a round of this revision.
-      final groups = (body['groups'] as List).cast<Map>();
-      for (final group in groups) {
-        expect(roundIds, contains(group['round_id']));
-      }
-      // Round 2's placements survive the redraw untouched.
-      final round2Body =
-          (body['rounds'] as List).cast<Map>().firstWhere(
-            (r) => r['ordinal'] == 2,
-          );
-      final round2Before =
-          (before['rounds'] as List).cast<Map>().firstWhere(
-            (r) => r['ordinal'] == 2,
-          );
-      expect(placement(body, round2Body), placement(before, round2Before));
-      expect(body['progress'], isEmpty);
-    });
+        final body = await readRevision(_firstRevisionId);
+        expect((body['revision'] as Map)['id'], _firstRevisionId);
+        final roundIds = {
+          for (final r in (body['rounds'] as List).cast<Map>()) r['id'],
+        };
+        // Only the first revision's rounds, not the added ones.
+        expect(roundIds, hasLength(3));
+        // Each group belongs to a round of this revision.
+        final groups = (body['groups'] as List).cast<Map>();
+        for (final group in groups) {
+          expect(roundIds, contains(group['round_id']));
+        }
+        // Round 2's placements survive the redraw untouched.
+        final round2Body = (body['rounds'] as List).cast<Map>().firstWhere(
+          (r) => r['ordinal'] == 2,
+        );
+        final round2Before = (before['rounds'] as List).cast<Map>().firstWhere(
+          (r) => r['ordinal'] == 2,
+        );
+        expect(placement(body, round2Body), placement(before, round2Before));
+        expect(body['progress'], isEmpty);
+      },
+    );
 
     test('of the latest revision equals the current matrix', () async {
       await drawn();
@@ -204,7 +204,11 @@ void main() {
         await api.send(
           'POST',
           '/participants',
-          body: {'id': matrixTestProfileId(6), 'first_name': 'P6', 'last_name': 'X'},
+          body: {
+            'id': matrixTestProfileId(6),
+            'first_name': 'P6',
+            'last_name': 'X',
+          },
         );
         await api.send(
           'POST',
@@ -241,13 +245,9 @@ void main() {
             .toList();
         expect(after1, hasLength(5));
         final byPilot = {
-          for (final a in after1)
-            a['contest_participation_id']: a['group'],
+          for (final a in after1) a['contest_participation_id']: a['group'],
         };
-        expect(
-          byPilot[source['contest_participation_id']],
-          source['group'],
-        );
+        expect(byPilot[source['contest_participation_id']], source['group']);
         expect(byPilot.containsKey(matrixTestParticipationId(6)), isFalse);
       },
     );

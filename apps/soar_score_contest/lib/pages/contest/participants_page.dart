@@ -143,18 +143,44 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
     final updated = row as StoredParticipant;
     final before = c.rows.where((r) => r.rowId == updated.rowId).firstOrNull;
     c.edit(updated);
+    final inDraw = before != null && c.inDraw(before);
     if (before != null &&
         before.isPilot &&
         !updated.isPilot &&
-        before.classification.trim().isNotEmpty) {
+        (before.classification.trim().isNotEmpty || inDraw)) {
       final ok = await confirmNonFlying(
         context,
         name: updated.name,
         roleName: updated.roleName,
         classification: before.classification,
+        inDraw: inDraw,
       );
       if (!ok) c.edit(before);
     }
+  }
+
+  /// The bulk role change. Making pilots who are in the draw non-flying
+  /// takes them out of it, so that asks first, like a single edit.
+  Future<void> _setRoleForSelected(Role role) async {
+    final c = _controller!;
+    if (role.type != RoleType.pilot) {
+      final leaving = [
+        for (final row in c.rows)
+          if (c.selection.contains(row.rowId) && c.inDraw(row)) row.name,
+      ];
+      if (leaving.isNotEmpty) {
+        final ok = await confirmNonFlying(
+          context,
+          name: ParticipantsController.andList(leaving),
+          roleName: role.displayName,
+          classification: '',
+          inDraw: true,
+          plural: leaving.length > 1,
+        );
+        if (!ok || !mounted) return;
+      }
+    }
+    c.setRoleForSelected(role);
   }
 
   Future<void> _addProfile(
@@ -257,6 +283,10 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
       context,
       names: names,
       contestName: c.contest?.name ?? 'this contest',
+      inDraw: [
+        for (final row in c.rows)
+          if (c.selection.contains(row.rowId) && c.inDraw(row)) row.name,
+      ],
     );
     if (ok && mounted) await c.removeSelected();
   }
@@ -349,6 +379,12 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
                               _goTo(contestMatrixPath(widget.contestId)),
                           onOpenScoring: () =>
                               _goTo(contestScoringPath(widget.contestId)),
+                          onRedoDraw: () => _goTo(
+                            contestMatrixPath(
+                              widget.contestId,
+                              intent: MatrixIntent.redraw,
+                            ),
+                          ),
                           onPlaceUnplaced: _placeUnplaced,
                           onShowClass: (row) =>
                               _showRow(row, ParticipantColumn.classification),
@@ -456,7 +492,7 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
               : null,
           onTeam: c.setTeamForSelected,
           onClass: c.setClassForSelected,
-          onRole: c.setRoleForSelected,
+          onRole: _setRoleForSelected,
         ),
         const SizedBox(height: 12),
       ],

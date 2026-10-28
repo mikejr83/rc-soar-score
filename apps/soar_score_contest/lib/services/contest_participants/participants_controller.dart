@@ -67,6 +67,11 @@ class ParticipantsController extends ChangeNotifier {
   /// What the last removal left behind.
   RemoveResult? lastRemoval;
 
+  /// People who left the draw since the page opened (removed, or changed to
+  /// a non-flying role) while they had places in it but no scores. The draw
+  /// then needs redoing, and the page says so until dismissed.
+  List<String> leftTheDraw = const [];
+
   /// Where the last pilot added after the draw was put in the rounds.
   PlacementReport? lastPlacement;
 
@@ -158,6 +163,14 @@ class ParticipantsController extends ChangeNotifier {
   /// Whether the pilot has a score in any round.
   bool hasFlights(StoredParticipant row) =>
       rules.isScoring(row) && (data?.hasFlights(row.id) ?? false);
+
+  /// Whether the matrix has a place for the pilot, who has no score. Removing
+  /// them, or making them non-flying, takes those places out of the draw.
+  bool inDraw(StoredParticipant row) =>
+      rules.isScoring(row) && !hasFlights(row) && _hasMatrixRows(row);
+
+  bool _hasMatrixRows(StoredParticipant row) =>
+      data?.hasMatrixRows(row.id) ?? false;
 
   /// Pilots added after the draw and not in a group yet.
   List<StoredParticipant> get unplaced => [
@@ -374,6 +387,7 @@ class ParticipantsController extends ChangeNotifier {
     }
     notifyListeners();
     var ok = 0;
+    final left = <String>[];
     final touched = <String>[];
     final warnings = <String>{};
     for (final id in ids) {
@@ -384,6 +398,7 @@ class ParticipantsController extends ChangeNotifier {
       // A step that went through before a later one failed has already
       // changed the results, so its notice counts for a failed row too.
       if (result.warning != null) warnings.add(result.warning!);
+      if (result.matrixRowsRemoved > 0) left.add(saved.name);
       if (result.failure == null) {
         ok++;
         // A non-flier who became a pilot after the draw joins the rounds.
@@ -396,6 +411,14 @@ class ParticipantsController extends ChangeNotifier {
       notifyListeners();
     }
     saving = false;
+    if (left.isNotEmpty) {
+      leftTheDraw = [...leftTheDraw, ...left];
+      try {
+        await _read();
+      } on Object {
+        // The next load shows the matrix as it is.
+      }
+    }
     recalculated = touched;
     recalculationWarning = warnings.isEmpty ? null : warnings.join(' ');
     message = ok == 0 ? null : '$ok participant${ok == 1 ? '' : 's'} saved.';
@@ -412,7 +435,8 @@ class ParticipantsController extends ChangeNotifier {
     return '${row.name}’s $what';
   }
 
-  Future<({RowState? failure, String? warning})> _saveRow(
+  Future<({RowState? failure, String? warning, int matrixRowsRemoved})>
+  _saveRow(
     StoredParticipant saved,
     StoredParticipant draft,
     Set<ParticipantCell> changed,
@@ -421,6 +445,7 @@ class ParticipantsController extends ChangeNotifier {
     var membershipId = saved.membershipId;
     var team = saved.team;
     String? warning;
+    var rowsRemoved = 0;
     // Keeps what already went through, so a retry starts from it.
     void remember() {
       final progress = StoredParticipant(
@@ -467,6 +492,7 @@ class ParticipantsController extends ChangeNotifier {
         );
         participation = result.participation;
         warning = result.recalculationWarning;
+        rowsRemoved = result.matrixRowsRemoved;
         remember();
       }
       if (changed.contains(ParticipantCell.team)) {
@@ -495,7 +521,7 @@ class ParticipantsController extends ChangeNotifier {
         }
       }
       remember();
-      return (failure: null, warning: warning);
+      return (failure: null, warning: warning, matrixRowsRemoved: rowsRemoved);
     } on Object catch (error) {
       remember();
       final stale =
@@ -506,6 +532,7 @@ class ParticipantsController extends ChangeNotifier {
           message: apiErrorTextOf(error),
         ),
         warning: warning,
+        matrixRowsRemoved: rowsRemoved,
       );
     }
   }
@@ -601,11 +628,13 @@ class ParticipantsController extends ChangeNotifier {
         if (selection.contains(r.rowId)) r,
     ];
     final removed = <String>[];
+    final left = <String>[];
     final refused = <({String name, String reason})>[];
     for (final row in targets) {
       try {
-        await client.removeParticipation(contestId, row.id);
+        final result = await client.removeParticipation(contestId, row.id);
         removed.add(row.name);
+        if (result.matrixRowsRemoved > 0) left.add(row.name);
         _drafts.remove(row.rowId);
       } on Object catch (error) {
         refused.add((name: row.name, reason: apiErrorTextOf(error)));
@@ -614,6 +643,7 @@ class ParticipantsController extends ChangeNotifier {
     selection.clear();
     final result = RemoveResult(removed: removed, refused: refused);
     lastRemoval = result;
+    leftTheDraw = [...leftTheDraw, ...left];
     await reload();
     if (removed.isNotEmpty) {
       message = '${_andList(removed)} removed from the contest.';
@@ -653,6 +683,11 @@ class ParticipantsController extends ChangeNotifier {
 
   void dismissPlacement() {
     lastPlacement = null;
+    notifyListeners();
+  }
+
+  void dismissLeftTheDraw() {
+    leftTheDraw = const [];
     notifyListeners();
   }
 

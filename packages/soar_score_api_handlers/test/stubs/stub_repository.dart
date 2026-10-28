@@ -144,6 +144,10 @@ class StubRepository implements core.Repository {
   core.ResultsRepository get resultsRepository => results;
 
   @override
+  core.ReFlightParticipantRepository get reFlightParticipantRepository =>
+      StubReFlightParticipantRepository();
+
+  @override
   dynamic noSuchMethod(Invocation invocation) =>
       throw UnimplementedError('${invocation.memberName} is not stubbed');
 }
