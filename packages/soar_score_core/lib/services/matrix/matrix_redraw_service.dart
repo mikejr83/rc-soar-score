@@ -22,6 +22,7 @@ import 'basic_draw.dart';
 import 'draw_engine.dart';
 import 'draw_job.dart';
 import 'draw_optimizer.dart';
+import 'matrix_draw_audit.dart';
 import 'matrix_draw_builder.dart';
 import 'matrix_service.dart';
 
@@ -37,7 +38,8 @@ import 'matrix_service.dart';
 /// fairness report covers every round. A redraw replaces every round from
 /// [redraw]'s `firstRound` to the end of the contest, which is only allowed
 /// while none of them has a score; an extension has `firstRound` one past the
-/// last round. See `plan/data-model/entities/matrix_revision.md`.
+/// last round. Each leaves one `MatrixDrawn` audit event, stored with it. See
+/// `plan/data-model/entities/matrix_revision.md`.
 class MatrixRedrawService {
   MatrixRedrawService(
     this.repository, {
@@ -250,6 +252,7 @@ class MatrixRedrawService {
       );
     }
 
+    final now = _clock();
     final extension = firstRound == lastRound + 1;
     final built = MatrixDrawBuilder(newId: _newId).build(
       contestId: contestId,
@@ -276,7 +279,7 @@ class MatrixRedrawService {
       fairness: drawn.fairness,
       reason: _blankToNull(reason) ?? _defaultReason(extension, firstRound),
       actorId: actorId,
-      now: _clock(),
+      now: now,
       drawMode: seeded ? DrawMode.seededManOnMan : DrawMode.standardManOnMan,
       seedingStandings: standings,
     );
@@ -294,6 +297,12 @@ class MatrixRedrawService {
         ],
       ),
       metadata: metadata,
+      audit: MatrixDrawAudit.event(
+        id: _newId(),
+        revision: built.draw.revision,
+        metadata: metadata,
+        at: now,
+      ),
     );
     return MatrixService(repository).current(contestId);
   }

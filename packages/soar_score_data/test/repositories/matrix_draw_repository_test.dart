@@ -281,6 +281,47 @@ void _tests(Backend backend) {
       );
     });
 
+    core.AuditEvent drawAudit(core.MatrixRevision revision) => core.AuditEvent(
+      id: core.Id.create(),
+      entityType: 'MatrixRevision',
+      entityId: revision.id,
+      contestId: revision.contestId,
+      action: core.AuditAction.matrixDrawn,
+      authority: core.Authority.director,
+      resultingRevision: revision.revisionNumber,
+      serverTimestamp: DateTime.utc(2026, 10, 28),
+      outcome: core.AuditOutcome.success,
+    );
+
+    test('appendFinalizedDraw stores its audit event with the draw', () async {
+      final finalized = await newFinalized();
+      final audit = drawAudit(finalized.draw.revision);
+
+      await repo.appendFinalizedDraw(
+        finalized,
+        metadata: metadata(),
+        audit: audit,
+      );
+
+      expect(await repository.auditEventRepository.findById(audit.id), audit);
+    });
+
+    test('appendFinalizedDraw stores no audit event when the draw is '
+        'refused', () async {
+      final taken = (await repository.scorePlaceholderRepository.listForContest(
+        example.contestId,
+      )).first;
+      final finalized = await newFinalized(placeholderId: taken.id.value);
+      final audit = drawAudit(finalized.draw.revision);
+
+      await expectLater(
+        repo.appendFinalizedDraw(finalized, metadata: metadata(), audit: audit),
+        throwsA(anything),
+      );
+
+      expect(await repository.auditEventRepository.findById(audit.id), isNull);
+    });
+
     test('listForContest and latestForContest order by number', () async {
       final draw = newDraw();
       await repo.appendDraw(draw, metadata: metadata());

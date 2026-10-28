@@ -284,6 +284,40 @@ void main() {
 
       await expectLater(save(input()), throwsA(isA<ContestStateError>()));
       expect(revisions.stored, isEmpty);
+      expect(contests.audits, isEmpty);
+    });
+
+    test('each save leaves one ConfigurationSaved event', () async {
+      final first = await save(input());
+      final second = await save(
+        input(base: 1, discipline: {'working_time': 480}),
+        key: 'm2',
+      );
+
+      expect(contests.audits, hasLength(2));
+      final event = contests.audits.last;
+      expect(event.action, AuditAction.configurationSaved);
+      expect(event.entityType, 'ContestConfigurationRevision');
+      expect(event.entityId, second.revision.id);
+      expect(event.contestId, contestId);
+      expect(event.actorId, owner);
+      expect(event.authority, Authority.director);
+      expect(event.baseRevision, 1);
+      expect(event.resultingRevision, 2);
+      expect(event.serverTimestamp, now);
+      expect(event.outcome, AuditOutcome.success);
+      expect(contests.audits.first.entityId, first.revision.id);
+      expect(contests.audits.first.baseRevision, isNull);
+      expect(contests.audits.first.resultingRevision, 1);
+    });
+
+    test('a refused save leaves no event', () async {
+      await save(input());
+      await expectLater(
+        save(input(base: 0), key: 'm2'),
+        throwsA(isA<StaleRevisionError>()),
+      );
+      expect(contests.audits, hasLength(1));
     });
   });
 

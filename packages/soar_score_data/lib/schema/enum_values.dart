@@ -71,6 +71,8 @@ const auditActionValues = [
   'Deletion',
   'Restoration',
   'InstallationActivation',
+  'ConfigurationSaved',
+  'MatrixDrawn',
 ];
 
 /// `AuditOutcome`.

@@ -40,10 +40,12 @@ class StubConfigurationRevisionRepository
     ContestConfigurationRevision revision, {
     required Contest contest,
     required MutationMetadata metadata,
+    AuditEvent? audit,
   }) async {
     final savedContest = await contests.save(
       contest,
       metadata: metadata.forPart(contest.id.value),
+      audit: audit,
     );
     stored.add(revision);
     return SavedConfiguration(revision: revision, contest: savedContest);
