@@ -130,6 +130,11 @@ class StubRoundRepository implements RoundRepository {
         ..sort((a, b) => a.ordinal.compareTo(b.ordinal));
 
   @override
+  Future<List<Round>> listForRevision(Id matrixRevisionId) async =>
+      rounds.where((r) => r.matrixRevisionId == matrixRevisionId).toList()
+        ..sort((a, b) => a.ordinal.compareTo(b.ordinal));
+
+  @override
   dynamic noSuchMethod(Invocation invocation) =>
       throw UnimplementedError('${invocation.memberName} is not stubbed');
 }

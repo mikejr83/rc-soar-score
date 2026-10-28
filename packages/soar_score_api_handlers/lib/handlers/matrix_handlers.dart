@@ -14,6 +14,10 @@ import 'package:soar_score_core/soar_score_core.dart';
 /// - `GET /contests/{id}/matrix` is the current matrix: the latest finalized
 ///   revision with its rounds, groups and assignments, empty before the first
 ///   draw;
+/// - `GET /contests/{id}/matrix/revisions` lists every matrix revision,
+///   newest first, and `GET /contests/{id}/matrix/revisions/{revisionId}`
+///   reads one of them back with its rounds, groups and the original
+///   assignments, so history can be shown read-only;
 /// - `POST /contests/{id}/matrix/draws` draws and finalizes the first matrix,
 ///   which moves a `Configuring` contest to `Ready` and numbers the
 ///   participants;
@@ -54,6 +58,32 @@ void addMatrixRoutes(
     final contestId = Id.parse(id);
     await requireContestDirector(request, repository, contestId);
     final matrix = await service.current(contestId);
+    return jsonResponse(matrix.toJson());
+  });
+
+  router.get('/contests/<id>/matrix/revisions', (
+    Request request,
+    String id,
+  ) async {
+    final contestId = Id.parse(id);
+    await requireContestDirector(request, repository, contestId);
+    final revisions = await service.revisions(contestId);
+    return jsonResponse(<String, dynamic>{
+      'revisions': [
+        for (final revision in revisions)
+          MatrixRevisionSummary.of(revision).toJson(),
+      ],
+    });
+  });
+
+  router.get('/contests/<id>/matrix/revisions/<revisionId>', (
+    Request request,
+    String id,
+    String revisionId,
+  ) async {
+    final contestId = Id.parse(id);
+    await requireContestDirector(request, repository, contestId);
+    final matrix = await service.revision(contestId, Id.parse(revisionId));
     return jsonResponse(matrix.toJson());
   });
 

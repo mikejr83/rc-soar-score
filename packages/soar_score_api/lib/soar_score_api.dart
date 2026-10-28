@@ -26,6 +26,7 @@ export 'dto/health_dto.dart';
 export 'dto/import_gliderscore_request.dart';
 export 'dto/local_account_claim_dto.dart';
 export 'dto/late_add_request.dart';
+export 'dto/matrix_revision_summary.dart';
 export 'dto/move_assignment_request.dart';
 export 'dto/public_publication_dto.dart';
 export 'dto/public_publication_summary_dto.dart';

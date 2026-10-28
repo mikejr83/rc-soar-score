@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import '../../enums/admin_lock.dart';
+import '../../enums/assignment_type.dart';
 import '../../enums/lifecycle_state.dart';
 import '../../errors/contest_state_error.dart';
 import '../../errors/entity_not_found_error.dart';
@@ -17,6 +18,7 @@ import '../../repositories/repository.dart';
 import '../../enums/draw_mode.dart';
 import 'basic_draw.dart';
 import '../../models/matrix/current_matrix.dart';
+import '../../models/matrix/matrix_revision.dart';
 import 'draw_engine.dart';
 import 'draw_job.dart';
 import 'draw_optimizer.dart';
@@ -114,6 +116,55 @@ class MatrixService {
       groups: groups,
       assignments: assignments,
       progress: progress,
+    );
+  }
+
+  /// Every matrix revision of contest [contestId], newest first; empty before
+  /// the first draw.
+  ///
+  /// Throws an [EntityNotFoundError] when the contest does not exist.
+  Future<List<MatrixRevision>> revisions(Id contestId) async {
+    await _requireContest(contestId);
+    final all = await repository
+        .matrixRevisionRepository
+        .listForContest(contestId);
+    return all.reversed.toList();
+  }
+
+  /// One stored matrix revision with its rounds, groups and the assignments
+  /// the draw made — its `Original` rows. A read-only history view: it shows
+  /// the revision exactly as drawn, so it shows no progress and drops the
+  /// moves, re-flights and late adds made after the draw; a pilot that was
+  /// later moved still appears in the group the draw placed them in.
+  ///
+  /// Throws an [EntityNotFoundError] when the contest or the revision does
+  /// not exist, or the revision belongs to a different contest.
+  Future<CurrentMatrix> revision(Id contestId, Id revisionId) async {
+    await _requireContest(contestId);
+    final revision =
+        await repository.matrixRevisionRepository.findById(revisionId);
+    if (revision == null || revision.contestId != contestId) {
+      throw EntityNotFoundError(
+        entityType: 'MatrixRevision',
+        entityId: revisionId,
+      );
+    }
+    final rounds = await repository.roundRepository.listForRevision(revisionId);
+    final roundIds = {for (final round in rounds) round.id};
+    final groups = (await repository.roundGroupRepository.listForContest(
+      contestId,
+    )).where((group) => roundIds.contains(group.roundId));
+    final assignments = (await repository
+        .matrixAssignmentRepository
+        .listForRevision(revisionId))
+        .where((assignment) =>
+            assignment.assignmentType == AssignmentType.original)
+        .toList();
+    return CurrentMatrix(
+      revision: revision,
+      rounds: rounds,
+      groups: groups,
+      assignments: assignments,
     );
   }
 
