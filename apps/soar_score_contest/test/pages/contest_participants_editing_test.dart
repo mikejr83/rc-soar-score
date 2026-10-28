@@ -303,4 +303,28 @@ void main() {
     expect(find.text('Results are recalculated'), findsOneWidget);
     expect(find.textContaining('the results are stale'), findsOneWidget);
   });
+
+  testWidgets('a notice from leaving the old team survives a failed join', (
+    tester,
+  ) async {
+    final server =
+        ParticipantsServer(state: LifecycleState.running, drawn: true)
+          ..warning = 'Recalculation failed after a team change; stale'
+          ..membershipAddFailure = 500;
+    await pumpParticipantsPage(tester, server);
+    await _type(tester, _field('team', 1), 'harbor hawks');
+
+    await tester.tap(_save());
+    await tester.pumpAndSettle();
+
+    // The old membership is gone, so the results may be stale even though
+    // the row did not save.
+    expect(server.membershipRemovals, hasLength(1));
+    expect(
+      find.descendant(of: _status(1), matching: find.text('Not saved')),
+      findsOneWidget,
+    );
+    expect(find.text('Results are recalculated'), findsOneWidget);
+    expect(find.textContaining('team change; stale'), findsOneWidget);
+  });
 }

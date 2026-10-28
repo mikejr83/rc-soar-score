@@ -104,6 +104,9 @@ class ParticipantsServer {
   /// Fails every addition with this status when set.
   int? addFailure;
 
+  /// Fails every team membership addition with this status when set.
+  int? membershipAddFailure;
+
   /// Answers every removal of these participations with a 409.
   final Set<Id> removalRefused = {};
 
@@ -198,6 +201,13 @@ class ParticipantsServer {
     }
     if (path.endsWith('/team-memberships') && method == 'POST') {
       membershipAdds.add(body);
+      if (membershipAddFailure != null) {
+        return _error(
+          membershipAddFailure!,
+          'internal_error',
+          'The server failed.',
+        );
+      }
       final membership = TeamMembership(
         id: Id.parse(body['id']! as String),
         teamId: Id.parse(body['team_id']! as String),

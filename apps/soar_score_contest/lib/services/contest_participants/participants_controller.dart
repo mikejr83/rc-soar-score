@@ -370,10 +370,12 @@ class ParticipantsController extends ChangeNotifier {
       final draft = _drafts[id]!;
       final changed = draft.changedFrom(saved);
       final result = await _saveRow(saved, draft, changed);
+      // A step that went through before a later one failed has already
+      // changed the results, so its notice counts for a failed row too.
+      if (result.warning != null) warnings.add(result.warning!);
       if (result.failure == null) {
         ok++;
         if (running) touched.add(_recalcLabel(draft, changed));
-        if (result.warning != null) warnings.add(result.warning!);
         _states[id] = const RowState(RowOutcome.saved);
       } else {
         _states[id] = result.failure!;
