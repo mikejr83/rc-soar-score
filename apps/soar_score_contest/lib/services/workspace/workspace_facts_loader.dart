@@ -37,14 +37,14 @@ abstract final class WorkspaceFactsLoader {
       _landingTables(client, unavailable),
       _audit(client, contest, actingAccountId),
     ]);
-    final audit = results[4]! as (TransitionFacts, ActivityFacts);
+    final audit = results[4]! as _AuditFacts;
     return WorkspaceFacts.derive(
       data: results[0]! as MatrixPageData,
       scores: results[1] as ContestScores?,
       publication: results[2]! as PublicationFacts,
       landingTables: results[3] as List<LandingTableView>?,
-      transitions: audit.$1,
-      activity: audit.$2,
+      transitions: audit.transitions,
+      activity: audit.activity,
       unavailable: unavailable,
       isOffline: isOffline,
     );
@@ -63,41 +63,59 @@ abstract final class WorkspaceFactsLoader {
     }
   }
 
-  /// Reads the audit trail once for the completion and lock facts and the
-  /// activity card: every state transition, plus the newest publication
-  /// events. Asking by action keeps other events (score edits, say) from
-  /// pushing the ones listed out of a limited read.
+  /// Reads the audit trail for the completion and lock facts and the activity
+  /// card: every state transition, plus the newest publication events. Asking
+  /// by action keeps other events (score edits, say) from pushing the ones
+  /// listed out of a limited read, and the server applies no limit unless one
+  /// is passed, so no transition is cut off.
   ///
-  /// A failed read leaves the transition facts unknown and marks the
-  /// activity as failed; the rest of the page still loads.
-  static Future<(TransitionFacts, ActivityFacts)> _audit(
+  /// The two reads fail on their own: a failed publication read still leaves
+  /// the transition facts known, and marks only the activity as failed.
+  static Future<_AuditFacts> _audit(
     ApiClient client,
     Contest contest,
     String? actingAccountId,
   ) async {
+    final (transitions, publications) = await (
+      _auditEvents(client, contest, AuditAction.stateTransition),
+      _auditEvents(
+        client,
+        contest,
+        AuditAction.publicationAttempt,
+        limit: ActivityFacts.shown,
+      ),
+    ).wait;
+    return _AuditFacts(
+      transitions: transitions == null
+          ? TransitionFacts.unknown
+          : TransitionFacts.of(
+              contest,
+              transitions,
+              actingAccountId: actingAccountId,
+            ),
+      activity: transitions == null || publications == null
+          ? ActivityFacts.unavailable
+          : ActivityFacts.of([
+              ...transitions,
+              ...publications,
+            ], actingAccountId: actingAccountId),
+    );
+  }
+
+  static Future<List<AuditEventDto>?> _auditEvents(
+    ApiClient client,
+    Contest contest,
+    AuditAction action, {
+    int? limit,
+  }) async {
     try {
-      final (transitions, publications) = await (
-        client.auditEvents(contest.id, action: AuditAction.stateTransition),
-        client.auditEvents(
-          contest.id,
-          action: AuditAction.publicationAttempt,
-          limit: ActivityFacts.shown,
-        ),
-      ).wait;
-      return (
-        TransitionFacts.of(
-          contest,
-          transitions,
-          actingAccountId: actingAccountId,
-        ),
-        ActivityFacts.of([
-          ...transitions,
-          ...publications,
-        ], actingAccountId: actingAccountId),
-      );
+      return await client.auditEvents(contest.id, action: action, limit: limit);
     } on Object catch (error) {
-      _logger.warning('Could not read the audit trail of ${contest.id}', error);
-      return (TransitionFacts.unknown, ActivityFacts.unavailable);
+      _logger.warning(
+        'Could not read the ${action.name} audit events of ${contest.id}',
+        error,
+      );
+      return null;
     }
   }
 
@@ -136,4 +154,12 @@ abstract final class WorkspaceFactsLoader {
     unavailable.add(WorkspaceFactSource.publication);
     return PublicationFacts.unknown;
   }
+}
+
+/// What one audit read yields for the workspace.
+class _AuditFacts {
+  const _AuditFacts({required this.transitions, required this.activity});
+
+  final TransitionFacts transitions;
+  final ActivityFacts activity;
 }

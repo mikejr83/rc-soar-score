@@ -35,6 +35,7 @@ Future<WorkspaceFacts> _load({
   List<String>? requests,
   Contest? contest,
   int auditStatus = 200,
+  String? failingAuditAction,
   List<Map<String, Object?>> auditEvents = const [],
   String? actingAccountId,
 }) {
@@ -46,7 +47,10 @@ Future<WorkspaceFacts> _load({
       requests?.add(request.url.path);
       final path = request.url.path;
       if (path.endsWith('/audit-events')) {
-        return auditStatus == 200
+        final failing =
+            auditStatus != 200 ||
+            request.url.queryParameters['action'] == failingAuditAction;
+        return !failing
             ? _json({
                 'audit_events': [
                   for (final event in auditEvents)
@@ -58,7 +62,7 @@ Future<WorkspaceFacts> _load({
               })
             : _json({
                 'error': {'code': 'boom', 'message': 'Broken.'},
-              }, auditStatus);
+              }, auditStatus == 200 ? 500 : auditStatus);
       }
       if (path.endsWith('/scores')) {
         return scoresStatus == 200
@@ -252,6 +256,24 @@ void main() {
         ActivityKind.openScoring,
       ]);
       expect(facts.activity.entries.every((e) => e.byYou), isTrue);
+    });
+
+    test('a failed publication read keeps the transition facts and fails the '
+        'activity', () async {
+      final facts = await _load(
+        contest: matrixContest(
+          state: LifecycleState.running,
+          lock: AdminLock.locked,
+        ),
+        auditEvents: [event('lock', '2026-10-18T15:00:00.000Z')],
+        failingAuditAction: 'PublicationAttempt',
+        actingAccountId: director,
+      );
+
+      expect(facts.lockedAt, DateTime.utc(2026, 10, 18, 15));
+      expect(facts.lockedBy, 'you');
+      expect(facts.activity, ActivityFacts.unavailable);
+      expect(facts.unavailable, isEmpty);
     });
 
     test('a failed audit read marks only the activity as failed', () async {
