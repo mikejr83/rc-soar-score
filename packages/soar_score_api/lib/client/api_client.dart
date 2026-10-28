@@ -22,6 +22,7 @@ import '../dto/health_dto.dart';
 import '../dto/import_gliderscore_request.dart';
 import '../dto/local_account_claim_dto.dart';
 import '../dto/late_add_request.dart';
+import '../dto/matrix_revision_summary.dart';
 import '../dto/move_assignment_request.dart';
 import '../dto/public_publication_dto.dart';
 import '../dto/public_publication_summary_dto.dart';
@@ -582,6 +583,38 @@ class ApiClient {
   /// Empty (no revision) until the first draw.
   Future<CurrentMatrix> matrix(Id id) async {
     final uri = _resolve('/api/v1/contests/${id.value}/matrix');
+    final response = await _send('GET', uri);
+    return _decode<CurrentMatrix>(response, uri, CurrentMatrix.fromJson);
+  }
+
+  /// `GET /api/v1/contests/{id}/matrix/revisions` — every matrix
+  /// revision of contest [id], newest first; empty before the first draw.
+  Future<List<MatrixRevisionSummary>> matrixRevisions(Id id) async {
+    final uri = _resolve('/api/v1/contests/${id.value}/matrix/revisions');
+    final response = await _send('GET', uri);
+    return _decode<List<MatrixRevisionSummary>>(
+      response,
+      uri,
+      (json) => [
+        for (final item in json['revisions'] as List<dynamic>)
+          MatrixRevisionSummary.fromJson(item as Map<String, dynamic>),
+      ],
+    );
+  }
+
+  /// `GET /api/v1/contests/{id}/matrix/revisions/{revisionId}` — one
+  /// stored matrix revision with its rounds, groups and the original
+  /// assignments the draw made, for a read-only history view.
+  ///
+  /// A contest or revision that does not exist, or a revision that belongs
+  /// to a different contest, is an [ApiHttpError] with status 404.
+  Future<CurrentMatrix> matrixRevision(
+    Id id,
+    Id revisionId,
+  ) async {
+    final uri = _resolve(
+      '/api/v1/contests/${id.value}/matrix/revisions/${revisionId.value}',
+    );
     final response = await _send('GET', uri);
     return _decode<CurrentMatrix>(response, uri, CurrentMatrix.fromJson);
   }

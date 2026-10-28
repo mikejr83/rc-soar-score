@@ -125,6 +125,79 @@ void main() {
     );
   });
 
+  test('matrixRevisions GETs the list and decodes the summaries', () async {
+    final client = clientFor((_) => body({
+      'revisions': [
+        {
+          'id': revisionId.value,
+          'revision_number': 1,
+          'created_at': '2026-10-17T14:00:00.000Z',
+          'reason': 'initial draw',
+          'created_by': contestId.value,
+          'first_round': 1,
+          'last_round': 3,
+          'algorithm_version': '1.0.0',
+          'random_seed': 7,
+          'fairness_score': 0.15,
+        },
+      ],
+    }));
+
+    final revisions = await client.matrixRevisions(contestId);
+
+    expect(seen.method, 'GET');
+    expect(seen.url.path, '$matrixPath/revisions');
+    expect(revisions, hasLength(1));
+    expect(revisions.first.id, revisionId);
+    expect(revisions.first.revisionNumber, 1);
+    expect(revisions.first.reason, 'initial draw');
+    expect(revisions.first.createdBy, contestId);
+    expect(revisions.first.firstRound, 1);
+    expect(revisions.first.lastRound, 3);
+    expect(revisions.first.algorithmVersion, '1.0.0');
+    expect(revisions.first.randomSeed, 7);
+    expect(revisions.first.fairnessScore, 0.15);
+    expect(
+      revisions.first.createdAt,
+      DateTime.utc(2026, 10, 17, 14),
+    );
+  });
+
+  test('matrixRevisions is an empty list before a draw', () async {
+    final client = clientFor((_) => body({'revisions': <Object?>[]}));
+
+    expect(await client.matrixRevisions(contestId), isEmpty);
+  });
+
+  test('matrixRevision GETs one revision and decodes its matrix', () async {
+    final client = clientFor((_) => body(CurrentMatrix().toJson()));
+
+    final matrix = await client.matrixRevision(contestId, revisionId);
+
+    expect(seen.method, 'GET');
+    expect(
+      seen.url.path,
+      '$matrixPath/revisions/${revisionId.value}',
+    );
+    expect(matrix.isEmpty, isTrue);
+  });
+
+  test('a revision the server does not know is an ApiHttpError 404', () async {
+    final client = clientFor(
+      (_) => body({
+        'error': {
+          'code': 'not_found',
+          'message': 'no such matrix revision',
+        },
+      }, 404),
+    );
+
+    await expectLater(
+      client.matrixRevision(contestId, revisionId),
+      throwsA(isA<ApiHttpError>().having((e) => e.statusCode, 'status', 404)),
+    );
+  });
+
   test('moveAssignment POSTs the move and decodes the matrix', () async {
     final client = clientFor((_) => body(CurrentMatrix().toJson(), 201));
     final assignmentId = Id.parse('019c0000-0000-7000-8000-000000000601');
