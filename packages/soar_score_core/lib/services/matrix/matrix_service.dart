@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import '../../enums/admin_lock.dart';
+import '../../enums/assignment_type.dart';
 import '../../enums/lifecycle_state.dart';
 import '../../errors/contest_state_error.dart';
 import '../../errors/entity_not_found_error.dart';
@@ -130,9 +131,11 @@ class MatrixService {
     return all.reversed.toList();
   }
 
-  /// One stored matrix revision with its rounds, groups and the original
-  /// assignments the draw made. A read-only history view: it shows no
-  /// progress and includes the revision's superseded rounds unchanged.
+  /// One stored matrix revision with its rounds, groups and the assignments
+  /// the draw made — its `Original` rows. A read-only history view: it shows
+  /// the revision exactly as drawn, so it shows no progress and drops the
+  /// moves, re-flights and late adds made after the draw; a pilot that was
+  /// later moved still appears in the group the draw placed them in.
   ///
   /// Throws an [EntityNotFoundError] when the contest or the revision does
   /// not exist, or the revision belongs to a different contest.
@@ -151,9 +154,12 @@ class MatrixService {
     final groups = (await repository.roundGroupRepository.listForContest(
       contestId,
     )).where((group) => roundIds.contains(group.roundId));
-    final assignments = await repository
+    final assignments = (await repository
         .matrixAssignmentRepository
-        .listForRevision(revisionId);
+        .listForRevision(revisionId))
+        .where((assignment) =>
+            assignment.assignmentType == AssignmentType.original)
+        .toList();
     return CurrentMatrix(
       revision: revision,
       rounds: rounds,

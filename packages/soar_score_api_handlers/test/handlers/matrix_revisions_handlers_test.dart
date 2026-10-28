@@ -166,6 +166,91 @@ void main() {
         (current['assignments'] as List).length,
       );
     });
+
+    test(
+      'shows the draw itself, not the moves and late adds made after it',
+      () async {
+        await drawnContest(api, pilots: 5);
+        final before = await api.json(
+          await api.send('GET', '/contests/$_contestId/matrix'),
+        );
+        final round1 = (before['rounds'] as List).cast<Map>().firstWhere(
+          (r) => r['ordinal'] == 1,
+        );
+        final inRound1 = (before['assignments'] as List)
+            .cast<Map>()
+            .where((a) => a['scheduled_round_id'] == round1['id'])
+            .toList();
+        final byGroup = <int, List<Map>>{};
+        for (final a in inRound1) {
+          byGroup.putIfAbsent(a['group'] as int, () => []).add(a);
+        }
+        // The group with an open spot and the one it moves into.
+        final open = byGroup.entries.firstWhere((e) => e.value.length < 3).key;
+        final into = byGroup.entries.firstWhere((e) => e.value.length == 3).key;
+        final source = byGroup[open]!.first;
+
+        // Move a pilot to the other group, and add a new pilot to round 1.
+        final move = await api.send(
+          'POST',
+          '/contests/$_contestId/matrix/assignments/${source['id']}/moves',
+          body: {
+            'id': '019c0000-0000-7000-8000-000000000901',
+            'group': into,
+            'reason': 'Wrong group',
+          },
+        );
+        expect(move.statusCode, 201, reason: '${await api.json(move)}');
+        await api.send(
+          'POST',
+          '/participants',
+          body: {'id': matrixTestProfileId(6), 'first_name': 'P6', 'last_name': 'X'},
+        );
+        await api.send(
+          'POST',
+          '/contests/$_contestId/participations',
+          body: {
+            'id': matrixTestParticipationId(6),
+            'participant_profile_id': matrixTestProfileId(6),
+            'role_id': SystemRoles.pilotId.value,
+          },
+        );
+        final add = await api.send(
+          'POST',
+          '/contests/$_contestId/matrix/late-adds',
+          body: {
+            'id': '019c0000-0000-7000-8000-000000000801',
+            'contest_participation_id': matrixTestParticipationId(6),
+            'scheduled_round_id': round1['id'],
+            'group': open,
+            'reason': 'Joined late',
+          },
+        );
+        expect(add.statusCode, 201, reason: '${await api.json(add)}');
+
+        final body = await readRevision(_firstRevisionId);
+        final rows = (body['assignments'] as List).cast<Map>();
+        // The fifteen rows the draw made, nothing more.
+        expect(rows, hasLength(15));
+        expect(rows.map((a) => a['assignment_type']), everyElement('Original'));
+        final ids = {for (final a in rows) a['id']};
+        expect(ids, hasLength(15));
+        // Round 1 is the draw's, with the moved pilot in the group drawn.
+        final after1 = rows
+            .where((a) => a['scheduled_round_id'] == round1['id'])
+            .toList();
+        expect(after1, hasLength(5));
+        final byPilot = {
+          for (final a in after1)
+            a['contest_participation_id']: a['group'],
+        };
+        expect(
+          byPilot[source['contest_participation_id']],
+          source['group'],
+        );
+        expect(byPilot.containsKey(matrixTestParticipationId(6)), isFalse);
+      },
+    );
   });
 
   group('refusals', () {
