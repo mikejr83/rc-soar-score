@@ -229,7 +229,11 @@ void main() {
       final list = await api.json(
         await api.send('GET', '/contests/$_contestId/team-memberships'),
       );
-      expect(list['team_memberships'], [membership]);
+      // The join answer also says whether a recalculation failed.
+      expect(membership['recalculation_warning'], isNull);
+      expect(list['team_memberships'], [
+        {...membership}..remove('recalculation_warning'),
+      ]);
     });
 
     test('repeating the request returns the same membership', () async {

@@ -19,7 +19,9 @@ import 'package:soar_score_core/soar_score_core.dart';
 ///
 /// A membership change recalculates the results when the contest has an
 /// official score, since team scores follow the memberships. The change is
-/// stored first; if the recalculation fails the results read as stale.
+/// stored first; if the recalculation fails the results read as stale and
+/// the response carries `recalculation_warning`: beside the membership on
+/// the POST, and as the body of a 200 on the DELETE (a 204 otherwise).
 ///
 /// The handlers only translate between HTTP and [TeamsService].
 ///
@@ -35,15 +37,17 @@ void addTeamRoutes(
   final recalculationService =
       recalculation ?? RecalculationService(ResultsService(repository));
 
-  Future<void> recalculateAfterMembership(Id contestId) async {
+  /// Recalculates after a membership change; the notice when it fails.
+  Future<String?> recalculateAfterMembership(Id contestId) async {
     // A contest with no official score has no results to go stale.
     final scores = await scoresService.list(contestId);
     if (scores.slots.any((slot) => slot.officialScore != null)) {
-      await recalculationService.recalculateAfterEntry(
+      return recalculationService.recalculateAfterEntry(
         contestId,
         cause: 'a team change',
       );
     }
+    return null;
   }
 
   router.get('/contests/<id>/teams', (Request request, String id) async {
@@ -136,8 +140,14 @@ void addTeamRoutes(
       participationId: body.contestParticipationId,
       metadata: writeMetadata(principal),
     );
-    await recalculateAfterMembership(contestId);
-    return jsonResponse(membership.toJson(), statusCode: 201);
+    final warning = await recalculateAfterMembership(contestId);
+    return jsonResponse(
+      TeamMembershipResult(
+        membership: membership,
+        recalculationWarning: warning,
+      ).toJson(),
+      statusCode: 201,
+    );
   });
 
   router.delete('/contests/<id>/team-memberships/<membershipId>', (
@@ -153,7 +163,8 @@ void addTeamRoutes(
       Id.parse(membershipId),
       metadata: writeMetadata(principal),
     );
-    await recalculateAfterMembership(contestId);
-    return Response(204);
+    final warning = await recalculateAfterMembership(contestId);
+    if (warning == null) return Response(204);
+    return jsonResponse(<String, dynamic>{'recalculation_warning': warning});
   });
 }

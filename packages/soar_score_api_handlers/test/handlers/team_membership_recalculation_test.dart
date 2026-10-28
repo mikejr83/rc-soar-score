@@ -54,14 +54,79 @@ void main() {
         'contest_participation_id': matrixTestParticipationId(2),
       },
     );
-    expect(join.statusCode, 201, reason: await api.json(join).toString());
+    expect(join.statusCode, 201);
     expect(recalculations, hasLength(1));
 
     final leave = await api.send(
       'DELETE',
       '/contests/$_contestId/team-memberships/$_membershipId',
     );
-    expect(leave.statusCode, 204);
+    expect(leave.statusCode, 200);
     expect(recalculations, hasLength(2));
+  });
+
+  test(
+    'a refused recalculation is reported on the join and the leave',
+    () async {
+      final api = await scoredContest();
+
+      final join = await api.send(
+        'POST',
+        '/contests/$_contestId/team-memberships',
+        body: {
+          'id': _membershipId,
+          'team_id': _teamId,
+          'contest_participation_id': matrixTestParticipationId(2),
+        },
+      );
+      expect(join.statusCode, 201);
+      final joined = await api.json(join);
+      expect(joined['id'], _membershipId);
+      expect(
+        joined['recalculation_warning'],
+        'Recalculation was refused after a team change; the results are stale',
+      );
+
+      final leave = await api.send(
+        'DELETE',
+        '/contests/$_contestId/team-memberships/$_membershipId',
+      );
+      expect(leave.statusCode, 200);
+      expect(
+        (await api.json(leave))['recalculation_warning'],
+        'Recalculation was refused after a team change; the results are stale',
+      );
+    },
+  );
+
+  test('a contest with no score has nothing to recalculate', () async {
+    final api = HandlerHarness(
+      _owner,
+      recalculation: RecalculationService(RefusingResults(recalculations)),
+    );
+    await drawnContest(api);
+    await api.send(
+      'POST',
+      '/contests/$_contestId/teams',
+      body: {'id': _teamId, 'name': 'Gators'},
+    );
+
+    final join = await api.send(
+      'POST',
+      '/contests/$_contestId/team-memberships',
+      body: {
+        'id': _membershipId,
+        'team_id': _teamId,
+        'contest_participation_id': matrixTestParticipationId(2),
+      },
+    );
+    final leave = await api.send(
+      'DELETE',
+      '/contests/$_contestId/team-memberships/$_membershipId',
+    );
+
+    expect(recalculations, isEmpty);
+    expect((await api.json(join))['recalculation_warning'], isNull);
+    expect(leave.statusCode, 204);
   });
 }

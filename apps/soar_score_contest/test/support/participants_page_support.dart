@@ -207,7 +207,10 @@ class ParticipantsServer {
         contestId: contestId,
       );
       _memberships.add(membership);
-      return _json(membership.toJson(), 201);
+      return _json({
+        ...membership.toJson(),
+        'recalculation_warning': warning,
+      }, 201);
     }
     final membershipPath = RegExp(r'/team-memberships/([^/]+)$')
         .firstMatch(path);
@@ -215,7 +218,9 @@ class ParticipantsServer {
       final id = Id.parse(membershipPath.group(1)!);
       membershipRemovals.add(id);
       _memberships.removeWhere((m) => m.id == id);
-      return http.Response('', 204);
+      return warning == null
+          ? http.Response('', 204)
+          : _json({'recalculation_warning': warning});
     }
     return _error(404, 'not_found', 'Unknown request $method $path');
   }

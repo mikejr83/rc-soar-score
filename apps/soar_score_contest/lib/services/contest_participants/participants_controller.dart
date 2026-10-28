@@ -458,7 +458,8 @@ class ParticipantsController extends ChangeNotifier {
         final name = draft.team.trim();
         final teamId = name.isEmpty ? null : await _teamIdFor(name);
         if (membershipId != null) {
-          await client.removeTeamMember(contestId, membershipId);
+          warning =
+              await client.removeTeamMember(contestId, membershipId) ?? warning;
           membershipId = null;
           team = '';
           remember();
@@ -472,7 +473,8 @@ class ParticipantsController extends ChangeNotifier {
               contestParticipationId: saved.id,
             ),
           );
-          membershipId = membership.id;
+          membershipId = membership.membership.id;
+          warning = membership.recalculationWarning ?? warning;
           team = name;
           remember();
         }

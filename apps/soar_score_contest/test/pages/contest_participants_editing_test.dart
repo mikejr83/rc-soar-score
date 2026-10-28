@@ -286,4 +286,21 @@ void main() {
     expect(find.text('Results are recalculated'), findsOneWidget);
     expect(find.textContaining('Bo Ray’s class changed'), findsOneWidget);
   });
+
+  testWidgets('a failed recalculation after a team change is reported', (
+    tester,
+  ) async {
+    final server =
+        ParticipantsServer(state: LifecycleState.running, drawn: true)
+          ..warning =
+              'Recalculation failed after a team change; the results are stale';
+    await pumpParticipantsPage(tester, server);
+    await _type(tester, _field('team', 1), 'harbor hawks');
+
+    await tester.tap(_save());
+    await tester.pumpAndSettle();
+
+    expect(find.text('Results are recalculated'), findsOneWidget);
+    expect(find.textContaining('the results are stale'), findsOneWidget);
+  });
 }

@@ -556,25 +556,36 @@ class ApiClient {
   /// team.
   ///
   /// A participant already on a team is an [ApiHttpError] with status 409:
-  /// take them off first.
-  Future<TeamMembership> addTeamMember(
+  /// take them off first. The result carries a notice when the recalculation
+  /// that follows a team change failed.
+  Future<TeamMembershipResult> addTeamMember(
     Id id,
     AddTeamMemberRequest request,
   ) async {
     final uri = _resolve('/api/v1/contests/${id.value}/team-memberships');
     final response = await _send('POST', uri, body: request.toJson());
-    return _decode<TeamMembership>(response, uri, TeamMembership.fromJson);
+    return _decode<TeamMembershipResult>(
+      response,
+      uri,
+      TeamMembershipResult.fromJson,
+    );
   }
 
   /// `DELETE /api/v1/contests/{id}/team-memberships/{membershipId}` — takes a
-  /// participant off their team.
-  Future<void> removeTeamMember(Id id, Id membershipId) async {
-    await _send(
+  /// participant off their team. Completes with a notice when the
+  /// recalculation that follows a team change failed, otherwise `null`.
+  Future<String?> removeTeamMember(Id id, Id membershipId) async {
+    final response = await _send(
       'DELETE',
       _resolve(
         '/api/v1/contests/${id.value}/team-memberships/${membershipId.value}',
       ),
     );
+    if (response.statusCode != 200 || response.bodyBytes.isEmpty) return null;
+    final decoded = jsonDecode(utf8.decode(response.bodyBytes));
+    return decoded is Map<String, dynamic>
+        ? decoded['recalculation_warning'] as String?
+        : null;
   }
 
   /// `GET /api/v1/contests/{id}/matrix` — the contest's current matrix:
