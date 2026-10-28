@@ -18,7 +18,8 @@
 
 .topic {
   display: grid;
-  gap: 8px;
+  grid-template-columns: 28px 1fr;
+  gap: 8px 12px;
   padding: 20px 56px 20px 20px;
   height: 100%;
   color: var(--text);
@@ -32,6 +33,33 @@
   border-color: var(--text);
   color: var(--text);
   transform: translateY(-2px);
+}
+
+/* Pre-flight check: a drawn checkbox beside the title; the tick draws in on hover or focus. */
+.topic > :global(.eyebrow),
+.title,
+.copy {
+  grid-column: 2;
+}
+.check {
+  grid-column: 1;
+  grid-row: 2;
+  width: 24px;
+  height: 24px;
+  color: var(--text-muted);
+  transition: color 160ms ease;
+}
+.tick {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+.topic:hover .check,
+.topic:focus-visible .check {
+  color: var(--accent);
+}
+.topic:hover .tick,
+.topic:focus-visible .tick {
+  stroke-dashoffset: 0;
 }
 
 .title {
@@ -55,6 +83,12 @@
   color: var(--text-muted);
   transition: transform 160ms ease;
 }
+@media (prefers-reduced-motion: no-preference) {
+  .tick {
+    transition: stroke-dashoffset 500ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+}
+
 .topic:hover .arrow {
   transform: translateX(4px);
   color: var(--accent);

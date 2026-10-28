@@ -51,6 +51,10 @@ export function HelpLinks() {
               <Link href={t.href} className={`card ${styles.topic}`}>
                 <span className="eyebrow">{t.who}</span>
                 <span className={styles.title}>{t.title}</span>
+                <svg className={styles.check} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <rect x="3" y="3" width="18" height="18" rx="4" />
+                  <path className={styles.tick} pathLength="1" d="M7 12.5l3.5 3.5L17 9" />
+                </svg>
                 <span className={styles.copy}>{t.copy}</span>
                 <svg className={styles.arrow} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <path d="M4 12h16M13 5l7 7-7 7" />

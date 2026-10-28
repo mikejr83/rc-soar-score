@@ -5,11 +5,13 @@ import { ExternalLink } from "@/components/external-link";
 import { contestAppUrl, repositoryUrl } from "@/lib/site";
 
 import styles from "./closing-cta.module.css";
+import { SkyGlider } from "./sky-glider";
 
 export function ClosingCta() {
   return (
     <section className={`${styles.cta} seams-host`} aria-labelledby="cta-title">
       <div className={`seams ${styles.seams}`} aria-hidden="true" />
+      <SkyGlider className={styles.glider} />
       <div className="wrap">
         <Reveal className={styles.inner}>
           <p className={`stencil ${styles.round}`}>NEXT ROUND</p>
