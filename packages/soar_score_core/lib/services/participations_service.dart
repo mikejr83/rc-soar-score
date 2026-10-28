@@ -1,5 +1,6 @@
 import '../enums/lifecycle_state.dart';
 import '../enums/role_type.dart';
+import '../enums/score_placeholder_state.dart';
 import '../errors/contest_state_error.dart';
 import '../errors/entity_not_found_error.dart';
 import '../models/contest/contest.dart';
@@ -104,12 +105,15 @@ class ParticipationsService {
   /// Changes the role, classification and retirement of participation
   /// [id] in contest [contestId].
   ///
-  /// [roleId] null keeps the role. A pilot with assignments cannot become a
-  /// non-flier ([ContestStateError]). Throws a [StaleRevisionError] when
-  /// [baseRevision] is not the stored revision, and an [ArgumentError] when
-  /// the result breaks a participation rule (a non-pilot with a
-  /// classification or a retirement round).
-  Future<ContestParticipation> update(
+  /// [roleId] null keeps the role. A pilot who becomes a non-flier gives up
+  /// their matrix rows: a pilot with no scores has them removed (the draw
+  /// then needs redoing, and the answer says how many went), and one with a
+  /// score is refused with a [ContestStateError] (`has_scores`; they retire
+  /// instead). Throws a [StaleRevisionError] when [baseRevision] is not the
+  /// stored revision, and an [ArgumentError] when the result breaks a
+  /// participation rule (a non-pilot with a classification or a retirement
+  /// round).
+  Future<({ContestParticipation participation, int matrixRowsRemoved})> update(
     Id contestId,
     Id ownerAccountId,
     Id id, {
@@ -124,17 +128,12 @@ class ParticipationsService {
         ? null
         : await _requireRole(ownerAccountId, roleId);
 
-    if (role != null &&
+    final leavesFlying =
+        role != null &&
         stored.roleType == RoleType.pilot &&
-        role.type != RoleType.pilot) {
-      final assignments = await repository.matrixAssignmentRepository
-          .listForParticipation(id);
-      if (assignments.isNotEmpty) {
-        throw ContestStateError(
-          'has_assignments',
-          'a pilot with flight assignments cannot become a non-flier',
-        );
-      }
+        role.type != RoleType.pilot;
+    if (leavesFlying) {
+      await _requireNoScores(id, 'cannot become a non-flier');
     }
     if (stored.revision != baseRevision) {
       throw StaleRevisionError(
@@ -157,7 +156,16 @@ class ParticipationsService {
       retiredAtRound: retiredAtRound,
       revision: stored.revision,
     );
-    return repository.contestParticipationRepository.save(
+    // The matrix rows go in the same transaction as the role, so a change
+    // that loses to another edit removes nothing.
+    if (!leavesFlying) {
+      final saved = await repository.contestParticipationRepository.save(
+        updated,
+        metadata: metadata,
+      );
+      return (participation: saved, matrixRowsRemoved: 0);
+    }
+    return repository.contestParticipationRepository.saveRemovingMatrixRows(
       updated,
       metadata: metadata,
     );
@@ -166,27 +174,45 @@ class ParticipationsService {
   /// Removes participation [id] from contest [contestId], with its team
   /// memberships.
   ///
-  /// One with flight assignments is refused with a [ContestStateError]: the
-  /// pilot retires instead.
-  Future<void> remove(
+  /// A pilot with matrix rows but no scores leaves with them: the rows and
+  /// their empty score slots are removed, the matrix revision stays, and the
+  /// number removed is returned so the caller can say the draw needs redoing.
+  /// One with a score is refused with a [ContestStateError] (`has_scores`):
+  /// the pilot retires instead.
+  Future<int> remove(
     Id contestId,
     Id id, {
     required MutationMetadata metadata,
   }) async {
     await _require(contestId, id);
-    final assignments = await repository.matrixAssignmentRepository
+    await _requireNoScores(id, 'cannot be removed');
+    final result = await repository.contestParticipationRepository
+        .deleteRemovingMatrixRows(id, metadata: metadata);
+    return result.matrixRowsRemoved;
+  }
+
+  /// Refuses with a [ContestStateError] when the pilot of [id] has a score,
+  /// or a re-flight, which only exists beside scores.
+  Future<void> _requireNoScores(Id id, String what) async {
+    final placeholders = await repository.scorePlaceholderRepository
         .listForParticipation(id);
-    if (assignments.isNotEmpty) {
+    final scored = placeholders.any(
+      (p) => p.state != ScorePlaceholderState.notEntered || p.scoreRevision > 0,
+    );
+    if (scored) {
       throw ContestStateError(
-        'has_assignments',
-        'a participant with flight assignments cannot be removed; '
-            'retire the pilot instead',
+        'has_scores',
+        'a participant with scores $what; retire the pilot instead',
       );
     }
-    await repository.contestParticipationRepository.delete(
-      id,
-      metadata: metadata,
-    );
+    final reFlights = await repository.reFlightParticipantRepository
+        .listForParticipation(id);
+    if (reFlights.isNotEmpty) {
+      throw ContestStateError(
+        'has_scores',
+        'a participant with re-flights $what; retire the pilot instead',
+      );
+    }
   }
 
   Future<Contest> _requireContest(Id contestId) async {

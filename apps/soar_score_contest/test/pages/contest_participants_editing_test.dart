@@ -127,18 +127,32 @@ void main() {
     expect(server.membershipAdds, hasLength(1));
   });
 
-  testWidgets('clearing a class turns Save off and says which row', (
-    tester,
-  ) async {
-    await pumpParticipantsPage(tester, ParticipantsServer());
+  testWidgets('clearing a class is a notice: Save stays on and saves it, '
+      'along with other edits', (tester) async {
+    final server = ParticipantsServer();
+    await pumpParticipantsPage(tester, server);
 
     await _type(tester, _field('class', 1), '');
+    await _type(tester, _field('team', 2), 'harbor hawks');
 
-    expect(_saveEnabled(tester), isFalse);
-    expect(find.text('Fix 1 row before saving.'), findsOneWidget);
+    expect(_saveEnabled(tester), isTrue);
+    expect(find.textContaining('before saving'), findsNothing);
     expect(
-      find.descendant(of: _status(1), matching: find.text('Needs class')),
+      find.descendant(of: _status(1), matching: find.text('Unsaved')),
       findsOneWidget,
+    );
+
+    await tester.tap(_save());
+    await tester.pumpAndSettle();
+
+    expect(server.updates.single.body['classification'], isNull);
+    expect(
+      find.descendant(of: _status(1), matching: find.text('Saved')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: _status(1), matching: find.text('No class')),
+      findsNothing,
     );
   });
 

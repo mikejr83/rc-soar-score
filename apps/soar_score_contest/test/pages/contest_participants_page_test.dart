@@ -85,7 +85,7 @@ void main() {
     await pumpParticipantsPage(tester, ParticipantsServer());
 
     expect(find.byKey(const ValueKey('banner-missing-class')), findsOneWidget);
-    expect(find.text('1 participant needs a class'), findsOneWidget);
+    expect(find.text('1 participant has no class'), findsOneWidget);
     expect(find.text('Di Park: enter a class'), findsOneWidget);
   });
 

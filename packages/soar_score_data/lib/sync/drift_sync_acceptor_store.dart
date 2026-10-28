@@ -4,6 +4,7 @@ import 'package:soar_score_core/soar_score_core.dart' as core;
 import '../database.dart';
 import '../schema/table_group.dart';
 import '../schema/tables/conflict_records_table.dart';
+import 'assignment_markers.dart';
 import 'entity_stores.dart';
 import 'sql_placeholders.dart';
 import 'table_mapper.dart';
@@ -181,7 +182,25 @@ class _DriftSyncAcceptorTransaction implements core.SyncAcceptorTransaction {
     if (entityType == 'LandingTable') {
       await _stores.of('LandingResult').removeWhereId('landing_table_id', id);
     }
+    // The server keeps derived results too; they are recomputed, so they go
+    // with the rows they were calculated from.
+    if (entityType == 'ScorePlaceholder') {
+      await _stores
+          .of('FlightResult')
+          .removeWhereId('score_placeholder_id', id);
+    }
+    if (entityType == 'ContestParticipation') {
+      await _stores
+          .of('FlightResult')
+          .removeWhereId('contest_participation_id', id);
+      await _stores
+          .of('ParticipationStanding')
+          .removeWhereId('contest_participation_id', id);
+    }
     await _stores.of(entityType).remove(id);
+    if (entityType == 'MatrixAssignment') {
+      await clearSupersededMarkers(_db, id);
+    }
   }
 
   @override

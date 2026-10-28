@@ -17,6 +17,11 @@ import 'package:soar_score_core/soar_score_core.dart';
 ///   classification or retirement
 /// - `DELETE /contests/{id}/participations/{participationId}` removes one
 ///
+/// A pilot with matrix rows but no scores can be removed, or can become a
+/// non-flier; the rows go with the change and the answer says how many
+/// (`matrix_rows_removed`), because the draw then needs redoing. One with a
+/// score is refused with `has_scores`.
+///
 /// A change of the retirement round, the role or the classification
 /// recalculates the results (a retired pilot's later flights count as
 /// retired, not as zeros; a class or role decides who is ranked where). The
@@ -37,6 +42,16 @@ void addParticipationRoutes(
   final scoresService = ScoresService(repository);
   final recalculationService =
       recalculation ?? RecalculationService(ResultsService(repository));
+
+  /// A contest with no official score has no results to go stale.
+  Future<String?> recalculateIfScored(
+    Id contestId, {
+    required String cause,
+  }) async {
+    final scores = await scoresService.list(contestId);
+    if (!scores.slots.any((slot) => slot.officialScore != null)) return null;
+    return recalculationService.recalculateAfterEntry(contestId, cause: cause);
+  }
 
   router.get('/contests/<id>/participations', (
     Request request,
@@ -89,7 +104,7 @@ void addParticipationRoutes(
     final before = (await service.list(contestId))
         .where((p) => p.id == Id.parse(participationId))
         .firstOrNull;
-    final participation = await service.update(
+    final change = await service.update(
       contestId,
       principal.accountId,
       Id.parse(participationId),
@@ -99,26 +114,24 @@ void addParticipationRoutes(
       baseRevision: body.baseRevision,
       metadata: writeMetadata(principal),
     );
+    final participation = change.participation;
     String? warning;
     if (before != null &&
         (before.retiredAtRound != participation.retiredAtRound ||
             before.roleId != participation.roleId ||
             before.classification != participation.classification)) {
-      // A contest with no official score has no results to go stale.
-      final scores = await scoresService.list(contestId);
-      if (scores.slots.any((slot) => slot.officialScore != null)) {
-        warning = await recalculationService.recalculateAfterEntry(
-          contestId,
-          cause: before.retiredAtRound != participation.retiredAtRound
-              ? 'a retirement change'
-              : 'a participant change',
-        );
-      }
+      warning = await recalculateIfScored(
+        contestId,
+        cause: before.retiredAtRound != participation.retiredAtRound
+            ? 'a retirement change'
+            : 'a participant change',
+      );
     }
     return jsonResponse(
       ParticipationUpdateResult(
         participation: participation,
         recalculationWarning: warning,
+        matrixRowsRemoved: change.matrixRowsRemoved,
       ).toJson(),
     );
   });
@@ -129,12 +142,23 @@ void addParticipationRoutes(
     String participationId,
   ) async {
     final principal = requirePrincipal(request);
-    await requireContestDirector(request, repository, Id.parse(id));
-    await service.remove(
-      Id.parse(id),
+    final contestId = Id.parse(id);
+    await requireContestDirector(request, repository, contestId);
+    final removed = await service.remove(
+      contestId,
       Id.parse(participationId),
       metadata: writeMetadata(principal),
     );
-    return Response(204);
+    // The other pilots' ranks move when one leaves a scored contest.
+    final warning = await recalculateIfScored(
+      contestId,
+      cause: 'a participant removal',
+    );
+    return jsonResponse(
+      ParticipationRemoveResult(
+        matrixRowsRemoved: removed,
+        recalculationWarning: warning,
+      ).toJson(),
+    );
   });
 }

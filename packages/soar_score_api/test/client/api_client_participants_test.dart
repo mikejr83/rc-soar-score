@@ -191,17 +191,48 @@ void main() {
     test('removeParticipation sends DELETE', () async {
       final client = clientFor((_) => http.Response('', 204));
 
-      await client.removeParticipation(contestId, participationId);
+      final result = await client.removeParticipation(
+        contestId,
+        participationId,
+      );
 
       expect(seen.method, 'DELETE');
       expect(seen.url.path, '$base/${participationId.value}');
+      expect(result.matrixRowsRemoved, 0);
+    });
+
+    test('removeParticipation reports the matrix rows that went', () async {
+      final client = clientFor(
+        (_) => body({'matrix_rows_removed': 3, 'recalculation_warning': null}),
+      );
+
+      final result = await client.removeParticipation(
+        contestId,
+        participationId,
+      );
+
+      expect(result.matrixRowsRemoved, 3);
+    });
+
+    test('updateParticipation reports the matrix rows that went', () async {
+      final client = clientFor(
+        (_) => body({...participation.toJson(), 'matrix_rows_removed': 2}),
+      );
+
+      final result = await client.updateParticipation(
+        contestId,
+        participationId,
+        const UpdateParticipationRequest(baseRevision: 0),
+      );
+
+      expect(result.matrixRowsRemoved, 2);
     });
 
     test('a refused removal surfaces the 409 error code', () async {
       final client = clientFor(
         (_) => body({
           'error': {
-            'code': 'has_assignments',
+            'code': 'has_scores',
             'message': 'assigned',
             'requestId': 'r1',
           },

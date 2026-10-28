@@ -422,13 +422,27 @@ class MutationProcessor {
   Future<MutationResult> _delete(_Step s) async {
     final stored = s.stored;
     if (s.kind.shape == SyncEntityShape.appendOnly) {
-      return _log.reject(
-        s.tx,
-        s.ctx,
-        s.m,
-        SyncReasonCode.locked.code,
-        'The ${s.m.entityType} is immutable and cannot be deleted.',
-      );
+      // The one append-only deletion: the matrix row of a pilot with no
+      // scores who left the contest or stopped flying after the draw.
+      if (s.m.entityType != 'MatrixAssignment') {
+        return _log.reject(
+          s.tx,
+          s.ctx,
+          s.m,
+          SyncReasonCode.locked.code,
+          'The ${s.m.entityType} is immutable and cannot be deleted.',
+        );
+      }
+      final refusal = await _assignmentDeletionRefusal(s);
+      if (refusal != null) {
+        return _log.reject(
+          s.tx,
+          s.ctx,
+          s.m,
+          SyncReasonCode.locked.code,
+          refusal,
+        );
+      }
     }
     if (stored != null && s.kind.shape == SyncEntityShape.revisioned) {
       final current = stored['revision'] as int;
@@ -476,6 +490,27 @@ class MutationProcessor {
       MutationPayload.delete,
       audit: AuditAction.deletion,
     );
+  }
+
+  /// Why the deletion of a matrix assignment is refused, or null. Only a
+  /// director removes one, and only after its score slot is gone: the slot's
+  /// own deletion cannot happen while attempts, official scores or review
+  /// requests refer to it, so a row that was ever scored stays.
+  Future<String?> _assignmentDeletionRefusal(_Step s) async {
+    if (s.m.authority != Authority.director) {
+      return 'Only a director removes a matrix assignment.';
+    }
+    if (s.stored == null) return null;
+    final slots = await s.tx.findEntitiesWhere(
+      'ScorePlaceholder',
+      'assignment_id',
+      s.m.entityId,
+    );
+    if (slots.isNotEmpty) {
+      return 'The assignment still has a score slot; remove the empty slot '
+          'first.';
+    }
+    return null;
   }
 
   // Shared steps --------------------------------------------------------

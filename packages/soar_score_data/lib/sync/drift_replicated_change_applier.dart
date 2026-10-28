@@ -2,6 +2,7 @@ import 'package:drift/drift.dart' show Variable;
 import 'package:soar_score_core/soar_score_core.dart' as core;
 
 import '../database.dart';
+import 'assignment_markers.dart';
 import 'entity_stores.dart';
 import 'sql_placeholders.dart';
 
@@ -42,6 +43,9 @@ class DriftReplicatedChangeApplier implements core.ReplicatedChangeApplier {
               .removeWhereId('landing_table_id', change.entityId);
         }
         await store.remove(change.entityId);
+        if (change.entityType == 'MatrixAssignment') {
+          await clearSupersededMarkers(_db, change.entityId);
+        }
         return;
       }
       final storedRevision = stored?['revision'] as int?;

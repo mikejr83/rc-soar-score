@@ -5,7 +5,8 @@ enum SyncEntityShape {
   /// Carries a `revision` the service bumps on each accepted change.
   revisioned,
 
-  /// Written once and never changed.
+  /// Written once and never changed. The one deletion allowed is a
+  /// `MatrixAssignment` of a pilot with no scores who leaves the contest.
   appendOnly,
 
   /// Replaced or deleted whole, with no revision (a landing table).

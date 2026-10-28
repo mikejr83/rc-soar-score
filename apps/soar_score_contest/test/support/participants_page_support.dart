@@ -120,6 +120,9 @@ class ParticipantsServer {
   /// Fails every team membership addition with this status when set.
   int? membershipAddFailure;
 
+  /// The pilots whose places in the draw a removal or role change took out.
+  final Set<Id> leftTheDraw = {};
+
   /// Answers every removal of these participations with a 409.
   final Set<Id> removalRefused = {};
 
@@ -289,7 +292,27 @@ class ParticipantsServer {
       });
     }
     if (path.endsWith('/matrix')) {
-      return _json((drawn ? drawnMatrix() : CurrentMatrix()).toJson());
+      if (!drawn) return _json(CurrentMatrix().toJson());
+      // The matrix fixture names its pilots with its own participation ids.
+      final people = {
+        for (var n = 1; n <= 4; n++)
+          _id('0001', n).value: personParticipationId(n),
+      };
+      final matrix = drawnMatrix().toJson();
+      return _json({
+        ...matrix,
+        'assignments': [
+          for (final a in matrix['assignments']! as List<dynamic>)
+            if (!leftTheDraw.contains(
+              people[(a as Map<String, dynamic>)['contest_participation_id']],
+            ))
+              {
+                ...a,
+                'contest_participation_id':
+                    people[a['contest_participation_id']]!.value,
+              },
+        ],
+      });
     }
     if (path.endsWith('/scores')) {
       return _json({
@@ -386,8 +409,25 @@ class ParticipantsServer {
       retiredAtRound: body['retired_at_round'] as int?,
       revision: stored.revision + 1,
     );
+    final leaves =
+        stored.roleType == RoleType.pilot && updated.roleType != RoleType.pilot;
+    final rows = leaves ? _takeOutOfDraw(id) : 0;
     _participations[index] = updated;
-    return _json({...updated.toJson(), 'recalculation_warning': warning});
+    return _json({
+      ...updated.toJson(),
+      'recalculation_warning': warning,
+      'matrix_rows_removed': rows,
+    });
+  }
+
+  /// Takes the pilot's places out of the draw, as the server does for a
+  /// pilot with no scores; returns how many there were.
+  int _takeOutOfDraw(Id id) {
+    final pilot = _participations
+        .where((p) => p.id == id && p.roleType == RoleType.pilot)
+        .firstOrNull;
+    if (!drawn || pilot == null || !leftTheDraw.add(id)) return 0;
+    return 2;
   }
 
   http.Response _remove(Id id) {
@@ -396,14 +436,15 @@ class ParticipantsServer {
         (withScores && id == personParticipationId(1))) {
       return _error(
         409,
-        'has_assignments',
-        'a participant with flight assignments cannot be removed; retire '
-            'the pilot instead',
+        'has_scores',
+        'a participant with scores cannot be removed; retire the pilot '
+            'instead',
       );
     }
+    final rows = _takeOutOfDraw(id);
     _participations.removeWhere((p) => p.id == id);
     _memberships.removeWhere((m) => m.contestParticipationId == id);
-    return http.Response('', 204);
+    return _json({'matrix_rows_removed': rows, 'recalculation_warning': null});
   }
 
   /// Changes the stored participation of person [n] behind the page's back,

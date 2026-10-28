@@ -9,6 +9,7 @@ class ParticipationUpdateResult extends Equatable {
   const ParticipationUpdateResult({
     required this.participation,
     this.recalculationWarning,
+    this.matrixRowsRemoved = 0,
   });
 
   /// The participation's own JSON with `recalculation_warning` beside it, so
@@ -17,6 +18,7 @@ class ParticipationUpdateResult extends Equatable {
       ParticipationUpdateResult(
         participation: ContestParticipation.fromJson(json),
         recalculationWarning: json['recalculation_warning'] as String?,
+        matrixRowsRemoved: json['matrix_rows_removed'] as int? ?? 0,
       );
 
   final ContestParticipation participation;
@@ -24,11 +26,20 @@ class ParticipationUpdateResult extends Equatable {
   /// A human-readable notice that the recalculation failed, or null.
   final String? recalculationWarning;
 
+  /// How many matrix rows the change removed: a pilot with no scores who
+  /// became a non-flier leaves the draw, which then needs redoing.
+  final int matrixRowsRemoved;
+
   Map<String, Object?> toJson() => {
     ...participation.toJson(),
     'recalculation_warning': recalculationWarning,
+    'matrix_rows_removed': matrixRowsRemoved,
   };
 
   @override
-  List<Object?> get props => [participation, recalculationWarning];
+  List<Object?> get props => [
+    participation,
+    recalculationWarning,
+    matrixRowsRemoved,
+  ];
 }

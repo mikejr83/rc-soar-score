@@ -149,12 +149,17 @@ Future<bool> askRedrawWith(BuildContext context, {required String name}) async {
   return redraw ?? false;
 }
 
-/// Asks before a pilot becomes non-flying, which clears their class.
+/// Asks before a pilot becomes non-flying, which clears their class
+/// ([classification] is blank when there is none) and, when they have places
+/// in the draw ([inDraw]), takes those out of it.
 Future<bool> confirmNonFlying(
   BuildContext context, {
   required String name,
   required String roleName,
   required String classification,
+  bool inDraw = false,
+  bool plural = false,
+  bool? clearsClass,
 }) async {
   final ok = await showDialog<bool>(
     context: context,
@@ -162,9 +167,19 @@ Future<bool> confirmNonFlying(
       icon: const Icon(Icons.badge),
       title: Text('Change $name to $roleName?'),
       content: Text(
-        '$roleName is a non-flying role, so $name gets no score rows and '
-        'their class ($classification) is cleared. You can still undo this '
-        'before you save.',
+        [
+          '$roleName is a non-flying role, so $name ${plural ? 'get' : 'gets'} no score rows'
+              '${!(clearsClass ?? classification.trim().isNotEmpty)
+                  ? ''
+                  : plural
+                  ? ' and their classes are cleared'
+                  : ' and their class ($classification) is cleared'}.',
+          if (inDraw)
+            'Their places in the draw are removed when you save, and the '
+                'draw will need redoing.',
+          'You can still undo this before you save.',
+        ].join(' '),
+        key: const ValueKey('confirm-role-change-body'),
       ),
       actions: [
         TextButton(
@@ -183,10 +198,14 @@ Future<bool> confirmNonFlying(
 }
 
 /// Asks before removing [names] from the contest.
+///
+/// [inDraw] names those who have places in the draw: they leave it, and the
+/// draw will need redoing.
 Future<bool> confirmRemove(
   BuildContext context, {
   required List<String> names,
   required String contestName,
+  List<String> inDraw = const [],
 }) async {
   final ok = await showDialog<bool>(
     context: context,
@@ -206,6 +225,15 @@ Future<bool> confirmRemove(
               'This removes them from $contestName only. Their saved '
               'profiles stay, and you can add them again later.',
             ),
+            if (inDraw.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              Text(
+                '${_names(inDraw)} ${inDraw.length == 1 ? 'is' : 'are'} in '
+                'the draw. Their places in it are removed too, and the draw '
+                'will need redoing.',
+                key: const ValueKey('confirm-remove-draw'),
+              ),
+            ],
             const SizedBox(height: 12),
             for (final name in names)
               Padding(
@@ -236,3 +264,7 @@ Future<bool> confirmRemove(
   );
   return ok ?? false;
 }
+
+String _names(List<String> names) => names.length < 2
+    ? names.join()
+    : '${names.sublist(0, names.length - 1).join(', ')} and ${names.last}';
