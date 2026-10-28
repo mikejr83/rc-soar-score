@@ -48,6 +48,24 @@ Future<void> goToMainPage(WidgetTester tester) async {
   await pumpUntilFound(tester, find.byKey(const ValueKey('create-contest')));
 }
 
+/// Scrolls the list that holds the `ListTile` rows until [row] is built. A
+/// list builds only the rows near the screen, and a smaller window than the
+/// web run's shows fewer of them, so a row far down the list is not there to
+/// find until the list is scrolled to it.
+Future<void> scrollListTo(WidgetTester tester, Finder row) async {
+  await pumpUntilFound(tester, find.byType(ListTile));
+  if (row.evaluate().isNotEmpty) {
+    return;
+  }
+  final list = find
+      .ancestor(
+        of: find.byType(ListTile).first,
+        matching: find.byType(Scrollable),
+      )
+      .first;
+  await tester.scrollUntilVisible(row, 200, scrollable: list, maxScrolls: 60);
+}
+
 /// Scrolls [finder] into view, taps it and lets the app react.
 Future<void> tapVisible(WidgetTester tester, Finder finder) async {
   await tester.ensureVisible(finder);
