@@ -383,7 +383,7 @@ class _ContestConfigurationPageState extends State<ContestConfigurationPage> {
   void _fix(BlockerFix fix) => context.go(switch (fix) {
     BlockerFix.configuration => contestConfigurationPath(widget.contestId),
     BlockerFix.workspace => contestWorkspacePath(widget.contestId),
-    BlockerFix.participants => participantsPath,
+    BlockerFix.participants => contestParticipantsPath(widget.contestId),
   });
 
   void _goToMatrix() => context.go(contestMatrixPath(widget.contestId));
@@ -580,7 +580,8 @@ class _ContestConfigurationPageState extends State<ContestConfigurationPage> {
                       onChanged: _changed,
                       onFix: _fix,
                       onOpenLandings: () => context.go(landingsPath),
-                      onOpenParticipants: () => context.go(participantsPath),
+                      onOpenParticipants: () =>
+                          context.go(contestParticipantsPath(widget.contestId)),
                       onGoToMatrix: _goToMatrix,
                       onOpenWorkspace: () =>
                           context.go(contestWorkspacePath(widget.contestId)),

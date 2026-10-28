@@ -29,7 +29,7 @@ Future<void> _open(WidgetTester tester, NextStepAction action) async {
       for (final entry in {
         contestConfigurationPath(matrixContestId): 'Configuration stub',
         contestMatrixPath(matrixContestId): 'Matrix stub',
-        participantsPath: 'Participants stub',
+        contestParticipantsPath(matrixContestId): 'Participants stub',
         contestScoringPath(matrixContestId): 'Scoring stub',
         contestReportsPath(matrixContestId): 'Reports stub',
       }.entries)
