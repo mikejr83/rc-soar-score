@@ -35,7 +35,6 @@ export function SkyGlider({
     let target = rest();
     let pos = { ...target };
     let angle = 0;
-    let active = false;
 
     const tick = () => {
       const dx = target.x - pos.x;
@@ -48,7 +47,8 @@ export function SkyGlider({
         angle += delta * 0.08;
       }
       el.style.transform = `translate(${pos.x}px, ${pos.y}px) rotate(${angle}deg)`;
-      if (active || Math.hypot(dx, dy) > 0.5) frame = requestAnimationFrame(tick);
+      // Settled: stop; the next pointer move wakes the loop again.
+      if (Math.hypot(dx, dy) > 0.5) frame = requestAnimationFrame(tick);
       else frame = 0;
     };
     const wake = () => {
@@ -57,12 +57,10 @@ export function SkyGlider({
     const onMove = (e: PointerEvent) => {
       const r = host.getBoundingClientRect();
       target = { x: e.clientX - r.left, y: e.clientY - r.top };
-      active = true;
       wake();
     };
     const onLeave = () => {
       target = rest();
-      active = false;
       wake();
     };
     el.style.transform = `translate(${pos.x}px, ${pos.y}px) rotate(0deg)`;

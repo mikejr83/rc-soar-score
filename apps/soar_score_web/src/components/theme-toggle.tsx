@@ -15,7 +15,10 @@ export function ThemeToggle() {
     const system = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
     const current = root.dataset.theme ?? system;
     const next = current === "dark" ? "light" : "dark";
-    root.dataset.theme = next;
+    // Back on the OS scheme, drop the override too, so the page follows the
+    // OS again instead of staying pinned to this choice.
+    if (next === system) delete root.dataset.theme;
+    else root.dataset.theme = next;
     try {
       if (next === system) localStorage.removeItem("theme");
       else localStorage.setItem("theme", next);
