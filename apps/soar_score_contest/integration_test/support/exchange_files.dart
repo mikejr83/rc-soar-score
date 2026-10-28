@@ -68,6 +68,7 @@ Future<void> selectContest(WidgetTester tester, String name) async {
     of: find.byType(ListTile),
     matching: find.text(name),
   );
+  await scrollListTo(tester, row);
   await pumpUntilFound(tester, row);
   await tapVisible(tester, row);
 }

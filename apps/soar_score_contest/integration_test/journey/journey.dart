@@ -131,6 +131,9 @@ class Journey {
     try {
       // A step that hangs (an await that never completes) would otherwise
       // run into the whole file's timeout and say nothing about where.
+      // The timeout only reports the step; it does not cancel `body`, which may
+      // still touch the app while the failure is reported, so treat it as a
+      // diagnostic for a hung run, not as a way to stop work.
       await body().timeout(
         timeout,
         onTimeout: () => throw TimeoutException(

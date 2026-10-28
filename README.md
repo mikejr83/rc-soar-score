@@ -300,7 +300,7 @@ The contest app's journeys live in `apps/soar_score_contest/integration_test/`. 
 ```bash
 ./scripts/e2e.sh                                  # Windows desktop (default)
 ./scripts/e2e.sh -d web                           # headless Chrome (any OS)
-./scripts/e2e.sh -d web -f score_entry_test.dart  # one test file
+./scripts/e2e.sh -d web -f save_failure_retry_test.dart  # one test file
 ```
 
 On PowerShell use `.\scripts\e2e.ps1`, with `-Device web` and `-File <name>`. On Windows desktop you can also add `-Name '<test name>'` (or `-- --name '<test name>'` for the shell script) to run one journey of a file; the web mode runs whole files, since `flutter drive` has no name filter.
