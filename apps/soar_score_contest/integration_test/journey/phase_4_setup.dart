@@ -27,6 +27,76 @@ Future<void> runSetupPhase(Journey journey, JourneyContext data) async {
     () => inContest(() => _editConfiguration(tester)),
   );
   await journey.step(
+    'Participants: the contest lists its pilots with Save off',
+    () => inContest(() async {
+      await tapRail(tester, 'Participants');
+      await pumpUntilFound(tester, _key('participants-count'));
+      expect(
+        tester.widget<Text>(_key('participants-count')).data,
+        matches(r'^\d+ pilots?'),
+      );
+      // The contest has no optional participant options, so no Class column.
+      expect(find.text('Class *'), findsNothing);
+      for (final person in data.demoPilots) {
+        expect(find.text(person), findsOneWidget);
+      }
+      // Save is always there, off, with its reason.
+      expect(
+        tester.widget<FilledButton>(_key('save-participants')).onPressed,
+        isNull,
+      );
+      expect(find.text('No changes to save.'), findsOneWidget);
+    }),
+  );
+  await journey.step(
+    'Participants: a class is edited, discarded, then saved',
+    () async {
+      await goToMainPage(tester);
+      // The copied contest keeps its pilots' classes (phase 3).
+      await openContest(tester, 'E2E Copied Classes');
+      await tapRail(tester, 'Participants');
+      await pumpUntilFound(tester, _key('participants-count'));
+      final classField = find.descendant(
+        of: find.byWidgetPredicate(
+          (w) =>
+              w.key is ValueKey<String> &&
+              (w.key! as ValueKey<String>).value.startsWith('class-'),
+          description: 'a class cell',
+        ),
+        matching: find.byType(TextField),
+      );
+      final save = _key('save-participants');
+
+      // An edit marks the row and turns Save on.
+      await enterIn(tester, classField.first, 'Zz Class');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await pumpUntilFound(
+        tester,
+        find.text('Unsaved changes to 1 participant'),
+      );
+      expect(tester.widget<FilledButton>(save).onPressed, isNotNull);
+
+      // Discard puts the saved value back.
+      await tapVisible(tester, _key('discard-participants'));
+      await pumpUntilFound(tester, find.text('No changes to save.'));
+
+      // Save stores the change and says so.
+      await enterIn(tester, classField.first, 'Zz Class');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await pumpUntilFound(
+        tester,
+        find.text('Unsaved changes to 1 participant'),
+      );
+      await tapVisible(tester, save);
+      await pumpUntilFound(tester, find.text('1 participant saved.'));
+      await pumpUntilFound(tester, find.text('No changes to save.'));
+      expect(
+        tester.widget<TextField>(classField.first).controller!.text,
+        'Zz Class',
+      );
+    },
+  );
+  await journey.step(
     'Configuration: scoring access and the lock point to the Workspace',
     () => inContest(() async {
       await openConfiguration(tester);
@@ -165,6 +235,10 @@ Future<void> runSetupPhase(Journey journey, JourneyContext data) async {
       await pumpUntilFound(tester, find.text('No pilots selected'));
       await tapVisible(tester, _key('cards-select-all'));
       await pumpUntilGone(tester, find.text('No pilots selected'));
+
+      // The viewer has no shell, so leave it for the next step.
+      await tapVisible(tester, _key('viewer-back'));
+      await pumpUntilFound(tester, find.text('Reports are built from'));
     }),
   );
 }

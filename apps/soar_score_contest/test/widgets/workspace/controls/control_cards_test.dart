@@ -184,6 +184,19 @@ void main() {
       await tester.pumpAndSettle();
       expect(server.actions, ['unlock', 'lock']);
     });
+
+    testWidgets('the confirmation disappears on its own', (tester) async {
+      final server = _server(lock: AdminLock.locked);
+      await pumpWorkspace(tester, server);
+      await tester.tap(_key('control-unlock'));
+      await tester.pumpAndSettle();
+      expect(find.text(unlockedMessage), findsOneWidget);
+      expect(find.text('Undo'), findsOneWidget);
+      await tester.pump(const Duration(seconds: 8));
+      await tester.pumpAndSettle();
+      expect(find.text(unlockedMessage), findsNothing);
+      expect(server.actions, ['unlock']);
+    });
   });
 
   group('a 409 conflict', () {
