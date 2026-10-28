@@ -252,6 +252,14 @@ void addMatrixRoutes(
       actorId: principal.accountId,
       metadata: writeMetadata(principal),
     );
+    // The new matrix revision outdates every stored result, even when no
+    // score changed (a round was only added), so the standings would read as
+    // preliminary until the next score entry. A failure is logged and leaves
+    // the results stale, as after a score entry.
+    await recalculationService.recalculateAfterEntry(
+      contestId,
+      cause: 'a matrix redraw',
+    );
     return jsonResponse(matrix.toJson(), statusCode: 201);
   });
 }

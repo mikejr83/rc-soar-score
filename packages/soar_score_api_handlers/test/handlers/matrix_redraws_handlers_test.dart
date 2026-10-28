@@ -83,6 +83,27 @@ void main() {
       expect(api.repository.scorePlaceholders.stored, hasLength(30));
     });
 
+    test('keeps stored results current when only rounds are added', () async {
+      await drawn();
+      final slot = await assignmentOfPilot(api, 1);
+      await api.send(
+        'POST',
+        '/contests/$_contestId/assignments/${slot['id']}/scores',
+        body: {
+          'client_mutation_id': 'entry-1',
+          'base_score_revision': 0,
+          'components': {'time_flown': 540, 'launch_height': 200},
+        },
+      );
+
+      await redraw(firstRound: 4);
+
+      final results = await api.json(
+        await api.send('GET', '/contests/$_contestId/results'),
+      );
+      expect(results['stale'], isFalse);
+    });
+
     test('keeps the rounds already drawn as they are', () async {
       await drawn();
       final before = await matrix();
