@@ -102,16 +102,49 @@ void main() {
       contestParticipationId: participationId,
     );
 
-    expect(await client.addTeamMember(contestId, request), membership);
+    final result = await client.addTeamMember(contestId, request);
+    expect(result.membership, membership);
+    expect(result.recalculationWarning, isNull);
     expect(seen.method, 'POST');
     expect(seen.url.path, '$contestPath/team-memberships');
     expect(jsonDecode(seen.body), request.toJson());
   });
 
+  test('addTeamMember reads the recalculation notice', () async {
+    final client = clientFor(
+      (_) => body({
+        ...membership.toJson(),
+        'recalculation_warning': 'the results are stale',
+      }, 201),
+    );
+
+    final result = await client.addTeamMember(
+      contestId,
+      AddTeamMemberRequest(
+        id: membershipId,
+        teamId: teamId,
+        contestParticipationId: participationId,
+      ),
+    );
+
+    expect(result.recalculationWarning, 'the results are stale');
+  });
+
+  test('removeTeamMember reads the recalculation notice', () async {
+    final client = clientFor(
+      (_) => body({'recalculation_warning': 'the results are stale'}),
+    );
+
+    expect(
+      await client.removeTeamMember(contestId, membershipId),
+      'the results are stale',
+    );
+  });
+
   test('removeTeamMember sends DELETE', () async {
     final client = clientFor((_) => http.Response('', 204));
 
-    await client.removeTeamMember(contestId, membershipId);
+    expect(await client.removeTeamMember(contestId, membershipId), isNull);
 
     expect(seen.method, 'DELETE');
     expect(

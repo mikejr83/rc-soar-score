@@ -17,6 +17,9 @@ Future<void> requireContestDirector(
     throw EntityNotFoundError(entityType: 'Contest', entityId: contestId);
   }
   if (contest.ownerAccountId != principal.accountId) {
-    throw ForbiddenError('not_director', 'only the director of the contest may');
+    throw ForbiddenError(
+      'not_director',
+      'only the director of the contest may',
+    );
   }
 }

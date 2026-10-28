@@ -17,8 +17,10 @@ import 'package:soar_score_core/soar_score_core.dart';
 ///   classification or retirement
 /// - `DELETE /contests/{id}/participations/{participationId}` removes one
 ///
-/// A change of the retirement round recalculates the results, which count a
-/// retired pilot's later flights as retired, not as zeros. The change is
+/// A change of the retirement round, the role or the classification
+/// recalculates the results (a retired pilot's later flights count as
+/// retired, not as zeros; a class or role decides who is ranked where). The
+/// change is
 /// stored first; if the recalculation fails the results read as stale and the
 /// response carries `recalculation_warning`, as a score entry does.
 ///
@@ -99,13 +101,17 @@ void addParticipationRoutes(
     );
     String? warning;
     if (before != null &&
-        before.retiredAtRound != participation.retiredAtRound) {
+        (before.retiredAtRound != participation.retiredAtRound ||
+            before.roleId != participation.roleId ||
+            before.classification != participation.classification)) {
       // A contest with no official score has no results to go stale.
       final scores = await scoresService.list(contestId);
       if (scores.slots.any((slot) => slot.officialScore != null)) {
         warning = await recalculationService.recalculateAfterEntry(
           contestId,
-          cause: 'a retirement change',
+          cause: before.retiredAtRound != participation.retiredAtRound
+              ? 'a retirement change'
+              : 'a participant change',
         );
       }
     }

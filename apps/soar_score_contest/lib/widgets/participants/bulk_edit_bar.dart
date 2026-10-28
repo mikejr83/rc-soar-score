@@ -12,6 +12,7 @@ class BulkEditBar extends StatelessWidget {
     required this.count,
     required this.onClear,
     required this.onRemove,
+    this.removeReason,
     this.teams,
     this.classes,
     this.roles,
@@ -22,7 +23,12 @@ class BulkEditBar extends StatelessWidget {
 
   final int count;
   final VoidCallback onClear;
-  final VoidCallback onRemove;
+
+  /// Removes the selected rows; `null` turns the button off.
+  final VoidCallback? onRemove;
+
+  /// Why Remove is off, as its tooltip.
+  final String? removeReason;
 
   /// The choices for each bulk action; `null` hides the action (its option
   /// is off).
@@ -143,12 +149,15 @@ class BulkEditBar extends StatelessWidget {
                     text: (role) => role.displayName,
                     onPick: onRole!,
                   ),
-                TextButton.icon(
-                  key: const ValueKey('bulk-remove'),
-                  style: buttonStyle,
-                  onPressed: onRemove,
-                  icon: const Icon(Icons.person_remove_outlined, size: 18),
-                  label: const Text('Remove'),
+                Tooltip(
+                  message: removeReason ?? '',
+                  child: TextButton.icon(
+                    key: const ValueKey('bulk-remove'),
+                    style: buttonStyle,
+                    onPressed: onRemove,
+                    icon: const Icon(Icons.person_remove_outlined, size: 18),
+                    label: const Text('Remove'),
+                  ),
                 ),
                 IconButton(
                   tooltip: 'Clear selection',

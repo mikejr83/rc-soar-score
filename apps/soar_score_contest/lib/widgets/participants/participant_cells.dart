@@ -4,6 +4,7 @@ import 'package:soar_score_core/soar_score_core.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/participants/participant_option.dart';
 import '../../services/participants/participant_row.dart';
+import '../../services/participants/participant_row_style.dart';
 import 'cell_focus_registry.dart';
 import 'participant_editing.dart';
 import 'participant_email_text.dart';
@@ -28,6 +29,9 @@ class ParticipantCells {
   List<ParticipantIssue> get issues => editing.rules.issuesOf(participant);
 
   bool get selected => editing.selected.contains(_id);
+
+  /// How this row is drawn beyond its values.
+  ParticipantRowStyle get style => editing.styleOf(participant);
 
   FocusNode _node(ParticipantColumn column) => editing.focus.node(_id, column);
 
@@ -82,9 +86,41 @@ class ParticipantCells {
     );
   }
 
+  /// Plain text for a cell of a read-only list.
+  Widget _plain(BuildContext context, String text, {String? semantics}) {
+    final theme = Theme.of(context);
+    return Semantics(
+      label: semantics,
+      child: Text(
+        text,
+        overflow: TextOverflow.ellipsis,
+        style: theme.textTheme.bodyMedium?.copyWith(
+          color: text.isEmpty ? theme.colorScheme.onSurfaceVariant : null,
+        ),
+      ),
+    );
+  }
+
   Widget role(BuildContext context) {
     final roles = editing.roles;
+    final rowStyle = style;
+    if (rowStyle.readOnly) {
+      return _plain(
+        context,
+        participant.roleName,
+        semantics: 'Role for ${participant.name}',
+      );
+    }
+    final scheme = Theme.of(context).colorScheme;
     final known = roles.any((role) => role.id == participant.roleId);
+    final edited = rowStyle.changed.contains(ParticipantCell.role);
+    OutlineInputBorder border(Color color, double width) => OutlineInputBorder(
+      borderRadius: BorderRadius.circular(8),
+      borderSide: BorderSide(color: color, width: width),
+    );
+    // A pilot with flights cannot become non-flying, and the option says why.
+    bool blocked(Role role) =>
+        rowStyle.hasFlights && role.type != RoleType.pilot;
     return Semantics(
       label: 'Role for ${participant.name}',
       child: DropdownButtonFormField<Id>(
@@ -97,56 +133,99 @@ class ParticipantCells {
           isDense: true,
           constraints: BoxConstraints.tightFor(height: height),
           contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+          border: border(scheme.outline, 1),
+          enabledBorder: border(
+            edited ? scheme.primary : scheme.outline,
+            edited ? 2 : 1,
+          ),
+          disabledBorder: border(Colors.transparent, 1),
+          filled: rowStyle.locked,
+          fillColor: scheme.onSurface.withValues(alpha: 0.12),
         ),
         hint: Text(participant.roleName),
         items: [
           for (final role in roles)
             DropdownMenuItem(
               value: role.id,
-              child: Text(role.displayName, overflow: TextOverflow.ellipsis),
+              enabled: !blocked(role),
+              child: Text(
+                blocked(role)
+                    ? '${role.displayName} (not available: has flights)'
+                    : role.displayName,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
         ],
-        onChanged: (id) {
-          final role = roles.firstWhere((role) => role.id == id);
-          _update(participant.withEdits(role: role));
-        },
+        onChanged: rowStyle.locked
+            ? null
+            : (id) {
+                final role = roles.firstWhere((role) => role.id == id);
+                _update(participant.withEdits(role: role));
+              },
       ),
     );
   }
 
-  Widget classification() => ParticipantTextCell(
-    key: ValueKey('class-$_id'),
-    value: participant.classification,
-    focusNode: _node(ParticipantColumn.classification),
-    semanticLabel: 'Class for ${participant.name}',
-    enabled: scoring,
-    hint: scoring ? 'Required' : 'Not scored',
-    error: issues.contains(ParticipantIssue.classification),
-    suggestions: editing.rules.classes,
-    height: height,
-    onChanged: (value) => _update(participant.withEdits(classification: value)),
-    onCommit: (value) {
-      final normalized = titleCase(value);
-      if (normalized != participant.classification) {
-        _update(participant.withEdits(classification: normalized));
-      }
-    },
-    onSubmitted: () =>
-        editing.focus.moveDown(_id, ParticipantColumn.classification),
-  );
+  Widget classification(BuildContext context) {
+    final rowStyle = style;
+    if (rowStyle.readOnly) {
+      return _plain(
+        context,
+        scoring
+            ? (participant.classification.isEmpty
+                  ? 'No class'
+                  : participant.classification)
+            : 'Not scored',
+        semantics: 'Class for ${participant.name}',
+      );
+    }
+    return ParticipantTextCell(
+      key: ValueKey('class-$_id'),
+      value: participant.classification,
+      focusNode: _node(ParticipantColumn.classification),
+      semanticLabel: 'Class for ${participant.name}',
+      enabled: scoring && !rowStyle.locked,
+      hint: scoring ? 'Required' : 'Not scored',
+      error: issues.contains(ParticipantIssue.classification),
+      changed: rowStyle.changed.contains(ParticipantCell.classification),
+      suggestions: editing.rules.classes,
+      height: height,
+      onChanged: (value) =>
+          _update(participant.withEdits(classification: value)),
+      onCommit: (value) {
+        final normalized = titleCase(value);
+        if (normalized != participant.classification) {
+          _update(participant.withEdits(classification: normalized));
+        }
+      },
+      onSubmitted: () =>
+          editing.focus.moveDown(_id, ParticipantColumn.classification),
+    );
+  }
 
-  Widget team() => TeamCell(
-    key: ValueKey('team-$_id'),
-    value: participant.team,
-    teams: editing.rules.teams,
-    normalize: editing.rules.normalizeTeam,
-    focusNode: _node(ParticipantColumn.team),
-    semanticLabel: 'Team for ${participant.name}',
-    height: height,
-    onChanged: (team) => _update(participant.withEdits(team: team)),
-    onSubmitted: () => editing.focus.moveDown(_id, ParticipantColumn.team),
-  );
+  Widget team(BuildContext context) {
+    final rowStyle = style;
+    if (rowStyle.readOnly) {
+      return _plain(
+        context,
+        participant.team.isEmpty ? 'No team' : participant.team,
+        semantics: 'Team for ${participant.name}',
+      );
+    }
+    return TeamCell(
+      key: ValueKey('team-$_id'),
+      value: participant.team,
+      teams: editing.rules.teams,
+      normalize: editing.rules.normalizeTeam,
+      focusNode: _node(ParticipantColumn.team),
+      semanticLabel: 'Team for ${participant.name}',
+      height: height,
+      enabled: !rowStyle.locked,
+      changed: rowStyle.changed.contains(ParticipantCell.team),
+      onChanged: (team) => _update(participant.withEdits(team: team)),
+      onSubmitted: () => editing.focus.moveDown(_id, ParticipantColumn.team),
+    );
+  }
 
   /// The Models cell until models can be recorded: plain text, not
   /// focusable, and not an error.
@@ -184,11 +263,27 @@ class ParticipantCells {
     ),
   );
 
-  /// Ready, Non-flying, or what the row needs (icon and text, not color
-  /// alone).
+  /// The row's status: what the page says about it, or in the wizard Ready,
+  /// Non-flying, or what the row needs (icon and text, not color alone).
   Widget status(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final (icon, text, color) = !scoring
+    final custom = style.status;
+    if (custom != null && custom.text.isEmpty) {
+      return SizedBox.shrink(key: ValueKey('status-$_id'));
+    }
+    final (icon, text, color) = custom != null
+        ? (
+            custom.icon,
+            custom.text,
+            switch (custom.tone) {
+              ParticipantStatusTone.neutral => scheme.onSurfaceVariant,
+              ParticipantStatusTone.primary => scheme.primary,
+              ParticipantStatusTone.success => scheme.secondary,
+              ParticipantStatusTone.warning => scheme.tertiary,
+              ParticipantStatusTone.error => scheme.error,
+            },
+          )
+        : !scoring
         ? (Icons.badge, 'Non-flying', scheme.onSurfaceVariant)
         : issues.isNotEmpty
         ? (
@@ -201,7 +296,13 @@ class ParticipantCells {
       key: ValueKey('status-$_id'),
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 18, color: color),
+        if (custom?.busy ?? false)
+          SizedBox.square(
+            dimension: 16,
+            child: CircularProgressIndicator(strokeWidth: 2, color: color),
+          )
+        else
+          Icon(icon, size: 18, color: color),
         const SizedBox(width: 6),
         Flexible(
           child: Text(
@@ -210,6 +311,38 @@ class ParticipantCells {
                 ?.copyWith(color: color),
           ),
         ),
+      ],
+    );
+  }
+
+  /// The name, with a `Has flights` marker for a pilot who has scores.
+  Widget nameBlock(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          participant.name,
+          overflow: TextOverflow.ellipsis,
+          style: theme.textTheme.bodyMedium,
+        ),
+        if (style.hasFlights)
+          Row(
+            key: ValueKey('flights-$_id'),
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.flight, size: 14, color: scheme.onSurfaceVariant),
+              const SizedBox(width: 4),
+              Text(
+                'Has flights',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
       ],
     );
   }

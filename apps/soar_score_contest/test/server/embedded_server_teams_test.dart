@@ -109,7 +109,7 @@ void main() {
         contestParticipationId: pilot.id,
       ),
     );
-    expect(await client.teamMemberships(contestId), [member]);
+    expect(await client.teamMemberships(contestId), [member.membership]);
 
     await expectLater(
       client.addTeamMember(

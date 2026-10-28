@@ -74,12 +74,13 @@ class SliceClient {
   /// The handler stack acting as [principal], cached per principal. Every
   /// request to [database] goes through it, so tests can act as two
   /// accounts over the same database.
-  Handler handlerFor(core.Id principal) =>
-      _handlers.putIfAbsent(
-          principal, () => createServerHandler(
-            database,
-            authMiddleware: fixedPrincipal(Principal(accountId: principal)),
-          ));
+  Handler handlerFor(core.Id principal) => _handlers.putIfAbsent(
+    principal,
+    () => createServerHandler(
+      database,
+      authMiddleware: fixedPrincipal(Principal(accountId: principal)),
+    ),
+  );
 
   Future<void> close() async {
     await database.close();

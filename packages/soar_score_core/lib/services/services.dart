@@ -52,6 +52,7 @@ export 'score_entry_result.dart';
 export 'score_history.dart';
 export 'scores_service.dart';
 export 'roles_service.dart';
+export 'team_membership_result.dart';
 export 'teams_service.dart';
 export 'sync/accepted_change.dart';
 export 'sync/installation_sync_service.dart';

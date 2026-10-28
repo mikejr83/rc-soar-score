@@ -20,6 +20,7 @@ class ParticipantTextCell extends StatefulWidget {
     this.enabled = true,
     this.suggestions = const [],
     this.height = 40,
+    this.changed = false,
   });
 
   final String value;
@@ -33,6 +34,9 @@ class ParticipantTextCell extends StatefulWidget {
   final bool enabled;
   final List<String> suggestions;
   final double height;
+
+  /// The value was edited since the last save (a primary outline).
+  final bool changed;
 
   @override
   State<ParticipantTextCell> createState() => _ParticipantTextCellState();
@@ -95,6 +99,8 @@ class _ParticipantTextCellState extends State<ParticipantTextCell> {
       border: border(scheme.outline),
       enabledBorder: widget.error
           ? border(scheme.error, 2)
+          : widget.changed
+          ? border(scheme.primary, 2)
           : border(scheme.outline),
       focusedBorder: border(widget.error ? scheme.error : scheme.primary, 2),
       disabledBorder: border(Colors.transparent),

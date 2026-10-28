@@ -76,7 +76,10 @@ class PostgresConfig {
   ///
   /// Throws [ArgumentError] for any malformed URL. Error messages never
   /// contain the password.
-  static PostgresConfig fromUrl(String url, {SslMode sslMode = SslMode.require}) {
+  static PostgresConfig fromUrl(
+    String url, {
+    SslMode sslMode = SslMode.require,
+  }) {
     final Uri uri;
     try {
       uri = Uri.parse(url);
@@ -170,9 +173,12 @@ class PostgresConfig {
       if (colonIndex == -1) {
         authorityUser = Uri.decodeComponent(uri.userInfo);
       } else {
-        authorityUser = Uri.decodeComponent(uri.userInfo.substring(0, colonIndex));
-        authorityPassword =
-            Uri.decodeComponent(uri.userInfo.substring(colonIndex + 1));
+        authorityUser = Uri.decodeComponent(
+          uri.userInfo.substring(0, colonIndex),
+        );
+        authorityPassword = Uri.decodeComponent(
+          uri.userInfo.substring(colonIndex + 1),
+        );
       }
     }
 
@@ -214,7 +220,7 @@ class PostgresConfig {
           value,
           'sslmode',
           'must be one of: disable, allow, prefer, require, verify-ca, '
-          'verify-full',
+              'verify-full',
         );
     }
   }

@@ -56,7 +56,7 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
 
       // The checklist rows open the pages that fix them.
       await tapVisible(tester, _key('checklist-row-pilots'));
-      await pumpUntilFound(tester, find.textContaining('Contest ID:'));
+      await pumpUntilFound(tester, _key('participants-count'));
       await tapRail(tester, 'Workspace');
       await pumpUntilFound(tester, _key('checklist-row-matrix'));
       await tapVisible(tester, _key('checklist-row-matrix'));
