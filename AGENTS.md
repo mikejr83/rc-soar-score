@@ -44,8 +44,14 @@ Soar Score is an RC sailplane soaring contest scoring and management suite. It c
   runs `test/` only. See `apps/soar_score_contest/AGENTS.md`.
 - **Keep the E2E tests current.** After any change to the contest app's pages,
   routes, widget keys, visible labels, flows or demo data, run
-  `scripts/e2e.ps1` and fix or extend the journeys the change affects, in the
-  same PR. A change that adds a page or flow gets a journey for it.
+  `scripts/e2e.ps1` (or `scripts/e2e.sh -d web`) and fix or extend the
+  journeys the change affects, in the same PR. The contest lifecycle journey
+  (`contest_lifecycle_journey_test.dart`, phases in
+  `apps/soar_score_contest/integration_test/journey/`) covers a contest from
+  start to results: a UI change extends the matching phase file with a step.
+  Only a feature outside the lifecycle gets its own standalone `*_test.dart`,
+  and the PR says why in one line. The allowed standalone files are listed in
+  `apps/soar_score_contest/AGENTS.md`.
 
 ## Code Style & Linting
 
