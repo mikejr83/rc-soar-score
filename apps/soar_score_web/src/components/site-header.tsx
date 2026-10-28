@@ -4,13 +4,14 @@ import { contestAppUrl, primaryNav, siteName } from "@/lib/site";
 
 import { ExternalLink } from "./external-link";
 
-import { BrandMark } from "./brand-logo";
+import { BrandLockup } from "./brand-logo";
+import { ThemeToggle } from "./theme-toggle";
 import styles from "./site-header.module.css";
 
 /**
  * The instrument-panel header shared by every page: the mark and name home
- * link, the primary navigation and the Sign in link out to the contest
- * administration app (the site has no sign-in of its own, #464).
+ * link, the primary navigation, the theme switch and the Sign in link out
+ * to the contest administration app (the site has no sign-in of its own, #464).
  *
  * On a phone, Contests stays one tap away beside a native `<details>` menu
  * that needs no JavaScript.
@@ -23,10 +24,7 @@ export function SiteHeader() {
       </a>
       <div className={`wrap ${styles.inner}`}>
         <Link href="/" className={styles.home} aria-label={`${siteName} home`}>
-          <BrandMark size={36} decorative />
-          <span className={styles.wordmark}>
-            <span className={styles.rc}>RC</span> Soar Score
-          </span>
+          <BrandLockup height={40} onDark priority className={styles.lockup} />
         </Link>
 
         <nav className={styles.nav} aria-label="Primary">
@@ -37,6 +35,7 @@ export function SiteHeader() {
               </li>
             ))}
           </ul>
+          <ThemeToggle />
           <ExternalLink
             className={`btn btn--ghost btn--sm btn--on-dark ${styles.login}`}
             href={contestAppUrl}
@@ -50,6 +49,7 @@ export function SiteHeader() {
           <Link href="/results/contests" className={`btn btn--ghost btn--sm btn--on-dark`}>
             Contests
           </Link>
+          <ThemeToggle />
           <details className={styles.menu}>
             <summary className={styles.menuButton} aria-label="Menu">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">

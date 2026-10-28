@@ -79,6 +79,31 @@
     --shadow: 0 1px 2px rgb(0 0 0 / 0.35), 0 8px 24px -12px rgb(0 0 0 / 0.6);
   }
 }
+/* The theme switch sets data-theme; the inline script in layout.tsx
+   restores it before paint. Without it the OS scheme applies. */
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+    --bg: var(--night);
+    /* Elevation is explicit: a card steps up from the night canvas, its edge
+       a clear hairline, and it keeps a shadow because tone alone is too close. */
+    --surface: #2b2927;
+    --surface-2: #35322f;
+    --text: var(--paper);
+    --text-muted: var(--muted-dark);
+    --line: #49443f;
+    --line-strong: #6a645d;
+    --accent: var(--orange-on-dark);
+    --accent-hover: #ff8257;
+    --on-accent: var(--dial);
+    --focus: var(--orange-on-dark);
+    --ok-bg: #173a27;
+    --ok-fg: #b1f1ce;
+    --selected-row: #3a2a22;
+    --shadow: 0 1px 2px rgb(0 0 0 / 0.35), 0 8px 24px -12px rgb(0 0 0 / 0.6);
+}
 
 *,
 *::before,

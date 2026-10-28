@@ -33,8 +33,14 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className={`no-js ${display.variable} ${body.variable} ${accent.variable}`} suppressHydrationWarning>
       <body style={{ minHeight: "100dvh", display: "flex", flexDirection: "column" }}>
-        {/* Scroll reveals hide content until JavaScript runs; without it, globals.css shows everything. */}
-        <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.remove('no-js')" }} />
+        {/* Scroll reveals hide content until JavaScript runs; without it, globals.css shows everything.
+            The stored theme choice is applied here too, before first paint. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "document.documentElement.classList.remove('no-js');try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t}catch(e){}",
+          }}
+        />
         <SiteHeader />
         <main id="main" style={{ flex: 1 }}>
           {children}
