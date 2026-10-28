@@ -14,7 +14,7 @@ import '../page_states/page_banner.dart';
 ///   the draw needs redoing;
 /// - results recalculated after a change in a running contest;
 /// - people added since the draw who are not in a group yet;
-/// - scoring pilots with no class (when classes are on).
+/// - scoring pilots with no class (when classes are on), as a notice only.
 List<Widget> participantBanners({
   required ParticipantsController controller,
   required VoidCallback onAdd,
@@ -226,12 +226,14 @@ List<Widget> participantBanners({
     banners.add(
       PageBanner(
         key: const ValueKey('banner-missing-class'),
-        kind: PageBannerKind.alert,
-        icon: Icons.error,
+        kind: PageBannerKind.info,
+        icon: Icons.info,
         shape: PageBannerShape.card,
         title:
-            '${missing.length} participant${missing.length == 1 ? ' needs' : 's need'} a class',
-        text: 'Every scoring pilot needs a class in this contest.',
+            '${missing.length} participant${missing.length == 1 ? ' has' : 's have'} no class',
+        text:
+            'Results are grouped by class. This does not stop you saving, '
+            'drawing or scoring.',
         child: Wrap(
           spacing: 8,
           children: [

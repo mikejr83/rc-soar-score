@@ -143,7 +143,7 @@ class ParticipationsService {
         storedRevision: stored.revision,
       );
     }
-    final removed = leavesFlying ? await _removeMatrixRows(id, metadata) : 0;
+    final removed = leavesFlying ? await _matrixRowCount(id) : 0;
     final updated = ContestParticipation(
       id: stored.id,
       contestId: stored.contestId,
@@ -157,9 +157,12 @@ class ParticipationsService {
       retiredAtRound: retiredAtRound,
       revision: stored.revision,
     );
+    // The matrix rows go in the same transaction as the role, so a change
+    // that loses to another edit removes nothing.
     final saved = await repository.contestParticipationRepository.save(
       updated,
       metadata: metadata,
+      removeMatrixRows: leavesFlying,
     );
     return (participation: saved, matrixRowsRemoved: removed);
   }
@@ -179,7 +182,7 @@ class ParticipationsService {
   }) async {
     await _require(contestId, id);
     await _requireNoScores(id, 'cannot be removed');
-    final removed = await _removeMatrixRows(id, metadata);
+    final removed = await _matrixRowCount(id);
     await repository.contestParticipationRepository.delete(
       id,
       metadata: metadata,
@@ -211,11 +214,9 @@ class ParticipationsService {
     }
   }
 
-  Future<int> _removeMatrixRows(Id id, MutationMetadata metadata) async {
-    final assignments = repository.matrixAssignmentRepository;
-    if ((await assignments.listForParticipation(id)).isEmpty) return 0;
-    return assignments.removeForParticipation(id, metadata: metadata);
-  }
+  Future<int> _matrixRowCount(Id id) async =>
+      (await repository.matrixAssignmentRepository.listForParticipation(id))
+          .length;
 
   Future<Contest> _requireContest(Id contestId) async {
     final contest = await repository.contestRepository.findById(contestId);

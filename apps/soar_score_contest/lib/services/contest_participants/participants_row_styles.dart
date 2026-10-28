@@ -93,9 +93,9 @@ extension ParticipantsRowStyles on ParticipantsController {
       status = const ParticipantStatus('Non-flying', Icons.badge);
     } else if (rules.issuesOf(row).isNotEmpty) {
       status = const ParticipantStatus(
-        'Needs class',
-        Icons.error,
-        tone: ParticipantStatusTone.error,
+        'No class',
+        Icons.info,
+        tone: ParticipantStatusTone.warning,
       );
     } else {
       status = const ParticipantStatus('', Icons.circle);

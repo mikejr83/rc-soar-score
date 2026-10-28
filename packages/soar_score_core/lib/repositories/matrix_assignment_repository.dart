@@ -54,17 +54,4 @@ abstract interface class MatrixAssignmentRepository {
     ContestParticipation? numberedParticipation,
     required MutationMetadata metadata,
   });
-
-  /// Removes every assignment of [contestParticipationId] with its empty score
-  /// placeholder and the results derived from them, newest first, in one
-  /// transaction. Each removal leaves a tombstone. No matrix revision changes.
-  ///
-  /// This is for a pilot with no scores who leaves the contest or stops
-  /// flying. Returns how many assignments were removed. Throws a
-  /// [StateError], changing nothing, when a placeholder holds a score or is
-  /// not empty.
-  Future<int> removeForParticipation(
-    Id contestParticipationId, {
-    required MutationMetadata metadata,
-  });
 }

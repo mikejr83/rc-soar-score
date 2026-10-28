@@ -228,14 +228,12 @@ class StubMatrixAssignmentRepository implements MatrixAssignmentRepository {
     return lateAdd;
   }
 
-  /// Participations whose marked assignment was removed.
+  /// Participations whose matrix rows were removed with them.
   final Set<Id> removedFor = {};
 
-  @override
-  Future<int> removeForParticipation(
-    Id contestParticipationId, {
-    required MutationMetadata metadata,
-  }) async {
+  /// Removes the rows of [contestParticipationId], as the real repository
+  /// does inside a participation save or delete; returns how many went.
+  Future<int> removeRowsOf(Id contestParticipationId) async {
     final rows = await listForParticipation(contestParticipationId);
     stored.removeWhere(
       (assignment) =>

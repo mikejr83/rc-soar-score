@@ -342,10 +342,9 @@ class ParticipantsController extends ChangeNotifier {
 
   // Why Save is off.
 
-  /// A changed row that cannot be saved as it is: a missing class, or a team
-  /// name that is too long.
-  bool isInvalid(StoredParticipant row) =>
-      rules.issuesOf(row).isNotEmpty || teamTooLong(row);
+  /// A changed row that cannot be saved as it is: a team name that is too
+  /// long. A missing class never blocks (it is a notice only).
+  bool isInvalid(StoredParticipant row) => teamTooLong(row);
 
   bool teamTooLong(StoredParticipant row) =>
       row.team.trim().length > maxTeamName;

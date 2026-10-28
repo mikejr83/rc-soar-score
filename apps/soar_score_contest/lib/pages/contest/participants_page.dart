@@ -159,23 +159,33 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
     }
   }
 
-  /// The bulk role change. Making pilots who are in the draw non-flying
-  /// takes them out of it, so that asks first, like a single edit.
+  /// The bulk role change. Making pilots non-flying clears their class and,
+  /// for those in the draw, takes them out of it, so that asks first, like a
+  /// single edit.
   Future<void> _setRoleForSelected(Role role) async {
     final c = _controller!;
     if (role.type != RoleType.pilot) {
-      final leaving = [
+      final affected = [
         for (final row in c.rows)
-          if (c.selection.contains(row.rowId) && c.inDraw(row)) row.name,
+          if (c.selection.contains(row.rowId) &&
+              row.isPilot &&
+              !c.hasFlights(row) &&
+              (row.classification.trim().isNotEmpty || c.inDraw(row)))
+            row,
       ];
-      if (leaving.isNotEmpty) {
+      if (affected.isNotEmpty) {
         final ok = await confirmNonFlying(
           context,
-          name: ParticipantsController.andList(leaving),
+          name: ParticipantsController.andList([
+            for (final row in affected) row.name,
+          ]),
           roleName: role.displayName,
-          classification: '',
-          inDraw: true,
-          plural: leaving.length > 1,
+          classification: affected
+              .map((row) => row.classification.trim())
+              .firstWhere((c) => c.isNotEmpty, orElse: () => ''),
+          clearsClass: affected.any((r) => r.classification.trim().isNotEmpty),
+          inDraw: affected.any(c.inDraw),
+          plural: affected.length > 1,
         );
         if (!ok || !mounted) return;
       }

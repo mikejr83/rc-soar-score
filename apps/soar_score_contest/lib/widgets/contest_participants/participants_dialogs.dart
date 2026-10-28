@@ -159,6 +159,7 @@ Future<bool> confirmNonFlying(
   required String classification,
   bool inDraw = false,
   bool plural = false,
+  bool? clearsClass,
 }) async {
   final ok = await showDialog<bool>(
     context: context,
@@ -168,7 +169,11 @@ Future<bool> confirmNonFlying(
       content: Text(
         [
           '$roleName is a non-flying role, so $name ${plural ? 'get' : 'gets'} no score rows'
-              '${classification.trim().isEmpty ? '' : ' and their class ($classification) is cleared'}.',
+              '${!(clearsClass ?? classification.trim().isNotEmpty)
+                  ? ''
+                  : plural
+                  ? ' and their classes are cleared'
+                  : ' and their class ($classification) is cleared'}.',
           if (inDraw)
             'Their places in the draw are removed when you save, and the '
                 'draw will need redoing.',

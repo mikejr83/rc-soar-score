@@ -218,6 +218,59 @@ void _tests(Backend backend) {
       expect(await rowsOf(pilot), hasLength(2));
     });
 
+    test('the rows and the role change together: a save that lost to another '
+        'edit removes nothing', () async {
+      final pilot = (await pilots()).first;
+      // Another edit lands between the service's check and its save.
+      await repository.contestParticipationRepository.save(
+        core.ContestParticipation.fromJson({
+          ...pilot.toJson(),
+          'classification': 'Open',
+        }),
+        metadata: meta(),
+      );
+      final helper = (await repository.roleRepository.listVisibleTo())
+          .firstWhere((r) => r.id == core.SystemRoles.helperId);
+      final demoted = core.ContestParticipation.fromJson({
+        ...pilot.toJson(),
+        'role_id': helper.id.value,
+        'role_name': helper.displayName,
+        'role_type': 'NonFlier',
+      });
+
+      await expectLater(
+        repository.contestParticipationRepository.save(
+          demoted,
+          metadata: meta(),
+          removeMatrixRows: true,
+        ),
+        throwsA(isA<core.StaleRevisionError>()),
+      );
+
+      expect(await rowsOf(pilot), hasLength(2));
+      expect(await inst.count('score_placeholders'), 8);
+    });
+
+    test('a slot that gained a score before the save refuses the whole '
+        'change', () async {
+      final pilot = (await pilots()).first;
+      await score(pilot);
+      final current = (await repository.contestParticipationRepository.findById(
+        pilot.id,
+      ))!;
+
+      await expectLater(
+        repository.contestParticipationRepository.save(
+          current,
+          metadata: meta(),
+          removeMatrixRows: true,
+        ),
+        throwsA(isA<core.ContestStateError>()),
+      );
+
+      expect(await rowsOf(pilot), hasLength(2));
+    });
+
     test('both ends of a move go together', () async {
       final pilot = (await pilots()).first;
       final source = (await rowsOf(pilot)).first;

@@ -50,6 +50,10 @@ class StubContestParticipationRepository
     implements ContestParticipationRepository {
   final Map<Id, ContestParticipation> participations = {};
 
+  /// Removes a participation's matrix rows; set by the repository that owns
+  /// the assignments.
+  Future<int> Function(Id participationId)? removeMatrixRows;
+
   @override
   Future<ContestParticipation?> findById(Id id) async => participations[id];
 
@@ -77,6 +81,7 @@ class StubContestParticipationRepository
   Future<ContestParticipation> save(
     ContestParticipation participation, {
     required MutationMetadata metadata,
+    bool removeMatrixRows = false,
   }) async {
     final current = participations[participation.id];
     if (current != null && current.revision != participation.revision) {
@@ -87,6 +92,7 @@ class StubContestParticipationRepository
         storedRevision: current.revision,
       );
     }
+    if (removeMatrixRows) await this.removeMatrixRows?.call(participation.id);
     final stored = ContestParticipation.fromJson({
       ...participation.toJson(),
       'revision': current == null ? 0 : current.revision + 1,
@@ -96,8 +102,10 @@ class StubContestParticipationRepository
   }
 
   @override
-  Future<bool> delete(Id id, {required MutationMetadata metadata}) async =>
-      participations.remove(id) != null;
+  Future<bool> delete(Id id, {required MutationMetadata metadata}) async {
+    await removeMatrixRows?.call(id);
+    return participations.remove(id) != null;
+  }
 }
 
 /// A [RoleRepository] holding the system roles plus any [roles] a test adds;

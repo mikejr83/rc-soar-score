@@ -19,7 +19,9 @@ class StubRepository implements core.Repository {
         _contestRepository is StubContestRepository
             ? _contestRepository
             : StubContestRepository(),
-      );
+      ) {
+    participations.removeMatrixRows = matrixAssignments.removeRowsOf;
+  }
 
   @override
   core.ContestRepository get contestRepository => _contestRepository;

@@ -228,5 +228,30 @@ void main() {
         findsOneWidget,
       );
     });
+
+    testWidgets(
+      'the bulk role change before the draw says classes are cleared',
+      (tester) async {
+        await pumpParticipantsPage(tester, ParticipantsServer());
+        await tester.tap(_check(1));
+        await tester.tap(_check(2));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byKey(const ValueKey('bulk-role')));
+        await tester.pumpAndSettle();
+        await tester.tap(find.widgetWithText(MenuItemButton, 'Helper'));
+        await tester.pumpAndSettle();
+
+        expect(
+          find.text('Change Ann Lee and Bo Ray to Helper?'),
+          findsOneWidget,
+        );
+        expect(
+          find.textContaining('their classes are cleared'),
+          findsOneWidget,
+        );
+        expect(find.textContaining('draw will need redoing'), findsNothing);
+      },
+    );
   });
 }

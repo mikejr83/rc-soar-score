@@ -58,4 +58,75 @@ void _tests(Backend backend) {
     expect(await serverCount('score_placeholders'), placeholders - 2);
     expect(await harness.stored('ContestParticipation', pilot.id), isNull);
   });
+
+  /// Removes the first pilot on the client and returns what it queued.
+  Future<List<core.MutationRecord>> removePilot() async {
+    final pilot =
+        (await harness.clientRepository.contestParticipationRepository
+                .listForContest(contestId))
+            .first;
+    await ParticipationsService(harness.clientRepository).remove(
+      contestId,
+      pilot.id,
+      metadata: core.MutationMetadata(
+        clientMutationId: 'remove-guard',
+        authority: core.Authority.director,
+        clientTime: DateTime.utc(2026, 10, 14),
+        actorId: harness.account,
+      ),
+    );
+    return harness.client.syncStore.pendingMutations(scope);
+  }
+
+  test('a matrix row is refused when its score slot still exists', () async {
+    final assignments = await serverCount('matrix_assignments');
+    final pending = await removePilot();
+    final rowsOnly = [
+      for (final m in pending)
+        if (m.entityType == 'MatrixAssignment') AcceptorHarness.toMutation(m),
+    ];
+
+    final out = await harness.exchange(scope, mutations: rowsOnly);
+
+    expect(rowsOnly, isNotEmpty);
+    expect(
+      out.results.map((r) => r.outcome),
+      everyElement(core.MutationOutcome.rejected),
+    );
+    expect(
+      out.results.map((r) => r.reasonCode),
+      everyElement(core.SyncReasonCode.locked.code),
+    );
+    expect(await serverCount('matrix_assignments'), assignments);
+  });
+
+  test('a matrix row is refused unless a director removes it', () async {
+    final assignments = await serverCount('matrix_assignments');
+    final pending = await removePilot();
+    final mutations = [
+      for (final m in pending)
+        if (m.entityType == 'MatrixAssignment')
+          SyncMutation(
+            id: m.id,
+            clientMutationId: m.clientMutationId,
+            entityType: m.entityType,
+            entityId: m.entityId,
+            baseRevision: m.baseRevision,
+            authority: core.Authority.helper,
+            clientTime: m.clientTime,
+            dependsOnMutationId: m.dependsOnMutationId,
+            payload: m.payload,
+          )
+        else
+          AcceptorHarness.toMutation(m),
+    ];
+
+    final out = await harness.exchange(scope, mutations: mutations);
+    final refused = out.results.where(
+      (r) => r.outcome == core.MutationOutcome.rejected,
+    );
+
+    expect(refused, isNotEmpty);
+    expect(await serverCount('matrix_assignments'), assignments);
+  });
 }

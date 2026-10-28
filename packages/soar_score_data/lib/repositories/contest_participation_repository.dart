@@ -1,5 +1,6 @@
 import 'package:soar_score_core/soar_score_core.dart' as core;
 
+import '../sync/unscored_matrix_rows.dart';
 import 'drift_repository.dart';
 
 /// Contest participations in the database.
@@ -34,15 +35,25 @@ class ContestParticipationRepository extends DriftRepository
   Future<core.ContestParticipation> save(
     core.ContestParticipation participation, {
     required core.MutationMetadata metadata,
-  }) => unitOfWork.run(
-    (context) => context.save(participation, metadata: metadata),
-  );
+    bool removeMatrixRows = false,
+  }) => unitOfWork.run((context) async {
+    if (removeMatrixRows) {
+      await removeUnscoredMatrixRows(
+        context,
+        stores,
+        participation.id,
+        metadata,
+      );
+    }
+    return context.save(participation, metadata: metadata);
+  });
 
   @override
   Future<bool> delete(core.Id id, {required core.MutationMetadata metadata}) =>
       unitOfWork.run((context) async {
         final participation = await _store.find(id);
         if (participation == null) return false;
+        await removeUnscoredMatrixRows(context, stores, id, metadata);
         for (final membership in await _memberships.whereId(
           'contest_participation_id',
           id,
