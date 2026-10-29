@@ -7,10 +7,13 @@ import '../../enums/score_placeholder_state.dart';
 import '../../errors/contest_state_error.dart';
 import '../../errors/entity_not_found_error.dart';
 import '../../models/contest/contest.dart';
+import '../../models/contest/core_options.dart';
+import '../../models/matrix/redraw_preview.dart';
 import '../contest_results.dart';
 import '../../models/id.dart';
 import '../../models/matrix/current_matrix.dart';
 import '../../models/matrix/matrix_assignment.dart';
+import '../../models/matrix/matrix_revision.dart';
 import '../../models/matrix/round.dart';
 import '../../models/participants/contest_participation.dart';
 import '../../repositories/already_stored_error.dart';
@@ -37,7 +40,9 @@ import 'matrix_service.dart';
 /// fairness report covers every round. A redraw replaces every round from
 /// [redraw]'s `firstRound` to the end of the contest, which is only allowed
 /// while none of them has a score; an extension has `firstRound` one past the
-/// last round. See `plan/data-model/entities/matrix_revision.md`.
+/// last round. A redraw can also be previewed with [previewRedraw], which
+/// runs the same draw but stores nothing. See
+/// `plan/data-model/entities/matrix_revision.md`.
 class MatrixRedrawService {
   MatrixRedrawService(
     this.repository, {
@@ -94,6 +99,7 @@ class MatrixRedrawService {
     int attemptsPerRound = BasicDraw.defaultAttemptsPerRound,
     int seedCount = DrawEngine.defaultSeedCount,
     String? reason,
+    required int base,
     required Id actorId,
     required MutationMetadata metadata,
   }) async {
@@ -105,6 +111,145 @@ class MatrixRedrawService {
       }
       return MatrixService(repository).current(contestId);
     }
+    final prepared = await _prepareRedraw(
+      contestId,
+      contest,
+      id: id,
+      firstRound: firstRound,
+      rounds: rounds,
+      groupsPerRound: groupsPerRound,
+      randomSeed: randomSeed,
+      attemptsPerRound: attemptsPerRound,
+      seedCount: seedCount,
+      base: base,
+    );
+    final built = MatrixDrawBuilder(newId: _newId).build(
+      contestId: contestId,
+      id: id,
+      revisionNumber: prepared.latest.revisionNumber + 1,
+      previousRevisionId: prepared.latest.id,
+      firstRound: firstRound,
+      drawn: prepared.drawn.rounds,
+      seed: prepared.drawn.seed,
+      algorithmVersion: MatrixService.algorithmVersion,
+      groupsPerRound: groupsPerRound,
+      drawConfig: {
+        'schema_version': 1,
+        'attempts_per_round': attemptsPerRound,
+        'seed_count': seedCount,
+        'requested_seed': prepared.requestedSeed,
+        'iterations_per_placement': DrawOptimizer.defaultIterationsPerPlacement,
+        'team_protection': prepared.options.teamProtection,
+        'allow_back_to_back': prepared.options.allowBackToBack,
+        'lane_mode': prepared.options.laneMode.json,
+        'configured_draw_mode': prepared.options.drawMode.json,
+      },
+      pilots: prepared.pilots,
+      fairness: prepared.drawn.fairness,
+      reason:
+          _blankToNull(reason) ??
+          _defaultReason(prepared.extension, firstRound),
+      actorId: actorId,
+      now: _clock(),
+      drawMode: prepared.standings == null
+          ? DrawMode.standardManOnMan
+          : DrawMode.seededManOnMan,
+      seedingStandings: prepared.standings,
+    );
+
+    final newByOrdinal = {
+      for (final round in built.draw.rounds) round.ordinal: round,
+    };
+    await repository.matrixRevisionRepository.appendRedraw(
+      FinalizedRedraw(
+        draw: built.draw,
+        placeholders: built.placeholders,
+        numberedParticipations: MatrixDrawBuilder.numbered(
+          prepared.participations,
+        ),
+        replacedRounds: [
+          for (final round in prepared.replaced) _replace(round, newByOrdinal),
+        ],
+      ),
+      expectedBaseRevision: base,
+      metadata: metadata,
+    );
+    return MatrixService(repository).current(contestId);
+  }
+
+  /// Draws what [redraw] would store, without storing it: returns a
+  /// [RedrawPreview] with the seed that draws the candidate, its fairness
+  /// report, and whether it beats the latest revision's fairness report.
+  ///
+  /// Runs the draw with the same [jobs] progress and cancellation as [redraw]
+  /// and applies the same state checks, including the stale check on [base].
+  /// Nothing is stored; drawing the returned [RedrawPreview.seed] with the
+  /// same settings reproduces the previewed fairness.
+  ///
+  /// Throws the same errors as [redraw] (including `stale_matrix`) for the
+  /// same reasons, but never one for an existing revision: [id] is the id a
+  /// later confirm would use, and one that is already stored on the contest
+  /// makes this a no-op that answers `null`.
+  Future<RedrawPreview?> previewRedraw(
+    Id contestId, {
+    required Id id,
+    required int firstRound,
+    required int rounds,
+    required int groupsPerRound,
+    int? randomSeed,
+    int attemptsPerRound = BasicDraw.defaultAttemptsPerRound,
+    int seedCount = DrawEngine.defaultSeedCount,
+    required int base,
+  }) async {
+    final contest = await _requireContest(contestId);
+    final stored = await repository.matrixRevisionRepository.findById(id);
+    if (stored != null) {
+      if (stored.contestId != contestId) {
+        throw AlreadyStoredError(entityType: 'MatrixRevision', entityId: id);
+      }
+      return null;
+    }
+    final prepared = await _prepareRedraw(
+      contestId,
+      contest,
+      id: id,
+      firstRound: firstRound,
+      rounds: rounds,
+      groupsPerRound: groupsPerRound,
+      randomSeed: randomSeed,
+      attemptsPerRound: attemptsPerRound,
+      seedCount: seedCount,
+      base: base,
+    );
+    final current = prepared.latest.fairnessSummary;
+    return RedrawPreview(
+      seed: prepared.drawn.seed,
+      candidateFairness: prepared.drawn.fairness,
+      currentFairness: current,
+    );
+  }
+
+  /// The state checks and the draw of a redraw, before anything is built or
+  /// stored.
+  ///
+  /// Applies, in order: the lock and lifecycle checks; the no-matrix check;
+  /// the stale check on [base] against the latest finalized revision; the
+  /// round range and replaceability checks; the configuration, seeded-mode and
+  /// one-seeded-round checks; the pilots and kept-rounds history; and the draw
+  /// itself (standard through [jobs], so progress and cancellation apply, or
+  /// seeded synchronously from the standings).
+  Future<_PreparedRedraw> _prepareRedraw(
+    Id contestId,
+    Contest contest, {
+    required Id id,
+    required int firstRound,
+    required int rounds,
+    required int groupsPerRound,
+    int? randomSeed,
+    required int attemptsPerRound,
+    required int seedCount,
+    required int base,
+  }) async {
     if (contest.adminLock == AdminLock.locked) {
       throw ContestStateError(
         'contest_locked',
@@ -126,6 +271,13 @@ class MatrixRedrawService {
       throw ContestStateError(
         'no_matrix',
         'draw the first matrix before adding or redrawing rounds',
+      );
+    }
+    if (base != latest.revisionNumber) {
+      throw ContestStateError(
+        'stale_matrix',
+        'the matrix has moved on: you read revision $base, but the latest is '
+            '${latest.revisionNumber}; reload the matrix and draw again',
       );
     }
 
@@ -250,52 +402,17 @@ class MatrixRedrawService {
       );
     }
 
-    final extension = firstRound == lastRound + 1;
-    final built = MatrixDrawBuilder(newId: _newId).build(
-      contestId: contestId,
-      id: id,
-      revisionNumber: latest.revisionNumber + 1,
-      previousRevisionId: latest.id,
-      firstRound: firstRound,
-      drawn: drawn.rounds,
-      seed: drawn.seed,
-      algorithmVersion: MatrixService.algorithmVersion,
-      groupsPerRound: groupsPerRound,
-      drawConfig: {
-        'schema_version': 1,
-        'attempts_per_round': attemptsPerRound,
-        'seed_count': seedCount,
-        'requested_seed': requestedSeed,
-        'iterations_per_placement': DrawOptimizer.defaultIterationsPerPlacement,
-        'team_protection': options.teamProtection,
-        'allow_back_to_back': options.allowBackToBack,
-        'lane_mode': options.laneMode.json,
-        'configured_draw_mode': options.drawMode.json,
-      },
+    return _PreparedRedraw(
+      latest: latest,
+      drawn: drawn,
+      requestedSeed: requestedSeed,
+      standings: standings,
+      extension: firstRound == lastRound + 1,
+      options: options,
       pilots: pilots,
-      fairness: drawn.fairness,
-      reason: _blankToNull(reason) ?? _defaultReason(extension, firstRound),
-      actorId: actorId,
-      now: _clock(),
-      drawMode: seeded ? DrawMode.seededManOnMan : DrawMode.standardManOnMan,
-      seedingStandings: standings,
+      participations: participations,
+      replaced: replaced,
     );
-
-    final newByOrdinal = {
-      for (final round in built.draw.rounds) round.ordinal: round,
-    };
-    await repository.matrixRevisionRepository.appendRedraw(
-      FinalizedRedraw(
-        draw: built.draw,
-        placeholders: built.placeholders,
-        numberedParticipations: MatrixDrawBuilder.numbered(participations),
-        replacedRounds: [
-          for (final round in replaced) _replace(round, newByOrdinal),
-        ],
-      ),
-      metadata: metadata,
-    );
-    return MatrixService(repository).current(contestId);
   }
 
   static String _defaultReason(bool extension, int firstRound) =>
@@ -464,4 +581,30 @@ class MatrixRedrawService {
     }
     return contest;
   }
+}
+
+/// The state of a redraw that is drawn and checked but not stored yet: what
+/// [MatrixRedrawService.redraw] would append and what its [MatrixRedrawService.previewRedraw] would report.
+class _PreparedRedraw {
+  _PreparedRedraw({
+    required this.latest,
+    required this.drawn,
+    required this.requestedSeed,
+    required this.standings,
+    required this.extension,
+    required this.options,
+    required this.pilots,
+    required this.participations,
+    required this.replaced,
+  });
+
+  final MatrixRevision latest;
+  final DrawResult drawn;
+  final int requestedSeed;
+  final Map<String, Object?>? standings;
+  final bool extension;
+  final CoreOptions options;
+  final List<DrawPilot> pilots;
+  final List<ContestParticipation> participations;
+  final List<Round> replaced;
 }

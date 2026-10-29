@@ -68,6 +68,7 @@ void main() {
         expect(server.redraws.single['rounds'], 2);
         expect(server.redraws.single['groups_per_round'], 2);
         expect(server.redraws.single['random_seed'], isNull);
+        expect(server.redraws.single['base_matrix_revision'], 1);
         expect(find.text('Rounds added.'), findsOneWidget);
         // Back on the matrix.
         expect(_add, findsOneWidget);
@@ -121,6 +122,7 @@ void main() {
       expect(body['groups_per_round'], 2);
       expect(body['random_seed'], isNull);
       expect(body['reason'], 'Did not like the first draw');
+      expect(body['base_matrix_revision'], 1);
       expect(find.text('Rounds redrawn.'), findsOneWidget);
 
       // A second redraw is a new request with its own id.

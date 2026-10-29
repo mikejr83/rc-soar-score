@@ -45,15 +45,22 @@ abstract interface class MatrixRevisionRepository {
 
   /// Stores [finalized], a later revision: the replaced rounds first (so
   /// their ordinals are free), then the draw, its score placeholders and the
-  /// participant numbers, in one transaction.
+  /// participant numbers, in one transaction. [expectedBaseRevision] is the
+  /// newest revision number when the caller read the matrix: the store
+  /// re-checks it inside the transaction and throws a `ContestStateError`
+  /// with the `stale_matrix` code when it is no longer the newest. A redraw
+  /// that passes that check can still lose it to a concurrent redraw that
+  /// claims the successor first; the loser stores nothing and is answered
+  /// with the same `stale_matrix`.
   ///
   /// Throws an `AlreadyStoredError` if the revision, an assignment or a
   /// placeholder is already stored, and a `StaleRevisionError` if a replaced
-  /// round or a participation changed since it was read. Each stored entity
-  /// gets its own mutation, derived from [metadata] with
-  /// `MutationMetadata.forPart`.
+  /// round or a participation changed since it was read, unless the failure
+  /// was of the just-rejected kind. Each stored entity gets its own mutation,
+  /// derived from [metadata] with `MutationMetadata.forPart`.
   Future<FinalizedRedraw> appendRedraw(
     FinalizedRedraw finalized, {
+    required int expectedBaseRevision,
     required MutationMetadata metadata,
   });
 }

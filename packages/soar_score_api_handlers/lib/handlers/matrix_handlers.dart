@@ -237,7 +237,26 @@ void addMatrixRoutes(
     final contestId = Id.parse(id);
     await requireContestDirector(request, repository, contestId);
     final body = await readJsonBody(request, RedrawMatrixRequest.fromJson);
-
+    final attemptsPerRound =
+        body.attemptsPerRound ?? BasicDraw.defaultAttemptsPerRound;
+    final seedCount = body.seedCount ?? DrawEngine.defaultSeedCount;
+    if (body.preview ?? false) {
+      final preview = await redraws.previewRedraw(
+        contestId,
+        id: body.id,
+        firstRound: body.firstRound,
+        rounds: body.rounds,
+        groupsPerRound: body.groupsPerRound,
+        randomSeed: body.randomSeed,
+        attemptsPerRound: attemptsPerRound,
+        seedCount: seedCount,
+        base: body.baseMatrixRevision,
+      );
+      if (preview == null) {
+        throw AlreadyStoredError(entityType: 'Redraw', entityId: body.id);
+      }
+      return jsonResponse(preview.toJson());
+    }
     final matrix = await redraws.redraw(
       contestId,
       id: body.id,
@@ -245,10 +264,10 @@ void addMatrixRoutes(
       rounds: body.rounds,
       groupsPerRound: body.groupsPerRound,
       randomSeed: body.randomSeed,
-      attemptsPerRound:
-          body.attemptsPerRound ?? BasicDraw.defaultAttemptsPerRound,
-      seedCount: body.seedCount ?? DrawEngine.defaultSeedCount,
+      attemptsPerRound: attemptsPerRound,
+      seedCount: seedCount,
       reason: body.reason,
+      base: body.baseMatrixRevision,
       actorId: principal.accountId,
       metadata: writeMetadata(principal),
     );

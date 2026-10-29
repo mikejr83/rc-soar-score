@@ -47,17 +47,22 @@ void _tests(Backend backend) {
 
     tearDown(() => inst.close());
 
-    Future<core.CurrentMatrix> seededRound({int firstRound = 2}) =>
-        MatrixRedrawService(repository).redraw(
-          contestId,
-          id: core.Id.create(),
-          firstRound: firstRound,
-          rounds: 1,
-          groupsPerRound: 2,
-          randomSeed: 3,
-          actorId: actor,
-          metadata: meta(),
-        );
+    Future<core.CurrentMatrix> seededRound({int firstRound = 2}) async {
+      final latest = await repository.matrixRevisionRepository.latestForContest(
+        contestId,
+      );
+      return MatrixRedrawService(repository).redraw(
+        contestId,
+        id: core.Id.create(),
+        firstRound: firstRound,
+        rounds: 1,
+        groupsPerRound: 2,
+        randomSeed: 3,
+        base: latest!.revisionNumber,
+        actorId: actor,
+        metadata: meta(),
+      );
+    }
 
     Future<List<MatrixSlot>> roundSlots(int ordinal) async {
       final matrix = await MatrixService(repository).current(contestId);
@@ -194,6 +199,7 @@ void _tests(Backend backend) {
           firstRound: 2,
           rounds: 2,
           groupsPerRound: 2,
+          base: 1,
           actorId: actor,
           metadata: meta(),
         ),
@@ -215,6 +221,7 @@ void _tests(Backend backend) {
           firstRound: 1,
           rounds: 2,
           groupsPerRound: 2,
+          base: 1,
           actorId: actor,
           metadata: meta(),
         ),
