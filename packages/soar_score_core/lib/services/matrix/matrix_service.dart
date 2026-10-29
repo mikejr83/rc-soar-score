@@ -22,6 +22,7 @@ import '../../models/matrix/matrix_revision.dart';
 import 'draw_engine.dart';
 import 'draw_job.dart';
 import 'draw_optimizer.dart';
+import 'matrix_draw_audit.dart';
 import 'matrix_draw_builder.dart';
 
 /// The flight matrix operations of the API: reading the current matrix and
@@ -30,7 +31,8 @@ import 'matrix_draw_builder.dart';
 /// The draw is made by [DrawEngine]: every round is built several times and
 /// the fairest build kept, the whole draw is improved across all rounds, and
 /// that is repeated for several seeds, keeping the fairest result. Every draw
-/// is finalized as it is made, so there is no draft stage yet.
+/// is finalized as it is made, so there is no draft stage yet, and each leaves
+/// one `MatrixDrawn` audit event, stored with it.
 class MatrixService {
   MatrixService(
     this.repository, {
@@ -312,6 +314,12 @@ class MatrixService {
     await repository.matrixRevisionRepository.appendFinalizedDraw(
       finalized,
       metadata: metadata,
+      audit: MatrixDrawAudit.event(
+        id: _newId(),
+        revision: finalized.draw.revision,
+        metadata: metadata,
+        at: now,
+      ),
     );
     return current(contestId);
   }

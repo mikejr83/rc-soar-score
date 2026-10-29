@@ -44,6 +44,10 @@ enum AuditAction {
   restoration,
   @JsonValue('InstallationActivation')
   installationActivation,
+  @JsonValue('ConfigurationSaved')
+  configurationSaved,
+  @JsonValue('MatrixDrawn')
+  matrixDrawn,
 }
 
 /// The serialized text of an [AuditAction], for places that carry it outside

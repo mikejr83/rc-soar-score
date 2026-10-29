@@ -25,6 +25,7 @@ import 'basic_draw.dart';
 import 'draw_engine.dart';
 import 'draw_job.dart';
 import 'draw_optimizer.dart';
+import 'matrix_draw_audit.dart';
 import 'matrix_draw_builder.dart';
 import 'matrix_service.dart';
 
@@ -41,7 +42,8 @@ import 'matrix_service.dart';
 /// [redraw]'s `firstRound` to the end of the contest, which is only allowed
 /// while none of them has a score; an extension has `firstRound` one past the
 /// last round. A redraw can also be previewed with [previewRedraw], which
-/// runs the same draw but stores nothing. See
+/// runs the same draw but stores nothing. Each redraw leaves one `MatrixDrawn`
+/// audit event, stored with it. See
 /// `plan/data-model/entities/matrix_revision.md`.
 class MatrixRedrawService {
   MatrixRedrawService(
@@ -123,6 +125,7 @@ class MatrixRedrawService {
       seedCount: seedCount,
       base: base,
     );
+    final now = _clock();
     final built = MatrixDrawBuilder(newId: _newId).build(
       contestId: contestId,
       id: id,
@@ -150,7 +153,7 @@ class MatrixRedrawService {
           _blankToNull(reason) ??
           _defaultReason(prepared.extension, firstRound),
       actorId: actorId,
-      now: _clock(),
+      now: now,
       drawMode: prepared.standings == null
           ? DrawMode.standardManOnMan
           : DrawMode.seededManOnMan,
@@ -173,6 +176,12 @@ class MatrixRedrawService {
       ),
       expectedBaseRevision: base,
       metadata: metadata,
+      audit: MatrixDrawAudit.event(
+        id: _newId(),
+        revision: built.draw.revision,
+        metadata: metadata,
+        at: now,
+      ),
     );
     return MatrixService(repository).current(contestId);
   }

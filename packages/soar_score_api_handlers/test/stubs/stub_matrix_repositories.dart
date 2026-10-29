@@ -64,11 +64,13 @@ class StubMatrixRevisionRepository implements MatrixRevisionRepository {
   Future<FinalizedDraw> appendFinalizedDraw(
     FinalizedDraw finalized, {
     required MutationMetadata metadata,
+    AuditEvent? audit,
   }) async {
     // The contest goes first: a stale one stores nothing.
     final contest = await _contests.save(
       finalized.contest,
       metadata: metadata.forPart(finalized.contest.id.value),
+      audit: audit,
     );
     final draw = finalized.draw;
     revisions.add(draw.revision);
@@ -95,6 +97,7 @@ class StubMatrixRevisionRepository implements MatrixRevisionRepository {
     FinalizedRedraw finalized, {
     required int expectedBaseRevision,
     required MutationMetadata metadata,
+    AuditEvent? audit,
   }) async {
     // Re-checked as the real repository re-checks it in its transaction.
     final latest = await latestForContest(finalized.draw.revision.contestId);
@@ -104,6 +107,7 @@ class StubMatrixRevisionRepository implements MatrixRevisionRepository {
         'the matrix moved on since it was read',
       );
     }
+    if (audit != null) _contests.audits.add(audit);
     for (final round in finalized.replacedRounds) {
       final index = _rounds.rounds.indexWhere((r) => r.id == round.id);
       _rounds.rounds[index] = round;

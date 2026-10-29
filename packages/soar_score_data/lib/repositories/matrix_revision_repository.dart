@@ -1,5 +1,6 @@
 import 'package:soar_score_core/soar_score_core.dart' as core;
 
+import 'audit_event_repository.dart';
 import 'drift_repository.dart';
 
 /// Matrix revisions, and the draws stored in them, in the database.
@@ -8,6 +9,7 @@ class MatrixRevisionRepository extends DriftRepository
   MatrixRevisionRepository(super.db, {super.stores});
 
   late final _store = store<core.MatrixRevision>('MatrixRevision');
+  late final _audits = AuditEventRepository(db, stores: stores);
 
   @override
   Future<core.MatrixRevision?> findById(core.Id id) => _store.find(id);
@@ -47,6 +49,7 @@ class MatrixRevisionRepository extends DriftRepository
   Future<core.FinalizedDraw> appendFinalizedDraw(
     core.FinalizedDraw finalized, {
     required core.MutationMetadata metadata,
+    core.AuditEvent? audit,
   }) => unitOfWork.run((context) async {
     final draw = finalized.draw;
     await context.append(draw.revision, metadata: metadata);
@@ -78,6 +81,7 @@ class MatrixRevisionRepository extends DriftRepository
       finalized.contest,
       metadata: metadata.forPart(finalized.contest.id.value),
     );
+    if (audit != null) await _audits.append(audit);
     return finalized;
   });
 
@@ -86,6 +90,7 @@ class MatrixRevisionRepository extends DriftRepository
     core.FinalizedRedraw finalized, {
     required int expectedBaseRevision,
     required core.MutationMetadata metadata,
+    core.AuditEvent? audit,
   }) async {
     final contestId = finalized.draw.revision.contestId;
     try {
@@ -127,6 +132,7 @@ class MatrixRevisionRepository extends DriftRepository
             metadata: metadata.forPart(participation.id.value),
           );
         }
+        if (audit != null) await _audits.append(audit);
         return finalized;
       });
     } on Object catch (error) {

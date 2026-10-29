@@ -224,6 +224,14 @@ void main() {
       expect(await client.configuration(id), saved.revision);
       expect(await client.configurationRevisions(id), [saved.revision]);
       expect(await client.contest(id), saved.contest);
+      final events = await client.auditEvents(
+        id,
+        action: AuditAction.configurationSaved,
+      );
+      expect(events, hasLength(1));
+      expect(events.single.actorId, server.localAccountId);
+      expect(events.single.entityId, saved.revision.id);
+      expect(events.single.resultingRevision, 1);
     } finally {
       client.close();
       await server.close();
@@ -281,6 +289,12 @@ void main() {
           randomSeed: 7,
         ),
       );
+      final drawn = await client.auditEvents(
+        id,
+        action: AuditAction.matrixDrawn,
+      );
+      expect(drawn, hasLength(1));
+      expect(drawn.single.entityId, matrix.revision!.id);
 
       final result = await client.enterScore(
         id,

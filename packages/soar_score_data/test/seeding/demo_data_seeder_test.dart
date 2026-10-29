@@ -74,6 +74,39 @@ void _tests(Backend backend) {
     },
   );
 
+  test(
+    'records configuration saves and matrix draws as audit events',
+    () async {
+      await seeder.seed();
+      final contests = await contestsByName();
+      final audits = repository.auditEventRepository;
+
+      final drawn = contests['Front Range F5J Open']!.id;
+      final undrawn = contests['Club Thermal Fun Fly']!.id;
+      expect(
+        await audits.listForContest(
+          drawn,
+          action: core.AuditAction.configurationSaved,
+        ),
+        isNotEmpty,
+      );
+      expect(
+        await audits.listForContest(
+          drawn,
+          action: core.AuditAction.matrixDrawn,
+        ),
+        hasLength(1),
+      );
+      expect(
+        await audits.listForContest(
+          undrawn,
+          action: core.AuditAction.matrixDrawn,
+        ),
+        isEmpty,
+      );
+    },
+  );
+
   test('gives drawn contests a matrix and unnumbered ones none', () async {
     await seeder.seed();
     final contests = await contestsByName();
