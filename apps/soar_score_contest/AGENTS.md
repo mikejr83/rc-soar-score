@@ -52,7 +52,7 @@ Contest management application for directors, pilots, and helpers. Runs on web a
     - `back_to_back_draw_test.dart`, `matrix_rounds_test.dart`: draw options and adding or redrawing rounds on a ready contest, which change the lifecycle contest's draw.
     - `matrix_draw_cancel_test.dart`: the slow-draw hook (`SOAR_SCORE_E2E_SLOW_DRAW`).
     - `offline_frame_status_test.dart`: native storage and sync indicator.
-    Adding to this list needs the reason in the PR and Mike's agreement.
+      Adding to this list needs the reason in the PR and Mike's agreement.
   - One `flutter test` run per file: the Windows app allows a single instance, so a second file cannot launch while the previous app is alive. The scripts handle this; do not run `flutter test integration_test` as a whole.
   - The tests need the demo flags: `--dart-define=SOAR_SCORE_DEMO=true --dart-define=SOAR_SCORE_DEMO_RESET=true`. The scripts pass them. For VS Code, use the `soar_score_contest (E2E, current file)` launch configuration, or for the Testing pane set `dart.flutterTestAdditionalArgs` to those two defines in your own (untracked) `.vscode/settings.json`. Run one file at a time from the pane; running the whole folder fails on the second file for the reason above.
   - Writing journeys: a `ValueKey` on a `Text` or `TextField` is on that widget, so read its `data` or controller instead of `find.descendant(of: key, ...)`. Close any running app instance before a run.
