@@ -25,6 +25,25 @@ void main() {
       expect(again.candidateFairness['unmet_opponent_count'], 1);
     });
 
+    test('a response without a better falls back to the comparison', () {
+      expect(
+        RedrawPreview.fromJson({
+          'seed': 1,
+          'candidate_fairness': fairness(unmet: 1),
+          'current_fairness': fairness(unmet: 2),
+        }).better,
+        true,
+      );
+      expect(
+        RedrawPreview.fromJson({
+          'seed': 1,
+          'candidate_fairness': fairness(unmet: 2),
+          'current_fairness': fairness(unmet: 1),
+        }).better,
+        false,
+      );
+    });
+
     test('beats on fewer never-met pairs', () {
       expect(
         RedrawPreview(

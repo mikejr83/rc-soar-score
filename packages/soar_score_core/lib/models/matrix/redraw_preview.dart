@@ -36,7 +36,7 @@ class RedrawPreview extends Equatable {
       seed: (json['seed'] as num).toInt(),
       candidateFairness: read('candidate_fairness')!,
       currentFairness: read('current_fairness'),
-      better: json['better'] as bool,
+      better: json['better'] as bool?,
     );
   }
 
