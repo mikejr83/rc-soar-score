@@ -95,9 +95,18 @@ class StubMatrixRevisionRepository implements MatrixRevisionRepository {
   @override
   Future<FinalizedRedraw> appendRedraw(
     FinalizedRedraw finalized, {
+    required int expectedBaseRevision,
     required MutationMetadata metadata,
     AuditEvent? audit,
   }) async {
+    // Re-checked as the real repository re-checks it in its transaction.
+    final latest = await latestForContest(finalized.draw.revision.contestId);
+    if (latest == null || latest.revisionNumber != expectedBaseRevision) {
+      throw ContestStateError(
+        'stale_matrix',
+        'the matrix moved on since it was read',
+      );
+    }
     if (audit != null) _contests.audits.add(audit);
     for (final round in finalized.replacedRounds) {
       final index = _rounds.rounds.indexWhere((r) => r.id == round.id);

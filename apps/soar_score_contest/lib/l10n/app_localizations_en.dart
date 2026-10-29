@@ -685,4 +685,80 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get participantEmailPrivateExplanation =>
       'This person hasn’t allowed their email to be shown.';
+
+  @override
+  String get activityHeading => 'Recent activity';
+
+  @override
+  String get activityViewAll => 'View all';
+
+  @override
+  String get activityViewAllUnavailable =>
+      'The full activity log is not available yet.';
+
+  @override
+  String get activityEmpty => 'Nothing has happened yet';
+
+  @override
+  String get activityLoading => 'Loading recent activity…';
+
+  @override
+  String get activityFailed => 'Recent activity could not be loaded.';
+
+  @override
+  String get activityRetry => 'Retry';
+
+  @override
+  String activityComplete(String actor) {
+    String _temp0 = intl.Intl.selectLogic(actor, {
+      'you': 'You completed the contest. Participant scoring closed.',
+      'other': 'The contest was completed. Participant scoring closed.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String activityOpenScoring(String actor) {
+    String _temp0 = intl.Intl.selectLogic(actor, {
+      'you': 'You opened participant scoring',
+      'other': 'Participant scoring was opened',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String activityCloseScoring(String actor) {
+    String _temp0 = intl.Intl.selectLogic(actor, {
+      'you': 'You closed participant scoring',
+      'other': 'Participant scoring was closed',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String activityLock(String actor) {
+    String _temp0 = intl.Intl.selectLogic(actor, {
+      'you': 'You locked administration',
+      'other': 'Administration was locked',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String activityUnlock(String actor) {
+    String _temp0 = intl.Intl.selectLogic(actor, {
+      'you': 'You unlocked administration',
+      'other': 'Administration was unlocked',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String activityPublication(String actor) {
+    String _temp0 = intl.Intl.selectLogic(actor, {
+      'you': 'You updated the published results',
+      'other': 'The published results were updated',
+    });
+    return '$_temp0';
+  }
 }

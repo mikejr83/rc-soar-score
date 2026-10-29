@@ -53,6 +53,8 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
         isNot(contains('Continue scoring')),
       );
       expect(_key('attention-card'), findsNothing);
+      // The activity card is on every workspace, empty or not.
+      await pumpUntilFound(tester, _key('activity-card'));
 
       // The checklist rows open the pages that fix them.
       await tapVisible(tester, _key('checklist-row-pilots'));
@@ -212,6 +214,7 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
       // A running contest shows what needs attention and no checklist.
       expect(_key('attention-card'), findsOneWidget);
       expect(_key('setup-checklist-card'), findsNothing);
+      expect(_key('activity-card'), findsOneWidget);
 
       // The next step and a progress tile open Scoring at their round.
       await tapVisible(tester, _key('next-step-primary'));

@@ -801,5 +801,87 @@
   "participantEmailPrivateExplanation": "This person hasn’t allowed their email to be shown.",
   "@participantEmailPrivateExplanation": {
     "description": "Tooltip for the Private email status."
+  },
+  "activityHeading": "Recent activity",
+  "@activityHeading": {
+    "description": "Heading of the workspace card that lists the latest events of the contest."
+  },
+  "activityViewAll": "View all",
+  "@activityViewAll": {
+    "description": "Disabled button on the Recent activity card that will open the full activity log."
+  },
+  "activityViewAllUnavailable": "The full activity log is not available yet.",
+  "@activityViewAllUnavailable": {
+    "description": "Note under the Recent activity list explaining the disabled View all button."
+  },
+  "activityEmpty": "Nothing has happened yet",
+  "@activityEmpty": {
+    "description": "Recent activity card text when the contest has no events."
+  },
+  "activityLoading": "Loading recent activity…",
+  "@activityLoading": {
+    "description": "Recent activity card text while the events load."
+  },
+  "activityFailed": "Recent activity could not be loaded.",
+  "@activityFailed": {
+    "description": "Recent activity card text when reading the events failed."
+  },
+  "activityRetry": "Retry",
+  "@activityRetry": {
+    "description": "Button on the Recent activity card that reads the events again."
+  },
+  "activityComplete": "{actor, select, you{You completed the contest. Participant scoring closed.} other{The contest was completed. Participant scoring closed.}}",
+  "@activityComplete": {
+    "description": "Recent activity line: the contest was completed. actor is \"you\" when the signed-in account did it.",
+    "placeholders": {
+      "actor": {
+        "type": "String"
+      }
+    }
+  },
+  "activityOpenScoring": "{actor, select, you{You opened participant scoring} other{Participant scoring was opened}}",
+  "@activityOpenScoring": {
+    "description": "Recent activity line: participant scoring was opened.",
+    "placeholders": {
+      "actor": {
+        "type": "String"
+      }
+    }
+  },
+  "activityCloseScoring": "{actor, select, you{You closed participant scoring} other{Participant scoring was closed}}",
+  "@activityCloseScoring": {
+    "description": "Recent activity line: participant scoring was closed.",
+    "placeholders": {
+      "actor": {
+        "type": "String"
+      }
+    }
+  },
+  "activityLock": "{actor, select, you{You locked administration} other{Administration was locked}}",
+  "@activityLock": {
+    "description": "Recent activity line: administration was locked.",
+    "placeholders": {
+      "actor": {
+        "type": "String"
+      }
+    }
+  },
+  "activityUnlock": "{actor, select, you{You unlocked administration} other{Administration was unlocked}}",
+  "@activityUnlock": {
+    "description": "Recent activity line: administration was unlocked.",
+    "placeholders": {
+      "actor": {
+        "type": "String"
+      }
+    }
+  },
+  "activityPublication": "{actor, select, you{You updated the published results} other{The published results were updated}}",
+  "@activityPublication": {
+    "description": "Recent activity line: the contest was published or its publication changed.",
+    "placeholders": {
+      "actor": {
+        "type": "String"
+      }
+    }
   }
 }

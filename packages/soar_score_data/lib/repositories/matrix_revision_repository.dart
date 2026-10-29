@@ -88,41 +88,79 @@ class MatrixRevisionRepository extends DriftRepository
   @override
   Future<core.FinalizedRedraw> appendRedraw(
     core.FinalizedRedraw finalized, {
+    required int expectedBaseRevision,
     required core.MutationMetadata metadata,
     core.AuditEvent? audit,
-  }) => unitOfWork.run((context) async {
-    // The replaced rounds go first: a superseded round leaves the unique
-    // index on live ordinals before its replacement enters it.
-    for (final round in finalized.replacedRounds) {
-      await context.save(round, metadata: metadata.forPart(round.id.value));
+  }) async {
+    final contestId = finalized.draw.revision.contestId;
+    try {
+      return await unitOfWork.run((context) async {
+        // Re-checked in the transaction: a matrix that moved on since the
+        // caller read it stores nothing.
+        final latest = await latestForContest(contestId);
+        if (latest == null || latest.revisionNumber != expectedBaseRevision) {
+          throw _staleMatrix();
+        }
+        // The replaced rounds go first: a superseded round leaves the unique
+        // index on live ordinals before its replacement enters it.
+        for (final round in finalized.replacedRounds) {
+          await context.save(round, metadata: metadata.forPart(round.id.value));
+        }
+        final draw = finalized.draw;
+        await context.append(draw.revision, metadata: metadata);
+        for (final round in draw.rounds) {
+          await context.save(round, metadata: metadata.forPart(round.id.value));
+        }
+        for (final group in draw.groups) {
+          await context.save(group, metadata: metadata.forPart(group.id.value));
+        }
+        for (final assignment in draw.assignments) {
+          await context.append(
+            assignment,
+            metadata: metadata.forPart(assignment.id.value),
+          );
+        }
+        for (final placeholder in finalized.placeholders) {
+          await context.save(
+            placeholder,
+            metadata: metadata.forPart(placeholder.id.value),
+          );
+        }
+        for (final participation in finalized.numberedParticipations) {
+          await context.save(
+            participation,
+            metadata: metadata.forPart(participation.id.value),
+          );
+        }
+        if (audit != null) await _audits.append(audit);
+        return finalized;
+      });
+    } on Object catch (error) {
+      // A redraw that passed the check above can still lose it to a concurrent
+      // redraw: both read the same newest revision, both claim the successor
+      // index, and one is rolled back. When the matrix moved on, answer the
+      // same stale_matrix the check would have; otherwise rethrow the
+      // original error, so a rule the winner's commit broke still surfaces.
+      if (!_isUniqueViolation(error)) rethrow;
+      final latest = await latestForContest(contestId);
+      if (latest == null || latest.revisionNumber != expectedBaseRevision) {
+        throw _staleMatrix();
+      }
+      rethrow;
     }
-    final draw = finalized.draw;
-    await context.append(draw.revision, metadata: metadata);
-    for (final round in draw.rounds) {
-      await context.save(round, metadata: metadata.forPart(round.id.value));
-    }
-    for (final group in draw.groups) {
-      await context.save(group, metadata: metadata.forPart(group.id.value));
-    }
-    for (final assignment in draw.assignments) {
-      await context.append(
-        assignment,
-        metadata: metadata.forPart(assignment.id.value),
-      );
-    }
-    for (final placeholder in finalized.placeholders) {
-      await context.save(
-        placeholder,
-        metadata: metadata.forPart(placeholder.id.value),
-      );
-    }
-    for (final participation in finalized.numberedParticipations) {
-      await context.save(
-        participation,
-        metadata: metadata.forPart(participation.id.value),
-      );
-    }
-    if (audit != null) await _audits.append(audit);
-    return finalized;
-  });
+  }
+
+  static core.ContestStateError _staleMatrix() => core.ContestStateError(
+    'stale_matrix',
+    'the matrix moved on since it was read',
+  );
+
+  /// Whether [error] is a broken unique rule on either backend, the only
+  /// failure the successor index can surface here.
+  static bool _isUniqueViolation(Object error) {
+    final text = '$error'.toLowerCase();
+    return text.contains('unique constraint') ||
+        text.contains('duplicate key') ||
+        text.contains('23505');
+  }
 }

@@ -8,6 +8,7 @@ import '../configuration/house_rules.dart';
 import '../matrix/config_drift.dart';
 import '../matrix/matrix_page_data.dart';
 import '../matrix/round_progress_view.dart';
+import 'activity/activity_facts.dart';
 import 'current_group_facts.dart';
 import 'latest_score.dart';
 import 'participant_number_range.dart';
@@ -49,6 +50,7 @@ class WorkspaceFacts extends Equatable {
     required this.drawReadiness,
     required this.publication,
     required this.transitions,
+    required this.activity,
     required this.unavailable,
     required this.isOffline,
   });
@@ -65,6 +67,7 @@ class WorkspaceFacts extends Equatable {
     List<LandingTableView>? landingTables,
     PublicationFacts publication = PublicationFacts.unknown,
     TransitionFacts transitions = TransitionFacts.unknown,
+    ActivityFacts activity = ActivityFacts.none,
     Set<WorkspaceFactSource> unavailable = const {},
     bool isOffline = false,
   }) {
@@ -205,6 +208,7 @@ class WorkspaceFacts extends Equatable {
       ),
       publication: publication,
       transitions: transitions,
+      activity: activity,
       unavailable: Set.unmodifiable(unavailable),
       isOffline: isOffline,
     );
@@ -240,6 +244,7 @@ class WorkspaceFacts extends Equatable {
           drawReadiness: drawReadiness,
           publication: publication,
           transitions: transitions,
+          activity: activity,
           unavailable: unavailable,
           isOffline: isOffline,
         );
@@ -440,6 +445,9 @@ class WorkspaceFacts extends Equatable {
   /// Completion and lock facts from the audit trail; see [completedAt].
   final TransitionFacts transitions;
 
+  /// The newest audit events as lines for the recent-activity card.
+  final ActivityFacts activity;
+
   /// Secondary reads that failed.
   final Set<WorkspaceFactSource> unavailable;
   final bool isOffline;
@@ -486,6 +494,7 @@ class WorkspaceFacts extends Equatable {
     configDrift,
     publication,
     transitions,
+    activity,
     unavailable,
     isOffline,
   ];

@@ -1,7 +1,35 @@
+import 'dart:async';
+
 import 'package:soar_score_core/soar_score_core.dart';
 import 'package:test/test.dart';
 
 import 'handler_test_support.dart';
+
+/// A [DrawRunner] that reports 40% and then waits for a cancel or [release],
+/// so a test can cancel a running draw.
+class HeldDrawRunner implements DrawRunner {
+  final release = Completer<void>();
+
+  /// Whether a draw waits for [release] or a cancel; otherwise it just runs.
+  bool hold = true;
+  final reported = Completer<void>();
+
+  @override
+  Future<DrawResult> run(
+    DrawSpec spec, {
+    void Function(DrawProgress progress)? onProgress,
+    DrawCancellation? cancellation,
+  }) async {
+    if (!hold) return spec.generate();
+    onProgress?.call(const DrawProgress(percent: 40, seed: 2, seedCount: 3));
+    if (!reported.isCompleted) reported.complete();
+    final cancelled = Completer<void>();
+    cancellation?.onCancel(cancelled.complete);
+    await Future.any([release.future, cancelled.future]);
+    if (cancellation?.isCancelled ?? false) throw DrawCancelledError();
+    return spec.generate();
+  }
+}
 
 /// The contest every matrix edit test works on.
 const matrixTestContestId = '019c0000-0000-7000-8000-000000000020';

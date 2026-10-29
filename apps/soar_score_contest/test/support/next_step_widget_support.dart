@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:soar_score_api/soar_score_api.dart';
+import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_contest/api_client_provider.dart';
 import 'package:soar_score_contest/connectivity_provider.dart';
 import 'package:soar_score_contest/services/connectivity/app_connectivity.dart';
@@ -212,6 +213,8 @@ Future<void> pumpWorkspace(
           httpClient: MockClient(server.handle),
         ),
         child: MaterialApp.router(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           routerConfig: router,
           builder: (context, child) => MediaQuery(
             data: MediaQuery.of(context)
@@ -286,6 +289,8 @@ Future<GoRouter> pumpShellWorkspace(
           httpClient: MockClient(server.handle),
         ),
         child: MaterialApp.router(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           routerConfig: router,
           builder: (context, child) => MediaQuery(
             data: MediaQuery.of(context)
