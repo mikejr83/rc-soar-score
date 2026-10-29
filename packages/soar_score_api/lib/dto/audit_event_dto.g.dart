@@ -134,6 +134,8 @@ const _$ContestActionEnumMap = {
   ContestAction.closeScoring: 'closeScoring',
   ContestAction.lock: 'lock',
   ContestAction.unlock: 'unlock',
+  ContestAction.hideResults: 'hideResults',
+  ContestAction.showResults: 'showResults',
 };
 
 Value? _$JsonConverterFromJson<Json, Value>(

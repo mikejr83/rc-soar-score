@@ -61,6 +61,8 @@ class ActivityFacts extends Equatable {
         ContestAction.closeScoring => ActivityKind.closeScoring,
         ContestAction.lock => ActivityKind.lock,
         ContestAction.unlock => ActivityKind.unlock,
+        // No activity line for results hiding yet; #658 adds the card.
+        ContestAction.hideResults || ContestAction.showResults => null,
         null => null,
       },
       _ => null,

@@ -17,4 +17,8 @@ enum ContestAction {
   lock,
   @JsonValue('unlock')
   unlock,
+  @JsonValue('hideResults')
+  hideResults,
+  @JsonValue('showResults')
+  showResults,
 }

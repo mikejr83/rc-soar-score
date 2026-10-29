@@ -132,13 +132,16 @@ class Contest extends Equatable implements Synchronizable {
 
   /// A copy with a changed lifecycle or control value and update time.
   ///
-  /// [clearResultsHiding] ends results hiding. The revision is kept: the
+  /// [clearResultsHiding] ends results hiding. [hideResultsThroughRound]
+  /// turns it on, or moves it, to that round, stamped [updatedAt];
+  /// [clearResultsHiding] wins if both are given. The revision is kept: the
   /// repository bumps it when the copy is saved.
   Contest copyWithState({
     LifecycleState? lifecycleState,
     ScoringAccess? scoringAccess,
     AdminLock? adminLock,
     bool clearResultsHiding = false,
+    int? hideResultsThroughRound,
     required DateTime updatedAt,
   }) => Contest(
     id: id,
@@ -156,8 +159,12 @@ class Contest extends Equatable implements Synchronizable {
     adminLock: adminLock ?? this.adminLock,
     resultsHiddenThroughRound: clearResultsHiding
         ? null
-        : resultsHiddenThroughRound,
-    resultsHiddenAt: clearResultsHiding ? null : resultsHiddenAt,
+        : hideResultsThroughRound ?? resultsHiddenThroughRound,
+    resultsHiddenAt: clearResultsHiding
+        ? null
+        : hideResultsThroughRound != null
+        ? updatedAt
+        : resultsHiddenAt,
     localArchive: localArchive,
     createdAt: createdAt,
     updatedAt: updatedAt,

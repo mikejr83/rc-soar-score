@@ -12,9 +12,18 @@ import '../models/contest/contest.dart';
 abstract final class ContestLifecycle {
   /// [contest] after [action], stamped [now].
   ///
+  /// [hideThroughRound] is the round that overall results stay visible
+  /// through; [ContestAction.hideResults] needs it and the other actions
+  /// ignore it.
+  ///
   /// Throws a [ContestStateError] when the contest's state does not allow
   /// [action].
-  static Contest apply(Contest contest, ContestAction action, DateTime now) {
+  static Contest apply(
+    Contest contest,
+    ContestAction action,
+    DateTime now, {
+    int? hideThroughRound,
+  }) {
     switch (action) {
       case ContestAction.complete:
         // Completion closes participant scoring and ends results hiding.
@@ -73,6 +82,26 @@ abstract final class ContestLifecycle {
           adminLock: AdminLock.unlocked,
           updatedAt: now,
         );
+      case ContestAction.hideResults:
+        // Turning it on again moves the round and restarts the 24 hours.
+        if (contest.lifecycleState != LifecycleState.running) {
+          throw ContestStateError.invalidTransition(
+            'results can be hidden only while the contest is Running, this '
+            'one is ${contest.lifecycleState.name}',
+          );
+        }
+        if (hideThroughRound == null) {
+          throw ArgumentError.notNull('hideThroughRound');
+        }
+        return contest.copyWithState(
+          hideResultsThroughRound: hideThroughRound,
+          updatedAt: now,
+        );
+      case ContestAction.showResults:
+        if (!contest.resultsHidden) {
+          throw ContestStateError.invalidTransition('results are not hidden');
+        }
+        return contest.copyWithState(clearResultsHiding: true, updatedAt: now);
     }
   }
 }
