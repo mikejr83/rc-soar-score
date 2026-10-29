@@ -1,3 +1,4 @@
+import 'package:shelf/shelf.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 import 'package:test/test.dart';
 
@@ -22,28 +23,44 @@ void main() {
       drawnContest(api, core: core);
 
   var count = 0;
-  Future<dynamic> redraw({
+  /// [base] defaults to the contest's latest revision, like a client that
+  /// draws from the matrix it shows.
+  Future<Response> redraw({
     required int firstRound,
     int rounds = 2,
     int groups = 2,
     String? reason,
     String? id,
-  }) => api.send(
-    'POST',
-    '/contests/$_contestId/matrix/redraws',
-    body: {
-      'id':
-          id ??
-          '019c0000-0000-7000-8000-0000000007${(++count).toString().padLeft(2, '0')}',
-      'first_round': firstRound,
-      'rounds': rounds,
-      'groups_per_round': groups,
-      'random_seed': 9,
-      'attempts_per_round': 5,
-      'seed_count': 2,
-      'reason': ?reason,
-    },
-  );
+    int? base,
+    bool? preview,
+    int? randomSeed,
+    int? seedCount,
+  }) async {
+    if (base == null) {
+      final current = await api.json(
+        await api.send('GET', '/contests/$_contestId/matrix'),
+      );
+      base = (current['revision'] as Map)['revision_number'] as int;
+    }
+    return api.send(
+      'POST',
+      '/contests/$_contestId/matrix/redraws',
+      body: {
+        'id':
+            id ??
+            '019c0000-0000-7000-8000-0000000007${(++count).toString().padLeft(2, '0')}',
+        'first_round': firstRound,
+        'rounds': rounds,
+        'groups_per_round': groups,
+        'random_seed': randomSeed ?? 9,
+        'attempts_per_round': 5,
+        'seed_count': seedCount ?? 2,
+        'reason': ?reason,
+        'base_matrix_revision': base,
+        'preview': preview,
+      },
+    );
+  }
 
   Future<Map<String, Object?>> matrix() async =>
       api.json(await api.send('GET', '/contests/$_contestId/matrix'));
@@ -81,6 +98,27 @@ void main() {
       expect(revision['last_round'], 5);
       expect(revision['reason'], 'rounds added');
       expect(api.repository.scorePlaceholders.stored, hasLength(30));
+    });
+
+    test('keeps stored results current when only rounds are added', () async {
+      await drawn();
+      final slot = await assignmentOfPilot(api, 1);
+      await api.send(
+        'POST',
+        '/contests/$_contestId/assignments/${slot['id']}/scores',
+        body: {
+          'client_mutation_id': 'entry-1',
+          'base_score_revision': 0,
+          'components': {'time_flown': 540, 'launch_height': 200},
+        },
+      );
+
+      await redraw(firstRound: 4);
+
+      final results = await api.json(
+        await api.send('GET', '/contests/$_contestId/results'),
+      );
+      expect(results['stale'], isFalse);
     });
 
     test('keeps the rounds already drawn as they are', () async {
@@ -317,7 +355,9 @@ void main() {
     test('before the first draw is a 409', () async {
       await drawnContest(api, pilots: 4, skipDraw: true);
 
-      final response = await redraw(firstRound: 1);
+      // No draw exists yet, so there is no revision to resolve from; the
+      // 409 comes from the matrix being uneditable.
+      final response = await redraw(firstRound: 1, base: 1);
 
       expect(response.statusCode, 409);
       expect((await api.errorOf(response))['code'], 'matrix_not_editable');
@@ -338,7 +378,155 @@ void main() {
     });
 
     test('of an unknown contest is a 404', () async {
-      expect((await redraw(firstRound: 1)).statusCode, 404);
+      // The contest check comes before the body check, so a missing
+      // `base_matrix_revision` in the body does not turn this into a 400.
+      expect(
+        (await api.send(
+          'POST',
+          '/contests/$_contestId/matrix/redraws',
+          body: {
+            'id': '019c0000-0000-7000-8000-000000000701',
+            'first_round': 1,
+            'rounds': 2,
+            'groups_per_round': 2,
+          },
+        )).statusCode,
+        404,
+      );
+    });
+  });
+
+  group('reading the base revision', () {
+    test('without `base_matrix_revision` is a 400', () async {
+      await drawn();
+
+      final response = await api.send(
+        'POST',
+        '/contests/$_contestId/matrix/redraws',
+        body: {
+          'id': '019c0000-0000-7000-8000-000000000707',
+          'first_round': 4,
+          'rounds': 2,
+          'groups_per_round': 2,
+        },
+      );
+
+      expect(response.statusCode, 400);
+    });
+  });
+
+  group('the stale-matrix check', () {
+    test('against the latest revision is stored', () async {
+      await drawn();
+      final before = (await matrix())['revision'];
+
+      final response = await redraw(firstRound: 4, base: 1);
+      final body = await api.json(response);
+
+      expect(response.statusCode, 201, reason: '$body');
+      expect((body['revision'] as Map)['revision_number'], 2);
+      expect(before, allOf(isNotNull, isNot(body['revision'])));
+    });
+
+    test('behind the latest is a 409 that changes nothing', () async {
+      await drawn();
+      await redraw(firstRound: 4); // the matrix moves to revision 2.
+      final before = await matrix();
+
+      final refused = await redraw(firstRound: 3, base: 1);
+
+      expect(refused.statusCode, 409);
+      expect((await api.errorOf(refused))['code'], 'stale_matrix');
+      expect(await matrix(), before);
+    });
+
+    test('applies to a preview too', () async {
+      await drawn();
+      await redraw(firstRound: 4); // the matrix moves to revision 2.
+      final before = await matrix();
+
+      final refused = await redraw(firstRound: 3, base: 1, preview: true);
+
+      expect(refused.statusCode, 409);
+      expect((await api.errorOf(refused))['code'], 'stale_matrix');
+      expect(await matrix(), before);
+    });
+  });
+
+  group('drawing without storing', () {
+    test('answers the draw its confirm would store', () async {
+      await drawn();
+      final before = await matrix();
+
+      final preview = await api.json(await redraw(firstRound: 4, preview: true));
+
+      expect(preview['seed'], isA<int>());
+      expect(preview['candidate_fairness'], isA<Map>());
+      expect(preview['current_fairness'], isA<Map>());
+      expect(preview['better'], isA<bool>());
+
+      // Nothing was stored: same revision, rounds and placeholders.
+      expect(await matrix(), before);
+      expect(api.repository.scorePlaceholders.stored, hasLength(18));
+    });
+
+    test('a confirm with its seed reproduces the previewed fairness', () async {
+      await drawn();
+      final preview = await api.json(await redraw(firstRound: 4, preview: true));
+      final seed = preview['seed'] as int;
+
+      final body = await api.json(
+        await redraw(firstRound: 4, randomSeed: seed, seedCount: 1),
+      );
+
+      expect(
+        (body['revision'] as Map)['fairness_summary'],
+        preview['candidate_fairness'],
+        reason: 'confirming the previewed seed must store the fairness the '
+            'preview reported',
+      );
+    });
+
+    test('a cancelled preview stores nothing', () async {
+      final runner = HeldDrawRunner()..hold = false;
+      final apiWithRunner = HandlerHarness(_owner, drawRunner: runner);
+      await drawnContest(apiWithRunner);
+      runner.hold = true;
+      final before = await apiWithRunner.json(
+        await apiWithRunner.send('GET', '/contests/$_contestId/matrix'),
+      );
+      Future<dynamic> preview() => apiWithRunner.send(
+        'POST',
+        '/contests/$_contestId/matrix/redraws',
+        body: {
+          'id': '019c0000-0000-7000-8000-000000000799',
+          'first_round': 4,
+          'rounds': 2,
+          'groups_per_round': 2,
+          'base_matrix_revision': 1,
+          'preview': true,
+        },
+      );
+      final drawing = preview();
+      await runner.reported.future;
+      expect(
+        (await apiWithRunner.send(
+          'DELETE',
+          '/contests/$_contestId/matrix/draws/019c0000-0000-7000-8000-000000000799',
+        )).statusCode,
+        200,
+      );
+
+      final response = await drawing;
+
+      expect(response.statusCode, 409);
+      expect((await apiWithRunner.errorOf(response))['code'], 'draw_cancelled');
+      expect(
+        await apiWithRunner.json(
+          await apiWithRunner.send('GET', '/contests/$_contestId/matrix'),
+        ),
+        before,
+      );
     });
   });
 }

@@ -391,7 +391,9 @@ void main() {
       expect(foreignIds, contains(contestBId));
       expect(foreignIds, isNot(contains(contestAId)));
 
-      final own = await two.ownerApi.json(await two.ownerApi.send('GET', '/contests'));
+      final own = await two.ownerApi.json(
+        await two.ownerApi.send('GET', '/contests'),
+      );
       final ownIds = [
         for (final c in own['contests']! as List)
           (c as Map<String, Object?>)['id'] as String,
@@ -413,8 +415,7 @@ void main() {
         await scoped.ownerApi.send('GET', '/contests'),
       );
       final ids = [
-        for (final c in list['contests']! as List)
-          c as Map<String, Object?>,
+        for (final c in list['contests']! as List) c as Map<String, Object?>,
       ].map((c) => c['id'] as String);
       expect(ids, containsAll([contestAId, contestBId]));
     });

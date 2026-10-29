@@ -3,6 +3,7 @@ import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../matrix/matrix_page_data.dart';
+import 'activity/activity_facts.dart';
 import 'publication_facts.dart';
 import 'transition_facts.dart';
 import 'workspace_fact_source.dart';
@@ -34,14 +35,16 @@ abstract final class WorkspaceFactsLoader {
       _scores(client, id, unavailable),
       _publication(client, id, unavailable),
       _landingTables(client, unavailable),
-      _transitions(client, contest, actingAccountId),
+      _audit(client, contest, actingAccountId),
     ]);
+    final audit = results[4]! as _AuditFacts;
     return WorkspaceFacts.derive(
       data: results[0]! as MatrixPageData,
       scores: results[1] as ContestScores?,
       publication: results[2]! as PublicationFacts,
       landingTables: results[3] as List<LandingTableView>?,
-      transitions: results[4]! as TransitionFacts,
+      transitions: audit.transitions,
+      activity: audit.activity,
       unavailable: unavailable,
       isOffline: isOffline,
     );
@@ -60,28 +63,59 @@ abstract final class WorkspaceFactsLoader {
     }
   }
 
-  static Future<TransitionFacts> _transitions(
+  /// Reads the audit trail for the completion and lock facts and the activity
+  /// card: every state transition, plus the newest publication events. Asking
+  /// by action keeps other events (score edits, say) from pushing the ones
+  /// listed out of a limited read, and the server applies no limit unless one
+  /// is passed, so no transition is cut off.
+  ///
+  /// The two reads fail on their own: a failed publication read still leaves
+  /// the transition facts known, and marks only the activity as failed.
+  static Future<_AuditFacts> _audit(
     ApiClient client,
     Contest contest,
     String? actingAccountId,
   ) async {
-    final completed = contest.lifecycleState == LifecycleState.completed;
-    final locked = contest.adminLock == AdminLock.locked;
-    if (!completed && !locked) {
-      return TransitionFacts.unknown;
-    }
-    try {
-      return TransitionFacts.of(
+    final (transitions, publications) = await (
+      _auditEvents(client, contest, AuditAction.stateTransition),
+      _auditEvents(
+        client,
         contest,
-        await client.auditEvents(
-          contest.id,
-          action: AuditAction.stateTransition,
-        ),
-        actingAccountId: actingAccountId,
-      );
+        AuditAction.publicationAttempt,
+        limit: ActivityFacts.shown,
+      ),
+    ).wait;
+    return _AuditFacts(
+      transitions: transitions == null
+          ? TransitionFacts.unknown
+          : TransitionFacts.of(
+              contest,
+              transitions,
+              actingAccountId: actingAccountId,
+            ),
+      activity: transitions == null || publications == null
+          ? ActivityFacts.unavailable
+          : ActivityFacts.of([
+              ...transitions,
+              ...publications,
+            ], actingAccountId: actingAccountId),
+    );
+  }
+
+  static Future<List<AuditEventDto>?> _auditEvents(
+    ApiClient client,
+    Contest contest,
+    AuditAction action, {
+    int? limit,
+  }) async {
+    try {
+      return await client.auditEvents(contest.id, action: action, limit: limit);
     } on Object catch (error) {
-      _logger.warning('Could not read the audit trail of ${contest.id}', error);
-      return TransitionFacts.unknown;
+      _logger.warning(
+        'Could not read the ${action.name} audit events of ${contest.id}',
+        error,
+      );
+      return null;
     }
   }
 
@@ -120,4 +154,12 @@ abstract final class WorkspaceFactsLoader {
     unavailable.add(WorkspaceFactSource.publication);
     return PublicationFacts.unknown;
   }
+}
+
+/// What one audit read yields for the workspace.
+class _AuditFacts {
+  const _AuditFacts({required this.transitions, required this.activity});
+
+  final TransitionFacts transitions;
+  final ActivityFacts activity;
 }

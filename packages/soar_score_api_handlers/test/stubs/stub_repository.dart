@@ -19,7 +19,9 @@ class StubRepository implements core.Repository {
         _contestRepository is StubContestRepository
             ? _contestRepository
             : StubContestRepository(),
-      );
+      ) {
+    participations.removeMatrixRows = matrixAssignments.removeRowsOf;
+  }
 
   @override
   core.ContestRepository get contestRepository => _contestRepository;
@@ -142,6 +144,10 @@ class StubRepository implements core.Repository {
 
   @override
   core.ResultsRepository get resultsRepository => results;
+
+  @override
+  core.ReFlightParticipantRepository get reFlightParticipantRepository =>
+      StubReFlightParticipantRepository();
 
   @override
   dynamic noSuchMethod(Invocation invocation) =>

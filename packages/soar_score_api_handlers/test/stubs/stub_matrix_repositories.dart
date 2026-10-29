@@ -93,8 +93,17 @@ class StubMatrixRevisionRepository implements MatrixRevisionRepository {
   @override
   Future<FinalizedRedraw> appendRedraw(
     FinalizedRedraw finalized, {
+    required int expectedBaseRevision,
     required MutationMetadata metadata,
   }) async {
+    // Re-checked as the real repository re-checks it in its transaction.
+    final latest = await latestForContest(finalized.draw.revision.contestId);
+    if (latest == null || latest.revisionNumber != expectedBaseRevision) {
+      throw ContestStateError(
+        'stale_matrix',
+        'the matrix moved on since it was read',
+      );
+    }
     for (final round in finalized.replacedRounds) {
       final index = _rounds.rounds.indexWhere((r) => r.id == round.id);
       _rounds.rounds[index] = round;
@@ -127,6 +136,11 @@ class StubRoundRepository implements RoundRepository {
   @override
   Future<List<Round>> listForContest(Id contestId) async =>
       rounds.where((r) => r.contestId == contestId).toList()
+        ..sort((a, b) => a.ordinal.compareTo(b.ordinal));
+
+  @override
+  Future<List<Round>> listForRevision(Id matrixRevisionId) async =>
+      rounds.where((r) => r.matrixRevisionId == matrixRevisionId).toList()
         ..sort((a, b) => a.ordinal.compareTo(b.ordinal));
 
   @override
@@ -171,6 +185,15 @@ class StubScorePlaceholderRepository implements ScorePlaceholderRepository {
   }
 
   @override
+  Future<List<ScorePlaceholder>> listForParticipation(
+    Id contestParticipationId,
+  ) async => [
+    for (final placeholder in stored)
+      if (placeholder.contestParticipationId == contestParticipationId)
+        placeholder,
+  ];
+
+  @override
   Future<ScorePlaceholder?> findForAssignment(Id assignmentId) async => stored
       .where((placeholder) => placeholder.assignmentId == assignmentId)
       .firstOrNull;
@@ -212,6 +235,26 @@ class StubMatrixAssignmentRepository implements MatrixAssignmentRepository {
       await participations?.save(numberedParticipation, metadata: metadata);
     }
     return lateAdd;
+  }
+
+  /// Participations whose matrix rows were removed with them.
+  final Set<Id> removedFor = {};
+
+  /// Removes the rows of [contestParticipationId], as the real repository
+  /// does inside a participation save or delete; returns how many went.
+  Future<int> removeRowsOf(Id contestParticipationId) async {
+    final rows = await listForParticipation(contestParticipationId);
+    stored.removeWhere(
+      (assignment) =>
+          assignment.contestParticipationId == contestParticipationId,
+    );
+    placeholders?.stored.removeWhere(
+      (placeholder) =>
+          placeholder.contestParticipationId == contestParticipationId,
+    );
+    participationsWithAssignments.remove(contestParticipationId);
+    removedFor.add(contestParticipationId);
+    return rows.length;
   }
 
   @override
@@ -270,6 +313,19 @@ class StubMatrixAssignmentRepository implements MatrixAssignmentRepository {
       ),
     ];
   }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) =>
+      throw UnimplementedError('${invocation.memberName} is not stubbed');
+}
+
+/// Re-flight participants: none, in every handler test that asks.
+class StubReFlightParticipantRepository
+    implements ReFlightParticipantRepository {
+  @override
+  Future<List<ReFlightParticipant>> listForParticipation(
+    Id contestParticipationId,
+  ) async => const [];
 
   @override
   dynamic noSuchMethod(Invocation invocation) =>

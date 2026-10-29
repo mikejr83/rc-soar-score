@@ -4,6 +4,7 @@ import '../../services/participants/participant_option.dart';
 import '../../services/participants/participant_row.dart';
 import 'participant_cells.dart';
 import 'participant_editing.dart';
+import 'participant_row_note_view.dart';
 
 /// A table column: its header, minimum width, share of extra width and
 /// cell.
@@ -25,6 +26,7 @@ class ParticipantsTable extends StatelessWidget {
     required this.editing,
     required this.rows,
     required this.onToggleAll,
+    this.selectable = true,
   });
 
   final ParticipantEditing editing;
@@ -33,6 +35,9 @@ class ParticipantsTable extends StatelessWidget {
   final List<ParticipantRow> rows;
 
   final VoidCallback onToggleAll;
+
+  /// Whether rows can be selected (a read-only list hides the checkboxes).
+  final bool selectable;
 
   static const double _gap = 8;
   static const double _padding = 12;
@@ -46,13 +51,7 @@ class ParticipantsTable extends StatelessWidget {
         children: [
           cells.avatar(context),
           const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              cells.participant.name,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-          ),
+          Expanded(child: cells.nameBlock(context)),
         ],
       ),
     ),
@@ -67,15 +66,15 @@ class ParticipantsTable extends StatelessWidget {
             'Class *',
             112,
             0,
-            (context, cells) => cells.classification(),
+            (context, cells) => cells.classification(context),
           ),
         ],
         ParticipantOption.teams => [
-          _Column('Team', 150, 1.2, (context, cells) => cells.team()),
+          _Column('Team', 150, 1.2, (context, cells) => cells.team(context)),
         ],
         ParticipantOption.pilotNumbers => [
           _Column(
-            'Pilot no. (provisional)',
+            editing.rules.numberHeader,
             110,
             0,
             (context, cells) => cells.number(context),
@@ -98,7 +97,7 @@ class ParticipantsTable extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final columns = _columns();
-    const checkboxWidth = 40.0;
+    final checkboxWidth = selectable ? 40.0 : 0.0;
     final minWidth =
         checkboxWidth +
         columns.fold<double>(0, (sum, column) => sum + column.minWidth) +
@@ -139,6 +138,7 @@ class ParticipantsTable extends StatelessWidget {
               Color? color,
               bool divider = true,
               Key? key,
+              Widget? note,
             }) => Container(
               key: key,
               constraints: BoxConstraints(minHeight: minHeight),
@@ -152,13 +152,21 @@ class ParticipantsTable extends StatelessWidget {
                     ? Border(bottom: BorderSide(color: scheme.outlineVariant))
                     : null,
               ),
-              child: Row(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(width: checkboxWidth, child: lead),
-                  for (final (index, cell) in cells.indexed) ...[
-                    const SizedBox(width: _gap),
-                    SizedBox(width: widths[index], child: cell),
-                  ],
+                  Row(
+                    children: [
+                      if (selectable)
+                        SizedBox(width: checkboxWidth, child: lead),
+                      for (final (index, cell) in cells.indexed) ...[
+                        if (selectable || index > 0)
+                          const SizedBox(width: _gap),
+                        SizedBox(width: widths[index], child: cell),
+                      ],
+                    ],
+                  ),
+                  ?note,
                 ],
               ),
             );
@@ -189,11 +197,29 @@ class ParticipantsTable extends StatelessWidget {
                   for (final (index, participant) in rows.indexed)
                     () {
                       final cells = ParticipantCells(editing, participant);
+                      final style = cells.style;
+                      final note = style.note;
                       return line(
                         key: ValueKey('row-${participant.rowId}'),
-                        color: cells.selected
+                        color: style.highlighted && !style.hasChanges
+                            ? scheme.primaryContainer
+                            : cells.selected
                             ? scheme.onSurface.withValues(alpha: 0.08)
+                            : style.hasChanges
+                            ? scheme.primary.withValues(alpha: 0.07)
                             : null,
+                        note: note == null
+                            ? null
+                            : Padding(
+                                padding: const EdgeInsets.only(
+                                  top: 6,
+                                  bottom: 2,
+                                ),
+                                child: ParticipantRowNoteView(
+                                  note: note,
+                                  rowId: participant.rowId,
+                                ),
+                              ),
                         divider: index < rows.length - 1,
                         lead: cells.checkbox(),
                         cells: [

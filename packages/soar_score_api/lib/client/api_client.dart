@@ -22,6 +22,7 @@ import '../dto/health_dto.dart';
 import '../dto/import_gliderscore_request.dart';
 import '../dto/local_account_claim_dto.dart';
 import '../dto/late_add_request.dart';
+import '../dto/matrix_revision_summary.dart';
 import '../dto/move_assignment_request.dart';
 import '../dto/public_publication_dto.dart';
 import '../dto/public_publication_summary_dto.dart';
@@ -464,7 +465,9 @@ class ApiClient {
   /// `PUT /api/v1/contests/{id}/participations/{participationId}` — changes
   /// the role, classification or retirement of a participation. A changed
   /// retirement recalculates the results; when that fails the answer carries
-  /// [ParticipationUpdateResult.recalculationWarning].
+  /// [ParticipationUpdateResult.recalculationWarning]. A pilot with no scores
+  /// who becomes a non-flier gives up their matrix rows
+  /// ([ParticipationUpdateResult.matrixRowsRemoved]).
   Future<ParticipationUpdateResult> updateParticipation(
     Id id,
     Id participationId,
@@ -484,13 +487,23 @@ class ApiClient {
   /// `DELETE /api/v1/contests/{id}/participations/{participationId}` —
   /// removes a participant from the contest.
   ///
-  /// One with flight assignments is an [ApiHttpError] with status 409.
-  Future<void> removeParticipation(Id id, Id participationId) async {
-    await _send(
-      'DELETE',
-      _resolve(
-        '/api/v1/contests/${id.value}/participations/${participationId.value}',
-      ),
+  /// A pilot with matrix rows but no scores leaves with them
+  /// ([ParticipationRemoveResult.matrixRowsRemoved]); the draw then needs
+  /// redoing. One with a score is an [ApiHttpError] with status 409 and code
+  /// `has_scores`.
+  Future<ParticipationRemoveResult> removeParticipation(
+    Id id,
+    Id participationId,
+  ) async {
+    final uri = _resolve(
+      '/api/v1/contests/${id.value}/participations/${participationId.value}',
+    );
+    final response = await _send('DELETE', uri);
+    if (response.bodyBytes.isEmpty) return const ParticipationRemoveResult();
+    return _decode<ParticipationRemoveResult>(
+      response,
+      uri,
+      ParticipationRemoveResult.fromJson,
     );
   }
 
@@ -555,26 +568,37 @@ class ApiClient {
   /// `POST /api/v1/contests/{id}/team-memberships` — puts a participant on a
   /// team.
   ///
-  /// A participant already on a team, or a pilot once a matrix is drawn, is
-  /// an [ApiHttpError] with status 409.
-  Future<TeamMembership> addTeamMember(
+  /// A participant already on a team is an [ApiHttpError] with status 409:
+  /// take them off first. The result carries a notice when the recalculation
+  /// that follows a team change failed.
+  Future<TeamMembershipResult> addTeamMember(
     Id id,
     AddTeamMemberRequest request,
   ) async {
     final uri = _resolve('/api/v1/contests/${id.value}/team-memberships');
     final response = await _send('POST', uri, body: request.toJson());
-    return _decode<TeamMembership>(response, uri, TeamMembership.fromJson);
+    return _decode<TeamMembershipResult>(
+      response,
+      uri,
+      TeamMembershipResult.fromJson,
+    );
   }
 
   /// `DELETE /api/v1/contests/{id}/team-memberships/{membershipId}` — takes a
-  /// participant off their team.
-  Future<void> removeTeamMember(Id id, Id membershipId) async {
-    await _send(
+  /// participant off their team. Completes with a notice when the
+  /// recalculation that follows a team change failed, otherwise `null`.
+  Future<String?> removeTeamMember(Id id, Id membershipId) async {
+    final response = await _send(
       'DELETE',
       _resolve(
         '/api/v1/contests/${id.value}/team-memberships/${membershipId.value}',
       ),
     );
+    if (response.statusCode != 200 || response.bodyBytes.isEmpty) return null;
+    final decoded = jsonDecode(utf8.decode(response.bodyBytes));
+    return decoded is Map<String, dynamic>
+        ? decoded['recalculation_warning'] as String?
+        : null;
   }
 
   /// `GET /api/v1/contests/{id}/matrix` — the contest's current matrix:
@@ -582,6 +606,35 @@ class ApiClient {
   /// Empty (no revision) until the first draw.
   Future<CurrentMatrix> matrix(Id id) async {
     final uri = _resolve('/api/v1/contests/${id.value}/matrix');
+    final response = await _send('GET', uri);
+    return _decode<CurrentMatrix>(response, uri, CurrentMatrix.fromJson);
+  }
+
+  /// `GET /api/v1/contests/{id}/matrix/revisions` — every matrix
+  /// revision of contest [id], newest first; empty before the first draw.
+  Future<List<MatrixRevisionSummary>> matrixRevisions(Id id) async {
+    final uri = _resolve('/api/v1/contests/${id.value}/matrix/revisions');
+    final response = await _send('GET', uri);
+    return _decode<List<MatrixRevisionSummary>>(
+      response,
+      uri,
+      (json) => [
+        for (final item in json['revisions'] as List<dynamic>)
+          MatrixRevisionSummary.fromJson(item as Map<String, dynamic>),
+      ],
+    );
+  }
+
+  /// `GET /api/v1/contests/{id}/matrix/revisions/{revisionId}` — one
+  /// stored matrix revision with its rounds, groups and the original
+  /// assignments the draw made, for a read-only history view.
+  ///
+  /// A contest or revision that does not exist, or a revision that belongs
+  /// to a different contest, is an [ApiHttpError] with status 404.
+  Future<CurrentMatrix> matrixRevision(Id id, Id revisionId) async {
+    final uri = _resolve(
+      '/api/v1/contests/${id.value}/matrix/revisions/${revisionId.value}',
+    );
     final response = await _send('GET', uri);
     return _decode<CurrentMatrix>(response, uri, CurrentMatrix.fromJson);
   }
@@ -836,6 +889,33 @@ class ApiClient {
     return _decode<CurrentMatrix>(response, uri, CurrentMatrix.fromJson);
   }
 
+  /// `POST /api/v1/contests/{id}/matrix/late-placements` — puts a pilot who
+  /// joined after the draw in every round: the last group that can take them,
+  /// and a zero score in a round that is already fully scored.
+  ///
+  /// A round no group can take the pilot in is reported in the result, not
+  /// failed. Repeating the call places nobody twice. A contest with no matrix,
+  /// a locked one, or a participation that is not an active pilot is an
+  /// [ApiHttpError] with status 409.
+  Future<LatePlacementResult> placeInAllRounds(
+    Id contestId,
+    Id participationId,
+  ) async {
+    final uri = _resolve(
+      '/api/v1/contests/${contestId.value}/matrix/late-placements',
+    );
+    final response = await _send(
+      'POST',
+      uri,
+      body: {'contest_participation_id': participationId.value},
+    );
+    return _decode<LatePlacementResult>(
+      response,
+      uri,
+      LatePlacementResult.fromJson,
+    );
+  }
+
   /// Adds rounds to the matrix of contest [contestId], or draws its unscored
   /// tail again, and returns the current matrix.
   ///
@@ -849,8 +929,39 @@ class ApiClient {
     RedrawMatrixRequest request,
   ) async {
     final uri = _resolve('/api/v1/contests/${contestId.value}/matrix/redraws');
-    final response = await _send('POST', uri, body: request.toJson());
+    // The body's `preview` is forced off, so the answer is a matrix even when
+    // the request was built for a preview.
+    final response = await _send(
+      'POST',
+      uri,
+      body: {...request.toJson(), 'preview': false},
+    );
     return _decode<CurrentMatrix>(response, uri, CurrentMatrix.fromJson);
+  }
+
+  /// Runs [request]'s redraw without storing it and returns what it would
+  /// store: the seed that draws the candidate, its fairness report and
+  /// whether it beats the current matrix's.
+  ///
+  /// Sends [request] with `preview` set, so the answer is the preview, not a
+  /// matrix. A redraw with an id already stored on the contest is an
+  /// [ApiHttpError] with status 409; the same state errors as [redrawMatrix]
+  /// apply.
+  ///
+  /// Requires a server that knows the `preview` key: an older server ignores
+  /// it and stores an ordinary redraw, whose matrix answer fails to decode as
+  /// a [RedrawPreview].
+  Future<RedrawPreview> previewRedraw(
+    Id contestId,
+    RedrawMatrixRequest request,
+  ) async {
+    final uri = _resolve('/api/v1/contests/${contestId.value}/matrix/redraws');
+    final response = await _send(
+      'POST',
+      uri,
+      body: {...request.toJson(), 'preview': true},
+    );
+    return _decode<RedrawPreview>(response, uri, RedrawPreview.fromJson);
   }
 
   /// `GET /api/v1/sync/info` — the version ranges the service accepts.

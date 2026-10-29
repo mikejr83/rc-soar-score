@@ -49,6 +49,34 @@ void main() {
     'classification': classification,
   };
 
+  /// A slot of the participation that already holds an official score.
+  void storeScoredSlot() {
+    final round = Id.create();
+    final assignment = MatrixAssignment(
+      id: Id.create(),
+      contestId: Id.parse(_contestId),
+      matrixRevisionId: Id.create(),
+      contestParticipationId: Id.parse(_participationId),
+      scheduledRoundId: round,
+      creditedRoundId: round,
+      group: 1,
+      assignmentType: AssignmentType.original,
+      actorId: Id.create(),
+      createdAt: DateTime.utc(2026, 10, 1),
+    );
+    api.repository.matrixAssignments.stored.add(assignment);
+    api.repository.scorePlaceholders.stored.add(
+      ScorePlaceholder(
+        id: Id.create(),
+        contestId: Id.parse(_contestId),
+        contestParticipationId: Id.parse(_participationId),
+        assignmentId: assignment.id,
+        state: ScorePlaceholderState.official,
+        scoreRevision: 1,
+      ),
+    );
+  }
+
   Future<Map<String, Object?>> add([Map<String, Object?>? body]) async {
     final response = await api.send(
       'POST',
@@ -238,7 +266,23 @@ void main() {
       expect(body['role_type'], 'NonFlier');
     });
 
-    test('a pilot with assignments cannot become a non-flier', () async {
+    test('a pilot with scores cannot become a non-flier', () async {
+      await add();
+      storeScoredSlot();
+
+      final response = await api.send(
+        'PUT',
+        path(),
+        body: {'base_revision': 0, 'role_id': SystemRoles.helperId.value},
+      );
+
+      expect(response.statusCode, 409);
+      expect((await api.errorOf(response))['code'], 'has_scores');
+      expect(api.repository.matrixAssignments.stored, isNotEmpty);
+    });
+
+    test('a pilot with matrix rows and no scores becomes a non-flier and '
+        'leaves the draw', () async {
       await add();
       api.repository.matrixAssignments.participationsWithAssignments.add(
         Id.parse(_participationId),
@@ -250,8 +294,28 @@ void main() {
         body: {'base_revision': 0, 'role_id': SystemRoles.helperId.value},
       );
 
-      expect(response.statusCode, 409);
-      expect((await api.errorOf(response))['code'], 'has_assignments');
+      expect(response.statusCode, 200);
+      final body = await api.json(response);
+      expect(body['role_type'], 'NonFlier');
+      expect(body['matrix_rows_removed'], 1);
+      expect(
+        api.repository.matrixAssignments.removedFor,
+        contains(Id.parse(_participationId)),
+      );
+    });
+
+    test('a pilot with no matrix rows leaves nothing to redraw', () async {
+      await add();
+
+      final body = await api.json(
+        await api.send(
+          'PUT',
+          path(),
+          body: {'base_revision': 0, 'role_id': SystemRoles.helperId.value},
+        ),
+      );
+
+      expect(body['matrix_rows_removed'], 0);
     });
 
     test('a stale base revision is a 409', () async {
@@ -313,21 +377,37 @@ void main() {
 
       final response = await api.send('DELETE', path());
 
-      expect(response.statusCode, 204);
+      expect(response.statusCode, 200);
+      expect((await api.json(response))['matrix_rows_removed'], 0);
       expect(api.repository.participations.participations, isEmpty);
     });
 
-    test('one with flight assignments is a 409', () async {
+    test(
+      'one with matrix rows and no scores leaves the draw with them',
+      () async {
+        await add();
+        api.repository.matrixAssignments.participationsWithAssignments.add(
+          Id.parse(_participationId),
+        );
+
+        final response = await api.send('DELETE', path());
+
+        expect(response.statusCode, 200);
+        expect((await api.json(response))['matrix_rows_removed'], 1);
+        expect(api.repository.participations.participations, isEmpty);
+      },
+    );
+
+    test('one with a score is a 409', () async {
       await add();
-      api.repository.matrixAssignments.participationsWithAssignments.add(
-        Id.parse(_participationId),
-      );
+      storeScoredSlot();
 
       final response = await api.send('DELETE', path());
 
       expect(response.statusCode, 409);
-      expect((await api.errorOf(response))['code'], 'has_assignments');
+      expect((await api.errorOf(response))['code'], 'has_scores');
       expect(api.repository.participations.participations, hasLength(1));
+      expect(api.repository.matrixAssignments.stored, isNotEmpty);
     });
   });
 
@@ -336,27 +416,27 @@ void main() {
 
     setUp(() => two = TwoAccountApi(owner: _owner));
 
-    test('a foreign director cannot add, edit or remove participants', () async {
-      two.storeContest(Id.parse(_contestId));
+    test(
+      'a foreign director cannot add, edit or remove participants',
+      () async {
+        two.storeContest(Id.parse(_contestId));
 
-      await two.expectDenied(
-        two.outsiderApi,
-        'POST',
-        '/contests/$_contestId/participations',
-        body: {
-          'id': _participationId,
-          'participant_profile_id': _profileId,
-        },
-      );
-      await two.expectDenied(
-        two.outsiderApi,
-        'PUT',
-        path(),
-        body: {'base_revision': 0},
-      );
-      await two.expectDenied(two.outsiderApi, 'DELETE', path());
+        await two.expectDenied(
+          two.outsiderApi,
+          'POST',
+          '/contests/$_contestId/participations',
+          body: {'id': _participationId, 'participant_profile_id': _profileId},
+        );
+        await two.expectDenied(
+          two.outsiderApi,
+          'PUT',
+          path(),
+          body: {'base_revision': 0},
+        );
+        await two.expectDenied(two.outsiderApi, 'DELETE', path());
 
-      expect(two.ownerApi.repository.participations.participations, isEmpty);
-    });
+        expect(two.ownerApi.repository.participations.participations, isEmpty);
+      },
+    );
   });
 }

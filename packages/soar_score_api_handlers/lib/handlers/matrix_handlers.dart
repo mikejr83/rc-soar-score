@@ -14,6 +14,10 @@ import 'package:soar_score_core/soar_score_core.dart';
 /// - `GET /contests/{id}/matrix` is the current matrix: the latest finalized
 ///   revision with its rounds, groups and assignments, empty before the first
 ///   draw;
+/// - `GET /contests/{id}/matrix/revisions` lists every matrix revision,
+///   newest first, and `GET /contests/{id}/matrix/revisions/{revisionId}`
+///   reads one of them back with its rounds, groups and the original
+///   assignments, so history can be shown read-only;
 /// - `POST /contests/{id}/matrix/draws` draws and finalizes the first matrix,
 ///   which moves a `Configuring` contest to `Ready` and numbers the
 ///   participants;
@@ -27,6 +31,9 @@ import 'package:soar_score_core/soar_score_core.dart';
 /// - `POST /contests/{id}/matrix/late-adds` places a pilot who joined after
 ///   the draw, or who is making up a missed round, in a group with an open
 ///   spot;
+/// - `POST /contests/{id}/matrix/late-placements` puts a pilot who joined
+///   after the draw in the last group that can take them in every round, with
+///   a zero score in rounds that are already fully scored;
 /// - `POST /contests/{id}/matrix/redraws` adds rounds to the matrix or draws
 ///   its unscored tail again, as a new matrix revision.
 ///
@@ -39,11 +46,15 @@ void addMatrixRoutes(
   Router router,
   Repository repository, {
   DrawRunner drawRunner = const IsolateDrawRunner(),
+  RecalculationService? recalculation,
 }) {
   final jobs = DrawJobs();
   final service = MatrixService(repository, runner: drawRunner, jobs: jobs);
   final moves = AssignmentMoveService(repository);
   final lateAdds = LateAddService(repository);
+  final placements = LatePlacementService(repository);
+  final recalculationService =
+      recalculation ?? RecalculationService(ResultsService(repository));
   final redraws = MatrixRedrawService(
     repository,
     runner: drawRunner,
@@ -54,6 +65,32 @@ void addMatrixRoutes(
     final contestId = Id.parse(id);
     await requireContestDirector(request, repository, contestId);
     final matrix = await service.current(contestId);
+    return jsonResponse(matrix.toJson());
+  });
+
+  router.get('/contests/<id>/matrix/revisions', (
+    Request request,
+    String id,
+  ) async {
+    final contestId = Id.parse(id);
+    await requireContestDirector(request, repository, contestId);
+    final revisions = await service.revisions(contestId);
+    return jsonResponse(<String, dynamic>{
+      'revisions': [
+        for (final revision in revisions)
+          MatrixRevisionSummary.of(revision).toJson(),
+      ],
+    });
+  });
+
+  router.get('/contests/<id>/matrix/revisions/<revisionId>', (
+    Request request,
+    String id,
+    String revisionId,
+  ) async {
+    final contestId = Id.parse(id);
+    await requireContestDirector(request, repository, contestId);
+    final matrix = await service.revision(contestId, Id.parse(revisionId));
     return jsonResponse(matrix.toJson());
   });
 
@@ -158,6 +195,40 @@ void addMatrixRoutes(
     return jsonResponse(matrix.toJson(), statusCode: 201);
   });
 
+  router.post('/contests/<id>/matrix/late-placements', (
+    Request request,
+    String id,
+  ) async {
+    final principal = requirePrincipal(request);
+    final contestId = Id.parse(id);
+    await requireContestDirector(request, repository, contestId);
+    final participationId = await readJsonBody(
+      request,
+      (json) => Id.parse(json['contest_participation_id']! as String),
+    );
+
+    final rounds = await placements.placeInAllRounds(
+      contestId,
+      participationId,
+      actorId: principal.accountId,
+      metadata: writeMetadata(principal),
+    );
+    // A zero score changes the results.
+    final warning = rounds.any((round) => round.zeroed)
+        ? await recalculationService.recalculateAfterEntry(
+            contestId,
+            cause: 'a pilot added after the round was scored',
+          )
+        : null;
+    return jsonResponse(
+      LatePlacementResult(
+        rounds: rounds,
+        recalculationWarning: warning,
+      ).toJson(),
+      statusCode: 201,
+    );
+  });
+
   router.post('/contests/<id>/matrix/redraws', (
     Request request,
     String id,
@@ -166,7 +237,26 @@ void addMatrixRoutes(
     final contestId = Id.parse(id);
     await requireContestDirector(request, repository, contestId);
     final body = await readJsonBody(request, RedrawMatrixRequest.fromJson);
-
+    final attemptsPerRound =
+        body.attemptsPerRound ?? BasicDraw.defaultAttemptsPerRound;
+    final seedCount = body.seedCount ?? DrawEngine.defaultSeedCount;
+    if (body.preview ?? false) {
+      final preview = await redraws.previewRedraw(
+        contestId,
+        id: body.id,
+        firstRound: body.firstRound,
+        rounds: body.rounds,
+        groupsPerRound: body.groupsPerRound,
+        randomSeed: body.randomSeed,
+        attemptsPerRound: attemptsPerRound,
+        seedCount: seedCount,
+        base: body.baseMatrixRevision,
+      );
+      if (preview == null) {
+        throw AlreadyStoredError(entityType: 'Redraw', entityId: body.id);
+      }
+      return jsonResponse(preview.toJson());
+    }
     final matrix = await redraws.redraw(
       contestId,
       id: body.id,
@@ -174,12 +264,20 @@ void addMatrixRoutes(
       rounds: body.rounds,
       groupsPerRound: body.groupsPerRound,
       randomSeed: body.randomSeed,
-      attemptsPerRound:
-          body.attemptsPerRound ?? BasicDraw.defaultAttemptsPerRound,
-      seedCount: body.seedCount ?? DrawEngine.defaultSeedCount,
+      attemptsPerRound: attemptsPerRound,
+      seedCount: seedCount,
       reason: body.reason,
+      base: body.baseMatrixRevision,
       actorId: principal.accountId,
       metadata: writeMetadata(principal),
+    );
+    // The new matrix revision outdates every stored result, even when no
+    // score changed (a round was only added), so the standings would read as
+    // preliminary until the next score entry. A failure is logged and leaves
+    // the results stale, as after a score entry.
+    await recalculationService.recalculateAfterEntry(
+      contestId,
+      cause: 'a matrix redraw',
     );
     return jsonResponse(matrix.toJson(), statusCode: 201);
   });

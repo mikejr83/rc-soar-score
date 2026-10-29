@@ -104,4 +104,7 @@ abstract interface class ParticipantListRules {
 
   /// The pilot number cell text for [row] (`3 · provisional`, `—`).
   String numberLabel(ParticipantRow row);
+
+  /// The heading of the pilot number column.
+  String get numberHeader;
 }

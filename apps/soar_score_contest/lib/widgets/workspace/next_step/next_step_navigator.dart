@@ -35,8 +35,7 @@ abstract final class NextStepNavigator {
       case NextStepTarget.matrix:
         context.go(contestMatrixPath(contestId, intent: action.matrixIntent));
       case NextStepTarget.participants:
-        // The system Participants manager, until #121 selects per contest.
-        context.go(participantsPath);
+        context.go(contestParticipantsPath(contestId));
       case NextStepTarget.scoring:
         context.go(
           contestScoringPath(

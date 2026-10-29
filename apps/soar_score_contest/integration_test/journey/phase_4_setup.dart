@@ -27,6 +27,76 @@ Future<void> runSetupPhase(Journey journey, JourneyContext data) async {
     () => inContest(() => _editConfiguration(tester)),
   );
   await journey.step(
+    'Participants: the contest lists its pilots with Save off',
+    () => inContest(() async {
+      await tapRail(tester, 'Participants');
+      await pumpUntilFound(tester, _key('participants-count'));
+      expect(
+        tester.widget<Text>(_key('participants-count')).data,
+        matches(r'^\d+ pilots?'),
+      );
+      // The contest has no optional participant options, so no Class column.
+      expect(find.text('Class *'), findsNothing);
+      for (final person in data.demoPilots) {
+        expect(find.text(person), findsOneWidget);
+      }
+      // Save is always there, off, with its reason.
+      expect(
+        tester.widget<FilledButton>(_key('save-participants')).onPressed,
+        isNull,
+      );
+      expect(find.text('No changes to save.'), findsOneWidget);
+    }),
+  );
+  await journey.step(
+    'Participants: a class is edited, discarded, then saved',
+    () async {
+      await goToMainPage(tester);
+      // The copied contest keeps its pilots' classes (phase 3).
+      await openContest(tester, 'E2E Copied Classes');
+      await tapRail(tester, 'Participants');
+      await pumpUntilFound(tester, _key('participants-count'));
+      final classField = find.descendant(
+        of: find.byWidgetPredicate(
+          (w) =>
+              w.key is ValueKey<String> &&
+              (w.key! as ValueKey<String>).value.startsWith('class-'),
+          description: 'a class cell',
+        ),
+        matching: find.byType(TextField),
+      );
+      final save = _key('save-participants');
+
+      // An edit marks the row and turns Save on.
+      await enterIn(tester, classField.first, 'Zz Class');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await pumpUntilFound(
+        tester,
+        find.text('Unsaved changes to 1 participant'),
+      );
+      expect(tester.widget<FilledButton>(save).onPressed, isNotNull);
+
+      // Discard puts the saved value back.
+      await tapVisible(tester, _key('discard-participants'));
+      await pumpUntilFound(tester, find.text('No changes to save.'));
+
+      // Save stores the change and says so.
+      await enterIn(tester, classField.first, 'Zz Class');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await pumpUntilFound(
+        tester,
+        find.text('Unsaved changes to 1 participant'),
+      );
+      await tapVisible(tester, save);
+      await pumpUntilFound(tester, find.text('1 participant saved.'));
+      await pumpUntilFound(tester, find.text('No changes to save.'));
+      expect(
+        tester.widget<TextField>(classField.first).controller!.text,
+        'Zz Class',
+      );
+    },
+  );
+  await journey.step(
     'Configuration: scoring access and the lock point to the Workspace',
     () => inContest(() async {
       await openConfiguration(tester);
@@ -98,6 +168,80 @@ Future<void> runSetupPhase(Journey journey, JourneyContext data) async {
     },
   );
   await journey.step(
+    'Participants: a pilot added to a drawn contest is offered a redraw, '
+    'or put in every round',
+    () async {
+      await goToMainPage(tester);
+      // A demo contest that arrives drawn, ready and without scores.
+      await openContest(tester, 'Front Range F5J Open');
+      await tapRail(tester, 'Participants');
+      await pumpUntilFound(tester, _key('participants-count'));
+      final newcomer = data.roster.last;
+      final name = '${newcomer.first} ${newcomer.last}';
+      // Give the web input time to attach after the tap, or the first
+      // characters are lost.
+      final search = find.descendant(
+        of: _key('participant-search'),
+        matching: find.byType(TextField),
+      );
+      await tester.tap(search);
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.enterText(search, newcomer.last);
+      await tester.pump(const Duration(milliseconds: 300));
+      final result = find.widgetWithText(ListTile, name);
+      await pumpUntilFound(tester, result);
+      // Tap the menu row itself: scrolling to it first closes the menu.
+      await tester.tap(result);
+      await tester.pump(const Duration(milliseconds: 300));
+      await pumpUntilFound(tester, _key('add-participant-confirm'));
+      await tapVisible(tester, _key('add-participant-confirm'));
+
+      // No scores yet, so the director may redraw the matrix with them.
+      await pumpUntilFound(tester, find.text('Redraw the matrix with $name?'));
+      // Keeping the matrix puts them in the last group that can take them
+      // in every round.
+      await tapVisible(tester, _key('redraw-keep'));
+      await pumpUntilFound(tester, _key('banner-placement'));
+      expect(find.text(name), findsWidgets);
+    },
+  );
+  await journey.step(
+    'Participants: removing an unscored pilot from a drawn contest takes '
+    'them out of the draw and says it needs redoing',
+    () async {
+      await goToMainPage(tester);
+      await openContest(tester, 'Front Range F5J Open');
+      await tapRail(tester, 'Participants');
+      await pumpUntilFound(tester, _key('participants-count'));
+      // The previous step put this pilot in every round; they have no scores.
+      final newcomer = data.roster.last;
+      final name = '${newcomer.first} ${newcomer.last}';
+      await pumpUntilFound(tester, find.text(name));
+      await tapVisible(
+        tester,
+        find.byWidgetPredicate(
+          (w) => w is Checkbox && w.semanticLabel == 'Select $name',
+        ),
+      );
+      await tapVisible(tester, _key('remove-participants'));
+      await pumpUntilFound(tester, _key('confirm-remove-draw'));
+      expect(
+        find.textContaining('Their places in it are removed too'),
+        findsOneWidget,
+      );
+      await tapVisible(tester, _key('confirm-remove'));
+
+      await pumpUntilFound(tester, _key('banner-redo-draw'));
+      expect(find.text('The draw needs redoing'), findsOneWidget);
+      expect(find.textContaining('$name was in the draw'), findsOneWidget);
+      await pumpUntilGone(tester, find.text(name));
+
+      // The notice leads to the Matrix page's redraw.
+      await tapVisible(tester, find.text('Redo the draw'));
+      await pumpUntilFound(tester, find.text('Redraw unscored rounds'));
+    },
+  );
+  await journey.step(
     'Reports: readiness before the run',
     () => inContest(() async {
       await _openReports(tester);
@@ -165,6 +309,10 @@ Future<void> runSetupPhase(Journey journey, JourneyContext data) async {
       await pumpUntilFound(tester, find.text('No pilots selected'));
       await tapVisible(tester, _key('cards-select-all'));
       await pumpUntilGone(tester, find.text('No pilots selected'));
+
+      // The viewer has no shell, so leave it for the next step.
+      await tapVisible(tester, _key('viewer-back'));
+      await pumpUntilFound(tester, find.text('Reports are built from'));
     }),
   );
 }

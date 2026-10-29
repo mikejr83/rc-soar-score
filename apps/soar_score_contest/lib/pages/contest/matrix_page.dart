@@ -267,7 +267,7 @@ class _MatrixPageState extends State<MatrixPage> {
   void _fix(BlockerFix fix) => context.go(switch (fix) {
     BlockerFix.configuration => contestConfigurationPath(widget.contestId),
     BlockerFix.workspace => contestWorkspacePath(widget.contestId),
-    BlockerFix.participants => participantsPath,
+    BlockerFix.participants => contestParticipantsPath(widget.contestId),
   });
 
   String? _configurationProblem(MatrixPageData data) => ConfigurationProblem.of(
@@ -386,6 +386,8 @@ class _MatrixPageState extends State<MatrixPage> {
             attemptsPerRound: DrawFormController.optionalNumber(form.attempts),
             seedCount: DrawFormController.optionalNumber(form.seedCount),
             reason: reason.isEmpty ? null : reason,
+            // A confirm is drawn from the revision the form shows.
+            baseMatrixRevision: data.matrix.revision!.revisionNumber,
           ),
         );
       }

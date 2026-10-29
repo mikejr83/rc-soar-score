@@ -50,6 +50,10 @@ class StubContestParticipationRepository
     implements ContestParticipationRepository {
   final Map<Id, ContestParticipation> participations = {};
 
+  /// Removes a participation's matrix rows; set by the repository that owns
+  /// the assignments.
+  Future<int> Function(Id participationId)? removeMatrixRows;
+
   @override
   Future<ContestParticipation?> findById(Id id) async => participations[id];
 
@@ -77,7 +81,20 @@ class StubContestParticipationRepository
   Future<ContestParticipation> save(
     ContestParticipation participation, {
     required MutationMetadata metadata,
-  }) async {
+  }) async => (await _store(participation, 0)).participation;
+
+  @override
+  Future<({ContestParticipation participation, int matrixRowsRemoved})>
+  saveRemovingMatrixRows(
+    ContestParticipation participation, {
+    required MutationMetadata metadata,
+  }) => _store(participation, null);
+
+  /// Stores [participation]; with a null [removed] the matrix rows go too.
+  Future<({ContestParticipation participation, int matrixRowsRemoved})> _store(
+    ContestParticipation participation,
+    int? removed,
+  ) async {
     final current = participations[participation.id];
     if (current != null && current.revision != participation.revision) {
       throw StaleRevisionError(
@@ -87,17 +104,31 @@ class StubContestParticipationRepository
         storedRevision: current.revision,
       );
     }
+    final count =
+        removed ?? await removeMatrixRows?.call(participation.id) ?? 0;
     final stored = ContestParticipation.fromJson({
       ...participation.toJson(),
       'revision': current == null ? 0 : current.revision + 1,
     });
     participations[participation.id] = stored;
-    return stored;
+    return (participation: stored, matrixRowsRemoved: count);
   }
 
   @override
   Future<bool> delete(Id id, {required MutationMetadata metadata}) async =>
-      participations.remove(id) != null;
+      (await deleteRemovingMatrixRows(id, metadata: metadata)).deleted;
+
+  @override
+  Future<({bool deleted, int matrixRowsRemoved})> deleteRemovingMatrixRows(
+    Id id, {
+    required MutationMetadata metadata,
+  }) async {
+    final count = await removeMatrixRows?.call(id) ?? 0;
+    return (
+      deleted: participations.remove(id) != null,
+      matrixRowsRemoved: count,
+    );
+  }
 }
 
 /// A [RoleRepository] holding the system roles plus any [roles] a test adds;

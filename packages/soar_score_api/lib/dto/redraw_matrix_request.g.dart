@@ -32,6 +32,11 @@ RedrawMatrixRequest _$RedrawMatrixRequestFromJson(Map<String, dynamic> json) =>
           ),
           seedCount: $checkedConvert('seed_count', (v) => (v as num?)?.toInt()),
           reason: $checkedConvert('reason', (v) => v as String?),
+           baseMatrixRevision: $checkedConvert(
+             'base_matrix_revision',
+             (v) => (v as num).toInt(),
+           ),
+          preview: $checkedConvert('preview', (v) => v as bool?),
         );
         return val;
       },
@@ -41,6 +46,7 @@ RedrawMatrixRequest _$RedrawMatrixRequestFromJson(Map<String, dynamic> json) =>
         'randomSeed': 'random_seed',
         'attemptsPerRound': 'attempts_per_round',
         'seedCount': 'seed_count',
+        'baseMatrixRevision': 'base_matrix_revision',
       },
     );
 
@@ -55,4 +61,6 @@ Map<String, dynamic> _$RedrawMatrixRequestToJson(
   'attempts_per_round': instance.attemptsPerRound,
   'seed_count': instance.seedCount,
   'reason': instance.reason,
+  'base_matrix_revision': instance.baseMatrixRevision,
+  'preview': instance.preview,
 };

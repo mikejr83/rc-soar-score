@@ -41,48 +41,43 @@ export function BrandMark({
   );
 }
 
-const lockupRatio = 3199 / 920;
-
-/** The mark beside the wordmark. `height` is in CSS pixels. */
+/**
+ * The mark beside the wordmark. `height` is in CSS pixels. The tagline line
+ * is 6% of the lockup's height, so below about 120px use `compact`, the kit
+ * lockup without it.
+ */
 export function BrandLockup({
   height = 48,
   onDark,
+  compact = false,
   className,
   priority = false,
 }: {
   height?: number;
-  /** Pin the ground; undefined follows the colour scheme. */
+  /** Pin the ground; undefined follows the theme (OS scheme or the switch). */
   onDark?: boolean;
+  compact?: boolean;
   className?: string;
   priority?: boolean;
 }) {
-  const width = Math.round(height * lockupRatio);
+  const [ratio, suffix] = compact ? [3100 / 761, "compact"] : [3199 / 920, "transparent"];
+  const width = Math.round(height * ratio);
   const alt = `${siteName} logo`;
-  if (onDark !== undefined) {
-    return (
-      <Image
-        src={`/brand/rc-soar-score-lockup-${onDark ? "dark" : "light"}-transparent.svg`}
-        width={width}
-        height={height}
-        alt={alt}
-        className={className}
-        priority={priority}
-      />
-    );
-  }
+  const image = (ground: "dark" | "light", cls?: string) => (
+    <Image
+      src={`/brand/rc-soar-score-lockup-${ground}-${suffix}.svg`}
+      width={width}
+      height={height}
+      alt={alt}
+      className={cls}
+      priority={priority}
+    />
+  );
+  if (onDark !== undefined) return image(onDark ? "dark" : "light", className);
   return (
-    <picture className={className}>
-      <source
-        srcSet="/brand/rc-soar-score-lockup-dark-transparent.svg"
-        media="(prefers-color-scheme: dark)"
-      />
-      <Image
-        src="/brand/rc-soar-score-lockup-light-transparent.svg"
-        width={width}
-        height={height}
-        alt={alt}
-        priority={priority}
-      />
-    </picture>
+    <>
+      {image("light", `only-light ${className ?? ""}`)}
+      {image("dark", `only-dark ${className ?? ""}`)}
+    </>
   );
 }

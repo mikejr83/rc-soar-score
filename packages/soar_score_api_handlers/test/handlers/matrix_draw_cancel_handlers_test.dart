@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:soar_score_core/soar_score_core.dart';
 import 'package:test/test.dart';
 
@@ -9,37 +7,12 @@ import 'matrix_test_support.dart';
 const _drawId = '019c0000-0000-7000-8000-000000000501';
 const _otherId = '019c0000-0000-7000-8000-000000000502';
 
-/// A runner that reports 40% and then waits for a cancel or [release].
-class _HeldRunner implements DrawRunner {
-  final release = Completer<void>();
-
-  /// Whether a draw waits for [release] or a cancel; otherwise it just runs.
-  bool hold = true;
-  final reported = Completer<void>();
-
-  @override
-  Future<DrawResult> run(
-    DrawSpec spec, {
-    void Function(DrawProgress progress)? onProgress,
-    DrawCancellation? cancellation,
-  }) async {
-    if (!hold) return spec.generate();
-    onProgress?.call(const DrawProgress(percent: 40, seed: 2, seedCount: 3));
-    if (!reported.isCompleted) reported.complete();
-    final cancelled = Completer<void>();
-    cancellation?.onCancel(cancelled.complete);
-    await Future.any([release.future, cancelled.future]);
-    if (cancellation?.isCancelled ?? false) throw DrawCancelledError();
-    return spec.generate();
-  }
-}
-
 void main() {
   final owner = Id.parse('019c0000-0000-7000-8000-000000000001');
   final path = '/contests/$matrixTestContestId/matrix/draws';
 
   test('a running draw reports its progress and can be cancelled', () async {
-    final runner = _HeldRunner();
+    final runner = HeldDrawRunner();
     final api = HandlerHarness(owner, drawRunner: runner);
     await drawnContest(api, skipDraw: true);
 
@@ -125,7 +98,7 @@ void main() {
   });
 
   test('another contest cannot read or cancel a draw', () async {
-    final runner = _HeldRunner();
+    final runner = HeldDrawRunner();
     final api = HandlerHarness(owner, drawRunner: runner);
     await drawnContest(api, skipDraw: true);
     const elsewhere = '019c0000-0000-7000-8000-000000000099';
@@ -150,7 +123,7 @@ void main() {
   });
 
   test('cancelling a redraw leaves the existing matrix intact', () async {
-    final runner = _HeldRunner()..hold = false;
+    final runner = HeldDrawRunner()..hold = false;
     final api = HandlerHarness(owner, drawRunner: runner);
     await drawnContest(api);
     Future<Map<String, Object?>> matrix() async => api.json(
@@ -167,6 +140,7 @@ void main() {
         'first_round': 4,
         'rounds': 2,
         'groups_per_round': 2,
+        'base_matrix_revision': 1,
       },
     );
     await runner.reported.future;

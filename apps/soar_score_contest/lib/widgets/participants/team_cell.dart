@@ -36,6 +36,8 @@ class TeamCell extends StatefulWidget {
     required this.semanticLabel,
     this.onSubmitted,
     this.height = 40,
+    this.enabled = true,
+    this.changed = false,
   });
 
   final String value;
@@ -51,6 +53,12 @@ class TeamCell extends StatefulWidget {
   final String semanticLabel;
   final VoidCallback? onSubmitted;
   final double height;
+
+  /// Whether the team can change.
+  final bool enabled;
+
+  /// The team was edited since the last save (a primary outline).
+  final bool changed;
 
   @override
   State<TeamCell> createState() => _TeamCellState();
@@ -171,6 +179,7 @@ class _TeamCellState extends State<TeamCell> {
             TextField(
               controller: controller,
               focusNode: focusNode,
+              enabled: widget.enabled,
               style: theme.textTheme.bodyMedium,
               onSubmitted: (text) {
                 _commit(text);
@@ -184,9 +193,14 @@ class _TeamCellState extends State<TeamCell> {
                   horizontal: 8,
                   vertical: 10,
                 ),
+                filled: !widget.enabled,
+                fillColor: scheme.onSurface.withValues(alpha: 0.12),
                 border: border(scheme.outline),
-                enabledBorder: border(scheme.outline),
+                enabledBorder: widget.changed
+                    ? border(scheme.primary, 2)
+                    : border(scheme.outline),
                 focusedBorder: border(scheme.primary, 2),
+                disabledBorder: border(Colors.transparent),
                 prefixIcon: team.isNotEmpty && !focused
                     ? Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 6),

@@ -1,4 +1,11 @@
 .header {
+  /* The header stays night in both themes, so the dark lockup is always right. */
+  --panel-bg: var(--night);
+  --panel-surface: #262422;
+  --panel-text: var(--paper);
+  --panel-muted: var(--muted-dark);
+  --panel-line: #3a3735;
+  --panel-accent: var(--orange-on-dark);
   position: sticky;
   top: 0;
   z-index: 50;
@@ -12,6 +19,9 @@
   position: absolute;
   left: 16px;
   top: -100px;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   background: var(--panel-surface);
   color: var(--panel-text);
   padding: 8px 12px;
@@ -39,16 +49,10 @@
   min-height: 44px;
 }
 
-.wordmark {
-  font-family: var(--font-display), var(--font-body), sans-serif;
-  font-weight: 800;
-  font-size: 18px;
-  letter-spacing: 0.01em;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-.rc {
-  color: var(--panel-accent);
+.lockup {
+  display: block;
+  height: 44px;
+  width: auto;
 }
 
 .nav {
@@ -156,7 +160,7 @@
 }
 
 @media (max-width: 379px) {
-  .wordmark {
-    display: none;
+  .lockup {
+    height: 34px;
   }
 }

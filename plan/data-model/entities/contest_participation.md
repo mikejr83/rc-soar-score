@@ -43,7 +43,7 @@
 - `role_type` equals the type of the referenced role at the time it was assigned
 - `role_name` and `role_type` are snapshots. Renaming, retyping, or archiving the role never changes them
 - Only participations with `role_type` `Pilot` have assignments, score placeholders, and scores
-- `role_type` cannot be changed from `Pilot` once the participation has an assignment. A participation changed to `Pilot` after a draw is a late add and follows the matrix rules. Every change to `role_type` is an audited mutation
+- `role_type` cannot be changed from `Pilot` once the participation has a score. A pilot with assignments but no scores can change: the assignments and their empty score placeholders are deleted (see MatrixAssignment) and the draw needs redoing. A participation changed to `Pilot` after a draw is a late add and follows the matrix rules. Every change to `role_type` is an audited mutation
 - Team membership is held by TeamMembership, which references this participation. A participation belongs to at most one team in a contest
 - `retired_at_round` is set only on a participation with `role_type` `Pilot`, and is at least 1
 - Retirement is an overlay, not a status: it creates no records, and accepted scores in earlier rounds are untouched. From `retired_at_round` on, new score submissions and review requests are rejected and read access remains
@@ -55,7 +55,7 @@
 - Created when the director adds the participant to the contest, as a pilot or a non-flier
 - A pilot can be added at any time before the contest is `Completed`. Once a matrix exists, the pilot is added only if the remaining rounds have group space for them, and the add creates `LateAdd` assignments. Before any score exists they are placed at random in the existing groups and the director is advised to redraw. After scores exist the director chooses open groups, and rounds the pilot never gets a make-up for count as not entered. If no group has space, the pilot is not added and the director is told; redrawing the later rounds is the director's decision
 - A pilot retires from a round, either through their own scoring link or by the director, which sets `retired_at_round`. The change is an audited mutation, recorded with its actor and time. A director may reverse it by clearing the value, also audited
-- A participation with no assignments can be deleted, which creates a tombstone. One that has assignments but no scores can be retired from round 1. One with scores can only be retired
+- A participation with no scores can be deleted, which creates a tombstone. If it has assignments, they and their empty score placeholders are deleted with it and the draw needs redoing. One with scores can only be retired
 - Non-fliers are never retired. They are removed by deleting the participation, and their invitations are revoked
 
 ## Privacy and Scope
@@ -70,4 +70,4 @@
 
 - Mutation through revision-based optimistic concurrency
 - Participant number allocation is idempotent once assigned
-- A participation that has assignments or scores cannot be deleted; the pilot retires instead
+- A participation that has scores (or re-flights) cannot be deleted; the pilot retires instead

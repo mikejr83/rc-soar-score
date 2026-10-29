@@ -6,6 +6,8 @@ import 'journey/phase_1_start.dart';
 import 'journey/phase_2_participants.dart';
 import 'journey/phase_3_wizard.dart';
 import 'journey/phase_4_setup.dart';
+import 'journey/phase_5_run.dart';
+import 'journey/phase_6_finish.dart';
 
 /// One contest from the landing page on: participants, the wizard, set-up,
 /// scoring and results, as a director would run it. Phases live in
@@ -17,9 +19,7 @@ import 'journey/phase_4_setup.dart';
 void main() {
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('contest lifecycle: start, participants, wizard, set-up', (
-    tester,
-  ) async {
+  testWidgets('contest lifecycle: start to results', (tester) async {
     final journey = Journey(tester, binding);
     final data = JourneyContext();
 
@@ -31,7 +31,9 @@ void main() {
     );
     await journey.phase(3, 'Wizard', () => runWizardPhase(journey, data));
     await journey.phase(4, 'Set up', () => runSetupPhase(journey, data));
+    await journey.phase(5, 'Run', () => runRunPhase(journey, data));
+    await journey.phase(6, 'Finish', () => runFinishPhase(journey, data));
 
     journey.finish();
-  }, timeout: const Timeout(Duration(minutes: 20)));
+  }, timeout: const Timeout(Duration(minutes: 30)));
 }

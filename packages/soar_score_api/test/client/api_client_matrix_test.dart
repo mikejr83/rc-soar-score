@@ -125,6 +125,72 @@ void main() {
     );
   });
 
+  test('matrixRevisions GETs the list and decodes the summaries', () async {
+    final client = clientFor(
+      (_) => body({
+        'revisions': [
+          {
+            'id': revisionId.value,
+            'revision_number': 1,
+            'created_at': '2026-10-17T14:00:00.000Z',
+            'reason': 'initial draw',
+            'created_by': contestId.value,
+            'first_round': 1,
+            'last_round': 3,
+            'algorithm_version': '1.0.0',
+            'random_seed': 7,
+            'fairness_score': 0.15,
+          },
+        ],
+      }),
+    );
+
+    final revisions = await client.matrixRevisions(contestId);
+
+    expect(seen.method, 'GET');
+    expect(seen.url.path, '$matrixPath/revisions');
+    expect(revisions, hasLength(1));
+    expect(revisions.first.id, revisionId);
+    expect(revisions.first.revisionNumber, 1);
+    expect(revisions.first.reason, 'initial draw');
+    expect(revisions.first.createdBy, contestId);
+    expect(revisions.first.firstRound, 1);
+    expect(revisions.first.lastRound, 3);
+    expect(revisions.first.algorithmVersion, '1.0.0');
+    expect(revisions.first.randomSeed, 7);
+    expect(revisions.first.fairnessScore, 0.15);
+    expect(revisions.first.createdAt, DateTime.utc(2026, 10, 17, 14));
+  });
+
+  test('matrixRevisions is an empty list before a draw', () async {
+    final client = clientFor((_) => body({'revisions': <Object?>[]}));
+
+    expect(await client.matrixRevisions(contestId), isEmpty);
+  });
+
+  test('matrixRevision GETs one revision and decodes its matrix', () async {
+    final client = clientFor((_) => body(CurrentMatrix().toJson()));
+
+    final matrix = await client.matrixRevision(contestId, revisionId);
+
+    expect(seen.method, 'GET');
+    expect(seen.url.path, '$matrixPath/revisions/${revisionId.value}');
+    expect(matrix.isEmpty, isTrue);
+  });
+
+  test('a revision the server does not know is an ApiHttpError 404', () async {
+    final client = clientFor(
+      (_) => body({
+        'error': {'code': 'not_found', 'message': 'no such matrix revision'},
+      }, 404),
+    );
+
+    await expectLater(
+      client.matrixRevision(contestId, revisionId),
+      throwsA(isA<ApiHttpError>().having((e) => e.statusCode, 'status', 404)),
+    );
+  });
+
   test('moveAssignment POSTs the move and decodes the matrix', () async {
     final client = clientFor((_) => body(CurrentMatrix().toJson(), 201));
     final assignmentId = Id.parse('019c0000-0000-7000-8000-000000000601');
@@ -187,6 +253,28 @@ void main() {
     });
   });
 
+  test('placeInAllRounds POSTs the pilot and decodes each round', () async {
+    final pilot = Id.parse('019c0000-0000-7000-8000-000000000206');
+    final client = clientFor(
+      (_) => body({
+        'rounds': [
+          {'round': 1, 'group': 2, 'lane': null, 'zeroed': true},
+          {'round': 2, 'skipped_reason': 'group 2 has no open spot'},
+        ],
+        'recalculation_warning': null,
+      }, 201),
+    );
+
+    final result = await client.placeInAllRounds(contestId, pilot);
+
+    expect(seen.method, 'POST');
+    expect(seen.url.path, '$matrixPath/late-placements');
+    expect(jsonDecode(seen.body), {'contest_participation_id': pilot.value});
+    expect(result.placed.single.round, 1);
+    expect(result.zeroed.single.round, 1);
+    expect(result.skipped.single.skippedReason, 'group 2 has no open spot');
+  });
+
   test('redrawMatrix POSTs the request and decodes the matrix', () async {
     final client = clientFor((_) => body(CurrentMatrix().toJson(), 201));
     final newId = Id.parse('019c0000-0000-7000-8000-000000000603');
@@ -200,6 +288,7 @@ void main() {
         groupsPerRound: 3,
         randomSeed: 5,
         reason: 'Two more rounds',
+        baseMatrixRevision: 1,
       ),
     );
 
@@ -214,6 +303,61 @@ void main() {
       'attempts_per_round': null,
       'seed_count': null,
       'reason': 'Two more rounds',
+      'base_matrix_revision': 1,
+      'preview': false,
     });
+  });
+
+  test('redrawMatrix always asks for the matrix, even a preview request',
+      () async {
+    final client = clientFor((_) => body(CurrentMatrix().toJson(), 201));
+    final newId = Id.parse('019c0000-0000-7000-8000-000000000603');
+
+    await client.redrawMatrix(
+      contestId,
+      RedrawMatrixRequest(
+        id: newId,
+        firstRound: 2,
+        rounds: 2,
+        groupsPerRound: 2,
+        baseMatrixRevision: 4,
+        preview: true,
+      ),
+    );
+
+    expect(jsonDecode(seen.body)['base_matrix_revision'], 4);
+    expect(jsonDecode(seen.body)['preview'], isFalse);
+  });
+
+  test('previewRedraw POSTs as a preview and decodes the preview', () async {
+    final client = clientFor((_) =>
+        body(
+          RedrawPreview(
+            seed: 7,
+            candidateFairness: {'unmet_opponent_count': 1},
+            currentFairness: {'unmet_opponent_count': 2},
+            better: true,
+          ).toJson(),
+          200,
+        ));
+    final request = RedrawMatrixRequest(
+      id: revisionId,
+      firstRound: 4,
+      rounds: 2,
+      groupsPerRound: 2,
+      baseMatrixRevision: 1,
+    );
+
+    final preview = await client.previewRedraw(contestId, request);
+
+    expect(seen.method, 'POST');
+    expect(seen.url.path, '$matrixPath/redraws');
+    expect(jsonDecode(seen.body)['preview'], isTrue);
+    expect(preview.seed, 7);
+    expect(preview.better, isTrue);
+    expect(
+      preview.candidateFairness['unmet_opponent_count'],
+      1,
+    );
   });
 }

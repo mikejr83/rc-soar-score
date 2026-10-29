@@ -1,6 +1,7 @@
 import Link from "next/link";
 
-import { contestAppUrl, selfScoreAppUrl } from "@/lib/site";
+import { ExternalLink } from "@/components/external-link";
+import { contestAppUrl } from "@/lib/site";
 
 import styles from "./hero.module.css";
 import { WorkingTimeDial } from "./working-time-dial";
@@ -11,9 +12,6 @@ export function Hero() {
       <div className={`seams ${styles.seams}`} aria-hidden="true" />
       <div className={`wrap ${styles.inner}`}>
         <div className={styles.copy}>
-          <p className="eyebrow">
-            <b>RC</b> Glider contest scoring
-          </p>
           <h1 id="hero-title" className={styles.title}>
             Contest scoring that keeps up with the field.
           </h1>
@@ -26,12 +24,9 @@ export function Hero() {
             <Link href="/results/contests" className="btn btn--primary">
               Find a contest
             </Link>
-            <a href={contestAppUrl} className="btn btn--ghost btn--on-dark" rel="noopener">
+            <ExternalLink href={contestAppUrl} className="btn btn--ghost btn--on-dark" destination="the contest app">
               Run a contest
-            </a>
-            <a href={selfScoreAppUrl} className="btn btn--ghost btn--on-dark" rel="noopener">
-              Enter my score
-            </a>
+            </ExternalLink>
           </div>
           <dl className={styles.facts}>
             <div>
@@ -39,21 +34,22 @@ export function Hero() {
               <dd>F5J first, more to follow</dd>
             </div>
             <div>
-              <dt>Works</dt>
-              <dd>Online, or offline on Windows</dd>
+              <dt>Runs on</dt>
+              <dd>The web, or offline on Windows</dd>
             </div>
             <div>
               <dt>Results</dt>
               <dd>Public, round by round</dd>
+            </div>
+            <div>
+              <dt>Copy</dt>
+              <dd>Draft, pending review (#165)</dd>
             </div>
           </dl>
         </div>
         <div className={styles.instrument}>
           <WorkingTimeDial />
         </div>
-      </div>
-      <div className={styles.scrollHint} aria-hidden="true">
-        <span />
       </div>
     </section>
   );

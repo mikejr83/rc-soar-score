@@ -49,11 +49,12 @@ createHandlers(
   addParticipantRoutes(router, repository);
   addRoleRoutes(router, repository);
   addParticipationRoutes(router, repository, recalculation: recalculation);
-  addTeamRoutes(router, repository);
+  addTeamRoutes(router, repository, recalculation: recalculation);
   addMatrixRoutes(
     router,
     repository,
     drawRunner: drawRunner ?? const IsolateDrawRunner(),
+    recalculation: recalculation,
   );
   addScoreRoutes(
     router,

@@ -41,7 +41,7 @@
   color: var(--panel-muted);
 }
 
-/* The sweep fills to 62 of 100 on load, the hand follows. */
+/* The sweep fills to 62 of 100 on load (6:12 of 10:00 elapsed, 3:48 on the readout), the hand follows. */
 .sweep {
   stroke-dasharray: 62 100;
   stroke-dashoffset: 0;

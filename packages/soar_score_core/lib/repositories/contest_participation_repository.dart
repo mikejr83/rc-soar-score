@@ -24,7 +24,30 @@ abstract interface class ContestParticipationRepository {
     required MutationMetadata metadata,
   });
 
-  /// Deletes the participation with [id] and its team memberships, in one
-  /// transaction; returns whether a row was removed.
+  /// As [save], and the pilot's matrix rows go in the same transaction, so a
+  /// stale revision removes nothing: every assignment of the participation,
+  /// its empty score slot and the results derived from them, each with a
+  /// tombstone; no matrix revision changes. Throws a `ContestStateError`
+  /// (`has_scores`), changing nothing, when a slot holds a score.
+  ///
+  /// `matrixRowsRemoved` is the number of assignments that transaction
+  /// removed, counted inside it.
+  Future<({ContestParticipation participation, int matrixRowsRemoved})>
+  saveRemovingMatrixRows(
+    ContestParticipation participation, {
+    required MutationMetadata metadata,
+  });
+
+  /// Deletes the participation with [id], its team memberships and its matrix
+  /// rows (as with [saveRemovingMatrixRows]), in one transaction; returns
+  /// whether a row was removed. Throws a `ContestStateError` (`has_scores`)
+  /// when a slot holds a score.
   Future<bool> delete(Id id, {required MutationMetadata metadata});
+
+  /// As [delete], and also returns the number of matrix assignments removed,
+  /// counted inside the transaction.
+  Future<({bool deleted, int matrixRowsRemoved})> deleteRemovingMatrixRows(
+    Id id, {
+    required MutationMetadata metadata,
+  });
 }

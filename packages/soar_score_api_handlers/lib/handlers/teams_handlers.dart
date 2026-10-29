@@ -17,9 +17,38 @@ import 'package:soar_score_core/soar_score_core.dart';
 ///   `POST /contests/{id}/team-memberships` put a participant on a team
 /// - `DELETE /contests/{id}/team-memberships/{membershipId}` takes them off
 ///
+/// A membership change recalculates the results when the contest has an
+/// official score, since team scores follow the memberships. The change is
+/// stored first; if the recalculation fails the results read as stale and
+/// the response carries `recalculation_warning`: beside the membership on
+/// the POST, and as the body of a 200 on the DELETE (a 204 otherwise).
+///
 /// The handlers only translate between HTTP and [TeamsService].
-void addTeamRoutes(Router router, Repository repository) {
+///
+/// [recalculation] defaults to a [RecalculationService] over [repository]; it
+/// is exposed so tests can force a recalculation failure.
+void addTeamRoutes(
+  Router router,
+  Repository repository, {
+  RecalculationService? recalculation,
+}) {
   final service = TeamsService(repository);
+  final scoresService = ScoresService(repository);
+  final recalculationService =
+      recalculation ?? RecalculationService(ResultsService(repository));
+
+  /// Recalculates after a membership change; the notice when it fails.
+  Future<String?> recalculateAfterMembership(Id contestId) async {
+    // A contest with no official score has no results to go stale.
+    final scores = await scoresService.list(contestId);
+    if (scores.slots.any((slot) => slot.officialScore != null)) {
+      return recalculationService.recalculateAfterEntry(
+        contestId,
+        cause: 'a team change',
+      );
+    }
+    return null;
+  }
 
   router.get('/contests/<id>/teams', (Request request, String id) async {
     final contestId = Id.parse(id);
@@ -111,7 +140,14 @@ void addTeamRoutes(Router router, Repository repository) {
       participationId: body.contestParticipationId,
       metadata: writeMetadata(principal),
     );
-    return jsonResponse(membership.toJson(), statusCode: 201);
+    final warning = await recalculateAfterMembership(contestId);
+    return jsonResponse(
+      TeamMembershipResult(
+        membership: membership,
+        recalculationWarning: warning,
+      ).toJson(),
+      statusCode: 201,
+    );
   });
 
   router.delete('/contests/<id>/team-memberships/<membershipId>', (
@@ -127,6 +163,8 @@ void addTeamRoutes(Router router, Repository repository) {
       Id.parse(membershipId),
       metadata: writeMetadata(principal),
     );
-    return Response(204);
+    final warning = await recalculateAfterMembership(contestId);
+    if (warning == null) return Response(204);
+    return jsonResponse(<String, dynamic>{'recalculation_warning': warning});
   });
 }
