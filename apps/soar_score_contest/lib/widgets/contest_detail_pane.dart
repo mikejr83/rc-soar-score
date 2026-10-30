@@ -107,7 +107,7 @@ class ContestDetailPane extends StatelessWidget {
         DetailSectionCard(
           title: 'Schedule',
           items: [
-            DetailItem('Dates', ContestList.contestDates(contest)),
+            DetailItem('Dates', ContestList.contestDates(l10n, contest)),
             DetailItem('Timezone', contest.timezone),
           ],
         ),
@@ -125,7 +125,7 @@ class ContestDetailPane extends StatelessWidget {
           items: [
             DetailItem(
               'Lifecycle',
-              ContestStatusChip.label(contest.lifecycleState),
+              ContestStatusChip.label(l10n, contest.lifecycleState),
             ),
             DetailItem(
               'Scoring access',

@@ -104,21 +104,22 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) => FutureBuilder<List<Contest>>(
     future: _contests,
     builder: (context, snapshot) {
+      final l10n = AppLocalizations.of(context);
       if (snapshot.hasError) {
         return loadFailedView(
           snapshot.error!,
-          title: 'Contests could not be loaded.',
+          title: l10n.contestsLoadFailed,
           onRetry: _retry,
         );
       }
       final contests = snapshot.data;
       if (contests == null) {
-        return const PageStateView.loading(label: 'Loading contests');
+        return PageStateView.loading(label: l10n.contestsLoading);
       }
       if (contests.isEmpty) {
         final store = contestDraftStoreOf(context);
         return PageStateView.empty(
-          title: 'No contests yet.',
+          title: l10n.contestsEmpty,
           action: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -130,7 +131,7 @@ class _HomePageState extends State<HomePage> {
                     key: const ValueKey('empty-create-contest'),
                     onPressed: () => context.go(newContestPath),
                     icon: Icon(CreateContestEntry.icon(hasDraft)),
-                    label: Text(CreateContestEntry.label(hasDraft)),
+                    label: Text(CreateContestEntry.label(l10n, hasDraft)),
                   );
                 },
               ),

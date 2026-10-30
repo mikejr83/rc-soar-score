@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_contest/auth/auth_session_inherited.dart';
 import 'package:soar_score_contest/auth/identity_provider_check.dart';
 import 'package:soar_score_contest/connectivity_provider.dart';
@@ -28,7 +29,10 @@ void main() {
       monitor: FakeAppConnectivity(),
       child: AuthSessionInherited(
         session: session,
-        child: MaterialApp.router(routerConfig: router),
+        child: MaterialApp.router(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          routerConfig: router,
+        ),
       ),
     );
   }

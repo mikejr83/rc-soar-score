@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/reports/reports_facts.dart';
 import '../contest_status_chip.dart';
 import 'reports_offline_note.dart';
@@ -60,7 +61,10 @@ class ReportsContextStrip extends StatelessWidget {
                       label: 'Lifecycle',
                       value: completed
                           ? 'Completed · Results are final'
-                          : ContestStatusChip.label(facts.lifecycle),
+                          : ContestStatusChip.label(
+                              AppLocalizations.of(context),
+                              facts.lifecycle,
+                            ),
                     ),
                     if (facts.matrixRevision == null)
                       _Fact(

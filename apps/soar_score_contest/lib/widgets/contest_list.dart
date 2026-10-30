@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../l10n/app_localizations.dart';
 import 'contest_status_chip.dart';
 
 /// The master pane of the contests page: title and count, then one row per
@@ -33,11 +34,11 @@ class ContestList extends StatefulWidget {
   State<ContestList> createState() => _ContestListState();
 
   /// The contest's date range, e.g. `Oct 17, 2026 to Oct 18, 2026`.
-  static String contestDates(Contest contest) {
+  static String contestDates(AppLocalizations l10n, Contest contest) {
     final format = DateFormat.yMMMd();
     final start = format.format(contest.startDateTime.toLocal());
     final end = format.format(contest.endDateTime.toLocal());
-    return start == end ? start : '$start to $end';
+    return start == end ? start : l10n.contestDateRange(start, end);
   }
 }
 
@@ -73,6 +74,7 @@ class _ContestListState extends State<ContestList> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -82,11 +84,11 @@ class _ContestListState extends State<ContestList> {
             crossAxisAlignment: CrossAxisAlignment.baseline,
             textBaseline: TextBaseline.alphabetic,
             children: [
-              Text('Contests', style: theme.textTheme.titleLarge),
+              Text(l10n.contestListHeading, style: theme.textTheme.titleLarge),
               const SizedBox(width: 12),
               Flexible(
                 child: Text(
-                  '${widget.contests.length} contests',
+                  l10n.contestListCount(widget.contests.length),
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
@@ -111,7 +113,7 @@ class _ContestListState extends State<ContestList> {
                 selectedTileColor: theme.colorScheme.secondaryContainer,
                 leading: _DateBadge(contest.startDateTime.toLocal()),
                 title: Text(contest.name),
-                subtitle: Text(ContestList.contestDates(contest)),
+                subtitle: Text(ContestList.contestDates(l10n, contest)),
                 trailing: ContestStatusChip(state: contest.lifecycleState),
                 onTap: () => _tap(contest),
               );

@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
 import '../pages/landing_page.dart';
 import '../services/window/window_title_channel.dart';
 
 /// The window title for the current context: the application name, followed
 /// by the selected contest's name when there is one.
-String windowTitleFor({String? contestName}) => contestName == null
+String windowTitleFor(AppLocalizations l10n, {String? contestName}) =>
+    contestName == null
     ? LandingPage.title
-    : '${LandingPage.title}: $contestName';
+    : l10n.windowTitleContest(LandingPage.title, contestName);
 
 /// Applies [title] to the application window: the browser tab on web (through
 /// [Title]) and the title bar on Windows desktop (through
