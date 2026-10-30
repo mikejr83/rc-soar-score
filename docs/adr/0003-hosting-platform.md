@@ -13,7 +13,7 @@ Release 1 must be cheap to run and easy to move to a bigger platform later. The 
 Use a managed host for the first release:
 
 - The three Flutter web apps run on Cloudflare Pages.
-- The API container runs on Fly.io or Railway. The final choice is made when staging is set up.
+- The API container runs on Fly.io (chosen 2026-10-30, [#130](https://github.com/mikejr83/rc-soar-score/issues/130)); see [deploy-api-fly.md](../deploy-api-fly.md).
 - PostgreSQL runs on Neon's free tier to start.
 - The domain uses the root for the public site, with `app.`, `score.` and `api.` subdomains.
 
