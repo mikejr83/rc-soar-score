@@ -63,7 +63,8 @@ Then check it:
 
 ```sh
 fly logs --app rc-soar-score-api      # look for "Database open and migrated."
-scripts/hosted-smoke.sh https://api.rcsoarscore.com
+scripts/hosted-smoke.sh https://api.rcsoarscore.com          # bash
+./scripts/hosted-smoke.ps1 -BaseUrl https://api.rcsoarscore.com  # PowerShell
 ```
 
 ## Idle behaviour
