@@ -1,7 +1,9 @@
-# Fly.io configuration for the API server. Deploy from the repository root:
+# Fly.io configuration for the API server. Fly does not build anything: it
+# runs the container image published to GitHub Container Registry. Deploy a
+# release from anywhere (no checkout of the source is needed):
 #
 #   fly deploy --config apps/soar_score_server/fly.toml \
-#     --dockerfile apps/soar_score_server/Dockerfile .
+#     --image ghcr.io/mikejr83/rc-soar-score-server:<tag>
 #
 # See docs/deploy-api-fly.md. Secrets (DATABASE_URL) are never stored here;
 # set them with `fly secrets set`.

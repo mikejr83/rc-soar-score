@@ -52,12 +52,23 @@ Check current prices on the Fly.io and Neon pricing pages first.
 
 ## Deploy
 
-From the repository root:
+Fly does not build the API. It runs the image that was built for the GitHub
+release and pushed to GitHub Container Registry as
+`ghcr.io/mikejr83/rc-soar-score-server:<tag>`, so the API is released on its
+own schedule, separately from the web apps (a contest app fix that does not
+touch the API needs no API deploy). Deploy a tag:
 
 ```sh
 fly deploy --config apps/soar_score_server/fly.toml \
-  --dockerfile apps/soar_score_server/Dockerfile .
+  --image ghcr.io/mikejr83/rc-soar-score-server:<tag>
 ```
+
+Use a version tag or digest, never `latest`, so `fly releases` shows exactly
+what runs and a rollback is a redeploy of the earlier tag. Fly pulls the image
+anonymously, so the GHCR package must be public (it holds no secrets: all
+configuration is environment variables and Fly secrets). If you would rather
+keep it private, pull it locally, run `fly auth docker`, retag it as
+`registry.fly.io/rc-soar-score-api:<tag>`, push it, and deploy that image.
 
 Then check it:
 
@@ -78,7 +89,8 @@ adds a little more). For the MVP release set `min_machines_running = 1` and
 
 ```sh
 fly releases --app rc-soar-score-api
-fly deploy --image <image of the earlier release> --config apps/soar_score_server/fly.toml
+fly deploy --config apps/soar_score_server/fly.toml \
+  --image ghcr.io/mikejr83/rc-soar-score-server:<earlier tag>
 ```
 
 Schema changes are made in place in version 1 and the server migrates on start,
