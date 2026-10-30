@@ -763,6 +763,24 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String activityConfigurationSaved(String actor) {
+    String _temp0 = intl.Intl.selectLogic(actor, {
+      'you': 'You saved the contest configuration',
+      'other': 'The contest configuration was saved',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String activityMatrixDrawn(String actor) {
+    String _temp0 = intl.Intl.selectLogic(actor, {
+      'you': 'You drew the matrix',
+      'other': 'The matrix was drawn',
+    });
+    return '$_temp0';
+  }
+
+  @override
   String get shellNavContests => 'Contests';
 
   @override

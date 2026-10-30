@@ -1094,6 +1094,18 @@ abstract class AppLocalizations {
   /// **'{actor, select, you{You updated the published results} other{The published results were updated}}'**
   String activityPublication(String actor);
 
+  /// Recent activity line: a configuration revision was saved.
+  ///
+  /// In en, this message translates to:
+  /// **'{actor, select, you{You saved the contest configuration} other{The contest configuration was saved}}'**
+  String activityConfigurationSaved(String actor);
+
+  /// Recent activity line: the matrix was drawn or redrawn.
+  ///
+  /// In en, this message translates to:
+  /// **'{actor, select, you{You drew the matrix} other{The matrix was drawn}}'**
+  String activityMatrixDrawn(String actor);
+
   /// Navigation rail destination, page title and breadcrumb: main page.
   ///
   /// In en, this message translates to:
