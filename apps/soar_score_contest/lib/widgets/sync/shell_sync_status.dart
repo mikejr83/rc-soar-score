@@ -38,26 +38,23 @@ class ShellSyncStatus extends StatelessWidget {
             key: const ValueKey('shell-sync-status'),
             borderRadius: BorderRadius.circular(8),
             onTap: () => context.go(contestSyncPath(contest.id.value)),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(minHeight: 48),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    attention ? Icons.sync_problem : Icons.sync,
-                    size: 18,
-                    color: attention
-                        ? theme.colorScheme.error
-                        : theme.colorScheme.onSurfaceVariant,
-                  ),
-                  const SizedBox(width: 6),
-                  Text('Sync', style: theme.textTheme.labelMedium),
-                  const SizedBox(width: 8),
-                  Flexible(
-                    child: Text(text, style: theme.textTheme.bodyMedium),
-                  ),
-                ],
-              ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  attention ? Icons.sync_problem : Icons.sync,
+                  size: 16,
+                  color: attention
+                      ? theme.colorScheme.error
+                      : theme.colorScheme.onSurfaceVariant,
+                ),
+                const SizedBox(width: 6),
+                Text('Sync', style: theme.textTheme.bodySmall),
+                const SizedBox(width: 6),
+                Flexible(
+                  child: Text(text, style: theme.textTheme.bodySmall),
+                ),
+              ],
             ),
           ),
         );
