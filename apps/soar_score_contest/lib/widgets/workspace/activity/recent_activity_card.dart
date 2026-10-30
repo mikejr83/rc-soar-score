@@ -80,7 +80,8 @@ class RecentActivityCard extends StatelessWidget {
             else if (entries.isEmpty)
               _note(context, 'activity-empty', l10n.activityEmpty)
             else ...[
-              for (final entry in entries) _row(context, entry),
+              for (var i = 0; i < entries.length; i++)
+                _row(context, entries[i], i),
               _note(
                 context,
                 'activity-view-all-note',
@@ -93,7 +94,7 @@ class RecentActivityCard extends StatelessWidget {
     );
   }
 
-  Widget _row(BuildContext context, ActivityEntry entry) {
+  Widget _row(BuildContext context, ActivityEntry entry, int index) {
     final theme = Theme.of(context);
     final muted = theme.colorScheme.onSurfaceVariant;
     final text = Text(_text(context, entry), style: theme.textTheme.bodyMedium);
@@ -102,7 +103,10 @@ class RecentActivityCard extends StatelessWidget {
       style: theme.textTheme.bodySmall?.copyWith(color: muted),
     );
     return Padding(
-      key: ValueKey('activity-row-${entry.kind.name}'),
+      // The position, not the kind, is the stable identity of a row: several
+      // events can share a kind (a configuration saved twice), so a kind key
+      // would not be unique.
+      key: ValueKey('activity-row-$index'),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -183,6 +187,8 @@ class RecentActivityCard extends StatelessWidget {
     ActivityKind.lock => Icons.lock_outline,
     ActivityKind.unlock => Icons.lock_open_outlined,
     ActivityKind.publication => Icons.public,
+    ActivityKind.configurationSaved => Icons.tune_outlined,
+    ActivityKind.matrixDrawn => Icons.grid_on_outlined,
   };
 
   static String _text(BuildContext context, ActivityEntry entry) {
@@ -196,6 +202,8 @@ class RecentActivityCard extends StatelessWidget {
       ActivityKind.lock => l10n.activityLock(actor),
       ActivityKind.unlock => l10n.activityUnlock(actor),
       ActivityKind.publication => l10n.activityPublication(actor),
+      ActivityKind.configurationSaved => l10n.activityConfigurationSaved(actor),
+      ActivityKind.matrixDrawn => l10n.activityMatrixDrawn(actor),
     };
   }
 }

@@ -8,6 +8,8 @@ enum ActivityKind {
   lock,
   unlock,
   publication,
+  configurationSaved,
+  matrixDrawn,
 }
 
 /// One line of the workspace's recent-activity list: what happened, whether

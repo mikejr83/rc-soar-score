@@ -883,5 +883,23 @@
         "type": "String"
       }
     }
+  },
+  "activityConfigurationSaved": "{actor, select, you{You saved the contest configuration} other{The contest configuration was saved}}",
+  "@activityConfigurationSaved": {
+    "description": "Recent activity line: a configuration revision was saved.",
+    "placeholders": {
+      "actor": {
+        "type": "String"
+      }
+    }
+  },
+  "activityMatrixDrawn": "{actor, select, you{You drew the matrix} other{The matrix was drawn}}",
+  "@activityMatrixDrawn": {
+    "description": "Recent activity line: the matrix was drawn or redrawn.",
+    "placeholders": {
+      "actor": {
+        "type": "String"
+      }
+    }
   }
 }

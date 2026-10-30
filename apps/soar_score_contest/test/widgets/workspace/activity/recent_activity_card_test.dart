@@ -68,11 +68,13 @@ void main() {
     expect(find.text('Participant scoring was opened'), findsOneWidget);
     expect(find.textContaining('2026-10-18 '), findsOneWidget);
     expect(
-      tester.getTopLeft(find.byKey(const ValueKey('activity-row-complete'))).dy,
+      tester
+          .getTopLeft(
+            find.text('You completed the contest. Participant scoring closed.'),
+          )
+          .dy,
       lessThan(
-        tester
-            .getTopLeft(find.byKey(const ValueKey('activity-row-openScoring')))
-            .dy,
+        tester.getTopLeft(find.text('Participant scoring was opened')).dy,
       ),
     );
   });

@@ -64,20 +64,33 @@ abstract final class WorkspaceFactsLoader {
   }
 
   /// Reads the audit trail for the completion and lock facts and the activity
-  /// card: every state transition, plus the newest publication events. Asking
-  /// by action keeps other events (score edits, say) from pushing the ones
-  /// listed out of a limited read, and the server applies no limit unless one
-  /// is passed, so no transition is cut off.
+  /// card: every state transition, every configuration save and matrix draw,
+  /// plus the newest publication events. Asking by action keeps other events
+  /// (score edits, say) from pushing the ones listed out of a limited read,
+  /// and the server applies no limit unless one is passed, so no transition
+  /// is cut off.
   ///
-  /// The two reads fail on their own: a failed publication read still leaves
-  /// the transition facts known, and marks only the activity as failed.
+  /// The reads fail on their own: a failed publication read still leaves the
+  /// transition facts known, and marks only the activity as failed.
   static Future<_AuditFacts> _audit(
     ApiClient client,
     Contest contest,
     String? actingAccountId,
   ) async {
-    final (transitions, publications) = await (
+    final (transitions, configurations, draws, publications) = await (
       _auditEvents(client, contest, AuditAction.stateTransition),
+      _auditEvents(
+        client,
+        contest,
+        AuditAction.configurationSaved,
+        limit: ActivityFacts.shown,
+      ),
+      _auditEvents(
+        client,
+        contest,
+        AuditAction.matrixDrawn,
+        limit: ActivityFacts.shown,
+      ),
       _auditEvents(
         client,
         contest,
@@ -85,6 +98,7 @@ abstract final class WorkspaceFactsLoader {
         limit: ActivityFacts.shown,
       ),
     ).wait;
+    final activityReads = [transitions, configurations, draws, publications];
     return _AuditFacts(
       transitions: transitions == null
           ? TransitionFacts.unknown
@@ -93,11 +107,13 @@ abstract final class WorkspaceFactsLoader {
               transitions,
               actingAccountId: actingAccountId,
             ),
-      activity: transitions == null || publications == null
+      activity: activityReads.any((read) => read == null)
           ? ActivityFacts.unavailable
           : ActivityFacts.of([
-              ...transitions,
-              ...publications,
+              ...transitions!,
+              ...configurations!,
+              ...draws!,
+              ...publications!,
             ], actingAccountId: actingAccountId),
     );
   }

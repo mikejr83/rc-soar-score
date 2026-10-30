@@ -70,4 +70,27 @@ void main() {
 
     expect(facts.entries, hasLength(ActivityFacts.shown));
   });
+
+  test('lists configuration saves and matrix draws', () {
+    final facts = ActivityFacts.of([
+      _event(t1, kind: AuditAction.configurationSaved),
+      _event(t2, kind: AuditAction.matrixDrawn),
+    ], actingAccountId: _me.value);
+
+    expect(facts.entries.map((e) => e.kind), [
+      ActivityKind.matrixDrawn,
+      ActivityKind.configurationSaved,
+    ]);
+    expect(facts.entries.every((e) => e.byYou), isTrue);
+  });
+
+  test('orders events stored in the same instant by id, newest first', () {
+    final save = _event(t1, kind: AuditAction.configurationSaved);
+    final draw = _event(t1, kind: AuditAction.matrixDrawn);
+
+    expect(
+      ActivityFacts.of([save, draw]).entries.map((e) => e.kind),
+      ActivityFacts.of([draw, save]).entries.map((e) => e.kind),
+    );
+  });
 }
