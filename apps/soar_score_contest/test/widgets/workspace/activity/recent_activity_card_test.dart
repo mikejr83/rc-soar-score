@@ -47,11 +47,13 @@ void main() {
       ActivityFacts(
         entries: [
           ActivityEntry(
+            id: 'event-1',
             kind: ActivityKind.complete,
             byYou: true,
             at: DateTime.utc(2026, 10, 18, 16, 40),
           ),
           ActivityEntry(
+            id: 'event-2',
             kind: ActivityKind.openScoring,
             byYou: false,
             at: DateTime.utc(2026, 10, 17, 8, 40),
@@ -68,11 +70,13 @@ void main() {
     expect(find.text('Participant scoring was opened'), findsOneWidget);
     expect(find.textContaining('2026-10-18 '), findsOneWidget);
     expect(
-      tester.getTopLeft(find.byKey(const ValueKey('activity-row-complete'))).dy,
+      tester
+          .getTopLeft(
+            find.text('You completed the contest. Participant scoring closed.'),
+          )
+          .dy,
       lessThan(
-        tester
-            .getTopLeft(find.byKey(const ValueKey('activity-row-openScoring')))
-            .dy,
+        tester.getTopLeft(find.text('Participant scoring was opened')).dy,
       ),
     );
   });
@@ -83,6 +87,7 @@ void main() {
       ActivityFacts(
         entries: [
           ActivityEntry(
+            id: 'event-3',
             kind: ActivityKind.lock,
             byYou: true,
             at: DateTime.utc(2026, 10, 18, 16, 40),
@@ -126,6 +131,7 @@ void main() {
       ActivityFacts(
         entries: [
           ActivityEntry(
+            id: 'event-4',
             kind: ActivityKind.complete,
             byYou: true,
             at: DateTime.utc(2026, 10, 18, 16, 40),

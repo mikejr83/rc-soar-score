@@ -44,7 +44,7 @@ Future<WorkspaceFacts> _load({
   final client = ApiClient(
     baseUrl: Uri.parse('http://localhost'),
     httpClient: MockClient((request) async {
-      requests?.add(request.url.path);
+      requests?.add(request.url.toString());
       final path = request.url.path;
       if (path.endsWith('/audit-events')) {
         final failing =
@@ -231,15 +231,29 @@ void main() {
       },
     );
 
-    test('an open, running contest reads the trail once for transitions and activity', () async {
-      final requests = <String>[];
-      await _load(requests: requests);
+    test(
+      'an open, running contest reads the trail by action for transitions and '
+      'activity',
+      () async {
+        final requests = <String>[];
+        await _load(requests: requests);
 
-      expect(
-        requests.where((path) => path.endsWith('/audit-events')),
-        hasLength(2),
-      );
-    });
+        final uris = requests.map(Uri.parse).toList();
+        final auditReads = uris
+            .where((u) => u.path.endsWith('/audit-events'))
+            .toList();
+        expect(auditReads, hasLength(4));
+        expect(
+          {for (final u in auditReads) u.queryParameters['action']},
+          {
+            'StateTransition',
+            'ConfigurationSaved',
+            'MatrixDrawn',
+            'PublicationAttempt',
+          },
+        );
+      },
+    );
 
     test('the newest events become activity lines', () async {
       final facts = await _load(
@@ -257,6 +271,25 @@ void main() {
       ]);
       expect(facts.activity.entries.every((e) => e.byYou), isTrue);
     });
+
+    for (final action in ['ConfigurationSaved', 'MatrixDrawn']) {
+      test('a failed $action read fails the activity but keeps the transition '
+          'facts', () async {
+        final facts = await _load(
+          contest: matrixContest(
+            state: LifecycleState.running,
+            lock: AdminLock.locked,
+          ),
+          auditEvents: [event('lock', '2026-10-18T15:00:00.000Z')],
+          failingAuditAction: action,
+          actingAccountId: director,
+        );
+
+        expect(facts.lockedAt, DateTime.utc(2026, 10, 18, 15));
+        expect(facts.activity, ActivityFacts.unavailable);
+        expect(facts.unavailable, isEmpty);
+      });
+    }
 
     test('a failed publication read keeps the transition facts and fails the '
         'activity', () async {
