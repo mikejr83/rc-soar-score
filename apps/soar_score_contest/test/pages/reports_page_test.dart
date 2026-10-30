@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/testing.dart';
 import 'package:soar_score_api/soar_score_api.dart';
@@ -69,7 +70,10 @@ Future<GoRouter> _pump(
         baseUrl: Uri.parse('http://localhost'),
         httpClient: MockClient(server.handle),
       ),
-      child: MaterialApp.router(routerConfig: router),
+      child: MaterialApp.router(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        routerConfig: router,
+      ),
     ),
   );
   if (settle) {

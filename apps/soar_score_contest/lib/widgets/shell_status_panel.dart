@@ -48,12 +48,12 @@ class ShellStatusPanel extends StatelessWidget {
     final theme = Theme.of(context);
     final locked = contest.adminLock == AdminLock.locked;
     final round = this.round;
-    final l10n = round == null ? null : AppLocalizations.of(context);
+    final l10n = AppLocalizations.of(context);
     final openRound = onOpenRound;
     final scoringOpen = contest.scoringAccess == ScoringAccess.open;
     return Semantics(
       container: true,
-      label: 'Contest status',
+      label: l10n.shellStatusPanelLabel,
       child: Padding(
         key: const ValueKey('shell-status-panel'),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -63,30 +63,35 @@ class ShellStatusPanel extends StatelessWidget {
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             _Item(
-              label: 'Status',
+              label: l10n.shellStatusLifecycle,
+              semanticsTarget: 'lifecycle',
               onTap: _tap(WorkspaceControlTarget.lifecycle),
               theme: theme,
               icon: Icons.flag_outlined,
-              value: ContestStatusChip.label(contest.lifecycleState),
+              value: ContestStatusChip.label(l10n, contest.lifecycleState),
             ),
             _Item(
-              label: 'Participant scoring',
+              label: l10n.shellStatusScoring,
+              semanticsTarget: 'scoring',
               onTap: _tap(WorkspaceControlTarget.scoring),
               theme: theme,
               icon: Icons.sports_score,
-              value: scoringOpen ? 'Open' : 'Closed',
+              value: scoringOpen
+                  ? l10n.shellScoringOpen
+                  : l10n.shellScoringClosed,
             ),
             _Item(
-              label: 'Administration',
+              label: l10n.shellStatusAdministration,
+              semanticsTarget: 'administration',
               onTap: _tap(WorkspaceControlTarget.administration),
               theme: theme,
               icon: locked ? Icons.lock : Icons.lock_open,
-              value: locked ? 'Locked' : 'Unlocked',
+              value: locked ? l10n.shellAdminLocked : l10n.shellAdminUnlocked,
             ),
             if (round != null)
               _Item(
                 key: const ValueKey('shell-round-status'),
-                label: l10n!.shellRoundLabel,
+                label: l10n.shellRoundLabel,
                 onTap: openRound == null ? null : () => openRound(round),
                 theme: theme,
                 icon: Icons.format_list_numbered,
@@ -122,6 +127,7 @@ class _Item extends StatelessWidget {
   const _Item({
     super.key,
     this.semanticsLabel,
+    this.semanticsTarget = 'other',
     required this.label,
     required this.value,
     required this.icon,
@@ -133,6 +139,9 @@ class _Item extends StatelessWidget {
 
   /// Overrides the accessible name of the button.
   final String? semanticsLabel;
+
+  /// Which control the button opens, for the default accessible name.
+  final String semanticsTarget;
 
   /// The value as text, for the accessible name.
   final String value;
@@ -169,7 +178,8 @@ class _Item extends StatelessWidget {
       button: true,
       label:
           semanticsLabel ??
-          '$label: $value. Go to the ${label.toLowerCase()} control',
+          AppLocalizations.of(context)
+              .shellStatusSemantics(label, value, semanticsTarget),
       excludeSemantics: true,
       onTap: onTap,
       child: InkWell(

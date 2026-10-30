@@ -5,6 +5,7 @@ import '../app_mode_provider.dart';
 import '../auth/auth_session.dart';
 import '../auth/auth_session_inherited.dart';
 import '../router.dart';
+import '../l10n/app_localizations.dart';
 import 'app_version_label.dart';
 import 'shell_destinations.dart';
 
@@ -16,8 +17,6 @@ import 'shell_destinations.dart';
 /// otherwise it opens the Settings page directly.
 class ShellAccountButton extends StatelessWidget {
   const ShellAccountButton({super.key});
-
-  static const settingsLabel = 'Settings';
 
   /// Opens Settings, staying inside the selected contest when there is one.
   static void _openSettings(BuildContext context) {
@@ -55,28 +54,29 @@ class ShellAccountButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final session = authSessionOf(context);
+    final l10n = AppLocalizations.of(context);
     if (session != null && session.isSignedIn) {
       return _signedIn(context, session);
     }
     if (isOfflineModeOf(context)) {
       return PopupMenuButton<VoidCallback>(
         key: const ValueKey('account-menu'),
-        tooltip: 'Settings and sign in',
+        tooltip: l10n.shellAccountSettingsAndSignIn,
         icon: const Icon(Icons.settings_outlined),
         onSelected: (action) => action(),
         itemBuilder: (_) => [
           PopupMenuItem(
             value: () => _signIn(context),
-            child: const ListTile(
-              leading: Icon(Icons.login),
-              title: Text('Sign in'),
+            child: ListTile(
+              leading: const Icon(Icons.login),
+              title: Text(l10n.shellSignIn),
             ),
           ),
           PopupMenuItem(
             value: () => _openSettings(context),
-            child: const ListTile(
-              leading: Icon(Icons.settings_outlined),
-              title: Text(settingsLabel),
+            child: ListTile(
+              leading: const Icon(Icons.settings_outlined),
+              title: Text(l10n.shellNavSettings),
             ),
           ),
           const PopupMenuDivider(),
@@ -86,17 +86,18 @@ class ShellAccountButton extends StatelessWidget {
     }
     return IconButton(
       key: const ValueKey('settings-button'),
-      tooltip: settingsLabel,
+      tooltip: l10n.shellNavSettings,
       icon: const Icon(Icons.settings_outlined),
       onPressed: () => _openSettings(context),
     );
   }
 
   Widget _signedIn(BuildContext context, AuthSession session) {
-    final name = session.displayName ?? 'Signed in';
+    final l10n = AppLocalizations.of(context);
+    final name = session.displayName ?? l10n.shellSignedIn;
     return PopupMenuButton<VoidCallback>(
       key: const ValueKey('account-menu'),
-      tooltip: 'Account: $name',
+      tooltip: l10n.shellAccountTooltip(name),
       onSelected: (action) => action(),
       itemBuilder: (_) => [
         PopupMenuItem(
@@ -110,16 +111,16 @@ class ShellAccountButton extends StatelessWidget {
         const PopupMenuDivider(),
         PopupMenuItem(
           value: () => _openSettings(context),
-          child: const ListTile(
-            leading: Icon(Icons.settings_outlined),
-            title: Text(settingsLabel),
+          child: ListTile(
+            leading: const Icon(Icons.settings_outlined),
+            title: Text(l10n.shellNavSettings),
           ),
         ),
         PopupMenuItem(
           value: () => _signOut(context, session),
-          child: const ListTile(
-            leading: Icon(Icons.logout),
-            title: Text('Sign out'),
+          child: ListTile(
+            leading: const Icon(Icons.logout),
+            title: Text(l10n.shellSignOut),
           ),
         ),
         const PopupMenuDivider(),
@@ -151,7 +152,7 @@ class _Avatar extends StatelessWidget {
     );
     final url = pictureUrl;
     return Semantics(
-      label: 'Account menu',
+      label: AppLocalizations.of(context).shellAccountMenu,
       child: CircleAvatar(
         radius: size / 2,
         backgroundColor: scheme.primaryContainer,

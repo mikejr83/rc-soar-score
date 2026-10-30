@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/l10n/app_localizations_en.dart';
 import 'package:soar_score_contest/router.dart';
 import 'package:soar_score_contest/widgets/shell_destinations.dart';
 
 const String _contestId = '01890a5d-ac96-774b-bcce-b302099a8057';
 
+final _l10n = AppLocalizationsEn();
+
 List<String> _labels(String path) =>
-    shellDestinationsFor(path).map((destination) => destination.label).toList();
+    shellDestinationsFor(path)
+        .map((destination) => destination.label.of(_l10n))
+        .toList();
 
 void main() {
   group('contestIdFor', () {
@@ -64,7 +69,8 @@ void main() {
     test('adds Sync last in a contest only when the build syncs', () {
       final path = contestWorkspacePath(_contestId);
       final labels = [
-        for (final d in shellDestinationsFor(path, showSync: true)) d.label,
+        for (final d in shellDestinationsFor(path, showSync: true))
+          d.label.of(_l10n),
       ];
       expect(labels.last, 'Sync');
       expect(
@@ -72,7 +78,8 @@ void main() {
         contestSyncPath(_contestId),
       );
       expect([
-        for (final d in shellDestinationsFor(homePath, showSync: true)) d.label,
+        for (final d in shellDestinationsFor(homePath, showSync: true))
+          d.label.of(_l10n),
       ], isNot(contains('Sync')));
     });
 

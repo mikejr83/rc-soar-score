@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_contest/api_client_provider.dart';
@@ -91,6 +92,7 @@ Future<void> pumpShellRouter(
   Widget Function(Widget app)? wrap,
 }) async {
   Widget app = MaterialApp.router(
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
     debugShowCheckedModeBanner: false,
     routerConfig: router,
   );

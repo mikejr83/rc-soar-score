@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_contest/api_client_provider.dart';
 import 'package:soar_score_contest/app_mode_provider.dart';
 import 'package:soar_score_contest/router.dart';
@@ -23,7 +24,10 @@ Future<void> _pump(WidgetTester tester, String initial) async {
   await tester.pumpWidget(
     ApiClientInherited(
       client: client,
-      child: MaterialApp.router(routerConfig: router),
+      child: MaterialApp.router(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        routerConfig: router,
+      ),
     ),
   );
   await tester.pumpAndSettle();

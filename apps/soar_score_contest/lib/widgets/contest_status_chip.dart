@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../l10n/app_localizations.dart';
 import 'page_states/status_label.dart';
 
 /// The lifecycle state of a contest as an outlined chip with a state icon;
@@ -18,8 +19,14 @@ class ContestStatusChip extends StatelessWidget {
   final String field;
 
   /// The state's display name, e.g. `Running`.
-  static String label(LifecycleState state) =>
-      '${state.name[0].toUpperCase()}${state.name.substring(1)}';
+  static String label(AppLocalizations l10n, LifecycleState state) =>
+      switch (state) {
+        LifecycleState.created => l10n.lifecycleCreated,
+        LifecycleState.configuring => l10n.lifecycleConfiguring,
+        LifecycleState.ready => l10n.lifecycleReady,
+        LifecycleState.running => l10n.lifecycleRunning,
+        LifecycleState.completed => l10n.lifecycleCompleted,
+      };
 
   static IconData _icon(LifecycleState state) => switch (state) {
     LifecycleState.running => Icons.timer,
@@ -32,6 +39,7 @@ class ContestStatusChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final text = label(AppLocalizations.of(context), state);
     final color = switch (state) {
       LifecycleState.running => scheme.tertiary,
       LifecycleState.ready => scheme.primary,
@@ -39,10 +47,10 @@ class ContestStatusChip extends StatelessWidget {
     };
     return StatusLabel(
       field: field,
-      value: label(state),
+      value: text,
       child: Chip(
         avatar: Icon(_icon(state), size: 18, color: color),
-        label: Text(label(state)),
+        label: Text(text),
         visualDensity: VisualDensity.compact,
         side: BorderSide(
           color: state == LifecycleState.running

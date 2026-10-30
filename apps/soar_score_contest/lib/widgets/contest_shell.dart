@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../l10n/app_localizations.dart';
 import '../router.dart';
 import '../services/workspace/workspace_control_target.dart';
 import 'app_window_title.dart';
@@ -66,7 +67,10 @@ class _ContestShellState extends State<ContestShell> {
     return ContestNameLoader(
       contestId: contestIdFor(path),
       builder: (context, contest) => AppWindowTitle(
-        title: windowTitleFor(contestName: contest?.name),
+        title: windowTitleFor(
+          AppLocalizations.of(context),
+          contestName: contest?.name,
+        ),
         child: Scaffold(
           body: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,

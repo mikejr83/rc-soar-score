@@ -7,13 +7,13 @@ import 'package:soar_score_ui/soar_score_ui.dart';
 import '../collapsible_areas_provider.dart';
 import '../services/collapsible_areas/collapsible_area.dart';
 import '../contest_draft_provider.dart';
+import '../l10n/app_localizations.dart';
 import '../app_sync_provider.dart';
 import '../router.dart';
 import 'new_contest/create_contest_entry.dart';
 import 'not_wired_up_dialog.dart';
 import 'shell_account_button.dart';
 import 'shell_destinations.dart';
-import 'shell_stub_page.dart';
 
 /// The shell's full-height navigation rail (Material 3).
 ///
@@ -35,8 +35,6 @@ class ShellRail extends StatefulWidget {
 
   /// The window width from which the rail can be expanded.
   static const double expandableWidth = 840;
-
-  static const String notBuiltDetail = ShellStubPage.notBuiltDetail;
 
   @override
   State<ShellRail> createState() => _ShellRailState();
@@ -70,9 +68,10 @@ class _ShellRailState extends State<ShellRail> {
     BuildContext context,
     bool hasDraft,
   ) {
+    final l10n = AppLocalizations.of(context);
     if (_isUnder(participantsPath)) {
       return (
-        label: 'Add participant',
+        label: l10n.shellAddParticipant,
         icon: Icons.add,
         key: const ValueKey('add-participant'),
         onPressed: () => context.go(newParticipantPath),
@@ -80,7 +79,7 @@ class _ShellRailState extends State<ShellRail> {
     }
     if (_isUnder(landingsPath)) {
       return (
-        label: 'New landing',
+        label: l10n.shellNewLanding,
         icon: Icons.add,
         key: const ValueKey('new-landing'),
         onPressed: () => context.go(newLandingPath),
@@ -88,14 +87,14 @@ class _ShellRailState extends State<ShellRail> {
     }
     if (widget.path == rolesPath) {
       return (
-        label: 'New role',
+        label: l10n.shellNewRole,
         icon: Icons.add,
         key: const ValueKey('new-role'),
         onPressed: () => context.go(newRolePath),
       );
     }
     return (
-      label: CreateContestEntry.label(hasDraft),
+      label: CreateContestEntry.label(l10n, hasDraft),
       icon: CreateContestEntry.icon(hasDraft),
       key: const ValueKey('create-contest'),
       onPressed: () => context.go(newContestPath),
@@ -112,6 +111,7 @@ class _ShellRailState extends State<ShellRail> {
   }
 
   Widget _buildRail(BuildContext context, bool hasDraft) {
+    final l10n = AppLocalizations.of(context);
     final destinations = shellDestinationsFor(
       widget.path,
       showSync: appSyncOf(context).available,
@@ -142,7 +142,7 @@ class _ShellRailState extends State<ShellRail> {
           if (canExpand)
             IconButton(
               key: const ValueKey('rail-toggle'),
-              tooltip: expanded ? 'Collapse navigation' : 'Expand navigation',
+              tooltip: expanded ? l10n.shellCollapseNav : l10n.shellExpandNav,
               icon: Icon(expanded ? Icons.menu_open : Icons.menu),
               onPressed: () => _toggleExpanded(expanded),
             ),
@@ -184,7 +184,7 @@ class _ShellRailState extends State<ShellRail> {
           NavigationRailDestination(
             icon: Icon(destination.icon),
             selectedIcon: Icon(destination.selectedIcon),
-            label: Text(destination.label),
+            label: Text(destination.label.of(l10n)),
           ),
       ],
       onDestinationSelected: (index) {
@@ -195,8 +195,8 @@ class _ShellRailState extends State<ShellRail> {
         } else {
           showNotWiredUpDialog(
             context,
-            destination.label,
-            detail: ShellRail.notBuiltDetail,
+            destination.label.of(l10n),
+            detail: l10n.shellNotBuiltDetail,
           );
         }
       },

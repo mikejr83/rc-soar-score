@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_contest/collapsible_areas_provider.dart';
 import 'package:soar_score_contest/services/collapsible_areas/collapsible_areas_controller.dart';
 import 'package:soar_score_ui_storage/soar_score_ui_storage.dart';
@@ -22,6 +23,7 @@ Future<void> _pump(
   final router = buildShellTestRouter();
   addTearDown(router.dispose);
   Widget app = MaterialApp.router(
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
     debugShowCheckedModeBanner: false,
     routerConfig: router,
   );

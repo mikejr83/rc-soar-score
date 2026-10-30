@@ -761,4 +761,177 @@ class AppLocalizationsEn extends AppLocalizations {
     });
     return '$_temp0';
   }
+
+  @override
+  String get shellNavContests => 'Contests';
+
+  @override
+  String get shellNavParticipants => 'Participants';
+
+  @override
+  String get shellNavRoles => 'Roles';
+
+  @override
+  String get shellNavLandings => 'Landings';
+
+  @override
+  String get shellNavWorkspace => 'Workspace';
+
+  @override
+  String get shellNavConfiguration => 'Configuration';
+
+  @override
+  String get shellNavMatrix => 'Matrix';
+
+  @override
+  String get shellNavScoring => 'Scoring';
+
+  @override
+  String get shellNavReports => 'Reports';
+
+  @override
+  String get shellNavSync => 'Sync';
+
+  @override
+  String get shellNavSettings => 'Settings';
+
+  @override
+  String get shellAddParticipant => 'Add participant';
+
+  @override
+  String get shellNewLanding => 'New landing';
+
+  @override
+  String get shellNewRole => 'New role';
+
+  @override
+  String get createContestLabel => 'Create contest';
+
+  @override
+  String get continueConfigurationLabel => 'Continue configuration';
+
+  @override
+  String get shellCollapseNav => 'Collapse navigation';
+
+  @override
+  String get shellExpandNav => 'Expand navigation';
+
+  @override
+  String get shellCrumbNew => 'New';
+
+  @override
+  String get shellCrumbEdit => 'Edit';
+
+  @override
+  String get shellCrumbNewContest => 'New contest';
+
+  @override
+  String get shellContestFallback => 'Contest';
+
+  @override
+  String get shellAccountSettingsAndSignIn => 'Settings and sign in';
+
+  @override
+  String get shellSignIn => 'Sign in';
+
+  @override
+  String get shellSignOut => 'Sign out';
+
+  @override
+  String get shellSignedIn => 'Signed in';
+
+  @override
+  String shellAccountTooltip(String name) {
+    return 'Account: $name';
+  }
+
+  @override
+  String get shellAccountMenu => 'Account menu';
+
+  @override
+  String get shellNotBuiltDetail =>
+      'This page has not been built yet. Please check back soon.';
+
+  @override
+  String get shellStatusPanelLabel => 'Contest status';
+
+  @override
+  String get shellStatusLifecycle => 'Status';
+
+  @override
+  String get shellStatusScoring => 'Participant scoring';
+
+  @override
+  String get shellStatusAdministration => 'Administration';
+
+  @override
+  String get shellScoringOpen => 'Open';
+
+  @override
+  String get shellScoringClosed => 'Closed';
+
+  @override
+  String get shellAdminLocked => 'Locked';
+
+  @override
+  String get shellAdminUnlocked => 'Unlocked';
+
+  @override
+  String shellStatusSemantics(String label, String value, String target) {
+    String _temp0 = intl.Intl.selectLogic(target, {
+      'lifecycle': 'Go to the status control',
+      'scoring': 'Go to the participant scoring control',
+      'administration': 'Go to the administration control',
+      'other': 'Go to the control',
+    });
+    return '$label: $value. $_temp0';
+  }
+
+  @override
+  String get lifecycleCreated => 'Created';
+
+  @override
+  String get lifecycleConfiguring => 'Configuring';
+
+  @override
+  String get lifecycleReady => 'Ready';
+
+  @override
+  String get lifecycleRunning => 'Running';
+
+  @override
+  String get lifecycleCompleted => 'Completed';
+
+  @override
+  String windowTitleContest(String app, String contest) {
+    return '$app: $contest';
+  }
+
+  @override
+  String get contestListHeading => 'Contests';
+
+  @override
+  String contestListCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count contests',
+      one: '1 contest',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String contestDateRange(String start, String end) {
+    return '$start to $end';
+  }
+
+  @override
+  String get contestsLoadFailed => 'Contests could not be loaded.';
+
+  @override
+  String get contestsLoading => 'Loading contests';
+
+  @override
+  String get contestsEmpty => 'No contests yet.';
 }
