@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/matrix/matrix_grid_model.dart';
 import '../../services/matrix/team_marker.dart';
 import 'matrix_colors.dart';
@@ -22,6 +24,8 @@ class PilotRowTile extends StatelessWidget {
     required this.group,
     required this.textScale,
     required this.onTap,
+    this.onMove,
+    this.moveBlock,
   });
 
   final GridSlot slot;
@@ -35,11 +39,18 @@ class PilotRowTile extends StatelessWidget {
   final double textScale;
   final VoidCallback onTap;
 
+  /// Moves this pilot; `null` when the grid cannot move pilots.
+  final VoidCallback? onMove;
+
+  /// Why moving is off for this contest, or `null` when it is on.
+  final String? moveBlock;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final colors = MatrixColors.of(context);
+    final l10n = AppLocalizations.of(context);
     final pilot = slot.pilot;
     final label =
         StringBuffer(
@@ -52,6 +63,7 @@ class PilotRowTile extends StatelessWidget {
           )
           ..write(showLane && slot.lane != null ? ', lane ${slot.lane}' : '')
           ..write(', round $round, group $group')
+          ..write(slot.moved ? ', ${l10n.matrixMovedLabel}' : '')
           ..write(selected ? ', highlighted' : '')
           ..write(matched ? ', search match' : '');
     final ring = selected
@@ -70,6 +82,10 @@ class PilotRowTile extends StatelessWidget {
       label: label.toString(),
       excludeSemantics: true,
       onTap: onTap,
+      customSemanticsActions: {
+        if (selected && onMove != null && moveBlock == null)
+          CustomSemanticsAction(label: l10n.matrixMoveMenu): onMove!,
+      },
       // The tile gets its own Material so its ink and highlight paint inside
       // the grid's scroll views. On the page's Material they paint outside
       // the clipped viewport and show as blue lines beside the grid.
@@ -132,6 +148,7 @@ class PilotRowTile extends StatelessWidget {
                     ),
                   ),
                 ),
+                if (slot.moved) _MovedLabel(label: l10n.matrixMovedLabel),
                 if (showLane && slot.lane != null)
                   Container(
                     constraints: const BoxConstraints(minHeight: 22),
@@ -146,20 +163,88 @@ class PilotRowTile extends StatelessWidget {
                       style: TextStyle(fontSize: 12),
                     ),
                   ),
-                if (selected)
-                  Tooltip(
-                    message: 'Pilot actions (move, late add) · later release',
-                    child: Icon(
-                      Icons.more_vert,
-                      size: 18,
-                      color: scheme.onSurface.withValues(alpha: .38),
-                    ),
-                  ),
+                if (selected && onMove != null)
+                  _PilotActions(onMove: onMove!, block: moveBlock),
               ],
             ),
           ),
         ),
       ),
+    );
+  }
+}
+
+/// The mark on a pilot whom a director moved: an icon and the word, so it
+/// never relies on colour.
+class _MovedLabel extends StatelessWidget {
+  const _MovedLabel({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Row(
+      key: const ValueKey('moved-label'),
+      mainAxisSize: MainAxisSize.min,
+      spacing: 2,
+      children: [
+        Icon(Icons.swap_horiz, size: 14, color: scheme.onSurfaceVariant),
+        Text(
+          label,
+          style: TextStyle(fontSize: 11, color: scheme.onSurfaceVariant),
+        ),
+      ],
+    );
+  }
+}
+
+/// The pilot actions menu on the highlighted pilot. Move is shown off, with
+/// the reason beside it, when the contest does not allow it.
+class _PilotActions extends StatelessWidget {
+  const _PilotActions({required this.onMove, required this.block});
+
+  final VoidCallback onMove;
+  final String? block;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    return PopupMenuButton<void>(
+      key: const ValueKey('pilot-actions'),
+      tooltip: l10n.matrixPilotActions,
+      padding: EdgeInsets.zero,
+      iconSize: 18,
+      style: IconButton.styleFrom(
+        minimumSize: const Size(28, 28),
+        padding: EdgeInsets.zero,
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      ),
+      icon: Icon(Icons.more_vert, color: theme.colorScheme.onSurface),
+      itemBuilder: (context) => [
+        PopupMenuItem<void>(
+          key: const ValueKey('pilot-action-move'),
+          enabled: block == null,
+          onTap: onMove,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(l10n.matrixMoveMenu),
+              if (block != null)
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 260),
+                  child: Text(
+                    block!,
+                    key: const ValueKey('pilot-action-move-reason'),
+                    style: theme.textTheme.bodySmall,
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
