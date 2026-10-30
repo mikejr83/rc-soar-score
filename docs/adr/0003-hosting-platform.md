@@ -12,10 +12,15 @@ Release 1 must be cheap to run and easy to move to a bigger platform later. The 
 
 Use a managed host for the first release:
 
-- The three Flutter web apps run on Cloudflare Pages.
+- The Flutter web apps run on Cloudflare's free Workers hosting. Cloudflare is connected to the GitHub account and builds and deploys on every push, so no deploy workflow in this repository is needed for them.
+- Cloudflare manages DNS for `rcsoarscore.com`.
 - The API container runs on Fly.io (chosen 2026-10-30, [#130](https://github.com/mikejr83/rc-soar-score/issues/130)); see [deploy-api-fly.md](../deploy-api-fly.md).
 - PostgreSQL runs on Neon's free tier to start.
-- The domain uses the root for the public site, with `app.`, `score.` and `api.` subdomains.
+- The domain uses the root for the public site, with `app.`, `score.` and `api.` subdomains:
+  - `rcsoarscore.com` and `www.rcsoarscore.com`: public project site
+  - `app.rcsoarscore.com`: contest management site (admin web app)
+  - `score.rcsoarscore.com`: participant self-scoring site
+  - `api.rcsoarscore.com`: API server (Fly.io)
 
 ## Portability rules
 

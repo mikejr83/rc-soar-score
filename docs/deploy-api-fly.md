@@ -7,6 +7,20 @@ are run by hand with `flyctl` (GitHub Actions is not used for this yet).
 The server migrates the database when it starts, so an empty Neon database is
 enough. No secret lives in the repository: `DATABASE_URL` is a Fly secret.
 
+## Where everything lives
+
+| Host name | What | Hosted on |
+| --- | --- | --- |
+| `rcsoarscore.com`, `www.rcsoarscore.com` | public project site | Cloudflare |
+| `app.rcsoarscore.com` | contest management site | Cloudflare |
+| `score.rcsoarscore.com` | participant self-scoring site | Cloudflare |
+| `api.rcsoarscore.com` | API server (this document) | Fly.io |
+
+DNS for all of them is managed in Cloudflare. The Flutter web apps use
+Cloudflare's free Workers hosting; Cloudflare is connected to the GitHub
+account and builds and deploys them on every push. Only the API is deployed by
+hand.
+
 ## Environment variables
 
 | Variable | Where | Value |
