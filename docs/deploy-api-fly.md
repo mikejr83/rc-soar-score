@@ -11,15 +11,16 @@ enough. No secret lives in the repository: `DATABASE_URL` is a Fly secret.
 
 | Host name | What | Hosted on |
 | --- | --- | --- |
-| `rcsoarscore.com`, `www.rcsoarscore.com` | public project site | Cloudflare |
+| `rcsoarscore.com`, `www.rcsoarscore.com` | public project site | Vercel (proxied by Cloudflare) |
 | `app.rcsoarscore.com` | contest management site | Cloudflare |
 | `score.rcsoarscore.com` | participant self-scoring site | Cloudflare |
 | `api.rcsoarscore.com` | API server (this document) | Fly.io |
 
-DNS for all of them is managed in Cloudflare. The Flutter web apps use
-Cloudflare's free Workers hosting; Cloudflare is connected to the GitHub
-account and builds and deploys them on every push. Only the API is deployed by
-hand.
+DNS for all of them is managed in Cloudflare. The public site is hosted on
+Vercel, a connected app on the repository that builds and deploys when `master`
+is updated; Cloudflare proxies it. The two Flutter web apps use Cloudflare's
+free Workers hosting; Cloudflare is connected to the GitHub account and builds
+and deploys them on every push. Only the API is deployed by hand.
 
 ## Environment variables
 
