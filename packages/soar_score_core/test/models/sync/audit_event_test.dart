@@ -87,6 +87,8 @@ void main() {
         'Deletion',
         'Restoration',
         'InstallationActivation',
+        'ConfigurationSaved',
+        'MatrixDrawn',
       ];
       expect(AuditAction.values, hasLength(texts.length));
       final base = make(contest: exampleId(1)).toJson();

@@ -2,6 +2,8 @@ import 'dart:math';
 
 import '../../enums/admin_lock.dart';
 import '../../enums/assignment_type.dart';
+import '../../enums/audit_action.dart';
+import '../../enums/audit_outcome.dart';
 import '../../enums/lifecycle_state.dart';
 import '../../errors/contest_state_error.dart';
 import '../../errors/entity_not_found_error.dart';
@@ -11,6 +13,7 @@ import '../../models/id.dart';
 import '../../models/matrix/matrix_assignment.dart';
 import '../contest_scores.dart';
 import '../../models/participants/contest_participation.dart';
+import '../../models/sync/audit_event.dart';
 import '../../repositories/already_stored_error.dart';
 import '../../repositories/finalized_draw.dart';
 import '../../repositories/mutation_metadata.dart';
@@ -309,9 +312,27 @@ class MatrixService {
       actorId: actorId,
       now: now,
     );
+    final revision = finalized.draw.revision;
+    final audit = AuditEvent(
+      id: _newId(),
+      entityType: revision.entityType,
+      entityId: revision.id,
+      contestId: contestId,
+      action: AuditAction.matrixDrawn,
+      actorId: metadata.actorId,
+      authority: metadata.authority,
+      installationId: metadata.sourceInstallationId,
+      device: metadata.sourceDevice,
+      resultingRevision: revision.revisionNumber,
+      serverTimestamp: now,
+      clientTimestamp: metadata.clientTime,
+      reason: revision.reason,
+      outcome: AuditOutcome.success,
+    );
     await repository.matrixRevisionRepository.appendFinalizedDraw(
       finalized,
       metadata: metadata,
+      audit: audit,
     );
     return current(contestId);
   }

@@ -112,6 +112,8 @@ const _$AuditActionEnumMap = {
   AuditAction.deletion: 'Deletion',
   AuditAction.restoration: 'Restoration',
   AuditAction.installationActivation: 'InstallationActivation',
+  AuditAction.configurationSaved: 'ConfigurationSaved',
+  AuditAction.matrixDrawn: 'MatrixDrawn',
 };
 
 const _$AuthorityEnumMap = {

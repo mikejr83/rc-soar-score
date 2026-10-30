@@ -72,8 +72,11 @@ class StubRepository implements core.Repository {
   final StubConfigurationRevisionRepository configurations;
 
   @override
-  core.AuditEventRepository get auditEventRepository =>
-      StubAuditEventRepository(_contestRepository as StubContestRepository);
+  core.AuditEventRepository get auditEventRepository => StubAuditEventRepository(
+    _contestRepository as StubContestRepository,
+    configurations,
+    matrixRevisions,
+  );
 
   @override
   core.ContestConfigurationRevisionRepository

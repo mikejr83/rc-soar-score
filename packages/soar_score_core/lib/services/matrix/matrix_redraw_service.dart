@@ -1,5 +1,7 @@
 import '../../enums/admin_lock.dart';
 import '../../enums/assignment_type.dart';
+import '../../enums/audit_action.dart';
+import '../../enums/audit_outcome.dart';
 import '../../enums/draw_mode.dart';
 import '../../enums/lifecycle_state.dart';
 import '../../enums/round_status.dart';
@@ -16,6 +18,7 @@ import '../../models/matrix/matrix_assignment.dart';
 import '../../models/matrix/matrix_revision.dart';
 import '../../models/matrix/round.dart';
 import '../../models/participants/contest_participation.dart';
+import '../../models/sync/audit_event.dart';
 import '../../repositories/already_stored_error.dart';
 import '../../repositories/finalized_redraw.dart';
 import '../../repositories/mutation_metadata.dart';
@@ -160,6 +163,24 @@ class MatrixRedrawService {
     final newByOrdinal = {
       for (final round in built.draw.rounds) round.ordinal: round,
     };
+    final revision = built.draw.revision;
+    final audit = AuditEvent(
+      id: _newId(),
+      entityType: revision.entityType,
+      entityId: revision.id,
+      contestId: contestId,
+      action: AuditAction.matrixDrawn,
+      actorId: metadata.actorId,
+      authority: metadata.authority,
+      installationId: metadata.sourceInstallationId,
+      device: metadata.sourceDevice,
+      baseRevision: prepared.latest.revisionNumber,
+      resultingRevision: revision.revisionNumber,
+      serverTimestamp: _clock(),
+      clientTimestamp: metadata.clientTime,
+      reason: revision.reason,
+      outcome: AuditOutcome.success,
+    );
     await repository.matrixRevisionRepository.appendRedraw(
       FinalizedRedraw(
         draw: built.draw,
@@ -173,6 +194,7 @@ class MatrixRedrawService {
       ),
       expectedBaseRevision: base,
       metadata: metadata,
+      audit: audit,
     );
     return MatrixService(repository).current(contestId);
   }

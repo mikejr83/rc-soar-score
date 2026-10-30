@@ -453,6 +453,57 @@ void main() {
     });
   });
 
+  group('audit events', () {
+    Future<List<Map<String, Object?>>> events() async {
+      final response = await api.send(
+        'GET',
+        '/contests/$_contestId/audit-events?action=MatrixDrawn',
+      );
+      expect(response.statusCode, 200);
+      return [
+        for (final e in (await api.json(response))['audit_events']! as List)
+          e as Map<String, Object?>,
+      ];
+    }
+
+    test('a redraw leaves a MatrixDrawn event for the new revision', () async {
+      await drawn();
+      final before = await events();
+      expect(before, hasLength(1));
+      expect(before.single['reason'], 'initial draw');
+
+      final body = await api.json(await redraw(firstRound: 4));
+      final revisionId = (body['revision'] as Map)['id'] as String;
+
+      final listed = await events();
+      expect(listed, hasLength(2));
+      expect(listed.first['entity_id'], revisionId);
+      expect(listed.first['entity_type'], 'MatrixRevision');
+      expect(listed.first['resulting_revision'], 2);
+      expect(listed.first['base_revision'], 1);
+      expect(listed.first['reason'], 'rounds added');
+      expect(listed.first['actor_id'], _owner.value);
+    });
+
+    test('a preview stores no event', () async {
+      await drawn();
+
+      await redraw(firstRound: 4, preview: true);
+
+      expect(await events(), hasLength(1));
+    });
+
+    test('a refused redraw stores no event', () async {
+      await drawn();
+
+      final refused = await redraw(firstRound: 2, base: 9);
+      expect(refused.statusCode, 409);
+      expect((await api.errorOf(refused))['code'], 'stale_matrix');
+
+      expect(await events(), hasLength(1));
+    });
+  });
+
   group('drawing without storing', () {
     test('answers the draw its confirm would store', () async {
       await drawn();

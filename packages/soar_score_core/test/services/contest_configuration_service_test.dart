@@ -287,6 +287,54 @@ void main() {
     });
   });
 
+  group('audit events', () {
+    test('a save stores a ConfigurationSaved event for the revision', () async {
+      final saved = await save(input());
+
+      expect(revisions.audits, hasLength(1));
+      final event = revisions.audits.single;
+      expect(event.action, AuditAction.configurationSaved);
+      expect(event.entityType, 'ContestConfigurationRevision');
+      expect(event.entityId, saved.revision.id);
+      expect(event.contestId, contestId);
+      expect(event.actorId, owner);
+      expect(event.authority, Authority.director);
+      expect(event.baseRevision, isNull);
+      expect(event.resultingRevision, 1);
+      expect(
+        event.reason,
+        'revision 1 of ${SystemDisciplineProfiles.f5j.profile.name}',
+      );
+      expect(event.serverTimestamp, now);
+      expect(event.outcome, AuditOutcome.success);
+    });
+
+    test('a second save records the previous revision number', () async {
+      await save(input());
+      await save(input(base: 1, discipline: {'working_time': 480}), key: 'm2');
+
+      final second = revisions.audits.last;
+      expect(second.baseRevision, 1);
+      expect(second.resultingRevision, 2);
+    });
+
+    test('a refused save stores no event', () async {
+      await save(input());
+
+      await expectLater(
+        save(input(base: 0), key: 'm2'),
+        throwsA(isA<StaleRevisionError>()),
+      );
+      await seedContest(lock: AdminLock.locked);
+      await expectLater(
+        save(input(base: 1), key: 'm3'),
+        throwsA(isA<ContestStateError>()),
+      );
+
+      expect(revisions.audits, hasLength(1));
+    });
+  });
+
   group('reads', () {
     test('latest and revisions need a stored configuration', () async {
       await expectLater(

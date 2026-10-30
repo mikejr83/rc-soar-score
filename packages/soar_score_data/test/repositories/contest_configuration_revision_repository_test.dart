@@ -57,6 +57,65 @@ void _tests(Backend backend) {
       );
     });
 
+    core.AuditEvent audit(core.Id revisionId) => core.AuditEvent(
+      id: core.Id.create(),
+      entityType: 'ContestConfigurationRevision',
+      entityId: revisionId,
+      contestId: example.contestId,
+      action: core.AuditAction.configurationSaved,
+      authority: core.Authority.director,
+      serverTimestamp: DateTime.utc(2026, 5, 1, 12),
+    );
+
+    test('appendWithContest stores the audit event in the same '
+        'transaction', () async {
+      final next = revision(3);
+      final contest = (await Repository(inst.db).contestRepository.findById(
+        example.contestId,
+      ))!;
+
+      final stored = await repo.appendWithContest(
+        next,
+        contest: contest,
+        metadata: metadata(),
+        audit: audit(next.id),
+      );
+
+      expect(stored.revision, next);
+      final events = await Repository(inst.db).auditEventRepository
+          .listForContest(
+            example.contestId,
+            action: core.AuditAction.configurationSaved,
+          );
+      expect(events, hasLength(1));
+      expect(events.single.entityId, next.id);
+    });
+
+    test('appendWithContest with a stale contest stores no event', () async {
+      final next = revision(3);
+      final stale = (await Repository(inst.db).contestRepository.findById(
+        example.contestId,
+      ))!;
+
+      await expectLater(
+        repo.appendWithContest(
+          next,
+          contest: core.Contest.fromJson({
+            ...stale.toJson(),
+            'revision': stale.revision + 5,
+          }),
+          metadata: metadata(),
+          audit: audit(next.id),
+        ),
+        throwsA(isA<core.StaleRevisionError>()),
+      );
+      expect(await Repository(inst.db).auditEventRepository.listForContest(
+        example.contestId,
+        action: core.AuditAction.configurationSaved,
+      ), isEmpty);
+      expect(await repo.findById(next.id), isNull);
+    });
+
     test('listForContest returns the revisions oldest first', () async {
       final third = await repo.append(revision(4), metadata: metadata());
       final first = await repo.append(revision(1), metadata: metadata());

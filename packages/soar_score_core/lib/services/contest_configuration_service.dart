@@ -1,3 +1,5 @@
+import '../enums/audit_action.dart';
+import '../enums/audit_outcome.dart';
 import '../enums/config_field_type.dart';
 import '../enums/profile_status.dart';
 import '../errors/contest_state_error.dart';
@@ -8,6 +10,7 @@ import '../models/contest/core_options.dart';
 import '../models/contest/saved_configuration.dart';
 import '../models/discipline/discipline_profile_with_rules.dart';
 import '../models/id.dart';
+import '../models/sync/audit_event.dart';
 import '../repositories/mutation_metadata.dart';
 import '../repositories/repository.dart';
 import '../repositories/stale_revision_error.dart';
@@ -125,10 +128,29 @@ class ContestConfigurationService {
       revision,
       now,
     );
+    final audit = AuditEvent(
+      id: _newId(),
+      entityType: revision.entityType,
+      entityId: revision.id,
+      contestId: contestId,
+      action: AuditAction.configurationSaved,
+      actorId: metadata.actorId,
+      authority: metadata.authority,
+      installationId: metadata.sourceInstallationId,
+      device: metadata.sourceDevice,
+      baseRevision: previous?.revisionNumber,
+      resultingRevision: revision.revisionNumber,
+      serverTimestamp: now,
+      clientTimestamp: metadata.clientTime,
+      reason:
+          'revision ${revision.revisionNumber} of ${profile.profile.name}',
+      outcome: AuditOutcome.success,
+    );
     return revisions.appendWithContest(
       revision,
       contest: changed,
       metadata: metadata,
+      audit: audit,
     );
   }
 

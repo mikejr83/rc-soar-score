@@ -392,6 +392,47 @@ void main() {
     });
   });
 
+  group('audit events', () {
+    Future<List<Map<String, Object?>>> events() async {
+      final response = await api.send(
+        'GET',
+        '/contests/$_contestId/audit-events?action=MatrixDrawn',
+      );
+      expect(response.statusCode, 200);
+      return [
+        for (final e in (await api.json(response))['audit_events']! as List)
+          e as Map<String, Object?>,
+      ];
+    }
+
+    test('a draw leaves a MatrixDrawn event for the revision', () async {
+      await createContest();
+      await configure();
+      await addPilots(4);
+
+      await draw(seed: 7);
+
+      final listed = await events();
+      expect(listed, hasLength(1));
+      expect(listed.single['entity_id'], _revisionId);
+      expect(listed.single['entity_type'], 'MatrixRevision');
+      expect(listed.single['resulting_revision'], 1);
+      expect(listed.single['base_revision'], isNull);
+      expect(listed.single['reason'], 'initial draw');
+      expect(listed.single['actor_id'], _owner.value);
+    });
+
+    test('a refused draw leaves no event', () async {
+      await createContest();
+      await configure();
+
+      // No pilots: the draw is refused before anything is stored.
+      expect((await draw()).statusCode, 400);
+
+      expect(await events(), isEmpty);
+    });
+  });
+
   group('contest-scoped authorization', () {
     late TwoAccountApi two;
 

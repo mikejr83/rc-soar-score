@@ -11,6 +11,9 @@ class StubConfigurationRevisionRepository
   final StubContestRepository contests;
   final List<ContestConfigurationRevision> stored = [];
 
+  /// The audit events saved with a configuration, oldest first.
+  final List<AuditEvent> audits = [];
+
   @override
   Future<ContestConfigurationRevision?> findById(Id id) async =>
       stored.where((r) => r.id == id).firstOrNull;
@@ -40,12 +43,14 @@ class StubConfigurationRevisionRepository
     ContestConfigurationRevision revision, {
     required Contest contest,
     required MutationMetadata metadata,
+    AuditEvent? audit,
   }) async {
     final savedContest = await contests.save(
       contest,
       metadata: metadata.forPart(contest.id.value),
     );
     stored.add(revision);
+    if (audit != null) audits.add(audit);
     return SavedConfiguration(revision: revision, contest: savedContest);
   }
 }

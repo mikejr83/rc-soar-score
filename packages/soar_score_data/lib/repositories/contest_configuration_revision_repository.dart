@@ -1,6 +1,7 @@
 import 'package:soar_score_core/soar_score_core.dart' as core;
 
 import '../database.dart';
+import 'audit_event_repository.dart';
 import 'drift_repository.dart';
 
 /// Contest configuration revisions in [SoarScoreDatabase]; append-only.
@@ -10,6 +11,11 @@ class ContestConfigurationRevisionRepository extends DriftRepository
 
   late final _store = store<core.ContestConfigurationRevision>(
     'ContestConfigurationRevision',
+  );
+
+  late final AuditEventRepository _audits = AuditEventRepository(
+    db,
+    stores: stores,
   );
 
   @override
@@ -41,12 +47,14 @@ class ContestConfigurationRevisionRepository extends DriftRepository
     core.ContestConfigurationRevision revision, {
     required core.Contest contest,
     required core.MutationMetadata metadata,
+    core.AuditEvent? audit,
   }) => unitOfWork.run((context) async {
     final storedRevision = await context.append(revision, metadata: metadata);
     final storedContest = await context.save(
       contest,
       metadata: metadata.forPart(contest.id.value),
     );
+    if (audit != null) await _audits.append(audit);
     return core.SavedConfiguration(
       revision: storedRevision,
       contest: storedContest,

@@ -215,6 +215,46 @@ void main() {
     });
   });
 
+  group('audit events', () {
+    Future<List<Map<String, Object?>>> events({String? action}) async {
+      final query = action == null ? '' : '?action=$action';
+      final response = await send(
+        'GET',
+        '/contests/$_contestId/audit-events$query',
+      );
+      expect(response.statusCode, 200);
+      return [
+        for (final e in (await json(response))['audit_events']! as List)
+          e as Map<String, Object?>,
+      ];
+    }
+
+    test('a save leaves a ConfigurationSaved event, newest first', () async {
+      await save(_body());
+      await save(_body(base: 1, discipline: {'working_time': 480}));
+
+      final listed = await events(action: 'ConfigurationSaved');
+
+      expect(listed, hasLength(2));
+      expect(listed.first['entity_id'], isNotNull);
+      expect(listed.first['entity_type'], 'ContestConfigurationRevision');
+      expect(listed.first['resulting_revision'], 2);
+      expect(listed.first['base_revision'], 1);
+      expect(listed.first['actor_id'], _owner.value);
+      expect(listed.last['base_revision'], isNull);
+      expect(listed.last['resulting_revision'], 1);
+    });
+
+    test('a refused save leaves no event', () async {
+      await save(_body());
+
+      final response = await save(_body());
+      expect(response.statusCode, 409);
+
+      expect(await events(action: 'ConfigurationSaved'), hasLength(1));
+    });
+  });
+
   group('contest-scoped authorization', () {
     late TwoAccountApi two;
 

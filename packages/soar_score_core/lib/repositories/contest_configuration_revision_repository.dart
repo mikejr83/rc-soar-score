@@ -2,6 +2,7 @@ import '../models/contest/contest.dart';
 import '../models/contest/contest_configuration_revision.dart';
 import '../models/contest/saved_configuration.dart';
 import '../models/id.dart';
+import '../models/sync/audit_event.dart';
 import 'mutation_metadata.dart';
 
 /// Abstract persistence contract for [ContestConfigurationRevision]s.
@@ -36,9 +37,13 @@ abstract interface class ContestConfigurationRevisionRepository {
   /// an older revision, which also guards against two requests adding the
   /// same revision number. Throws an `AlreadyStoredError` if a revision with
   /// the same id is stored. Two mutations are recorded.
+  ///
+  /// An [audit] event is stored in the same transaction as the revision and
+  /// the contest, so either all are kept or none is.
   Future<SavedConfiguration> appendWithContest(
     ContestConfigurationRevision revision, {
     required Contest contest,
     required MutationMetadata metadata,
+    AuditEvent? audit,
   });
 }

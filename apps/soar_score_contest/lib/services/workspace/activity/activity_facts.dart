@@ -6,8 +6,8 @@ import 'activity_entry.dart';
 
 /// The newest audit events of a contest, turned into [ActivityEntry] lines.
 ///
-/// Only state transitions and successful publication events are written
-/// today, so only those are listed; other events are skipped.
+/// The events the workspace lists are state transitions, configuration saves
+/// and matrix draws, plus successful publications; other events are skipped.
 class ActivityFacts extends Equatable {
   const ActivityFacts({this.entries = const [], this.failed = false});
 
@@ -55,6 +55,8 @@ class ActivityFacts extends Equatable {
     }
     return switch (event.action) {
       AuditAction.publicationAttempt => ActivityKind.publication,
+      AuditAction.configurationSaved => ActivityKind.configurationSaved,
+      AuditAction.matrixDrawn => ActivityKind.matrixDrawn,
       AuditAction.stateTransition => switch (event.transition) {
         ContestAction.complete => ActivityKind.complete,
         ContestAction.openScoring => ActivityKind.openScoring,

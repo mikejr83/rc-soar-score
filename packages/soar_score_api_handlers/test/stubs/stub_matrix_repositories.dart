@@ -29,6 +29,9 @@ class StubMatrixRevisionRepository implements MatrixRevisionRepository {
   final Set<Id> drawnContests = {};
   final List<MatrixRevision> revisions = [];
 
+  /// The audit events stored with a draw, oldest first.
+  final List<AuditEvent> audits = [];
+
   @override
   Future<MatrixRevision?> findById(Id id) async =>
       revisions.where((r) => r.id == id).firstOrNull;
@@ -64,6 +67,7 @@ class StubMatrixRevisionRepository implements MatrixRevisionRepository {
   Future<FinalizedDraw> appendFinalizedDraw(
     FinalizedDraw finalized, {
     required MutationMetadata metadata,
+    AuditEvent? audit,
   }) async {
     // The contest goes first: a stale one stores nothing.
     final contest = await _contests.save(
@@ -82,6 +86,7 @@ class StubMatrixRevisionRepository implements MatrixRevisionRepository {
         metadata: metadata.forPart(participation.id.value),
       );
     }
+    if (audit != null) audits.add(audit);
     return FinalizedDraw(
       draw: draw,
       placeholders: finalized.placeholders,
@@ -95,6 +100,7 @@ class StubMatrixRevisionRepository implements MatrixRevisionRepository {
     FinalizedRedraw finalized, {
     required int expectedBaseRevision,
     required MutationMetadata metadata,
+    AuditEvent? audit,
   }) async {
     // Re-checked as the real repository re-checks it in its transaction.
     final latest = await latestForContest(finalized.draw.revision.contestId);
@@ -117,6 +123,7 @@ class StubMatrixRevisionRepository implements MatrixRevisionRepository {
     for (final participation in finalized.numberedParticipations) {
       await _participations.save(participation, metadata: metadata);
     }
+    if (audit != null) audits.add(audit);
     return finalized;
   }
 

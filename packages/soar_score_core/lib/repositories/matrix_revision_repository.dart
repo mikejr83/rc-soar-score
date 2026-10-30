@@ -1,6 +1,7 @@
 import '../models/id.dart';
 import '../models/matrix/matrix_draw.dart';
 import '../models/matrix/matrix_revision.dart';
+import '../models/sync/audit_event.dart';
 import 'finalized_draw.dart';
 import 'finalized_redraw.dart';
 import 'mutation_metadata.dart';
@@ -38,9 +39,13 @@ abstract interface class MatrixRevisionRepository {
   /// contest or a participation changed since it was read. Each stored entity
   /// gets its own mutation, derived from [metadata] with
   /// `MutationMetadata.forPart`.
+  ///
+  /// An [audit] event is stored in the same transaction as the draw, so
+  /// either both are kept or neither is.
   Future<FinalizedDraw> appendFinalizedDraw(
     FinalizedDraw finalized, {
     required MutationMetadata metadata,
+    AuditEvent? audit,
   });
 
   /// Stores [finalized], a later revision: the replaced rounds first (so
@@ -58,9 +63,13 @@ abstract interface class MatrixRevisionRepository {
   /// round or a participation changed since it was read, unless the failure
   /// was of the just-rejected kind. Each stored entity gets its own mutation,
   /// derived from [metadata] with `MutationMetadata.forPart`.
+  ///
+  /// An [audit] event is stored in the same transaction as the redraw, so
+  /// either both are kept or neither is.
   Future<FinalizedRedraw> appendRedraw(
     FinalizedRedraw finalized, {
     required int expectedBaseRevision,
     required MutationMetadata metadata,
+    AuditEvent? audit,
   });
 }
