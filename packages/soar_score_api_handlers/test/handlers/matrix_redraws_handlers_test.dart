@@ -23,6 +23,7 @@ void main() {
       drawnContest(api, core: core);
 
   var count = 0;
+
   /// [base] defaults to the contest's latest revision, like a client that
   /// draws from the matrix it shows.
   Future<Response> redraw({
@@ -149,13 +150,13 @@ void main() {
     });
 
     test('draws a pilot who joined after the first draw', () async {
-      await drawn();
+      await drawnContest(api, pilots: 5);
       await api.send(
         'POST',
         '/participants',
         body: {
-          'id': matrixTestProfileId(7),
-          'first_name': 'P7',
+          'id': matrixTestProfileId(6),
+          'first_name': 'P6',
           'last_name': 'X',
         },
       );
@@ -163,8 +164,8 @@ void main() {
         'POST',
         '/contests/$_contestId/participations',
         body: {
-          'id': _participationId(7),
-          'participant_profile_id': matrixTestProfileId(7),
+          'id': _participationId(6),
+          'participant_profile_id': matrixTestProfileId(6),
           'role_id': SystemRoles.pilotId.value,
         },
       );
@@ -172,16 +173,16 @@ void main() {
       final body = await api.json(await redraw(firstRound: 4));
 
       final seven = (body['assignments'] as List).cast<Map>().where(
-        (a) => a['contest_participation_id'] == _participationId(7),
+        (a) => a['contest_participation_id'] == _participationId(6),
       );
       expect(seven, hasLength(2));
       expect(
         api
             .repository
             .participations
-            .participations[Id.parse(_participationId(7))]!
+            .participations[Id.parse(_participationId(6))]!
             .participantNumber,
-        7,
+        6,
       );
     });
 
@@ -458,7 +459,9 @@ void main() {
       await drawn();
       final before = await matrix();
 
-      final preview = await api.json(await redraw(firstRound: 4, preview: true));
+      final preview = await api.json(
+        await redraw(firstRound: 4, preview: true),
+      );
 
       expect(preview['seed'], isA<int>());
       expect(preview['candidate_fairness'], isA<Map>());
@@ -472,7 +475,9 @@ void main() {
 
     test('a confirm with its seed reproduces the previewed fairness', () async {
       await drawn();
-      final preview = await api.json(await redraw(firstRound: 4, preview: true));
+      final preview = await api.json(
+        await redraw(firstRound: 4, preview: true),
+      );
       final seed = preview['seed'] as int;
 
       final body = await api.json(
@@ -482,7 +487,8 @@ void main() {
       expect(
         (body['revision'] as Map)['fairness_summary'],
         preview['candidate_fairness'],
-        reason: 'confirming the previewed seed must store the fairness the '
+        reason:
+            'confirming the previewed seed must store the fairness the '
             'preview reported',
       );
     });

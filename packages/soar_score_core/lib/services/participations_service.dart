@@ -13,6 +13,7 @@ import '../repositories/already_stored_error.dart';
 import '../repositories/mutation_metadata.dart';
 import '../repositories/repository.dart';
 import '../repositories/stale_revision_error.dart';
+import 'matrix/late_add_capacity.dart';
 
 /// The contest participation operations of the API: who takes part in a
 /// contest, in which role.
@@ -42,7 +43,9 @@ class ParticipationsService {
   /// Completed contest takes no new participants ([ContestStateError]). The
   /// role must be visible to the director and not archived, and its name and
   /// type are copied onto the participation. The participant number stays
-  /// empty: it is allocated at the first draw.
+  /// empty: it is allocated at the first draw. In a drawn contest a pilot is
+  /// refused (`no_room_in_round`) while a round that is not fully scored has no
+  /// group with room, so nobody joins without a seat.
   Future<ContestParticipation> add(
     Id contestId,
     Id ownerAccountId, {
@@ -87,6 +90,9 @@ class ParticipationsService {
         entityId: existing.first.id,
       );
     }
+    if (role.type == RoleType.pilot) {
+      await LateAddCapacity(repository).requireRoomForPilot(contestId);
+    }
     return participations.save(
       ContestParticipation(
         id: id,
@@ -109,7 +115,9 @@ class ParticipationsService {
   /// their matrix rows: a pilot with no scores has them removed (the draw
   /// then needs redoing, and the answer says how many went), and one with a
   /// score is refused with a [ContestStateError] (`has_scores`; they retire
-  /// instead). Throws a [StaleRevisionError] when [baseRevision] is not the
+  /// instead). A non-flier who becomes a pilot in a drawn contest needs room
+  /// in every round that is not fully scored (`no_room_in_round`). Throws a
+  /// [StaleRevisionError] when [baseRevision] is not the
   /// stored revision, and an [ArgumentError] when the result breaks a
   /// participation rule (a non-pilot with a classification or a retirement
   /// round).
@@ -142,6 +150,13 @@ class ParticipationsService {
         expectedRevision: baseRevision,
         storedRevision: stored.revision,
       );
+    }
+    if (role != null &&
+        stored.roleType != RoleType.pilot &&
+        role.type == RoleType.pilot &&
+        !stored.isRetired) {
+      await LateAddCapacity(repository)
+          .requireRoomForPilot(contestId, participationId: id);
     }
     final updated = ContestParticipation(
       id: stored.id,

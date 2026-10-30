@@ -178,23 +178,7 @@ Future<void> runSetupPhase(Journey journey, JourneyContext data) async {
       await pumpUntilFound(tester, _key('participants-count'));
       final newcomer = data.roster.last;
       final name = '${newcomer.first} ${newcomer.last}';
-      // Give the web input time to attach after the tap, or the first
-      // characters are lost.
-      final search = find.descendant(
-        of: _key('participant-search'),
-        matching: find.byType(TextField),
-      );
-      await tester.tap(search);
-      await tester.pump(const Duration(milliseconds: 500));
-      await tester.enterText(search, newcomer.last);
-      await tester.pump(const Duration(milliseconds: 300));
-      final result = find.widgetWithText(ListTile, name);
-      await pumpUntilFound(tester, result);
-      // Tap the menu row itself: scrolling to it first closes the menu.
-      await tester.tap(result);
-      await tester.pump(const Duration(milliseconds: 300));
-      await pumpUntilFound(tester, _key('add-participant-confirm'));
-      await tapVisible(tester, _key('add-participant-confirm'));
+      await _addFromSearch(tester, newcomer);
 
       // No scores yet, so the director may redraw the matrix with them.
       await pumpUntilFound(tester, find.text('Redraw the matrix with $name?'));
@@ -203,6 +187,30 @@ Future<void> runSetupPhase(Journey journey, JourneyContext data) async {
       await tapVisible(tester, _key('redraw-keep'));
       await pumpUntilFound(tester, _key('banner-placement'));
       expect(find.text(name), findsWidgets);
+    },
+  );
+  await journey.step(
+    'Participants: a pilot is refused while every group of a round is full',
+    () async {
+      await goToMainPage(tester);
+      // The demo contest flies 14 pilots in 3 groups, so each group holds 5.
+      // The previous step took the last open seat of every round.
+      await openContest(tester, 'Front Range F5J Open');
+      await tapRail(tester, 'Participants');
+      await pumpUntilFound(tester, _key('participants-count'));
+      final blocked = data.roster[data.rosterPilots];
+      final name = '${blocked.first} ${blocked.last}';
+      await _addFromSearch(tester, blocked);
+
+      await pumpUntilFound(tester, _key('banner-add-failed'));
+      expect(find.text('Couldn’t add $name'), findsOneWidget);
+      expect(find.textContaining('Round 1 has no group'), findsOneWidget);
+      expect(find.textContaining('groups per round'), findsOneWidget);
+      expect(find.textContaining('Nothing was added'), findsOneWidget);
+      // Nothing was saved: the count is still the 14 demo pilots and the one
+      // added before, and there is no offer to redraw or place them.
+      expect(find.textContaining('15 pilots'), findsWidgets);
+      expect(find.text('Redraw the matrix with $name?'), findsNothing);
     },
   );
   await journey.step(
@@ -560,4 +568,27 @@ Future<void> _landingsManager(WidgetTester tester) async {
     await pumpUntilGone(tester, _landingRow(name));
   }
   expect(_landingRow('F5J Standard Landing Table'), findsOneWidget);
+}
+
+/// Picks [person] from the participants page's search menu and confirms the
+/// add dialog.
+Future<void> _addFromSearch(WidgetTester tester, Person person) async {
+  final name = '${person.first} ${person.last}';
+  // Give the web input time to attach after the tap, or the first
+  // characters are lost.
+  final search = find.descendant(
+    of: _key('participant-search'),
+    matching: find.byType(TextField),
+  );
+  await tester.tap(search);
+  await tester.pump(const Duration(milliseconds: 500));
+  await tester.enterText(search, person.last);
+  await tester.pump(const Duration(milliseconds: 300));
+  final result = find.widgetWithText(ListTile, name);
+  await pumpUntilFound(tester, result);
+  // Tap the menu row itself: scrolling to it first closes the menu.
+  await tester.tap(result);
+  await tester.pump(const Duration(milliseconds: 300));
+  await pumpUntilFound(tester, _key('add-participant-confirm'));
+  await tapVisible(tester, _key('add-participant-confirm'));
 }

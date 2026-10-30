@@ -124,6 +124,30 @@ void main() {
       expect(find.text('Couldn’t add Pia Ward'), findsNothing);
     });
 
+    testWidgets('an add refused for lack of room says what to change', (
+      tester,
+    ) async {
+      final server =
+          ParticipantsServer(state: LifecycleState.running, drawn: true)
+            ..addFailure = 409
+            ..addFailureCode = 'no_room_in_round'
+            ..addFailureMessage =
+                'Round 2 has no group that can take another pilot (2 full at 4 '
+                'pilots). Raise the number of groups per round and redraw the '
+                'rounds that have no scores on the Matrix page, then add the '
+                'pilot.';
+      await pumpParticipantsPage(tester, server);
+
+      await _searchAndPick(tester, 'pia', 'Pia Ward');
+      await tester.tap(find.byKey(const ValueKey('add-participant-confirm')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Couldn’t add Pia Ward'), findsOneWidget);
+      expect(find.textContaining('Raise the number of groups'), findsOneWidget);
+      expect(find.textContaining('Nothing was added'), findsOneWidget);
+      expect(find.text('Pia Ward added to the contest.'), findsNothing);
+    });
+
     testWidgets('a locked administration cannot add', (tester) async {
       await pumpParticipantsPage(
         tester,
