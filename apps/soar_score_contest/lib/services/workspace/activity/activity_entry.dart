@@ -16,10 +16,14 @@ enum ActivityKind {
 /// the acting account did it, and when.
 class ActivityEntry extends Equatable {
   const ActivityEntry({
+    required this.id,
     required this.kind,
     required this.byYou,
     required this.at,
   });
+
+  /// The audit event's id, which keeps a row's identity across reloads.
+  final String id;
 
   final ActivityKind kind;
 
@@ -31,5 +35,5 @@ class ActivityEntry extends Equatable {
   final DateTime at;
 
   @override
-  List<Object?> get props => [kind, byYou, at];
+  List<Object?> get props => [id, kind, byYou, at];
 }

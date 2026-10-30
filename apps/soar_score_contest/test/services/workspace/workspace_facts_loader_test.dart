@@ -272,6 +272,25 @@ void main() {
       expect(facts.activity.entries.every((e) => e.byYou), isTrue);
     });
 
+    for (final action in ['ConfigurationSaved', 'MatrixDrawn']) {
+      test('a failed $action read fails the activity but keeps the transition '
+          'facts', () async {
+        final facts = await _load(
+          contest: matrixContest(
+            state: LifecycleState.running,
+            lock: AdminLock.locked,
+          ),
+          auditEvents: [event('lock', '2026-10-18T15:00:00.000Z')],
+          failingAuditAction: action,
+          actingAccountId: director,
+        );
+
+        expect(facts.lockedAt, DateTime.utc(2026, 10, 18, 15));
+        expect(facts.activity, ActivityFacts.unavailable);
+        expect(facts.unavailable, isEmpty);
+      });
+    }
+
     test('a failed publication read keeps the transition facts and fails the '
         'activity', () async {
       final facts = await _load(

@@ -80,8 +80,7 @@ class RecentActivityCard extends StatelessWidget {
             else if (entries.isEmpty)
               _note(context, 'activity-empty', l10n.activityEmpty)
             else ...[
-              for (var i = 0; i < entries.length; i++)
-                _row(context, entries[i], i),
+              for (final entry in entries) _row(context, entry),
               _note(
                 context,
                 'activity-view-all-note',
@@ -94,7 +93,7 @@ class RecentActivityCard extends StatelessWidget {
     );
   }
 
-  Widget _row(BuildContext context, ActivityEntry entry, int index) {
+  Widget _row(BuildContext context, ActivityEntry entry) {
     final theme = Theme.of(context);
     final muted = theme.colorScheme.onSurfaceVariant;
     final text = Text(_text(context, entry), style: theme.textTheme.bodyMedium);
@@ -103,10 +102,9 @@ class RecentActivityCard extends StatelessWidget {
       style: theme.textTheme.bodySmall?.copyWith(color: muted),
     );
     return Padding(
-      // The position, not the kind, is the stable identity of a row: several
-      // events can share a kind (a configuration saved twice), so a kind key
-      // would not be unique.
-      key: ValueKey('activity-row-$index'),
+      // The event id, not the kind, identifies a row: several events can share
+      // a kind (a configuration saved twice).
+      key: ValueKey('activity-row-${entry.id}'),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,

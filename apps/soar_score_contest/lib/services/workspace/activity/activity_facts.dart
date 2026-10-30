@@ -42,6 +42,7 @@ class ActivityFacts extends Equatable {
       final actor = event.actorId?.value;
       entries.add(
         ActivityEntry(
+          id: event.id.value,
           kind: kind,
           byYou: actor != null && actor == actingAccountId,
           at: event.serverTimestamp,
