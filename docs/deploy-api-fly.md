@@ -9,12 +9,12 @@ enough. No secret lives in the repository: `DATABASE_URL` is a Fly secret.
 
 ## Where everything lives
 
-| Host name | What | Hosted on |
-| --- | --- | --- |
-| `rcsoarscore.com`, `www.rcsoarscore.com` | public project site | Vercel (proxied by Cloudflare) |
-| `app.rcsoarscore.com` | contest management site | Cloudflare |
-| `score.rcsoarscore.com` | participant self-scoring site | Cloudflare |
-| `api.rcsoarscore.com` | API server (this document) | Fly.io |
+| Host name                                | What                          | Hosted on                      |
+| ---------------------------------------- | ----------------------------- | ------------------------------ |
+| `rcsoarscore.com`, `www.rcsoarscore.com` | public project site           | Vercel (proxied by Cloudflare) |
+| `app.rcsoarscore.com`                    | contest management site       | Cloudflare                     |
+| `score.rcsoarscore.com`                  | participant self-scoring site | Cloudflare                     |
+| `api.rcsoarscore.com`                    | API server (this document)    | Fly.io                         |
 
 DNS for all of them is managed in Cloudflare. The public site is hosted on
 Vercel, a connected app on the repository that builds and deploys when `master`
@@ -24,13 +24,13 @@ and deploys them on every push. Only the API is deployed by hand.
 
 ## Environment variables
 
-| Variable | Where | Value |
-| --- | --- | --- |
-| `DATABASE_URL` | Fly secret | Neon **direct** (not pooled) connection string; it ends in `sslmode=require` |
-| `AUTH0_DOMAIN` | `fly.toml` | `login.rcsoarscore.com` (the token issuer; not the `dev-...` tenant name) |
-| `API_AUDIENCE` | `fly.toml` | `https://soar-score.com/server` |
-| `CORS_ALLOWED_ORIGINS` | `fly.toml` | app, score and public site origins |
-| `PORT`, `LOG_LEVEL`, `LOG_FORMAT` | `fly.toml` | `8080`, `INFO`, `json` |
+| Variable                          | Where      | Value                                                                        |
+| --------------------------------- | ---------- | ---------------------------------------------------------------------------- |
+| `DATABASE_URL`                    | Fly secret | Neon **direct** (not pooled) connection string; it ends in `sslmode=require` |
+| `AUTH0_DOMAIN`                    | `fly.toml` | `login.rcsoarscore.com` (the token issuer; not the `dev-...` tenant name)    |
+| `API_AUDIENCE`                    | `fly.toml` | `https://soar-score.com/server`                                              |
+| `CORS_ALLOWED_ORIGINS`            | `fly.toml` | app, score and public site origins                                           |
+| `PORT`, `LOG_LEVEL`, `LOG_FORMAT` | `fly.toml` | `8080`, `INFO`, `json`                                                       |
 
 The full list is in `apps/soar_score_server/lib/config/server_config.dart`.
 
