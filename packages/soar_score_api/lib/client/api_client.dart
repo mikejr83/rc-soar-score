@@ -4,7 +4,9 @@ import 'package:http/http.dart' as http;
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../dto/activate_installation_request.dart';
+import '../dto/add_model_link_request.dart';
 import '../dto/add_participation_request.dart';
+import '../dto/add_profile_model_request.dart';
 import '../dto/add_team_member_request.dart';
 import '../dto/audit_event_dto.dart';
 import '../dto/claim_local_account_request.dart';
@@ -39,6 +41,8 @@ import '../dto/sync_info_dto.dart';
 import '../dto/sync_mutation_result.dart';
 import '../dto/system_data_response.dart';
 import '../dto/update_contest_request.dart';
+import '../dto/update_model_link_request.dart';
+import '../dto/update_profile_model_request.dart';
 import '../dto/update_participant_request.dart';
 import '../dto/update_participation_request.dart';
 import '../dto/update_team_request.dart';
@@ -504,6 +508,116 @@ class ApiClient {
       response,
       uri,
       ParticipationRemoveResult.fromJson,
+    );
+  }
+
+  /// `GET /api/v1/participants/{id}/models` — the models of profile [id], by
+  /// name.
+  Future<List<ModelCatalog>> profileModels(Id id) async {
+    final uri = _resolve('/api/v1/participants/${id.value}/models');
+    final response = await _send('GET', uri);
+    return _decode<List<ModelCatalog>>(
+      response,
+      uri,
+      (json) => [
+        for (final item in json['models'] as List<dynamic>)
+          ModelCatalog.fromJson(item as Map<String, dynamic>),
+      ],
+    );
+  }
+
+  /// `POST /api/v1/participants/{id}/models` — adds a model to profile [id].
+  ///
+  /// Repeating the same [request] returns the model it created; the same
+  /// name and manufacturer already on the profile is an [ApiHttpError] with
+  /// status 409.
+  Future<ModelCatalog> addProfileModel(
+    Id id,
+    AddProfileModelRequest request,
+  ) async {
+    final uri = _resolve('/api/v1/participants/${id.value}/models');
+    final response = await _send('POST', uri, body: request.toJson());
+    return _decode<ModelCatalog>(response, uri, ModelCatalog.fromJson);
+  }
+
+  /// `PUT /api/v1/participants/{id}/models/{modelId}` — replaces the details
+  /// of a model. A stale [UpdateProfileModelRequest.baseRevision] is an
+  /// [ApiHttpError] with status 409.
+  Future<ModelCatalog> updateProfileModel(
+    Id id,
+    Id modelId,
+    UpdateProfileModelRequest request,
+  ) async {
+    final uri = _resolve(
+      '/api/v1/participants/${id.value}/models/${modelId.value}',
+    );
+    final response = await _send('PUT', uri, body: request.toJson());
+    return _decode<ModelCatalog>(response, uri, ModelCatalog.fromJson);
+  }
+
+  /// `DELETE /api/v1/participants/{id}/models/{modelId}` — removes a model
+  /// from the profile. Contest entries keep their own copy.
+  Future<void> removeProfileModel(Id id, Id modelId) async {
+    await _send(
+      'DELETE',
+      _resolve('/api/v1/participants/${id.value}/models/${modelId.value}'),
+    );
+  }
+
+  /// `GET /api/v1/contests/{id}/model-links` — the models of every pilot of
+  /// contest [id].
+  Future<List<ContestModelLink>> modelLinks(Id id) async {
+    final uri = _resolve('/api/v1/contests/${id.value}/model-links');
+    final response = await _send('GET', uri);
+    return _decode<List<ContestModelLink>>(
+      response,
+      uri,
+      (json) => [
+        for (final item in json['model_links'] as List<dynamic>)
+          ContestModelLink.fromJson(item as Map<String, dynamic>),
+      ],
+    );
+  }
+
+  /// `POST /api/v1/contests/{id}/participations/{participationId}/model-links`
+  /// — adds a model to a pilot.
+  ///
+  /// Repeating the same [request] returns the link it created. A participant
+  /// who is not a pilot is an [ApiHttpError] with status 400.
+  Future<ContestModelLink> addModelLink(
+    Id id,
+    Id participationId,
+    AddModelLinkRequest request,
+  ) async {
+    final uri = _resolve(
+      '/api/v1/contests/${id.value}/participations/'
+      '${participationId.value}/model-links',
+    );
+    final response = await _send('POST', uri, body: request.toJson());
+    return _decode<ContestModelLink>(response, uri, ContestModelLink.fromJson);
+  }
+
+  /// `PUT /api/v1/contests/{id}/model-links/{linkId}` — replaces the details
+  /// of a pilot's model. A stale [UpdateModelLinkRequest.baseRevision] is an
+  /// [ApiHttpError] with status 409.
+  Future<ContestModelLink> updateModelLink(
+    Id id,
+    Id linkId,
+    UpdateModelLinkRequest request,
+  ) async {
+    final uri = _resolve(
+      '/api/v1/contests/${id.value}/model-links/${linkId.value}',
+    );
+    final response = await _send('PUT', uri, body: request.toJson());
+    return _decode<ContestModelLink>(response, uri, ContestModelLink.fromJson);
+  }
+
+  /// `DELETE /api/v1/contests/{id}/model-links/{linkId}` — removes a model
+  /// from a pilot.
+  Future<void> removeModelLink(Id id, Id linkId) async {
+    await _send(
+      'DELETE',
+      _resolve('/api/v1/contests/${id.value}/model-links/${linkId.value}'),
     );
   }
 

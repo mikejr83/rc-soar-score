@@ -23,6 +23,7 @@ void main() {
       drawnContest(api, core: core);
 
   var count = 0;
+
   /// [base] defaults to the contest's latest revision, like a client that
   /// draws from the matrix it shows.
   Future<Response> redraw({
@@ -458,7 +459,9 @@ void main() {
       await drawn();
       final before = await matrix();
 
-      final preview = await api.json(await redraw(firstRound: 4, preview: true));
+      final preview = await api.json(
+        await redraw(firstRound: 4, preview: true),
+      );
 
       expect(preview['seed'], isA<int>());
       expect(preview['candidate_fairness'], isA<Map>());
@@ -472,7 +475,9 @@ void main() {
 
     test('a confirm with its seed reproduces the previewed fairness', () async {
       await drawn();
-      final preview = await api.json(await redraw(firstRound: 4, preview: true));
+      final preview = await api.json(
+        await redraw(firstRound: 4, preview: true),
+      );
       final seed = preview['seed'] as int;
 
       final body = await api.json(
@@ -482,7 +487,8 @@ void main() {
       expect(
         (body['revision'] as Map)['fairness_summary'],
         preview['candidate_fairness'],
-        reason: 'confirming the previewed seed must store the fairness the '
+        reason:
+            'confirming the previewed seed must store the fairness the '
             'preview reported',
       );
     });

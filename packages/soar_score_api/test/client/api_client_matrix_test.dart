@@ -308,38 +308,41 @@ void main() {
     });
   });
 
-  test('redrawMatrix always asks for the matrix, even a preview request',
-      () async {
-    final client = clientFor((_) => body(CurrentMatrix().toJson(), 201));
-    final newId = Id.parse('019c0000-0000-7000-8000-000000000603');
+  test(
+    'redrawMatrix always asks for the matrix, even a preview request',
+    () async {
+      final client = clientFor((_) => body(CurrentMatrix().toJson(), 201));
+      final newId = Id.parse('019c0000-0000-7000-8000-000000000603');
 
-    await client.redrawMatrix(
-      contestId,
-      RedrawMatrixRequest(
-        id: newId,
-        firstRound: 2,
-        rounds: 2,
-        groupsPerRound: 2,
-        baseMatrixRevision: 4,
-        preview: true,
-      ),
-    );
+      await client.redrawMatrix(
+        contestId,
+        RedrawMatrixRequest(
+          id: newId,
+          firstRound: 2,
+          rounds: 2,
+          groupsPerRound: 2,
+          baseMatrixRevision: 4,
+          preview: true,
+        ),
+      );
 
-    expect(jsonDecode(seen.body)['base_matrix_revision'], 4);
-    expect(jsonDecode(seen.body)['preview'], isFalse);
-  });
+      expect(jsonDecode(seen.body)['base_matrix_revision'], 4);
+      expect(jsonDecode(seen.body)['preview'], isFalse);
+    },
+  );
 
   test('previewRedraw POSTs as a preview and decodes the preview', () async {
-    final client = clientFor((_) =>
-        body(
-          RedrawPreview(
-            seed: 7,
-            candidateFairness: {'unmet_opponent_count': 1},
-            currentFairness: {'unmet_opponent_count': 2},
-            better: true,
-          ).toJson(),
-          200,
-        ));
+    final client = clientFor(
+      (_) => body(
+        RedrawPreview(
+          seed: 7,
+          candidateFairness: {'unmet_opponent_count': 1},
+          currentFairness: {'unmet_opponent_count': 2},
+          better: true,
+        ).toJson(),
+        200,
+      ),
+    );
     final request = RedrawMatrixRequest(
       id: revisionId,
       firstRound: 4,
@@ -355,9 +358,6 @@ void main() {
     expect(jsonDecode(seen.body)['preview'], isTrue);
     expect(preview.seed, 7);
     expect(preview.better, isTrue);
-    expect(
-      preview.candidateFairness['unmet_opponent_count'],
-      1,
-    );
+    expect(preview.candidateFairness['unmet_opponent_count'], 1);
   });
 }
