@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui' show PlatformDispatcher;
 
 import 'package:flutter/material.dart';
@@ -8,7 +9,9 @@ import 'package:soar_score_core/soar_score_core.dart';
 
 import '../../api_client_provider.dart';
 import '../../connectivity_provider.dart';
+import '../../local_ui_store_provider.dart';
 import '../../router.dart';
+import '../../ui_account_provider.dart';
 import '../../services/reports/report_availability.dart';
 import '../../services/reports/report_kind.dart';
 import '../../services/reports/report_launcher.dart';
@@ -17,6 +20,7 @@ import '../../services/reports/result_status.dart';
 import '../../services/reports/viewer/page_setup.dart';
 import '../../services/reports/viewer/print_page_range.dart';
 import '../../services/reports/viewer/report_print_result.dart';
+import '../../services/reports/viewer/report_options_store.dart';
 import '../../services/reports/viewer/report_spec.dart';
 import '../../services/reports/viewer/report_view_params.dart';
 import '../../services/reports/viewer/report_viewer_controller.dart';
@@ -118,6 +122,10 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
       initial: widget.params,
       pollInterval: widget.pollInterval,
       onParams: widget.onParams,
+      options: ReportOptionsStore(
+        localUiStoreOf(context),
+        uiAccountIdOf(context),
+      ),
     )..addListener(_onChanged);
     _definition = definition;
     _controller = controller;
@@ -192,8 +200,8 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
                 setup,
                 _definition!.barePageMargins(controller.sheetFilters, facts),
               ),
-        preview: controller.params.preview,
-        data: controller.data,
+          preview: controller.preview,
+          data: controller.data,
         online:
             appConnectivityOf(context)?.internetStatus !=
             ConnectivityStatus.unavailable,
@@ -256,7 +264,7 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
   List<Widget> _printPages() {
     final pages = _pages(_document()!);
     final range = PrintPageRange.parse(
-      _controller!.params.printPages,
+      _controller!.printPages,
       pages.length,
     );
     return [
@@ -272,7 +280,7 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
   bool _rangeIsValid(ReportDocument? document) =>
       document == null ||
       PrintPageRange.parse(
-        _controller!.params.printPages,
+        _controller!.printPages,
         document.pages.length,
       ).isValid;
 
@@ -384,7 +392,7 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
       ),
       setup: setup,
       locale: Localizations.localeOf(context),
-      preview: controller.params.preview,
+      preview: controller.preview,
       onPaper: controller.setPaper,
       onOrientation: controller.setOrientation,
       onPreview: controller.setPreview,
@@ -392,7 +400,7 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
       columns: columns,
       showOrientation: !_definition!.fixedOrientation,
       pageCount: _document()?.pages.length ?? 0,
-      printPages: controller.params.printPages,
+      printPages: controller.printPages,
       onPrintPages: controller.setPrintPages,
     );
   }
@@ -601,7 +609,7 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
       setup: setup,
       pages: pages,
       zoom: controller.params.zoom,
-      preview: controller.params.preview,
+      preview: controller.preview,
       dimmed: controller.refreshing || controller.generating,
       onFit: (fit) => setState(() => _fit = fit),
       onPage: (page) => setState(() => _page = page),
@@ -614,7 +622,7 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
     final compact = width < 600;
     final pageCount = document?.pages.length ?? 0;
     final nothing = document == null;
-    final legend = controller.params.preview
+    final legend = controller.preview
         ? 'Print preview: the white pages are exactly what prints.'
         : compact
         ? 'White pages print as shown'
@@ -720,7 +728,7 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
             pdfPrimary: !caps.canPrint && caps.canSavePdf,
             onPrint: _print,
             onPdf: _savePdf,
-            preview: controller.params.preview,
+            preview: controller.preview,
             onPreview: controller.setPreview,
             onPageSetup: () {
               if (compact) {
@@ -729,7 +737,7 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
                 setState(() => _panelOpen = true);
               }
             },
-            onReset: controller.resetFilters,
+            onReset: () => unawaited(controller.resetAll()),
           ),
           body: switch (controller.load) {
             ViewerLoad.loading => ViewerLoading(

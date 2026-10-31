@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 
 import '../collapsible_areas_provider.dart';
+import '../local_ui_store_provider.dart';
 import '../preferences_controller_provider.dart';
 import '../text_size_controller_provider.dart';
 import '../theme_controller_provider.dart';
+import '../ui_account_provider.dart';
+import '../services/reports/viewer/report_options_store.dart';
 import '../widgets/settings/locale_setting.dart';
+import '../widgets/settings/report_options_setting.dart';
 import '../widgets/settings/reset_areas_setting.dart';
 import '../widgets/settings/text_size_setting.dart';
 import '../widgets/settings/theme_mode_setting.dart';
@@ -13,14 +17,15 @@ import '../widgets/settings/time_zone_setting.dart';
 /// Settings kept on this device for the signed-in (or Local) account
 /// (system scope, opened from the account control at the bottom of the rail).
 ///
-/// The theme, the text size, the account's preferred time zone and locale, and resetting the
-/// remembered hidden panels.
+/// The theme, the text size, the account's preferred time zone and locale,
+/// the remembered report options, and the remembered hidden panels.
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     final preferences = preferencesOf(context);
+    final uiStore = localUiStoreOf(context);
     return Align(
       alignment: Alignment.topCenter,
       child: ConstrainedBox(
@@ -40,6 +45,11 @@ class SettingsPage extends StatelessWidget {
                 LocaleSetting(controller: preferences),
               ],
               ResetAreasSetting(controller: collapsibleAreasOf(context)),
+              ReportOptionsSetting(
+                store: uiStore == null
+                    ? null
+                    : ReportOptionsStore(uiStore, uiAccountIdOf(context)),
+              ),
             ],
           ),
         ),

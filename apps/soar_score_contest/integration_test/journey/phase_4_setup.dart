@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 
 import '../support/configuration_fields.dart';
 import '../support/interact.dart';
@@ -290,6 +291,29 @@ Future<void> runSetupPhase(Journey journey, JourneyContext data) async {
     }),
   );
   await journey.step(
+    'Reports: a Draw Matrix option is remembered across reopenings',
+    () => inContest(() async {
+      await _openReports(tester);
+      await tapVisible(tester, _key('report-open-matrix'));
+      await pumpUntilFound(tester, _key('viewer-title'));
+      final compact = find.widgetWithText(SwitchListTile, 'Compact mode');
+      expect(tester.widget<SwitchListTile>(compact).value, isFalse);
+
+      // Turning it on writes the account's stored options.
+      await tapVisible(tester, compact);
+      await tester.pump(const Duration(milliseconds: 300));
+
+      // Back to Reports, then reopen: the option comes back on, and the URL
+      // carries it.
+      await tapVisible(tester, _key('viewer-back'));
+      await pumpUntilFound(tester, find.text('Reports are built from'));
+      await tapVisible(tester, _key('report-open-matrix'));
+      await pumpUntilFound(tester, _key('viewer-title'));
+      expect(tester.widget<SwitchListTile>(compact).value, isTrue);
+      expect(currentRoute(tester), contains('f.cmp=1'));
+    }),
+  );
+  await journey.step(
     'Reports: Pilot Scoring Cards show a card per pilot and follow the choice',
     () => inContest(() async {
       await _openReports(tester);
@@ -320,6 +344,12 @@ Future<void> runSetupPhase(Journey journey, JourneyContext data) async {
 Future<void> _openReports(WidgetTester tester) async {
   await tapRail(tester, 'Reports');
   await pumpUntilFound(tester, find.text('Reports are built from'));
+}
+
+/// The current route as a string; the viewer keeps its options in the query.
+String currentRoute(WidgetTester tester) {
+  final context = tester.element(find.byType(Scaffold).first);
+  return GoRouter.of(context).routeInformationProvider.value.uri.toString();
 }
 
 bool _reportEnabled(WidgetTester tester, String report) =>

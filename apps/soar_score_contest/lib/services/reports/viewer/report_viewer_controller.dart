@@ -4,10 +4,12 @@ import 'package:flutter/widgets.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../report_kind.dart';
 import '../reports_facts.dart';
 import '../reports_facts_loader.dart';
 import 'page_setup.dart';
 import 'report_print_result.dart';
+import 'report_options_store.dart';
 import 'report_spec.dart';
 import 'report_view_params.dart';
 
@@ -28,6 +30,12 @@ class ViewerNotice {
 /// The state behind the report viewer: the data, the filters, the page setup
 /// and the print flow. Filter changes apply at once; there is no Apply step.
 ///
+/// The options the user changed are remembered per account through
+/// [options], shared by every contest: a hard-coded default gives way to the
+/// stored choice, which gives way to the URL. A change in the viewer writes
+/// the stored choice at once; a value the URL carried but the user did not
+/// touch is not written.
+///
 /// An open report never redraws on its own when the contest changes. With a
 /// [pollInterval] the controller checks now and then and sets [outdated];
 /// [refresh] is the only thing that replaces the sheet's data.
@@ -41,6 +49,7 @@ class ReportViewerController extends ChangeNotifier {
     ReportViewParams initial = const ReportViewParams(),
     this.pollInterval,
     this.onParams,
+    this.options,
   }) : _params = initial;
 
   final ApiClient? client;
@@ -55,9 +64,25 @@ class ReportViewerController extends ChangeNotifier {
   /// Told whenever the params change, so the page can keep the URL current.
   final ValueChanged<ReportViewParams>? onParams;
 
+  /// Where the account's remembered options live; `null` keeps them in
+  /// memory only.
+  final ReportOptionsStore? options;
+
   ViewerLoad _load = ViewerLoad.loading;
   ReportsFacts? _facts;
   ReportViewParams _params;
+
+  /// This report kind's remembered options, read at [start].
+  Map<String, String> _stored = const {};
+
+  /// The options are read before the panel can be touched, so its controls
+  /// start from the stored values.
+  bool _storedLoaded = false;
+
+  /// The writes of this controller, one behind the other: a save reads the
+  /// account's map before it writes one kind's entry, so two saves of the
+  /// same kind must not overlap.
+  Future<void> _saved = Future<void>.value();
   Map<String, String>? _lastGood;
   bool _outdated = false;
   bool _refreshing = false;
@@ -114,17 +139,52 @@ class ReportViewerController extends ChangeNotifier {
   bool get dataFailed => _dataFailed;
 
   PageSetup get setup => PageSetup(
-    _params.paper ?? defaultPaper,
-    _params.orientation ?? spec.defaultOrientation,
+    _params.paper ??
+        _storedPaper ??
+        defaultPaper,
+    _params.orientation ?? _storedOrientation ?? spec.defaultOrientation,
   );
 
-  /// The filters in force: the URL's over the report's defaults.
+  PaperSize? get _storedPaper {
+    final name = _stored['paper'];
+    if (name == null) return null;
+    return PaperSize.values.where((paper) => paper.name == name).firstOrNull;
+  }
+
+  PageOrientation? get _storedOrientation {
+    final name = _stored['orient'];
+    if (name == null) return null;
+    return PageOrientation.values
+        .where((orientation) => orientation.name == name)
+        .firstOrNull;
+  }
+
+  /// Print preview: the viewer's choice, else the stored one, else off.
+  bool get preview => _params.previewExplicit
+      ? _params.preview
+      : _stored['preview'] == '1';
+
+  /// The pages to print or save, as typed: the viewer's, else the stored
+  /// ones, else every page.
+  String get printPages => _params.printPagesExplicit
+      ? _params.printPages
+      : _stored['pp'] ?? '';
+
+  /// The filters in force: the URL's over the remembered options, over the
+  /// report's defaults.
   Map<String, String> get filters => _filtersFor(_facts);
 
-  Map<String, String> _filtersFor(ReportsFacts? facts) => {
-    if (facts != null) ...spec.defaultFilters(facts),
-    ..._params.filters,
-  };
+  Map<String, String> _filtersFor(ReportsFacts? facts) {
+    final defaults =
+        facts == null ? const <String, String>{} : spec.defaultFilters(facts);
+    final optionKeys = _optionKeysByKind[spec.kind]!;
+    return {
+      ...defaults,
+      for (final entry in _stored.entries)
+        if (optionKeys.contains(entry.key)) entry.key: entry.value,
+      ..._params.filters,
+    };
+  }
 
   ReportCheck get check {
     final facts = _facts;
@@ -162,10 +222,27 @@ class ReportViewerController extends ChangeNotifier {
   // Loading.
 
   Future<void> start() async {
+    await _loadOptions();
     await _fetch();
     final interval = pollInterval;
     if (interval != null && !_disposed) {
       _timer = Timer.periodic(interval, (_) => unawaited(_poll()));
+    }
+  }
+
+  /// The account's remembered options for this report kind. The options
+  /// panel appears only when the view is ready, so the stored values are in
+  /// place before the user can see the controls.
+  Future<void> _loadOptions() async {
+    final store = options;
+    final map =
+        store == null
+            ? const <String, Map<String, String>>{}
+            : await store.load();
+    _stored = Map<String, String>.of(map[spec.kind.key] ?? const {});
+    _storedLoaded = true;
+    if (!_disposed) {
+      _changed();
     }
   }
 
@@ -331,25 +408,110 @@ class ReportViewerController extends ChangeNotifier {
   /// Reads the report's data again after a failure.
   Future<void> retryData() => _syncData(force: true);
 
-  void setFilter(String key, String value) =>
-      _setParams(_params.copyWith(filters: {..._params.filters, key: value}));
+  void setFilter(String key, String value) {
+    _setParams(_params.copyWith(filters: {..._params.filters, key: value}));
+    if (_isOptionKey(key)) {
+      _rememberOption(key, value);
+    }
+  }
 
-  void setFilters(Map<String, String> changes) =>
-      _setParams(_params.copyWith(filters: {..._params.filters, ...changes}));
+  void setFilters(Map<String, String> changes) {
+    _setParams(_params.copyWith(filters: {..._params.filters, ...changes}));
+    for (final entry in changes.entries) {
+      if (_isOptionKey(entry.key)) {
+        _rememberOption(entry.key, entry.value);
+      }
+    }
+  }
 
   void resetFilters() => _setParams(_params.copyWith(filters: const {}));
 
-  void setPaper(PaperSize paper) => _setParams(_params.copyWith(paper: paper));
+  void setPaper(PaperSize paper) {
+    _setParams(_params.copyWith(paper: paper));
+    _rememberOption('paper', paper.name);
+  }
 
-  void setOrientation(PageOrientation orientation) =>
-      _setParams(_params.copyWith(orientation: orientation));
+  void setOrientation(PageOrientation orientation) {
+    _setParams(_params.copyWith(orientation: orientation));
+    _rememberOption('orient', orientation.name);
+  }
 
-  void setPreview(bool preview) =>
-      _setParams(_params.copyWith(preview: preview));
+  void setPreview(bool preview) {
+    _setParams(_params.copyWith(preview: preview, previewExplicit: true));
+    _rememberOption('preview', preview ? '1' : '0');
+  }
 
   /// The pages to print or save, as typed; empty for every page.
-  void setPrintPages(String pages) =>
-      _setParams(_params.copyWith(printPages: pages));
+  void setPrintPages(String pages) {
+    _setParams(_params.copyWith(printPages: pages, printPagesExplicit: true));
+    _rememberOption('pp', pages);
+  }
+
+  /// The overflow menu's "Reset filters and options": clears the view's
+  /// state — the filters, the options, the paper, the orientation, the
+  /// preview and the pages to print (the zoom stays) — and forgets the
+  /// stored options of this report kind.
+  Future<void> resetAll() async {
+    _stored = const {};
+    _setParams(ReportViewParams(zoom: _params.zoom));
+    final reset = _saved
+        .then((_) =>
+            options?.reset(spec.kind.key) ?? Future<void>.value());
+    _saved = reset;
+    return reset;
+  }
+
+  // Remembered options.
+
+  /// The option keys of this report kind, besides the round ranges and the
+  /// pilot choice, which are filtering and stay in the URL only.
+  static const Map<ReportKind, Set<String>> _optionKeysByKind = {
+    ReportKind.standings: {
+      'pct',
+      'raw',
+      'team',
+      'num',
+      'cls',
+      'det',
+      'prov',
+    },
+    ReportKind.matrix: {
+      'cmp',
+      'inf',
+      'club',
+      'fai',
+      'nat',
+      'team',
+      'num',
+      'cls',
+    },
+    ReportKind.sheet: {},
+    ReportKind.cards: {'ret', 'pre', 'up', 'mg'},
+  };
+
+  bool _isOptionKey(String key) =>
+      _optionKeysByKind[spec.kind]!.contains(key);
+
+  /// Remembers [key] as [value] for this report kind and writes the account
+  /// map. A change writes even when it equals the default: the stored value
+  /// is the user's last explicit choice.
+  void _rememberOption(String key, String value) {
+    if (!_storedLoaded) {
+      return;
+    }
+    _stored = {..._stored, key: value};
+    unawaited(_saveStored());
+  }
+
+  /// Writes the account map for this kind, behind any write of this
+  /// controller still in flight.
+  Future<void> _saveStored() async {
+    final write = _saved;
+    final done = write.then((_) => options?.set(spec.kind.key, _stored) ??
+        Future<void>.value());
+    _saved = done;
+    return done;
+  }
 
   /// A fixed zoom, or `null` to fit the width.
   void setZoom(double? zoom) => _setParams(_params.copyWith(zoom: () => zoom));

@@ -32,7 +32,10 @@ void main() {
   });
 
   test('the typed pages are kept in the URL', () {
-    const params = ReportViewParams(printPages: '2-3');
+    const params = ReportViewParams(
+      printPages: '2-3',
+      printPagesExplicit: true,
+    );
     expect(params.toQuery()['pp'], '2-3');
     expect(ReportViewParams.fromQuery(params.toQuery()).printPages, '2-3');
     expect(const ReportViewParams().toQuery().containsKey('pp'), isFalse);
