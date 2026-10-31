@@ -7,6 +7,7 @@ import 'package:soar_score_contest/services/new_contest/contest_creator.dart';
 import 'package:soar_score_contest/services/new_contest/contest_draft.dart';
 import 'package:soar_score_contest/services/new_contest/draft_participant.dart';
 import 'package:soar_score_contest/services/new_contest/draw_settings.dart';
+import 'package:soar_score_contest/services/participants/model_entry.dart';
 import 'package:soar_score_contest/services/participants/participant_option.dart';
 import 'package:soar_score_contest/services/new_contest/scoring_settings.dart';
 import 'package:soar_score_contest/services/new_contest/wizard_discipline.dart';
@@ -155,5 +156,89 @@ void main() {
     expect(core.groupScoreMode, GroupScoreMode.time);
     expect(core.dropAfterRounds, [4, 8]);
     expect(core.teamProtection, isFalse);
+  });
+
+  group('models', () {
+    ContestDraft withModels(List<ModelEntry> first) => draft().copyWith(
+      options: const {ParticipantOption.models},
+      participants: [
+        DraftParticipant.fromProfile(profiles[0]).copyWith(models: first),
+        // A pilot without a model is fine.
+        DraftParticipant.fromProfile(profiles[1]),
+        DraftParticipant.fromProfile(profiles[2]),
+      ],
+    );
+
+    test('are stored with the contest and kept on the profile', () async {
+      final supra = ModelEntry(
+        id: Id.create(),
+        name: 'Supra',
+        manufacturer: 'Vladimir',
+        modelId: 'S-1',
+        contestIdentifier: 'A7',
+      );
+      final spare = ModelEntry(id: Id.create(), name: 'Spare');
+
+      final contest = await ContestCreator(client)
+          .create(withModels([supra, spare]), CreationIds('test'));
+
+      final links = await client.modelLinks(contest.id);
+      expect(
+        links.map((l) => l.modelName),
+        unorderedEquals(['Supra', 'Spare']),
+      );
+      final stored = links.firstWhere((l) => l.modelName == 'Supra');
+      expect(stored.modelId, 'S-1');
+      expect(stored.contestSpecificIdentifier, 'A7');
+      final profileModels = await client.profileModels(profiles[0].id);
+      expect(profileModels.map((m) => m.name), ['Spare', 'Supra']);
+      expect(stored.modelCatalogId, isIn(profileModels.map((m) => m.id)));
+      expect(await client.profileModels(profiles[1].id), isEmpty);
+    });
+
+    test('a retry adds nothing twice, and a second contest reuses the '
+        'profile model', () async {
+      final supra = ModelEntry(
+        id: Id.create(),
+        name: 'Supra',
+        manufacturer: 'Vladimir',
+      );
+      final ids = CreationIds('test');
+      final creator = ContestCreator(client);
+      final contest = await creator.create(withModels([supra]), ids);
+      await creator.create(withModels([supra]), ids);
+
+      expect(await client.modelLinks(contest.id), hasLength(1));
+
+      // Typed again for another contest: the profile still has one Supra.
+      final again = ModelEntry(
+        id: Id.create(),
+        name: 'supra',
+        manufacturer: 'vladimir',
+      );
+      final second = await creator.create(
+        withModels([again]),
+        CreationIds('second'),
+      );
+
+      expect(await client.modelLinks(second.id), hasLength(1));
+      expect(await client.profileModels(profiles[0].id), hasLength(1));
+    });
+
+    test('are not sent for a non-flier or when the option is off', () async {
+      final model = ModelEntry(id: Id.create(), name: 'Supra');
+      final noOption = await ContestCreator(client).create(
+        draft().copyWith(
+          participants: [
+            DraftParticipant.fromProfile(profiles[0]).copyWith(models: [model]),
+            DraftParticipant.fromProfile(profiles[1]),
+            DraftParticipant.fromProfile(profiles[2]),
+          ],
+        ),
+        CreationIds('test'),
+      );
+
+      expect(await client.modelLinks(noOption.id), isEmpty);
+    });
   });
 }

@@ -138,6 +138,125 @@ Future<void> runWizardPhase(Journey journey, JourneyContext data) async {
     expect(configurationCount(tester, 'Other participants'), 0);
   });
 
+  await journey.step('Models: entered in the wizard, edited on the '
+      'Participants page', () async {
+    final first = data.demoPilots.first;
+    final second = data.demoPilots.last;
+    await goToMainPage(tester);
+    await openWizard(tester);
+    await enterWizardDetails(tester, 'E2E Models');
+    await wizardPrimary(tester);
+    await pumpUntilStep(tester, 'Discipline');
+    await tapVisible(tester, find.byKey(const ValueKey('discipline-F5J')));
+    await wizardPrimary(tester);
+
+    // Models is the only option on.
+    await pumpUntilStep(tester, 'Participant options');
+    await tapVisible(tester, find.byKey(const ValueKey('option-models')));
+    await wizardPrimary(tester);
+
+    await pumpUntilStep(tester, 'Participants');
+    await addWizardPilot(tester, first);
+    await addWizardPilot(tester, second);
+    // Both pilots start with the notice, which does not block continuing.
+    expect(find.text('No models entered'), findsNWidgets(2));
+    expect(find.textContaining('fixing before you continue'), findsNothing);
+
+    // The first pilot gets a typed model.
+    await tapVisible(tester, _modelsButton.first);
+    await pumpUntilFound(tester, find.byKey(const ValueKey('models-done')));
+    await tapVisible(tester, find.byKey(const ValueKey('model-add')));
+    await enterIn(
+      tester,
+      find.byKey(const ValueKey('model-name')),
+      'E2E Supra',
+    );
+    await enterIn(
+      tester,
+      find.byKey(const ValueKey('model-manufacturer')),
+      'E2E Models Co',
+    );
+    await tapVisible(tester, find.byKey(const ValueKey('model-save')));
+    await pumpUntilFound(tester, find.text('E2E Supra · E2E Models Co'));
+    await tapVisible(tester, find.byKey(const ValueKey('models-done')));
+    await pumpUntilGone(tester, find.byKey(const ValueKey('models-done')));
+    expect(find.text('E2E Supra · E2E Models Co'), findsOneWidget);
+    expect(find.text('No models entered'), findsOneWidget);
+    await wizardPrimary(tester);
+
+    await pumpUntilStep(tester, 'Scoring & publication');
+    await wizardPrimary(tester);
+    await pumpUntilStep(tester, 'Draw options');
+    await enterIn(tester, fieldWithKey('groups-per-round'), '1');
+    await enterIn(tester, fieldWithKey('preliminary-rounds'), '2');
+    await wizardPrimary(tester);
+    await pumpUntilFound(tester, find.byKey(const ValueKey('summary-Details')));
+    expect(find.textContaining('1 entered'), findsOneWidget);
+    await wizardPrimary(tester);
+    await pumpUntilFound(tester, find.text('Scoring pilots'));
+
+    // The Participants page shows what was saved, and the pilot without a
+    // model still shows only the notice.
+    await tapRail(tester, 'Participants');
+    await pumpUntilFound(tester, find.text('E2E Supra · E2E Models Co'));
+    expect(find.text('No models entered'), findsOneWidget);
+
+    // A model is added to the second pilot, edited, then removed.
+    await tapVisible(tester, _modelsButton.last);
+    await pumpUntilFound(tester, find.byKey(const ValueKey('model-add')));
+    await tapVisible(tester, find.byKey(const ValueKey('model-add')));
+    await enterIn(
+      tester,
+      find.byKey(const ValueKey('model-name')),
+      'E2E Spare',
+    );
+    await enterIn(
+      tester,
+      find.byKey(const ValueKey('model-contest-id')),
+      'E2E-7',
+    );
+    await tapVisible(tester, find.byKey(const ValueKey('model-save')));
+    await pumpUntilFound(tester, find.text('Contest E2E-7'));
+    await tapVisible(
+      tester,
+      find.byWidgetPredicate(
+        (w) =>
+            w.key is ValueKey<String> &&
+            (w.key! as ValueKey<String>).value.startsWith('edit-model-'),
+        description: 'the edit model button',
+      ),
+    );
+    await enterIn(
+      tester,
+      find.byKey(const ValueKey('model-name')),
+      'E2E Spare Two',
+    );
+    await tapVisible(tester, find.byKey(const ValueKey('model-save')));
+    await pumpUntilFound(tester, find.text('E2E Spare Two'));
+    await tapVisible(tester, find.byKey(const ValueKey('models-done')));
+    await pumpUntilFound(tester, find.text('E2E Spare Two'));
+    expect(find.text('No models entered'), findsNothing);
+
+    await tapVisible(tester, _modelsButton.last);
+    await pumpUntilFound(tester, find.byKey(const ValueKey('model-add')));
+    await tapVisible(
+      tester,
+      find.byWidgetPredicate(
+        (w) =>
+            w.key is ValueKey<String> &&
+            (w.key! as ValueKey<String>).value.startsWith('remove-model-'),
+        description: 'the remove model button',
+      ),
+    );
+    await pumpUntilFound(
+      tester,
+      find.byKey(const ValueKey('models-dialog-empty')),
+    );
+    await tapVisible(tester, find.byKey(const ValueKey('models-done')));
+    await pumpUntilFound(tester, find.text('No models entered'));
+    expect(find.text('E2E Spare Two'), findsNothing);
+  });
+
   await journey.step('Copying a contest with classes', () async {
     await goToMainPage(tester);
     await openContest(tester, 'Front Range F5J Open');
@@ -250,3 +369,11 @@ Future<void> runWizardPhase(Journey journey, JourneyContext data) async {
     expect(configurationCount(tester, 'Scoring pilots'), sourcePilots);
   });
 }
+
+/// The buttons that edit a pilot's models, in row order.
+final Finder _modelsButton = find.byWidgetPredicate(
+  (w) =>
+      w.key is ValueKey<String> &&
+      (w.key! as ValueKey<String>).value.startsWith('edit-models-'),
+  description: 'a pilot models button',
+);

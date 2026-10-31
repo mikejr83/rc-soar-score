@@ -24,11 +24,16 @@ class CreationIds {
   final Map<String, Id> _participations = {};
   final Map<String, Id> _teams = {};
   final Map<String, Id> _memberships = {};
+  final Map<String, Id> _profileModels = {};
 
   Id participation(Id profileId) =>
       _participations.putIfAbsent(profileId.value, Id.create);
 
   Id team(String name) => _teams.putIfAbsent(name.toLowerCase(), Id.create);
+
+  /// The id of the profile model made for the draft model [entryId].
+  Id profileModel(Id entryId) =>
+      _profileModels.putIfAbsent(entryId.value, Id.create);
 
   Id membership(Id profileId) =>
       _memberships.putIfAbsent(profileId.value, Id.create);
@@ -42,8 +47,8 @@ class CreationIds {
 /// score is created. Each request uses ids from [CreationIds], and steps
 /// that already happened are skipped, so retrying after a failure is safe.
 ///
-/// Models are not sent: participations have no place for them yet (#594).
-/// Remote profiles can't be added until remote search exists.
+/// A model typed in the wizard is added to the person's profile (so a later
+/// contest can pick it) and entered for the pilot. Remote profiles can't be added until remote search exists.
 class ContestCreator {
   ContestCreator(this.client);
 
@@ -55,6 +60,9 @@ class ContestCreator {
     final participations = await _addParticipants(contest, draft, ids);
     if (draft.has(ParticipantOption.teams)) {
       await _addTeams(contest, draft, ids, participations);
+    }
+    if (draft.has(ParticipantOption.models)) {
+      await _addModels(contest, draft, ids, participations);
     }
     return client.contest(contest.id);
   }
@@ -83,6 +91,17 @@ class ContestCreator {
           p.roleId.value,
           p.classification,
           p.team,
+          [
+            for (final m in p.models)
+              [
+                m.id.value,
+                m.catalogId?.value,
+                m.name,
+                m.manufacturer,
+                m.modelId,
+                m.contestIdentifier,
+              ],
+          ],
         ],
     ],
   ]);
@@ -211,6 +230,68 @@ class ContestCreator {
       added[participant.profileId.value] = participation.id;
     }
     return added;
+  }
+
+  Future<void> _addModels(
+    Contest contest,
+    ContestDraft draft,
+    CreationIds ids,
+    Map<String, Id> participations,
+  ) async {
+    final entered = {
+      for (final link in await client.modelLinks(contest.id)) link.id.value,
+    };
+    for (final participant in draft.participants) {
+      final participation = participations[participant.profileId.value];
+      if (participation == null ||
+          !draft.isScoring(participant) ||
+          participant.models.isEmpty) {
+        continue;
+      }
+      List<ModelCatalog>? profileModels;
+      for (final model in participant.models) {
+        if (entered.contains(model.id.value)) continue;
+        var catalogId = model.catalogId;
+        if (catalogId == null) {
+          profileModels ??= [
+            ...await client.profileModels(participant.profileId),
+          ];
+          final known = profileModels.where(
+            (m) =>
+                m.name.toLowerCase() == model.name.toLowerCase() &&
+                (m.manufacturer ?? '').toLowerCase() ==
+                    (model.manufacturer ?? '').toLowerCase(),
+          );
+          if (known.isNotEmpty) {
+            catalogId = known.first.id;
+          } else {
+            final created = await client.addProfileModel(
+              participant.profileId,
+              AddProfileModelRequest(
+                id: ids.profileModel(model.id),
+                name: model.name,
+                manufacturer: model.manufacturer,
+                modelId: model.modelId,
+              ),
+            );
+            profileModels.add(created);
+            catalogId = created.id;
+          }
+        }
+        await client.addModelLink(
+          contest.id,
+          participation,
+          AddModelLinkRequest(
+            id: model.id,
+            modelCatalogId: catalogId,
+            modelName: model.name,
+            manufacturer: model.manufacturer,
+            modelId: model.modelId,
+            contestSpecificIdentifier: model.contestIdentifier,
+          ),
+        );
+      }
+    }
   }
 
   Future<void> _addTeams(

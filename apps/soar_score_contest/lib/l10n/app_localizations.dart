@@ -1405,6 +1405,162 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No contests yet.'**
   String get contestsEmpty;
+
+  /// Shown in the Models cell of a pilot who has no models. A notice only: the contest goes ahead without models.
+  ///
+  /// In en, this message translates to:
+  /// **'No models entered'**
+  String get modelsCellNone;
+
+  /// Tooltip on the notice that a pilot has no models.
+  ///
+  /// In en, this message translates to:
+  /// **'A pilot without a model is fine. Add models any time.'**
+  String get modelsCellNoneTooltip;
+
+  /// Tooltip and accessible name of the button that opens a pilot's models.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit models for {name}'**
+  String modelsEditTooltip(String name);
+
+  /// Title of the window where a pilot's models are added, edited and removed.
+  ///
+  /// In en, this message translates to:
+  /// **'Models for {name}'**
+  String modelsDialogTitle(String name);
+
+  /// Shown in the models window when the pilot has no models.
+  ///
+  /// In en, this message translates to:
+  /// **'No models yet. The contest can go ahead without them.'**
+  String get modelsDialogEmpty;
+
+  /// Label of the menu that picks a model the person already has on their profile.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick one of their models'**
+  String get modelsPickLabel;
+
+  /// Hint under the profile model menu.
+  ///
+  /// In en, this message translates to:
+  /// **'Or type a new one below'**
+  String get modelsPickHint;
+
+  /// Label of the required model name field.
+  ///
+  /// In en, this message translates to:
+  /// **'Model name *'**
+  String get modelsFieldName;
+
+  /// Label of the optional model manufacturer field.
+  ///
+  /// In en, this message translates to:
+  /// **'Manufacturer'**
+  String get modelsFieldManufacturer;
+
+  /// Label of the optional field for the identifier the pilot put on the model.
+  ///
+  /// In en, this message translates to:
+  /// **'Model ID'**
+  String get modelsFieldModelId;
+
+  /// Helper text under the Model ID field.
+  ///
+  /// In en, this message translates to:
+  /// **'The marking the pilot put on the model'**
+  String get modelsFieldModelIdHelper;
+
+  /// Label of the optional field for the identifier the director applied for this contest.
+  ///
+  /// In en, this message translates to:
+  /// **'Contest identifier'**
+  String get modelsFieldContestId;
+
+  /// Helper text under the Contest identifier field.
+  ///
+  /// In en, this message translates to:
+  /// **'Applied by you for this contest, such as a serial number'**
+  String get modelsFieldContestIdHelper;
+
+  /// Button that opens the form to add a model.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a model'**
+  String get modelsAddButton;
+
+  /// Button that adds the model in the form.
+  ///
+  /// In en, this message translates to:
+  /// **'Add model'**
+  String get modelsSaveAdd;
+
+  /// Button that saves changes to the model in the form.
+  ///
+  /// In en, this message translates to:
+  /// **'Save model'**
+  String get modelsSaveEdit;
+
+  /// Button that closes the model form without saving.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get modelsFormCancel;
+
+  /// Button that closes the models window.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get modelsDone;
+
+  /// Tooltip of the button that edits one model.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit {model}'**
+  String modelsEditEntry(String model);
+
+  /// Tooltip of the button that removes one model.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {model}'**
+  String modelsRemoveEntry(String model);
+
+  /// Error under the model name field when it is empty.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a model name.'**
+  String get modelsNameRequired;
+
+  /// Warning in the model form when the model matches one the pilot already has.
+  ///
+  /// In en, this message translates to:
+  /// **'This pilot already has a model with the same name, manufacturer and ID.'**
+  String get modelsDuplicate;
+
+  /// Shown when a model change is refused because the model changed since it was read.
+  ///
+  /// In en, this message translates to:
+  /// **'This pilot\'s models were changed elsewhere. Close this window to refresh them, then try again.'**
+  String get modelsStale;
+
+  /// Shown when saving a model fails.
+  ///
+  /// In en, this message translates to:
+  /// **'The model could not be saved. {error}'**
+  String modelsSaveFailed(String error);
+
+  /// Detail line of a model: the identifier the pilot put on it.
+  ///
+  /// In en, this message translates to:
+  /// **'ID {value}'**
+  String modelsDetailModelId(String value);
+
+  /// Detail line of a model: the identifier the director applied for this contest.
+  ///
+  /// In en, this message translates to:
+  /// **'Contest {value}'**
+  String modelsDetailContestId(String value);
 }
 
 class _AppLocalizationsDelegate

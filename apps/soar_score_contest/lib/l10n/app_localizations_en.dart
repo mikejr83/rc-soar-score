@@ -952,4 +952,102 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get contestsEmpty => 'No contests yet.';
+
+  @override
+  String get modelsCellNone => 'No models entered';
+
+  @override
+  String get modelsCellNoneTooltip =>
+      'A pilot without a model is fine. Add models any time.';
+
+  @override
+  String modelsEditTooltip(String name) {
+    return 'Edit models for $name';
+  }
+
+  @override
+  String modelsDialogTitle(String name) {
+    return 'Models for $name';
+  }
+
+  @override
+  String get modelsDialogEmpty =>
+      'No models yet. The contest can go ahead without them.';
+
+  @override
+  String get modelsPickLabel => 'Pick one of their models';
+
+  @override
+  String get modelsPickHint => 'Or type a new one below';
+
+  @override
+  String get modelsFieldName => 'Model name *';
+
+  @override
+  String get modelsFieldManufacturer => 'Manufacturer';
+
+  @override
+  String get modelsFieldModelId => 'Model ID';
+
+  @override
+  String get modelsFieldModelIdHelper =>
+      'The marking the pilot put on the model';
+
+  @override
+  String get modelsFieldContestId => 'Contest identifier';
+
+  @override
+  String get modelsFieldContestIdHelper =>
+      'Applied by you for this contest, such as a serial number';
+
+  @override
+  String get modelsAddButton => 'Add a model';
+
+  @override
+  String get modelsSaveAdd => 'Add model';
+
+  @override
+  String get modelsSaveEdit => 'Save model';
+
+  @override
+  String get modelsFormCancel => 'Cancel';
+
+  @override
+  String get modelsDone => 'Done';
+
+  @override
+  String modelsEditEntry(String model) {
+    return 'Edit $model';
+  }
+
+  @override
+  String modelsRemoveEntry(String model) {
+    return 'Remove $model';
+  }
+
+  @override
+  String get modelsNameRequired => 'Enter a model name.';
+
+  @override
+  String get modelsDuplicate =>
+      'This pilot already has a model with the same name, manufacturer and ID.';
+
+  @override
+  String get modelsStale =>
+      'This pilot\'s models were changed elsewhere. Close this window to refresh them, then try again.';
+
+  @override
+  String modelsSaveFailed(String error) {
+    return 'The model could not be saved. $error';
+  }
+
+  @override
+  String modelsDetailModelId(String value) {
+    return 'ID $value';
+  }
+
+  @override
+  String modelsDetailContestId(String value) {
+    return 'Contest $value';
+  }
 }

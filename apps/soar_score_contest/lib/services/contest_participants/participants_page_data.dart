@@ -2,6 +2,7 @@ import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../matrix/matrix_page_data.dart';
+import '../participants/model_entry.dart';
 import '../participants/participant_option.dart';
 import 'stored_participant.dart';
 
@@ -11,6 +12,7 @@ class ParticipantsPageData {
     required this.base,
     required this.roles,
     required Set<Id> participationsWithScores,
+    this.modelLinks = const [],
   }) : _withScores = participationsWithScores;
 
   /// Loads the contest, its people, teams, matrix, scores and the roles.
@@ -19,11 +21,13 @@ class ParticipantsPageData {
       MatrixPageData.load(client, id),
       client.scores(id),
       client.roles(),
+      client.modelLinks(id),
     ]);
     final scores = results[1]! as ContestScores;
     return ParticipantsPageData(
       base: results[0]! as MatrixPageData,
       roles: _usable(results[2]! as List<Role>),
+      modelLinks: results[3]! as List<ContestModelLink>,
       participationsWithScores: {
         for (final slot in scores.slots)
           if (slot.placeholder.state != ScorePlaceholderState.notEntered)
@@ -44,6 +48,9 @@ class ParticipantsPageData {
   final MatrixPageData base;
   final List<Role> roles;
   final Set<Id> _withScores;
+
+  /// The models of every pilot of the contest.
+  final List<ContestModelLink> modelLinks;
 
   Contest get contest => base.contest;
 
@@ -90,6 +97,11 @@ class ParticipantsPageData {
             profile: profile,
             team: teams[memberships[participation.id]?.teamId]?.name ?? '',
             membershipId: memberships[participation.id]?.id,
+            models: [
+              for (final link in modelLinks)
+                if (link.contestParticipationId == participation.id)
+                  ModelEntry.fromLink(link),
+            ],
           ),
     ];
   }

@@ -52,13 +52,20 @@ void main() {
       },
     );
     expect(draft.issuesOf(draft.participants[0]), isEmpty);
-    // Models can't be recorded yet, so they never hold a pilot back.
+    // A missing model is a notice only; it never holds a pilot back.
     expect(draft.issuesOf(draft.participants[1]), [
       ParticipantIssue.classification,
     ]);
     // Non-flying roles are not scored, so they need neither.
     expect(draft.issuesOf(draft.participants[2]), isEmpty);
     expect(DraftValidation.participants(draft), isFalse);
+  });
+
+  test('a pilot without a model is ready; models never block', () {
+    final draft = _draft([_p(11), _p(12)], options: {ParticipantOption.models});
+    expect(draft.participants.every((p) => p.models.isEmpty), isTrue);
+    expect(draft.participantsNeedingFixes, isEmpty);
+    expect(DraftValidation.participants(draft), isTrue);
   });
 
   test('a team is optional', () {
