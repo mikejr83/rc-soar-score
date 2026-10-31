@@ -442,6 +442,10 @@ void _tests(Backend backend) {
 
 /// The ids of every audit event of the database, found by contest scope.
 Future<List<core.Id>> _eventIds(Installation inst) async {
-  final rows = await inst.db.customSelect('SELECT id FROM audit_events').get();
+  final rows = await inst.db
+      .customSelect(
+        "SELECT id FROM audit_events WHERE action = 'PublicationAttempt'",
+      )
+      .get();
   return [for (final row in rows) core.Id.parse(row.read<String>('id'))];
 }

@@ -15,8 +15,9 @@ AuditEventDto _event(
   AuditAction kind = AuditAction.stateTransition,
   AuditOutcome outcome = AuditOutcome.success,
   Id? actor,
+  Id? id,
 }) => AuditEventDto(
-  id: Id.create(),
+  id: id ?? Id.create(),
   entityType: 'Contest',
   entityId: contestId,
   action: kind,
@@ -32,15 +33,24 @@ void main() {
   final t2 = DateTime.utc(2026, 10, 18, 10);
 
   test('keeps the order and marks the acting account as you', () {
-    final facts = ActivityFacts.of([
-      _event(t2, action: ContestAction.lock),
-      _event(t1, action: ContestAction.openScoring, actor: _other),
-    ], actingAccountId: _me.value);
+    final lock = _event(t2, action: ContestAction.lock);
+    final open = _event(t1, action: ContestAction.openScoring, actor: _other);
+    final facts = ActivityFacts.of([lock, open], actingAccountId: _me.value);
 
     expect(facts.failed, isFalse);
     expect(facts.entries, [
-      ActivityEntry(kind: ActivityKind.lock, byYou: true, at: t2),
-      ActivityEntry(kind: ActivityKind.openScoring, byYou: false, at: t1),
+      ActivityEntry(
+        id: lock.id.value,
+        kind: ActivityKind.lock,
+        byYou: true,
+        at: t2,
+      ),
+      ActivityEntry(
+        id: open.id.value,
+        kind: ActivityKind.openScoring,
+        byYou: false,
+        at: t1,
+      ),
     ]);
   });
 
@@ -69,5 +79,44 @@ void main() {
     ]);
 
     expect(facts.entries, hasLength(ActivityFacts.shown));
+  });
+
+  test('lists configuration saves and matrix draws', () {
+    final facts = ActivityFacts.of([
+      _event(t1, kind: AuditAction.configurationSaved),
+      _event(t2, kind: AuditAction.matrixDrawn),
+    ], actingAccountId: _me.value);
+
+    expect(facts.entries.map((e) => e.kind), [
+      ActivityKind.matrixDrawn,
+      ActivityKind.configurationSaved,
+    ]);
+    expect(facts.entries.every((e) => e.byYou), isTrue);
+  });
+
+  test('orders events stored in the same instant by id, larger first', () {
+    final older = _event(
+      t1,
+      kind: AuditAction.configurationSaved,
+      id: Id.parse('019c0000-0000-7000-8000-0000000000c1'),
+    );
+    final newer = _event(
+      t1,
+      kind: AuditAction.matrixDrawn,
+      id: Id.parse('019c0000-0000-7000-8000-0000000000c2'),
+    );
+    const expected = [
+      ActivityKind.matrixDrawn,
+      ActivityKind.configurationSaved,
+    ];
+
+    expect(
+      ActivityFacts.of([older, newer]).entries.map((e) => e.kind),
+      expected,
+    );
+    expect(
+      ActivityFacts.of([newer, older]).entries.map((e) => e.kind),
+      expected,
+    );
   });
 }

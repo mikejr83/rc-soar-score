@@ -148,6 +148,26 @@ void main() {
       expect(await getMatrix(), body);
     });
 
+    test('a draw is an audit event the contest lists', () async {
+      await createContest();
+      await configure();
+      await addPilots(6);
+      await draw(seed: 7);
+      await draw(id: '019c0000-0000-7000-8000-000000000502'); // refused
+
+      final response = await api.send(
+        'GET',
+        '/contests/$_contestId/audit-events?action=MatrixDrawn',
+      );
+
+      final events = (await api.json(response))['audit_events']! as List;
+      expect(events, hasLength(1));
+      final event = events.single as Map;
+      expect(event['entity_id'], _revisionId);
+      expect(event['resulting_revision'], 1);
+      expect(event['reason'], 'initial draw');
+    });
+
     test('the same seed gives the same matrix', () async {
       Future<List<Object?>> run() async {
         api = HandlerHarness(_owner);

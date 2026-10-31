@@ -43,25 +43,25 @@ List<ShellDestination> shellDestinationsFor(
   if (contestId == null) {
     return const [
       ShellDestination(
-        label: 'Contests',
+        label: ShellDestinationName.contests,
         icon: Icons.event_outlined,
         selectedIcon: Icons.event,
         location: homePath,
       ),
       ShellDestination(
-        label: 'Participants',
+        label: ShellDestinationName.participants,
         icon: Icons.groups_outlined,
         selectedIcon: Icons.groups,
         location: participantsPath,
       ),
       ShellDestination(
-        label: 'Roles',
+        label: ShellDestinationName.roles,
         icon: Icons.badge_outlined,
         selectedIcon: Icons.badge,
         location: rolesPath,
       ),
       ShellDestination(
-        label: 'Landings',
+        label: ShellDestinationName.landings,
         icon: Icons.track_changes,
         selectedIcon: Icons.track_changes,
         location: landingsPath,
@@ -70,44 +70,44 @@ List<ShellDestination> shellDestinationsFor(
   }
   return [
     ShellDestination(
-      label: 'Workspace',
+      label: ShellDestinationName.workspace,
       icon: Icons.dashboard_outlined,
       selectedIcon: Icons.dashboard,
       location: contestWorkspacePath(contestId),
     ),
     ShellDestination(
-      label: 'Configuration',
+      label: ShellDestinationName.configuration,
       icon: Icons.tune_outlined,
       selectedIcon: Icons.tune,
       location: contestConfigurationPath(contestId),
     ),
     ShellDestination(
-      label: 'Participants',
+      label: ShellDestinationName.participants,
       icon: Icons.groups_outlined,
       selectedIcon: Icons.groups,
       location: contestParticipantsPath(contestId),
     ),
     ShellDestination(
-      label: 'Matrix',
+      label: ShellDestinationName.matrix,
       icon: Icons.grid_on_outlined,
       selectedIcon: Icons.grid_on,
       location: contestMatrixPath(contestId),
     ),
     ShellDestination(
-      label: 'Scoring',
+      label: ShellDestinationName.scoring,
       icon: Icons.edit_note_outlined,
       selectedIcon: Icons.edit_note,
       location: contestScoringPath(contestId),
     ),
     ShellDestination(
-      label: 'Reports',
+      label: ShellDestinationName.reports,
       icon: Icons.assessment_outlined,
       selectedIcon: Icons.assessment,
       location: contestReportsPath(contestId),
     ),
     if (showSync)
       ShellDestination(
-        label: 'Sync',
+        label: ShellDestinationName.sync,
         icon: Icons.sync_outlined,
         selectedIcon: Icons.sync,
         location: contestSyncPath(contestId),

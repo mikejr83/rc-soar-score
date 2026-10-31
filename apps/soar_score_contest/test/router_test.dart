@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_contest/app_mode_provider.dart';
 import 'package:soar_score_contest/pages/contest/workspace_page.dart';
 import 'package:soar_score_contest/router.dart';
@@ -51,7 +52,12 @@ void main() {
       final router = buildAppRouter(initialLocation: '/unknown-route');
       addTearDown(router.dispose);
 
-      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+      await tester.pumpWidget(
+        MaterialApp.router(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          routerConfig: router,
+        ),
+      );
       await tester.pumpAndSettle();
 
       expect(router.state.uri.path, landingPath);
@@ -61,7 +67,12 @@ void main() {
       final router = buildAppRouter(initialLocation: landingPath);
       addTearDown(router.dispose);
 
-      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+      await tester.pumpWidget(
+        MaterialApp.router(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          routerConfig: router,
+        ),
+      );
       await tester.pumpAndSettle();
 
       expect(router.state.uri.path, landingPath);
@@ -77,7 +88,12 @@ void main() {
         );
         addTearDown(router.dispose);
 
-        await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+        await tester.pumpWidget(
+          MaterialApp.router(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            routerConfig: router,
+          ),
+        );
         await tester.pumpAndSettle();
 
         expect(router.state.uri.path, landingPath);
@@ -94,7 +110,12 @@ void main() {
       );
       addTearDown(router.dispose);
 
-      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+      await tester.pumpWidget(
+        MaterialApp.router(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          routerConfig: router,
+        ),
+      );
       await tester.pumpAndSettle();
 
       expect(router.state.uri.path, '$landingPath/home');
@@ -110,7 +131,12 @@ void main() {
       );
       addTearDown(router.dispose);
 
-      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+      await tester.pumpWidget(
+        MaterialApp.router(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          routerConfig: router,
+        ),
+      );
       await tester.pumpAndSettle();
       expect(find.byType(ContestShell), findsOneWidget);
 
@@ -130,7 +156,12 @@ void main() {
       );
       addTearDown(router.dispose);
 
-      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+      await tester.pumpWidget(
+        MaterialApp.router(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          routerConfig: router,
+        ),
+      );
       await tester.pumpAndSettle();
 
       expect(router.state.uri.path, workspace);
@@ -148,7 +179,12 @@ void main() {
       );
       addTearDown(router.dispose);
 
-      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+      await tester.pumpWidget(
+        MaterialApp.router(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          routerConfig: router,
+        ),
+      );
       await tester.pumpAndSettle();
       expect(router.state.uri.path, '$landingPath/home');
 

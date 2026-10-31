@@ -315,7 +315,7 @@ class _LandingPageState extends State<LandingPage> {
     }
 
     return AppWindowTitle(
-      title: windowTitleFor(),
+      title: LandingPage.title,
       child: Scaffold(
         appBar: AppBar(
           automaticallyImplyLeading: false,

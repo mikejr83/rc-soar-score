@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../contest_list.dart';
 import '../detail_section_card.dart';
 
@@ -21,7 +22,10 @@ class WorkspaceFactsDetails extends StatelessWidget {
     return DetailSectionCard(
       title: 'Contest',
       items: [
-        DetailItem('Dates', ContestList.contestDates(contest)),
+        DetailItem(
+          'Dates',
+          ContestList.contestDates(AppLocalizations.of(context), contest),
+        ),
         DetailItem('Timezone', contest.timezone),
         DetailItem('Host', contest.host),
         DetailItem('Location', location),

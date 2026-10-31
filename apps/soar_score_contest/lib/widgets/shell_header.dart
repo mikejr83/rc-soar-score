@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../contest_draft_provider.dart';
+import '../l10n/app_localizations.dart';
 import '../router.dart';
 import 'new_contest/draft_status_label.dart';
 import 'shell_destinations.dart';
@@ -26,30 +27,60 @@ class ShellHeader extends StatelessWidget {
 
   final String path;
 
-  /// The selected contest's name, once loaded; [contestFallback] is shown
-  /// until then.
+  /// The selected contest's name, once loaded; a generic word is shown until
+  /// then.
   final String? contestName;
-
-  static const String contestFallback = 'Contest';
 
   static const double height = 64;
 
-  static String _label(String segment) => segment.length > 1
-      ? segment[0].toUpperCase() + segment.substring(1)
-      : segment;
+  /// Trailing segment standing for the `New` crumb.
+  static const String _newSegment = 'new';
+
+  /// Trailing segment standing for the `Edit` crumb.
+  static const String _editSegment = 'edit';
+
+  /// Trailing segment standing for the `New contest` crumb.
+  static const String _newContestSegment = 'new-contest';
+
+  /// The text of a trailing [segment]: a page the rail names, one of the
+  /// editor crumbs, else the segment capitalized.
+  static String _label(AppLocalizations l10n, String segment) =>
+      switch (segment) {
+        _newSegment => l10n.shellCrumbNew,
+        _editSegment => l10n.shellCrumbEdit,
+        _newContestSegment => l10n.shellCrumbNewContest,
+        'workspace' => l10n.shellNavWorkspace,
+        'configuration' => l10n.shellNavConfiguration,
+        'participants' => l10n.shellNavParticipants,
+        'matrix' => l10n.shellNavMatrix,
+        'scoring' => l10n.shellNavScoring,
+        'reports' => l10n.shellNavReports,
+        'sync' => l10n.shellNavSync,
+        'settings' => l10n.shellNavSettings,
+        _ =>
+          segment.length > 1
+              ? segment[0].toUpperCase() + segment.substring(1)
+              : segment,
+      };
 
   /// Whether [path] is the participant list or a page below it.
   static bool _isParticipants(String path) =>
       path == participantsPath || path.startsWith('$participantsPath/');
 
-  /// The path and label of the stub page (`Roles`, `Landings`) that [path]
-  /// is, else `null`.
-  static (String, String)? _stubRoot(String path) {
+  /// The path, breadcrumb key suffix and label of the stub page (`Roles`,
+  /// `Landings`, `Settings`) that [path] is, else `null`.
+  static (String, String, String Function(AppLocalizations))? _stubRoot(
+    String path,
+  ) {
     if (path == landingsPath || path.startsWith('$landingsPath/')) {
-      return (landingsPath, 'Landings');
+      return (landingsPath, 'landings', (l10n) => l10n.shellNavLandings);
     }
-    if (path == settingsPath) return (settingsPath, 'Settings');
-    return path == rolesPath ? (rolesPath, 'Roles') : null;
+    if (path == settingsPath) {
+      return (settingsPath, 'settings', (l10n) => l10n.shellNavSettings);
+    }
+    return path == rolesPath
+        ? (rolesPath, 'roles', (l10n) => l10n.shellNavRoles)
+        : null;
   }
 
   /// Path segments to show as plain crumbs after the root crumb (and the
@@ -61,11 +92,11 @@ class ShellHeader extends StatelessWidget {
       if (path == participantsPath) {
         return const [];
       }
-      return [path == newParticipantPath ? 'New' : 'Edit'];
+      return [path == newParticipantPath ? _newSegment : _editSegment];
     } else if (_stubRoot(path) != null) {
-      return path == newLandingPath ? const ['New'] : const [];
+      return path == newLandingPath ? const [_newSegment] : const [];
     } else if (path == newContestPath) {
-      return const ['New contest'];
+      return const [_newContestSegment];
     } else if (contestId != null) {
       rest = path.substring('$contestsPath/$contestId'.length);
     } else if (path.startsWith('$homePath/')) {
@@ -79,14 +110,18 @@ class ShellHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
+    final contestFallback = l10n.shellContestFallback;
     final participants = _isParticipants(path);
     final stub = _stubRoot(path);
     final rootPath = participants ? participantsPath : stub?.$1 ?? homePath;
-    final rootLabel = participants ? 'Participants' : stub?.$2 ?? 'Contests';
+    final rootLabel = participants
+        ? l10n.shellNavParticipants
+        : stub?.$3(l10n) ?? l10n.shellNavContests;
     final rootKey = participants
         ? 'breadcrumb-participants'
         : stub != null
-        ? 'breadcrumb-${stub.$2.toLowerCase()}'
+        ? 'breadcrumb-${stub.$2}'
         : 'breadcrumb-contests';
     final isRoot = path == rootPath;
     final contestId = contestIdFor(path);
@@ -106,9 +141,9 @@ class ShellHeader extends StatelessWidget {
     // The title names the selected page: the deepest segment, else the
     // contest's page or the root page itself.
     final title = trailing.isNotEmpty
-        ? _label(trailing.last)
+        ? _label(l10n, trailing.last)
         : contestId != null
-        ? 'Workspace'
+        ? l10n.shellNavWorkspace
         : rootLabel;
     final crumbs = trailing.isEmpty
         ? const <String>[]
@@ -150,7 +185,7 @@ class ShellHeader extends StatelessWidget {
                     separator,
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8),
-                      child: Text(_label(segment), style: crumbStyle),
+                      child: Text(_label(l10n, segment), style: crumbStyle),
                     ),
                   ],
                 ],

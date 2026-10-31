@@ -3,6 +3,7 @@ import 'package:logging/logging.dart';
 import '../enums/audit_action.dart';
 import '../enums/audit_outcome.dart';
 import '../enums/contest_action.dart';
+import '../errors/contest_state_error.dart';
 import '../errors/entity_not_found_error.dart';
 import '../models/contest/contest.dart';
 import '../models/id.dart';
@@ -14,6 +15,7 @@ import '../repositories/stale_revision_error.dart';
 import 'contest_details.dart';
 import 'contest_lifecycle.dart';
 import 'contest_transition_audit.dart';
+import 'scores_service.dart';
 import 'new_contest.dart';
 
 final Logger _logger = Logger('ContestsService');
@@ -141,7 +143,14 @@ class ContestsService {
       );
     }
     final now = _clock();
-    final changed = ContestLifecycle.apply(stored, action, now);
+    final changed = ContestLifecycle.apply(
+      stored,
+      action,
+      now,
+      hideThroughRound: action == ContestAction.hideResults
+          ? await _hideThroughRound(id)
+          : null,
+    );
     final audit = AuditEvent(
       id: _newId(),
       entityType: stored.entityType,
@@ -184,6 +193,23 @@ class ContestsService {
       id,
       action: action,
       limit: limit,
+    );
+  }
+
+  /// The round overall results stay visible through when hiding starts: the
+  /// round in progress, or else the last completed one.
+  ///
+  /// Throws a [ContestStateError] when no round has a score yet.
+  Future<int> _hideThroughRound(Id id) async {
+    final progress = (await ScoresService(repository).list(id)).rounds;
+    for (final round in progress) {
+      if (round.isStarted && !round.isComplete) return round.ordinal;
+    }
+    for (final round in progress.reversed) {
+      if (round.isComplete) return round.ordinal;
+    }
+    throw ContestStateError.invalidTransition(
+      'results can be hidden once a round has a score',
     );
   }
 

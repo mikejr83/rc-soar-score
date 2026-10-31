@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_contest/router.dart';
 
 import '../support/fake_auth_session.dart';
@@ -15,7 +16,12 @@ void main() {
       );
       addTearDown(router.dispose);
 
-      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+      await tester.pumpWidget(
+        MaterialApp.router(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          routerConfig: router,
+        ),
+      );
       await tester.pumpAndSettle();
 
       expect(router.state.uri.path, landingPath);
@@ -28,7 +34,12 @@ void main() {
       );
       addTearDown(router.dispose);
 
-      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+      await tester.pumpWidget(
+        MaterialApp.router(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          routerConfig: router,
+        ),
+      );
       await tester.pumpAndSettle();
 
       expect(router.state.uri.path, homePath);
@@ -41,7 +52,12 @@ void main() {
       final router = buildAppRouter(initialLocation: homePath, auth: session);
       addTearDown(router.dispose);
 
-      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+      await tester.pumpWidget(
+        MaterialApp.router(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          routerConfig: router,
+        ),
+      );
       await tester.pumpAndSettle();
       expect(router.state.uri.path, homePath);
 

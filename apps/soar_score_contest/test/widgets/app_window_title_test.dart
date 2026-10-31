@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/l10n/app_localizations_en.dart';
 import 'package:soar_score_contest/widgets/app_window_title.dart';
 
 import '../support/window_title_recorder.dart';
@@ -11,12 +12,12 @@ Widget _host(String title) => MaterialApp(
 void main() {
   group('windowTitleFor', () {
     test('is the application name without a contest', () {
-      expect(windowTitleFor(), 'RC Soar Score');
+      expect(windowTitleFor(AppLocalizationsEn()), 'RC Soar Score');
     });
 
     test('appends the selected contest name', () {
       expect(
-        windowTitleFor(contestName: 'Spring F3J 2026'),
+        windowTitleFor(AppLocalizationsEn(), contestName: 'Spring F3J 2026'),
         'RC Soar Score: Spring F3J 2026',
       );
     });

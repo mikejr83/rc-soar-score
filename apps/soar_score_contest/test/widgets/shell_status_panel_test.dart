@@ -31,6 +31,7 @@ void main() {
   ) async {
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
         home: Scaffold(
           body: ShellStatusPanel(contest: _contest(access: ScoringAccess.open)),
         ),
@@ -53,6 +54,7 @@ void main() {
     final opened = <WorkspaceControlTarget>[];
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
         home: Scaffold(
           body: ShellStatusPanel(
             contest: _contest(access: ScoringAccess.open),
@@ -88,6 +90,7 @@ void main() {
   testWidgets('a value is at least 48 dp to hit', (tester) async {
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
         home: Scaffold(
           body: ShellStatusPanel(contest: _contest(), onOpen: (_) {}),
         ),
@@ -103,6 +106,7 @@ void main() {
   testWidgets('without a callback the values are not buttons', (tester) async {
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
         home: Scaffold(body: ShellStatusPanel(contest: _contest())),
       ),
     );

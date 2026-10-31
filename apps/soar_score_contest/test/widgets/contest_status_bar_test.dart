@@ -178,6 +178,35 @@ void _syncAndStorage() {
 
     expect(find.byKey(const ValueKey('shell-sync-status')), findsNothing);
   });
+
+  testWidgets('keeps the same height with and without a selected contest', (
+    tester,
+  ) async {
+    // The sync entry only exists in a contest; it must not inflate the bar.
+    final contest = _contest();
+    final sync = FakeAppSync(
+      state: AppSyncState(
+        scopes: {
+          ContestScopeKey(contest.id): const SyncScopeSummary(localOnly: true),
+        },
+      ),
+    );
+    for (final width in [800.0, 360.0]) {
+      tester.view.physicalSize = Size(width, 700);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(_frame(null));
+      await tester.pump();
+      final without = tester.getSize(find.byType(ContestStatusBar)).height;
+
+      await tester.pumpWidget(_frame(contest, sync: sync));
+      await tester.pump();
+      final withContest = tester.getSize(find.byType(ContestStatusBar)).height;
+
+      expect(withContest, without, reason: 'at ${width.round()}dp');
+    }
+  });
 }
 
 void _constrained() {

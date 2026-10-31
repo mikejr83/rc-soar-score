@@ -77,6 +77,20 @@ void main() {
       );
     });
 
+    test('names the results hiding actions', () {
+      for (final action in [
+        ContestAction.hideResults,
+        ContestAction.showResults,
+      ]) {
+        final json = ContestActionRequest(
+          action: action,
+          baseRevision: 1,
+        ).toJson();
+        expect(json['action'], action.name);
+        expect(ContestActionRequest.fromJson(json).action, action);
+      }
+    });
+
     test('an unknown action fails to decode', () {
       expect(
         () => ContestActionRequest.fromJson({

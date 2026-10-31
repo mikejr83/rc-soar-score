@@ -1093,6 +1093,318 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{actor, select, you{You updated the published results} other{The published results were updated}}'**
   String activityPublication(String actor);
+
+  /// Recent activity line: a configuration revision was saved.
+  ///
+  /// In en, this message translates to:
+  /// **'{actor, select, you{You saved the contest configuration} other{The contest configuration was saved}}'**
+  String activityConfigurationSaved(String actor);
+
+  /// Recent activity line: the matrix was drawn or redrawn.
+  ///
+  /// In en, this message translates to:
+  /// **'{actor, select, you{You drew the matrix} other{The matrix was drawn}}'**
+  String activityMatrixDrawn(String actor);
+
+  /// Navigation rail destination, page title and breadcrumb: main page.
+  ///
+  /// In en, this message translates to:
+  /// **'Contests'**
+  String get shellNavContests;
+
+  /// Navigation rail destination, page title and breadcrumb: main page and contest.
+  ///
+  /// In en, this message translates to:
+  /// **'Participants'**
+  String get shellNavParticipants;
+
+  /// Navigation rail destination, page title and breadcrumb: main page.
+  ///
+  /// In en, this message translates to:
+  /// **'Roles'**
+  String get shellNavRoles;
+
+  /// Navigation rail destination, page title and breadcrumb: main page.
+  ///
+  /// In en, this message translates to:
+  /// **'Landings'**
+  String get shellNavLandings;
+
+  /// Navigation rail destination, page title and breadcrumb: contest.
+  ///
+  /// In en, this message translates to:
+  /// **'Workspace'**
+  String get shellNavWorkspace;
+
+  /// Navigation rail destination, page title and breadcrumb: contest.
+  ///
+  /// In en, this message translates to:
+  /// **'Configuration'**
+  String get shellNavConfiguration;
+
+  /// Navigation rail destination, page title and breadcrumb: contest.
+  ///
+  /// In en, this message translates to:
+  /// **'Matrix'**
+  String get shellNavMatrix;
+
+  /// Navigation rail destination, page title and breadcrumb: contest.
+  ///
+  /// In en, this message translates to:
+  /// **'Scoring'**
+  String get shellNavScoring;
+
+  /// Navigation rail destination, page title and breadcrumb: contest.
+  ///
+  /// In en, this message translates to:
+  /// **'Reports'**
+  String get shellNavReports;
+
+  /// Navigation rail destination, page title and breadcrumb: contest, native builds.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync'**
+  String get shellNavSync;
+
+  /// Navigation rail destination, page title and breadcrumb: breadcrumb and title of the Settings page and the account menu item.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get shellNavSettings;
+
+  /// Button on the rail while on a participant page.
+  ///
+  /// In en, this message translates to:
+  /// **'Add participant'**
+  String get shellAddParticipant;
+
+  /// Button on the rail while on the Landings page.
+  ///
+  /// In en, this message translates to:
+  /// **'New landing'**
+  String get shellNewLanding;
+
+  /// Button on the rail while on the Roles page.
+  ///
+  /// In en, this message translates to:
+  /// **'New role'**
+  String get shellNewRole;
+
+  /// Button that opens the New Contest wizard before a draft exists.
+  ///
+  /// In en, this message translates to:
+  /// **'Create contest'**
+  String get createContestLabel;
+
+  /// Button that returns to the New Contest wizard while a draft is underway.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue configuration'**
+  String get continueConfigurationLabel;
+
+  /// Tooltip of the rail button that narrows the navigation rail.
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse navigation'**
+  String get shellCollapseNav;
+
+  /// Tooltip of the rail button that widens the navigation rail.
+  ///
+  /// In en, this message translates to:
+  /// **'Expand navigation'**
+  String get shellExpandNav;
+
+  /// Last breadcrumb and page title on a page that creates a participant or landing.
+  ///
+  /// In en, this message translates to:
+  /// **'New'**
+  String get shellCrumbNew;
+
+  /// Last breadcrumb and page title on the participant editor.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get shellCrumbEdit;
+
+  /// Last breadcrumb and page title of the New Contest wizard.
+  ///
+  /// In en, this message translates to:
+  /// **'New contest'**
+  String get shellCrumbNewContest;
+
+  /// Stands in for the contest name in the header until it has loaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Contest'**
+  String get shellContestFallback;
+
+  /// Tooltip of the account menu when working offline.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings and sign in'**
+  String get shellAccountSettingsAndSignIn;
+
+  /// Account menu item that returns to the sign-in page.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in'**
+  String get shellSignIn;
+
+  /// Account menu item that ends the session.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out'**
+  String get shellSignOut;
+
+  /// Shown as the account name when the identity provider gives none.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed in'**
+  String get shellSignedIn;
+
+  /// Tooltip of the account menu while signed in.
+  ///
+  /// In en, this message translates to:
+  /// **'Account: {name}'**
+  String shellAccountTooltip(String name);
+
+  /// Accessible name of the account picture.
+  ///
+  /// In en, this message translates to:
+  /// **'Account menu'**
+  String get shellAccountMenu;
+
+  /// Explains a page that is only a placeholder.
+  ///
+  /// In en, this message translates to:
+  /// **'This page has not been built yet. Please check back soon.'**
+  String get shellNotBuiltDetail;
+
+  /// Accessible name of the contest status panel.
+  ///
+  /// In en, this message translates to:
+  /// **'Contest status'**
+  String get shellStatusPanelLabel;
+
+  /// Label of the lifecycle state in the contest status panel.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get shellStatusLifecycle;
+
+  /// Label of the participant scoring state in the contest status panel.
+  ///
+  /// In en, this message translates to:
+  /// **'Participant scoring'**
+  String get shellStatusScoring;
+
+  /// Label of the administration lock state in the contest status panel.
+  ///
+  /// In en, this message translates to:
+  /// **'Administration'**
+  String get shellStatusAdministration;
+
+  /// Participant scoring is open.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get shellScoringOpen;
+
+  /// Participant scoring is closed.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed'**
+  String get shellScoringClosed;
+
+  /// Administration is locked.
+  ///
+  /// In en, this message translates to:
+  /// **'Locked'**
+  String get shellAdminLocked;
+
+  /// Administration is unlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlocked'**
+  String get shellAdminUnlocked;
+
+  /// Accessible name of a button in the contest status panel; target names the control it opens.
+  ///
+  /// In en, this message translates to:
+  /// **'{label}: {value}. {target, select, lifecycle{Go to the status control} scoring{Go to the participant scoring control} administration{Go to the administration control} other{Go to the control}}'**
+  String shellStatusSemantics(String label, String value, String target);
+
+  /// Contest lifecycle state "created".
+  ///
+  /// In en, this message translates to:
+  /// **'Created'**
+  String get lifecycleCreated;
+
+  /// Contest lifecycle state "configuring".
+  ///
+  /// In en, this message translates to:
+  /// **'Configuring'**
+  String get lifecycleConfiguring;
+
+  /// Contest lifecycle state "ready".
+  ///
+  /// In en, this message translates to:
+  /// **'Ready'**
+  String get lifecycleReady;
+
+  /// Contest lifecycle state "running".
+  ///
+  /// In en, this message translates to:
+  /// **'Running'**
+  String get lifecycleRunning;
+
+  /// Contest lifecycle state "completed".
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get lifecycleCompleted;
+
+  /// Window or browser tab title while a contest is selected; app is the application name.
+  ///
+  /// In en, this message translates to:
+  /// **'{app}: {contest}'**
+  String windowTitleContest(String app, String contest);
+
+  /// Heading of the contest list.
+  ///
+  /// In en, this message translates to:
+  /// **'Contests'**
+  String get contestListHeading;
+
+  /// Number of contests beside the list heading.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 contest} other{{count} contests}}'**
+  String contestListCount(int count);
+
+  /// Start and end dates of a contest that spans days.
+  ///
+  /// In en, this message translates to:
+  /// **'{start} to {end}'**
+  String contestDateRange(String start, String end);
+
+  /// Title of the error shown when the contest list fails to load.
+  ///
+  /// In en, this message translates to:
+  /// **'Contests could not be loaded.'**
+  String get contestsLoadFailed;
+
+  /// Accessible name of the loading indicator on the main page.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading contests'**
+  String get contestsLoading;
+
+  /// Shown on the main page when there are no contests.
+  ///
+  /// In en, this message translates to:
+  /// **'No contests yet.'**
+  String get contestsEmpty;
 }
 
 class _AppLocalizationsDelegate

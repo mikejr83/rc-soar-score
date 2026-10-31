@@ -104,6 +104,26 @@ void main() {
       },
     );
 
+    test('each save is an audit event the contest lists', () async {
+      await save(_body());
+      await save(_body(base: 1, discipline: {'working_time': 480}));
+      await save(_body()); // stale: refused, leaves no event
+
+      final response = await send(
+        'GET',
+        '/contests/$_contestId/audit-events?action=ConfigurationSaved',
+      );
+
+      final events = (await json(response))['audit_events']! as List;
+      expect(
+        [
+          for (final e in events.cast<Map<String, Object?>>())
+            (e['action'], e['resulting_revision']),
+        ],
+        [('ConfigurationSaved', 2), ('ConfigurationSaved', 1)],
+      );
+    });
+
     test('the next revision needs the latest revision number', () async {
       await save(_body());
 

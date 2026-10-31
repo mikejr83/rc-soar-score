@@ -53,8 +53,24 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
         isNot(contains('Continue scoring')),
       );
       expect(_key('attention-card'), findsNothing);
-      // The activity card is on every workspace, empty or not.
+      // The activity card is on every workspace, empty or not. The ready
+      // contest already drew its matrix and saved its configuration (twice:
+      // once in the wizard, once in the setup phase), so the card lists the
+      // newest of each, newest first. Only the native app knows which account
+      // it acts as, so only it can say "you".
       await pumpUntilFound(tester, _key('activity-card'));
+      await pumpUntilFound(
+        tester,
+        find.text(kIsWeb ? 'The matrix was drawn' : 'You drew the matrix'),
+      );
+      expect(
+        find.text(
+          kIsWeb
+              ? 'The contest configuration was saved'
+              : 'You saved the contest configuration',
+        ),
+        findsWidgets,
+      );
 
       // The checklist rows open the pages that fix them.
       await tapVisible(tester, _key('checklist-row-pilots'));

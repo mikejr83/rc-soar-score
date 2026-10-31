@@ -883,5 +883,260 @@
         "type": "String"
       }
     }
+  },
+  "activityConfigurationSaved": "{actor, select, you{You saved the contest configuration} other{The contest configuration was saved}}",
+  "@activityConfigurationSaved": {
+    "description": "Recent activity line: a configuration revision was saved.",
+    "placeholders": {
+      "actor": {
+        "type": "String"
+      }
+    }
+  },
+  "activityMatrixDrawn": "{actor, select, you{You drew the matrix} other{The matrix was drawn}}",
+  "@activityMatrixDrawn": {
+    "description": "Recent activity line: the matrix was drawn or redrawn.",
+    "placeholders": {
+      "actor": {
+        "type": "String"
+      }
+    }
+  },
+  "shellNavContests": "Contests",
+  "@shellNavContests": {
+    "description": "Navigation rail destination, page title and breadcrumb: main page."
+  },
+  "shellNavParticipants": "Participants",
+  "@shellNavParticipants": {
+    "description": "Navigation rail destination, page title and breadcrumb: main page and contest."
+  },
+  "shellNavRoles": "Roles",
+  "@shellNavRoles": {
+    "description": "Navigation rail destination, page title and breadcrumb: main page."
+  },
+  "shellNavLandings": "Landings",
+  "@shellNavLandings": {
+    "description": "Navigation rail destination, page title and breadcrumb: main page."
+  },
+  "shellNavWorkspace": "Workspace",
+  "@shellNavWorkspace": {
+    "description": "Navigation rail destination, page title and breadcrumb: contest."
+  },
+  "shellNavConfiguration": "Configuration",
+  "@shellNavConfiguration": {
+    "description": "Navigation rail destination, page title and breadcrumb: contest."
+  },
+  "shellNavMatrix": "Matrix",
+  "@shellNavMatrix": {
+    "description": "Navigation rail destination, page title and breadcrumb: contest."
+  },
+  "shellNavScoring": "Scoring",
+  "@shellNavScoring": {
+    "description": "Navigation rail destination, page title and breadcrumb: contest."
+  },
+  "shellNavReports": "Reports",
+  "@shellNavReports": {
+    "description": "Navigation rail destination, page title and breadcrumb: contest."
+  },
+  "shellNavSync": "Sync",
+  "@shellNavSync": {
+    "description": "Navigation rail destination, page title and breadcrumb: contest, native builds."
+  },
+  "shellNavSettings": "Settings",
+  "@shellNavSettings": {
+    "description": "Navigation rail destination, page title and breadcrumb: breadcrumb and title of the Settings page and the account menu item."
+  },
+  "shellAddParticipant": "Add participant",
+  "@shellAddParticipant": {
+    "description": "Button on the rail while on a participant page."
+  },
+  "shellNewLanding": "New landing",
+  "@shellNewLanding": {
+    "description": "Button on the rail while on the Landings page."
+  },
+  "shellNewRole": "New role",
+  "@shellNewRole": {
+    "description": "Button on the rail while on the Roles page."
+  },
+  "createContestLabel": "Create contest",
+  "@createContestLabel": {
+    "description": "Button that opens the New Contest wizard before a draft exists."
+  },
+  "continueConfigurationLabel": "Continue configuration",
+  "@continueConfigurationLabel": {
+    "description": "Button that returns to the New Contest wizard while a draft is underway."
+  },
+  "shellCollapseNav": "Collapse navigation",
+  "@shellCollapseNav": {
+    "description": "Tooltip of the rail button that narrows the navigation rail."
+  },
+  "shellExpandNav": "Expand navigation",
+  "@shellExpandNav": {
+    "description": "Tooltip of the rail button that widens the navigation rail."
+  },
+  "shellCrumbNew": "New",
+  "@shellCrumbNew": {
+    "description": "Last breadcrumb and page title on a page that creates a participant or landing."
+  },
+  "shellCrumbEdit": "Edit",
+  "@shellCrumbEdit": {
+    "description": "Last breadcrumb and page title on the participant editor."
+  },
+  "shellCrumbNewContest": "New contest",
+  "@shellCrumbNewContest": {
+    "description": "Last breadcrumb and page title of the New Contest wizard."
+  },
+  "shellContestFallback": "Contest",
+  "@shellContestFallback": {
+    "description": "Stands in for the contest name in the header until it has loaded."
+  },
+  "shellAccountSettingsAndSignIn": "Settings and sign in",
+  "@shellAccountSettingsAndSignIn": {
+    "description": "Tooltip of the account menu when working offline."
+  },
+  "shellSignIn": "Sign in",
+  "@shellSignIn": {
+    "description": "Account menu item that returns to the sign-in page."
+  },
+  "shellSignOut": "Sign out",
+  "@shellSignOut": {
+    "description": "Account menu item that ends the session."
+  },
+  "shellSignedIn": "Signed in",
+  "@shellSignedIn": {
+    "description": "Shown as the account name when the identity provider gives none."
+  },
+  "shellAccountTooltip": "Account: {name}",
+  "@shellAccountTooltip": {
+    "description": "Tooltip of the account menu while signed in.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "shellAccountMenu": "Account menu",
+  "@shellAccountMenu": {
+    "description": "Accessible name of the account picture."
+  },
+  "shellNotBuiltDetail": "This page has not been built yet. Please check back soon.",
+  "@shellNotBuiltDetail": {
+    "description": "Explains a page that is only a placeholder."
+  },
+  "shellStatusPanelLabel": "Contest status",
+  "@shellStatusPanelLabel": {
+    "description": "Accessible name of the contest status panel."
+  },
+  "shellStatusLifecycle": "Status",
+  "@shellStatusLifecycle": {
+    "description": "Label of the lifecycle state in the contest status panel."
+  },
+  "shellStatusScoring": "Participant scoring",
+  "@shellStatusScoring": {
+    "description": "Label of the participant scoring state in the contest status panel."
+  },
+  "shellStatusAdministration": "Administration",
+  "@shellStatusAdministration": {
+    "description": "Label of the administration lock state in the contest status panel."
+  },
+  "shellScoringOpen": "Open",
+  "@shellScoringOpen": {
+    "description": "Participant scoring is open."
+  },
+  "shellScoringClosed": "Closed",
+  "@shellScoringClosed": {
+    "description": "Participant scoring is closed."
+  },
+  "shellAdminLocked": "Locked",
+  "@shellAdminLocked": {
+    "description": "Administration is locked."
+  },
+  "shellAdminUnlocked": "Unlocked",
+  "@shellAdminUnlocked": {
+    "description": "Administration is unlocked."
+  },
+  "shellStatusSemantics": "{label}: {value}. {target, select, lifecycle{Go to the status control} scoring{Go to the participant scoring control} administration{Go to the administration control} other{Go to the control}}",
+  "@shellStatusSemantics": {
+    "description": "Accessible name of a button in the contest status panel; target names the control it opens.",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "lifecycleCreated": "Created",
+  "@lifecycleCreated": {
+    "description": "Contest lifecycle state \"created\"."
+  },
+  "lifecycleConfiguring": "Configuring",
+  "@lifecycleConfiguring": {
+    "description": "Contest lifecycle state \"configuring\"."
+  },
+  "lifecycleReady": "Ready",
+  "@lifecycleReady": {
+    "description": "Contest lifecycle state \"ready\"."
+  },
+  "lifecycleRunning": "Running",
+  "@lifecycleRunning": {
+    "description": "Contest lifecycle state \"running\"."
+  },
+  "lifecycleCompleted": "Completed",
+  "@lifecycleCompleted": {
+    "description": "Contest lifecycle state \"completed\"."
+  },
+  "windowTitleContest": "{app}: {contest}",
+  "@windowTitleContest": {
+    "description": "Window or browser tab title while a contest is selected; app is the application name.",
+    "placeholders": {
+      "app": {
+        "type": "String"
+      },
+      "contest": {
+        "type": "String"
+      }
+    }
+  },
+  "contestListHeading": "Contests",
+  "@contestListHeading": {
+    "description": "Heading of the contest list."
+  },
+  "contestListCount": "{count, plural, =1{1 contest} other{{count} contests}}",
+  "@contestListCount": {
+    "description": "Number of contests beside the list heading.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "contestDateRange": "{start} to {end}",
+  "@contestDateRange": {
+    "description": "Start and end dates of a contest that spans days.",
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "contestsLoadFailed": "Contests could not be loaded.",
+  "@contestsLoadFailed": {
+    "description": "Title of the error shown when the contest list fails to load."
+  },
+  "contestsLoading": "Loading contests",
+  "@contestsLoading": {
+    "description": "Accessible name of the loading indicator on the main page."
+  },
+  "contestsEmpty": "No contests yet.",
+  "@contestsEmpty": {
+    "description": "Shown on the main page when there are no contests."
   }
 }

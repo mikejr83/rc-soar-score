@@ -32,10 +32,10 @@ RedrawMatrixRequest _$RedrawMatrixRequestFromJson(Map<String, dynamic> json) =>
           ),
           seedCount: $checkedConvert('seed_count', (v) => (v as num?)?.toInt()),
           reason: $checkedConvert('reason', (v) => v as String?),
-           baseMatrixRevision: $checkedConvert(
-             'base_matrix_revision',
-             (v) => (v as num).toInt(),
-           ),
+          baseMatrixRevision: $checkedConvert(
+            'base_matrix_revision',
+            (v) => (v as num).toInt(),
+          ),
           preview: $checkedConvert('preview', (v) => v as bool?),
         );
         return val;

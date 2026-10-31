@@ -18,6 +18,7 @@ abstract final class BrandLogos {
   static const String lockupDark = '${_dir}rc-soar-score-lockup-dark.svg';
   static const String lockupDarkTransparent =
       '${_dir}rc-soar-score-lockup-dark-transparent.svg';
+
   /// The lockup without its tagline line, for heights under about 120px
   /// where the tagline would be unreadable. Derived from the kit lockups.
   static const String lockupLightCompact =

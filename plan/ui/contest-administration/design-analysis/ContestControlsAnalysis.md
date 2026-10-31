@@ -75,6 +75,8 @@ So the controls have **current-value data and mutation endpoints for five of the
 
 ### 1. Hide-results has no backend
 
+> Update (#237): `ContestAction` now also has `hideResults` and `showResults`, and `Contest` carries `resultsHiddenThroughRound` and `resultsHiddenAt`. The paragraph below describes the state before that change.
+
 `ContestAction` contains only `complete`, `openScoring`, `closeScoring`, `lock`, `unlock`. There is **no** `hideScores` / `unhideScores` action, **no** "overall results Shown / Hidden through round N (24-hour expiry)" field on `Contest`, and **no** server handler for it. The brief describes hide-results as a control with a countdown, but the data model and API have no such state.
 
 Options:

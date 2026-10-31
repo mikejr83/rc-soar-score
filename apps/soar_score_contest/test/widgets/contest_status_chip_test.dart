@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_contest/widgets/contest_status_chip.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
@@ -8,6 +9,7 @@ void main() {
     final handle = tester.ensureSemantics();
     await tester.pumpWidget(
       const MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
         home: Scaffold(body: ContestStatusChip(state: LifecycleState.running)),
       ),
     );
