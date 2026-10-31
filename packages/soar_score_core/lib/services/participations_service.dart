@@ -117,10 +117,9 @@ class ParticipationsService {
   /// score is refused with a [ContestStateError] (`has_scores`; they retire
   /// instead). A non-flier who becomes a pilot in a drawn contest needs room
   /// in every round that is not fully scored (`no_room_in_round`). Throws a
-  /// [StaleRevisionError] when [baseRevision] is not the
-  /// stored revision, and an [ArgumentError] when the result breaks a
-  /// participation rule (a non-pilot with a classification or a retirement
-  /// round).
+  /// [StaleRevisionError] when [baseRevision] is not the stored revision, and
+  /// an [ArgumentError] when the result breaks a participation rule (a
+  /// non-pilot with a classification or a retirement round).
   Future<({ContestParticipation participation, int matrixRowsRemoved})> update(
     Id contestId,
     Id ownerAccountId,

@@ -146,6 +146,7 @@ void main() {
       expect(find.textContaining('Raise the number of groups'), findsOneWidget);
       expect(find.textContaining('Nothing was added'), findsOneWidget);
       expect(find.text('Pia Ward added to the contest.'), findsNothing);
+      expect(find.text('Open Matrix'), findsOneWidget);
     });
 
     testWidgets('a locked administration cannot add', (tester) async {

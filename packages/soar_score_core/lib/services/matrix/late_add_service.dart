@@ -3,7 +3,6 @@ import 'dart:math';
 import '../../enums/admin_lock.dart';
 import '../../enums/assignment_type.dart';
 import '../../enums/lifecycle_state.dart';
-import '../../enums/score_placeholder_state.dart';
 import '../../errors/contest_state_error.dart';
 import '../../errors/entity_not_found_error.dart';
 import '../../models/contest/contest.dart';
@@ -253,7 +252,7 @@ class LateAddService {
       final placeholder = await repository.scorePlaceholderRepository
           .findForAssignment(assignment.id);
       if (placeholder != null &&
-          placeholder.state != ScorePlaceholderState.notEntered) {
+          _rules.hasFlown(assignment, {assignment.id: placeholder})) {
         throw ContestStateError(
           'group_already_flown',
           'group $group already has scores; choose a group that has not '

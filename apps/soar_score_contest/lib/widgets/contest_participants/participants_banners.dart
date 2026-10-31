@@ -89,14 +89,14 @@ List<Widget> participantBanners({
         shape: PageBannerShape.card,
         title: 'Couldn’t add ${failedAdd.firstName} ${failedAdd.lastName}',
         text: c.addNeedsRoom
-            ? '${c.addFailure ?? ''} Nothing was added. Try again once the '
-                      'groups are changed.'
+            ? '${c.addFailure ?? ''} Nothing was added. Add them again once '
+                      'the groups are changed.'
                   .trim()
             : '${c.addFailure ?? ''} Nothing was added. Trying again won’t '
                       'add them twice.'
                   .trim(),
-        actionLabel: 'Try again',
-        onAction: onRetryAdd,
+        actionLabel: c.addNeedsRoom ? 'Open Matrix' : 'Try again',
+        onAction: c.addNeedsRoom ? onOpenMatrix : onRetryAdd,
       ),
     );
   }

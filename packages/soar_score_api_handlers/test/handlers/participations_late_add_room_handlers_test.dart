@@ -161,4 +161,64 @@ void main() {
     expect(response.statusCode, 409);
     expect((await api.errorOf(response))['message'], contains('locked'));
   });
+
+  test('a round with no assignments yet does not refuse anyone', () async {
+    await drawnContest(api, pilots: 6);
+    // Rounds exist but hold no assignments yet.
+    api.repository.matrixAssignments.stored.clear();
+
+    final response = await join(7);
+
+    expect(response.statusCode, 201, reason: '${await api.json(response)}');
+  });
+
+  test(
+    'a teammate in every group refuses a non-flier becoming a pilot',
+    () async {
+      await drawnContest(
+        api,
+        pilots: 5,
+        core: {
+          'teams_enabled': true,
+          'team_pilot_count': 2,
+          'team_protection': true,
+        },
+      );
+      expect(
+        (await join(6, roleId: SystemRoles.helperId.value)).statusCode,
+        201,
+      );
+      const teamId = '019c0000-0000-7000-8000-000000000301';
+      final team = await api.send(
+        'POST',
+        '/contests/$_contestId/teams',
+        body: {'id': teamId, 'name': 'Red'},
+      );
+      expect(team.statusCode, 201, reason: '${await api.json(team)}');
+      // Teammates in both groups of every round: pilots 1 to 5 and the helper.
+      for (var n = 1; n <= 6; n++) {
+        final member = await api.send(
+          'POST',
+          '/contests/$_contestId/team-memberships',
+          body: {
+            'id': '019c0000-0000-7000-8000-00000000040$n',
+            'team_id': teamId,
+            'contest_participation_id': matrixTestParticipationId(n),
+          },
+        );
+        expect(member.statusCode, 201, reason: '${await api.json(member)}');
+      }
+
+      final response = await api.send(
+        'PUT',
+        '/contests/$_contestId/participations/${matrixTestParticipationId(6)}',
+        body: {'base_revision': 0, 'role_id': SystemRoles.pilotId.value},
+      );
+
+      expect(response.statusCode, 409);
+      final error = await api.errorOf(response);
+      expect(error['code'], 'no_room_in_round');
+      expect(error['message'], contains('with a teammate'));
+    },
+  );
 }
