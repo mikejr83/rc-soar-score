@@ -156,6 +156,8 @@ void main() {
       AddParticipationRequest(
         id: core.Id.create(),
         participantProfileId: profile.id,
+        // The imported contest is drawn and full, so a pilot would be refused.
+        roleId: core.SystemRoles.helperId,
       ),
     );
 

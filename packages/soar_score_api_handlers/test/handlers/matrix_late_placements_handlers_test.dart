@@ -41,6 +41,30 @@ void main() {
     expect(response.statusCode, 201, reason: '${await api.json(response)}');
   }
 
+  /// Stores pilot [n] in the contest without the server's room check, as
+  /// older data holds them.
+  Future<void> joinsWithoutRoom(int n) async {
+    await api.send(
+      'POST',
+      '/participants',
+      body: {
+        'id': matrixTestProfileId(n),
+        'first_name': 'P$n',
+        'last_name': 'X',
+      },
+    );
+    final id = Id.parse(_participationId(n));
+    api.repository.participations.participations[id] = ContestParticipation(
+      id: id,
+      contestId: Id.parse(_contestId),
+      participantProfileId: Id.parse(matrixTestProfileId(n)),
+      roleId: SystemRoles.pilotId,
+      roleName: 'Pilot',
+      roleType: RoleType.pilot,
+      scoringUuid: ScoringUuid.create(),
+    );
+  }
+
   Future<Map<String, Object?>> place(int n) async {
     final response = await api.send(
       'POST',
@@ -160,9 +184,10 @@ void main() {
   });
 
   test('a round with no open group is reported, not failed', () async {
-    // Six pilots in two full groups of three.
+    // Six pilots in two full groups of three, and a seventh who is in the
+    // contest anyway (data from before adds were refused).
     await drawnContest(api, pilots: 6);
-    await joins(7);
+    await joinsWithoutRoom(7);
 
     final body = await place(7);
 

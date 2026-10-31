@@ -13,14 +13,14 @@
 
 ## Fields/Properties
 
-| Field                      | Type    | Required | Default | Description                                      |
-| -------------------------- | ------- | -------- | ------- | ------------------------------------------------ |
-| `id`                       | UUIDv7  | Yes      | —       | Primary key                                      |
-| `contest_id`               | UUIDv7  | Yes      | —       | Foreign key to Contest                           |
-| `contest_participation_id` | UUIDv7  | Yes      | —       | Foreign key to ContestParticipation              |
-| `round_id`                 | UUIDv7  | Yes      | —       | Foreign key to Round                             |
+| Field                      | Type    | Required | Default | Description                                                |
+| -------------------------- | ------- | -------- | ------- | ---------------------------------------------------------- |
+| `id`                       | UUIDv7  | Yes      | —       | Primary key                                                |
+| `contest_id`               | UUIDv7  | Yes      | —       | Foreign key to Contest                                     |
+| `contest_participation_id` | UUIDv7  | Yes      | —       | Foreign key to ContestParticipation                        |
+| `round_id`                 | UUIDv7  | Yes      | —       | Foreign key to Round                                       |
 | `contest_model_link_id`    | UUIDv7  | Yes      | —       | Foreign key to the ContestModelLink that started the round |
-| `revision`                 | Integer | Yes      | 0       | Revision counter for optimistic locking          |
+| `revision`                 | Integer | Yes      | 0       | Revision counter for optimistic locking                    |
 
 ## Invariants and Constraints
 

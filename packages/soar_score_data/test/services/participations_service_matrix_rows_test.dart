@@ -158,6 +158,35 @@ void _tests(Backend backend) {
       expect(removed, 0);
     });
 
+    test('a pilot is refused when every group of a round is full', () async {
+      final profile = await ParticipantsService(repository).create(
+        actor,
+        core.Id.create(),
+        ParticipantDetails(firstName: 'Late', lastName: 'Test'),
+        metadata: meta(),
+      );
+      final before = (await pilots()).length;
+
+      await expectLater(
+        service.add(
+          contestId,
+          actor,
+          id: core.Id.create(),
+          participantProfileId: profile.id,
+          metadata: meta(),
+        ),
+        throwsA(
+          isA<core.ContestStateError>().having(
+            (e) => e.code,
+            'code',
+            'no_room_in_round',
+          ),
+        ),
+      );
+
+      expect(await pilots(), hasLength(before));
+    });
+
     test('a pilot with a score is refused and keeps everything', () async {
       final scored = (await pilots()).first;
       await score(scored);

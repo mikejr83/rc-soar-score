@@ -886,7 +886,7 @@ class _PanelFrame extends StatelessWidget {
     final line = BorderSide(color: scheme.outlineVariant);
     // Material paints the tint so list tiles inside can show their ink.
     return Material(
-      color: scheme.surfaceContainerLow,
+      color: scheme.secondaryContainer,
       child: DecoratedBox(
         decoration: BoxDecoration(
           border: sideEdge ? Border(right: line) : Border(bottom: line),

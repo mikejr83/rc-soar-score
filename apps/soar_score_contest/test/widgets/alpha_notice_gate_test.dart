@@ -3,13 +3,26 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_contest/app.dart';
 import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_contest/pages/landing_page.dart';
+import 'package:soar_score_contest/services/alpha_notice/alpha_notice_key.dart';
+import 'package:soar_score_contest/services/ui_account/ui_account.dart';
 import 'package:soar_score_contest/widgets/alpha_notice_gate.dart';
+import 'package:soar_score_ui_storage/soar_score_ui_storage.dart';
 
-Widget _host({required bool enabled}) => MaterialApp(
+LocalUiStore _store() => BackendLocalUiStore(MemoryLocalUiBackend());
+
+final _t0 = DateTime.utc(2026, 10, 31, 12);
+
+Widget _host({
+  required bool enabled,
+  LocalUiStore? store,
+  DateTime Function()? now,
+}) => MaterialApp(
   localizationsDelegates: AppLocalizations.localizationsDelegates,
   supportedLocales: AppLocalizations.supportedLocales,
   home: AlphaNoticeGate(
     enabled: enabled,
+    store: store,
+    now: now ?? DateTime.now,
     child: Scaffold(
       body: Center(
         child: ElevatedButton(onPressed: () {}, child: const Text('Behind')),
@@ -91,6 +104,104 @@ void main() {
     await tester.pumpWidget(_host(enabled: true));
 
     expect(find.text('Alpha release'), findsOneWidget);
+  });
+
+  group('remembered acknowledgement', () {
+    testWidgets('stays quiet on a new launch within 24 hours', (tester) async {
+      final store = _store();
+      await tester.pumpWidget(
+        _host(enabled: true, store: store, now: () => _t0),
+      );
+      await tester.pump();
+      expect(find.text('Alpha release'), findsOneWidget);
+      await _acknowledge(tester);
+
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pumpWidget(
+        _host(
+          enabled: true,
+          store: store,
+          now: () => _t0.add(const Duration(hours: 23)),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.text('Alpha release'), findsNothing);
+      expect(find.text('Behind'), findsOneWidget);
+    });
+
+    testWidgets('returns after 24 hours', (tester) async {
+      final store = _store();
+      await store.set(localUiAccountId, alphaNoticeAcknowledgedKey, _t0);
+
+      await tester.pumpWidget(
+        _host(
+          enabled: true,
+          store: store,
+          now: () => _t0.add(const Duration(hours: 24)),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.text('Alpha release'), findsOneWidget);
+    });
+
+    testWidgets('shows with nothing stored, after a brief cover while '
+        'loading', (tester) async {
+      await tester.pumpWidget(
+        _host(enabled: true, store: _store(), now: () => _t0),
+      );
+      expect(find.text('Alpha release'), findsNothing);
+      await tester.pump();
+      expect(find.text('Alpha release'), findsOneWidget);
+    });
+
+    testWidgets('does not flash for a recent acknowledgement', (tester) async {
+      final store = _store();
+      await store.set(localUiAccountId, alphaNoticeAcknowledgedKey, _t0);
+
+      await tester.pumpWidget(
+        _host(enabled: true, store: store, now: () => _t0),
+      );
+      expect(find.text('Alpha release'), findsNothing);
+      await tester.pump();
+      expect(find.text('Alpha release'), findsNothing);
+      expect(find.text('Behind'), findsOneWidget);
+    });
+
+    testWidgets('a few seconds of clock jitter still counts', (tester) async {
+      final store = _store();
+      await store.set(localUiAccountId, alphaNoticeAcknowledgedKey, _t0);
+
+      await tester.pumpWidget(
+        _host(
+          enabled: true,
+          store: store,
+          now: () => _t0.subtract(const Duration(seconds: 5)),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.text('Alpha release'), findsNothing);
+    });
+
+    testWidgets('a time in the future counts as not acknowledged', (
+      tester,
+    ) async {
+      final store = _store();
+      await store.set(
+        localUiAccountId,
+        alphaNoticeAcknowledgedKey,
+        _t0.add(const Duration(days: 2)),
+      );
+
+      await tester.pumpWidget(
+        _host(enabled: true, store: store, now: () => _t0),
+      );
+      await tester.pump();
+
+      expect(find.text('Alpha release'), findsOneWidget);
+    });
   });
 
   testWidgets('covers the landing page of the app when opted in', (

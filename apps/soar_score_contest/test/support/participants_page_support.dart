@@ -114,6 +114,10 @@ class ParticipantsServer {
   /// Fails every addition with this status when set.
   int? addFailure;
 
+  /// The error code and text of a failed addition, when not a server error.
+  String? addFailureCode;
+  String? addFailureMessage;
+
   /// The participations put in the rounds, in order.
   final List<Id> placements = [];
 
@@ -380,7 +384,11 @@ class ParticipantsServer {
   http.Response _add(Map<String, dynamic> body) {
     additions.add(body);
     if (addFailure != null) {
-      return _error(addFailure!, 'internal_error', 'The server failed.');
+      return _error(
+        addFailure!,
+        addFailureCode ?? 'internal_error',
+        addFailureMessage ?? 'The server failed.',
+      );
     }
     final profile = Id.parse(body['participant_profile_id']! as String);
     final roleId = body['role_id'] as String?;

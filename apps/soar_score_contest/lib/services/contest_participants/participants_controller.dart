@@ -64,6 +64,10 @@ class ParticipantsController extends ChangeNotifier {
   Role? failedAddRole;
   String? addFailure;
 
+  /// Whether the last failed add was refused because a round has no group
+  /// with room, which trying again does not change until the groups do.
+  bool addNeedsRoom = false;
+
   /// What the last removal left behind.
   RemoveResult? lastRemoval;
 
@@ -604,6 +608,7 @@ class ParticipantsController extends ChangeNotifier {
       failedAdd = null;
       failedAddRole = null;
       addFailure = null;
+      addNeedsRoom = false;
       await _read();
       final rowId = participation.id.value;
       _states[rowId] = RowState(RowOutcome.added, late: late);
@@ -616,6 +621,8 @@ class ParticipantsController extends ChangeNotifier {
       failedAdd = profile;
       failedAddRole = role;
       addFailure = apiErrorTextOf(error);
+      addNeedsRoom =
+          error is ApiHttpError && error.error?.code == 'no_room_in_round';
       notifyListeners();
       return false;
     }

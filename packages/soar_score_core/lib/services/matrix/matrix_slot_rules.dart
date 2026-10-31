@@ -5,7 +5,9 @@ import '../../enums/lane_mode.dart';
 import '../../errors/contest_state_error.dart';
 import '../../models/id.dart';
 import '../../models/matrix/matrix_assignment.dart';
+import '../../enums/score_placeholder_state.dart';
 import '../../models/matrix/round.dart';
+import '../../models/scores/score_placeholder.dart';
 import '../../repositories/repository.dart';
 
 /// The rules about where a pilot may sit in a round, shared by the edits that
@@ -29,6 +31,34 @@ class MatrixSlotRules {
     for (final row in rows)
       if (!row.isSuperseded) row,
   ];
+
+  /// Whether [assignment] has a score entered (past `NotEntered`), so its
+  /// group has flown.
+  bool hasFlown(
+    MatrixAssignment assignment,
+    Map<Id, ScorePlaceholder> placeholders,
+  ) => switch (placeholders[assignment.id]?.state) {
+    null || ScorePlaceholderState.notEntered => false,
+    _ => true,
+  };
+
+  /// Whether a teammate of [participationId] (by [teamOf], the team of each
+  /// participation) already flies in [group] among [live].
+  bool teamAllows({
+    required Id participationId,
+    required List<MatrixAssignment> live,
+    required int group,
+    required Map<Id, Id> teamOf,
+  }) {
+    final team = teamOf[participationId];
+    if (team == null) return true;
+    return !live.any(
+      (other) =>
+          other.group == group &&
+          other.contestParticipationId != participationId &&
+          teamOf[other.contestParticipationId] == team,
+    );
+  }
 
   /// The size of the largest group the draw made in [round]: the lanes of the
   /// round, and the room of every group.
@@ -102,17 +132,16 @@ class MatrixSlotRules {
           ))
         membership.contestParticipationId: membership.teamId,
     };
-    final team = teamOf[participationId];
-    if (team == null) return;
-    for (final other in live) {
-      if (other.group == group &&
-          other.contestParticipationId != participationId &&
-          teamOf[other.contestParticipationId] == team) {
-        throw ContestStateError(
-          'team_conflict',
-          'a teammate already flies in this group',
-        );
-      }
+    if (!teamAllows(
+      participationId: participationId,
+      live: live,
+      group: group,
+      teamOf: teamOf,
+    )) {
+      throw ContestStateError(
+        'team_conflict',
+        'a teammate already flies in this group',
+      );
     }
   }
 }

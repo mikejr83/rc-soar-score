@@ -174,7 +174,7 @@ class PilotPanel extends StatelessWidget {
       label: 'Opponents of ${pilot.name}',
       child: Material(
         key: const ValueKey('pilot-panel'),
-        color: scheme.surfaceContainerLow,
+        color: scheme.secondaryContainer,
         elevation: bottom ? 3 : 1,
         borderRadius: bottom
             ? const BorderRadius.vertical(top: Radius.circular(28))

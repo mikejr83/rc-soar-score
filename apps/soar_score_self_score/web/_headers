@@ -1,0 +1,33 @@
+# Cloudflare Pages response headers. Copied into the build output by Flutter.
+# Cloudflare serves index.html for unknown paths (SPA fallback) as long as the
+# build output has no 404.html and no _redirects file; do not add either.
+
+/*
+  X-Robots-Tag: noindex, nofollow
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+
+# Entry points and version files must always revalidate so deploys are picked up.
+/
+  Cache-Control: no-cache
+/index.html
+  Cache-Control: no-cache
+/flutter_bootstrap.js
+  Cache-Control: no-cache
+/flutter_service_worker.js
+  Cache-Control: no-cache
+/version.json
+  Cache-Control: no-cache
+/manifest.json
+  Cache-Control: no-cache
+/main.dart.js
+  Cache-Control: no-cache
+
+# Static assets have stable names but rarely change: revalidate daily.
+/assets/*
+  Cache-Control: public, max-age=3600
+/canvaskit/*
+  Cache-Control: public, max-age=86400
+/icons/*
+  Cache-Control: public, max-age=86400
