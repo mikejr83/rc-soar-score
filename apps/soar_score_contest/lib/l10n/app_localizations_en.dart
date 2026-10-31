@@ -1119,4 +1119,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String matrixMovedLine(int round, String reason) {
     return 'Round $round: $reason';
   }
+
+  @override
+  String get matrixMoveSourceRetired =>
+      'This pilot has retired and cannot be moved.';
+
+  @override
+  String get matrixMoveChecking => 'Checking scores…';
 }

@@ -1669,6 +1669,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Round {round}: {reason}'**
   String matrixMovedLine(int round, String reason);
+
+  /// Why a retired pilot cannot be moved.
+  ///
+  /// In en, this message translates to:
+  /// **'This pilot has retired and cannot be moved.'**
+  String get matrixMoveSourceRetired;
+
+  /// Snackbar while the scores are read before the move dialog opens.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking scores…'**
+  String get matrixMoveChecking;
 }
 
 class _AppLocalizationsDelegate

@@ -27,6 +27,7 @@ class MatrixDrawnView extends StatefulWidget {
     required this.onRedraw,
     this.actionBlock,
     this.onMovePilot,
+    this.moveBlock,
   });
 
   final MatrixPageData data;
@@ -44,6 +45,9 @@ class MatrixDrawnView extends StatefulWidget {
   /// Moves the pilot of an assignment (the pilot actions menu); `null` leaves
   /// the menu off.
   final ValueChanged<Id>? onMovePilot;
+
+  /// Why moving a pilot is off for the whole contest, or `null`.
+  final String? moveBlock;
 
   @override
   State<MatrixDrawnView> createState() => _MatrixDrawnViewState();
@@ -182,14 +186,7 @@ class _MatrixDrawnViewState extends State<MatrixDrawnView> {
           controller: _grid,
           onAddRounds: widget.actionBlock == null ? widget.onAddRounds : null,
           onMove: widget.onMovePilot,
-          moveBlock: switch (data.contest) {
-            Contest(adminLock: AdminLock.locked) => l10n.matrixMoveLocked,
-            Contest(:final lifecycleState)
-                when lifecycleState != LifecycleState.ready &&
-                    lifecycleState != LifecycleState.running =>
-              l10n.matrixMoveNotEditable,
-            _ => null,
-          },
+          moveBlock: widget.moveBlock,
         );
         return CallbackShortcuts(
           bindings: {

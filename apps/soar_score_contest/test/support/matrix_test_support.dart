@@ -291,6 +291,9 @@ class MatrixServer {
   String? participationWarning;
   int _participationRevision = 0;
 
+  /// The scores read as the server answers it.
+  ContestScores scoresForTest() => _scores();
+
   ContestScores _scores() {
     final current = matrix ?? CurrentMatrix();
     final rounds = {for (final r in current.rounds) r.id: r.ordinal};

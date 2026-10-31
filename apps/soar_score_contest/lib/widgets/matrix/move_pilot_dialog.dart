@@ -7,24 +7,11 @@ import '../../services/matrix/draw_form_check.dart';
 import '../../services/matrix/matrix_pilot.dart';
 import '../../services/matrix/move_plan.dart';
 import '../api_error_text.dart';
-import 'matrix_colors.dart';
+import 'move_banner.dart';
+import 'move_group_tile.dart';
+import 'move_outcome.dart';
 
-/// What the move dialog ended with.
-sealed class MoveOutcome {
-  const MoveOutcome();
-}
-
-/// The server moved the pilot; [matrix] is the matrix after the move.
-class PilotMoved extends MoveOutcome {
-  const PilotMoved(this.matrix);
-
-  final CurrentMatrix matrix;
-}
-
-/// The matrix or the contest changed under the dialog: reload the page.
-class MoveNeedsReload extends MoveOutcome {
-  const MoveNeedsReload();
-}
+export 'move_outcome.dart';
 
 /// Sends a move to the server.
 typedef SendMove = Future<CurrentMatrix> Function(
@@ -125,7 +112,9 @@ class _MovePilotDialogState extends State<MovePilotDialog> {
         _busy) {
       return;
     }
-    final key = '${target.round.id.value}/${target.group}/$_lane/$reason';
+    // The reason is not part of the key: after a lost connection the move
+    // may have gone through, and a changed reason must not send a new move.
+    final key = '${target.round.id.value}/${target.group}/$_lane';
     setState(() => _busy = true);
     final l10n = AppLocalizations.of(context);
     try {
@@ -169,142 +158,6 @@ class _MovePilotDialogState extends State<MovePilotDialog> {
     }
   }
 
-  String _blockText(AppLocalizations l10n, MoveTarget target) =>
-      switch (target.block!) {
-        MoveBlockKind.currentGroup => l10n.matrixMoveBlockCurrent,
-        MoveBlockKind.alreadyInGroup => l10n.matrixMoveBlockAlready(
-          target.round.ordinal,
-        ),
-        MoveBlockKind.groupLocked => l10n.matrixMoveBlockGroupLocked,
-        MoveBlockKind.roundLocked => l10n.matrixMoveBlockRoundLocked,
-        MoveBlockKind.teamProtection => l10n.matrixMoveBlockTeam,
-      };
-
-  String _notIdealText(AppLocalizations l10n, NotIdealReason reason) =>
-      switch (reason) {
-        NotIdealReason.hasScores => l10n.matrixMoveReasonHasScores,
-        NotIdealReason.roundCompleted => l10n.matrixMoveReasonRoundCompleted,
-        NotIdealReason.teammate => l10n.matrixMoveReasonTeammate,
-      };
-
-  Widget _banner(
-    BuildContext context, {
-    required Key key,
-    required IconData icon,
-    required String text,
-    required bool error,
-  }) {
-    final scheme = Theme.of(context).colorScheme;
-    return Semantics(
-      liveRegion: true,
-      child: Container(
-        key: key,
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: error ? scheme.errorContainer : scheme.tertiaryContainer,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          spacing: 10,
-          children: [
-            Icon(
-              icon,
-              size: 20,
-              color: error
-                  ? scheme.onErrorContainer
-                  : scheme.onTertiaryContainer,
-            ),
-            Expanded(
-              child: Text(
-                text,
-                style: TextStyle(
-                  color: error
-                      ? scheme.onErrorContainer
-                      : scheme.onTertiaryContainer,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _groupTile(
-    BuildContext context,
-    AppLocalizations l10n,
-    MoveTarget target,
-  ) {
-    final scheme = Theme.of(context).colorScheme;
-    final colors = MatrixColors.of(context);
-    final letter = DrawFormCheck.groupLetter(target.group - 1);
-    final selected =
-        _target?.round.id == target.round.id && _target?.group == target.group;
-    final sourceBlocked = widget.plan.sourceBlock != null;
-    final enabled = target.allowed && !sourceBlocked && !_busy;
-    final List<String> lines = target.allowed
-        ? [for (final reason in target.notIdeal) _notIdealText(l10n, reason)]
-        : [_blockText(l10n, target)];
-    final mark = !target.allowed
-        ? null
-        : target.recommended
-        ? (Icons.thumb_up_outlined, l10n.matrixMoveRecommended, scheme.primary)
-        : (Icons.warning_amber, l10n.matrixMoveNotIdeal, colors.warn);
-    return Semantics(
-      selected: selected,
-      child: ListTile(
-        key: ValueKey('move-group-$letter'),
-        enabled: enabled,
-        selected: selected,
-        dense: true,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-          side: selected
-              ? BorderSide(color: scheme.primary, width: 2)
-              : BorderSide.none,
-        ),
-        leading: Icon(
-          !target.allowed
-              ? Icons.block
-              : selected
-              ? Icons.radio_button_checked
-              : Icons.radio_button_unchecked,
-        ),
-        title: Row(
-          spacing: 8,
-          children: [
-            Text(l10n.matrixMoveGroupLabel(letter)),
-            if (mark != null)
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                spacing: 4,
-                children: [
-                  Icon(mark.$1, size: 16, color: mark.$3),
-                  Text(
-                    mark.$2,
-                    key: ValueKey('move-mark-$letter'),
-                    style: Theme.of(context).textTheme.labelMedium
-                        ?.copyWith(color: mark.$3, fontWeight: FontWeight.w600),
-                  ),
-                ],
-              ),
-          ],
-        ),
-        subtitle: lines.isEmpty
-            ? null
-            : Text(lines.join(' '), key: ValueKey('move-note-$letter')),
-        onTap: enabled
-            ? () => setState(() {
-                _target = target;
-                _lane = null;
-              })
-            : null,
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -334,16 +187,14 @@ class _MovePilotDialogState extends State<MovePilotDialog> {
                       ),
               ),
               if (plan.scored)
-                _banner(
-                  context,
+                MoveBanner(
                   key: const ValueKey('move-score-warning'),
                   icon: Icons.warning_amber,
                   text: l10n.matrixMoveScoredWarning,
                   error: true,
                 ),
               if (sourceBlock != null)
-                _banner(
-                  context,
+                MoveBanner(
                   key: const ValueKey('move-source-block'),
                   icon: Icons.lock_outline,
                   text: switch (sourceBlock) {
@@ -351,6 +202,8 @@ class _MovePilotDialogState extends State<MovePilotDialog> {
                       l10n.matrixMoveSourceGroupLocked,
                     SourceBlockKind.scoreLocked =>
                       l10n.matrixMoveSourceScoreLocked,
+                    SourceBlockKind.pilotRetired =>
+                      l10n.matrixMoveSourceRetired,
                   },
                   error: false,
                 ),
@@ -386,7 +239,20 @@ class _MovePilotDialogState extends State<MovePilotDialog> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   for (final group in plan.groupsOf(_round))
-                    _groupTile(context, l10n, group),
+                    MoveGroupTile(
+                      target: group,
+                      selected:
+                          _target?.round.id == group.round.id &&
+                          _target?.group == group.group,
+                      enabled:
+                          group.allowed &&
+                          widget.plan.sourceBlock == null &&
+                          !_busy,
+                      onTap: () => setState(() {
+                        _target = group;
+                        _lane = null;
+                      }),
+                    ),
                 ],
               ),
               if (_submitted && target == null)
@@ -444,8 +310,7 @@ class _MovePilotDialogState extends State<MovePilotDialog> {
                 onChanged: (_) => setState(() {}),
               ),
               if (_failure != null)
-                _banner(
-                  context,
+                MoveBanner(
                   key: const ValueKey('move-error'),
                   icon: Icons.error_outline,
                   text: _failure!,

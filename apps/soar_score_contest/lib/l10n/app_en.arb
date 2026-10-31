@@ -1352,5 +1352,13 @@
       "round": {"type": "int"},
       "reason": {"type": "String"}
     }
+  },
+  "matrixMoveSourceRetired": "This pilot has retired and cannot be moved.",
+  "@matrixMoveSourceRetired": {
+    "description": "Why a retired pilot cannot be moved."
+  },
+  "matrixMoveChecking": "Checking scores…",
+  "@matrixMoveChecking": {
+    "description": "Snackbar while the scores are read before the move dialog opens."
   }
 }

@@ -5,6 +5,8 @@ import '../../l10n/app_localizations.dart';
 import '../../services/matrix/matrix_grid_model.dart';
 import '../../services/matrix/team_marker.dart';
 import 'matrix_colors.dart';
+import 'moved_label.dart';
+import 'pilot_actions_menu.dart';
 import 'team_badge.dart';
 
 /// One pilot in a group of a round. Selecting it highlights the pilot in
@@ -148,7 +150,7 @@ class PilotRowTile extends StatelessWidget {
                     ),
                   ),
                 ),
-                if (slot.moved) _MovedLabel(label: l10n.matrixMovedLabel),
+                if (slot.moved) MovedLabel(label: l10n.matrixMovedLabel),
                 if (showLane && slot.lane != null)
                   Container(
                     constraints: const BoxConstraints(minHeight: 22),
@@ -164,87 +166,12 @@ class PilotRowTile extends StatelessWidget {
                     ),
                   ),
                 if (selected && onMove != null)
-                  _PilotActions(onMove: onMove!, block: moveBlock),
+                  PilotActionsMenu(onMove: onMove!, block: moveBlock),
               ],
             ),
           ),
         ),
       ),
-    );
-  }
-}
-
-/// The mark on a pilot whom a director moved: an icon and the word, so it
-/// never relies on colour.
-class _MovedLabel extends StatelessWidget {
-  const _MovedLabel({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return Row(
-      key: const ValueKey('moved-label'),
-      mainAxisSize: MainAxisSize.min,
-      spacing: 2,
-      children: [
-        Icon(Icons.swap_horiz, size: 14, color: scheme.onSurfaceVariant),
-        Text(
-          label,
-          style: TextStyle(fontSize: 11, color: scheme.onSurfaceVariant),
-        ),
-      ],
-    );
-  }
-}
-
-/// The pilot actions menu on the highlighted pilot. Move is shown off, with
-/// the reason beside it, when the contest does not allow it.
-class _PilotActions extends StatelessWidget {
-  const _PilotActions({required this.onMove, required this.block});
-
-  final VoidCallback onMove;
-  final String? block;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
-    return PopupMenuButton<void>(
-      key: const ValueKey('pilot-actions'),
-      tooltip: l10n.matrixPilotActions,
-      padding: EdgeInsets.zero,
-      iconSize: 18,
-      style: IconButton.styleFrom(
-        minimumSize: const Size(28, 28),
-        padding: EdgeInsets.zero,
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      ),
-      icon: Icon(Icons.more_vert, color: theme.colorScheme.onSurface),
-      itemBuilder: (context) => [
-        PopupMenuItem<void>(
-          key: const ValueKey('pilot-action-move'),
-          enabled: block == null,
-          onTap: onMove,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(l10n.matrixMoveMenu),
-              if (block != null)
-                ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 260),
-                  child: Text(
-                    block!,
-                    key: const ValueKey('pilot-action-move-reason'),
-                    style: theme.textTheme.bodySmall,
-                  ),
-                ),
-            ],
-          ),
-        ),
-      ],
     );
   }
 }

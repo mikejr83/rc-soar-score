@@ -157,6 +157,19 @@ class _MatrixPageState extends State<MatrixPage> {
     return null;
   }
 
+  /// Why moving a pilot is off for the whole contest, or `null`.
+  String? _moveBlock(MatrixPageData data, AppLocalizations l10n) {
+    final contest = data.contest;
+    if (contest.adminLock == AdminLock.locked) {
+      return l10n.matrixMoveLocked;
+    }
+    if (contest.lifecycleState != LifecycleState.ready &&
+        contest.lifecycleState != LifecycleState.running) {
+      return l10n.matrixMoveNotEditable;
+    }
+    return null;
+  }
+
   /// Opens the form for [intent], filled in from the current matrix.
   void _openForm(MatrixIntent intent, MatrixPageData data) {
     final plan = MatrixRoundsPlan.of(data.matrix);
@@ -481,11 +494,32 @@ class _MatrixPageState extends State<MatrixPage> {
       return;
     }
     final l10n = AppLocalizations.of(context);
+    // A menu can be open when the contest gets locked.
+    if (_moveBlock(data, l10n) != null) {
+      return;
+    }
     final messenger = ScaffoldMessenger.of(context);
+    messenger.showSnackBar(
+      SnackBar(
+        content: Row(
+          spacing: 12,
+          children: [
+            const SizedBox.square(
+              dimension: 16,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+            Text(l10n.matrixMoveChecking),
+          ],
+        ),
+        duration: const Duration(seconds: 30),
+      ),
+    );
     final ContestScores scores;
     try {
       scores = await client.scores(data.contest.id);
+      messenger.hideCurrentSnackBar();
     } on Object catch (error) {
+      messenger.hideCurrentSnackBar();
       messenger.showSnackBar(
         SnackBar(
           content: Text(l10n.matrixMoveScoresFailed(apiErrorText(error))),
@@ -497,6 +531,9 @@ class _MatrixPageState extends State<MatrixPage> {
       return;
     }
     final options = data.options;
+    final assignment = data.matrix.assignments
+        .where((a) => a.id == assignmentId)
+        .firstOrNull;
     final plan = MovePlan.of(
       matrix: data.matrix,
       scores: scores,
@@ -507,11 +544,16 @@ class _MatrixPageState extends State<MatrixPage> {
       },
       teamsEnabled: data.showTeams,
       teamProtection: options?.teamProtection ?? false,
+      pilotRetired: data.participations.any(
+        (p) => p.id == assignment?.contestParticipationId && p.isRetired,
+      ),
     );
     final pilot = plan == null
         ? null
         : data.pilots[plan.source.contestParticipationId];
     if (plan == null || pilot == null) {
+      // The page is out of date: the pilot is not in the matrix any more.
+      await _reload();
       return;
     }
     final outcome = await showMovePilotDialog(
@@ -631,6 +673,7 @@ class _MatrixPageState extends State<MatrixPage> {
               setState(() => _openForm(MatrixIntent.addRounds, data)),
           onRedraw: () => setState(() => _openForm(MatrixIntent.redraw, data)),
           onMovePilot: _movePilot,
+          moveBlock: _moveBlock(data, AppLocalizations.of(context)),
         );
       }
       if (form == null) {

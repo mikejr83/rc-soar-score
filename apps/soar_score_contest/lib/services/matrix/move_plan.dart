@@ -40,7 +40,7 @@ class MoveTarget {
 }
 
 /// Why a pilot cannot be moved out of where they are.
-enum SourceBlockKind { groupLocked, scoreLocked }
+enum SourceBlockKind { groupLocked, scoreLocked, pilotRetired }
 
 /// A lane of a group: free, or taken by [takenBy].
 class LaneOption {
@@ -58,6 +58,7 @@ class MovePlan {
   MovePlan._({
     required this.source,
     required this.sourceRound,
+    required this.rounds,
     required this.scored,
     required this.sourceBlock,
     required this.targets,
@@ -66,11 +67,13 @@ class MovePlan {
   });
 
   /// Builds the plan for moving the pilot of [assignmentId], or `null` when
-  /// the matrix has no such live assignment.
+  /// the matrix has no such live assignment in a current round (the page is
+  /// out of date).
   ///
   /// [scores] says which assignments have a score and which scores are
   /// locked. [teamOf] gives each participation its team; [teamsEnabled] and
-  /// [teamProtection] come from the contest options.
+  /// [teamProtection] come from the contest options. [pilotRetired] is
+  /// whether the pilot has retired.
   static MovePlan? of({
     required CurrentMatrix matrix,
     required ContestScores scores,
@@ -78,140 +81,116 @@ class MovePlan {
     required Map<Id, Id> teamOf,
     required bool teamsEnabled,
     required bool teamProtection,
+    bool pilotRetired = false,
   }) {
     final live = [
       for (final assignment in matrix.assignments)
         if (!assignment.isSuperseded) assignment,
     ];
     final source = live.where((a) => a.id == assignmentId).firstOrNull;
-    if (source == null) {
-      return null;
-    }
-    final placeholders = {
-      for (final slot in scores.slots)
-        slot.placeholder.assignmentId: slot.placeholder,
-    };
-    bool scoredOf(MatrixAssignment a) =>
-        (placeholders[a.id]?.state ?? ScorePlaceholderState.notEntered) !=
-        ScorePlaceholderState.notEntered;
-
     final rounds = [
       for (final round in matrix.rounds)
         if (round.isCurrent) round,
     ]..sort((a, b) => a.ordinal.compareTo(b.ordinal));
-    final roundById = {for (final round in rounds) round.id: round};
-    final lockedGroups = {
-      for (final group in matrix.groups)
-        if (group.isLocked) (group.roundId, group.groupNumber),
-    };
-    final progress = {
-      for (final item
-          in scores.rounds.isEmpty ? matrix.progress : scores.rounds)
-        item.roundId: item,
-    };
-    final pilot = source.contestParticipationId;
-    final team = teamOf[pilot];
-    final pilotAt = {
-      for (final a in live)
-        if (a.contestParticipationId == pilot) (a.scheduledRoundId, a.group),
-    };
+    final sourceRound = source == null
+        ? null
+        : rounds.where((r) => r.id == source.scheduledRoundId).firstOrNull;
+    if (source == null || sourceRound == null) {
+      return null;
+    }
+    final context = _Context(
+      live: live,
+      source: source,
+      placeholders: {
+        for (final slot in scores.slots)
+          slot.placeholder.assignmentId: slot.placeholder,
+      },
+      lockedGroups: {
+        for (final group in matrix.groups)
+          if (group.isLocked) (group.roundId, group.groupNumber),
+      },
+      progress: {
+        for (final item
+            in scores.rounds.isEmpty ? matrix.progress : scores.rounds)
+          item.roundId: item,
+      },
+      teamOf: teamOf,
+      teamsEnabled: teamsEnabled,
+      teamProtection: teamProtection,
+    );
 
     final targets = <MoveTarget>[];
     final lanesTaken = <(Id, int), Map<int, Id>>{};
     var laneCount = 1;
     for (final round in rounds) {
-      final inRound = [
-        for (final a in live)
-          if (a.scheduledRoundId == round.id) a,
-      ];
-      final originals = <int, int>{};
-      for (final a in matrix.assignments) {
-        if (a.scheduledRoundId == round.id &&
-            a.assignmentType == AssignmentType.original) {
-          originals[a.group] = (originals[a.group] ?? 0) + 1;
-        }
-      }
-      final sizes = originals.isEmpty
-          ? {
-              for (final a in inRound)
-                a.group: inRound.where((b) => b.group == a.group).length,
-            }
-          : originals;
-      final capacity = sizes.values.fold<int>(1, (a, b) => a > b ? a : b);
+      final capacity = _laneCapacity(round, matrix.assignments, live);
       if (capacity > laneCount) {
         laneCount = capacity;
       }
       for (var group = 1; group <= round.groupCount; group++) {
         final inGroup = [
-          for (final a in inRound)
-            if (a.group == group) a,
+          for (final a in live)
+            if (a.scheduledRoundId == round.id && a.group == group) a,
         ];
         lanesTaken[(round.id, group)] = {
           for (final a in inGroup)
             if (a.lane != null && a.id != source.id)
               a.lane!: a.contestParticipationId,
         };
-        final teammates =
-            teamsEnabled &&
-            team != null &&
-            inGroup.any(
-              (a) =>
-                  a.contestParticipationId != pilot &&
-                  teamOf[a.contestParticipationId] == team,
-            );
-        final MoveBlockKind? block;
-        if (source.scheduledRoundId == round.id && source.group == group) {
-          block = MoveBlockKind.currentGroup;
-        } else if (pilotAt.contains((round.id, group))) {
-          block = MoveBlockKind.alreadyInGroup;
-        } else if (round.status == RoundStatus.locked) {
-          block = MoveBlockKind.roundLocked;
-        } else if (lockedGroups.contains((round.id, group))) {
-          block = MoveBlockKind.groupLocked;
-        } else if (teammates && teamProtection) {
-          block = MoveBlockKind.teamProtection;
-        } else {
-          block = null;
-        }
+        final teammate = context.teammateIn(inGroup);
         targets.add(
           MoveTarget(
             round: round,
             group: group,
-            block: block,
-            notIdeal: [
-              if (inGroup.any(scoredOf)) NotIdealReason.hasScores,
-              if (progress[round.id]?.isComplete ?? false)
-                NotIdealReason.roundCompleted,
-              if (teammates && !teamProtection) NotIdealReason.teammate,
-            ],
+            block: context.blockFor(round, group, teammate),
+            notIdeal: context.notIdealFor(round, inGroup, teammate),
           ),
         );
       }
     }
-
-    final sourceRound = roundById[source.scheduledRoundId];
-    final sourcePlaceholder = placeholders[source.id];
-    final SourceBlockKind? sourceBlock;
-    if (lockedGroups.contains((source.scheduledRoundId, source.group))) {
-      sourceBlock = SourceBlockKind.groupLocked;
-    } else if (sourcePlaceholder?.isLocked ?? false) {
-      sourceBlock = SourceBlockKind.scoreLocked;
-    } else {
-      sourceBlock = null;
-    }
     return MovePlan._(
       source: source,
-      sourceRound: sourceRound ?? rounds.first,
-      scored: scoredOf(source),
-      sourceBlock: sourceBlock,
+      sourceRound: sourceRound,
+      rounds: rounds,
+      scored: context.isScored(source),
+      sourceBlock: pilotRetired
+          ? SourceBlockKind.pilotRetired
+          : context.sourceBlock(),
       targets: targets,
       laneCount: laneCount,
       lanesTaken: lanesTaken,
     );
   }
 
+  /// The size of the largest group the draw made in [round], which bounds
+  /// its lanes. Falls back to the live groups when the originals are gone.
+  static int _laneCapacity(
+    Round round,
+    List<MatrixAssignment> all,
+    List<MatrixAssignment> live,
+  ) {
+    Map<int, int> sizes(Iterable<MatrixAssignment> rows) {
+      final result = <int, int>{};
+      for (final a in rows) {
+        if (a.scheduledRoundId == round.id) {
+          result[a.group] = (result[a.group] ?? 0) + 1;
+        }
+      }
+      return result;
+    }
+
+    final originals = sizes(
+      all.where((a) => a.assignmentType == AssignmentType.original),
+    );
+    final counts = (originals.isEmpty ? sizes(live) : originals).values;
+    return counts.fold<int>(1, (a, b) => a > b ? a : b);
+  }
+
   final MatrixAssignment source;
   final Round sourceRound;
+
+  /// The current rounds, in order.
+  final List<Round> rounds;
 
   /// Whether the pilot's flight has a score, which the move discards.
   final bool scored;
@@ -231,11 +210,6 @@ class MovePlan {
       if (target.round.id == round.id) target,
   ];
 
-  List<Round> get rounds => [
-    for (final target in targets)
-      if (target.group == 1) target.round,
-  ];
-
   /// The lanes of [target], with the pilot who holds each taken one.
   List<LaneOption> lanesOf(MoveTarget target) {
     final taken = _lanesTaken[(target.round.id, target.group)] ?? const {};
@@ -243,5 +217,90 @@ class MovePlan {
       for (var lane = 1; lane <= laneCount; lane++)
         LaneOption(lane, takenBy: taken[lane]),
     ];
+  }
+}
+
+/// What the rules of one plan look at.
+class _Context {
+  _Context({
+    required this.live,
+    required this.source,
+    required this.placeholders,
+    required this.lockedGroups,
+    required this.progress,
+    required this.teamOf,
+    required this.teamsEnabled,
+    required this.teamProtection,
+  }) : pilotAt = {
+         for (final a in live)
+           if (a.contestParticipationId == source.contestParticipationId)
+             (a.scheduledRoundId, a.group),
+       };
+
+  final List<MatrixAssignment> live;
+  final MatrixAssignment source;
+  final Map<Id, ScorePlaceholder> placeholders;
+  final Set<(Id, int)> lockedGroups;
+  final Map<Id, RoundProgress> progress;
+  final Map<Id, Id> teamOf;
+  final bool teamsEnabled;
+  final bool teamProtection;
+
+  /// The groups the pilot flies in, as (round id, group).
+  final Set<(Id, int)> pilotAt;
+
+  bool isScored(MatrixAssignment a) =>
+      (placeholders[a.id]?.state ?? ScorePlaceholderState.notEntered) !=
+      ScorePlaceholderState.notEntered;
+
+  /// Whether a teammate of the pilot flies in [inGroup].
+  bool teammateIn(List<MatrixAssignment> inGroup) {
+    final team = teamOf[source.contestParticipationId];
+    return teamsEnabled &&
+        team != null &&
+        inGroup.any(
+          (a) =>
+              a.contestParticipationId != source.contestParticipationId &&
+              teamOf[a.contestParticipationId] == team,
+        );
+  }
+
+  MoveBlockKind? blockFor(Round round, int group, bool teammate) {
+    if (source.scheduledRoundId == round.id && source.group == group) {
+      return MoveBlockKind.currentGroup;
+    }
+    if (pilotAt.contains((round.id, group))) {
+      return MoveBlockKind.alreadyInGroup;
+    }
+    if (round.status == RoundStatus.locked) {
+      return MoveBlockKind.roundLocked;
+    }
+    if (lockedGroups.contains((round.id, group))) {
+      return MoveBlockKind.groupLocked;
+    }
+    if (teammate && teamProtection) {
+      return MoveBlockKind.teamProtection;
+    }
+    return null;
+  }
+
+  List<NotIdealReason> notIdealFor(
+    Round round,
+    List<MatrixAssignment> inGroup,
+    bool teammate,
+  ) => [
+    if (inGroup.any(isScored)) NotIdealReason.hasScores,
+    if (progress[round.id]?.isComplete ?? false) NotIdealReason.roundCompleted,
+    if (teammate && !teamProtection) NotIdealReason.teammate,
+  ];
+
+  SourceBlockKind? sourceBlock() {
+    if (lockedGroups.contains((source.scheduledRoundId, source.group))) {
+      return SourceBlockKind.groupLocked;
+    }
+    if (placeholders[source.id]?.isLocked ?? false) {
+      return SourceBlockKind.scoreLocked;
+    }
+    return null;
   }
 }
