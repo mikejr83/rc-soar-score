@@ -146,18 +146,42 @@ void main() {
       expect(find.text('Alpha release'), findsOneWidget);
     });
 
-    testWidgets('shows with nothing stored and does not flash while loading', (
-      tester,
-    ) async {
+    testWidgets('shows with nothing stored, after a brief cover while '
+        'loading', (tester) async {
+      await tester.pumpWidget(
+        _host(enabled: true, store: _store(), now: () => _t0),
+      );
+      expect(find.text('Alpha release'), findsNothing);
+      await tester.pump();
+      expect(find.text('Alpha release'), findsOneWidget);
+    });
+
+    testWidgets('does not flash for a recent acknowledgement', (tester) async {
       final store = _store();
       await store.set(localUiAccountId, alphaNoticeAcknowledgedKey, _t0);
 
       await tester.pumpWidget(
         _host(enabled: true, store: store, now: () => _t0),
       );
-      // Before the stored time is read the card is not shown.
       expect(find.text('Alpha release'), findsNothing);
       await tester.pump();
+      expect(find.text('Alpha release'), findsNothing);
+      expect(find.text('Behind'), findsOneWidget);
+    });
+
+    testWidgets('a few seconds of clock jitter still counts', (tester) async {
+      final store = _store();
+      await store.set(localUiAccountId, alphaNoticeAcknowledgedKey, _t0);
+
+      await tester.pumpWidget(
+        _host(
+          enabled: true,
+          store: store,
+          now: () => _t0.subtract(const Duration(seconds: 5)),
+        ),
+      );
+      await tester.pump();
+
       expect(find.text('Alpha release'), findsNothing);
     });
 

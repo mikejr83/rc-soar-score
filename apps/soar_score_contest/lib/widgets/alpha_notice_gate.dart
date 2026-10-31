@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import 'package:soar_score_ui_storage/soar_score_ui_storage.dart';
@@ -38,38 +40,47 @@ class AlphaNoticeGate extends StatefulWidget {
   State<AlphaNoticeGate> createState() => _AlphaNoticeGateState();
 }
 
+const Duration _clockSkew = Duration(minutes: 1);
+
 class _AlphaNoticeGateState extends State<AlphaNoticeGate> {
   bool _acknowledged = false;
-  bool _loading = false;
+  late bool _loading = widget.enabled && widget.store != null;
 
   @override
   void initState() {
     super.initState();
-    _loadAcknowledgement();
+    if (_loading) unawaited(_loadAcknowledgement());
   }
 
   /// Reads the stored time; until it arrives the app stays covered, so the
-  /// warning never flashes for someone who already acknowledged it.
+  /// warning never flashes for someone who already acknowledged it. A failed
+  /// read counts as never acknowledged.
   Future<void> _loadAcknowledgement() async {
-    final store = widget.store;
-    if (!widget.enabled || store == null) return;
-    _loading = true;
-    final at = await store.get(localUiAccountId, alphaNoticeAcknowledgedKey);
-    if (!mounted) return;
-    setState(() {
-      _loading = false;
+    try {
+      final at = await widget.store!.get(
+        localUiAccountId,
+        alphaNoticeAcknowledgedKey,
+      );
+      if (!mounted) return;
       if (at != null) {
         final age = widget.now().difference(at);
-        _acknowledged = !age.isNegative && age < alphaNoticeQuietPeriod;
+        // A little negative age is clock jitter between two launches.
+        _acknowledged = age >= -_clockSkew && age < alphaNoticeQuietPeriod;
       }
-    });
+    } catch (_) {
+      // Show the warning rather than leave the app covered.
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
   }
 
   void _acknowledge() {
     setState(() => _acknowledged = true);
     final store = widget.store;
     if (store != null) {
-      store.set(localUiAccountId, alphaNoticeAcknowledgedKey, widget.now());
+      unawaited(
+        store.set(localUiAccountId, alphaNoticeAcknowledgedKey, widget.now()),
+      );
     }
   }
 
