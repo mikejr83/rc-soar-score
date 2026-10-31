@@ -90,7 +90,7 @@ class PilotCardsData {
               round: round,
               group: DrawMatrixData.groupLabel(assignment.group - 1),
               lane: assignment.lane,
-              score: _score(slots[assignment.id], points),
+              score: scoreOf(slots[assignment.id], points),
             ),
           );
     }
@@ -116,7 +116,7 @@ class PilotCardsData {
   List<CardRow> rowsOf(Id participation) =>
       rowsByPilot[participation.value] ?? const [];
 
-  static CardScore? _score(ScoreSlot? slot, Map<String, int> points) {
+  static CardScore? scoreOf(ScoreSlot? slot, Map<String, int> points) {
     final official = slot?.officialScore;
     if (slot == null || official == null) {
       return null;

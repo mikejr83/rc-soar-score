@@ -1,11 +1,10 @@
 import 'package:flutter/widgets.dart';
-import 'package:soar_score_core/soar_score_core.dart';
 
 import '../../../services/matrix/matrix_page_data.dart';
-import '../../../services/new_contest/date_range_text.dart';
 import '../../../services/reports/draw_matrix/draw_matrix_data.dart';
 import '../../../services/reports/draw_matrix/draw_matrix_layout.dart';
 import '../../../services/reports/draw_matrix/draw_matrix_options.dart';
+import '../../../services/reports/report_contest_line.dart';
 import '../../../services/reports/report_kind.dart';
 import '../../../services/reports/reports_facts.dart';
 import '../../../services/reports/viewer/page_setup.dart';
@@ -101,21 +100,11 @@ class DrawMatrixReport extends DataReportDefinition<DrawMatrixData> {
   }
 
   /// The venue and dates, then the range when it is a slice.
-  String _subtitle(ReportsFacts facts, DrawMatrixOptions options) {
-    final contest = facts.contest;
-    final place = [
-      if (contest.city case final city? when city.trim().isNotEmpty) city,
-      if (contest.state case final state? when state.trim().isNotEmpty) state,
-    ].join(', ');
-    final start = ContestTime.inZone(contest.startDateTime, contest.timezone);
-    final end = ContestTime.inZone(contest.endDateTime, contest.timezone);
-    return [
-      if (place.isNotEmpty) place,
-      dateRangeText(start, end),
-      if (!options.isAll)
-        'Rounds ${options.from} to ${options.to} of ${options.drawn}',
-    ].join(' · ');
-  }
+  String _subtitle(ReportsFacts facts, DrawMatrixOptions options) => [
+    contestPlaceAndDates(facts.contest),
+    if (!options.isAll)
+      'Rounds ${options.from} to ${options.to} of ${options.drawn}',
+  ].join(' · ');
 
   /// Advice for a sheet whose columns need more room than the page has, naming
   /// the columns that are on and can be turned off.

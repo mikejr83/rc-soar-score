@@ -270,8 +270,7 @@ Future<void> runSetupPhase(Journey journey, JourneyContext data) async {
       }
 
       // The matrix is drawn but nothing is scored: the documents can be
-      // opened and the standings say why they cannot. Scoring Sheet is still
-      // a placeholder report (#479): the card is there and can be opened.
+      // opened and the standings say why they cannot.
       for (final report in ['matrix', 'sheet', 'cards']) {
         expect(_reportEnabled(tester, report), isTrue, reason: report);
       }
@@ -293,6 +292,41 @@ Future<void> runSetupPhase(Journey journey, JourneyContext data) async {
       // The paper sheet, its filter and page panel, and Print.
       expect(find.textContaining('Page 1 of'), findsWidgets);
       expect(find.text('Print'), findsWidgets);
+      await tapVisible(tester, _key('viewer-back'));
+      await pumpUntilFound(tester, find.text('Reports are built from'));
+    }),
+  );
+  await journey.step(
+    'Reports: the Scoring Sheet shows blank grids and follows the options',
+    () => inContest(() async {
+      await _openReports(tester);
+      await tapVisible(tester, _key('report-open-sheet'));
+      await pumpUntilFound(tester, _key('viewer-title'));
+      expect(tester.widget<Text>(_key('viewer-title')).data, 'Scoring Sheet');
+
+      // The draw by round and group, ruled for writing, with the readout.
+      await pumpUntilFound(tester, _key('sheet-readout'));
+      expect(find.textContaining('Round 1'), findsWidgets);
+      expect(find.textContaining('Working Time'), findsWidgets);
+      expect(find.text('Reflight'), findsWidgets);
+
+      // Nothing is scored yet, so Pre-fill says why it is off; an option
+      // changes at once.
+      expect(find.text('No scores have been entered yet.'), findsOneWidget);
+      await tapVisible(tester, _key('sheet-validated'));
+      await tester.pumpAndSettle();
+      expect(
+        tester
+            .widget<CheckboxListTile>(
+              find.descendant(
+                of: _key('sheet-validated'),
+                matching: find.byType(CheckboxListTile),
+              ),
+            )
+            .value,
+        isFalse,
+      );
+
       await tapVisible(tester, _key('viewer-back'));
       await pumpUntilFound(tester, find.text('Reports are built from'));
     }),

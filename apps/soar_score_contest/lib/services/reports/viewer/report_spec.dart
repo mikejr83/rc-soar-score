@@ -105,8 +105,24 @@ abstract class ReportSpec {
   /// The orientation the report starts with; the director can change it.
   PageOrientation get defaultOrientation => PageOrientation.landscape;
 
+  /// The orientation to start with once the filters, the facts and the
+  /// report's data are known, on [paper]; the director's own choice still wins.
+  /// A report whose best orientation depends on its columns overrides this.
+  PageOrientation suggestedOrientation(
+    Map<String, String> filters,
+    ReportsFacts facts,
+    Object? data,
+    PaperSize paper,
+  ) => defaultOrientation;
+
   /// The page setup offers no orientation: the report prints one way only.
   bool get fixedOrientation => false;
+
+  /// Blank space added down each side of the whole page (running header and
+  /// footer included) on top of the frame's own margin, in logical pixels, for
+  /// a report whose output is cut off by a printer at the page edge. Most
+  /// reports need none.
+  double get extraSideMargin => 0;
 
   /// Whether the frame's running header and footer surround each page. A
   /// report cut apart after printing draws its own on every card.
