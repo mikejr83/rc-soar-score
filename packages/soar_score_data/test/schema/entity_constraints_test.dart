@@ -104,7 +104,7 @@ void _tests(Backend backend) {
     });
 
     test(
-      'a model name without a manufacturer is unique within an owner',
+      'a model name without a manufacturer is unique within a profile',
       () async {
         final base = {...example('model_catalog'), 'manufacturer': null};
         await put('ModelCatalog', base);
@@ -115,7 +115,7 @@ void _tests(Backend backend) {
         await put('ModelCatalog', {
           ...base,
           'id': newId(),
-          'owner_account_id': newId(),
+          'participant_profile_id': newId(),
         });
       },
     );

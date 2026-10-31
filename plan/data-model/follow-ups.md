@@ -121,7 +121,7 @@ Where to look for the new rules:
 ## Models (decided 2026-10-26)
 
 - Models belong to a participant profile, many per person, and a pilot can enter one or more of them in a contest. Missing models are a notice and never block anything. `model_id` is the contestant-applied identifier and `contest_specific_identifier` the director-applied one (serial number); both are optional.
-- Code still has one `ContestModelLink` per participation, a required `model_id`, and a `ModelCatalog` owned by the director account only. Changing them is tracked in #594 and the round-model follow-up.
+- Code now matches this (#594): `ModelCatalog` belongs to a profile, a participation has any number of `ContestModelLink`s, and `model_id` is optional on both. The per-round model record (`ContestRoundModel`) is still to do.
 - The GliderScore mapping plan (outside this folder) still says one link per participation; update it with the importer ticket.
 
 ## Questions the UI will force

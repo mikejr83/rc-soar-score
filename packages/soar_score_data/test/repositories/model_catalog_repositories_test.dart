@@ -48,6 +48,16 @@ void _tests(Backend backend) {
       },
     );
 
+    test('listForProfile returns that profile\'s models by name', () async {
+      final profile = examples.first.participantProfileId;
+      final owned =
+          examples.where((e) => e.participantProfileId == profile).toList()
+            ..sort((a, b) => a.name.compareTo(b.name));
+
+      expect(await repo.listForProfile(profile), owned);
+      expect(await repo.listForProfile(core.Id.create()), isEmpty);
+    });
+
     test('save inserts, then bumps the revision on update', () async {
       final fresh = core.ModelCatalog.fromJson({
         ...examples.first.toJson(),
@@ -115,14 +125,18 @@ void _tests(Backend backend) {
       expect(await repo.findById(core.Id.create()), isNull);
     });
 
-    test('finds the link of a participation', () async {
+    test('lists the links of a participation, any number', () async {
       final link = examples.first;
-
-      expect(
-        await repo.findForParticipation(link.contestParticipationId),
-        link,
+      final expected = examples.where(
+        (l) => l.contestParticipationId == link.contestParticipationId,
       );
-      expect(await repo.findForParticipation(core.Id.create()), isNull);
+
+      expect(expected.length, greaterThan(1));
+      expect(
+        await repo.listForParticipation(link.contestParticipationId),
+        unorderedEquals(expected),
+      );
+      expect(await repo.listForParticipation(core.Id.create()), isEmpty);
     });
 
     test('listForContest returns that contest\'s links', () async {

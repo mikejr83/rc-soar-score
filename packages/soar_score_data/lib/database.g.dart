@@ -10765,6 +10765,17 @@ class $ModelCatalogsTable extends ModelCatalogs
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _participantProfileIdMeta =
+      const VerificationMeta('participantProfileId');
+  @override
+  late final GeneratedColumn<String> participantProfileId =
+      GeneratedColumn<String>(
+        'participant_profile_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      );
   static const VerificationMeta _nameMeta = const VerificationMeta('name');
   @override
   late final GeneratedColumn<String> name = GeneratedColumn<String>(
@@ -10780,6 +10791,17 @@ class $ModelCatalogsTable extends ModelCatalogs
   @override
   late final GeneratedColumn<String> manufacturer = GeneratedColumn<String>(
     'manufacturer',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _modelIdMeta = const VerificationMeta(
+    'modelId',
+  );
+  @override
+  late final GeneratedColumn<String> modelId = GeneratedColumn<String>(
+    'model_id',
     aliasedName,
     true,
     type: DriftSqlType.string,
@@ -10801,8 +10823,10 @@ class $ModelCatalogsTable extends ModelCatalogs
   List<GeneratedColumn> get $columns => [
     id,
     ownerAccountId,
+    participantProfileId,
     name,
     manufacturer,
+    modelId,
     revision,
   ];
   @override
@@ -10833,6 +10857,17 @@ class $ModelCatalogsTable extends ModelCatalogs
     } else if (isInserting) {
       context.missing(_ownerAccountIdMeta);
     }
+    if (data.containsKey('participant_profile_id')) {
+      context.handle(
+        _participantProfileIdMeta,
+        participantProfileId.isAcceptableOrUnknown(
+          data['participant_profile_id']!,
+          _participantProfileIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_participantProfileIdMeta);
+    }
     if (data.containsKey('name')) {
       context.handle(
         _nameMeta,
@@ -10848,6 +10883,12 @@ class $ModelCatalogsTable extends ModelCatalogs
           data['manufacturer']!,
           _manufacturerMeta,
         ),
+      );
+    }
+    if (data.containsKey('model_id')) {
+      context.handle(
+        _modelIdMeta,
+        modelId.isAcceptableOrUnknown(data['model_id']!, _modelIdMeta),
       );
     }
     if (data.containsKey('revision')) {
@@ -10873,6 +10914,10 @@ class $ModelCatalogsTable extends ModelCatalogs
         DriftSqlType.string,
         data['${effectivePrefix}owner_account_id'],
       )!,
+      participantProfileId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}participant_profile_id'],
+      )!,
       name: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}name'],
@@ -10880,6 +10925,10 @@ class $ModelCatalogsTable extends ModelCatalogs
       manufacturer: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}manufacturer'],
+      ),
+      modelId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}model_id'],
       ),
       revision: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
@@ -10898,14 +10947,18 @@ class ModelCatalogData extends DataClass
     implements Insertable<ModelCatalogData> {
   final String id;
   final String ownerAccountId;
+  final String participantProfileId;
   final String name;
   final String? manufacturer;
+  final String? modelId;
   final int revision;
   const ModelCatalogData({
     required this.id,
     required this.ownerAccountId,
+    required this.participantProfileId,
     required this.name,
     this.manufacturer,
+    this.modelId,
     required this.revision,
   });
   @override
@@ -10913,9 +10966,13 @@ class ModelCatalogData extends DataClass
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
     map['owner_account_id'] = Variable<String>(ownerAccountId);
+    map['participant_profile_id'] = Variable<String>(participantProfileId);
     map['name'] = Variable<String>(name);
     if (!nullToAbsent || manufacturer != null) {
       map['manufacturer'] = Variable<String>(manufacturer);
+    }
+    if (!nullToAbsent || modelId != null) {
+      map['model_id'] = Variable<String>(modelId);
     }
     map['revision'] = Variable<int>(revision);
     return map;
@@ -10925,10 +10982,14 @@ class ModelCatalogData extends DataClass
     return ModelCatalogsCompanion(
       id: Value(id),
       ownerAccountId: Value(ownerAccountId),
+      participantProfileId: Value(participantProfileId),
       name: Value(name),
       manufacturer: manufacturer == null && nullToAbsent
           ? const Value.absent()
           : Value(manufacturer),
+      modelId: modelId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(modelId),
       revision: Value(revision),
     );
   }
@@ -10941,8 +11002,12 @@ class ModelCatalogData extends DataClass
     return ModelCatalogData(
       id: serializer.fromJson<String>(json['id']),
       ownerAccountId: serializer.fromJson<String>(json['ownerAccountId']),
+      participantProfileId: serializer.fromJson<String>(
+        json['participantProfileId'],
+      ),
       name: serializer.fromJson<String>(json['name']),
       manufacturer: serializer.fromJson<String?>(json['manufacturer']),
+      modelId: serializer.fromJson<String?>(json['modelId']),
       revision: serializer.fromJson<int>(json['revision']),
     );
   }
@@ -10952,8 +11017,10 @@ class ModelCatalogData extends DataClass
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
       'ownerAccountId': serializer.toJson<String>(ownerAccountId),
+      'participantProfileId': serializer.toJson<String>(participantProfileId),
       'name': serializer.toJson<String>(name),
       'manufacturer': serializer.toJson<String?>(manufacturer),
+      'modelId': serializer.toJson<String?>(modelId),
       'revision': serializer.toJson<int>(revision),
     };
   }
@@ -10961,14 +11028,18 @@ class ModelCatalogData extends DataClass
   ModelCatalogData copyWith({
     String? id,
     String? ownerAccountId,
+    String? participantProfileId,
     String? name,
     Value<String?> manufacturer = const Value.absent(),
+    Value<String?> modelId = const Value.absent(),
     int? revision,
   }) => ModelCatalogData(
     id: id ?? this.id,
     ownerAccountId: ownerAccountId ?? this.ownerAccountId,
+    participantProfileId: participantProfileId ?? this.participantProfileId,
     name: name ?? this.name,
     manufacturer: manufacturer.present ? manufacturer.value : this.manufacturer,
+    modelId: modelId.present ? modelId.value : this.modelId,
     revision: revision ?? this.revision,
   );
   ModelCatalogData copyWithCompanion(ModelCatalogsCompanion data) {
@@ -10977,10 +11048,14 @@ class ModelCatalogData extends DataClass
       ownerAccountId: data.ownerAccountId.present
           ? data.ownerAccountId.value
           : this.ownerAccountId,
+      participantProfileId: data.participantProfileId.present
+          ? data.participantProfileId.value
+          : this.participantProfileId,
       name: data.name.present ? data.name.value : this.name,
       manufacturer: data.manufacturer.present
           ? data.manufacturer.value
           : this.manufacturer,
+      modelId: data.modelId.present ? data.modelId.value : this.modelId,
       revision: data.revision.present ? data.revision.value : this.revision,
     );
   }
@@ -10990,65 +11065,88 @@ class ModelCatalogData extends DataClass
     return (StringBuffer('ModelCatalogData(')
           ..write('id: $id, ')
           ..write('ownerAccountId: $ownerAccountId, ')
+          ..write('participantProfileId: $participantProfileId, ')
           ..write('name: $name, ')
           ..write('manufacturer: $manufacturer, ')
+          ..write('modelId: $modelId, ')
           ..write('revision: $revision')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, ownerAccountId, name, manufacturer, revision);
+  int get hashCode => Object.hash(
+    id,
+    ownerAccountId,
+    participantProfileId,
+    name,
+    manufacturer,
+    modelId,
+    revision,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is ModelCatalogData &&
           other.id == this.id &&
           other.ownerAccountId == this.ownerAccountId &&
+          other.participantProfileId == this.participantProfileId &&
           other.name == this.name &&
           other.manufacturer == this.manufacturer &&
+          other.modelId == this.modelId &&
           other.revision == this.revision);
 }
 
 class ModelCatalogsCompanion extends UpdateCompanion<ModelCatalogData> {
   final Value<String> id;
   final Value<String> ownerAccountId;
+  final Value<String> participantProfileId;
   final Value<String> name;
   final Value<String?> manufacturer;
+  final Value<String?> modelId;
   final Value<int> revision;
   final Value<int> rowid;
   const ModelCatalogsCompanion({
     this.id = const Value.absent(),
     this.ownerAccountId = const Value.absent(),
+    this.participantProfileId = const Value.absent(),
     this.name = const Value.absent(),
     this.manufacturer = const Value.absent(),
+    this.modelId = const Value.absent(),
     this.revision = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ModelCatalogsCompanion.insert({
     required String id,
     required String ownerAccountId,
+    required String participantProfileId,
     required String name,
     this.manufacturer = const Value.absent(),
+    this.modelId = const Value.absent(),
     this.revision = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        ownerAccountId = Value(ownerAccountId),
+       participantProfileId = Value(participantProfileId),
        name = Value(name);
   static Insertable<ModelCatalogData> custom({
     Expression<String>? id,
     Expression<String>? ownerAccountId,
+    Expression<String>? participantProfileId,
     Expression<String>? name,
     Expression<String>? manufacturer,
+    Expression<String>? modelId,
     Expression<int>? revision,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (ownerAccountId != null) 'owner_account_id': ownerAccountId,
+      if (participantProfileId != null)
+        'participant_profile_id': participantProfileId,
       if (name != null) 'name': name,
       if (manufacturer != null) 'manufacturer': manufacturer,
+      if (modelId != null) 'model_id': modelId,
       if (revision != null) 'revision': revision,
       if (rowid != null) 'rowid': rowid,
     });
@@ -11057,16 +11155,20 @@ class ModelCatalogsCompanion extends UpdateCompanion<ModelCatalogData> {
   ModelCatalogsCompanion copyWith({
     Value<String>? id,
     Value<String>? ownerAccountId,
+    Value<String>? participantProfileId,
     Value<String>? name,
     Value<String?>? manufacturer,
+    Value<String?>? modelId,
     Value<int>? revision,
     Value<int>? rowid,
   }) {
     return ModelCatalogsCompanion(
       id: id ?? this.id,
       ownerAccountId: ownerAccountId ?? this.ownerAccountId,
+      participantProfileId: participantProfileId ?? this.participantProfileId,
       name: name ?? this.name,
       manufacturer: manufacturer ?? this.manufacturer,
+      modelId: modelId ?? this.modelId,
       revision: revision ?? this.revision,
       rowid: rowid ?? this.rowid,
     );
@@ -11081,11 +11183,19 @@ class ModelCatalogsCompanion extends UpdateCompanion<ModelCatalogData> {
     if (ownerAccountId.present) {
       map['owner_account_id'] = Variable<String>(ownerAccountId.value);
     }
+    if (participantProfileId.present) {
+      map['participant_profile_id'] = Variable<String>(
+        participantProfileId.value,
+      );
+    }
     if (name.present) {
       map['name'] = Variable<String>(name.value);
     }
     if (manufacturer.present) {
       map['manufacturer'] = Variable<String>(manufacturer.value);
+    }
+    if (modelId.present) {
+      map['model_id'] = Variable<String>(modelId.value);
     }
     if (revision.present) {
       map['revision'] = Variable<int>(revision.value);
@@ -11101,8 +11211,10 @@ class ModelCatalogsCompanion extends UpdateCompanion<ModelCatalogData> {
     return (StringBuffer('ModelCatalogsCompanion(')
           ..write('id: $id, ')
           ..write('ownerAccountId: $ownerAccountId, ')
+          ..write('participantProfileId: $participantProfileId, ')
           ..write('name: $name, ')
           ..write('manufacturer: $manufacturer, ')
+          ..write('modelId: $modelId, ')
           ..write('revision: $revision, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -11196,9 +11308,9 @@ class $ContestModelLinksTable extends ContestModelLinks
   late final GeneratedColumn<String> modelId = GeneratedColumn<String>(
     'model_id',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.string,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _contestSpecificIdentifierMeta =
       const VerificationMeta('contestSpecificIdentifier');
@@ -11302,8 +11414,6 @@ class $ContestModelLinksTable extends ContestModelLinks
         _modelIdMeta,
         modelId.isAcceptableOrUnknown(data['model_id']!, _modelIdMeta),
       );
-    } else if (isInserting) {
-      context.missing(_modelIdMeta);
     }
     if (data.containsKey('contest_specific_identifier')) {
       context.handle(
@@ -11356,7 +11466,7 @@ class $ContestModelLinksTable extends ContestModelLinks
       modelId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}model_id'],
-      )!,
+      ),
       contestSpecificIdentifier: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}contest_specific_identifier'],
@@ -11382,7 +11492,7 @@ class ContestModelLinkData extends DataClass
   final String? modelCatalogId;
   final String modelName;
   final String? manufacturer;
-  final String modelId;
+  final String? modelId;
   final String? contestSpecificIdentifier;
   final int revision;
   const ContestModelLinkData({
@@ -11392,7 +11502,7 @@ class ContestModelLinkData extends DataClass
     this.modelCatalogId,
     required this.modelName,
     this.manufacturer,
-    required this.modelId,
+    this.modelId,
     this.contestSpecificIdentifier,
     required this.revision,
   });
@@ -11409,7 +11519,9 @@ class ContestModelLinkData extends DataClass
     if (!nullToAbsent || manufacturer != null) {
       map['manufacturer'] = Variable<String>(manufacturer);
     }
-    map['model_id'] = Variable<String>(modelId);
+    if (!nullToAbsent || modelId != null) {
+      map['model_id'] = Variable<String>(modelId);
+    }
     if (!nullToAbsent || contestSpecificIdentifier != null) {
       map['contest_specific_identifier'] = Variable<String>(
         contestSpecificIdentifier,
@@ -11431,7 +11543,9 @@ class ContestModelLinkData extends DataClass
       manufacturer: manufacturer == null && nullToAbsent
           ? const Value.absent()
           : Value(manufacturer),
-      modelId: Value(modelId),
+      modelId: modelId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(modelId),
       contestSpecificIdentifier:
           contestSpecificIdentifier == null && nullToAbsent
           ? const Value.absent()
@@ -11454,7 +11568,7 @@ class ContestModelLinkData extends DataClass
       modelCatalogId: serializer.fromJson<String?>(json['modelCatalogId']),
       modelName: serializer.fromJson<String>(json['modelName']),
       manufacturer: serializer.fromJson<String?>(json['manufacturer']),
-      modelId: serializer.fromJson<String>(json['modelId']),
+      modelId: serializer.fromJson<String?>(json['modelId']),
       contestSpecificIdentifier: serializer.fromJson<String?>(
         json['contestSpecificIdentifier'],
       ),
@@ -11473,7 +11587,7 @@ class ContestModelLinkData extends DataClass
       'modelCatalogId': serializer.toJson<String?>(modelCatalogId),
       'modelName': serializer.toJson<String>(modelName),
       'manufacturer': serializer.toJson<String?>(manufacturer),
-      'modelId': serializer.toJson<String>(modelId),
+      'modelId': serializer.toJson<String?>(modelId),
       'contestSpecificIdentifier': serializer.toJson<String?>(
         contestSpecificIdentifier,
       ),
@@ -11488,7 +11602,7 @@ class ContestModelLinkData extends DataClass
     Value<String?> modelCatalogId = const Value.absent(),
     String? modelName,
     Value<String?> manufacturer = const Value.absent(),
-    String? modelId,
+    Value<String?> modelId = const Value.absent(),
     Value<String?> contestSpecificIdentifier = const Value.absent(),
     int? revision,
   }) => ContestModelLinkData(
@@ -11501,7 +11615,7 @@ class ContestModelLinkData extends DataClass
         : this.modelCatalogId,
     modelName: modelName ?? this.modelName,
     manufacturer: manufacturer.present ? manufacturer.value : this.manufacturer,
-    modelId: modelId ?? this.modelId,
+    modelId: modelId.present ? modelId.value : this.modelId,
     contestSpecificIdentifier: contestSpecificIdentifier.present
         ? contestSpecificIdentifier.value
         : this.contestSpecificIdentifier,
@@ -11579,7 +11693,7 @@ class ContestModelLinksCompanion extends UpdateCompanion<ContestModelLinkData> {
   final Value<String?> modelCatalogId;
   final Value<String> modelName;
   final Value<String?> manufacturer;
-  final Value<String> modelId;
+  final Value<String?> modelId;
   final Value<String?> contestSpecificIdentifier;
   final Value<int> revision;
   final Value<int> rowid;
@@ -11602,15 +11716,14 @@ class ContestModelLinksCompanion extends UpdateCompanion<ContestModelLinkData> {
     this.modelCatalogId = const Value.absent(),
     required String modelName,
     this.manufacturer = const Value.absent(),
-    required String modelId,
+    this.modelId = const Value.absent(),
     this.contestSpecificIdentifier = const Value.absent(),
     this.revision = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        contestId = Value(contestId),
        contestParticipationId = Value(contestParticipationId),
-       modelName = Value(modelName),
-       modelId = Value(modelId);
+       modelName = Value(modelName);
   static Insertable<ContestModelLinkData> custom({
     Expression<String>? id,
     Expression<String>? contestId,
@@ -11646,7 +11759,7 @@ class ContestModelLinksCompanion extends UpdateCompanion<ContestModelLinkData> {
     Value<String?>? modelCatalogId,
     Value<String>? modelName,
     Value<String?>? manufacturer,
-    Value<String>? modelId,
+    Value<String?>? modelId,
     Value<String?>? contestSpecificIdentifier,
     Value<int>? revision,
     Value<int>? rowid,
@@ -49659,8 +49772,10 @@ typedef $$ModelCatalogsTableCreateCompanionBuilder =
     ModelCatalogsCompanion Function({
       required String id,
       required String ownerAccountId,
+      required String participantProfileId,
       required String name,
       Value<String?> manufacturer,
+      Value<String?> modelId,
       Value<int> revision,
       Value<int> rowid,
     });
@@ -49668,8 +49783,10 @@ typedef $$ModelCatalogsTableUpdateCompanionBuilder =
     ModelCatalogsCompanion Function({
       Value<String> id,
       Value<String> ownerAccountId,
+      Value<String> participantProfileId,
       Value<String> name,
       Value<String?> manufacturer,
+      Value<String?> modelId,
       Value<int> revision,
       Value<int> rowid,
     });
@@ -49731,6 +49848,11 @@ class $$ModelCatalogsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get participantProfileId => $composableBuilder(
+    column: $table.participantProfileId,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<String> get name => $composableBuilder(
     column: $table.name,
     builder: (column) => ColumnFilters(column),
@@ -49738,6 +49860,11 @@ class $$ModelCatalogsTableFilterComposer
 
   ColumnFilters<String> get manufacturer => $composableBuilder(
     column: $table.manufacturer,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get modelId => $composableBuilder(
+    column: $table.modelId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -49791,6 +49918,11 @@ class $$ModelCatalogsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get participantProfileId => $composableBuilder(
+    column: $table.participantProfileId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get name => $composableBuilder(
     column: $table.name,
     builder: (column) => ColumnOrderings(column),
@@ -49798,6 +49930,11 @@ class $$ModelCatalogsTableOrderingComposer
 
   ColumnOrderings<String> get manufacturer => $composableBuilder(
     column: $table.manufacturer,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get modelId => $composableBuilder(
+    column: $table.modelId,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -49824,6 +49961,11 @@ class $$ModelCatalogsTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get participantProfileId => $composableBuilder(
+    column: $table.participantProfileId,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<String> get name =>
       $composableBuilder(column: $table.name, builder: (column) => column);
 
@@ -49831,6 +49973,9 @@ class $$ModelCatalogsTableAnnotationComposer
     column: $table.manufacturer,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get modelId =>
+      $composableBuilder(column: $table.modelId, builder: (column) => column);
 
   GeneratedColumn<int> get revision =>
       $composableBuilder(column: $table.revision, builder: (column) => column);
@@ -49894,15 +50039,19 @@ class $$ModelCatalogsTableTableManager
               ({
                 Value<String> id = const Value.absent(),
                 Value<String> ownerAccountId = const Value.absent(),
+                Value<String> participantProfileId = const Value.absent(),
                 Value<String> name = const Value.absent(),
                 Value<String?> manufacturer = const Value.absent(),
+                Value<String?> modelId = const Value.absent(),
                 Value<int> revision = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ModelCatalogsCompanion(
                 id: id,
                 ownerAccountId: ownerAccountId,
+                participantProfileId: participantProfileId,
                 name: name,
                 manufacturer: manufacturer,
+                modelId: modelId,
                 revision: revision,
                 rowid: rowid,
               ),
@@ -49910,15 +50059,19 @@ class $$ModelCatalogsTableTableManager
               ({
                 required String id,
                 required String ownerAccountId,
+                required String participantProfileId,
                 required String name,
                 Value<String?> manufacturer = const Value.absent(),
+                Value<String?> modelId = const Value.absent(),
                 Value<int> revision = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ModelCatalogsCompanion.insert(
                 id: id,
                 ownerAccountId: ownerAccountId,
+                participantProfileId: participantProfileId,
                 name: name,
                 manufacturer: manufacturer,
+                modelId: modelId,
                 revision: revision,
                 rowid: rowid,
               ),
@@ -49990,7 +50143,7 @@ typedef $$ContestModelLinksTableCreateCompanionBuilder =
       Value<String?> modelCatalogId,
       required String modelName,
       Value<String?> manufacturer,
-      required String modelId,
+      Value<String?> modelId,
       Value<String?> contestSpecificIdentifier,
       Value<int> revision,
       Value<int> rowid,
@@ -50003,7 +50156,7 @@ typedef $$ContestModelLinksTableUpdateCompanionBuilder =
       Value<String?> modelCatalogId,
       Value<String> modelName,
       Value<String?> manufacturer,
-      Value<String> modelId,
+      Value<String?> modelId,
       Value<String?> contestSpecificIdentifier,
       Value<int> revision,
       Value<int> rowid,
@@ -50445,7 +50598,7 @@ class $$ContestModelLinksTableTableManager
                 Value<String?> modelCatalogId = const Value.absent(),
                 Value<String> modelName = const Value.absent(),
                 Value<String?> manufacturer = const Value.absent(),
-                Value<String> modelId = const Value.absent(),
+                Value<String?> modelId = const Value.absent(),
                 Value<String?> contestSpecificIdentifier = const Value.absent(),
                 Value<int> revision = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -50469,7 +50622,7 @@ class $$ContestModelLinksTableTableManager
                 Value<String?> modelCatalogId = const Value.absent(),
                 required String modelName,
                 Value<String?> manufacturer = const Value.absent(),
-                required String modelId,
+                Value<String?> modelId = const Value.absent(),
                 Value<String?> contestSpecificIdentifier = const Value.absent(),
                 Value<int> revision = const Value.absent(),
                 Value<int> rowid = const Value.absent(),

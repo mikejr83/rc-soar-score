@@ -2,15 +2,37 @@
   {
     "id": "019c0000-0000-7000-8000-000000000060",
     "owner_account_id": "019c0000-0000-7000-8000-000000000001",
+    "participant_profile_id": "019c0000-0000-7000-8000-000000000020",
     "name": "Supra",
     "manufacturer": "Vladimir's Model",
+    "model_id": "SUPRA-2024-001",
     "revision": 1
   },
   {
     "id": "019c0000-0000-7000-8000-000000000062",
     "owner_account_id": "019c0000-0000-7000-8000-000000000001",
+    "participant_profile_id": "019c0000-0000-7000-8000-000000000024",
     "name": "Estrella",
     "manufacturer": "Sky Dancer Models",
+    "model_id": "EST-2025-003",
+    "revision": 1
+  },
+  {
+    "id": "019c0000-0000-7000-8000-000000000067",
+    "owner_account_id": "019c0000-0000-7000-8000-000000000001",
+    "participant_profile_id": "019c0000-0000-7000-8000-000000000021",
+    "name": "Supra",
+    "manufacturer": "Vladimir's Model",
+    "model_id": "SUPRA-2025-014",
+    "revision": 1
+  },
+  {
+    "id": "019c0000-0000-7000-8000-000000000068",
+    "owner_account_id": "019c0000-0000-7000-8000-000000000001",
+    "participant_profile_id": "019c0000-0000-7000-8000-000000000023",
+    "name": "Supra",
+    "manufacturer": "Vladimir's Model",
+    "model_id": "SUPRA-2023-077",
     "revision": 1
   }
 ]
