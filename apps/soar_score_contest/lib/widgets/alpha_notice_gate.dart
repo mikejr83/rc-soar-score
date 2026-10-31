@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 
+import 'package:soar_score_ui_storage/soar_score_ui_storage.dart';
+
 import '../l10n/app_localizations.dart';
+import '../services/alpha_notice/alpha_notice_key.dart';
+import '../services/ui_account/ui_account.dart';
 
 /// Covers [child] with the alpha release warning until the user ticks the
-/// acknowledgement and continues. The acknowledgement is kept only for this
-/// run of the app, so the warning returns on every launch.
+/// acknowledgement and continues. With a [store] the acknowledgement time is
+/// remembered on this device and the warning stays away for
+/// [alphaNoticeQuietPeriod], so a page reload (such as the sign-in redirect on
+/// web) does not bring it back. Without a store it is kept for this run only.
 ///
 /// [child] stays mounted underneath (the router keeps its place) but cannot
 /// be reached by pointer, keyboard or screen reader while the warning shows.
@@ -13,7 +19,15 @@ class AlphaNoticeGate extends StatefulWidget {
     super.key,
     required this.enabled,
     required this.child,
+    this.store,
+    this.now = DateTime.now,
   });
+
+  /// Where the acknowledgement time is remembered; `null` keeps it in memory.
+  final LocalUiStore? store;
+
+  /// The current time; tests replace it.
+  final DateTime Function() now;
 
   /// When `false` the warning never shows (demo and E2E builds, tests).
   final bool enabled;
@@ -26,6 +40,38 @@ class AlphaNoticeGate extends StatefulWidget {
 
 class _AlphaNoticeGateState extends State<AlphaNoticeGate> {
   bool _acknowledged = false;
+  bool _loading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAcknowledgement();
+  }
+
+  /// Reads the stored time; until it arrives the app stays covered, so the
+  /// warning never flashes for someone who already acknowledged it.
+  Future<void> _loadAcknowledgement() async {
+    final store = widget.store;
+    if (!widget.enabled || store == null) return;
+    _loading = true;
+    final at = await store.get(localUiAccountId, alphaNoticeAcknowledgedKey);
+    if (!mounted) return;
+    setState(() {
+      _loading = false;
+      if (at != null) {
+        final age = widget.now().difference(at);
+        _acknowledged = !age.isNegative && age < alphaNoticeQuietPeriod;
+      }
+    });
+  }
+
+  void _acknowledge() {
+    setState(() => _acknowledged = true);
+    final store = widget.store;
+    if (store != null) {
+      store.set(localUiAccountId, alphaNoticeAcknowledgedKey, widget.now());
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,17 +83,16 @@ class _AlphaNoticeGateState extends State<AlphaNoticeGate> {
           child: ExcludeSemantics(child: AbsorbPointer(child: widget.child)),
         ),
         const ModalBarrier(dismissible: false, color: Colors.black54),
-        FocusScope(
-          autofocus: true,
-          child: Center(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: _AlphaNoticeCard(
-                onContinue: () => setState(() => _acknowledged = true),
+        if (!_loading)
+          FocusScope(
+            autofocus: true,
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: _AlphaNoticeCard(onContinue: _acknowledge),
               ),
             ),
           ),
-        ),
       ],
     );
   }
