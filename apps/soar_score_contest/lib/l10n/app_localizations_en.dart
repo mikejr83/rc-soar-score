@@ -1050,4 +1050,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String modelsDetailContestId(String value) {
     return 'Contest $value';
   }
+
+  @override
+  String modelsCellCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count models',
+      one: '1 model',
+    );
+    return '$_temp0';
+  }
 }

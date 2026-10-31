@@ -1190,5 +1190,7 @@
   "modelsDetailModelId": "ID {value}",
   "@modelsDetailModelId": {"description": "Detail line of a model: the identifier the pilot put on it.", "placeholders": {"value": {"type": "String"}}},
   "modelsDetailContestId": "Contest {value}",
-  "@modelsDetailContestId": {"description": "Detail line of a model: the identifier the director applied for this contest.", "placeholders": {"value": {"type": "String"}}}
+  "@modelsDetailContestId": {"description": "Detail line of a model: the identifier the director applied for this contest.", "placeholders": {"value": {"type": "String"}}},
+  "modelsCellCount": "{count, plural, one{1 model} other{{count} models}}",
+  "@modelsCellCount": {"description": "Models cell of a pilot with several models: how many.", "placeholders": {"count": {"type": "int"}}}
 }

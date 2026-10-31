@@ -356,4 +356,32 @@ void main() {
     expect(response.statusCode, 200);
     expect(api.repository.modelLinks.links, isEmpty);
   });
+
+  test('a Completed contest takes no change to its models', () async {
+    await addParticipation();
+    await addLink();
+    final contest = await api.contests.findById(Id.parse(_contestId));
+    api.contests.replace(
+      Contest.fromJson({...contest!.toJson(), 'lifecycle_state': 'Completed'}),
+    );
+
+    final path = '/contests/$_contestId/model-links/$_linkId';
+    final add = await api.send(
+      'POST',
+      linksPath(),
+      body: {'id': '019c0000-0000-7000-8000-000000000403', 'model_name': 'New'},
+    );
+    final update = await api.send(
+      'PUT',
+      path,
+      body: {'base_revision': 0, 'model_name': 'X'},
+    );
+    final remove = await api.send('DELETE', path);
+
+    for (final response in [add, update, remove]) {
+      expect(response.statusCode, 409);
+      expect((await api.errorOf(response))['code'], 'contest_completed');
+    }
+    expect(api.repository.modelLinks.links, hasLength(1));
+  });
 }

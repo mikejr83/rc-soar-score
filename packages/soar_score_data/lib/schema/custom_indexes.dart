@@ -71,8 +71,8 @@ const customIndexes = <String, List<String>>{
   'model_catalogs': [
     // Entries without a manufacturer are unique by name within a profile.
     'CREATE UNIQUE INDEX model_catalogs_profile_name_manufacturer ON '
-        'model_catalogs (participant_profile_id, name, '
-        "COALESCE(manufacturer, ''))",
+        'model_catalogs (participant_profile_id, lower(name), '
+        "lower(COALESCE(manufacturer, '')))",
   ],
   'discipline_formulas': [
     // Only one formula per profile version is the primary one.

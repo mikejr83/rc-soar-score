@@ -244,6 +244,7 @@ class ContestCreator {
     for (final participant in draft.participants) {
       final participation = participations[participant.profileId.value];
       if (participation == null ||
+          participant.source == ParticipantSource.remote ||
           !draft.isScoring(participant) ||
           participant.models.isEmpty) {
         continue;
@@ -257,10 +258,11 @@ class ContestCreator {
             ...await client.profileModels(participant.profileId),
           ];
           final known = profileModels.where(
-            (m) =>
-                m.name.toLowerCase() == model.name.toLowerCase() &&
-                (m.manufacturer ?? '').toLowerCase() ==
-                    (model.manufacturer ?? '').toLowerCase(),
+            (m) => ModelsService.sameProfileModel(
+              m,
+              name: model.name,
+              manufacturer: model.manufacturer,
+            ),
           );
           if (known.isNotEmpty) {
             catalogId = known.first.id;

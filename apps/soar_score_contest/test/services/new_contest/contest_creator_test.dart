@@ -9,6 +9,7 @@ import 'package:soar_score_contest/services/new_contest/draft_participant.dart';
 import 'package:soar_score_contest/services/new_contest/draw_settings.dart';
 import 'package:soar_score_contest/services/participants/model_entry.dart';
 import 'package:soar_score_contest/services/participants/participant_option.dart';
+import 'package:soar_score_contest/services/participants/participant_row.dart';
 import 'package:soar_score_contest/services/new_contest/scoring_settings.dart';
 import 'package:soar_score_contest/services/new_contest/wizard_discipline.dart';
 import 'package:soar_score_core/soar_score_core.dart';
@@ -223,6 +224,30 @@ void main() {
 
       expect(await client.modelLinks(second.id), hasLength(1));
       expect(await client.profileModels(profiles[0].id), hasLength(1));
+    });
+
+    test('of a remote pilot are not sent, and make no profile model', () async {
+      final model = ModelEntry(id: Id.create(), name: 'Supra');
+      final remote = DraftParticipant(
+        profileId: profiles[2].id,
+        name: 'Remote Pilot',
+        source: ParticipantSource.remote,
+        models: [model],
+      );
+      final contest = await ContestCreator(client).create(
+        draft().copyWith(
+          options: const {ParticipantOption.models},
+          participants: [
+            DraftParticipant.fromProfile(profiles[0]),
+            DraftParticipant.fromProfile(profiles[1]),
+            remote,
+          ],
+        ),
+        CreationIds('test'),
+      );
+
+      expect(await client.modelLinks(contest.id), isEmpty);
+      expect(await client.profileModels(profiles[2].id), isEmpty);
     });
 
     test('are not sent for a non-flier or when the option is off', () async {

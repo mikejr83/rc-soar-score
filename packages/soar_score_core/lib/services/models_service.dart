@@ -1,4 +1,6 @@
+import '../enums/lifecycle_state.dart';
 import '../enums/role_type.dart';
+import '../errors/contest_state_error.dart';
 import '../errors/entity_not_found_error.dart';
 import '../models/id.dart';
 import '../models/participants/contest_participation.dart';
@@ -136,7 +138,8 @@ class ModelsService {
   ///
   /// Idempotent on [id]: repeating the same request returns the stored link.
   /// The same id with different content throws an [AlreadyStoredError]. Only
-  /// a pilot has models: any other role throws an [ArgumentError].
+  /// a pilot has models: any other role throws an [ArgumentError]. A
+  /// Completed contest takes no change ([ContestStateError]).
   Future<ContestModelLink> addLink(
     Id contestId,
     Id ownerAccountId,
@@ -153,6 +156,12 @@ class ModelsService {
       contestId,
       participationId,
     );
+    final stored = await repository.contestModelLinkRepository.findById(id);
+    // A repeated request is answered even after the contest completed.
+    if (stored == null) {
+      await _requireOpen(contestId);
+      _requirePilot(participation);
+    }
     ModelCatalog? source;
     if (modelCatalogId != null) {
       source = await _requireProfileModel(
@@ -175,7 +184,6 @@ class ModelsService {
       contestSpecificIdentifier: _blankToNull(contestSpecificIdentifier),
     );
     final links = repository.contestModelLinkRepository;
-    final stored = await links.findById(id);
     if (stored != null) {
       if (_sameDetails(stored, link) &&
           stored.contestId == contestId &&
@@ -184,14 +192,14 @@ class ModelsService {
       }
       throw AlreadyStoredError(entityType: 'ContestModelLink', entityId: id);
     }
-    _requirePilot(participation);
     return links.save(link, metadata: metadata);
   }
 
   /// Replaces the details of link [id] in contest [contestId]; the link to
   /// the profile's model stays as it was.
   ///
-  /// Allowed after flights are scored: no score is recalculated. Throws a
+  /// Allowed after flights are scored (no score is recalculated), but not once
+  /// the contest is Completed. Throws a
   /// [StaleRevisionError] when [baseRevision] is not the stored revision.
   Future<ContestModelLink> updateLink(
     Id contestId,
@@ -204,6 +212,7 @@ class ModelsService {
     required MutationMetadata metadata,
   }) async {
     final stored = await _requireLink(contestId, id);
+    await _requireOpen(contestId);
     if (stored.revision != baseRevision) {
       throw StaleRevisionError(
         entityType: stored.entityType,
@@ -235,6 +244,7 @@ class ModelsService {
     required MutationMetadata metadata,
   }) async {
     await _requireLink(contestId, id);
+    await _requireOpen(contestId);
     await repository.contestModelLinkRepository.delete(id, metadata: metadata);
   }
 
@@ -268,6 +278,17 @@ class ModelsService {
   Future<void> _requireContest(Id contestId) async {
     if (await repository.contestRepository.findById(contestId) == null) {
       throw EntityNotFoundError(entityType: 'Contest', entityId: contestId);
+    }
+  }
+
+  /// A Completed contest is history: its models are not changed.
+  Future<void> _requireOpen(Id contestId) async {
+    final contest = await repository.contestRepository.findById(contestId);
+    if (contest?.lifecycleState == LifecycleState.completed) {
+      throw ContestStateError(
+        'contest_completed',
+        'the models of a Completed contest are not changed',
+      );
     }
   }
 
@@ -319,14 +340,28 @@ class ModelsService {
         .where(
           (m) =>
               m.id != except &&
-              m.name == model.name &&
-              m.manufacturer == model.manufacturer,
+              sameProfileModel(
+                m,
+                name: model.name,
+                manufacturer: model.manufacturer,
+              ),
         )
         .firstOrNull;
     if (twin != null) {
       throw AlreadyStoredError(entityType: 'ModelCatalog', entityId: twin.id);
     }
   }
+
+  /// Whether [model] has this name and manufacturer, ignoring case: one
+  /// profile holds a model once.
+  static bool sameProfileModel(
+    ModelCatalog model, {
+    required String name,
+    String? manufacturer,
+  }) =>
+      model.name.trim().toLowerCase() == name.trim().toLowerCase() &&
+      (model.manufacturer ?? '').trim().toLowerCase() ==
+          (manufacturer ?? '').trim().toLowerCase();
 
   static ModelCatalog _catalog({
     required Id id,

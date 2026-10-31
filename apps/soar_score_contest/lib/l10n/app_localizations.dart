@@ -1561,6 +1561,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Contest {value}'**
   String modelsDetailContestId(String value);
+
+  /// Models cell of a pilot with several models: how many.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 model} other{{count} models}}'**
+  String modelsCellCount(int count);
 }
 
 class _AppLocalizationsDelegate

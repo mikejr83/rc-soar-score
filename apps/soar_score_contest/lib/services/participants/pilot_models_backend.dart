@@ -80,10 +80,11 @@ class ApiPilotModelsBackend implements PilotModelsBackend {
     if (catalogId == null) {
       final models = [...await client.profileModels(profileId)];
       final known = models.where(
-        (m) =>
-            m.name.toLowerCase() == entry.name.toLowerCase() &&
-            (m.manufacturer ?? '').toLowerCase() ==
-                (entry.manufacturer ?? '').toLowerCase(),
+        (m) => ModelsService.sameProfileModel(
+          m,
+          name: entry.name,
+          manufacturer: entry.manufacturer,
+        ),
       );
       if (known.isNotEmpty) {
         catalogId = known.first.id;

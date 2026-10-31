@@ -205,18 +205,16 @@ Future<void> runWizardPhase(Journey journey, JourneyContext data) async {
     await tapVisible(tester, _modelsButton.last);
     await pumpUntilFound(tester, find.byKey(const ValueKey('model-add')));
     await tapVisible(tester, find.byKey(const ValueKey('model-add')));
-    await enterIn(
-      tester,
-      find.byKey(const ValueKey('model-name')),
-      'E2E Spare',
-    );
+    // Blake's demo profile has a model to pick.
+    await tapVisible(tester, find.byKey(const ValueKey('model-pick')));
+    await tapVisible(tester, find.text('Demo Mini · Demo Models').last);
     await enterIn(
       tester,
       find.byKey(const ValueKey('model-contest-id')),
       'E2E-7',
     );
     await tapVisible(tester, find.byKey(const ValueKey('model-save')));
-    await pumpUntilFound(tester, find.text('Contest E2E-7'));
+    await pumpUntilFound(tester, find.textContaining('Contest E2E-7'));
     await tapVisible(
       tester,
       find.byWidgetPredicate(
@@ -232,9 +230,9 @@ Future<void> runWizardPhase(Journey journey, JourneyContext data) async {
       'E2E Spare Two',
     );
     await tapVisible(tester, find.byKey(const ValueKey('model-save')));
-    await pumpUntilFound(tester, find.text('E2E Spare Two'));
+    await pumpUntilFound(tester, find.textContaining('E2E Spare Two'));
     await tapVisible(tester, find.byKey(const ValueKey('models-done')));
-    await pumpUntilFound(tester, find.text('E2E Spare Two'));
+    await pumpUntilFound(tester, find.textContaining('E2E Spare Two'));
     expect(find.text('No models entered'), findsNothing);
 
     await tapVisible(tester, _modelsButton.last);
@@ -254,7 +252,7 @@ Future<void> runWizardPhase(Journey journey, JourneyContext data) async {
     );
     await tapVisible(tester, find.byKey(const ValueKey('models-done')));
     await pumpUntilFound(tester, find.text('No models entered'));
-    expect(find.text('E2E Spare Two'), findsNothing);
+    expect(find.textContaining('E2E Spare Two'), findsNothing);
   });
 
   await journey.step('Copying a contest with classes', () async {

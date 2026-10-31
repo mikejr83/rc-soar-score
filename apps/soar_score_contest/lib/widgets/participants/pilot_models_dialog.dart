@@ -192,16 +192,13 @@ class _PilotModelsDialogState extends State<PilotModelsDialog> {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final pickable = [
-      for (final model in _profileModels)
-        if (!_models.any((m) => m.catalogId == model.id)) model,
-    ];
+    final pickable = _profileModels;
     return AlertDialog(
       key: const ValueKey('pilot-models-dialog'),
       icon: const Icon(Icons.flight),
       title: Text(l10n.modelsDialogTitle(widget.pilotName)),
       content: SizedBox(
-        width: 480,
+        width: 440,
         child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -249,7 +246,7 @@ class _PilotModelsDialogState extends State<PilotModelsDialog> {
                 if (_editing == null && pickable.isNotEmpty) ...[
                   DropdownMenu<ModelCatalog>(
                     key: const ValueKey('model-pick'),
-                    width: 440,
+                    width: 392,
                     label: Text(l10n.modelsPickLabel),
                     helperText: l10n.modelsPickHint,
                     enabled: !_busy,

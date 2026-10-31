@@ -247,10 +247,15 @@ class ParticipantCells {
               style: theme.textTheme.bodySmall?.copyWith(color: color),
             ),
           )
-        : Text(
-            models.map((model) => model.label).join(', '),
-            key: ValueKey('models-$_id'),
-            style: theme.textTheme.bodySmall,
+        : Tooltip(
+            message: models.map((model) => model.label).join('\n'),
+            child: Text(
+              models.length == 1
+                  ? models.single.label
+                  : l10n.modelsCellCount(models.length),
+              key: ValueKey('models-$_id'),
+              style: theme.textTheme.bodySmall,
+            ),
           );
     return Row(
       children: [

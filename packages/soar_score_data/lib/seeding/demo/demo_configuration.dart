@@ -21,7 +21,7 @@ abstract final class DemoConfiguration {
         'drop_after_rounds': <int>[],
         'tiebreaker_enabled': false,
         'classes_enabled': plan.classes,
-        'models_enabled': false,
+        'models_enabled': plan.models,
         'participant_numbers_enabled': plan.classes || teams,
         'review_requests_enabled': true,
         'public_update_mode': core.PublicUpdateMode.roundCompletion.json,
