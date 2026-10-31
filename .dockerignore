@@ -29,3 +29,6 @@ scripts/
 # Docker files
 #**/Dockerfile*
 #.dockerignore
+
+**/.claude/
+**/.e2e-tools/

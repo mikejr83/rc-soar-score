@@ -21,17 +21,17 @@ Imported data: if a director imports a contest from other scoring software, any 
 
 ## 3. What we collect
 
-| Who | Data | Why |
-|---|---|---|
-| Account holders | Name, email address (and whether our sign-in provider verified it), a stable account id, optional preferred time zone and language | Sign in, own contests, receive invitations |
-| Contest directors | Contests, participant (pilot and helper) records including name and optionally email and AMA/club details they choose to enter, rounds, matrix, scores, notes, audit history | Run and score contests |
-| Pilots invited to self-score | An invitation link (a random credential, stored only in protected form), a temporary guest identity, the scores they enter | Let pilots enter their own scores without an account |
-| Pilots with an account | Optional directory listing (you choose whether you are listed and whether directors can see your email), optional public name | Let directors find you; control how you appear in results |
-| Anonymous publishers | An email address, verified with a one-time code (valid 10 minutes), kept private | Prove control of the email, manage and later claim the publication |
-| People using the support form | Name, email, role, request type, message | Answer your request |
-| All visitors | Technical data: IP address, browser type, requested pages, timestamps, error details; page-view statistics [analytics provider TBD, see section 10] | Security, abuse prevention, reliability, understanding site use |
-| Signed-in users' devices | Installation record: a label (by default derived from the computer's name, [change to a generic label before launch]), platform, last-seen and last-sync times | Show and revoke your connected devices |
-| Everyone whose data syncs | A change log of synced records (including the pilot name and email fields they contain), who made the change, which device, and when | Sync, conflict handling, debugging and audit |
+| Who                           | Data                                                                                                                                                                         | Why                                                                |
+| ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| Account holders               | Name, email address (and whether our sign-in provider verified it), a stable account id, optional preferred time zone and language                                           | Sign in, own contests, receive invitations                         |
+| Contest directors             | Contests, participant (pilot and helper) records including name and optionally email and AMA/club details they choose to enter, rounds, matrix, scores, notes, audit history | Run and score contests                                             |
+| Pilots invited to self-score  | An invitation link (a random credential, stored only in protected form), a temporary guest identity, the scores they enter                                                   | Let pilots enter their own scores without an account               |
+| Pilots with an account        | Optional directory listing (you choose whether you are listed and whether directors can see your email), optional public name                                                | Let directors find you; control how you appear in results          |
+| Anonymous publishers          | An email address, verified with a one-time code (valid 10 minutes), kept private                                                                                             | Prove control of the email, manage and later claim the publication |
+| People using the support form | Name, email, role, request type, message                                                                                                                                     | Answer your request                                                |
+| All visitors                  | Technical data: IP address, browser type, requested pages, timestamps, error details; page-view statistics [analytics provider TBD, see section 10]                          | Security, abuse prevention, reliability, understanding site use    |
+| Signed-in users' devices      | Installation record: a label (by default derived from the computer's name, [change to a generic label before launch]), platform, last-seen and last-sync times               | Show and revoke your connected devices                             |
+| Everyone whose data syncs     | A change log of synced records (including the pilot name and email fields they contain), who made the change, which device, and when                                         | Sync, conflict handling, debugging and audit                       |
 
 We do not collect payment data, precise location, or data from children knowingly. [You must be at least 16 to register an account. Junior pilots may appear in results entered by a director, who is responsible for having any required parental consent.]
 
@@ -80,7 +80,6 @@ Our hosts keep their own server logs under their own policies (method, path, sta
 - Verification email of an anonymous publisher: deleted 30 days after the publication is claimed, delisted or removed.
 - Backups: [TBD with hosting; verify Neon's retention]; deleted data can persist in backups until they age out.
 - Inactive accounts: closed after 3 years without sign-in, with prior notice (may follow after the first release).
-
 
 ## 8. Your choices and rights
 

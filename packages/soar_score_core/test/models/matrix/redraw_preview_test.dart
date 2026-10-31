@@ -103,10 +103,7 @@ void main() {
 
     test('never wins when the current fairness is missing or a cost is', () {
       expect(
-        RedrawPreview(
-          seed: 1,
-          candidateFairness: fairness(unmet: 0),
-        ).better,
+        RedrawPreview(seed: 1, candidateFairness: fairness(unmet: 0)).better,
         false,
         reason: 'nothing to beat when there is no current fairness',
       );
