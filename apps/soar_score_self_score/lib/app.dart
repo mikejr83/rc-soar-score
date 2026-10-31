@@ -9,7 +9,7 @@ class SelfScoreApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      title: 'Self Score',
+      title: 'RC Soar Score Self-Scoring',
       debugShowCheckedModeBanner: false,
       theme: SelfScoreAppTheme.lightTheme,
       darkTheme: SelfScoreAppTheme.darkTheme,
