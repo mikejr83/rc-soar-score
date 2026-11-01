@@ -1,0 +1,69 @@
+{
+  "schema": "gs-import/v1",
+  "id": "00000000-0000-7000-8000-000000000001",
+  "sourceDbFile": "GliderScoreData.mdb",
+  "tables": [
+    {
+      "name": "Pilots",
+      "rowCount": 5,
+      "rowCapExceeded": false,
+      "rows": [
+        {
+          "PilotNo": 2,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "E",
+          "Filter": "N",
+          "FirstName": "Oakley",
+          "LastName": "ZZCandlewick",
+          "FutureColumn": "x",
+          "AnotherNewThing": 7
+        },
+        {
+          "PilotNo": 4,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "E",
+          "Filter": "N",
+          "FirstName": "Dana",
+          "LastName": "ZZEastwick",
+          "FutureColumn": "x",
+          "AnotherNewThing": 7
+        },
+        {
+          "PilotNo": 5,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "E",
+          "Filter": "N",
+          "FirstName": "Kai",
+          "LastName": "ZZFairweather",
+          "FutureColumn": "x",
+          "AnotherNewThing": 7
+        },
+        {
+          "PilotNo": 6,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "A",
+          "Filter": "N",
+          "FirstName": "Riley",
+          "LastName": "ZZGladstone",
+          "FutureColumn": "x",
+          "AnotherNewThing": 7
+        },
+        {
+          "PilotNo": 7,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "A",
+          "Filter": "N",
+          "FirstName": "Zion",
+          "LastName": "ZZHawthorne",
+          "FutureColumn": "x",
+          "AnotherNewThing": 7
+        }
+      ]
+    }
+  ]
+}

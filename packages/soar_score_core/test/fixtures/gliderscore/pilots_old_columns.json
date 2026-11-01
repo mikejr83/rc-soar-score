@@ -1,0 +1,122 @@
+{
+  "schema": "gs-import/v1",
+  "id": "00000000-0000-7000-8000-000000000001",
+  "sourceDbFile": "GliderScoreData.mdb",
+  "tables": [
+    {
+      "name": "Pilots",
+      "rowCount": 12,
+      "rowCapExceeded": false,
+      "rows": [
+        {
+          "PilotNo": 2,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "E",
+          "Filter": "N",
+          "FirstName": "Oakley",
+          "LastName": "ZZCandlewick"
+        },
+        {
+          "PilotNo": 4,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "E",
+          "Filter": "N",
+          "FirstName": "Dana",
+          "LastName": "ZZEastwick"
+        },
+        {
+          "PilotNo": 5,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "E",
+          "Filter": "N",
+          "FirstName": "Kai",
+          "LastName": "ZZFairweather"
+        },
+        {
+          "PilotNo": 6,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "A",
+          "Filter": "N",
+          "FirstName": "Riley",
+          "LastName": "ZZGladstone"
+        },
+        {
+          "PilotNo": 7,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "A",
+          "Filter": "N",
+          "FirstName": "Zion",
+          "LastName": "ZZHawthorne"
+        },
+        {
+          "PilotNo": 10,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "E",
+          "Filter": "N",
+          "FirstName": "Uma",
+          "LastName": "ZZKingsley"
+        },
+        {
+          "PilotNo": 11,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "E",
+          "Filter": "N",
+          "FirstName": "Casey",
+          "LastName": "ZZLarkspur"
+        },
+        {
+          "PilotNo": 12,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "E",
+          "Filter": "N",
+          "FirstName": "Jordan",
+          "LastName": "ZZMarlowe"
+        },
+        {
+          "PilotNo": 13,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "E",
+          "Filter": "N",
+          "FirstName": "Quinn",
+          "LastName": "ZZNorthcott"
+        },
+        {
+          "PilotNo": 14,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "A",
+          "Filter": "N",
+          "FirstName": "Yael",
+          "LastName": "ZZOakenfold"
+        },
+        {
+          "PilotNo": 16,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "E",
+          "Filter": "N",
+          "FirstName": "Morgan",
+          "LastName": "ZZQuillfeather"
+        },
+        {
+          "PilotNo": 18,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "E",
+          "Filter": "N",
+          "FirstName": "Blair",
+          "LastName": "ZZSandford"
+        }
+      ]
+    }
+  ]
+}
