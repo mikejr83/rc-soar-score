@@ -59,23 +59,22 @@ jobs:
           "VCPKG_ROOT=$env:VCPKG_INSTALLATION_ROOT" | Out-File -FilePath $env:GITHUB_ENV -Append
           & "$env:VCPKG_INSTALLATION_ROOT\vcpkg.exe" install --recurse "cpp-httplib[core,openssl]:x64-windows" nlohmann-json:x64-windows openssl:x64-windows
 
+      # Notices for the offline app, from the generator that also feeds the
+      # public /open-source page. --product reads only the contest app's Dart
+      # graph (the pub cache from the bootstrap), so no npm install is needed.
+      # The JSON refreshes the asset behind the in-app licence page.
+      - name: Generate third-party notices
+        run: >
+          dart scripts/generate_licences.dart
+          --product contest-app --notices THIRD_PARTY_NOTICES.txt
+          --json apps/soar_score_contest/assets/licences/contest-app.json
+
       - name: Build Windows
         working-directory: apps/soar_score_contest
         run: >
           flutter build windows --release --no-pub
           --build-name ${{ steps.version.outputs.core }}
           --build-number ${{ github.run_number }}
-
-      # Notices for the offline app, from the generator that also feeds the
-      # public /open-source page. Flags are those of scripts/generate_licences.dart.
-      - name: Install web dependencies for the notices generator
-        working-directory: apps/soar_score_web
-        run: npm ci
-
-      - name: Generate third-party notices
-        run: >
-          dart scripts/generate_licences.dart
-          --product contest-app --notices THIRD_PARTY_NOTICES.txt
 
       - name: Package the zip
         shell: pwsh
