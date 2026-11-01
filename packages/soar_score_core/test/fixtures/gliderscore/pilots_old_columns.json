@@ -9,112 +9,100 @@
       "rowCapExceeded": false,
       "rows": [
         {
-          "PilotNo": 2,
-          "Country": "AUS",
+          "PilotNo": 75,
+          "Country": "USA",
           "FAINumber": "0",
-          "UsualClass": "E",
+          "Filter": "Y",
+          "FirstName": "Alex",
+          "LastName": "Ashdown3"
+        },
+        {
+          "PilotNo": 77,
+          "Country": "USA",
+          "FAINumber": "0",
           "Filter": "N",
           "FirstName": "Oakley",
-          "LastName": "ZZCandlewick"
+          "LastName": "Candlewick3"
         },
         {
-          "PilotNo": 4,
-          "Country": "AUS",
+          "PilotNo": 78,
+          "Country": "USA",
           "FAINumber": "0",
-          "UsualClass": "E",
           "Filter": "N",
-          "FirstName": "Dana",
-          "LastName": "ZZEastwick"
+          "FirstName": "Val",
+          "LastName": "Dunmore3"
         },
         {
-          "PilotNo": 5,
-          "Country": "AUS",
+          "PilotNo": 80,
+          "Country": "USA",
           "FAINumber": "0",
-          "UsualClass": "E",
           "Filter": "N",
           "FirstName": "Kai",
-          "LastName": "ZZFairweather"
+          "LastName": "Fairweather3"
         },
         {
-          "PilotNo": 6,
-          "Country": "AUS",
+          "PilotNo": 82,
+          "Country": "USA",
           "FAINumber": "0",
-          "UsualClass": "A",
-          "Filter": "N",
-          "FirstName": "Riley",
-          "LastName": "ZZGladstone"
-        },
-        {
-          "PilotNo": 7,
-          "Country": "AUS",
-          "FAINumber": "0",
-          "UsualClass": "A",
           "Filter": "N",
           "FirstName": "Zion",
-          "LastName": "ZZHawthorne"
+          "LastName": "Hawthorne3"
         },
         {
-          "PilotNo": 10,
-          "Country": "AUS",
+          "PilotNo": 83,
+          "Country": "USA",
           "FAINumber": "0",
-          "UsualClass": "E",
           "Filter": "N",
-          "FirstName": "Uma",
-          "LastName": "ZZKingsley"
+          "FirstName": "Glenn",
+          "LastName": "Ironside3"
         },
         {
-          "PilotNo": 11,
-          "Country": "AUS",
+          "PilotNo": 84,
+          "Country": "USA",
           "FAINumber": "0",
-          "UsualClass": "E",
+          "Filter": "N",
+          "FirstName": "Nico",
+          "LastName": "Jessup3"
+        },
+        {
+          "PilotNo": 85,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "Y",
+          "FirstName": "Uma",
+          "LastName": "Kingsley3"
+        },
+        {
+          "PilotNo": 86,
+          "Country": "USA",
+          "FAINumber": "0",
           "Filter": "N",
           "FirstName": "Casey",
-          "LastName": "ZZLarkspur"
+          "LastName": "Larkspur3"
         },
         {
-          "PilotNo": 12,
-          "Country": "AUS",
+          "PilotNo": 87,
+          "Country": "USA",
           "FAINumber": "0",
-          "UsualClass": "E",
           "Filter": "N",
           "FirstName": "Jordan",
-          "LastName": "ZZMarlowe"
+          "LastName": "Marlowe3"
         },
         {
-          "PilotNo": 13,
-          "Country": "AUS",
+          "PilotNo": 88,
+          "Country": "USA",
           "FAINumber": "0",
-          "UsualClass": "E",
           "Filter": "N",
           "FirstName": "Quinn",
-          "LastName": "ZZNorthcott"
+          "LastName": "Northcott3"
         },
         {
-          "PilotNo": 14,
-          "Country": "AUS",
+          "PilotNo": 89,
+          "Country": "USA",
           "FAINumber": "0",
-          "UsualClass": "A",
           "Filter": "N",
           "FirstName": "Yael",
-          "LastName": "ZZOakenfold"
-        },
-        {
-          "PilotNo": 16,
-          "Country": "AUS",
-          "FAINumber": "0",
-          "UsualClass": "E",
-          "Filter": "N",
-          "FirstName": "Morgan",
-          "LastName": "ZZQuillfeather"
-        },
-        {
-          "PilotNo": 18,
-          "Country": "AUS",
-          "FAINumber": "0",
-          "UsualClass": "E",
-          "Filter": "N",
-          "FirstName": "Blair",
-          "LastName": "ZZSandford"
+          "LastName": "Oakenfold3"
         }
       ]
     }

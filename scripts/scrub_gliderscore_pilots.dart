@@ -105,12 +105,16 @@ void main(List<String> args) {
         (jsonDecode(line) as Map<String, dynamic>).cast<String, Object?>(),
   ];
   final scrubbed = [for (final row in original) _scrub(row)];
+  final realPilots = [
+    for (final row in scrubbed)
+      if (!(row['LastName']! as String).startsWith('ZZ')) row,
+  ];
 
   final files = <String, List<Map<String, Object?>>>{
     'pilots_reference.json': scrubbed,
     'pilots_edge_cases.json': _edgeCases(),
     'pilots_old_columns.json': [
-      for (final row in scrubbed.take(12))
+      for (final row in realPilots.take(12))
         {
           for (final key in const [
             'PilotNo',
@@ -125,7 +129,7 @@ void main(List<String> args) {
         },
     ],
     'pilots_extra_columns.json': [
-      for (final row in scrubbed.take(5))
+      for (final row in realPilots.take(5))
         {...row, 'FutureColumn': 'x', 'AnotherNewThing': 7},
     ],
   };

@@ -23,6 +23,7 @@ export 'models/accounts/accounts.dart';
 export 'models/contest/contest_models.dart';
 export 'models/discipline/discipline.dart';
 export 'models/imports/glider_score_import_result.dart';
+export 'models/imports/pilot_import_draft.dart';
 export 'models/id.dart';
 export 'models/landing/landing.dart';
 export 'models/matrix/matrix.dart';
