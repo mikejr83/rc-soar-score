@@ -57,8 +57,9 @@ DNS for all of them is managed in Cloudflare. The API record stays unproxied
 
 ## Secrets and settings
 
-GitHub repository secrets (Settings > Secrets and variables > Actions). None
-are stored in the repository.
+GitHub environment secrets, stored in the `Production` environment (Settings >
+Environments > Production > Environment secrets); every deploy job runs in that
+environment. None are stored in the repository.
 
 | Secret              | Used by     | How to get it                                                     |
 | ------------------- | ----------- | ----------------------------------------------------------------- |
@@ -86,7 +87,7 @@ Environment variables on each host:
 
 Do these once, in this order, so there is no gap.
 
-1. Add the six secrets above to the repository.
+1. Create the `Production` environment and add the six secrets above to it.
 2. Vercel project settings: Root Directory `apps/soar_score_web`; rename the
    `RAILWAY_API_URL` environment variable to `SOAR_SCORE_API_URL` (Production)
    at the same time you merge the PR that renames it in `next.config.ts`.

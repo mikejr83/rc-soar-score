@@ -43,6 +43,7 @@ jobs:
     if: github.event_name == 'release' || inputs.api
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    environment: Production
     steps:
       - uses: actions/checkout@v4
         with:
@@ -70,6 +71,7 @@ jobs:
     needs: api
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    environment: Production
     env:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
@@ -104,6 +106,7 @@ jobs:
     needs: api
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    environment: Production
     strategy:
       fail-fast: false
       matrix:
