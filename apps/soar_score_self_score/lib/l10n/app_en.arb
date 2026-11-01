@@ -1,0 +1,23 @@
+{
+  "@@locale": "en",
+  "moreMenuTooltip": "More",
+  "@moreMenuTooltip": {
+    "description": "Tooltip of the app bar button that opens the menu with legal and licence links."
+  },
+  "openSourceLicencesLink": "Open source licences",
+  "@openSourceLicencesLink": {
+    "description": "Link to the public site page that lists the open source software this app uses."
+  },
+  "licencesInThisAppLink": "Licences in this app",
+  "@licencesInThisAppLink": {
+    "description": "Menu item that opens the licence list built into the app. It works without a network connection."
+  },
+  "privacyPolicyLink": "Privacy Policy",
+  "@privacyPolicyLink": {
+    "description": "Link to the Privacy Policy on the public site."
+  },
+  "termsLink": "Terms",
+  "@termsLink": {
+    "description": "Link to the Terms of Service on the public site."
+  }
+}

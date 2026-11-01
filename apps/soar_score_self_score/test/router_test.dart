@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_self_score/l10n/app_localizations.dart';
 import 'package:soar_score_self_score/router.dart';
 
 void main() {
@@ -7,7 +8,12 @@ void main() {
     tester.view.physicalSize = const Size(800, 2400);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
-    await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+    await tester.pumpWidget(
+      MaterialApp.router(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        routerConfig: router,
+      ),
+    );
 
     router.go('/contests/spring-open');
     await tester.pumpAndSettle();
