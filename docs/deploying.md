@@ -61,15 +61,19 @@ GitHub environment secrets, stored in the `Production` environment (Settings >
 Environments > Production > Environment secrets); every deploy job runs in that
 environment. None are stored in the repository.
 
-| Secret              | Used by     | How to get it                                                     |
-| ------------------- | ----------- | ----------------------------------------------------------------- |
-| `FLY_API_TOKEN`     | API         | `fly tokens create deploy --app rc-soar-score-api`                |
-| `VERCEL_TOKEN`      | public site | Vercel > Account Settings > Tokens                                |
-| `VERCEL_ORG_ID`     | public site | `vercel link` in the repository root, then `.vercel/project.json` |
-| `VERCEL_PROJECT_ID` | public site | the same file                                                     |
+| Secret          | Used by     | How to get it                                      |
+| --------------- | ----------- | -------------------------------------------------- |
+| `FLY_API_TOKEN` | API         | `fly tokens create deploy --app rc-soar-score-api` |
+| `VERCEL_TOKEN`  | public site | Vercel > Account Settings > Tokens                 |
 
 | `CLOUDFLARE_API_TOKEN` | Flutter apps | Cloudflare > My Profile > API Tokens > template "Edit Cloudflare Workers" |
 | `CLOUDFLARE_ACCOUNT_ID` | Flutter apps | Cloudflare dashboard > Workers & Pages (right sidebar) |
+
+The Vercel IDs are identifiers, not credentials, so they are Environment
+**variables** (the Variables tab of the same environment): `VERCEL_ORG_ID` (the
+Vercel team ID, Team Settings > General) and `VERCEL_PROJECT_ID` (Project >
+Settings > General). To get them locally, `vercel link` and read
+`.vercel/project.json`.
 
 Do not commit `.vercel/`.
 
@@ -87,7 +91,7 @@ Environment variables on each host:
 
 Do these once, in this order, so there is no gap.
 
-1. Create the `Production` environment and add the six secrets above to it.
+1. Create the `Production` environment and add the four secrets above to it, and the two Vercel IDs as variables (below).
 2. Vercel project settings: Root Directory `apps/soar_score_web`; rename the
    `RAILWAY_API_URL` environment variable to `SOAR_SCORE_API_URL` (Production)
    at the same time you merge the PR that renames it in `next.config.ts`.
