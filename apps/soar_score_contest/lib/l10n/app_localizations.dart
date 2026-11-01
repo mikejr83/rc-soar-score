@@ -2087,8 +2087,8 @@ abstract class AppLocalizations {
   /// Summary line above the import button of the pilot import.
   ///
   /// In en, this message translates to:
-  /// **'{added} to add, {updated} to update, {skipped} left out'**
-  String pilotImportPlan(int added, int updated, int skipped);
+  /// **'{added} to add, {updated} to update, {unchanged} unchanged, {skipped} left out'**
+  String pilotImportPlan(int added, int updated, int unchanged, int skipped);
 
   /// Button that saves the pilot import.
   ///

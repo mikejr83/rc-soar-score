@@ -1621,7 +1621,7 @@
   "@pilotImportNoPilots": {
     "description": "Shown when the GliderScore file holds no pilots to import."
   },
-  "pilotImportPlan": "{added} to add, {updated} to update, {skipped} left out",
+  "pilotImportPlan": "{added} to add, {updated} to update, {unchanged} unchanged, {skipped} left out",
   "@pilotImportPlan": {
     "description": "Summary line above the import button of the pilot import.",
     "placeholders": {
@@ -1629,6 +1629,9 @@
         "type": "int"
       },
       "updated": {
+        "type": "int"
+      },
+      "unchanged": {
         "type": "int"
       },
       "skipped": {

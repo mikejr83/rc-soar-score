@@ -143,10 +143,15 @@ class _PilotImportDialogState extends State<PilotImportDialog> {
         return const [];
       case PilotImportStep.review:
         final plan = _c.plan;
-        final any = plan.added + plan.updated > 0;
+        final any = plan.added + plan.updated + plan.unchanged > 0;
         return [
           Text(
-            l10n.pilotImportPlan(plan.added, plan.updated, plan.skipped),
+            l10n.pilotImportPlan(
+              plan.added,
+              plan.updated,
+              plan.unchanged,
+              plan.skipped,
+            ),
             key: const ValueKey('pilot-import-plan'),
           ),
           TextButton(onPressed: close, child: Text(l10n.cancelButton)),

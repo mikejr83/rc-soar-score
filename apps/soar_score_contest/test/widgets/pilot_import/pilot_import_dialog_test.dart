@@ -92,7 +92,10 @@ void main() {
     expect(find.textContaining('2 GliderScore test pilots'), findsOneWidget);
     expect(find.textContaining('street'), findsNothing);
     expect(find.textContaining('Street'), findsOneWidget);
-    expect(find.text('1 to add, 1 to update, 1 left out'), findsOneWidget);
+    expect(
+      find.text('1 to add, 1 to update, 0 unchanged, 1 left out'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('unchecking a pilot and choosing for a maybe updates the plan', (
@@ -101,14 +104,23 @@ void main() {
     await open(tester);
     await tester.tap(find.byKey(const ValueKey('pilot-import-row-1')));
     await tester.pump();
-    expect(find.text('0 to add, 1 to update, 1 left out'), findsNothing);
-    expect(find.text('0 to add, 1 to update, 2 left out'), findsOneWidget);
+    expect(
+      find.text('0 to add, 1 to update, 0 unchanged, 1 left out'),
+      findsNothing,
+    );
+    expect(
+      find.text('0 to add, 1 to update, 0 unchanged, 2 left out'),
+      findsOneWidget,
+    );
 
     await tester.tap(find.byKey(const ValueKey('pilot-import-choice-3')));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Add as new').last);
     await tester.pumpAndSettle();
-    expect(find.text('1 to add, 1 to update, 1 left out'), findsOneWidget);
+    expect(
+      find.text('1 to add, 1 to update, 0 unchanged, 1 left out'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('importing saves, shows the result and reports a change', (
@@ -172,5 +184,52 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('pilot-import-review-again')));
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('pilot-import-confirm')), findsOneWidget);
+  });
+
+  testWidgets('a review of only unchanged matches can still be confirmed', (
+    tester,
+  ) async {
+    store = FakePilotImportStore([
+      profile(first: 'Erin', last: 'Existing', email: 'e@x.test'),
+    ]);
+    await open(
+      tester,
+      read: (_) async => pilotsSnapshot([
+        {
+          'PilotNo': 2,
+          'FirstName': 'Erin',
+          'LastName': 'Existing',
+          'Email': 'e@x.test',
+        },
+      ]),
+    );
+    expect(
+      find.text('0 to add, 0 to update, 1 unchanged, 0 left out'),
+      findsOneWidget,
+    );
+    final confirm = tester.widget<FilledButton>(
+      find.byKey(const ValueKey('pilot-import-confirm')),
+    );
+    expect(confirm.onPressed, isNotNull);
+    await tester.tap(find.byKey(const ValueKey('pilot-import-confirm')));
+    await tester.pumpAndSettle();
+    expect(
+      find.text('Added 0, updated 0, unchanged 1, left out 0.'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('a review where every row is skipped cannot be confirmed', (
+    tester,
+  ) async {
+    await open(tester);
+    for (final n in [1, 2]) {
+      await tester.tap(find.byKey(ValueKey('pilot-import-row-$n')));
+      await tester.pump();
+    }
+    final confirm = tester.widget<FilledButton>(
+      find.byKey(const ValueKey('pilot-import-confirm')),
+    );
+    expect(confirm.onPressed, isNull);
   });
 }

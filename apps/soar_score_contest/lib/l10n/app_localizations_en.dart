@@ -1405,8 +1405,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pilotImportNoPilots => 'No pilots were found in this file.';
 
   @override
-  String pilotImportPlan(int added, int updated, int skipped) {
-    return '$added to add, $updated to update, $skipped left out';
+  String pilotImportPlan(int added, int updated, int unchanged, int skipped) {
+    return '$added to add, $updated to update, $unchanged unchanged, $skipped left out';
   }
 
   @override
