@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/widgets/matrix/pilot_row_tile.dart';
 
 import '../support/configuration_fields.dart';
 import '../support/interact.dart';
@@ -153,6 +154,10 @@ Future<void> runSetupPhase(Journey journey, JourneyContext data) async {
   await journey.step(
     'Matrix: the undrawn contest is drawn with the wizard options',
     () => inContest(() => _drawMatrix(tester, data)),
+  );
+  await journey.step(
+    'Matrix: a pilot is moved to another group and the grid says so',
+    () => inContest(() => _movePilot(tester)),
   );
   await journey.step(
     'Matrix: a contest that arrives drawn shows its grid and no Draw action',
@@ -422,6 +427,51 @@ Future<void> _drawMatrix(WidgetTester tester, JourneyContext data) async {
   expect(find.text('Group B'), findsWidgets);
   expect(find.text('No matrix drawn yet'), findsNothing);
   expect(_key('draw-button'), findsNothing);
+}
+
+/// Moves the first pilot of the grid to the first group that can take them
+/// in their own round, with a reason, and checks the Moved label and the
+/// reason in the pilot panel. Which group that is depends on the draw.
+Future<void> _movePilot(WidgetTester tester) async {
+  await tapRail(tester, 'Matrix');
+  await pumpUntilFound(tester, _key('fairness-score'));
+  expect(_key('moved-label'), findsNothing);
+
+  // The test window is small: hide the fairness summary so the grid has room
+  // for its tiles. It is shown again at the end.
+  await tapVisible(tester, _key('summary-toggle'));
+  await pumpUntilFound(tester, find.byType(PilotRowTile));
+
+  // Highlight a pilot; the pilot actions menu is on their tiles.
+  final tile = find.byType(PilotRowTile).first;
+  await tapVisible(tester, tile);
+  await pumpUntilFound(tester, _key('pilot-panel'));
+  await pumpUntilFound(tester, _key('pilot-actions'));
+  await tapVisible(tester, _key('pilot-actions').first);
+  await pumpUntilFound(tester, _key('pilot-action-move'));
+  await tester.tap(_key('pilot-action-move'));
+  await pumpUntilFound(tester, _key('move-reason'));
+
+  // Nothing is scored yet, so there is no discard warning.
+  expect(_key('move-score-warning'), findsNothing);
+  // Their own group cannot be chosen; the first group that can is.
+  final groups = find.byWidgetPredicate(
+    (w) =>
+        w is ListTile &&
+        w.key is ValueKey<String> &&
+        (w.key! as ValueKey<String>).value.startsWith('move-group-') &&
+        w.enabled,
+    description: 'a group that can take the pilot',
+  );
+  await tapVisible(tester, groups.first);
+  await enterIn(tester, _key('move-reason'), 'E2E move');
+  await tapVisible(tester, _key('move-confirm'));
+  await pumpUntilGone(tester, _key('move-confirm'));
+
+  // The grid shows the Moved label and the pilot panel the reason.
+  await pumpUntilFound(tester, _key('moved-label'));
+  await pumpUntilFound(tester, find.textContaining(': E2E move'));
+  await tapVisible(tester, _key('summary-toggle'));
 }
 
 /// The list row of the role called [name]; the detail pane repeats the name.

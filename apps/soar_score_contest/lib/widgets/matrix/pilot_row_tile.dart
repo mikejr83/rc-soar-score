@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/matrix/matrix_grid_model.dart';
 import '../../services/matrix/team_marker.dart';
 import 'matrix_colors.dart';
+import 'moved_label.dart';
+import 'pilot_actions_menu.dart';
 import 'team_badge.dart';
 
 /// One pilot in a group of a round. Selecting it highlights the pilot in
@@ -22,6 +26,8 @@ class PilotRowTile extends StatelessWidget {
     required this.group,
     required this.textScale,
     required this.onTap,
+    this.onMove,
+    this.moveBlock,
   });
 
   final GridSlot slot;
@@ -35,11 +41,18 @@ class PilotRowTile extends StatelessWidget {
   final double textScale;
   final VoidCallback onTap;
 
+  /// Moves this pilot; `null` when the grid cannot move pilots.
+  final VoidCallback? onMove;
+
+  /// Why moving is off for this contest, or `null` when it is on.
+  final String? moveBlock;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final colors = MatrixColors.of(context);
+    final l10n = AppLocalizations.of(context);
     final pilot = slot.pilot;
     final label =
         StringBuffer(
@@ -52,6 +65,7 @@ class PilotRowTile extends StatelessWidget {
           )
           ..write(showLane && slot.lane != null ? ', lane ${slot.lane}' : '')
           ..write(', round $round, group $group')
+          ..write(slot.moved ? ', ${l10n.matrixMovedLabel}' : '')
           ..write(selected ? ', highlighted' : '')
           ..write(matched ? ', search match' : '');
     final ring = selected
@@ -70,6 +84,10 @@ class PilotRowTile extends StatelessWidget {
       label: label.toString(),
       excludeSemantics: true,
       onTap: onTap,
+      customSemanticsActions: {
+        if (selected && onMove != null && moveBlock == null)
+          CustomSemanticsAction(label: l10n.matrixMoveMenu): onMove!,
+      },
       // The tile gets its own Material so its ink and highlight paint inside
       // the grid's scroll views. On the page's Material they paint outside
       // the clipped viewport and show as blue lines beside the grid.
@@ -132,6 +150,7 @@ class PilotRowTile extends StatelessWidget {
                     ),
                   ),
                 ),
+                if (slot.moved) MovedLabel(label: l10n.matrixMovedLabel),
                 if (showLane && slot.lane != null)
                   Container(
                     constraints: const BoxConstraints(minHeight: 22),
@@ -146,15 +165,8 @@ class PilotRowTile extends StatelessWidget {
                       style: TextStyle(fontSize: 12),
                     ),
                   ),
-                if (selected)
-                  Tooltip(
-                    message: 'Pilot actions (move, late add) · later release',
-                    child: Icon(
-                      Icons.more_vert,
-                      size: 18,
-                      color: scheme.onSurface.withValues(alpha: .38),
-                    ),
-                  ),
+                if (selected && onMove != null)
+                  PilotActionsMenu(onMove: onMove!, block: moveBlock),
               ],
             ),
           ),
