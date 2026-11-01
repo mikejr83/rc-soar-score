@@ -18,6 +18,15 @@ abstract interface class ParticipantProfileRepository {
     required MutationMetadata metadata,
   });
 
+  /// Saves all of [profiles] in one transaction, as [save] does for each: a
+  /// failure on any of them stores none. Each profile is written with
+  /// `metadata.forPart(profile.id.value)`. Returns the profiles as stored, in
+  /// order.
+  Future<List<ParticipantProfile>> saveAll(
+    List<ParticipantProfile> profiles, {
+    required MutationMetadata metadata,
+  });
+
   /// Deletes the profile with [id]; returns whether a row was removed.
   ///
   /// A profile that still has participations cannot be deleted.

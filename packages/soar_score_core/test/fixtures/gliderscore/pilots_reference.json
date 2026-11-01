@@ -1,0 +1,1563 @@
+{
+  "schema": "gs-import/v1",
+  "id": "00000000-0000-7000-8000-000000000001",
+  "sourceDbFile": "GliderScoreData.mdb",
+  "tables": [
+    {
+      "name": "Pilots",
+      "rowCount": 158,
+      "rowCapExceeded": false,
+      "rows": [
+        {
+          "PilotNo": 2,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "E",
+          "Filter": "N",
+          "FirstName": "Oakley",
+          "LastName": "ZZCandlewick"
+        },
+        {
+          "PilotNo": 4,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "E",
+          "Filter": "N",
+          "FirstName": "Dana",
+          "LastName": "ZZEastwick"
+        },
+        {
+          "PilotNo": 5,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "E",
+          "Filter": "N",
+          "FirstName": "Kai",
+          "LastName": "ZZFairweather"
+        },
+        {
+          "PilotNo": 6,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "A",
+          "Filter": "N",
+          "FirstName": "Riley",
+          "LastName": "ZZGladstone"
+        },
+        {
+          "PilotNo": 7,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "A",
+          "Filter": "N",
+          "FirstName": "Zion",
+          "LastName": "ZZHawthorne"
+        },
+        {
+          "PilotNo": 10,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "E",
+          "Filter": "N",
+          "FirstName": "Uma",
+          "LastName": "ZZKingsley"
+        },
+        {
+          "PilotNo": 11,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "E",
+          "Filter": "N",
+          "FirstName": "Casey",
+          "LastName": "ZZLarkspur"
+        },
+        {
+          "PilotNo": 12,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "E",
+          "Filter": "N",
+          "FirstName": "Jordan",
+          "LastName": "ZZMarlowe"
+        },
+        {
+          "PilotNo": 13,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "E",
+          "Filter": "N",
+          "FirstName": "Quinn",
+          "LastName": "ZZNorthcott"
+        },
+        {
+          "PilotNo": 14,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "A",
+          "Filter": "N",
+          "FirstName": "Yael",
+          "LastName": "ZZOakenfold"
+        },
+        {
+          "PilotNo": 16,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "E",
+          "Filter": "N",
+          "FirstName": "Morgan",
+          "LastName": "ZZQuillfeather"
+        },
+        {
+          "PilotNo": 18,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "E",
+          "Filter": "N",
+          "FirstName": "Blair",
+          "LastName": "ZZSandford"
+        },
+        {
+          "PilotNo": 19,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "E",
+          "Filter": "N",
+          "FirstName": "Indigo",
+          "LastName": "ZZThistlewood"
+        },
+        {
+          "PilotNo": 20,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "E",
+          "Filter": "N",
+          "FirstName": "Parker",
+          "LastName": "ZZUnderhill"
+        },
+        {
+          "PilotNo": 21,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "E",
+          "Filter": "N",
+          "FirstName": "Wren",
+          "LastName": "ZZValence"
+        },
+        {
+          "PilotNo": 23,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "E",
+          "Filter": "N",
+          "FirstName": "Lane",
+          "LastName": "ZZYarrow"
+        },
+        {
+          "PilotNo": 24,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "E",
+          "Filter": "N",
+          "FirstName": "Sage",
+          "LastName": "ZZZephyr"
+        },
+        {
+          "PilotNo": 26,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "E",
+          "Filter": "N",
+          "FirstName": "Harper",
+          "LastName": "ZZBirchall1"
+        },
+        {
+          "PilotNo": 27,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "E",
+          "Filter": "N",
+          "FirstName": "Oakley",
+          "LastName": "ZZCandlewick1"
+        },
+        {
+          "PilotNo": 28,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "E",
+          "Filter": "N",
+          "FirstName": "Val",
+          "LastName": "ZZDunmore1"
+        },
+        {
+          "PilotNo": 30,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "E",
+          "Filter": "N",
+          "FirstName": "Kai",
+          "LastName": "ZZFairweather1"
+        },
+        {
+          "PilotNo": 31,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "A",
+          "Filter": "N",
+          "FirstName": "Riley",
+          "LastName": "ZZGladstone1"
+        },
+        {
+          "PilotNo": 32,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "A",
+          "Filter": "N",
+          "FirstName": "Zion",
+          "LastName": "ZZHawthorne1"
+        },
+        {
+          "PilotNo": 34,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "A",
+          "Filter": "N",
+          "FirstName": "Nico",
+          "LastName": "ZZJessup1"
+        },
+        {
+          "PilotNo": 35,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "A",
+          "Filter": "N",
+          "FirstName": "Uma",
+          "LastName": "ZZKingsley1"
+        },
+        {
+          "PilotNo": 36,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "A",
+          "Filter": "N",
+          "FirstName": "Casey",
+          "LastName": "ZZLarkspur1"
+        },
+        {
+          "PilotNo": 38,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "A",
+          "Filter": "N",
+          "FirstName": "Quinn",
+          "LastName": "ZZNorthcott1"
+        },
+        {
+          "PilotNo": 39,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "A",
+          "Filter": "N",
+          "FirstName": "Yael",
+          "LastName": "ZZOakenfold1"
+        },
+        {
+          "PilotNo": 40,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "A",
+          "Filter": "N",
+          "FirstName": "Frankie",
+          "LastName": "ZZPemberton1"
+        },
+        {
+          "PilotNo": 42,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "E",
+          "Filter": "N",
+          "FirstName": "Taylor",
+          "LastName": "ZZRavenscroft1"
+        },
+        {
+          "PilotNo": 44,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "N",
+          "Filter": "N",
+          "FirstName": "Indigo",
+          "LastName": "ZZThistlewood1"
+        },
+        {
+          "PilotNo": 45,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "E",
+          "Filter": "N",
+          "FirstName": "Parker",
+          "LastName": "ZZUnderhill1"
+        },
+        {
+          "PilotNo": 46,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "Filter": "N",
+          "FirstName": "Wren",
+          "LastName": "ZZValence1"
+        },
+        {
+          "PilotNo": 47,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "Filter": "N",
+          "FirstName": "Eden",
+          "LastName": "ZZWhitlock1"
+        },
+        {
+          "PilotNo": 48,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "E",
+          "Filter": "N",
+          "FirstName": "Lane",
+          "LastName": "ZZYarrow1"
+        },
+        {
+          "PilotNo": 51,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "A",
+          "Filter": "N",
+          "FirstName": "Harper",
+          "LastName": "ZZBirchall2"
+        },
+        {
+          "PilotNo": 52,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "N",
+          "Filter": "N",
+          "FirstName": "Oakley",
+          "LastName": "ZZCandlewick2"
+        },
+        {
+          "PilotNo": 53,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "A",
+          "Filter": "N",
+          "FirstName": "Val",
+          "LastName": "ZZDunmore2"
+        },
+        {
+          "PilotNo": 54,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "Filter": "N",
+          "FirstName": "Dana",
+          "LastName": "ZZEastwick2"
+        },
+        {
+          "PilotNo": 56,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "E",
+          "Filter": "N",
+          "FirstName": "Riley",
+          "LastName": "ZZGladstone2"
+        },
+        {
+          "PilotNo": 58,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "N",
+          "Filter": "N",
+          "FirstName": "Glenn",
+          "LastName": "ZZIronside2"
+        },
+        {
+          "PilotNo": 59,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "N",
+          "Filter": "N",
+          "FirstName": "Nico",
+          "LastName": "ZZJessup2"
+        },
+        {
+          "PilotNo": 60,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "A",
+          "Filter": "N",
+          "FirstName": "Uma",
+          "LastName": "ZZKingsley2"
+        },
+        {
+          "PilotNo": 61,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "N",
+          "Filter": "N",
+          "FirstName": "Casey",
+          "LastName": "ZZLarkspur2"
+        },
+        {
+          "PilotNo": 62,
+          "Country": "NZL",
+          "FAINumber": "0",
+          "UsualClass": "E",
+          "Filter": "N",
+          "FirstName": "Jordan",
+          "LastName": "ZZMarlowe2"
+        },
+        {
+          "PilotNo": 65,
+          "FAINumber": "0",
+          "UsualClass": "A",
+          "Filter": "N",
+          "FirstName": "Frankie",
+          "LastName": "ZZPemberton2"
+        },
+        {
+          "PilotNo": 66,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "N",
+          "Filter": "N",
+          "FirstName": "Morgan",
+          "LastName": "ZZQuillfeather2"
+        },
+        {
+          "PilotNo": 67,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "N",
+          "Filter": "N",
+          "FirstName": "Taylor",
+          "LastName": "ZZRavenscroft2"
+        },
+        {
+          "PilotNo": 68,
+          "FAINumber": "0",
+          "UsualClass": "E",
+          "Filter": "N",
+          "FirstName": "Blair",
+          "LastName": "ZZSandford2"
+        },
+        {
+          "PilotNo": 69,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "E",
+          "Filter": "N",
+          "FirstName": "Indigo",
+          "LastName": "ZZThistlewood2"
+        },
+        {
+          "PilotNo": 72,
+          "FAINumber": "0",
+          "Filter": "N",
+          "FirstName": "Eden",
+          "LastName": "ZZWhitlock2"
+        },
+        {
+          "PilotNo": 73,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "J",
+          "Filter": "N",
+          "FirstName": "Lane",
+          "LastName": "ZZYarrow2"
+        },
+        {
+          "PilotNo": 74,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "A",
+          "Filter": "N",
+          "FirstName": "Sage",
+          "LastName": "ZZZephyr2"
+        },
+        {
+          "PilotNo": 75,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "Y",
+          "State": "FL",
+          "Email": "fixture75@example.test",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Alex",
+          "LastName": "Ashdown3"
+        },
+        {
+          "PilotNo": 77,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "State": "CA",
+          "Email": "fixture77@example.test",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Oakley",
+          "LastName": "Candlewick3"
+        },
+        {
+          "PilotNo": 78,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "State": "NC",
+          "Email": "fixture78@example.test",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Val",
+          "LastName": "Dunmore3"
+        },
+        {
+          "PilotNo": 80,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "State": "CA",
+          "Email": "fixture80@example.test",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Kai",
+          "LastName": "Fairweather3"
+        },
+        {
+          "PilotNo": 82,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "State": "FL",
+          "Email": "fixture82@example.test",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Zion",
+          "LastName": "Hawthorne3"
+        },
+        {
+          "PilotNo": 83,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "State": "CO",
+          "Email": "fixture83@example.test",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Glenn",
+          "LastName": "Ironside3"
+        },
+        {
+          "PilotNo": 84,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "State": "NC",
+          "Email": "fixture84@example.test",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Nico",
+          "LastName": "Jessup3"
+        },
+        {
+          "PilotNo": 85,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "Y",
+          "State": "FL",
+          "Email": "fixture85@example.test",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Uma",
+          "LastName": "Kingsley3"
+        },
+        {
+          "PilotNo": 86,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "State": "CO",
+          "Email": "fixture86@example.test",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Casey",
+          "LastName": "Larkspur3"
+        },
+        {
+          "PilotNo": 87,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "State": "AZ",
+          "Email": "fixture87@example.test",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Jordan",
+          "LastName": "Marlowe3"
+        },
+        {
+          "PilotNo": 88,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "State": "AZ",
+          "Email": "fixture88@example.test",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Quinn",
+          "LastName": "Northcott3"
+        },
+        {
+          "PilotNo": 89,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "State": "FL",
+          "Email": "fixture89@example.test",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Yael",
+          "LastName": "Oakenfold3"
+        },
+        {
+          "PilotNo": 92,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "State": "OH",
+          "Email": "fixture92@example.test",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Taylor",
+          "LastName": "Ravenscroft3"
+        },
+        {
+          "PilotNo": 94,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "State": "FL",
+          "Email": "fixture94@example.test",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Indigo",
+          "LastName": "Thistlewood3"
+        },
+        {
+          "PilotNo": 95,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "State": "NH",
+          "Email": "fixture95@example.test",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Parker",
+          "LastName": "Underhill3"
+        },
+        {
+          "PilotNo": 81,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "State": "FL",
+          "Email": "fixture81@example.test",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Riley",
+          "LastName": "Gladstone3"
+        },
+        {
+          "PilotNo": 96,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "State": "FL",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Wren",
+          "LastName": "Valence3"
+        },
+        {
+          "PilotNo": 97,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Eden",
+          "LastName": "Whitlock3"
+        },
+        {
+          "PilotNo": 98,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "Y",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Lane",
+          "LastName": "Yarrow3"
+        },
+        {
+          "PilotNo": 99,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Sage",
+          "LastName": "Zephyr3"
+        },
+        {
+          "PilotNo": 100,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Alex",
+          "LastName": "Ashdown4"
+        },
+        {
+          "PilotNo": 101,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Harper",
+          "LastName": "Birchall4"
+        },
+        {
+          "PilotNo": 103,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "State": "GA",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Val",
+          "LastName": "Dunmore4"
+        },
+        {
+          "PilotNo": 104,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "State": "FL",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Dana",
+          "LastName": "Eastwick4"
+        },
+        {
+          "PilotNo": 106,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Riley",
+          "LastName": "Gladstone4"
+        },
+        {
+          "PilotNo": 107,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Zion",
+          "LastName": "Hawthorne4"
+        },
+        {
+          "PilotNo": 108,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "Y",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Glenn",
+          "LastName": "Ironside4"
+        },
+        {
+          "PilotNo": 110,
+          "Country": "CAN",
+          "FAINumber": "0",
+          "Filter": "N",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Uma",
+          "LastName": "Kingsley4"
+        },
+        {
+          "PilotNo": 111,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Casey",
+          "LastName": "Larkspur4"
+        },
+        {
+          "PilotNo": 112,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "Y",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Jordan",
+          "LastName": "Marlowe4"
+        },
+        {
+          "PilotNo": 114,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Yael",
+          "LastName": "Oakenfold4"
+        },
+        {
+          "PilotNo": 115,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Frankie",
+          "LastName": "Pemberton4"
+        },
+        {
+          "PilotNo": 116,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "Y",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Morgan",
+          "LastName": "Quillfeather4"
+        },
+        {
+          "PilotNo": 117,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Taylor",
+          "LastName": "Ravenscroft4"
+        },
+        {
+          "PilotNo": 118,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Blair",
+          "LastName": "Sandford4"
+        },
+        {
+          "PilotNo": 120,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Parker",
+          "LastName": "Underhill4"
+        },
+        {
+          "PilotNo": 122,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Eden",
+          "LastName": "Whitlock4"
+        },
+        {
+          "PilotNo": 123,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Lane",
+          "LastName": "Yarrow4"
+        },
+        {
+          "PilotNo": 124,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Sage",
+          "LastName": "Zephyr4"
+        },
+        {
+          "PilotNo": 125,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Alex",
+          "LastName": "Ashdown5"
+        },
+        {
+          "PilotNo": 126,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Harper",
+          "LastName": "Birchall5"
+        },
+        {
+          "PilotNo": 129,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "State": "FL",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Dana",
+          "LastName": "Eastwick5"
+        },
+        {
+          "PilotNo": 130,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "State": "OH",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Kai",
+          "LastName": "Fairweather5"
+        },
+        {
+          "PilotNo": 131,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "Y",
+          "State": "FL",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Riley",
+          "LastName": "Gladstone5"
+        },
+        {
+          "PilotNo": 132,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "State": "LA",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Zion",
+          "LastName": "Hawthorne5"
+        },
+        {
+          "PilotNo": 133,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Glenn",
+          "LastName": "Ironside5"
+        },
+        {
+          "PilotNo": 134,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "State": "TN",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Nico",
+          "LastName": "Jessup5"
+        },
+        {
+          "PilotNo": 135,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "State": "SC",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Uma",
+          "LastName": "Kingsley5"
+        },
+        {
+          "PilotNo": 136,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Casey",
+          "LastName": "Larkspur5"
+        },
+        {
+          "PilotNo": 137,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "State": "FL",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Jordan",
+          "LastName": "Marlowe5"
+        },
+        {
+          "PilotNo": 138,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "State": "FL",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Quinn",
+          "LastName": "Northcott5"
+        },
+        {
+          "PilotNo": 140,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "State": "FL",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Frankie",
+          "LastName": "Pemberton5"
+        },
+        {
+          "PilotNo": 141,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "State": "FL",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Morgan",
+          "LastName": "Quillfeather5"
+        },
+        {
+          "PilotNo": 142,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "State": "FL",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Taylor",
+          "LastName": "Ravenscroft5"
+        },
+        {
+          "PilotNo": 143,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Blair",
+          "LastName": "Sandford5"
+        },
+        {
+          "PilotNo": 144,
+          "FAINumber": "0",
+          "Filter": "N",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Indigo",
+          "LastName": "Thistlewood5"
+        },
+        {
+          "PilotNo": 145,
+          "FAINumber": "0",
+          "Filter": "N",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Parker",
+          "LastName": "Underhill5"
+        },
+        {
+          "PilotNo": 146,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Wren",
+          "LastName": "Valence5"
+        },
+        {
+          "PilotNo": 148,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "Y",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Lane",
+          "LastName": "Yarrow5"
+        },
+        {
+          "PilotNo": 149,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Sage",
+          "LastName": "Zephyr5"
+        },
+        {
+          "PilotNo": 150,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Alex",
+          "LastName": "Ashdown6"
+        },
+        {
+          "PilotNo": 151,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Harper",
+          "LastName": "Birchall6"
+        },
+        {
+          "PilotNo": 152,
+          "FAINumber": "0",
+          "Filter": "N",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Oakley",
+          "LastName": "Candlewick6"
+        },
+        {
+          "PilotNo": 153,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Val",
+          "LastName": "Dunmore6"
+        },
+        {
+          "PilotNo": 154,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "Y",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Dana",
+          "LastName": "Eastwick6"
+        },
+        {
+          "PilotNo": 155,
+          "FAINumber": "0",
+          "Filter": "Y",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Kai",
+          "LastName": "Fairweather6"
+        },
+        {
+          "PilotNo": 1,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "E",
+          "Filter": "N",
+          "FirstName": "Harper",
+          "LastName": "ZZBirchall"
+        },
+        {
+          "PilotNo": 8,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "A",
+          "Filter": "N",
+          "FirstName": "Glenn",
+          "LastName": "ZZIronside"
+        },
+        {
+          "PilotNo": 17,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "E",
+          "Filter": "N",
+          "FirstName": "Taylor",
+          "LastName": "ZZRavenscroft"
+        },
+        {
+          "PilotNo": 25,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "E",
+          "Filter": "N",
+          "FirstName": "Alex",
+          "LastName": "ZZAshdown1"
+        },
+        {
+          "PilotNo": 33,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "E",
+          "Filter": "N",
+          "FirstName": "Glenn",
+          "LastName": "ZZIronside1"
+        },
+        {
+          "PilotNo": 49,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "Filter": "N",
+          "FirstName": "Sage",
+          "LastName": "ZZZephyr1"
+        },
+        {
+          "PilotNo": 55,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "A",
+          "Filter": "N",
+          "FirstName": "Kai",
+          "LastName": "ZZFairweather2"
+        },
+        {
+          "PilotNo": 63,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "Filter": "N",
+          "FirstName": "Quinn",
+          "LastName": "ZZNorthcott2"
+        },
+        {
+          "PilotNo": 71,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "N",
+          "Filter": "N",
+          "FirstName": "Wren",
+          "LastName": "ZZValence2"
+        },
+        {
+          "PilotNo": 79,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "State": "FL",
+          "Email": "fixture79@example.test",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Dana",
+          "LastName": "Eastwick3"
+        },
+        {
+          "PilotNo": 93,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "State": "SC",
+          "Email": "fixture93@example.test",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Blair",
+          "LastName": "Sandford3"
+        },
+        {
+          "PilotNo": 113,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Quinn",
+          "LastName": "Northcott4"
+        },
+        {
+          "PilotNo": 128,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "State": "SC",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Val",
+          "LastName": "Dunmore5"
+        },
+        {
+          "PilotNo": 3,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "E",
+          "Filter": "N",
+          "FirstName": "Val",
+          "LastName": "ZZDunmore"
+        },
+        {
+          "PilotNo": 9,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "A",
+          "Filter": "N",
+          "FirstName": "Nico",
+          "LastName": "ZZJessup"
+        },
+        {
+          "PilotNo": 15,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "E",
+          "Filter": "N",
+          "FirstName": "Frankie",
+          "LastName": "ZZPemberton"
+        },
+        {
+          "PilotNo": 121,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Wren",
+          "LastName": "Valence4"
+        },
+        {
+          "PilotNo": 22,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "E",
+          "Filter": "N",
+          "FirstName": "Eden",
+          "LastName": "ZZWhitlock"
+        },
+        {
+          "PilotNo": 29,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "A",
+          "Filter": "N",
+          "FirstName": "Dana",
+          "LastName": "ZZEastwick1"
+        },
+        {
+          "PilotNo": 37,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "E",
+          "Filter": "N",
+          "FirstName": "Jordan",
+          "LastName": "ZZMarlowe1"
+        },
+        {
+          "PilotNo": 41,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "A",
+          "Filter": "N",
+          "FirstName": "Morgan",
+          "LastName": "ZZQuillfeather1"
+        },
+        {
+          "PilotNo": 43,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "A",
+          "Filter": "N",
+          "FirstName": "Blair",
+          "LastName": "ZZSandford1"
+        },
+        {
+          "PilotNo": 50,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "J",
+          "Filter": "N",
+          "FirstName": "Alex",
+          "LastName": "ZZAshdown2"
+        },
+        {
+          "PilotNo": 57,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "A",
+          "Filter": "N",
+          "FirstName": "Zion",
+          "LastName": "ZZHawthorne2"
+        },
+        {
+          "PilotNo": 64,
+          "FAINumber": "0",
+          "Filter": "N",
+          "FirstName": "Yael",
+          "LastName": "ZZOakenfold2"
+        },
+        {
+          "PilotNo": 70,
+          "Country": "AUS",
+          "FAINumber": "0",
+          "UsualClass": "A",
+          "Filter": "N",
+          "FirstName": "Parker",
+          "LastName": "ZZUnderhill2"
+        },
+        {
+          "PilotNo": 76,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "State": "NC",
+          "Email": "fixture76@example.test",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Harper",
+          "LastName": "Birchall3"
+        },
+        {
+          "PilotNo": 90,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "State": "SC",
+          "Email": "fixture90@example.test",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Frankie",
+          "LastName": "Pemberton3"
+        },
+        {
+          "PilotNo": 91,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "State": "PA",
+          "Email": "fixture91@example.test",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Morgan",
+          "LastName": "Quillfeather3"
+        },
+        {
+          "PilotNo": 102,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Oakley",
+          "LastName": "Candlewick4"
+        },
+        {
+          "PilotNo": 105,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "Y",
+          "State": "FL",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Kai",
+          "LastName": "Fairweather4"
+        },
+        {
+          "PilotNo": 109,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Nico",
+          "LastName": "Jessup4"
+        },
+        {
+          "PilotNo": 119,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Indigo",
+          "LastName": "Thistlewood4"
+        },
+        {
+          "PilotNo": 127,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "State": "SC",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Oakley",
+          "LastName": "Candlewick5"
+        },
+        {
+          "PilotNo": 139,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "State": "FL",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Yael",
+          "LastName": "Oakenfold5"
+        },
+        {
+          "PilotNo": 147,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "Y",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Eden",
+          "LastName": "Whitlock5"
+        },
+        {
+          "PilotNo": 156,
+          "FAINumber": "0",
+          "Filter": "Y",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Riley",
+          "LastName": "Gladstone6"
+        },
+        {
+          "PilotNo": 157,
+          "FAINumber": "0",
+          "Filter": "Y",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Zion",
+          "LastName": "Hawthorne6"
+        },
+        {
+          "PilotNo": 158,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Glenn",
+          "LastName": "Ironside6"
+        }
+      ]
+    }
+  ]
+}

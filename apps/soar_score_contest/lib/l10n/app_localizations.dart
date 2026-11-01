@@ -1909,6 +1909,240 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not open the link. Check your network connection and try again.'**
   String get aboutLinkFailed;
+
+  /// Button on the participants page that imports pilots from a GliderScore database file.
+  ///
+  /// In en, this message translates to:
+  /// **'Import pilots from GliderScore…'**
+  String get pilotImportButton;
+
+  /// Title of the pilot import dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Import pilots from GliderScore'**
+  String get pilotImportTitle;
+
+  /// Shown in the pilot import dialog before a file is chosen.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a GliderScore database (.mdb) to read the pilots from.'**
+  String get pilotImportChoosing;
+
+  /// Button that opens the file chooser in the pilot import dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose file…'**
+  String get pilotImportChooseButton;
+
+  /// Shown while the GliderScore file is read.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading {file}…'**
+  String pilotImportReading(String file);
+
+  /// Introduction above the list of pilots found in a GliderScore file.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose which pilots to add to your participants. Pilots already in your list get any new details; their names are never changed.'**
+  String get pilotImportReviewIntro;
+
+  /// Heading of the pilots that are not in the participants yet.
+  ///
+  /// In en, this message translates to:
+  /// **'New ({count})'**
+  String pilotImportNewHeading(int count);
+
+  /// Heading of the pilots that match a participant.
+  ///
+  /// In en, this message translates to:
+  /// **'Already in your list ({count})'**
+  String pilotImportUpdateHeading(int count);
+
+  /// Heading of the pilots that might be a participant already in the list.
+  ///
+  /// In en, this message translates to:
+  /// **'Maybe the same person ({count})'**
+  String pilotImportMaybeHeading(int count);
+
+  /// Row text naming the details an import adds to an existing participant.
+  ///
+  /// In en, this message translates to:
+  /// **'Will update: {fields}'**
+  String pilotImportWillUpdate(String fields);
+
+  /// Row text when an existing participant already has everything the file holds.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing new to add'**
+  String get pilotImportNothingNew;
+
+  /// Row text when the identifiers of a pilot point at different participants.
+  ///
+  /// In en, this message translates to:
+  /// **'Their email and registration numbers match different people in your list.'**
+  String get pilotImportConflict;
+
+  /// Row text when a pilot is the same person as an earlier row of the file.
+  ///
+  /// In en, this message translates to:
+  /// **'Looks like another pilot earlier in this file.'**
+  String get pilotImportDuplicateInFile;
+
+  /// Choice for a pilot that might be an existing participant: leave out.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get pilotImportChoiceSkip;
+
+  /// Choice for a pilot that might be an existing participant: add a new one.
+  ///
+  /// In en, this message translates to:
+  /// **'Add as new'**
+  String get pilotImportChoiceAdd;
+
+  /// Choice for a pilot that might be an existing participant: update that participant.
+  ///
+  /// In en, this message translates to:
+  /// **'Update {name}'**
+  String pilotImportChoiceUpdate(String name);
+
+  /// Name of a participant detail in the list of details an import updates.
+  ///
+  /// In en, this message translates to:
+  /// **'email'**
+  String get pilotImportFieldEmail;
+
+  /// Name of a participant detail in the list of details an import updates.
+  ///
+  /// In en, this message translates to:
+  /// **'FAI number'**
+  String get pilotImportFieldFai;
+
+  /// Name of a participant detail in the list of details an import updates.
+  ///
+  /// In en, this message translates to:
+  /// **'national ID'**
+  String get pilotImportFieldNationalId;
+
+  /// Name of a participant detail in the list of details an import updates.
+  ///
+  /// In en, this message translates to:
+  /// **'club'**
+  String get pilotImportFieldClub;
+
+  /// Name of a participant detail in the list of details an import updates.
+  ///
+  /// In en, this message translates to:
+  /// **'city'**
+  String get pilotImportFieldCity;
+
+  /// Name of a participant detail in the list of details an import updates.
+  ///
+  /// In en, this message translates to:
+  /// **'state'**
+  String get pilotImportFieldState;
+
+  /// Name of a participant detail in the list of details an import updates.
+  ///
+  /// In en, this message translates to:
+  /// **'country'**
+  String get pilotImportFieldCountry;
+
+  /// Note on the pilot import review about GliderScore test pilots that were left out.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 GliderScore test pilot (last name starting ZZ) was left out.} other{{count} GliderScore test pilots (last name starting ZZ) were left out.}}'**
+  String pilotImportTestPilots(int count);
+
+  /// Note on the pilot import review about rows that were skipped.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 row could not be used (no name or pilot number).} other{{count} rows could not be used (no name or pilot number).}}'**
+  String pilotImportSkippedRows(int count);
+
+  /// Note on the pilot import review naming GliderScore columns that are not imported.
+  ///
+  /// In en, this message translates to:
+  /// **'Not imported, because participants have no place for them: {columns}.'**
+  String pilotImportDroppedDetails(String columns);
+
+  /// Note on the pilot import review about pilots without a usable country.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 pilot has no recognised country.} other{{count} pilots have no recognised country.}}'**
+  String pilotImportCountryNote(int count);
+
+  /// Warning on the pilot import review when the file was too large to read fully.
+  ///
+  /// In en, this message translates to:
+  /// **'The file has more pilots than could be read. Some are missing.'**
+  String get pilotImportTruncated;
+
+  /// Shown when the GliderScore file holds no pilots to import.
+  ///
+  /// In en, this message translates to:
+  /// **'No pilots were found in this file.'**
+  String get pilotImportNoPilots;
+
+  /// Summary line above the import button of the pilot import.
+  ///
+  /// In en, this message translates to:
+  /// **'{added} to add, {updated} to update, {unchanged} unchanged, {skipped} left out'**
+  String pilotImportPlan(int added, int updated, int unchanged, int skipped);
+
+  /// Button that saves the pilot import.
+  ///
+  /// In en, this message translates to:
+  /// **'Import'**
+  String get pilotImportConfirm;
+
+  /// Shown while the pilots are saved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving pilots…'**
+  String get pilotImportSaving;
+
+  /// Result of a pilot import.
+  ///
+  /// In en, this message translates to:
+  /// **'Added {added}, updated {updated}, unchanged {unchanged}, left out {skipped}.'**
+  String pilotImportDone(int added, int updated, int unchanged, int skipped);
+
+  /// Button that closes the finished pilot import.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get pilotImportDoneButton;
+
+  /// Shown when the pilot import fails.
+  ///
+  /// In en, this message translates to:
+  /// **'The import did not work. {reason}'**
+  String pilotImportFailed(String reason);
+
+  /// Shown when the GliderScore reader is missing.
+  ///
+  /// In en, this message translates to:
+  /// **'Importing from GliderScore is not available on this computer.'**
+  String get pilotImportUnavailable;
+
+  /// Shown when a participant was edited during the pilot import review.
+  ///
+  /// In en, this message translates to:
+  /// **'Your participants changed while you were reviewing. Review again before importing.'**
+  String get pilotImportChangedDuringReview;
+
+  /// Button that opens the file chooser again after it failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a file again'**
+  String get pilotImportChooseAgain;
+
+  /// Button that rebuilds the pilot import review.
+  ///
+  /// In en, this message translates to:
+  /// **'Review again'**
+  String get pilotImportReviewAgain;
 }
 
 class _AppLocalizationsDelegate

@@ -41,6 +41,27 @@ class StubParticipantProfileRepository implements ParticipantProfileRepository {
   }
 
   @override
+  Future<List<ParticipantProfile>> saveAll(
+    List<ParticipantProfile> profiles, {
+    required MutationMetadata metadata,
+  }) async {
+    final before = Map<Id, ParticipantProfile>.of(this.profiles);
+    final savedBefore = savedWith.length;
+    try {
+      return [
+        for (final profile in profiles)
+          await save(profile, metadata: metadata.forPart(profile.id.value)),
+      ];
+    } on Object {
+      this.profiles
+        ..clear()
+        ..addAll(before);
+      savedWith.removeRange(savedBefore, savedWith.length);
+      rethrow;
+    }
+  }
+
+  @override
   Future<bool> delete(Id id, {required MutationMetadata metadata}) async =>
       profiles.remove(id) != null;
 }

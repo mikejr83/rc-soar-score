@@ -1272,4 +1272,173 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get aboutLinkFailed =>
       'Could not open the link. Check your network connection and try again.';
+
+  @override
+  String get pilotImportButton => 'Import pilots from GliderScore…';
+
+  @override
+  String get pilotImportTitle => 'Import pilots from GliderScore';
+
+  @override
+  String get pilotImportChoosing =>
+      'Choose a GliderScore database (.mdb) to read the pilots from.';
+
+  @override
+  String get pilotImportChooseButton => 'Choose file…';
+
+  @override
+  String pilotImportReading(String file) {
+    return 'Reading $file…';
+  }
+
+  @override
+  String get pilotImportReviewIntro =>
+      'Choose which pilots to add to your participants. Pilots already in your list get any new details; their names are never changed.';
+
+  @override
+  String pilotImportNewHeading(int count) {
+    return 'New ($count)';
+  }
+
+  @override
+  String pilotImportUpdateHeading(int count) {
+    return 'Already in your list ($count)';
+  }
+
+  @override
+  String pilotImportMaybeHeading(int count) {
+    return 'Maybe the same person ($count)';
+  }
+
+  @override
+  String pilotImportWillUpdate(String fields) {
+    return 'Will update: $fields';
+  }
+
+  @override
+  String get pilotImportNothingNew => 'Nothing new to add';
+
+  @override
+  String get pilotImportConflict =>
+      'Their email and registration numbers match different people in your list.';
+
+  @override
+  String get pilotImportDuplicateInFile =>
+      'Looks like another pilot earlier in this file.';
+
+  @override
+  String get pilotImportChoiceSkip => 'Skip';
+
+  @override
+  String get pilotImportChoiceAdd => 'Add as new';
+
+  @override
+  String pilotImportChoiceUpdate(String name) {
+    return 'Update $name';
+  }
+
+  @override
+  String get pilotImportFieldEmail => 'email';
+
+  @override
+  String get pilotImportFieldFai => 'FAI number';
+
+  @override
+  String get pilotImportFieldNationalId => 'national ID';
+
+  @override
+  String get pilotImportFieldClub => 'club';
+
+  @override
+  String get pilotImportFieldCity => 'city';
+
+  @override
+  String get pilotImportFieldState => 'state';
+
+  @override
+  String get pilotImportFieldCountry => 'country';
+
+  @override
+  String pilotImportTestPilots(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count GliderScore test pilots (last name starting ZZ) were left out.',
+      one: '1 GliderScore test pilot (last name starting ZZ) was left out.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pilotImportSkippedRows(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count rows could not be used (no name or pilot number).',
+      one: '1 row could not be used (no name or pilot number).',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pilotImportDroppedDetails(String columns) {
+    return 'Not imported, because participants have no place for them: $columns.';
+  }
+
+  @override
+  String pilotImportCountryNote(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count pilots have no recognised country.',
+      one: '1 pilot has no recognised country.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pilotImportTruncated =>
+      'The file has more pilots than could be read. Some are missing.';
+
+  @override
+  String get pilotImportNoPilots => 'No pilots were found in this file.';
+
+  @override
+  String pilotImportPlan(int added, int updated, int unchanged, int skipped) {
+    return '$added to add, $updated to update, $unchanged unchanged, $skipped left out';
+  }
+
+  @override
+  String get pilotImportConfirm => 'Import';
+
+  @override
+  String get pilotImportSaving => 'Saving pilots…';
+
+  @override
+  String pilotImportDone(int added, int updated, int unchanged, int skipped) {
+    return 'Added $added, updated $updated, unchanged $unchanged, left out $skipped.';
+  }
+
+  @override
+  String get pilotImportDoneButton => 'Done';
+
+  @override
+  String pilotImportFailed(String reason) {
+    return 'The import did not work. $reason';
+  }
+
+  @override
+  String get pilotImportUnavailable =>
+      'Importing from GliderScore is not available on this computer.';
+
+  @override
+  String get pilotImportChangedDuringReview =>
+      'Your participants changed while you were reviewing. Review again before importing.';
+
+  @override
+  String get pilotImportChooseAgain => 'Choose a file again';
+
+  @override
+  String get pilotImportReviewAgain => 'Review again';
 }

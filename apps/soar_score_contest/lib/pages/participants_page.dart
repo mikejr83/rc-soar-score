@@ -3,10 +3,13 @@ import 'package:go_router/go_router.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../api_client_provider.dart';
+import '../l10n/app_localizations.dart';
 import '../router.dart';
+import '../services/pilot_import/pilot_import.dart';
 import '../widgets/api_error_text.dart';
 import '../widgets/master_detail.dart';
 import '../widgets/page_states/page_states.dart';
+import '../widgets/pilot_import/pilot_import_dialog.dart';
 import '../widgets/participant_detail_pane.dart';
 import '../widgets/participant_list_pane.dart';
 
@@ -61,6 +64,37 @@ class _ParticipantsPageState extends State<ParticipantsPage> {
     setState(() {
       _participants = participants;
     });
+  }
+
+  Future<void> _importPilots() async {
+    final changed = await importPilots(context);
+    if (changed && mounted) {
+      _reload();
+    }
+  }
+
+  Widget _importButton() => TextButton.icon(
+    key: const ValueKey('import-pilots'),
+    onPressed: _importPilots,
+    icon: const Icon(Icons.file_upload_outlined, size: 18),
+    label: Text(AppLocalizations.of(context).pilotImportButton),
+  );
+
+  /// [body] with the import action above it, where this build has one.
+  Widget _withImport(Widget body) {
+    if (PilotImportStore.current == null) return body;
+    return Column(
+      children: [
+        Align(
+          alignment: Alignment.centerRight,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+            child: _importButton(),
+          ),
+        ),
+        Expanded(child: body),
+      ],
+    );
   }
 
   Future<void> _delete(ParticipantProfile profile) async {
@@ -118,7 +152,9 @@ class _ParticipantsPageState extends State<ParticipantsPage> {
         return const PageStateView.loading(label: 'Loading participants');
       }
       if (all.isEmpty) {
-        return const PageStateView.empty(title: 'No participants yet.');
+        return _withImport(
+          const PageStateView.empty(title: 'No participants yet.'),
+        );
       }
       // The first participant is selected until one is chosen (or when the
       // chosen one is gone).
@@ -126,24 +162,26 @@ class _ParticipantsPageState extends State<ParticipantsPage> {
         (profile) => profile.id == _selectedId,
         orElse: () => all.first,
       );
-      return MasterDetail(
-        showDetail: _showDetail,
-        list: (context, wide) => ParticipantListPane(
-          participants: all,
-          search: _search,
-          onSearch: (value) => setState(() => _search = value),
-          selectedId: selected.id,
-          highlight: wide,
-          onSelect: (profile) => setState(() {
-            _selectedId = profile.id;
-            _showDetail = true;
-          }),
-        ),
-        detail: (context, wide) => ParticipantDetailPane(
-          profile: selected,
-          onBack: wide ? null : () => setState(() => _showDetail = false),
-          onEdit: () => context.go(participantPath(selected.id.value)),
-          onDelete: () => _delete(selected),
+      return _withImport(
+        MasterDetail(
+          showDetail: _showDetail,
+          list: (context, wide) => ParticipantListPane(
+            participants: all,
+            search: _search,
+            onSearch: (value) => setState(() => _search = value),
+            selectedId: selected.id,
+            highlight: wide,
+            onSelect: (profile) => setState(() {
+              _selectedId = profile.id;
+              _showDetail = true;
+            }),
+          ),
+          detail: (context, wide) => ParticipantDetailPane(
+            profile: selected,
+            onBack: wide ? null : () => setState(() => _showDetail = false),
+            onEdit: () => context.go(participantPath(selected.id.value)),
+            onDelete: () => _delete(selected),
+          ),
         ),
       );
     },
