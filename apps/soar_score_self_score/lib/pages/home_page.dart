@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:soar_score_ui/soar_score_ui.dart';
 
 import '../router.dart';
+import '../widgets/legal_footer.dart';
 
 /// The landing page: brand lockup, what the app is for and the two ways in.
 class HomePage extends StatelessWidget {
@@ -89,6 +90,8 @@ class HomePage extends StatelessWidget {
                             ),
                           ],
                         ),
+                        const SizedBox(height: 8),
+                        const LegalFooter(),
                       ],
                     ),
                   ),
