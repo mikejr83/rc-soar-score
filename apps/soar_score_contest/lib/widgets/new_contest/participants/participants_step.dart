@@ -153,15 +153,27 @@ class _ParticipantsStepState extends State<ParticipantsStep> {
     ]);
   }
 
-  void _add(DraftParticipant participant) {
-    if (_draft.participants.any((p) => p.profileId == participant.profileId)) {
-      widget.onMessage?.call('${participant.name} is already in the contest.');
-      return;
+  void _add(DraftParticipant participant) => _addAll([participant]);
+
+  /// Adds [participants] in one change. The draft is only refreshed when the
+  /// step rebuilds, so each one is checked against the list built so far.
+  void _addAll(List<DraftParticipant> participants) {
+    final next = [..._draft.participants];
+    for (final participant in participants) {
+      if (next.any((p) => p.profileId == participant.profileId)) {
+        widget.onMessage?.call(
+          '${participant.name} is already in the contest.',
+        );
+        continue;
+      }
+      next.add(participant);
     }
-    _setParticipants([..._draft.participants, participant]);
+    if (next.length != _draft.participants.length) _setParticipants(next);
   }
 
   Future<void> _addNew() async {
+    // Profiles saved with "Save and add another" before the dialog closes.
+    final others = <ParticipantProfile>[];
     final profile = await showDialog<ParticipantProfile>(
       context: context,
       builder: (context) => Dialog.fullscreen(
@@ -177,17 +189,22 @@ class _ParticipantsStepState extends State<ParticipantsStep> {
           body: ParticipantEditorPage(
             onDone: (profile) => Navigator.of(context).pop(profile),
             onCancel: () => Navigator.of(context).pop(),
+            onSavedAnother: others.add,
           ),
         ),
       ),
     );
-    if (profile == null || !mounted) {
-      return;
+    if (!mounted) return;
+    final saved = [...others, ?profile];
+    if (saved.isEmpty) return;
+    final participants = [
+      for (final profile in saved) DraftParticipant.fromProfile(profile),
+    ];
+    _addAll(participants);
+    setState(() => _profiles = [...?_profiles, ...saved]);
+    for (final participant in participants) {
+      widget.onMessage?.call('${participant.name} is added as Pilot.');
     }
-    final participant = DraftParticipant.fromProfile(profile);
-    _add(participant);
-    setState(() => _profiles = [...?_profiles, profile]);
-    widget.onMessage?.call('${participant.name} is added as Pilot.');
   }
 
   void _removeSelected() {

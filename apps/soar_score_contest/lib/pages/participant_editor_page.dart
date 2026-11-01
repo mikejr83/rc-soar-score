@@ -41,6 +41,7 @@ class ParticipantEditorPage extends StatefulWidget {
     this.guard,
     this.onDone,
     this.onCancel,
+    this.onSavedAnother,
     this.remoteMatchingUnavailable = false,
     this.managedFields = const {},
   });
@@ -57,6 +58,10 @@ class ParticipantEditorPage extends StatefulWidget {
   /// Called instead of returning to the participant list when the user
   /// cancels.
   final VoidCallback? onCancel;
+
+  /// Called with each profile saved by "Save and add another", so the
+  /// caller can add it too; the editor stays open for the next one.
+  final ValueChanged<ParticipantProfile>? onSavedAnother;
 
   /// Show that matching against online records failed, so the email check
   /// covered this device only (#247; no remote source yet).
@@ -176,6 +181,7 @@ class _ParticipantEditorPageState extends State<ParticipantEditorPage> {
         _leave(_c.saved);
       case SaveOutcome.savedAnother:
         final saved = _c.saved!;
+        widget.onSavedAnother?.call(saved);
         _snack('${saved.firstName} ${saved.lastName} added');
         if (_scroll.hasClients) {
           _scroll.jumpTo(0);

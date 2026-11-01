@@ -281,6 +281,8 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
   Future<void> _addNew() async {
     final c = _controller!;
     if (!c.canEdit) return;
+    // Profiles saved with "Save and add another" before the dialog closes.
+    final others = <ParticipantProfile>[];
     final profile = await showDialog<ParticipantProfile>(
       context: context,
       builder: (context) => Dialog.fullscreen(
@@ -296,14 +298,19 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
           body: ParticipantEditorPage(
             onDone: (profile) => Navigator.of(context).pop(profile),
             onCancel: () => Navigator.of(context).pop(),
+            onSavedAnother: others.add,
           ),
         ),
       ),
     );
-    if (profile == null || !mounted) return;
-    await c.reload();
     if (!mounted) return;
-    await _addProfile(profile);
+    final added = [...others, ?profile];
+    if (added.isEmpty) return;
+    await c.reload();
+    for (final saved in added) {
+      if (!mounted) return;
+      await _addProfile(saved);
+    }
   }
 
   Future<void> _removeSelected() async {
