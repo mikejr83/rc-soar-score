@@ -1,0 +1,148 @@
+name: Deploy
+
+# Hosting changes only when a GitHub release is published (pre-releases
+# included: the server and the clients must always ship together). Pushes to
+# master deploy nothing. Run it by hand to redeploy or roll back a tag.
+# Process, secrets and first-time setup: docs/deploying.md.
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Tag (or ref) to deploy, for example v0.1.0"
+        required: true
+      api:
+        description: "Deploy the API (Fly.io)"
+        type: boolean
+        default: true
+      public_site:
+        description: "Deploy the public site (Vercel)"
+        type: boolean
+        default: true
+      flutter_web:
+        description: "Deploy the contest and self-scoring apps (Cloudflare)"
+        type: boolean
+        default: true
+
+# One deploy at a time; a second release waits instead of racing the first.
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  REF: ${{ github.event.release.tag_name || inputs.ref }}
+  API_URL: https://api.rcsoarscore.com
+
+jobs:
+  api:
+    name: API (Fly.io)
+    if: github.event_name == 'release' || inputs.api
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: Production
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.REF }}
+
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+
+      - name: Deploy
+        # Fly builds the image from the Dockerfile (remote builder) and runs
+        # exactly one machine; the Dockerfile build context is the repo root.
+        run: >
+          flyctl deploy --remote-only --ha=false
+          --config apps/soar_score_server/fly.toml
+          --dockerfile apps/soar_score_server/Dockerfile
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+      - name: Smoke test
+        run: scripts/hosted-smoke.sh "$API_URL"
+
+  public-site:
+    name: Public site (Vercel)
+    if: github.event_name == 'release' || inputs.public_site
+    # The site proxies /api to the server, so the new server goes first.
+    needs: api
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: Production
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.REF }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Install the Vercel CLI
+        run: npm install --global vercel@latest
+
+      # The Vercel project's Root Directory is apps/soar_score_web and its
+      # production environment variables live in Vercel; these steps run from
+      # the repository root.
+      - name: Pull project settings
+        run: vercel pull --yes --environment=production --token "${{ secrets.VERCEL_TOKEN }}"
+
+      - name: Build
+        run: vercel build --prod --token "${{ secrets.VERCEL_TOKEN }}"
+
+      - name: Deploy
+        run: vercel deploy --prebuilt --prod --token "${{ secrets.VERCEL_TOKEN }}"
+
+  flutter-web:
+    name: ${{ matrix.name }} (Cloudflare)
+    if: github.event_name == 'release' || inputs.flutter_web
+    # The apps are built against the new server, so the server goes first.
+    needs: api
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: Production
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Contest app
+            app: soar_score_contest
+            worker: soar-score-contest
+          - name: Self-scoring app
+            app: soar_score_self_score
+            worker: rc-soar-score-self-score
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.REF }}
+
+      - name: Install Flutter
+        # Same version the Cloudflare dashboard builds used.
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.47.4
+          cache: true
+
+      - name: Get packages
+        run: flutter pub get
+
+      - name: Build web
+        working-directory: apps/${{ matrix.app }}
+        run: flutter build web --release --dart-define=SOAR_SCORE_API_BASE_URL=${{ env.API_URL }}
+
+      - name: Deploy to Cloudflare
+        run: >
+          npx --yes wrangler@4 deploy
+          --assets=apps/${{ matrix.app }}/build/web
+          --name ${{ matrix.worker }}
+          --compatibility-date=2026-10-25
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
