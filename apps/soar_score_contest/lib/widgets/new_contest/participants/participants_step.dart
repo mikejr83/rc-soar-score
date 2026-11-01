@@ -162,6 +162,8 @@ class _ParticipantsStepState extends State<ParticipantsStep> {
   }
 
   Future<void> _addNew() async {
+    // Profiles saved with "Save and add another" before the dialog closes.
+    final others = <ParticipantProfile>[];
     final profile = await showDialog<ParticipantProfile>(
       context: context,
       builder: (context) => Dialog.fullscreen(
@@ -177,17 +179,18 @@ class _ParticipantsStepState extends State<ParticipantsStep> {
           body: ParticipantEditorPage(
             onDone: (profile) => Navigator.of(context).pop(profile),
             onCancel: () => Navigator.of(context).pop(),
+            onSavedAnother: others.add,
           ),
         ),
       ),
     );
-    if (profile == null || !mounted) {
-      return;
+    if (!mounted) return;
+    for (final saved in [...others, ?profile]) {
+      final participant = DraftParticipant.fromProfile(saved);
+      _add(participant);
+      setState(() => _profiles = [...?_profiles, saved]);
+      widget.onMessage?.call('${participant.name} is added as Pilot.');
     }
-    final participant = DraftParticipant.fromProfile(profile);
-    _add(participant);
-    setState(() => _profiles = [...?_profiles, profile]);
-    widget.onMessage?.call('${participant.name} is added as Pilot.');
   }
 
   void _removeSelected() {
