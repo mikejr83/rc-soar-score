@@ -134,13 +134,13 @@ void main() {
     );
     expect(controller.preview, isTrue);
     expect(controller.printPages, '2');
-    // The URL still names neither, so a copy of the link keeps them.
-    expect(controller.params.toQuery(), isEmpty);
+    // The stored options join the params, so the URL carries them.
+    expect(controller.params.toQuery(), {'preview': '1', 'pp': '2'});
 
     controller.setPreview(false);
     await _flush();
     expect(controller.preview, isFalse);
-    expect(controller.params.toQuery(), {'preview': '0'});
+    expect(controller.params.toQuery(), {'preview': '0', 'pp': '2'});
   });
 
   test('the viewer reset clears the view state and removes the kind entry', () async {

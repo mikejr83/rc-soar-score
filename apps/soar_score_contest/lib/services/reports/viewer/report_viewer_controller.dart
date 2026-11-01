@@ -241,6 +241,10 @@ class ReportViewerController extends ChangeNotifier {
             : await store.load();
     _stored = Map<String, String>.of(map[spec.kind.key] ?? const {});
     _storedLoaded = true;
+    // The stored options now join the view, so the URL carries them too. A
+    // params the store already names is deep-equal, so this is a no-op
+    // without a store or with a view the link already set.
+    _setParams(_params);
     if (!_disposed) {
       _changed();
     }
@@ -332,11 +336,42 @@ class ReportViewerController extends ChangeNotifier {
   }
 
   void _setParams(ReportViewParams params) {
-    _params = params;
+    final merged = _mergeStored(params);
+    if (merged == _params) {
+      return;
+    }
+    _params = merged;
     _remember();
-    onParams?.call(params);
+    onParams?.call(merged);
     _changed();
     unawaited(_syncData());
+  }
+
+  /// The params to keep once the stored options are in place: the stored
+  /// options the params carry no explicit choice for join in, so the URL
+  /// names what is in force, not only what the link brought.
+  ReportViewParams _mergeStored(ReportViewParams params) {
+    return params.copyWith(
+      filters: {
+        ...params.filters,
+        if (_stored.isNotEmpty)
+          for (final entry in _stored.entries)
+            if (_optionKeysByKind[spec.kind]!.contains(entry.key) &&
+                !params.filters.containsKey(entry.key))
+              entry.key: entry.value,
+      },
+      paper: params.paper ?? _storedPaper,
+      orientation: params.orientation ?? _storedOrientation,
+      preview: params.previewExplicit
+          ? params.preview
+          : _stored['preview'] == '1',
+      previewExplicit:
+          params.previewExplicit || _stored.containsKey('preview'),
+      printPages:
+          params.printPagesExplicit ? params.printPages : _stored['pp'] ?? '',
+      printPagesExplicit:
+          params.printPagesExplicit || _stored.containsKey('pp'),
+    );
   }
 
   /// Reads the report's data again when the filters now need other data (or

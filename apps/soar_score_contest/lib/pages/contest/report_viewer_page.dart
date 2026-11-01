@@ -1,6 +1,6 @@
 import 'dart:async';
-import 'dart:ui' show PlatformDispatcher;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -328,6 +328,32 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
   void _openPath(String path) =>
       (widget.launcher ?? ReportLaunchers.current).open(context, path);
 
+  /// A link to this report with the view in force: the route with every filter,
+  /// option and page setup the URL now carries. On the web the router uses
+  /// the hash strategy, so the route goes into the fragment of this window's
+  /// URL; anywhere else the app is the window and the route is the whole link.
+  String _copyLinkUrl() {
+    final report = widget.report!;
+    final route = Uri(
+      path: contestReportPath(widget.contestId, report),
+      queryParameters: {
+        ..._controller!.params.toQuery(),
+        if (widget.openedInPlace) 'back': '1',
+      },
+    );
+    if (!kIsWeb) {
+      return route.toString();
+    }
+    final base = Uri.base;
+    return Uri(
+      scheme: base.scheme,
+      host: base.host,
+      port: base.hasPort ? base.port : null,
+      path: base.path,
+      fragment: route.toString(),
+    ).toString();
+  }
+
   void _openAction(ReportAction action) =>
       _openPath(switch (action.destination) {
         ReportDestination.scoring => contestScoringPath(
@@ -569,7 +595,9 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
               PageBannerAction(
                 'Copy link',
                 () =>
-                    Clipboard.setData(ClipboardData(text: Uri.base.toString())),
+                    Clipboard.setData(
+                      ClipboardData(text: _copyLinkUrl()),
+                    ),
                 emphasis: PageBannerEmphasis.filled,
               ),
           ],

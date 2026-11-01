@@ -6,6 +6,7 @@ import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_contest/api_client_provider.dart';
 import 'package:soar_score_contest/local_ui_store_provider.dart';
 import 'package:soar_score_contest/pages/contest/report_viewer_page.dart';
+import 'package:soar_score_contest/router.dart';
 import 'package:soar_score_contest/services/matrix/matrix_page_data.dart';
 import 'package:soar_score_contest/services/reports/draw_matrix/draw_matrix_data.dart';
 import 'package:soar_score_contest/services/reports/draw_matrix/draw_matrix_options.dart';
@@ -508,12 +509,39 @@ void main() {
           canSavePdf: false,
         ),
       );
-      await _pump(tester, _server(), printer: printer);
+      await _pump(
+        tester,
+        _server(),
+        params: ReportViewParams.fromQuery(const {'f.pct': '1', 'preview': '1'}),
+        openedInPlace: true,
+        printer: printer,
+      );
       expect(
         find.textContaining('This browser can’t print or save PDFs.'),
         findsOneWidget,
       );
       expect(find.text('Copy link'), findsOneWidget);
+
+      // Capture the text handed to the system clipboard.
+      final messenger = tester.binding.defaultBinaryMessenger;
+      Object? copied;
+      messenger.setMockMethodCallHandler(SystemChannels.platform, (call) async {
+        if (call.method == 'Clipboard.setData') {
+          copied = (call.arguments as Map<String, dynamic>)['text'];
+        }
+        return null;
+      });
+      await tester.tap(find.text('Copy link'));
+      await tester.pump();
+      messenger.setMockMethodCallHandler(SystemChannels.platform, null);
+
+      // The link is the report's route with the view in force.
+      final link = Uri.parse('$copied');
+      expect(
+        link.path,
+        contestReportPath(matrixContestId, ReportKind.standings),
+      );
+      expect(link.queryParameters, {'f.pct': '1', 'preview': '1', 'back': '1'});
     });
   });
 

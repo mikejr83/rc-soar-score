@@ -2,11 +2,12 @@ import 'package:equatable/equatable.dart';
 
 import 'page_setup.dart';
 
-/// What the URL of a report holds: its filters and options, the page setup,
-/// print preview and zoom. Refreshing the tab, copying the link or reopening
-/// it restores the same view. The viewer keeps the user's changes in the URL
-/// and, separately, in the account's local UI settings; a value the user
-/// never chose is not named here at all.
+/// The view the URL of a report holds: its filters and options, the page
+/// setup, print preview and zoom. Refreshing the tab, copying the link or
+/// reopening it restores the same view. The viewer keeps the user's changes
+/// in the URL and, separately, in the account's local UI settings; the URL
+/// carries what is in force, so a remembered choice shows even when the link
+/// did not name it.
 class ReportViewParams extends Equatable {
   const ReportViewParams({
     this.filters = const {},
