@@ -25,10 +25,10 @@ because the server and the clients must ship together. The
       (`score.`).
 4. Watch the run under Actions > Deploy. A failed API job stops the rest.
 
-The same tag also starts the Windows alpha build
-(`.github/workflows/release-windows.yml`), which attaches the zip to a draft
-release. Publish a release only after the zip is attached and checked; the
-publish is what deploys the hosts.
+The same publish also starts the Windows alpha build
+(`.github/workflows/release-windows.yml`), which attaches the zip to the release
+a few minutes later. Both workflows start from the one event, so the release
+can be created entirely in the GitHub UI (new tag, "Pre-release" for alphas).
 
 ### Redeploy or roll back
 
