@@ -1418,5 +1418,41 @@
   "matrixMoveChecking": "Checking scores…",
   "@matrixMoveChecking": {
     "description": "Snackbar while the scores are read before the move dialog opens."
+  },
+  "aboutHeading": "About",
+  "@aboutHeading": {
+    "description": "Heading of the Settings card with the version, licences and legal links."
+  },
+  "aboutOpenSourceLicences": "Open source licences",
+  "@aboutOpenSourceLicences": {
+    "description": "Settings entry that opens the public site's open source licences page in the browser."
+  },
+  "aboutOpenSourceLicencesHint": "Opens the list on the RC Soar Score website",
+  "@aboutOpenSourceLicencesHint": {
+    "description": "Explains that the open source licences entry opens the website."
+  },
+  "aboutLicencesOnThisDevice": "Licences on this device",
+  "@aboutLicencesOnThisDevice": {
+    "description": "Settings entry that shows the licences bundled with the app, which works without a network."
+  },
+  "aboutLicencesOnThisDeviceHint": "Works without a network connection",
+  "@aboutLicencesOnThisDeviceHint": {
+    "description": "Explains that the bundled licences page needs no network."
+  },
+  "aboutSourceCode": "Source code (AGPL-3.0)",
+  "@aboutSourceCode": {
+    "description": "Settings entry that opens the source code repository; the app is licensed under the AGPL-3.0."
+  },
+  "aboutPrivacyPolicy": "Privacy Policy",
+  "@aboutPrivacyPolicy": {
+    "description": "Settings entry that opens the Privacy Policy on the public site."
+  },
+  "aboutTermsOfService": "Terms of Service",
+  "@aboutTermsOfService": {
+    "description": "Settings entry that opens the Terms of Service on the public site."
+  },
+  "aboutLinkFailed": "Could not open the link. Check your network connection and try again.",
+  "@aboutLinkFailed": {
+    "description": "Snackbar when a link in the About card could not be opened."
   }
 }

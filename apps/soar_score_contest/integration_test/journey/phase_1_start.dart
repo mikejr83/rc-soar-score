@@ -6,6 +6,7 @@ import 'package:soar_score_contest/pages/landing_page.dart';
 import '../support/interact.dart';
 import '../support/launch_app.dart';
 import '../support/open_demo_contest.dart';
+import '../support/open_settings.dart';
 import 'journey.dart';
 
 /// Phase 1: start the app on the landing page and reach the main page.
@@ -44,5 +45,15 @@ Future<void> runStartPhase(Journey journey, JourneyContext data) async {
     await openContest(tester, 'Autumn F5J Classic');
     expect(find.text('Matrix'), findsWidgets);
     await pumpUntilFound(tester, find.text('Workspace'));
+  });
+
+  await journey.step('Settings lists the open source licences', () async {
+    await openSettings(tester);
+    await pumpUntilFound(tester, find.text('About'));
+    await pumpUntilFound(tester, find.text('Open source licences'));
+    expect(find.text('Privacy Policy'), findsOneWidget);
+    expect(find.text('Terms of Service'), findsOneWidget);
+    await goToMainPage(tester);
+    await pumpUntilFound(tester, find.byType(HomePage));
   });
 }

@@ -66,6 +66,17 @@ jobs:
           --build-name ${{ steps.version.outputs.core }}
           --build-number ${{ github.run_number }}
 
+      # Notices for the offline app, from the generator that also feeds the
+      # public /open-source page. Flags are those of scripts/generate_licences.dart.
+      - name: Install web dependencies for the notices generator
+        working-directory: apps/soar_score_web
+        run: npm ci
+
+      - name: Generate third-party notices
+        run: >
+          dart scripts/generate_licences.dart
+          --product contest-app --notices THIRD_PARTY_NOTICES.txt
+
       - name: Package the zip
         shell: pwsh
         run: |
@@ -76,6 +87,8 @@ jobs:
           Copy-Item "$release/*" $stage -Recurse
           (Get-Content docs/alpha-readme.txt -Raw).Replace('{{VERSION}}', '${{ steps.version.outputs.full }}') |
             Set-Content "$stage/README.txt"
+          if (-not (Test-Path THIRD_PARTY_NOTICES.txt)) { throw 'THIRD_PARTY_NOTICES.txt was not generated' }
+          Copy-Item THIRD_PARTY_NOTICES.txt "$stage/THIRD_PARTY_NOTICES.txt"
           Compress-Archive -Path "stage/$name" -DestinationPath "$name.zip"
           "ZIP=$name.zip" | Out-File -FilePath $env:GITHUB_ENV -Append
           "ZIP_NAME=$name" | Out-File -FilePath $env:GITHUB_ENV -Append

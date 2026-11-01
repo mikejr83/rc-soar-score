@@ -1242,4 +1242,34 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get matrixMoveChecking => 'Checking scores…';
+
+  @override
+  String get aboutHeading => 'About';
+
+  @override
+  String get aboutOpenSourceLicences => 'Open source licences';
+
+  @override
+  String get aboutOpenSourceLicencesHint =>
+      'Opens the list on the RC Soar Score website';
+
+  @override
+  String get aboutLicencesOnThisDevice => 'Licences on this device';
+
+  @override
+  String get aboutLicencesOnThisDeviceHint =>
+      'Works without a network connection';
+
+  @override
+  String get aboutSourceCode => 'Source code (AGPL-3.0)';
+
+  @override
+  String get aboutPrivacyPolicy => 'Privacy Policy';
+
+  @override
+  String get aboutTermsOfService => 'Terms of Service';
+
+  @override
+  String get aboutLinkFailed =>
+      'Could not open the link. Check your network connection and try again.';
 }
