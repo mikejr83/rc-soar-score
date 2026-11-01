@@ -1681,6 +1681,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Checking scores…'**
   String get matrixMoveChecking;
+
+  /// Heading of the Settings card with the version, licences and legal links.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get aboutHeading;
+
+  /// Settings entry that opens the public site's open source licences page in the browser.
+  ///
+  /// In en, this message translates to:
+  /// **'Open source licences'**
+  String get aboutOpenSourceLicences;
+
+  /// Explains that the open source licences entry opens the website.
+  ///
+  /// In en, this message translates to:
+  /// **'Opens the list on the RC Soar Score website'**
+  String get aboutOpenSourceLicencesHint;
+
+  /// Settings entry that shows the licences bundled with the app, which works without a network.
+  ///
+  /// In en, this message translates to:
+  /// **'Licences on this device'**
+  String get aboutLicencesOnThisDevice;
+
+  /// Explains that the bundled licences page needs no network.
+  ///
+  /// In en, this message translates to:
+  /// **'Works without a network connection'**
+  String get aboutLicencesOnThisDeviceHint;
+
+  /// Settings entry that opens the source code repository; the app is licensed under the AGPL-3.0.
+  ///
+  /// In en, this message translates to:
+  /// **'Source code (AGPL-3.0)'**
+  String get aboutSourceCode;
+
+  /// Settings entry that opens the Privacy Policy on the public site.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy Policy'**
+  String get aboutPrivacyPolicy;
+
+  /// Settings entry that opens the Terms of Service on the public site.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms of Service'**
+  String get aboutTermsOfService;
+
+  /// Snackbar when a link in the About card could not be opened.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open the link. Check your network connection and try again.'**
+  String get aboutLinkFailed;
 }
 
 class _AppLocalizationsDelegate

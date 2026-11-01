@@ -32,6 +32,15 @@ Close the app, download the newer zip, unzip it, and replace the old folder.
 Your contests are kept. The version shows at the bottom of the settings menu
 (the gear at the bottom of the left rail) and on a contest's Sync page.
 
+## Open source licences
+
+The app is free software under the AGPL-3.0; the source is at
+https://github.com/mikejr83/rc-soar-score. The zip holds
+`THIRD_PARTY_NOTICES.txt`, which lists the open source libraries in the app
+and their licences. In the app, Settings > About > Licences on this device
+shows them with no network. Online they are at
+https://rcsoarscore.com/open-source#contest-app
+
 ## Clean-machine checklist
 
 Run this on a Windows machine that has never had the app:
@@ -48,7 +57,9 @@ Push a tag such as `v0.1.0-alpha.1`. The workflow
 `.github/workflows/release-windows.yml` builds the zip and attaches it to a
 **draft** release; review the notes and publish it. The build name is the
 tag without its pre-release suffix (`0.1.0`, because the Windows file version is
-numeric) and the build number is the workflow run number. Run the workflow by
+numeric) and the build number is the workflow run number. The workflow also
+runs `dart scripts/generate_licences.dart --product contest-app --notices
+THIRD_PARTY_NOTICES.txt` and puts the file in the zip. Run the workflow by
 hand to build without releasing; the result is a workflow artifact holding the unzipped folder. Actions has no
 credits at the moment, so check that the build works on a Windows machine
 first.

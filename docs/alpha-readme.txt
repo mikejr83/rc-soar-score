@@ -19,6 +19,15 @@ Update
   Download the newer zip, close the app, unzip it and replace this folder.
   Your contests are kept.
 
+Open source
+  RC Soar Score is free software under the GNU Affero General Public
+  License, version 3 (AGPL-3.0). The source code is at
+  https://github.com/mikejr83/rc-soar-score
+  THIRD_PARTY_NOTICES.txt in this folder lists the open source libraries the
+  app uses and their licences. The same notices are in the app under
+  Settings > About > Licences on this device (no network needed), and online
+  at https://rcsoarscore.com/open-source#contest-app
+
 Feedback
   Please report problems and ideas at
   https://github.com/mikejr83/rc-soar-score/issues
