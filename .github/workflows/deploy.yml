@@ -66,8 +66,11 @@ jobs:
 
   public-site:
     name: Public site (Vercel)
-    if: github.event_name == 'release' || inputs.public_site
-    # The site proxies /api to the server, so the new server goes first.
+    if: >-
+      ${{ !cancelled() && (needs.api.result == 'success' || needs.api.result == 'skipped')
+      && (github.event_name == 'release' || inputs.public_site) }}
+    # The site proxies /api to the server, so the new server goes first. A
+    # skipped API job (manual run) does not block this one; a failed one does.
     needs: api
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -101,7 +104,9 @@ jobs:
 
   flutter-web:
     name: ${{ matrix.name }} (Cloudflare)
-    if: github.event_name == 'release' || inputs.flutter_web
+    if: >-
+      ${{ !cancelled() && (needs.api.result == 'success' || needs.api.result == 'skipped')
+      && (github.event_name == 'release' || inputs.flutter_web) }}
     # The apps are built against the new server, so the server goes first.
     needs: api
     runs-on: ubuntu-latest
