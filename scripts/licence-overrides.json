@@ -1,0 +1,39 @@
+{
+  "_comment": "Overrides for the licence generator (scripts/generate_licences.dart). 'dart' and 'npm' map a package name to {license, textFiles (names under scripts/licence-texts), textFrom (another package of the same ecosystem), homepage}. Entries under 'npmPatterns' match a name prefix (the text before '*').",
+  "dart": {},
+  "npm": {
+    "client-only": {
+      "license": "MIT",
+      "textFiles": [
+        "MIT-standard.txt"
+      ],
+      "note": "The package declares MIT in package.json but ships no licence file or copyright line; this is the standard MIT text."
+    }
+  },
+  "npmPatterns": {
+    "@next/": {
+      "textFrom": "next"
+    },
+    "@img/sharp-libvips-": {
+      "textFiles": [
+        "LGPL-3.0.txt",
+        "GPL-3.0.txt"
+      ]
+    },
+    "@img/sharp-": {
+      "textFiles": [
+        "Apache-2.0.txt"
+      ]
+    }
+  },
+  "npmSkipPlatform": {
+    "_comment": "The public site is built and served on Vercel (Linux x64, glibc). Optional platform packages for other platforms are not shipped and are left out. The lockfile has no libc field, so musl and WebAssembly variants are excluded by name.",
+    "os": "linux",
+    "cpu": "x64",
+    "libc": "glibc",
+    "excludeNameContains": [
+      "musl",
+      "wasm"
+    ]
+  }
+}
