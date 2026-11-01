@@ -139,9 +139,7 @@ class ReportViewerController extends ChangeNotifier {
   bool get dataFailed => _dataFailed;
 
   PageSetup get setup => PageSetup(
-    _params.paper ??
-        _storedPaper ??
-        defaultPaper,
+    _params.paper ?? _storedPaper ?? defaultPaper,
     _params.orientation ?? _storedOrientation ?? spec.defaultOrientation,
   );
 
@@ -160,23 +158,22 @@ class ReportViewerController extends ChangeNotifier {
   }
 
   /// Print preview: the viewer's choice, else the stored one, else off.
-  bool get preview => _params.previewExplicit
-      ? _params.preview
-      : _stored['preview'] == '1';
+  bool get preview =>
+      _params.previewExplicit ? _params.preview : _stored['preview'] == '1';
 
   /// The pages to print or save, as typed: the viewer's, else the stored
   /// ones, else every page.
-  String get printPages => _params.printPagesExplicit
-      ? _params.printPages
-      : _stored['pp'] ?? '';
+  String get printPages =>
+      _params.printPagesExplicit ? _params.printPages : _stored['pp'] ?? '';
 
   /// The filters in force: the URL's over the remembered options, over the
   /// report's defaults.
   Map<String, String> get filters => _filtersFor(_facts);
 
   Map<String, String> _filtersFor(ReportsFacts? facts) {
-    final defaults =
-        facts == null ? const <String, String>{} : spec.defaultFilters(facts);
+    final defaults = facts == null
+        ? const <String, String>{}
+        : spec.defaultFilters(facts);
     final optionKeys = _optionKeysByKind[spec.kind]!;
     return {
       ...defaults,
@@ -235,10 +232,9 @@ class ReportViewerController extends ChangeNotifier {
   /// place before the user can see the controls.
   Future<void> _loadOptions() async {
     final store = options;
-    final map =
-        store == null
-            ? const <String, Map<String, String>>{}
-            : await store.load();
+    final map = store == null
+        ? const <String, Map<String, String>>{}
+        : await store.load();
     _stored = Map<String, String>.of(map[spec.kind.key] ?? const {});
     _storedLoaded = true;
     // The stored options now join the view, so the URL carries them too. A
@@ -365,10 +361,10 @@ class ReportViewerController extends ChangeNotifier {
       preview: params.previewExplicit
           ? params.preview
           : _stored['preview'] == '1',
-      previewExplicit:
-          params.previewExplicit || _stored.containsKey('preview'),
-      printPages:
-          params.printPagesExplicit ? params.printPages : _stored['pp'] ?? '',
+      previewExplicit: params.previewExplicit || _stored.containsKey('preview'),
+      printPages: params.printPagesExplicit
+          ? params.printPages
+          : _stored['pp'] ?? '',
       printPagesExplicit:
           params.printPagesExplicit || _stored.containsKey('pp'),
     );
@@ -489,9 +485,9 @@ class ReportViewerController extends ChangeNotifier {
   Future<void> resetAll() async {
     _stored = const {};
     _setParams(ReportViewParams(zoom: _params.zoom));
-    final reset = _saved
-        .then((_) =>
-            options?.reset(spec.kind.key) ?? Future<void>.value());
+    final reset = _saved.then(
+      (_) => options?.reset(spec.kind.key) ?? Future<void>.value(),
+    );
     _saved = reset;
     return reset;
   }
@@ -501,15 +497,7 @@ class ReportViewerController extends ChangeNotifier {
   /// The option keys of this report kind, besides the round ranges and the
   /// pilot choice, which are filtering and stay in the URL only.
   static const Map<ReportKind, Set<String>> _optionKeysByKind = {
-    ReportKind.standings: {
-      'pct',
-      'raw',
-      'team',
-      'num',
-      'cls',
-      'det',
-      'prov',
-    },
+    ReportKind.standings: {'pct', 'raw', 'team', 'num', 'cls', 'det', 'prov'},
     ReportKind.matrix: {
       'cmp',
       'inf',
@@ -524,8 +512,7 @@ class ReportViewerController extends ChangeNotifier {
     ReportKind.cards: {'ret', 'pre', 'up', 'mg'},
   };
 
-  bool _isOptionKey(String key) =>
-      _optionKeysByKind[spec.kind]!.contains(key);
+  bool _isOptionKey(String key) => _optionKeysByKind[spec.kind]!.contains(key);
 
   /// Remembers [key] as [value] for this report kind and writes the account
   /// map. A change writes even when it equals the default: the stored value
@@ -542,8 +529,9 @@ class ReportViewerController extends ChangeNotifier {
   /// controller still in flight.
   Future<void> _saveStored() async {
     final write = _saved;
-    final done = write.then((_) => options?.set(spec.kind.key, _stored) ??
-        Future<void>.value());
+    final done = write.then(
+      (_) => options?.set(spec.kind.key, _stored) ?? Future<void>.value(),
+    );
     _saved = done;
     return done;
   }

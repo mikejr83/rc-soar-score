@@ -186,7 +186,9 @@ void _syncAndStorage() {
     final contest = _contest();
     final sync = FakeAppSync(
       state: AppSyncState(
-        scopes: {ContestScopeKey(contest.id): const SyncScopeSummary(localOnly: true)},
+        scopes: {
+          ContestScopeKey(contest.id): const SyncScopeSummary(localOnly: true),
+        },
       ),
     );
     for (final width in [800.0, 360.0]) {

@@ -514,8 +514,10 @@ void main() {
       );
       // A stored option the URL does not name, so the link must carry it.
       final uiStore = BackendLocalUiStore(MemoryLocalUiBackend());
-      await ReportOptionsStore(uiStore, 'local')
-          .set('standings', {'preview': '1'});
+      await ReportOptionsStore(
+        uiStore,
+        'local',
+      ).set('standings', {'preview': '1'});
       await _pump(
         tester,
         _server(),
@@ -753,8 +755,7 @@ void main() {
       tester,
     ) async {
       final uiStore = BackendLocalUiStore(MemoryLocalUiBackend());
-      await ReportOptionsStore(uiStore, 'local')
-          .set('standings', {'pct': '1'});
+      await ReportOptionsStore(uiStore, 'local').set('standings', {'pct': '1'});
       await pumpWithStore(tester, uiStore, const StandInReport());
 
       // The stored '1' is on before anything is touched.
@@ -762,13 +763,19 @@ void main() {
       final store = ReportOptionsStore(uiStore, 'local');
 
       // Changing it writes the new value, even back to the default.
-      await tester.tap(find.widgetWithText(CheckboxListTile, 'Percentage of total'));
+      await tester.tap(
+        find.widgetWithText(CheckboxListTile, 'Percentage of total'),
+      );
       await tester.pumpAndSettle();
-      expect(await store.load(), {'standings': {'pct': '0'}});
+      expect(await store.load(), {
+        'standings': {'pct': '0'},
+      });
       expect(_option(tester, 'Percentage of total'), isFalse);
     });
 
-    testWidgets('a value the URL names does not reach the store', (tester) async {
+    testWidgets('a value the URL names does not reach the store', (
+      tester,
+    ) async {
       final uiStore = BackendLocalUiStore(MemoryLocalUiBackend());
       await pumpWithStore(
         tester,
@@ -776,10 +783,7 @@ void main() {
         const StandInReport(),
         params: ReportViewParams.fromQuery(const {'f.pct': '1'}),
       );
-      expect(
-        await ReportOptionsStore(uiStore, 'local').load(),
-        isEmpty,
-      );
+      expect(await ReportOptionsStore(uiStore, 'local').load(), isEmpty);
     });
 
     testWidgets('reopening the report starts with the stored choice', (
@@ -787,7 +791,9 @@ void main() {
     ) async {
       final uiStore = BackendLocalUiStore(MemoryLocalUiBackend());
       await pumpWithStore(tester, uiStore, const StandInReport());
-      await tester.tap(find.widgetWithText(CheckboxListTile, 'Percentage of total'));
+      await tester.tap(
+        find.widgetWithText(CheckboxListTile, 'Percentage of total'),
+      );
       await tester.pumpAndSettle();
 
       // A fresh widget on the same store starts with the stored value on.
@@ -800,8 +806,10 @@ void main() {
       tester,
     ) async {
       final uiStore = BackendLocalUiStore(MemoryLocalUiBackend());
-      await ReportOptionsStore(uiStore, 'local')
-          .set('standings', {'pct': '1', 'paper': 'a4'});
+      await ReportOptionsStore(
+        uiStore,
+        'local',
+      ).set('standings', {'pct': '1', 'paper': 'a4'});
       await pumpWithStore(tester, uiStore, const StandInReport());
       expect(_option(tester, 'Percentage of total'), isTrue);
 
@@ -811,18 +819,14 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(_option(tester, 'Percentage of total'), isFalse);
-      expect(
-        await ReportOptionsStore(uiStore, 'local').load(),
-        isEmpty,
-      );
+      expect(await ReportOptionsStore(uiStore, 'local').load(), isEmpty);
     });
 
     testWidgets('the empty-state reset keeps the stored options', (
       tester,
     ) async {
       final uiStore = BackendLocalUiStore(MemoryLocalUiBackend());
-      await ReportOptionsStore(uiStore, 'local')
-          .set('standings', {'pct': '1'});
+      await ReportOptionsStore(uiStore, 'local').set('standings', {'pct': '1'});
       await pumpWithStore(
         tester,
         uiStore,
@@ -835,10 +839,9 @@ void main() {
       await tester.pumpAndSettle();
       expect(_body(1), findsOneWidget);
       expect(_option(tester, 'Percentage of total'), isTrue);
-      expect(
-        await ReportOptionsStore(uiStore, 'local').load(),
-        {'standings': {'pct': '1'}},
-      );
+      expect(await ReportOptionsStore(uiStore, 'local').load(), {
+        'standings': {'pct': '1'},
+      });
     });
 
     testWidgets('the Draw Matrix remembers Compact mode per report kind', (
@@ -858,7 +861,9 @@ void main() {
       await tester.tap(compact);
       await tester.pumpAndSettle();
       // The stored entry is keyed to the matrix kind, not to standings.
-      expect(await store.load(), {'matrix': {'cmp': '1'}});
+      expect(await store.load(), {
+        'matrix': {'cmp': '1'},
+      });
 
       // Reopening starts with it on.
       await tester.pumpWidget(const SizedBox());

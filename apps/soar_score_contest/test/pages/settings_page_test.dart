@@ -171,9 +171,7 @@ void main() {
       find.text(AppLocalizationsEn().reportOptionsHeading),
       findsOneWidget,
     );
-    await tester.tap(
-      find.byKey(const ValueKey('reset-report-options-button')),
-    );
+    await tester.tap(find.byKey(const ValueKey('reset-report-options-button')));
     await tester.pumpAndSettle();
 
     expect(await options.load(), isEmpty);
@@ -183,15 +181,11 @@ void main() {
     );
   });
 
-  testWidgets('a failed report options reset save is reported', (
-    tester,
-  ) async {
+  testWidgets('a failed report options reset save is reported', (tester) async {
     final store = _FailingStore();
     await _pumpSettings(tester, store);
 
-    await tester.tap(
-      find.byKey(const ValueKey('reset-report-options-button')),
-    );
+    await tester.tap(find.byKey(const ValueKey('reset-report-options-button')));
     await tester.pumpAndSettle();
 
     expect(

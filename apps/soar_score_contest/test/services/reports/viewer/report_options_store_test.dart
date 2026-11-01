@@ -53,7 +53,9 @@ void main() {
     await options.set('cards', {'up': 'two'});
 
     await options.reset('matrix');
-    expect(await options.load(), {'cards': {'up': 'two'}});
+    expect(await options.load(), {
+      'cards': {'up': 'two'},
+    });
 
     await options.reset();
     expect(await options.load(), isEmpty);

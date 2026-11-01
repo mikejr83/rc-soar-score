@@ -64,7 +64,11 @@ Future<void> _flush() => Future<void>.delayed(Duration.zero);
 
 void main() {
   test('a stored option applies over the default', () async {
-    final controller = await _controller(stored: {'standings': {'pct': '1'}});
+    final controller = await _controller(
+      stored: {
+        'standings': {'pct': '1'},
+      },
+    );
     expect(controller.load, ViewerLoad.ready);
     // The stand-in's default is off; the stored '1' turns it on.
     expect(controller.filters['pct'], '1');
@@ -72,21 +76,26 @@ void main() {
 
   test('a URL option beats the stored one', () async {
     final controller = await _controller(
-      stored: {'standings': {'pct': '1'}},
+      stored: {
+        'standings': {'pct': '1'},
+      },
       initial: ReportViewParams.fromQuery(const {'f.pct': '0'}),
     );
     expect(controller.filters['pct'], '0');
   });
 
-  test('a value the URL names and the user did not touch is not written', () async {
-    final controller = await _controller(
-      initial: ReportViewParams.fromQuery(const {'f.pct': '1'}),
-    );
-    expect(controller.filters['pct'], '1');
-    // The option came from the URL, not a change in the viewer.
-    final store = _storeOf(controller);
-    expect(await store.load(), isEmpty);
-  });
+  test(
+    'a value the URL names and the user did not touch is not written',
+    () async {
+      final controller = await _controller(
+        initial: ReportViewParams.fromQuery(const {'f.pct': '1'}),
+      );
+      expect(controller.filters['pct'], '1');
+      // The option came from the URL, not a change in the viewer.
+      final store = _storeOf(controller);
+      expect(await store.load(), isEmpty);
+    },
+  );
 
   test('changing an option writes the account map', () async {
     final controller = await _controller();
@@ -96,11 +105,15 @@ void main() {
     controller.setFilter('pct', '0');
     await _flush();
     // '0' is the default, but it is the user's last explicit choice.
-    expect(await store.load(), {'standings': {'pct': '0'}});
+    expect(await store.load(), {
+      'standings': {'pct': '0'},
+    });
 
     controller.setFilter('pct', '1');
     await _flush();
-    expect(await store.load(), {'standings': {'pct': '1'}});
+    expect(await store.load(), {
+      'standings': {'pct': '1'},
+    });
   });
 
   test('a round filter is not remembered', () async {
@@ -143,58 +156,67 @@ void main() {
     expect(controller.params.toQuery(), {'preview': '0', 'pp': '2'});
   });
 
-  test('the viewer reset clears the view state and removes the kind entry', () async {
-    final controller = await _controller(
-      stored: {
+  test(
+    'the viewer reset clears the view state and removes the kind entry',
+    () async {
+      final controller = await _controller(
+        stored: {
+          'standings': {'pct': '1', 'paper': 'a4'},
+          'matrix': {'cmp': '1'},
+        },
+        initial: ReportViewParams.fromQuery(const {
+          'f.pct': '0',
+          'paper': 'letter',
+          'preview': '1',
+          'pp': '2',
+          'zoom': '1.25',
+        }),
+      );
+      expect(await _storeOf(controller).load(), {
         'standings': {'pct': '1', 'paper': 'a4'},
         'matrix': {'cmp': '1'},
-      },
-      initial: ReportViewParams.fromQuery(const {
-        'f.pct': '0',
-        'paper': 'letter',
-        'preview': '1',
-        'pp': '2',
-        'zoom': '1.25',
-      }),
-    );
-    expect(await _storeOf(controller).load(), {
-      'standings': {'pct': '1', 'paper': 'a4'},
-      'matrix': {'cmp': '1'},
-    });
+      });
 
-    await controller.resetAll();
-    // The view state is fresh: filters, options, paper, preview, pages.
-    expect(controller.params.filters, isEmpty);
-    expect(controller.params.paper, isNull);
-    expect(controller.params.preview, isFalse);
-    expect(controller.params.printPages, isEmpty);
-    expect(controller.params.previewExplicit, isFalse);
-    expect(controller.params.printPagesExplicit, isFalse);
-    // The zoom stays.
-    expect(controller.params.zoom, 1.25);
-    // Only this kind's entry is forgotten; another report's stays.
-    final store = _storeOf(controller);
-    expect(await store.load(), {'matrix': {'cmp': '1'}});
-    expect(controller.filters['pct'], isNull);
-  });
+      await controller.resetAll();
+      // The view state is fresh: filters, options, paper, preview, pages.
+      expect(controller.params.filters, isEmpty);
+      expect(controller.params.paper, isNull);
+      expect(controller.params.preview, isFalse);
+      expect(controller.params.printPages, isEmpty);
+      expect(controller.params.previewExplicit, isFalse);
+      expect(controller.params.printPagesExplicit, isFalse);
+      // The zoom stays.
+      expect(controller.params.zoom, 1.25);
+      // Only this kind's entry is forgotten; another report's stays.
+      final store = _storeOf(controller);
+      expect(await store.load(), {
+        'matrix': {'cmp': '1'},
+      });
+      expect(controller.filters['pct'], isNull);
+    },
+  );
 
-  test('the empty-state reset clears the URL filters and keeps the options', () async {
-    final controller = await _controller(
-      stored: {'standings': {'pct': '1'}},
-      initial: ReportViewParams.fromQuery(const {
-        'f.from': '2',
-        'f.to': '1',
-      }),
-    );
-    expect(controller.check, isA<ReportInvalid>());
+  test(
+    'the empty-state reset clears the URL filters and keeps the options',
+    () async {
+      final controller = await _controller(
+        stored: {
+          'standings': {'pct': '1'},
+        },
+        initial: ReportViewParams.fromQuery(const {'f.from': '2', 'f.to': '1'}),
+      );
+      expect(controller.check, isA<ReportInvalid>());
 
-    controller.resetFilters();
-    expect(controller.check, isNot(isA<ReportInvalid>()));
-    // The stored option still applies after the URL filters are cleared.
-    expect(controller.filters['pct'], '1');
-    final store = _storeOf(controller);
-    expect(await store.load(), {'standings': {'pct': '1'}});
-  });
+      controller.resetFilters();
+      expect(controller.check, isNot(isA<ReportInvalid>()));
+      // The stored option still applies after the URL filters are cleared.
+      expect(controller.filters['pct'], '1');
+      final store = _storeOf(controller);
+      expect(await store.load(), {
+        'standings': {'pct': '1'},
+      });
+    },
+  );
 }
 
 /// The store the controller writes to: the one given to it.

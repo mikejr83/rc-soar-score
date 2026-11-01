@@ -75,10 +75,7 @@ void main() {
       const unset = ReportViewParams(preview: true);
       expect(unset.toQuery(), isEmpty);
       // A round trip keeps the flags, not just the values.
-      expect(
-        ReportViewParams.fromQuery(params.toQuery()),
-        params,
-      );
+      expect(ReportViewParams.fromQuery(params.toQuery()), params);
     });
   });
 

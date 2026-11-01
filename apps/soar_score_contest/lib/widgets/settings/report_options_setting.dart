@@ -18,7 +18,9 @@ class ReportOptionsSetting extends StatelessWidget {
     messenger.showSnackBar(
       SnackBar(
         content: Text(
-          saved ? l10n.reportOptionsResetDone : l10n.reportOptionsResetSaveFailed,
+          saved
+              ? l10n.reportOptionsResetDone
+              : l10n.reportOptionsResetSaveFailed,
         ),
       ),
     );
@@ -46,9 +48,7 @@ class ReportOptionsSetting extends StatelessWidget {
             const SizedBox(height: 16),
             OutlinedButton(
               key: const ValueKey('reset-report-options-button'),
-              onPressed: store == null
-                  ? null
-                  : () => _reset(context, store),
+              onPressed: store == null ? null : () => _reset(context, store),
               child: Text(l10n.reportOptionsResetButton),
             ),
           ],

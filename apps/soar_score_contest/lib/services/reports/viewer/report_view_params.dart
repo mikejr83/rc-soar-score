@@ -30,6 +30,7 @@ class ReportViewParams extends Equatable {
       }
       return null;
     }
+
     final preview = query.containsKey('preview');
     final printPages = query.containsKey('pp');
     return ReportViewParams(

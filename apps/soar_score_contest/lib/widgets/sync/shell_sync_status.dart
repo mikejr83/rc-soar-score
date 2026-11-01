@@ -51,9 +51,7 @@ class ShellSyncStatus extends StatelessWidget {
                 const SizedBox(width: 6),
                 Text('Sync', style: theme.textTheme.bodySmall),
                 const SizedBox(width: 6),
-                Flexible(
-                  child: Text(text, style: theme.textTheme.bodySmall),
-                ),
+                Flexible(child: Text(text, style: theme.textTheme.bodySmall)),
               ],
             ),
           ),

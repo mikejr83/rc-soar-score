@@ -200,8 +200,8 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
                 setup,
                 _definition!.barePageMargins(controller.sheetFilters, facts),
               ),
-          preview: controller.preview,
-          data: controller.data,
+        preview: controller.preview,
+        data: controller.data,
         online:
             appConnectivityOf(context)?.internetStatus !=
             ConnectivityStatus.unavailable,
@@ -263,10 +263,7 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
   /// have here.
   List<Widget> _printPages() {
     final pages = _pages(_document()!);
-    final range = PrintPageRange.parse(
-      _controller!.printPages,
-      pages.length,
-    );
+    final range = PrintPageRange.parse(_controller!.printPages, pages.length);
     return [
       for (final number in range.pages)
         Localizations.override(
@@ -594,10 +591,7 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
             if (!caps.canSavePdf)
               PageBannerAction(
                 'Copy link',
-                () =>
-                    Clipboard.setData(
-                      ClipboardData(text: _copyLinkUrl()),
-                    ),
+                () => Clipboard.setData(ClipboardData(text: _copyLinkUrl())),
                 emphasis: PageBannerEmphasis.filled,
               ),
           ],

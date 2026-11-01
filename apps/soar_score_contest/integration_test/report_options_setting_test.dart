@@ -46,8 +46,14 @@ void main() {
     await tester.ensureVisible(
       find.byKey(const ValueKey('reset-report-options-button')),
     );
-    await tapVisible(tester, find.byKey(const ValueKey('reset-report-options-button')));
-    await pumpUntilFound(tester, find.text('Report options are back to their defaults.'));
+    await tapVisible(
+      tester,
+      find.byKey(const ValueKey('reset-report-options-button')),
+    );
+    await pumpUntilFound(
+      tester,
+      find.text('Report options are back to their defaults.'),
+    );
 
     // Reopening the report shows the default again.
     await tapRail(tester, 'Reports');

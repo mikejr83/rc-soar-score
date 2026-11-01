@@ -8,12 +8,13 @@ import 'package:soar_score_ui_storage/soar_score_ui_storage.dart';
 /// `'1'`/`'0'`, choices by key, and the pages to print as typed. A value the
 /// option parsers do not recognise falls back to its default, so a stale or
 /// foreign value never crashes the viewer.
-final LocalUiKey<Map<String, Map<String, String>>> reportOptionsKey = LocalUiKey(
-  name: 'report_options',
-  defaultValue: const <String, Map<String, String>>{},
-  encode: (options) => options,
-  decode: (data) => _read(data),
-);
+final LocalUiKey<Map<String, Map<String, String>>> reportOptionsKey =
+    LocalUiKey(
+      name: 'report_options',
+      defaultValue: const <String, Map<String, String>>{},
+      encode: (options) => options,
+      decode: (data) => _read(data),
+    );
 
 Map<String, Map<String, String>> _read(Object? data) {
   if (data is! Map) {

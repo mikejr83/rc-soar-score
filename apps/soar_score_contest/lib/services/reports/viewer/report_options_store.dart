@@ -32,11 +32,10 @@ class ReportOptionsStore {
       return true;
     }
     final map = await load();
-    return store.set(
-      accountId,
-      reportOptionsKey,
-      {...map, kindKey: Map<String, String>.unmodifiable(options)},
-    );
+    return store.set(accountId, reportOptionsKey, {
+      ...map,
+      kindKey: Map<String, String>.unmodifiable(options),
+    });
   }
 
   /// Forgets the options of [kindKey]; `null` forgets every report's.
@@ -53,8 +52,7 @@ class ReportOptionsStore {
     if (!map.containsKey(kindKey)) {
       return true;
     }
-    final rest = Map<String, Map<String, String>>.of(map)
-      ..remove(kindKey);
+    final rest = Map<String, Map<String, String>>.of(map)..remove(kindKey);
     return rest.isEmpty
         ? store.remove(accountId, reportOptionsKey)
         : store.set(accountId, reportOptionsKey, rest);
