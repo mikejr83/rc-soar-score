@@ -1138,5 +1138,227 @@
   "contestsEmpty": "No contests yet.",
   "@contestsEmpty": {
     "description": "Shown on the main page when there are no contests."
+  },
+  "matrixPilotActions": "Pilot actions",
+  "@matrixPilotActions": {
+    "description": "Tooltip of the menu button on the highlighted pilot in the matrix grid."
+  },
+  "matrixMoveMenu": "Move",
+  "@matrixMoveMenu": {
+    "description": "Menu item and accessibility action that moves a pilot to another group."
+  },
+  "matrixMoveLocked": "Administration is locked. Unlock the contest to move a pilot.",
+  "@matrixMoveLocked": {
+    "description": "Why moving a pilot is off while the contest is locked."
+  },
+  "matrixMoveNotEditable": "Pilots can be moved once the matrix is drawn and until the contest is complete.",
+  "@matrixMoveNotEditable": {
+    "description": "Why moving a pilot is off before the first draw or after completion."
+  },
+  "matrixMoveTitle": "Move {name}",
+  "@matrixMoveTitle": {
+    "description": "Title of the dialog that moves a pilot.",
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "matrixMoveFrom": "Now flying round {round}, group {group}.",
+  "@matrixMoveFrom": {
+    "description": "Where the pilot flies now, in the move dialog.",
+    "placeholders": {
+      "round": {"type": "int"},
+      "group": {"type": "String"}
+    }
+  },
+  "matrixMoveFromLane": "Now flying round {round}, group {group}, lane {lane}.",
+  "@matrixMoveFromLane": {
+    "description": "Where the pilot flies now when the contest has lanes, in the move dialog.",
+    "placeholders": {
+      "round": {"type": "int"},
+      "group": {"type": "String"},
+      "lane": {"type": "int"}
+    }
+  },
+  "matrixMoveScoredWarning": "This flight has a score. Moving the pilot discards it: the score stays in the history as a reset and no longer counts. This is not the standard way to correct a flight, so check that you want this before you continue.",
+  "@matrixMoveScoredWarning": {
+    "description": "Warning in the move dialog when the pilot's flight has a score."
+  },
+  "matrixMoveSourceGroupLocked": "The pilot's group is locked. Unlock the group before moving the pilot.",
+  "@matrixMoveSourceGroupLocked": {
+    "description": "Why a pilot cannot be moved out of a locked group."
+  },
+  "matrixMoveSourceScoreLocked": "The pilot's score is locked. Unlock the score before moving the pilot.",
+  "@matrixMoveSourceScoreLocked": {
+    "description": "Why a pilot with a locked score cannot be moved."
+  },
+  "matrixMoveRound": "Round",
+  "@matrixMoveRound": {
+    "description": "Label of the round picker in the move dialog."
+  },
+  "matrixMoveRoundOption": "Round {round}",
+  "@matrixMoveRoundOption": {
+    "description": "One round in the move dialog's round picker.",
+    "placeholders": {
+      "round": {"type": "int"}
+    }
+  },
+  "matrixMoveGroupHeading": "Move to group",
+  "@matrixMoveGroupHeading": {
+    "description": "Heading of the group list in the move dialog."
+  },
+  "matrixMoveGroupLabel": "Group {group}",
+  "@matrixMoveGroupLabel": {
+    "description": "One group in the move dialog.",
+    "placeholders": {
+      "group": {"type": "String"}
+    }
+  },
+  "matrixMoveRecommended": "Recommended",
+  "@matrixMoveRecommended": {
+    "description": "Mark on a group that is a good place to move a pilot to."
+  },
+  "matrixMoveNotIdeal": "Not ideal",
+  "@matrixMoveNotIdeal": {
+    "description": "Mark on a group that is allowed but a poor place to move a pilot to."
+  },
+  "matrixMoveReasonHasScores": "Pilots in this group already have scores.",
+  "@matrixMoveReasonHasScores": {
+    "description": "Why a group is not ideal as a move target."
+  },
+  "matrixMoveReasonRoundCompleted": "This round appears to be completed.",
+  "@matrixMoveReasonRoundCompleted": {
+    "description": "Why a group is not ideal as a move target."
+  },
+  "matrixMoveReasonTeammate": "A teammate flies in this group.",
+  "@matrixMoveReasonTeammate": {
+    "description": "Why a group is not ideal as a move target."
+  },
+  "matrixMoveBlockCurrent": "The pilot flies in this group now.",
+  "@matrixMoveBlockCurrent": {
+    "description": "Why the pilot's current group cannot be chosen."
+  },
+  "matrixMoveBlockAlready": "The pilot already flies in this group in round {round}.",
+  "@matrixMoveBlockAlready": {
+    "description": "Why a group the pilot is already part of cannot be chosen.",
+    "placeholders": {
+      "round": {"type": "int"}
+    }
+  },
+  "matrixMoveBlockGroupLocked": "This group is locked. Unlock the group first.",
+  "@matrixMoveBlockGroupLocked": {
+    "description": "Why a locked group cannot be chosen."
+  },
+  "matrixMoveBlockRoundLocked": "This round is locked. Unlock the round first.",
+  "@matrixMoveBlockRoundLocked": {
+    "description": "Why a group of a locked round cannot be chosen."
+  },
+  "matrixMoveBlockTeam": "Team protection is on and a teammate flies in this group.",
+  "@matrixMoveBlockTeam": {
+    "description": "Why a group with a teammate cannot be chosen when team protection is on."
+  },
+  "matrixMoveLane": "Lane",
+  "@matrixMoveLane": {
+    "description": "Label of the lane picker in the move dialog."
+  },
+  "matrixMoveLaneFree": "Lane {lane}",
+  "@matrixMoveLaneFree": {
+    "description": "One free lane in the lane picker.",
+    "placeholders": {
+      "lane": {"type": "int"}
+    }
+  },
+  "matrixMoveLaneTaken": "Lane {lane}, taken by {name}",
+  "@matrixMoveLaneTaken": {
+    "description": "One taken lane in the lane picker.",
+    "placeholders": {
+      "lane": {"type": "int"},
+      "name": {"type": "String"}
+    }
+  },
+  "matrixMoveReasonLabel": "Reason",
+  "@matrixMoveReasonLabel": {
+    "description": "Label of the reason field in the move dialog."
+  },
+  "matrixMoveReasonHelp": "Required. Kept with the move in the history.",
+  "@matrixMoveReasonHelp": {
+    "description": "Help under the reason field in the move dialog."
+  },
+  "matrixMoveReasonRequired": "Enter a reason.",
+  "@matrixMoveReasonRequired": {
+    "description": "Error when the move reason is empty."
+  },
+  "matrixMoveGroupRequired": "Choose a group to move the pilot to.",
+  "@matrixMoveGroupRequired": {
+    "description": "Error when no group is chosen in the move dialog."
+  },
+  "matrixMoveLaneRequired": "Choose a lane.",
+  "@matrixMoveLaneRequired": {
+    "description": "Error when no lane is chosen in the move dialog."
+  },
+  "matrixMoveCancel": "Cancel",
+  "@matrixMoveCancel": {
+    "description": "Button that closes the move dialog."
+  },
+  "matrixMoveConfirm": "Move pilot",
+  "@matrixMoveConfirm": {
+    "description": "Button that moves the pilot."
+  },
+  "matrixMoveConfirmDiscard": "Discard score and move",
+  "@matrixMoveConfirmDiscard": {
+    "description": "Button that moves a pilot whose flight has a score."
+  },
+  "matrixMoveWorking": "Moving…",
+  "@matrixMoveWorking": {
+    "description": "Shown on the button while the move is sent."
+  },
+  "matrixMoveNetwork": "Soar Score can't reach the server. Nothing was moved. Try again.",
+  "@matrixMoveNetwork": {
+    "description": "Shown in the move dialog when the server cannot be reached."
+  },
+  "matrixMoveChanged": "The matrix or the contest changed since this page loaded. Nothing was moved. Reload to see the current matrix.",
+  "@matrixMoveChanged": {
+    "description": "Shown in the move dialog when the server says the matrix changed."
+  },
+  "matrixMoveReload": "Reload",
+  "@matrixMoveReload": {
+    "description": "Button that reloads the matrix after a move was refused because it changed."
+  },
+  "matrixMoveScoresFailed": "The scores could not be checked, so the pilot was not moved. {error}",
+  "@matrixMoveScoresFailed": {
+    "description": "Snackbar when the scores could not be read before a move.",
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "matrixPilotMoved": "{name} moved.",
+  "@matrixPilotMoved": {
+    "description": "Snackbar after a pilot was moved.",
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "matrixMovedLabel": "Moved",
+  "@matrixMovedLabel": {
+    "description": "Label on a pilot in the grid whom a director moved."
+  },
+  "matrixMovedHeading": "Moves",
+  "@matrixMovedHeading": {
+    "description": "Heading in the pilot panel of the moves of the pilot."
+  },
+  "matrixMovedLine": "Round {round}: {reason}",
+  "@matrixMovedLine": {
+    "description": "One move of the pilot in the pilot panel, with the reason.",
+    "placeholders": {
+      "round": {"type": "int"},
+      "reason": {"type": "String"}
+    }
+  },
+  "matrixMoveSourceRetired": "This pilot has retired and cannot be moved.",
+  "@matrixMoveSourceRetired": {
+    "description": "Why a retired pilot cannot be moved."
+  },
+  "matrixMoveChecking": "Checking scores…",
+  "@matrixMoveChecking": {
+    "description": "Snackbar while the scores are read before the move dialog opens."
   }
 }

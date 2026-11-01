@@ -1405,6 +1405,282 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No contests yet.'**
   String get contestsEmpty;
+
+  /// Tooltip of the menu button on the highlighted pilot in the matrix grid.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilot actions'**
+  String get matrixPilotActions;
+
+  /// Menu item and accessibility action that moves a pilot to another group.
+  ///
+  /// In en, this message translates to:
+  /// **'Move'**
+  String get matrixMoveMenu;
+
+  /// Why moving a pilot is off while the contest is locked.
+  ///
+  /// In en, this message translates to:
+  /// **'Administration is locked. Unlock the contest to move a pilot.'**
+  String get matrixMoveLocked;
+
+  /// Why moving a pilot is off before the first draw or after completion.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilots can be moved once the matrix is drawn and until the contest is complete.'**
+  String get matrixMoveNotEditable;
+
+  /// Title of the dialog that moves a pilot.
+  ///
+  /// In en, this message translates to:
+  /// **'Move {name}'**
+  String matrixMoveTitle(String name);
+
+  /// Where the pilot flies now, in the move dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Now flying round {round}, group {group}.'**
+  String matrixMoveFrom(int round, String group);
+
+  /// Where the pilot flies now when the contest has lanes, in the move dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Now flying round {round}, group {group}, lane {lane}.'**
+  String matrixMoveFromLane(int round, String group, int lane);
+
+  /// Warning in the move dialog when the pilot's flight has a score.
+  ///
+  /// In en, this message translates to:
+  /// **'This flight has a score. Moving the pilot discards it: the score stays in the history as a reset and no longer counts. This is not the standard way to correct a flight, so check that you want this before you continue.'**
+  String get matrixMoveScoredWarning;
+
+  /// Why a pilot cannot be moved out of a locked group.
+  ///
+  /// In en, this message translates to:
+  /// **'The pilot\'s group is locked. Unlock the group before moving the pilot.'**
+  String get matrixMoveSourceGroupLocked;
+
+  /// Why a pilot with a locked score cannot be moved.
+  ///
+  /// In en, this message translates to:
+  /// **'The pilot\'s score is locked. Unlock the score before moving the pilot.'**
+  String get matrixMoveSourceScoreLocked;
+
+  /// Label of the round picker in the move dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Round'**
+  String get matrixMoveRound;
+
+  /// One round in the move dialog's round picker.
+  ///
+  /// In en, this message translates to:
+  /// **'Round {round}'**
+  String matrixMoveRoundOption(int round);
+
+  /// Heading of the group list in the move dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to group'**
+  String get matrixMoveGroupHeading;
+
+  /// One group in the move dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Group {group}'**
+  String matrixMoveGroupLabel(String group);
+
+  /// Mark on a group that is a good place to move a pilot to.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended'**
+  String get matrixMoveRecommended;
+
+  /// Mark on a group that is allowed but a poor place to move a pilot to.
+  ///
+  /// In en, this message translates to:
+  /// **'Not ideal'**
+  String get matrixMoveNotIdeal;
+
+  /// Why a group is not ideal as a move target.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilots in this group already have scores.'**
+  String get matrixMoveReasonHasScores;
+
+  /// Why a group is not ideal as a move target.
+  ///
+  /// In en, this message translates to:
+  /// **'This round appears to be completed.'**
+  String get matrixMoveReasonRoundCompleted;
+
+  /// Why a group is not ideal as a move target.
+  ///
+  /// In en, this message translates to:
+  /// **'A teammate flies in this group.'**
+  String get matrixMoveReasonTeammate;
+
+  /// Why the pilot's current group cannot be chosen.
+  ///
+  /// In en, this message translates to:
+  /// **'The pilot flies in this group now.'**
+  String get matrixMoveBlockCurrent;
+
+  /// Why a group the pilot is already part of cannot be chosen.
+  ///
+  /// In en, this message translates to:
+  /// **'The pilot already flies in this group in round {round}.'**
+  String matrixMoveBlockAlready(int round);
+
+  /// Why a locked group cannot be chosen.
+  ///
+  /// In en, this message translates to:
+  /// **'This group is locked. Unlock the group first.'**
+  String get matrixMoveBlockGroupLocked;
+
+  /// Why a group of a locked round cannot be chosen.
+  ///
+  /// In en, this message translates to:
+  /// **'This round is locked. Unlock the round first.'**
+  String get matrixMoveBlockRoundLocked;
+
+  /// Why a group with a teammate cannot be chosen when team protection is on.
+  ///
+  /// In en, this message translates to:
+  /// **'Team protection is on and a teammate flies in this group.'**
+  String get matrixMoveBlockTeam;
+
+  /// Label of the lane picker in the move dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Lane'**
+  String get matrixMoveLane;
+
+  /// One free lane in the lane picker.
+  ///
+  /// In en, this message translates to:
+  /// **'Lane {lane}'**
+  String matrixMoveLaneFree(int lane);
+
+  /// One taken lane in the lane picker.
+  ///
+  /// In en, this message translates to:
+  /// **'Lane {lane}, taken by {name}'**
+  String matrixMoveLaneTaken(int lane, String name);
+
+  /// Label of the reason field in the move dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason'**
+  String get matrixMoveReasonLabel;
+
+  /// Help under the reason field in the move dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Required. Kept with the move in the history.'**
+  String get matrixMoveReasonHelp;
+
+  /// Error when the move reason is empty.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a reason.'**
+  String get matrixMoveReasonRequired;
+
+  /// Error when no group is chosen in the move dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a group to move the pilot to.'**
+  String get matrixMoveGroupRequired;
+
+  /// Error when no lane is chosen in the move dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a lane.'**
+  String get matrixMoveLaneRequired;
+
+  /// Button that closes the move dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get matrixMoveCancel;
+
+  /// Button that moves the pilot.
+  ///
+  /// In en, this message translates to:
+  /// **'Move pilot'**
+  String get matrixMoveConfirm;
+
+  /// Button that moves a pilot whose flight has a score.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard score and move'**
+  String get matrixMoveConfirmDiscard;
+
+  /// Shown on the button while the move is sent.
+  ///
+  /// In en, this message translates to:
+  /// **'Moving…'**
+  String get matrixMoveWorking;
+
+  /// Shown in the move dialog when the server cannot be reached.
+  ///
+  /// In en, this message translates to:
+  /// **'Soar Score can\'t reach the server. Nothing was moved. Try again.'**
+  String get matrixMoveNetwork;
+
+  /// Shown in the move dialog when the server says the matrix changed.
+  ///
+  /// In en, this message translates to:
+  /// **'The matrix or the contest changed since this page loaded. Nothing was moved. Reload to see the current matrix.'**
+  String get matrixMoveChanged;
+
+  /// Button that reloads the matrix after a move was refused because it changed.
+  ///
+  /// In en, this message translates to:
+  /// **'Reload'**
+  String get matrixMoveReload;
+
+  /// Snackbar when the scores could not be read before a move.
+  ///
+  /// In en, this message translates to:
+  /// **'The scores could not be checked, so the pilot was not moved. {error}'**
+  String matrixMoveScoresFailed(String error);
+
+  /// Snackbar after a pilot was moved.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} moved.'**
+  String matrixPilotMoved(String name);
+
+  /// Label on a pilot in the grid whom a director moved.
+  ///
+  /// In en, this message translates to:
+  /// **'Moved'**
+  String get matrixMovedLabel;
+
+  /// Heading in the pilot panel of the moves of the pilot.
+  ///
+  /// In en, this message translates to:
+  /// **'Moves'**
+  String get matrixMovedHeading;
+
+  /// One move of the pilot in the pilot panel, with the reason.
+  ///
+  /// In en, this message translates to:
+  /// **'Round {round}: {reason}'**
+  String matrixMovedLine(int round, String reason);
+
+  /// Why a retired pilot cannot be moved.
+  ///
+  /// In en, this message translates to:
+  /// **'This pilot has retired and cannot be moved.'**
+  String get matrixMoveSourceRetired;
+
+  /// Snackbar while the scores are read before the move dialog opens.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking scores…'**
+  String get matrixMoveChecking;
 }
 
 class _AppLocalizationsDelegate

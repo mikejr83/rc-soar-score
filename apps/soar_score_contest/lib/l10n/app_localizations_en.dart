@@ -952,4 +952,178 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get contestsEmpty => 'No contests yet.';
+
+  @override
+  String get matrixPilotActions => 'Pilot actions';
+
+  @override
+  String get matrixMoveMenu => 'Move';
+
+  @override
+  String get matrixMoveLocked =>
+      'Administration is locked. Unlock the contest to move a pilot.';
+
+  @override
+  String get matrixMoveNotEditable =>
+      'Pilots can be moved once the matrix is drawn and until the contest is complete.';
+
+  @override
+  String matrixMoveTitle(String name) {
+    return 'Move $name';
+  }
+
+  @override
+  String matrixMoveFrom(int round, String group) {
+    return 'Now flying round $round, group $group.';
+  }
+
+  @override
+  String matrixMoveFromLane(int round, String group, int lane) {
+    return 'Now flying round $round, group $group, lane $lane.';
+  }
+
+  @override
+  String get matrixMoveScoredWarning =>
+      'This flight has a score. Moving the pilot discards it: the score stays in the history as a reset and no longer counts. This is not the standard way to correct a flight, so check that you want this before you continue.';
+
+  @override
+  String get matrixMoveSourceGroupLocked =>
+      'The pilot\'s group is locked. Unlock the group before moving the pilot.';
+
+  @override
+  String get matrixMoveSourceScoreLocked =>
+      'The pilot\'s score is locked. Unlock the score before moving the pilot.';
+
+  @override
+  String get matrixMoveRound => 'Round';
+
+  @override
+  String matrixMoveRoundOption(int round) {
+    return 'Round $round';
+  }
+
+  @override
+  String get matrixMoveGroupHeading => 'Move to group';
+
+  @override
+  String matrixMoveGroupLabel(String group) {
+    return 'Group $group';
+  }
+
+  @override
+  String get matrixMoveRecommended => 'Recommended';
+
+  @override
+  String get matrixMoveNotIdeal => 'Not ideal';
+
+  @override
+  String get matrixMoveReasonHasScores =>
+      'Pilots in this group already have scores.';
+
+  @override
+  String get matrixMoveReasonRoundCompleted =>
+      'This round appears to be completed.';
+
+  @override
+  String get matrixMoveReasonTeammate => 'A teammate flies in this group.';
+
+  @override
+  String get matrixMoveBlockCurrent => 'The pilot flies in this group now.';
+
+  @override
+  String matrixMoveBlockAlready(int round) {
+    return 'The pilot already flies in this group in round $round.';
+  }
+
+  @override
+  String get matrixMoveBlockGroupLocked =>
+      'This group is locked. Unlock the group first.';
+
+  @override
+  String get matrixMoveBlockRoundLocked =>
+      'This round is locked. Unlock the round first.';
+
+  @override
+  String get matrixMoveBlockTeam =>
+      'Team protection is on and a teammate flies in this group.';
+
+  @override
+  String get matrixMoveLane => 'Lane';
+
+  @override
+  String matrixMoveLaneFree(int lane) {
+    return 'Lane $lane';
+  }
+
+  @override
+  String matrixMoveLaneTaken(int lane, String name) {
+    return 'Lane $lane, taken by $name';
+  }
+
+  @override
+  String get matrixMoveReasonLabel => 'Reason';
+
+  @override
+  String get matrixMoveReasonHelp =>
+      'Required. Kept with the move in the history.';
+
+  @override
+  String get matrixMoveReasonRequired => 'Enter a reason.';
+
+  @override
+  String get matrixMoveGroupRequired => 'Choose a group to move the pilot to.';
+
+  @override
+  String get matrixMoveLaneRequired => 'Choose a lane.';
+
+  @override
+  String get matrixMoveCancel => 'Cancel';
+
+  @override
+  String get matrixMoveConfirm => 'Move pilot';
+
+  @override
+  String get matrixMoveConfirmDiscard => 'Discard score and move';
+
+  @override
+  String get matrixMoveWorking => 'Moving…';
+
+  @override
+  String get matrixMoveNetwork =>
+      'Soar Score can\'t reach the server. Nothing was moved. Try again.';
+
+  @override
+  String get matrixMoveChanged =>
+      'The matrix or the contest changed since this page loaded. Nothing was moved. Reload to see the current matrix.';
+
+  @override
+  String get matrixMoveReload => 'Reload';
+
+  @override
+  String matrixMoveScoresFailed(String error) {
+    return 'The scores could not be checked, so the pilot was not moved. $error';
+  }
+
+  @override
+  String matrixPilotMoved(String name) {
+    return '$name moved.';
+  }
+
+  @override
+  String get matrixMovedLabel => 'Moved';
+
+  @override
+  String get matrixMovedHeading => 'Moves';
+
+  @override
+  String matrixMovedLine(int round, String reason) {
+    return 'Round $round: $reason';
+  }
+
+  @override
+  String get matrixMoveSourceRetired =>
+      'This pilot has retired and cannot be moved.';
+
+  @override
+  String get matrixMoveChecking => 'Checking scores…';
 }

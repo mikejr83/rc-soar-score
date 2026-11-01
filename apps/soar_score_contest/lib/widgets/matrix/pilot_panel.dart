@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/matrix/draw_form_check.dart';
 import '../../services/matrix/matrix_grid_model.dart';
 import '../../services/matrix/matrix_pilot.dart';
@@ -51,12 +52,9 @@ class PilotPanel extends StatelessWidget {
     final first = pilot.name.split(' ').first;
     final places = [
       for (final round in model.rounds)
-        if (model.placeOf(pilot.participationId, round) case (
-          final group,
-          final lane,
-        ))
+        for (final (group, slot) in model.slotsOf(pilot.participationId, round))
           'R${round.ordinal} · ${DrawFormCheck.groupLetter(group)}'
-              '${model.hasLanes && lane != null ? ' · L$lane' : ''}',
+              '${model.hasLanes && slot.lane != null ? ' · L${slot.lane}' : ''}',
     ];
 
     Widget section(String title, String sub, List<(MatrixPilot, int)> rows) =>
@@ -81,7 +79,25 @@ class PilotPanel extends StatelessWidget {
           ],
         );
 
+    final l10n = AppLocalizations.of(context);
+    final moves = [
+      for (final round in model.rounds)
+        for (final (_, slot) in model.slotsOf(pilot.participationId, round))
+          if (slot.moved)
+            l10n.matrixMovedLine(round.ordinal, slot.reason ?? ''),
+    ];
+
     final sections = [
+      if (moves.isNotEmpty)
+        Column(
+          key: const ValueKey('pilot-panel-moves'),
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(l10n.matrixMovedHeading, style: theme.textTheme.titleSmall),
+            const SizedBox(height: 4),
+            for (final line in moves) Text(line),
+          ],
+        ),
       section(
         'Opponents (${met.length} of ${opponents.length})',
         'Most meetings first. Repeats are marked.',
