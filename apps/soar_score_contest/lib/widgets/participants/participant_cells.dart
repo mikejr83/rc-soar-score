@@ -227,31 +227,51 @@ class ParticipantCells {
     );
   }
 
-  /// The Models cell until models can be recorded: plain text, not
-  /// focusable, and not an error.
+  /// The Models cell: the pilot's models, or a notice (never an error) that
+  /// there are none, with the button that edits them.
   Widget modelsCell(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
     final color = theme.colorScheme.onSurfaceVariant;
     if (!scoring) {
       return const SizedBox.shrink();
     }
-    return Tooltip(
-      message: 'Model details can’t be recorded yet.',
-      child: ExcludeFocus(
-        child: Row(
-          key: ValueKey('models-$_id'),
-          children: [
-            Icon(Icons.edit_off_outlined, size: 18, color: color),
-            const SizedBox(width: 6),
-            Flexible(
-              child: Text(
-                'No models information entered.',
-                style: theme.textTheme.bodySmall?.copyWith(color: color),
-              ),
+    final models = participant.models;
+    final edit = editing.editModels;
+    final text = models.isEmpty
+        ? Tooltip(
+            message: l10n.modelsCellNoneTooltip,
+            child: Text(
+              l10n.modelsCellNone,
+              key: ValueKey('models-none-$_id'),
+              style: theme.textTheme.bodySmall?.copyWith(color: color),
             ),
-          ],
-        ),
-      ),
+          )
+        : Tooltip(
+            message: models.map((model) => model.label).join('\n'),
+            child: Text(
+              models.length == 1
+                  ? models.single.label
+                  : l10n.modelsCellCount(models.length),
+              key: ValueKey('models-$_id'),
+              style: theme.textTheme.bodySmall,
+            ),
+          );
+    return Row(
+      children: [
+        Flexible(child: text),
+        if (edit != null)
+          IconButton(
+            key: ValueKey('edit-models-$_id'),
+            tooltip: l10n.modelsEditTooltip(participant.name),
+            visualDensity: VisualDensity.compact,
+            icon: Icon(
+              models.isEmpty ? Icons.add : Icons.edit_outlined,
+              size: 18,
+            ),
+            onPressed: style.locked ? null : () => edit(participant),
+          ),
+      ],
     );
   }
 

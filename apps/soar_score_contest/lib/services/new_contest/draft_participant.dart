@@ -1,5 +1,6 @@
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../participants/model_entry.dart';
 import '../participants/participant_row.dart';
 
 /// A person selected for the new contest in the draft.
@@ -15,6 +16,7 @@ class DraftParticipant implements ParticipantRow {
     this.isPilot = true,
     this.classification = '',
     this.team = '',
+    this.models = const [],
   }) : roleId = roleId ?? SystemRoles.pilotId;
 
   final Id profileId;
@@ -46,6 +48,10 @@ class DraftParticipant implements ParticipantRow {
   @override
   final String team;
 
+  /// The models entered for the contest; a pilot may have none.
+  @override
+  final List<ModelEntry> models;
+
   @override
   String get rowId => profileId.value;
 
@@ -72,6 +78,7 @@ class DraftParticipant implements ParticipantRow {
     Role? role,
     String? classification,
     String? team,
+    List<ModelEntry>? models,
   }) => DraftParticipant(
     profileId: profileId,
     name: name,
@@ -83,6 +90,10 @@ class DraftParticipant implements ParticipantRow {
     isPilot: role == null ? isPilot : role.type == RoleType.pilot,
     classification: classification ?? this.classification,
     team: team ?? this.team,
+    // A non-flying role has no models.
+    models: role != null && role.type != RoleType.pilot
+        ? const []
+        : models ?? this.models,
   );
 
   @override
@@ -90,5 +101,11 @@ class DraftParticipant implements ParticipantRow {
     Role? role,
     String? classification,
     String? team,
-  }) => copyWith(role: role, classification: classification, team: team);
+    List<ModelEntry>? models,
+  }) => copyWith(
+    role: role,
+    classification: classification,
+    team: team,
+    models: models,
+  );
 }

@@ -6,7 +6,7 @@ import '../shared/shared.dart';
 
 part 'contest_model_link.g.dart';
 
-/// The model a participation flies, snapshotted for the contest.
+/// A model a participation flies (a participation can have several), snapshotted for the contest.
 ///
 /// Scores refer to this, never to the catalog entry. See
 /// `plan/data-model/entities/contest_model_link.md`.
@@ -21,11 +21,11 @@ class ContestModelLink extends Equatable implements Synchronizable {
     this.modelCatalogId,
     required String modelName,
     this.manufacturer,
-    required String modelId,
+    String? modelId,
     this.contestSpecificIdentifier,
     this.revision = 0,
   }) : modelName = requireNotBlank(modelName, 'modelName'),
-       modelId = requireNotBlank(modelId, 'modelId') {
+       modelId = modelId == null ? null : requireNotBlank(modelId, 'modelId') {
     requireNonNegative(revision, 'revision');
   }
 
@@ -43,8 +43,8 @@ class ContestModelLink extends Equatable implements Synchronizable {
   final String modelName;
   final String? manufacturer;
 
-  /// External model identifier.
-  final String modelId;
+  /// The identifier the pilot applied to the model, if any.
+  final String? modelId;
 
   final String? contestSpecificIdentifier;
 

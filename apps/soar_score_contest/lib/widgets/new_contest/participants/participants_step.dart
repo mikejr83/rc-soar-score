@@ -12,12 +12,14 @@ import '../../../services/new_contest/draft_participant.dart';
 import '../../../services/new_contest/draft_validation.dart';
 import '../../../services/new_contest/participant_rules.dart';
 import '../../../services/participants/participant_candidate.dart';
+import '../../../services/participants/pilot_models_backend.dart';
 import '../../../services/participants/participant_option.dart';
 import '../../../services/participants/participant_row.dart';
 import '../../participants/bulk_edit_bar.dart';
 import '../../participants/cell_focus_registry.dart';
 import '../../participants/participant_card.dart';
 import '../../participants/participant_editing.dart';
+import '../../participants/pilot_models_dialog.dart';
 import '../../participants/participant_search_field.dart';
 import '../../participants/participants_table.dart';
 import '../wizard_banner.dart';
@@ -120,6 +122,29 @@ class _ParticipantsStepState extends State<ParticipantsStep> {
     for (final p in _draft.participants)
       p.profileId == updated.profileId ? updated : p,
   ]);
+
+  /// Opens the models window for [row]; the models stay in the draft and are
+  /// sent when the contest is created.
+  Future<void> _editModels(ParticipantRow row) async {
+    final participant = row as DraftParticipant;
+    final client = apiClientOf(context);
+    final models = await showPilotModelsDialog(
+      context,
+      pilotName: participant.name,
+      models: participant.models,
+      backend: DraftPilotModelsBackend(
+        loadProfileModels: () async =>
+            client == null || participant.source == ParticipantSource.remote
+            ? const []
+            : client.profileModels(participant.profileId),
+      ),
+    );
+    if (!mounted) return;
+    final current = _draft.participants.where(
+      (p) => p.profileId == participant.profileId,
+    );
+    if (current.isNotEmpty) _update(current.first.copyWith(models: models));
+  }
 
   void _updateSelected(DraftParticipant Function(DraftParticipant) change) {
     _setParticipants([
@@ -293,6 +318,7 @@ class _ParticipantsStepState extends State<ParticipantsStep> {
       selected: _selected,
       onToggleSelected: (row) => _toggle(row as DraftParticipant),
       onUpdate: (row) => _update(row as DraftParticipant),
+      editModels: _editModels,
     );
     final scoring = draft.scoringCount;
 

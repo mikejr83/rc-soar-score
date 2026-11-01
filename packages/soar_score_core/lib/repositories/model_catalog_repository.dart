@@ -2,7 +2,8 @@ import '../models/id.dart';
 import '../models/teams/model_catalog.dart';
 import 'mutation_metadata.dart';
 
-/// Abstract persistence contract for a director's private [ModelCatalog].
+/// Abstract persistence contract for the [ModelCatalog] models of a
+/// director's participant profiles.
 ///
 /// Entries are never shown to other directors; callers list by owner.
 abstract interface class ModelCatalogRepository {
@@ -10,6 +11,9 @@ abstract interface class ModelCatalogRepository {
 
   /// The entries owned by [ownerAccountId], by name.
   Future<List<ModelCatalog>> listForOwner(Id ownerAccountId);
+
+  /// The models of the profile [participantProfileId], by name.
+  Future<List<ModelCatalog>> listForProfile(Id participantProfileId);
 
   /// Stores [entry], bumping its revision, and records one mutation.
   ///

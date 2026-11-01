@@ -49,6 +49,9 @@ class SummaryStep extends StatelessWidget {
     final plan = GroupPlan.of(d);
     final scoringPilots = d.scoringCount;
     final needing = d.participantsNeedingFixes.length;
+    final modelCount = d.participants
+        .where(d.isScoring)
+        .fold<int>(0, (count, p) => count + p.models.length);
     final on = [
       for (final option in ParticipantOption.values)
         if (d.has(option))
@@ -168,7 +171,12 @@ class SummaryStep extends StatelessWidget {
               : classCounts.join(', '),
         ),
         if (d.has(ParticipantOption.models))
-          ('Models', 'Entered here, not saved with the contest yet'),
+          (
+            'Models',
+            d.participants.any((p) => d.isScoring(p) && p.models.isEmpty)
+                ? '$modelCount entered; pilots without one are fine'
+                : '$modelCount entered',
+          ),
       ]),
       _Section('Scoring and publication', 5, [
         ('Group score', ScoringLabels.groupScore(scoring.groupScoreMode)),

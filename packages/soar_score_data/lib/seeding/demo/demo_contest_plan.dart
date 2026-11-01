@@ -17,6 +17,7 @@ class DemoContestPlan {
     this.helpers = 0,
     this.teamSize,
     this.classes = false,
+    this.models = false,
     this.rounds = 0,
     this.groupsPerRound = 0,
     this.scoredRounds = 0,
@@ -52,6 +53,10 @@ class DemoContestPlan {
 
   /// Splits the pilots into Open and Sportsman.
   final bool classes;
+
+  /// Turns pilot models on and gives the first three pilots models: the
+  /// first has two, the second one, the third none.
+  final bool models;
 
   /// Rounds and groups of the drawn matrix; `0` rounds leaves it undrawn.
   final int rounds;
@@ -126,6 +131,7 @@ class DemoContestPlan {
       disciplineProfileId: core.SystemDisciplineProfiles.thermalId,
       finalState: core.LifecycleState.configuring,
       pilots: 6,
+      models: true,
     ),
     DemoContestPlan(
       number: 5,

@@ -5,6 +5,7 @@ import 'copy_mode.dart';
 import 'copy_source.dart';
 import 'draft_participant.dart';
 import 'draw_settings.dart';
+import '../participants/model_entry.dart';
 import '../participants/participant_option.dart';
 import '../participants/participant_row.dart';
 import 'scoring_settings.dart';
@@ -146,7 +147,28 @@ class ContestDraftCodec {
     'is_pilot': p.isPilot,
     'classification': p.classification,
     'team': p.team,
+    'models': [for (final m in p.models) _encodeModel(m)],
   };
+
+  static Map<String, Object?> _encodeModel(ModelEntry m) => {
+    'id': m.id.value,
+    'catalog_id': m.catalogId?.value,
+    'name': m.name,
+    'manufacturer': m.manufacturer,
+    'model_id': m.modelId,
+    'contest_identifier': m.contestIdentifier,
+  };
+
+  static ModelEntry _decodeModel(Map<String, Object?> map) => ModelEntry(
+    id: Id.parse(map['id']! as String),
+    catalogId: map['catalog_id'] == null
+        ? null
+        : Id.parse(map['catalog_id']! as String),
+    name: map['name']! as String,
+    manufacturer: map['manufacturer'] as String?,
+    modelId: map['model_id'] as String?,
+    contestIdentifier: map['contest_identifier'] as String?,
+  );
 
   static DraftParticipant _decodeParticipant(Map<String, Object?> map) =>
       DraftParticipant(
@@ -160,6 +182,10 @@ class ContestDraftCodec {
         isPilot: map['is_pilot']! as bool,
         classification: map['classification']! as String,
         team: map['team']! as String,
+        models: [
+          for (final m in map['models'] as List? ?? const [])
+            _decodeModel(_map(m)),
+        ],
       );
 
   static Map<String, Object?> _encodeScoring(ScoringSettings s) => {

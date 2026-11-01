@@ -116,6 +116,9 @@ class DemoDataSeeder {
     if (plan.teamSize != null) {
       await _addTeams(plan, participations);
     }
+    if (plan.models) {
+      await _addModels(plan, participations);
+    }
     if (!plan.drawn) {
       return;
     }
@@ -159,6 +162,41 @@ class DemoDataSeeder {
       added[pilot] = participation.id;
     }
     return added;
+  }
+
+  /// Models for the first pilots: kept on their profiles and entered in the
+  /// contest. The third pilot has none, to show the notice.
+  Future<void> _addModels(
+    DemoContestPlan plan,
+    Map<int, core.Id> participations,
+  ) async {
+    final service = services.ModelsService(_repository);
+    final contestId = DemoIds.contest(plan.number);
+    const models = {
+      0: [('Demo Supra', 'Demo Models'), ('Demo Estrella', 'Demo Models')],
+      1: [('Demo Mini', 'Demo Models')],
+    };
+    for (final MapEntry(key: pilot, value: list) in models.entries) {
+      for (final (n, (name, maker)) in list.indexed) {
+        await service.addProfileModel(
+          _localAccountId,
+          DemoIds.profile(pilot),
+          id: DemoIds.model(pilot, n),
+          name: name,
+          manufacturer: maker,
+          modelId: 'DM-$pilot$n',
+          metadata: _metadata(),
+        );
+        await service.addLink(
+          contestId,
+          _localAccountId,
+          participations[pilot]!,
+          id: DemoIds.modelLink(plan.number, pilot, n),
+          modelCatalogId: DemoIds.model(pilot, n),
+          metadata: _metadata(),
+        );
+      }
+    }
   }
 
   /// Consecutive pilots form a team, named for the team's number.
