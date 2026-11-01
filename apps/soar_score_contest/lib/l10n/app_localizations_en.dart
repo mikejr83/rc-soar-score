@@ -1061,4 +1061,11 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get modelsProfileUnavailable =>
+      'Their saved models could not be loaded. You can still type a model.';
+
+  @override
+  String get modelsProfileRetry => 'Retry';
 }

@@ -1192,5 +1192,9 @@
   "modelsDetailContestId": "Contest {value}",
   "@modelsDetailContestId": {"description": "Detail line of a model: the identifier the director applied for this contest.", "placeholders": {"value": {"type": "String"}}},
   "modelsCellCount": "{count, plural, one{1 model} other{{count} models}}",
-  "@modelsCellCount": {"description": "Models cell of a pilot with several models: how many.", "placeholders": {"count": {"type": "int"}}}
+  "@modelsCellCount": {"description": "Models cell of a pilot with several models: how many.", "placeholders": {"count": {"type": "int"}}},
+  "modelsProfileUnavailable": "Their saved models could not be loaded. You can still type a model.",
+  "@modelsProfileUnavailable": {"description": "Warning in the models form when the pilot's saved models could not be read, as opposed to there being none."},
+  "modelsProfileRetry": "Retry",
+  "@modelsProfileRetry": {"description": "Button that tries again to load the pilot's saved models."}
 }

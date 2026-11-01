@@ -1567,6 +1567,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, one{1 model} other{{count} models}}'**
   String modelsCellCount(int count);
+
+  /// Warning in the models form when the pilot's saved models could not be read, as opposed to there being none.
+  ///
+  /// In en, this message translates to:
+  /// **'Their saved models could not be loaded. You can still type a model.'**
+  String get modelsProfileUnavailable;
+
+  /// Button that tries again to load the pilot's saved models.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get modelsProfileRetry;
 }
 
 class _AppLocalizationsDelegate

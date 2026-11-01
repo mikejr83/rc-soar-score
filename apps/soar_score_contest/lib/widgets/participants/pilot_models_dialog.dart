@@ -50,6 +50,9 @@ class _PilotModelsDialogState extends State<PilotModelsDialog> {
   late List<ModelEntry> _models = widget.models;
   List<ModelCatalog> _profileModels = const [];
 
+  /// The profile's models could not be read (as opposed to there being none).
+  bool _profileUnavailable = false;
+
   /// The form is shown while adding ([_editing] null) or editing one.
   bool _formOpen = false;
   ModelEntry? _editing;
@@ -67,11 +70,23 @@ class _PilotModelsDialogState extends State<PilotModelsDialog> {
   @override
   void initState() {
     super.initState();
-    widget.backend.profileModels().then((models) {
-      if (mounted) setState(() => _profileModels = models);
-    });
+    _loadProfileModels();
     for (final field in [_name, _manufacturer, _modelId]) {
       field.addListener(() => setState(() {}));
+    }
+  }
+
+  Future<void> _loadProfileModels() async {
+    try {
+      final models = await widget.backend.profileModels();
+      if (!mounted) return;
+      setState(() {
+        _profileModels = models;
+        _profileUnavailable = false;
+      });
+    } on Object {
+      // Typing a model still works; the form says the list is missing.
+      if (mounted) setState(() => _profileUnavailable = true);
     }
   }
 
@@ -243,6 +258,22 @@ class _PilotModelsDialogState extends State<PilotModelsDialog> {
                 ),
               if (_formOpen) ...[
                 const Divider(),
+                if (_editing == null && _profileUnavailable) ...[
+                  Row(
+                    key: const ValueKey('models-profile-unavailable'),
+                    children: [
+                      Icon(Icons.warning_amber, size: 18, color: scheme.error),
+                      const SizedBox(width: 8),
+                      Expanded(child: Text(l10n.modelsProfileUnavailable)),
+                      TextButton(
+                        key: const ValueKey('models-profile-retry'),
+                        onPressed: _loadProfileModels,
+                        child: Text(l10n.modelsProfileRetry),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                ],
                 if (_editing == null && pickable.isNotEmpty) ...[
                   DropdownMenu<ModelCatalog>(
                     key: const ValueKey('model-pick'),

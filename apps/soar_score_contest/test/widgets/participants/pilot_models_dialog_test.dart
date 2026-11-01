@@ -9,14 +9,23 @@ import 'package:soar_score_core/soar_score_core.dart';
 
 /// Keeps the models in memory and can be told to refuse a change.
 class _Backend implements PilotModelsBackend {
-  _Backend({this.catalog = const [], this.failWith});
+  _Backend({this.catalog = const [], this.failWith, this.profileFailures = 0});
+
+  /// How many reads of the profile's models fail before one succeeds.
+  int profileFailures;
 
   final List<ModelCatalog> catalog;
   Object? failWith;
   final List<String> calls = [];
 
   @override
-  Future<List<ModelCatalog>> profileModels() async => catalog;
+  Future<List<ModelCatalog>> profileModels() async {
+    if (profileFailures > 0) {
+      profileFailures--;
+      throw ApiNetworkError('offline', requestUri: Uri.parse('http://x/'));
+    }
+    return catalog;
+  }
 
   Future<T> _do<T>(String call, T Function() result) async {
     calls.add(call);
@@ -85,6 +94,32 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('models-done')));
     await tester.pumpAndSettle();
     expect(find.byType(PilotModelsDialog), findsNothing);
+  });
+
+  testWidgets('saved models that cannot be loaded are called out, typing '
+      'still works, and retry fills the picker', (tester) async {
+    final backend = _Backend(
+      catalog: [catalogModel('Supra')],
+      profileFailures: 1,
+    );
+    await _open(tester, models: const [], backend: backend);
+
+    await tester.tap(find.byKey(const ValueKey('model-add')));
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const ValueKey('models-profile-unavailable')),
+      findsOneWidget,
+    );
+    expect(find.byKey(const ValueKey('model-pick')), findsNothing);
+    expect(find.byKey(const ValueKey('model-name')), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('models-profile-retry')));
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const ValueKey('models-profile-unavailable')),
+      findsNothing,
+    );
+    expect(find.byKey(const ValueKey('model-pick')), findsOneWidget);
   });
 
   testWidgets('adds a typed model; the name is required', (tester) async {

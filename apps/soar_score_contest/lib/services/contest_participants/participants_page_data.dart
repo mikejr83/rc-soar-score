@@ -89,6 +89,12 @@ class ParticipantsPageData {
     final memberships = {
       for (final m in base.memberships) m.contestParticipationId: m,
     };
+    final linksByParticipation = <Id, List<ModelEntry>>{};
+    for (final link in modelLinks) {
+      (linksByParticipation[link.contestParticipationId] ??= []).add(
+        ModelEntry.fromLink(link),
+      );
+    }
     return [
       for (final participation in base.participations)
         if (profiles[participation.participantProfileId] case final profile?)
@@ -97,11 +103,7 @@ class ParticipantsPageData {
             profile: profile,
             team: teams[memberships[participation.id]?.teamId]?.name ?? '',
             membershipId: memberships[participation.id]?.id,
-            models: [
-              for (final link in modelLinks)
-                if (link.contestParticipationId == participation.id)
-                  ModelEntry.fromLink(link),
-            ],
+            models: linksByParticipation[participation.id] ?? const [],
           ),
     ];
   }

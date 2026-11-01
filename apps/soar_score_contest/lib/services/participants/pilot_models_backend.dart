@@ -7,7 +7,9 @@ import 'model_entry.dart';
 /// in the stored contest through the API.
 abstract interface class PilotModelsBackend {
   /// The models the person already has on their profile, for the picker.
-  /// Empty when they cannot be read.
+  /// Empty when the person has none, or the profile is not stored yet.
+  /// Throws when they could not be read, so the window can say so and offer
+  /// a retry.
   Future<List<ModelCatalog>> profileModels();
 
   /// Enters [entry] for the pilot and returns it as stored.
@@ -30,9 +32,9 @@ class DraftPilotModelsBackend implements PilotModelsBackend {
   Future<List<ModelCatalog>> profileModels() async {
     try {
       return await loadProfileModels();
-    } on Object {
-      // The picker is a convenience; typing a model still works.
-      return const [];
+    } on ApiHttpError catch (e) {
+      if (e.statusCode == 404) return const [];
+      rethrow;
     }
   }
 
@@ -69,8 +71,9 @@ class ApiPilotModelsBackend implements PilotModelsBackend {
   Future<List<ModelCatalog>> profileModels() async {
     try {
       return _profileModels ??= await client.profileModels(profileId);
-    } on Object {
-      return const [];
+    } on ApiHttpError catch (e) {
+      if (e.statusCode == 404) return const [];
+      rethrow;
     }
   }
 
