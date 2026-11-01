@@ -12,8 +12,9 @@ Release 1 must be cheap to run and easy to move to a bigger platform later. The 
 
 Use a managed host for the first release:
 
-- The public site (`rcsoarscore.com`) is hosted on Vercel, which is a connected app on the GitHub repository and builds and deploys when `master` is updated. Cloudflare proxies it.
-- The Flutter web apps (`app.` and `score.`) run on Cloudflare's free Workers hosting. Cloudflare is connected to the GitHub account and builds and deploys on every push, so no deploy workflow in this repository is needed for them.
+- Hosting changes only when a GitHub release is published (decided 2026-11-01): the Deploy workflow pushes to each host, and no host watches `master`. See [deploying.md](../deploying.md).
+- The public site (`rcsoarscore.com`) is hosted on Vercel; Cloudflare proxies it.
+- The Flutter web apps (`app.` and `score.`) run on Cloudflare's free Workers hosting.
 - Cloudflare manages DNS for `rcsoarscore.com`.
 - The API container runs on Fly.io (chosen 2026-10-30, [#130](https://github.com/mikejr83/rc-soar-score/issues/130)); see [deploy-api-fly.md](../deploy-api-fly.md).
 - PostgreSQL runs on Neon's free tier to start.
@@ -26,7 +27,7 @@ Use a managed host for the first release:
 ## Portability rules
 
 - The server reads all configuration from environment variables, including the database URL and the Auth0 issuer and audience.
-- One Docker image is built in CI and pushed to GitHub Container Registry. Any host pulls that image.
+- The server ships as a Docker image built from `apps/soar_score_server/Dockerfile`; any host can build or run it.
 - Only stock PostgreSQL features are used.
 - The applications take their API base URL at build or startup.
 - A runbook documents moving hosts: restore a `pg_dump`, then point DNS.

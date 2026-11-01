@@ -1,11 +1,12 @@
-# Fly.io configuration for the API server. Fly does not build anything: it
-# runs the container image published to GitHub Container Registry. Deploy a
-# release from anywhere (no checkout of the source is needed):
+# Fly.io configuration for the API server. The Deploy workflow
+# (.github/workflows/deploy.yml) runs this on every published GitHub release;
+# by hand, from the repository root at the tag you want:
 #
-#   fly deploy --config apps/soar_score_server/fly.toml \
-#     --image ghcr.io/mikejr83/rc-soar-score-server:<tag>
+#   fly deploy --remote-only --ha=false --config apps/soar_score_server/fly.toml \
+#     --dockerfile apps/soar_score_server/Dockerfile
 #
-# See docs/deploy-api-fly.md. Secrets (DATABASE_URL) are never stored here;
+# `--ha=false` keeps a single machine (the database is a single Neon instance
+# and one machine is enough for the cost cap). See docs/deploying.md. Secrets (DATABASE_URL) are never stored here;
 # set them with `fly secrets set`.
 app = "rc-soar-score-api"
 primary_region = "iad"

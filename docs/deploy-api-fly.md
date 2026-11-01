@@ -1,26 +1,13 @@
 # Deploy the API server to Fly.io
 
 The API runs on Fly.io with PostgreSQL on Neon, as decided in
-[ADR 0003](adr/0003-hosting-platform.md). The monthly spend cap is $15. Deploys
-are run by hand with `flyctl` (GitHub Actions is not used for this yet).
+[ADR 0003](adr/0003-hosting-platform.md). The monthly spend cap is $15. Normal
+deploys are made by the Deploy workflow when a GitHub release is published; see
+[deploying.md](deploying.md) for the release process, the hosts and the
+secrets. This page covers the API specifically, including a manual deploy.
 
 The server migrates the database when it starts, so an empty Neon database is
 enough. No secret lives in the repository: `DATABASE_URL` is a Fly secret.
-
-## Where everything lives
-
-| Host name                                | What                          | Hosted on                      |
-| ---------------------------------------- | ----------------------------- | ------------------------------ |
-| `rcsoarscore.com`, `www.rcsoarscore.com` | public project site           | Vercel (proxied by Cloudflare) |
-| `app.rcsoarscore.com`                    | contest management site       | Cloudflare                     |
-| `score.rcsoarscore.com`                  | participant self-scoring site | Cloudflare                     |
-| `api.rcsoarscore.com`                    | API server (this document)    | Fly.io                         |
-
-DNS for all of them is managed in Cloudflare. The public site is hosted on
-Vercel, a connected app on the repository that builds and deploys when `master`
-is updated; Cloudflare proxies it. The two Flutter web apps use Cloudflare's
-free Workers hosting; Cloudflare is connected to the GitHub account and builds
-and deploys them on every push. Only the API is deployed by hand.
 
 ## Environment variables
 
@@ -52,23 +39,17 @@ Check current prices on the Fly.io and Neon pricing pages first.
 
 ## Deploy
 
-Fly does not build the API. It runs the image that was built for the GitHub
-release and pushed to GitHub Container Registry as
-`ghcr.io/mikejr83/rc-soar-score-server:<tag>`, so the API is released on its
-own schedule, separately from the web apps (a contest app fix that does not
-touch the API needs no API deploy). Deploy a tag:
+A published GitHub release deploys the API through
+`.github/workflows/deploy.yml`. Fly builds the image from
+`apps/soar_score_server/Dockerfile` on its remote builder (there is no image in
+GitHub Container Registry) and runs a single machine. To deploy by hand, from a
+checkout of the tag:
 
 ```sh
-fly deploy --config apps/soar_score_server/fly.toml \
-  --image ghcr.io/mikejr83/rc-soar-score-server:<tag>
+fly deploy --remote-only --ha=false \
+  --config apps/soar_score_server/fly.toml \
+  --dockerfile apps/soar_score_server/Dockerfile
 ```
-
-Use a version tag or digest, never `latest`, so `fly releases` shows exactly
-what runs and a rollback is a redeploy of the earlier tag. Fly pulls the image
-anonymously, so the GHCR package must be public (it holds no secrets: all
-configuration is environment variables and Fly secrets). If you would rather
-keep it private, pull it locally, run `fly auth docker`, retag it as
-`registry.fly.io/rc-soar-score-api:<tag>`, push it, and deploy that image.
 
 Then check it:
 
@@ -89,9 +70,13 @@ adds a little more). For the MVP release set `min_machines_running = 1` and
 
 ```sh
 fly releases --app rc-soar-score-api
-fly deploy --config apps/soar_score_server/fly.toml \
-  --image ghcr.io/mikejr83/rc-soar-score-server:<earlier tag>
+fly deploy --remote-only --ha=false \
+  --config apps/soar_score_server/fly.toml \
+  --dockerfile apps/soar_score_server/Dockerfile   # from a checkout of the earlier tag
 ```
+
+Or run the Deploy workflow by hand (Actions > Deploy > Run workflow) with the
+earlier tag.
 
 Schema changes are made in place in version 1 and the server migrates on start,
 so a rollback across a schema change needs a Neon restore (point-in-time

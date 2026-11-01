@@ -10,10 +10,15 @@ const nextConfig: NextConfig = {
         permanent: false,
       },
       { source: '/help', destination: '/docs', permanent: false },
+    ];
+  },
+  // Same-origin proxy to the API server (Fly.io). SOAR_SCORE_API_URL is set
+  // in Vercel for production; see docs/deploying.md.
+  async rewrites() {
+    return [
       {
         source: '/api/:path*',
-        destination: `${process.env.RAILWAY_API_URL ?? 'http://localhost:8080'}/:path*`,
-        permanent: false,
+        destination: `${process.env.SOAR_SCORE_API_URL ?? 'http://localhost:8080'}/:path*`,
       },
     ];
   },
