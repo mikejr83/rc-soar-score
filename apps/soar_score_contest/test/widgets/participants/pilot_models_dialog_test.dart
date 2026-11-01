@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_api/soar_score_api.dart';
@@ -14,12 +16,20 @@ class _Backend implements PilotModelsBackend {
   /// How many reads of the profile's models fail before one succeeds.
   int profileFailures;
 
+  /// When set, the next read waits for it, so a test can look mid-request.
+  Completer<void>? profileGate;
+
   final List<ModelCatalog> catalog;
   Object? failWith;
   final List<String> calls = [];
 
   @override
   Future<List<ModelCatalog>> profileModels() async {
+    final gate = profileGate;
+    if (gate != null) {
+      profileGate = null;
+      await gate.future;
+    }
     if (profileFailures > 0) {
       profileFailures--;
       throw ApiNetworkError('offline', requestUri: Uri.parse('http://x/'));
@@ -113,7 +123,14 @@ void main() {
     expect(find.byKey(const ValueKey('model-pick')), findsNothing);
     expect(find.byKey(const ValueKey('model-name')), findsOneWidget);
 
+    final gate = backend.profileGate = Completer<void>();
     await tester.tap(find.byKey(const ValueKey('models-profile-retry')));
+    await tester.pump();
+    final retry = tester.widget<TextButton>(
+      find.byKey(const ValueKey('models-profile-retry')),
+    );
+    expect(retry.onPressed, isNull, reason: 'one request at a time');
+    gate.complete();
     await tester.pumpAndSettle();
     expect(
       find.byKey(const ValueKey('models-profile-unavailable')),

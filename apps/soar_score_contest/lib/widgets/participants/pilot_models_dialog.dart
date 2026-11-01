@@ -53,6 +53,9 @@ class _PilotModelsDialogState extends State<PilotModelsDialog> {
   /// The profile's models could not be read (as opposed to there being none).
   bool _profileUnavailable = false;
 
+  /// A read of the profile's models is in flight; Retry waits for it.
+  bool _profileLoading = false;
+
   /// The form is shown while adding ([_editing] null) or editing one.
   bool _formOpen = false;
   ModelEntry? _editing;
@@ -77,6 +80,8 @@ class _PilotModelsDialogState extends State<PilotModelsDialog> {
   }
 
   Future<void> _loadProfileModels() async {
+    if (_profileLoading) return;
+    setState(() => _profileLoading = true);
     try {
       final models = await widget.backend.profileModels();
       if (!mounted) return;
@@ -87,6 +92,8 @@ class _PilotModelsDialogState extends State<PilotModelsDialog> {
     } on Object {
       // Typing a model still works; the form says the list is missing.
       if (mounted) setState(() => _profileUnavailable = true);
+    } finally {
+      if (mounted) setState(() => _profileLoading = false);
     }
   }
 
@@ -267,8 +274,15 @@ class _PilotModelsDialogState extends State<PilotModelsDialog> {
                       Expanded(child: Text(l10n.modelsProfileUnavailable)),
                       TextButton(
                         key: const ValueKey('models-profile-retry'),
-                        onPressed: _loadProfileModels,
-                        child: Text(l10n.modelsProfileRetry),
+                        onPressed: _profileLoading ? null : _loadProfileModels,
+                        child: _profileLoading
+                            ? const SizedBox.square(
+                                dimension: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : Text(l10n.modelsProfileRetry),
                       ),
                     ],
                   ),
