@@ -19,6 +19,7 @@ class ScoringSheetTableView extends StatelessWidget {
     required this.page,
     required this.workingTime,
     required this.label,
+    this.prefilled = false,
   });
 
   final ScoringSheetPage page;
@@ -26,6 +27,9 @@ class ScoringSheetTableView extends StatelessWidget {
 
   /// Names the table for a screen reader ("Page 2").
   final String label;
+
+  /// Entered scores are printed in the score cells (Pre-fill is on).
+  final bool prefilled;
 
   static const _mono = [
     'Noto Sans Mono',
@@ -47,7 +51,10 @@ class ScoringSheetTableView extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Semantics(
     container: true,
-    label: '$label. Score cells are blank for officials to write in.',
+    label: prefilled
+        ? '$label. Scores already entered are printed in the score cells; '
+              'the other score cells are blank for officials to write in.'
+        : '$label. Score cells are blank for officials to write in.',
     child: SizedBox(
       width: page.strip.width,
       child: Column(
@@ -266,12 +273,21 @@ class ScoringSheetTableView extends StatelessWidget {
 
     Widget printed(String text, TextStyle style, {bool centered = false}) =>
         cell(
-          Text(
-            text,
-            maxLines: 2,
-            overflow: TextOverflow.clip,
-            textAlign: centered ? TextAlign.center : TextAlign.left,
-            style: style,
+          // A long value wraps and, if it still does not fit the row, shrinks
+          // to fit, so a name is never cut off on paper.
+          LayoutBuilder(
+            builder: (context, box) => FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: centered ? Alignment.center : Alignment.centerLeft,
+              child: SizedBox(
+                width: box.maxWidth,
+                child: Text(
+                  text,
+                  textAlign: centered ? TextAlign.center : TextAlign.left,
+                  style: style,
+                ),
+              ),
+            ),
           ),
           alignment: centered ? Alignment.center : Alignment.centerLeft,
         );

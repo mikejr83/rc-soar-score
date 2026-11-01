@@ -104,6 +104,7 @@ class ScoringSheetLayout {
     required this.legend,
     required this.workingTime,
     required this.bands,
+    required this.prefilled,
   });
 
   factory ScoringSheetLayout.plan({
@@ -243,6 +244,7 @@ class ScoringSheetLayout {
       legend: legend,
       workingTime: data.workingTime,
       bands: nonEmpty.length,
+      prefilled: options.prefill,
     );
   }
 
@@ -290,6 +292,9 @@ class ScoringSheetLayout {
 
   /// The bands of rows; each is repeated for every strip.
   final int bands;
+
+  /// Entered scores are printed in the score cells.
+  final bool prefilled;
 
   bool get fitsAcross => strips.length == 1;
 

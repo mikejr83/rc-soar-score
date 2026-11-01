@@ -42,6 +42,7 @@ class ScoringSheetPageBody extends StatelessWidget {
                 page: page,
                 workingTime: layout.workingTime,
                 label: 'Page $number',
+                prefilled: layout.prefilled,
               ),
             ),
             if (legend != null)
