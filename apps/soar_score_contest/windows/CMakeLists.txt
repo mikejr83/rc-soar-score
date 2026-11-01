@@ -137,7 +137,8 @@ endforeach()
 # and the source offer lives in NOTICE.txt, so the build output (and the
 # installer that ships it) carries the license files through as well.
 set(GS_IMPORTER_LICENSE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../tools/gs_importer")
-foreach(f COPYING COPYING.LIB LGPL-2.1.txt NOTICE.txt)
+foreach(f COPYING COPYING.LIB LGPL-2.1.txt GPL-3.0.txt GCC-exception-3.1.txt
+    winpthreads-COPYING.txt NOTICE.txt)
   if(NOT EXISTS "${GS_IMPORTER_LICENSE_DIR}/${f}")
     message(FATAL_ERROR
       "gs_importer: missing license file tools/gs_importer/${f}")

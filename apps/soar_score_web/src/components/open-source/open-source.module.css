@@ -1,0 +1,79 @@
+/* The /open-source page: product sections with collapsible package lists. */
+
+.product {
+  margin-top: 48px;
+  scroll-margin-top: calc(var(--header-h) + 16px);
+}
+
+.toc {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  list-style: none;
+  padding: 0;
+  margin: 16px 0 0;
+}
+
+.list {
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+  border-top: 1px solid var(--line);
+}
+
+.entry {
+  border-bottom: 1px solid var(--line);
+}
+
+.entry summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  align-items: baseline;
+  min-height: 44px;
+  padding: 10px 4px;
+  cursor: pointer;
+}
+
+.entry summary:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+.name {
+  font-weight: 600;
+}
+
+.licence {
+  margin-left: auto;
+  font-size: 0.875rem;
+}
+
+.body {
+  padding: 4px 4px 20px;
+}
+
+.body p {
+  margin: 0 0 12px;
+}
+
+.text {
+  margin: 12px 0 0;
+  padding: 12px 14px;
+  max-height: 22rem;
+  overflow: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+}
+
+.shared {
+  margin-top: 24px;
+}
+
+.shared h3 {
+  margin: 0 0 8px;
+}
