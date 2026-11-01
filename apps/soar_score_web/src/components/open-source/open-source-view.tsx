@@ -141,7 +141,7 @@ export function OpenSourceView({
               GNU Affero General Public License v3.0
             </a>{" "}
             (AGPL-3.0). The text is in the{" "}
-            <a href={`${repositoryUrl}/blob/main/LICENSE`}>LICENSE</a> file.
+            <a href={`${repositoryUrl}/blob/master/LICENSE`}>LICENSE</a> file.
           </li>
           <li>
             The planning and rule documentation is licensed under{" "}
@@ -157,7 +157,7 @@ export function OpenSourceView({
             ) : (
               <>
                 The version running on this site is built from the
-                main branch.
+                master branch.
               </>
             )}{" "}
             If you use a modified version over a network, the AGPL asks you to
