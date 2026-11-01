@@ -1,3 +1,5 @@
+import 'dart:convert' as convert;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_contest/services/participants/participant_option.dart';
@@ -5,6 +7,7 @@ import 'package:soar_score_contest/widgets/participants/participant_card.dart';
 import 'package:soar_score_contest/widgets/participants/participants_table.dart';
 
 import '../support/new_contest_test_support.dart';
+import '../support/participant_test_support.dart';
 import '../support/participants_step_support.dart';
 
 Finder _class(int index) => find.descendant(
@@ -190,6 +193,87 @@ void main() {
     // Roles are off, so one pilot count replaces the three chips.
     expect(find.text('1 pilots'), findsOneWidget);
     expect(find.textContaining('non-flying'), findsNothing);
+  });
+
+  testWidgets('Save and add another keeps every person in the draft', (
+    tester,
+  ) async {
+    final store = await storeAtStep4(options: const {ParticipantOption.teams});
+    var created = 0;
+    await pumpWizard(
+      tester,
+      respond: (request) async {
+        if (request.url.path.endsWith('/participants') &&
+            request.method == 'POST') {
+          final body = convert.jsonDecode(request.body) as Map<String, dynamic>;
+          return json(
+            profile(
+              body['first_name'] as String,
+              body['last_name'] as String,
+              n: 40 + created++,
+            ).toJson(),
+          );
+        }
+        return stepApi(request);
+      },
+      store: store,
+    );
+
+    await tester.tap(find.byKey(const ValueKey('add-participant-new')));
+    await tester.pumpAndSettle();
+    Future<void> fill(String first, String last) async {
+      await tester.enterText(find.byKey(const ValueKey('first-name')), first);
+      await tester.enterText(find.byKey(const ValueKey('last-name')), last);
+      await tester.enterText(
+        find.byKey(const ValueKey('email')),
+        '$first.$last@example.com'.toLowerCase(),
+      );
+      await tester.pump();
+    }
+
+    await fill('Jordan', 'Lee');
+    await tester.tap(find.byKey(const ValueKey('save-add-another')));
+    await tester.pumpAndSettle();
+    // Let the "added" snackbar go; it covers the buttons.
+    await tester.pump(const Duration(seconds: 5));
+    await tester.pumpAndSettle();
+    await fill('Casey', 'Park');
+    await tester.tap(find.byKey(const ValueKey('save-add-another')));
+    await tester.pumpAndSettle();
+    await tester.pump(const Duration(seconds: 5));
+    await tester.pumpAndSettle();
+    await fill('Robin', 'Diaz');
+    await tester.tap(find.byKey(const ValueKey('save-participant')));
+    await tester.pumpAndSettle();
+
+    expect(store.draft.participants.map((p) => p.name), [
+      'Jordan Lee',
+      'Casey Park',
+      'Robin Diaz',
+    ]);
+  });
+
+  testWidgets('cancelling after Save and add another keeps the saved ones', (
+    tester,
+  ) async {
+    final store = await storeAtStep4(options: const {ParticipantOption.teams});
+    await pumpWizard(tester, respond: stepApi, store: store);
+
+    await tester.tap(find.byKey(const ValueKey('add-participant-new')));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const ValueKey('first-name')), 'Jordan');
+    await tester.enterText(find.byKey(const ValueKey('last-name')), 'Lee');
+    await tester.enterText(
+      find.byKey(const ValueKey('email')),
+      'jordan.lee@example.com',
+    );
+    await tester.pump();
+    await tester.tap(find.byKey(const ValueKey('save-add-another')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Cancel'));
+    await tester.pumpAndSettle();
+
+    expect(store.draft.participants.map((p) => p.name), ['Jordan Lee']);
   });
 
   testWidgets('narrow windows stack the rows as cards', (tester) async {
