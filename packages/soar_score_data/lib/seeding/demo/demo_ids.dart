@@ -12,6 +12,13 @@ abstract final class DemoIds {
   static core.Id participation(int contest, int pilot) =>
       _id('f000', contest, pilot);
 
+  /// The [n]th model of a pilot's profile.
+  static core.Id model(int pilot, int n) => _id('a100', pilot, n);
+
+  /// The [n]th model link of a pilot in a contest.
+  static core.Id modelLink(int contest, int pilot, int n) =>
+      _id('a200', contest, pilot * 4 + n);
+
   static core.Id team(int contest, int team) => _id('c100', contest, team);
 
   static core.Id membership(int contest, int pilot) =>

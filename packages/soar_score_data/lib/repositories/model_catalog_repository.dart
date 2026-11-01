@@ -17,6 +17,15 @@ class ModelCatalogRepository extends DriftRepository
       _store.whereId('owner_account_id', ownerAccountId, orderBy: 'name, id');
 
   @override
+  Future<List<core.ModelCatalog>> listForProfile(
+    core.Id participantProfileId,
+  ) => _store.whereId(
+    'participant_profile_id',
+    participantProfileId,
+    orderBy: 'name, id',
+  );
+
+  @override
   Future<core.ModelCatalog> save(
     core.ModelCatalog entry, {
     required core.MutationMetadata metadata,

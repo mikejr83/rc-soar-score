@@ -17,7 +17,7 @@ class ContestModelLinks extends Table {
       .nullable()();
   TextColumn get modelName => text()();
   TextColumn get manufacturer => text().nullable()();
-  TextColumn get modelId => text()();
+  TextColumn get modelId => text().nullable()();
   TextColumn get contestSpecificIdentifier => text().nullable()();
   IntColumn get revision => integer().withDefault(const Constant(0))();
 

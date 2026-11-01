@@ -39,8 +39,10 @@ void main() {
       final m = ModelCatalog(
         id: exampleId(1),
         ownerAccountId: exampleId(5),
+        participantProfileId: exampleId(6),
         name: 'Supra',
         manufacturer: "Vladimir's Model",
+        modelId: 'SUPRA-1',
       );
       expect(ModelCatalog.fromJson(m.toJson()), m);
       expect(m.syncScope, SyncScope.director);
@@ -51,6 +53,7 @@ void main() {
         ModelCatalog(
           id: exampleId(1),
           ownerAccountId: exampleId(5),
+          participantProfileId: exampleId(6),
           name: 'Supra',
         ).manufacturer,
         null,
@@ -59,6 +62,7 @@ void main() {
         () => ModelCatalog(
           id: exampleId(1),
           ownerAccountId: exampleId(5),
+          participantProfileId: exampleId(6),
           name: '',
         ),
         throwsArgumentError,
@@ -67,7 +71,7 @@ void main() {
   });
 
   group('ContestModelLink', () {
-    ContestModelLink link({String modelId = 'SUPRA-1'}) => ContestModelLink(
+    ContestModelLink link({String? modelId = 'SUPRA-1'}) => ContestModelLink(
       id: exampleId(1),
       contestId: exampleId(2),
       contestParticipationId: exampleId(3),
@@ -82,8 +86,9 @@ void main() {
       expect(l.modelCatalogId, isNull);
     });
 
-    test('needs a model name and external id', () {
+    test('needs a model name; the model id is optional but not blank', () {
       expect(() => link(modelId: ' '), throwsArgumentError);
+      expect(link(modelId: null).modelId, isNull);
     });
   });
 }

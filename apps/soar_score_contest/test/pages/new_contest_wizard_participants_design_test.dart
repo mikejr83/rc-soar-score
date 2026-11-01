@@ -36,25 +36,25 @@ void main() {
     expect(find.textContaining('@'), findsNothing);
   });
 
-  testWidgets('the Models column says nothing can be recorded yet and never '
-      'blocks continuing', (tester) async {
-    final store = await storeAtStep4(
-      options: const {ParticipantOption.classes, ParticipantOption.models},
-      participants: [
-        row(0, classification: 'Open'),
-        row(1, classification: 'Open'),
-      ],
-    );
-    await pumpWizard(tester, respond: stepApi, store: store);
+  testWidgets(
+    'the Models column shows a notice for a pilot without models and never '
+    'blocks continuing',
+    (tester) async {
+      final store = await storeAtStep4(
+        options: const {ParticipantOption.classes, ParticipantOption.models},
+        participants: [
+          row(0, classification: 'Open'),
+          row(1, classification: 'Open'),
+        ],
+      );
+      await pumpWizard(tester, respond: stepApi, store: store);
 
-    expect(_inTable(find.text('Models')), findsOneWidget);
-    expect(find.text('Model *'), findsNothing);
-    expect(
-      _inTable(find.text('No models information entered.')),
-      findsNWidgets(2),
-    );
-    expect(find.textContaining('fixing before you continue'), findsNothing);
-  });
+      expect(_inTable(find.text('Models')), findsOneWidget);
+      expect(find.text('Model *'), findsNothing);
+      expect(_inTable(find.text('No models entered')), findsNWidgets(2));
+      expect(find.textContaining('fixing before you continue'), findsNothing);
+    },
+  );
 
   testWidgets('the search field also filters the list', (tester) async {
     final store = await storeAtStep4(

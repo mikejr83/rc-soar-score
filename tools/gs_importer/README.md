@@ -19,10 +19,13 @@ app invokes them as child processes and parses their JSON output.
 | `COPYING`                     | GPLv2 license text (the `mdb-*` exes)            |
 | `COPYING.LIB`                 | LGPL v2 license text (libmdb, upstream mdbtools) |
 | `LGPL-2.1.txt`                | LGPL 2.1 text (libiconv, win_pthreads)           |
+| `GPL-3.0.txt`                 | GPL v3 text (libgcc runtime)                     |
+| `GCC-exception-3.1.txt`       | GCC Runtime Library Exception 3.1 (libgcc)       |
+| `winpthreads-COPYING.txt`     | winpthreads copyright and permission notice      |
 | `NOTICE.txt`                  | Provenance, SHA-256 checksums, GPL source offer  |
 
 Installation: `apps/soar_score_contest/windows/CMakeLists.txt` validates the
-six files in `bin/x86/` plus the four files above and installs them into
+six files in `bin/x86/` plus the seven license files above and installs them into
 `gs_importer/` next to the app executable, so the build output — and the
 installer that ships it — carries the license texts with the binaries.
 

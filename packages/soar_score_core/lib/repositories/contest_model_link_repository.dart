@@ -7,9 +7,11 @@ import 'mutation_metadata.dart';
 abstract interface class ContestModelLinkRepository {
   Future<ContestModelLink?> findById(Id id);
 
-  /// The link of [contestParticipationId], or `null`. A participation has at
-  /// most one.
-  Future<ContestModelLink?> findForParticipation(Id contestParticipationId);
+  /// The links of [contestParticipationId], by id. A participation has any
+  /// number, including none.
+  Future<List<ContestModelLink>> listForParticipation(
+    Id contestParticipationId,
+  );
 
   /// Every link of [contestId], by id.
   Future<List<ContestModelLink>> listForContest(Id contestId);

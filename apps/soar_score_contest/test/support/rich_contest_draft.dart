@@ -3,6 +3,7 @@ import 'package:soar_score_contest/services/new_contest/copy_mode.dart';
 import 'package:soar_score_contest/services/new_contest/copy_source.dart';
 import 'package:soar_score_contest/services/new_contest/draft_participant.dart';
 import 'package:soar_score_contest/services/new_contest/draw_settings.dart';
+import 'package:soar_score_contest/services/participants/model_entry.dart';
 import 'package:soar_score_contest/services/participants/participant_option.dart';
 import 'package:soar_score_contest/services/participants/participant_row.dart';
 import 'package:soar_score_contest/services/new_contest/scoring_settings.dart';
@@ -51,6 +52,20 @@ ContestDraft richDraft() {
         roleName: 'Pilot',
         classification: 'Open',
         team: 'Gators',
+        models: [
+          ModelEntry(
+            id: Id.parse('019c0000-0000-7000-8000-000000000071'),
+            catalogId: Id.parse('019c0000-0000-7000-8000-000000000072'),
+            name: 'Supra',
+            manufacturer: 'Vladimir',
+            modelId: 'S-1',
+            contestIdentifier: 'A7',
+          ),
+          ModelEntry(
+            id: Id.parse('019c0000-0000-7000-8000-000000000073'),
+            name: 'Home-built',
+          ),
+        ],
       ),
     ],
     scoring: const ScoringSettings(

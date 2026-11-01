@@ -37,6 +37,9 @@ export function SiteFooter() {
               <li>
                 <Link href="/terms">Terms</Link>
               </li>
+              <li>
+                <Link href="/open-source">Open source</Link>
+              </li>
             </ul>
           </div>
           <div>

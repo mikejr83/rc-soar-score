@@ -39,8 +39,8 @@ enum ParticipantOption {
     description: 'Record the models each pilot flies.',
     effect: 'Adds a Models column for scoring pilots.',
     note:
-        'Model details can’t be recorded yet. The column says so until they '
-        'can.',
+        'Add models any time. A pilot without a model never holds up the '
+        'contest.',
   );
 
   const ParticipantOption({

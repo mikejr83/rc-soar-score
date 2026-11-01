@@ -5,8 +5,10 @@ import 'package:drift/drift.dart';
 class ModelCatalogs extends Table {
   TextColumn get id => text()();
   TextColumn get ownerAccountId => text()();
+  TextColumn get participantProfileId => text()();
   TextColumn get name => text()();
   TextColumn get manufacturer => text().nullable()();
+  TextColumn get modelId => text().nullable()();
   IntColumn get revision => integer().withDefault(const Constant(0))();
 
   @override

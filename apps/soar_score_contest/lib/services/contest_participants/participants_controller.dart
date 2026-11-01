@@ -226,6 +226,11 @@ class ParticipantsController extends ChangeNotifier {
     _saved = loaded.participants;
     final ids = {for (final row in _saved) row.rowId};
     _drafts.removeWhere((id, _) => !ids.contains(id));
+    // Models are saved on their own, so an edited row shows the fresh ones.
+    for (final row in _saved) {
+      final edited = _drafts[row.rowId];
+      if (edited != null) _drafts[row.rowId] = edited.withModels(row.models);
+    }
     _states.removeWhere((id, _) => !ids.contains(id));
     selection.retainAll(ids);
     _rules = _makeRules();
@@ -455,6 +460,7 @@ class ParticipantsController extends ChangeNotifier {
         participation: participation,
         profile: saved.profile,
         membershipId: membershipId,
+        models: saved.models,
         team: team,
       );
       _replaceSaved(progress);
@@ -466,6 +472,7 @@ class ParticipantsController extends ChangeNotifier {
           participation: participation,
           profile: draft.profile,
           membershipId: membershipId,
+          models: saved.models,
           roleId: draft.roleId,
           roleName: draft.roleName,
           isPilot: draft.isPilot,

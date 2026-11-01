@@ -24,11 +24,7 @@ void main() {
     'installationActivationRepository':
         'backend-only; needs a server demo (#305)',
     'syncCursorRepository': 'backend-only; needs a server demo (#305)',
-    'modelCatalogRepository':
-        'not used by a screen yet; needs demo data (#288)',
     'contestConfigurationPresetRepository':
-        'not used by a screen yet; needs demo data (#288)',
-    'contestModelLinkRepository':
         'not used by a screen yet; needs demo data (#288)',
     'accountRepository': 'backend-only; needs a server demo (#305)',
     'accountAliasRepository': 'backend-only; needs a server demo (#305)',
@@ -67,6 +63,8 @@ void main() {
     'teamRepository',
     'teamMembershipRepository',
     'contestParticipationRepository',
+    'modelCatalogRepository',
+    'contestModelLinkRepository',
   };
 
   test('every repository is seeded or exempt', () {

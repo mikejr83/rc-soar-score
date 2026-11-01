@@ -22,7 +22,7 @@ import '../../services/reports/viewer/report_view_params.dart';
 import '../../services/reports/viewer/report_viewer_controller.dart';
 import '../../widgets/app_window_title.dart';
 import '../../widgets/page_states/page_banner.dart';
-import '../../widgets/reports/viewer/placeholder_report.dart';
+import '../../widgets/reports/viewer/report_definitions.dart';
 import '../../widgets/reports/viewer/report_definition.dart';
 import '../../widgets/reports/viewer/report_sheet_area.dart';
 import '../../widgets/reports/viewer/report_sheet_page.dart';
@@ -187,7 +187,10 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
         filters: controller.sheetFilters,
         setup: setup,
         bodySize: _definition!.hasRunningFrame
-            ? SheetLayout.bodySize(setup)
+            ? SheetLayout.bodySize(
+                setup,
+                extraSide: _definition!.extraSideMargin,
+              )
             : SheetLayout.bareBodySize(
                 setup,
                 _definition!.barePageMargins(controller.sheetFilters, facts),
@@ -234,6 +237,7 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
           reportName: widget.report!.title,
           pageNumber: i + 1,
           pageCount: count,
+          extraSideMargin: _definition!.extraSideMargin,
           generated: 'Generated $stamp',
           status: document.status,
           body: document.pages[i],
@@ -380,6 +384,7 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
           setFilter: controller.setFilter,
           setFilters: controller.setFilters,
           setup: setup,
+          data: controller.data,
         ),
       ),
       setup: setup,
@@ -388,7 +393,7 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
       onPaper: controller.setPaper,
       onOrientation: controller.setOrientation,
       onPreview: controller.setPreview,
-      defaultOrientation: _definition!.defaultOrientation,
+      defaultOrientation: controller.suggestedOrientation,
       columns: columns,
       showOrientation: !_definition!.fixedOrientation,
       pageCount: _document()?.pages.length ?? 0,

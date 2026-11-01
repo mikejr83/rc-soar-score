@@ -1,5 +1,6 @@
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../participants/model_entry.dart';
 import '../participants/participant_row.dart';
 import '../participants/participant_row_style.dart';
 
@@ -15,6 +16,7 @@ class StoredParticipant implements ParticipantRow {
     required this.profile,
     this.team = '',
     this.membershipId,
+    this.models = const [],
     Id? roleId,
     String? roleName,
     bool? isPilot,
@@ -41,6 +43,10 @@ class StoredParticipant implements ParticipantRow {
   final String classification;
   @override
   final String team;
+
+  /// The saved models of the pilot, which are edited and saved on their own.
+  @override
+  final List<ModelEntry> models;
 
   Id get id => participation.id;
 
@@ -70,12 +76,14 @@ class StoredParticipant implements ParticipantRow {
     Role? role,
     String? classification,
     String? team,
+    List<ModelEntry>? models,
   }) {
     final pilot = role == null ? isPilot : role.type == RoleType.pilot;
     return StoredParticipant(
       participation: participation,
       profile: profile,
       membershipId: membershipId,
+      models: this.models,
       roleId: role?.id ?? roleId,
       roleName: role?.displayName ?? roleName,
       isPilot: pilot,
@@ -84,6 +92,19 @@ class StoredParticipant implements ParticipantRow {
       team: team ?? this.team,
     );
   }
+
+  /// This row with its saved [models] replaced, keeping the unsaved edits.
+  StoredParticipant withModels(List<ModelEntry> models) => StoredParticipant(
+    participation: participation,
+    profile: profile,
+    membershipId: membershipId,
+    models: models,
+    roleId: roleId,
+    roleName: roleName,
+    isPilot: isPilot,
+    classification: classification,
+    team: team,
+  );
 
   /// The cells that differ from [saved].
   Set<ParticipantCell> changedFrom(StoredParticipant saved) => {
