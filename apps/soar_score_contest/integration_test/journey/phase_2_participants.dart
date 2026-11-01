@@ -6,6 +6,7 @@ import '../support/launch_app.dart';
 import '../support/participant_extras.dart';
 import '../support/participant_form.dart';
 import 'journey.dart';
+import 'pilot_import_step.dart';
 
 /// Phase 2: the participants manager and editor, ending with a roster of new
 /// people the wizard uses later.
@@ -42,6 +43,11 @@ Future<void> runParticipantsPhase(Journey journey, JourneyContext data) async {
   await journey.step(
     'Delete asks first',
     () => inManager(() => _deleteAsksFirst(tester)),
+  );
+  await journey.step(
+    'Pilots are imported from a GliderScore file, twice (native)',
+    () => importPilotsFromGliderScore(tester, data),
+    nativeOnly: true,
   );
 }
 

@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_contest/api_client_provider.dart';
+import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_contest/pages/participant_editor_page.dart';
 import 'package:soar_score_contest/pages/participants_page.dart';
 import 'package:soar_score_contest/router.dart';
@@ -87,7 +88,11 @@ Widget participantsApp(ApiClient client, {String initial = participantsPath}) {
   );
   return ApiClientInherited(
     client: client,
-    child: MaterialApp.router(routerConfig: router),
+    child: MaterialApp.router(
+      routerConfig: router,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+    ),
   );
 }
 

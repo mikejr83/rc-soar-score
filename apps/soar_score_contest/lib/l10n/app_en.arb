@@ -1454,5 +1454,237 @@
   "aboutLinkFailed": "Could not open the link. Check your network connection and try again.",
   "@aboutLinkFailed": {
     "description": "Snackbar when a link in the About card could not be opened."
+  },
+  "pilotImportButton": "Import pilots from GliderScore…",
+  "@pilotImportButton": {
+    "description": "Button on the participants page that imports pilots from a GliderScore database file."
+  },
+  "pilotImportTitle": "Import pilots from GliderScore",
+  "@pilotImportTitle": {
+    "description": "Title of the pilot import dialog."
+  },
+  "pilotImportChoosing": "Choose a GliderScore database (.mdb) to read the pilots from.",
+  "@pilotImportChoosing": {
+    "description": "Shown in the pilot import dialog before a file is chosen."
+  },
+  "pilotImportChooseButton": "Choose file…",
+  "@pilotImportChooseButton": {
+    "description": "Button that opens the file chooser in the pilot import dialog."
+  },
+  "pilotImportReading": "Reading {file}…",
+  "@pilotImportReading": {
+    "description": "Shown while the GliderScore file is read.",
+    "placeholders": {
+      "file": {
+        "type": "String"
+      }
+    }
+  },
+  "pilotImportReviewIntro": "Choose which pilots to add to your participants. Pilots already in your list get any new details; their names are never changed.",
+  "@pilotImportReviewIntro": {
+    "description": "Introduction above the list of pilots found in a GliderScore file."
+  },
+  "pilotImportNewHeading": "New ({count})",
+  "@pilotImportNewHeading": {
+    "description": "Heading of the pilots that are not in the participants yet.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pilotImportUpdateHeading": "Already in your list ({count})",
+  "@pilotImportUpdateHeading": {
+    "description": "Heading of the pilots that match a participant.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pilotImportMaybeHeading": "Maybe the same person ({count})",
+  "@pilotImportMaybeHeading": {
+    "description": "Heading of the pilots that might be a participant already in the list.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pilotImportWillUpdate": "Will update: {fields}",
+  "@pilotImportWillUpdate": {
+    "description": "Row text naming the details an import adds to an existing participant.",
+    "placeholders": {
+      "fields": {
+        "type": "String"
+      }
+    }
+  },
+  "pilotImportNothingNew": "Nothing new to add",
+  "@pilotImportNothingNew": {
+    "description": "Row text when an existing participant already has everything the file holds."
+  },
+  "pilotImportConflict": "Their email and registration numbers match different people in your list.",
+  "@pilotImportConflict": {
+    "description": "Row text when the identifiers of a pilot point at different participants."
+  },
+  "pilotImportDuplicateInFile": "Looks like another pilot earlier in this file.",
+  "@pilotImportDuplicateInFile": {
+    "description": "Row text when a pilot is the same person as an earlier row of the file."
+  },
+  "pilotImportChoiceSkip": "Skip",
+  "@pilotImportChoiceSkip": {
+    "description": "Choice for a pilot that might be an existing participant: leave out."
+  },
+  "pilotImportChoiceAdd": "Add as new",
+  "@pilotImportChoiceAdd": {
+    "description": "Choice for a pilot that might be an existing participant: add a new one."
+  },
+  "pilotImportChoiceUpdate": "Update {name}",
+  "@pilotImportChoiceUpdate": {
+    "description": "Choice for a pilot that might be an existing participant: update that participant.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "pilotImportFieldEmail": "email",
+  "@pilotImportFieldEmail": {
+    "description": "Name of a participant detail in the list of details an import updates."
+  },
+  "pilotImportFieldFai": "FAI number",
+  "@pilotImportFieldFai": {
+    "description": "Name of a participant detail in the list of details an import updates."
+  },
+  "pilotImportFieldNationalId": "national ID",
+  "@pilotImportFieldNationalId": {
+    "description": "Name of a participant detail in the list of details an import updates."
+  },
+  "pilotImportFieldClub": "club",
+  "@pilotImportFieldClub": {
+    "description": "Name of a participant detail in the list of details an import updates."
+  },
+  "pilotImportFieldCity": "city",
+  "@pilotImportFieldCity": {
+    "description": "Name of a participant detail in the list of details an import updates."
+  },
+  "pilotImportFieldState": "state",
+  "@pilotImportFieldState": {
+    "description": "Name of a participant detail in the list of details an import updates."
+  },
+  "pilotImportFieldCountry": "country",
+  "@pilotImportFieldCountry": {
+    "description": "Name of a participant detail in the list of details an import updates."
+  },
+  "pilotImportTestPilots": "{count, plural, =1{1 GliderScore test pilot (last name starting ZZ) was left out.} other{{count} GliderScore test pilots (last name starting ZZ) were left out.}}",
+  "@pilotImportTestPilots": {
+    "description": "Note on the pilot import review about GliderScore test pilots that were left out.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pilotImportSkippedRows": "{count, plural, =1{1 row could not be used (no name or pilot number).} other{{count} rows could not be used (no name or pilot number).}}",
+  "@pilotImportSkippedRows": {
+    "description": "Note on the pilot import review about rows that were skipped.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pilotImportDroppedDetails": "Not imported, because participants have no place for them: {columns}.",
+  "@pilotImportDroppedDetails": {
+    "description": "Note on the pilot import review naming GliderScore columns that are not imported.",
+    "placeholders": {
+      "columns": {
+        "type": "String"
+      }
+    }
+  },
+  "pilotImportCountryNote": "{count, plural, =1{1 pilot has no recognised country.} other{{count} pilots have no recognised country.}}",
+  "@pilotImportCountryNote": {
+    "description": "Note on the pilot import review about pilots without a usable country.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pilotImportTruncated": "The file has more pilots than could be read. Some are missing.",
+  "@pilotImportTruncated": {
+    "description": "Warning on the pilot import review when the file was too large to read fully."
+  },
+  "pilotImportNoPilots": "No pilots were found in this file.",
+  "@pilotImportNoPilots": {
+    "description": "Shown when the GliderScore file holds no pilots to import."
+  },
+  "pilotImportPlan": "{added} to add, {updated} to update, {skipped} left out",
+  "@pilotImportPlan": {
+    "description": "Summary line above the import button of the pilot import.",
+    "placeholders": {
+      "added": {
+        "type": "int"
+      },
+      "updated": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      }
+    }
+  },
+  "pilotImportConfirm": "Import",
+  "@pilotImportConfirm": {
+    "description": "Button that saves the pilot import."
+  },
+  "pilotImportSaving": "Saving pilots…",
+  "@pilotImportSaving": {
+    "description": "Shown while the pilots are saved."
+  },
+  "pilotImportDone": "Added {added}, updated {updated}, unchanged {unchanged}, left out {skipped}.",
+  "@pilotImportDone": {
+    "description": "Result of a pilot import.",
+    "placeholders": {
+      "added": {
+        "type": "int"
+      },
+      "updated": {
+        "type": "int"
+      },
+      "unchanged": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      }
+    }
+  },
+  "pilotImportDoneButton": "Done",
+  "@pilotImportDoneButton": {
+    "description": "Button that closes the finished pilot import."
+  },
+  "pilotImportFailed": "The import did not work. {reason}",
+  "@pilotImportFailed": {
+    "description": "Shown when the pilot import fails.",
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "pilotImportUnavailable": "Importing from GliderScore is not available on this computer.",
+  "@pilotImportUnavailable": {
+    "description": "Shown when the GliderScore reader is missing."
+  },
+  "pilotImportChangedDuringReview": "Your participants changed while you were reviewing. Review again before importing.",
+  "@pilotImportChangedDuringReview": {
+    "description": "Shown when a participant was edited during the pilot import review."
+  },
+  "pilotImportReviewAgain": "Review again",
+  "@pilotImportReviewAgain": {
+    "description": "Button that rebuilds the pilot import review."
   }
 }
