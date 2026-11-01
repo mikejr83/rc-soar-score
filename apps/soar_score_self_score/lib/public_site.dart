@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'l10n/app_localizations.dart';
+
 /// Base URL of the public project site. Builds can point it elsewhere with
 /// `--dart-define=SOAR_SCORE_PUBLIC_SITE_URL=...`.
 const String publicSiteBaseUrl = String.fromEnvironment(
@@ -33,14 +35,42 @@ Future<bool> openInBrowser(Uri uri) async {
   }
 }
 
+/// Opens [uri] and says so in a snackbar when it could not be opened.
+Future<void> openLinkOrExplain(
+  BuildContext context,
+  Uri uri, {
+  UrlOpener opener = openInBrowser,
+}) async {
+  final messenger = ScaffoldMessenger.of(context);
+  final failed = AppLocalizations.of(context).linkOpenFailed;
+  var opened = false;
+  try {
+    opened = await opener(uri);
+  } on Object {
+    opened = false;
+  }
+  if (!opened) {
+    messenger.showSnackBar(SnackBar(content: Text(failed)));
+  }
+}
+
+/// Shows the licence list built into the app, which needs no network.
+void showAppLicences(BuildContext context) =>
+    showLicensePage(context: context, applicationName: 'RC Soar Score');
+
 /// Opens the open source licences page on the public site. When the site
 /// cannot be opened, shows the licence list built into the app instead.
 Future<void> openOpenSourceLicences(
   BuildContext context, {
   UrlOpener opener = openInBrowser,
 }) async {
-  final opened = await opener(openSourcePageUri());
+  var opened = false;
+  try {
+    opened = await opener(openSourcePageUri());
+  } on Object {
+    opened = false;
+  }
   if (!opened && context.mounted) {
-    showLicensePage(context: context);
+    showAppLicences(context);
   }
 }

@@ -23,4 +23,8 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get termsLink => 'Terms';
+
+  @override
+  String get linkOpenFailed =>
+      'Could not open the link. Check your network connection and try again.';
 }

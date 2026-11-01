@@ -123,6 +123,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Terms'**
   String get termsLink;
+
+  /// Snackbar when a link to the public site could not be opened.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open the link. Check your network connection and try again.'**
+  String get linkOpenFailed;
 }
 
 class _AppLocalizationsDelegate

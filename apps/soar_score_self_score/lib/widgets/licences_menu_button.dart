@@ -24,11 +24,11 @@ class LicencesMenuButton extends StatelessWidget {
           case _Entry.openSource:
             openOpenSourceLicences(context, opener: opener);
           case _Entry.inApp:
-            showLicensePage(context: context);
+            showAppLicences(context);
           case _Entry.privacy:
-            opener(privacyPageUri());
+            openLinkOrExplain(context, privacyPageUri(), opener: opener);
           case _Entry.terms:
-            opener(termsPageUri());
+            openLinkOrExplain(context, termsPageUri(), opener: opener);
         }
       },
       itemBuilder: (context) => [

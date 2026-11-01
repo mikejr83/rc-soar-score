@@ -88,6 +88,35 @@ void main() {
       expect(find.byType(LicensePage), findsOneWidget);
     },
   );
+
+  testWidgets('privacy link that cannot open says so', (tester) async {
+    await tester.pumpWidget(
+      _app(const Scaffold(body: LegalFooter(opener: _fail))),
+    );
+    await tester.tap(find.text('Privacy Policy'));
+    await tester.pump();
+    expect(find.textContaining('Could not open the link'), findsOneWidget);
+  });
+
+  testWidgets('a thrown opener also says so', (tester) async {
+    await tester.pumpWidget(
+      _app(const Scaffold(body: LegalFooter(opener: _throws))),
+    );
+    await tester.tap(find.text('Terms'));
+    await tester.pump();
+    expect(find.textContaining('Could not open the link'), findsOneWidget);
+  });
+
+  testWidgets('the in-app list is named for the app', (tester) async {
+    await tester.pumpWidget(
+      _app(const Scaffold(body: LegalFooter(opener: _fail))),
+    );
+    await tester.tap(find.text('Open source licences'));
+    await tester.pumpAndSettle();
+    expect(find.text('RC Soar Score'), findsWidgets);
+  });
 }
+
+Future<bool> _throws(Uri uri) async => throw Exception('blocked');
 
 Future<bool> _fail(Uri uri) async => false;

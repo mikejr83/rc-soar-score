@@ -19,5 +19,9 @@
   "termsLink": "Terms",
   "@termsLink": {
     "description": "Link to the Terms of Service on the public site."
+  },
+  "linkOpenFailed": "Could not open the link. Check your network connection and try again.",
+  "@linkOpenFailed": {
+    "description": "Snackbar when a link to the public site could not be opened."
   }
 }

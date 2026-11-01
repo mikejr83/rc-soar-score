@@ -22,11 +22,13 @@ class LegalFooter extends StatelessWidget {
           child: Text(l10n.openSourceLicencesLink),
         ),
         TextButton(
-          onPressed: () => opener(privacyPageUri()),
+          onPressed: () =>
+              openLinkOrExplain(context, privacyPageUri(), opener: opener),
           child: Text(l10n.privacyPolicyLink),
         ),
         TextButton(
-          onPressed: () => opener(termsPageUri()),
+          onPressed: () =>
+              openLinkOrExplain(context, termsPageUri(), opener: opener),
           child: Text(l10n.termsLink),
         ),
       ],

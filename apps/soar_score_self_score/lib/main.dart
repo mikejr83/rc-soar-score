@@ -4,11 +4,13 @@ import 'package:soar_score_ui/soar_score_ui.dart';
 
 import 'api_client_provider.dart';
 import 'app.dart';
+import 'bundled_licences.dart';
 import 'data/sample_self_score_repository.dart';
 import 'data/self_score_scope.dart';
 
 void main() {
   registerBrandFontLicenses();
+  registerProjectLicence();
   const String defaultUrl = 'http://localhost:8080';
   const String configuredUrl = String.fromEnvironment(
     'SOAR_SCORE_API_BASE_URL',
