@@ -61,13 +61,12 @@ GitHub environment secrets, stored in the `Production` environment (Settings >
 Environments > Production > Environment secrets); every deploy job runs in that
 environment. None are stored in the repository.
 
-| Secret          | Used by     | How to get it                                      |
-| --------------- | ----------- | -------------------------------------------------- |
-| `FLY_API_TOKEN` | API         | `fly tokens create deploy --app rc-soar-score-api` |
-| `VERCEL_TOKEN`  | public site | Vercel > Account Settings > Tokens                 |
-
-| `CLOUDFLARE_API_TOKEN` | Flutter apps | Cloudflare > My Profile > API Tokens > template "Edit Cloudflare Workers" |
-| `CLOUDFLARE_ACCOUNT_ID` | Flutter apps | Cloudflare dashboard > Workers & Pages (right sidebar) |
+| Secret                  | Used by      | How to get it                                                             |
+| ----------------------- | ------------ | ------------------------------------------------------------------------- |
+| `FLY_API_TOKEN`         | API          | `fly tokens create deploy --app rc-soar-score-api`                        |
+| `VERCEL_TOKEN`          | public site  | Vercel > Account Settings > Tokens                                        |
+| `CLOUDFLARE_API_TOKEN`  | Flutter apps | Cloudflare > My Profile > API Tokens > template "Edit Cloudflare Workers" |
+| `CLOUDFLARE_ACCOUNT_ID` | Flutter apps | Cloudflare dashboard > Workers & Pages (right sidebar)                    |
 
 The Vercel IDs are identifiers, not credentials, so they are Environment
 **variables** (the Variables tab of the same environment): `VERCEL_ORG_ID` (the
