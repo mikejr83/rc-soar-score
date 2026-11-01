@@ -5,9 +5,9 @@ import 'package:soar_score_ui_storage/soar_score_ui_storage.dart';
 /// `{"matrix": {"cmp": "1", "paper": "a4"}}`.
 ///
 /// The values are strings, as the viewer already speaks them: booleans as
-/// `'1'`/`'0'`, choices by key, and the pages to print as typed. A value the
-/// option parsers do not recognise falls back to its default, so a stale or
-/// foreign value never crashes the viewer.
+/// `'1'`/`'0'` and choices by key. The pages to print are view-local and are
+/// not remembered here. A value the option parsers do not recognise falls
+/// back to its default, so a stale or foreign value never crashes the viewer.
 final LocalUiKey<Map<String, Map<String, String>>> reportOptionsKey =
     LocalUiKey(
       name: 'report_options',

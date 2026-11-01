@@ -161,10 +161,9 @@ class ReportViewerController extends ChangeNotifier {
   bool get preview =>
       _params.previewExplicit ? _params.preview : _stored['preview'] == '1';
 
-  /// The pages to print or save, as typed: the viewer's, else the stored
-  /// ones, else every page.
-  String get printPages =>
-      _params.printPagesExplicit ? _params.printPages : _stored['pp'] ?? '';
+  /// The pages to print or save, as typed in this view; empty for every page.
+  /// Never remembered, so a range from another contest does not carry over.
+  String get printPages => _params.printPages;
 
   /// The filters in force: the URL's over the remembered options, over the
   /// report's defaults.
@@ -220,6 +219,9 @@ class ReportViewerController extends ChangeNotifier {
 
   Future<void> start() async {
     await _loadOptions();
+    if (_disposed) {
+      return;
+    }
     await _fetch();
     final interval = pollInterval;
     if (interval != null && !_disposed) {
@@ -235,7 +237,12 @@ class ReportViewerController extends ChangeNotifier {
     final map = store == null
         ? const <String, Map<String, String>>{}
         : await store.load();
+    if (_disposed) {
+      return;
+    }
+    // The pages to print are view-local; a stale `pp` left on disk is dropped.
     _stored = Map<String, String>.of(map[spec.kind.key] ?? const {});
+    _stored.remove('pp');
     _storedLoaded = true;
     // The stored options now join the view, so the URL carries them too. A
     // params the store already names is deep-equal, so this is a no-op
@@ -362,11 +369,6 @@ class ReportViewerController extends ChangeNotifier {
           ? params.preview
           : _stored['preview'] == '1',
       previewExplicit: params.previewExplicit || _stored.containsKey('preview'),
-      printPages: params.printPagesExplicit
-          ? params.printPages
-          : _stored['pp'] ?? '',
-      printPagesExplicit:
-          params.printPagesExplicit || _stored.containsKey('pp'),
     );
   }
 
@@ -472,10 +474,11 @@ class ReportViewerController extends ChangeNotifier {
     _rememberOption('preview', preview ? '1' : '0');
   }
 
-  /// The pages to print or save, as typed; empty for every page.
+  /// The pages to print or save, as typed; empty for every page. Kept in this
+  /// view's URL only: it is never remembered, so it does not carry to another
+  /// contest or to a view the range does not fit.
   void setPrintPages(String pages) {
     _setParams(_params.copyWith(printPages: pages, printPagesExplicit: true));
-    _rememberOption('pp', pages);
   }
 
   /// The overflow menu's "Reset filters and options": clears the view's

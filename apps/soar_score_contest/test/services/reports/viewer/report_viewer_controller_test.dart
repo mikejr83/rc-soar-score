@@ -124,7 +124,7 @@ void main() {
     expect(await store.load(), isEmpty);
   });
 
-  test('paper, preview and pages to print are remembered', () async {
+  test('paper and preview are remembered, the pages to print are not', () async {
     final controller = await _controller();
     final store = _storeOf(controller);
 
@@ -132,28 +132,33 @@ void main() {
     controller.setPreview(true);
     controller.setPrintPages('1-2');
     await _flush();
+    // The pages to print stay out of the account map.
     expect(await store.load(), {
-      'standings': {'paper': 'a4', 'preview': '1', 'pp': '1-2'},
+      'standings': {'paper': 'a4', 'preview': '1'},
     });
     expect(controller.params.previewExplicit, isTrue);
+    // The range the user typed is in this view's params and URL only.
+    expect(controller.params.printPages, '1-2');
     expect(controller.params.printPagesExplicit, isTrue);
+    expect(controller.params.toQuery()['pp'], '1-2');
   });
 
-  test('a stored preview and pages to print apply before a change', () async {
+  test('a stored preview applies, a stored pages-to-print is ignored', () async {
     final controller = await _controller(
       stored: {
         'standings': {'preview': '1', 'pp': '2'},
       },
     );
     expect(controller.preview, isTrue);
-    expect(controller.printPages, '2');
-    // The stored options join the params, so the URL carries them.
-    expect(controller.params.toQuery(), {'preview': '1', 'pp': '2'});
+    // The stale stored range does not carry over: the view starts on all
+    // pages and the URL names no range.
+    expect(controller.printPages, isEmpty);
+    expect(controller.params.toQuery(), {'preview': '1'});
 
     controller.setPreview(false);
     await _flush();
     expect(controller.preview, isFalse);
-    expect(controller.params.toQuery(), {'preview': '0', 'pp': '2'});
+    expect(controller.params.toQuery(), {'preview': '0'});
   });
 
   test(
