@@ -414,4 +414,122 @@ void main() {
       expect(repo.stored[b.id], b);
     },
   );
+
+  group('reviewed revisions', () {
+    Map<Id, int> snapshot() => {
+      for (final p in repo.stored.values) p.id: p.revision,
+    };
+
+    Future<PilotImportOutcome> runReviewed(
+      List<PilotDraft> drafts,
+      Map<Id, int> reviewed,
+    ) {
+      final matches = matcher.match(drafts, repo.stored.values.toList());
+      return service.apply(
+        _owner,
+        [for (final m in matches) PilotImportSelection.defaultFor(m)],
+        metadata: _metadata(),
+        reviewedRevisions: reviewed,
+      );
+    }
+
+    test('an unchanged list is applied', () async {
+      final a = await repo.save(_profile(), metadata: _metadata('seed'));
+      final outcome = await runReviewed([
+        _draft(first: 'Bea', last: 'Birch'),
+      ], snapshot());
+      expect(outcome.added, hasLength(1));
+      expect(repo.stored, hasLength(2));
+      expect(repo.stored[a.id], isNotNull);
+    });
+
+    test('a candidate that was skipped but changed refuses all', () async {
+      final a = await repo.save(
+        _profile(email: 'a@x.test'),
+        metadata: _metadata('seed'),
+      );
+      final reviewed = snapshot();
+      final matches = matcher.match([
+        _draft(email: 'a@x.test', club: 'C'),
+      ], repo.stored.values.toList());
+      await repo.save(
+        ParticipantProfile.fromJson({...a.toJson(), 'club': 'Edited'}),
+        metadata: _metadata('edit'),
+      );
+      await expectLater(
+        service.apply(
+          _owner,
+          [
+            PilotImportSelection(
+              match: matches.single,
+              choice: PilotImportChoice.skip,
+            ),
+            PilotImportSelection.defaultFor(
+              matcher.match([
+                _draft(no: 2, first: 'Zed', last: 'Zee'),
+              ], const []).single,
+            ),
+          ],
+          metadata: _metadata(),
+          reviewedRevisions: reviewed,
+        ),
+        throwsA(isA<PilotImportReviewChangedError>()),
+      );
+      expect(repo.stored, hasLength(1));
+    });
+
+    test('a participant added after the review refuses the import', () async {
+      await repo.save(_profile(), metadata: _metadata('seed'));
+      final reviewed = snapshot();
+      // Someone adds the pilot the review classified as new.
+      await repo.save(
+        _profile(first: 'Bea', last: 'Birch', email: 'bea@x.test'),
+        metadata: _metadata('hand'),
+      );
+      await expectLater(
+        runReviewed([
+          _draft(first: 'Bea', last: 'Birch', email: 'bea@x.test'),
+        ], reviewed),
+        throwsA(
+          isA<PilotImportReviewChangedError>().having(
+            (e) => e.changedIds,
+            'changedIds',
+            hasLength(1),
+          ),
+        ),
+      );
+      expect(repo.stored, hasLength(2));
+    });
+
+    test('a participant removed after the review refuses the import', () async {
+      final a = await repo.save(_profile(), metadata: _metadata('seed'));
+      final reviewed = snapshot();
+      await repo.delete(a.id, metadata: _metadata('del'));
+      await expectLater(
+        runReviewed([_draft(first: 'Bea', last: 'Birch')], reviewed),
+        throwsA(isA<PilotImportReviewChangedError>()),
+      );
+    });
+
+    test('a retry after the import was stored is not refused', () async {
+      final reviewed = <Id, int>{};
+      final matches = matcher.match([_draft()], const []);
+      final selections = [PilotImportSelection.defaultFor(matches.single)];
+      await service.apply(
+        _owner,
+        selections,
+        metadata: _metadata(),
+        reviewedRevisions: reviewed,
+      );
+      final again = await service.apply(
+        _owner,
+        selections,
+        metadata: _metadata('op-2'),
+        reviewedRevisions: reviewed,
+      );
+      expect(again.added, isEmpty);
+      expect(again.unchanged, 1);
+      expect(repo.stored, hasLength(1));
+    });
+  });
 }

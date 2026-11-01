@@ -42,11 +42,12 @@ void main() {
     WidgetTester tester, {
     String? chosen = '/gs/Contest.mdb',
     Future<GliderScoreImportResult> Function(String)? read,
+    Future<String?> Function()? choose,
   }) async {
     final controller = PilotImportController(
       store: store,
       readFile: read ?? (_) async => pilotsSnapshot(rows),
-      files: GliderScoreFiles(choose: () async => chosen),
+      files: GliderScoreFiles(choose: choose ?? () async => chosen),
     );
     addTearDown(controller.dispose);
     tester.view.physicalSize = const Size(1000, 1000);
@@ -231,5 +232,34 @@ void main() {
       find.byKey(const ValueKey('pilot-import-confirm')),
     );
     expect(confirm.onPressed, isNull);
+  });
+
+  testWidgets('a throwing file chooser shows the error and can retry', (
+    tester,
+  ) async {
+    var calls = 0;
+    await open(
+      tester,
+      choose: () async {
+        calls++;
+        if (calls == 1) throw StateError('no picker');
+        return '/gs/Contest.mdb';
+      },
+    );
+    expect(find.byKey(const ValueKey('pilot-import-error')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('pilot-import-choose-again')));
+    await tester.pumpAndSettle();
+    expect(find.text('New (1)'), findsOneWidget);
+  });
+
+  testWidgets('a changed participant list offers a new review', (tester) async {
+    await open(tester);
+    store.applyError = PilotImportReviewChangedError(const []);
+    await tester.tap(find.byKey(const ValueKey('pilot-import-confirm')));
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const ValueKey('pilot-import-review-again')),
+      findsOneWidget,
+    );
   });
 }

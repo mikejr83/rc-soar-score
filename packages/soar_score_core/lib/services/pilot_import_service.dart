@@ -9,6 +9,20 @@ import '../repositories/participant_profile_repository.dart';
 import '../repositories/stale_revision_error.dart';
 import 'pilot_import_matcher.dart';
 
+/// The participants differ from the list the import was reviewed against:
+/// one was added, removed or edited, whether or not the import touches it.
+class PilotImportReviewChangedError extends Error {
+  PilotImportReviewChangedError(this.changedIds);
+
+  /// The participants that were added, removed or changed since the review.
+  final List<Id> changedIds;
+
+  @override
+  String toString() =>
+      'PilotImportReviewChangedError: ${changedIds.length} participant(s) '
+      'changed since the review';
+}
+
 /// Stores the pilots a director chose to import from GliderScore.
 ///
 /// New profiles and updates are written in one transaction through the
@@ -20,6 +34,10 @@ import 'pilot_import_matcher.dart';
 /// again. An update is refused when the stored profile changed since the
 /// review. This guards a retry of one operation; re-importing a file is the
 /// matcher's job.
+///
+/// When [apply] is given the revisions the review saw, the whole list must
+/// still match them, so an edit to a participant the import does not touch
+/// (which could turn a "new" pilot into a duplicate) also refuses the import.
 class PilotImportService {
   PilotImportService(this.profiles, {DateTime Function()? clock})
     : _clock = clock ?? DateTime.now;
@@ -31,7 +49,11 @@ class PilotImportService {
     Id ownerAccountId,
     List<PilotImportSelection> selections, {
     required MutationMetadata metadata,
+    Map<Id, int>? reviewedRevisions,
   }) async {
+    if (reviewedRevisions != null) {
+      await _checkReviewed(ownerAccountId, selections, reviewedRevisions);
+    }
     final now = _clock();
     final toSave = <ParticipantProfile>[];
     final working = <Id, ParticipantProfile>{};
@@ -119,6 +141,32 @@ class PilotImportService {
       unchanged: unchanged,
       skipped: skipped,
     );
+  }
+
+  Future<void> _checkReviewed(
+    Id ownerAccountId,
+    List<PilotImportSelection> selections,
+    Map<Id, int> reviewed,
+  ) async {
+    // A profile an earlier try of this same import stored is expected.
+    final ours = {
+      for (final s in selections)
+        if (s.choice == PilotImportChoice.add) s.newProfileId,
+    };
+    final stored = {
+      for (final p in await profiles.listForOwner(ownerAccountId))
+        p.id: p.revision,
+    };
+    final changed = <Id>[
+      for (final entry in stored.entries)
+        if (reviewed[entry.key] != entry.value && !ours.contains(entry.key))
+          entry.key,
+      for (final id in reviewed.keys)
+        if (!stored.containsKey(id)) id,
+    ];
+    if (changed.isNotEmpty) {
+      throw PilotImportReviewChangedError(changed);
+    }
   }
 
   /// [existing] with the non-blank values of [draft] applied, or null when it

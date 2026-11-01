@@ -177,6 +177,12 @@ class _PilotImportDialogState extends State<PilotImportDialog> {
               key: const ValueKey('pilot-import-review-again'),
               onPressed: _c.reviewAgain,
               child: Text(l10n.pilotImportReviewAgain),
+            )
+          else if (_c.canChooseAgain)
+            FilledButton(
+              key: const ValueKey('pilot-import-choose-again'),
+              onPressed: _c.reviewAgain,
+              child: Text(l10n.pilotImportChooseAgain),
             ),
         ];
     }

@@ -132,4 +132,46 @@ void main() {
       expect(reads, hasLength(1), reason: 'the file is not read again');
     },
   );
+
+  test('the review revisions of every participant go to the store', () async {
+    final c = controller();
+    await c.chooseAndRead();
+    await c.apply();
+    expect(store.appliedRevisions.single, {
+      erin.id: erin.revision,
+      sam.id: sam.revision,
+    });
+  });
+
+  test('a changed participant list asks for a new review', () async {
+    final c = controller();
+    await c.chooseAndRead();
+    store.applyError = PilotImportReviewChangedError([erin.id]);
+    await c.apply();
+    expect(c.step, PilotImportStep.failed);
+    expect(c.changedDuringReview, isTrue);
+  });
+
+  test('a file chooser that throws is a failure that can be retried', () async {
+    var calls = 0;
+    final c = PilotImportController(
+      store: store,
+      readFile: (_) async => pilotsSnapshot(rows),
+      files: GliderScoreFiles(
+        choose: () async {
+          calls++;
+          if (calls == 1) throw StateError('plugin missing');
+          return r'C:\gs\Contest.mdb';
+        },
+      ),
+    );
+    expect(await c.chooseAndRead(), isTrue);
+    expect(c.step, PilotImportStep.failed);
+    expect(c.error, isA<StateError>());
+    expect(c.canChooseAgain, isTrue);
+    expect(c.changedDuringReview, isFalse);
+
+    await c.reviewAgain();
+    expect(c.step, PilotImportStep.review);
+  });
 }

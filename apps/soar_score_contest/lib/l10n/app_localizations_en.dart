@@ -1437,5 +1437,8 @@ class AppLocalizationsEn extends AppLocalizations {
       'Your participants changed while you were reviewing. Review again before importing.';
 
   @override
+  String get pilotImportChooseAgain => 'Choose a file again';
+
+  @override
   String get pilotImportReviewAgain => 'Review again';
 }

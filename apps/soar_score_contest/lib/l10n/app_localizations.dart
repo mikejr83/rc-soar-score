@@ -2132,6 +2132,12 @@ abstract class AppLocalizations {
   /// **'Your participants changed while you were reviewing. Review again before importing.'**
   String get pilotImportChangedDuringReview;
 
+  /// Button that opens the file chooser again after it failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a file again'**
+  String get pilotImportChooseAgain;
+
   /// Button that rebuilds the pilot import review.
   ///
   /// In en, this message translates to:

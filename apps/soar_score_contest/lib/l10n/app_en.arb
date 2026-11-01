@@ -1686,6 +1686,10 @@
   "@pilotImportChangedDuringReview": {
     "description": "Shown when a participant was edited during the pilot import review."
   },
+  "pilotImportChooseAgain": "Choose a file again",
+  "@pilotImportChooseAgain": {
+    "description": "Button that opens the file chooser again after it failed."
+  },
   "pilotImportReviewAgain": "Review again",
   "@pilotImportReviewAgain": {
     "description": "Button that rebuilds the pilot import review."

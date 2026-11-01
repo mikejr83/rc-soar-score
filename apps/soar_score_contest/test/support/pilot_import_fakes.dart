@@ -40,6 +40,7 @@ class FakePilotImportStore implements PilotImportStore {
 
   List<ParticipantProfile> profiles;
   final applied = <List<PilotImportSelection>>[];
+  final appliedRevisions = <Map<Id, int>>[];
   Object? applyError;
 
   @override
@@ -47,10 +48,12 @@ class FakePilotImportStore implements PilotImportStore {
 
   @override
   Future<PilotImportOutcome> apply(
-    List<PilotImportSelection> selections,
-  ) async {
+    List<PilotImportSelection> selections, {
+    required Map<Id, int> reviewedRevisions,
+  }) async {
     if (applyError != null) throw applyError!;
     applied.add(selections);
+    appliedRevisions.add(reviewedRevisions);
     var added = <ParticipantProfile>[], updated = <ParticipantProfile>[];
     var unchanged = 0, skipped = 0;
     for (final s in selections) {

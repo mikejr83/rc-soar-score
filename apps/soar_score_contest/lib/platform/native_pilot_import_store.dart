@@ -22,8 +22,9 @@ class NativePilotImportStore implements PilotImportStore {
 
   @override
   Future<core.PilotImportOutcome> apply(
-    List<core.PilotImportSelection> selections,
-  ) {
+    List<core.PilotImportSelection> selections, {
+    required Map<core.Id, int> reviewedRevisions,
+  }) {
     final acting = _server.actingAccountId;
     return core.PilotImportService(
       _server.repository.participantProfileRepository,
@@ -31,6 +32,7 @@ class NativePilotImportStore implements PilotImportStore {
     ).apply(
       acting,
       selections,
+      reviewedRevisions: reviewedRevisions,
       metadata: Principal(accountId: acting).mutationMetadata(
         clientMutationId: 'gliderscore-pilots-${core.Id.create().value}',
         clientTime: _clock().toUtc(),

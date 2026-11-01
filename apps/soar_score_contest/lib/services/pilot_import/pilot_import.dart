@@ -24,9 +24,15 @@ abstract class PilotImportStore {
   /// The participants the director has now.
   Future<List<ParticipantProfile>> existing();
 
-  /// Stores the chosen pilots in one transaction. Throws a
-  /// [StaleRevisionError] when a participant changed since the review.
-  Future<PilotImportOutcome> apply(List<PilotImportSelection> selections);
+  /// Stores the chosen pilots in one transaction. [reviewedRevisions] holds
+  /// the revision of every participant the review saw. Throws a
+  /// [StaleRevisionError] when a chosen participant changed since the review,
+  /// and a [PilotImportReviewChangedError] when any participant was added,
+  /// removed or changed.
+  Future<PilotImportOutcome> apply(
+    List<PilotImportSelection> selections, {
+    required Map<Id, int> reviewedRevisions,
+  });
 }
 
 /// The system file dialog the import uses. A journey cannot drive it, so it
@@ -142,12 +148,23 @@ class PilotImportController extends ChangeNotifier {
   Object? get error => _error;
 
   /// True when the failure is that a participant changed during the review.
-  bool get changedDuringReview => _error is StaleRevisionError;
+  bool get changedDuringReview =>
+      _error is StaleRevisionError || _error is PilotImportReviewChangedError;
+
+  /// True when nothing was read yet, so a failure can be retried by choosing
+  /// a file again.
+  bool get canChooseAgain => _result == null;
 
   /// Asks for a file and reads it. Returns false when the director cancelled
   /// the chooser.
   Future<bool> chooseAndRead() async {
-    final path = await _files.choose();
+    final String? path;
+    try {
+      path = await _files.choose();
+    } on Object catch (e) {
+      _fail(e);
+      return true;
+    }
     if (path == null) {
       return false;
     }
@@ -183,9 +200,13 @@ class PilotImportController extends ChangeNotifier {
   }
 
   /// Reads the participants again and rebuilds the review from the same
-  /// file, after a participant changed under it.
+  /// file, after a participant changed under it. With no file read yet (the
+  /// chooser failed) it asks for a file again.
   Future<void> reviewAgain() async {
-    if (_result == null) return;
+    if (_result == null) {
+      await chooseAndRead();
+      return;
+    }
     _set(PilotImportStep.reading);
     try {
       await _prepare();
@@ -244,7 +265,12 @@ class PilotImportController extends ChangeNotifier {
   Future<void> apply() async {
     _set(PilotImportStep.applying);
     try {
-      _outcome = await store.apply(_selections);
+      _outcome = await store.apply(
+        _selections,
+        reviewedRevisions: {
+          for (final p in _review!.existing) p.id: p.revision,
+        },
+      );
       _set(PilotImportStep.done);
     } on Object catch (e) {
       _fail(e);
