@@ -31,6 +31,10 @@ melos.iml
 # VS Code settings
 .vscode/settings.json
 
+
+graphify-out/*
+!graphify-out/graph.json
+
 # Agent items
 # Kilo agent plans
 /.kilo/plans
