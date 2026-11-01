@@ -25,12 +25,13 @@ Licensing (license texts in this directory):
       MinGW-w64 winpthreads (from the MSYS2 MinGW32 toolchain,
       https://www.mingw-w64.org), under its permissive MIT/BSD-style
       license. It may accompany the app without imposing copyleft on it.
-      Its copyright notice is the one in the mingw-w64 source tree
-      (mingw-w64-libraries/winpthreads/COPYING).
+      Its copyright notice is in winpthreads-COPYING.txt (from
+      mingw-w64-libraries/winpthreads/COPYING in the mingw-w64 source tree).
   libgcc_s_dw2-1.dll
       GNU General Public License v3 with the GCC runtime exception (MinGW
-      GCC runtime) - freely redistributable as a sidecar, as with the other
-      runtime DLLs.
+      GCC runtime) - GPL-3.0.txt and GCC-exception-3.1.txt. The exception
+      lets the DLL accompany the app as a sidecar, as with the other runtime
+      DLLs.
 
 Source:
   The mdb JSON helpers are the MinGW32 (MSYS2) build of mdbtools from

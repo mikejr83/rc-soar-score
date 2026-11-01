@@ -35,7 +35,16 @@ zip, come from the same data:
 
 ```
 scripts/generate-licences.sh --product contest-app --notices THIRD_PARTY_NOTICES.txt
+scripts/generate-licences.sh --product contest-app --json contest-app-licences.json
 ```
+
+With `--product` the generator reads only that product's inputs: the Dart
+apps need the pub cache (`dart pub get`), and only the public site needs
+`node_modules`. `--json` writes that product's entries and texts in the same
+shape as `licences.json`, for an app that wants to bundle the list as an
+asset. The bundled native components (OpenSSL, cpp-httplib, nlohmann/json,
+the GliderScore helpers) are listed in the generator only, so the notices
+file, the in-app list and the web page agree.
 
 The staleness check is a vitest test (`src/lib/licences.test.ts`, run by
 `npm test` and the `public-site` CI job). It fails when `pubspec.lock`,
@@ -56,13 +65,8 @@ The staleness check is a vitest test (`src/lib/licences.test.ts`, run by
 | `dbus`, `nm` (Dart)                                   | MPL-2.0                            | Flutter apps (Linux plugin path) | File-level source availability for modified files                                         | Unmodified; the page links their sources.                                                 |
 | `@img/sharp-libvips-linux-x64`                        | LGPL-3.0                           | Public site build on Vercel      | Binary is not distributed to users; notice and text listed                                | Listed with LGPL-3.0 and GPL-3.0 texts.                                                   |
 
-Before the Windows alpha is distributed:
-
-1. Add the winpthreads copyright text and the GPL-3.0 plus GCC runtime
-   exception texts to `tools/gs_importer/` and install them with the helpers
-   (`docs/windows-installer-requirements.md`).
-2. Put `THIRD_PARTY_NOTICES.txt` (generated as above) in the zip.
-3. Flutter's engine bundles further components (Skia, HarfBuzz, ICU, FreeType
-   and others). The generated file credits Flutter and points to its
-   repository. An in-app licence screen (Flutter's `showLicensePage`) would
-   cover them completely and is worth considering with #688 and #689.
+Before the Windows alpha is distributed: put `THIRD_PARTY_NOTICES.txt`
+(generated as above) in the zip (the release workflow in #690 does this).
+Flutter's engine bundles further components (Skia, HarfBuzz, ICU, FreeType and
+others); the generated file credits Flutter and points to its repository, and
+the app's built-in licence screen (Flutter's `showLicensePage`) covers them.

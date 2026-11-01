@@ -10,6 +10,11 @@
 //   dart scripts/generate_licences.dart --check          fail if it is stale
 //   dart scripts/generate_licences.dart --product contest-app \
 //       --notices THIRD_PARTY_NOTICES.txt                plain-text notices
+//   ... --product contest-app --json FILE                that product's data
+//                                                        (bundle as an asset)
+//
+// With --product only that product's inputs are read: the Dart apps need the
+// pub cache (`dart pub get`), only the public site needs node_modules.
 //
 // Wrappers: scripts/generate-licences.sh and scripts/generate-licences.ps1.
 // It needs only the Dart SDK (no pub packages). Output is deterministic: no
@@ -545,20 +550,17 @@ List<Map<String, dynamic>> _windowsEntries() {
       version: '',
       license: 'GPL-3.0 WITH GCC-exception-3.1',
       homepage: 'https://gcc.gnu.org/',
-      files: ['$gs/NOTICE.txt'],
+      files: ['$gs/GPL-3.0.txt', '$gs/GCC-exception-3.1.txt'],
       note:
-          'Licensed under the GNU GPL v3 with the GCC Runtime Library '
-          'Exception; the exception allows it to accompany the app. $sourceNote',
+          'The GCC Runtime Library Exception lets this DLL accompany the app. $sourceNote',
     ),
     _asset(
       name: 'winpthreads (libwinpthread-1.dll)',
       version: '',
       license: 'MIT',
       homepage: 'https://www.mingw-w64.org/',
-      files: ['$gs/NOTICE.txt'],
-      note:
-          'MinGW-w64 winpthreads, under its permissive MIT/BSD-style licence. '
-          '$sourceNote',
+      files: ['$gs/winpthreads-COPYING.txt'],
+      note: 'MinGW-w64 winpthreads. $sourceNote',
     ),
     _entry(
       name: 'OpenSSL (libssl-3-x64.dll, libcrypto-3-x64.dll)',
@@ -571,18 +573,52 @@ List<Map<String, dynamic>> _windowsEntries() {
           'Bundled with the sign-in plugin (auth0_flutter) next to the '
           'Windows executable. Copyright The OpenSSL Project Authors.',
     ),
+    _entry(
+      name: 'cpp-httplib',
+      version: '',
+      license: 'MIT',
+      homepage: 'https://github.com/yhirose/cpp-httplib',
+      source: 'bundled',
+      texts: [_addText(_licenceText('cpp-httplib.txt'))],
+      note:
+          'Linked into the Windows app by the sign-in plugin (auth0_flutter, '
+          'native dependencies from vcpkg).',
+    ),
+    _entry(
+      name: 'nlohmann/json',
+      version: '',
+      license: 'MIT',
+      homepage: 'https://github.com/nlohmann/json',
+      source: 'bundled',
+      texts: [_addText(_licenceText('nlohmann-json.txt'))],
+      note:
+          'Linked into the Windows app by the sign-in plugin (auth0_flutter, '
+          'native dependencies from vcpkg).',
+    ),
   ];
 }
 
 // -------------------------------------------------------------- output
 
-Map<String, dynamic> _build() {
+/// Builds the data for every product, or only for [only]. A single product
+/// reads just what it needs: the npm lockfile and node_modules only for the
+/// public site, the pub cache only for the Dart apps.
+Map<String, dynamic> _build({String? only}) {
   _overrides = jsonDecode(
     _read('scripts/licence-overrides.json'),
   ) as Map<String, dynamic>;
-  final graph = _loadPubGraph();
+  final selected = [
+    for (final p in _products)
+      if (only == null || p.id == only) p,
+  ];
+  if (selected.isEmpty) {
+    _fail('unknown product "$only" (${_products.map((p) => p.id).join(', ')})');
+  }
+  final graph = selected.any((p) => p.dartRoot != null)
+      ? _loadPubGraph()
+      : const <String, dynamic>{};
   final products = <Map<String, dynamic>>[];
-  for (final product in _products) {
+  for (final product in selected) {
     final entries = <Map<String, dynamic>>[
       if (product.dartRoot != null) ..._dartEntries(graph, product),
       if (product.npm) ..._npmEntries(),
@@ -602,6 +638,9 @@ Map<String, dynamic> _build() {
       'summary': product.summary,
       'entries': entries,
     });
+  }
+  if (only != null) {
+    return {'schema': 1, 'products': products, 'texts': _texts};
   }
   return {
     'schema': 1,
@@ -659,6 +698,7 @@ void main(List<String> args) {
   _root = Directory.fromUri(Platform.script.resolve('..'));
   String? notices;
   String? product;
+  String? jsonOut;
   var check = false;
   for (var i = 0; i < args.length; i++) {
     switch (args[i]) {
@@ -668,21 +708,32 @@ void main(List<String> args) {
         notices = args[++i];
       case '--product':
         product = args[++i];
+      case '--json':
+        jsonOut = args[++i];
       default:
         _fail('unknown argument ${args[i]}');
     }
   }
-  if ((notices == null) != (product == null)) {
-    _fail('--notices <file> and --product <id> go together');
+  if (product != null && notices == null && jsonOut == null) {
+    _fail('--product <id> needs --notices <file> and/or --json <file>');
+  }
+  if (product == null && (notices != null || jsonOut != null)) {
+    _fail('--notices and --json need --product <id>');
   }
 
-  final data = _build();
+  final data = _build(only: product);
   final json = '${const JsonEncoder.withIndent('  ').convert(data)}\n';
   final out = File('${_root.path}/$_outRelative');
 
-  if (notices != null) {
-    File(notices).writeAsStringSync(_notices(data, product!));
-    stdout.writeln('wrote $notices');
+  if (product != null) {
+    if (notices != null) {
+      File(notices).writeAsStringSync(_notices(data, product));
+      stdout.writeln('wrote $notices');
+    }
+    if (jsonOut != null) {
+      File(jsonOut).writeAsStringSync(json);
+      stdout.writeln('wrote $jsonOut');
+    }
     return;
   }
   if (check) {
