@@ -11,6 +11,8 @@ import '../models/imports/pilot_import_draft.dart';
 class GliderScorePilotMapper {
   const GliderScorePilotMapper();
 
+  static final _emailPattern = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
+
   /// GliderScore columns with no `ParticipantProfile` field.
   static const droppedColumns = <String>[
     'Street',
@@ -51,6 +53,15 @@ class GliderScorePilotMapper {
       final first = _text(row['FirstName']);
       final last = _text(row['LastName']);
 
+      if (no == null) {
+        skipped.add(
+          const SkippedPilot(
+            sourcePilotNo: null,
+            reason: PilotImportWarning.missingNumber,
+          ),
+        );
+        continue;
+      }
       if (first == null || last == null) {
         skipped.add(
           SkippedPilot(
@@ -64,7 +75,7 @@ class GliderScorePilotMapper {
         excluded++;
         continue;
       }
-      if (no != null && !seenNumbers.add(no)) {
+      if (!seenNumbers.add(no)) {
         skipped.add(
           SkippedPilot(
             sourcePilotNo: no,
@@ -77,7 +88,7 @@ class GliderScorePilotMapper {
       final pilotWarnings = <PilotImportWarning>[];
 
       String? email = _text(row['Email']);
-      if (email != null && !email.contains('@')) {
+      if (email != null && !_emailPattern.hasMatch(email)) {
         pilotWarnings.add(
           PilotImportWarning(
             PilotImportWarning.emailInvalid,

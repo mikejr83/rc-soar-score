@@ -3,7 +3,8 @@
 //
 // The real file holds names and email addresses, so nothing from it is
 // committed: this script replaces every identifying value with a stable fake
-// and refuses to write anything that still contains an original name or email.
+// and refuses to write anything that still contains an original text value.
+// Only an allowlist of columns is carried over; every other column is dropped.
 //
 // Steps (any machine with mdbtools; on Windows use the bundled
 // tools/gs_importer/bin/x86/mdb-json.exe):
@@ -146,6 +147,29 @@ void main(List<String> args) {
   }
 }
 
+/// Columns kept as they are: codes and flags that identify nobody. Anything
+/// not named here or in [_replaced] is dropped, so an unexpected column (a
+/// phone number, an address) can never reach a fixture.
+const _keptVerbatim = <String>{
+  'PilotNo',
+  'Country',
+  'State',
+  'UsualClass',
+  'Filter',
+};
+
+/// Columns replaced with fakes (or dropped when blank).
+const _replaced = <String>{
+  'FirstName',
+  'LastName',
+  'Email',
+  'FAINumber',
+  'FAI_ID',
+  'OtherRegistration',
+  'Club',
+  'Town',
+};
+
 Map<String, Object?> _scrub(Map<String, Object?> row) {
   final no = (row['PilotNo'] as num).toInt();
   final isTestUser = ((row['LastName'] as String?) ?? '')
@@ -155,14 +179,25 @@ Map<String, Object?> _scrub(Map<String, Object?> row) {
   final last =
       _lastNames[no % _lastNames.length] +
       (no ~/ _lastNames.length == 0 ? '' : '${no ~/ _lastNames.length}');
+  // "0", blank and whitespace are GliderScore's "none"; a real number becomes
+  // a fake that is stable per pilot.
+  Object? number(Object? value, String prefix) =>
+      _hasText(value) && !RegExp(r'^\s*0+\s*$').hasMatch(value! as String)
+      ? '$prefix$no'
+      : value;
   return {
     for (final entry in row.entries)
-      entry.key: switch (entry.key) {
-        'FirstName' => _firstNames[(no * 7) % _firstNames.length],
-        'LastName' => isTestUser ? 'ZZ$last' : last,
-        'Email' => _hasText(entry.value) ? 'fixture$no@$_emailDomain' : null,
-        _ => entry.value,
-      },
+      if (_keptVerbatim.contains(entry.key) || _replaced.contains(entry.key))
+        entry.key: switch (entry.key) {
+          'FirstName' => _firstNames[(no * 7) % _firstNames.length],
+          'LastName' => isTestUser ? 'ZZ$last' : last,
+          'Email' => _hasText(entry.value) ? 'fixture$no@$_emailDomain' : null,
+          'FAINumber' || 'FAI_ID' => number(entry.value, 'FAI-'),
+          'OtherRegistration' => number(entry.value, 'REG-'),
+          'Club' => _hasText(entry.value) ? 'Example Club ${no % 5}' : null,
+          'Town' => _hasText(entry.value) ? 'Exampleton' : null,
+          _ => entry.value,
+        },
   }..removeWhere((_, value) => value == null);
 }
 
@@ -281,9 +316,12 @@ void _refuseLeaks(
 ) {
   final secrets = <String>{};
   for (final row in original) {
-    for (final key in const ['FirstName', 'LastName', 'Email']) {
-      final value = row[key];
-      if (value is String && value.trim().length >= 3) {
+    for (final entry in row.entries) {
+      if (_keptVerbatim.contains(entry.key)) {
+        continue;
+      }
+      final value = entry.value;
+      if (value is String && value.trim().length >= 4) {
         secrets.add(value.trim().toLowerCase());
       }
     }

@@ -90,15 +90,51 @@ void main() {
       expect(byOrg.rule, PilotMatchRule.nationalOrgId);
     });
 
-    test('email outranks FAI, which outranks org id', () {
+    test('identifiers that point at different profiles are a conflict', () {
       final byEmail = _profile(first: 'A', last: 'A', email: 'e@x.test');
       final byFai = _profile(first: 'B', last: 'B', fai: 'F1');
       final m = one(
         _draft(first: 'C', last: 'C', email: 'e@x.test', fai: 'F1'),
         [byFai, byEmail],
       );
+      expect(m.kind, PilotMatchKind.likely);
+      expect(m.conflict, isTrue);
       expect(m.rule, PilotMatchRule.email);
-      expect(m.candidateIds, [byEmail.id]);
+      expect(m.candidateIds, unorderedEquals([byEmail.id, byFai.id]));
+      expect(m.defaultAction, PilotImportAction.ask);
+      expect(m.changes, isEmpty);
+    });
+
+    test('an incoming FAI number owned by another profile is a conflict', () {
+      final owner = _profile(first: 'A', last: 'A', email: 'e@x.test');
+      final other = _profile(first: 'B', last: 'B', fai: 'F9');
+      final m = one(
+        _draft(first: 'A', last: 'A', email: 'e@x.test', fai: 'F9'),
+        [owner, other],
+      );
+      expect(m.conflict, isTrue);
+      expect(m.kind, PilotMatchKind.likely);
+    });
+
+    test('identifiers that agree on one profile stay exact', () {
+      final p = _profile(first: 'A', last: 'A', email: 'e@x.test', fai: 'F1');
+      final m = one(_draft(email: 'e@x.test', fai: 'f1'), [p]);
+      expect(m.kind, PilotMatchKind.exact);
+      expect(m.conflict, isFalse);
+      expect(m.candidateIds, [p.id]);
+    });
+
+    test('an identifier only one profile holds still matches', () {
+      final p = _profile(first: 'A', last: 'A', email: 'e@x.test');
+      final m = one(_draft(email: 'e@x.test', fai: 'NEW1'), [p]);
+      expect(m.kind, PilotMatchKind.exact);
+      expect(m.changes.single.field, 'faiNumber');
+    });
+
+    test('the matcher records the revision of each candidate', () {
+      final p = _profile(email: 'e@x.test');
+      final m = one(_draft(email: 'e@x.test'), [p]);
+      expect(m.candidateRevisions, {p.id: p.revision});
     });
 
     test('name alone is only a likely match, with no default', () {
@@ -198,6 +234,28 @@ void main() {
         _draft(no: 2, first: 'B', last: 'Two', email: ' S@x.test'),
       ], const []);
       expect(matches[1].duplicateOfSourcePilotNo, 1);
+    });
+  });
+
+  group('name normalisation', () {
+    test('ignores case, accents, ligatures and repeated spaces', () {
+      String n(String f, String l) => PilotImportMatcher.normalizeName(f, l);
+      expect(n('Zoë', 'Åkerman'), n('zoe', ' akerman'));
+      expect(n('Jörg', 'Straße'), n('JORG', 'Strasse'));
+      expect(n('Æsa', 'Ørsted'), n('aesa', 'orsted'));
+      expect(n('Anne  Marie', 'X'), n('anne marie', 'x'));
+    });
+
+    test('keeps names that differ apart', () {
+      String n(String f, String l) => PilotImportMatcher.normalizeName(f, l);
+      expect(n('Jon', 'Smith'), isNot(n('John', 'Smith')));
+    });
+
+    test('email and number normalisation', () {
+      expect(PilotImportMatcher.normalizeEmail('  A@B.C '), 'a@b.c');
+      expect(PilotImportMatcher.normalizeEmail('   '), isNull);
+      expect(PilotImportMatcher.normalizeNumber(' fai 12 '), 'FAI12');
+      expect(PilotImportMatcher.normalizeNumber(''), isNull);
     });
   });
 

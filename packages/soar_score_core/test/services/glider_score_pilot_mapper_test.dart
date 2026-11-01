@@ -213,7 +213,7 @@ void main() {
       final draft = mapper.map(
         _rows(const [
           {'PilotNo': '12', 'FirstName': 5, 'LastName': true, 'Email': 'nope'},
-          {'PilotNo': null, 'FirstName': 'Ok', 'LastName': 'Pilot', 'Email': 3},
+          {'PilotNo': 13, 'FirstName': 'Ok', 'LastName': 'Pilot', 'Email': 3},
         ]),
       );
       expect(draft.pilots, hasLength(2));
@@ -222,6 +222,52 @@ void main() {
         _codes(draft.pilots.first),
         contains(PilotImportWarning.emailInvalid),
       );
+    });
+
+    test('a row without a usable PilotNo is skipped with a code', () {
+      final draft = mapper.map(
+        _rows(const [
+          {'FirstName': 'No', 'LastName': 'Number'},
+          {'PilotNo': 'abc', 'FirstName': 'Bad', 'LastName': 'Number'},
+          {'PilotNo': null, 'FirstName': 'Null', 'LastName': 'Number'},
+          {'PilotNo': 5, 'FirstName': 'Good', 'LastName': 'Number'},
+        ]),
+      );
+      expect(draft.pilots.single.sourcePilotNo, 5);
+      expect(draft.skipped, hasLength(3));
+      expect(
+        draft.skipped.every(
+          (s) => s.reason == PilotImportWarning.missingNumber,
+        ),
+        isTrue,
+      );
+    });
+
+    test('malformed emails are dropped with a warning', () {
+      for (final bad in ['a@', '@x.test', 'a b@x.test', 'a@x', 'a@@x.test']) {
+        final draft = mapper.map(
+          _rows([
+            {'PilotNo': 1, 'FirstName': 'A', 'LastName': 'B', 'Email': bad},
+          ]),
+        );
+        expect(draft.pilots.single.email, isNull, reason: bad);
+        expect(
+          _codes(draft.pilots.single),
+          contains(PilotImportWarning.emailInvalid),
+          reason: bad,
+        );
+      }
+      final ok = mapper.map(
+        _rows(const [
+          {
+            'PilotNo': 1,
+            'FirstName': 'A',
+            'LastName': 'B',
+            'Email': ' a@x.test ',
+          },
+        ]),
+      );
+      expect(ok.pilots.single.email, 'a@x.test');
     });
 
     test('FAI_ID is used when FAINumber is a placeholder', () {

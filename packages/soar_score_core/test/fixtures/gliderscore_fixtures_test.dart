@@ -57,6 +57,35 @@ void main() {
       );
     });
 
+    test(
+      'derived snapshots carry only allowlisted columns and fake values',
+      () {
+        const allowed = {
+          'PilotNo', 'Country', 'State', 'UsualClass', 'Filter', 'FirstName',
+          'LastName', 'Email', 'FAINumber', 'FAI_ID', 'OtherRegistration',
+          'Club', 'Town',
+          // Added on purpose to the extra-columns snapshot.
+          'FutureColumn', 'AnotherNewThing',
+        };
+        final number = RegExp(r'^(0|(FAI|REG)-\d+)$');
+        for (final file in [
+          'pilots_reference.json',
+          'pilots_old_columns.json',
+          'pilots_extra_columns.json',
+        ]) {
+          for (final row in _pilotRows(file)) {
+            expect(allowed.containsAll(row.keys), isTrue, reason: '$file $row');
+            for (final key in ['FAINumber', 'FAI_ID', 'OtherRegistration']) {
+              final value = row[key];
+              if (value != null) {
+                expect(number.hasMatch(value as String), isTrue, reason: key);
+              }
+            }
+          }
+        }
+      },
+    );
+
     test('the old-column snapshot lacks the newer columns', () {
       for (final row in _pilotRows('pilots_old_columns.json')) {
         expect(row.keys, isNot(contains('Email')));

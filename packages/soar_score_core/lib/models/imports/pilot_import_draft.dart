@@ -42,7 +42,8 @@ class SkippedPilot {
 
   final int? sourcePilotNo;
 
-  /// A stable code: [PilotImportWarning.missingName] or
+  /// A stable code: [PilotImportWarning.missingName],
+  /// [PilotImportWarning.missingNumber] or
   /// [PilotImportWarning.duplicatePilotNumber].
   final String reason;
 }
@@ -53,6 +54,10 @@ class PilotImportWarning {
 
   /// Neither a first nor a last name; the pilot is skipped.
   static const missingName = 'pilot_missing_name';
+
+  /// The row has no usable `PilotNo`, so it cannot be traced or told apart
+  /// from another; the pilot is skipped.
+  static const missingNumber = 'pilot_missing_number';
 
   /// A second row with the same `PilotNo`; the later row is skipped.
   static const duplicatePilotNumber = 'duplicate_pilot_number';

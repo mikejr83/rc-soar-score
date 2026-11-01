@@ -6,6 +6,7 @@ import '../models/participants/participant_profile.dart';
 import '../repositories/already_stored_error.dart';
 import '../repositories/mutation_metadata.dart';
 import '../repositories/participant_profile_repository.dart';
+import '../repositories/stale_revision_error.dart';
 import 'pilot_import_matcher.dart';
 
 /// Stores the pilots a director chose to import from GliderScore.
@@ -14,9 +15,10 @@ import 'pilot_import_matcher.dart';
 /// ordinary profile repository, so revisions, audit and sync behave as for a
 /// profile edited by hand. A failure part-way stores nothing.
 ///
-/// Retrying with the same selections is safe: a new profile keeps the id in
-/// its selection, and a profile already stored under it is not written
-/// again. This guards a retry of one operation; re-importing a file is the
+/// Retrying with the same selections is safe: a new profile keeps the id its
+/// selection was given, and a profile already stored under it is not written
+/// again. An update is refused when the stored profile changed since the
+/// review. This guards a retry of one operation; re-importing a file is the
 /// matcher's job.
 class PilotImportService {
   PilotImportService(this.profiles, {DateTime Function()? clock})
@@ -35,6 +37,7 @@ class PilotImportService {
     final working = <Id, ParticipantProfile>{};
     final addedIds = <Id>{};
     final updatedIds = <Id>{};
+    final newIds = <Id>{};
     var unchanged = 0;
     var skipped = 0;
 
@@ -43,7 +46,12 @@ class PilotImportService {
         case PilotImportChoice.skip:
           skipped++;
         case PilotImportChoice.add:
-          final id = selection.newProfileId ?? Id.create();
+          final id = selection.newProfileId;
+          if (!newIds.add(id)) {
+            throw ArgumentError(
+              'two selections add a profile with the same id $id',
+            );
+          }
           final stored = await profiles.findById(id);
           if (stored != null) {
             if (stored.ownerAccountId != ownerAccountId) {
@@ -67,6 +75,17 @@ class PilotImportService {
         case PilotImportChoice.update:
           final id = _target(selection);
           final current = working[id] ?? await _require(ownerAccountId, id);
+          final expected =
+              selection.expectedRevision ??
+              selection.match.candidateRevisions[id];
+          if (expected != null && current.revision != expected) {
+            throw StaleRevisionError(
+              entityType: 'ParticipantProfile',
+              entityId: id,
+              expectedRevision: expected,
+              storedRevision: current.revision,
+            );
+          }
           final merged = merge(current, selection.match.draft, now);
           if (merged == null) {
             unchanged++;

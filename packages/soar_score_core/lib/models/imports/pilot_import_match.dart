@@ -42,7 +42,9 @@ class PilotMatch {
     required this.draft,
     required this.kind,
     required this.candidateIds,
+    this.candidateRevisions = const {},
     this.rule,
+    this.conflict = false,
     this.changes = const [],
     this.duplicateOfSourcePilotNo,
   });
@@ -52,6 +54,15 @@ class PilotMatch {
 
   /// The existing profiles that matched under [rule]; empty for a new pilot.
   final List<Id> candidateIds;
+
+  /// The revision each candidate had when it was matched. An update refuses
+  /// to run if the stored profile has moved on since.
+  final Map<Id, int> candidateRevisions;
+
+  /// True when the pilot's identifiers point at different profiles (for
+  /// example the email at one and the FAI number at another). Never updated
+  /// automatically.
+  final bool conflict;
 
   /// The strongest rule that found a match; null for a new pilot.
   final PilotMatchRule? rule;

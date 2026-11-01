@@ -41,7 +41,11 @@ class PilotImportMatcher {
           draft: draft,
           kind: kind,
           candidateIds: [for (final p in found.profiles) p.id],
+          candidateRevisions: {
+            for (final p in found.profiles) p.id: p.revision,
+          },
           rule: found.rule,
+          conflict: found.conflict,
           changes: kind == PilotMatchKind.exact
               ? _changes(draft, found.profiles.single, found.rule!)
               : const [],
@@ -52,16 +56,23 @@ class PilotImportMatcher {
     return result;
   }
 
-  static ({PilotMatchRule? rule, List<ParticipantProfile> profiles}) _find(
-    PilotDraft draft,
-    List<ParticipantProfile> existing,
-  ) {
+  /// Every strong identifier the draft has (email, FAI number, national
+  /// organization ID) is looked up. If they all point at one profile, that is
+  /// the match. If they point at different profiles, or one identifier
+  /// matches several, the match is not automatic: all of the profiles are
+  /// returned as candidates and [conflict] is set when they disagree. Name is
+  /// tried only when no identifier matched anything.
+  static ({
+    PilotMatchRule? rule,
+    List<ParticipantProfile> profiles,
+    bool conflict,
+  })
+  _find(PilotDraft draft, List<ParticipantProfile> existing) {
     final email = normalizeEmail(draft.email);
     final fai = normalizeNumber(draft.faiNumber);
     final org = normalizeNumber(draft.nationalOrgId);
-    final name = normalizeName(draft.firstName, draft.lastName);
 
-    final steps = <(PilotMatchRule, bool Function(ParticipantProfile)?)>[
+    final strong = <(PilotMatchRule, bool Function(ParticipantProfile)?)>[
       (
         PilotMatchRule.email,
         email == null ? null : (p) => normalizeEmail(p.email) == email,
@@ -74,21 +85,48 @@ class PilotImportMatcher {
         PilotMatchRule.nationalOrgId,
         org == null ? null : (p) => normalizeNumber(p.nationalOrgId) == org,
       ),
-      (
-        PilotMatchRule.name,
-        (p) => normalizeName(p.firstName, p.lastName) == name,
-      ),
     ];
-    for (final (rule, test) in steps) {
+
+    PilotMatchRule? rule;
+    final profiles = <ParticipantProfile>[];
+    var matchedKeys = 0;
+    var multipleOnOneKey = false;
+    for (final (keyRule, test) in strong) {
       if (test == null) {
         continue;
       }
-      final profiles = existing.where(test).toList();
-      if (profiles.isNotEmpty) {
-        return (rule: rule, profiles: profiles);
+      final matched = existing.where(test).toList();
+      if (matched.isEmpty) {
+        continue;
+      }
+      matchedKeys++;
+      rule ??= keyRule;
+      if (matched.length > 1) {
+        multipleOnOneKey = true;
+      }
+      for (final profile in matched) {
+        if (!profiles.any((p) => p.id == profile.id)) {
+          profiles.add(profile);
+        }
       }
     }
-    return (rule: null, profiles: const []);
+    if (profiles.isNotEmpty) {
+      return (
+        rule: rule,
+        profiles: profiles,
+        conflict: profiles.length > 1 && (matchedKeys > 1 || multipleOnOneKey),
+      );
+    }
+
+    final name = normalizeName(draft.firstName, draft.lastName);
+    final byName = existing
+        .where((p) => normalizeName(p.firstName, p.lastName) == name)
+        .toList();
+    return (
+      rule: byName.isEmpty ? null : PilotMatchRule.name,
+      profiles: byName,
+      conflict: false,
+    );
   }
 
   /// The first earlier draft that is the same person by email, FAI number,

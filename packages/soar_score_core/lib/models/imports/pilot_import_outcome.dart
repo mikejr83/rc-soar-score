@@ -16,12 +16,13 @@ enum PilotImportChoice {
 
 /// One drafted pilot with the director's decision.
 class PilotImportSelection {
-  const PilotImportSelection({
+  PilotImportSelection({
     required this.match,
     required this.choice,
     this.targetProfileId,
-    this.newProfileId,
-  });
+    this.expectedRevision,
+    Id? newProfileId,
+  }) : newProfileId = newProfileId ?? Id.create();
 
   /// The default for [match]: add, update or (for a pilot someone has to
   /// decide on) skip until they choose.
@@ -34,6 +35,7 @@ class PilotImportSelection {
         PilotImportAction.update => PilotImportSelection(
           match: match,
           choice: PilotImportChoice.update,
+          targetProfileId: match.candidateIds.single,
         ),
         PilotImportAction.ask => PilotImportSelection(
           match: match,
@@ -48,10 +50,17 @@ class PilotImportSelection {
   /// when the match found exactly one.
   final Id? targetProfileId;
 
-  /// For [PilotImportChoice.add]: the id of the new profile. Pick it once
-  /// when the review starts so that retrying the save stays idempotent;
-  /// generated when left out.
-  final Id? newProfileId;
+  /// For [PilotImportChoice.update]: the revision of the target profile that
+  /// the review was based on. Defaults to the revision the matcher saw. If
+  /// the stored profile has a different revision when the import is applied,
+  /// nothing is written and the review has to be redone.
+  final int? expectedRevision;
+
+  /// For [PilotImportChoice.add]: the id of the new profile. Fixed when the
+  /// selection is made (generated if not given), so applying the same
+  /// selection again, for example after an unclear failure, finds the profile
+  /// it already stored instead of adding another.
+  final Id newProfileId;
 }
 
 /// What an import changed.

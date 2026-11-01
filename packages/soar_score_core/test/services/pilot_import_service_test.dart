@@ -325,4 +325,93 @@ void main() {
     expect(updated.state, 'CA');
     expect(updated.revision, 1);
   });
+
+  test('retrying the default selections does not add twice', () async {
+    final matches = matcher.match([
+      _draft(),
+      _draft(no: 2, first: 'Bea', last: 'Birch'),
+    ], const []);
+    final selections = [
+      for (final m in matches) PilotImportSelection.defaultFor(m),
+    ];
+    await service.apply(_owner, selections, metadata: _metadata());
+    final retry = await service.apply(
+      _owner,
+      selections,
+      metadata: _metadata(),
+    );
+    expect(retry.added, isEmpty);
+    expect(repo.stored, hasLength(2));
+  });
+
+  test('two new profiles with the same id in one batch are refused', () async {
+    final matches = matcher.match([
+      _draft(),
+      _draft(no: 2, first: 'Bea', last: 'Birch'),
+    ], const []);
+    final id = Id.create();
+    await expectLater(
+      service.apply(_owner, [
+        for (final m in matches)
+          PilotImportSelection(
+            match: m,
+            choice: PilotImportChoice.add,
+            newProfileId: id,
+          ),
+      ], metadata: _metadata()),
+      throwsArgumentError,
+    );
+    expect(repo.stored, isEmpty);
+  });
+
+  test(
+    'an update is refused when the profile changed after the review',
+    () async {
+      final existing = _profile(email: 'a@x.test');
+      repo.stored[existing.id] = existing;
+      final selections = [
+        for (final m in matcher.match(
+          [_draft(email: 'a@x.test', club: 'Imported')],
+          [existing],
+        ))
+          PilotImportSelection.defaultFor(m),
+      ];
+
+      // The director edits the profile while the review is open.
+      repo.stored[existing.id] = ParticipantProfile.fromJson({
+        ...existing.toJson(),
+        'club': 'Typed by hand',
+        'revision': 1,
+      });
+
+      await expectLater(
+        service.apply(_owner, selections, metadata: _metadata()),
+        throwsA(isA<StaleRevisionError>()),
+      );
+      expect(repo.stored[existing.id]!.club, 'Typed by hand');
+    },
+  );
+
+  test(
+    'a conflicting match is not updated unless the director picks',
+    () async {
+      final a = _profile(first: 'A', last: 'A', email: 'e@x.test');
+      final b = _profile(first: 'B', last: 'B', fai: 'F1');
+      repo.stored
+        ..[a.id] = a
+        ..[b.id] = b;
+      final match = matcher
+          .match(
+            [_draft(first: 'C', last: 'C', email: 'e@x.test', fai: 'F1')],
+            [a, b],
+          )
+          .single;
+      final outcome = await service.apply(_owner, [
+        PilotImportSelection.defaultFor(match),
+      ], metadata: _metadata());
+      expect(outcome.skipped, 1);
+      expect(repo.stored[a.id], a);
+      expect(repo.stored[b.id], b);
+    },
+  );
 }
