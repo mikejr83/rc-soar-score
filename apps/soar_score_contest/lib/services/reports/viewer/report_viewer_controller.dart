@@ -115,8 +115,23 @@ class ReportViewerController extends ChangeNotifier {
 
   PageSetup get setup => PageSetup(
     _params.paper ?? defaultPaper,
-    _params.orientation ?? spec.defaultOrientation,
+    _params.orientation ?? suggestedOrientation,
   );
+
+  /// The orientation the report would pick for the paper in force, when the
+  /// director has not chosen one.
+  PageOrientation get suggestedOrientation {
+    final facts = _facts;
+    if (facts == null) {
+      return spec.defaultOrientation;
+    }
+    return spec.suggestedOrientation(
+      _currentFilters(),
+      facts,
+      _data,
+      _params.paper ?? defaultPaper,
+    );
+  }
 
   /// The filters in force: the URL's over the report's defaults.
   Map<String, String> get filters => _filtersFor(_facts);

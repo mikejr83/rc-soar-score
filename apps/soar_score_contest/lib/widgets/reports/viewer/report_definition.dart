@@ -25,6 +25,7 @@ class ReportControlsContext {
     required this.setFilter,
     required this.setFilters,
     this.setup = const PageSetup(PaperSize.letter, PageOrientation.landscape),
+    this.data,
   });
 
   /// The filters in force, defaults included.
@@ -39,6 +40,10 @@ class ReportControlsContext {
   /// The paper and orientation in force, for a report whose options depend on
   /// the page.
   final PageSetup setup;
+
+  /// What the report's `loadData` returned; `null` for a report with no data
+  /// of its own, or before it loads.
+  final Object? data;
 }
 
 /// What a report builds its pages from.

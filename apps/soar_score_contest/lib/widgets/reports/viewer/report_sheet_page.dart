@@ -20,8 +20,8 @@ abstract final class SheetLayout {
       Size(setup.width - margins.horizontal, setup.height - margins.vertical);
 
   /// What a report's page body can use.
-  static Size bodySize(PageSetup setup) => Size(
-    setup.width - 2 * marginX,
+  static Size bodySize(PageSetup setup, {double extraSide = 0}) => Size(
+    setup.width - 2 * (marginX + extraSide),
     setup.height - marginTop - headerHeight - footerHeight - marginBottom,
   );
 }
@@ -86,9 +86,14 @@ class ReportSheetPage extends StatelessWidget {
     required this.generated,
     required this.body,
     this.status,
+    this.extraSideMargin = 0,
   });
 
   final PageSetup setup;
+
+  /// Blank space added down each side, header and footer included, as the
+  /// report asks for it.
+  final double extraSideMargin;
   final String title;
   final String subtitle;
   final String? detail;
@@ -120,10 +125,10 @@ class ReportSheetPage extends StatelessWidget {
             width: setup.width,
             height: setup.height,
             color: PaperStyle.paper,
-            padding: const EdgeInsets.fromLTRB(
-              SheetLayout.marginX,
+            padding: EdgeInsets.fromLTRB(
+              SheetLayout.marginX + extraSideMargin,
               SheetLayout.marginTop,
-              SheetLayout.marginX,
+              SheetLayout.marginX + extraSideMargin,
               SheetLayout.marginBottom,
             ),
             child: Column(
