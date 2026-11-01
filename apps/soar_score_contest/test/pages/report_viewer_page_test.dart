@@ -53,33 +53,36 @@ Future<List<ReportViewParams>> _pump(
   ReportKind? report = ReportKind.standings,
   bool settle = true,
   Locale appLocale = const Locale('en', 'US'),
+  LocalUiStore? uiStore,
 }) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
   final changes = <ReportViewParams>[];
-  await tester.pumpWidget(
-    ApiClientInherited(
-      client: ApiClient(
-        baseUrl: Uri.parse('http://localhost'),
-        httpClient: MockClient(server.handle),
-      ),
-      child: MaterialApp(
-        locale: appLocale,
-        home: ReportViewerPage(
-          contestId: contestId,
-          report: report,
-          params: params,
-          openedInPlace: openedInPlace,
-          definitionFor: (_) => const StandInReport(),
-          printer: printer ?? FakeReportPrinter(ReportPrintResult.sent),
-          launcher: FakeReportLauncher(),
-          onParams: changes.add,
-          pollInterval: pollInterval,
-        ),
+  Widget app = ApiClientInherited(
+    client: ApiClient(
+      baseUrl: Uri.parse('http://localhost'),
+      httpClient: MockClient(server.handle),
+    ),
+    child: MaterialApp(
+      locale: appLocale,
+      home: ReportViewerPage(
+        contestId: contestId,
+        report: report,
+        params: params,
+        openedInPlace: openedInPlace,
+        definitionFor: (_) => const StandInReport(),
+        printer: printer ?? FakeReportPrinter(ReportPrintResult.sent),
+        launcher: FakeReportLauncher(),
+        onParams: changes.add,
+        pollInterval: pollInterval,
       ),
     ),
   );
+  if (uiStore != null) {
+    app = LocalUiStoreInherited(store: uiStore, child: app);
+  }
+  await tester.pumpWidget(app);
   if (settle) {
     await tester.pumpAndSettle();
   }
@@ -509,12 +512,17 @@ void main() {
           canSavePdf: false,
         ),
       );
+      // A stored option the URL does not name, so the link must carry it.
+      final uiStore = BackendLocalUiStore(MemoryLocalUiBackend());
+      await ReportOptionsStore(uiStore, 'local')
+          .set('standings', {'preview': '1'});
       await _pump(
         tester,
         _server(),
-        params: ReportViewParams.fromQuery(const {'f.pct': '1', 'preview': '1'}),
+        params: ReportViewParams.fromQuery(const {'f.pct': '1'}),
         openedInPlace: true,
         printer: printer,
+        uiStore: uiStore,
       );
       expect(
         find.textContaining('This browser can’t print or save PDFs.'),
@@ -535,7 +543,8 @@ void main() {
       await tester.pump();
       messenger.setMockMethodCallHandler(SystemChannels.platform, null);
 
-      // The link is the report's route with the view in force.
+      // The link is the report's route with the view in force: what the URL
+      // named and the stored option the view settled from.
       final link = Uri.parse('$copied');
       expect(
         link.path,
