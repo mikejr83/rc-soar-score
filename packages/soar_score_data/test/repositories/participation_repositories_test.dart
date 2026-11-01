@@ -80,6 +80,88 @@ void _tests(Backend backend) {
       );
     });
 
+    core.ParticipantProfile freshProfile(String name) =>
+        core.ParticipantProfile.fromJson({
+          ...exampleRows('participant_profile').first,
+          'id': core.Id.create().value,
+          'first_name': name,
+          'revision': 0,
+        });
+
+    test('saveAll stores every profile in one transaction', () async {
+      final a = freshProfile('SaveAllA');
+      final b = freshProfile('SaveAllB');
+
+      final saved = await repo.saveAll([a, b], metadata: metadata());
+
+      expect(saved.map((p) => p.id), [a.id, b.id]);
+      expect(await repo.findById(a.id), isNotNull);
+      expect(await repo.findById(b.id), isNotNull);
+    });
+
+    test('saveAll stores nothing when one profile is stale', () async {
+      final fresh = freshProfile('SaveAllFresh');
+      final stale = core.ParticipantProfile.fromJson({
+        ...examples.first.toJson(),
+        'revision': 0,
+      });
+
+      await expectLater(
+        repo.saveAll([fresh, stale], metadata: metadata()),
+        throwsA(isA<core.StaleRevisionError>()),
+      );
+      expect(await repo.findById(fresh.id), isNull);
+    });
+
+    test(
+      'a GliderScore pilot import adds, updates and re-imports cleanly',
+      () async {
+        final owner = examples.first.ownerAccountId;
+        final service = core.PilotImportService(repo);
+        const matcher = core.PilotImportMatcher();
+        final existing = core.ParticipantProfile.fromJson({
+          ...freshProfile('ImportExisting').toJson(),
+          'email': 'import-existing@example.test',
+        });
+        await repo.save(existing, metadata: metadata());
+
+        final drafts = [
+          core.PilotDraft(
+            sourcePilotNo: 1,
+            firstName: 'Imported',
+            lastName: 'Newcomer',
+            email: 'Newcomer@Example.test',
+            club: 'Import Club',
+          ),
+          core.PilotDraft(
+            sourcePilotNo: 2,
+            firstName: 'Other',
+            lastName: 'Name',
+            email: existing.email,
+            state: 'ZZ-State',
+          ),
+        ];
+
+        Future<core.PilotImportOutcome> run() async {
+          final matches = matcher.match(drafts, await repo.listForOwner(owner));
+          return service.apply(owner, [
+            for (final m in matches) core.PilotImportSelection.defaultFor(m),
+          ], metadata: metadata());
+        }
+
+        final first = await run();
+        expect(first.added.single.email, 'newcomer@example.test');
+        expect(first.updated.single.id, existing.id);
+        expect(first.updated.single.state, 'ZZ-State');
+        expect(first.updated.single.firstName, existing.firstName);
+
+        final again = await run();
+        expect(again.added, isEmpty);
+        expect(again.updated, isEmpty);
+        expect(again.unchanged, 2);
+      },
+    );
+
     test('delete removes an unused profile and records a tombstone', () async {
       final fresh = core.ParticipantProfile.fromJson({
         ...exampleRows('participant_profile').first,
