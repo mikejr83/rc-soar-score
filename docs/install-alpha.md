@@ -53,9 +53,11 @@ Run this on a Windows machine that has never had the app:
 
 ## For maintainers
 
-Push a tag such as `v0.1.0-alpha.1`. The workflow
-`.github/workflows/release-windows.yml` builds the zip and attaches it to a
-**draft** release; review the notes and publish it. The build name is the
+Create and publish a GitHub release for a new tag such as `v0.1.0-alpha.1`
+(tick "Pre-release" for alphas; "Generate release notes" fills the notes). The
+workflow `.github/workflows/release-windows.yml` starts when the release is
+published, builds the zip, and attaches it to that release a few minutes later.
+Publishing also deploys the hosted apps (docs/deploying.md). The build name is the
 tag without its pre-release suffix (`0.1.0`, because the Windows file version is
 numeric) and the build number is the workflow run number. The workflow also
 runs `dart scripts/generate_licences.dart --product contest-app --notices
