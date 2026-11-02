@@ -34,10 +34,17 @@ Future<void> continueFromLanding(WidgetTester tester) async {
 }
 
 /// Goes back to the main page (the contest list) from wherever the app is:
-/// the header's Contests crumb inside a contest, the rail's Contests entry
+/// the report viewer's Back (the viewer sits outside the shell), the
+/// header's Contests crumb inside a contest, or the rail's Contests entry
 /// elsewhere. Steps start with this so they never depend on where the
 /// previous step left the screen.
 Future<void> goToMainPage(WidgetTester tester) async {
+  // A report opened in place is outside the shell, so neither the crumb nor
+  // the rail exists there; tap its Back to pop out onto the shell first.
+  final viewerBack = find.byKey(const ValueKey('viewer-back'));
+  while (viewerBack.evaluate().isNotEmpty) {
+    await tapVisible(tester, viewerBack);
+  }
   final crumb = find.byKey(const ValueKey('breadcrumb-contests'));
   if (crumb.evaluate().isNotEmpty) {
     await tapVisible(tester, crumb);

@@ -70,6 +70,23 @@ class AppLocalizationsEn extends AppLocalizations {
       'The reset could not be saved. It applies until you close the app.';
 
   @override
+  String get reportOptionsHeading => 'Report options';
+
+  @override
+  String get reportOptionsDescription =>
+      'Report options are remembered each time you change them. You can reset them all to the default.';
+
+  @override
+  String get reportOptionsResetButton => 'Reset report options';
+
+  @override
+  String get reportOptionsResetDone =>
+      'Report options are back to their defaults.';
+
+  @override
+  String get reportOptionsResetSaveFailed => 'The reset could not be saved.';
+
+  @override
   String get timeZoneHeading => 'Time zone';
 
   @override

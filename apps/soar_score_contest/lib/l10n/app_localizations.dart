@@ -202,6 +202,36 @@ abstract class AppLocalizations {
   /// **'The reset could not be saved. It applies until you close the app.'**
   String get panelsResetSaveFailed;
 
+  /// Heading of the Settings card that resets the report viewer's remembered options.
+  ///
+  /// In en, this message translates to:
+  /// **'Report options'**
+  String get reportOptionsHeading;
+
+  /// Explains the Report options card on the Settings page.
+  ///
+  /// In en, this message translates to:
+  /// **'Report options are remembered each time you change them. You can reset them all to the default.'**
+  String get reportOptionsDescription;
+
+  /// Button that brings every report's options back to their defaults.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset report options'**
+  String get reportOptionsResetButton;
+
+  /// Snackbar shown after the report options were reset.
+  ///
+  /// In en, this message translates to:
+  /// **'Report options are back to their defaults.'**
+  String get reportOptionsResetDone;
+
+  /// Snackbar shown when the report options reset could not be stored on the device.
+  ///
+  /// In en, this message translates to:
+  /// **'The reset could not be saved.'**
+  String get reportOptionsResetSaveFailed;
+
   /// Heading of the Settings card that sets the preferred time zone.
   ///
   /// In en, this message translates to:

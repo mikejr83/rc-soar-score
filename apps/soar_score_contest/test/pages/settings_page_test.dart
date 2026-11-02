@@ -9,6 +9,7 @@ import 'package:soar_score_contest/l10n/app_localizations_en.dart';
 import 'package:soar_score_contest/services/preferences/preferences_controller.dart';
 import 'package:soar_score_contest/services/text_size/text_size.dart';
 import 'package:soar_score_contest/services/text_size/text_size_controller.dart';
+import 'package:soar_score_contest/services/reports/viewer/report_options_store.dart';
 import 'package:soar_score_contest/services/theme/theme_controller.dart';
 import 'package:soar_score_ui_storage/soar_score_ui_storage.dart';
 
@@ -153,6 +154,43 @@ void main() {
 
     expect(
       find.text(AppLocalizationsEn().panelsResetSaveFailed),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('the report options card shows and resets every report', (
+    tester,
+  ) async {
+    final uiStore = BackendLocalUiStore(MemoryLocalUiBackend());
+    final options = ReportOptionsStore(uiStore, 'local');
+    await options.set('matrix', {'cmp': '1'});
+    await options.set('standings', {'pct': '1'});
+    await _pumpSettings(tester, uiStore);
+
+    expect(
+      find.text(AppLocalizationsEn().reportOptionsHeading),
+      findsOneWidget,
+    );
+    await tester.tap(find.byKey(const ValueKey('reset-report-options-button')));
+    await tester.pumpAndSettle();
+
+    expect(await options.load('matrix'), isEmpty);
+    expect(await options.load('standings'), isEmpty);
+    expect(
+      find.text(AppLocalizationsEn().reportOptionsResetDone),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('a failed report options reset save is reported', (tester) async {
+    final store = _FailingStore();
+    await _pumpSettings(tester, store);
+
+    await tester.tap(find.byKey(const ValueKey('reset-report-options-button')));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text(AppLocalizationsEn().reportOptionsResetSaveFailed),
       findsOneWidget,
     );
   });

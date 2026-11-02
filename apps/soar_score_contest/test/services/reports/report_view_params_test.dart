@@ -21,6 +21,7 @@ void main() {
         paper: PaperSize.a4,
         orientation: PageOrientation.portrait,
         preview: true,
+        previewExplicit: true,
         zoom: 1.25,
       );
       expect(ReportViewParams.fromQuery(params.toQuery()), params);
@@ -43,6 +44,38 @@ void main() {
       const params = ReportViewParams(zoom: 1);
       expect(params.copyWith(zoom: () => null).zoom, isNull);
       expect(params.copyWith(preview: true).zoom, 1);
+    });
+
+    test('the explicit flags follow the query', () {
+      expect(
+        ReportViewParams.fromQuery(const {'preview': '0', 'pp': ''}),
+        const ReportViewParams(
+          preview: false,
+          previewExplicit: true,
+          printPages: '',
+          printPagesExplicit: true,
+        ),
+      );
+      // An empty query names nothing: the stored choices apply.
+      const defaultParams = ReportViewParams();
+      expect(defaultParams.previewExplicit, isFalse);
+      expect(defaultParams.printPagesExplicit, isFalse);
+      expect(defaultParams.preview, isFalse);
+      expect(defaultParams.printPages, isEmpty);
+    });
+
+    test('toQuery names the explicit values and leaves out the unset ones', () {
+      const params = ReportViewParams(
+        preview: false,
+        previewExplicit: true,
+        printPages: '2-4',
+        printPagesExplicit: true,
+      );
+      expect(params.toQuery(), {'preview': '0', 'pp': '2-4'});
+      const unset = ReportViewParams(preview: true);
+      expect(unset.toQuery(), isEmpty);
+      // A round trip keeps the flags, not just the values.
+      expect(ReportViewParams.fromQuery(params.toQuery()), params);
     });
   });
 

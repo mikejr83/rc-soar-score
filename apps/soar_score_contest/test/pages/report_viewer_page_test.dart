@@ -4,11 +4,22 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/testing.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_contest/api_client_provider.dart';
+import 'package:soar_score_contest/local_ui_store_provider.dart';
 import 'package:soar_score_contest/pages/contest/report_viewer_page.dart';
+import 'package:soar_score_contest/router.dart';
+import 'package:soar_score_contest/services/matrix/matrix_page_data.dart';
+import 'package:soar_score_contest/services/reports/draw_matrix/draw_matrix_data.dart';
+import 'package:soar_score_contest/services/reports/draw_matrix/draw_matrix_options.dart';
 import 'package:soar_score_contest/services/reports/report_kind.dart';
+import 'package:soar_score_contest/services/reports/reports_facts.dart';
 import 'package:soar_score_contest/services/reports/viewer/page_setup.dart';
+import 'package:soar_score_contest/services/reports/viewer/report_options_store.dart';
 import 'package:soar_score_contest/services/reports/viewer/report_print_result.dart';
+import 'package:soar_score_contest/services/reports/viewer/report_spec.dart';
 import 'package:soar_score_contest/services/reports/viewer/report_view_params.dart';
+import 'package:soar_score_contest/widgets/reports/draw_matrix/draw_matrix_controls.dart';
+import 'package:soar_score_contest/widgets/reports/viewer/report_definition.dart';
+import 'package:soar_score_ui_storage/soar_score_ui_storage.dart';
 
 import '../support/fake_report_launcher.dart';
 import '../support/matrix_test_support.dart';
@@ -42,33 +53,36 @@ Future<List<ReportViewParams>> _pump(
   ReportKind? report = ReportKind.standings,
   bool settle = true,
   Locale appLocale = const Locale('en', 'US'),
+  LocalUiStore? uiStore,
 }) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
   final changes = <ReportViewParams>[];
-  await tester.pumpWidget(
-    ApiClientInherited(
-      client: ApiClient(
-        baseUrl: Uri.parse('http://localhost'),
-        httpClient: MockClient(server.handle),
-      ),
-      child: MaterialApp(
-        locale: appLocale,
-        home: ReportViewerPage(
-          contestId: contestId,
-          report: report,
-          params: params,
-          openedInPlace: openedInPlace,
-          definitionFor: (_) => const StandInReport(),
-          printer: printer ?? FakeReportPrinter(ReportPrintResult.sent),
-          launcher: FakeReportLauncher(),
-          onParams: changes.add,
-          pollInterval: pollInterval,
-        ),
+  Widget app = ApiClientInherited(
+    client: ApiClient(
+      baseUrl: Uri.parse('http://localhost'),
+      httpClient: MockClient(server.handle),
+    ),
+    child: MaterialApp(
+      locale: appLocale,
+      home: ReportViewerPage(
+        contestId: contestId,
+        report: report,
+        params: params,
+        openedInPlace: openedInPlace,
+        definitionFor: (_) => const StandInReport(),
+        printer: printer ?? FakeReportPrinter(ReportPrintResult.sent),
+        launcher: FakeReportLauncher(),
+        onParams: changes.add,
+        pollInterval: pollInterval,
       ),
     ),
   );
+  if (uiStore != null) {
+    app = LocalUiStoreInherited(store: uiStore, child: app);
+  }
+  await tester.pumpWidget(app);
   if (settle) {
     await tester.pumpAndSettle();
   }
@@ -498,12 +512,47 @@ void main() {
           canSavePdf: false,
         ),
       );
-      await _pump(tester, _server(), printer: printer);
+      // A stored option the URL does not name, so the link must carry it.
+      final uiStore = BackendLocalUiStore(MemoryLocalUiBackend());
+      await ReportOptionsStore(
+        uiStore,
+        'local',
+      ).set('standings', {'preview': '1'});
+      await _pump(
+        tester,
+        _server(),
+        params: ReportViewParams.fromQuery(const {'f.pct': '1'}),
+        openedInPlace: true,
+        printer: printer,
+        uiStore: uiStore,
+      );
       expect(
         find.textContaining('This browser can’t print or save PDFs.'),
         findsOneWidget,
       );
       expect(find.text('Copy link'), findsOneWidget);
+
+      // Capture the text handed to the system clipboard.
+      final messenger = tester.binding.defaultBinaryMessenger;
+      Object? copied;
+      messenger.setMockMethodCallHandler(SystemChannels.platform, (call) async {
+        if (call.method == 'Clipboard.setData') {
+          copied = (call.arguments as Map<String, dynamic>)['text'];
+        }
+        return null;
+      });
+      await tester.tap(find.text('Copy link'));
+      await tester.pump();
+      messenger.setMockMethodCallHandler(SystemChannels.platform, null);
+
+      // The link is the report's route with the view in force: what the URL
+      // named and the stored option the view settled from.
+      final link = Uri.parse('$copied');
+      expect(
+        link.path,
+        contestReportPath(matrixContestId, ReportKind.standings),
+      );
+      expect(link.queryParameters, {'f.pct': '1', 'preview': '1', 'back': '1'});
     });
   });
 
@@ -662,6 +711,226 @@ void main() {
     );
     expect(PageSetup(PaperSize.letter, PageOrientation.landscape).width, 1056);
   });
+
+  group('remembered options', () {
+    Future<LocalUiStore> pumpWithStore(
+      WidgetTester tester,
+      LocalUiStore uiStore,
+      ReportDefinition definition, {
+      ReportKind report = ReportKind.standings,
+      ReportViewParams params = const ReportViewParams(),
+    }) async {
+      tester.view.physicalSize = const Size(1280, 1000);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final server = _server();
+      await tester.pumpWidget(
+        LocalUiStoreInherited(
+          store: uiStore,
+          child: ApiClientInherited(
+            client: ApiClient(
+              baseUrl: Uri.parse('http://localhost'),
+              httpClient: MockClient(server.handle),
+            ),
+            child: MaterialApp(
+              locale: const Locale('en', 'US'),
+              home: ReportViewerPage(
+                contestId: matrixContestId,
+                report: report,
+                params: params,
+                definitionFor: (_) => definition,
+                printer: FakeReportPrinter(ReportPrintResult.sent),
+                launcher: FakeReportLauncher(),
+                pollInterval: null,
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      return uiStore;
+    }
+
+    testWidgets('a stored option shows in the panel and is written on change', (
+      tester,
+    ) async {
+      final uiStore = BackendLocalUiStore(MemoryLocalUiBackend());
+      await ReportOptionsStore(uiStore, 'local').set('standings', {'pct': '1'});
+      await pumpWithStore(tester, uiStore, const StandInReport());
+
+      // The stored '1' is on before anything is touched.
+      expect(_option(tester, 'Percentage of total'), isTrue);
+      final store = ReportOptionsStore(uiStore, 'local');
+
+      // Changing it writes the new value, even back to the default.
+      await tester.tap(
+        find.widgetWithText(CheckboxListTile, 'Percentage of total'),
+      );
+      await tester.pumpAndSettle();
+      expect(await store.load('standings'), {'pct': '0'});
+      expect(_option(tester, 'Percentage of total'), isFalse);
+    });
+
+    testWidgets('a value the URL names does not reach the store', (
+      tester,
+    ) async {
+      final uiStore = BackendLocalUiStore(MemoryLocalUiBackend());
+      await pumpWithStore(
+        tester,
+        uiStore,
+        const StandInReport(),
+        params: ReportViewParams.fromQuery(const {'f.pct': '1'}),
+      );
+      expect(
+        await ReportOptionsStore(uiStore, 'local').load('standings'),
+        isEmpty,
+      );
+    });
+
+    testWidgets('reopening the report starts with the stored choice', (
+      tester,
+    ) async {
+      final uiStore = BackendLocalUiStore(MemoryLocalUiBackend());
+      await pumpWithStore(tester, uiStore, const StandInReport());
+      await tester.tap(
+        find.widgetWithText(CheckboxListTile, 'Percentage of total'),
+      );
+      await tester.pumpAndSettle();
+
+      // A fresh widget on the same store starts with the stored value on.
+      await tester.pumpWidget(const SizedBox());
+      await pumpWithStore(tester, uiStore, const StandInReport());
+      expect(_option(tester, 'Percentage of total'), isTrue);
+    });
+
+    testWidgets('the overflow menu reset clears the stored options', (
+      tester,
+    ) async {
+      final uiStore = BackendLocalUiStore(MemoryLocalUiBackend());
+      await ReportOptionsStore(
+        uiStore,
+        'local',
+      ).set('standings', {'pct': '1', 'paper': 'a4'});
+      await pumpWithStore(tester, uiStore, const StandInReport());
+      expect(_option(tester, 'Percentage of total'), isTrue);
+
+      await tester.tap(find.byKey(const ValueKey('viewer-overflow')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Reset filters and options'));
+      await tester.pumpAndSettle();
+
+      expect(_option(tester, 'Percentage of total'), isFalse);
+      expect(
+        await ReportOptionsStore(uiStore, 'local').load('standings'),
+        isEmpty,
+      );
+    });
+
+    testWidgets('the empty-state reset keeps the stored options', (
+      tester,
+    ) async {
+      final uiStore = BackendLocalUiStore(MemoryLocalUiBackend());
+      await ReportOptionsStore(uiStore, 'local').set('standings', {'pct': '1'});
+      await pumpWithStore(
+        tester,
+        uiStore,
+        const StandInReport(),
+        params: ReportViewParams.fromQuery(const {'f.empty': '1'}),
+      );
+      expect(find.text('No scores in these rounds'), findsOneWidget);
+
+      await tester.tap(find.text('Reset filters'));
+      await tester.pumpAndSettle();
+      expect(_body(1), findsOneWidget);
+      expect(_option(tester, 'Percentage of total'), isTrue);
+      expect(await ReportOptionsStore(uiStore, 'local').load('standings'), {
+        'pct': '1',
+      });
+    });
+
+    testWidgets('the Draw Matrix remembers Compact mode per report kind', (
+      tester,
+    ) async {
+      final uiStore = BackendLocalUiStore(MemoryLocalUiBackend());
+      await pumpWithStore(
+        tester,
+        uiStore,
+        const _MatrixDefinition(),
+        report: ReportKind.matrix,
+      );
+      final compact = find.widgetWithText(SwitchListTile, 'Compact mode');
+      expect(tester.widget<SwitchListTile>(compact).value, isFalse);
+      final store = ReportOptionsStore(uiStore, 'local');
+
+      await tester.tap(compact);
+      await tester.pumpAndSettle();
+      // The stored entry is keyed to the matrix kind, not to standings.
+      expect(await store.load('matrix'), {'cmp': '1'});
+
+      // Reopening starts with it on.
+      await tester.pumpWidget(const SizedBox());
+      await pumpWithStore(
+        tester,
+        uiStore,
+        const _MatrixDefinition(),
+        report: ReportKind.matrix,
+      );
+      expect(tester.widget<SwitchListTile>(compact).value, isTrue);
+    });
+  });
 }
+
+/// The real Draw Matrix report's controls and data read, so its Compact mode
+/// control is in the panel. The data is read through the page's own client.
+class _MatrixDefinition extends ReportDefinition {
+  const _MatrixDefinition();
+
+  @override
+  ReportKind get kind => ReportKind.matrix;
+
+  @override
+  Map<String, String> defaultFilters(ReportsFacts facts) =>
+      DrawMatrixOptions.defaults(facts);
+
+  @override
+  ReportCheck check(Map<String, String> filters, ReportsFacts facts) =>
+      DrawMatrixOptions.of(filters, facts).check();
+
+  @override
+  String filterSummary(Map<String, String> filters, ReportsFacts facts) =>
+      DrawMatrixOptions.of(filters, facts).summary;
+
+  @override
+  String? dataKey(Map<String, String> filters, ReportsFacts facts) =>
+      'matrix=${facts.matrixRevision}';
+
+  @override
+  Future<ReportLoad<Object>> loadData(ReportDataRequest request) async {
+    final page = await MatrixPageData.forContest(
+      request.client,
+      request.facts.contest,
+    );
+    return ReportLoaded(DrawMatrixData.of(page));
+  }
+
+  @override
+  List<ReportControlGroup> controls(ReportControlsContext context) =>
+      drawMatrixControls(
+        context,
+        DrawMatrixOptions.of(context.filters, context.facts),
+      );
+
+  @override
+  ReportDocument build(ReportPageContext context) => ReportDocument(
+    title: 'Flight Matrix - ${context.facts.contest.name}',
+    subtitle: 'No matrix to show',
+    pages: const [SizedBox.shrink()],
+  );
+}
+
+/// The value of the checkbox with [label] in the options panel.
+bool _option(WidgetTester tester, String label) => tester
+    .widget<CheckboxListTile>(find.widgetWithText(CheckboxListTile, label))
+    .value!;
 
 String _contestName(WidgetTester tester) => matrixContest().name;

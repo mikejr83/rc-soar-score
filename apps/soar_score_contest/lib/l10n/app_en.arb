@@ -72,6 +72,26 @@
   "@panelsResetSaveFailed": {
     "description": "Snackbar shown when the panel reset could not be stored on the device."
   },
+  "reportOptionsHeading": "Report options",
+  "@reportOptionsHeading": {
+    "description": "Heading of the Settings card that resets the report viewer's remembered options."
+  },
+  "reportOptionsDescription": "Report options are remembered each time you change them. You can reset them all to the default.",
+  "@reportOptionsDescription": {
+    "description": "Explains the Report options card on the Settings page."
+  },
+  "reportOptionsResetButton": "Reset report options",
+  "@reportOptionsResetButton": {
+    "description": "Button that brings every report's options back to their defaults."
+  },
+  "reportOptionsResetDone": "Report options are back to their defaults.",
+  "@reportOptionsResetDone": {
+    "description": "Snackbar shown after the report options were reset."
+  },
+  "reportOptionsResetSaveFailed": "The reset could not be saved.",
+  "@reportOptionsResetSaveFailed": {
+    "description": "Snackbar shown when the report options reset could not be stored on the device."
+  },
   "timeZoneHeading": "Time zone",
   "@timeZoneHeading": {
     "description": "Heading of the Settings card that sets the preferred time zone."

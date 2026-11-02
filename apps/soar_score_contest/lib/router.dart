@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:soar_score_api/soar_score_api.dart';
@@ -173,17 +172,29 @@ GoRouter buildAppRouter({
             params: ReportViewParams.fromQuery(state.uri.queryParameters),
             openedInPlace: inPlace,
             // The URL follows the filters, so refreshing or copying the link
-            // restores the view. Replacing keeps back-button history clean.
-            onParams: (params) => SystemNavigator.routeInformationUpdated(
-              uri: Uri(
-                path: state.uri.path,
-                queryParameters: {
-                  ...params.toQuery(),
-                  if (inPlace) 'back': '1',
-                },
-              ),
-              replace: true,
-            ),
+            // restores the view. A replace keeps the same page (and the viewer
+            // state) and back-button history clean; on the web it also keeps
+            // the address bar in step.
+            onParams: (params) {
+              if (!context.mounted) {
+                // The page went away while params were settling; nothing to
+                // point the URL at anymore.
+                return;
+              }
+              final router = GoRouter.maybeOf(context);
+              if (router == null) {
+                return;
+              }
+              router.replace(
+                Uri(
+                  path: state.uri.path,
+                  queryParameters: {
+                    ...params.toQuery(),
+                    if (inPlace) 'back': '1',
+                  },
+                ).toString(),
+              );
+            },
           );
         },
       ),
