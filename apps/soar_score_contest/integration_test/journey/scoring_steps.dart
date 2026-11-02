@@ -10,7 +10,7 @@ import 'journey.dart';
 
 /// What the director types for one flight: digits for the time field (`630`
 /// is 6:30) and the launch height in metres.
-typedef Flight = ({String time, String height});
+typedef Flight = ({String time, String height, String landing});
 
 /// The flight of the pilot called [name], derived from where the name stands
 /// in [JourneyContext.pilotNames], so the standings do not depend on the
@@ -23,7 +23,7 @@ Flight flightOf(JourneyContext data, String name, {int bonusSeconds = 0}) {
   final last = index == data.pilotNames.length - 1;
   final seconds = (last ? 150 : 590 - 20 * index) + bonusSeconds;
   final time = '${seconds ~/ 60}${(seconds % 60).toString().padLeft(2, '0')}';
-  return (time: time, height: index == 0 ? '100' : '190');
+  return (time: time, height: index == 0 ? '100' : '190', landing: '50');
 }
 
 Finder _key(String key) => find.byKey(ValueKey(key));
@@ -143,6 +143,11 @@ Future<List<String>> scoreOpenRows(
     await tapVisible(tester, time);
     await enterIn(tester, time, flight.time);
     await enterIn(tester, fieldWithKey('score-height-$id'), flight.height);
+    // Landing is typed as table points, after the height; the caption names
+    // the band it selected.
+    final landing = fieldWithKey('score-landing-$id');
+    await enterIn(tester, landing, flight.landing);
+    expect(tester.widget<TextField>(landing).controller!.text, flight.landing);
     final penalty = penalties[name];
     if (penalty != null) {
       await pumpUntilFound(tester, _key('cumulative-penalty'));
