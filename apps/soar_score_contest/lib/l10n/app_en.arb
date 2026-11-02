@@ -1755,5 +1755,249 @@
   "pilotImportReviewAgain": "Review again",
   "@pilotImportReviewAgain": {
     "description": "Button that rebuilds the pilot import review."
+  },
+  "shellNavPublication": "Publication",
+  "@shellNavPublication": {
+    "description": "Navigation rail destination, page title and breadcrumb: contest publication."
+  },
+  "publicationCardTitle": "Publication",
+  "@publicationCardTitle": {
+    "description": "Title of the publication card on the contest workspace and of the Publication page."
+  },
+  "publicationStateUnpublished": "Unpublished",
+  "@publicationStateUnpublished": {
+    "description": "Current publication state: the contest was never published."
+  },
+  "publicationStatePublished": "Published, {visibility}",
+  "@publicationStatePublished": {
+    "description": "Current publication state: published with the given visibility.",
+    "placeholders": {
+      "visibility": {
+        "type": "String"
+      }
+    }
+  },
+  "publicationStateUnknown": "Unknown",
+  "@publicationStateUnknown": {
+    "description": "Current publication state when it could not be read."
+  },
+  "publicationStateUnavailable": "Not available",
+  "@publicationStateUnavailable": {
+    "description": "Current publication state when the server does not publish contests."
+  },
+  "publicationVisibilityUnlisted": "Unlisted",
+  "@publicationVisibilityUnlisted": {
+    "description": "Visibility of a publication that only people with the link can see."
+  },
+  "publicationVisibilityPublic": "Public",
+  "@publicationVisibilityPublic": {
+    "description": "Visibility of a publication listed on the public site."
+  },
+  "publicationVisibilityDelisted": "Delisted",
+  "@publicationVisibilityDelisted": {
+    "description": "Visibility of a publication removed from public view."
+  },
+  "publicationScopeUnpublished": "Publishing puts a copy of the results on the public site. It starts Unlisted: only people with the link can see it.",
+  "@publicationScopeUnpublished": {
+    "description": "What publishing does, shown on the publication card before the first publish."
+  },
+  "publicationScopePublished": "Last published {time}.",
+  "@publicationScopePublished": {
+    "description": "Publication card: when the results were last published.",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "publicationPolicyAutomatic": "Public updates: automatic after each score.",
+  "@publicationPolicyAutomatic": {
+    "description": "The public update policy Automatic, read only."
+  },
+  "publicationPolicyRoundCompletion": "Public updates: after each completed round.",
+  "@publicationPolicyRoundCompletion": {
+    "description": "The public update policy RoundCompletion, read only."
+  },
+  "publicationPolicyManual": "Public updates: only when you publish.",
+  "@publicationPolicyManual": {
+    "description": "The public update policy Manual, read only."
+  },
+  "publicationPolicyUnknown": "Public updates: not set yet.",
+  "@publicationPolicyUnknown": {
+    "description": "Shown when the contest has no saved public update policy."
+  },
+  "publicationChangePolicy": "Change in Configuration",
+  "@publicationChangePolicy": {
+    "description": "Link from the publication card to the configuration page where the update policy is set."
+  },
+  "publicationActionPublish": "Publish results",
+  "@publicationActionPublish": {
+    "description": "Button that starts publishing a contest for the first time."
+  },
+  "publicationActionUpdate": "Publish update",
+  "@publicationActionUpdate": {
+    "description": "Button that publishes the contest's current results again."
+  },
+  "publicationActionMakePublic": "Make public",
+  "@publicationActionMakePublic": {
+    "description": "Button that lists the publication on the public site."
+  },
+  "publicationActionMakeUnlisted": "Make unlisted",
+  "@publicationActionMakeUnlisted": {
+    "description": "Button that removes the publication from the public list but keeps its link working."
+  },
+  "publicationActionOpenPage": "Open Publication page",
+  "@publicationActionOpenPage": {
+    "description": "Button on the workspace card that opens the Publication page."
+  },
+  "publicationActionRetry": "Retry",
+  "@publicationActionRetry": {
+    "description": "Button that reads the publication again after a failed read."
+  },
+  "publicationNeedsConnection": "Needs a connection.",
+  "@publicationNeedsConnection": {
+    "description": "Reason a publication action is disabled while offline."
+  },
+  "publicationUnavailableReason": "This server does not publish contests.",
+  "@publicationUnavailableReason": {
+    "description": "Reason publishing is disabled on an embedded server."
+  },
+  "publicationUnknownReason": "The publication could not be read, so its state is not shown.",
+  "@publicationUnknownReason": {
+    "description": "Reason publishing is disabled when reading the publication failed."
+  },
+  "publicationNotCompletedHint": "You can publish at any time. Most directors publish once the contest is completed.",
+  "@publicationNotCompletedHint": {
+    "description": "Hint shown on the Publication page for a contest that is not completed."
+  },
+  "publishDialogTitle": "Publish results?",
+  "@publishDialogTitle": {
+    "description": "Title of the confirmation dialog for publishing."
+  },
+  "publishDialogBody": "This copies the contest as it is now to the public site.",
+  "@publishDialogBody": {
+    "description": "First line of the publish confirmation dialog."
+  },
+  "publishDialogRevision": "Contest revision: {revision}",
+  "@publishDialogRevision": {
+    "description": "Publish dialog: the contest revision that will be published.",
+    "placeholders": {
+      "revision": {
+        "type": "String"
+      }
+    }
+  },
+  "publishDialogVisibility": "Visibility: {visibility}",
+  "@publishDialogVisibility": {
+    "description": "Publish dialog: who can see the publication afterwards.",
+    "placeholders": {
+      "visibility": {
+        "type": "String"
+      }
+    }
+  },
+  "publishDialogConfirm": "Publish",
+  "@publishDialogConfirm": {
+    "description": "Confirm button of the publish dialog."
+  },
+  "publicDialogTitle": "Make results public?",
+  "@publicDialogTitle": {
+    "description": "Title of the confirmation dialog for making a publication Public."
+  },
+  "publicDialogBody": "The results will be listed on the public site, where anyone can find them.",
+  "@publicDialogBody": {
+    "description": "Body of the make public dialog."
+  },
+  "publicDialogConfirm": "Make public",
+  "@publicDialogConfirm": {
+    "description": "Confirm button of the make public dialog."
+  },
+  "publicationDialogCancel": "Cancel",
+  "@publicationDialogCancel": {
+    "description": "Cancel button of the publication dialogs."
+  },
+  "publicationPublishedDone": "Results published.",
+  "@publicationPublishedDone": {
+    "description": "Snackbar after a successful publish."
+  },
+  "publicationVisibilityDone": "Visibility is now {visibility}.",
+  "@publicationVisibilityDone": {
+    "description": "Snackbar after a visibility change.",
+    "placeholders": {
+      "visibility": {
+        "type": "String"
+      }
+    }
+  },
+  "publicationFailStaleContest": "The contest changed since you opened this page. Review it and publish again.",
+  "@publicationFailStaleContest": {
+    "description": "Publish refused because the contest moved on."
+  },
+  "publicationFailStaleResults": "The results are out of date. Recalculate them and publish again.",
+  "@publicationFailStaleResults": {
+    "description": "Publish refused because results are stale."
+  },
+  "publicationFailNotReady": "The contest is not ready to publish yet.",
+  "@publicationFailNotReady": {
+    "description": "Publish refused for another conflict."
+  },
+  "publicationFailDelisted": "This publication was delisted and can no longer change.",
+  "@publicationFailDelisted": {
+    "description": "Change refused because the publication is delisted."
+  },
+  "publicationFailUnavailable": "This server does not publish contests.",
+  "@publicationFailUnavailable": {
+    "description": "Change refused because the server cannot publish."
+  },
+  "publicationFailNotDirector": "Only the contest's director can publish it.",
+  "@publicationFailNotDirector": {
+    "description": "Change refused because the caller is not the director."
+  },
+  "publicationFailNetwork": "The server could not be reached. Check your connection and try again.",
+  "@publicationFailNetwork": {
+    "description": "Change failed because of a network error."
+  },
+  "publicationFailOther": "Publishing failed. Try again.",
+  "@publicationFailOther": {
+    "description": "Change failed for an unknown reason."
+  },
+  "publicationPageLatestCopy": "Latest published copy",
+  "@publicationPageLatestCopy": {
+    "description": "Heading on the Publication page for the current projection."
+  },
+  "publicationPageCopyNumber": "Copy {number}",
+  "@publicationPageCopyNumber": {
+    "description": "Publication page: the projection revision.",
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "publicationPageFromRevision": "Made from contest revision {revision}",
+  "@publicationPageFromRevision": {
+    "description": "Publication page: contest revision of the latest copy.",
+    "placeholders": {
+      "revision": {
+        "type": "String"
+      }
+    }
+  },
+  "publicationPagePublishedAt": "Published {time}",
+  "@publicationPagePublishedAt": {
+    "description": "Publication page: when the latest copy was made.",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "publicationPageNoCopy": "Nothing has been published yet.",
+  "@publicationPageNoCopy": {
+    "description": "Publication page: empty state before the first publish."
+  },
+  "publicationPageLoadFailed": "The contest could not be loaded.",
+  "@publicationPageLoadFailed": {
+    "description": "Publication page: failure to load the contest."
   }
 }

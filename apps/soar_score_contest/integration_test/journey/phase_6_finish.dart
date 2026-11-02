@@ -52,6 +52,31 @@ Future<void> runFinishPhase(Journey journey, JourneyContext data) async {
   );
 
   await journey.step(
+    'Publication: the card and page say this server does not publish',
+    () => inContest(() async {
+      await pumpUntilFound(tester, _key('status-summary'));
+      // The contest runs on the embedded server here, which never publishes,
+      // so the card explains instead of offering a button that would fail.
+      await pumpUntilFound(tester, _key('workspace-control-publication'));
+      await pumpUntilFound(tester, _key('control-publication-reason'));
+      expect(_key('publication-publish'), findsOneWidget);
+      expect(
+        tester.widget<ButtonStyleButton>(_key('publication-publish')).onPressed,
+        isNull,
+      );
+
+      await tapVisible(tester, _key('publication-open-page'));
+      await pumpUntilFound(tester, _key('publication-page-state'));
+      expect(_key('publication-page-no-copy'), findsOneWidget);
+      expect(_key('publication-page-reason'), findsOneWidget);
+      expect(
+        tester.widget<ButtonStyleButton>(_key('publication-publish')).onPressed,
+        isNull,
+      );
+    }),
+  );
+
+  await journey.step(
     'Overall Standings: every pilot ranked, no Provisional, options apply',
     () => inContest(() async {
       await tapRail(tester, 'Reports');

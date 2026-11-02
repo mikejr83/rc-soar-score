@@ -4,12 +4,11 @@ import 'package:go_router/go_router.dart';
 import '../../../router.dart';
 import '../../../services/workspace/next_step/next_step_action.dart';
 import '../../../services/workspace/next_step/next_step_target.dart';
-import '../../not_wired_up_dialog.dart';
 
 /// Where each next-step button goes.
 ///
 /// One entry per target, so the ticket that builds a destination changes one
-/// line: #121 participants and #125 publish. The
+/// line: the publish target opens the Publication page (#125). The
 /// in-place targets ([NextStepTarget.openScoring],
 /// [NextStepTarget.unlock], [NextStepTarget.completeDialog] and
 /// [NextStepTarget.dismissSuggestion]) are handled by the card.
@@ -47,11 +46,7 @@ abstract final class NextStepNavigator {
       case NextStepTarget.reports:
         context.go(contestReportsPath(contestId));
       case NextStepTarget.publish:
-        showNotWiredUpDialog(
-          context,
-          'Publish',
-          detail: 'The publish flow is not built yet.',
-        );
+        context.go(contestPublicationPath(contestId));
       case NextStepTarget.openScoring ||
           NextStepTarget.unlock ||
           NextStepTarget.completeDialog ||

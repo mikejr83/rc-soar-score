@@ -55,6 +55,7 @@ class ShellHeader extends StatelessWidget {
         'matrix' => l10n.shellNavMatrix,
         'scoring' => l10n.shellNavScoring,
         'reports' => l10n.shellNavReports,
+        'publication' => l10n.shellNavPublication,
         'sync' => l10n.shellNavSync,
         'settings' => l10n.shellNavSettings,
         _ =>

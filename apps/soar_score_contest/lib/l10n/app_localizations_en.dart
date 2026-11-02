@@ -1509,4 +1509,189 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pilotImportReviewAgain => 'Review again';
+
+  @override
+  String get shellNavPublication => 'Publication';
+
+  @override
+  String get publicationCardTitle => 'Publication';
+
+  @override
+  String get publicationStateUnpublished => 'Unpublished';
+
+  @override
+  String publicationStatePublished(String visibility) {
+    return 'Published, $visibility';
+  }
+
+  @override
+  String get publicationStateUnknown => 'Unknown';
+
+  @override
+  String get publicationStateUnavailable => 'Not available';
+
+  @override
+  String get publicationVisibilityUnlisted => 'Unlisted';
+
+  @override
+  String get publicationVisibilityPublic => 'Public';
+
+  @override
+  String get publicationVisibilityDelisted => 'Delisted';
+
+  @override
+  String get publicationScopeUnpublished =>
+      'Publishing puts a copy of the results on the public site. It starts Unlisted: only people with the link can see it.';
+
+  @override
+  String publicationScopePublished(String time) {
+    return 'Last published $time.';
+  }
+
+  @override
+  String get publicationPolicyAutomatic =>
+      'Public updates: automatic after each score.';
+
+  @override
+  String get publicationPolicyRoundCompletion =>
+      'Public updates: after each completed round.';
+
+  @override
+  String get publicationPolicyManual =>
+      'Public updates: only when you publish.';
+
+  @override
+  String get publicationPolicyUnknown => 'Public updates: not set yet.';
+
+  @override
+  String get publicationChangePolicy => 'Change in Configuration';
+
+  @override
+  String get publicationActionPublish => 'Publish results';
+
+  @override
+  String get publicationActionUpdate => 'Publish update';
+
+  @override
+  String get publicationActionMakePublic => 'Make public';
+
+  @override
+  String get publicationActionMakeUnlisted => 'Make unlisted';
+
+  @override
+  String get publicationActionOpenPage => 'Open Publication page';
+
+  @override
+  String get publicationActionRetry => 'Retry';
+
+  @override
+  String get publicationNeedsConnection => 'Needs a connection.';
+
+  @override
+  String get publicationUnavailableReason =>
+      'This server does not publish contests.';
+
+  @override
+  String get publicationUnknownReason =>
+      'The publication could not be read, so its state is not shown.';
+
+  @override
+  String get publicationNotCompletedHint =>
+      'You can publish at any time. Most directors publish once the contest is completed.';
+
+  @override
+  String get publishDialogTitle => 'Publish results?';
+
+  @override
+  String get publishDialogBody =>
+      'This copies the contest as it is now to the public site.';
+
+  @override
+  String publishDialogRevision(String revision) {
+    return 'Contest revision: $revision';
+  }
+
+  @override
+  String publishDialogVisibility(String visibility) {
+    return 'Visibility: $visibility';
+  }
+
+  @override
+  String get publishDialogConfirm => 'Publish';
+
+  @override
+  String get publicDialogTitle => 'Make results public?';
+
+  @override
+  String get publicDialogBody =>
+      'The results will be listed on the public site, where anyone can find them.';
+
+  @override
+  String get publicDialogConfirm => 'Make public';
+
+  @override
+  String get publicationDialogCancel => 'Cancel';
+
+  @override
+  String get publicationPublishedDone => 'Results published.';
+
+  @override
+  String publicationVisibilityDone(String visibility) {
+    return 'Visibility is now $visibility.';
+  }
+
+  @override
+  String get publicationFailStaleContest =>
+      'The contest changed since you opened this page. Review it and publish again.';
+
+  @override
+  String get publicationFailStaleResults =>
+      'The results are out of date. Recalculate them and publish again.';
+
+  @override
+  String get publicationFailNotReady =>
+      'The contest is not ready to publish yet.';
+
+  @override
+  String get publicationFailDelisted =>
+      'This publication was delisted and can no longer change.';
+
+  @override
+  String get publicationFailUnavailable =>
+      'This server does not publish contests.';
+
+  @override
+  String get publicationFailNotDirector =>
+      'Only the contest\'s director can publish it.';
+
+  @override
+  String get publicationFailNetwork =>
+      'The server could not be reached. Check your connection and try again.';
+
+  @override
+  String get publicationFailOther => 'Publishing failed. Try again.';
+
+  @override
+  String get publicationPageLatestCopy => 'Latest published copy';
+
+  @override
+  String publicationPageCopyNumber(String number) {
+    return 'Copy $number';
+  }
+
+  @override
+  String publicationPageFromRevision(String revision) {
+    return 'Made from contest revision $revision';
+  }
+
+  @override
+  String publicationPagePublishedAt(String time) {
+    return 'Published $time';
+  }
+
+  @override
+  String get publicationPageNoCopy => 'Nothing has been published yet.';
+
+  @override
+  String get publicationPageLoadFailed => 'The contest could not be loaded.';
 }

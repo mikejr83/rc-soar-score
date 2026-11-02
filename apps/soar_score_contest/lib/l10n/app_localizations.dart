@@ -2191,6 +2191,312 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Review again'**
   String get pilotImportReviewAgain;
+
+  /// Navigation rail destination, page title and breadcrumb: contest publication.
+  ///
+  /// In en, this message translates to:
+  /// **'Publication'**
+  String get shellNavPublication;
+
+  /// Title of the publication card on the contest workspace and of the Publication page.
+  ///
+  /// In en, this message translates to:
+  /// **'Publication'**
+  String get publicationCardTitle;
+
+  /// Current publication state: the contest was never published.
+  ///
+  /// In en, this message translates to:
+  /// **'Unpublished'**
+  String get publicationStateUnpublished;
+
+  /// Current publication state: published with the given visibility.
+  ///
+  /// In en, this message translates to:
+  /// **'Published, {visibility}'**
+  String publicationStatePublished(String visibility);
+
+  /// Current publication state when it could not be read.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get publicationStateUnknown;
+
+  /// Current publication state when the server does not publish contests.
+  ///
+  /// In en, this message translates to:
+  /// **'Not available'**
+  String get publicationStateUnavailable;
+
+  /// Visibility of a publication that only people with the link can see.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlisted'**
+  String get publicationVisibilityUnlisted;
+
+  /// Visibility of a publication listed on the public site.
+  ///
+  /// In en, this message translates to:
+  /// **'Public'**
+  String get publicationVisibilityPublic;
+
+  /// Visibility of a publication removed from public view.
+  ///
+  /// In en, this message translates to:
+  /// **'Delisted'**
+  String get publicationVisibilityDelisted;
+
+  /// What publishing does, shown on the publication card before the first publish.
+  ///
+  /// In en, this message translates to:
+  /// **'Publishing puts a copy of the results on the public site. It starts Unlisted: only people with the link can see it.'**
+  String get publicationScopeUnpublished;
+
+  /// Publication card: when the results were last published.
+  ///
+  /// In en, this message translates to:
+  /// **'Last published {time}.'**
+  String publicationScopePublished(String time);
+
+  /// The public update policy Automatic, read only.
+  ///
+  /// In en, this message translates to:
+  /// **'Public updates: automatic after each score.'**
+  String get publicationPolicyAutomatic;
+
+  /// The public update policy RoundCompletion, read only.
+  ///
+  /// In en, this message translates to:
+  /// **'Public updates: after each completed round.'**
+  String get publicationPolicyRoundCompletion;
+
+  /// The public update policy Manual, read only.
+  ///
+  /// In en, this message translates to:
+  /// **'Public updates: only when you publish.'**
+  String get publicationPolicyManual;
+
+  /// Shown when the contest has no saved public update policy.
+  ///
+  /// In en, this message translates to:
+  /// **'Public updates: not set yet.'**
+  String get publicationPolicyUnknown;
+
+  /// Link from the publication card to the configuration page where the update policy is set.
+  ///
+  /// In en, this message translates to:
+  /// **'Change in Configuration'**
+  String get publicationChangePolicy;
+
+  /// Button that starts publishing a contest for the first time.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish results'**
+  String get publicationActionPublish;
+
+  /// Button that publishes the contest's current results again.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish update'**
+  String get publicationActionUpdate;
+
+  /// Button that lists the publication on the public site.
+  ///
+  /// In en, this message translates to:
+  /// **'Make public'**
+  String get publicationActionMakePublic;
+
+  /// Button that removes the publication from the public list but keeps its link working.
+  ///
+  /// In en, this message translates to:
+  /// **'Make unlisted'**
+  String get publicationActionMakeUnlisted;
+
+  /// Button on the workspace card that opens the Publication page.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Publication page'**
+  String get publicationActionOpenPage;
+
+  /// Button that reads the publication again after a failed read.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get publicationActionRetry;
+
+  /// Reason a publication action is disabled while offline.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs a connection.'**
+  String get publicationNeedsConnection;
+
+  /// Reason publishing is disabled on an embedded server.
+  ///
+  /// In en, this message translates to:
+  /// **'This server does not publish contests.'**
+  String get publicationUnavailableReason;
+
+  /// Reason publishing is disabled when reading the publication failed.
+  ///
+  /// In en, this message translates to:
+  /// **'The publication could not be read, so its state is not shown.'**
+  String get publicationUnknownReason;
+
+  /// Hint shown on the Publication page for a contest that is not completed.
+  ///
+  /// In en, this message translates to:
+  /// **'You can publish at any time. Most directors publish once the contest is completed.'**
+  String get publicationNotCompletedHint;
+
+  /// Title of the confirmation dialog for publishing.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish results?'**
+  String get publishDialogTitle;
+
+  /// First line of the publish confirmation dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'This copies the contest as it is now to the public site.'**
+  String get publishDialogBody;
+
+  /// Publish dialog: the contest revision that will be published.
+  ///
+  /// In en, this message translates to:
+  /// **'Contest revision: {revision}'**
+  String publishDialogRevision(String revision);
+
+  /// Publish dialog: who can see the publication afterwards.
+  ///
+  /// In en, this message translates to:
+  /// **'Visibility: {visibility}'**
+  String publishDialogVisibility(String visibility);
+
+  /// Confirm button of the publish dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish'**
+  String get publishDialogConfirm;
+
+  /// Title of the confirmation dialog for making a publication Public.
+  ///
+  /// In en, this message translates to:
+  /// **'Make results public?'**
+  String get publicDialogTitle;
+
+  /// Body of the make public dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'The results will be listed on the public site, where anyone can find them.'**
+  String get publicDialogBody;
+
+  /// Confirm button of the make public dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Make public'**
+  String get publicDialogConfirm;
+
+  /// Cancel button of the publication dialogs.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get publicationDialogCancel;
+
+  /// Snackbar after a successful publish.
+  ///
+  /// In en, this message translates to:
+  /// **'Results published.'**
+  String get publicationPublishedDone;
+
+  /// Snackbar after a visibility change.
+  ///
+  /// In en, this message translates to:
+  /// **'Visibility is now {visibility}.'**
+  String publicationVisibilityDone(String visibility);
+
+  /// Publish refused because the contest moved on.
+  ///
+  /// In en, this message translates to:
+  /// **'The contest changed since you opened this page. Review it and publish again.'**
+  String get publicationFailStaleContest;
+
+  /// Publish refused because results are stale.
+  ///
+  /// In en, this message translates to:
+  /// **'The results are out of date. Recalculate them and publish again.'**
+  String get publicationFailStaleResults;
+
+  /// Publish refused for another conflict.
+  ///
+  /// In en, this message translates to:
+  /// **'The contest is not ready to publish yet.'**
+  String get publicationFailNotReady;
+
+  /// Change refused because the publication is delisted.
+  ///
+  /// In en, this message translates to:
+  /// **'This publication was delisted and can no longer change.'**
+  String get publicationFailDelisted;
+
+  /// Change refused because the server cannot publish.
+  ///
+  /// In en, this message translates to:
+  /// **'This server does not publish contests.'**
+  String get publicationFailUnavailable;
+
+  /// Change refused because the caller is not the director.
+  ///
+  /// In en, this message translates to:
+  /// **'Only the contest\'s director can publish it.'**
+  String get publicationFailNotDirector;
+
+  /// Change failed because of a network error.
+  ///
+  /// In en, this message translates to:
+  /// **'The server could not be reached. Check your connection and try again.'**
+  String get publicationFailNetwork;
+
+  /// Change failed for an unknown reason.
+  ///
+  /// In en, this message translates to:
+  /// **'Publishing failed. Try again.'**
+  String get publicationFailOther;
+
+  /// Heading on the Publication page for the current projection.
+  ///
+  /// In en, this message translates to:
+  /// **'Latest published copy'**
+  String get publicationPageLatestCopy;
+
+  /// Publication page: the projection revision.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy {number}'**
+  String publicationPageCopyNumber(String number);
+
+  /// Publication page: contest revision of the latest copy.
+  ///
+  /// In en, this message translates to:
+  /// **'Made from contest revision {revision}'**
+  String publicationPageFromRevision(String revision);
+
+  /// Publication page: when the latest copy was made.
+  ///
+  /// In en, this message translates to:
+  /// **'Published {time}'**
+  String publicationPagePublishedAt(String time);
+
+  /// Publication page: empty state before the first publish.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing has been published yet.'**
+  String get publicationPageNoCopy;
+
+  /// Publication page: failure to load the contest.
+  ///
+  /// In en, this message translates to:
+  /// **'The contest could not be loaded.'**
+  String get publicationPageLoadFailed;
 }
 
 class _AppLocalizationsDelegate
