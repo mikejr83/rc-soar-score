@@ -30,11 +30,15 @@ Id scoringAssignmentId(int round, int pilot) =>
 /// [entryStatus] other than 200 answers every entry with that status and
 /// [entryCode]. [offlineOnEntry] makes entries fail like a lost connection.
 class ScoringServer {
+  /// Answers the landing-table list empty, as a contest without a table.
+  final bool noLandingTable;
+
   ScoringServer({
     Contest? contest,
     CurrentMatrix? matrix,
     Map<String, Object?> discipline = const {},
     Map<String, Object?> core = const {},
+    this.noLandingTable = false,
   }) : matrixServer = MatrixServer(
          contest: contest ?? matrixContest(state: LifecycleState.running),
          configuration: _configuration(discipline, core),
@@ -225,6 +229,7 @@ class ScoringServer {
       }, failure);
     }
     if (request.method == 'GET' && path.endsWith('/landing-tables')) {
+      if (noLandingTable) return _json({'landing_tables': []});
       return _json({
         'landing_tables': [
           {
