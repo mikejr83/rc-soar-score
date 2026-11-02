@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:soar_score_contest/services/connectivity/app_connectivity.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../../../support/fake_app_connectivity.dart';
