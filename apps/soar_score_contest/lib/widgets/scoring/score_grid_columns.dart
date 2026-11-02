@@ -13,7 +13,7 @@ enum ScoreGridMode {
   /// A stacked card per pilot.
   compact;
 
-  static const double wideMin = 1130;
+  static const double wideMin = 1160;
   static const double mediumMin = 600;
 
   static ScoreGridMode of(double width) {
@@ -29,7 +29,10 @@ abstract final class ScoreGridColumns {
   static const double lane = 48;
   static const double time = 116;
   static const double height = 96;
-  static const double land = 120;
+
+  /// The Landing field takes a share of the width the other columns leave,
+  /// never less than this; its caption names the band or the valid points.
+  static const double landMin = 120;
   static const double raw = 72;
   static const double group = 80;
   static const double pen = 108;
@@ -37,8 +40,11 @@ abstract final class ScoreGridColumns {
   static const double stat = 132;
   static const double menu = 44;
 
-  /// The pilot column's least width; it takes the rest.
-  static const double pilotMin = 150;
+  /// The pilot and Landing columns split what the fixed columns leave, 3 to 2,
+  /// so a wide window feeds the Landing field as well as the name. At the
+  /// narrowest wide width they get about 180 and 120 dp.
+  static const int pilotFlex = 3;
+  static const int landFlex = 2;
 
   static const double gap = 6;
   static const double rowPadding = 8;
@@ -68,6 +74,7 @@ class ScoreGridHeader extends StatelessWidget {
       String unit,
       double? width, {
       TextAlign align = TextAlign.start,
+      int flex = 1,
     }) {
       final child = Padding(
         padding: const EdgeInsets.symmetric(vertical: 10),
@@ -91,7 +98,7 @@ class ScoreGridHeader extends StatelessWidget {
         ),
       );
       return width == null
-          ? Expanded(child: child)
+          ? Expanded(flex: flex, child: child)
           : SizedBox(width: width, child: child);
     }
 
@@ -118,7 +125,12 @@ class ScoreGridHeader extends StatelessWidget {
             ),
             gap,
           ],
-          cell(options.showTeams ? 'Pilot · team' : 'Pilot', '', null),
+          cell(
+            options.showTeams ? 'Pilot · team' : 'Pilot',
+            '',
+            null,
+            flex: ScoreGridColumns.pilotFlex,
+          ),
           gap,
           cell('Time flown', 'm:ss', ScoreGridColumns.time),
           gap,
@@ -126,7 +138,12 @@ class ScoreGridHeader extends StatelessWidget {
             cell('Launch height', 'metres', ScoreGridColumns.height),
             gap,
           ],
-          cell('Landing · flags', 'table points', ScoreGridColumns.land),
+          cell(
+            'Landing · flags',
+            'table points',
+            null,
+            flex: ScoreGridColumns.landFlex,
+          ),
           gap,
           cell(
             'Raw score',
