@@ -14,14 +14,16 @@ class PublicationActionsRow extends StatefulWidget {
     super.key,
     required this.contest,
     required this.publication,
-    required this.policy,
+    required this.policyText,
     required this.isOffline,
     required this.onChanged,
   });
 
   final Contest contest;
   final PublicationFacts publication;
-  final PublicUpdateMode? policy;
+
+  /// The public update policy as a sentence, shown in the publish dialog.
+  final String policyText;
   final bool isOffline;
   final VoidCallback onChanged;
 
@@ -92,7 +94,7 @@ class _PublicationActionsRowState extends State<PublicationActionsRow> {
                       context,
                       contest: widget.contest,
                       publication: publication,
-                      policy: widget.policy,
+                      policyText: widget.policyText,
                     ),
                   )
                 : null,

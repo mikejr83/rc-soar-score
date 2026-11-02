@@ -153,6 +153,9 @@ class _Ready extends StatelessWidget {
     final theme = Theme.of(context);
     final publication = data.publication;
     final projection = publication.projection;
+    final policyText = data.policyReadFailed
+        ? l10n.publicationPolicyUnreadable
+        : l10n.updatePolicy(data.policy);
     final reason = PublicationActionsRow.disabledReason(
       l10n,
       publication,
@@ -177,7 +180,7 @@ class _Ready extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           publication.isPublished
-              ? l10n.updatePolicy(data.policy)
+              ? policyText
               : l10n.publicationScopeUnpublished,
           key: const ValueKey('publication-page-policy'),
         ),
@@ -192,7 +195,7 @@ class _Ready extends StatelessWidget {
         PublicationActionsRow(
           contest: data.contest,
           publication: publication,
-          policy: data.policy,
+          policyText: policyText,
           isOffline: isOffline,
           onChanged: onChanged,
         ),

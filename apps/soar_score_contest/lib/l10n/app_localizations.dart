@@ -2449,6 +2449,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The contest could not be loaded.'**
   String get publicationPageLoadFailed;
+
+  /// Shown instead of the public update policy when the contest's configuration could not be read.
+  ///
+  /// In en, this message translates to:
+  /// **'Public updates: the policy could not be read.'**
+  String get publicationPolicyUnreadable;
 }
 
 class _AppLocalizationsDelegate
