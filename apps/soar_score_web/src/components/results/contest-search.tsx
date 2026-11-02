@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { ExternalLink } from "@/components/external-link";
 import { fetchPublicationList } from "@/lib/results/api";
@@ -47,12 +47,17 @@ export function ContestSearch() {
   const key = `${requestKey}#${generation}`;
   const [loaded, setLoaded] = useState<{ key: string; state: State }>();
   const state: State = loaded?.key === key ? loaded.state : { kind: "loading" };
+  // The filters of the last request sent: only a change to them is typing
+  // worth waiting out; the first load and Refresh go straight out.
+  const lastRequested = useRef<string>(undefined);
 
   useEffect(() => {
     const controller = new AbortController();
-    const timer = setTimeout(() => {
-      const now = new Date();
-      const params = listQuery(filtersFromQuery(new URLSearchParams(requestKey)), now);
+    const now = new Date();
+    const params = listQuery(filtersFromQuery(new URLSearchParams(requestKey)), now);
+    const typing = lastRequested.current !== undefined && lastRequested.current !== requestKey;
+    const send = () => {
+      lastRequested.current = requestKey;
       fetchPublicationList(params, controller.signal)
         .then(({ publications, recentCount }) => {
           const contests = publications.map((d) => contestSummaryFrom(d, now));
@@ -65,7 +70,8 @@ export function ContestSearch() {
             state: { kind: "failed", message: e instanceof Error ? e.message : String(e) },
           });
         });
-    }, typingDelayMs);
+    };
+    const timer = setTimeout(send, typing ? typingDelayMs : 0);
     return () => {
       clearTimeout(timer);
       controller.abort();

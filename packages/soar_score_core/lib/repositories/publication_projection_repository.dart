@@ -8,6 +8,9 @@ import '../models/publication/publication_projection.dart';
 abstract interface class PublicationProjectionRepository {
   Future<PublicationProjection?> findById(Id id);
 
+  /// The projections with [ids] in one read; an id with none is left out.
+  Future<Map<Id, PublicationProjection>> findByIds(Iterable<Id> ids);
+
   /// Every projection of [publicationId], oldest revision first.
   Future<List<PublicationProjection>> listForPublication(Id publicationId);
 

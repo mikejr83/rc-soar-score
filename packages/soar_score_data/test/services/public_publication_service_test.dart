@@ -241,13 +241,18 @@ void _tests(Backend backend) {
       await publishPublic('Next week', DateTime.utc(2026, 11, 7, 12));
       await publishPublic('Too far', DateTime.utc(2026, 11, 9, 12));
 
-      // Sunday 2026-11-01 evening.
-      final sunday = DateTime.utc(2026, 11, 1, 21);
-      expect(await names(await reading.list(today: sunday)), ['Next week']);
-      // The next day the cutoff is Nov 8: same answer.
+      // Sunday 2026-11-01 evening, then Monday: the cutoff is Nov 8 both days.
+      for (final day in [
+        DateTime.utc(2026, 11, 1, 21),
+        DateTime.utc(2026, 11, 2),
+      ]) {
+        final onDay = PublicPublicationService(repository, clock: () => day);
+        expect(await names(await onDay.list()), ['Next week']);
+      }
+      // A caller a day off the server's still gets its own day's cutoff.
       expect(
-        await names(await reading.list(today: DateTime.utc(2026, 11, 2))),
-        ['Next week'],
+        await names(await reading.list(today: DateTime.utc(2026, 10, 18))),
+        isEmpty,
       );
     });
 
@@ -298,6 +303,56 @@ void _tests(Backend backend) {
       expect(await names(await reading.list(name: '%')), ['100% Sure_Thing']);
       expect(await names(await reading.list(name: 'S_re')), isEmpty);
       expect(await names(await reading.list(name: 'nothing')), isEmpty);
+    });
+
+    test('a venue search matches its parts in any order', () async {
+      await publishPublic(
+        'Gator Classic',
+        DateTime.utc(2026, 10, 17, 14),
+        host: 'Flying Gators RC Club',
+        city: 'Gainesville',
+      );
+
+      expect(await names(await reading.list(venue: 'Gainesville, Gators')), [
+        'Gator Classic',
+      ]);
+      expect(
+        await names(await reading.list(venue: 'Gainesville, Seattle')),
+        isEmpty,
+      );
+    });
+
+    test('a Public record without a current projection is not listed and '
+        'does not shorten the page', () async {
+      final kept = await publishPublic('Kept', DateTime.utc(2026, 10, 17, 14));
+      await repository.publicationIdentityRepository.save(
+        core.PublicationIdentity(
+          id: core.Id.create(),
+          verificationEmail: 'x@example.com',
+          visibility: core.PublicationVisibility.public,
+          publishedAt: now,
+          contestName: 'Orphan',
+          contestStartsAt: DateTime.utc(2026, 10, 18, 9),
+        ),
+      );
+
+      final page = await reading.list(limit: 1);
+
+      expect(
+        [for (final p in page.publications) p.publicationId],
+        [kept.value],
+      );
+    });
+
+    test('a caller far from the server day cannot lift the cap', () async {
+      await publishPublic('Far', DateTime.utc(2026, 11, 7, 12));
+
+      // The service clock is 2026-10-17; a year ahead is clamped to Oct 18.
+      expect(
+        await names(await reading.list(today: DateTime.utc(2027, 10, 17))),
+        isEmpty,
+      );
+      expect(await names(await reading.list(limit: 1000)), isEmpty);
     });
 
     test('the summary counts contests flown in the last 30 days', () async {

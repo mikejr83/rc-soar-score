@@ -35,7 +35,7 @@ class PublicationIdentityRepository extends DriftRepository
   ) {
     final where = StringBuffer(
       "visibility = 'Public' AND published_at IS NOT NULL "
-      'AND contest_starts_at IS NOT NULL',
+      'AND current_projection_id IS NOT NULL AND contest_starts_at IS NOT NULL',
     );
     final variables = <Variable>[];
     void contains(String column, String text) {
@@ -46,7 +46,10 @@ class PublicationIdentityRepository extends DriftRepository
     }
 
     contains('contest_name', query.name);
-    contains('venue', query.venue);
+    // "Seattle, WA" finds a venue holding both parts, in any stored order.
+    for (final part in query.venue.split(',')) {
+      contains('venue', part);
+    }
     final from = query.startsOnOrAfter;
     if (from != null) {
       where.write(' AND contest_starts_at >= ?');

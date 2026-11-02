@@ -92,6 +92,26 @@ class PublicationIdentity extends Equatable implements BackendOnly {
 
   final int revision;
 
+  /// This identity with [visibility] changed and everything else kept.
+  PublicationIdentity withVisibility(PublicationVisibility visibility) =>
+      PublicationIdentity(
+        id: id,
+        contestId: contestId,
+        ownerPublicProfileId: ownerPublicProfileId,
+        claimStatus: claimStatus,
+        verificationEmail: verificationEmail,
+        visibility: visibility,
+        publishedAt: publishedAt,
+        currentProjectionId: currentProjectionId,
+        resultsHiddenThroughRound: resultsHiddenThroughRound,
+        resultsHiddenAt: resultsHiddenAt,
+        contestName: contestName,
+        contestStartsAt: contestStartsAt,
+        contestEndsAt: contestEndsAt,
+        venue: venue,
+        revision: revision,
+      );
+
   bool get isDelisted => visibility == PublicationVisibility.delisted;
 
   Map<String, Object?> toJson() => _$PublicationIdentityToJson(this);

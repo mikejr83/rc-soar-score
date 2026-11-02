@@ -59,7 +59,7 @@ class TableMapper {
           readsFrom: {_table},
         )
         .get();
-    return rows.single.read<int>('n');
+    return (rows.single.data['n']! as num).toInt();
   }
 
   /// Every row, in [orderBy] order.

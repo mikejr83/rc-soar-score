@@ -333,23 +333,7 @@ class PublicationService {
       return PublicationView(identity: identity, current: current);
     }
     final saved = await repository.publicationIdentityRepository.save(
-      PublicationIdentity(
-        id: identity.id,
-        contestId: identity.contestId,
-        ownerPublicProfileId: identity.ownerPublicProfileId,
-        claimStatus: identity.claimStatus,
-        verificationEmail: identity.verificationEmail,
-        visibility: visibility,
-        publishedAt: identity.publishedAt,
-        currentProjectionId: identity.currentProjectionId,
-        resultsHiddenThroughRound: identity.resultsHiddenThroughRound,
-        resultsHiddenAt: identity.resultsHiddenAt,
-        contestName: identity.contestName,
-        contestStartsAt: identity.contestStartsAt,
-        contestEndsAt: identity.contestEndsAt,
-        venue: identity.venue,
-        revision: identity.revision,
-      ),
+      identity.withVisibility(visibility),
     );
     return PublicationView(identity: saved, current: current);
   }

@@ -68,7 +68,8 @@ class PublicPublicationService {
   /// [to] bound the contest start day (UTC, inclusive). Without a [to], only
   /// contests starting through the coming Sunday are listed; on a Sunday that
   /// is the following Sunday. [today] is the caller's calendar day (default:
-  /// today in UTC) and fixes both the coming Sunday and the 30-day window.
+  /// today in UTC, and never more than a day from it) and fixes both the
+  /// coming Sunday and the 30-day window.
   /// [limit] is capped at [maxListLimit]. Throws an [ArgumentError] for a
   /// non-positive [limit], a negative [offset] or a [from] after [to].
   Future<PublicPublicationList> list({
@@ -89,26 +90,46 @@ class PublicPublicationService {
     if (fromDay != null && toDay != null && fromDay.isAfter(toDay)) {
       throw ArgumentError.value(from, 'from', 'must not be after to');
     }
-    final day = _day(today ?? _clock());
-    // Dart's weekday runs Monday 1 to Sunday 7, so a Sunday is 7 days short
-    // of the following Sunday.
+    // A caller's day may be a time zone away from the server's, never more;
+    // anything further would only lift the cap.
+    final serverDay = _day(_clock());
+    final day = today == null
+        ? serverDay
+        : _day(today).isBefore(serverDay.subtract(const Duration(days: 1)))
+        ? serverDay.subtract(const Duration(days: 1))
+        : _day(today).isAfter(serverDay.add(const Duration(days: 1)))
+        ? serverDay.add(const Duration(days: 1))
+        : _day(today);
     final startsBefore =
         toDay?.add(const Duration(days: 1)) ??
         day.add(Duration(days: 7 - (day.weekday % 7) + 1));
-    final identities = await repository.publicationIdentityRepository
-        .listPublic(
-          PublicationListQuery(
-            name: name,
-            venue: venue,
-            startsOnOrAfter: fromDay,
-            startsBefore: startsBefore,
-            limit: limit.clamp(1, maxListLimit),
-            offset: offset,
-          ),
-        );
+    final identityRepository = repository.publicationIdentityRepository;
+    final (identities, recent) = await (
+      identityRepository.listPublic(
+        PublicationListQuery(
+          name: name,
+          venue: venue,
+          startsOnOrAfter: fromDay,
+          startsBefore: startsBefore,
+          limit: limit.clamp(1, maxListLimit),
+          offset: offset,
+        ),
+      ),
+      identityRepository.countPublicActive(
+        windowStart: day.subtract(const Duration(days: 30)),
+        at: day.add(const Duration(days: 1)),
+      ),
+    ).wait;
+    // One read for the whole page, not one per row.
+    final projections = await repository.publicationProjectionRepository
+        .findByIds([
+          for (final identity in identities)
+            if (identity.currentProjectionId != null)
+              identity.currentProjectionId!,
+        ]);
     final summaries = <PublicPublicationSummary>[];
     for (final identity in identities) {
-      final projection = await _currentOrNull(identity);
+      final projection = projections[identity.currentProjectionId];
       if (projection == null) continue;
       summaries.add(
         PublicPublicationSummary(
@@ -120,11 +141,6 @@ class PublicPublicationService {
         ),
       );
     }
-    final recent = await repository.publicationIdentityRepository
-        .countPublicActive(
-          windowStart: day.subtract(const Duration(days: 30)),
-          at: day.add(const Duration(days: 1)),
-        );
     return PublicPublicationList(publications: summaries, recentCount: recent);
   }
 
