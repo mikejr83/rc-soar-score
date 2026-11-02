@@ -902,6 +902,48 @@
       }
     }
   },
+  "activityScoreCorrected": "{actor, select, you{You corrected a score for {pilot, select, none{a pilot} other{pilot {pilot}}} in round {round}} other{A score was corrected for {pilot, select, none{a pilot} other{pilot {pilot}}} in round {round}}}",
+  "@activityScoreCorrected": {
+    "description": "Recent activity line: a director corrected an official score. actor is \"you\" when the signed-in account did it; pilot is the participant number, or \"none\" when the event names none.",
+    "placeholders": {
+      "actor": {
+        "type": "String"
+      },
+      "pilot": {
+        "type": "String"
+      },
+      "round": {
+        "type": "int"
+      }
+    }
+  },
+  "activityPilotRetired": "{actor, select, you{You retired {pilot, select, none{a pilot} other{pilot {pilot}}} from round {round}} other{{pilot, select, none{A pilot} other{Pilot {pilot}}} was retired from round {round}}}",
+  "@activityPilotRetired": {
+    "description": "Recent activity line: a pilot was retired from a round on. actor is \"you\" when the signed-in account did it; pilot is the participant number, or \"none\" when the event names none.",
+    "placeholders": {
+      "actor": {
+        "type": "String"
+      },
+      "pilot": {
+        "type": "String"
+      },
+      "round": {
+        "type": "int"
+      }
+    }
+  },
+  "activityPilotReinstated": "{actor, select, you{You reinstated {pilot, select, none{a pilot} other{pilot {pilot}}}} other{{pilot, select, none{A pilot} other{Pilot {pilot}}} was reinstated}}",
+  "@activityPilotReinstated": {
+    "description": "Recent activity line: a retired pilot was reinstated. actor is \"you\" when the signed-in account did it; pilot is the participant number, or \"none\" when the event names none.",
+    "placeholders": {
+      "actor": {
+        "type": "String"
+      },
+      "pilot": {
+        "type": "String"
+      }
+    }
+  },
   "shellNavContests": "Contests",
   "@shellNavContests": {
     "description": "Navigation rail destination, page title and breadcrumb: main page."

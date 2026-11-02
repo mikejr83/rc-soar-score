@@ -6,8 +6,9 @@ import 'activity_entry.dart';
 
 /// The newest audit events of a contest, turned into [ActivityEntry] lines.
 ///
-/// The events the workspace lists are state transitions, configuration saves
-/// and matrix draws, plus successful publications; other events are skipped.
+/// The events the workspace lists are state transitions (a contest action or a
+/// pilot's retirement), configuration saves, matrix draws and score
+/// corrections, plus successful publications; other events are skipped.
 class ActivityFacts extends Equatable {
   const ActivityFacts({this.entries = const [], this.failed = false});
 
@@ -39,6 +40,7 @@ class ActivityFacts extends Equatable {
       if (kind == null) {
         continue;
       }
+      final (pilot, round) = _where(event);
       final actor = event.actorId?.value;
       entries.add(
         ActivityEntry(
@@ -46,6 +48,8 @@ class ActivityFacts extends Equatable {
           kind: kind,
           byYou: actor != null && actor == actingAccountId,
           at: event.serverTimestamp,
+          pilot: pilot,
+          round: round,
         ),
       );
       if (entries.length == shown) {
@@ -55,11 +59,31 @@ class ActivityFacts extends Equatable {
     return ActivityFacts(entries: List.unmodifiable(entries));
   }
 
+  /// The pilot and round a score correction or a retirement names.
+  static (int?, int?) _where(AuditEventDto event) {
+    final correction = ScoreCorrectionAudit.parseReason(
+      event.action,
+      event.reason,
+    );
+    if (correction != null) {
+      return (correction.pilot, correction.round);
+    }
+    final retirement = PilotRetirementAudit.parseReason(
+      event.action,
+      event.reason,
+    );
+    return (retirement?.pilot, retirement?.round);
+  }
+
   static ActivityKind? _kindOf(AuditEventDto event) {
     if (event.outcome != AuditOutcome.success) {
       return null;
     }
     return switch (event.action) {
+      AuditAction.scoreAttempt =>
+        ScoreCorrectionAudit.parseReason(event.action, event.reason) == null
+            ? null
+            : ActivityKind.scoreCorrected,
       AuditAction.publicationAttempt => ActivityKind.publication,
       AuditAction.configurationSaved => ActivityKind.configurationSaved,
       AuditAction.matrixDrawn => ActivityKind.matrixDrawn,
@@ -71,7 +95,16 @@ class ActivityFacts extends Equatable {
         ContestAction.unlock => ActivityKind.unlock,
         // No activity line for results hiding yet; #658 adds the card.
         ContestAction.hideResults || ContestAction.showResults => null,
-        null => null,
+        // A retirement is a state transition of a participation, written by
+        // `PilotRetirementAudit`, not a contest action.
+        null => switch (PilotRetirementAudit.parseReason(
+          event.action,
+          event.reason,
+        )?.kind) {
+          PilotRetirementKind.retire => ActivityKind.pilotRetired,
+          PilotRetirementKind.reinstate => ActivityKind.pilotReinstated,
+          null => null,
+        },
       },
       _ => null,
     };

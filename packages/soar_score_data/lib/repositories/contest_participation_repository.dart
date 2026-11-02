@@ -1,6 +1,7 @@
 import 'package:soar_score_core/soar_score_core.dart' as core;
 
 import '../sync/unscored_matrix_rows.dart';
+import 'audit_event_repository.dart';
 import 'drift_repository.dart';
 
 /// Contest participations in the database.
@@ -8,6 +9,7 @@ class ContestParticipationRepository extends DriftRepository
     implements core.ContestParticipationRepository {
   ContestParticipationRepository(super.db, {super.stores});
 
+  late final _audits = AuditEventRepository(db, stores: stores);
   late final _store = store<core.ContestParticipation>('ContestParticipation');
   late final _memberships = store<core.TeamMembership>('TeamMembership');
   late final _modelLinks = store<core.ContestModelLink>('ContestModelLink');
@@ -50,15 +52,19 @@ class ContestParticipationRepository extends DriftRepository
   Future<core.ContestParticipation> save(
     core.ContestParticipation participation, {
     required core.MutationMetadata metadata,
-  }) => unitOfWork.run(
-    (context) => context.save(participation, metadata: metadata),
-  );
+    core.AuditEvent? audit,
+  }) => unitOfWork.run((context) async {
+    final saved = await context.save(participation, metadata: metadata);
+    if (audit != null) await _audits.append(audit);
+    return saved;
+  });
 
   @override
   Future<({core.ContestParticipation participation, int matrixRowsRemoved})>
   saveRemovingMatrixRows(
     core.ContestParticipation participation, {
     required core.MutationMetadata metadata,
+    core.AuditEvent? audit,
   }) => unitOfWork.run((context) async {
     final removed = await removeUnscoredMatrixRows(
       context,
@@ -68,6 +74,7 @@ class ContestParticipationRepository extends DriftRepository
     );
     await _removeModelLinks(context, participation.id, metadata);
     final saved = await context.save(participation, metadata: metadata);
+    if (audit != null) await _audits.append(audit);
     return (participation: saved, matrixRowsRemoved: removed);
   });
 

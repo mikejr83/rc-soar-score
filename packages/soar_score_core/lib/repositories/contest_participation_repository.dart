@@ -1,5 +1,6 @@
 import '../models/id.dart';
 import '../models/participants/contest_participation.dart';
+import '../models/sync/audit_event.dart';
 import 'mutation_metadata.dart';
 
 /// Abstract persistence contract for [ContestParticipation]s.
@@ -17,11 +18,14 @@ abstract interface class ContestParticipationRepository {
 
   /// Inserts [participation], or updates the stored row with the same id.
   ///
+  /// An [audit] event is stored in the same transaction.
+  ///
   /// Throws a `StaleRevisionError` when it was read at an older revision.
   /// Returns the participation as stored.
   Future<ContestParticipation> save(
     ContestParticipation participation, {
     required MutationMetadata metadata,
+    AuditEvent? audit,
   });
 
   /// As [save], and the pilot's matrix rows go in the same transaction, so a
@@ -36,6 +40,7 @@ abstract interface class ContestParticipationRepository {
   saveRemovingMatrixRows(
     ContestParticipation participation, {
     required MutationMetadata metadata,
+    AuditEvent? audit,
   });
 
   /// Deletes the participation with [id], its team memberships and its matrix

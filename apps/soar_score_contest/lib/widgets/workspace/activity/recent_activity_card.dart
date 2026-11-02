@@ -187,12 +187,19 @@ class RecentActivityCard extends StatelessWidget {
     ActivityKind.publication => Icons.public,
     ActivityKind.configurationSaved => Icons.tune_outlined,
     ActivityKind.matrixDrawn => Icons.grid_on_outlined,
+    ActivityKind.scoreCorrected => Icons.edit_note_outlined,
+    ActivityKind.pilotRetired => Icons.logout,
+    ActivityKind.pilotReinstated => Icons.login,
   };
 
   static String _text(BuildContext context, ActivityEntry entry) {
     final l10n = AppLocalizations.of(context);
     // The ARB messages use ICU `select`: "you" or anything else ("other").
     final actor = entry.byYou ? 'you' : 'other';
+    // The pilot is "none" when the event does not name one. Every event that
+    // reaches a line with a round names it, so 0 is only a placeholder.
+    final pilot = entry.pilot?.toString() ?? 'none';
+    final round = entry.round ?? 0;
     return switch (entry.kind) {
       ActivityKind.complete => l10n.activityComplete(actor),
       ActivityKind.openScoring => l10n.activityOpenScoring(actor),
@@ -202,6 +209,20 @@ class RecentActivityCard extends StatelessWidget {
       ActivityKind.publication => l10n.activityPublication(actor),
       ActivityKind.configurationSaved => l10n.activityConfigurationSaved(actor),
       ActivityKind.matrixDrawn => l10n.activityMatrixDrawn(actor),
+      ActivityKind.scoreCorrected => l10n.activityScoreCorrected(
+        actor,
+        pilot,
+        round,
+      ),
+      ActivityKind.pilotRetired => l10n.activityPilotRetired(
+        actor,
+        pilot,
+        round,
+      ),
+      ActivityKind.pilotReinstated => l10n.activityPilotReinstated(
+        actor,
+        pilot,
+      ),
     };
   }
 }

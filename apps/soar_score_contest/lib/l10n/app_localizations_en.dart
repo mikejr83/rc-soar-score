@@ -781,6 +781,57 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String activityScoreCorrected(String actor, String pilot, int round) {
+    String _temp0 = intl.Intl.selectLogic(pilot, {
+      'none': 'a pilot',
+      'other': 'pilot $pilot',
+    });
+    String _temp1 = intl.Intl.selectLogic(pilot, {
+      'none': 'a pilot',
+      'other': 'pilot $pilot',
+    });
+    String _temp2 = intl.Intl.selectLogic(actor, {
+      'you': 'You corrected a score for $_temp0 in round $round',
+      'other': 'A score was corrected for $_temp1 in round $round',
+    });
+    return '$_temp2';
+  }
+
+  @override
+  String activityPilotRetired(String actor, String pilot, int round) {
+    String _temp0 = intl.Intl.selectLogic(pilot, {
+      'none': 'a pilot',
+      'other': 'pilot $pilot',
+    });
+    String _temp1 = intl.Intl.selectLogic(pilot, {
+      'none': 'A pilot',
+      'other': 'Pilot $pilot',
+    });
+    String _temp2 = intl.Intl.selectLogic(actor, {
+      'you': 'You retired $_temp0 from round $round',
+      'other': '$_temp1 was retired from round $round',
+    });
+    return '$_temp2';
+  }
+
+  @override
+  String activityPilotReinstated(String actor, String pilot) {
+    String _temp0 = intl.Intl.selectLogic(pilot, {
+      'none': 'a pilot',
+      'other': 'pilot $pilot',
+    });
+    String _temp1 = intl.Intl.selectLogic(pilot, {
+      'none': 'A pilot',
+      'other': 'Pilot $pilot',
+    });
+    String _temp2 = intl.Intl.selectLogic(actor, {
+      'you': 'You reinstated $_temp0',
+      'other': '$_temp1 was reinstated',
+    });
+    return '$_temp2';
+  }
+
+  @override
   String get shellNavContests => 'Contests';
 
   @override
