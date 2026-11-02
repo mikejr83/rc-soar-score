@@ -16,6 +16,23 @@ const _flight = {
   'landing': 'points_50',
 };
 
+/// A recalculation that fails its first [failures] calls (the attempt and
+/// its retry), then succeeds, and counts how often it ran.
+class FailingThenWorkingResults extends ResultsService {
+  FailingThenWorkingResults(this._runs, {this.failures = 2})
+    : super(StubRepository(StubContestRepository()));
+
+  final List<int> _runs;
+  final int failures;
+
+  @override
+  Future<ContestResults> recalculate(Id contestId) async {
+    _runs.add(1);
+    if (_runs.length <= failures) throw StateError('stopped before finishing');
+    return ContestResults(isStale: false);
+  }
+}
+
 /// A recalculation that succeeds and counts how often it ran.
 class CountingResults extends ResultsService {
   CountingResults(this._runs) : super(StubRepository(StubContestRepository()));
@@ -205,6 +222,7 @@ void main() {
       final results = (body['results']! as List).cast<Map>();
       expect(results[0]['result'], isNotNull);
       expect((results[1]['error'] as Map)['status'], 400);
+      expect(api.repository.officialScores.stored, hasLength(1));
     });
 
     test('entries of two rounds are refused beyond the first round', () async {
@@ -221,6 +239,7 @@ void main() {
       final results = (body['results']! as List).cast<Map>();
       expect(results[0]['result'], isNotNull);
       expect((results[1]['error'] as Map)['status'], 400);
+      expect(api.repository.officialScores.stored, hasLength(1));
     });
 
     test('two entries for one slot: the second is refused', () async {
@@ -255,6 +274,136 @@ void main() {
       expect(api.repository.officialScores.stored, hasLength(2));
       expect(body['recalculation_warning'], isNotNull);
     });
+
+    test('a repeat finishes what an interrupted request left undone', () async {
+      final runs = <int>[];
+      final api = HandlerHarness(
+        _owner,
+        recalculation: RecalculationService(FailingThenWorkingResults(runs)),
+      );
+      await drawnContest(api);
+      final entries = [
+        entry(await assignmentOfPilot(api, 1), 'bulk-1'),
+        entry(await assignmentOfPilot(api, 2), 'bulk-2'),
+      ];
+
+      final first = await api.json(await bulk(api, entries));
+      expect(first['recalculation_warning'], isNotNull);
+      final again = await api.json(await bulk(api, entries));
+
+      expect(again['recalculation_warning'], isNull, reason: '$again');
+      expect(runs, hasLength(3));
+      expect(api.repository.officialScores.stored, hasLength(2));
+      final results = (again['results']! as List).cast<Map>();
+      expect(
+        results.map(
+          (r) => ((r['result'] as Map)['contest'] as Map)['lifecycle_state'],
+        ),
+        everyElement('Running'),
+      );
+    });
+
+    test(
+      'a replay mixed with a new entry reports one contest and recalculates',
+      () async {
+        final runs = <int>[];
+        final api = HandlerHarness(
+          _owner,
+          recalculation: RecalculationService(CountingResults(runs)),
+        );
+        await drawnContest(api);
+        final one = entry(await assignmentOfPilot(api, 1), 'bulk-1');
+        await bulk(api, [one]);
+
+        final body = await api.json(
+          await bulk(api, [
+            entry(await assignmentOfPilot(api, 2), 'bulk-2'),
+            one,
+          ]),
+        );
+
+        final results = (body['results']! as List).cast<Map>();
+        expect(
+          results.map(
+            (r) => ((r['result'] as Map)['contest'] as Map)['lifecycle_state'],
+          ),
+          everyElement('Running'),
+        );
+        expect(runs, hasLength(2));
+        expect(api.repository.officialScores.stored, hasLength(2));
+      },
+    );
+
+    test(
+      'a pilot who is not a director gets 403 and nothing is stored',
+      () async {
+        final api = HandlerHarness(_owner);
+        await drawnContest(api);
+        final outsider = HandlerHarness(
+          Id.parse('019c0000-0000-7000-8000-000000000002'),
+          contests: api.contests,
+        );
+
+        final response = await bulk(outsider, [
+          entry(await assignmentOfPilot(api, 1), 'bulk-1'),
+        ]);
+
+        expect(response.statusCode, 403);
+        expect((await outsider.errorOf(response))['code'], 'not_director');
+        expect(api.repository.officialScores.stored, isEmpty);
+      },
+    );
+
+    test('a malformed body is a 400', () async {
+      final api = HandlerHarness(_owner);
+      await drawnContest(api);
+
+      for (final body in <Object>[
+        {'entries': 'nope'},
+        {
+          'entries': [
+            {'assignment_id': 'x'},
+          ],
+        },
+        {},
+      ]) {
+        final response = await api.send(
+          'POST',
+          '/contests/$_contestId/scores/bulk',
+          body: body,
+        );
+        expect(response.statusCode, 400, reason: '$body');
+      }
+    });
+
+    test(
+      'a locked contest refuses every entry like the single route',
+      () async {
+        final api = HandlerHarness(_owner);
+        await drawnContest(api);
+        final current = await api.json(
+          await api.send('GET', '/contests/$_contestId'),
+        );
+        await api.send(
+          'POST',
+          '/contests/$_contestId/actions',
+          body: {'action': 'lock', 'base_revision': current['revision']},
+        );
+
+        final response = await bulk(api, [
+          entry(await assignmentOfPilot(api, 1), 'bulk-1'),
+          entry(await assignmentOfPilot(api, 2), 'bulk-2'),
+        ]);
+        final body = await api.json(response);
+
+        expect(response.statusCode, 200);
+        for (final result in (body['results']! as List).cast<Map>()) {
+          expect((result['error'] as Map)['code'], 'contest_locked');
+          expect((result['error'] as Map)['status'], 409);
+        }
+        expect(api.repository.officialScores.stored, isEmpty);
+      },
+    );
 
     test('an empty or oversized request is a 400', () async {
       final api = HandlerHarness(_owner);

@@ -70,6 +70,13 @@ class ScoringServer {
   int? readFailure;
 
   int entryStatus = 200;
+
+  /// Answers a bulk request with this status instead of the entries, like
+  /// a server without the bulk route (404).
+  int bulkStatus = 200;
+
+  /// The recalculation warning a bulk answer carries.
+  String? bulkWarning;
   String entryCode = 'rejected';
   bool offlineOnEntry = false;
 
@@ -358,6 +365,11 @@ class ScoringServer {
       if (offlineOnEntry) {
         throw http.ClientException('offline', request.url);
       }
+      if (bulkStatus != 200) {
+        return _json({
+          'error': {'code': 'not_found', 'message': 'No such route.'},
+        }, bulkStatus);
+      }
       final body = jsonDecode(request.body) as Map<String, dynamic>;
       return _json({
         'results': [
@@ -370,7 +382,7 @@ class ScoringServer {
               bulk: true,
             ).$2,
         ],
-        'recalculation_warning': null,
+        'recalculation_warning': bulkWarning,
       });
     }
     if (request.method == 'POST' && path.endsWith('/scores')) {

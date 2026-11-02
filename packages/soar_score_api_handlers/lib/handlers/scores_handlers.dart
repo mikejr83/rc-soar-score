@@ -29,14 +29,18 @@ final _logger = Logger('Scores');
 ///   publishes, the contest's public update mode then decides whether the
 ///   entry also reaches the public projection; a failed publish is logged
 ///   and audited, never an error;
-/// - `POST /contests/{id}/scores/bulk` enters the scores of up to
-///   [EnterScoresRequest.maxEntries] slots in one request (200). Each entry
-///   is checked like a single one and answered on its own (stored, or the
-///   refusal it would have got alone); the stored entries go in ONE
+/// - `POST /contests/{id}/scores/bulk` enters the scores of 1 to
+///   [EnterScoresRequest.maxEntries] slots of ONE round in one request (200;
+///   more or none is a 400; an entry for another round, a second entry for a
+///   slot or a repeated `client_mutation_id` is refused alone with 400). Each
+///   entry is checked like a single one and answered on its own (stored, or
+///   the refusal it would have got alone); the stored entries go in ONE
 ///   transaction, then the results are recalculated ONCE (own transaction,
 ///   one retry, a warning on the response when it still fails) and the public
-///   projection is updated at most ONCE. A request repeated after a failure
-///   is safe: each entry keeps its `client_mutation_id`;
+///   projection is updated at most ONCE. A repeat is safe and finishes an
+///   interrupted request: each entry keeps its `client_mutation_id`, so it
+///   replays, and the contest start, recalculation and publish run again
+///   whenever any entry is saved, replayed or new;
 /// - `GET /contests/{id}/assignments/{assignmentId}/scores/history` is every
 ///   submission to a slot, oldest first: the official revisions with their
 ///   reasons, and the attempts that never became official.

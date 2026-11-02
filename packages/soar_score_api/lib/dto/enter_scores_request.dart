@@ -8,8 +8,10 @@ part 'enter_scores_request.g.dart';
 ///
 /// Each entry has the fields of an [EnterScoreRequest] plus its
 /// [assignmentId], and its own `client_mutation_id`, so repeating the request
-/// returns what each entry made the first time. At most [maxEntries] entries,
-/// for different slots.
+/// returns what each entry made the first time. A request takes 1 to
+/// [maxEntries] entries (more is a 400), for different slots of ONE round,
+/// each with a different `client_mutation_id`; an entry that breaks either
+/// rule is refused on its own (400) and the others are still stored.
 @JsonSerializable(
   checked: true,
   fieldRename: FieldRename.snake,

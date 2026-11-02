@@ -309,6 +309,9 @@ class ScoringController extends ChangeNotifier {
       final code = error.error?.code;
       if (error.statusCode == 409 &&
           (code == 'stale_revision' || code == 'already_stored')) {
+        // An existing attempt with this mutation id is not this save: the
+        // next save must not replay it over what was typed.
+        if (code == 'already_stored') _mutationIds.remove(row.id);
         await _markStale([row]);
       } else if (error.statusCode == 409 || error.statusCode == 400) {
         _mutationIds.remove(row.id);
@@ -378,6 +381,10 @@ class ScoringController extends ChangeNotifier {
       );
       saved += await _saveBatch(chunk);
     }
+    if (saved > 0) {
+      await _loadResults();
+      notifyListeners();
+    }
     return saved;
   }
 
@@ -428,6 +435,7 @@ class ScoringController extends ChangeNotifier {
         } else if (outcome.statusCode == 409 &&
             (outcome.code == 'stale_revision' ||
                 outcome.code == 'already_stored')) {
+          if (outcome.code == 'already_stored') _mutationIds.remove(row.id);
           stale.add(row);
         } else if (outcome.statusCode == 409 || outcome.statusCode == 400) {
           _mutationIds.remove(row.id);
@@ -445,6 +453,17 @@ class ScoringController extends ChangeNotifier {
       if (saved > 0) recalculationWarning = answer.recalculationWarning;
       if (stale.isNotEmpty) await _markStale(stale);
     } on ApiHttpError catch (error) {
+      if (error.statusCode == 404 || error.statusCode == 405) {
+        // A server older than this app has no bulk route: save row by row.
+        for (final row in batch) {
+          _saves.remove(row.id);
+        }
+        for (final row in batch) {
+          if (await save(row)) saved++;
+        }
+        notifyListeners();
+        return saved;
+      }
       _failAll(
         batch,
         RowSave(
@@ -467,10 +486,6 @@ class ScoringController extends ChangeNotifier {
       _failAll(batch, RowSave(RowSaveKind.failed, message: '$error'));
     }
     notifyListeners();
-    if (saved > 0) {
-      await _loadResults();
-      notifyListeners();
-    }
     return saved;
   }
 
