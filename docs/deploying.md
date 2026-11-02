@@ -76,6 +76,13 @@ Settings > General). To get them locally, `vercel link` and read
 
 Do not commit `.vercel/`.
 
+Auth0 needs no secret in CI or on any host. Builds take the tenant domain and
+client IDs as `--dart-define` values, and the server only needs `AUTH0_DOMAIN`
+and `API_AUDIENCE`; it verifies tokens against the tenant's public keys. These
+are identifiers, not credentials, and nothing uses machine-to-machine access, so
+there is no client secret. Adding a machine-to-machine application would be the
+trigger to revisit this and store its secret in the `Production` environment.
+
 Environment variables on each host:
 
 | Where  | Variable                  | Value                                                                                                                                                 |
