@@ -126,6 +126,40 @@ the development tenant. Create your own Google OAuth client before release;
 Auth0's shared keys are not for production. Then open each application's
 Connections tab and switch the connections on.
 
+## Who can do what
+
+Auth0 only proves who the caller is. It does not decide what they may do. RBAC
+is off on the API, so tokens carry no roles or permissions, and there is no
+role-to-scope mapping to maintain. The server decides access from relationships
+in its own data, looked up for the account behind the token:
+
+- **Director.** The account that owns a contest. Only the owner may change the
+  contest, its pilots, draw, scores and publication; anyone else gets 403
+  `not_director`. The director's pilot list is their own private copy; a pilot's
+  account never changes it.
+- **Pilot.** A participant in a contest, linked to an account by invitation, by
+  a director copying a listed pilot, or by the pilot confirming "Is this you?".
+  A pilot can end a link; that never changes anything already published. The
+  full model is in the agreed participants and accounts design (issues #149,
+  #545).
+- **Helper and guest scorers.** Scoring access for helpers and self-scoring
+  participants follows the same rule: it comes from the participation record,
+  not from a token claim.
+
+Public results are different: `/public/*` reads need no sign-in, and the route
+list is in [Environment Setup](environment-setup.md#auth0). Which relationships
+the server enforces today grows with the account tickets under #169; this page
+states the principle, the code and tickets state the current rules.
+
+## Sign-in decisions
+
+- **Contest app (web and Windows):** signs in with Auth0. "Continue offline" on
+  Windows never contacts Auth0.
+- **Self-scoring app (`score.rcsoarscore.com`):** signs in with Auth0, using its
+  own Single Page Web Application (section 5). Wiring is tracked under #140.
+- **Public site (`rcsoarscore.com`):** does not sign in. Results are anonymous
+  reads of the public API.
+
 ## 5. Not needed yet
 
 - A custom login domain. It changes the token issuer, and the issuer is part of
@@ -135,7 +169,9 @@ Connections tab and switch the connections on.
 - A post-login Action adding name and email to the access token. The server
   ticket (#148) decides between that and calling `/userinfo`.
 - A production tenant. Repeat sections 1 to 4 in it before release and keep its
-  identifiers out of the development defaults.
+  identifiers out of the development defaults. Create your own Google OAuth
+  client for it and settle the custom login domain first (tracked in release
+  readiness, #157).
 
 ## Checking it
 
