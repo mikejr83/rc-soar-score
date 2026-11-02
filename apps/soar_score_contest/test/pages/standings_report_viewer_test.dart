@@ -301,7 +301,7 @@ void main() {
       await _pump(
         tester,
         server,
-        params: const ReportViewParams(preview: true),
+        params: const ReportViewParams(preview: true, previewExplicit: true),
       );
       expect(_text('Ray, Bo'), findsOneWidget);
       expect(_text('Review'), findsNothing);

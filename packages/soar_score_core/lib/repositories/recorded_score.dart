@@ -2,6 +2,7 @@ import '../models/contest/contest.dart';
 import '../models/scores/official_score.dart';
 import '../models/scores/score_attempt.dart';
 import '../models/scores/score_placeholder.dart';
+import '../models/sync/audit_event.dart';
 
 /// A score entry ready to store: the attempt, the official score taken from
 /// it and the placeholder in its new state, with the contest when the entry
@@ -14,6 +15,7 @@ class RecordedScore {
     required this.officialScore,
     required this.placeholder,
     this.contest,
+    this.audit,
   });
 
   final ScoreAttempt attempt;
@@ -24,4 +26,8 @@ class RecordedScore {
 
   /// The contest to store with the entry, or null when it does not change.
   final Contest? contest;
+
+  /// The audit event of a correction, stored in the same transaction, or null
+  /// for a first entry (which is not audited).
+  final AuditEvent? audit;
 }

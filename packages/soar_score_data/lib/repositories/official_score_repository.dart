@@ -1,5 +1,6 @@
 import 'package:soar_score_core/soar_score_core.dart' as core;
 
+import 'audit_event_repository.dart';
 import 'drift_repository.dart';
 
 /// Official scores in the database; append-only.
@@ -7,6 +8,7 @@ class OfficialScoreRepository extends DriftRepository
     implements core.OfficialScoreRepository {
   OfficialScoreRepository(super.db, {super.stores});
 
+  late final _audits = AuditEventRepository(db, stores: stores);
   late final _store = store<core.OfficialScore>('OfficialScore');
 
   @override
@@ -94,11 +96,14 @@ class OfficialScoreRepository extends DriftRepository
               contest,
               metadata: metadata.forPart(contest.id.value),
             );
+      final audit = entry.audit;
+      if (audit != null) await _audits.append(audit);
       return core.RecordedScore(
         attempt: entry.attempt,
         officialScore: score,
         placeholder: saved,
         contest: savedContest,
+        audit: audit,
       );
     });
   }

@@ -70,6 +70,23 @@ class AppLocalizationsEn extends AppLocalizations {
       'The reset could not be saved. It applies until you close the app.';
 
   @override
+  String get reportOptionsHeading => 'Report options';
+
+  @override
+  String get reportOptionsDescription =>
+      'Report options are remembered each time you change them. You can reset them all to the default.';
+
+  @override
+  String get reportOptionsResetButton => 'Reset report options';
+
+  @override
+  String get reportOptionsResetDone =>
+      'Report options are back to their defaults.';
+
+  @override
+  String get reportOptionsResetSaveFailed => 'The reset could not be saved.';
+
+  @override
   String get timeZoneHeading => 'Time zone';
 
   @override
@@ -778,6 +795,57 @@ class AppLocalizationsEn extends AppLocalizations {
       'other': 'The matrix was drawn',
     });
     return '$_temp0';
+  }
+
+  @override
+  String activityScoreCorrected(String actor, String pilot, int round) {
+    String _temp0 = intl.Intl.selectLogic(pilot, {
+      'none': 'a pilot',
+      'other': 'pilot $pilot',
+    });
+    String _temp1 = intl.Intl.selectLogic(pilot, {
+      'none': 'a pilot',
+      'other': 'pilot $pilot',
+    });
+    String _temp2 = intl.Intl.selectLogic(actor, {
+      'you': 'You corrected a score for $_temp0 in round $round',
+      'other': 'A score was corrected for $_temp1 in round $round',
+    });
+    return '$_temp2';
+  }
+
+  @override
+  String activityPilotRetired(String actor, String pilot, int round) {
+    String _temp0 = intl.Intl.selectLogic(pilot, {
+      'none': 'a pilot',
+      'other': 'pilot $pilot',
+    });
+    String _temp1 = intl.Intl.selectLogic(pilot, {
+      'none': 'A pilot',
+      'other': 'Pilot $pilot',
+    });
+    String _temp2 = intl.Intl.selectLogic(actor, {
+      'you': 'You retired $_temp0 from round $round',
+      'other': '$_temp1 was retired from round $round',
+    });
+    return '$_temp2';
+  }
+
+  @override
+  String activityPilotReinstated(String actor, String pilot) {
+    String _temp0 = intl.Intl.selectLogic(pilot, {
+      'none': 'a pilot',
+      'other': 'pilot $pilot',
+    });
+    String _temp1 = intl.Intl.selectLogic(pilot, {
+      'none': 'A pilot',
+      'other': 'Pilot $pilot',
+    });
+    String _temp2 = intl.Intl.selectLogic(actor, {
+      'you': 'You reinstated $_temp0',
+      'other': '$_temp1 was reinstated',
+    });
+    return '$_temp2';
   }
 
   @override

@@ -29,6 +29,11 @@ class ScoreRowDraft extends ChangeNotifier {
   String timeText = '';
   String heightText = '';
   String? landing;
+
+  /// The table points typed in the landing field. Empty when the landing was
+  /// chosen with a chip or loaded from a saved score, in which case the field
+  /// shows the points of [landing].
+  String landingText = '';
   bool lateLanding = false;
   bool motorRestart = false;
   bool outOfBounds = false;
@@ -45,6 +50,7 @@ class ScoreRowDraft extends ChangeNotifier {
     final height = saved['launch_height'];
     heightText = height is num ? '${height.toInt()}' : '';
     landing = saved['landing'] as String?;
+    landingText = '';
     lateLanding = saved['late_landing'] == true;
     motorRestart = saved['motor_restart'] == true;
     outOfBounds = saved['out_of_bounds'] == true;
@@ -159,8 +165,17 @@ class ScoreRowDraft extends ChangeNotifier {
     _changed();
   }
 
+  /// Sets the landing from the keypad or a chip: [text] is what the field
+  /// shows, [key] the table entry its points match (null when none does).
+  void setLandingEntry(String text, String? key) {
+    landingText = text;
+    landing = key;
+    _changed();
+  }
+
   void setLanding(String? key) {
     landing = key;
+    landingText = '';
     _changed();
   }
 
@@ -176,7 +191,10 @@ class ScoreRowDraft extends ChangeNotifier {
 
   void setLateLanding(bool on) {
     lateLanding = on;
-    if (on) landing = null;
+    if (on) {
+      landing = null;
+      landingText = '';
+    }
     _changed();
   }
 
@@ -207,6 +225,7 @@ class ScoreRowDraft extends ChangeNotifier {
     timeText = '';
     heightText = '';
     landing = null;
+    landingText = '';
     lateLanding = false;
   }
 
@@ -283,9 +302,24 @@ class ScoreRowDraft extends ChangeNotifier {
     return true;
   }
 
+  /// Whether points were typed in the landing field that no table entry has.
+  bool get landingBad =>
+      !zeroing &&
+      !lateLanding &&
+      landingText.trim().isNotEmpty &&
+      landing == null;
+
   /// Why this row cannot be saved yet. Empty when it can.
   List<RowProblem> get problems {
     final out = <RowProblem>[];
+    if (landingBad) {
+      out.add(
+        const RowProblem(
+          'landing',
+          'Landing points must be one of the landing table’s.',
+        ),
+      );
+    }
     if (!zeroing) {
       final t = time;
       if (t.error != null) out.add(RowProblem('time_flown', t.error!));

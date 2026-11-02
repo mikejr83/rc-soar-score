@@ -4,10 +4,13 @@ import 'package:flutter/widgets.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../pilot_cards/pilot_cards_options.dart';
+import '../report_kind.dart';
 import '../reports_facts.dart';
 import '../reports_facts_loader.dart';
 import 'page_setup.dart';
 import 'report_print_result.dart';
+import 'report_options_store.dart';
 import 'report_spec.dart';
 import 'report_view_params.dart';
 
@@ -28,6 +31,12 @@ class ViewerNotice {
 /// The state behind the report viewer: the data, the filters, the page setup
 /// and the print flow. Filter changes apply at once; there is no Apply step.
 ///
+/// The options the user changed are remembered per account through
+/// [options], shared by every contest: a hard-coded default gives way to the
+/// stored choice, which gives way to the URL. A change in the viewer writes
+/// the stored choice at once; a value the URL carried but the user did not
+/// touch is not written.
+///
 /// An open report never redraws on its own when the contest changes. With a
 /// [pollInterval] the controller checks now and then and sets [outdated];
 /// [refresh] is the only thing that replaces the sheet's data.
@@ -41,6 +50,7 @@ class ReportViewerController extends ChangeNotifier {
     ReportViewParams initial = const ReportViewParams(),
     this.pollInterval,
     this.onParams,
+    this.options,
   }) : _params = initial;
 
   final ApiClient? client;
@@ -55,9 +65,25 @@ class ReportViewerController extends ChangeNotifier {
   /// Told whenever the params change, so the page can keep the URL current.
   final ValueChanged<ReportViewParams>? onParams;
 
+  /// Where the account's remembered options live; `null` keeps them in
+  /// memory only.
+  final ReportOptionsStore? options;
+
   ViewerLoad _load = ViewerLoad.loading;
   ReportsFacts? _facts;
   ReportViewParams _params;
+
+  /// This report kind's remembered options, read at [start].
+  Map<String, String> _stored = const {};
+
+  /// The options are read before the panel can be touched, so its controls
+  /// start from the stored values.
+  bool _storedLoaded = false;
+
+  /// The writes of this controller, one behind the other: a save reads the
+  /// account's map before it writes one kind's entry, so two saves of the
+  /// same kind must not overlap.
+  Future<void> _saved = Future<void>.value();
   Map<String, String>? _lastGood;
   bool _outdated = false;
   bool _refreshing = false;
@@ -114,12 +140,27 @@ class ReportViewerController extends ChangeNotifier {
   bool get dataFailed => _dataFailed;
 
   PageSetup get setup => PageSetup(
-    _params.paper ?? defaultPaper,
-    _params.orientation ?? suggestedOrientation,
+    _params.paper ?? _storedPaper ?? defaultPaper,
+    _params.orientation ?? _storedOrientation ?? suggestedOrientation,
   );
 
+  PaperSize? get _storedPaper {
+    final name = _stored['paper'];
+    if (name == null) return null;
+    return PaperSize.values.where((paper) => paper.name == name).firstOrNull;
+  }
+
+  PageOrientation? get _storedOrientation {
+    final name = _stored['orient'];
+    if (name == null) return null;
+    return PageOrientation.values
+        .where((orientation) => orientation.name == name)
+        .firstOrNull;
+  }
+
   /// The orientation the report would pick for the paper in force, when the
-  /// director has not chosen one.
+  /// director has not chosen one (in the view or among the remembered
+  /// options).
   PageOrientation get suggestedOrientation {
     final facts = _facts;
     if (facts == null) {
@@ -129,17 +170,34 @@ class ReportViewerController extends ChangeNotifier {
       _currentFilters(),
       facts,
       _data,
-      _params.paper ?? defaultPaper,
+      _params.paper ?? _storedPaper ?? defaultPaper,
     );
   }
 
-  /// The filters in force: the URL's over the report's defaults.
+  /// Print preview: the viewer's choice, else the stored one, else off.
+  bool get preview =>
+      _params.previewExplicit ? _params.preview : _stored['preview'] == '1';
+
+  /// The pages to print or save, as typed in this view; empty for every page.
+  /// Never remembered, so a range from another contest does not carry over.
+  String get printPages => _params.printPages;
+
+  /// The filters in force: the URL's over the remembered options, over the
+  /// report's defaults.
   Map<String, String> get filters => _filtersFor(_facts);
 
-  Map<String, String> _filtersFor(ReportsFacts? facts) => {
-    if (facts != null) ...spec.defaultFilters(facts),
-    ..._params.filters,
-  };
+  Map<String, String> _filtersFor(ReportsFacts? facts) {
+    final defaults = facts == null
+        ? const <String, String>{}
+        : spec.defaultFilters(facts);
+    final optionKeys = _optionKeysByKind[spec.kind]!;
+    return {
+      ...defaults,
+      for (final entry in _stored.entries)
+        if (optionKeys.contains(entry.key)) entry.key: entry.value,
+      ..._params.filters,
+    };
+  }
 
   ReportCheck get check {
     final facts = _facts;
@@ -177,10 +235,39 @@ class ReportViewerController extends ChangeNotifier {
   // Loading.
 
   Future<void> start() async {
+    await _loadOptions();
+    if (_disposed) {
+      return;
+    }
     await _fetch();
     final interval = pollInterval;
     if (interval != null && !_disposed) {
       _timer = Timer.periodic(interval, (_) => unawaited(_poll()));
+    }
+  }
+
+  /// The account's remembered options for this report kind. The options
+  /// panel appears only when the view is ready, so the stored values are in
+  /// place before the user can see the controls.
+  Future<void> _loadOptions() async {
+    final store = options;
+    final stored = store == null
+        ? const <String, String>{}
+        : await store.load(spec.kind.key);
+    if (_disposed) {
+      return;
+    }
+    // The pages to print are view-local and never remembered; every other
+    // stored option is dropped unless its value is still recognised, so a
+    // stale or foreign value is forgotten rather than trusted.
+    _stored = _validateStored(Map<String, String>.of(stored));
+    _storedLoaded = true;
+    // The stored options now join the view, so the URL carries them too. A
+    // params the store already names is deep-equal, so this is a no-op
+    // without a store or with a view the link already set.
+    _setParams(_params);
+    if (!_disposed) {
+      _changed();
     }
   }
 
@@ -270,11 +357,37 @@ class ReportViewerController extends ChangeNotifier {
   }
 
   void _setParams(ReportViewParams params) {
-    _params = params;
+    final merged = _mergeStored(params);
+    if (merged == _params) {
+      return;
+    }
+    _params = merged;
     _remember();
-    onParams?.call(params);
+    onParams?.call(merged);
     _changed();
     unawaited(_syncData());
+  }
+
+  /// The params to keep once the stored options are in place: the stored
+  /// options the params carry no explicit choice for join in, so the URL
+  /// names what is in force, not only what the link brought.
+  ReportViewParams _mergeStored(ReportViewParams params) {
+    return params.copyWith(
+      filters: {
+        ...params.filters,
+        if (_stored.isNotEmpty)
+          for (final entry in _stored.entries)
+            if (_optionKeysByKind[spec.kind]!.contains(entry.key) &&
+                !params.filters.containsKey(entry.key))
+              entry.key: entry.value,
+      },
+      paper: params.paper ?? _storedPaper,
+      orientation: params.orientation ?? _storedOrientation,
+      preview: params.previewExplicit
+          ? params.preview
+          : _stored['preview'] == '1',
+      previewExplicit: params.previewExplicit || _stored.containsKey('preview'),
+    );
   }
 
   /// Reads the report's data again when the filters now need other data (or
@@ -346,25 +459,152 @@ class ReportViewerController extends ChangeNotifier {
   /// Reads the report's data again after a failure.
   Future<void> retryData() => _syncData(force: true);
 
-  void setFilter(String key, String value) =>
-      _setParams(_params.copyWith(filters: {..._params.filters, key: value}));
+  void setFilter(String key, String value) {
+    _setParams(_params.copyWith(filters: {..._params.filters, key: value}));
+    if (_isOptionKey(key)) {
+      _rememberOption(key, value);
+    }
+  }
 
-  void setFilters(Map<String, String> changes) =>
-      _setParams(_params.copyWith(filters: {..._params.filters, ...changes}));
+  void setFilters(Map<String, String> changes) {
+    _setParams(_params.copyWith(filters: {..._params.filters, ...changes}));
+    for (final entry in changes.entries) {
+      if (_isOptionKey(entry.key)) {
+        _rememberOption(entry.key, entry.value);
+      }
+    }
+  }
 
   void resetFilters() => _setParams(_params.copyWith(filters: const {}));
 
-  void setPaper(PaperSize paper) => _setParams(_params.copyWith(paper: paper));
+  void setPaper(PaperSize paper) {
+    _setParams(_params.copyWith(paper: paper));
+    _rememberOption('paper', paper.name);
+  }
 
-  void setOrientation(PageOrientation orientation) =>
-      _setParams(_params.copyWith(orientation: orientation));
+  void setOrientation(PageOrientation orientation) {
+    _setParams(_params.copyWith(orientation: orientation));
+    _rememberOption('orient', orientation.name);
+  }
 
-  void setPreview(bool preview) =>
-      _setParams(_params.copyWith(preview: preview));
+  void setPreview(bool preview) {
+    _setParams(_params.copyWith(preview: preview, previewExplicit: true));
+    _rememberOption('preview', preview ? '1' : '0');
+  }
 
-  /// The pages to print or save, as typed; empty for every page.
-  void setPrintPages(String pages) =>
-      _setParams(_params.copyWith(printPages: pages));
+  /// The pages to print or save, as typed; empty for every page. Kept in this
+  /// view's URL only: it is never remembered, so it does not carry to another
+  /// contest or to a view the range does not fit.
+  void setPrintPages(String pages) {
+    _setParams(_params.copyWith(printPages: pages, printPagesExplicit: true));
+  }
+
+  /// The overflow menu's "Reset filters and options": clears the view's
+  /// state — the filters, the options, the paper, the orientation, the
+  /// preview and the pages to print (the zoom stays) — and forgets the
+  /// stored options of this report kind.
+  Future<void> resetAll() async {
+    _stored = const {};
+    _setParams(ReportViewParams(zoom: _params.zoom));
+    final reset = _saved.then(
+      (_) => options?.reset(spec.kind.key) ?? Future<void>.value(),
+    );
+    _saved = reset;
+    return reset;
+  }
+
+  // Remembered options.
+
+  /// The option keys of this report kind, besides the round ranges and the
+  /// pilot choice, which are filtering and stay in the URL only.
+  static const Map<ReportKind, Set<String>> _optionKeysByKind = {
+    // `prov` is intentionally not remembered: it describes a contest's
+    // scoring state, so a remembered value from one contest must not force
+    // Provisional off in the next. It follows the data-dependent default or
+    // the URL each time.
+    ReportKind.standings: {'pct', 'raw', 'team', 'num', 'cls', 'det'},
+    ReportKind.matrix: {
+      'cmp',
+      'inf',
+      'club',
+      'fai',
+      'nat',
+      'team',
+      'num',
+      'cls',
+    },
+    ReportKind.sheet: {},
+    ReportKind.cards: {'ret', 'pre', 'up', 'mg'},
+  };
+
+  bool _isOptionKey(String key) => _optionKeysByKind[spec.kind]!.contains(key);
+
+  /// The recognised values of the options that are not simple on/off flags.
+  /// Every other option key is a boolean spoken as `'0'` or `'1'`.
+  static const Map<String, Set<String>> _recognisedValues = {
+    'up': CardsPerPageChoice.keys,
+    'mg': PrintMargin.keys,
+  };
+
+  /// The keys this report kind can remember: its filter options, plus the
+  /// page setup and preview, which are shared by every kind.
+  Set<String> _rememberableKeys() => {
+    ..._optionKeysByKind[spec.kind]!,
+    'paper',
+    'orient',
+    'preview',
+  };
+
+  /// The stored options of this report kind, keeping only the values the
+  /// viewer still recognises: on/off keys as `'0'`/`'1'`, paper and
+  /// orientation by their names, and the choices that have one of their own
+  /// keys. A key or value nothing recognises is forgotten.
+  Map<String, String> _validateStored(Map<String, String> stored) {
+    final keys = _rememberableKeys();
+    return {
+      for (final entry in stored.entries)
+        if (keys.contains(entry.key) && _isRecognised(entry.key, entry.value))
+          entry.key: entry.value,
+    };
+  }
+
+  /// Whether [value] is still a valid choice for the option [key].
+  bool _isRecognised(String key, String value) {
+    if (key == 'paper') {
+      return PaperSize.values.any((paper) => paper.name == value);
+    }
+    if (key == 'orient') {
+      return PageOrientation.values.any(
+        (orientation) => orientation.name == value,
+      );
+    }
+    final choices = _recognisedValues[key];
+    return choices == null
+        ? value == '0' || value == '1'
+        : choices.contains(value);
+  }
+
+  /// Remembers [key] as [value] for this report kind and writes the account
+  /// map. A change writes even when it equals the default: the stored value
+  /// is the user's last explicit choice.
+  void _rememberOption(String key, String value) {
+    if (!_storedLoaded) {
+      return;
+    }
+    _stored = {..._stored, key: value};
+    unawaited(_saveStored());
+  }
+
+  /// Writes the account map for this kind, behind any write of this
+  /// controller still in flight.
+  Future<void> _saveStored() async {
+    final write = _saved;
+    final done = write.then(
+      (_) => options?.set(spec.kind.key, _stored) ?? Future<void>.value(),
+    );
+    _saved = done;
+    return done;
+  }
 
   /// A fixed zoom, or `null` to fit the width.
   void setZoom(double? zoom) => _setParams(_params.copyWith(zoom: () => zoom));

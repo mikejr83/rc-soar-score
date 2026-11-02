@@ -46,7 +46,7 @@ Contest management application for directors, pilots, and helpers. Runs on web a
     - `signed_out_landing_journey_test.dart`: the signed-out start, before any session exists.
     - `close_warning_test.dart`, `save_failure_retry_test.dart`: need the app to be closed or a server write to fail, which would break the lifecycle run.
     - `new_contest_wizard_draft_test.dart`, `new_contest_wizard_fresh_draft_test.dart`, `new_contest_wizard_resume_draft_test.dart`: draft handling across launches.
-    - `preferences_setting_test.dart`, `theme_setting_test.dart`, `text_size_setting_test.dart`, `hidden_areas_test.dart`: local settings that must start from a clean install.
+    - `preferences_setting_test.dart`, `theme_setting_test.dart`, `text_size_setting_test.dart`, `hidden_areas_test.dart`, `report_options_setting_test.dart`: local settings that must start from a clean install.
     - `report_printing_test.dart`, `pilot_cards_report_test.dart`: native printing and QR output.
     - `contest_import_inspection_test.dart`, `contest_import_refused_test.dart`: import of prepared files, including refusals.
     - `back_to_back_draw_test.dart`, `matrix_rounds_test.dart`: draw options and adding or redrawing rounds on a ready contest, which change the lifecycle contest's draw.

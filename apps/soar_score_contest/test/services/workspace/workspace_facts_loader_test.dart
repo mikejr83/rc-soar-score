@@ -242,13 +242,14 @@ void main() {
         final auditReads = uris
             .where((u) => u.path.endsWith('/audit-events'))
             .toList();
-        expect(auditReads, hasLength(4));
+        expect(auditReads, hasLength(5));
         expect(
           {for (final u in auditReads) u.queryParameters['action']},
           {
             'StateTransition',
             'ConfigurationSaved',
             'MatrixDrawn',
+            'ScoreAttempt',
             'PublicationAttempt',
           },
         );
@@ -272,7 +273,11 @@ void main() {
       expect(facts.activity.entries.every((e) => e.byYou), isTrue);
     });
 
-    for (final action in ['ConfigurationSaved', 'MatrixDrawn']) {
+    for (final action in [
+      'ConfigurationSaved',
+      'MatrixDrawn',
+      'ScoreAttempt',
+    ]) {
       test('a failed $action read fails the activity but keeps the transition '
           'facts', () async {
         final facts = await _load(

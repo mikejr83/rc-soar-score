@@ -202,6 +202,36 @@ abstract class AppLocalizations {
   /// **'The reset could not be saved. It applies until you close the app.'**
   String get panelsResetSaveFailed;
 
+  /// Heading of the Settings card that resets the report viewer's remembered options.
+  ///
+  /// In en, this message translates to:
+  /// **'Report options'**
+  String get reportOptionsHeading;
+
+  /// Explains the Report options card on the Settings page.
+  ///
+  /// In en, this message translates to:
+  /// **'Report options are remembered each time you change them. You can reset them all to the default.'**
+  String get reportOptionsDescription;
+
+  /// Button that brings every report's options back to their defaults.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset report options'**
+  String get reportOptionsResetButton;
+
+  /// Snackbar shown after the report options were reset.
+  ///
+  /// In en, this message translates to:
+  /// **'Report options are back to their defaults.'**
+  String get reportOptionsResetDone;
+
+  /// Snackbar shown when the report options reset could not be stored on the device.
+  ///
+  /// In en, this message translates to:
+  /// **'The reset could not be saved.'**
+  String get reportOptionsResetSaveFailed;
+
   /// Heading of the Settings card that sets the preferred time zone.
   ///
   /// In en, this message translates to:
@@ -1105,6 +1135,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{actor, select, you{You drew the matrix} other{The matrix was drawn}}'**
   String activityMatrixDrawn(String actor);
+
+  /// Recent activity line: a director corrected an official score. actor is "you" when the signed-in account did it; pilot is the participant number, or "none" when the event names none.
+  ///
+  /// In en, this message translates to:
+  /// **'{actor, select, you{You corrected a score for {pilot, select, none{a pilot} other{pilot {pilot}}} in round {round}} other{A score was corrected for {pilot, select, none{a pilot} other{pilot {pilot}}} in round {round}}}'**
+  String activityScoreCorrected(String actor, String pilot, int round);
+
+  /// Recent activity line: a pilot was retired from a round on. actor is "you" when the signed-in account did it; pilot is the participant number, or "none" when the event names none.
+  ///
+  /// In en, this message translates to:
+  /// **'{actor, select, you{You retired {pilot, select, none{a pilot} other{pilot {pilot}}} from round {round}} other{{pilot, select, none{A pilot} other{Pilot {pilot}}} was retired from round {round}}}'**
+  String activityPilotRetired(String actor, String pilot, int round);
+
+  /// Recent activity line: a retired pilot was reinstated. actor is "you" when the signed-in account did it; pilot is the participant number, or "none" when the event names none.
+  ///
+  /// In en, this message translates to:
+  /// **'{actor, select, you{You reinstated {pilot, select, none{a pilot} other{pilot {pilot}}}} other{{pilot, select, none{A pilot} other{Pilot {pilot}}} was reinstated}}'**
+  String activityPilotReinstated(String actor, String pilot);
 
   /// Navigation rail destination, page title and breadcrumb: main page.
   ///

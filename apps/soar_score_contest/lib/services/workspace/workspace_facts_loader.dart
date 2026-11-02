@@ -66,7 +66,7 @@ abstract final class WorkspaceFactsLoader {
 
   /// Reads the audit trail for the completion and lock facts and the activity
   /// card: every state transition, every configuration save and matrix draw,
-  /// plus the newest publication events. Asking by action keeps other events
+  /// plus the newest score corrections and publication events. Asking by action keeps other events
   /// (score edits, say) from pushing the ones listed out of a limited read,
   /// and the server applies no limit unless one is passed, so no transition
   /// is cut off.
@@ -78,7 +78,13 @@ abstract final class WorkspaceFactsLoader {
     Contest contest,
     String? actingAccountId,
   ) async {
-    final (transitions, configurations, draws, publications) = await (
+    final (
+      transitions,
+      configurations,
+      draws,
+      corrections,
+      publications,
+    ) = await (
       _auditEvents(client, contest, AuditAction.stateTransition),
       _auditEvents(
         client,
@@ -95,11 +101,23 @@ abstract final class WorkspaceFactsLoader {
       _auditEvents(
         client,
         contest,
+        AuditAction.scoreAttempt,
+        limit: ActivityFacts.shown,
+      ),
+      _auditEvents(
+        client,
+        contest,
         AuditAction.publicationAttempt,
         limit: ActivityFacts.shown,
       ),
     ).wait;
-    final activityReads = [transitions, configurations, draws, publications];
+    final activityReads = [
+      transitions,
+      configurations,
+      draws,
+      corrections,
+      publications,
+    ];
     return _AuditFacts(
       transitions: transitions == null
           ? TransitionFacts.unknown
@@ -114,6 +132,7 @@ abstract final class WorkspaceFactsLoader {
               ...transitions!,
               ...configurations!,
               ...draws!,
+              ...corrections!,
               ...publications!,
             ], actingAccountId: actingAccountId),
     );

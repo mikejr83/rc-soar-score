@@ -200,6 +200,23 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
       await pumpUntilFound(tester, find.text('Group history'));
       expect(find.text('Revision 2'), findsOneWidget);
       await closeHistory(tester);
+
+      // The correction, not the routine first entries before it, is on the
+      // Recent activity card of the workspace.
+      await tapRail(tester, 'Workspace');
+      await pumpUntilFound(
+        tester,
+        find.textContaining(
+          kIsWeb ? 'A score was corrected for pilot' : 'You corrected a score',
+        ),
+      );
+      expect(
+        find.textContaining(
+          kIsWeb ? 'A score was corrected' : 'You corrected a score',
+        ),
+        findsOneWidget,
+      );
+      expect(find.textContaining('in round 1'), findsOneWidget);
     }),
   );
 
@@ -414,6 +431,16 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
       await tapVisible(tester, _key('retire-confirm'));
       await pumpUntilFound(tester, find.text('Retired'));
       expect(find.text('Retired from round 3'), findsOneWidget);
+
+      // The retirement is on the Recent activity card too.
+      await tapRail(tester, 'Workspace');
+      await pumpUntilFound(
+        tester,
+        find.textContaining(
+          kIsWeb ? 'was retired from round 3' : 'You retired pilot',
+        ),
+      );
+      expect(find.textContaining('from round 3'), findsOneWidget);
 
       await scoreRound(tester, data, 3);
     }),
