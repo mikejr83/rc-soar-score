@@ -44,20 +44,32 @@ class PublicationOutcome {
 
 /// Publishes a contest and changes its visibility with the publication API.
 class PublicationActions {
-  PublicationActions(this.client, {String Function()? newMutationId})
-    : _newMutationId = newMutationId ?? (() => Id.create().value);
+  PublicationActions(this.client);
 
   final ApiClient client;
-  final String Function() _newMutationId;
+
+  /// The mutation id of publishing [contest] on top of the copy numbered
+  /// [projectionRevision] (0 when never published).
+  ///
+  /// It depends only on what the director saw, so retrying the same attempt
+  /// after a lost response sends the same id and the server returns the copy
+  /// it already made. Once the page has seen a new copy, or the contest has
+  /// moved on, the id changes and the publish is a new update.
+  static String mutationId(Contest contest, int projectionRevision) =>
+      'publish-${contest.id.value}-c${contest.revision}-p$projectionRevision';
 
   /// Publishes [contest] as it is now. The revision sent is the one the
-  /// director saw, so a contest that moved on is refused.
-  Future<PublicationOutcome> publish(Contest contest) => _run(
+  /// director saw, so a contest that moved on is refused. [projectionRevision]
+  /// is the latest copy the director saw, if any.
+  Future<PublicationOutcome> publish(
+    Contest contest, {
+    int projectionRevision = 0,
+  }) => _run(
     () async => PublicationOutcome.success(
       await client.publishContest(
         contest.id,
         PublishContestRequest(
-          clientMutationId: _newMutationId(),
+          clientMutationId: mutationId(contest, projectionRevision),
           sourceContestRevision: contest.revision,
         ),
       ),

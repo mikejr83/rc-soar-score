@@ -51,7 +51,7 @@ class _PublicationActionsRowState extends State<PublicationActionsRow> {
     setState(() => _busy = true);
     try {
       final changed = await action();
-      if (changed) {
+      if (changed && mounted) {
         widget.onChanged();
       }
     } finally {

@@ -39,7 +39,10 @@ abstract final class PublicationFlow {
     if (!confirmed) {
       return false;
     }
-    final outcome = await PublicationActions(client).publish(contest);
+    final outcome = await PublicationActions(client).publish(
+      contest,
+      projectionRevision: publication.projection?.projectionRevision ?? 0,
+    );
     _report(messenger, l10n, outcome, l10n.publicationPublishedDone);
     return outcome.succeeded;
   }
