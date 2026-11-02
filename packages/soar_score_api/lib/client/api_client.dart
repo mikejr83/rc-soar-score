@@ -20,6 +20,7 @@ import '../dto/create_team_request.dart';
 import '../dto/draw_matrix_request.dart';
 import '../dto/draw_status_dto.dart';
 import '../dto/enter_score_request.dart';
+import '../dto/enter_scores_request.dart';
 import '../dto/health_dto.dart';
 import '../dto/import_gliderscore_request.dart';
 import '../dto/local_account_claim_dto.dart';
@@ -854,6 +855,23 @@ class ApiClient {
     );
     final response = await _send('POST', uri, body: request.toJson());
     return _decode<ScoreEntryResult>(response, uri, ScoreEntryResult.fromJson);
+  }
+
+  /// `POST /api/v1/contests/{id}/scores/bulk` — enters the scores of several
+  /// slots at once. The entries are stored together, then the results are
+  /// recalculated once. An entry that is refused (stale revision, locked,
+  /// invalid) is reported on its own outcome and the others still save.
+  Future<EnterScoresResult> enterScores(
+    Id contestId,
+    EnterScoresRequest request,
+  ) async {
+    final uri = _resolve('/api/v1/contests/${contestId.value}/scores/bulk');
+    final response = await _send('POST', uri, body: request.toJson());
+    return _decode<EnterScoresResult>(
+      response,
+      uri,
+      EnterScoresResult.fromJson,
+    );
   }
 
   /// `GET /api/v1/contests/{id}/assignments/{assignmentId}/scores/history` —

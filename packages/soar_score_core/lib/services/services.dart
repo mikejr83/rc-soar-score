@@ -58,6 +58,7 @@ export 'recalculation/recalculation_service.dart';
 export 'results_service.dart';
 export 'round_flight_result.dart';
 export 'round_results.dart';
+export 'bulk_score_entry.dart';
 export 'score_entry_result.dart';
 export 'score_history.dart';
 export 'scores_service.dart';

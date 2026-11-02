@@ -332,11 +332,54 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('penalty-removal-confirm')));
     await tester.pumpAndSettle();
     expect(server.entries, hasLength(2));
+    expect(server.entryRequests, 1, reason: 'both removals in one request');
     for (final body in server.entries) {
       expect(body['reason'], 'Timer slip misread');
       expect(body['components']['cumulative_penalty'], 0);
     }
     expect(find.text('Saved 2 rows.'), findsOneWidget);
+  });
+
+  testWidgets('Save all sends one bulk request for several rows', (
+    tester,
+  ) async {
+    final server = ScoringServer();
+    await pumpScoringPage(tester, server, round: 1, group: 1);
+    for (final pilot in [1, 2]) {
+      await _activate(tester, 1, pilot);
+      await tester.enterText(_time(1, pilot), '540');
+      await tester.enterText(_height(1, pilot), '180');
+      await tester.pump();
+    }
+    expect(find.text('Save 2 rows'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('score-save-all')));
+    await tester.pumpAndSettle();
+
+    expect(server.entryRequests, 1);
+    expect(server.entries, hasLength(2));
+    expect(find.text('Saved 2 rows.'), findsOneWidget);
+  });
+
+  testWidgets('Save all keeps a refused row and saves the others', (
+    tester,
+  ) async {
+    final server = ScoringServer();
+    server.entryFailures[scoringAssignmentId(1, 2)] = (409, 'group_locked');
+    await pumpScoringPage(tester, server, round: 1, group: 1);
+    for (final pilot in [1, 2]) {
+      await _activate(tester, 1, pilot);
+      await tester.enterText(_time(1, pilot), '540');
+      await tester.enterText(_height(1, pilot), '180');
+      await tester.pump();
+    }
+
+    await tester.tap(find.byKey(const ValueKey('score-save-all')));
+    await tester.pumpAndSettle();
+
+    expect(server.entryRequests, 1);
+    expect(find.text('Saved 1 row.'), findsOneWidget);
+    expect(find.textContaining('group_locked'), findsWidgets);
   });
 
   testWidgets('a bulk save of a removal plus an edit records both reasons', (

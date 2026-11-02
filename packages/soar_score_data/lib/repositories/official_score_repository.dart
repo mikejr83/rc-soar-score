@@ -67,6 +67,36 @@ class OfficialScoreRepository extends DriftRepository
     core.RecordedScore entry, {
     required core.MutationMetadata metadata,
   }) {
+    _check(entry);
+    return unitOfWork.run((context) => _storeEntry(context, entry, metadata));
+  }
+
+  @override
+  Future<List<core.RecordedScore>> recordEntries(
+    List<core.RecordedScore> entries, {
+    required core.MutationMetadata metadata,
+  }) {
+    for (final entry in entries) {
+      _check(entry);
+    }
+    return unitOfWork.run((context) async {
+      final saved = <core.RecordedScore>[];
+      for (final entry in entries) {
+        // Each entry is its own part of the request, so its mutation ids
+        // stay unique and a repeated request derives the same ones.
+        saved.add(
+          await _storeEntry(
+            context,
+            entry,
+            metadata.forPart(entry.attempt.clientMutationId),
+          ),
+        );
+      }
+      return saved;
+    });
+  }
+
+  void _check(core.RecordedScore entry) {
     final score = entry.officialScore;
     final placeholder = entry.placeholder;
     if (placeholder.id != score.scorePlaceholderId ||
@@ -82,29 +112,36 @@ class OfficialScoreRepository extends DriftRepository
         'the score is revision ${score.scoreRevision}',
       );
     }
-    return unitOfWork.run((context) async {
-      await context.append(entry.attempt, metadata: metadata);
-      await context.append(score, metadata: metadata.forPart(score.id.value));
-      final saved = await context.save(
-        placeholder,
-        metadata: metadata.forPart(placeholder.id.value),
-      );
-      final contest = entry.contest;
-      final savedContest = contest == null
-          ? null
-          : await context.save(
-              contest,
-              metadata: metadata.forPart(contest.id.value),
-            );
-      final audit = entry.audit;
-      if (audit != null) await _audits.append(audit);
-      return core.RecordedScore(
-        attempt: entry.attempt,
-        officialScore: score,
-        placeholder: saved,
-        contest: savedContest,
-        audit: audit,
-      );
-    });
+  }
+
+  Future<core.RecordedScore> _storeEntry(
+    core.WriteContext context,
+    core.RecordedScore entry,
+    core.MutationMetadata metadata,
+  ) async {
+    final score = entry.officialScore;
+    final placeholder = entry.placeholder;
+    await context.append(entry.attempt, metadata: metadata);
+    await context.append(score, metadata: metadata.forPart(score.id.value));
+    final saved = await context.save(
+      placeholder,
+      metadata: metadata.forPart(placeholder.id.value),
+    );
+    final contest = entry.contest;
+    final savedContest = contest == null
+        ? null
+        : await context.save(
+            contest,
+            metadata: metadata.forPart(contest.id.value),
+          );
+    final audit = entry.audit;
+    if (audit != null) await _audits.append(audit);
+    return core.RecordedScore(
+      attempt: entry.attempt,
+      officialScore: score,
+      placeholder: saved,
+      contest: savedContest,
+      audit: audit,
+    );
   }
 }

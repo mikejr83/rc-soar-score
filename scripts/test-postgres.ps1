@@ -8,7 +8,7 @@
 #   ./scripts/test-postgres.ps1 -- -n "unit of work"     # extra args go to dart test
 
 param(
-    [string]$Image = 'postgres:17',
+    [string]$Image = 'postgres:18',
     # Host port. Not 5432, so a PostgreSQL already on this machine is left alone.
     [int]$Port = 54329,
     [Parameter(ValueFromRemainingArguments = $true)]

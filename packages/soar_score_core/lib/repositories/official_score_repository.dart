@@ -48,4 +48,16 @@ abstract interface class OfficialScoreRepository {
     RecordedScore entry, {
     required MutationMetadata metadata,
   });
+
+  /// Stores several director score entries in ONE transaction: everything of
+  /// every entry, or nothing.
+  ///
+  /// The entries are for different slots, and at most one of them carries the
+  /// contest. Throws a `StaleRevisionError` or an `AlreadyStoredError` when
+  /// any entry's placeholder, contest or ids conflict; nothing is stored
+  /// then, and the caller can fall back to [recordEntry] one by one.
+  Future<List<RecordedScore>> recordEntries(
+    List<RecordedScore> entries, {
+    required MutationMetadata metadata,
+  });
 }

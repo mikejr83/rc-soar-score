@@ -1,3 +1,5 @@
+import 'package:logging/logging.dart';
+
 import '../enums/admin_lock.dart';
 import '../enums/authority.dart';
 import '../enums/discipline_type.dart';
@@ -19,12 +21,17 @@ import '../repositories/recorded_score.dart';
 import '../repositories/repository.dart';
 import '../repositories/stale_revision_error.dart';
 import '../scoring/f5j/f5j_profile.dart';
+import 'bulk_score_entry.dart';
 import 'calculated_flight.dart';
 import 'contest_scores.dart';
 import 'landing_bonus.dart';
 import 'score_correction_audit.dart';
 import 'score_entry_result.dart';
 import 'score_history.dart';
+
+part 'scores_service_bulk.dart';
+
+final _logger = Logger('ScoresService');
 
 /// Reads the scores of a contest and lets the director enter an official
 /// score for a pilot in a group.
@@ -50,6 +57,7 @@ class ScoresService {
   static const String defaultReason = 'Entered by the director';
 
   final Repository repository;
+  final F5jProfile _f5j = F5jProfile();
   final DateTime Function() _clock;
   final Id Function() _newId;
 
@@ -209,11 +217,53 @@ class ScoresService {
   }) async {
     final contest = await _requireContest(contestId);
     final context = await _configuration(contest);
+    final prepared = await _prepare(
+      contest,
+      context,
+      assignmentId,
+      clientMutationId: clientMutationId,
+      baseScoreRevision: baseScoreRevision,
+      components: components,
+      reason: reason,
+      actorId: actorId,
+      metadata: metadata,
+      moveContest: true,
+    );
+    final replay = prepared.replay;
+    if (replay != null) return replay;
+    final recorded = await repository.officialScoreRepository.recordEntry(
+      prepared.entry!,
+      metadata: metadata,
+    );
+    return ScoreEntryResult(
+      officialScore: recorded.officialScore,
+      placeholder: recorded.placeholder,
+      contest: recorded.contest ?? contest,
+      calculated: prepared.calculated!,
+    );
+  }
 
+  /// Checks one entry and builds what would be stored for it, or finds that
+  /// it was entered before ([_Prepared.replay]). Stores nothing.
+  Future<_Prepared> _prepare(
+    Contest contest,
+    _Configuration context,
+    Id assignmentId, {
+    required String clientMutationId,
+    required int baseScoreRevision,
+    required Map<String, Object?> components,
+    required String? reason,
+    required Id actorId,
+    required MutationMetadata metadata,
+    required bool moveContest,
+  }) async {
+    final contestId = contest.id;
     final earlier = await repository.scoreAttemptRepository
         .findByClientMutationId(contestId, clientMutationId);
     if (earlier != null) {
-      return _replay(contest, context, earlier, assignmentId);
+      return _Prepared.replay(
+        await _replay(contest, context, earlier, assignmentId),
+      );
     }
 
     _requireScoringAllowed(contest);
@@ -275,41 +325,33 @@ class ScoresService {
       lockedAt: placeholder.lockedAt,
       revision: placeholder.revision,
     );
-    final recorded = await repository.officialScoreRepository.recordEntry(
-      RecordedScore(
-        attempt: attempt,
-        officialScore: official,
-        placeholder: updated,
-        contest: contest.lifecycleState == LifecycleState.ready
-            ? contest.copyWithState(
-                lifecycleState: LifecycleState.running,
-                updatedAt: now,
-              )
-            : null,
-        audit: isCorrection
-            ? ScoreCorrectionAudit.event(
-                id: _newId(),
-                attempt: attempt,
-                official: official,
-                previousRevision: baseScoreRevision,
-                pilotNumber: slot.pilotNumber,
-                round: slot.round,
-                group: slot.assignment.group,
-                previousPoints: await _previousPoints(context, placeholder),
-                points: calculated.rawScore,
-                metadata: metadata,
-                at: now,
-              )
-            : null,
-      ),
-      metadata: metadata,
+    final entry = RecordedScore(
+      attempt: attempt,
+      officialScore: official,
+      placeholder: updated,
+      contest: moveContest && contest.lifecycleState == LifecycleState.ready
+          ? contest.copyWithState(
+              lifecycleState: LifecycleState.running,
+              updatedAt: now,
+            )
+          : null,
+      audit: isCorrection
+          ? ScoreCorrectionAudit.event(
+              id: _newId(),
+              attempt: attempt,
+              official: official,
+              previousRevision: baseScoreRevision,
+              pilotNumber: slot.pilotNumber,
+              round: slot.round,
+              group: slot.assignment.group,
+              previousPoints: await _previousPoints(context, placeholder),
+              points: calculated.rawScore,
+              metadata: metadata,
+              at: now,
+            )
+          : null,
     );
-    return ScoreEntryResult(
-      officialScore: recorded.officialScore,
-      placeholder: recorded.placeholder,
-      contest: recorded.contest ?? contest,
-      calculated: calculated,
-    );
+    return _Prepared(entry, calculated, slot.round);
   }
 
   /// The points of the score now official on [placeholder], or null when they
@@ -464,7 +506,7 @@ class ScoresService {
     _Configuration context,
     Map<String, Object?> components,
   ) async {
-    final profile = F5jProfile();
+    final profile = _f5j;
     final options = context.revision.config.discipline;
     profile.validateOrThrow(components);
     final bonus = await resolveLandingBonus(
@@ -490,6 +532,28 @@ class _Configuration {
   const _Configuration(this.revision);
 
   final ContestConfigurationRevision revision;
+}
+
+class _Prepared {
+  const _Prepared(
+    RecordedScore this.entry,
+    CalculatedFlight this.calculated,
+    int this.round,
+  ) : replay = null;
+
+  const _Prepared.replay(ScoreEntryResult this.replay)
+    : entry = null,
+      calculated = null,
+      round = null;
+
+  final RecordedScore? entry;
+  final CalculatedFlight? calculated;
+
+  /// The ordinal of the entry's round (null for a replay).
+  final int? round;
+
+  /// The result of the earlier entry with the same mutation id.
+  final ScoreEntryResult? replay;
 }
 
 class _Slot {
