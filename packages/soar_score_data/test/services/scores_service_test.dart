@@ -596,6 +596,57 @@ void _tests(Backend backend) {
         );
       });
 
+      test(
+        'one mutation id used twice is refused, not a failed request',
+        () async {
+          final outcomes = await enterMany([
+            bulkEntry(slots[0], 'same'),
+            bulkEntry(slots[1], 'same'),
+          ]);
+
+          expect(outcomes[0].isSaved, isTrue);
+          expect(outcomes[1].statusCode, 400);
+          expect(outcomes[1].code, 'invalid_request');
+        },
+      );
+
+      test(
+        'a refused first entry does not stop the contest starting',
+        () async {
+          final outcomes = await enterMany([
+            BulkScoreEntry(
+              assignmentId: slots[0],
+              clientMutationId: 'bad',
+              baseScoreRevision: 0,
+              components: const {'time_flown': -1},
+            ),
+            bulkEntry(slots[1], 'good'),
+          ]);
+
+          expect(outcomes[0].isSaved, isFalse);
+          expect(outcomes[1].isSaved, isTrue);
+          expect(
+            outcomes[1].result!.contest.lifecycleState,
+            core.LifecycleState.running,
+          );
+          expect(
+            (await repository.contestRepository.findById(contestId))!
+                .lifecycleState,
+            core.LifecycleState.running,
+          );
+        },
+      );
+
+      test('a replayed entry is not newly stored', () async {
+        final entries = [bulkEntry(slots[0], 'bulk-0')];
+        final first = await enterMany(entries);
+        final again = await enterMany(entries);
+
+        expect(first.single.isNewlyStored, isTrue);
+        expect(again.single.isSaved, isTrue);
+        expect(again.single.isNewlyStored, isFalse);
+      });
+
       test('a second entry for one slot is refused', () async {
         final outcomes = await enterMany([
           bulkEntry(slots[0], 'bulk-0'),

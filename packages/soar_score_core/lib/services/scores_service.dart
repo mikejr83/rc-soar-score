@@ -51,6 +51,7 @@ class ScoresService {
   static const String defaultReason = 'Entered by the director';
 
   final Repository repository;
+  final F5jProfile _f5j = F5jProfile();
   final DateTime Function() _clock;
   final Id Function() _newId;
 
@@ -261,14 +262,23 @@ class ScoresService {
 
     final outcomes = List<BulkScoreOutcome?>.filled(entries.length, null);
     final prepared = <int, _Prepared>{};
-    final seen = <Id>{};
-    var contestMoved = false;
+    final seenSlots = <Id>{};
+    final seenMutations = <String>{};
+    int? round;
     for (final (i, entry) in entries.indexed) {
-      if (!seen.add(entry.assignmentId)) {
+      if (!seenSlots.add(entry.assignmentId)) {
         outcomes[i] = const BulkScoreOutcome.refused(
           statusCode: 400,
           code: 'invalid_request',
           message: 'the request has two entries for the same slot',
+        );
+        continue;
+      }
+      if (!seenMutations.add(entry.clientMutationId)) {
+        outcomes[i] = const BulkScoreOutcome.refused(
+          statusCode: 400,
+          code: 'invalid_request',
+          message: 'the request uses one client mutation id twice',
         );
         continue;
       }
@@ -283,13 +293,21 @@ class ScoresService {
           reason: entry.reason,
           actorId: actorId,
           metadata: metadata.forPart(entry.clientMutationId),
-          moveContest: !contestMoved,
+          // The contest is started once, after the entries are stored, so
+          // no entry can be refused because of a contest conflict.
+          moveContest: false,
         );
         if (one.replay != null) {
-          outcomes[i] = BulkScoreOutcome.saved(one.replay!);
+          outcomes[i] = BulkScoreOutcome.saved(one.replay!, replayed: true);
+        } else if (round != null && round != one.round) {
+          outcomes[i] = const BulkScoreOutcome.refused(
+            statusCode: 400,
+            code: 'invalid_request',
+            message: 'a bulk entry is for the slots of one round',
+          );
         } else {
+          round = one.round;
           prepared[i] = one;
-          if (one.entry!.contest != null) contestMoved = true;
         }
       } on Object catch (error) {
         final refused = _refusal(error);
@@ -298,6 +316,7 @@ class ScoresService {
       }
     }
 
+    final stored = <int, RecordedScore>{};
     if (prepared.isNotEmpty) {
       final order = prepared.keys.toList();
       List<RecordedScore>? recorded;
@@ -311,18 +330,8 @@ class ScoresService {
         recorded = null;
       }
       if (recorded != null) {
-        // Only one entry carried the contest; all of them report it.
-        final started =
-            recorded.map((r) => r.contest).nonNulls.firstOrNull ?? contest;
         for (final (k, i) in order.indexed) {
-          outcomes[i] = BulkScoreOutcome.saved(
-            ScoreEntryResult(
-              officialScore: recorded[k].officialScore,
-              placeholder: recorded[k].placeholder,
-              contest: started,
-              calculated: prepared[i]!.calculated!,
-            ),
-          );
+          stored[i] = recorded[k];
         }
       } else {
         // A revision moved while the entries were being stored. Nothing was
@@ -330,17 +339,9 @@ class ScoresService {
         // refused.
         for (final i in order) {
           try {
-            final one = await repository.officialScoreRepository.recordEntry(
+            stored[i] = await repository.officialScoreRepository.recordEntry(
               prepared[i]!.entry!,
               metadata: metadata.forPart(entries[i].clientMutationId),
-            );
-            outcomes[i] = BulkScoreOutcome.saved(
-              ScoreEntryResult(
-                officialScore: one.officialScore,
-                placeholder: one.placeholder,
-                contest: one.contest ?? contest,
-                calculated: prepared[i]!.calculated!,
-              ),
             );
           } on Object catch (error) {
             final refused = _refusal(error);
@@ -350,7 +351,46 @@ class ScoresService {
         }
       }
     }
+
+    if (stored.isNotEmpty) {
+      final started = await _startContest(contest, metadata);
+      for (final MapEntry(key: i, value: one) in stored.entries) {
+        outcomes[i] = BulkScoreOutcome.saved(
+          ScoreEntryResult(
+            officialScore: one.officialScore,
+            placeholder: one.placeholder,
+            contest: started,
+            calculated: prepared[i]!.calculated!,
+          ),
+        );
+      }
+    }
     return [for (final outcome in outcomes) outcome!];
+  }
+
+  /// Moves a `Ready` contest to `Running` after its first stored scores, and
+  /// returns the contest as it is. A conflicting contest change is read
+  /// again once; a contest that has moved on by itself is left alone.
+  Future<Contest> _startContest(
+    Contest contest,
+    MutationMetadata metadata,
+  ) async {
+    var current = contest;
+    for (var attempt = 0; attempt < 2; attempt++) {
+      if (current.lifecycleState != LifecycleState.ready) return current;
+      try {
+        return await repository.contestRepository.save(
+          current.copyWithState(
+            lifecycleState: LifecycleState.running,
+            updatedAt: _clock(),
+          ),
+          metadata: metadata.forPart('contest-${current.id.value}'),
+        );
+      } on StaleRevisionError {
+        current = await _requireContest(current.id);
+      }
+    }
+    return current;
   }
 
   /// The outcome that stands for [error] on one entry, or null when the
@@ -497,7 +537,7 @@ class ScoresService {
             )
           : null,
     );
-    return _Prepared(entry, calculated);
+    return _Prepared(entry, calculated, slot.round);
   }
 
   /// The points of the score now official on [placeholder], or null when they
@@ -652,7 +692,7 @@ class ScoresService {
     _Configuration context,
     Map<String, Object?> components,
   ) async {
-    final profile = F5jProfile();
+    final profile = _f5j;
     final options = context.revision.config.discipline;
     profile.validateOrThrow(components);
     final bonus = await resolveLandingBonus(
@@ -681,15 +721,22 @@ class _Configuration {
 }
 
 class _Prepared {
-  const _Prepared(RecordedScore this.entry, CalculatedFlight this.calculated)
-    : replay = null;
+  const _Prepared(
+    RecordedScore this.entry,
+    CalculatedFlight this.calculated,
+    int this.round,
+  ) : replay = null;
 
   const _Prepared.replay(ScoreEntryResult this.replay)
     : entry = null,
-      calculated = null;
+      calculated = null,
+      round = null;
 
   final RecordedScore? entry;
   final CalculatedFlight? calculated;
+
+  /// The ordinal of the entry's round (null for a replay).
+  final int? round;
 
   /// The result of the earlier entry with the same mutation id.
   final ScoreEntryResult? replay;

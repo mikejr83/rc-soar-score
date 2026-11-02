@@ -47,6 +47,10 @@ class StubOfficialScoreRepository implements OfficialScoreRepository {
 
   final List<OfficialScore> stored = [];
 
+  /// When set, the next [recordEntries] is refused as if a revision moved
+  /// underneath it, with nothing stored.
+  bool conflictOnNextBulk = false;
+
   @override
   Future<List<OfficialScore>> listForPlaceholder(Id scorePlaceholderId) async =>
       [
@@ -100,6 +104,15 @@ class StubOfficialScoreRepository implements OfficialScoreRepository {
     List<RecordedScore> entries, {
     required MutationMetadata metadata,
   }) async {
+    if (conflictOnNextBulk) {
+      conflictOnNextBulk = false;
+      throw StaleRevisionError(
+        entityType: 'ScorePlaceholder',
+        entityId: entries.first.placeholder.id,
+        expectedRevision: 0,
+        storedRevision: 1,
+      );
+    }
     // All or nothing, like the real one: check every placeholder first.
     for (final entry in entries) {
       final current = _placeholders.stored.firstWhere(

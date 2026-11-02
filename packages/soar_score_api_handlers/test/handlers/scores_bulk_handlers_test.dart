@@ -152,6 +152,73 @@ void main() {
       );
     });
 
+    test('a repeated request recalculates nothing', () async {
+      final runs = <int>[];
+      final api = HandlerHarness(
+        _owner,
+        recalculation: RecalculationService(CountingResults(runs)),
+      );
+      await drawnContest(api);
+      final entries = [
+        entry(await assignmentOfPilot(api, 1), 'bulk-1'),
+        entry(await assignmentOfPilot(api, 2), 'bulk-2'),
+      ];
+
+      await bulk(api, entries);
+      await bulk(api, entries);
+
+      expect(runs, hasLength(1), reason: 'the repeat stored nothing new');
+    });
+
+    test('a conflict while storing falls back to one by one', () async {
+      final api = HandlerHarness(_owner);
+      await drawnContest(api);
+      api.repository.officialScores.conflictOnNextBulk = true;
+
+      final body = await api.json(
+        await bulk(api, [
+          entry(await assignmentOfPilot(api, 1), 'bulk-1'),
+          entry(await assignmentOfPilot(api, 2), 'bulk-2'),
+        ]),
+      );
+
+      final results = (body['results']! as List).cast<Map>();
+      expect(results.every((r) => r['result'] != null), isTrue);
+      expect(api.repository.officialScores.stored, hasLength(2));
+    });
+
+    test('one mutation id used twice is refused on the second entry', () async {
+      final api = HandlerHarness(_owner);
+      await drawnContest(api);
+
+      final body = await api.json(
+        await bulk(api, [
+          entry(await assignmentOfPilot(api, 1), 'same'),
+          entry(await assignmentOfPilot(api, 2), 'same'),
+        ]),
+      );
+
+      final results = (body['results']! as List).cast<Map>();
+      expect(results[0]['result'], isNotNull);
+      expect((results[1]['error'] as Map)['status'], 400);
+    });
+
+    test('entries of two rounds are refused beyond the first round', () async {
+      final api = HandlerHarness(_owner);
+      await drawnContest(api);
+
+      final body = await api.json(
+        await bulk(api, [
+          entry(await assignmentOfPilot(api, 1), 'bulk-1'),
+          entry(await assignmentOfPilot(api, 2, ordinal: 2), 'bulk-2'),
+        ]),
+      );
+
+      final results = (body['results']! as List).cast<Map>();
+      expect(results[0]['result'], isNotNull);
+      expect((results[1]['error'] as Map)['status'], 400);
+    });
+
     test('two entries for one slot: the second is refused', () async {
       final api = HandlerHarness(_owner);
       await drawnContest(api);

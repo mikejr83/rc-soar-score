@@ -88,7 +88,7 @@ class OfficialScoreRepository extends DriftRepository
           await _storeEntry(
             context,
             entry,
-            metadata.forPart(entry.attempt.id.value),
+            metadata.forPart(entry.attempt.clientMutationId),
           ),
         );
       }

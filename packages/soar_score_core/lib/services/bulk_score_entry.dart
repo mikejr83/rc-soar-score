@@ -34,16 +34,19 @@ class BulkScoreEntry extends Equatable {
 /// refused ([statusCode], [code] and [message], the same as the single entry
 /// would have answered).
 class BulkScoreOutcome extends Equatable {
-  const BulkScoreOutcome.saved(ScoreEntryResult this.result)
-    : statusCode = 201,
-      code = null,
-      message = null;
+  const BulkScoreOutcome.saved(
+    ScoreEntryResult this.result, {
+    this.replayed = false,
+  }) : statusCode = 201,
+       code = null,
+       message = null;
 
   const BulkScoreOutcome.refused({
     required int this.statusCode,
     required String this.code,
     required String this.message,
-  }) : result = null;
+  }) : result = null,
+       replayed = false;
 
   factory BulkScoreOutcome.fromJson(Map<String, Object?> json) {
     final result = json['result'];
@@ -67,6 +70,14 @@ class BulkScoreOutcome extends Equatable {
   final String? message;
 
   bool get isSaved => result != null;
+
+  /// For a saved entry: it was stored by an earlier request with the same
+  /// mutation id, and this request stored nothing for it. Not sent over the
+  /// wire; the recalculation and publish that follow only run for entries
+  /// stored now.
+  final bool replayed;
+
+  bool get isNewlyStored => isSaved && !replayed;
 
   Map<String, Object?> toJson() => result != null
       ? {'result': result!.toJson()}

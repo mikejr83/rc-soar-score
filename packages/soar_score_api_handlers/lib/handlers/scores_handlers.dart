@@ -110,9 +110,11 @@ void addScoreRoutes(
     );
 
     String? warning;
+    // Only entries stored now count: a request that only replays earlier
+    // entries changes nothing, so it recalculates and publishes nothing.
     final savedAt = [
       for (final (i, outcome) in outcomes.indexed)
-        if (outcome.isSaved) i,
+        if (outcome.isNewlyStored) i,
     ];
     if (savedAt.isNotEmpty) {
       warning = await recalculationService.recalculateAfterEntry(contestId);
@@ -123,14 +125,16 @@ void addScoreRoutes(
         );
       }
       if (publishingEnabled) {
-        // One publish for the request. The round-completion mode looks at
-        // the round of the last stored entry; the mutation id of the first
-        // makes a repeated request publish once.
+        // One publish for the request. A bulk request is for one round, so
+        // the round-completion mode looks at the round of any stored entry.
+        // The key is the last stored entry's mutation id: a request repeated
+        // with new entries after it changes the key, a plain repeat of the
+        // same entries does not.
         try {
           await publicUpdates.afterScoreEntry(
             contestId,
             assignmentId: body.entries[savedAt.last].assignmentId,
-            entryMutationId: body.entries[savedAt.first].clientMutationId,
+            entryMutationId: body.entries[savedAt.last].clientMutationId,
           );
         } on Object catch (error, stackTrace) {
           _logger.warning(

@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_core/soar_score_core.dart';
@@ -363,7 +365,19 @@ class ScoringController extends ChangeNotifier {
     }
     if (batch.isEmpty) return 0;
     if (batch.length == 1) return await save(batch.single) ? 1 : 0;
-    return _saveBatch(batch);
+    var saved = 0;
+    for (
+      var from = 0;
+      from < batch.length;
+      from += EnterScoresRequest.maxEntries
+    ) {
+      final chunk = batch.sublist(
+        from,
+        min(from + EnterScoresRequest.maxEntries, batch.length),
+      );
+      saved += await _saveBatch(chunk);
+    }
+    return saved;
   }
 
   /// Records the reason for removing [row]'s applied cumulative penalty, to
@@ -397,6 +411,12 @@ class ScoringController extends ChangeNotifier {
         contestId,
         EnterScoresRequest(entries: entries),
       );
+      if (answer.results.length != batch.length) {
+        throw StateError(
+          'The server answered ${answer.results.length} '
+          'results for ${batch.length} entries.',
+        );
+      }
       final stale = <ScoringRow>[];
       for (final (i, row) in batch.indexed) {
         final outcome = answer.results[i];
