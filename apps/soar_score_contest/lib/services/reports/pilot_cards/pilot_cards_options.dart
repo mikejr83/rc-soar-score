@@ -15,6 +15,8 @@ enum CardsPerPageChoice {
   final String key;
   final String label;
 
+  static const Set<String> keys = {'auto', 'four', 'two'};
+
   static CardsPerPageChoice of(String? key) =>
       values.firstWhere((choice) => choice.key == key, orElse: () => automatic);
 }
@@ -38,6 +40,8 @@ enum PrintMargin {
   final String label;
   final String help;
   final double mm;
+
+  static const Set<String> keys = {'std', 'wide'};
 
   static PrintMargin of(String? key) =>
       values.firstWhere((m) => m.key == key, orElse: () => standard);

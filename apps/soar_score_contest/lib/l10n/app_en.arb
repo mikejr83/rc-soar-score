@@ -88,7 +88,7 @@
   "@reportOptionsResetDone": {
     "description": "Snackbar shown after the report options were reset."
   },
-  "reportOptionsResetSaveFailed": "The reset could not be saved. It applies until you close the app.",
+  "reportOptionsResetSaveFailed": "The reset could not be saved.",
   "@reportOptionsResetSaveFailed": {
     "description": "Snackbar shown when the report options reset could not be stored on the device."
   },

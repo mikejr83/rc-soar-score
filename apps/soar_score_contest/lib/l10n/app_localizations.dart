@@ -229,7 +229,7 @@ abstract class AppLocalizations {
   /// Snackbar shown when the report options reset could not be stored on the device.
   ///
   /// In en, this message translates to:
-  /// **'The reset could not be saved. It applies until you close the app.'**
+  /// **'The reset could not be saved.'**
   String get reportOptionsResetSaveFailed;
 
   /// Heading of the Settings card that sets the preferred time zone.

@@ -84,8 +84,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Report options are back to their defaults.';
 
   @override
-  String get reportOptionsResetSaveFailed =>
-      'The reset could not be saved. It applies until you close the app.';
+  String get reportOptionsResetSaveFailed => 'The reset could not be saved.';
 
   @override
   String get timeZoneHeading => 'Time zone';

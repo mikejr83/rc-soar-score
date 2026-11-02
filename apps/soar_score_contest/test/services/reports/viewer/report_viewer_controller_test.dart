@@ -74,6 +74,26 @@ void main() {
     expect(controller.filters['pct'], '1');
   });
 
+  test('a stored value the viewer no longer recognises is dropped', () async {
+    final controller = await _controller(
+      stored: {
+        'standings': {'pct': 'bogus', 'raw': '1', 'paper': 'not-a-paper'},
+      },
+    );
+    // The unrecognised boolean and the bogus paper are forgotten at load.
+    expect(controller.filters['pct'], isNull);
+    expect(controller.params.paper, isNull);
+    // The recognised value stays and applies over the default.
+    expect(controller.filters['raw'], '1');
+    // The recognised paper stays: the view starts from it.
+    final controller2 = await _controller(
+      stored: {
+        'standings': {'paper': 'a4'},
+      },
+    );
+    expect(controller2.params.paper, PaperSize.a4);
+  });
+
   test('a URL option beats the stored one', () async {
     final controller = await _controller(
       stored: {
@@ -124,42 +144,48 @@ void main() {
     expect(await store.load(), isEmpty);
   });
 
-  test('paper and preview are remembered, the pages to print are not', () async {
-    final controller = await _controller();
-    final store = _storeOf(controller);
+  test(
+    'paper and preview are remembered, the pages to print are not',
+    () async {
+      final controller = await _controller();
+      final store = _storeOf(controller);
 
-    controller.setPaper(PaperSize.a4);
-    controller.setPreview(true);
-    controller.setPrintPages('1-2');
-    await _flush();
-    // The pages to print stay out of the account map.
-    expect(await store.load(), {
-      'standings': {'paper': 'a4', 'preview': '1'},
-    });
-    expect(controller.params.previewExplicit, isTrue);
-    // The range the user typed is in this view's params and URL only.
-    expect(controller.params.printPages, '1-2');
-    expect(controller.params.printPagesExplicit, isTrue);
-    expect(controller.params.toQuery()['pp'], '1-2');
-  });
+      controller.setPaper(PaperSize.a4);
+      controller.setPreview(true);
+      controller.setPrintPages('1-2');
+      await _flush();
+      // The pages to print stay out of the account map.
+      expect(await store.load(), {
+        'standings': {'paper': 'a4', 'preview': '1'},
+      });
+      expect(controller.params.previewExplicit, isTrue);
+      // The range the user typed is in this view's params and URL only.
+      expect(controller.params.printPages, '1-2');
+      expect(controller.params.printPagesExplicit, isTrue);
+      expect(controller.params.toQuery()['pp'], '1-2');
+    },
+  );
 
-  test('a stored preview applies, a stored pages-to-print is ignored', () async {
-    final controller = await _controller(
-      stored: {
-        'standings': {'preview': '1', 'pp': '2'},
-      },
-    );
-    expect(controller.preview, isTrue);
-    // The stale stored range does not carry over: the view starts on all
-    // pages and the URL names no range.
-    expect(controller.printPages, isEmpty);
-    expect(controller.params.toQuery(), {'preview': '1'});
+  test(
+    'a stored preview applies, a stored pages-to-print is ignored',
+    () async {
+      final controller = await _controller(
+        stored: {
+          'standings': {'preview': '1', 'pp': '2'},
+        },
+      );
+      expect(controller.preview, isTrue);
+      // The stale stored range does not carry over: the view starts on all
+      // pages and the URL names no range.
+      expect(controller.printPages, isEmpty);
+      expect(controller.params.toQuery(), {'preview': '1'});
 
-    controller.setPreview(false);
-    await _flush();
-    expect(controller.preview, isFalse);
-    expect(controller.params.toQuery(), {'preview': '0'});
-  });
+      controller.setPreview(false);
+      await _flush();
+      expect(controller.preview, isFalse);
+      expect(controller.params.toQuery(), {'preview': '0'});
+    },
+  );
 
   test(
     'the viewer reset clears the view state and removes the kind entry',

@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../pilot_cards/pilot_cards_options.dart';
 import '../report_kind.dart';
 import '../reports_facts.dart';
 import '../reports_facts_loader.dart';
@@ -240,9 +241,12 @@ class ReportViewerController extends ChangeNotifier {
     if (_disposed) {
       return;
     }
-    // The pages to print are view-local; a stale `pp` left on disk is dropped.
-    _stored = Map<String, String>.of(map[spec.kind.key] ?? const {});
-    _stored.remove('pp');
+    // The pages to print are view-local and never remembered; every other
+    // stored option is dropped unless its value is still recognised, so a
+    // stale or foreign value is forgotten rather than trusted.
+    _stored = _validateStored(
+      Map<String, String>.of(map[spec.kind.key] ?? const {}),
+    );
     _storedLoaded = true;
     // The stored options now join the view, so the URL carries them too. A
     // params the store already names is deep-equal, so this is a no-op
@@ -516,6 +520,51 @@ class ReportViewerController extends ChangeNotifier {
   };
 
   bool _isOptionKey(String key) => _optionKeysByKind[spec.kind]!.contains(key);
+
+  /// The recognised values of the options that are not simple on/off flags.
+  /// Every other option key is a boolean spoken as `'0'` or `'1'`.
+  static const Map<String, Set<String>> _recognisedValues = {
+    'up': CardsPerPageChoice.keys,
+    'mg': PrintMargin.keys,
+  };
+
+  /// The keys this report kind can remember: its filter options, plus the
+  /// page setup and preview, which are shared by every kind.
+  Set<String> _rememberableKeys() => {
+    ..._optionKeysByKind[spec.kind]!,
+    'paper',
+    'orient',
+    'preview',
+  };
+
+  /// The stored options of this report kind, keeping only the values the
+  /// viewer still recognises: on/off keys as `'0'`/`'1'`, paper and
+  /// orientation by their names, and the choices that have one of their own
+  /// keys. A key or value nothing recognises is forgotten.
+  Map<String, String> _validateStored(Map<String, String> stored) {
+    final keys = _rememberableKeys();
+    return {
+      for (final entry in stored.entries)
+        if (keys.contains(entry.key) && _isRecognised(entry.key, entry.value))
+          entry.key: entry.value,
+    };
+  }
+
+  /// Whether [value] is still a valid choice for the option [key].
+  bool _isRecognised(String key, String value) {
+    if (key == 'paper') {
+      return PaperSize.values.any((paper) => paper.name == value);
+    }
+    if (key == 'orient') {
+      return PageOrientation.values.any(
+        (orientation) => orientation.name == value,
+      );
+    }
+    final choices = _recognisedValues[key];
+    return choices == null
+        ? value == '0' || value == '1'
+        : choices.contains(value);
+  }
 
   /// Remembers [key] as [value] for this report kind and writes the account
   /// map. A change writes even when it equals the default: the stored value
