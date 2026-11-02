@@ -107,6 +107,36 @@ void _tests(Backend backend) {
     },
   );
 
+  test('logs the demo corrections, and only those, as score events', () async {
+    await seeder.seed();
+    final contests = await contestsByName();
+    final audits = repository.auditEventRepository;
+
+    final completed = await audits.listForContest(
+      contests['Autumn F5J Classic']!.id,
+      action: core.AuditAction.scoreAttempt,
+    );
+    // Every event is a correction naming pilot and round; first entries of
+    // the many scored slots leave none.
+    expect(completed, isNotEmpty);
+    expect(
+      completed.map((e) => services.ScoreCorrectionAudit.parse(e)),
+      everyElement(isNotNull),
+    );
+    var corrections = 0;
+    for (final placeholder
+        in await repository.scorePlaceholderRepository.listForContest(
+          contests['Autumn F5J Classic']!.id,
+        )) {
+      corrections +=
+          (await repository.officialScoreRepository.listForPlaceholder(
+            placeholder.id,
+          )).length -
+          1;
+    }
+    expect(completed, hasLength(corrections));
+  });
+
   test('gives drawn contests a matrix and unnumbered ones none', () async {
     await seeder.seed();
     final contests = await contestsByName();

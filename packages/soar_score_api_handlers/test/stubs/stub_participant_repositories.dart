@@ -106,6 +106,7 @@ class StubContestParticipationRepository
   Future<ContestParticipation> save(
     ContestParticipation participation, {
     required MutationMetadata metadata,
+    AuditEvent? audit,
   }) async => (await _store(participation, 0)).participation;
 
   @override
@@ -113,6 +114,7 @@ class StubContestParticipationRepository
   saveRemovingMatrixRows(
     ContestParticipation participation, {
     required MutationMetadata metadata,
+    AuditEvent? audit,
   }) => _store(participation, null);
 
   /// Stores [participation]; with a null [removed] the matrix rows go too.

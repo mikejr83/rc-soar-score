@@ -1136,6 +1136,24 @@ abstract class AppLocalizations {
   /// **'{actor, select, you{You drew the matrix} other{The matrix was drawn}}'**
   String activityMatrixDrawn(String actor);
 
+  /// Recent activity line: a director corrected an official score. actor is "you" when the signed-in account did it; pilot is the participant number, or "none" when the event names none.
+  ///
+  /// In en, this message translates to:
+  /// **'{actor, select, you{You corrected a score for {pilot, select, none{a pilot} other{pilot {pilot}}} in round {round}} other{A score was corrected for {pilot, select, none{a pilot} other{pilot {pilot}}} in round {round}}}'**
+  String activityScoreCorrected(String actor, String pilot, int round);
+
+  /// Recent activity line: a pilot was retired from a round on. actor is "you" when the signed-in account did it; pilot is the participant number, or "none" when the event names none.
+  ///
+  /// In en, this message translates to:
+  /// **'{actor, select, you{You retired {pilot, select, none{a pilot} other{pilot {pilot}}} from round {round}} other{{pilot, select, none{A pilot} other{Pilot {pilot}}} was retired from round {round}}}'**
+  String activityPilotRetired(String actor, String pilot, int round);
+
+  /// Recent activity line: a retired pilot was reinstated. actor is "you" when the signed-in account did it; pilot is the participant number, or "none" when the event names none.
+  ///
+  /// In en, this message translates to:
+  /// **'{actor, select, you{You reinstated {pilot, select, none{a pilot} other{pilot {pilot}}}} other{{pilot, select, none{A pilot} other{Pilot {pilot}}} was reinstated}}'**
+  String activityPilotReinstated(String actor, String pilot);
+
   /// Navigation rail destination, page title and breadcrumb: main page.
   ///
   /// In en, this message translates to:

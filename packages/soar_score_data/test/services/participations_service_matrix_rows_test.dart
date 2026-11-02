@@ -460,16 +460,22 @@ class _Hooked implements core.ContestParticipationRepository {
   Future<core.ContestParticipation> save(
     core.ContestParticipation participation, {
     required core.MutationMetadata metadata,
-  }) => _inner.save(participation, metadata: metadata);
+    core.AuditEvent? audit,
+  }) => _inner.save(participation, metadata: metadata, audit: audit);
 
   @override
   Future<({core.ContestParticipation participation, int matrixRowsRemoved})>
   saveRemovingMatrixRows(
     core.ContestParticipation participation, {
     required core.MutationMetadata metadata,
+    core.AuditEvent? audit,
   }) async {
     await _beforeChange();
-    return _inner.saveRemovingMatrixRows(participation, metadata: metadata);
+    return _inner.saveRemovingMatrixRows(
+      participation,
+      metadata: metadata,
+      audit: audit,
+    );
   }
 
   @override

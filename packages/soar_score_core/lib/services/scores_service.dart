@@ -5,6 +5,7 @@ import '../enums/lifecycle_state.dart';
 import '../enums/score_placeholder_state.dart';
 import '../errors/contest_state_error.dart';
 import '../errors/entity_not_found_error.dart';
+import '../errors/scoring_validation_error.dart';
 import '../models/contest/contest.dart';
 import '../models/contest/contest_configuration_revision.dart';
 import '../models/id.dart';
@@ -21,6 +22,7 @@ import '../scoring/f5j/f5j_profile.dart';
 import 'calculated_flight.dart';
 import 'contest_scores.dart';
 import 'landing_bonus.dart';
+import 'score_correction_audit.dart';
 import 'score_entry_result.dart';
 import 'score_history.dart';
 
@@ -31,7 +33,9 @@ import 'score_history.dart';
 /// them), the official score taken from it and the placeholder in its new
 /// state, in one transaction. The first accepted score also moves a `Ready`
 /// contest to `Running`. Entering a score for a slot that already has one is
-/// a correction: it adds the next score revision and keeps the earlier ones.
+/// a correction: it adds the next score revision, keeps the earlier ones and
+/// leaves a `ScoreAttempt` audit event naming the pilot and round, stored
+/// with it (see `ScoreCorrectionAudit`). A first entry leaves none.
 ///
 /// Only F5J is scored so far; the other disciplines follow the same path.
 class ScoresService {
@@ -282,6 +286,21 @@ class ScoresService {
                 updatedAt: now,
               )
             : null,
+        audit: isCorrection
+            ? ScoreCorrectionAudit.event(
+                id: _newId(),
+                attempt: attempt,
+                official: official,
+                previousRevision: baseScoreRevision,
+                pilotNumber: slot.pilotNumber,
+                round: slot.round,
+                group: slot.assignment.group,
+                previousPoints: await _previousPoints(context, placeholder),
+                points: calculated.rawScore,
+                metadata: metadata,
+                at: now,
+              )
+            : null,
       ),
       metadata: metadata,
     );
@@ -291,6 +310,22 @@ class ScoresService {
       contest: recorded.contest ?? contest,
       calculated: calculated,
     );
+  }
+
+  /// The points of the score now official on [placeholder], or null when they
+  /// cannot be worked out any more (the configuration changed under them).
+  Future<double?> _previousPoints(
+    _Configuration context,
+    ScorePlaceholder placeholder,
+  ) async {
+    final current = await repository.officialScoreRepository
+        .currentForPlaceholder(placeholder.id);
+    if (current == null) return null;
+    try {
+      return (await _calculate(context, current.components)).rawScore;
+    } on ScoringValidationError {
+      return null;
+    }
   }
 
   Future<ScoreEntryResult> _replay(
@@ -390,7 +425,12 @@ class ScoresService {
         entityId: assignmentId,
       );
     }
-    return _Slot(assignment, placeholder);
+    return _Slot(
+      assignment,
+      placeholder,
+      round: round.ordinal,
+      pilotNumber: participation?.participantNumber,
+    );
   }
 
   Future<_Configuration> _configuration(Contest contest) async {
@@ -453,8 +493,18 @@ class _Configuration {
 }
 
 class _Slot {
-  const _Slot(this.assignment, this.placeholder);
+  const _Slot(
+    this.assignment,
+    this.placeholder, {
+    required this.round,
+    this.pilotNumber,
+  });
 
   final MatrixAssignment assignment;
   final ScorePlaceholder placeholder;
+
+  /// The ordinal of the slot's round.
+  final int round;
+
+  final int? pilotNumber;
 }

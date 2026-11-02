@@ -116,6 +116,61 @@ void main() {
     expect(find.text('Loading recent activity…'), findsOneWidget);
   });
 
+  testWidgets('says which pilot and round a correction or retirement is for', (
+    tester,
+  ) async {
+    final at = DateTime.utc(2026, 10, 18, 16, 40);
+    await _pump(
+      tester,
+      ActivityFacts(
+        entries: [
+          ActivityEntry(
+            id: 'event-5',
+            kind: ActivityKind.scoreCorrected,
+            byYou: true,
+            at: at,
+            pilot: 12,
+            round: 3,
+          ),
+          ActivityEntry(
+            id: 'event-6',
+            kind: ActivityKind.pilotRetired,
+            byYou: false,
+            at: at,
+            pilot: 7,
+            round: 2,
+          ),
+          ActivityEntry(
+            id: 'event-7',
+            kind: ActivityKind.pilotReinstated,
+            byYou: false,
+            at: at,
+            pilot: 7,
+            round: 2,
+          ),
+          ActivityEntry(
+            id: 'event-8',
+            kind: ActivityKind.scoreCorrected,
+            byYou: false,
+            at: at,
+            round: 1,
+          ),
+        ],
+      ),
+    );
+
+    expect(
+      find.text('You corrected a score for pilot 12 in round 3'),
+      findsOneWidget,
+    );
+    expect(find.text('Pilot 7 was retired from round 2'), findsOneWidget);
+    expect(find.text('Pilot 7 was reinstated'), findsOneWidget);
+    expect(
+      find.text('A score was corrected for a pilot in round 1'),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('a failed read offers a retry', (tester) async {
     var retried = 0;
     await _pump(tester, ActivityFacts.unavailable, onRetry: () => retried++);

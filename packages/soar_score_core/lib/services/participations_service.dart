@@ -14,6 +14,7 @@ import '../repositories/mutation_metadata.dart';
 import '../repositories/repository.dart';
 import '../repositories/stale_revision_error.dart';
 import 'matrix/late_add_capacity.dart';
+import 'pilot_retirement_audit.dart';
 
 /// The contest participation operations of the API: who takes part in a
 /// contest, in which role.
@@ -22,9 +23,16 @@ import 'matrix/late_add_capacity.dart';
 /// contest. It holds no name or other identity detail, which are read from
 /// the profile.
 class ParticipationsService {
-  ParticipationsService(this.repository);
+  ParticipationsService(
+    this.repository, {
+    DateTime Function()? clock,
+    Id Function()? newId,
+  }) : _clock = clock ?? DateTime.now,
+       _newId = newId ?? Id.create;
 
   final Repository repository;
+  final DateTime Function() _clock;
+  final Id Function() _newId;
 
   /// The participations of contest [contestId], in the order they were added.
   ///
@@ -111,6 +119,8 @@ class ParticipationsService {
   /// Changes the role, classification and retirement of participation
   /// [id] in contest [contestId].
   ///
+  /// A changed [retiredAtRound] (a retirement, a reinstatement or a move)
+  /// leaves a `StateTransition` audit event naming the pilot and round.
   /// [roleId] null keeps the role. A pilot who becomes a non-flier gives up
   /// their matrix rows: a pilot with no scores has them removed (the draw
   /// then needs redoing, and the answer says how many went), and one with a
@@ -170,18 +180,29 @@ class ParticipationsService {
       retiredAtRound: retiredAtRound,
       revision: stored.revision,
     );
+    // A changed retirement round leaves an audit event, stored in the same
+    // transaction as the change.
+    final audit = PilotRetirementAudit.event(
+      id: _newId(),
+      before: stored,
+      after: updated,
+      metadata: metadata,
+      at: _clock(),
+    );
     // The matrix rows go in the same transaction as the role, so a change
     // that loses to another edit removes nothing.
     if (!leavesFlying) {
       final saved = await repository.contestParticipationRepository.save(
         updated,
         metadata: metadata,
+        audit: audit,
       );
       return (participation: saved, matrixRowsRemoved: 0);
     }
     return repository.contestParticipationRepository.saveRemovingMatrixRows(
       updated,
       metadata: metadata,
+      audit: audit,
     );
   }
 

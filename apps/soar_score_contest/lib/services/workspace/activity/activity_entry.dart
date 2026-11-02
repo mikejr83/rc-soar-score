@@ -10,6 +10,9 @@ enum ActivityKind {
   publication,
   configurationSaved,
   matrixDrawn,
+  scoreCorrected,
+  pilotRetired,
+  pilotReinstated,
 }
 
 /// One line of the workspace's recent-activity list: what happened, whether
@@ -20,6 +23,8 @@ class ActivityEntry extends Equatable {
     required this.kind,
     required this.byYou,
     required this.at,
+    this.pilot,
+    this.round,
   });
 
   /// The audit event's id, which keeps a row's identity across reloads.
@@ -34,6 +39,13 @@ class ActivityEntry extends Equatable {
   /// When the server logged the event (UTC).
   final DateTime at;
 
+  /// The participant number of the pilot a score correction or retirement
+  /// concerns, when the event gives one.
+  final int? pilot;
+
+  /// The round a score correction or retirement concerns.
+  final int? round;
+
   @override
-  List<Object?> get props => [id, kind, byYou, at];
+  List<Object?> get props => [id, kind, byYou, at, pilot, round];
 }

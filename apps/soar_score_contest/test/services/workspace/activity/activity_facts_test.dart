@@ -16,6 +16,7 @@ AuditEventDto _event(
   AuditOutcome outcome = AuditOutcome.success,
   Id? actor,
   Id? id,
+  String? reason,
 }) => AuditEventDto(
   id: id ?? Id.create(),
   entityType: 'Contest',
@@ -26,6 +27,7 @@ AuditEventDto _event(
   authority: Authority.director,
   serverTimestamp: at,
   outcome: outcome,
+  reason: reason,
 );
 
 void main() {
@@ -92,6 +94,40 @@ void main() {
       ActivityKind.configurationSaved,
     ]);
     expect(facts.entries.every((e) => e.byYou), isTrue);
+  });
+
+  test('lists score corrections and retirements with pilot and round', () {
+    final facts = ActivityFacts.of([
+      _event(
+        t1,
+        kind: AuditAction.scoreAttempt,
+        reason:
+            'correction: pilot 12; round 3; group 2; points 82.4 → 95.1; '
+            'reason: Timer misread',
+      ),
+      _event(t2, reason: 'retire: pilot 7; from round 2 → 4'),
+      _event(
+        DateTime.utc(2026, 10, 18, 11),
+        reason:
+            'reinstate: pilot 7; '
+            'was retired from round 4',
+      ),
+    ]);
+
+    expect(facts.entries.map((e) => (e.kind, e.pilot, e.round)), [
+      (ActivityKind.pilotReinstated, 7, 4),
+      (ActivityKind.pilotRetired, 7, 4),
+      (ActivityKind.scoreCorrected, 12, 3),
+    ]);
+  });
+
+  test('skips events whose text is not a correction or a retirement', () {
+    final facts = ActivityFacts.of([
+      _event(t1, kind: AuditAction.scoreAttempt, reason: 'something else'),
+      _event(t2, reason: 'lock: AdminLock Unlocked → Locked'),
+    ]);
+
+    expect(facts.entries, isEmpty);
   });
 
   test('orders events stored in the same instant by id, larger first', () {
