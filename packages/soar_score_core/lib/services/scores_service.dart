@@ -19,6 +19,7 @@ import '../repositories/recorded_score.dart';
 import '../repositories/repository.dart';
 import '../repositories/stale_revision_error.dart';
 import '../scoring/f5j/f5j_profile.dart';
+import 'bulk_score_entry.dart';
 import 'calculated_flight.dart';
 import 'contest_scores.dart';
 import 'landing_bonus.dart';
@@ -209,11 +210,206 @@ class ScoresService {
   }) async {
     final contest = await _requireContest(contestId);
     final context = await _configuration(contest);
+    final prepared = await _prepare(
+      contest,
+      context,
+      assignmentId,
+      clientMutationId: clientMutationId,
+      baseScoreRevision: baseScoreRevision,
+      components: components,
+      reason: reason,
+      actorId: actorId,
+      metadata: metadata,
+      moveContest: true,
+    );
+    final replay = prepared.replay;
+    if (replay != null) return replay;
+    final recorded = await repository.officialScoreRepository.recordEntry(
+      prepared.entry!,
+      metadata: metadata,
+    );
+    return ScoreEntryResult(
+      officialScore: recorded.officialScore,
+      placeholder: recorded.placeholder,
+      contest: recorded.contest ?? contest,
+      calculated: prepared.calculated!,
+    );
+  }
 
+  /// Enters many scores at once, for the slots of one contest.
+  ///
+  /// Every entry is checked first, exactly as a single entry is (stale
+  /// revision, locks, retired pilot, invalid components, a missing reason for
+  /// a correction); an entry that fails is refused alone and the others go
+  /// on. The accepted entries are stored together in ONE transaction. When
+  /// that transaction is refused because a revision moved underneath it,
+  /// nothing of it is kept and the entries are stored one by one instead, so
+  /// only the entries that really conflict are refused. Any other failure
+  /// is thrown with nothing stored; repeating the request is safe because
+  /// each entry keeps its [BulkScoreEntry.clientMutationId].
+  ///
+  /// Returns one outcome per entry, in order. The recalculation and the
+  /// publish that follow are the caller's, and run once for the request.
+  Future<List<BulkScoreOutcome>> enterOfficialScores(
+    Id contestId,
+    List<BulkScoreEntry> entries, {
+    required Id actorId,
+    required MutationMetadata metadata,
+  }) async {
+    final contest = await _requireContest(contestId);
+    final context = await _configuration(contest);
+
+    final outcomes = List<BulkScoreOutcome?>.filled(entries.length, null);
+    final prepared = <int, _Prepared>{};
+    final seen = <Id>{};
+    var contestMoved = false;
+    for (final (i, entry) in entries.indexed) {
+      if (!seen.add(entry.assignmentId)) {
+        outcomes[i] = const BulkScoreOutcome.refused(
+          statusCode: 400,
+          code: 'invalid_request',
+          message: 'the request has two entries for the same slot',
+        );
+        continue;
+      }
+      try {
+        final one = await _prepare(
+          contest,
+          context,
+          entry.assignmentId,
+          clientMutationId: entry.clientMutationId,
+          baseScoreRevision: entry.baseScoreRevision,
+          components: entry.components,
+          reason: entry.reason,
+          actorId: actorId,
+          metadata: metadata.forPart(entry.clientMutationId),
+          moveContest: !contestMoved,
+        );
+        if (one.replay != null) {
+          outcomes[i] = BulkScoreOutcome.saved(one.replay!);
+        } else {
+          prepared[i] = one;
+          if (one.entry!.contest != null) contestMoved = true;
+        }
+      } on Object catch (error) {
+        final refused = _refusal(error);
+        if (refused == null) rethrow;
+        outcomes[i] = refused;
+      }
+    }
+
+    if (prepared.isNotEmpty) {
+      final order = prepared.keys.toList();
+      List<RecordedScore>? recorded;
+      try {
+        recorded = await repository.officialScoreRepository.recordEntries([
+          for (final i in order) prepared[i]!.entry!,
+        ], metadata: metadata);
+      } on StaleRevisionError {
+        recorded = null;
+      } on AlreadyStoredError {
+        recorded = null;
+      }
+      if (recorded != null) {
+        // Only one entry carried the contest; all of them report it.
+        final started =
+            recorded.map((r) => r.contest).nonNulls.firstOrNull ?? contest;
+        for (final (k, i) in order.indexed) {
+          outcomes[i] = BulkScoreOutcome.saved(
+            ScoreEntryResult(
+              officialScore: recorded[k].officialScore,
+              placeholder: recorded[k].placeholder,
+              contest: started,
+              calculated: prepared[i]!.calculated!,
+            ),
+          );
+        }
+      } else {
+        // A revision moved while the entries were being stored. Nothing was
+        // kept, so store them one by one; only the real conflicts are
+        // refused.
+        for (final i in order) {
+          try {
+            final one = await repository.officialScoreRepository.recordEntry(
+              prepared[i]!.entry!,
+              metadata: metadata.forPart(entries[i].clientMutationId),
+            );
+            outcomes[i] = BulkScoreOutcome.saved(
+              ScoreEntryResult(
+                officialScore: one.officialScore,
+                placeholder: one.placeholder,
+                contest: one.contest ?? contest,
+                calculated: prepared[i]!.calculated!,
+              ),
+            );
+          } on Object catch (error) {
+            final refused = _refusal(error);
+            if (refused == null) rethrow;
+            outcomes[i] = refused;
+          }
+        }
+      }
+    }
+    return [for (final outcome in outcomes) outcome!];
+  }
+
+  /// The outcome that stands for [error] on one entry, or null when the
+  /// error is not about the entry (it is the request's, and is thrown).
+  BulkScoreOutcome? _refusal(Object error) => switch (error) {
+    EntityNotFoundError() => BulkScoreOutcome.refused(
+      statusCode: 404,
+      code: 'not_found',
+      message: '$error',
+    ),
+    ContestStateError(:final code, :final message) => BulkScoreOutcome.refused(
+      statusCode: 409,
+      code: code,
+      message: message,
+    ),
+    StaleRevisionError() => BulkScoreOutcome.refused(
+      statusCode: 409,
+      code: 'stale_revision',
+      message: '$error',
+    ),
+    AlreadyStoredError() => BulkScoreOutcome.refused(
+      statusCode: 409,
+      code: 'already_stored',
+      message: '$error',
+    ),
+    ScoringValidationError() => BulkScoreOutcome.refused(
+      statusCode: 400,
+      code: 'invalid_request',
+      message: '$error',
+    ),
+    ArgumentError(:final message) => BulkScoreOutcome.refused(
+      statusCode: 400,
+      code: 'invalid_request',
+      message: '${message ?? error}',
+    ),
+    _ => null,
+  };
+
+  /// Checks one entry and builds what would be stored for it, or finds that
+  /// it was entered before ([_Prepared.replay]). Stores nothing.
+  Future<_Prepared> _prepare(
+    Contest contest,
+    _Configuration context,
+    Id assignmentId, {
+    required String clientMutationId,
+    required int baseScoreRevision,
+    required Map<String, Object?> components,
+    required String? reason,
+    required Id actorId,
+    required MutationMetadata metadata,
+    required bool moveContest,
+  }) async {
+    final contestId = contest.id;
     final earlier = await repository.scoreAttemptRepository
         .findByClientMutationId(contestId, clientMutationId);
     if (earlier != null) {
-      return _replay(contest, context, earlier, assignmentId);
+      return _Prepared.replay(
+        await _replay(contest, context, earlier, assignmentId),
+      );
     }
 
     _requireScoringAllowed(contest);
@@ -275,41 +471,33 @@ class ScoresService {
       lockedAt: placeholder.lockedAt,
       revision: placeholder.revision,
     );
-    final recorded = await repository.officialScoreRepository.recordEntry(
-      RecordedScore(
-        attempt: attempt,
-        officialScore: official,
-        placeholder: updated,
-        contest: contest.lifecycleState == LifecycleState.ready
-            ? contest.copyWithState(
-                lifecycleState: LifecycleState.running,
-                updatedAt: now,
-              )
-            : null,
-        audit: isCorrection
-            ? ScoreCorrectionAudit.event(
-                id: _newId(),
-                attempt: attempt,
-                official: official,
-                previousRevision: baseScoreRevision,
-                pilotNumber: slot.pilotNumber,
-                round: slot.round,
-                group: slot.assignment.group,
-                previousPoints: await _previousPoints(context, placeholder),
-                points: calculated.rawScore,
-                metadata: metadata,
-                at: now,
-              )
-            : null,
-      ),
-      metadata: metadata,
+    final entry = RecordedScore(
+      attempt: attempt,
+      officialScore: official,
+      placeholder: updated,
+      contest: moveContest && contest.lifecycleState == LifecycleState.ready
+          ? contest.copyWithState(
+              lifecycleState: LifecycleState.running,
+              updatedAt: now,
+            )
+          : null,
+      audit: isCorrection
+          ? ScoreCorrectionAudit.event(
+              id: _newId(),
+              attempt: attempt,
+              official: official,
+              previousRevision: baseScoreRevision,
+              pilotNumber: slot.pilotNumber,
+              round: slot.round,
+              group: slot.assignment.group,
+              previousPoints: await _previousPoints(context, placeholder),
+              points: calculated.rawScore,
+              metadata: metadata,
+              at: now,
+            )
+          : null,
     );
-    return ScoreEntryResult(
-      officialScore: recorded.officialScore,
-      placeholder: recorded.placeholder,
-      contest: recorded.contest ?? contest,
-      calculated: calculated,
-    );
+    return _Prepared(entry, calculated);
   }
 
   /// The points of the score now official on [placeholder], or null when they
@@ -490,6 +678,21 @@ class _Configuration {
   const _Configuration(this.revision);
 
   final ContestConfigurationRevision revision;
+}
+
+class _Prepared {
+  const _Prepared(RecordedScore this.entry, CalculatedFlight this.calculated)
+    : replay = null;
+
+  const _Prepared.replay(ScoreEntryResult this.replay)
+    : entry = null,
+      calculated = null;
+
+  final RecordedScore? entry;
+  final CalculatedFlight? calculated;
+
+  /// The result of the earlier entry with the same mutation id.
+  final ScoreEntryResult? replay;
 }
 
 class _Slot {

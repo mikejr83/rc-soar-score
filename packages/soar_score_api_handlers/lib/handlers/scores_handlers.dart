@@ -29,6 +29,14 @@ final _logger = Logger('Scores');
 ///   publishes, the contest's public update mode then decides whether the
 ///   entry also reaches the public projection; a failed publish is logged
 ///   and audited, never an error;
+/// - `POST /contests/{id}/scores/bulk` enters the scores of up to
+///   [EnterScoresRequest.maxEntries] slots in one request (200). Each entry
+///   is checked like a single one and answered on its own (stored, or the
+///   refusal it would have got alone); the stored entries go in ONE
+///   transaction, then the results are recalculated ONCE (own transaction,
+///   one retry, a warning on the response when it still fails) and the public
+///   projection is updated at most ONCE. A request repeated after a failure
+///   is safe: each entry keeps its `client_mutation_id`;
 /// - `GET /contests/{id}/assignments/{assignmentId}/scores/history` is every
 ///   submission to a slot, oldest first: the official revisions with their
 ///   reasons, and the attempts that never became official.
@@ -67,6 +75,79 @@ void addScoreRoutes(
     );
     final history = await service.history(contestId, Id.parse(assignmentId));
     return jsonResponse(history.toJson());
+  });
+
+  router.post('/contests/<id>/scores/bulk', (Request request, String id) async {
+    final principal = requirePrincipal(request);
+    final contestId = Id.parse(id);
+    await requireContestDirector(request, repository, contestId);
+    final body = await readJsonBody(request, EnterScoresRequest.fromJson);
+    if (body.entries.isEmpty ||
+        body.entries.length > EnterScoresRequest.maxEntries) {
+      throw ArgumentError(
+        'a bulk entry takes 1 to ${EnterScoresRequest.maxEntries} entries',
+      );
+    }
+
+    _logger.fine(
+      'Entering ${body.entries.length} official scores in contest $id',
+    );
+
+    final outcomes = await service.enterOfficialScores(
+      contestId,
+      [
+        for (final entry in body.entries)
+          BulkScoreEntry(
+            assignmentId: entry.assignmentId,
+            clientMutationId: entry.clientMutationId,
+            baseScoreRevision: entry.baseScoreRevision,
+            components: entry.components,
+            reason: entry.reason,
+          ),
+      ],
+      actorId: principal.accountId,
+      metadata: writeMetadata(principal),
+    );
+
+    String? warning;
+    final savedAt = [
+      for (final (i, outcome) in outcomes.indexed)
+        if (outcome.isSaved) i,
+    ];
+    if (savedAt.isNotEmpty) {
+      warning = await recalculationService.recalculateAfterEntry(contestId);
+      if (warning != null) {
+        _logger.info(
+          'Recalculation warning after ${savedAt.length} scores in contest '
+          '$id: $warning',
+        );
+      }
+      if (publishingEnabled) {
+        // One publish for the request. The round-completion mode looks at
+        // the round of the last stored entry; the mutation id of the first
+        // makes a repeated request publish once.
+        try {
+          await publicUpdates.afterScoreEntry(
+            contestId,
+            assignmentId: body.entries[savedAt.last].assignmentId,
+            entryMutationId: body.entries[savedAt.first].clientMutationId,
+          );
+        } on Object catch (error, stackTrace) {
+          _logger.warning(
+            'Public update after a bulk score entry failed; the last '
+            'projection stays public',
+            error,
+            stackTrace,
+          );
+        }
+      }
+    }
+    return jsonResponse(
+      EnterScoresResult(
+        results: outcomes,
+        recalculationWarning: warning,
+      ).toJson(),
+    );
   });
 
   router.post('/contests/<id>/assignments/<assignmentId>/scores', (

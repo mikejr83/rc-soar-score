@@ -57,3 +57,7 @@ Created when score made official. New version created on each officialization/sc
 - New versions created by making score official, director corrections, or score updates
 - Mutations: creation only (append-only version history)
 - Idempotent creation guarded by score_revision counter
+
+### Bulk entry
+
+The director's scoring page can save many rows at once (`POST /contests/{id}/scores/bulk`, up to 100 entries). Every entry is checked like a single one and refused alone if it fails. The accepted entries (attempt, official score, placeholder, the first-score contest change and correction audit of each) are stored in ONE transaction (`OfficialScoreRepository.recordEntries`); if a revision moved while storing, nothing of it is kept and the entries are stored one by one so only real conflicts are refused. The results are then recalculated once in their own transaction, and the public projection is updated at most once. A repeated request replays by each entry's `client_mutation_id`.

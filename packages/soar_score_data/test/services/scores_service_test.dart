@@ -501,6 +501,112 @@ void _tests(Backend backend) {
       });
     });
 
+    group('entering many scores at once', () {
+      BulkScoreEntry bulkEntry(
+        core.Id slot,
+        String mutation, {
+        int base = 0,
+        String? reason,
+      }) => BulkScoreEntry(
+        assignmentId: slot,
+        clientMutationId: mutation,
+        baseScoreRevision: base,
+        components: const {
+          'time_flown': 540,
+          'launch_height': 200,
+          'landing': 'points_50',
+        },
+        reason: reason,
+      );
+
+      Future<List<BulkScoreOutcome>> enterMany(List<BulkScoreEntry> entries) =>
+          service.enterOfficialScores(
+            contestId,
+            entries,
+            actorId: actor,
+            metadata: meta(),
+          );
+
+      test('stores every entry and starts the contest once', () async {
+        final outcomes = await enterMany([
+          for (final (i, slot) in slots.take(3).indexed)
+            bulkEntry(slot, 'bulk-$i'),
+        ]);
+
+        expect(outcomes.every((o) => o.isSaved), isTrue);
+        for (final outcome in outcomes) {
+          expect(outcome.result!.officialScore.scoreRevision, 1);
+          expect(outcome.result!.calculated.rawScore, 490);
+          expect(
+            outcome.result!.contest.lifecycleState,
+            core.LifecycleState.running,
+          );
+        }
+        expect(
+          (await repository.contestRepository.findById(contestId))!
+              .lifecycleState,
+          core.LifecycleState.running,
+        );
+      });
+
+      test('refuses a stale entry alone and keeps the others', () async {
+        await enter(slots[0], mutation: 'single');
+
+        final outcomes = await enterMany([
+          bulkEntry(slots[0], 'bulk-0'),
+          bulkEntry(slots[1], 'bulk-1'),
+        ]);
+
+        expect(outcomes[0].isSaved, isFalse);
+        expect(outcomes[0].code, 'stale_revision');
+        expect(outcomes[1].isSaved, isTrue);
+      });
+
+      test('a correction is audited like a single one', () async {
+        await enter(slots[0], mutation: 'single');
+
+        final outcomes = await enterMany([
+          bulkEntry(slots[0], 'bulk-0', base: 1, reason: 'fixed'),
+          bulkEntry(slots[1], 'bulk-1'),
+        ]);
+
+        expect(outcomes.every((o) => o.isSaved), isTrue);
+        expect(outcomes[0].result!.officialScore.scoreRevision, 2);
+        expect(outcomes[0].result!.officialScore.reason, 'fixed');
+      });
+
+      test('a repeated request replays and stores nothing more', () async {
+        final entries = [
+          bulkEntry(slots[0], 'bulk-0'),
+          bulkEntry(slots[1], 'bulk-1'),
+        ];
+        final first = await enterMany(entries);
+
+        final again = await enterMany(entries);
+
+        expect(
+          [for (final o in again) o.result!.officialScore],
+          [for (final o in first) o.result!.officialScore],
+        );
+        expect(
+          await repository.officialScoreRepository.listForPlaceholder(
+            first[0].result!.placeholder.id,
+          ),
+          hasLength(1),
+        );
+      });
+
+      test('a second entry for one slot is refused', () async {
+        final outcomes = await enterMany([
+          bulkEntry(slots[0], 'bulk-0'),
+          bulkEntry(slots[0], 'bulk-1'),
+        ]);
+
+        expect(outcomes[0].isSaved, isTrue);
+        expect(outcomes[1].statusCode, 400);
+      });
+    });
+
     test('lists the slots and how far each round is scored', () async {
       await enter(slots.first);
 

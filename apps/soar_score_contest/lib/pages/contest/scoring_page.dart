@@ -210,51 +210,36 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
     }
   }
 
-  /// Saves every dirty row, first recording a reason for each applied
-  /// cumulative penalty the save removes. Returns how many rows saved.
+  /// Saves every dirty row in one bulk request, first recording a reason for
+  /// each applied cumulative penalty the save removes. Returns how many rows
+  /// saved.
   ///
-  /// Removals whose save already failed or went stale keep their recorded
-  /// reason and are not asked about again; a missing reason is asked once
-  /// for every removal that lacks one.
+  /// Removals whose save already failed, was refused or went stale keep their
+  /// banner and are not asked about; a missing reason is asked once for every
+  /// other removal that lacks one.
   Future<int> _saveAllWithRemovals() async {
     final c = _controller!;
-    var saved = 0;
-    final removal = c.removalRows;
-    if (removal.isNotEmpty) {
-      final need = [
-        for (final r in removal)
-          if (c.removalReason(r.id) == null) r,
-      ];
-      String? freshReason;
-      if (need.isNotEmpty) {
-        freshReason = await askPenaltyRemovalReason(
-          context,
-          pilots: [for (final r in need) r.pilot.name],
-        );
-        if (!mounted || freshReason == null) return 0;
-      }
-      for (final row in removal) {
-        final fresh = c.rows.firstWhere(
-          (r) => r.id == row.id,
-          orElse: () => row,
-        );
-        // A removal that already failed or went stale stays with its banner;
-        // the director retries or resolves it on the row.
-        final pending = c.saveOf(fresh.id).kind;
-        if (pending == RowSaveKind.failed ||
-            pending == RowSaveKind.stale ||
-            pending == RowSaveKind.refused) {
-          continue;
-        }
-        if (c.isPenaltyRemoval(fresh)) {
-          final reason = c.removalReason(fresh.id) ?? freshReason;
-          if (reason == null) continue;
-          if (await c.save(fresh, reason: reason)) saved++;
-        }
+    final need = [
+      for (final r in c.removalRows)
+        if (c.removalReason(r.id) == null &&
+            !const {
+              RowSaveKind.failed,
+              RowSaveKind.stale,
+              RowSaveKind.refused,
+            }.contains(c.saveOf(r.id).kind))
+          r,
+    ];
+    if (need.isNotEmpty) {
+      final reason = await askPenaltyRemovalReason(
+        context,
+        pilots: [for (final r in need) r.pilot.name],
+      );
+      if (!mounted || reason == null) return 0;
+      for (final r in need) {
+        c.recordRemovalReason(r.id, reason);
       }
     }
-    saved += await c.saveAll();
-    return saved;
+    return c.saveAll();
   }
 
   Future<void> _saveAll() async {

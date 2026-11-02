@@ -418,6 +418,23 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
   );
 
   await journey.step(
+    'Round 3: several rows are saved together with the group Save',
+    () => inContest(() async {
+      await openRoundGroup(tester, 3, 1);
+      // Tess retires in the next step, so she stays unscored here.
+      final scored = await scoreOpenRowsTogether(
+        tester,
+        data,
+        2,
+        skip: {'Tess Valdez'},
+      );
+      expect(scored, hasLength(2));
+      await pumpUntilFound(tester, find.text('Saved 2 rows.'));
+    }),
+    timeout: _longStep,
+  );
+
+  await journey.step(
     'Round 3: a pilot retires, the rest of the round is scored',
     () => inContest(() async {
       const retiring = 'Tess Valdez';

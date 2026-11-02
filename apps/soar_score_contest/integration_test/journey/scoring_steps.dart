@@ -137,26 +137,7 @@ Future<List<String>> scoreOpenRows(
     }
     final id = next.id.value;
     final name = next.pilot.name;
-    final flight = flightOf(data, name);
-    final time = fieldWithKey('score-time-$id');
-    await pumpUntilFound(tester, time);
-    await tapVisible(tester, time);
-    await enterIn(tester, time, flight.time);
-    await enterIn(tester, fieldWithKey('score-height-$id'), flight.height);
-    // Landing is typed as table points, after the height; the caption names
-    // the band it selected.
-    final landing = fieldWithKey('score-landing-$id');
-    await enterIn(tester, landing, flight.landing);
-    expect(tester.widget<TextField>(landing).controller!.text, flight.landing);
-    final penalty = penalties[name];
-    if (penalty != null) {
-      await pumpUntilFound(tester, _key('cumulative-penalty'));
-      await enterIn(tester, _key('cumulative-penalty'), '$penalty');
-      await pumpUntilFound(
-        tester,
-        find.text('−$penalty pts from the contest total.'),
-      );
-    }
+    await _enterFlight(tester, data, next, penalties[name]);
     final officialBefore = _officialCount(tester);
     await tapVisible(tester, _key('score-save-$id'));
     // The strip's count, not the row, tells the save landed: saving moves on
@@ -165,6 +146,66 @@ Future<List<String>> scoreOpenRows(
     scored.add(name);
   }
   return scored;
+}
+
+/// Types the flight of [row] (and [penalty] when given) without saving it.
+Future<void> _enterFlight(
+  WidgetTester tester,
+  JourneyContext data,
+  ScoringRow row,
+  int? penalty,
+) async {
+  final id = row.id.value;
+  final name = row.pilot.name;
+  final flight = flightOf(data, name);
+  final time = fieldWithKey('score-time-$id');
+  await pumpUntilFound(tester, time);
+  await tapVisible(tester, time);
+  await enterIn(tester, time, flight.time);
+  await enterIn(tester, fieldWithKey('score-height-$id'), flight.height);
+  // Landing is typed as table points, after the height; the caption names
+  // the band it selected.
+  final landing = fieldWithKey('score-landing-$id');
+  await enterIn(tester, landing, flight.landing);
+  expect(tester.widget<TextField>(landing).controller!.text, flight.landing);
+  if (penalty != null) {
+    await pumpUntilFound(tester, _key('cumulative-penalty'));
+    await enterIn(tester, _key('cumulative-penalty'), '$penalty');
+    await pumpUntilFound(
+      tester,
+      find.text('−$penalty pts from the contest total.'),
+    );
+  }
+}
+
+/// Enters the flights of the first [count] open rows of the group, leaving
+/// out the pilots in [skip], and saves them all at once with the group's Save
+/// (one bulk request). Returns the names scored.
+Future<List<String>> scoreOpenRowsTogether(
+  WidgetTester tester,
+  JourneyContext data,
+  int count, {
+  Set<String> skip = const {},
+}) async {
+  final rows = [
+    for (final tile in _built(tester))
+      if (tile.row.status == RowStatus.notEntered &&
+          !skip.contains(tile.row.pilot.name))
+        tile.row,
+  ].take(count).toList();
+  expect(rows, hasLength(count), reason: 'the group has $count open rows');
+  for (final row in rows) {
+    await tapVisible(tester, _key('score-row-${row.id.value}'));
+    await _enterFlight(tester, data, row, null);
+  }
+  final officialBefore = _officialCount(tester);
+  await tapVisible(tester, _key('score-save-all'));
+  await _pumpUntilOfficial(
+    tester,
+    officialBefore + count,
+    rows.first.pilot.name,
+  );
+  return [for (final row in rows) row.pilot.name];
 }
 
 /// The first built row that has no score and is not retired. A list builds

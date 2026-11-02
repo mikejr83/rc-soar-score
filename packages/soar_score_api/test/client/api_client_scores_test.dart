@@ -173,4 +173,63 @@ void main() {
       ),
     );
   });
+
+  test('enterScores posts every entry once and decodes each outcome', () async {
+    final result = ScoreEntryResult(
+      officialScore: official,
+      placeholder: placeholder,
+      contest: contest,
+      calculated: calculated,
+    );
+    final client = clientFor(
+      (_) => body({
+        'results': [
+          {'result': result.toJson()},
+          {
+            'error': {
+              'status': 409,
+              'code': 'stale_revision',
+              'message': 'stale',
+            },
+          },
+        ],
+        'recalculation_warning': 'results are stale',
+      }),
+    );
+
+    final answer = await client.enterScores(
+      contestId,
+      EnterScoresRequest(
+        entries: [
+          EnterScoresEntry(
+            assignmentId: assignmentId,
+            clientMutationId: 'bulk-1',
+            baseScoreRevision: 0,
+            components: const {'time_flown': 540},
+          ),
+          EnterScoresEntry(
+            assignmentId: placeholderId,
+            clientMutationId: 'bulk-2',
+            baseScoreRevision: 1,
+            components: const {'time_flown': 500},
+            reason: 'fixed',
+          ),
+        ],
+      ),
+    );
+
+    expect(seen.method, 'POST');
+    expect(seen.url.path, '/api/v1/contests/${contestId.value}/scores/bulk');
+    final sent = jsonDecode(seen.body) as Map<String, Object?>;
+    final entries = (sent['entries']! as List).cast<Map>();
+    expect(entries, hasLength(2));
+    expect(entries[0]['assignment_id'], assignmentId.value);
+    expect(entries[1]['reason'], 'fixed');
+    expect(answer.results[0].isSaved, isTrue);
+    expect(answer.results[0].result, result);
+    expect(answer.results[1].isSaved, isFalse);
+    expect(answer.results[1].statusCode, 409);
+    expect(answer.results[1].code, 'stale_revision');
+    expect(answer.recalculationWarning, 'results are stale');
+  });
 }

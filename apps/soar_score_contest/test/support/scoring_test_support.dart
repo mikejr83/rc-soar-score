@@ -77,8 +77,68 @@ class ScoringServer {
   /// of the defaults, for a row-specific failure while the rest succeeds.
   final Map<Id, (int, String)> entryFailures = {};
 
-  /// The bodies of the entries received, in order.
+  /// The bodies of the entries received, in order (a bulk request adds one
+  /// per entry).
   final List<Map<String, dynamic>> entries = [];
+
+  /// How many score-entry requests arrived: a bulk request counts once.
+  int entryRequests = 0;
+
+  /// Stores one entry like the server does and answers it: the status and
+  /// the body of the single-entry route, or, for a [bulk] entry, the
+  /// per-entry outcome (`result` or `error`).
+  (int, Map<String, Object?>) _enter(
+    Id assignmentId,
+    Map<String, dynamic> body, {
+    bool bulk = false,
+  }) {
+    entries.add(body);
+    final failure = entryFailures[assignmentId];
+    final status = failure?.$1 ?? entryStatus;
+    final code = failure?.$2 ?? entryCode;
+    if (status != 200) {
+      final message = 'The entry was $code.';
+      return (
+        status,
+        bulk
+            ? {
+                'error': {'status': status, 'code': code, 'message': message},
+              }
+            : {
+                'error': {'code': code, 'message': message},
+              },
+      );
+    }
+    final revision = (_score[assignmentId]?.scoreRevision ?? 0) + 1;
+    final components = Map<String, Object?>.from(
+      body['components'] as Map<String, dynamic>,
+    );
+    final official = _official(assignmentId, components, revision);
+    _score[assignmentId] = official;
+    _record(
+      assignmentId,
+      components,
+      revision,
+      body['reason'] as String? ?? 'Entered by the director',
+    );
+    // The first score moves a Ready contest to Running, as the server does.
+    if (matrixServer.contest.lifecycleState == LifecycleState.ready) {
+      matrixServer.contest = matrixServer.contest.copyWithState(
+        lifecycleState: LifecycleState.running,
+        updatedAt: DateTime.utc(2026, 10, 17, 15),
+      );
+    }
+    final result = ScoreEntryResult(
+      officialScore: official,
+      placeholder: _placeholder(assignmentId),
+      contest: matrixServer.contest,
+      calculated: const CalculatedFlight(
+        outcome: FlightOutcome.scored,
+        rawScore: 0,
+      ),
+    ).toJson();
+    return (200, bulk ? {'result': result} : result);
+  }
 
   /// The history of each slot, oldest first.
   final Map<Id, List<ScoreHistoryEntry>> _history = {};
@@ -293,52 +353,36 @@ class ScoringServer {
         'error': {'code': 'not_calculated', 'message': 'none'},
       }, 400);
     }
-    if (request.method == 'POST' && path.endsWith('/scores')) {
+    if (request.method == 'POST' && path.endsWith('/scores/bulk')) {
+      entryRequests++;
       if (offlineOnEntry) {
         throw http.ClientException('offline', request.url);
       }
       final body = jsonDecode(request.body) as Map<String, dynamic>;
-      entries.add(body);
+      return _json({
+        'results': [
+          for (final raw in body['entries'] as List<dynamic>)
+            _enter(
+              Id.parse(
+                (raw as Map<String, dynamic>)['assignment_id'] as String,
+              ),
+              raw,
+              bulk: true,
+            ).$2,
+        ],
+        'recalculation_warning': null,
+      });
+    }
+    if (request.method == 'POST' && path.endsWith('/scores')) {
+      entryRequests++;
+      if (offlineOnEntry) {
+        throw http.ClientException('offline', request.url);
+      }
+      final body = jsonDecode(request.body) as Map<String, dynamic>;
       final segments = path.split('/');
       final assignmentId = Id.parse(segments[segments.length - 2]);
-      final failure = entryFailures[assignmentId];
-      final status = failure?.$1 ?? entryStatus;
-      final code = failure?.$2 ?? entryCode;
-      if (status != 200) {
-        return _json({
-          'error': {'code': code, 'message': 'The entry was $code.'},
-        }, status);
-      }
-      final revision = (_score[assignmentId]?.scoreRevision ?? 0) + 1;
-      final components = Map<String, Object?>.from(
-        body['components'] as Map<String, dynamic>,
-      );
-      final official = _official(assignmentId, components, revision);
-      _score[assignmentId] = official;
-      _record(
-        assignmentId,
-        components,
-        revision,
-        body['reason'] as String? ?? 'Entered by the director',
-      );
-      // The first score moves a Ready contest to Running, as the server does.
-      if (matrixServer.contest.lifecycleState == LifecycleState.ready) {
-        matrixServer.contest = matrixServer.contest.copyWithState(
-          lifecycleState: LifecycleState.running,
-          updatedAt: DateTime.utc(2026, 10, 17, 15),
-        );
-      }
-      return _json(
-        ScoreEntryResult(
-          officialScore: official,
-          placeholder: _placeholder(assignmentId),
-          contest: matrixServer.contest,
-          calculated: const CalculatedFlight(
-            outcome: FlightOutcome.scored,
-            rawScore: 0,
-          ),
-        ).toJson(),
-      );
+      final (status, answer) = _enter(assignmentId, body);
+      return _json(answer, status);
     }
     return matrixServer.handle(request);
   }

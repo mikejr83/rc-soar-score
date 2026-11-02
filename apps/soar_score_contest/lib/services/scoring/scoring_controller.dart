@@ -13,7 +13,8 @@ import 'scoring_row.dart';
 /// view, a draft per pilot, and the save of each row.
 ///
 /// Save is per row: one timekeeper slip is one pilot, so one save is one
-/// official revision and a conflict or failure stays with its row.
+/// official revision and a conflict or failure stays with its row. Saving
+/// many rows at once is one bulk request that still answers per row.
 class ScoringController extends ChangeNotifier {
   ScoringController({
     required this.client,
@@ -235,6 +236,38 @@ class ScoringController extends ChangeNotifier {
     return draft.cumulativePenalty == 0;
   }
 
+  /// The reason recorded with [row]'s save. A recorded removal reason
+  /// belongs to the removal being saved; once the row is no longer a removal
+  /// it no longer applies.
+  String _reasonFor(ScoringRow row, String? reason) {
+    if (isPenaltyRemoval(row)) {
+      if (reason != null) _removalReasons[row.id] = reason;
+    } else {
+      _removalReasons.remove(row.id);
+    }
+    return reason ??
+        _removalReasons[row.id] ??
+        (row.isScored
+            ? 'Corrected on the scoring page'
+            : 'Entered on the scoring page');
+  }
+
+  /// Takes a stored entry into the page: the slot, the contest and the row's
+  /// draft and save state.
+  void _applySaved(ScoringRow row, ScoreEntryResult result) {
+    _mutationIds.remove(row.id);
+    final slot = ScoreSlot(
+      placeholder: result.placeholder,
+      officialScore: result.officialScore,
+    );
+    data = data!.withSlot(slot).withContest(result.contest);
+    _drafts[row.id]?.resetTo(result.officialScore.components);
+    _saves.remove(row.id);
+    _theirs.remove(row.id);
+    // The row no longer removes a penalty, so its reason is done with.
+    _clearRemovalReason(row.id);
+  }
+
   /// Saves one row as its own official revision. Returns whether it saved.
   ///
   /// When the save removed an applied cumulative penalty, any earlier
@@ -247,20 +280,7 @@ class ScoringController extends ChangeNotifier {
     if (draft.needsZeroConfirmation && !draft.zeroConfirmed) return false;
     _saves[row.id] = RowSave.saving;
     notifyListeners();
-    final removal = isPenaltyRemoval(row);
-    // A recorded reason belongs to the removal being saved; once the row is
-    // no longer a removal, it no longer applies.
-    if (removal) {
-      if (reason != null) _removalReasons[row.id] = reason;
-    } else {
-      _removalReasons.remove(row.id);
-    }
-    final effectiveReason =
-        reason ??
-        _removalReasons[row.id] ??
-        (row.isScored
-            ? 'Corrected on the scoring page'
-            : 'Entered on the scoring page');
+    final effectiveReason = _reasonFor(row, reason);
     final mutationId = _mutationIds.putIfAbsent(
       row.id,
       () => Id.create().value,
@@ -277,16 +297,7 @@ class ScoringController extends ChangeNotifier {
         ),
       );
       _mutationIds.remove(row.id);
-      final slot = ScoreSlot(
-        placeholder: result.placeholder,
-        officialScore: result.officialScore,
-      );
-      data = data!.withSlot(slot).withContest(result.contest);
-      _drafts[row.id]?.resetTo(result.officialScore.components);
-      _saves.remove(row.id);
-      _theirs.remove(row.id);
-      // The row no longer removes a penalty, so its reason is done with.
-      _clearRemovalReason(row.id);
+      _applySaved(row, result);
       recalculationWarning = result.recalculationWarning;
       notifyListeners();
       await _loadResults();
@@ -295,7 +306,7 @@ class ScoringController extends ChangeNotifier {
     } on ApiHttpError catch (error) {
       final code = error.error?.code;
       if (error.statusCode == 409 && code == 'stale_revision') {
-        await _markStale(row);
+        await _markStale([row]);
       } else if (error.statusCode == 409 || error.statusCode == 400) {
         _mutationIds.remove(row.id);
         _saves[row.id] = RowSave(
@@ -323,43 +334,150 @@ class ScoringController extends ChangeNotifier {
     return false;
   }
 
-  /// Saves every dirty row, each as its own revision, stopping at none: a
-  /// failed row keeps its message and the others still save. Rows that
-  /// remove an applied cumulative penalty, or that went stale, are left for
-  /// the director to resolve on the row instead of being saved here.
+  /// Saves every dirty row, each as its own revision, in ONE bulk request
+  /// (one row goes through the single-row route). A row the server refuses
+  /// keeps its message and the others still save; the results are loaded
+  /// once at the end.
+  ///
+  /// Rows that went stale, or whose last save failed or was refused and
+  /// removes an applied cumulative penalty, are left for the director to
+  /// resolve on the row. A removal row is included only when its reason was
+  /// recorded first ([recordRemovalReason]), so it is never saved under a
+  /// generic reason.
   Future<int> saveAll() async {
-    var saved = 0;
+    final batch = <ScoringRow>[];
     for (final row in rows.where(isDirty).toList()) {
-      // A removal or a conflicting row has already been dealt with and is
-      // waiting for the director again; saveAll() must not force it through
-      // under a generic reason.
-      if (saveOf(row.id).kind == RowSaveKind.stale || isPenaltyRemoval(row)) {
-        continue;
+      final kind = saveOf(row.id).kind;
+      if (kind == RowSaveKind.stale || kind == RowSaveKind.saving) continue;
+      if (isPenaltyRemoval(row)) {
+        if (removalReason(row.id) == null ||
+            kind == RowSaveKind.failed ||
+            kind == RowSaveKind.refused) {
+          continue;
+        }
       }
       final draft = draftOf(row);
       if (draft.problems.isNotEmpty) continue;
       if (draft.needsZeroConfirmation) draft.confirmZero();
-      if (await save(row)) saved++;
+      batch.add(row);
+    }
+    if (batch.isEmpty) return 0;
+    if (batch.length == 1) return await save(batch.single) ? 1 : 0;
+    return _saveBatch(batch);
+  }
+
+  /// Records the reason for removing [row]'s applied cumulative penalty, to
+  /// be sent with its save.
+  void recordRemovalReason(Id id, String reason) {
+    _removalReasons[id] = reason;
+  }
+
+  Future<int> _saveBatch(List<ScoringRow> batch) async {
+    final entries = <EnterScoresEntry>[];
+    for (final row in batch) {
+      _saves[row.id] = RowSave.saving;
+      final reason = _reasonFor(row, null);
+      entries.add(
+        EnterScoresEntry(
+          assignmentId: row.id,
+          clientMutationId: _mutationIds.putIfAbsent(
+            row.id,
+            () => Id.create().value,
+          ),
+          baseScoreRevision: row.baseRevision,
+          components: draftOf(row).components,
+          reason: reason,
+        ),
+      );
+    }
+    notifyListeners();
+    var saved = 0;
+    try {
+      final answer = await client.enterScores(
+        contestId,
+        EnterScoresRequest(entries: entries),
+      );
+      final stale = <ScoringRow>[];
+      for (final (i, row) in batch.indexed) {
+        final outcome = answer.results[i];
+        final result = outcome.result;
+        if (result != null) {
+          _applySaved(row, result);
+          saved++;
+        } else if (outcome.statusCode == 409 &&
+            outcome.code == 'stale_revision') {
+          stale.add(row);
+        } else if (outcome.statusCode == 409 || outcome.statusCode == 400) {
+          _mutationIds.remove(row.id);
+          _saves[row.id] = RowSave(
+            RowSaveKind.refused,
+            message: outcome.message ?? 'The entry was refused.',
+          );
+        } else {
+          _saves[row.id] = RowSave(
+            RowSaveKind.failed,
+            message: outcome.message ?? 'The entry failed.',
+          );
+        }
+      }
+      if (saved > 0) recalculationWarning = answer.recalculationWarning;
+      if (stale.isNotEmpty) await _markStale(stale);
+    } on ApiHttpError catch (error) {
+      _failAll(
+        batch,
+        RowSave(
+          RowSaveKind.failed,
+          message:
+              error.error?.message ??
+              'The server failed (${error.statusCode}).',
+        ),
+      );
+    } on ApiNetworkError {
+      _failAll(
+        batch,
+        const RowSave(
+          RowSaveKind.failed,
+          message: 'The server could not be reached. Your values are kept.',
+          networkProblem: true,
+        ),
+      );
+    } on Object catch (error) {
+      _failAll(batch, RowSave(RowSaveKind.failed, message: '$error'));
+    }
+    notifyListeners();
+    if (saved > 0) {
+      await _loadResults();
+      notifyListeners();
     }
     return saved;
   }
 
-  Future<void> _markStale(ScoringRow row) async {
+  void _failAll(List<ScoringRow> batch, RowSave failure) {
+    for (final row in batch) {
+      _saves[row.id] = failure;
+    }
+  }
+
+  Future<void> _markStale(List<ScoringRow> stale) async {
     try {
       final fresh = await client.scores(contestId);
+      final ids = {for (final row in stale) row.id};
       for (final slot in fresh.slots) {
-        if (slot.placeholder.assignmentId == row.id) {
+        if (ids.contains(slot.placeholder.assignmentId)) {
           data = data!.withSlot(slot);
-          _theirs[row.id] = slot.officialScore?.components ?? const {};
+          _theirs[slot.placeholder.assignmentId] =
+              slot.officialScore?.components ?? const {};
         }
       }
     } on Object {
       // The conflict is still shown; the other values may be missing.
     }
-    _saves[row.id] = const RowSave(
-      RowSaveKind.stale,
-      message: 'This row changed since you opened it.',
-    );
+    for (final row in stale) {
+      _saves[row.id] = const RowSave(
+        RowSaveKind.stale,
+        message: 'This row changed since you opened it.',
+      );
+    }
   }
 
   /// Keeps the typed values over the newer revision, then saves again.
