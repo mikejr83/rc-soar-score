@@ -7,6 +7,7 @@ class PublicationFacts extends Equatable {
     required this.isPublished,
     this.visibility,
     this.publishedAt,
+    this.projection,
     this.isKnown = true,
     this.supported = true,
   });
@@ -41,12 +42,18 @@ class PublicationFacts extends Equatable {
       isPublished: true,
       visibility: visibility,
       publishedAt: at is String ? DateTime.tryParse(at)?.toUtc() : null,
+      projection: PublicationProjectionFacts.tryParse(
+        json['current_projection'],
+      ),
     );
   }
 
   final bool isPublished;
   final PublicationVisibility? visibility;
   final DateTime? publishedAt;
+
+  /// The latest published copy of the results, when the server sent one.
+  final PublicationProjectionFacts? projection;
 
   /// False for [unknown].
   final bool isKnown;
@@ -61,7 +68,45 @@ class PublicationFacts extends Equatable {
     isPublished,
     visibility,
     publishedAt,
+    projection,
     isKnown,
     supported,
   ];
+}
+
+/// A summary of the latest projection (published copy) of a contest.
+class PublicationProjectionFacts extends Equatable {
+  const PublicationProjectionFacts({
+    required this.projectionRevision,
+    required this.contestRevision,
+    this.publishedAt,
+  });
+
+  /// Reads the server's `current_projection`, or null when it is missing or
+  /// not the expected shape.
+  static PublicationProjectionFacts? tryParse(Object? json) {
+    if (json is! Map) {
+      return null;
+    }
+    final revision = json['projection_revision'];
+    final contestRevision = json['contest_revision'];
+    final at = json['published_at'];
+    if (revision is! int || contestRevision is! int) {
+      return null;
+    }
+    return PublicationProjectionFacts(
+      projectionRevision: revision,
+      contestRevision: contestRevision,
+      publishedAt: at is String ? DateTime.tryParse(at)?.toUtc() : null,
+    );
+  }
+
+  final int projectionRevision;
+
+  /// The contest revision this copy was made from.
+  final int contestRevision;
+  final DateTime? publishedAt;
+
+  @override
+  List<Object?> get props => [projectionRevision, contestRevision, publishedAt];
 }

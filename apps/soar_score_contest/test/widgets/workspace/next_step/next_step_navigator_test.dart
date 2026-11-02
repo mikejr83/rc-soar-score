@@ -32,6 +32,7 @@ Future<void> _open(WidgetTester tester, NextStepAction action) async {
         contestParticipantsPath(matrixContestId): 'Participants stub',
         contestScoringPath(matrixContestId): 'Scoring stub',
         contestReportsPath(matrixContestId): 'Reports stub',
+        contestPublicationPath(matrixContestId): 'Publication stub',
       }.entries)
         GoRoute(path: entry.key, builder: (context, _) => Text(entry.value)),
     ],
@@ -52,6 +53,7 @@ void main() {
       NextStepTarget.matrix: 'Matrix stub',
       NextStepTarget.participants: 'Participants stub',
       NextStepTarget.reports: 'Reports stub',
+      NextStepTarget.publish: 'Publication stub',
     };
     pages.forEach((target, text) {
       testWidgets('${target.name} goes to its route', (tester) async {
@@ -100,19 +102,6 @@ void main() {
     testWidgets('without a place goes to the page itself', (tester) async {
       await _open(tester, _to(NextStepTarget.scoring));
       expect(find.text('Scoring stub'), findsOneWidget);
-    });
-  });
-
-  group('shows the not-available dialog', () {
-    final dialogs = {
-      NextStepTarget.publish: ('Publish', 'The publish flow is not built yet.'),
-    };
-    dialogs.forEach((target, text) {
-      testWidgets('${target.name} says what is missing', (tester) async {
-        await _open(tester, _to(target));
-        expect(find.text('${text.$1} is not available yet'), findsOneWidget);
-        expect(find.text(text.$2), findsOneWidget);
-      });
     });
   });
 

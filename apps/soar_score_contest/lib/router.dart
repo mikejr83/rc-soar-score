@@ -16,6 +16,7 @@ import 'auth/auth_session.dart';
 import 'auth/auth_session_inherited.dart';
 import 'auth/identity_provider_check.dart';
 import 'pages/contest/configuration_page.dart';
+import 'pages/contest/publication_page.dart';
 import 'pages/contest/workspace_page.dart';
 import 'pages/home_page.dart';
 import 'pages/landing_editor_page.dart';
@@ -118,6 +119,10 @@ String contestReportsPath(String contestId) =>
 /// the shell and holds its filters and page setup in the query.
 String contestReportPath(String contestId, ReportKind kind) =>
     '$contestsPath/$contestId/reports/${kind.key}';
+
+/// The publication page of the contest with [contestId].
+String contestPublicationPath(String contestId) =>
+    '$contestsPath/$contestId/publication';
 
 /// The sync details page of the contest with [contestId].
 String contestSyncPath(String contestId) => '$contestsPath/$contestId/sync';
@@ -301,6 +306,13 @@ GoRouter buildAppRouter({
             path: '$contestsPath/:contestId/reports',
             name: 'contestReports',
             builder: (context, state) => ContestReportsPage(
+              contestId: state.pathParameters['contestId']!,
+            ),
+          ),
+          _shellRoute(
+            path: '$contestsPath/:contestId/publication',
+            name: 'contestPublication',
+            builder: (context, state) => ContestPublicationPage(
               contestId: state.pathParameters['contestId']!,
             ),
           ),

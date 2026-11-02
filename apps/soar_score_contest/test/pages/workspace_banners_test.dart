@@ -55,7 +55,7 @@ void main() {
         find.byKey(const ValueKey('next-step-primary')),
       );
       expect(button.onPressed, isNull);
-      expect(find.text('Needs a connection.'), findsOneWidget);
+      expect(find.text('Needs a connection.'), findsWidgets);
       final node = tester.getSemantics(
         find.byKey(const ValueKey('next-step-primary')),
       );

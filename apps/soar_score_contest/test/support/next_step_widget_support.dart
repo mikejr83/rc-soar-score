@@ -41,6 +41,38 @@ class WorkspaceServer {
   /// When not 404, reading the publication fails with this status.
   int publicationStatus = 404;
 
+  /// The error code sent with a failed publication read.
+  String publicationReadCode = 'rejected';
+
+  /// The publication the server holds; set by a publish, or by a test to start
+  /// published. While null, reading it is [publicationStatus].
+  Map<String, Object?>? publication;
+
+  /// When set, the next publish or visibility change is refused with this
+  /// status and error code.
+  int? publicationRefusal;
+  String publicationRefusalCode = 'stale_source_revision';
+
+  /// The bodies of the publish requests received.
+  final List<Map<String, dynamic>> publishes = [];
+
+  /// The visibilities requested, as sent (`Public` or `Unlisted`).
+  final List<String> visibilities = [];
+
+  /// Starts the server with a published contest.
+  void startPublished({String visibility = 'Unlisted'}) {
+    publication = {
+      'publication_id': 'p1',
+      'visibility': visibility,
+      'published_at': '2026-10-17T15:00:00.000Z',
+      'current_projection': {
+        'projection_revision': 1,
+        'contest_revision': 1,
+        'published_at': '2026-10-17T15:00:00.000Z',
+      },
+    };
+  }
+
   /// When set, the next action is answered with this status and message.
   int? rejectNext;
   String rejectMessage = 'The contest changed.';
@@ -92,6 +124,10 @@ class WorkspaceServer {
     'error': {'code': 'rejected', 'message': message},
   }, status);
 
+  http.Response _coded(int status, String code) => _json({
+    'error': {'code': code, 'message': code},
+  }, status);
+
   Future<http.Response> handle(http.Request request) async {
     if (networkDown) {
       throw http.ClientException('offline', request.url);
@@ -107,8 +143,49 @@ class WorkspaceServer {
           ? _error(scoresStatus == 200 ? 404 : scoresStatus, 'No scores.')
           : _json(current.toJson());
     }
+    if (path.endsWith('/publication/visibility')) {
+      final refusal = publicationRefusal;
+      if (refusal != null) {
+        return _coded(refusal, publicationRefusalCode);
+      }
+      final visibility =
+          (jsonDecode(request.body) as Map<String, dynamic>)['visibility']
+              as String;
+      visibilities.add(visibility);
+      publication = {...?publication, 'visibility': visibility};
+      return _json(publication!);
+    }
+    if (request.method == 'POST' && path.endsWith('/publication')) {
+      final refusal = publicationRefusal;
+      if (refusal != null) {
+        return _coded(refusal, publicationRefusalCode);
+      }
+      final body = jsonDecode(request.body) as Map<String, dynamic>;
+      publishes.add(body);
+      final previous = publication;
+      final revision =
+          ((previous?['current_projection']
+                      as Map<String, Object?>?)?['projection_revision']
+                  as int? ??
+              0) +
+          1;
+      publication = {
+        'publication_id': 'p1',
+        'visibility': previous?['visibility'] ?? 'Unlisted',
+        'published_at': previous?['published_at'] ?? '2026-10-17T16:00:00.000Z',
+        'current_projection': {
+          'projection_revision': revision,
+          'contest_revision': body['source_contest_revision'],
+          'published_at': '2026-10-17T16:00:00.000Z',
+        },
+      };
+      return _json(publication!, previous == null ? 201 : 200);
+    }
     if (path.endsWith('/publication')) {
-      return _error(publicationStatus, 'No publication.');
+      final current = publication;
+      return current != null
+          ? _json(current)
+          : _coded(publicationStatus, publicationReadCode);
     }
     if (path.endsWith('/contests/$matrixContestId')) {
       contestReads++;
@@ -196,6 +273,7 @@ Future<void> pumpWorkspace(
         contestMatrixPath(matrixContestId): 'Matrix stub',
         contestScoringPath(matrixContestId): 'Scoring stub',
         contestParticipantsPath(matrixContestId): 'Participants stub',
+        contestPublicationPath(matrixContestId): 'Publication stub',
       }.entries)
         GoRoute(
           path: entry.key,

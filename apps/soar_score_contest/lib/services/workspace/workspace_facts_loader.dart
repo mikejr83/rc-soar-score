@@ -5,6 +5,7 @@ import 'package:soar_score_core/soar_score_core.dart';
 import '../matrix/matrix_page_data.dart';
 import 'activity/activity_facts.dart';
 import 'publication_facts.dart';
+import 'publication_facts_loader.dart';
 import 'transition_facts.dart';
 import 'workspace_fact_source.dart';
 import 'workspace_facts.dart';
@@ -152,23 +153,11 @@ abstract final class WorkspaceFactsLoader {
     Id id,
     Set<WorkspaceFactSource> unavailable,
   ) async {
-    try {
-      return PublicationFacts.fromJson(await client.publication(id));
-    } on ApiHttpError catch (error) {
-      if (error.statusCode == 404) {
-        return PublicationFacts.notPublished;
-      }
-      if (error.statusCode == 409 &&
-          error.error?.code == 'publishing_not_available') {
-        // This server does not publish contests; a stable state, not a
-        // failed read, so it leaves [unavailable] untouched.
-        return PublicationFacts.unsupported;
-      }
-    } on Object {
-      // Falls through to unavailable.
+    final facts = await PublicationFactsLoader.load(client, id);
+    if (!facts.isKnown) {
+      unavailable.add(WorkspaceFactSource.publication);
     }
-    unavailable.add(WorkspaceFactSource.publication);
-    return PublicationFacts.unknown;
+    return facts;
   }
 }
 
