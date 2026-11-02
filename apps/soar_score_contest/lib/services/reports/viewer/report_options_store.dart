@@ -64,14 +64,4 @@ class ReportOptionsStore {
     }
     return saved;
   }
-
-  /// Streams [kindKey]'s options: the current value, then each change in this
-  /// instance.
-  Stream<Map<String, String>> watch(String kindKey) {
-    final store = this.store;
-    if (store == null) {
-      return Stream.value(const {});
-    }
-    return store.watch(accountId, reportOptionsKeyFor(kindKey));
-  }
 }

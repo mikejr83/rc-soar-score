@@ -152,6 +152,16 @@ void main() {
     expect(await store.load('standings'), isEmpty);
   });
 
+  test('prov is never remembered, only kept in the view', () async {
+    final controller = await _controller();
+    final store = _storeOf(controller);
+    controller.setFilter('prov', '0');
+    await _flush();
+    // The choice reaches the view but never the account map.
+    expect(controller.filters['prov'], '0');
+    expect(await store.load('standings'), isEmpty);
+  });
+
   test(
     'paper and preview are remembered, the pages to print are not',
     () async {
