@@ -25,15 +25,29 @@ class PublicationPageData extends Equatable {
   /// publication read is [PublicationFacts.unknown], not an error.
   static Future<PublicationPageData> load(ApiClient client, Id id) async {
     final contest = await client.contest(id);
-    final results = await Future.wait<Object?>([
-      MatrixPageData.forContest(client, contest),
+    final (policy, publication) = await (
+      _policy(client, id),
       PublicationFactsLoader.load(client, id),
-    ]);
+    ).wait;
     return PublicationPageData(
       contest: contest,
-      publication: results[1]! as PublicationFacts,
-      policy: (results[0]! as MatrixPageData).options?.publicUpdateMode,
+      publication: publication,
+      policy: policy,
     );
+  }
+
+  /// The saved public update policy. Only the configuration is read, and a
+  /// failed read leaves the policy unset rather than failing the page.
+  static Future<PublicUpdateMode?> _policy(ApiClient client, Id id) async {
+    try {
+      final configuration = await MatrixPageData.latestConfiguration(
+        client,
+        id,
+      );
+      return configuration?.config.coreOptions.publicUpdateMode;
+    } on Object {
+      return null;
+    }
   }
 
   @override

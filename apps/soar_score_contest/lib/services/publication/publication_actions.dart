@@ -1,5 +1,8 @@
+import 'package:logging/logging.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_core/soar_score_core.dart';
+
+final _logger = Logger('PublicationActions');
 
 /// Why a publish or visibility change did not happen. The page words each in
 /// its own language.
@@ -113,7 +116,12 @@ class PublicationActions {
       return PublicationOutcome.failed(_classify(error, forPublish));
     } on ApiNetworkError {
       return const PublicationOutcome.failed(PublicationFailure.network);
-    } on Object {
+    } on ApiException {
+      return const PublicationOutcome.failed(PublicationFailure.other);
+    } on Object catch (error, stack) {
+      // Not a failure the API reports: a bug. The director still gets a
+      // message, and the details go to the log.
+      _logger.severe('Unexpected publication failure', error, stack);
       return const PublicationOutcome.failed(PublicationFailure.other);
     }
   }

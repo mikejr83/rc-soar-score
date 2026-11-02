@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
+import 'package:logging/logging.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_contest/services/publication/publication_actions.dart';
 import 'package:soar_score_core/soar_score_core.dart';
@@ -58,5 +59,20 @@ void main() {
       PublicationActions.mutationId(moved, 0),
       isNot(PublicationActions.mutationId(contest, 0)),
     );
+  });
+
+  test('an unexpected error is logged and reported as a failure', () async {
+    final records = <LogRecord>[];
+    final sub = Logger('PublicationActions').onRecord.listen(records.add);
+    addTearDown(sub.cancel);
+    final result = await PublicationActions(
+      ApiClient(
+        baseUrl: Uri.parse('http://localhost'),
+        httpClient: MockClient((request) async => throw StateError('bug')),
+      ),
+    ).publish(contest);
+    expect(result.failure, PublicationFailure.other);
+    expect(records.single.level, Level.SEVERE);
+    expect(records.single.error, isA<StateError>());
   });
 }
