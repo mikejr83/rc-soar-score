@@ -174,7 +174,8 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('reset-report-options-button')));
     await tester.pumpAndSettle();
 
-    expect(await options.load(), isEmpty);
+    expect(await options.load('matrix'), isEmpty);
+    expect(await options.load('standings'), isEmpty);
     expect(
       find.text(AppLocalizationsEn().reportOptionsResetDone),
       findsOneWidget,

@@ -63,6 +63,18 @@ Future<ReportViewerController> _controller({
 Future<void> _flush() => Future<void>.delayed(Duration.zero);
 
 void main() {
+  test('a settings reset applies the next time a report opens', () async {
+    final uiStore = BackendLocalUiStore(MemoryLocalUiBackend());
+    // A remembered option, then the Settings page reset that removes it.
+    final seeded = ReportOptionsStore(uiStore, _account);
+    await seeded.set('standings', {'pct': '1'});
+    await ReportOptionsStore(uiStore, _account).reset();
+
+    // A freshly opened report re-reads the store and starts from defaults.
+    final controller = await _controller(uiStore: uiStore);
+    expect(controller.filters['pct'], isNull);
+  });
+
   test('a stored option applies over the default', () async {
     final controller = await _controller(
       stored: {
@@ -113,27 +125,23 @@ void main() {
       expect(controller.filters['pct'], '1');
       // The option came from the URL, not a change in the viewer.
       final store = _storeOf(controller);
-      expect(await store.load(), isEmpty);
+      expect(await store.load('standings'), isEmpty);
     },
   );
 
   test('changing an option writes the account map', () async {
     final controller = await _controller();
     final store = _storeOf(controller);
-    expect(await store.load(), isEmpty);
+    expect(await store.load('standings'), isEmpty);
 
     controller.setFilter('pct', '0');
     await _flush();
     // '0' is the default, but it is the user's last explicit choice.
-    expect(await store.load(), {
-      'standings': {'pct': '0'},
-    });
+    expect(await store.load('standings'), {'pct': '0'});
 
     controller.setFilter('pct', '1');
     await _flush();
-    expect(await store.load(), {
-      'standings': {'pct': '1'},
-    });
+    expect(await store.load('standings'), {'pct': '1'});
   });
 
   test('a round filter is not remembered', () async {
@@ -141,7 +149,7 @@ void main() {
     final store = _storeOf(controller);
     controller.setFilter('from', '2');
     await _flush();
-    expect(await store.load(), isEmpty);
+    expect(await store.load('standings'), isEmpty);
   });
 
   test(
@@ -155,9 +163,7 @@ void main() {
       controller.setPrintPages('1-2');
       await _flush();
       // The pages to print stay out of the account map.
-      expect(await store.load(), {
-        'standings': {'paper': 'a4', 'preview': '1'},
-      });
+      expect(await store.load('standings'), {'paper': 'a4', 'preview': '1'});
       expect(controller.params.previewExplicit, isTrue);
       // The range the user typed is in this view's params and URL only.
       expect(controller.params.printPages, '1-2');
@@ -203,9 +209,9 @@ void main() {
           'zoom': '1.25',
         }),
       );
-      expect(await _storeOf(controller).load(), {
-        'standings': {'pct': '1', 'paper': 'a4'},
-        'matrix': {'cmp': '1'},
+      expect(await _storeOf(controller).load('standings'), {
+        'pct': '1',
+        'paper': 'a4',
       });
 
       await controller.resetAll();
@@ -220,9 +226,8 @@ void main() {
       expect(controller.params.zoom, 1.25);
       // Only this kind's entry is forgotten; another report's stays.
       final store = _storeOf(controller);
-      expect(await store.load(), {
-        'matrix': {'cmp': '1'},
-      });
+      expect(await store.load('standings'), isEmpty);
+      expect(await store.load('matrix'), {'cmp': '1'});
       expect(controller.filters['pct'], isNull);
     },
   );
@@ -243,9 +248,7 @@ void main() {
       // The stored option still applies after the URL filters are cleared.
       expect(controller.filters['pct'], '1');
       final store = _storeOf(controller);
-      expect(await store.load(), {
-        'standings': {'pct': '1'},
-      });
+      expect(await store.load('standings'), {'pct': '1'});
     },
   );
 }

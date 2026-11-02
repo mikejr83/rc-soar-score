@@ -5,6 +5,10 @@ import '../../services/reports/viewer/report_options_store.dart';
 
 /// The `Report options` card on the Settings page: one button that brings
 /// every report's remembered options back to how they start.
+///
+/// The reset takes effect the next time a report opens. A report already
+/// open in another tab keeps its in-memory copy until it reloads, because
+/// the UI store does not stream changes across tabs.
 class ReportOptionsSetting extends StatelessWidget {
   const ReportOptionsSetting({super.key, required this.store});
 

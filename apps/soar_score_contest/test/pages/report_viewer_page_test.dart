@@ -767,9 +767,7 @@ void main() {
         find.widgetWithText(CheckboxListTile, 'Percentage of total'),
       );
       await tester.pumpAndSettle();
-      expect(await store.load(), {
-        'standings': {'pct': '0'},
-      });
+      expect(await store.load('standings'), {'pct': '0'});
       expect(_option(tester, 'Percentage of total'), isFalse);
     });
 
@@ -783,7 +781,10 @@ void main() {
         const StandInReport(),
         params: ReportViewParams.fromQuery(const {'f.pct': '1'}),
       );
-      expect(await ReportOptionsStore(uiStore, 'local').load(), isEmpty);
+      expect(
+        await ReportOptionsStore(uiStore, 'local').load('standings'),
+        isEmpty,
+      );
     });
 
     testWidgets('reopening the report starts with the stored choice', (
@@ -819,7 +820,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(_option(tester, 'Percentage of total'), isFalse);
-      expect(await ReportOptionsStore(uiStore, 'local').load(), isEmpty);
+      expect(
+        await ReportOptionsStore(uiStore, 'local').load('standings'),
+        isEmpty,
+      );
     });
 
     testWidgets('the empty-state reset keeps the stored options', (
@@ -839,8 +843,8 @@ void main() {
       await tester.pumpAndSettle();
       expect(_body(1), findsOneWidget);
       expect(_option(tester, 'Percentage of total'), isTrue);
-      expect(await ReportOptionsStore(uiStore, 'local').load(), {
-        'standings': {'pct': '1'},
+      expect(await ReportOptionsStore(uiStore, 'local').load('standings'), {
+        'pct': '1',
       });
     });
 
@@ -861,9 +865,7 @@ void main() {
       await tester.tap(compact);
       await tester.pumpAndSettle();
       // The stored entry is keyed to the matrix kind, not to standings.
-      expect(await store.load(), {
-        'matrix': {'cmp': '1'},
-      });
+      expect(await store.load('matrix'), {'cmp': '1'});
 
       // Reopening starts with it on.
       await tester.pumpWidget(const SizedBox());

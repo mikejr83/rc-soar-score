@@ -235,18 +235,16 @@ class ReportViewerController extends ChangeNotifier {
   /// place before the user can see the controls.
   Future<void> _loadOptions() async {
     final store = options;
-    final map = store == null
-        ? const <String, Map<String, String>>{}
-        : await store.load();
+    final stored = store == null
+        ? const <String, String>{}
+        : await store.load(spec.kind.key);
     if (_disposed) {
       return;
     }
     // The pages to print are view-local and never remembered; every other
     // stored option is dropped unless its value is still recognised, so a
     // stale or foreign value is forgotten rather than trusted.
-    _stored = _validateStored(
-      Map<String, String>.of(map[spec.kind.key] ?? const {}),
-    );
+    _stored = _validateStored(Map<String, String>.of(stored));
     _storedLoaded = true;
     // The stored options now join the view, so the URL carries them too. A
     // params the store already names is deep-equal, so this is a no-op
@@ -504,7 +502,11 @@ class ReportViewerController extends ChangeNotifier {
   /// The option keys of this report kind, besides the round ranges and the
   /// pilot choice, which are filtering and stay in the URL only.
   static const Map<ReportKind, Set<String>> _optionKeysByKind = {
-    ReportKind.standings: {'pct', 'raw', 'team', 'num', 'cls', 'det', 'prov'},
+    // `prov` is intentionally not remembered: it describes a contest's
+    // scoring state, so a remembered value from one contest must not force
+    // Provisional off in the next. It follows the data-dependent default or
+    // the URL each time.
+    ReportKind.standings: {'pct', 'raw', 'team', 'num', 'cls', 'det'},
     ReportKind.matrix: {
       'cmp',
       'inf',
