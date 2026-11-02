@@ -1694,4 +1694,8 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get publicationPageLoadFailed => 'The contest could not be loaded.';
+
+  @override
+  String get publicationPolicyUnreadable =>
+      'Public updates: the policy could not be read.';
 }

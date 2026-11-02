@@ -73,6 +73,9 @@ class WorkspaceServer {
     };
   }
 
+  /// When not 200, reading the configuration fails with this status.
+  int configurationStatus = 200;
+
   /// When set, the next action is answered with this status and message.
   int? rejectNext;
   String rejectMessage = 'The contest changed.';
@@ -142,6 +145,9 @@ class WorkspaceServer {
       return current == null || scoresStatus != 200
           ? _error(scoresStatus == 200 ? 404 : scoresStatus, 'No scores.')
           : _json(current.toJson());
+    }
+    if (path.endsWith('/configuration') && configurationStatus != 200) {
+      return _error(configurationStatus, 'Configuration lookup failed.');
     }
     if (path.endsWith('/publication/visibility')) {
       final refusal = publicationRefusal;

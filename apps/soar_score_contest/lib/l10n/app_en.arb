@@ -1999,5 +1999,9 @@
   "publicationPageLoadFailed": "The contest could not be loaded.",
   "@publicationPageLoadFailed": {
     "description": "Publication page: failure to load the contest."
+  },
+  "publicationPolicyUnreadable": "Public updates: the policy could not be read.",
+  "@publicationPolicyUnreadable": {
+    "description": "Shown instead of the public update policy when the contest's configuration could not be read."
   }
 }

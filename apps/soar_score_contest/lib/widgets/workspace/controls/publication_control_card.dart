@@ -65,7 +65,7 @@ class PublicationControlCard extends StatelessWidget {
           PublicationActionsRow(
             contest: contest,
             publication: publication,
-            policy: policy,
+            policyText: l10n.updatePolicy(policy),
             isOffline: facts.isOffline,
             onChanged: scope.reloadFacts,
           ),

@@ -19,7 +19,7 @@ abstract final class PublicationFlow {
     BuildContext context, {
     required Contest contest,
     required PublicationFacts publication,
-    required PublicUpdateMode? policy,
+    required String policyText,
   }) async {
     final client = apiClientOf(context);
     final messenger = ScaffoldMessenger.of(context);
@@ -34,7 +34,7 @@ abstract final class PublicationFlow {
       context,
       contest: contest,
       visibility: publication.visibility ?? PublicationVisibility.unlisted,
-      policy: policy,
+      policyText: policyText,
     );
     if (!confirmed) {
       return false;

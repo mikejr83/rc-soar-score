@@ -97,4 +97,24 @@ void main() {
     await tester.pumpAndSettle();
     expect(_key('publication-page-failed'), findsNothing);
   });
+
+  testWidgets('says so when the update policy could not be read', (
+    tester,
+  ) async {
+    final server = _server()
+      ..startPublished()
+      ..configurationStatus = 500;
+    await _pump(tester, server);
+    expect(
+      find.text('Public updates: the policy could not be read.'),
+      findsOneWidget,
+    );
+    // The page still renders and still offers publishing.
+    await tester.tap(_key('publication-publish'));
+    await tester.pumpAndSettle();
+    expect(
+      find.text('Public updates: the policy could not be read.'),
+      findsNWidgets(2),
+    );
+  });
 }

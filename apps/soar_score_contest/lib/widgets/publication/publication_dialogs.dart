@@ -11,7 +11,7 @@ Future<bool> confirmPublish(
   BuildContext context, {
   required Contest contest,
   required PublicationVisibility visibility,
-  required PublicUpdateMode? policy,
+  required String policyText,
 }) async {
   final l10n = AppLocalizations.of(context);
   final confirmed = await showDialog<bool>(
@@ -33,10 +33,7 @@ Future<bool> confirmPublish(
             key: const ValueKey('publish-dialog-visibility'),
             l10n.publishDialogVisibility(l10n.visibilityName(visibility)),
           ),
-          Text(
-            key: const ValueKey('publish-dialog-policy'),
-            l10n.updatePolicy(policy),
-          ),
+          Text(key: const ValueKey('publish-dialog-policy'), policyText),
         ],
       ),
       actions: [
