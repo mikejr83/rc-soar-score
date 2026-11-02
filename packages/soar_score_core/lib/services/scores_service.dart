@@ -1,3 +1,5 @@
+import 'package:logging/logging.dart';
+
 import '../enums/admin_lock.dart';
 import '../enums/authority.dart';
 import '../enums/discipline_type.dart';
@@ -26,6 +28,8 @@ import 'landing_bonus.dart';
 import 'score_correction_audit.dart';
 import 'score_entry_result.dart';
 import 'score_history.dart';
+
+final _logger = Logger('ScoresService');
 
 /// Reads the scores of a contest and lets the director enter an official
 /// score for a pilot in a group.
@@ -245,9 +249,13 @@ class ScoresService {
   /// on. The accepted entries are stored together in ONE transaction. When
   /// that transaction is refused because a revision moved underneath it,
   /// nothing of it is kept and the entries are stored one by one instead, so
-  /// only the entries that really conflict are refused. Any other failure
-  /// is thrown with nothing stored; repeating the request is safe because
-  /// each entry keeps its [BulkScoreEntry.clientMutationId].
+  /// only the entries that really conflict are refused, and an entry that
+  /// fails otherwise is reported as failed (500) while the rest are kept.
+  /// Any other failure of the single transaction is thrown with nothing
+  /// stored. Repeating a request is safe because each entry keeps its
+  /// [BulkScoreEntry.clientMutationId]; the contest start, the
+  /// recalculation and the publish that follow run for a replay as well, so a
+  /// request that stopped after storing its scores is finished by a repeat.
   ///
   /// Returns one outcome per entry, in order. The recalculation and the
   /// publish that follow are the caller's, and run once for the request.
@@ -262,6 +270,7 @@ class ScoresService {
 
     final outcomes = List<BulkScoreOutcome?>.filled(entries.length, null);
     final prepared = <int, _Prepared>{};
+    final replays = <int, ScoreEntryResult>{};
     final seenSlots = <Id>{};
     final seenMutations = <String>{};
     int? round;
@@ -298,7 +307,7 @@ class ScoresService {
           moveContest: false,
         );
         if (one.replay != null) {
-          outcomes[i] = BulkScoreOutcome.saved(one.replay!, replayed: true);
+          replays[i] = one.replay!;
         } else if (round != null && round != one.round) {
           outcomes[i] = const BulkScoreOutcome.refused(
             statusCode: 400,
@@ -343,17 +352,43 @@ class ScoresService {
               prepared[i]!.entry!,
               metadata: metadata.forPart(entries[i].clientMutationId),
             );
-          } on Object catch (error) {
+          } on Object catch (error, stackTrace) {
+            // The entries before this one are already stored, so report
+            // this one as failed and go on instead of throwing.
             final refused = _refusal(error);
-            if (refused == null) rethrow;
-            outcomes[i] = refused;
+            if (refused == null) {
+              _logger.warning(
+                'Bulk fallback: storing entry $i failed',
+                error,
+                stackTrace,
+              );
+            }
+            outcomes[i] =
+                refused ??
+                const BulkScoreOutcome.refused(
+                  statusCode: 500,
+                  code: 'internal_error',
+                  message: 'The entry could not be stored.',
+                );
           }
         }
       }
     }
 
-    if (stored.isNotEmpty) {
+    if (stored.isNotEmpty || replays.isNotEmpty) {
+      // A replay also starts the contest: an earlier request may have
+      // stopped after storing its scores.
       final started = await _startContest(contest, metadata);
+      for (final MapEntry(key: i, value: replay) in replays.entries) {
+        outcomes[i] = BulkScoreOutcome.saved(
+          ScoreEntryResult(
+            officialScore: replay.officialScore,
+            placeholder: replay.placeholder,
+            contest: started,
+            calculated: replay.calculated,
+          ),
+        );
+      }
       for (final MapEntry(key: i, value: one) in stored.entries) {
         outcomes[i] = BulkScoreOutcome.saved(
           ScoreEntryResult(
@@ -388,6 +423,14 @@ class ScoresService {
         );
       } on StaleRevisionError {
         current = await _requireContest(current.id);
+      } on Object catch (error, stackTrace) {
+        // The scores are stored; a repeat of the request starts the contest.
+        _logger.warning(
+          'Starting the contest after a bulk entry failed',
+          error,
+          stackTrace,
+        );
+        return current;
       }
     }
     return current;

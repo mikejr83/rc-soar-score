@@ -307,7 +307,8 @@ class ScoringController extends ChangeNotifier {
       return true;
     } on ApiHttpError catch (error) {
       final code = error.error?.code;
-      if (error.statusCode == 409 && code == 'stale_revision') {
+      if (error.statusCode == 409 &&
+          (code == 'stale_revision' || code == 'already_stored')) {
         await _markStale([row]);
       } else if (error.statusCode == 409 || error.statusCode == 400) {
         _mutationIds.remove(row.id);
@@ -425,7 +426,8 @@ class ScoringController extends ChangeNotifier {
           _applySaved(row, result);
           saved++;
         } else if (outcome.statusCode == 409 &&
-            outcome.code == 'stale_revision') {
+            (outcome.code == 'stale_revision' ||
+                outcome.code == 'already_stored')) {
           stale.add(row);
         } else if (outcome.statusCode == 409 || outcome.statusCode == 400) {
           _mutationIds.remove(row.id);

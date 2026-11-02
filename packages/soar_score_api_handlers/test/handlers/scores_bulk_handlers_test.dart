@@ -152,23 +152,27 @@ void main() {
       );
     });
 
-    test('a repeated request recalculates nothing', () async {
-      final runs = <int>[];
-      final api = HandlerHarness(
-        _owner,
-        recalculation: RecalculationService(CountingResults(runs)),
-      );
-      await drawnContest(api);
-      final entries = [
-        entry(await assignmentOfPilot(api, 1), 'bulk-1'),
-        entry(await assignmentOfPilot(api, 2), 'bulk-2'),
-      ];
+    test(
+      'a repeated request recalculates again to finish an interrupted one',
+      () async {
+        final runs = <int>[];
+        final api = HandlerHarness(
+          _owner,
+          recalculation: RecalculationService(CountingResults(runs)),
+        );
+        await drawnContest(api);
+        final entries = [
+          entry(await assignmentOfPilot(api, 1), 'bulk-1'),
+          entry(await assignmentOfPilot(api, 2), 'bulk-2'),
+        ];
 
-      await bulk(api, entries);
-      await bulk(api, entries);
+        await bulk(api, entries);
+        await bulk(api, entries);
 
-      expect(runs, hasLength(1), reason: 'the repeat stored nothing new');
-    });
+        expect(runs, hasLength(2));
+        expect(api.repository.officialScores.stored, hasLength(2));
+      },
+    );
 
     test('a conflict while storing falls back to one by one', () async {
       final api = HandlerHarness(_owner);

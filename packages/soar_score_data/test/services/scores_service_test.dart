@@ -637,14 +637,52 @@ void _tests(Backend backend) {
         },
       );
 
-      test('a replayed entry is not newly stored', () async {
-        final entries = [bulkEntry(slots[0], 'bulk-0')];
-        final first = await enterMany(entries);
-        final again = await enterMany(entries);
+      test(
+        'a replay mixed with a new entry reports the running contest',
+        () async {
+          final first = await enterMany([bulkEntry(slots[0], 'bulk-0')]);
 
-        expect(first.single.isNewlyStored, isTrue);
-        expect(again.single.isSaved, isTrue);
-        expect(again.single.isNewlyStored, isFalse);
+          final again = await enterMany([
+            bulkEntry(slots[1], 'bulk-1'),
+            bulkEntry(slots[0], 'bulk-0'),
+          ]);
+
+          expect(again.every((o) => o.isSaved), isTrue);
+          expect([
+            for (final o in again) o.result!.contest.lifecycleState,
+          ], everyElement(core.LifecycleState.running));
+          expect(
+            again[1].result!.officialScore,
+            first.single.result!.officialScore,
+          );
+          expect(again[0].result!.officialScore.scoreRevision, 1);
+        },
+      );
+
+      test('a repeat starts a contest an earlier request left Ready', () async {
+        final first = await enterMany([bulkEntry(slots[0], 'bulk-0')]);
+        // The earlier request stored its score but stopped before the start.
+        final running = (await repository.contestRepository.findById(
+          contestId,
+        ))!;
+        await repository.contestRepository.save(
+          running.copyWithState(
+            lifecycleState: core.LifecycleState.ready,
+            updatedAt: DateTime.utc(2026, 10, 9),
+          ),
+          metadata: meta(),
+        );
+
+        final again = await enterMany([bulkEntry(slots[0], 'bulk-0')]);
+
+        expect(
+          again.single.result!.officialScore,
+          first.single.result!.officialScore,
+        );
+        expect(
+          again.single.result!.contest.lifecycleState,
+          core.LifecycleState.running,
+        );
       });
 
       test('a second entry for one slot is refused', () async {
