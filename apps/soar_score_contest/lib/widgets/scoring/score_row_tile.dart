@@ -551,6 +551,9 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
     } else if (d.lateLanding) {
       text = '0 · late';
       icon = Icons.timer_off;
+    } else if (widget.landings.isEmpty) {
+      text = 'No landing table';
+      icon = Icons.block;
     } else if (d.landingBad) {
       text = '${d.landingText.trim()} isn’t in the landing table. Use $hint';
       icon = Icons.error;
@@ -593,7 +596,7 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
           key: ValueKey(_k('landing')),
           controller: _landing,
           node: _landingNode,
-          enabled: editable && off == null,
+          enabled: editable && off == null && widget.landings.isNotEmpty,
           type: TextInputType.number,
           formatters: [FilteringTextInputFormatter.digitsOnly],
           onChanged: (value) {

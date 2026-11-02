@@ -815,6 +815,20 @@ void main() {
       expect(tester.widget<FilledButton>(_save(1, 1)).onPressed, isNull);
     });
 
+    testWidgets('is off when the contest has no landing table', (tester) async {
+      final server = ScoringServer(noLandingTable: true);
+      await pumpScoringPage(tester, server, round: 1, group: 1);
+      await tester.tap(_row(1, 1));
+      await tester.pumpAndSettle();
+      expect(tester.widget<TextField>(landing(1)).enabled, isFalse);
+      expect(find.text('No landing table'), findsWidgets);
+      // A flight without a landing can still be saved.
+      await tester.enterText(_time(1, 1), '630');
+      await tester.enterText(_height(1, 1), '150');
+      await tester.pump();
+      expect(tester.widget<FilledButton>(_save(1, 1)).onPressed, isNotNull);
+    });
+
     testWidgets('Up and Down step through the bands', (tester) async {
       await open(tester);
       await tester.tap(landing(1));
