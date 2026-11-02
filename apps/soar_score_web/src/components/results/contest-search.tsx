@@ -5,20 +5,15 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { ExternalLink } from "@/components/external-link";
-import { fetchPublicationSummaries } from "@/lib/results/api";
+import { fetchPublicationList } from "@/lib/results/api";
 import {
   filtersAreEmpty,
   filtersFromQuery,
-  filtersMatch,
   filtersToQuery,
+  listQuery,
   type ContestFilters,
 } from "@/lib/results/contest-filters";
-import {
-  activeInLast30Days,
-  contestSummaryFrom,
-  startsAfterComingSunday,
-  type ContestSummary,
-} from "@/lib/results/contest-summary";
+import { contestSummaryFrom, type ContestSummary } from "@/lib/results/contest-summary";
 import { contestAppUrl } from "@/lib/site";
 
 import { ContestRow } from "./contest-row";
@@ -26,50 +21,56 @@ import { FilterBar } from "./filter-bar";
 import styles from "./results.module.css";
 import { Skeleton } from "./skeleton";
 
-/** Number of contests listed when no filter is set. */
-const defaultCount = 10;
+/** Wait this long after the last keystroke before asking the server. */
+const typingDelayMs = 250;
 
 type State =
   | { kind: "loading" }
-  | { kind: "loaded"; contests: ContestSummary[]; now: Date }
+  | { kind: "loaded"; contests: ContestSummary[]; recentCount: number }
   | { kind: "failed"; message: string };
 
-
 /**
- * Contest search at `/results/contests`: the most recent contests, filters
- * carried in the query, a 30-day summary and Refresh. Ordering, filtering,
- * the coming-Sunday rule and the summary run client-side until #455.
+ * Contest search at `/results/contests`: the filters live in the query, the
+ * server filters, orders, caps and counts, and this page renders the answer
+ * (#455).
  */
 export function ContestSearch() {
   const router = useRouter();
   const pathname = usePathname();
   const query = useSearchParams();
   const filters = useMemo(() => filtersFromQuery(query), [query]);
+  // Everything the request depends on, as one stable string.
+  const requestKey = filtersToQuery(filters).toString();
   const [generation, setGeneration] = useState(0);
-  // Keyed by the refresh generation so a refresh reads as "loading" without
-  // a reset inside the effect.
-  const [loaded, setLoaded] = useState<{ generation: number; state: State }>();
-  const state: State = loaded?.generation === generation ? loaded.state : { kind: "loading" };
+  // Keyed by the request and refresh generation so a change reads as
+  // "loading" without a reset inside the effect.
+  const key = `${requestKey}#${generation}`;
+  const [loaded, setLoaded] = useState<{ key: string; state: State }>();
+  const state: State = loaded?.key === key ? loaded.state : { kind: "loading" };
 
   useEffect(() => {
     const controller = new AbortController();
-    fetchPublicationSummaries(controller.signal)
-      .then((dtos) => {
-        const now = new Date();
-        const contests = dtos
-          .map((d) => contestSummaryFrom(d, now))
-          .sort((a, b) => b.start.getTime() - a.start.getTime());
-        setLoaded({ generation, state: { kind: "loaded", contests, now } });
-      })
-      .catch((e: unknown) => {
-        if (controller.signal.aborted) return;
-        setLoaded({
-          generation,
-          state: { kind: "failed", message: e instanceof Error ? e.message : String(e) },
+    const timer = setTimeout(() => {
+      const now = new Date();
+      const params = listQuery(filtersFromQuery(new URLSearchParams(requestKey)), now);
+      fetchPublicationList(params, controller.signal)
+        .then(({ publications, recentCount }) => {
+          const contests = publications.map((d) => contestSummaryFrom(d, now));
+          setLoaded({ key, state: { kind: "loaded", contests, recentCount } });
+        })
+        .catch((e: unknown) => {
+          if (controller.signal.aborted) return;
+          setLoaded({
+            key,
+            state: { kind: "failed", message: e instanceof Error ? e.message : String(e) },
+          });
         });
-      });
-    return () => controller.abort();
-  }, [generation]);
+    }, typingDelayMs);
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
+  }, [key, requestKey]);
 
   const applyFilters = useCallback(
     (next: ContestFilters) => {
@@ -82,10 +83,8 @@ export function ContestSearch() {
   let body;
   let summary;
   if (state.kind === "loaded") {
-    const visible = state.contests.filter((c) => !startsAfterComingSunday(c, state.now));
-    const matching = visible.filter((c) => filtersMatch(filters, c));
-    const listed = filtersAreEmpty(filters) ? matching.slice(0, defaultCount) : matching;
-    const recent = visible.filter((c) => activeInLast30Days(c, state.now)).length;
+    const listed = state.contests;
+    const recent = state.recentCount;
     summary = (
       <p className={styles.summary}>
         <b>{recent}</b> {recent === 1 ? "contest" : "contests"} completed or in progress in the
@@ -93,9 +92,13 @@ export function ContestSearch() {
       </p>
     );
     body =
-      visible.length === 0 ? (
+      listed.length === 0 && filtersAreEmpty(filters) ? (
         <div className={`card ${styles.empty}`}>
           <h2>No contests published yet</h2>
+          <p>
+            Contests starting after this weekend are listed once you set an end date in the
+            filters.
+          </p>
           <p>
             Every contest a director publishes appears here: overall standings, team
             scores and every flight group, as of any round, open to anyone without an

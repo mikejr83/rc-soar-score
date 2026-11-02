@@ -97,6 +97,32 @@ class EntityStore<T extends Object> {
       _decode(json),
   ];
 
+  /// The entities matching a hand-written [whereSql] (with `?` placeholders
+  /// for [variables]), in [orderBy] order, from [offset], at most [limit].
+  ///
+  /// [whereSql] and [orderBy] are built from schema names, never user input;
+  /// user text travels only in [variables].
+  Future<List<T>> whereSql(
+    String whereSql,
+    List<Variable> variables, {
+    String? orderBy,
+    int? limit,
+    int? offset,
+  }) async => [
+    for (final json in await _mapper.where(
+      whereSql,
+      variables,
+      orderBy: orderBy,
+      limit: limit,
+      offset: offset,
+    ))
+      _decode(json),
+  ];
+
+  /// How many entities match [whereSql]; see [whereSql] for its rules.
+  Future<int> countWhere(String whereSql, List<Variable> variables) =>
+      _mapper.count(whereSql, variables);
+
   /// The rows whose [column] equals [value], as stored JSON.
   ///
   /// [column] is a column name from the schema, never user input.

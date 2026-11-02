@@ -62,25 +62,3 @@ export function contestSummaryFrom(dto: PublicPublicationSummary, now: Date): Co
     status: statusOf(text(contest, "status"), end, now),
   };
 }
-
-/** Local calendar day of a date, for date-only comparisons. */
-export function dayOf(d: Date): Date {
-  return new Date(d.getFullYear(), d.getMonth(), d.getDate());
-}
-
-/**
- * True when the contest starts after the coming Sunday: a future contest is
- * listed only through the following weekend. Client-side until #455.
- */
-export function startsAfterComingSunday(c: ContestSummary, now: Date): boolean {
-  const today = dayOf(now);
-  const sunday = new Date(today);
-  sunday.setDate(today.getDate() + ((7 - today.getDay()) % 7));
-  return dayOf(c.start) > sunday;
-}
-
-/** True when the contest was flown, in whole or in part, in the last 30 days. */
-export function activeInLast30Days(c: ContestSummary, now: Date): boolean {
-  const windowStart = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-  return c.start <= now && c.end > windowStart;
-}

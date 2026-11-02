@@ -29,7 +29,10 @@ void _tests(Backend backend) {
       repository = Repository(inst.db);
       now = DateTime.utc(2026, 10, 17, 15);
       publishing = PublicationService(repository, clock: () => now);
-      reading = PublicPublicationService(repository);
+      reading = PublicPublicationService(
+        repository,
+        clock: () => DateTime.utc(2026, 10, 17, 22),
+      );
       await repository.accountRepository.save(
         core.Account(
           id: actor,
@@ -110,6 +113,10 @@ void _tests(Backend backend) {
         currentProjectionId: identity.currentProjectionId,
         resultsHiddenThroughRound: hiddenThrough,
         resultsHiddenAt: hiddenThrough == null ? null : now,
+        contestName: identity.contestName,
+        contestStartsAt: identity.contestStartsAt,
+        contestEndsAt: identity.contestEndsAt,
+        venue: identity.venue,
         revision: identity.revision,
       ),
     );
@@ -145,7 +152,7 @@ void _tests(Backend backend) {
           visibility: core.PublicationVisibility.public,
         );
 
-        final listed = await reading.list();
+        final listed = (await reading.list()).publications;
 
         expect([for (final p in listed) p.publicationId], [public.id.value]);
         expect(listed.single.contest['name'], 'Spring Open');
@@ -155,34 +162,154 @@ void _tests(Backend backend) {
       },
     );
 
-    test('the listing is newest first and pages', () async {
-      final ids = <core.Id>[];
-      for (var i = 0; i < 3; i++) {
-        now = now.add(const Duration(hours: 1));
-        final contest = i == 0
-            ? contestId
-            : await drawnContest(repository, actor, mutationPrefix: 'extra-$i');
-        ids.add(
-          (await publish(
-            contest: contest,
-            visibility: core.PublicationVisibility.public,
-          )).id,
-        );
-      }
+    /// Publishes a Public contest with the given details.
+    Future<core.Id> publishPublic(
+      String name,
+      DateTime start, {
+      DateTime? end,
+      String? host,
+      String? city,
+    }) async {
+      final contest = await drawnContest(
+        repository,
+        actor,
+        mutationPrefix: 'c-${mutations++}',
+        name: name,
+        start: start,
+        end: end ?? start.add(const Duration(days: 1)),
+        host: host,
+        city: city,
+      );
+      return (await publish(
+        contest: contest,
+        visibility: core.PublicationVisibility.public,
+      )).id;
+    }
+
+    Future<List<String>> names(PublicPublicationList list) async => [
+      for (final p in list.publications) p.contest['name']! as String,
+    ];
+
+    // The service's clock is Saturday 2026-10-17; the coming Sunday is Oct 18.
+    test('the listing is by contest start, newest first, and pages', () async {
+      final older = await publishPublic('Older', DateTime.utc(2026, 10, 3, 14));
+      final newest = await publishPublic(
+        'Newest',
+        DateTime.utc(2026, 10, 18, 9),
+      );
+      final middle = await publishPublic(
+        'Middle',
+        DateTime.utc(2026, 10, 10, 14),
+      );
 
       final all = await reading.list();
       final page = await reading.list(limit: 1, offset: 1);
 
       expect(
-        [for (final p in all) p.publicationId],
-        [for (final id in ids.reversed) id.value],
+        [for (final p in all.publications) p.publicationId],
+        [newest.value, middle.value, older.value],
       );
-      expect([for (final p in page) p.publicationId], [ids[1].value]);
+      expect(
+        [for (final p in page.publications) p.publicationId],
+        [middle.value],
+      );
       await expectLater(reading.list(limit: 0), throwsA(isA<ArgumentError>()));
       await expectLater(
         reading.list(offset: -1),
         throwsA(isA<ArgumentError>()),
       );
+    });
+
+    test('without an end date only contests through the coming Sunday are '
+        'listed', () async {
+      await publishPublic('Sunday', DateTime.utc(2026, 10, 18, 20));
+      await publishPublic('Monday', DateTime.utc(2026, 10, 19, 0));
+      await publishPublic('Later', DateTime.utc(2026, 11, 7, 12));
+
+      expect(await names(await reading.list()), ['Sunday']);
+      expect(
+        await names(await reading.list(from: DateTime.utc(2026, 10, 19))),
+        isEmpty,
+      );
+      expect(
+        await names(await reading.list(name: 'later', venue: '')),
+        isEmpty,
+      );
+    });
+
+    test('on a Sunday the coming Sunday is the following one', () async {
+      await publishPublic('Next week', DateTime.utc(2026, 11, 7, 12));
+      await publishPublic('Too far', DateTime.utc(2026, 11, 9, 12));
+
+      // Sunday 2026-11-01 evening.
+      final sunday = DateTime.utc(2026, 11, 1, 21);
+      expect(await names(await reading.list(today: sunday)), ['Next week']);
+      // The next day the cutoff is Nov 8: same answer.
+      expect(
+        await names(await reading.list(today: DateTime.utc(2026, 11, 2))),
+        ['Next week'],
+      );
+    });
+
+    test('an end date lifts the cap and bounds the start day', () async {
+      await publishPublic('Near', DateTime.utc(2026, 10, 17, 14));
+      await publishPublic('Far', DateTime.utc(2026, 11, 7, 12));
+      await publishPublic('Farther', DateTime.utc(2026, 12, 5, 12));
+
+      expect(await names(await reading.list(to: DateTime.utc(2026, 11, 7))), [
+        'Far',
+        'Near',
+      ]);
+      expect(
+        await names(
+          await reading.list(
+            from: DateTime.utc(2026, 11, 6),
+            to: DateTime.utc(2026, 11, 9),
+          ),
+        ),
+        ['Far'],
+      );
+      await expectLater(
+        reading.list(
+          from: DateTime.utc(2026, 11, 9),
+          to: DateTime.utc(2026, 11, 6),
+        ),
+        throwsA(isA<ArgumentError>()),
+      );
+    });
+
+    test('name and venue match case-insensitively as substrings', () async {
+      await publishPublic(
+        'Gator Classic',
+        DateTime.utc(2026, 10, 17, 14),
+        host: 'Flying Gators RC Club',
+        city: 'Gainesville',
+      );
+      await publishPublic('100% Sure_Thing', DateTime.utc(2026, 10, 16, 14));
+
+      expect(await names(await reading.list(name: 'GATOR')), ['Gator Classic']);
+      expect(await names(await reading.list(venue: 'gainesVILLE')), [
+        'Gator Classic',
+      ]);
+      expect(await names(await reading.list(name: '100%')), [
+        '100% Sure_Thing',
+      ]);
+      // `%` and `_` are literal, not wildcards.
+      expect(await names(await reading.list(name: '%')), ['100% Sure_Thing']);
+      expect(await names(await reading.list(name: 'S_re')), isEmpty);
+      expect(await names(await reading.list(name: 'nothing')), isEmpty);
+    });
+
+    test('the summary counts contests flown in the last 30 days', () async {
+      await publishPublic('Flown', DateTime.utc(2026, 10, 10, 14));
+      await publishPublic('Running', DateTime.utc(2026, 10, 17, 14));
+      await publishPublic('Old', DateTime.utc(2026, 8, 1, 14));
+      await publishPublic('Upcoming', DateTime.utc(2026, 10, 25, 14));
+
+      final list = await reading.list(name: 'Flown');
+
+      expect(list.recentCount, 2);
+      expect(list.toJson()['summary'], {'recent_count': 2});
     });
 
     test('a Delisted or unknown publication is not found', () async {
@@ -203,7 +330,7 @@ void _tests(Backend backend) {
         reading.read(core.Id.create()),
         throwsA(isA<core.EntityNotFoundError>()),
       );
-      expect(await reading.list(), isEmpty);
+      expect((await reading.list()).publications, isEmpty);
     });
 
     test('standings beyond the hidden round never reach the reader', () async {

@@ -41,6 +41,16 @@ PublicationIdentity _$PublicationIdentityFromJson(Map<String, dynamic> json) =>
         json['results_hidden_at'],
         const UtcTimestampConverter().fromJson,
       ),
+      contestName: json['contest_name'] as String?,
+      contestStartsAt: _$JsonConverterFromJson<String, DateTime>(
+        json['contest_starts_at'],
+        const UtcTimestampConverter().fromJson,
+      ),
+      contestEndsAt: _$JsonConverterFromJson<String, DateTime>(
+        json['contest_ends_at'],
+        const UtcTimestampConverter().fromJson,
+      ),
+      venue: json['venue'] as String?,
       revision: (json['revision'] as num?)?.toInt() ?? 0,
     );
 
@@ -72,6 +82,16 @@ Map<String, dynamic> _$PublicationIdentityToJson(
     instance.resultsHiddenAt,
     const UtcTimestampConverter().toJson,
   ),
+  'contest_name': instance.contestName,
+  'contest_starts_at': _$JsonConverterToJson<String, DateTime>(
+    instance.contestStartsAt,
+    const UtcTimestampConverter().toJson,
+  ),
+  'contest_ends_at': _$JsonConverterToJson<String, DateTime>(
+    instance.contestEndsAt,
+    const UtcTimestampConverter().toJson,
+  ),
+  'venue': instance.venue,
   'revision': instance.revision,
 };
 

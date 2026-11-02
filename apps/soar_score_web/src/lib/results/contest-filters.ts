@@ -1,5 +1,3 @@
-import { dayOf, type ContestSummary } from "./contest-summary";
-
 /**
  * The user-supplied contest search filters, carried as query parameters on
  * `/results/contests` so a filtered list can be bookmarked.
@@ -50,15 +48,19 @@ export function filtersToQuery(f: ContestFilters): URLSearchParams {
   return q;
 }
 
-const contains = (haystack: string, needle: string) =>
-  needle === "" || haystack.toLowerCase().includes(needle.toLowerCase());
+/** Number of contests listed when no filter is set. */
+export const defaultCount = 10;
+/** The server's page cap, used once any filter is set. */
+export const maxCount = 100;
 
-export function filtersMatch(f: ContestFilters, c: ContestSummary): boolean {
-  const day = dayOf(c.start);
-  return (
-    contains(c.name, f.name) &&
-    contains(c.venue, f.venue) &&
-    (!f.from || day >= f.from) &&
-    (!f.to || day <= f.to)
-  );
+/**
+ * The `GET /public/publications` query for [f]. The server filters, orders
+ * and caps; [today] is the viewer's local day so "through the coming Sunday"
+ * follows their calendar.
+ */
+export function listQuery(f: ContestFilters, today: Date): URLSearchParams {
+  const q = filtersToQuery(f);
+  q.set("today", formatDay(today));
+  q.set("limit", String(filtersAreEmpty(f) ? defaultCount : maxCount));
+  return q;
 }

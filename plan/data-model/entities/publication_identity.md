@@ -29,6 +29,10 @@
 | `current_projection_id`        | UUIDv7                            | no          | null      | FK to the most recent complete PublicationProjection                                                                                                                     |
 | `results_hidden_through_round` | Integer                           | No          | null      | Copy of the contest's results-hiding setting. Null when results are not hidden. Otherwise overall scores and placing are shown only through this round                   |
 | `results_hidden_at`            | timestamptz                       | No          | null      | When hiding was turned on. Hiding expires 24 hours after this time. Non-null exactly when `results_hidden_through_round` is non-null                                     |
+| `contest_name`                 | string                            | No          | null      | Copy of the current projection's contest name, kept so the public listing can filter and order in the database. Set on every publish                                     |
+| `contest_starts_at`            | timestamptz                       | No          | null      | Copy of the projection's contest start. The listing orders by it and filters on it. A record without it is not listed                                                   |
+| `contest_ends_at`              | timestamptz                       | No          | null      | Copy of the projection's contest end, for the 30-day count                                                                                                               |
+| `venue`                        | string                            | No          | null      | Host, city, state and country of the projection, whichever are set, joined with ", ". The listing searches it                                                            |
 | `revision`                     | Integer                           | Yes         | 0         | Row-level counter for optimistic locking, incremented on every change                                                                                                    |
 
 ## Invariants and Constraints
@@ -39,6 +43,7 @@
 - Claiming transfers management without changing public history
 - An unclaimed publication has no owner profile and is identified by `verification_email`. Claiming sets `owner_public_profile_id` and `claim_status` together
 - The hiding columns mirror the contest's setting and are updated whenever it changes. Once set they expire 24 hours after `results_hidden_at` even if the contest has been deleted. The service applies them when serving standings from the current projection
+- The `contest_*` and `venue` columns are copies of the current projection's contest identity, written together with `current_projection_id` on every publish. Visibility changes leave them as they are
 - `contest_id` is null only after the contest's working data has been deleted. Deleting the contest never deletes the publication
 - `Delisted` is set only when a DelistRequest is approved. The owner cannot move a delisted publication back to another visibility. Permanently purging a delisted publication's content is a separate administrator action
 - Published contests are retained indefinitely as a permanent public archive; deletion requires a formal delisting process

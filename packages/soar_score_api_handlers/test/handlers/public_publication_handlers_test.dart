@@ -64,7 +64,17 @@ void main() {
       expect((await get(handler, '/publications/not-an-id')).statusCode, 400);
     });
 
-    for (final query in ['limit=0', 'limit=x', 'offset=-1', 'offset=1.5']) {
+    for (final query in [
+      'limit=0',
+      'limit=x',
+      'offset=-1',
+      'offset=1.5',
+      'from=2026-11-06x',
+      'from=2026-13-01',
+      'to=2026-02-30',
+      'today=tomorrow',
+      'from=2026-11-09&to=2026-11-06',
+    ]) {
       test('listing with $query is a 400', () async {
         final response = await get(handler, '/publications?$query');
 

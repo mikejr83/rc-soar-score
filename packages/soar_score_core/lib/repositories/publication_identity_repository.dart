@@ -1,6 +1,34 @@
 import '../models/id.dart';
 import '../models/publication/publication_identity.dart';
 
+/// What the public listing asks for: filters, the page, and the order is
+/// always the contest start, newest first.
+class PublicationListQuery {
+  const PublicationListQuery({
+    this.name = '',
+    this.venue = '',
+    this.startsOnOrAfter,
+    this.startsBefore,
+    this.limit = 50,
+    this.offset = 0,
+  });
+
+  /// Case-insensitive substring of the contest name; empty matches all.
+  final String name;
+
+  /// Case-insensitive substring of the venue; empty matches all.
+  final String venue;
+
+  /// Inclusive lower bound on the contest start (UTC).
+  final DateTime? startsOnOrAfter;
+
+  /// Exclusive upper bound on the contest start (UTC).
+  final DateTime? startsBefore;
+
+  final int limit;
+  final int offset;
+}
+
 /// Abstract persistence contract for [PublicationIdentity]s.
 ///
 /// Publications are backend only: they never synchronize, so writes record
@@ -18,9 +46,19 @@ abstract interface class PublicationIdentityRepository {
   /// Every publication owned by [ownerPublicProfileId], oldest first.
   Future<List<PublicationIdentity>> listForOwner(Id ownerPublicProfileId);
 
-  /// Every publication whose visibility is Public and that has been
-  /// published, newest first. Unlisted and Delisted ones are never returned.
-  Future<List<PublicationIdentity>> listPublic();
+  /// The publications whose visibility is Public, that have been published
+  /// and that match [query], ordered by contest start, newest first (ties by
+  /// id). The database applies the filters and the page. Unlisted and
+  /// Delisted ones are never returned, nor are records without a recorded
+  /// contest start.
+  Future<List<PublicationIdentity>> listPublic(PublicationListQuery query);
+
+  /// How many Public, published publications have a contest that started on
+  /// or before [at] and ended after [windowStart].
+  Future<int> countPublicActive({
+    required DateTime windowStart,
+    required DateTime at,
+  });
 
   /// Stores [identity], bumping its revision, and returns it as stored.
   ///

@@ -8,8 +8,14 @@ import 'package:soar_score_core/soar_score_core.dart';
 /// - `GET /publications/{id}` is the current projection of a Public or
 ///   Unlisted publication, with pilots' display details unless redacted, and
 ///   standings only through the round the director allows;
-/// - `GET /publications` lists the Public publications, newest first
-///   (`limit`, at most 100, and `offset`). Unlisted ones are never listed.
+/// - `GET /publications` lists the Public publications by contest start,
+///   newest first, with a 30-day `summary`. Parameters: `name` and `venue`
+///   (case-insensitive substrings), `from` and `to` (`yyyy-MM-dd`, inclusive
+///   bounds on the start day, UTC), `today` (the caller's day; default the
+///   server's UTC day), `limit` (at most 100) and `offset`. Without `to`,
+///   only contests starting through the coming Sunday are listed (the
+///   following Sunday when `today` is a Sunday). Unlisted ones are never
+///   listed.
 ///
 /// A Delisted or unknown publication is a 404. With [enabled] false (the
 /// embedded server) both routes answer 409 `publishing_not_available`.
@@ -31,13 +37,16 @@ Handler buildPublicHandler(Repository repository, {required bool enabled}) {
   router.get('/publications', (Request request) async {
     requireEnabled();
     final query = request.url.queryParameters;
-    final publications = await service.list(
+    final page = await service.list(
+      name: query['name'] ?? '',
+      venue: query['venue'] ?? '',
+      from: _dayParameter(query, 'from'),
+      to: _dayParameter(query, 'to'),
+      today: _dayParameter(query, 'today'),
       limit: _intParameter(query, 'limit') ?? 50,
       offset: _intParameter(query, 'offset') ?? 0,
     );
-    return jsonResponse({
-      'publications': [for (final p in publications) p.toJson()],
-    });
+    return jsonResponse(page.toJson());
   });
 
   router.get('/publications/<id>', (Request request, String id) async {
@@ -48,6 +57,22 @@ Handler buildPublicHandler(Repository repository, {required bool enabled}) {
 
   return router.call;
 }
+
+/// A `yyyy-MM-dd` calendar day, or null when absent.
+DateTime? _dayParameter(Map<String, String> query, String name) {
+  final raw = query[name];
+  if (raw == null || raw.isEmpty) return null;
+  if (!RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(raw)) {
+    throw ArgumentError.value(raw, name, 'not a date (yyyy-MM-dd)');
+  }
+  final parsed = DateTime.tryParse('${raw}T00:00:00Z');
+  if (parsed == null || _formatDay(parsed) != raw) {
+    throw ArgumentError.value(raw, name, 'not a date (yyyy-MM-dd)');
+  }
+  return parsed;
+}
+
+String _formatDay(DateTime day) => day.toIso8601String().substring(0, 10);
 
 int? _intParameter(Map<String, String> query, String name) {
   final raw = query[name];

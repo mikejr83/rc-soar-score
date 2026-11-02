@@ -27,9 +27,15 @@ class PublicationIdentity extends Equatable implements BackendOnly {
     this.currentProjectionId,
     this.resultsHiddenThroughRound,
     DateTime? resultsHiddenAt,
+    this.contestName,
+    DateTime? contestStartsAt,
+    DateTime? contestEndsAt,
+    this.venue,
     this.revision = 0,
   }) : publishedAt = publishedAt?.toUtc(),
-       resultsHiddenAt = resultsHiddenAt?.toUtc() {
+       resultsHiddenAt = resultsHiddenAt?.toUtc(),
+       contestStartsAt = contestStartsAt?.toUtc(),
+       contestEndsAt = contestEndsAt?.toUtc() {
     if ((claimStatus == ClaimStatus.claimed) !=
         (ownerPublicProfileId != null)) {
       throw ArgumentError(
@@ -74,6 +80,16 @@ class PublicationIdentity extends Equatable implements BackendOnly {
   final int? resultsHiddenThroughRound;
   final DateTime? resultsHiddenAt;
 
+  /// Copies of the current projection's contest identity, kept so the public
+  /// listing can filter and order in the database. Null before the first
+  /// publish of a record written by an older version.
+  final String? contestName;
+  final DateTime? contestStartsAt;
+  final DateTime? contestEndsAt;
+
+  /// Host, city, state and country, whichever are set, joined with ", ".
+  final String? venue;
+
   final int revision;
 
   bool get isDelisted => visibility == PublicationVisibility.delisted;
@@ -92,6 +108,10 @@ class PublicationIdentity extends Equatable implements BackendOnly {
     currentProjectionId,
     resultsHiddenThroughRound,
     resultsHiddenAt,
+    contestName,
+    contestStartsAt,
+    contestEndsAt,
+    venue,
     revision,
   ];
 }

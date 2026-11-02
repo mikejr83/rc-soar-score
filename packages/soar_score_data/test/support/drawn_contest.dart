@@ -11,6 +11,11 @@ Future<core.Id> drawnContest(
   String mutationPrefix = 'setup',
   int rounds = 2,
   Map<String, Object?> coreOptions = const {},
+  String name = 'Spring Open',
+  DateTime? start,
+  DateTime? end,
+  String? host,
+  String? city,
 }) async {
   var n = 0;
   core.MutationMetadata meta() => core.MutationMetadata(
@@ -25,9 +30,11 @@ Future<core.Id> drawnContest(
       id: contestId,
       timezone: 'America/Denver',
       details: ContestDetails(
-        name: 'Spring Open',
-        startDateTime: DateTime.utc(2026, 10, 17, 14),
-        endDateTime: DateTime.utc(2026, 10, 18, 22),
+        name: name,
+        host: host,
+        city: city,
+        startDateTime: start ?? DateTime.utc(2026, 10, 17, 14),
+        endDateTime: end ?? DateTime.utc(2026, 10, 18, 22),
       ),
     ),
     ownerAccountId: actor,

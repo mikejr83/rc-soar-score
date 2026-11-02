@@ -944,17 +944,29 @@ class ApiClient {
     return _decode<Map<String, Object?>>(response, uri, (json) => json);
   }
 
-  /// `GET /public/publications` — the Public publications, newest first, with
-  /// no sign-in. [limit] is at most 100 (the server's default is 50) and
-  /// [offset] skips the first entries.
+  /// `GET /public/publications` — the Public publications by contest start,
+  /// newest first, with no sign-in. [name] and [venue] match as
+  /// case-insensitive substrings; [from] and [to] bound the contest start day
+  /// (inclusive, UTC; without [to] the server lists only contests starting
+  /// through the coming Sunday). [limit] is at most 100 (the server's default
+  /// is 50) and [offset] skips the first entries.
   ///
   /// A server that does not publish contests is an [ApiHttpError] with status
   /// 409 and code `publishing_not_available`.
   Future<List<PublicPublicationSummaryDto>> publicPublications({
+    String? name,
+    String? venue,
+    DateTime? from,
+    DateTime? to,
     int? limit,
     int? offset,
   }) async {
+    String day(DateTime d) => d.toUtc().toIso8601String().substring(0, 10);
     final query = <String, String>{
+      'name': ?name,
+      'venue': ?venue,
+      'from': ?(from == null ? null : day(from)),
+      'to': ?(to == null ? null : day(to)),
       'limit': ?limit?.toString(),
       'offset': ?offset?.toString(),
     };

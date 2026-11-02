@@ -95,6 +95,24 @@ void main() {
       expect(seen.url.queryParameters, {'limit': '10', 'offset': '20'});
     });
 
+    test('passes the filters as query parameters', () async {
+      final client = clientFor((_) => body({'publications': <Object?>[]}));
+
+      await client.publicPublications(
+        name: 'Open',
+        venue: 'Gator',
+        from: DateTime.utc(2026, 11, 6),
+        to: DateTime.utc(2026, 11, 9, 15),
+      );
+
+      expect(seen.url.queryParameters, {
+        'name': 'Open',
+        'venue': 'Gator',
+        'from': '2026-11-06',
+        'to': '2026-11-09',
+      });
+    });
+
     test('sends no Authorization header without a token', () async {
       final client = clientFor(
         (_) => body({'publications': <Object?>[]}),
