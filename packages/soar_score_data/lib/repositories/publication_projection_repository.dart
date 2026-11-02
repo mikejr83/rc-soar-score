@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart' show Variable;
 import 'package:soar_score_core/soar_score_core.dart' as core;
 
 import 'drift_repository.dart';
@@ -14,6 +15,19 @@ class PublicationProjectionRepository extends DriftRepository
 
   @override
   Future<core.PublicationProjection?> findById(core.Id id) => _store.find(id);
+
+  @override
+  Future<Map<core.Id, core.PublicationProjection>> findByIds(
+    Iterable<core.Id> ids,
+  ) async {
+    final wanted = ids.toSet().toList();
+    if (wanted.isEmpty) return {};
+    final found = await _store.whereSql(
+      'id IN (${List.filled(wanted.length, '?').join(', ')})',
+      [for (final id in wanted) Variable<String>(id.value)],
+    );
+    return {for (final projection in found) projection.id: projection};
+  }
 
   @override
   Future<List<core.PublicationProjection>> listForPublication(

@@ -2,10 +2,52 @@ import 'dart:convert';
 
 import 'package:shelf/shelf.dart';
 import 'package:soar_score_api_handlers/soar_score_api_handlers.dart';
+import 'package:soar_score_core/soar_score_core.dart' as core;
 import 'package:test/test.dart';
 
 import '../stubs/stub_contest_repository.dart';
 import '../stubs/stub_repository.dart';
+
+/// A repository whose public listing is empty, enough to answer `/publications`.
+class _EmptyListing extends StubRepository {
+  _EmptyListing() : super(StubContestRepository());
+
+  @override
+  core.PublicationIdentityRepository get publicationIdentityRepository =>
+      _EmptyIdentities();
+
+  @override
+  core.PublicationProjectionRepository get publicationProjectionRepository =>
+      _NoProjections();
+}
+
+class _EmptyIdentities implements core.PublicationIdentityRepository {
+  @override
+  Future<List<core.PublicationIdentity>> listPublic(
+    core.PublicationListQuery query,
+  ) async => [];
+
+  @override
+  Future<int> countPublicActive({
+    required DateTime windowStart,
+    required DateTime at,
+  }) async => 0;
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) =>
+      throw UnimplementedError('${invocation.memberName} is not stubbed');
+}
+
+class _NoProjections implements core.PublicationProjectionRepository {
+  @override
+  Future<Map<core.Id, core.PublicationProjection>> findByIds(
+    Iterable<core.Id> ids,
+  ) async => {};
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) =>
+      throw UnimplementedError('${invocation.memberName} is not stubbed');
+}
 
 const _publicationId = '019c0000-0000-7000-8000-0000000000d1';
 
@@ -64,7 +106,41 @@ void main() {
       expect((await get(handler, '/publications/not-an-id')).statusCode, 400);
     });
 
-    for (final query in ['limit=0', 'limit=x', 'offset=-1', 'offset=1.5']) {
+    test('the listing is cacheable for 30 seconds; errors are not', () async {
+      final listing = buildApiHandler(
+        name: 'soar_score_server',
+        displayName: 'Soar Score API Server',
+        version: '0.1.0',
+        repository: _EmptyListing(),
+        authMiddleware: (inner) =>
+            (request) => Response(401),
+        publishingEnabled: true,
+      );
+
+      final ok = await get(listing, '/publications?limit=5');
+      final bad = await get(listing, '/publications?limit=0');
+
+      expect(ok.statusCode, 200);
+      expect(ok.headers['cache-control'], 'public, max-age=30');
+      expect(jsonDecode(await ok.readAsString()), {
+        'publications': <Object?>[],
+        'summary': {'recent_count': 0},
+      });
+      expect(bad.statusCode, 400);
+      expect(bad.headers['cache-control'], isNull);
+    });
+
+    for (final query in [
+      'limit=0',
+      'limit=x',
+      'offset=-1',
+      'offset=1.5',
+      'from=2026-11-06x',
+      'from=2026-13-01',
+      'to=2026-02-30',
+      'today=tomorrow',
+      'from=2026-11-09&to=2026-11-06',
+    ]) {
       test('listing with $query is a 400', () async {
         final response = await get(handler, '/publications?$query');
 

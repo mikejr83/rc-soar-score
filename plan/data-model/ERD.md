@@ -567,6 +567,10 @@ erDiagram
         uuid        current_projection_id        FK "optional"
         int         results_hidden_through_round    "optional"
         timestamptz results_hidden_at               "optional"
+        text        contest_name                    "optional"
+        timestamptz contest_starts_at               "optional"
+        timestamptz contest_ends_at                 "optional"
+        text        venue                           "optional"
         int         revision
     }
 

@@ -1,8 +1,13 @@
-/// Unique indexes that a table definition cannot express: they use an
+/// Indexes (mostly unique) that a table definition cannot express: they use an
 /// expression (`lower(...)`, `COALESCE(...)`) or a `WHERE` clause. Plain SQL
 /// that SQLite and PostgreSQL both accept, kept here so there is one place to
 /// read and test them. The migration runs them after the table is created.
 const customIndexes = <String, List<String>>{
+  'publication_identities': [
+    // The public listing filters on visibility and orders by contest start.
+    'CREATE INDEX publication_identities_listing ON publication_identities '
+        '(visibility, contest_starts_at DESC)',
+  ],
   'accounts': [
     // Exactly one account stands in for erased users.
     "CREATE UNIQUE INDEX accounts_one_deleted ON accounts (kind) WHERE kind = 'deleted'",

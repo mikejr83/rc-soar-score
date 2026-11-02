@@ -79,6 +79,11 @@ export function FilterBar({
             onChange={(e) => onChange({ ...filters, to: day(e.target.value) })}
           />
         </div>
+        {!filters.to && (
+          <p className={styles.filterHint}>
+            Without an end date, only contests starting through this weekend are listed.
+          </p>
+        )}
         {!filtersAreEmpty(filters) && (
           <button type="button" className="btn btn--ghost" onClick={() => onChange(emptyFilters)}>
             Clear

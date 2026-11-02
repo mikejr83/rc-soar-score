@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart' show Variable;
 import 'package:soar_score_core/soar_score_core.dart' as core;
 
 import 'drift_repository.dart';
@@ -29,14 +30,62 @@ class PublicationIdentityRepository extends DriftRepository
   );
 
   @override
-  Future<List<core.PublicationIdentity>> listPublic() async => [
-    for (final identity in await _store.whereText(
-      'visibility',
-      'Public',
-      orderBy: 'published_at DESC, id',
-    ))
-      if (identity.publishedAt != null) identity,
-  ];
+  Future<List<core.PublicationIdentity>> listPublic(
+    core.PublicationListQuery query,
+  ) {
+    final where = StringBuffer(
+      "visibility = 'Public' AND published_at IS NOT NULL "
+      'AND current_projection_id IS NOT NULL AND contest_starts_at IS NOT NULL',
+    );
+    final variables = <Variable>[];
+    void contains(String column, String text) {
+      final needle = text.trim();
+      if (needle.isEmpty) return;
+      where.write(" AND LOWER($column) LIKE ? ESCAPE '!'");
+      variables.add(Variable<String>('%${_likeEscape(needle.toLowerCase())}%'));
+    }
+
+    contains('contest_name', query.name);
+    // "Seattle, WA" finds a venue holding both parts, in any stored order.
+    for (final part in query.venue.split(',')) {
+      contains('venue', part);
+    }
+    final from = query.startsOnOrAfter;
+    if (from != null) {
+      where.write(' AND contest_starts_at >= ?');
+      variables.add(Variable<String>(core.formatUtcTimestamp(from)));
+    }
+    final before = query.startsBefore;
+    if (before != null) {
+      where.write(' AND contest_starts_at < ?');
+      variables.add(Variable<String>(core.formatUtcTimestamp(before)));
+    }
+    return _store.whereSql(
+      where.toString(),
+      variables,
+      orderBy: 'contest_starts_at DESC, id',
+      limit: query.limit,
+      offset: query.offset,
+    );
+  }
+
+  @override
+  Future<int> countPublicActive({
+    required DateTime windowStart,
+    required DateTime at,
+  }) => _store.countWhere(
+    "visibility = 'Public' AND published_at IS NOT NULL "
+    'AND contest_starts_at IS NOT NULL AND contest_starts_at <= ? '
+    'AND COALESCE(contest_ends_at, contest_starts_at) > ?',
+    [
+      Variable<String>(core.formatUtcTimestamp(at)),
+      Variable<String>(core.formatUtcTimestamp(windowStart)),
+    ],
+  );
+
+  /// Escapes `%`, `_` and the escape character `!` for a LIKE pattern.
+  static String _likeEscape(String text) =>
+      text.replaceAll('!', '!!').replaceAll('%', '!%').replaceAll('_', '!_');
 
   @override
   Future<core.PublicationIdentity> save(core.PublicationIdentity identity) =>

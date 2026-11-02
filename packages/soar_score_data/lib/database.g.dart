@@ -16728,6 +16728,48 @@ class $PublicationIdentitiesTable extends PublicationIdentities
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _contestNameMeta = const VerificationMeta(
+    'contestName',
+  );
+  @override
+  late final GeneratedColumn<String> contestName = GeneratedColumn<String>(
+    'contest_name',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _contestStartsAtMeta = const VerificationMeta(
+    'contestStartsAt',
+  );
+  @override
+  late final GeneratedColumn<String> contestStartsAt = GeneratedColumn<String>(
+    'contest_starts_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _contestEndsAtMeta = const VerificationMeta(
+    'contestEndsAt',
+  );
+  @override
+  late final GeneratedColumn<String> contestEndsAt = GeneratedColumn<String>(
+    'contest_ends_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _venueMeta = const VerificationMeta('venue');
+  @override
+  late final GeneratedColumn<String> venue = GeneratedColumn<String>(
+    'venue',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _revisionMeta = const VerificationMeta(
     'revision',
   );
@@ -16752,6 +16794,10 @@ class $PublicationIdentitiesTable extends PublicationIdentities
     currentProjectionId,
     resultsHiddenThroughRound,
     resultsHiddenAt,
+    contestName,
+    contestStartsAt,
+    contestEndsAt,
+    venue,
     revision,
   ];
   @override
@@ -16850,6 +16896,39 @@ class $PublicationIdentitiesTable extends PublicationIdentities
         ),
       );
     }
+    if (data.containsKey('contest_name')) {
+      context.handle(
+        _contestNameMeta,
+        contestName.isAcceptableOrUnknown(
+          data['contest_name']!,
+          _contestNameMeta,
+        ),
+      );
+    }
+    if (data.containsKey('contest_starts_at')) {
+      context.handle(
+        _contestStartsAtMeta,
+        contestStartsAt.isAcceptableOrUnknown(
+          data['contest_starts_at']!,
+          _contestStartsAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('contest_ends_at')) {
+      context.handle(
+        _contestEndsAtMeta,
+        contestEndsAt.isAcceptableOrUnknown(
+          data['contest_ends_at']!,
+          _contestEndsAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('venue')) {
+      context.handle(
+        _venueMeta,
+        venue.isAcceptableOrUnknown(data['venue']!, _venueMeta),
+      );
+    }
     if (data.containsKey('revision')) {
       context.handle(
         _revisionMeta,
@@ -16908,6 +16987,22 @@ class $PublicationIdentitiesTable extends PublicationIdentities
         DriftSqlType.string,
         data['${effectivePrefix}results_hidden_at'],
       ),
+      contestName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}contest_name'],
+      ),
+      contestStartsAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}contest_starts_at'],
+      ),
+      contestEndsAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}contest_ends_at'],
+      ),
+      venue: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}venue'],
+      ),
       revision: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}revision'],
@@ -16933,6 +17028,10 @@ class PublicationIdentityData extends DataClass
   final String? currentProjectionId;
   final int? resultsHiddenThroughRound;
   final String? resultsHiddenAt;
+  final String? contestName;
+  final String? contestStartsAt;
+  final String? contestEndsAt;
+  final String? venue;
   final int revision;
   const PublicationIdentityData({
     required this.id,
@@ -16945,6 +17044,10 @@ class PublicationIdentityData extends DataClass
     this.currentProjectionId,
     this.resultsHiddenThroughRound,
     this.resultsHiddenAt,
+    this.contestName,
+    this.contestStartsAt,
+    this.contestEndsAt,
+    this.venue,
     required this.revision,
   });
   @override
@@ -16975,6 +17078,18 @@ class PublicationIdentityData extends DataClass
     }
     if (!nullToAbsent || resultsHiddenAt != null) {
       map['results_hidden_at'] = Variable<String>(resultsHiddenAt);
+    }
+    if (!nullToAbsent || contestName != null) {
+      map['contest_name'] = Variable<String>(contestName);
+    }
+    if (!nullToAbsent || contestStartsAt != null) {
+      map['contest_starts_at'] = Variable<String>(contestStartsAt);
+    }
+    if (!nullToAbsent || contestEndsAt != null) {
+      map['contest_ends_at'] = Variable<String>(contestEndsAt);
+    }
+    if (!nullToAbsent || venue != null) {
+      map['venue'] = Variable<String>(venue);
     }
     map['revision'] = Variable<int>(revision);
     return map;
@@ -17007,6 +17122,18 @@ class PublicationIdentityData extends DataClass
       resultsHiddenAt: resultsHiddenAt == null && nullToAbsent
           ? const Value.absent()
           : Value(resultsHiddenAt),
+      contestName: contestName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(contestName),
+      contestStartsAt: contestStartsAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(contestStartsAt),
+      contestEndsAt: contestEndsAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(contestEndsAt),
+      venue: venue == null && nullToAbsent
+          ? const Value.absent()
+          : Value(venue),
       revision: Value(revision),
     );
   }
@@ -17035,6 +17162,10 @@ class PublicationIdentityData extends DataClass
         json['resultsHiddenThroughRound'],
       ),
       resultsHiddenAt: serializer.fromJson<String?>(json['resultsHiddenAt']),
+      contestName: serializer.fromJson<String?>(json['contestName']),
+      contestStartsAt: serializer.fromJson<String?>(json['contestStartsAt']),
+      contestEndsAt: serializer.fromJson<String?>(json['contestEndsAt']),
+      venue: serializer.fromJson<String?>(json['venue']),
       revision: serializer.fromJson<int>(json['revision']),
     );
   }
@@ -17054,6 +17185,10 @@ class PublicationIdentityData extends DataClass
         resultsHiddenThroughRound,
       ),
       'resultsHiddenAt': serializer.toJson<String?>(resultsHiddenAt),
+      'contestName': serializer.toJson<String?>(contestName),
+      'contestStartsAt': serializer.toJson<String?>(contestStartsAt),
+      'contestEndsAt': serializer.toJson<String?>(contestEndsAt),
+      'venue': serializer.toJson<String?>(venue),
       'revision': serializer.toJson<int>(revision),
     };
   }
@@ -17069,6 +17204,10 @@ class PublicationIdentityData extends DataClass
     Value<String?> currentProjectionId = const Value.absent(),
     Value<int?> resultsHiddenThroughRound = const Value.absent(),
     Value<String?> resultsHiddenAt = const Value.absent(),
+    Value<String?> contestName = const Value.absent(),
+    Value<String?> contestStartsAt = const Value.absent(),
+    Value<String?> contestEndsAt = const Value.absent(),
+    Value<String?> venue = const Value.absent(),
     int? revision,
   }) => PublicationIdentityData(
     id: id ?? this.id,
@@ -17091,6 +17230,14 @@ class PublicationIdentityData extends DataClass
     resultsHiddenAt: resultsHiddenAt.present
         ? resultsHiddenAt.value
         : this.resultsHiddenAt,
+    contestName: contestName.present ? contestName.value : this.contestName,
+    contestStartsAt: contestStartsAt.present
+        ? contestStartsAt.value
+        : this.contestStartsAt,
+    contestEndsAt: contestEndsAt.present
+        ? contestEndsAt.value
+        : this.contestEndsAt,
+    venue: venue.present ? venue.value : this.venue,
     revision: revision ?? this.revision,
   );
   PublicationIdentityData copyWithCompanion(
@@ -17123,6 +17270,16 @@ class PublicationIdentityData extends DataClass
       resultsHiddenAt: data.resultsHiddenAt.present
           ? data.resultsHiddenAt.value
           : this.resultsHiddenAt,
+      contestName: data.contestName.present
+          ? data.contestName.value
+          : this.contestName,
+      contestStartsAt: data.contestStartsAt.present
+          ? data.contestStartsAt.value
+          : this.contestStartsAt,
+      contestEndsAt: data.contestEndsAt.present
+          ? data.contestEndsAt.value
+          : this.contestEndsAt,
+      venue: data.venue.present ? data.venue.value : this.venue,
       revision: data.revision.present ? data.revision.value : this.revision,
     );
   }
@@ -17140,6 +17297,10 @@ class PublicationIdentityData extends DataClass
           ..write('currentProjectionId: $currentProjectionId, ')
           ..write('resultsHiddenThroughRound: $resultsHiddenThroughRound, ')
           ..write('resultsHiddenAt: $resultsHiddenAt, ')
+          ..write('contestName: $contestName, ')
+          ..write('contestStartsAt: $contestStartsAt, ')
+          ..write('contestEndsAt: $contestEndsAt, ')
+          ..write('venue: $venue, ')
           ..write('revision: $revision')
           ..write(')'))
         .toString();
@@ -17157,6 +17318,10 @@ class PublicationIdentityData extends DataClass
     currentProjectionId,
     resultsHiddenThroughRound,
     resultsHiddenAt,
+    contestName,
+    contestStartsAt,
+    contestEndsAt,
+    venue,
     revision,
   );
   @override
@@ -17173,6 +17338,10 @@ class PublicationIdentityData extends DataClass
           other.currentProjectionId == this.currentProjectionId &&
           other.resultsHiddenThroughRound == this.resultsHiddenThroughRound &&
           other.resultsHiddenAt == this.resultsHiddenAt &&
+          other.contestName == this.contestName &&
+          other.contestStartsAt == this.contestStartsAt &&
+          other.contestEndsAt == this.contestEndsAt &&
+          other.venue == this.venue &&
           other.revision == this.revision);
 }
 
@@ -17188,6 +17357,10 @@ class PublicationIdentitiesCompanion
   final Value<String?> currentProjectionId;
   final Value<int?> resultsHiddenThroughRound;
   final Value<String?> resultsHiddenAt;
+  final Value<String?> contestName;
+  final Value<String?> contestStartsAt;
+  final Value<String?> contestEndsAt;
+  final Value<String?> venue;
   final Value<int> revision;
   final Value<int> rowid;
   const PublicationIdentitiesCompanion({
@@ -17201,6 +17374,10 @@ class PublicationIdentitiesCompanion
     this.currentProjectionId = const Value.absent(),
     this.resultsHiddenThroughRound = const Value.absent(),
     this.resultsHiddenAt = const Value.absent(),
+    this.contestName = const Value.absent(),
+    this.contestStartsAt = const Value.absent(),
+    this.contestEndsAt = const Value.absent(),
+    this.venue = const Value.absent(),
     this.revision = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -17215,6 +17392,10 @@ class PublicationIdentitiesCompanion
     this.currentProjectionId = const Value.absent(),
     this.resultsHiddenThroughRound = const Value.absent(),
     this.resultsHiddenAt = const Value.absent(),
+    this.contestName = const Value.absent(),
+    this.contestStartsAt = const Value.absent(),
+    this.contestEndsAt = const Value.absent(),
+    this.venue = const Value.absent(),
     this.revision = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
@@ -17231,6 +17412,10 @@ class PublicationIdentitiesCompanion
     Expression<String>? currentProjectionId,
     Expression<int>? resultsHiddenThroughRound,
     Expression<String>? resultsHiddenAt,
+    Expression<String>? contestName,
+    Expression<String>? contestStartsAt,
+    Expression<String>? contestEndsAt,
+    Expression<String>? venue,
     Expression<int>? revision,
     Expression<int>? rowid,
   }) {
@@ -17248,6 +17433,10 @@ class PublicationIdentitiesCompanion
       if (resultsHiddenThroughRound != null)
         'results_hidden_through_round': resultsHiddenThroughRound,
       if (resultsHiddenAt != null) 'results_hidden_at': resultsHiddenAt,
+      if (contestName != null) 'contest_name': contestName,
+      if (contestStartsAt != null) 'contest_starts_at': contestStartsAt,
+      if (contestEndsAt != null) 'contest_ends_at': contestEndsAt,
+      if (venue != null) 'venue': venue,
       if (revision != null) 'revision': revision,
       if (rowid != null) 'rowid': rowid,
     });
@@ -17264,6 +17453,10 @@ class PublicationIdentitiesCompanion
     Value<String?>? currentProjectionId,
     Value<int?>? resultsHiddenThroughRound,
     Value<String?>? resultsHiddenAt,
+    Value<String?>? contestName,
+    Value<String?>? contestStartsAt,
+    Value<String?>? contestEndsAt,
+    Value<String?>? venue,
     Value<int>? revision,
     Value<int>? rowid,
   }) {
@@ -17279,6 +17472,10 @@ class PublicationIdentitiesCompanion
       resultsHiddenThroughRound:
           resultsHiddenThroughRound ?? this.resultsHiddenThroughRound,
       resultsHiddenAt: resultsHiddenAt ?? this.resultsHiddenAt,
+      contestName: contestName ?? this.contestName,
+      contestStartsAt: contestStartsAt ?? this.contestStartsAt,
+      contestEndsAt: contestEndsAt ?? this.contestEndsAt,
+      venue: venue ?? this.venue,
       revision: revision ?? this.revision,
       rowid: rowid ?? this.rowid,
     );
@@ -17323,6 +17520,18 @@ class PublicationIdentitiesCompanion
     if (resultsHiddenAt.present) {
       map['results_hidden_at'] = Variable<String>(resultsHiddenAt.value);
     }
+    if (contestName.present) {
+      map['contest_name'] = Variable<String>(contestName.value);
+    }
+    if (contestStartsAt.present) {
+      map['contest_starts_at'] = Variable<String>(contestStartsAt.value);
+    }
+    if (contestEndsAt.present) {
+      map['contest_ends_at'] = Variable<String>(contestEndsAt.value);
+    }
+    if (venue.present) {
+      map['venue'] = Variable<String>(venue.value);
+    }
     if (revision.present) {
       map['revision'] = Variable<int>(revision.value);
     }
@@ -17345,6 +17554,10 @@ class PublicationIdentitiesCompanion
           ..write('currentProjectionId: $currentProjectionId, ')
           ..write('resultsHiddenThroughRound: $resultsHiddenThroughRound, ')
           ..write('resultsHiddenAt: $resultsHiddenAt, ')
+          ..write('contestName: $contestName, ')
+          ..write('contestStartsAt: $contestStartsAt, ')
+          ..write('contestEndsAt: $contestEndsAt, ')
+          ..write('venue: $venue, ')
           ..write('revision: $revision, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -55667,6 +55880,10 @@ typedef $$PublicationIdentitiesTableCreateCompanionBuilder =
       Value<String?> currentProjectionId,
       Value<int?> resultsHiddenThroughRound,
       Value<String?> resultsHiddenAt,
+      Value<String?> contestName,
+      Value<String?> contestStartsAt,
+      Value<String?> contestEndsAt,
+      Value<String?> venue,
       Value<int> revision,
       Value<int> rowid,
     });
@@ -55682,6 +55899,10 @@ typedef $$PublicationIdentitiesTableUpdateCompanionBuilder =
       Value<String?> currentProjectionId,
       Value<int?> resultsHiddenThroughRound,
       Value<String?> resultsHiddenAt,
+      Value<String?> contestName,
+      Value<String?> contestStartsAt,
+      Value<String?> contestEndsAt,
+      Value<String?> venue,
       Value<int> revision,
       Value<int> rowid,
     });
@@ -55859,6 +56080,26 @@ class $$PublicationIdentitiesTableFilterComposer
 
   ColumnFilters<String> get resultsHiddenAt => $composableBuilder(
     column: $table.resultsHiddenAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get contestName => $composableBuilder(
+    column: $table.contestName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get contestStartsAt => $composableBuilder(
+    column: $table.contestStartsAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get contestEndsAt => $composableBuilder(
+    column: $table.contestEndsAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get venue => $composableBuilder(
+    column: $table.venue,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -56041,6 +56282,26 @@ class $$PublicationIdentitiesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get contestName => $composableBuilder(
+    column: $table.contestName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get contestStartsAt => $composableBuilder(
+    column: $table.contestStartsAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get contestEndsAt => $composableBuilder(
+    column: $table.contestEndsAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get venue => $composableBuilder(
+    column: $table.venue,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get revision => $composableBuilder(
     column: $table.revision,
     builder: (column) => ColumnOrderings(column),
@@ -56140,6 +56401,24 @@ class $$PublicationIdentitiesTableAnnotationComposer
     column: $table.resultsHiddenAt,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get contestName => $composableBuilder(
+    column: $table.contestName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get contestStartsAt => $composableBuilder(
+    column: $table.contestStartsAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get contestEndsAt => $composableBuilder(
+    column: $table.contestEndsAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get venue =>
+      $composableBuilder(column: $table.venue, builder: (column) => column);
 
   GeneratedColumn<int> get revision =>
       $composableBuilder(column: $table.revision, builder: (column) => column);
@@ -56325,6 +56604,10 @@ class $$PublicationIdentitiesTableTableManager
                 Value<String?> currentProjectionId = const Value.absent(),
                 Value<int?> resultsHiddenThroughRound = const Value.absent(),
                 Value<String?> resultsHiddenAt = const Value.absent(),
+                Value<String?> contestName = const Value.absent(),
+                Value<String?> contestStartsAt = const Value.absent(),
+                Value<String?> contestEndsAt = const Value.absent(),
+                Value<String?> venue = const Value.absent(),
                 Value<int> revision = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => PublicationIdentitiesCompanion(
@@ -56338,6 +56621,10 @@ class $$PublicationIdentitiesTableTableManager
                 currentProjectionId: currentProjectionId,
                 resultsHiddenThroughRound: resultsHiddenThroughRound,
                 resultsHiddenAt: resultsHiddenAt,
+                contestName: contestName,
+                contestStartsAt: contestStartsAt,
+                contestEndsAt: contestEndsAt,
+                venue: venue,
                 revision: revision,
                 rowid: rowid,
               ),
@@ -56353,6 +56640,10 @@ class $$PublicationIdentitiesTableTableManager
                 Value<String?> currentProjectionId = const Value.absent(),
                 Value<int?> resultsHiddenThroughRound = const Value.absent(),
                 Value<String?> resultsHiddenAt = const Value.absent(),
+                Value<String?> contestName = const Value.absent(),
+                Value<String?> contestStartsAt = const Value.absent(),
+                Value<String?> contestEndsAt = const Value.absent(),
+                Value<String?> venue = const Value.absent(),
                 Value<int> revision = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => PublicationIdentitiesCompanion.insert(
@@ -56366,6 +56657,10 @@ class $$PublicationIdentitiesTableTableManager
                 currentProjectionId: currentProjectionId,
                 resultsHiddenThroughRound: resultsHiddenThroughRound,
                 resultsHiddenAt: resultsHiddenAt,
+                contestName: contestName,
+                contestStartsAt: contestStartsAt,
+                contestEndsAt: contestEndsAt,
+                venue: venue,
                 revision: revision,
                 rowid: rowid,
               ),

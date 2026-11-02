@@ -34,9 +34,12 @@ class TableMapper {
     List<Variable> variables, {
     String? orderBy,
     int? limit,
+    int? offset,
   }) async {
     final order = orderBy == null ? '' : ' ORDER BY $orderBy';
-    final cap = limit == null ? '' : ' LIMIT $limit';
+    final cap =
+        (limit == null ? '' : ' LIMIT $limit') +
+        (offset == null ? '' : ' OFFSET $offset');
     final rows = await _db
         .customSelect(
           portableSql(_db, 'SELECT * FROM $_name WHERE $whereSql$order$cap'),
@@ -45,6 +48,18 @@ class TableMapper {
         )
         .get();
     return [for (final row in rows) _fromRow(row.data)];
+  }
+
+  /// How many rows match [whereSql].
+  Future<int> count(String whereSql, List<Variable> variables) async {
+    final rows = await _db
+        .customSelect(
+          portableSql(_db, 'SELECT COUNT(*) AS n FROM $_name WHERE $whereSql'),
+          variables: variables,
+          readsFrom: {_table},
+        )
+        .get();
+    return (rows.single.data['n']! as num).toInt();
   }
 
   /// Every row, in [orderBy] order.

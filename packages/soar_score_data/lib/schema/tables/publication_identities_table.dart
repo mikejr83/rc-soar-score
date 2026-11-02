@@ -24,6 +24,10 @@ class PublicationIdentities extends Table {
   TextColumn get currentProjectionId => text().nullable()();
   IntColumn get resultsHiddenThroughRound => integer().nullable()();
   TextColumn get resultsHiddenAt => text().nullable()();
+  TextColumn get contestName => text().nullable()();
+  TextColumn get contestStartsAt => text().nullable()();
+  TextColumn get contestEndsAt => text().nullable()();
+  TextColumn get venue => text().nullable()();
   IntColumn get revision => integer().withDefault(const Constant(0))();
 
   @override

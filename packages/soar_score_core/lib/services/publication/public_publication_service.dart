@@ -4,6 +4,7 @@ import '../../models/id.dart';
 import '../../models/publication/publication_identity.dart';
 import '../../models/publication/publication_participant.dart';
 import '../../models/publication/publication_projection.dart';
+import '../../repositories/publication_identity_repository.dart';
 import '../../repositories/repository.dart';
 import 'public_publication.dart';
 
@@ -15,12 +16,14 @@ import 'public_publication.dart';
 ///
 /// Hosted server only: publications are backend only data.
 class PublicPublicationService {
-  PublicPublicationService(this.repository);
+  PublicPublicationService(this.repository, {DateTime Function()? clock})
+    : _clock = clock ?? DateTime.now;
 
   /// The most a listing returns in one call.
   static const maxListLimit = 100;
 
   final Repository repository;
+  final DateTime Function() _clock;
 
   /// The current projection of [publicationId].
   ///
@@ -58,11 +61,23 @@ class PublicPublicationService {
     );
   }
 
-  /// The Public publications, newest first.
+  /// The Public publications, by contest start, newest first, with the
+  /// number of contests flown in the last 30 days.
   ///
+  /// [name] and [venue] match case-insensitively as substrings. [from] and
+  /// [to] bound the contest start day (UTC, inclusive). Without a [to], only
+  /// contests starting through the coming Sunday are listed; on a Sunday that
+  /// is the following Sunday. [today] is the caller's calendar day (default:
+  /// today in UTC, and never more than a day from it) and fixes both the
+  /// coming Sunday and the 30-day window.
   /// [limit] is capped at [maxListLimit]. Throws an [ArgumentError] for a
-  /// non-positive [limit] or a negative [offset].
-  Future<List<PublicPublicationSummary>> list({
+  /// non-positive [limit], a negative [offset] or a [from] after [to].
+  Future<PublicPublicationList> list({
+    String name = '',
+    String venue = '',
+    DateTime? from,
+    DateTime? to,
+    DateTime? today,
     int limit = 50,
     int offset = 0,
   }) async {
@@ -70,12 +85,51 @@ class PublicPublicationService {
     if (offset < 0) {
       throw ArgumentError.value(offset, 'offset', 'must not be negative');
     }
+    final fromDay = from == null ? null : _day(from);
+    final toDay = to == null ? null : _day(to);
+    if (fromDay != null && toDay != null && fromDay.isAfter(toDay)) {
+      throw ArgumentError.value(from, 'from', 'must not be after to');
+    }
+    // A caller's day may be a time zone away from the server's, never more;
+    // anything further would only lift the cap.
+    final serverDay = _day(_clock());
+    final day = today == null
+        ? serverDay
+        : _day(today).isBefore(serverDay.subtract(const Duration(days: 1)))
+        ? serverDay.subtract(const Duration(days: 1))
+        : _day(today).isAfter(serverDay.add(const Duration(days: 1)))
+        ? serverDay.add(const Duration(days: 1))
+        : _day(today);
+    final startsBefore =
+        toDay?.add(const Duration(days: 1)) ??
+        day.add(Duration(days: 7 - (day.weekday % 7) + 1));
+    final identityRepository = repository.publicationIdentityRepository;
+    final (identities, recent) = await (
+      identityRepository.listPublic(
+        PublicationListQuery(
+          name: name,
+          venue: venue,
+          startsOnOrAfter: fromDay,
+          startsBefore: startsBefore,
+          limit: limit.clamp(1, maxListLimit),
+          offset: offset,
+        ),
+      ),
+      identityRepository.countPublicActive(
+        windowStart: day.subtract(const Duration(days: 30)),
+        at: day.add(const Duration(days: 1)),
+      ),
+    ).wait;
+    // One read for the whole page, not one per row.
+    final projections = await repository.publicationProjectionRepository
+        .findByIds([
+          for (final identity in identities)
+            if (identity.currentProjectionId != null)
+              identity.currentProjectionId!,
+        ]);
     final summaries = <PublicPublicationSummary>[];
-    final identities = await repository.publicationIdentityRepository
-        .listPublic();
-    for (final identity in identities.skip(offset)) {
-      if (summaries.length == limit.clamp(1, maxListLimit)) break;
-      final projection = await _currentOrNull(identity);
+    for (final identity in identities) {
+      final projection = projections[identity.currentProjectionId];
       if (projection == null) continue;
       summaries.add(
         PublicPublicationSummary(
@@ -87,7 +141,12 @@ class PublicPublicationService {
         ),
       );
     }
-    return summaries;
+    return PublicPublicationList(publications: summaries, recentCount: recent);
+  }
+
+  static DateTime _day(DateTime value) {
+    final utc = value.toUtc();
+    return DateTime.utc(utc.year, utc.month, utc.day);
   }
 
   /// The pilot's display entry with the identifying details from its

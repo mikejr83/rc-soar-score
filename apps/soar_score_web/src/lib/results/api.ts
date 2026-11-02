@@ -14,9 +14,14 @@ export class ApiHttpError extends Error {
   }
 }
 
-async function getJson<T>(path: string, signal?: AbortSignal): Promise<T> {
+async function getJson<T>(
+  path: string,
+  signal?: AbortSignal,
+  cache?: RequestCache,
+): Promise<T> {
   const response = await fetch(`${apiBaseUrl}${path}`, {
     signal,
+    cache,
     headers: { accept: "application/json" },
   });
   if (!response.ok) {
@@ -34,15 +39,31 @@ async function getJson<T>(path: string, signal?: AbortSignal): Promise<T> {
   return (await response.json()) as T;
 }
 
-/** The Public publications, newest first. The server caps a page at 100. */
-export async function fetchPublicationSummaries(
+/** A page of the listing and the server's 30-day count. */
+export interface PublicationList {
+  publications: PublicPublicationSummary[];
+  /** Contests completed or in progress in the last 30 days. */
+  recentCount: number;
+}
+
+/**
+ * The Public publications by contest start, newest first. [query] carries the
+ * filters, `today` and `limit`; the server does the filtering and the cap.
+ */
+export async function fetchPublicationList(
+  query: URLSearchParams,
   signal?: AbortSignal,
-): Promise<PublicPublicationSummary[]> {
-  const json = await getJson<{ publications: PublicPublicationSummary[] }>(
-    "/public/publications?limit=100",
-    signal,
-  );
-  return json.publications;
+  /** Refresh: skip the 30-second cache the server allows. */
+  fresh = false,
+): Promise<PublicationList> {
+  const json = await getJson<{
+    publications: PublicPublicationSummary[];
+    summary?: { recent_count?: number };
+  }>(`/public/publications?${query.toString()}`, signal, fresh ? "no-cache" : undefined);
+  return {
+    publications: json.publications,
+    recentCount: json.summary?.recent_count ?? 0,
+  };
 }
 
 /** The current projection of one Public or Unlisted publication. */

@@ -87,6 +87,28 @@ class PublicPublication extends Equatable {
   ];
 }
 
+/// A page of the public listing with the 30-day count.
+class PublicPublicationList extends Equatable {
+  const PublicPublicationList({
+    required this.publications,
+    required this.recentCount,
+  });
+
+  final List<PublicPublicationSummary> publications;
+
+  /// Public contests completed or in progress in the last 30 days, whatever
+  /// the filters and the page.
+  final int recentCount;
+
+  Map<String, Object?> toJson() => {
+    'publications': [for (final p in publications) p.toJson()],
+    'summary': {'recent_count': recentCount},
+  };
+
+  @override
+  List<Object?> get props => [publications, recentCount];
+}
+
 /// One line of the public listing.
 class PublicPublicationSummary extends Equatable {
   const PublicPublicationSummary({

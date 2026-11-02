@@ -10,6 +10,7 @@ import '../../models/accounts/account_public_profile.dart';
 import '../../models/contest/contest.dart';
 import '../../models/id.dart';
 import '../../models/publication/publication_identity.dart';
+import '../../models/shared/shared.dart';
 import '../../models/sync/audit_event.dart';
 import '../../repositories/repository.dart';
 import 'publication_projection_builder.dart';
@@ -232,6 +233,10 @@ class PublicationService {
       currentProjectionId: built.projection.id,
       resultsHiddenThroughRound: contest.resultsHiddenThroughRound,
       resultsHiddenAt: contest.resultsHiddenAt,
+      contestName: _text(built.projection.contestIdentity['name']),
+      contestStartsAt: _timestamp(built.projection.contestIdentity['start']),
+      contestEndsAt: _timestamp(built.projection.contestIdentity['end']),
+      venue: _venue(built.projection.contestIdentity),
       revision: existing?.revision ?? 0,
     );
     final stored = await repository.publicationPublisher.publish(
@@ -328,19 +333,7 @@ class PublicationService {
       return PublicationView(identity: identity, current: current);
     }
     final saved = await repository.publicationIdentityRepository.save(
-      PublicationIdentity(
-        id: identity.id,
-        contestId: identity.contestId,
-        ownerPublicProfileId: identity.ownerPublicProfileId,
-        claimStatus: identity.claimStatus,
-        verificationEmail: identity.verificationEmail,
-        visibility: visibility,
-        publishedAt: identity.publishedAt,
-        currentProjectionId: identity.currentProjectionId,
-        resultsHiddenThroughRound: identity.resultsHiddenThroughRound,
-        resultsHiddenAt: identity.resultsHiddenAt,
-        revision: identity.revision,
-      ),
+      identity.withVisibility(visibility),
     );
     return PublicationView(identity: saved, current: current);
   }
@@ -450,4 +443,24 @@ class PublicationService {
     }
     return identity;
   }
+}
+
+String? _text(Object? value) {
+  final text = value is String ? value.trim() : '';
+  return text.isEmpty ? null : text;
+}
+
+DateTime? _timestamp(Object? value) {
+  final text = _text(value);
+  return text == null ? null : parseUtcTimestamp(text);
+}
+
+/// Host, city, state and country of a projection's contest identity,
+/// whichever are set, joined with ", " (the form the listing searches).
+String? _venue(Map<String, Object?> contest) {
+  final parts = [
+    for (final key in const ['host', 'city', 'state', 'country'])
+      ?_text(contest[key]),
+  ];
+  return parts.isEmpty ? null : parts.join(', ');
 }
