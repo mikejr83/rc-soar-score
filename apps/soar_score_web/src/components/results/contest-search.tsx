@@ -58,7 +58,7 @@ export function ContestSearch() {
     const typing = lastRequested.current !== undefined && lastRequested.current !== requestKey;
     const send = () => {
       lastRequested.current = requestKey;
-      fetchPublicationList(params, controller.signal)
+      fetchPublicationList(params, controller.signal, generation > 0)
         .then(({ publications, recentCount }) => {
           const contests = publications.map((d) => contestSummaryFrom(d, now));
           setLoaded({ key, state: { kind: "loaded", contests, recentCount } });
@@ -76,7 +76,7 @@ export function ContestSearch() {
       clearTimeout(timer);
       controller.abort();
     };
-  }, [key, requestKey]);
+  }, [key, requestKey, generation]);
 
   const applyFilters = useCallback(
     (next: ContestFilters) => {

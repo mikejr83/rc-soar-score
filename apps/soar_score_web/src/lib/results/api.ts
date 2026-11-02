@@ -14,9 +14,14 @@ export class ApiHttpError extends Error {
   }
 }
 
-async function getJson<T>(path: string, signal?: AbortSignal): Promise<T> {
+async function getJson<T>(
+  path: string,
+  signal?: AbortSignal,
+  cache?: RequestCache,
+): Promise<T> {
   const response = await fetch(`${apiBaseUrl}${path}`, {
     signal,
+    cache,
     headers: { accept: "application/json" },
   });
   if (!response.ok) {
@@ -48,11 +53,13 @@ export interface PublicationList {
 export async function fetchPublicationList(
   query: URLSearchParams,
   signal?: AbortSignal,
+  /** Refresh: skip the 30-second cache the server allows. */
+  fresh = false,
 ): Promise<PublicationList> {
   const json = await getJson<{
     publications: PublicPublicationSummary[];
     summary?: { recent_count?: number };
-  }>(`/public/publications?${query.toString()}`, signal);
+  }>(`/public/publications?${query.toString()}`, signal, fresh ? "no-cache" : undefined);
   return {
     publications: json.publications,
     recentCount: json.summary?.recent_count ?? 0,
