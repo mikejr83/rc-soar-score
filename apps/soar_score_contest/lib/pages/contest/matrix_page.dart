@@ -15,10 +15,12 @@ import '../../services/matrix/draw_form_check.dart';
 import '../../services/matrix/draw_form_controller.dart';
 import '../../services/matrix/matrix_page_data.dart';
 import '../../services/matrix/matrix_rounds_plan.dart';
+import '../../services/matrix/move_plan.dart';
 import '../../widgets/api_error_text.dart';
 import '../../widgets/matrix/draw_confirm_dialog.dart';
 import '../../widgets/matrix/draw_form_panel.dart';
 import '../../widgets/matrix/matrix_drawn_view.dart';
+import '../../widgets/matrix/move_pilot_dialog.dart';
 import '../../widgets/page_states/page_states.dart';
 
 /// The matrix of one contest (`plan/ui/contest-administration/matrix.md`):
@@ -151,6 +153,19 @@ class _MatrixPageState extends State<MatrixPage> {
     if (contest.lifecycleState != LifecycleState.ready &&
         contest.lifecycleState != LifecycleState.running) {
       return l10n?.matrixActionNotEditable ?? '';
+    }
+    return null;
+  }
+
+  /// Why moving a pilot is off for the whole contest, or `null`.
+  String? _moveBlock(MatrixPageData data, AppLocalizations l10n) {
+    final contest = data.contest;
+    if (contest.adminLock == AdminLock.locked) {
+      return l10n.matrixMoveLocked;
+    }
+    if (contest.lifecycleState != LifecycleState.ready &&
+        contest.lifecycleState != LifecycleState.running) {
+      return l10n.matrixMoveNotEditable;
     }
     return null;
   }
@@ -470,6 +485,101 @@ class _MatrixPageState extends State<MatrixPage> {
     }
   }
 
+  /// Moves the pilot of [assignmentId]: reads the scores (which groups have
+  /// them, which are locked), asks where to, and sends the move.
+  Future<void> _movePilot(Id assignmentId) async {
+    final data = _data;
+    final client = apiClientOf(context);
+    if (data == null || client == null || _busy) {
+      return;
+    }
+    final l10n = AppLocalizations.of(context);
+    // A menu can be open when the contest gets locked.
+    if (_moveBlock(data, l10n) != null) {
+      return;
+    }
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.showSnackBar(
+      SnackBar(
+        content: Row(
+          spacing: 12,
+          children: [
+            const SizedBox.square(
+              dimension: 16,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+            Text(l10n.matrixMoveChecking),
+          ],
+        ),
+        duration: const Duration(seconds: 30),
+      ),
+    );
+    final ContestScores scores;
+    try {
+      scores = await client.scores(data.contest.id);
+      messenger.hideCurrentSnackBar();
+    } on Object catch (error) {
+      messenger.hideCurrentSnackBar();
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(l10n.matrixMoveScoresFailed(apiErrorText(error))),
+        ),
+      );
+      return;
+    }
+    if (!mounted) {
+      return;
+    }
+    final options = data.options;
+    final assignment = data.matrix.assignments
+        .where((a) => a.id == assignmentId)
+        .firstOrNull;
+    final plan = MovePlan.of(
+      matrix: data.matrix,
+      scores: scores,
+      assignmentId: assignmentId,
+      teamOf: {
+        for (final membership in data.memberships)
+          membership.contestParticipationId: membership.teamId,
+      },
+      teamsEnabled: data.showTeams,
+      teamProtection: options?.teamProtection ?? false,
+      pilotRetired: data.participations.any(
+        (p) => p.id == assignment?.contestParticipationId && p.isRetired,
+      ),
+    );
+    final pilot = plan == null
+        ? null
+        : data.pilots[plan.source.contestParticipationId];
+    if (plan == null || pilot == null) {
+      // The page is out of date: the pilot is not in the matrix any more.
+      await _reload();
+      return;
+    }
+    final outcome = await showMovePilotDialog(
+      context,
+      plan: plan,
+      pilot: pilot,
+      pilots: data.pilots,
+      send: (request) =>
+          client.moveAssignment(data.contest.id, assignmentId, request),
+    );
+    if (!mounted) {
+      return;
+    }
+    switch (outcome) {
+      case PilotMoved(:final matrix):
+        setState(() => _data = data.withMatrix(matrix));
+        messenger.showSnackBar(
+          SnackBar(content: Text(l10n.matrixPilotMoved(pilot.name))),
+        );
+      case MoveNeedsReload():
+        await _reload();
+      case null:
+        break;
+    }
+  }
+
   /// Starts asking the server how far the draw [drawId] has come.
   void _watch(ApiClient client, Id contestId, Id drawId) {
     _poll?.cancel();
@@ -562,6 +672,8 @@ class _MatrixPageState extends State<MatrixPage> {
           onAddRounds: () =>
               setState(() => _openForm(MatrixIntent.addRounds, data)),
           onRedraw: () => setState(() => _openForm(MatrixIntent.redraw, data)),
+          onMovePilot: _movePilot,
+          moveBlock: _moveBlock(data, AppLocalizations.of(context)),
         );
       }
       if (form == null) {

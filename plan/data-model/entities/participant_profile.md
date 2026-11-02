@@ -37,7 +37,7 @@
 
 - A profile has at least a first and last name
 - A profile is visible and editable only by its owning director. No other director can see, search, or match it
-- Two profiles of the same director may share an email, FAI number, or national organization ID, but the application warns the director about the duplicate (matching uses normalized email first, then FAI number, then national organization ID, never name)
+- Two profiles of the same director may share an email, FAI number, or national organization ID, but the application warns the director about the duplicate (matching uses normalized email first, then FAI number, then national organization ID. Name is never an automatic match: an import may offer a same-name profile as a "maybe the same person" for the director to confirm, and never merges or updates on it)
 - A profile is never changed by a participant's account. Data moves between an account and a profile only when the director pulls or refreshes it from a directory entry, and the profile stays the director's copy afterwards
 - A profile that is referenced by a ContestParticipation cannot be deleted
 - A profile has no class, role, team, number, or score; those belong to ContestParticipation

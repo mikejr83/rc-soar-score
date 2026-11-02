@@ -12,12 +12,14 @@ import '../../../services/new_contest/draft_participant.dart';
 import '../../../services/new_contest/draft_validation.dart';
 import '../../../services/new_contest/participant_rules.dart';
 import '../../../services/participants/participant_candidate.dart';
+import '../../../services/participants/pilot_models_backend.dart';
 import '../../../services/participants/participant_option.dart';
 import '../../../services/participants/participant_row.dart';
 import '../../participants/bulk_edit_bar.dart';
 import '../../participants/cell_focus_registry.dart';
 import '../../participants/participant_card.dart';
 import '../../participants/participant_editing.dart';
+import '../../participants/pilot_models_dialog.dart';
 import '../../participants/participant_search_field.dart';
 import '../../participants/participants_table.dart';
 import '../wizard_banner.dart';
@@ -121,6 +123,29 @@ class _ParticipantsStepState extends State<ParticipantsStep> {
       p.profileId == updated.profileId ? updated : p,
   ]);
 
+  /// Opens the models window for [row]; the models stay in the draft and are
+  /// sent when the contest is created.
+  Future<void> _editModels(ParticipantRow row) async {
+    final participant = row as DraftParticipant;
+    final client = apiClientOf(context);
+    final models = await showPilotModelsDialog(
+      context,
+      pilotName: participant.name,
+      models: participant.models,
+      backend: DraftPilotModelsBackend(
+        loadProfileModels: () async =>
+            client == null || participant.source == ParticipantSource.remote
+            ? const []
+            : client.profileModels(participant.profileId),
+      ),
+    );
+    if (!mounted) return;
+    final current = _draft.participants.where(
+      (p) => p.profileId == participant.profileId,
+    );
+    if (current.isNotEmpty) _update(current.first.copyWith(models: models));
+  }
+
   void _updateSelected(DraftParticipant Function(DraftParticipant) change) {
     _setParticipants([
       for (final p in _draft.participants)
@@ -128,15 +153,27 @@ class _ParticipantsStepState extends State<ParticipantsStep> {
     ]);
   }
 
-  void _add(DraftParticipant participant) {
-    if (_draft.participants.any((p) => p.profileId == participant.profileId)) {
-      widget.onMessage?.call('${participant.name} is already in the contest.');
-      return;
+  void _add(DraftParticipant participant) => _addAll([participant]);
+
+  /// Adds [participants] in one change. The draft is only refreshed when the
+  /// step rebuilds, so each one is checked against the list built so far.
+  void _addAll(List<DraftParticipant> participants) {
+    final next = [..._draft.participants];
+    for (final participant in participants) {
+      if (next.any((p) => p.profileId == participant.profileId)) {
+        widget.onMessage?.call(
+          '${participant.name} is already in the contest.',
+        );
+        continue;
+      }
+      next.add(participant);
     }
-    _setParticipants([..._draft.participants, participant]);
+    if (next.length != _draft.participants.length) _setParticipants(next);
   }
 
   Future<void> _addNew() async {
+    // Profiles saved with "Save and add another" before the dialog closes.
+    final others = <ParticipantProfile>[];
     final profile = await showDialog<ParticipantProfile>(
       context: context,
       builder: (context) => Dialog.fullscreen(
@@ -152,17 +189,22 @@ class _ParticipantsStepState extends State<ParticipantsStep> {
           body: ParticipantEditorPage(
             onDone: (profile) => Navigator.of(context).pop(profile),
             onCancel: () => Navigator.of(context).pop(),
+            onSavedAnother: others.add,
           ),
         ),
       ),
     );
-    if (profile == null || !mounted) {
-      return;
+    if (!mounted) return;
+    final saved = [...others, ?profile];
+    if (saved.isEmpty) return;
+    final participants = [
+      for (final profile in saved) DraftParticipant.fromProfile(profile),
+    ];
+    _addAll(participants);
+    setState(() => _profiles = [...?_profiles, ...saved]);
+    for (final participant in participants) {
+      widget.onMessage?.call('${participant.name} is added as Pilot.');
     }
-    final participant = DraftParticipant.fromProfile(profile);
-    _add(participant);
-    setState(() => _profiles = [...?_profiles, profile]);
-    widget.onMessage?.call('${participant.name} is added as Pilot.');
   }
 
   void _removeSelected() {
@@ -293,6 +335,7 @@ class _ParticipantsStepState extends State<ParticipantsStep> {
       selected: _selected,
       onToggleSelected: (row) => _toggle(row as DraftParticipant),
       onUpdate: (row) => _update(row as DraftParticipant),
+      editModels: _editModels,
     );
     final scoring = draft.scoringCount;
 

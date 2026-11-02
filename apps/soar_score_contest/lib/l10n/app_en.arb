@@ -1158,5 +1158,560 @@
   "contestsEmpty": "No contests yet.",
   "@contestsEmpty": {
     "description": "Shown on the main page when there are no contests."
+  },
+  "modelsCellNone": "No models entered",
+  "@modelsCellNone": {"description": "Shown in the Models cell of a pilot who has no models. A notice only: the contest goes ahead without models."},
+  "modelsCellNoneTooltip": "A pilot without a model is fine. Add models any time.",
+  "@modelsCellNoneTooltip": {"description": "Tooltip on the notice that a pilot has no models."},
+  "modelsEditTooltip": "Edit models for {name}",
+  "@modelsEditTooltip": {"description": "Tooltip and accessible name of the button that opens a pilot's models.", "placeholders": {"name": {"type": "String"}}},
+  "modelsDialogTitle": "Models for {name}",
+  "@modelsDialogTitle": {"description": "Title of the window where a pilot's models are added, edited and removed.", "placeholders": {"name": {"type": "String"}}},
+  "modelsDialogEmpty": "No models yet. The contest can go ahead without them.",
+  "@modelsDialogEmpty": {"description": "Shown in the models window when the pilot has no models."},
+  "modelsPickLabel": "Pick one of their models",
+  "@modelsPickLabel": {"description": "Label of the menu that picks a model the person already has on their profile."},
+  "modelsPickHint": "Or type a new one below",
+  "@modelsPickHint": {"description": "Hint under the profile model menu."},
+  "modelsFieldName": "Model name *",
+  "@modelsFieldName": {"description": "Label of the required model name field."},
+  "modelsFieldManufacturer": "Manufacturer",
+  "@modelsFieldManufacturer": {"description": "Label of the optional model manufacturer field."},
+  "modelsFieldModelId": "Model ID",
+  "@modelsFieldModelId": {"description": "Label of the optional field for the identifier the pilot put on the model."},
+  "modelsFieldModelIdHelper": "The marking the pilot put on the model",
+  "@modelsFieldModelIdHelper": {"description": "Helper text under the Model ID field."},
+  "modelsFieldContestId": "Contest identifier",
+  "@modelsFieldContestId": {"description": "Label of the optional field for the identifier the director applied for this contest."},
+  "modelsFieldContestIdHelper": "Applied by you for this contest, such as a serial number",
+  "@modelsFieldContestIdHelper": {"description": "Helper text under the Contest identifier field."},
+  "modelsAddButton": "Add a model",
+  "@modelsAddButton": {"description": "Button that opens the form to add a model."},
+  "modelsSaveAdd": "Add model",
+  "@modelsSaveAdd": {"description": "Button that adds the model in the form."},
+  "modelsSaveEdit": "Save model",
+  "@modelsSaveEdit": {"description": "Button that saves changes to the model in the form."},
+  "modelsFormCancel": "Cancel",
+  "@modelsFormCancel": {"description": "Button that closes the model form without saving."},
+  "modelsDone": "Done",
+  "@modelsDone": {"description": "Button that closes the models window."},
+  "modelsEditEntry": "Edit {model}",
+  "@modelsEditEntry": {"description": "Tooltip of the button that edits one model.", "placeholders": {"model": {"type": "String"}}},
+  "modelsRemoveEntry": "Remove {model}",
+  "@modelsRemoveEntry": {"description": "Tooltip of the button that removes one model.", "placeholders": {"model": {"type": "String"}}},
+  "modelsNameRequired": "Enter a model name.",
+  "@modelsNameRequired": {"description": "Error under the model name field when it is empty."},
+  "modelsDuplicate": "This pilot already has a model with the same name, manufacturer and ID.",
+  "@modelsDuplicate": {"description": "Warning in the model form when the model matches one the pilot already has."},
+  "modelsStale": "This pilot's models were changed elsewhere. Close this window to refresh them, then try again.",
+  "@modelsStale": {"description": "Shown when a model change is refused because the model changed since it was read."},
+  "modelsSaveFailed": "The model could not be saved. {error}",
+  "@modelsSaveFailed": {"description": "Shown when saving a model fails.", "placeholders": {"error": {"type": "String"}}},
+  "modelsDetailModelId": "ID {value}",
+  "@modelsDetailModelId": {"description": "Detail line of a model: the identifier the pilot put on it.", "placeholders": {"value": {"type": "String"}}},
+  "modelsDetailContestId": "Contest {value}",
+  "@modelsDetailContestId": {"description": "Detail line of a model: the identifier the director applied for this contest.", "placeholders": {"value": {"type": "String"}}},
+  "modelsCellCount": "{count, plural, one{1 model} other{{count} models}}",
+  "@modelsCellCount": {"description": "Models cell of a pilot with several models: how many.", "placeholders": {"count": {"type": "int"}}},
+  "modelsProfileUnavailable": "Their saved models could not be loaded. You can still type a model.",
+  "@modelsProfileUnavailable": {"description": "Warning in the models form when the pilot's saved models could not be read, as opposed to there being none."},
+  "modelsProfileRetry": "Retry",
+  "@modelsProfileRetry": {"description": "Button that tries again to load the pilot's saved models."},
+  "matrixPilotActions": "Pilot actions",
+  "@matrixPilotActions": {
+    "description": "Tooltip of the menu button on the highlighted pilot in the matrix grid."
+  },
+  "matrixMoveMenu": "Move",
+  "@matrixMoveMenu": {
+    "description": "Menu item and accessibility action that moves a pilot to another group."
+  },
+  "matrixMoveLocked": "Administration is locked. Unlock the contest to move a pilot.",
+  "@matrixMoveLocked": {
+    "description": "Why moving a pilot is off while the contest is locked."
+  },
+  "matrixMoveNotEditable": "Pilots can be moved once the matrix is drawn and until the contest is complete.",
+  "@matrixMoveNotEditable": {
+    "description": "Why moving a pilot is off before the first draw or after completion."
+  },
+  "matrixMoveTitle": "Move {name}",
+  "@matrixMoveTitle": {
+    "description": "Title of the dialog that moves a pilot.",
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "matrixMoveFrom": "Now flying round {round}, group {group}.",
+  "@matrixMoveFrom": {
+    "description": "Where the pilot flies now, in the move dialog.",
+    "placeholders": {
+      "round": {"type": "int"},
+      "group": {"type": "String"}
+    }
+  },
+  "matrixMoveFromLane": "Now flying round {round}, group {group}, lane {lane}.",
+  "@matrixMoveFromLane": {
+    "description": "Where the pilot flies now when the contest has lanes, in the move dialog.",
+    "placeholders": {
+      "round": {"type": "int"},
+      "group": {"type": "String"},
+      "lane": {"type": "int"}
+    }
+  },
+  "matrixMoveScoredWarning": "This flight has a score. Moving the pilot discards it: the score stays in the history as a reset and no longer counts. This is not the standard way to correct a flight, so check that you want this before you continue.",
+  "@matrixMoveScoredWarning": {
+    "description": "Warning in the move dialog when the pilot's flight has a score."
+  },
+  "matrixMoveSourceGroupLocked": "The pilot's group is locked. Unlock the group before moving the pilot.",
+  "@matrixMoveSourceGroupLocked": {
+    "description": "Why a pilot cannot be moved out of a locked group."
+  },
+  "matrixMoveSourceScoreLocked": "The pilot's score is locked. Unlock the score before moving the pilot.",
+  "@matrixMoveSourceScoreLocked": {
+    "description": "Why a pilot with a locked score cannot be moved."
+  },
+  "matrixMoveRound": "Round",
+  "@matrixMoveRound": {
+    "description": "Label of the round picker in the move dialog."
+  },
+  "matrixMoveRoundOption": "Round {round}",
+  "@matrixMoveRoundOption": {
+    "description": "One round in the move dialog's round picker.",
+    "placeholders": {
+      "round": {"type": "int"}
+    }
+  },
+  "matrixMoveGroupHeading": "Move to group",
+  "@matrixMoveGroupHeading": {
+    "description": "Heading of the group list in the move dialog."
+  },
+  "matrixMoveGroupLabel": "Group {group}",
+  "@matrixMoveGroupLabel": {
+    "description": "One group in the move dialog.",
+    "placeholders": {
+      "group": {"type": "String"}
+    }
+  },
+  "matrixMoveRecommended": "Recommended",
+  "@matrixMoveRecommended": {
+    "description": "Mark on a group that is a good place to move a pilot to."
+  },
+  "matrixMoveNotIdeal": "Not ideal",
+  "@matrixMoveNotIdeal": {
+    "description": "Mark on a group that is allowed but a poor place to move a pilot to."
+  },
+  "matrixMoveReasonHasScores": "Pilots in this group already have scores.",
+  "@matrixMoveReasonHasScores": {
+    "description": "Why a group is not ideal as a move target."
+  },
+  "matrixMoveReasonRoundCompleted": "This round appears to be completed.",
+  "@matrixMoveReasonRoundCompleted": {
+    "description": "Why a group is not ideal as a move target."
+  },
+  "matrixMoveReasonTeammate": "A teammate flies in this group.",
+  "@matrixMoveReasonTeammate": {
+    "description": "Why a group is not ideal as a move target."
+  },
+  "matrixMoveBlockCurrent": "The pilot flies in this group now.",
+  "@matrixMoveBlockCurrent": {
+    "description": "Why the pilot's current group cannot be chosen."
+  },
+  "matrixMoveBlockAlready": "The pilot already flies in this group in round {round}.",
+  "@matrixMoveBlockAlready": {
+    "description": "Why a group the pilot is already part of cannot be chosen.",
+    "placeholders": {
+      "round": {"type": "int"}
+    }
+  },
+  "matrixMoveBlockGroupLocked": "This group is locked. Unlock the group first.",
+  "@matrixMoveBlockGroupLocked": {
+    "description": "Why a locked group cannot be chosen."
+  },
+  "matrixMoveBlockRoundLocked": "This round is locked. Unlock the round first.",
+  "@matrixMoveBlockRoundLocked": {
+    "description": "Why a group of a locked round cannot be chosen."
+  },
+  "matrixMoveBlockTeam": "Team protection is on and a teammate flies in this group.",
+  "@matrixMoveBlockTeam": {
+    "description": "Why a group with a teammate cannot be chosen when team protection is on."
+  },
+  "matrixMoveLane": "Lane",
+  "@matrixMoveLane": {
+    "description": "Label of the lane picker in the move dialog."
+  },
+  "matrixMoveLaneFree": "Lane {lane}",
+  "@matrixMoveLaneFree": {
+    "description": "One free lane in the lane picker.",
+    "placeholders": {
+      "lane": {"type": "int"}
+    }
+  },
+  "matrixMoveLaneTaken": "Lane {lane}, taken by {name}",
+  "@matrixMoveLaneTaken": {
+    "description": "One taken lane in the lane picker.",
+    "placeholders": {
+      "lane": {"type": "int"},
+      "name": {"type": "String"}
+    }
+  },
+  "matrixMoveReasonLabel": "Reason",
+  "@matrixMoveReasonLabel": {
+    "description": "Label of the reason field in the move dialog."
+  },
+  "matrixMoveReasonHelp": "Required. Kept with the move in the history.",
+  "@matrixMoveReasonHelp": {
+    "description": "Help under the reason field in the move dialog."
+  },
+  "matrixMoveReasonRequired": "Enter a reason.",
+  "@matrixMoveReasonRequired": {
+    "description": "Error when the move reason is empty."
+  },
+  "matrixMoveGroupRequired": "Choose a group to move the pilot to.",
+  "@matrixMoveGroupRequired": {
+    "description": "Error when no group is chosen in the move dialog."
+  },
+  "matrixMoveLaneRequired": "Choose a lane.",
+  "@matrixMoveLaneRequired": {
+    "description": "Error when no lane is chosen in the move dialog."
+  },
+  "matrixMoveCancel": "Cancel",
+  "@matrixMoveCancel": {
+    "description": "Button that closes the move dialog."
+  },
+  "matrixMoveConfirm": "Move pilot",
+  "@matrixMoveConfirm": {
+    "description": "Button that moves the pilot."
+  },
+  "matrixMoveConfirmDiscard": "Discard score and move",
+  "@matrixMoveConfirmDiscard": {
+    "description": "Button that moves a pilot whose flight has a score."
+  },
+  "matrixMoveWorking": "Moving…",
+  "@matrixMoveWorking": {
+    "description": "Shown on the button while the move is sent."
+  },
+  "matrixMoveNetwork": "Soar Score can't reach the server. Nothing was moved. Try again.",
+  "@matrixMoveNetwork": {
+    "description": "Shown in the move dialog when the server cannot be reached."
+  },
+  "matrixMoveChanged": "The matrix or the contest changed since this page loaded. Nothing was moved. Reload to see the current matrix.",
+  "@matrixMoveChanged": {
+    "description": "Shown in the move dialog when the server says the matrix changed."
+  },
+  "matrixMoveReload": "Reload",
+  "@matrixMoveReload": {
+    "description": "Button that reloads the matrix after a move was refused because it changed."
+  },
+  "matrixMoveScoresFailed": "The scores could not be checked, so the pilot was not moved. {error}",
+  "@matrixMoveScoresFailed": {
+    "description": "Snackbar when the scores could not be read before a move.",
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "matrixPilotMoved": "{name} moved.",
+  "@matrixPilotMoved": {
+    "description": "Snackbar after a pilot was moved.",
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "matrixMovedLabel": "Moved",
+  "@matrixMovedLabel": {
+    "description": "Label on a pilot in the grid whom a director moved."
+  },
+  "matrixMovedHeading": "Moves",
+  "@matrixMovedHeading": {
+    "description": "Heading in the pilot panel of the moves of the pilot."
+  },
+  "matrixMovedLine": "Round {round}: {reason}",
+  "@matrixMovedLine": {
+    "description": "One move of the pilot in the pilot panel, with the reason.",
+    "placeholders": {
+      "round": {"type": "int"},
+      "reason": {"type": "String"}
+    }
+  },
+  "matrixMoveSourceRetired": "This pilot has retired and cannot be moved.",
+  "@matrixMoveSourceRetired": {
+    "description": "Why a retired pilot cannot be moved."
+  },
+  "matrixMoveChecking": "Checking scores…",
+  "@matrixMoveChecking": {
+    "description": "Snackbar while the scores are read before the move dialog opens."
+  },
+  "aboutHeading": "About",
+  "@aboutHeading": {
+    "description": "Heading of the Settings card with the version, licences and legal links."
+  },
+  "aboutOpenSourceLicences": "Open source licences",
+  "@aboutOpenSourceLicences": {
+    "description": "Settings entry that opens the public site's open source licences page in the browser."
+  },
+  "aboutOpenSourceLicencesHint": "Opens the list on the RC Soar Score website",
+  "@aboutOpenSourceLicencesHint": {
+    "description": "Explains that the open source licences entry opens the website."
+  },
+  "aboutLicencesOnThisDevice": "Licences on this device",
+  "@aboutLicencesOnThisDevice": {
+    "description": "Settings entry that shows the licences bundled with the app, which works without a network."
+  },
+  "aboutLicencesOnThisDeviceHint": "Works without a network connection",
+  "@aboutLicencesOnThisDeviceHint": {
+    "description": "Explains that the bundled licences page needs no network."
+  },
+  "aboutSourceCode": "Source code (AGPL-3.0)",
+  "@aboutSourceCode": {
+    "description": "Settings entry that opens the source code repository; the app is licensed under the AGPL-3.0."
+  },
+  "aboutPrivacyPolicy": "Privacy Policy",
+  "@aboutPrivacyPolicy": {
+    "description": "Settings entry that opens the Privacy Policy on the public site."
+  },
+  "aboutTermsOfService": "Terms of Service",
+  "@aboutTermsOfService": {
+    "description": "Settings entry that opens the Terms of Service on the public site."
+  },
+  "aboutLinkFailed": "Could not open the link. Check your network connection and try again.",
+  "@aboutLinkFailed": {
+    "description": "Snackbar when a link in the About card could not be opened."
+  },
+  "pilotImportButton": "Import pilots from GliderScore…",
+  "@pilotImportButton": {
+    "description": "Button on the participants page that imports pilots from a GliderScore database file."
+  },
+  "pilotImportTitle": "Import pilots from GliderScore",
+  "@pilotImportTitle": {
+    "description": "Title of the pilot import dialog."
+  },
+  "pilotImportChoosing": "Choose a GliderScore database (.mdb) to read the pilots from.",
+  "@pilotImportChoosing": {
+    "description": "Shown in the pilot import dialog before a file is chosen."
+  },
+  "pilotImportChooseButton": "Choose file…",
+  "@pilotImportChooseButton": {
+    "description": "Button that opens the file chooser in the pilot import dialog."
+  },
+  "pilotImportReading": "Reading {file}…",
+  "@pilotImportReading": {
+    "description": "Shown while the GliderScore file is read.",
+    "placeholders": {
+      "file": {
+        "type": "String"
+      }
+    }
+  },
+  "pilotImportReviewIntro": "Choose which pilots to add to your participants. Pilots already in your list get any new details; their names are never changed.",
+  "@pilotImportReviewIntro": {
+    "description": "Introduction above the list of pilots found in a GliderScore file."
+  },
+  "pilotImportNewHeading": "New ({count})",
+  "@pilotImportNewHeading": {
+    "description": "Heading of the pilots that are not in the participants yet.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pilotImportUpdateHeading": "Already in your list ({count})",
+  "@pilotImportUpdateHeading": {
+    "description": "Heading of the pilots that match a participant.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pilotImportMaybeHeading": "Maybe the same person ({count})",
+  "@pilotImportMaybeHeading": {
+    "description": "Heading of the pilots that might be a participant already in the list.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pilotImportWillUpdate": "Will update: {fields}",
+  "@pilotImportWillUpdate": {
+    "description": "Row text naming the details an import adds to an existing participant.",
+    "placeholders": {
+      "fields": {
+        "type": "String"
+      }
+    }
+  },
+  "pilotImportNothingNew": "Nothing new to add",
+  "@pilotImportNothingNew": {
+    "description": "Row text when an existing participant already has everything the file holds."
+  },
+  "pilotImportConflict": "Their email and registration numbers match different people in your list.",
+  "@pilotImportConflict": {
+    "description": "Row text when the identifiers of a pilot point at different participants."
+  },
+  "pilotImportDuplicateInFile": "Looks like another pilot earlier in this file.",
+  "@pilotImportDuplicateInFile": {
+    "description": "Row text when a pilot is the same person as an earlier row of the file."
+  },
+  "pilotImportChoiceSkip": "Skip",
+  "@pilotImportChoiceSkip": {
+    "description": "Choice for a pilot that might be an existing participant: leave out."
+  },
+  "pilotImportChoiceAdd": "Add as new",
+  "@pilotImportChoiceAdd": {
+    "description": "Choice for a pilot that might be an existing participant: add a new one."
+  },
+  "pilotImportChoiceUpdate": "Update {name}",
+  "@pilotImportChoiceUpdate": {
+    "description": "Choice for a pilot that might be an existing participant: update that participant.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "pilotImportFieldEmail": "email",
+  "@pilotImportFieldEmail": {
+    "description": "Name of a participant detail in the list of details an import updates."
+  },
+  "pilotImportFieldFai": "FAI number",
+  "@pilotImportFieldFai": {
+    "description": "Name of a participant detail in the list of details an import updates."
+  },
+  "pilotImportFieldNationalId": "national ID",
+  "@pilotImportFieldNationalId": {
+    "description": "Name of a participant detail in the list of details an import updates."
+  },
+  "pilotImportFieldClub": "club",
+  "@pilotImportFieldClub": {
+    "description": "Name of a participant detail in the list of details an import updates."
+  },
+  "pilotImportFieldCity": "city",
+  "@pilotImportFieldCity": {
+    "description": "Name of a participant detail in the list of details an import updates."
+  },
+  "pilotImportFieldState": "state",
+  "@pilotImportFieldState": {
+    "description": "Name of a participant detail in the list of details an import updates."
+  },
+  "pilotImportFieldCountry": "country",
+  "@pilotImportFieldCountry": {
+    "description": "Name of a participant detail in the list of details an import updates."
+  },
+  "pilotImportTestPilots": "{count, plural, =1{1 GliderScore test pilot (last name starting ZZ) was left out.} other{{count} GliderScore test pilots (last name starting ZZ) were left out.}}",
+  "@pilotImportTestPilots": {
+    "description": "Note on the pilot import review about GliderScore test pilots that were left out.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pilotImportSkippedRows": "{count, plural, =1{1 row could not be used (no name or pilot number).} other{{count} rows could not be used (no name or pilot number).}}",
+  "@pilotImportSkippedRows": {
+    "description": "Note on the pilot import review about rows that were skipped.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pilotImportDroppedDetails": "Not imported, because participants have no place for them: {columns}.",
+  "@pilotImportDroppedDetails": {
+    "description": "Note on the pilot import review naming GliderScore columns that are not imported.",
+    "placeholders": {
+      "columns": {
+        "type": "String"
+      }
+    }
+  },
+  "pilotImportCountryNote": "{count, plural, =1{1 pilot has no recognised country.} other{{count} pilots have no recognised country.}}",
+  "@pilotImportCountryNote": {
+    "description": "Note on the pilot import review about pilots without a usable country.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pilotImportTruncated": "The file has more pilots than could be read. Some are missing.",
+  "@pilotImportTruncated": {
+    "description": "Warning on the pilot import review when the file was too large to read fully."
+  },
+  "pilotImportNoPilots": "No pilots were found in this file.",
+  "@pilotImportNoPilots": {
+    "description": "Shown when the GliderScore file holds no pilots to import."
+  },
+  "pilotImportPlan": "{added} to add, {updated} to update, {unchanged} unchanged, {skipped} left out",
+  "@pilotImportPlan": {
+    "description": "Summary line above the import button of the pilot import.",
+    "placeholders": {
+      "added": {
+        "type": "int"
+      },
+      "updated": {
+        "type": "int"
+      },
+      "unchanged": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      }
+    }
+  },
+  "pilotImportConfirm": "Import",
+  "@pilotImportConfirm": {
+    "description": "Button that saves the pilot import."
+  },
+  "pilotImportSaving": "Saving pilots…",
+  "@pilotImportSaving": {
+    "description": "Shown while the pilots are saved."
+  },
+  "pilotImportDone": "Added {added}, updated {updated}, unchanged {unchanged}, left out {skipped}.",
+  "@pilotImportDone": {
+    "description": "Result of a pilot import.",
+    "placeholders": {
+      "added": {
+        "type": "int"
+      },
+      "updated": {
+        "type": "int"
+      },
+      "unchanged": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      }
+    }
+  },
+  "pilotImportDoneButton": "Done",
+  "@pilotImportDoneButton": {
+    "description": "Button that closes the finished pilot import."
+  },
+  "pilotImportFailed": "The import did not work. {reason}",
+  "@pilotImportFailed": {
+    "description": "Shown when the pilot import fails.",
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "pilotImportUnavailable": "Importing from GliderScore is not available on this computer.",
+  "@pilotImportUnavailable": {
+    "description": "Shown when the GliderScore reader is missing."
+  },
+  "pilotImportChangedDuringReview": "Your participants changed while you were reviewing. Review again before importing.",
+  "@pilotImportChangedDuringReview": {
+    "description": "Shown when a participant was edited during the pilot import review."
+  },
+  "pilotImportChooseAgain": "Choose a file again",
+  "@pilotImportChooseAgain": {
+    "description": "Button that opens the file chooser again after it failed."
+  },
+  "pilotImportReviewAgain": "Review again",
+  "@pilotImportReviewAgain": {
+    "description": "Button that rebuilds the pilot import review."
   }
 }

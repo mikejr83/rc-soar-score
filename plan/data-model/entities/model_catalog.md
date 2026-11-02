@@ -13,15 +13,15 @@
 
 ## Fields/Properties
 
-| Field                    | Type    | Required | Default | Description                                                                                                                                       |
-| ------------------------ | ------- | -------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `id`                     | UUIDv7  | Yes      | —       | Primary key                                                                                                                                       |
-| `owner_account_id`       | UUIDv7  | Yes      | —       | FK Account of the director who owns the profile. Used only for synchronization scope; it always equals the profile's owner                        |
-| `participant_profile_id` | UUIDv7  | Yes      | —       | FK ParticipantProfile of the person who flies this model                                                                                          |
-| `name`                   | String  | Yes      | —       | Model name                                                                                                                                        |
-| `manufacturer`           | String  | No       | —       | Model manufacturer                                                                                                                                |
-| `model_id`               | String  | No       | —       | The contestant-applied identifier: the marking, number or registration the pilot has put on the model. Not required, and never used for scoring   |
-| `revision`               | Integer | Yes      | 0       | Revision counter for optimistic locking                                                                                                           |
+| Field                    | Type    | Required | Default | Description                                                                                                                                     |
+| ------------------------ | ------- | -------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`                     | UUIDv7  | Yes      | —       | Primary key                                                                                                                                     |
+| `owner_account_id`       | UUIDv7  | Yes      | —       | FK Account of the director who owns the profile. Used only for synchronization scope; it always equals the profile's owner                      |
+| `participant_profile_id` | UUIDv7  | Yes      | —       | FK ParticipantProfile of the person who flies this model                                                                                        |
+| `name`                   | String  | Yes      | —       | Model name                                                                                                                                      |
+| `manufacturer`           | String  | No       | —       | Model manufacturer                                                                                                                              |
+| `model_id`               | String  | No       | —       | The contestant-applied identifier: the marking, number or registration the pilot has put on the model. Not required, and never used for scoring |
+| `revision`               | Integer | Yes      | 0       | Revision counter for optimistic locking                                                                                                         |
 
 ## Invariants and Constraints
 

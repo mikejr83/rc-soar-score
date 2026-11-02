@@ -1435,6 +1435,744 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No contests yet.'**
   String get contestsEmpty;
+
+  /// Shown in the Models cell of a pilot who has no models. A notice only: the contest goes ahead without models.
+  ///
+  /// In en, this message translates to:
+  /// **'No models entered'**
+  String get modelsCellNone;
+
+  /// Tooltip on the notice that a pilot has no models.
+  ///
+  /// In en, this message translates to:
+  /// **'A pilot without a model is fine. Add models any time.'**
+  String get modelsCellNoneTooltip;
+
+  /// Tooltip and accessible name of the button that opens a pilot's models.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit models for {name}'**
+  String modelsEditTooltip(String name);
+
+  /// Title of the window where a pilot's models are added, edited and removed.
+  ///
+  /// In en, this message translates to:
+  /// **'Models for {name}'**
+  String modelsDialogTitle(String name);
+
+  /// Shown in the models window when the pilot has no models.
+  ///
+  /// In en, this message translates to:
+  /// **'No models yet. The contest can go ahead without them.'**
+  String get modelsDialogEmpty;
+
+  /// Label of the menu that picks a model the person already has on their profile.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick one of their models'**
+  String get modelsPickLabel;
+
+  /// Hint under the profile model menu.
+  ///
+  /// In en, this message translates to:
+  /// **'Or type a new one below'**
+  String get modelsPickHint;
+
+  /// Label of the required model name field.
+  ///
+  /// In en, this message translates to:
+  /// **'Model name *'**
+  String get modelsFieldName;
+
+  /// Label of the optional model manufacturer field.
+  ///
+  /// In en, this message translates to:
+  /// **'Manufacturer'**
+  String get modelsFieldManufacturer;
+
+  /// Label of the optional field for the identifier the pilot put on the model.
+  ///
+  /// In en, this message translates to:
+  /// **'Model ID'**
+  String get modelsFieldModelId;
+
+  /// Helper text under the Model ID field.
+  ///
+  /// In en, this message translates to:
+  /// **'The marking the pilot put on the model'**
+  String get modelsFieldModelIdHelper;
+
+  /// Label of the optional field for the identifier the director applied for this contest.
+  ///
+  /// In en, this message translates to:
+  /// **'Contest identifier'**
+  String get modelsFieldContestId;
+
+  /// Helper text under the Contest identifier field.
+  ///
+  /// In en, this message translates to:
+  /// **'Applied by you for this contest, such as a serial number'**
+  String get modelsFieldContestIdHelper;
+
+  /// Button that opens the form to add a model.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a model'**
+  String get modelsAddButton;
+
+  /// Button that adds the model in the form.
+  ///
+  /// In en, this message translates to:
+  /// **'Add model'**
+  String get modelsSaveAdd;
+
+  /// Button that saves changes to the model in the form.
+  ///
+  /// In en, this message translates to:
+  /// **'Save model'**
+  String get modelsSaveEdit;
+
+  /// Button that closes the model form without saving.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get modelsFormCancel;
+
+  /// Button that closes the models window.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get modelsDone;
+
+  /// Tooltip of the button that edits one model.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit {model}'**
+  String modelsEditEntry(String model);
+
+  /// Tooltip of the button that removes one model.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {model}'**
+  String modelsRemoveEntry(String model);
+
+  /// Error under the model name field when it is empty.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a model name.'**
+  String get modelsNameRequired;
+
+  /// Warning in the model form when the model matches one the pilot already has.
+  ///
+  /// In en, this message translates to:
+  /// **'This pilot already has a model with the same name, manufacturer and ID.'**
+  String get modelsDuplicate;
+
+  /// Shown when a model change is refused because the model changed since it was read.
+  ///
+  /// In en, this message translates to:
+  /// **'This pilot\'s models were changed elsewhere. Close this window to refresh them, then try again.'**
+  String get modelsStale;
+
+  /// Shown when saving a model fails.
+  ///
+  /// In en, this message translates to:
+  /// **'The model could not be saved. {error}'**
+  String modelsSaveFailed(String error);
+
+  /// Detail line of a model: the identifier the pilot put on it.
+  ///
+  /// In en, this message translates to:
+  /// **'ID {value}'**
+  String modelsDetailModelId(String value);
+
+  /// Detail line of a model: the identifier the director applied for this contest.
+  ///
+  /// In en, this message translates to:
+  /// **'Contest {value}'**
+  String modelsDetailContestId(String value);
+
+  /// Models cell of a pilot with several models: how many.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 model} other{{count} models}}'**
+  String modelsCellCount(int count);
+
+  /// Warning in the models form when the pilot's saved models could not be read, as opposed to there being none.
+  ///
+  /// In en, this message translates to:
+  /// **'Their saved models could not be loaded. You can still type a model.'**
+  String get modelsProfileUnavailable;
+
+  /// Button that tries again to load the pilot's saved models.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get modelsProfileRetry;
+
+  /// Tooltip of the menu button on the highlighted pilot in the matrix grid.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilot actions'**
+  String get matrixPilotActions;
+
+  /// Menu item and accessibility action that moves a pilot to another group.
+  ///
+  /// In en, this message translates to:
+  /// **'Move'**
+  String get matrixMoveMenu;
+
+  /// Why moving a pilot is off while the contest is locked.
+  ///
+  /// In en, this message translates to:
+  /// **'Administration is locked. Unlock the contest to move a pilot.'**
+  String get matrixMoveLocked;
+
+  /// Why moving a pilot is off before the first draw or after completion.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilots can be moved once the matrix is drawn and until the contest is complete.'**
+  String get matrixMoveNotEditable;
+
+  /// Title of the dialog that moves a pilot.
+  ///
+  /// In en, this message translates to:
+  /// **'Move {name}'**
+  String matrixMoveTitle(String name);
+
+  /// Where the pilot flies now, in the move dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Now flying round {round}, group {group}.'**
+  String matrixMoveFrom(int round, String group);
+
+  /// Where the pilot flies now when the contest has lanes, in the move dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Now flying round {round}, group {group}, lane {lane}.'**
+  String matrixMoveFromLane(int round, String group, int lane);
+
+  /// Warning in the move dialog when the pilot's flight has a score.
+  ///
+  /// In en, this message translates to:
+  /// **'This flight has a score. Moving the pilot discards it: the score stays in the history as a reset and no longer counts. This is not the standard way to correct a flight, so check that you want this before you continue.'**
+  String get matrixMoveScoredWarning;
+
+  /// Why a pilot cannot be moved out of a locked group.
+  ///
+  /// In en, this message translates to:
+  /// **'The pilot\'s group is locked. Unlock the group before moving the pilot.'**
+  String get matrixMoveSourceGroupLocked;
+
+  /// Why a pilot with a locked score cannot be moved.
+  ///
+  /// In en, this message translates to:
+  /// **'The pilot\'s score is locked. Unlock the score before moving the pilot.'**
+  String get matrixMoveSourceScoreLocked;
+
+  /// Label of the round picker in the move dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Round'**
+  String get matrixMoveRound;
+
+  /// One round in the move dialog's round picker.
+  ///
+  /// In en, this message translates to:
+  /// **'Round {round}'**
+  String matrixMoveRoundOption(int round);
+
+  /// Heading of the group list in the move dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to group'**
+  String get matrixMoveGroupHeading;
+
+  /// One group in the move dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Group {group}'**
+  String matrixMoveGroupLabel(String group);
+
+  /// Mark on a group that is a good place to move a pilot to.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended'**
+  String get matrixMoveRecommended;
+
+  /// Mark on a group that is allowed but a poor place to move a pilot to.
+  ///
+  /// In en, this message translates to:
+  /// **'Not ideal'**
+  String get matrixMoveNotIdeal;
+
+  /// Why a group is not ideal as a move target.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilots in this group already have scores.'**
+  String get matrixMoveReasonHasScores;
+
+  /// Why a group is not ideal as a move target.
+  ///
+  /// In en, this message translates to:
+  /// **'This round appears to be completed.'**
+  String get matrixMoveReasonRoundCompleted;
+
+  /// Why a group is not ideal as a move target.
+  ///
+  /// In en, this message translates to:
+  /// **'A teammate flies in this group.'**
+  String get matrixMoveReasonTeammate;
+
+  /// Why the pilot's current group cannot be chosen.
+  ///
+  /// In en, this message translates to:
+  /// **'The pilot flies in this group now.'**
+  String get matrixMoveBlockCurrent;
+
+  /// Why a group the pilot is already part of cannot be chosen.
+  ///
+  /// In en, this message translates to:
+  /// **'The pilot already flies in this group in round {round}.'**
+  String matrixMoveBlockAlready(int round);
+
+  /// Why a locked group cannot be chosen.
+  ///
+  /// In en, this message translates to:
+  /// **'This group is locked. Unlock the group first.'**
+  String get matrixMoveBlockGroupLocked;
+
+  /// Why a group of a locked round cannot be chosen.
+  ///
+  /// In en, this message translates to:
+  /// **'This round is locked. Unlock the round first.'**
+  String get matrixMoveBlockRoundLocked;
+
+  /// Why a group with a teammate cannot be chosen when team protection is on.
+  ///
+  /// In en, this message translates to:
+  /// **'Team protection is on and a teammate flies in this group.'**
+  String get matrixMoveBlockTeam;
+
+  /// Label of the lane picker in the move dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Lane'**
+  String get matrixMoveLane;
+
+  /// One free lane in the lane picker.
+  ///
+  /// In en, this message translates to:
+  /// **'Lane {lane}'**
+  String matrixMoveLaneFree(int lane);
+
+  /// One taken lane in the lane picker.
+  ///
+  /// In en, this message translates to:
+  /// **'Lane {lane}, taken by {name}'**
+  String matrixMoveLaneTaken(int lane, String name);
+
+  /// Label of the reason field in the move dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason'**
+  String get matrixMoveReasonLabel;
+
+  /// Help under the reason field in the move dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Required. Kept with the move in the history.'**
+  String get matrixMoveReasonHelp;
+
+  /// Error when the move reason is empty.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a reason.'**
+  String get matrixMoveReasonRequired;
+
+  /// Error when no group is chosen in the move dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a group to move the pilot to.'**
+  String get matrixMoveGroupRequired;
+
+  /// Error when no lane is chosen in the move dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a lane.'**
+  String get matrixMoveLaneRequired;
+
+  /// Button that closes the move dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get matrixMoveCancel;
+
+  /// Button that moves the pilot.
+  ///
+  /// In en, this message translates to:
+  /// **'Move pilot'**
+  String get matrixMoveConfirm;
+
+  /// Button that moves a pilot whose flight has a score.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard score and move'**
+  String get matrixMoveConfirmDiscard;
+
+  /// Shown on the button while the move is sent.
+  ///
+  /// In en, this message translates to:
+  /// **'Moving…'**
+  String get matrixMoveWorking;
+
+  /// Shown in the move dialog when the server cannot be reached.
+  ///
+  /// In en, this message translates to:
+  /// **'Soar Score can\'t reach the server. Nothing was moved. Try again.'**
+  String get matrixMoveNetwork;
+
+  /// Shown in the move dialog when the server says the matrix changed.
+  ///
+  /// In en, this message translates to:
+  /// **'The matrix or the contest changed since this page loaded. Nothing was moved. Reload to see the current matrix.'**
+  String get matrixMoveChanged;
+
+  /// Button that reloads the matrix after a move was refused because it changed.
+  ///
+  /// In en, this message translates to:
+  /// **'Reload'**
+  String get matrixMoveReload;
+
+  /// Snackbar when the scores could not be read before a move.
+  ///
+  /// In en, this message translates to:
+  /// **'The scores could not be checked, so the pilot was not moved. {error}'**
+  String matrixMoveScoresFailed(String error);
+
+  /// Snackbar after a pilot was moved.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} moved.'**
+  String matrixPilotMoved(String name);
+
+  /// Label on a pilot in the grid whom a director moved.
+  ///
+  /// In en, this message translates to:
+  /// **'Moved'**
+  String get matrixMovedLabel;
+
+  /// Heading in the pilot panel of the moves of the pilot.
+  ///
+  /// In en, this message translates to:
+  /// **'Moves'**
+  String get matrixMovedHeading;
+
+  /// One move of the pilot in the pilot panel, with the reason.
+  ///
+  /// In en, this message translates to:
+  /// **'Round {round}: {reason}'**
+  String matrixMovedLine(int round, String reason);
+
+  /// Why a retired pilot cannot be moved.
+  ///
+  /// In en, this message translates to:
+  /// **'This pilot has retired and cannot be moved.'**
+  String get matrixMoveSourceRetired;
+
+  /// Snackbar while the scores are read before the move dialog opens.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking scores…'**
+  String get matrixMoveChecking;
+
+  /// Heading of the Settings card with the version, licences and legal links.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get aboutHeading;
+
+  /// Settings entry that opens the public site's open source licences page in the browser.
+  ///
+  /// In en, this message translates to:
+  /// **'Open source licences'**
+  String get aboutOpenSourceLicences;
+
+  /// Explains that the open source licences entry opens the website.
+  ///
+  /// In en, this message translates to:
+  /// **'Opens the list on the RC Soar Score website'**
+  String get aboutOpenSourceLicencesHint;
+
+  /// Settings entry that shows the licences bundled with the app, which works without a network.
+  ///
+  /// In en, this message translates to:
+  /// **'Licences on this device'**
+  String get aboutLicencesOnThisDevice;
+
+  /// Explains that the bundled licences page needs no network.
+  ///
+  /// In en, this message translates to:
+  /// **'Works without a network connection'**
+  String get aboutLicencesOnThisDeviceHint;
+
+  /// Settings entry that opens the source code repository; the app is licensed under the AGPL-3.0.
+  ///
+  /// In en, this message translates to:
+  /// **'Source code (AGPL-3.0)'**
+  String get aboutSourceCode;
+
+  /// Settings entry that opens the Privacy Policy on the public site.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy Policy'**
+  String get aboutPrivacyPolicy;
+
+  /// Settings entry that opens the Terms of Service on the public site.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms of Service'**
+  String get aboutTermsOfService;
+
+  /// Snackbar when a link in the About card could not be opened.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open the link. Check your network connection and try again.'**
+  String get aboutLinkFailed;
+
+  /// Button on the participants page that imports pilots from a GliderScore database file.
+  ///
+  /// In en, this message translates to:
+  /// **'Import pilots from GliderScore…'**
+  String get pilotImportButton;
+
+  /// Title of the pilot import dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Import pilots from GliderScore'**
+  String get pilotImportTitle;
+
+  /// Shown in the pilot import dialog before a file is chosen.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a GliderScore database (.mdb) to read the pilots from.'**
+  String get pilotImportChoosing;
+
+  /// Button that opens the file chooser in the pilot import dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose file…'**
+  String get pilotImportChooseButton;
+
+  /// Shown while the GliderScore file is read.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading {file}…'**
+  String pilotImportReading(String file);
+
+  /// Introduction above the list of pilots found in a GliderScore file.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose which pilots to add to your participants. Pilots already in your list get any new details; their names are never changed.'**
+  String get pilotImportReviewIntro;
+
+  /// Heading of the pilots that are not in the participants yet.
+  ///
+  /// In en, this message translates to:
+  /// **'New ({count})'**
+  String pilotImportNewHeading(int count);
+
+  /// Heading of the pilots that match a participant.
+  ///
+  /// In en, this message translates to:
+  /// **'Already in your list ({count})'**
+  String pilotImportUpdateHeading(int count);
+
+  /// Heading of the pilots that might be a participant already in the list.
+  ///
+  /// In en, this message translates to:
+  /// **'Maybe the same person ({count})'**
+  String pilotImportMaybeHeading(int count);
+
+  /// Row text naming the details an import adds to an existing participant.
+  ///
+  /// In en, this message translates to:
+  /// **'Will update: {fields}'**
+  String pilotImportWillUpdate(String fields);
+
+  /// Row text when an existing participant already has everything the file holds.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing new to add'**
+  String get pilotImportNothingNew;
+
+  /// Row text when the identifiers of a pilot point at different participants.
+  ///
+  /// In en, this message translates to:
+  /// **'Their email and registration numbers match different people in your list.'**
+  String get pilotImportConflict;
+
+  /// Row text when a pilot is the same person as an earlier row of the file.
+  ///
+  /// In en, this message translates to:
+  /// **'Looks like another pilot earlier in this file.'**
+  String get pilotImportDuplicateInFile;
+
+  /// Choice for a pilot that might be an existing participant: leave out.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get pilotImportChoiceSkip;
+
+  /// Choice for a pilot that might be an existing participant: add a new one.
+  ///
+  /// In en, this message translates to:
+  /// **'Add as new'**
+  String get pilotImportChoiceAdd;
+
+  /// Choice for a pilot that might be an existing participant: update that participant.
+  ///
+  /// In en, this message translates to:
+  /// **'Update {name}'**
+  String pilotImportChoiceUpdate(String name);
+
+  /// Name of a participant detail in the list of details an import updates.
+  ///
+  /// In en, this message translates to:
+  /// **'email'**
+  String get pilotImportFieldEmail;
+
+  /// Name of a participant detail in the list of details an import updates.
+  ///
+  /// In en, this message translates to:
+  /// **'FAI number'**
+  String get pilotImportFieldFai;
+
+  /// Name of a participant detail in the list of details an import updates.
+  ///
+  /// In en, this message translates to:
+  /// **'national ID'**
+  String get pilotImportFieldNationalId;
+
+  /// Name of a participant detail in the list of details an import updates.
+  ///
+  /// In en, this message translates to:
+  /// **'club'**
+  String get pilotImportFieldClub;
+
+  /// Name of a participant detail in the list of details an import updates.
+  ///
+  /// In en, this message translates to:
+  /// **'city'**
+  String get pilotImportFieldCity;
+
+  /// Name of a participant detail in the list of details an import updates.
+  ///
+  /// In en, this message translates to:
+  /// **'state'**
+  String get pilotImportFieldState;
+
+  /// Name of a participant detail in the list of details an import updates.
+  ///
+  /// In en, this message translates to:
+  /// **'country'**
+  String get pilotImportFieldCountry;
+
+  /// Note on the pilot import review about GliderScore test pilots that were left out.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 GliderScore test pilot (last name starting ZZ) was left out.} other{{count} GliderScore test pilots (last name starting ZZ) were left out.}}'**
+  String pilotImportTestPilots(int count);
+
+  /// Note on the pilot import review about rows that were skipped.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 row could not be used (no name or pilot number).} other{{count} rows could not be used (no name or pilot number).}}'**
+  String pilotImportSkippedRows(int count);
+
+  /// Note on the pilot import review naming GliderScore columns that are not imported.
+  ///
+  /// In en, this message translates to:
+  /// **'Not imported, because participants have no place for them: {columns}.'**
+  String pilotImportDroppedDetails(String columns);
+
+  /// Note on the pilot import review about pilots without a usable country.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 pilot has no recognised country.} other{{count} pilots have no recognised country.}}'**
+  String pilotImportCountryNote(int count);
+
+  /// Warning on the pilot import review when the file was too large to read fully.
+  ///
+  /// In en, this message translates to:
+  /// **'The file has more pilots than could be read. Some are missing.'**
+  String get pilotImportTruncated;
+
+  /// Shown when the GliderScore file holds no pilots to import.
+  ///
+  /// In en, this message translates to:
+  /// **'No pilots were found in this file.'**
+  String get pilotImportNoPilots;
+
+  /// Summary line above the import button of the pilot import.
+  ///
+  /// In en, this message translates to:
+  /// **'{added} to add, {updated} to update, {unchanged} unchanged, {skipped} left out'**
+  String pilotImportPlan(int added, int updated, int unchanged, int skipped);
+
+  /// Button that saves the pilot import.
+  ///
+  /// In en, this message translates to:
+  /// **'Import'**
+  String get pilotImportConfirm;
+
+  /// Shown while the pilots are saved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving pilots…'**
+  String get pilotImportSaving;
+
+  /// Result of a pilot import.
+  ///
+  /// In en, this message translates to:
+  /// **'Added {added}, updated {updated}, unchanged {unchanged}, left out {skipped}.'**
+  String pilotImportDone(int added, int updated, int unchanged, int skipped);
+
+  /// Button that closes the finished pilot import.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get pilotImportDoneButton;
+
+  /// Shown when the pilot import fails.
+  ///
+  /// In en, this message translates to:
+  /// **'The import did not work. {reason}'**
+  String pilotImportFailed(String reason);
+
+  /// Shown when the GliderScore reader is missing.
+  ///
+  /// In en, this message translates to:
+  /// **'Importing from GliderScore is not available on this computer.'**
+  String get pilotImportUnavailable;
+
+  /// Shown when a participant was edited during the pilot import review.
+  ///
+  /// In en, this message translates to:
+  /// **'Your participants changed while you were reviewing. Review again before importing.'**
+  String get pilotImportChangedDuringReview;
+
+  /// Button that opens the file chooser again after it failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a file again'**
+  String get pilotImportChooseAgain;
+
+  /// Button that rebuilds the pilot import review.
+  ///
+  /// In en, this message translates to:
+  /// **'Review again'**
+  String get pilotImportReviewAgain;
 }
 
 class _AppLocalizationsDelegate

@@ -10,6 +10,21 @@ class ContestParticipationRepository extends DriftRepository
 
   late final _store = store<core.ContestParticipation>('ContestParticipation');
   late final _memberships = store<core.TeamMembership>('TeamMembership');
+  late final _modelLinks = store<core.ContestModelLink>('ContestModelLink');
+
+  /// Removes the model links of [participationId]; only a pilot has any.
+  Future<void> _removeModelLinks(
+    core.WriteContext context,
+    core.Id participationId,
+    core.MutationMetadata metadata,
+  ) async {
+    for (final link in await _modelLinks.whereId(
+      'contest_participation_id',
+      participationId,
+    )) {
+      await context.delete(link, metadata: metadata.forPart(link.id.value));
+    }
+  }
 
   @override
   Future<core.ContestParticipation?> findById(core.Id id) => _store.find(id);
@@ -51,6 +66,7 @@ class ContestParticipationRepository extends DriftRepository
       participation.id,
       metadata,
     );
+    await _removeModelLinks(context, participation.id, metadata);
     final saved = await context.save(participation, metadata: metadata);
     return (participation: saved, matrixRowsRemoved: removed);
   });
@@ -83,6 +99,7 @@ class ContestParticipationRepository extends DriftRepository
         metadata: metadata.forPart(membership.id.value),
       );
     }
+    await _removeModelLinks(context, id, metadata);
     await context.delete(participation, metadata: metadata);
     return (deleted: true, matrixRowsRemoved: removed);
   });

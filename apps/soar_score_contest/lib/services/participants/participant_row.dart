@@ -1,5 +1,6 @@
 import 'package:soar_score_core/soar_score_core.dart';
 
+import 'model_entry.dart';
 import 'participant_option.dart';
 
 /// Where a selected participant's profile came from.
@@ -76,8 +77,17 @@ abstract interface class ParticipantRow {
   /// The team name; empty means not assigned to a team.
   String get team;
 
-  /// A copy with the given cells changed.
-  ParticipantRow withEdits({Role? role, String? classification, String? team});
+  /// The models the pilot flies in the contest; none for a non-flier.
+  List<ModelEntry> get models;
+
+  /// A copy with the given cells changed. [models] only changes a wizard
+  /// draft row; a stored row's models are saved as they are edited.
+  ParticipantRow withEdits({
+    Role? role,
+    String? classification,
+    String? team,
+    List<ModelEntry>? models,
+  });
 }
 
 /// The rules the shared participant list applies to its rows. The wizard

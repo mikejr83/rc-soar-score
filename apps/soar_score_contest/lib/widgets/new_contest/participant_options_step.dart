@@ -142,7 +142,7 @@ class _ParticipantOptionsStepState extends State<ParticipantOptionsStep> {
       if (draft.has(ParticipantOption.pilotNumbers))
         (Icons.pin_outlined, 'Pilot no.', 'provisional'),
       if (draft.has(ParticipantOption.models))
-        (Icons.flight, 'Models', 'not recorded yet'),
+        (Icons.flight, 'Models', 'optional'),
     ];
 
     return Column(

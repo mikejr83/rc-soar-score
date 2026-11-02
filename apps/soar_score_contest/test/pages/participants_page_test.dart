@@ -3,13 +3,49 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:soar_score_core/soar_score_core.dart';
 
+import 'package:soar_score_contest/services/pilot_import/pilot_import.dart';
+
 import '../support/participant_test_support.dart';
+import '../support/pilot_import_fakes.dart' show FakePilotImportStore;
 
 /// The list row for [name]. The detail pane repeats the selected
 /// participant's name, so look inside the list tiles only.
 Finder _row(String name) => find.widgetWithText(ListTile, name);
 
 void main() {
+  group('GliderScore pilot import', () {
+    tearDown(() => PilotImportStore.current = null);
+
+    testWidgets('has no import button when the build has no store', (
+      tester,
+    ) async {
+      final client = clientFor(
+        (_) async => json({
+          'participants': [profile('Ada', 'Lovelace').toJson()],
+        }),
+      );
+      await tester.pumpWidget(participantsApp(client));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('import-pilots')), findsNothing);
+    });
+
+    testWidgets('offers the import with participants and with none', (
+      tester,
+    ) async {
+      PilotImportStore.current = FakePilotImportStore(const []);
+      for (final list in [
+        <Object?>[],
+        [profile('Ada', 'Lovelace').toJson()],
+      ]) {
+        final client = clientFor((_) async => json({'participants': list}));
+        await tester.pumpWidget(participantsApp(client));
+        await tester.pumpAndSettle();
+        expect(find.byKey(const ValueKey('import-pilots')), findsOneWidget);
+        expect(find.text('Import pilots from GliderScore…'), findsOneWidget);
+      }
+    });
+  });
+
   testWidgets('lists the participants the API returns', (tester) async {
     final client = clientFor(
       (_) async => json({

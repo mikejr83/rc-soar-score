@@ -1,0 +1,110 @@
+{
+  "schema": "gs-import/v1",
+  "id": "00000000-0000-7000-8000-000000000001",
+  "sourceDbFile": "GliderScoreData.mdb",
+  "tables": [
+    {
+      "name": "Pilots",
+      "rowCount": 12,
+      "rowCapExceeded": false,
+      "rows": [
+        {
+          "PilotNo": 75,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "Y",
+          "FirstName": "Alex",
+          "LastName": "Ashdown3"
+        },
+        {
+          "PilotNo": 77,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "FirstName": "Oakley",
+          "LastName": "Candlewick3"
+        },
+        {
+          "PilotNo": 78,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "FirstName": "Val",
+          "LastName": "Dunmore3"
+        },
+        {
+          "PilotNo": 80,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "FirstName": "Kai",
+          "LastName": "Fairweather3"
+        },
+        {
+          "PilotNo": 82,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "FirstName": "Zion",
+          "LastName": "Hawthorne3"
+        },
+        {
+          "PilotNo": 83,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "FirstName": "Glenn",
+          "LastName": "Ironside3"
+        },
+        {
+          "PilotNo": 84,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "FirstName": "Nico",
+          "LastName": "Jessup3"
+        },
+        {
+          "PilotNo": 85,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "Y",
+          "FirstName": "Uma",
+          "LastName": "Kingsley3"
+        },
+        {
+          "PilotNo": 86,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "FirstName": "Casey",
+          "LastName": "Larkspur3"
+        },
+        {
+          "PilotNo": 87,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "FirstName": "Jordan",
+          "LastName": "Marlowe3"
+        },
+        {
+          "PilotNo": 88,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "FirstName": "Quinn",
+          "LastName": "Northcott3"
+        },
+        {
+          "PilotNo": 89,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "FirstName": "Yael",
+          "LastName": "Oakenfold3"
+        }
+      ]
+    }
+  ]
+}

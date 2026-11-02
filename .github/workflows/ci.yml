@@ -50,31 +50,15 @@ env:
   MELOS_VERSION: ^8.9.0
 
 jobs:
-  changes:
-    name: Detect changed areas
+  # Cheap checks run first. The expensive jobs below wait for them, and any
+  # failing job cancels the whole run (see the last step of each job).
+  quick-checks:
+    name: Format and analyze
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       contents: read
-      pull-requests: read
-    outputs:
-      windows: ${{ steps.filter.outputs.windows }}
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: dorny/paths-filter@v3
-        id: filter
-        with:
-          filters: |
-            windows:
-              - "apps/soar_score_contest/**"
-              - "packages/**"
-              - "pubspec.yaml"
-              - "pubspec.lock"
-              - ".github/workflows/ci.yml"
-
-  analyze-test-build:
-    name: Analyze, test, build
-    runs-on: ubuntu-latest
+      actions: write
     steps:
       - uses: actions/checkout@v4
 
@@ -91,14 +75,48 @@ jobs:
       - name: Bootstrap
         run: melos bootstrap
 
+      - name: Format check
+        run: melos format -o none --set-exit-if-changed -c 3
+
       - name: Analyze
-        run: melos analyze
+        run: melos analyze --fatal-infos
+
+      - name: Cancel the rest of the run
+        # Fail fast: stop sibling jobs instead of letting them run to the end.
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh run cancel ${{ github.run_id }} --repo ${{ github.repository }} || true
+
+  test:
+    name: Test
+    needs: quick-checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read
+      actions: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: Install Melos
+        run: dart pub global activate melos "$MELOS_VERSION"
+
+      - name: Bootstrap
+        run: melos bootstrap
 
       - name: Test
         # Runs test/ in every project. The contest app's integration_test/
         # E2E journeys are not run here (they need the Windows desktop app);
         # run them locally with scripts/e2e.ps1.
-        run: melos test
+        run: melos test -c 3
 
       - name: Data package tests against PostgreSQL
         # Spin up a throwaway postgres:17 container, run the data package
@@ -107,12 +125,56 @@ jobs:
         # PostgreSQL group is skipped, which is not a pass.
         run: bash scripts/test-postgres.sh
 
-      - name: Build
-        run: melos run build
+      - name: Cancel the rest of the run
+        # Fail fast: stop sibling jobs instead of letting them run to the end.
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh run cancel ${{ github.run_id }} --repo ${{ github.repository }} || true
 
-  public-site:
-    name: Public site (Next.js)
+  build:
+    name: Build
+    needs: quick-checks
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      actions: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: Install Melos
+        run: dart pub global activate melos "$MELOS_VERSION"
+
+      - name: Bootstrap
+        run: melos bootstrap
+
+      - name: Build
+        run: |
+          mkdir -p apps/soar_score_server/build/cli
+          melos run build
+
+      - name: Cancel the rest of the run
+        # Fail fast: stop sibling jobs instead of letting them run to the end.
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh run cancel ${{ github.run_id }} --repo ${{ github.repository }} || true
+
+  public-site-quick:
+    name: Public site install and lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      actions: write
     defaults:
       run:
         working-directory: apps/soar_score_web
@@ -131,18 +193,54 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Cancel the rest of the run
+        # Fail fast: stop sibling jobs instead of letting them run to the end.
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh run cancel ${{ github.run_id }} --repo ${{ github.repository }} || true
+
+  public-site:
+    name: Public site test and build
+    needs: public-site-quick
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      actions: write
+    defaults:
+      run:
+        working-directory: apps/soar_score_web
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: apps/soar_score_web/package-lock.json
+
+      - name: Install
+        run: npm ci
+
       - name: Test
         run: npm test
 
       - name: Build
         run: npm run build
 
+      - name: Cancel the rest of the run
+        # Fail fast: stop sibling jobs instead of letting them run to the end.
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh run cancel ${{ github.run_id }} --repo ${{ github.repository }} || true
 
   # build-windows:
   #   name: Build contest app (Windows)
   #   # The contest app only depends on itself and the shared packages, so
   #   # skip the (expensive) Windows runner for server-only and similar changes.
-  #   needs: changes
+  #   needs: changes # re-add the "changes" paths-filter job when this is enabled
   #   if: needs.changes.outputs.windows == 'true'
   #   runs-on: windows-latest
   #   steps:
@@ -171,60 +269,3 @@ jobs:
   #     - name: Build Windows
   #       working-directory: apps/soar_score_contest
   #       run: flutter build windows --no-pub
-
-  # server-image:
-  #   name: Server image
-  #   # PR builds only validate the code (analyze/test/Postgres suite); the
-  #   # image build costs an expensive Docker/Dart AOT compile, so only run it
-  #   # on pushes to master, where the image is also pushed to GHCR.
-  #   if: github.event_name == 'push'
-  #   runs-on: ubuntu-latest
-  #   permissions:
-  #     contents: read
-  #     packages: write
-  #   steps:
-  #     - uses: actions/checkout@v4
-
-  #     - name: Smoke test with docker compose
-  #       # Starts the server and PostgreSQL and waits for both health checks,
-  #       # so a healthy server answering /health proves the image runs.
-  #       run: |
-  #         docker compose up --build --wait --wait-timeout 300 -d
-  #         curl --fail --silent --show-error http://localhost:8080/health
-
-  #     - name: Show compose logs
-  #       if: failure()
-  #       run: docker compose logs
-
-  #     - name: Stop compose
-  #       if: always()
-  #       run: docker compose down --volumes
-
-  #     - uses: docker/setup-buildx-action@v3
-
-  #     - name: Log in to GitHub Container Registry
-  #       uses: docker/login-action@v3
-  #       with:
-  #         registry: ghcr.io
-  #         username: ${{ github.actor }}
-  #         password: ${{ secrets.GITHUB_TOKEN }}
-
-  #     - name: Image tags
-  #       id: meta
-  #       uses: docker/metadata-action@v5
-  #       with:
-  #         images: ghcr.io/${{ github.repository }}-server
-  #         tags: |
-  #           type=sha
-  #           type=raw,value=latest
-
-  #     - name: Build, and push from master
-  #       uses: docker/build-push-action@v6
-  #       with:
-  #         context: .
-  #         file: apps/soar_score_server/Dockerfile
-  #         push: ${{ github.event_name == 'push' }}
-  #         tags: ${{ steps.meta.outputs.tags }}
-  #         labels: ${{ steps.meta.outputs.labels }}
-  #         cache-from: type=gha
-  #         cache-to: type=gha,mode=max

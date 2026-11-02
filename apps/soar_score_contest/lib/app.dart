@@ -238,6 +238,7 @@ class _SoarScoreContestAppState extends State<SoarScoreContestApp> {
             ),
             child: AlphaNoticeGate(
               enabled: widget.alphaNotice,
+              store: widget.bootstrap?.localUiStore,
               child: child ?? const SizedBox.shrink(),
             ),
           );

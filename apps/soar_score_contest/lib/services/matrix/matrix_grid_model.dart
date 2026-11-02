@@ -5,10 +5,25 @@ import 'round_progress_view.dart';
 
 /// One pilot's place in a group of a round.
 class GridSlot {
-  const GridSlot({required this.pilot, required this.lane});
+  const GridSlot({
+    required this.pilot,
+    required this.lane,
+    this.assignmentId,
+    this.moved = false,
+    this.reason,
+  });
 
   final MatrixPilot pilot;
   final int? lane;
+
+  /// The assignment behind the slot, which a move starts from.
+  final Id? assignmentId;
+
+  /// Whether a director moved the pilot into this slot.
+  final bool moved;
+
+  /// Why the pilot was moved, when [moved].
+  final String? reason;
 }
 
 /// A round of the drawn matrix with its groups, in group order.
@@ -109,6 +124,9 @@ class MatrixGridModel {
                   pilots[assignment.contestParticipationId] ??
                   _unknown(assignment),
               lane: assignment.lane,
+              assignmentId: assignment.id,
+              moved: assignment.assignmentType == AssignmentType.moved,
+              reason: assignment.reason,
             ),
         ];
         lanes = lanes || slots.any((slot) => slot.lane != null);
@@ -197,6 +215,14 @@ class MatrixGridModel {
       if (other.participationId != pilot)
         (other, meetingsBetween(pilot, other.participationId)),
   ]..sort((a, b) => b.$2 != a.$2 ? b.$2.compareTo(a.$2) : _byPilot(a.$1, b.$1));
+
+  /// Every slot where [pilot] flies in [round], with its group index. A pilot
+  /// moved in from another round flies twice in this one.
+  List<(int group, GridSlot slot)> slotsOf(Id pilot, GridRound round) => [
+    for (var g = 0; g < round.groups.length; g++)
+      for (final slot in round.groups[g])
+        if (slot.pilot.participationId == pilot) (g, slot),
+  ];
 
   /// The round, group letter index and lane where [pilot] flies in [round].
   (int group, int? lane)? placeOf(Id pilot, GridRound round) {

@@ -24,6 +24,11 @@ void main() {
     expect(restored.source!.contest.name, draft.source!.contest.name);
     expect(restored.source!.pilots.single.name, 'Avery Brooks');
     expect(restored.participants.single.team, 'Gators');
+    final models = restored.participants.single.models;
+    expect(models.map((m) => m.name), ['Supra', 'Home-built']);
+    expect(models.first.catalogId, isNotNull);
+    expect(models.first.contestIdentifier, 'A7');
+    expect(models.last.catalogId, isNull);
     expect(restored.scoring!.secondDrop, 'x');
     expect(restored.draw.seededRounds, '2');
     expect(restored.visitedThrough, 5);

@@ -3,7 +3,9 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
+import 'package:soar_score_contest/pages/participant_editor_page.dart';
 import 'package:soar_score_contest/router.dart';
+import 'package:soar_score_core/soar_score_core.dart';
 
 import '../support/participant_test_support.dart';
 
@@ -95,6 +97,30 @@ void main() {
     ) as Map<String, dynamic>;
     expect(body['club'], 'Tampa Bay Soaring Society');
     expect(body['fai_number'], 'USA-1');
+  });
+
+  testWidgets('tells the caller about each profile saved and added', (
+    tester,
+  ) async {
+    useTallWindow(tester);
+    final client = clientFor((request) async {
+      if (request.method == 'POST') {
+        return json(profile('Sam', 'Okafor', n: 12).toJson(), 201);
+      }
+      return json({'participants': []});
+    });
+    final others = <ParticipantProfile>[];
+    await tester.pumpWidget(
+      editorApp(
+        client,
+        ParticipantEditorPage(onDone: (_) {}, onSavedAnother: others.add),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await _fillSam(tester);
+    await _saveAndAddAnother(tester);
+
+    expect(others.map((p) => p.firstName), ['Sam']);
   });
 
   testWidgets('it is not offered when editing', (tester) async {

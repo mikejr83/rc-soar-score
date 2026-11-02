@@ -64,6 +64,10 @@ class ParticipantsController extends ChangeNotifier {
   Role? failedAddRole;
   String? addFailure;
 
+  /// Whether the last failed add was refused because a round has no group
+  /// with room, which trying again does not change until the groups do.
+  bool addNeedsRoom = false;
+
   /// What the last removal left behind.
   RemoveResult? lastRemoval;
 
@@ -222,6 +226,11 @@ class ParticipantsController extends ChangeNotifier {
     _saved = loaded.participants;
     final ids = {for (final row in _saved) row.rowId};
     _drafts.removeWhere((id, _) => !ids.contains(id));
+    // Models are saved on their own, so an edited row shows the fresh ones.
+    for (final row in _saved) {
+      final edited = _drafts[row.rowId];
+      if (edited != null) _drafts[row.rowId] = edited.withModels(row.models);
+    }
     _states.removeWhere((id, _) => !ids.contains(id));
     selection.retainAll(ids);
     _rules = _makeRules();
@@ -451,6 +460,7 @@ class ParticipantsController extends ChangeNotifier {
         participation: participation,
         profile: saved.profile,
         membershipId: membershipId,
+        models: saved.models,
         team: team,
       );
       _replaceSaved(progress);
@@ -462,6 +472,7 @@ class ParticipantsController extends ChangeNotifier {
           participation: participation,
           profile: draft.profile,
           membershipId: membershipId,
+          models: saved.models,
           roleId: draft.roleId,
           roleName: draft.roleName,
           isPilot: draft.isPilot,
@@ -597,6 +608,7 @@ class ParticipantsController extends ChangeNotifier {
       failedAdd = null;
       failedAddRole = null;
       addFailure = null;
+      addNeedsRoom = false;
       await _read();
       final rowId = participation.id.value;
       _states[rowId] = RowState(RowOutcome.added, late: late);
@@ -609,6 +621,8 @@ class ParticipantsController extends ChangeNotifier {
       failedAdd = profile;
       failedAddRole = role;
       addFailure = apiErrorTextOf(error);
+      addNeedsRoom =
+          error is ApiHttpError && error.error?.code == 'no_room_in_round';
       notifyListeners();
       return false;
     }

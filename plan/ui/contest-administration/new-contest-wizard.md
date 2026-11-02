@@ -65,7 +65,7 @@ When classes are enabled, each pilot can have a class. A pilot without one gets 
 
 When roles are enabled, new participants default to the immutable `Pilot` role. The role selector lists the configured roles. Non-flying roles do not receive score rows, but may be associated with a team and may enter team scores later when authorized.
 
-When models are enabled, the director can add one or more models for each scoring pilot, from the models already on that person's profile or by typing a new one. A model has a name, an optional manufacturer, an optional model ID the contestant applied, and an optional contest ID the director applied (for example a serial number). Non-flying participants get no models. A pilot with no model shows a notice on the row and in the step summary; it never blocks continuation, creating the contest, the draw, or adding participants later. Until the model API exists (#594) models are kept in the draft and not stored with the contest.
+When models are enabled, the director can add one or more models for each scoring pilot, from the models already on that person's profile or by typing a new one. A model has a name, an optional manufacturer, an optional model ID the contestant applied, and an optional contest ID the director applied (for example a serial number). Non-flying participants get no models. A pilot with no model shows a notice on the row and in the step summary; it never blocks continuation, creating the contest, the draw, or adding participants later.
 
 Pilot numbers are assigned at the first draw, not in this wizard. The wizard may preview the expected numbering but must label it as provisional.
 

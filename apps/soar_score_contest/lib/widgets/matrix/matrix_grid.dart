@@ -32,6 +32,8 @@ class MatrixGrid extends StatefulWidget {
     required this.controller,
     this.dropAfterRounds = const [],
     this.onAddRounds,
+    this.onMove,
+    this.moveBlock,
   });
 
   final MatrixGridModel model;
@@ -41,6 +43,12 @@ class MatrixGrid extends StatefulWidget {
 
   /// Opens the add rounds form; `null` leaves the button off.
   final VoidCallback? onAddRounds;
+
+  /// Moves the pilot of an assignment; `null` leaves the pilot menu off.
+  final ValueChanged<Id>? onMove;
+
+  /// Why moving is off for the whole contest, or `null`.
+  final String? moveBlock;
   final TeamMarkers markers;
   final Id? selected;
   final String query;
@@ -181,6 +189,10 @@ class _MatrixGridState extends State<MatrixGrid> {
                     group: DrawFormCheck.groupLetter(g),
                     textScale: _scale,
                     onTap: () => widget.onSelect(slot.pilot.participationId),
+                    onMove: widget.onMove == null || slot.assignmentId == null
+                        ? null
+                        : () => widget.onMove!(slot.assignmentId!),
+                    moveBlock: widget.moveBlock,
                   ),
                 ),
               if (hidden > 0)

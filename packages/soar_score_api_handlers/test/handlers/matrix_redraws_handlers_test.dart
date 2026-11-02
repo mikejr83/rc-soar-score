@@ -150,13 +150,13 @@ void main() {
     });
 
     test('draws a pilot who joined after the first draw', () async {
-      await drawn();
+      await drawnContest(api, pilots: 5);
       await api.send(
         'POST',
         '/participants',
         body: {
-          'id': matrixTestProfileId(7),
-          'first_name': 'P7',
+          'id': matrixTestProfileId(6),
+          'first_name': 'P6',
           'last_name': 'X',
         },
       );
@@ -164,8 +164,8 @@ void main() {
         'POST',
         '/contests/$_contestId/participations',
         body: {
-          'id': _participationId(7),
-          'participant_profile_id': matrixTestProfileId(7),
+          'id': _participationId(6),
+          'participant_profile_id': matrixTestProfileId(6),
           'role_id': SystemRoles.pilotId.value,
         },
       );
@@ -173,16 +173,16 @@ void main() {
       final body = await api.json(await redraw(firstRound: 4));
 
       final seven = (body['assignments'] as List).cast<Map>().where(
-        (a) => a['contest_participation_id'] == _participationId(7),
+        (a) => a['contest_participation_id'] == _participationId(6),
       );
       expect(seven, hasLength(2));
       expect(
         api
             .repository
             .participations
-            .participations[Id.parse(_participationId(7))]!
+            .participations[Id.parse(_participationId(6))]!
             .participantNumber,
-        7,
+        6,
       );
     });
 

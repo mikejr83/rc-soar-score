@@ -12,6 +12,7 @@ import 'platform/app_bootstrap.dart';
 // Ticket 018.
 import 'platform/bootstrap.dart' as bootstrap;
 import 'services/alpha_notice/alpha_notice_mode.dart';
+import 'services/bundled_licences.dart';
 import 'services/connectivity/app_connectivity.dart';
 import 'services/connectivity/reachability_forwarder.dart';
 import 'services/storage/storage_monitor.dart';
@@ -27,6 +28,7 @@ Future<void> main() async {
 
   WidgetsFlutterBinding.ensureInitialized();
   installCloseWarning();
+  registerBundledLicences();
 
   try {
     _logger.info('Starting Soar Score Contest App');

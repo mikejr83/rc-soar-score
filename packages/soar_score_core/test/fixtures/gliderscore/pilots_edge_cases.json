@@ -1,0 +1,131 @@
+{
+  "schema": "gs-import/v1",
+  "id": "00000000-0000-7000-8000-000000000001",
+  "sourceDbFile": "GliderScoreData.mdb",
+  "tables": [
+    {
+      "name": "Pilots",
+      "rowCount": 18,
+      "rowCapExceeded": false,
+      "rows": [
+        {
+          "PilotNo": 1001,
+          "FirstName": "Sam",
+          "LastName": "Twin",
+          "Country": "USA"
+        },
+        {
+          "PilotNo": 1002,
+          "FirstName": "Sam",
+          "LastName": "Twin",
+          "Country": "USA"
+        },
+        {
+          "PilotNo": 1003,
+          "FirstName": "Ellis",
+          "LastName": "Shared",
+          "Email": "shared@example.test"
+        },
+        {
+          "PilotNo": 1004,
+          "FirstName": "Ellis",
+          "LastName": "Sharedname",
+          "Email": "  Shared@EXAMPLE.TEST "
+        },
+        {
+          "PilotNo": 1005,
+          "FirstName": "Fay",
+          "LastName": "Registered",
+          "FAINumber": "FAI12345",
+          "OtherRegistration": "NAT-0042",
+          "FAI_ID": "FAI12345",
+          "Country": "AUS"
+        },
+        {
+          "PilotNo": 1006,
+          "FirstName": "Gil",
+          "LastName": "Differs",
+          "FAINumber": "FAI777",
+          "FAI_ID": "FAI888"
+        },
+        {
+          "PilotNo": 1007,
+          "FirstName": "Hal",
+          "LastName": "Blanks",
+          "FAINumber": "0",
+          "OtherRegistration": "0",
+          "FAI_ID": " ",
+          "Email": "",
+          "Country": "",
+          "State": " "
+        },
+        {
+          "PilotNo": 1008,
+          "FirstName": "Ida",
+          "LastName": "zzLower"
+        },
+        {
+          "PilotNo": 1009,
+          "FirstName": "Jo",
+          "LastName": "  ZZPadded "
+        },
+        {
+          "PilotNo": 1010,
+          "FirstName": "Kit",
+          "LastName": "Pizzazz"
+        },
+        {
+          "PilotNo": 1011,
+          "LastName": "NoFirst"
+        },
+        {
+          "PilotNo": 1012,
+          "FirstName": "NoLast"
+        },
+        {
+          "PilotNo": 1013,
+          "FirstName": " ",
+          "LastName": " "
+        },
+        {
+          "PilotNo": 1014,
+          "FirstName": "Lee",
+          "LastName": "Ioc",
+          "Country": "GER"
+        },
+        {
+          "PilotNo": 1015,
+          "FirstName": "Mack",
+          "LastName": "Unknown",
+          "Country": "XXX"
+        },
+        {
+          "PilotNo": 1016,
+          "FirstName": "Ned",
+          "LastName": "Lower",
+          "Country": "usa"
+        },
+        {
+          "PilotNo": 1017,
+          "FirstName": "  Zoë ",
+          "LastName": "Accent ",
+          "Club": "Example Soaring Club",
+          "Town": "Exampleton",
+          "State": "ZZ"
+        },
+        {
+          "PilotNo": 1018,
+          "FirstName": "Ola",
+          "LastName": "Dropped",
+          "UsualClass": "F5J",
+          "UsualModel": "Example Model",
+          "Street": "1 Example Street",
+          "PostCode": "00000",
+          "PrivatePhone": "000",
+          "WorkPhone": "000",
+          "Filter": "Y"
+        }
+      ]
+    }
+  ]
+}

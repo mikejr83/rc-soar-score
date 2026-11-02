@@ -14,6 +14,7 @@ class ParticipantEditing {
     required this.selected,
     required this.onToggleSelected,
     required this.onUpdate,
+    this.editModels,
     this.styleOf = _plainStyle,
   });
 
@@ -33,6 +34,10 @@ class ParticipantEditing {
 
   /// Replaces a row (matched by [ParticipantRow.rowId]).
   final ValueChanged<ParticipantRow> onUpdate;
+
+  /// Opens the window that edits a pilot's models; null where models cannot
+  /// be edited, which leaves the Models cell read-only.
+  final Future<void> Function(ParticipantRow row)? editModels;
 
   /// How each row is drawn beyond its values (edited cells, state, locks).
   final ParticipantRowStyle Function(ParticipantRow row) styleOf;

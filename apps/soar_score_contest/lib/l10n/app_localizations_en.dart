@@ -969,4 +969,493 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get contestsEmpty => 'No contests yet.';
+
+  @override
+  String get modelsCellNone => 'No models entered';
+
+  @override
+  String get modelsCellNoneTooltip =>
+      'A pilot without a model is fine. Add models any time.';
+
+  @override
+  String modelsEditTooltip(String name) {
+    return 'Edit models for $name';
+  }
+
+  @override
+  String modelsDialogTitle(String name) {
+    return 'Models for $name';
+  }
+
+  @override
+  String get modelsDialogEmpty =>
+      'No models yet. The contest can go ahead without them.';
+
+  @override
+  String get modelsPickLabel => 'Pick one of their models';
+
+  @override
+  String get modelsPickHint => 'Or type a new one below';
+
+  @override
+  String get modelsFieldName => 'Model name *';
+
+  @override
+  String get modelsFieldManufacturer => 'Manufacturer';
+
+  @override
+  String get modelsFieldModelId => 'Model ID';
+
+  @override
+  String get modelsFieldModelIdHelper =>
+      'The marking the pilot put on the model';
+
+  @override
+  String get modelsFieldContestId => 'Contest identifier';
+
+  @override
+  String get modelsFieldContestIdHelper =>
+      'Applied by you for this contest, such as a serial number';
+
+  @override
+  String get modelsAddButton => 'Add a model';
+
+  @override
+  String get modelsSaveAdd => 'Add model';
+
+  @override
+  String get modelsSaveEdit => 'Save model';
+
+  @override
+  String get modelsFormCancel => 'Cancel';
+
+  @override
+  String get modelsDone => 'Done';
+
+  @override
+  String modelsEditEntry(String model) {
+    return 'Edit $model';
+  }
+
+  @override
+  String modelsRemoveEntry(String model) {
+    return 'Remove $model';
+  }
+
+  @override
+  String get modelsNameRequired => 'Enter a model name.';
+
+  @override
+  String get modelsDuplicate =>
+      'This pilot already has a model with the same name, manufacturer and ID.';
+
+  @override
+  String get modelsStale =>
+      'This pilot\'s models were changed elsewhere. Close this window to refresh them, then try again.';
+
+  @override
+  String modelsSaveFailed(String error) {
+    return 'The model could not be saved. $error';
+  }
+
+  @override
+  String modelsDetailModelId(String value) {
+    return 'ID $value';
+  }
+
+  @override
+  String modelsDetailContestId(String value) {
+    return 'Contest $value';
+  }
+
+  @override
+  String modelsCellCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count models',
+      one: '1 model',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get modelsProfileUnavailable =>
+      'Their saved models could not be loaded. You can still type a model.';
+
+  @override
+  String get modelsProfileRetry => 'Retry';
+
+  @override
+  String get matrixPilotActions => 'Pilot actions';
+
+  @override
+  String get matrixMoveMenu => 'Move';
+
+  @override
+  String get matrixMoveLocked =>
+      'Administration is locked. Unlock the contest to move a pilot.';
+
+  @override
+  String get matrixMoveNotEditable =>
+      'Pilots can be moved once the matrix is drawn and until the contest is complete.';
+
+  @override
+  String matrixMoveTitle(String name) {
+    return 'Move $name';
+  }
+
+  @override
+  String matrixMoveFrom(int round, String group) {
+    return 'Now flying round $round, group $group.';
+  }
+
+  @override
+  String matrixMoveFromLane(int round, String group, int lane) {
+    return 'Now flying round $round, group $group, lane $lane.';
+  }
+
+  @override
+  String get matrixMoveScoredWarning =>
+      'This flight has a score. Moving the pilot discards it: the score stays in the history as a reset and no longer counts. This is not the standard way to correct a flight, so check that you want this before you continue.';
+
+  @override
+  String get matrixMoveSourceGroupLocked =>
+      'The pilot\'s group is locked. Unlock the group before moving the pilot.';
+
+  @override
+  String get matrixMoveSourceScoreLocked =>
+      'The pilot\'s score is locked. Unlock the score before moving the pilot.';
+
+  @override
+  String get matrixMoveRound => 'Round';
+
+  @override
+  String matrixMoveRoundOption(int round) {
+    return 'Round $round';
+  }
+
+  @override
+  String get matrixMoveGroupHeading => 'Move to group';
+
+  @override
+  String matrixMoveGroupLabel(String group) {
+    return 'Group $group';
+  }
+
+  @override
+  String get matrixMoveRecommended => 'Recommended';
+
+  @override
+  String get matrixMoveNotIdeal => 'Not ideal';
+
+  @override
+  String get matrixMoveReasonHasScores =>
+      'Pilots in this group already have scores.';
+
+  @override
+  String get matrixMoveReasonRoundCompleted =>
+      'This round appears to be completed.';
+
+  @override
+  String get matrixMoveReasonTeammate => 'A teammate flies in this group.';
+
+  @override
+  String get matrixMoveBlockCurrent => 'The pilot flies in this group now.';
+
+  @override
+  String matrixMoveBlockAlready(int round) {
+    return 'The pilot already flies in this group in round $round.';
+  }
+
+  @override
+  String get matrixMoveBlockGroupLocked =>
+      'This group is locked. Unlock the group first.';
+
+  @override
+  String get matrixMoveBlockRoundLocked =>
+      'This round is locked. Unlock the round first.';
+
+  @override
+  String get matrixMoveBlockTeam =>
+      'Team protection is on and a teammate flies in this group.';
+
+  @override
+  String get matrixMoveLane => 'Lane';
+
+  @override
+  String matrixMoveLaneFree(int lane) {
+    return 'Lane $lane';
+  }
+
+  @override
+  String matrixMoveLaneTaken(int lane, String name) {
+    return 'Lane $lane, taken by $name';
+  }
+
+  @override
+  String get matrixMoveReasonLabel => 'Reason';
+
+  @override
+  String get matrixMoveReasonHelp =>
+      'Required. Kept with the move in the history.';
+
+  @override
+  String get matrixMoveReasonRequired => 'Enter a reason.';
+
+  @override
+  String get matrixMoveGroupRequired => 'Choose a group to move the pilot to.';
+
+  @override
+  String get matrixMoveLaneRequired => 'Choose a lane.';
+
+  @override
+  String get matrixMoveCancel => 'Cancel';
+
+  @override
+  String get matrixMoveConfirm => 'Move pilot';
+
+  @override
+  String get matrixMoveConfirmDiscard => 'Discard score and move';
+
+  @override
+  String get matrixMoveWorking => 'Moving…';
+
+  @override
+  String get matrixMoveNetwork =>
+      'Soar Score can\'t reach the server. Nothing was moved. Try again.';
+
+  @override
+  String get matrixMoveChanged =>
+      'The matrix or the contest changed since this page loaded. Nothing was moved. Reload to see the current matrix.';
+
+  @override
+  String get matrixMoveReload => 'Reload';
+
+  @override
+  String matrixMoveScoresFailed(String error) {
+    return 'The scores could not be checked, so the pilot was not moved. $error';
+  }
+
+  @override
+  String matrixPilotMoved(String name) {
+    return '$name moved.';
+  }
+
+  @override
+  String get matrixMovedLabel => 'Moved';
+
+  @override
+  String get matrixMovedHeading => 'Moves';
+
+  @override
+  String matrixMovedLine(int round, String reason) {
+    return 'Round $round: $reason';
+  }
+
+  @override
+  String get matrixMoveSourceRetired =>
+      'This pilot has retired and cannot be moved.';
+
+  @override
+  String get matrixMoveChecking => 'Checking scores…';
+
+  @override
+  String get aboutHeading => 'About';
+
+  @override
+  String get aboutOpenSourceLicences => 'Open source licences';
+
+  @override
+  String get aboutOpenSourceLicencesHint =>
+      'Opens the list on the RC Soar Score website';
+
+  @override
+  String get aboutLicencesOnThisDevice => 'Licences on this device';
+
+  @override
+  String get aboutLicencesOnThisDeviceHint =>
+      'Works without a network connection';
+
+  @override
+  String get aboutSourceCode => 'Source code (AGPL-3.0)';
+
+  @override
+  String get aboutPrivacyPolicy => 'Privacy Policy';
+
+  @override
+  String get aboutTermsOfService => 'Terms of Service';
+
+  @override
+  String get aboutLinkFailed =>
+      'Could not open the link. Check your network connection and try again.';
+
+  @override
+  String get pilotImportButton => 'Import pilots from GliderScore…';
+
+  @override
+  String get pilotImportTitle => 'Import pilots from GliderScore';
+
+  @override
+  String get pilotImportChoosing =>
+      'Choose a GliderScore database (.mdb) to read the pilots from.';
+
+  @override
+  String get pilotImportChooseButton => 'Choose file…';
+
+  @override
+  String pilotImportReading(String file) {
+    return 'Reading $file…';
+  }
+
+  @override
+  String get pilotImportReviewIntro =>
+      'Choose which pilots to add to your participants. Pilots already in your list get any new details; their names are never changed.';
+
+  @override
+  String pilotImportNewHeading(int count) {
+    return 'New ($count)';
+  }
+
+  @override
+  String pilotImportUpdateHeading(int count) {
+    return 'Already in your list ($count)';
+  }
+
+  @override
+  String pilotImportMaybeHeading(int count) {
+    return 'Maybe the same person ($count)';
+  }
+
+  @override
+  String pilotImportWillUpdate(String fields) {
+    return 'Will update: $fields';
+  }
+
+  @override
+  String get pilotImportNothingNew => 'Nothing new to add';
+
+  @override
+  String get pilotImportConflict =>
+      'Their email and registration numbers match different people in your list.';
+
+  @override
+  String get pilotImportDuplicateInFile =>
+      'Looks like another pilot earlier in this file.';
+
+  @override
+  String get pilotImportChoiceSkip => 'Skip';
+
+  @override
+  String get pilotImportChoiceAdd => 'Add as new';
+
+  @override
+  String pilotImportChoiceUpdate(String name) {
+    return 'Update $name';
+  }
+
+  @override
+  String get pilotImportFieldEmail => 'email';
+
+  @override
+  String get pilotImportFieldFai => 'FAI number';
+
+  @override
+  String get pilotImportFieldNationalId => 'national ID';
+
+  @override
+  String get pilotImportFieldClub => 'club';
+
+  @override
+  String get pilotImportFieldCity => 'city';
+
+  @override
+  String get pilotImportFieldState => 'state';
+
+  @override
+  String get pilotImportFieldCountry => 'country';
+
+  @override
+  String pilotImportTestPilots(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count GliderScore test pilots (last name starting ZZ) were left out.',
+      one: '1 GliderScore test pilot (last name starting ZZ) was left out.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pilotImportSkippedRows(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count rows could not be used (no name or pilot number).',
+      one: '1 row could not be used (no name or pilot number).',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pilotImportDroppedDetails(String columns) {
+    return 'Not imported, because participants have no place for them: $columns.';
+  }
+
+  @override
+  String pilotImportCountryNote(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count pilots have no recognised country.',
+      one: '1 pilot has no recognised country.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pilotImportTruncated =>
+      'The file has more pilots than could be read. Some are missing.';
+
+  @override
+  String get pilotImportNoPilots => 'No pilots were found in this file.';
+
+  @override
+  String pilotImportPlan(int added, int updated, int unchanged, int skipped) {
+    return '$added to add, $updated to update, $unchanged unchanged, $skipped left out';
+  }
+
+  @override
+  String get pilotImportConfirm => 'Import';
+
+  @override
+  String get pilotImportSaving => 'Saving pilots…';
+
+  @override
+  String pilotImportDone(int added, int updated, int unchanged, int skipped) {
+    return 'Added $added, updated $updated, unchanged $unchanged, left out $skipped.';
+  }
+
+  @override
+  String get pilotImportDoneButton => 'Done';
+
+  @override
+  String pilotImportFailed(String reason) {
+    return 'The import did not work. $reason';
+  }
+
+  @override
+  String get pilotImportUnavailable =>
+      'Importing from GliderScore is not available on this computer.';
+
+  @override
+  String get pilotImportChangedDuringReview =>
+      'Your participants changed while you were reviewing. Review again before importing.';
+
+  @override
+  String get pilotImportChooseAgain => 'Choose a file again';
+
+  @override
+  String get pilotImportReviewAgain => 'Review again';
 }

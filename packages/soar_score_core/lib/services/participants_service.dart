@@ -110,6 +110,15 @@ class ParticipantsService {
             'remove them from those first',
       );
     }
+    // The profile's models go with it, each with its own tombstone.
+    for (final model in await repository.modelCatalogRepository.listForProfile(
+      id,
+    )) {
+      await repository.modelCatalogRepository.delete(
+        model.id,
+        metadata: metadata.forPart(model.id.value),
+      );
+    }
     await repository.participantProfileRepository.delete(
       id,
       metadata: metadata,

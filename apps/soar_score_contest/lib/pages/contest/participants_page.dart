@@ -10,6 +10,7 @@ import '../../services/contest_participants/stored_participant.dart';
 import '../../services/matrix/matrix_rounds_plan.dart';
 import '../../services/participants/participant_option.dart';
 import '../../services/participants/participant_row.dart';
+import '../../services/participants/pilot_models_backend.dart';
 import '../../widgets/contest_participants/participants_banners.dart';
 import '../../widgets/contest_participants/participants_dialogs.dart';
 import '../../widgets/contest_participants/participants_header.dart';
@@ -21,6 +22,7 @@ import '../../widgets/participants/bulk_edit_bar.dart';
 import '../../widgets/participants/cell_focus_registry.dart';
 import '../../widgets/participants/participant_card.dart';
 import '../../widgets/participants/participant_editing.dart';
+import '../../widgets/participants/pilot_models_dialog.dart';
 import '../../widgets/participants/participants_table.dart';
 import '../../widgets/unsaved_changes_guard.dart';
 import '../participant_editor_page.dart';
@@ -135,6 +137,28 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
   }
 
   // Actions.
+
+  /// Opens the models window for [row]. Each change is saved as it is made;
+  /// the list is read again when the window closes, so a model changed
+  /// elsewhere shows up.
+  Future<void> _editModels(ParticipantRow row) async {
+    final c = _controller!;
+    final client = apiClientOf(context);
+    final participant = row as StoredParticipant;
+    if (client == null) return;
+    await showPilotModelsDialog(
+      context,
+      pilotName: participant.name,
+      models: participant.models,
+      backend: ApiPilotModelsBackend(
+        client: client,
+        contestId: c.contestId,
+        participationId: participant.id,
+        profileId: participant.profile.id,
+      ),
+    );
+    await c.reload();
+  }
 
   /// A cell edit. Making a pilot non-flying clears their class, so that
   /// asks first; cancelling puts the row back.
@@ -257,6 +281,8 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
   Future<void> _addNew() async {
     final c = _controller!;
     if (!c.canEdit) return;
+    // Profiles saved with "Save and add another" before the dialog closes.
+    final others = <ParticipantProfile>[];
     final profile = await showDialog<ParticipantProfile>(
       context: context,
       builder: (context) => Dialog.fullscreen(
@@ -272,14 +298,19 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
           body: ParticipantEditorPage(
             onDone: (profile) => Navigator.of(context).pop(profile),
             onCancel: () => Navigator.of(context).pop(),
+            onSavedAnother: others.add,
           ),
         ),
       ),
     );
-    if (profile == null || !mounted) return;
-    await c.reload();
     if (!mounted) return;
-    await _addProfile(profile);
+    final added = [...others, ?profile];
+    if (added.isEmpty) return;
+    await c.reload();
+    for (final saved in added) {
+      if (!mounted) return;
+      await _addProfile(saved);
+    }
   }
 
   Future<void> _removeSelected() async {
@@ -344,6 +375,7 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
       selected: c.selection,
       onToggleSelected: (row) => c.toggleSelected(row.rowId),
       onUpdate: _onEdit,
+      editModels: _editModels,
       styleOf: c.styleOf,
     );
     return Column(

@@ -23,6 +23,23 @@ class ParticipantProfileRepository extends DriftRepository
   }) => unitOfWork.run((context) => context.save(profile, metadata: metadata));
 
   @override
+  Future<List<core.ParticipantProfile>> saveAll(
+    List<core.ParticipantProfile> profiles, {
+    required core.MutationMetadata metadata,
+  }) => unitOfWork.run((context) async {
+    final saved = <core.ParticipantProfile>[];
+    for (final profile in profiles) {
+      saved.add(
+        await context.save(
+          profile,
+          metadata: metadata.forPart(profile.id.value),
+        ),
+      );
+    }
+    return saved;
+  });
+
+  @override
   Future<bool> delete(core.Id id, {required core.MutationMetadata metadata}) =>
       unitOfWork.run((context) async {
         final profile = await _store.find(id);

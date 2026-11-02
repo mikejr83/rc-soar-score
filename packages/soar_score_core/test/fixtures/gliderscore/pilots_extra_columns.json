@@ -1,0 +1,84 @@
+{
+  "schema": "gs-import/v1",
+  "id": "00000000-0000-7000-8000-000000000001",
+  "sourceDbFile": "GliderScoreData.mdb",
+  "tables": [
+    {
+      "name": "Pilots",
+      "rowCount": 5,
+      "rowCapExceeded": false,
+      "rows": [
+        {
+          "PilotNo": 75,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "Y",
+          "State": "FL",
+          "Email": "fixture75@example.test",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Alex",
+          "LastName": "Ashdown3",
+          "FutureColumn": "x",
+          "AnotherNewThing": 7
+        },
+        {
+          "PilotNo": 77,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "State": "CA",
+          "Email": "fixture77@example.test",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Oakley",
+          "LastName": "Candlewick3",
+          "FutureColumn": "x",
+          "AnotherNewThing": 7
+        },
+        {
+          "PilotNo": 78,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "State": "NC",
+          "Email": "fixture78@example.test",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Val",
+          "LastName": "Dunmore3",
+          "FutureColumn": "x",
+          "AnotherNewThing": 7
+        },
+        {
+          "PilotNo": 80,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "State": "CA",
+          "Email": "fixture80@example.test",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Kai",
+          "LastName": "Fairweather3",
+          "FutureColumn": "x",
+          "AnotherNewThing": 7
+        },
+        {
+          "PilotNo": 82,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "State": "FL",
+          "Email": "fixture82@example.test",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Zion",
+          "LastName": "Hawthorne3",
+          "FutureColumn": "x",
+          "AnotherNewThing": 7
+        }
+      ]
+    }
+  ]
+}

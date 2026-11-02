@@ -19,7 +19,7 @@ ContestModelLink _$ContestModelLinkFromJson(Map<String, dynamic> json) =>
       ),
       modelName: json['model_name'] as String,
       manufacturer: json['manufacturer'] as String?,
-      modelId: json['model_id'] as String,
+      modelId: json['model_id'] as String?,
       contestSpecificIdentifier: json['contest_specific_identifier'] as String?,
       revision: (json['revision'] as num?)?.toInt() ?? 0,
     );

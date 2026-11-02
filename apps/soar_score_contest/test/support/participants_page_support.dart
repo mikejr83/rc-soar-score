@@ -98,11 +98,25 @@ class ParticipantsServer {
   /// Answers the update of these participations with a status and code.
   final Map<Id, (int, String)> updateFailures = {};
 
+  /// The models of the pilots, which the models window adds to, changes and
+  /// removes.
+  final List<ContestModelLink> modelLinks = [];
+
+  /// The models on the profiles, which a typed model is also added to.
+  final List<ModelCatalog> profileModels = [];
+
+  /// Answers every model change with a 409 `stale_revision` when set.
+  bool modelsStale = false;
+
   /// Fails every read with this status when set.
   int? readFailure;
 
   /// Fails every addition with this status when set.
   int? addFailure;
+
+  /// The error code and text of a failed addition, when not a server error.
+  String? addFailureCode;
+  String? addFailureMessage;
 
   /// The participations put in the rounds, in order.
   final List<Id> placements = [];
@@ -199,6 +213,27 @@ class ParticipantsServer {
     final body = request.body.isEmpty
         ? const <String, dynamic>{}
         : jsonDecode(request.body) as Map<String, dynamic>;
+    if (path.endsWith('/models') && method == 'POST') {
+      final model = ModelCatalog(
+        id: Id.parse(body['id']! as String),
+        ownerAccountId: _actor,
+        participantProfileId: Id.parse(
+          RegExp(r'/participants/([^/]+)/models$').firstMatch(path)!.group(1)!,
+        ),
+        name: body['name']! as String,
+        manufacturer: body['manufacturer'] as String?,
+        modelId: body['model_id'] as String?,
+      );
+      profileModels.add(model);
+      return _json(model.toJson(), 201);
+    }
+    final modelLink = RegExp(r'/model-links/([^/]+)$').firstMatch(path);
+    if (path.endsWith('/model-links') && method == 'POST') {
+      return _addModel(body, path);
+    }
+    if (modelLink != null && method != 'GET') {
+      return _changeModel(Id.parse(modelLink.group(1)!), method, body);
+    }
     final participation = RegExp(r'/participations/([^/]+)$').firstMatch(path);
     if (path.endsWith('/participations') && method == 'POST') {
       return _add(body);
@@ -261,6 +296,16 @@ class ParticipantsServer {
   http.Response _read(String path) {
     if (path.endsWith('/configuration')) {
       return _json(matrixConfiguration(options).toJson());
+    }
+    if (path.endsWith('/models')) {
+      return _json({
+        'models': [for (final m in profileModels) m.toJson()],
+      });
+    }
+    if (path.endsWith('/model-links')) {
+      return _json({
+        'model_links': [for (final l in modelLinks) l.toJson()],
+      });
     }
     if (path.endsWith('/participations')) {
       return _json({
@@ -339,7 +384,11 @@ class ParticipantsServer {
   http.Response _add(Map<String, dynamic> body) {
     additions.add(body);
     if (addFailure != null) {
-      return _error(addFailure!, 'internal_error', 'The server failed.');
+      return _error(
+        addFailure!,
+        addFailureCode ?? 'internal_error',
+        addFailureMessage ?? 'The server failed.',
+      );
     }
     final profile = Id.parse(body['participant_profile_id']! as String);
     final roleId = body['role_id'] as String?;
@@ -355,6 +404,51 @@ class ParticipantsServer {
     );
     _participations.add(added);
     return _json(added.toJson(), 201);
+  }
+
+  http.Response _addModel(Map<String, dynamic> body, String path) {
+    final participation = RegExp(r'/participations/([^/]+)/model-links$')
+        .firstMatch(path)!
+        .group(1)!;
+    final link = ContestModelLink(
+      id: Id.parse(body['id']! as String),
+      contestId: contestId,
+      contestParticipationId: Id.parse(participation),
+      modelCatalogId: body['model_catalog_id'] == null
+          ? null
+          : Id.parse(body['model_catalog_id']! as String),
+      modelName: body['model_name']! as String,
+      manufacturer: body['manufacturer'] as String?,
+      modelId: body['model_id'] as String?,
+      contestSpecificIdentifier: body['contest_specific_identifier'] as String?,
+    );
+    modelLinks.add(link);
+    return _json(link.toJson(), 201);
+  }
+
+  http.Response _changeModel(Id id, String method, Map<String, dynamic> body) {
+    if (modelsStale) {
+      return _error(409, 'stale_revision', 'The model changed.');
+    }
+    final index = modelLinks.indexWhere((l) => l.id == id);
+    if (method == 'DELETE') {
+      modelLinks.removeAt(index);
+      return http.Response('', 204);
+    }
+    final stored = modelLinks[index];
+    final updated = ContestModelLink(
+      id: id,
+      contestId: contestId,
+      contestParticipationId: stored.contestParticipationId,
+      modelCatalogId: stored.modelCatalogId,
+      modelName: body['model_name']! as String,
+      manufacturer: body['manufacturer'] as String?,
+      modelId: body['model_id'] as String?,
+      contestSpecificIdentifier: body['contest_specific_identifier'] as String?,
+      revision: stored.revision + 1,
+    );
+    modelLinks[index] = updated;
+    return _json(updated.toJson());
   }
 
   http.Response _place(Id id) {

@@ -41,6 +41,27 @@ class StubParticipantProfileRepository implements ParticipantProfileRepository {
   }
 
   @override
+  Future<List<ParticipantProfile>> saveAll(
+    List<ParticipantProfile> profiles, {
+    required MutationMetadata metadata,
+  }) async {
+    final before = Map<Id, ParticipantProfile>.of(this.profiles);
+    final savedBefore = savedWith.length;
+    try {
+      return [
+        for (final profile in profiles)
+          await save(profile, metadata: metadata.forPart(profile.id.value)),
+      ];
+    } on Object {
+      this.profiles
+        ..clear()
+        ..addAll(before);
+      savedWith.removeRange(savedBefore, savedWith.length);
+      rethrow;
+    }
+  }
+
+  @override
   Future<bool> delete(Id id, {required MutationMetadata metadata}) async =>
       profiles.remove(id) != null;
 }
@@ -53,6 +74,10 @@ class StubContestParticipationRepository
   /// Removes a participation's matrix rows; set by the repository that owns
   /// the assignments.
   Future<int> Function(Id participationId)? removeMatrixRows;
+
+  /// Removes a participation's model links; set by the repository that owns
+  /// them.
+  void Function(Id participationId)? removeModelLinks;
 
   @override
   Future<ContestParticipation?> findById(Id id) async => participations[id];
@@ -106,6 +131,7 @@ class StubContestParticipationRepository
     }
     final count =
         removed ?? await removeMatrixRows?.call(participation.id) ?? 0;
+    if (removed == null) removeModelLinks?.call(participation.id);
     final stored = ContestParticipation.fromJson({
       ...participation.toJson(),
       'revision': current == null ? 0 : current.revision + 1,
@@ -124,6 +150,7 @@ class StubContestParticipationRepository
     required MutationMetadata metadata,
   }) async {
     final count = await removeMatrixRows?.call(id) ?? 0;
+    removeModelLinks?.call(id);
     return (
       deleted: participations.remove(id) != null,
       matrixRowsRemoved: count,
@@ -176,4 +203,100 @@ class StubRoleRepository implements RoleRepository {
   @override
   Future<bool> installSystemRole(Role role) =>
       throw UnimplementedError('not used by handlers');
+}
+
+/// In-memory [ModelCatalogRepository] for handler tests; a stale save throws
+/// [StaleRevisionError] like the real one.
+class StubModelCatalogRepository implements ModelCatalogRepository {
+  final Map<Id, ModelCatalog> models = {};
+
+  @override
+  Future<ModelCatalog?> findById(Id id) async => models[id];
+
+  @override
+  Future<List<ModelCatalog>> listForOwner(Id ownerAccountId) async => [
+    for (final m in models.values)
+      if (m.ownerAccountId == ownerAccountId) m,
+  ];
+
+  @override
+  Future<List<ModelCatalog>> listForProfile(Id participantProfileId) async => [
+    for (final m in models.values)
+      if (m.participantProfileId == participantProfileId) m,
+  ]..sort((a, b) => a.name.compareTo(b.name));
+
+  @override
+  Future<ModelCatalog> save(
+    ModelCatalog entry, {
+    required MutationMetadata metadata,
+  }) async {
+    final current = models[entry.id];
+    if (current != null && current.revision != entry.revision) {
+      throw StaleRevisionError(
+        entityType: 'ModelCatalog',
+        entityId: entry.id,
+        expectedRevision: entry.revision,
+        storedRevision: current.revision,
+      );
+    }
+    final stored = ModelCatalog.fromJson({
+      ...entry.toJson(),
+      'revision': current == null ? 0 : current.revision + 1,
+    });
+    models[entry.id] = stored;
+    return stored;
+  }
+
+  @override
+  Future<bool> delete(Id id, {required MutationMetadata metadata}) async =>
+      models.remove(id) != null;
+}
+
+/// In-memory [ContestModelLinkRepository] for handler tests; a stale save
+/// throws [StaleRevisionError] like the real one.
+class StubContestModelLinkRepository implements ContestModelLinkRepository {
+  final Map<Id, ContestModelLink> links = {};
+
+  @override
+  Future<ContestModelLink?> findById(Id id) async => links[id];
+
+  @override
+  Future<List<ContestModelLink>> listForParticipation(
+    Id contestParticipationId,
+  ) async => [
+    for (final l in links.values)
+      if (l.contestParticipationId == contestParticipationId) l,
+  ];
+
+  @override
+  Future<List<ContestModelLink>> listForContest(Id contestId) async => [
+    for (final l in links.values)
+      if (l.contestId == contestId) l,
+  ];
+
+  @override
+  Future<ContestModelLink> save(
+    ContestModelLink link, {
+    required MutationMetadata metadata,
+  }) async {
+    final current = links[link.id];
+    if (current != null && current.revision != link.revision) {
+      throw StaleRevisionError(
+        entityType: 'ContestModelLink',
+        entityId: link.id,
+        expectedRevision: link.revision,
+        storedRevision: current.revision,
+      );
+    }
+    final stored = ContestModelLink.fromJson({
+      ...link.toJson(),
+      'revision': current == null ? 0 : current.revision + 1,
+    });
+    links[link.id] = stored;
+    return stored;
+  }
+
+  @override
+  Future<bool> delete(Id id, {required MutationMetadata metadata}) async =>
+      links.remove(id) != null;
 }

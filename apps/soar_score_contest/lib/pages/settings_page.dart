@@ -5,8 +5,9 @@ import '../local_ui_store_provider.dart';
 import '../preferences_controller_provider.dart';
 import '../text_size_controller_provider.dart';
 import '../theme_controller_provider.dart';
-import '../ui_account_provider.dart';
 import '../services/reports/viewer/report_options_store.dart';
+import '../ui_account_provider.dart';
+import '../widgets/settings/about_setting.dart';
 import '../widgets/settings/locale_setting.dart';
 import '../widgets/settings/report_options_setting.dart';
 import '../widgets/settings/reset_areas_setting.dart';
@@ -18,7 +19,8 @@ import '../widgets/settings/time_zone_setting.dart';
 /// (system scope, opened from the account control at the bottom of the rail).
 ///
 /// The theme, the text size, the account's preferred time zone and locale,
-/// the remembered report options, and the remembered hidden panels.
+/// the remembered report options, the remembered hidden panels, and an
+/// About card (version, open source licences, Privacy Policy and Terms).
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
 
@@ -50,6 +52,7 @@ class SettingsPage extends StatelessWidget {
                     ? null
                     : ReportOptionsStore(uiStore, uiAccountIdOf(context)),
               ),
+              const AboutSetting(),
             ],
           ),
         ),

@@ -6,15 +6,22 @@ The public web site: product marketing and information, documentation and help, 
 
 - `npm install` once, then `npm run dev` (http://localhost:3000), `npm run build`, `npm run lint`, `npm test` (vitest, `src/**/*.test.ts`).
 - CI runs lint, test and build in the `public-site` job of `.github/workflows/ci.yml`. Melos does not manage this app.
-- Deployment is not decided; the app is a standard Next.js build (no static export, the contest routes are dynamic). Hosts are set per deployment with `NEXT_PUBLIC_SOAR_SCORE_API_BASE_URL`, `NEXT_PUBLIC_CONTEST_APP_URL`, `NEXT_PUBLIC_SELF_SCORE_APP_URL` and `NEXT_PUBLIC_DOWNLOAD_URL` (`src/lib/site.ts` holds the ADR 0003 defaults).
+- Deployed to Vercel by the Deploy workflow when a GitHub release is published (docs/deploying.md); the app is a standard Next.js build (no static export, the contest routes are dynamic). Hosts are set per deployment with `SOAR_SCORE_API_URL` (server-side proxy target for `/api/*`), `NEXT_PUBLIC_SOAR_SCORE_API_BASE_URL`, `NEXT_PUBLIC_CONTEST_APP_URL`, `NEXT_PUBLIC_SELF_SCORE_APP_URL` and `NEXT_PUBLIC_DOWNLOAD_URL` (`src/lib/site.ts` holds the ADR 0003 defaults).
 
 ## Structure (`src/`)
 
-- `app/` — routes. `layout.tsx` (fonts, metadata, header and footer), `page.tsx` (homepage), `not-found.tsx`, `docs/*`, `support/`, `results/contests/*`. `next.config.ts` holds the two redirects (`/results`, `/help`).
+- `app/` — routes. `layout.tsx` (fonts, metadata, header and footer), `page.tsx` (homepage), `not-found.tsx`, `docs/*`, `support/`, `open-source/`, `results/contests/*`. `next.config.ts` holds the two redirects (`/results`, `/help`).
 - `app/fonts.ts` and `fonts/` — the three brand fonts (OFL), copied from `packages/soar_score_ui/assets/fonts`. `public/brand/` — the logo SVGs from `packages/soar_score_ui/assets/logos`. Change them there first, then copy.
 - `app/globals.css` — the kit colours as fixed names, the semantic tokens (light and the dark mapping, which is a guess for the product owner to override; `data-theme="light"` or `"dark"` on `<html>` overrides the OS scheme, set by `components/theme-toggle` and restored before paint by the inline script in `layout.tsx` from the `theme` key in localStorage), type helpers (`.eyebrow`, `.stencil`, `.num`), `.btn`, `.card`, `.panel`, `.pill`, form classes and the `[data-reveal]` scroll animation. Components add CSS modules beside themselves; do not add globals for one component.
 - `components/` — `site-header`, `site-footer`, `theme-toggle`, `brand-logo` (`BrandMark`, `BrandLockup`), `reveal` (IntersectionObserver, sets `data-inview`), `home/*` (hero with the working-time instrument, stations, flight plan, score anatomy, help links, closing panel), `docs/*` (nav, prose, topic cards), `support/*` (the form), `results/*` (contest search, header, round selector, the three tables, not-found, not-visible, states).
 - `lib/site.ts` — site name, external hosts and the primary navigation. `lib/results/` — the port of the Flutter results models: `publication.ts` (API shapes as served, snake_case), `api.ts` (fetch and `ApiHttpError`), `published-contest.ts` (standings, teams, flight groups as of a round), `contest-summary.ts`, `contest-filters.ts`, `contest-load.ts`, `format.ts`, `paths.ts`, with tests and `__fixtures__/fake-publication.ts`.
+
+## Open source licences (`/open-source`, #687)
+
+- `src/app/open-source/page.tsx` renders `src/content/licences.json` through `components/open-source/open-source-view.tsx`; `lib/licences.ts` holds the types and helpers. The page has the anchors `#contest-app`, `#self-scoring`, `#server` and `#public-site`; the apps link to them, so keep the ids stable.
+- The JSON is generated, never edited by hand: `scripts/generate-licences.sh` (or `.ps1`) from the repo root, after `dart pub get` and `npm ci`. Overrides for packages with missing metadata are in `scripts/licence-overrides.json`; vendored standard texts in `scripts/licence-texts/`.
+- Staleness check: `src/lib/licences.test.ts` compares fingerprints of `pubspec.lock`, `package-lock.json` and the overrides with the ones stored in the JSON, so `npm test` (and CI) fails when a lockfile changed. Regenerate and commit the JSON in the same PR as the dependency change.
+- Details, copyleft review and open actions: `docs/open-source-licences.md`.
 
 ## Rules
 

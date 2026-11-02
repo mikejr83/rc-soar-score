@@ -13,16 +13,13 @@ class ContestModelLinkRepository extends DriftRepository
   Future<core.ContestModelLink?> findById(core.Id id) => _store.find(id);
 
   @override
-  Future<core.ContestModelLink?> findForParticipation(
+  Future<List<core.ContestModelLink>> listForParticipation(
     core.Id contestParticipationId,
-  ) async {
-    final links = await _store.whereId(
-      'contest_participation_id',
-      contestParticipationId,
-      orderBy: 'id',
-    );
-    return links.isEmpty ? null : links.first;
-  }
+  ) => _store.whereId(
+    'contest_participation_id',
+    contestParticipationId,
+    orderBy: 'id',
+  );
 
   @override
   Future<List<core.ContestModelLink>> listForContest(core.Id contestId) =>

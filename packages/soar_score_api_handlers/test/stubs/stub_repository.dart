@@ -21,6 +21,9 @@ class StubRepository implements core.Repository {
             : StubContestRepository(),
       ) {
     participations.removeMatrixRows = matrixAssignments.removeRowsOf;
+    participations.removeModelLinks = (id) => modelLinks.links.removeWhere(
+      (_, link) => link.contestParticipationId == id,
+    );
   }
 
   @override
@@ -35,6 +38,8 @@ class StubRepository implements core.Repository {
   final participantProfiles = StubParticipantProfileRepository();
   final participations = StubContestParticipationRepository();
   final roles = StubRoleRepository();
+  final modelCatalogs = StubModelCatalogRepository();
+  final modelLinks = StubContestModelLinkRepository();
   final teams = StubTeamRepository();
   final landingTables = StubLandingTableRepository();
   final teamMemberships = StubTeamMembershipRepository();
@@ -95,6 +100,12 @@ class StubRepository implements core.Repository {
 
   @override
   core.RoleRepository get roleRepository => roles;
+
+  @override
+  core.ModelCatalogRepository get modelCatalogRepository => modelCatalogs;
+
+  @override
+  core.ContestModelLinkRepository get contestModelLinkRepository => modelLinks;
 
   @override
   core.MatrixAssignmentRepository get matrixAssignmentRepository =>

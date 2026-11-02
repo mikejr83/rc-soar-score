@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:soar_score_contest/widgets/matrix/pilot_row_tile.dart';
 
 import '../support/configuration_fields.dart';
 import '../support/interact.dart';
@@ -156,6 +157,10 @@ Future<void> runSetupPhase(Journey journey, JourneyContext data) async {
     () => inContest(() => _drawMatrix(tester, data)),
   );
   await journey.step(
+    'Matrix: a pilot is moved to another group and the grid says so',
+    () => inContest(() => _movePilot(tester)),
+  );
+  await journey.step(
     'Matrix: a contest that arrives drawn shows its grid and no Draw action',
     () async {
       await goToMainPage(tester);
@@ -179,23 +184,7 @@ Future<void> runSetupPhase(Journey journey, JourneyContext data) async {
       await pumpUntilFound(tester, _key('participants-count'));
       final newcomer = data.roster.last;
       final name = '${newcomer.first} ${newcomer.last}';
-      // Give the web input time to attach after the tap, or the first
-      // characters are lost.
-      final search = find.descendant(
-        of: _key('participant-search'),
-        matching: find.byType(TextField),
-      );
-      await tester.tap(search);
-      await tester.pump(const Duration(milliseconds: 500));
-      await tester.enterText(search, newcomer.last);
-      await tester.pump(const Duration(milliseconds: 300));
-      final result = find.widgetWithText(ListTile, name);
-      await pumpUntilFound(tester, result);
-      // Tap the menu row itself: scrolling to it first closes the menu.
-      await tester.tap(result);
-      await tester.pump(const Duration(milliseconds: 300));
-      await pumpUntilFound(tester, _key('add-participant-confirm'));
-      await tapVisible(tester, _key('add-participant-confirm'));
+      await _addFromSearch(tester, newcomer);
 
       // No scores yet, so the director may redraw the matrix with them.
       await pumpUntilFound(tester, find.text('Redraw the matrix with $name?'));
@@ -204,6 +193,30 @@ Future<void> runSetupPhase(Journey journey, JourneyContext data) async {
       await tapVisible(tester, _key('redraw-keep'));
       await pumpUntilFound(tester, _key('banner-placement'));
       expect(find.text(name), findsWidgets);
+    },
+  );
+  await journey.step(
+    'Participants: a pilot is refused while every group of a round is full',
+    () async {
+      await goToMainPage(tester);
+      // The demo contest flies 14 pilots in 3 groups, so each group holds 5.
+      // The previous step took the last open seat of every round.
+      await openContest(tester, 'Front Range F5J Open');
+      await tapRail(tester, 'Participants');
+      await pumpUntilFound(tester, _key('participants-count'));
+      final blocked = data.roster[data.rosterPilots];
+      final name = '${blocked.first} ${blocked.last}';
+      await _addFromSearch(tester, blocked);
+
+      await pumpUntilFound(tester, _key('banner-add-failed'));
+      expect(find.text('Couldn’t add $name'), findsOneWidget);
+      expect(find.textContaining('Round 1 has no group'), findsOneWidget);
+      expect(find.textContaining('groups per round'), findsOneWidget);
+      expect(find.textContaining('Nothing was added'), findsOneWidget);
+      // Nothing was saved: the count is still the 14 demo pilots and the one
+      // added before, and there is no offer to redraw or place them.
+      expect(find.textContaining('15 pilots'), findsWidgets);
+      expect(find.text('Redraw the matrix with $name?'), findsNothing);
     },
   );
   await journey.step(
@@ -263,8 +276,7 @@ Future<void> runSetupPhase(Journey journey, JourneyContext data) async {
       }
 
       // The matrix is drawn but nothing is scored: the documents can be
-      // opened and the standings say why they cannot. Scoring Sheet is still
-      // a placeholder report (#479): the card is there and can be opened.
+      // opened and the standings say why they cannot.
       for (final report in ['matrix', 'sheet', 'cards']) {
         expect(_reportEnabled(tester, report), isTrue, reason: report);
       }
@@ -311,6 +323,41 @@ Future<void> runSetupPhase(Journey journey, JourneyContext data) async {
       await pumpUntilFound(tester, _key('viewer-title'));
       expect(tester.widget<SwitchListTile>(compact).value, isTrue);
       expect(currentRoute(tester), contains('f.cmp=1'));
+    }),
+  );
+  await journey.step(
+    'Reports: the Scoring Sheet shows blank grids and follows the options',
+    () => inContest(() async {
+      await _openReports(tester);
+      await tapVisible(tester, _key('report-open-sheet'));
+      await pumpUntilFound(tester, _key('viewer-title'));
+      expect(tester.widget<Text>(_key('viewer-title')).data, 'Scoring Sheet');
+
+      // The draw by round and group, ruled for writing, with the readout.
+      await pumpUntilFound(tester, _key('sheet-readout'));
+      expect(find.textContaining('Round 1'), findsWidgets);
+      expect(find.textContaining('Working Time'), findsWidgets);
+      expect(find.text('Reflight'), findsWidgets);
+
+      // Nothing is scored yet, so Pre-fill says why it is off; an option
+      // changes at once.
+      expect(find.text('No scores have been entered yet.'), findsOneWidget);
+      await tapVisible(tester, _key('sheet-validated'));
+      await tester.pumpAndSettle();
+      expect(
+        tester
+            .widget<CheckboxListTile>(
+              find.descendant(
+                of: _key('sheet-validated'),
+                matching: find.byType(CheckboxListTile),
+              ),
+            )
+            .value,
+        isFalse,
+      );
+
+      await tapVisible(tester, _key('viewer-back'));
+      await pumpUntilFound(tester, find.text('Reports are built from'));
     }),
   );
   await journey.step(
@@ -444,6 +491,51 @@ Future<void> _drawMatrix(WidgetTester tester, JourneyContext data) async {
   expect(find.text('Group B'), findsWidgets);
   expect(find.text('No matrix drawn yet'), findsNothing);
   expect(_key('draw-button'), findsNothing);
+}
+
+/// Moves the first pilot of the grid to the first group that can take them
+/// in their own round, with a reason, and checks the Moved label and the
+/// reason in the pilot panel. Which group that is depends on the draw.
+Future<void> _movePilot(WidgetTester tester) async {
+  await tapRail(tester, 'Matrix');
+  await pumpUntilFound(tester, _key('fairness-score'));
+  expect(_key('moved-label'), findsNothing);
+
+  // The test window is small: hide the fairness summary so the grid has room
+  // for its tiles. It is shown again at the end.
+  await tapVisible(tester, _key('summary-toggle'));
+  await pumpUntilFound(tester, find.byType(PilotRowTile));
+
+  // Highlight a pilot; the pilot actions menu is on their tiles.
+  final tile = find.byType(PilotRowTile).first;
+  await tapVisible(tester, tile);
+  await pumpUntilFound(tester, _key('pilot-panel'));
+  await pumpUntilFound(tester, _key('pilot-actions'));
+  await tapVisible(tester, _key('pilot-actions').first);
+  await pumpUntilFound(tester, _key('pilot-action-move'));
+  await tester.tap(_key('pilot-action-move'));
+  await pumpUntilFound(tester, _key('move-reason'));
+
+  // Nothing is scored yet, so there is no discard warning.
+  expect(_key('move-score-warning'), findsNothing);
+  // Their own group cannot be chosen; the first group that can is.
+  final groups = find.byWidgetPredicate(
+    (w) =>
+        w is ListTile &&
+        w.key is ValueKey<String> &&
+        (w.key! as ValueKey<String>).value.startsWith('move-group-') &&
+        w.enabled,
+    description: 'a group that can take the pilot',
+  );
+  await tapVisible(tester, groups.first);
+  await enterIn(tester, _key('move-reason'), 'E2E move');
+  await tapVisible(tester, _key('move-confirm'));
+  await pumpUntilGone(tester, _key('move-confirm'));
+
+  // The grid shows the Moved label and the pilot panel the reason.
+  await pumpUntilFound(tester, _key('moved-label'));
+  await pumpUntilFound(tester, find.textContaining(': E2E move'));
+  await tapVisible(tester, _key('summary-toggle'));
 }
 
 /// The list row of the role called [name]; the detail pane repeats the name.
@@ -590,4 +682,27 @@ Future<void> _landingsManager(WidgetTester tester) async {
     await pumpUntilGone(tester, _landingRow(name));
   }
   expect(_landingRow('F5J Standard Landing Table'), findsOneWidget);
+}
+
+/// Picks [person] from the participants page's search menu and confirms the
+/// add dialog.
+Future<void> _addFromSearch(WidgetTester tester, Person person) async {
+  final name = '${person.first} ${person.last}';
+  // Give the web input time to attach after the tap, or the first
+  // characters are lost.
+  final search = find.descendant(
+    of: _key('participant-search'),
+    matching: find.byType(TextField),
+  );
+  await tester.tap(search);
+  await tester.pump(const Duration(milliseconds: 500));
+  await tester.enterText(search, person.last);
+  await tester.pump(const Duration(milliseconds: 300));
+  final result = find.widgetWithText(ListTile, name);
+  await pumpUntilFound(tester, result);
+  // Tap the menu row itself: scrolling to it first closes the menu.
+  await tester.tap(result);
+  await tester.pump(const Duration(milliseconds: 300));
+  await pumpUntilFound(tester, _key('add-participant-confirm'));
+  await tapVisible(tester, _key('add-participant-confirm'));
 }

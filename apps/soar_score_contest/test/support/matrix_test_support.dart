@@ -28,6 +28,9 @@ Id _id(String kind, int n) =>
 /// The participation id of pilot [n] (1 to 4).
 Id participationId(int n) => _id('0001', n);
 
+/// The assignment of pilot [pilot] in round [round] of [drawnMatrix].
+Id assignmentId(int round, int pilot) => _id('0004', round * 100 + pilot);
+
 Contest matrixContest({
   LifecycleState state = LifecycleState.configuring,
   AdminLock lock = AdminLock.unlocked,
@@ -119,6 +122,7 @@ CurrentMatrix drawnMatrix({
   Map<String, Object?>? config,
   (int, int)? scored,
   RoundStatus round2Status = RoundStatus.open,
+  Set<(int, int)> lockedGroups = const {},
 }) {
   final rounds = [
     for (var r = 1; r <= 2; r++)
@@ -139,6 +143,11 @@ CurrentMatrix drawnMatrix({
           contestId: contestId,
           roundId: _id('0002', r),
           groupNumber: g,
+          status: lockedGroups.contains((r, g))
+              ? GroupStatus.locked
+              : GroupStatus.open,
+          lockedBy: lockedGroups.contains((r, g)) ? _actor : null,
+          lockedAt: lockedGroups.contains((r, g)) ? _created : null,
         ),
   ];
   MatrixAssignment assignment(int round, int group, int pilot, int lane) =>
@@ -253,6 +262,22 @@ class MatrixServer {
   int cancelStatus = 200;
   Completer<void>? _cancelled;
 
+  /// The assignments that have a score, as `(round, pilot)`, and the ones
+  /// whose score is locked. Answered by the scores read.
+  final Set<(int, int)> scoredAssignments = {};
+  final Set<(int, int)> lockedScores = {};
+
+  /// The bodies of the moves received, as `{assignment, body}`. A move is
+  /// answered 201 with the matrix after it, unless [moveStatus] says
+  /// otherwise (then with [moveCode] and [moveError]).
+  final List<Map<String, dynamic>> moves = [];
+  int moveStatus = 201;
+  String moveCode = 'lane_taken';
+  String moveError = 'lane 1 of group 2 is taken by another pilot';
+
+  /// Answers the scores read with this status when not 200.
+  int scoresStatus = 200;
+
   /// The round each pilot (1 to 4) retired at.
   final Map<int, int> retirements = {};
 
@@ -265,6 +290,64 @@ class MatrixServer {
   /// A notice sent with every successful participation update.
   String? participationWarning;
   int _participationRevision = 0;
+
+  /// The scores read as the server answers it.
+  ContestScores scoresForTest() => _scores();
+
+  ContestScores _scores() {
+    final current = matrix ?? CurrentMatrix();
+    final rounds = {for (final r in current.rounds) r.id: r.ordinal};
+    final slots = <ScoreSlot>[];
+    for (final a in current.assignments) {
+      final round = rounds[a.scheduledRoundId]!;
+      final pilot = [
+        for (var n = 1; n <= 4; n++)
+          if (participationId(n) == a.contestParticipationId) n,
+      ].single;
+      final scored = scoredAssignments.contains((round, pilot));
+      slots.add(
+        ScoreSlot(
+          placeholder: ScorePlaceholder(
+            id: _slotId(a.id),
+            contestId: contestId,
+            contestParticipationId: a.contestParticipationId,
+            assignmentId: a.id,
+            state: scored
+                ? ScorePlaceholderState.official
+                : ScorePlaceholderState.notEntered,
+            lockedBy: lockedScores.contains((round, pilot)) ? _actor : null,
+            lockedAt: lockedScores.contains((round, pilot)) ? _created : null,
+          ),
+        ),
+      );
+    }
+    return ContestScores(
+      slots: slots,
+      rounds: [
+        for (final r in current.rounds)
+          RoundProgress(
+            roundId: r.id,
+            ordinal: r.ordinal,
+            scored: slots
+                .where(
+                  (s) =>
+                      s.placeholder.state != ScorePlaceholderState.notEntered &&
+                      current.assignments
+                              .firstWhere(
+                                (a) => a.id == s.placeholder.assignmentId,
+                              )
+                              .scheduledRoundId ==
+                          r.id,
+                )
+                .length,
+            total: 4,
+          ),
+      ],
+    );
+  }
+
+  static Id _slotId(Id assignment) =>
+      Id.parse('019c0000-0000-7000-8000-0009${assignment.value.substring(28)}');
 
   http.Response _json(Object body, [int status = 200]) => http.Response(
     jsonEncode(body),
@@ -309,6 +392,26 @@ class MatrixServer {
         'seed': 2,
         'seed_count': 3,
       });
+    }
+    final move = RegExp(r'/matrix/assignments/([^/]+)/moves$').firstMatch(path);
+    if (request.method == 'POST' && move != null) {
+      final body = jsonDecode(request.body) as Map<String, dynamic>;
+      moves.add({'assignment': move.group(1), 'body': body});
+      if (moveStatus != 201) {
+        return _json({
+          'error': {'code': moveCode, 'message': moveError},
+        }, moveStatus);
+      }
+      matrix = _moved(matrix!, Id.parse(move.group(1)!), body);
+      return _json(matrix!.toJson(), 201);
+    }
+    if (request.method == 'GET' && path.endsWith('/scores')) {
+      if (scoresStatus != 200) {
+        return _json({
+          'error': {'code': 'unavailable', 'message': 'try later'},
+        }, scoresStatus);
+      }
+      return _json(_scores().toJson());
     }
     if (request.method == 'POST' && path.endsWith('/matrix/redraws')) {
       redraws.add(jsonDecode(request.body) as Map<String, dynamic>);
@@ -409,6 +512,37 @@ class MatrixServer {
     }
     return _json(contest.toJson());
   }
+}
+
+/// The matrix after the move of assignment [sourceId] as [body] asks.
+CurrentMatrix _moved(CurrentMatrix matrix, Id sourceId, Map body) {
+  final source = matrix.assignments.firstWhere((a) => a.id == sourceId);
+  final moved = MatrixAssignment(
+    id: Id.parse(body['id'] as String),
+    contestId: contestId,
+    matrixRevisionId: source.matrixRevisionId,
+    contestParticipationId: source.contestParticipationId,
+    scheduledRoundId: Id.parse(body['scheduled_round_id'] as String),
+    creditedRoundId: source.creditedRoundId,
+    group: body['group'] as int,
+    lane: body['lane'] as int?,
+    assignmentType: AssignmentType.moved,
+    sourceAssignmentId: source.id,
+    actorId: source.actorId,
+    reason: body['reason'] as String,
+    createdAt: DateTime.utc(2026, 10, 8),
+  );
+  return CurrentMatrix(
+    revision: matrix.revision,
+    rounds: matrix.rounds,
+    groups: matrix.groups,
+    assignments: [
+      for (final a in matrix.assignments)
+        if (a.id != sourceId) a,
+      moved,
+    ],
+    progress: matrix.progress,
+  );
 }
 
 /// Pumps [MatrixPage] against [server] in a window of [size].

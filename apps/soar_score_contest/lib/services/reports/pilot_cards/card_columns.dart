@@ -59,10 +59,10 @@ class CardColumn {
 /// (`plan/ui/contest-administration/reports/pilot-scoring-cards.md`).
 abstract final class CardColumns {
   /// The disciplines whose score has a height.
-  static const _withHeight = {'F5J'};
+  static const withHeight = {'F5J'};
 
   /// The disciplines that allow a motor restart.
-  static const _withRestart = {'F5J', 'ALES'};
+  static const withRestart = {'F5J', 'ALES'};
 
   /// The columns for [discipline] (`F5J`, `F3J`, ...; an unknown one counts as
   /// a duration task without height or restart), with lane and motor restart
@@ -94,7 +94,7 @@ abstract final class CardColumns {
         CardColumnKind.number,
         weight: 1,
       ),
-      if (_withHeight.contains(label))
+      if (withHeight.contains(label))
         const CardColumn(
           CardField.height,
           'Height',
@@ -110,7 +110,7 @@ abstract final class CardColumns {
         12,
         CardColumnKind.tick,
       ),
-      if (motorRestart && _withRestart.contains(label))
+      if (motorRestart && withRestart.contains(label))
         const CardColumn(
           CardField.restart,
           'Motor restart',

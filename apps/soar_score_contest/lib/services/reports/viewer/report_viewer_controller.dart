@@ -141,7 +141,7 @@ class ReportViewerController extends ChangeNotifier {
 
   PageSetup get setup => PageSetup(
     _params.paper ?? _storedPaper ?? defaultPaper,
-    _params.orientation ?? _storedOrientation ?? spec.defaultOrientation,
+    _params.orientation ?? _storedOrientation ?? suggestedOrientation,
   );
 
   PaperSize? get _storedPaper {
@@ -156,6 +156,22 @@ class ReportViewerController extends ChangeNotifier {
     return PageOrientation.values
         .where((orientation) => orientation.name == name)
         .firstOrNull;
+  }
+
+  /// The orientation the report would pick for the paper in force, when the
+  /// director has not chosen one (in the view or among the remembered
+  /// options).
+  PageOrientation get suggestedOrientation {
+    final facts = _facts;
+    if (facts == null) {
+      return spec.defaultOrientation;
+    }
+    return spec.suggestedOrientation(
+      _currentFilters(),
+      facts,
+      _data,
+      _params.paper ?? _storedPaper ?? defaultPaper,
+    );
   }
 
   /// Print preview: the viewer's choice, else the stored one, else off.

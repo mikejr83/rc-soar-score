@@ -91,6 +91,48 @@ void _tests(Backend backend) {
       }
     });
 
+    test('removing a pilot, or making them a non-flier, removes their '
+        'model links with a tombstone each', () async {
+      final all = await pilots();
+      final models = ModelsService(repository);
+      Future<void> addLinks(core.ContestParticipation pilot) async {
+        for (final name in ['Main', 'Spare']) {
+          await models.addLink(
+            contestId,
+            actor,
+            pilot.id,
+            id: core.Id.create(),
+            modelName: name,
+            metadata: meta(),
+          );
+        }
+      }
+
+      await addLinks(all[0]);
+      await addLinks(all[1]);
+      final links = repository.contestModelLinkRepository;
+      expect(await links.listForContest(contestId), hasLength(4));
+      final tombstones = await inst.count('tombstones');
+
+      await service.remove(contestId, all[0].id, metadata: meta());
+
+      expect(await links.listForParticipation(all[0].id), isEmpty);
+      expect(await links.listForParticipation(all[1].id), hasLength(2));
+      // Two assignments, two placeholders, two links and the participation.
+      expect(await inst.count('tombstones'), tombstones + 7);
+
+      await service.update(
+        contestId,
+        actor,
+        all[1].id,
+        roleId: core.SystemRoles.helperId,
+        baseRevision: all[1].revision,
+        metadata: meta(),
+      );
+
+      expect(await links.listForContest(contestId), isEmpty);
+    });
+
     test('a pilot with no matrix rows is removed as before', () async {
       final helper = await ParticipantsService(repository).create(
         actor,
@@ -114,6 +156,35 @@ void _tests(Backend backend) {
       );
 
       expect(removed, 0);
+    });
+
+    test('a pilot is refused when every group of a round is full', () async {
+      final profile = await ParticipantsService(repository).create(
+        actor,
+        core.Id.create(),
+        ParticipantDetails(firstName: 'Late', lastName: 'Test'),
+        metadata: meta(),
+      );
+      final before = (await pilots()).length;
+
+      await expectLater(
+        service.add(
+          contestId,
+          actor,
+          id: core.Id.create(),
+          participantProfileId: profile.id,
+          metadata: meta(),
+        ),
+        throwsA(
+          isA<core.ContestStateError>().having(
+            (e) => e.code,
+            'code',
+            'no_room_in_round',
+          ),
+        ),
+      );
+
+      expect(await pilots(), hasLength(before));
     });
 
     test('a pilot with a score is refused and keeps everything', () async {

@@ -26,6 +26,9 @@ flutter:
   assets:
     - assets/logos/
     - assets/logos/png/
+    - assets/fonts/archivo/OFL.txt
+    - assets/fonts/league_spartan/OFL.txt
+    - assets/fonts/saira_stencil_one/OFL.txt
   fonts:
     - family: League Spartan
       fonts:
