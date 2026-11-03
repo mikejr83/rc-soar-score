@@ -74,11 +74,68 @@ Future<void> scrollListTo(WidgetTester tester, Finder row) async {
 }
 
 /// Scrolls [finder] into view, taps it and lets the app react.
-Future<void> tapVisible(WidgetTester tester, Finder finder) async {
+///
+/// `ensureVisible` can leave a widget at the very edge of its list, under a
+/// pinned heading or a closing menu, or past the window's edge, and a tap
+/// there lands on something else without any error. So the tap point is
+/// checked: if the widget is not what a tap reaches, it is centred in its
+/// scroll view, and if it still is not, the step fails here, naming what is
+/// in the way, instead of timing out later on something the tap should have
+/// done. A caller that taps again by design when the first tap is lost (the
+/// layout shifts under it) passes `strict: false` to tap regardless.
+Future<void> tapVisible(
+  WidgetTester tester,
+  Finder finder, {
+  bool strict = true,
+}) async {
   await tester.ensureVisible(finder);
   await tester.pump(const Duration(milliseconds: 100));
+  if (!_tapReaches(tester, finder)) {
+    await Scrollable.ensureVisible(finder.evaluate().first, alignment: 0.5);
+    await tester.pump(const Duration(milliseconds: 300));
+  }
+  final covering = strict ? _coveredBy(tester, finder) : null;
+  if (covering != null) {
+    fail(
+      'A tap on ${finder.describeMatch(Plurality.one)} would not reach it: '
+      '$covering is in the way. The window is '
+      '${tester.view.physicalSize / tester.view.devicePixelRatio}.',
+    );
+  }
   await tester.tap(finder);
   await tester.pump(const Duration(milliseconds: 300));
+}
+
+bool _tapReaches(WidgetTester tester, Finder finder) =>
+    _coveredBy(tester, finder) == null;
+
+/// What a tap at the centre of [finder] reaches instead of it, or null when
+/// the tap reaches the widget (or its render object is not a box to check).
+String? _coveredBy(WidgetTester tester, Finder finder) {
+  final box = finder.evaluate().first.renderObject;
+  if (box is! RenderBox || !box.attached || !box.hasSize) {
+    return null;
+  }
+  final centre = box.localToGlobal(box.size.center(Offset.zero));
+  final path = tester.hitTestOnBinding(centre).path.toList();
+  for (final entry in path) {
+    final target = entry.target;
+    for (
+      RenderObject? o = target is RenderObject ? target : null;
+      o != null;
+      o = o.parent
+    ) {
+      if (o == box) {
+        return null;
+      }
+    }
+  }
+  final top = path.isEmpty ? null : path.first.target;
+  if (top is RenderBox && top.hasSize) {
+    final rect = top.localToGlobal(Offset.zero) & top.size;
+    return '${top.runtimeType} at $rect (tap point $centre)';
+  }
+  return '${top.runtimeType} (tap point $centre)';
 }
 
 /// Taps the destination called [label] in the navigation rail.

@@ -61,7 +61,7 @@ Future<void> runWizardPhase(Journey journey, JourneyContext data) async {
     // a few seconds later (a closing editor stays on screen for a moment).
     final save = find.byKey(const ValueKey('save-participant'));
     for (var attempt = 0; attempt < 3; attempt++) {
-      await tapVisible(tester, save);
+      await tapVisible(tester, save, strict: false);
       for (var i = 0; i < 15 && save.evaluate().isNotEmpty; i++) {
         await tester.pump(const Duration(milliseconds: 200));
       }
