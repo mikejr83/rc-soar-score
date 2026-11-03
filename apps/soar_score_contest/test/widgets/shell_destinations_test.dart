@@ -6,11 +6,11 @@ import 'package:soar_score_contest/widgets/shell_destinations.dart';
 
 const String _contestId = '01890a5d-ac96-774b-bcce-b302099a8057';
 
-final _l10n = AppLocalizationsEn();
+final l10n = AppLocalizationsEn();
 
 List<String> _labels(String path) =>
     shellDestinationsFor(path)
-        .map((destination) => destination.label.of(_l10n))
+        .map((destination) => destination.label.of(l10n))
         .toList();
 
 void main() {
@@ -47,22 +47,22 @@ void main() {
   group('shellDestinationsFor', () {
     test('lists system-level destinations without contest tasks', () {
       expect(_labels(homePath), [
-        'Contests',
-        'Participants',
-        'Roles',
-        'Landings',
+        l10n.shellNavContests,
+        l10n.shellNavParticipants,
+        l10n.shellNavRoles,
+        l10n.shellNavLandings,
       ]);
-      expect(_labels(homePath), isNot(contains('Matrix')));
+      expect(_labels(homePath), isNot(contains(l10n.shellNavMatrix)));
     });
 
     test('lists contest tasks for a contest route', () {
       expect(_labels(contestWorkspacePath(_contestId)), [
-        'Workspace',
-        'Configuration',
-        'Participants',
-        'Matrix',
-        'Scoring',
-        'Reports',
+        l10n.shellNavWorkspace,
+        l10n.shellNavConfiguration,
+        l10n.shellNavParticipants,
+        l10n.shellNavMatrix,
+        l10n.shellNavScoring,
+        l10n.shellNavReports,
       ]);
     });
 
@@ -70,17 +70,17 @@ void main() {
       final path = contestWorkspacePath(_contestId);
       final labels = [
         for (final d in shellDestinationsFor(path, showSync: true))
-          d.label.of(_l10n),
+          d.label.of(l10n),
       ];
-      expect(labels.last, 'Sync');
+      expect(labels.last, l10n.shellNavSync);
       expect(
         shellDestinationsFor(path, showSync: true).last.location,
         contestSyncPath(_contestId),
       );
       expect([
         for (final d in shellDestinationsFor(homePath, showSync: true))
-          d.label.of(_l10n),
-      ], isNot(contains('Sync')));
+          d.label.of(l10n),
+      ], isNot(contains(l10n.shellNavSync)));
     });
 
     test('wires Contests to the main page and Workspace to the contest', () {

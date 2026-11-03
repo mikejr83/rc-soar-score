@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/l10n/app_localizations_en.dart';
 import 'package:soar_score_contest/app_mode_provider.dart';
 import 'package:soar_score_contest/auth/auth_session_inherited.dart';
 import 'package:soar_score_contest/widgets/app_version_label.dart';
@@ -34,6 +35,8 @@ Future<void> _pump(
   );
 }
 
+final l10n = AppLocalizationsEn();
+
 void main() {
   testWidgets('the menu shows the app version', (tester) async {
     appVersionLoader = () async => '0.1.0-alpha.1';
@@ -60,9 +63,9 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('account-name')), findsOneWidget);
     expect(find.text('Pat Pilot'), findsWidgets);
-    expect(find.text('Settings'), findsOneWidget);
+    expect(find.text(l10n.shellNavSettings), findsOneWidget);
 
-    await tester.tap(find.text('Sign out'));
+    await tester.tap(find.text(l10n.shellSignOut));
     await tester.pumpAndSettle();
 
     expect(session.signOutCalls, 1);
@@ -74,13 +77,13 @@ void main() {
 
     await tester.tap(find.byKey(_menu));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Settings'));
+    await tester.tap(find.text(l10n.shellNavSettings));
     await tester.pumpAndSettle();
 
     expect(find.text('Settings content'), findsOneWidget);
     expect(
       tester.widget<Text>(find.byKey(const ValueKey('page-title'))).data,
-      'Settings',
+      l10n.shellNavSettings,
     );
   });
 
@@ -99,7 +102,7 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.enter);
     await tester.pumpAndSettle();
 
-    expect(find.text('Sign out'), findsOneWidget);
+    expect(find.text(l10n.shellSignOut), findsOneWidget);
   });
 
   testWidgets('signed out: a gear opens the Settings page', (tester) async {
@@ -121,10 +124,10 @@ void main() {
 
     await tester.tap(find.byKey(_menu));
     await tester.pumpAndSettle();
-    expect(find.text('Sign out'), findsNothing);
-    expect(find.text('Settings'), findsOneWidget);
+    expect(find.text(l10n.shellSignOut), findsNothing);
+    expect(find.text(l10n.shellNavSettings), findsOneWidget);
 
-    await tester.tap(find.text('Sign in'));
+    await tester.tap(find.text(l10n.shellSignIn));
     await tester.pumpAndSettle();
 
     expect(mode.isOfflineMode, isFalse);

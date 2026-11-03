@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/l10n/app_localizations_en.dart';
 import 'package:soar_score_contest/router.dart';
 import 'package:soar_score_contest/widgets/contest_shell.dart';
 import 'package:soar_score_contest/widgets/contest_status_bar.dart';
@@ -9,6 +10,8 @@ import 'package:soar_score_ui/soar_score_ui.dart';
 import 'support/shell_test_router.dart';
 
 Finder _contestsCrumb() => find.byKey(const ValueKey('breadcrumb-contests'));
+
+final l10n = AppLocalizationsEn();
 
 void main() {
   testWidgets('shell renders the rail, header, status bar and system '
@@ -30,10 +33,10 @@ void main() {
 
     // System-level destinations only: contest tasks need a contest.
     expect(railLabels(tester), [
-      'Contests',
-      'Participants',
-      'Roles',
-      'Landings',
+      l10n.shellNavContests,
+      l10n.shellNavParticipants,
+      l10n.shellNavRoles,
+      l10n.shellNavLandings,
     ]);
     final rail = tester.widget<NavigationRail>(find.byType(NavigationRail));
     expect(rail.selectedIndex, 0);
@@ -109,7 +112,7 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('rail-toggle')));
     await tester.pumpAndSettle();
     expect(rail().extended, isTrue);
-    expect(find.text('Create contest'), findsOneWidget);
+    expect(find.text(l10n.createContestLabel), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('rail-toggle')));
     await tester.pumpAndSettle();
     expect(rail().extended, isFalse);
@@ -142,7 +145,7 @@ void main() {
     addTearDown(router.dispose);
     await pumpShellRouter(tester, router);
 
-    expect(find.text('New'), findsOneWidget);
+    expect(find.text(l10n.shellCrumbNew), findsOneWidget);
     expect(find.byKey(const ValueKey('breadcrumb-back')), findsNothing);
 
     await tester.tap(find.byKey(const ValueKey('breadcrumb-participants')));
