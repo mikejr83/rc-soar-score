@@ -163,7 +163,6 @@ class SyncEngine {
           await _pull(scope, response, from: pulled.cursor);
         }
       });
-      if (!_outcomes.isClosed) _outcomes.add(failure);
       if (failure == null) {
         // Record the sync even when it brought no changes.
         await _store.writeCursor(
@@ -173,6 +172,7 @@ class SyncEngine {
         );
       }
       await _refresh(scope, failure: failure);
+      if (!_outcomes.isClosed) _outcomes.add(failure);
       return failure;
     } finally {
       _emit(_state.copyWith(syncing: false));

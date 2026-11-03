@@ -7,7 +7,6 @@ import '../services/workspace/workspace_control_target.dart';
 import 'app_window_title.dart';
 import 'contest_name_loader.dart';
 import 'contest_status_bar.dart';
-import 'shell_destinations.dart';
 import 'shell_header.dart';
 import 'shell_round_loader.dart';
 import 'shell_rail.dart';

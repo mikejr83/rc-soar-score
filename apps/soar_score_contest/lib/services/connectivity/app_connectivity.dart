@@ -225,13 +225,18 @@ class AppConnectivity extends ChangeNotifier {
   /// A request to the service found no connection: the health checks start,
   /// to learn when it returns.
   void reportUnreachable() {
-    if (_disposed || _apiStatus == ConnectivityStatus.unavailable) {
+    if (_disposed) {
       return;
     }
     _apiLastError = 'Network error';
-    _stopPolling();
     _setApiStatus(ConnectivityStatus.unavailable);
-    _scheduleRetry();
+    // Probing may already be under way (a timer waiting, or a probe running):
+    // leave it alone so its backoff continues. Otherwise, such as after the
+    // app was paused, start it again.
+    if (_apiPollTimer == null && !_apiProbeInFlight) {
+      _stopPolling();
+      _scheduleRetry();
+    }
   }
 
   /// The app went to the background: no probe runs until [resume].
@@ -248,6 +253,7 @@ class AppConnectivity extends ChangeNotifier {
       return;
     }
     _paused = false;
+    _pollDelay = _initialPollInterval;
     if (!_disposed &&
         !_assumeOnline &&
         _apiStatus != ConnectivityStatus.available) {

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:soar_score_core/soar_score_core.dart';
 import 'package:soar_score_sync/soar_score_sync.dart';
@@ -38,6 +39,7 @@ void main() {
     polls = [];
     clock = DateTime.utc(2026, 11, 3, 12);
     poller = SyncPoller(
+      jitter: 0,
       onPoll: (focus) async => polls.add(focus),
       timerFactory: (delay, run) {
         final timer = _ManualTimer(delay, run);
@@ -114,6 +116,7 @@ void main() {
 
   test('a failing poll does not stop the checks', () async {
     final failing = SyncPoller(
+      jitter: 0,
       onPoll: (_) async => throw StateError('boom'),
       timerFactory: (delay, run) {
         final timer = _ManualTimer(delay, run);
@@ -127,4 +130,68 @@ void main() {
     await Future<void>.delayed(Duration.zero);
     expect(active().delay, const Duration(minutes: 10));
   });
+
+  test('a slow poll is not overlapped by a second one', () async {
+    final release = Completer<void>();
+    var running = 0;
+    var maxRunning = 0;
+    final slow = SyncPoller(
+      jitter: 0,
+      onPoll: (_) async {
+        running++;
+        maxRunning = running > maxRunning ? running : maxRunning;
+        await release.future;
+        running--;
+      },
+      timerFactory: (delay, run) {
+        final timer = _ManualTimer(delay, run);
+        timers.add(timer);
+        return timer;
+      },
+      now: () => clock,
+    )..enabled = true;
+    addTearDown(slow.dispose);
+
+    active().fire();
+    await Future<void>.delayed(Duration.zero);
+    // The director moves while the poll runs: a new timer, which fires.
+    slow.focusChanged(SyncPollContest(Id.create()));
+    active().fire();
+    await Future<void>.delayed(Duration.zero);
+    expect(maxRunning, 1);
+
+    release.complete();
+    await Future<void>.delayed(Duration.zero);
+    expect(active().delay, const Duration(minutes: 5));
+  });
+
+  test('the wait varies by no more than the jitter', () {
+    final varied = SyncPoller(
+      onPoll: (_) async {},
+      jitter: 0.1,
+      random: _FixedRandom(1),
+      timerFactory: (delay, run) {
+        final timer = _ManualTimer(delay, run);
+        timers.add(timer);
+        return timer;
+      },
+    )..enabled = true;
+    addTearDown(varied.dispose);
+    expect(active().delay, const Duration(minutes: 11));
+  });
+}
+
+class _FixedRandom implements Random {
+  _FixedRandom(this.value);
+
+  final double value;
+
+  @override
+  double nextDouble() => value;
+
+  @override
+  bool nextBool() => value > 0.5;
+
+  @override
+  int nextInt(int max) => (value * max).floor();
 }

@@ -381,6 +381,34 @@ void main() {
       expect(calls, 1);
     });
 
+    test('an offline sync while paused is picked up again by resume', () async {
+      var calls = 0;
+      monitor = createMonitor(
+        httpClient: MockClient((request) async {
+          calls++;
+          return http.Response(_serverPayload, 200, headers: _jsonHeaders);
+        }),
+        poll: const Duration(milliseconds: 50),
+      );
+      await _flushUntil(
+        () => monitor.apiStatus == ConnectivityStatus.available,
+      );
+
+      monitor.pause();
+      monitor.reportUnreachable();
+      monitor.reportUnreachable();
+      expect(monitor.apiStatus, ConnectivityStatus.unavailable);
+      final seen = calls;
+      await Future<void>.delayed(const Duration(milliseconds: 200));
+      expect(calls, seen);
+
+      monitor.resume();
+      await _flushUntil(
+        () => monitor.apiStatus == ConnectivityStatus.available,
+      );
+      expect(calls, seen + 1);
+    });
+
     test('pause holds the retries and resume probes at once', () async {
       var calls = 0;
       monitor = createMonitor(

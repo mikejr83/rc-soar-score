@@ -103,7 +103,7 @@ class NativeBootstrap extends AppBootstrap {
   Stream<bool> get syncReachability => sync.reachability;
 
   @override
-  void syncFocusChanged(core.Id? contestId) => sync.focusChanged(contestId);
+  void syncFocusChanged(String? contestId) => sync.focusChanged(contestId);
 
   @override
   void appActiveChanged({required bool active}) =>

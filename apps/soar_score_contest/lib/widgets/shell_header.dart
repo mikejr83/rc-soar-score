@@ -5,7 +5,6 @@ import '../contest_draft_provider.dart';
 import '../l10n/app_localizations.dart';
 import '../router.dart';
 import 'new_contest/draft_status_label.dart';
-import 'shell_destinations.dart';
 
 /// The slim header at the top of the shell's content pane: a back arrow
 /// below the main page (the participant pages have none; their root crumb

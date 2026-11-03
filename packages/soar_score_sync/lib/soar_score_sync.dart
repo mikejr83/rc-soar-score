@@ -14,3 +14,4 @@ export 'src/sync_scheduler.dart';
 export 'src/sync_scope_state.dart';
 export 'src/sync_skip_reason.dart';
 export 'src/sync_state.dart';
+export 'src/sync_timer_factory.dart';

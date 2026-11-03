@@ -74,7 +74,7 @@ abstract class AppBootstrap {
 
   /// The director moved to [contestId]'s pages, or to pages outside any
   /// contest when it is null. Sets how often the service is asked for changes.
-  void syncFocusChanged(core.Id? contestId) {}
+  void syncFocusChanged(String? contestId) {}
 
   /// The app went to the background ([active] false) or came back. Nothing is
   /// requested from the service in the background.

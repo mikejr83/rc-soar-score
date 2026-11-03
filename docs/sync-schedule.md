@@ -9,9 +9,11 @@ the API, it asks as rarely as it can. The web app does not poll at all.
 Only while the service is not known to be reachable.
 
 - At start-up, then after each failure at 15 s, 30 s, and then every 60 s.
-- They stop at the first success. After that, a successful sync is the proof
-  that the service is reachable, and a sync that finds no connection restarts
-  the health checks.
+- They stop at the first success. After that, a sync that gets an answer from
+  the service (including a refusal such as an expired sign-in) is the proof
+  that it is reachable, and a sync that finds no connection restarts the
+  health checks. A server error (5xx) says nothing either way and changes
+  nothing.
 - An operating system network change, and the "Retry now" button of the cloud
   indicator, check once.
 - Nothing runs while the app is minimised; coming back checks at once if the
@@ -23,11 +25,14 @@ Only while the service is not known to be reachable.
 
 Only while signed in and the service is reachable.
 
-| Where the director is | Check | Every |
-| --- | --- | --- |
+| Where the director is                                 | Check                                                                          | Every  |
+| ----------------------------------------------------- | ------------------------------------------------------------------------------ | ------ |
 | Landing page and Contests pages (no contest selected) | the director's own data, plus a look for contests made on another installation | 10 min |
-| Inside a contest | that contest, and the director's own data | 5 min |
+| Inside a contest                                      | that contest, and the director's own data                                      | 5 min  |
 
+- Each wait varies by up to 10 percent, so installations that started together
+  do not ask together. Checks never overlap, and a check is skipped when a sync
+  is already running.
 - Any sync resets the timer: a manual one, one after a local change, or a
   scheduled one. The next check comes one interval after it.
 - Opening a contest that has not synced for 5 min syncs it at once.

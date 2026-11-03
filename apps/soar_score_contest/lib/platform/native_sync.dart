@@ -55,8 +55,9 @@ class NativeSync {
     // it, and a sync that found no connection says the service is unreachable.
     _outcomeSubscription = engine.outcomes.listen((failure) {
       _poller.synced();
-      if (!_reachability.isClosed) {
-        _reachability.add(failure != SyncFailureKind.offline);
+      final reached = reachedService(failure);
+      if (reached != null && !_reachability.isClosed) {
+        _reachability.add(reached);
       }
     });
     _acting?.addListener(_accountChanged);
@@ -65,9 +66,21 @@ class NativeSync {
   late final StreamSubscription<SyncState> _stateSubscription;
   late final StreamSubscription<SyncFailureKind?> _outcomeSubscription;
   late final SyncPoller _poller = SyncPoller(onPoll: _poll);
+  final _entrySyncs = <core.SyncScopeKey>{};
   final _reachability = StreamController<bool>.broadcast();
   bool _reachable = false;
   SyncPollFocus _focus = const SyncPollLanding();
+
+  /// What a sync that ended with [failure] says about the service: true when
+  /// it got an answer (it completed, or the service refused it for a reason of
+  /// its own such as an expired sign-in), false when there was no connection,
+  /// and null for a server error (5xx), which says nothing either way: a
+  /// gateway answering for a service that is down looks the same.
+  static bool? reachedService(SyncFailureKind? failure) => switch (failure) {
+    SyncFailureKind.offline => false,
+    SyncFailureKind.serverError => null,
+    _ => true,
+  };
 
   /// What syncs find out about the service: true when one reached it, false
   /// when one found no connection.
@@ -248,18 +261,38 @@ class NativeSync {
 
   /// The director moved to a contest's pages ([contestId]) or out of them.
   /// Opening a contest not synced for a while syncs it at once.
-  void focusChanged(core.Id? contestId) {
-    _focus = contestId == null
-        ? const SyncPollLanding()
-        : SyncPollContest(contestId);
-    _poller.focusChanged(_focus);
-    if (contestId == null || !_reachable || _syncAccount == null) return;
-    final scope = core.ContestScopeKey(contestId);
-    final last = engine.state.scopes[scope]?.lastSyncedAt;
-    if (last == null ||
-        DateTime.now().difference(last) >= _poller.contestInterval) {
-      unawaited(engine.syncScope(scope));
+  void focusChanged(String? contestId) {
+    core.Id? id;
+    if (contestId != null) {
+      try {
+        id = core.Id.parse(contestId);
+      } on ArgumentError {
+        // A location that is not a contest: treat it as outside one.
+      }
     }
+    _focus = id == null ? const SyncPollLanding() : SyncPollContest(id);
+    _poller.focusChanged(_focus);
+    if (id == null || !_reachable || _syncAccount == null) return;
+    final scope = core.ContestScopeKey(id);
+    final last = engine.state.scopes[scope]?.lastSyncedAt;
+    final stale =
+        last == null ||
+        DateTime.now().difference(last) >= _poller.contestInterval;
+    // Moving quickly between pages must not queue the same sync again.
+    if (!stale || !_entrySyncs.add(scope)) return;
+    unawaited(
+      engine
+          .syncScope(scope)
+          .catchError((Object error, StackTrace stack) {
+            _logger.warning(
+              'Could not sync on opening a contest',
+              error,
+              stack,
+            );
+            return null;
+          })
+          .whenComplete(() => _entrySyncs.remove(scope)),
+    );
   }
 
   /// The app went to the background or came back to the front.
@@ -269,12 +302,22 @@ class NativeSync {
   /// look for contests made on another installation.
   Future<void> _poll(SyncPollFocus focus) async {
     final account = _syncAccount;
-    if (account == null) return;
-    if (focus case SyncPollContest(:final contestId)) {
-      await engine.syncScope(core.ContestScopeKey(contestId));
+    // A sync under way is as good as this check.
+    if (account == null || engine.state.syncing) return;
+    final steps = <Future<Object?> Function()>[
+      if (focus case SyncPollContest(:final contestId))
+        () => engine.syncScope(core.ContestScopeKey(contestId)),
+      () => engine.syncScope(core.DirectorScopeKey(account)),
+      discoverAccountContests,
+    ];
+    // One step failing must not skip the others.
+    for (final step in steps) {
+      try {
+        await step();
+      } on Object catch (error, stack) {
+        _logger.warning('A periodic sync check step failed', error, stack);
+      }
     }
-    await engine.syncScope(core.DirectorScopeKey(account));
-    await discoverAccountContests();
   }
 
   /// The Local account's data now belongs to [accountId]: sync every scope it

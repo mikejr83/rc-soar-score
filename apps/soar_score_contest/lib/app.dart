@@ -4,9 +4,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:soar_score_ui/soar_score_ui.dart';
-import 'package:soar_score_core/soar_score_core.dart' show Id;
-
-import 'widgets/shell_destinations.dart' show contestIdFor;
 
 import 'api_client_provider.dart';
 import 'app_sync_provider.dart';
@@ -210,15 +207,7 @@ class _SoarScoreContestAppState extends State<SoarScoreContestApp>
     final contestId = contestIdFor(path);
     if (contestId == _syncFocusContest) return;
     _syncFocusContest = contestId;
-    Id? id;
-    if (contestId != null) {
-      try {
-        id = Id.parse(contestId);
-      } on ArgumentError {
-        id = null;
-      }
-    }
-    bootstrap.syncFocusChanged(id);
+    bootstrap.syncFocusChanged(contestId);
   }
 
   @override
