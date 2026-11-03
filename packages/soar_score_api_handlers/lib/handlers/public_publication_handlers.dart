@@ -21,7 +21,8 @@ import 'package:soar_score_core/soar_score_core.dart';
 /// `completed`, worked out when the contest is read: before its start, Upcoming;
 /// Completed after the director completes it or 48 hours without activity (#454).
 ///
-/// A Delisted or unknown publication is a 404. With [enabled] false (the
+/// An unknown publication is a 404. One that exists but is not shown (Delisted,
+/// or with no projection yet) is a 403 `contest_not_visible`. With [enabled] false (the
 /// embedded server) both routes answer 409 `publishing_not_available`.
 ///
 /// The handlers only translate between HTTP and [PublicPublicationService].

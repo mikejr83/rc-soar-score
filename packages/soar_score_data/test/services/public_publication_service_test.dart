@@ -479,6 +479,30 @@ void _tests(Backend backend) {
       );
     });
 
+    test(
+      'a publication with no projection yet is pending, not visible',
+      () async {
+        final pending = core.Id.create();
+        await repository.publicationIdentityRepository.save(
+          core.PublicationIdentity(
+            id: pending,
+            verificationEmail: 'x@example.com',
+          ),
+        );
+
+        await expectLater(
+          reading.read(pending),
+          throwsA(
+            isA<core.ForbiddenError>().having(
+              (e) => e.code,
+              'code',
+              'contest_not_visible',
+            ),
+          ),
+        );
+      },
+    );
+
     test('a caller far from the server day cannot lift the cap', () async {
       await publishPublic('Far', DateTime.utc(2026, 11, 7, 12));
 
@@ -551,26 +575,35 @@ void _tests(Backend backend) {
       expect(list.recentCount, 1);
     });
 
-    test('a Delisted or unknown publication is not found', () async {
-      final identity = await publish(
-        visibility: core.PublicationVisibility.public,
-      );
-      await update(
-        await repository.publicationIdentityRepository.findById(identity.id)
-            as core.PublicationIdentity,
-        visibility: core.PublicationVisibility.delisted,
-      );
+    test(
+      'a Delisted publication is not visible and an unknown one not found',
+      () async {
+        final identity = await publish(
+          visibility: core.PublicationVisibility.public,
+        );
+        await update(
+          await repository.publicationIdentityRepository.findById(identity.id)
+              as core.PublicationIdentity,
+          visibility: core.PublicationVisibility.delisted,
+        );
 
-      await expectLater(
-        reading.read(identity.id),
-        throwsA(isA<core.EntityNotFoundError>()),
-      );
-      await expectLater(
-        reading.read(core.Id.create()),
-        throwsA(isA<core.EntityNotFoundError>()),
-      );
-      expect((await reading.list()).publications, isEmpty);
-    });
+        await expectLater(
+          reading.read(identity.id),
+          throwsA(
+            isA<core.ForbiddenError>().having(
+              (e) => e.code,
+              'code',
+              'contest_not_visible',
+            ),
+          ),
+        );
+        await expectLater(
+          reading.read(core.Id.create()),
+          throwsA(isA<core.EntityNotFoundError>()),
+        );
+        expect((await reading.list()).publications, isEmpty);
+      },
+    );
 
     test('standings beyond the hidden round never reach the reader', () async {
       await scoreEverything();

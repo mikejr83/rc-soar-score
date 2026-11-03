@@ -1,5 +1,6 @@
 import '../../enums/publication_visibility.dart';
 import '../../errors/entity_not_found_error.dart';
+import '../../errors/forbidden_error.dart';
 import '../../models/id.dart';
 import '../../models/publication/publication_identity.dart';
 import '../../models/publication/publication_participant.dart';
@@ -21,6 +22,15 @@ class PublicPublicationService {
   PublicPublicationService(this.repository, {DateTime Function()? clock})
     : _clock = clock ?? DateTime.now;
 
+  /// The code of the [ForbiddenError] for a publication that exists but is
+  /// not shown.
+  static const notVisibleCode = 'contest_not_visible';
+
+  static ForbiddenError _notVisible() => ForbiddenError(
+    notVisibleCode,
+    'this contest is pending or private and is not shown',
+  );
+
   /// The most a listing returns in one call.
   static const maxListLimit = 100;
 
@@ -29,8 +39,10 @@ class PublicPublicationService {
 
   /// The current projection of [publicationId].
   ///
-  /// Throws an [EntityNotFoundError] when the publication does not exist, is
-  /// Delisted, or has no projection.
+  /// Throws an [EntityNotFoundError] when the publication does not exist, and
+  /// a [ForbiddenError] with [notVisibleCode] when it exists but is not shown:
+  /// Delisted (private), or with no projection yet (pending). The error
+  /// carries nothing about the contest (#463).
   Future<PublicPublication> read(Id publicationId) async {
     final identity = await _readable(publicationId);
     final projection = await _current(identity);
@@ -236,24 +248,21 @@ class PublicPublicationService {
     final identity = await repository.publicationIdentityRepository.findById(
       publicationId,
     );
-    if (identity == null ||
-        identity.visibility == PublicationVisibility.delisted) {
+    if (identity == null) {
       throw EntityNotFoundError(
         entityType: 'Publication',
         entityId: publicationId,
       );
+    }
+    if (identity.visibility == PublicationVisibility.delisted) {
+      throw _notVisible();
     }
     return identity;
   }
 
   Future<PublicationProjection> _current(PublicationIdentity identity) async {
     final projection = await _currentOrNull(identity);
-    if (projection == null) {
-      throw EntityNotFoundError(
-        entityType: 'Publication',
-        entityId: identity.id,
-      );
-    }
+    if (projection == null) throw _notVisible();
     return projection;
   }
 

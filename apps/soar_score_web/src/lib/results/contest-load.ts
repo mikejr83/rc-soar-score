@@ -23,8 +23,8 @@ export async function loadContest(
     return { kind: "loaded", contest: new PublishedContest(await fetchPublication(contestId, signal), now) };
   } catch (e) {
     if (e instanceof ApiHttpError) {
-      // TODO(#463): the server answers 404 for a pending or private contest
-      // too; once it returns a distinct status, map it to notVisible.
+      // 404: no such publication. 403 `contest_not_visible`: it exists but is
+      // pending or private (#463).
       if (e.status === 404) return { kind: "notFound" };
       if (e.status === 403 && e.code === "contest_not_visible") return { kind: "notVisible" };
     }

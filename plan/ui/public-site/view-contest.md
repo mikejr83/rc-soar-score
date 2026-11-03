@@ -39,7 +39,7 @@ The user may navigate to the contest page or its sub-routes through a saved link
 
 A suggestion to check back at a later time is made. The page should indicate that it will attempt to check after an interval (15 minutes) to see if the contest has become public.
 
-A contest that never existed or has been delisted uses the contest not found page instead ([contest-not-found.md](contest-not-found.md)).
+The server tells the two apart. `GET /public/publications/{id}` answers `403` with code `contest_not_visible` when the publication exists but is not shown: it is delisted (the director marked it private) or nothing is published yet (pending). The answer carries nothing about the contest. A contest that never existed (`404`) uses the contest not found page instead ([contest-not-found.md](contest-not-found.md)).
 
 ### Overall Individual Results
 
