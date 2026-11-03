@@ -49,6 +49,7 @@ export 'participation_update_result.dart';
 export 'models_service.dart';
 export 'participations_service.dart';
 export 'role_usage.dart';
+export 'publication/delist_request_service.dart';
 export 'publication/public_publication.dart';
 export 'publication/public_publication_service.dart';
 export 'publication/public_update_service.dart';

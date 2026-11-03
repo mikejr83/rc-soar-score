@@ -36,6 +36,7 @@ export 'dto/public_publication_summary_dto.dart';
 export 'dto/publish_contest_request.dart';
 export 'dto/register_installation_request.dart';
 export 'dto/redraw_matrix_request.dart';
+export 'dto/request_delisting_request.dart';
 export 'dto/rename_role_request.dart';
 export 'dto/resolve_conflict_request.dart';
 export 'dto/save_configuration_request.dart';

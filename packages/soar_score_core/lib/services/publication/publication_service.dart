@@ -10,6 +10,7 @@ import '../../models/accounts/account_public_profile.dart';
 import '../../models/contest/contest.dart';
 import '../../models/id.dart';
 import '../../models/publication/publication_identity.dart';
+import '../../models/publication/publication_projection.dart';
 import '../../models/shared/shared.dart';
 import '../../models/sync/audit_event.dart';
 import '../../repositories/repository.dart';
@@ -298,6 +299,29 @@ class PublicationService {
       current: await repository.publicationProjectionRepository
           .latestForPublication(identity.id),
     );
+  }
+
+  /// The projections of the director's publication, newest revision first.
+  ///
+  /// [limit] and [offset] page the list. Throws an [EntityNotFoundError]
+  /// when the contest or its publication does not exist, and a
+  /// [ForbiddenError] for anyone but the director.
+  Future<List<PublicationProjection>> history(
+    Id contestId, {
+    required Id actorId,
+    required Authority authority,
+    int limit = 50,
+    int offset = 0,
+  }) async {
+    if (limit < 1 || offset < 0) {
+      throw ArgumentError('limit must be positive and offset not negative');
+    }
+    final contest = await _requireContest(contestId);
+    _requireDirector(contest, actorId, authority);
+    final identity = await _requirePublication(contestId);
+    final all = await repository.publicationProjectionRepository
+        .listForPublication(identity.id);
+    return all.reversed.skip(offset).take(limit).toList();
   }
 
   /// Switches the publication between Unlisted and Public.
