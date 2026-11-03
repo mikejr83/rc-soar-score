@@ -96,7 +96,7 @@ export default function ContestsAndScoresPage() {
           This contest has pending results or has been marked private. It is
           not shown at this time. The contest will be shown after the final
           placing is announced and the contest director makes the results
-          public or 48hrs after the last score entered.
+          public.
         </p>
       </Callout>
       <p>

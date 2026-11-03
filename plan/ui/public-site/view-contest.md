@@ -35,9 +35,9 @@ The route will change when the round changes: `/results/contests/:contestId/roun
 
 The user may navigate to the contest page or its sub-routes through a saved link or some other means. If this occurs when the contest exists but is not yet public (its results are pending or the director has marked it private) the page shows this message:
 
-> This contest has pending results or has been marked private. It is not shown at this time. The contest will be shown after the final placing is announced and the contest director makes the results public or 48hrs after the last score entered.
+> This contest has pending results or has been marked private. It is not shown at this time. The contest will be shown after the final placing is announced and the contest director makes the results public.
 
-A suggestion to check back at a later time is made. The page should indicate that it will attempt to check after an interval (15 minutes) to see if the contest has become public.
+A contest that is only Unlisted (reachable by a link the director shared) never becomes public by itself; the director has to make it public. A suggestion to check back at a later time is made. The page should indicate that it will attempt to check after an interval (15 minutes) to see if the contest has become public.
 
 The server tells the two apart. `GET /public/publications/{id}` answers `403` with code `contest_not_visible` when the publication exists but is not shown: it is delisted (the director marked it private) or nothing is published yet (pending). The answer carries nothing about the contest. A contest that never existed (`404`) uses the contest not found page instead ([contest-not-found.md](contest-not-found.md)).
 
