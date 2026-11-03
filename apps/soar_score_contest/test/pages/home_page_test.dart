@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/l10n/app_localizations_en.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:soar_score_api/soar_score_api.dart';
@@ -43,6 +44,8 @@ http.Response _json(Object body) => http.Response(
   headers: {'content-type': 'application/json; charset=utf-8'},
 );
 
+final l10n = AppLocalizationsEn();
+
 void main() {
   testWidgets('lists the contests the API returns', (tester) async {
     final client = _client(
@@ -61,7 +64,7 @@ void main() {
     expect(find.text('Second Open'), findsOneWidget);
     // The first contest is listed and shown in the detail pane.
     expect(find.text('Front Range ALES Open'), findsNWidgets(2));
-    expect(find.text('Created'), findsNWidgets(3));
+    expect(find.text(l10n.lifecycleCreated), findsNWidgets(3));
     expect(find.text('Oct 17, 2026 to Oct 18, 2026'), findsNWidgets(2));
   });
 
@@ -118,7 +121,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('No contests yet.'), findsOneWidget);
+    expect(find.text(l10n.contestsEmpty), findsOneWidget);
   });
 
   testWidgets('shows the error and retries', (tester) async {
@@ -135,20 +138,20 @@ void main() {
 
     await tester.pumpWidget(_app(client));
     await tester.pumpAndSettle();
-    expect(find.text('Contests could not be loaded.'), findsOneWidget);
+    expect(find.text(l10n.contestsLoadFailed), findsOneWidget);
 
     await tester.tap(find.text('Retry'));
     await tester.pumpAndSettle();
 
     expect(find.text('Recovered Open'), findsNWidgets(2));
-    expect(find.text('Contests could not be loaded.'), findsNothing);
+    expect(find.text(l10n.contestsLoadFailed), findsNothing);
   });
 
   testWidgets('shows the error when no API client is provided', (tester) async {
     await tester.pumpWidget(_app(null));
     await tester.pumpAndSettle();
 
-    expect(find.text('Contests could not be loaded.'), findsOneWidget);
+    expect(find.text(l10n.contestsLoadFailed), findsOneWidget);
   });
 
   testWidgets('shows a loading state while the contests load', (tester) async {
@@ -156,9 +159,9 @@ void main() {
       _app(_client((_) async => _json({'contests': <Object>[]}))),
     );
 
-    expect(find.text('Loading contests'), findsOneWidget);
+    expect(find.text(l10n.contestsLoading), findsOneWidget);
     await tester.pumpAndSettle();
-    expect(find.text('Loading contests'), findsNothing);
+    expect(find.text(l10n.contestsLoading), findsNothing);
   });
 
   testWidgets('a 401 says to sign in again instead of blaming the server', (
@@ -167,7 +170,7 @@ void main() {
     await tester.pumpWidget(_app(_client((_) async => http.Response('', 401))));
     await tester.pumpAndSettle();
 
-    expect(find.text('Contests could not be loaded.'), findsOneWidget);
+    expect(find.text(l10n.contestsLoadFailed), findsOneWidget);
     expect(find.textContaining('not signed in'), findsOneWidget);
     expect(find.byIcon(Icons.lock_outline), findsOneWidget);
     expect(find.byKey(const ValueKey('page-state-retry')), findsNothing);

@@ -15,6 +15,24 @@ export const flightRowId = (group: FlightGroup, pilotKey: string) =>
   `flight-${group.round}-${group.group}-${group.reflight ?? 0}-${pilotKey}`;
 
 /**
+ * A discipline detail. A yes/no flag (motor restart, late landing, no
+ * altitude recorded) shows a check mark when it happened and a dash when not,
+ * never the word "true" (#722).
+ */
+function DetailValue({ label, text, value }: { label: string; text: string; value: unknown }) {
+  if (typeof value !== "boolean") return <>{text}</>;
+  if (!value) return <>-</>;
+  return (
+    <>
+      <span aria-hidden="true" className={styles.flagMark} title={label}>
+        ✓
+      </span>
+      <span className="visually-hidden">{label}: yes</span>
+    </>
+  );
+}
+
+/**
  * One flight group headed by its number and re-flight label. Time and the
  * discipline details show only when the flights carry raw components
  * (#456), labelled from the projection's score fields; the landing column only when `hasLanding`.
@@ -94,7 +112,11 @@ export function FlightGroupTable({
                   {hasLanding && <td className={num}>{formatScore(f.landingPoints)}</td>}
                   {details.map((key) => (
                     <td key={key} className={num}>
-                      {fields.format(key, f.rawComponents[key])}
+                      <DetailValue
+                        label={fields.label(key)}
+                        text={fields.format(key, f.rawComponents[key])}
+                        value={f.rawComponents[key]}
+                      />
                     </td>
                   ))}
                   <td className={num}>{formatScore(f.rawPoints)}</td>

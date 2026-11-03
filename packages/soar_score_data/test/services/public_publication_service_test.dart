@@ -367,6 +367,55 @@ void _tests(Backend backend) {
       expect(list.toJson()['summary'], {'recent_count': 2});
     });
 
+    test('the summary follows the date filters, not the name', () async {
+      await publishPublic('Flown', DateTime.utc(2026, 10, 10, 14));
+      await publishPublic('Running', DateTime.utc(2026, 10, 17, 14));
+      await publishPublic('Old', DateTime.utc(2026, 8, 1, 14));
+
+      final old = await reading.list(
+        from: DateTime.utc(2026, 7, 1),
+        to: DateTime.utc(2026, 8, 31),
+      );
+      final named = await reading.list(name: 'Old');
+      final all = await reading.list(from: DateTime.utc(2026, 1, 1));
+
+      expect(old.recentCount, 1);
+      expect(await names(old), ['Old']);
+      expect(named.recentCount, 2, reason: 'a name filter keeps the window');
+      expect(all.recentCount, 3);
+    });
+
+    test('a from filter does not count a contest that started before it, and '
+        'a to filter is not limited to 30 days', () async {
+      // Starts 2026-10-10, ends the 12th; the clock is 2026-10-17.
+      await publishPublic(
+        'Spans',
+        DateTime.utc(2026, 10, 10, 14),
+        end: DateTime.utc(2026, 10, 12, 14),
+      );
+      await publishPublic('Old', DateTime.utc(2026, 8, 1, 14));
+
+      final fromAfterStart = await reading.list(
+        from: DateTime.utc(2026, 10, 11),
+      );
+      final toOnly = await reading.list(to: DateTime.utc(2026, 10, 17));
+
+      expect(await names(fromAfterStart), isEmpty);
+      expect(fromAfterStart.recentCount, 0);
+      expect(await names(toOnly), ['Spans', 'Old']);
+      expect(toOnly.recentCount, 2);
+    });
+
+    test('a contest starting later this week is in the summary', () async {
+      // The clock is Saturday 2026-10-17; the list runs through Sunday.
+      await publishPublic('Tomorrow', DateTime.utc(2026, 10, 18, 9));
+
+      final list = await reading.list();
+
+      expect(await names(list), ['Tomorrow']);
+      expect(list.recentCount, 1);
+    });
+
     test('a Delisted or unknown publication is not found', () async {
       final identity = await publish(
         visibility: core.PublicationVisibility.public,

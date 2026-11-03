@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/l10n/app_localizations_en.dart';
 import 'package:flutter/semantics.dart';
 import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_contest/services/workspace/shell_round_item.dart';
@@ -25,6 +26,8 @@ Contest _contest({ScoringAccess access = ScoringAccess.closed}) => Contest(
   updatedAt: DateTime.utc(2026, 9),
 );
 
+final l10n = AppLocalizationsEn();
+
 void main() {
   testWidgets('shows status, participant scoring and administration', (
     tester,
@@ -38,13 +41,13 @@ void main() {
       ),
     );
 
-    expect(find.text('Status'), findsOneWidget);
+    expect(find.text(l10n.shellStatusLifecycle), findsOneWidget);
     expect(find.text('Lifecycle'), findsNothing);
-    expect(find.text('Running'), findsOneWidget);
-    expect(find.text('Participant scoring'), findsOneWidget);
-    expect(find.text('Open'), findsOneWidget);
-    expect(find.text('Administration'), findsOneWidget);
-    expect(find.text('Locked'), findsOneWidget);
+    expect(find.text(l10n.lifecycleRunning), findsOneWidget);
+    expect(find.text(l10n.shellStatusScoring), findsOneWidget);
+    expect(find.text(l10n.shellScoringOpen), findsOneWidget);
+    expect(find.text(l10n.shellStatusAdministration), findsOneWidget);
+    expect(find.text(l10n.shellAdminLocked), findsOneWidget);
   });
 
   testWidgets('each value is a button with its own accessible name', (
@@ -74,9 +77,9 @@ void main() {
       expect(node.getSemanticsData().hasAction(SemanticsAction.tap), isTrue);
     }
 
-    await tester.tap(find.text('Status'));
-    await tester.tap(find.text('Participant scoring'));
-    await tester.tap(find.text('Administration'));
+    await tester.tap(find.text(l10n.shellStatusLifecycle));
+    await tester.tap(find.text(l10n.shellStatusScoring));
+    await tester.tap(find.text(l10n.shellStatusAdministration));
     // The panel's three values; publication is a target but has no value
     // in the panel.
     expect(opened, [
@@ -97,7 +100,10 @@ void main() {
       ),
     );
     final size = tester.getSize(
-      find.ancestor(of: find.text('Status'), matching: find.byType(InkWell)),
+      find.ancestor(
+        of: find.text(l10n.shellStatusLifecycle),
+        matching: find.byType(InkWell),
+      ),
     );
     expect(size.height, greaterThanOrEqualTo(48));
     expect(size.width, greaterThanOrEqualTo(48));

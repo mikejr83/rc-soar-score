@@ -96,7 +96,11 @@ export function PilotCells({
         const score = row.roundScores.get(r);
         const dropped = row.droppedRounds.has(r);
         return (
-          <td key={r} className={num} title={dropped ? "Dropped" : undefined}>
+          <td
+            key={r}
+            className={dropped ? `${num} ${styles.droppedCell}` : num}
+            title={dropped ? "Dropped round" : undefined}
+          >
             {score === undefined ? (
               "-"
             ) : (
@@ -105,7 +109,14 @@ export function PilotCells({
                 className={`${styles.scoreLink} ${dropped ? styles.struck : ""}`}
               >
                 {formatScore(score)}
-                {dropped && <span className="visually-hidden"> (dropped)</span>}
+                {dropped && (
+                  <>
+                    <span aria-hidden="true" className={styles.droppedMark}>
+                      *
+                    </span>
+                    <span className="visually-hidden"> (dropped round)</span>
+                  </>
+                )}
               </Link>
             )}
           </td>

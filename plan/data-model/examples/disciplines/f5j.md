@@ -1,4 +1,4 @@
-# F5J (FAI Free-Flight) Discipline Example
+# F5J (Electric Thermal Duration) Discipline Example
 
 F5J is an FAI precision duration discipline where pilots fly to reach a specified
 working time, perform a precision landing, and incur launch height penalties.
@@ -10,7 +10,7 @@ working time, perform a precision landing, and incur launch height penalties.
   "id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2b01",
   "type": "F5J",
   "version": 1,
-  "name": "FAI Free-Flight (F5J)",
+  "name": "Electric Thermal Duration (F5J)",
   "description": "Precision duration discipline with working time, mandatory launch height penalties, and precision landing bonus. Score = flight points + landing bonus - height penalty.",
   "category": "duration",
   "default_landing_table_id": "019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2b02",

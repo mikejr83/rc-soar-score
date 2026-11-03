@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import '../../enums/lifecycle_state.dart';
 import '../../enums/role_type.dart';
 import '../../enums/score_field_kind.dart';
 import '../../enums/score_field_type.dart';
@@ -147,6 +148,16 @@ class PublicationProjectionBuilder {
     'state': contest.state,
     'country': contest.country,
     'discipline': disciplineName,
+    // The lifecycle state at publish time: `Completed`, or the state of a
+    // contest still under way. The public site shows Completed or In
+    // progress from it (#454).
+    'status': switch (contest.lifecycleState) {
+      LifecycleState.created => 'Created',
+      LifecycleState.configuring => 'Configuring',
+      LifecycleState.ready => 'Ready',
+      LifecycleState.running => 'Running',
+      LifecycleState.completed => 'Completed',
+    },
   };
 
   /// The pilots of the contest with their keys. A non-flying role is not

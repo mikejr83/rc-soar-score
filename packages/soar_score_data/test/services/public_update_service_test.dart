@@ -153,6 +153,31 @@ void _tests(Backend backend) {
       );
     });
 
+    test('completing a published contest publishes it again, once', () async {
+      await publishFirst();
+
+      final first = await updates.afterCompletion(contestId, revision: 7);
+      final again = await updates.afterCompletion(contestId, revision: 7);
+
+      expect(first!.created, isTrue);
+      expect(first.view.current!.projectionRevision, 2);
+      expect(again!.created, isFalse);
+      expect(await projections(), hasLength(2));
+    });
+
+    test(
+      'completing publishes nothing in Manual or when never published',
+      () async {
+        expect(await updates.afterCompletion(contestId, revision: 7), isNull);
+
+        await useMode(core.PublicUpdateMode.manual);
+        await publishFirst();
+
+        expect(await updates.afterCompletion(contestId, revision: 7), isNull);
+        expect(await projections(), hasLength(1));
+      },
+    );
+
     test('Manual never publishes after an entry', () async {
       await useMode(core.PublicUpdateMode.manual);
       await publishFirst();

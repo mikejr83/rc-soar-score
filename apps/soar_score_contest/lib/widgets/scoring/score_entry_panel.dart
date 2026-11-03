@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../../l10n/app_localizations.dart';
+
 import '../../services/scoring/row_save.dart';
 import '../../services/scoring/score_check.dart';
 import '../../services/scoring/score_row_draft.dart';
@@ -74,6 +76,12 @@ class ScoreEntryPanel extends StatelessWidget {
         (draft.isDirty || !row.isScored) &&
         (!draft.needsZeroConfirmation || draft.zeroConfirmed);
     final landingReason = draft.landingOffReason;
+    final awaitingZeroConfirm =
+        enabled &&
+        problems.isEmpty &&
+        (draft.isDirty || !row.isScored) &&
+        draft.needsZeroConfirmation &&
+        !draft.zeroConfirmed;
 
     var step = 3;
     Widget toggle(
@@ -316,6 +324,18 @@ class ScoreEntryPanel extends StatelessWidget {
                 .firstOrNull,
           ),
           const SizedBox(height: 14),
+          if (awaitingZeroConfirm)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Text(
+                AppLocalizations.of(context).scoreSaveNeedsZeroConfirm,
+                key: ValueKey(keyOf('save-needs-confirm')),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: scheme.error,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
           SizedBox(
             width: double.infinity,
             child: Wrap(

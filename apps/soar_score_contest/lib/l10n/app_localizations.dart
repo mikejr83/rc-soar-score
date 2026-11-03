@@ -2605,6 +2605,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'results hiding'**
   String get resultsCardWhat;
+
+  /// Next to the disabled Save row button while a zero score has not been confirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm the zero above to enable Save row.'**
+  String get scoreSaveNeedsZeroConfirm;
+
+  /// Title of the dialog shown before Save rows records unconfirmed zeros.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm zero scores'**
+  String get scoreSaveAllZeroTitle;
+
+  /// Body of the confirm-zeros dialog; pilots is a comma separated list of names.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{This row will be saved as a zero: {pilots}.} other{These {count} rows will be saved as zeros: {pilots}.}}'**
+  String scoreSaveAllZeroBody(int count, String pilots);
+
+  /// Button that confirms the zeros and saves every row.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm and save'**
+  String get scoreSaveAllZeroConfirm;
+
+  /// Button that closes the confirm-zeros dialog without saving.
+  ///
+  /// In en, this message translates to:
+  /// **'Go back'**
+  String get scoreSaveAllZeroCancel;
+
+  /// Shown on the scoring toolbar while rows are being saved.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{Saving 1 row…} other{Saving {count} rows…}}'**
+  String scoreSavingRows(int count);
 }
 
 class _AppLocalizationsDelegate

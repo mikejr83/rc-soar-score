@@ -26,7 +26,8 @@ export default function ContestsAndScoresPage() {
         <Link href="/results/contests">Contests</Link> lists the ten most recent
         contests that are in progress or completed, newest start date first,
         with a count of how many ran in the last 30 days. Filter by name, venue
-        or start date to see every match; the filters live in the address, so a
+        or start date to see every match; a start date filter also sets the time
+        frame of the count; the filters live in the address, so a
         filtered list can be bookmarked or shared. Refresh reloads the list
         without leaving the page, handy while you wait for a contest to go
         live.

@@ -53,11 +53,15 @@ abstract interface class PublicationIdentityRepository {
   /// contest start.
   Future<List<PublicationIdentity>> listPublic(PublicationListQuery query);
 
-  /// How many Public, published publications have a contest that started on
-  /// or before [at] and ended after [windowStart].
+  /// How many Public, published publications have a contest that started
+  /// before [startsBefore], on or after [startsOnOrAfter] when given, and
+  /// that ended on or after [endsOnOrAfter] when given (a contest without an
+  /// end counts as ending when it starts). The start bounds are the ones
+  /// [listPublic] applies.
   Future<int> countPublicActive({
-    required DateTime windowStart,
-    required DateTime at,
+    DateTime? startsOnOrAfter,
+    DateTime? endsOnOrAfter,
+    required DateTime startsBefore,
   });
 
   /// Stores [identity], bumping its revision, and returns it as stored.

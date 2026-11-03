@@ -475,6 +475,8 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
       );
       expect(scored, hasLength(2));
       await pumpUntilFound(tester, find.text('Saved 2 rows.'));
+      // The saving indicator is gone once the rows are saved.
+      expect(find.byKey(const ValueKey('score-saving-progress')), findsNothing);
     }),
     timeout: _longStep,
   );

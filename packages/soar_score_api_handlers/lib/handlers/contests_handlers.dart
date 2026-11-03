@@ -1,3 +1,4 @@
+import 'package:logging/logging.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:soar_score_api/soar_score_api.dart';
@@ -7,6 +8,8 @@ import 'package:soar_score_api_handlers/handlers/health_handler.dart';
 import 'package:soar_score_api_handlers/handlers/request_body.dart';
 import 'package:soar_score_api_handlers/handlers/write_metadata.dart';
 import 'package:soar_score_core/soar_score_core.dart';
+
+final _logger = Logger('Contests');
 
 /// Adds the contest routes to [router] (which is mounted under `/api/v1`):
 ///
@@ -20,8 +23,13 @@ import 'package:soar_score_core/soar_score_core.dart';
 /// Writes act as the request's `Principal`: it owns what is created and is
 /// the actor recorded with each change. The handlers only translate between
 /// HTTP and [ContestsService].
-void addContestRoutes(Router router, Repository repository) {
+void addContestRoutes(
+  Router router,
+  Repository repository, {
+  bool publishingEnabled = false,
+}) {
   final service = ContestsService(repository);
+  final publicUpdates = PublicUpdateService(repository);
 
   router.get('/contests', (Request request) async {
     final principal = requirePrincipal(request);
@@ -103,6 +111,23 @@ void addContestRoutes(Router router, Repository repository) {
       baseRevision: body.baseRevision,
       metadata: writeMetadata(principal),
     );
+    if (publishingEnabled && body.action == ContestAction.complete) {
+      // The public site shows the contest as Completed once it republishes.
+      // The contest is completed whatever happens here.
+      try {
+        await publicUpdates.afterCompletion(
+          contestId,
+          revision: contest.revision,
+        );
+      } on Object catch (error, stackTrace) {
+        _logger.warning(
+          'Public update after completing contest $id failed; the last '
+          'projection stays public',
+          error,
+          stackTrace,
+        );
+      }
+    }
     return jsonResponse(contest.toJson());
   });
   router.get('/contests/<id>/audit-events', (Request request, String id) async {

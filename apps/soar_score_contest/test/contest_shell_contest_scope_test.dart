@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/l10n/app_localizations_en.dart';
 import 'package:soar_score_contest/router.dart';
 
 import 'support/shell_test_router.dart';
+
+final l10n = AppLocalizationsEn();
 
 void main() {
   final workspace = contestWorkspacePath(testContestId);
@@ -15,12 +18,12 @@ void main() {
 
     expect(find.text('Contest workspace content'), findsOneWidget);
     expect(railLabels(tester), [
-      'Workspace',
-      'Configuration',
-      'Participants',
-      'Matrix',
-      'Scoring',
-      'Reports',
+      l10n.shellNavWorkspace,
+      l10n.shellNavConfiguration,
+      l10n.shellNavParticipants,
+      l10n.shellNavMatrix,
+      l10n.shellNavScoring,
+      l10n.shellNavReports,
     ]);
     final rail = tester.widget<NavigationRail>(find.byType(NavigationRail));
     expect(rail.selectedIndex, 0);
@@ -38,10 +41,10 @@ void main() {
 
     expect(find.text('Home content'), findsOneWidget);
     expect(railLabels(tester), [
-      'Contests',
-      'Participants',
-      'Roles',
-      'Landings',
+      l10n.shellNavContests,
+      l10n.shellNavParticipants,
+      l10n.shellNavRoles,
+      l10n.shellNavLandings,
     ]);
   });
 }
