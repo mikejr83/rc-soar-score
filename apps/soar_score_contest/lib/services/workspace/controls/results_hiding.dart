@@ -10,16 +10,11 @@ sealed class ResultsHiding {
   /// change.
   factory ResultsHiding.of(Contest contest, DateTime now) {
     final round = contest.resultsHiddenThroughRound;
-    final at = contest.resultsHiddenAt;
-    if (round == null || at == null || contest.hidingExpiredAt(now)) {
+    final endsAt = contest.hidingEndsAt;
+    if (round == null || endsAt == null || contest.hidingExpiredAt(now)) {
       return const ResultsVisible();
     }
-    final endsAt = at.add(Contest.hidingLifetime);
-    return ResultsHidden(
-      throughRound: round,
-      endsAt: endsAt,
-      remaining: endsAt.difference(now.toUtc()),
-    );
+    return ResultsHidden(throughRound: round, endsAt: endsAt);
   }
 }
 
@@ -31,15 +26,11 @@ class ResultsVisible extends ResultsHiding {
 /// Overall scores and placing are hidden through [throughRound] until
 /// [endsAt] (UTC) at the latest.
 class ResultsHidden extends ResultsHiding {
-  const ResultsHidden({
-    required this.throughRound,
-    required this.endsAt,
-    required this.remaining,
-  });
+  const ResultsHidden({required this.throughRound, required this.endsAt});
 
   final int throughRound;
   final DateTime endsAt;
 
-  /// Time left before the 24 hours run out; positive.
-  final Duration remaining;
+  /// Time left at [now] before the 24 hours run out.
+  Duration remainingAt(DateTime now) => endsAt.difference(now.toUtc());
 }

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
@@ -32,10 +34,51 @@ class ResultsControlCard extends StatefulWidget {
 
 class _ResultsControlCardState extends State<ResultsControlCard> {
   bool _running = false;
+  Timer? _tick;
 
-  // The revision the change produced; the button stays busy until the page
-  // shows it, so the old state cannot be changed twice.
-  int? _pendingRevision;
+  @override
+  void initState() {
+    super.initState();
+    _arm();
+  }
+
+  @override
+  void didUpdateWidget(ResultsControlCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.contest.resultsHiddenAt != widget.contest.resultsHiddenAt) {
+      _arm();
+    }
+  }
+
+  @override
+  void dispose() {
+    _tick?.cancel();
+    super.dispose();
+  }
+
+  /// While results are hidden, wakes the card each minute (and at the end of
+  /// the 24 hours) so the countdown stays right and the card flips to Visible
+  /// by itself.
+  void _arm() {
+    _tick?.cancel();
+    _tick = null;
+    final hiding = ResultsHiding.of(widget.contest, widget.clock());
+    if (hiding is! ResultsHidden) {
+      return;
+    }
+    final left = hiding.remainingAt(widget.clock());
+    const minute = Duration(minutes: 1);
+    final wait = left < minute ? left : minute;
+    _tick = Timer(
+      wait < const Duration(seconds: 1) ? const Duration(seconds: 1) : wait,
+      () {
+        if (mounted) {
+          setState(() {});
+          _arm();
+        }
+      },
+    );
+  }
 
   Future<void> _press(ResultsHiding hiding) async {
     final l10n = AppLocalizations.of(context);
@@ -48,35 +91,36 @@ class _ResultsControlCardState extends State<ResultsControlCard> {
     }
     final hide = hiding is ResultsVisible;
     setState(() => _running = true);
-    final updated =
-        await ContestActionRunner(
-          client: client,
-          messenger: messenger,
-          refresh: scope.refresh,
-          onStale: scope.reportStale,
-        ).run(
-          widget.contest,
-          hide ? ContestAction.hideResults : ContestAction.showResults,
-          what: l10n.resultsCardWhat,
-          done: hide
-              ? l10n.resultsCardHiddenMessage
-              : l10n.resultsCardShownMessage,
-          undo: hide ? ContestAction.showResults : ContestAction.hideResults,
-        );
-    if (!mounted) {
-      return;
+    // run() refreshes the page before it returns, so the button is busy until
+    // the new state is on screen, and a failure always frees it.
+    try {
+      await ContestActionRunner(
+        client: client,
+        messenger: messenger,
+        refresh: scope.refresh,
+        onStale: scope.reportStale,
+      ).run(
+        widget.contest,
+        hide ? ContestAction.hideResults : ContestAction.showResults,
+        what: l10n.resultsCardWhat,
+        done: hide
+            ? l10n.resultsCardHiddenMessage
+            : l10n.resultsCardShownMessage,
+        undo: hide ? ContestAction.showResults : ContestAction.hideResults,
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _running = false);
+      }
     }
-    setState(() {
-      _running = false;
-      _pendingRevision = updated?.revision;
-    });
   }
 
+  // Rounds up, so the countdown never understates what is left.
   String _remaining(AppLocalizations l10n, Duration left) {
-    final hours = left.inHours;
-    final time = hours >= 1
-        ? l10n.resultsCardRemainingHours(hours)
-        : l10n.resultsCardRemainingMinutes(left.inMinutes.clamp(1, 59));
+    final minutes = left.inSeconds <= 0 ? 1 : (left.inSeconds + 59) ~/ 60;
+    final time = minutes >= 60
+        ? l10n.resultsCardRemainingHours((minutes + 59) ~/ 60)
+        : l10n.resultsCardRemainingMinutes(minutes);
     return l10n.resultsCardRemaining(time);
   }
 
@@ -90,8 +134,7 @@ class _ResultsControlCardState extends State<ResultsControlCard> {
         : ContestTimeZones.utc;
     final offline = WorkspaceScope.of(context).facts?.isOffline ?? false;
     final running = contest.lifecycleState == LifecycleState.running;
-    final pending = _pendingRevision;
-    final busy = _running || (pending != null && contest.revision < pending);
+    final busy = _running;
 
     // Showing is always allowed; hiding only while Running.
     final String? reason = offline
@@ -100,21 +143,25 @@ class _ResultsControlCardState extends State<ResultsControlCard> {
         ? l10n.resultsCardNotRunning
         : null;
 
-    final (current, scope) = switch (hiding) {
+    final (current, detail) = switch (hiding) {
       ResultsVisible() => (
         l10n.resultsCardVisible,
         l10n.resultsCardScopeVisible,
       ),
-      ResultsHidden(:final throughRound, :final endsAt, :final remaining) => (
-        l10n.resultsCardHidden(throughRound, ContestTime.format(endsAt, zone)),
-        '${l10n.resultsCardScopeHidden} ${_remaining(l10n, remaining)}',
+      final ResultsHidden h => (
+        l10n.resultsCardHidden(
+          h.throughRound,
+          ContestTime.format(h.endsAt, zone),
+        ),
+        '${l10n.resultsCardScopeHidden} '
+            '${_remaining(l10n, h.remainingAt(widget.clock()))}',
       ),
     };
     final hide = hiding is ResultsVisible;
     return ControlCardBody(
       control: WorkspaceControl.results,
       current: current,
-      scope: scope,
+      scope: detail,
       disabledReason: reason,
       button: FilledButton.tonalIcon(
         key: ValueKey(hide ? 'control-hideResults' : 'control-showResults'),

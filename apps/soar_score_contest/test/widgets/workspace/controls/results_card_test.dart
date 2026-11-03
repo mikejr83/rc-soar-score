@@ -93,6 +93,49 @@ void main() {
       expect(find.textContaining('40 minutes left'), findsOneWidget);
     });
 
+    testWidgets('the countdown rounds up and never understates', (
+      tester,
+    ) async {
+      final server = _server()..startHidden();
+      // 23 h 59 m left reads 24 hours; 59 m 30 s left reads 60 minutes -> 1
+      // hour; one second left reads 1 minute.
+      await pumpWorkspace(
+        tester,
+        server,
+        clock: () => DateTime.utc(2026, 10, 17, 15, 1),
+      );
+      expect(find.textContaining('24 hours left'), findsOneWidget);
+    });
+
+    testWidgets('one second left reads 1 minute', (tester) async {
+      final server = _server()..startHidden();
+      await pumpWorkspace(
+        tester,
+        server,
+        clock: () => DateTime.utc(2026, 10, 18, 14, 59, 59),
+      );
+      expect(find.textContaining('1 minute left'), findsOneWidget);
+    });
+
+    testWidgets('the card flips to Visible by itself when the time runs out', (
+      tester,
+    ) async {
+      final server = _server()..startHidden();
+      var now = DateTime.utc(2026, 10, 18, 14, 58);
+      await pumpWorkspace(tester, server, clock: () => now);
+      expect(_current(tester), contains('Hidden through round 2'));
+      expect(find.textContaining('2 minutes left'), findsOneWidget);
+
+      now = DateTime.utc(2026, 10, 18, 14, 59);
+      await tester.pump(const Duration(minutes: 1));
+      expect(find.textContaining('1 minute left'), findsOneWidget);
+
+      now = DateTime.utc(2026, 10, 18, 15);
+      await tester.pump(const Duration(minutes: 1));
+      expect(_current(tester), 'Now: Visible');
+      expect(_key('control-hideResults'), findsOneWidget);
+    });
+
     testWidgets('hiding that has run out reads as visible', (tester) async {
       final server = _server()..startHidden();
       await pumpWorkspace(
