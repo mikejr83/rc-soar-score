@@ -93,8 +93,8 @@ export function ContestSearch() {
     const recent = state.recentCount;
     summary = (
       <p className={styles.summary}>
-        <b>{recent}</b> {recent === 1 ? "contest" : "contests"} completed or in progress in the
-        last 30 days
+        <b>{recent}</b> {recent === 1 ? "contest" : "contests"} completed or in progress{" "}
+        {filters.from || filters.to ? "within the selected time frame" : "in the last 30 days"}
       </p>
     );
     body =

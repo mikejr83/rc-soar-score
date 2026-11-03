@@ -72,13 +72,13 @@ class PublicationIdentityRepository extends DriftRepository
   @override
   Future<int> countPublicActive({
     required DateTime windowStart,
-    required DateTime at,
+    required DateTime startsBefore,
   }) => _store.countWhere(
     "visibility = 'Public' AND published_at IS NOT NULL "
-    'AND contest_starts_at IS NOT NULL AND contest_starts_at <= ? '
-    'AND COALESCE(contest_ends_at, contest_starts_at) > ?',
+    'AND contest_starts_at IS NOT NULL AND contest_starts_at < ? '
+    'AND COALESCE(contest_ends_at, contest_starts_at) >= ?',
     [
-      Variable<String>(core.formatUtcTimestamp(at)),
+      Variable<String>(core.formatUtcTimestamp(startsBefore)),
       Variable<String>(core.formatUtcTimestamp(windowStart)),
     ],
   );

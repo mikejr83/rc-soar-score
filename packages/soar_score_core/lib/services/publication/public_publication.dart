@@ -96,8 +96,9 @@ class PublicPublicationList extends Equatable {
 
   final List<PublicPublicationSummary> publications;
 
-  /// Public contests completed or in progress in the last 30 days, whatever
-  /// the filters and the page.
+  /// Public contests completed or in progress in the time frame of the list
+  /// (the date filters, else the last 30 days through the coming Sunday),
+  /// whatever the name and venue filters and the page.
   final int recentCount;
 
   Map<String, Object?> toJson() => {
