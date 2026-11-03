@@ -84,6 +84,8 @@ Proposed -> DrawPending -> AwaitingResponses -> ReadyToFly -> Finalized     (Ran
 any status before Finalized -> Cancelled
 ```
 
+The public projection publishes a re-flight number (`re_flight`) only for `ReadyToFly` and `Finalized`, the statuses in which the director has finalized the group (`group_finalized_at` is set). A `Reflight` assignment attached to an earlier status is legal in the data layer and stays unpublished; so does one for a `Cancelled` or `MoveToGroup` re-flight. Whether the re-flight service should refuse such an assignment is decided with that service.
+
 ## Privacy and Scope
 
 - Participants' responses, the candidate pool, and the draw internals are private to contest administration

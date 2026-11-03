@@ -210,9 +210,12 @@ class PublicPublicationService {
                   contest?.startDateTime ??
                   DateTime.tryParse('${captured['start'] ?? ''}') ??
                   projection.publishedAt,
-              lastActivityAt:
-                  (contest == null ? null : activity[contest.id]) ??
-                  DateTime.tryParse('${captured['last_activity_at'] ?? ''}'),
+              // A live contest is authoritative, even with no activity (the
+              // clock then runs from its start). The projection's value
+              // stands in only when the contest is not on this server.
+              lastActivityAt: contest == null
+                  ? DateTime.tryParse('${captured['last_activity_at'] ?? ''}')
+                  : activity[contest.id],
               now: now,
             ).wireName,
           };

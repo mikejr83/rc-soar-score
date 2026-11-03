@@ -233,136 +233,141 @@ void _tests(Backend backend) {
           a! as Map<String, Object?>,
     ];
 
-    test(
-      'a re-flight number is published only for a finalized group',
-      () async {
-        await scoreAndCalculate();
-        await reFlight(
-          core.ReFlightType.reflyEntireGroup,
-          core.ReFlightStatus.finalized,
-          1,
-          7,
-        );
-        await reFlight(
-          core.ReFlightType.randomDraw,
-          core.ReFlightStatus.readyToFly,
-          2,
-          8,
-        );
-        await reFlight(
-          core.ReFlightType.randomDraw,
-          core.ReFlightStatus.proposed,
-          3,
-          9,
-        );
-        await reFlight(
-          core.ReFlightType.randomDraw,
-          core.ReFlightStatus.drawPending,
-          4,
-          10,
-        );
-        await reFlight(
-          core.ReFlightType.randomDraw,
-          core.ReFlightStatus.awaitingResponses,
-          5,
-          11,
-        );
-        await reFlight(
-          core.ReFlightType.randomDraw,
-          core.ReFlightStatus.cancelled,
-          6,
-          12,
-        );
-        await reFlight(
-          core.ReFlightType.moveToGroup,
-          core.ReFlightStatus.finalized,
-          7,
-          13,
-        );
-
-        final assignments = publishedAssignments((await build()).projection);
-
-        expect(
-          {
-            for (final a in assignments)
-              if (a['group']! as int > 4) a['group']: a['re_flight'],
-          },
-          {7: 1, 8: 2, 9: null, 10: null, 11: null, 12: null, 13: null},
-        );
-        expect(
-          assignments.where((a) => (a['group']! as int) <= 4),
-          everyElement(containsPair('re_flight', null)),
-        );
-      },
-    );
-
-    test('a scored re-flight entry carries its number', () async {
+    test('a re-flight number is published only for a finalized group, whatever '
+        'other assignments exist', () async {
       await scoreAndCalculate();
-      final (_, assignment) = await reFlight(
+      await reFlight(
         core.ReFlightType.reflyEntireGroup,
         core.ReFlightStatus.finalized,
         1,
         7,
       );
-      await repository.scorePlaceholderRepository.save(
-        core.ScorePlaceholder(
-          id: core.Id.create(),
-          contestId: contestId,
-          contestParticipationId: assignment.contestParticipationId,
-          assignmentId: assignment.id,
-        ),
-        metadata: core.MutationMetadata(
-          clientMutationId: 'ph-${mutations++}',
-          authority: core.Authority.director,
-          clientTime: now,
-          actorId: actor,
-        ),
+      await reFlight(
+        core.ReFlightType.randomDraw,
+        core.ReFlightStatus.readyToFly,
+        2,
+        8,
       );
-      // Scoring does not support two flights in one round yet (recalculation
-      // refuses it), so the re-flight's result is stored the way the
-      // calculation will, from its official score, next to the others.
-      await enter(
-        MatrixSlot(assignment.id, assignment.contestParticipationId),
-        560,
+      await reFlight(
+        core.ReFlightType.randomDraw,
+        core.ReFlightStatus.proposed,
+        3,
+        9,
       );
-      final placeholder = (await repository.scorePlaceholderRepository
-          .findForAssignment(assignment.id))!;
-      final official = (await repository.officialScoreRepository
-          .currentForPlaceholder(placeholder.id))!;
-      final stored = await repository.flightResultRepository.listForContest(
-        contestId,
+      await reFlight(
+        core.ReFlightType.randomDraw,
+        core.ReFlightStatus.drawPending,
+        4,
+        10,
       );
-      final reflown = core.FlightResult.fromJson({
-        ...stored.first.toJson(),
-        'id': core.Id.create().value,
-        'score_placeholder_id': placeholder.id.value,
-        'official_score_id': official.id.value,
-        'contest_participation_id': assignment.contestParticipationId.value,
-      });
-      await repository.flightResultRepository.replaceForContest(contestId, [
-        for (final result in [...stored, reflown])
-          core.FlightResult.fromJson({
-            ...result.toJson(),
-            'computed_at': core.formatUtcTimestamp(
-              now.add(const Duration(minutes: 1)),
-            ),
-          }),
-      ]);
-      now = now.add(const Duration(minutes: 2));
+      await reFlight(
+        core.ReFlightType.randomDraw,
+        core.ReFlightStatus.awaitingResponses,
+        5,
+        11,
+      );
+      await reFlight(
+        core.ReFlightType.randomDraw,
+        core.ReFlightStatus.cancelled,
+        6,
+        12,
+      );
+      await reFlight(
+        core.ReFlightType.moveToGroup,
+        core.ReFlightStatus.finalized,
+        7,
+        13,
+      );
 
-      final scores = [
-        for (final score in (await build()).projection.scores!)
-          score! as Map<String, Object?>,
-      ];
+      final assignments = publishedAssignments((await build()).projection);
 
-      final reflownEntries = scores.where((s) => s['group'] == 7).toList();
-      expect(reflownEntries, hasLength(1));
-      expect(reflownEntries.single['re_flight'], 1);
       expect(
-        scores.where((s) => s['group'] != 7),
+        {
+          for (final a in assignments)
+            if (a['group']! as int > 4) a['group']: a['re_flight'],
+        },
+        {7: 1, 8: 2, 9: null, 10: null, 11: null, 12: null, 13: null},
+      );
+      expect(
+        assignments.where((a) => (a['group']! as int) <= 4),
         everyElement(containsPair('re_flight', null)),
       );
     });
+
+    // Projection mapping only: this does NOT prove the score pipeline carries
+    // re-flights end to end. Scoring does not support two flights in one
+    // round yet, so the result row is stored directly. The end-to-end test
+    // belongs to the re-flight scoring work.
+    test(
+      'the projection maps a stored re-flight result to its number',
+      () async {
+        await scoreAndCalculate();
+        final (_, assignment) = await reFlight(
+          core.ReFlightType.reflyEntireGroup,
+          core.ReFlightStatus.finalized,
+          1,
+          7,
+        );
+        await repository.scorePlaceholderRepository.save(
+          core.ScorePlaceholder(
+            id: core.Id.create(),
+            contestId: contestId,
+            contestParticipationId: assignment.contestParticipationId,
+            assignmentId: assignment.id,
+          ),
+          metadata: core.MutationMetadata(
+            clientMutationId: 'ph-${mutations++}',
+            authority: core.Authority.director,
+            clientTime: now,
+            actorId: actor,
+          ),
+        );
+        // Scoring does not support two flights in one round yet (recalculation
+        // refuses it), so the re-flight's result is stored the way the
+        // calculation will, from its official score, next to the others.
+        await enter(
+          MatrixSlot(assignment.id, assignment.contestParticipationId),
+          560,
+        );
+        final placeholder = (await repository.scorePlaceholderRepository
+            .findForAssignment(assignment.id))!;
+        final official = (await repository.officialScoreRepository
+            .currentForPlaceholder(placeholder.id))!;
+        final stored = await repository.flightResultRepository.listForContest(
+          contestId,
+        );
+        final reflown = core.FlightResult.fromJson({
+          ...stored.first.toJson(),
+          'id': core.Id.create().value,
+          'score_placeholder_id': placeholder.id.value,
+          'official_score_id': official.id.value,
+          'contest_participation_id': assignment.contestParticipationId.value,
+        });
+        await repository.flightResultRepository.replaceForContest(contestId, [
+          for (final result in [...stored, reflown])
+            core.FlightResult.fromJson({
+              ...result.toJson(),
+              'computed_at': core.formatUtcTimestamp(
+                now.add(const Duration(minutes: 1)),
+              ),
+            }),
+        ]);
+        now = now.add(const Duration(minutes: 2));
+
+        final scores = [
+          for (final score in (await build()).projection.scores!)
+            score! as Map<String, Object?>,
+        ];
+
+        final reflownEntries = scores.where((s) => s['group'] == 7).toList();
+        expect(reflownEntries, hasLength(1));
+        expect(reflownEntries.single['re_flight'], 1);
+        expect(
+          scores.where((s) => s['group'] != 7),
+          everyElement(containsPair('re_flight', null)),
+        );
+      },
+    );
 
     test('each score carries the raw components the site labels', () async {
       await scoreAndCalculate();

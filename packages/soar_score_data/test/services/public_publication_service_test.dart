@@ -337,6 +337,48 @@ void _tests(Backend backend) {
         expect(await statusOf(identity.id), 'in_progress');
       });
 
+      test('a live contest with no activity ignores an older captured one, '
+          'and the clock runs from its start', () async {
+        // Nothing scored: the live contest has no activity.
+        final identity = await publish();
+        final current = (await repository.publicationProjectionRepository
+            .findById(identity.currentProjectionId!))!;
+        final json = current.toJson();
+        // A second projection that captured activity after the start (the
+        // contest starts 2026-10-17 14:00 UTC).
+        final captured = core.PublicationProjection.fromJson({
+          ...json,
+          'id': core.Id.create().value,
+          'projection_revision': 2,
+          'client_mutation_id': 'captured-activity',
+          'contest_identity': {
+            ...(json['contest_identity']! as Map<String, Object?>),
+            'last_activity_at': '2026-10-19T10:00:00.000Z',
+          },
+        });
+        await repository.publicationProjectionRepository.append(captured);
+        await repository.publicationIdentityRepository.save(
+          core.PublicationIdentity(
+            id: identity.id,
+            contestId: identity.contestId,
+            ownerPublicProfileId: identity.ownerPublicProfileId,
+            claimStatus: identity.claimStatus,
+            visibility: identity.visibility,
+            publishedAt: identity.publishedAt,
+            currentProjectionId: captured.id,
+            contestName: identity.contestName,
+            contestStartsAt: identity.contestStartsAt,
+            contestEndsAt: identity.contestEndsAt,
+            venue: identity.venue,
+            revision: identity.revision,
+          ),
+        );
+
+        // 58 hours after the start, 14 after the captured activity.
+        readNow = DateTime.utc(2026, 10, 20);
+        expect(await statusOf(identity.id), 'completed');
+      });
+
       test('the projection stands in when the server has no contest', () async {
         await scoreEverything();
         final identity = await publish();
