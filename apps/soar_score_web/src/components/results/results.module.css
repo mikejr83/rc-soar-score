@@ -450,3 +450,18 @@
   gap: 10px;
   margin-top: 6px;
 }
+
+/* A dropped round: shaded and starred as well as struck through (#721). */
+.droppedCell {
+  background: var(--surface-2);
+}
+.droppedMark {
+  margin-left: 2px;
+  font-weight: 700;
+  color: var(--text);
+}
+.tableKey {
+  margin: 8px 0 0;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
