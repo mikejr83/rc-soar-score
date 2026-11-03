@@ -118,7 +118,7 @@ jobs:
         include:
           - name: Contest app
             app: soar_score_contest
-            worker: soar-score-contest
+            worker: rc-soar-score-contest
           - name: Self-scoring app
             app: soar_score_self_score
             worker: rc-soar-score-self-score
