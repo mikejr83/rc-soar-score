@@ -27,12 +27,12 @@ enum ScoreGridMode {
 /// heading and every pilot row use these, so the columns line up.
 abstract final class ScoreGridColumns {
   static const double lane = 48;
-  static const double time = 116;
-  static const double height = 96;
+  static const double time = 100;
+  static const double height = 75;
 
-  /// The Landing field takes a share of the width the other columns leave,
-  /// never less than this; its caption names the band or the valid points.
-  static const double landMin = 120;
+  /// The Landing field is fixed like Time and Height: it holds three digits.
+  /// Its caption wraps to name the band or the valid points.
+  static const double land = 75;
   static const double raw = 72;
   static const double group = 80;
   static const double pen = 108;
@@ -40,11 +40,8 @@ abstract final class ScoreGridColumns {
   static const double stat = 132;
   static const double menu = 44;
 
-  /// The pilot and Landing columns split what the fixed columns leave, 3 to 2,
-  /// so a wide window feeds the Landing field as well as the name. At the
-  /// narrowest wide width they get about 180 and 120 dp.
-  static const int pilotFlex = 3;
-  static const int landFlex = 2;
+  /// The pilot column takes whatever width the fixed columns leave.
+  static const int pilotFlex = 1;
 
   static const double gap = 6;
   static const double rowPadding = 8;
@@ -138,12 +135,7 @@ class ScoreGridHeader extends StatelessWidget {
             cell('Launch height', 'metres', ScoreGridColumns.height),
             gap,
           ],
-          cell(
-            'Landing · flags',
-            'table points',
-            null,
-            flex: ScoreGridColumns.landFlex,
-          ),
+          cell('Landing · flags', 'table points', ScoreGridColumns.land),
           gap,
           cell(
             'Raw score',

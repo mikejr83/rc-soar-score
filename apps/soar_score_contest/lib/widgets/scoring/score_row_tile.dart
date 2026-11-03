@@ -991,7 +991,7 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
           gap,
           SizedBox(width: ScoreGridColumns.height, child: height),
           gap,
-          Expanded(flex: ScoreGridColumns.landFlex, child: land),
+          SizedBox(width: ScoreGridColumns.land, child: land),
           gap,
           SizedBox(width: ScoreGridColumns.raw, child: raw),
           gap,
@@ -1027,13 +1027,12 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (widget.grid.showId) ...[const SizedBox(width: 44), gap],
-              Expanded(child: time),
+              SizedBox(width: ScoreGridColumns.time, child: time),
               gap,
-              Expanded(child: height),
+              SizedBox(width: ScoreGridColumns.height, child: height),
               gap,
-              Expanded(flex: 2, child: land),
-              gap,
-              const SizedBox(width: 44),
+              SizedBox(width: ScoreGridColumns.land, child: land),
+              const Spacer(),
             ],
           ),
           vgap,
@@ -1073,12 +1072,15 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(child: time),
+              SizedBox(width: ScoreGridColumns.time, child: time),
               gap,
-              Expanded(child: height),
+              SizedBox(width: ScoreGridColumns.height, child: height),
             ],
           ),
-          land,
+          Align(
+            alignment: Alignment.centerLeft,
+            child: SizedBox(width: ScoreGridColumns.land, child: land),
+          ),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
