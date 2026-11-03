@@ -4,9 +4,7 @@ import 'package:soar_score_core/soar_score_core.dart';
 
 import 'sync_engine.dart';
 import 'sync_failure_kind.dart';
-
-/// Starts a [Timer]; replaceable in tests.
-typedef SyncTimerFactory = Timer Function(Duration delay, void Function() run);
+import 'sync_timer_factory.dart';
 
 /// Turns "a local change was committed" into a push.
 ///

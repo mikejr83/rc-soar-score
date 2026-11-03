@@ -35,6 +35,7 @@ class SyncEngine {
   final SyncGateway _gateway;
   final SyncEngineConfig _config;
   final _controller = StreamController<SyncState>.broadcast();
+  final _outcomes = StreamController<SyncFailureKind?>.broadcast();
   final _remoteSequence = <SyncScopeKey, int>{};
 
   SyncState _state;
@@ -47,6 +48,11 @@ class SyncEngine {
 
   /// A state after every step that changes what the director sees.
   Stream<SyncState> get states => _controller.stream;
+
+  /// How each sync that contacted the service ended: null when it completed,
+  /// else why it failed. A scope that is not synced at all reports nothing, so
+  /// an event says whether the service could be reached.
+  Stream<SyncFailureKind?> get outcomes => _outcomes.stream;
 
   /// Syncs [scope]: pull, then push, then pull whatever the push returned.
   ///
@@ -130,6 +136,7 @@ class SyncEngine {
   Future<void> dispose() async {
     await _tail;
     await _controller.close();
+    await _outcomes.close();
   }
 
   Future<SyncFailureKind?> _syncScope(SyncScopeKey scope) async {
@@ -165,6 +172,7 @@ class SyncEngine {
         );
       }
       await _refresh(scope, failure: failure);
+      if (!_outcomes.isClosed) _outcomes.add(failure);
       return failure;
     } finally {
       _emit(_state.copyWith(syncing: false));

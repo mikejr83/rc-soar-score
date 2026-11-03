@@ -7,7 +7,6 @@ import '../auth/auth_session_inherited.dart';
 import '../router.dart';
 import '../l10n/app_localizations.dart';
 import 'app_version_label.dart';
-import 'shell_destinations.dart';
 
 /// The account control at the bottom of the shell rail.
 ///

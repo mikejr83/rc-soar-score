@@ -14,21 +14,6 @@ enum ShellScope {
   contest,
 }
 
-/// The selected contest's id when [path] is a contest-scoped route, else
-/// `null`. The New Contest wizard ([newContestPath]) is not a contest.
-String? contestIdFor(String path) {
-  if (!path.startsWith('$contestsPath/') ||
-      path == newContestPath ||
-      path.startsWith('$newContestPath/')) {
-    return null;
-  }
-  final segments = path
-      .substring(contestsPath.length)
-      .split('/')
-      .where((segment) => segment.isNotEmpty);
-  return segments.isEmpty ? null : segments.first;
-}
-
 ShellScope shellScopeFor(String path) =>
     contestIdFor(path) == null ? ShellScope.system : ShellScope.contest;
 

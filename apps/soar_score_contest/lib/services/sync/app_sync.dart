@@ -16,6 +16,10 @@ abstract interface class AppSync {
 
   AppSyncState get state;
 
+  /// The signed-in account's own data scope, whose status the shell shows
+  /// outside a contest; null when nobody is signed in or nothing syncs.
+  SyncScopeKey? get accountScope;
+
   /// A state after every step that changes what the director sees.
   Stream<AppSyncState> get states;
 

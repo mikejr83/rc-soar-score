@@ -82,13 +82,17 @@ void main() {
     required MockClient httpClient,
     InternetProbe? internetProbe,
     Duration poll = const Duration(milliseconds: 300),
+    Duration maxPoll = const Duration(seconds: 30),
     Duration timeout = const Duration(seconds: 2),
+    bool assumeOnline = false,
   }) {
     final client = ApiClient(baseUrl: _baseUrl, httpClient: httpClient);
     final created = AppConnectivity(
       client: client,
       internetProbe: internetProbe ?? probe,
-      apiPollInterval: poll,
+      initialPollInterval: poll,
+      maxPollInterval: maxPoll,
+      assumeOnline: assumeOnline,
       probeTimeout: timeout,
     );
     addTearDown(() {
@@ -177,6 +181,7 @@ void main() {
       expect(firstSuccess, isNotNull);
 
       failing = true;
+      monitor.retryApi();
       await _flushUntil(
         () => monitor.apiStatus == ConnectivityStatus.unavailable,
       );
@@ -280,14 +285,14 @@ void main() {
       expect(monitor.apiLastError, isNull);
     });
 
-    test('re-probes on the poll interval while nothing else changes', () async {
+    test('stops probing once the API is reachable', () async {
       var calls = 0;
       monitor = createMonitor(
         httpClient: MockClient((request) async {
           calls++;
           return http.Response(_serverPayload, 200, headers: _jsonHeaders);
         }),
-        poll: const Duration(milliseconds: 100),
+        poll: const Duration(milliseconds: 50),
       );
 
       await _flushUntil(
@@ -295,8 +300,132 @@ void main() {
       );
       await Future<void>.delayed(const Duration(milliseconds: 350));
 
-      expect(calls, greaterThanOrEqualTo(3));
+      expect(calls, 1);
       expect(monitor.apiStatus, ConnectivityStatus.available);
+    });
+
+    test(
+      'retries a failed probe with a growing delay up to the maximum',
+      () async {
+        final times = <DateTime>[];
+        monitor = createMonitor(
+          httpClient: MockClient((request) async {
+            times.add(DateTime.now());
+            return http.Response('down', 503);
+          }),
+          poll: const Duration(milliseconds: 50),
+          maxPoll: const Duration(milliseconds: 100),
+        );
+
+        await _flushUntil(() => times.length >= 5);
+        final gaps = [
+          for (var i = 1; i < times.length; i++)
+            times[i].difference(times[i - 1]).inMilliseconds,
+        ];
+        expect(gaps[0], inInclusiveRange(40, 90));
+        expect(gaps[1], greaterThanOrEqualTo(90));
+        expect(gaps[3], lessThan(190));
+        expect(monitor.apiStatus, ConnectivityStatus.unavailable);
+      },
+    );
+
+    test(
+      'reportUnreachable starts probing and reportReachable stops it',
+      () async {
+        var calls = 0;
+        monitor = createMonitor(
+          httpClient: MockClient((request) async {
+            calls++;
+            return http.Response(_serverPayload, 200, headers: _jsonHeaders);
+          }),
+          poll: const Duration(milliseconds: 50),
+        );
+        await _flushUntil(
+          () => monitor.apiStatus == ConnectivityStatus.available,
+        );
+
+        monitor.reportUnreachable();
+        expect(monitor.apiStatus, ConnectivityStatus.unavailable);
+        await _flushUntil(() => calls >= 2);
+        expect(monitor.apiStatus, ConnectivityStatus.available);
+
+        monitor.reportUnreachable();
+        monitor.reportReachable();
+        final seen = calls;
+        await Future<void>.delayed(const Duration(milliseconds: 200));
+        expect(calls, seen);
+        expect(monitor.apiStatus, ConnectivityStatus.available);
+      },
+    );
+
+    test('a build that assumes it is online never probes or polls', () async {
+      var calls = 0;
+      monitor = createMonitor(
+        httpClient: MockClient((request) async {
+          calls++;
+          return http.Response('down', 503);
+        }),
+        poll: const Duration(milliseconds: 20),
+        assumeOnline: true,
+      );
+
+      await Future<void>.delayed(const Duration(milliseconds: 150));
+      expect(calls, 0);
+      expect(monitor.apiStatus, ConnectivityStatus.available);
+
+      monitor.retryApi();
+      await _flushUntil(
+        () => monitor.apiStatus == ConnectivityStatus.unavailable,
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 150));
+      expect(calls, 1);
+    });
+
+    test('an offline sync while paused is picked up again by resume', () async {
+      var calls = 0;
+      monitor = createMonitor(
+        httpClient: MockClient((request) async {
+          calls++;
+          return http.Response(_serverPayload, 200, headers: _jsonHeaders);
+        }),
+        poll: const Duration(milliseconds: 50),
+      );
+      await _flushUntil(
+        () => monitor.apiStatus == ConnectivityStatus.available,
+      );
+
+      monitor.pause();
+      monitor.reportUnreachable();
+      monitor.reportUnreachable();
+      expect(monitor.apiStatus, ConnectivityStatus.unavailable);
+      final seen = calls;
+      await Future<void>.delayed(const Duration(milliseconds: 200));
+      expect(calls, seen);
+
+      monitor.resume();
+      await _flushUntil(
+        () => monitor.apiStatus == ConnectivityStatus.available,
+      );
+      expect(calls, seen + 1);
+    });
+
+    test('pause holds the retries and resume probes at once', () async {
+      var calls = 0;
+      monitor = createMonitor(
+        httpClient: MockClient((request) async {
+          calls++;
+          return http.Response('down', 503);
+        }),
+        poll: const Duration(milliseconds: 50),
+      );
+      await _flushUntil(() => calls >= 1);
+      monitor.pause();
+      final seen = calls;
+      await Future<void>.delayed(const Duration(milliseconds: 250));
+      expect(calls, seen);
+
+      monitor.resume();
+      await _flushUntil(() => calls > seen);
     });
 
     test('retryInternet re-checks the network interface', () async {
@@ -382,13 +511,11 @@ void main() {
       monitor = createMonitor(
         httpClient: MockClient((request) async {
           captured.add(request);
-          return http.Response(_serverPayload, 200, headers: _jsonHeaders);
+          return http.Response('down', 503);
         }),
         poll: const Duration(milliseconds: 100),
       );
-      await _flushUntil(
-        () => monitor.apiStatus == ConnectivityStatus.available,
-      );
+      await _flushUntil(() => captured.isNotEmpty);
 
       disposeMonitor();
       final countAtDispose = captured.length;

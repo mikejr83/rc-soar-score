@@ -100,6 +100,16 @@ class NativeBootstrap extends AppBootstrap {
   }
 
   @override
+  Stream<bool> get syncReachability => sync.reachability;
+
+  @override
+  void syncFocusChanged(String? contestId) => sync.focusChanged(contestId);
+
+  @override
+  void appActiveChanged({required bool active}) =>
+      sync.appActiveChanged(active: active);
+
+  @override
   bool get hasLocalStorage => true;
 
   @override

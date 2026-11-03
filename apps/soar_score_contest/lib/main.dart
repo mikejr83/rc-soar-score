@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:soar_score_core/soar_score_core.dart';
@@ -62,7 +63,11 @@ Future<void> _runContestApp(AppBootstrap appBootstrap) async {
   // so no API request ever bypasses `soar_score_api`, and no platform channel
   // is needed on web (its connectivity probe resolves there). Tests that pump
   // the app without a bootstrap simply get no monitor (D5).
-  final connectivity = AppConnectivity(client: appBootstrap.remoteApiClient);
+  final connectivity = AppConnectivity(
+    client: appBootstrap.remoteApiClient,
+    // The browser just loaded the app from the network: no health checks.
+    assumeOnline: kIsWeb,
+  );
   forwardReachability(connectivity, appBootstrap);
   final storage = appBootstrap.hasLocalStorage
       ? StorageMonitor(probe: appBootstrap.checkStorage)

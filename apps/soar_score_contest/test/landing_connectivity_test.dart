@@ -12,6 +12,18 @@ import 'package:soar_score_contest/widgets/connectivity_indicator.dart';
 /// probes, and recording retry entry points.
 class _FakeMonitor extends ChangeNotifier implements AppConnectivity {
   @override
+  void reportReachable() {}
+
+  @override
+  void reportUnreachable() {}
+
+  @override
+  void pause() {}
+
+  @override
+  void resume() {}
+
+  @override
   bool supportsConnectivity = true;
 
   @override

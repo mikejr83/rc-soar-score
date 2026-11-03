@@ -51,9 +51,40 @@ class NativeSync {
       if (wasSyncing && !state.syncing) _discoverSoon();
       wasSyncing = state.syncing;
     });
+    // Whoever started a sync, the next periodic check is one interval after
+    // it, and a sync that found no connection says the service is unreachable.
+    _outcomeSubscription = engine.outcomes.listen((failure) {
+      _poller.synced();
+      final reached = reachedService(failure);
+      if (reached != null && !_reachability.isClosed) {
+        _reachability.add(reached);
+      }
+    });
+    _acting?.addListener(_accountChanged);
   }
 
   late final StreamSubscription<SyncState> _stateSubscription;
+  late final StreamSubscription<SyncFailureKind?> _outcomeSubscription;
+  late final SyncPoller _poller = SyncPoller(onPoll: _poll);
+  final _entrySyncs = <core.SyncScopeKey>{};
+  final _reachability = StreamController<bool>.broadcast();
+  bool _reachable = false;
+  SyncPollFocus _focus = const SyncPollLanding();
+
+  /// What a sync that ended with [failure] says about the service: true when
+  /// it got an answer (it completed, or the service refused it for a reason of
+  /// its own such as an expired sign-in), false when there was no connection,
+  /// and null for a server error (5xx), which says nothing either way: a
+  /// gateway answering for a service that is down looks the same.
+  static bool? reachedService(SyncFailureKind? failure) => switch (failure) {
+    SyncFailureKind.offline => false,
+    SyncFailureKind.serverError => null,
+    _ => true,
+  };
+
+  /// What syncs find out about the service: true when one reached it, false
+  /// when one found no connection.
+  Stream<bool> get reachability => _reachability.stream;
 
   final ApiClient _remote;
 
@@ -199,9 +230,95 @@ class NativeSync {
 
   /// The remote API became reachable (or stopped being so).
   void remoteReachabilityChanged({required bool reachable}) {
+    _reachable = reachable;
+    _updatePoller();
     if (!reachable) return;
     _scheduler.connectivityRestored();
     unawaited(discoverAccountContests());
+  }
+
+  /// The account a periodic check may sync for: the claimed one, while the app
+  /// still acts as it. Null before a sign-in claimed the Local account and
+  /// after the director signed out.
+  core.Id? get _syncAccount {
+    final account = _accountId;
+    if (account == null) return null;
+    final acting = _acting;
+    return acting == null || acting.leaseFor(account) != null ? account : null;
+  }
+
+  void _accountChanged() => _updatePoller();
+
+  /// Checks run only while the service is reachable and an account is signed
+  /// in; the screens show the account's sync status while there is one.
+  void _updatePoller() {
+    final account = _syncAccount;
+    _poller.enabled = _reachable && account != null;
+    appSync.accountScopeChanged(
+      account == null ? null : core.DirectorScopeKey(account),
+    );
+  }
+
+  /// The director moved to a contest's pages ([contestId]) or out of them.
+  /// Opening a contest not synced for a while syncs it at once.
+  void focusChanged(String? contestId) {
+    core.Id? id;
+    if (contestId != null) {
+      try {
+        id = core.Id.parse(contestId);
+      } on ArgumentError {
+        // A location that is not a contest: treat it as outside one.
+      }
+    }
+    _focus = id == null ? const SyncPollLanding() : SyncPollContest(id);
+    _poller.focusChanged(_focus);
+    if (id == null || !_reachable || _syncAccount == null) return;
+    final scope = core.ContestScopeKey(id);
+    final last = engine.state.scopes[scope]?.lastSyncedAt;
+    final stale =
+        last == null ||
+        DateTime.now().difference(last) >= _poller.contestInterval;
+    // Moving quickly between pages must not queue the same sync again.
+    if (!stale || !_entrySyncs.add(scope)) return;
+    unawaited(
+      engine
+          .syncScope(scope)
+          .catchError((Object error, StackTrace stack) {
+            _logger.warning(
+              'Could not sync on opening a contest',
+              error,
+              stack,
+            );
+            return null;
+          })
+          .whenComplete(() => _entrySyncs.remove(scope)),
+    );
+  }
+
+  /// The app went to the background or came back to the front.
+  void appActiveChanged({required bool active}) => _poller.paused = !active;
+
+  /// One periodic check: the contest in front, the director's data, and a
+  /// look for contests made on another installation.
+  Future<void> _poll(SyncPollFocus focus) async {
+    final account = _syncAccount;
+    // The engine runs syncs one after another, so a sync of another scope
+    // under way only delays this check.
+    if (account == null) return;
+    final steps = <Future<Object?> Function()>[
+      if (focus case SyncPollContest(:final contestId))
+        () => engine.syncScope(core.ContestScopeKey(contestId)),
+      () => engine.syncScope(core.DirectorScopeKey(account)),
+      discoverAccountContests,
+    ];
+    // One step failing must not skip the others.
+    for (final step in steps) {
+      try {
+        await step();
+      } on Object catch (error, stack) {
+        _logger.warning('A periodic sync check step failed', error, stack);
+      }
+    }
   }
 
   /// The Local account's data now belongs to [accountId]: sync every scope it
@@ -209,6 +326,7 @@ class NativeSync {
   /// contests), which were skipped while they were local only.
   Future<void> accountClaimed(core.Id accountId) async {
     _accountId = accountId;
+    _updatePoller();
     final scopes = <core.SyncScopeKey>[core.DirectorScopeKey(accountId)];
     try {
       for (final contest in await ContestRepository(_database).getAll()) {
@@ -288,6 +406,10 @@ class NativeSync {
   Future<void> close() async {
     await _subscription.cancel();
     await _stateSubscription.cancel();
+    await _outcomeSubscription.cancel();
+    _acting?.removeListener(_accountChanged);
+    _poller.dispose();
+    await _reachability.close();
     _discoveryTimer?.cancel();
     _scheduler.dispose();
     await appSync.close();

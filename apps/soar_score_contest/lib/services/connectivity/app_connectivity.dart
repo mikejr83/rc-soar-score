@@ -22,6 +22,15 @@ import 'internet_probe.dart';
 /// behavior). State is expressed with [ConnectivityStatus] plus text in the
 /// UI — never color alone (see `plan/ui/contest-administration/offline-ui.md`).
 ///
+/// The API is probed only while it is not known to be reachable: a first
+/// probe at start-up, then retries after [initialPollInterval] that back off
+/// (doubling) to [maxPollInterval] until one succeeds. After that nothing
+/// polls: the sync reports what it finds ([reportReachable] and
+/// [reportUnreachable]), an interface change re-probes, and the director can
+/// retry by hand. This keeps many installations from loading the API with
+/// health checks. A build that [assumeOnline] (the web app, which was just
+/// served by the network) starts as reachable and never polls.
+///
 /// All requests to the API go through [ApiClient]'s public `health()`
 /// endpoint (decision D9: the package is unmodified; its transport — not this
 /// monitor — owns the HTTP plumbing). [probeTimeout] is applied with
@@ -30,27 +39,37 @@ import 'internet_probe.dart';
 class AppConnectivity extends ChangeNotifier {
   /// [client] is the app's single `ApiClient` (the one seam every API
   /// request goes through, decision D9); [internetProbe] is injectable for
-  /// tests (decision D10); [apiPollInterval] and [probeTimeout] are the D6
-  /// polling/timeout defaults.
+  /// tests (decision D10); [initialPollInterval], [maxPollInterval] and
+  /// [probeTimeout] are the polling/timeout defaults.
   AppConnectivity({
     required ApiClient client,
     InternetProbe? internetProbe,
-    Duration apiPollInterval = _defaultApiPollInterval,
+    Duration initialPollInterval = _defaultInitialPollInterval,
+    Duration maxPollInterval = _defaultMaxPollInterval,
     Duration probeTimeout = _defaultProbeTimeout,
+    bool assumeOnline = false,
   }) : _client = client,
-       _apiPollInterval = apiPollInterval,
+       _initialPollInterval = initialPollInterval,
+       _maxPollInterval = maxPollInterval,
+       _pollDelay = initialPollInterval,
+       _assumeOnline = assumeOnline,
        _probeTimeout = probeTimeout,
        _internetProbe = internetProbe ?? ConnectivityInternetProbe() {
     _start();
   }
 
-  static const Duration _defaultApiPollInterval = Duration(seconds: 30);
+  static const Duration _defaultInitialPollInterval = Duration(seconds: 15);
+  static const Duration _defaultMaxPollInterval = Duration(seconds: 60);
   static const Duration _defaultProbeTimeout = Duration(seconds: 10);
 
   final ApiClient _client;
   final InternetProbe _internetProbe;
-  final Duration _apiPollInterval;
+  final Duration _initialPollInterval;
+  final Duration _maxPollInterval;
+  final bool _assumeOnline;
   final Duration _probeTimeout;
+  Duration _pollDelay;
+  bool _paused = false;
 
   ConnectivityStatus _internetStatus = ConnectivityStatus.unknown;
   DateTime? _internetLastObservedAt;
@@ -103,8 +122,12 @@ class AppConnectivity extends ChangeNotifier {
   void _start() {
     _setInternetStatus(ConnectivityStatus.checking);
     unawaited(_initialInternetCheck());
+    if (_assumeOnline) {
+      _apiStatus = ConnectivityStatus.available;
+      _apiLastSuccessfulAt = DateTime.now();
+      return;
+    }
     _setApiStatus(ConnectivityStatus.checking);
-    _schedulePoll();
     _probeApi();
   }
 
@@ -162,9 +185,80 @@ class AppConnectivity extends ChangeNotifier {
     notifyListeners();
   }
 
-  void _schedulePoll() {
+  /// Schedules the next probe after a failure, with the delay growing to the
+  /// maximum. Nothing is scheduled for a build that assumes it is online, or
+  /// while the app is in the background.
+  void _scheduleRetry() {
     _apiPollTimer?.cancel();
-    _apiPollTimer = Timer.periodic(_apiPollInterval, (_) => _probeApi());
+    _apiPollTimer = null;
+    if (_disposed || _assumeOnline || _paused) {
+      return;
+    }
+    final delay = _pollDelay;
+    _pollDelay = _pollDelay * 2 > _maxPollInterval
+        ? _maxPollInterval
+        : _pollDelay * 2;
+    _apiPollTimer = Timer(delay, () {
+      _apiPollTimer = null;
+      _probeApi();
+    });
+  }
+
+  void _stopPolling() {
+    _apiPollTimer?.cancel();
+    _apiPollTimer = null;
+    _pollDelay = _initialPollInterval;
+  }
+
+  /// A request to the service worked (a sync, say): it is reachable, and the
+  /// health checks stop.
+  void reportReachable() {
+    if (_disposed) {
+      return;
+    }
+    _apiLastError = null;
+    _apiLastSuccessfulAt = DateTime.now();
+    _stopPolling();
+    _setApiStatus(ConnectivityStatus.available);
+  }
+
+  /// A request to the service found no connection: the health checks start,
+  /// to learn when it returns.
+  void reportUnreachable() {
+    if (_disposed) {
+      return;
+    }
+    _apiLastError = 'Network error';
+    _setApiStatus(ConnectivityStatus.unavailable);
+    // Probing may already be under way (a timer waiting, or a probe running):
+    // leave it alone so its backoff continues. Otherwise, such as after the
+    // app was paused, start it again.
+    if (_apiPollTimer == null && !_apiProbeInFlight) {
+      _stopPolling();
+      _scheduleRetry();
+    }
+  }
+
+  /// The app went to the background: no probe runs until [resume].
+  void pause() {
+    _paused = true;
+    _apiPollTimer?.cancel();
+    _apiPollTimer = null;
+  }
+
+  /// The app is in front again; a service not known to be reachable is
+  /// probed now.
+  void resume() {
+    if (!_paused) {
+      return;
+    }
+    _paused = false;
+    _pollDelay = _initialPollInterval;
+    if (!_disposed &&
+        !_assumeOnline &&
+        _apiStatus != ConnectivityStatus.available) {
+      _probeApi();
+    }
   }
 
   /// Probes `health()` once. Single-flight: a probe requested while one is
@@ -185,6 +279,7 @@ class AppConnectivity extends ChangeNotifier {
       await _client.health().timeout(_probeTimeout);
       _apiLastError = null;
       _apiLastSuccessfulAt = startedAt;
+      _stopPolling();
       _setApiStatus(ConnectivityStatus.available);
     } on ApiHttpError catch (error) {
       _failApiProbe('HTTP ${error.statusCode}');
@@ -204,6 +299,7 @@ class AppConnectivity extends ChangeNotifier {
   void _failApiProbe(String message) {
     _apiLastError = message;
     _setApiStatus(ConnectivityStatus.unavailable);
+    _scheduleRetry();
   }
 
   /// Manually re-checks the internet state now (detail dialog's "Retry now").

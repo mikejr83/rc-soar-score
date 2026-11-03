@@ -10,6 +10,18 @@ import 'package:soar_score_core/soar_score_core.dart';
 /// `ListenableBuilder` watching it. Retry calls are recorded, never executed
 /// (the chip only invokes them — it does not decide connectivity).
 class _FakeMonitor extends ChangeNotifier implements AppConnectivity {
+  @override
+  void reportReachable() {}
+
+  @override
+  void reportUnreachable() {}
+
+  @override
+  void pause() {}
+
+  @override
+  void resume() {}
+
   _FakeMonitor({
     this.internetStatus = ConnectivityStatus.unknown,
     this.apiStatus = ConnectivityStatus.unknown,
