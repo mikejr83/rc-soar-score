@@ -817,7 +817,7 @@ List<Map<String, Object?>> _validatedRoles(List<Map<String, Object?>> rows) {
     }
     seen[code] = name;
   }
-  if (seen.length != _knownRoles.length) {
+  if (rows.length != _knownRoles.length || seen.length != _knownRoles.length) {
     _abort('Roles does not hold exactly the six known roles');
   }
   return [

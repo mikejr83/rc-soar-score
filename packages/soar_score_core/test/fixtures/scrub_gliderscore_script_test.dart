@@ -106,6 +106,14 @@ void main() {
     expect(wroteNothing(), isTrue);
   });
 
+  test('a duplicated known role aborts the run', () {
+    writeInputs(roles: [...knownRoles, knownRoles.first]);
+    final result = run();
+    expect(result.exitCode, isNot(0));
+    expect(result.stderr, contains('Roles'));
+    expect(wroteNothing(), isTrue);
+  });
+
   test('a DBVersion that is not a version number aborts the run', () {
     writeInputs(
       dbParams: [
