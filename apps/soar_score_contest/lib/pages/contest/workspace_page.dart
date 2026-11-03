@@ -24,6 +24,7 @@ import '../../widgets/workspace/attention/attention_section.dart';
 import '../../widgets/workspace/checklist/setup_checklist_section.dart';
 import '../../widgets/workspace/controls/archive_control_card.dart';
 import '../../widgets/workspace/controls/publication_control_card.dart';
+import '../../widgets/workspace/controls/results_control_card.dart';
 import '../../widgets/workspace/controls/status_summary_card.dart';
 import '../../widgets/workspace/controls/transition_control_card.dart';
 import '../../widgets/workspace/next_step/next_step_section.dart';
@@ -467,7 +468,9 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
         WorkspaceControl.publication => PublicationControlCard(
           contest: contest,
         ),
-        // Results hiding has its own ticket.
-        WorkspaceControl.results => null,
+        WorkspaceControl.results => ResultsControlCard(
+          contest: contest,
+          clock: widget.clock,
+        ),
       };
 }

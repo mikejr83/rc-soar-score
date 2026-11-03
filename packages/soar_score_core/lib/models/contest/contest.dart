@@ -125,10 +125,12 @@ class Contest extends Equatable implements Synchronizable {
 
   bool get resultsHidden => resultsHiddenThroughRound != null;
 
+  /// When hiding runs out (UTC); null when results are not hidden.
+  DateTime? get hidingEndsAt => resultsHiddenAt?.add(hidingLifetime);
+
   /// Whether hiding has run its 24 hours by [now].
   bool hidingExpiredAt(DateTime now) =>
-      resultsHiddenAt != null &&
-      !now.toUtc().isBefore(resultsHiddenAt!.add(hidingLifetime));
+      hidingEndsAt != null && !now.toUtc().isBefore(hidingEndsAt!);
 
   /// A copy with a changed lifecycle or control value and update time.
   ///
