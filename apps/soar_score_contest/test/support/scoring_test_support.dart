@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -7,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'package:http/testing.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_contest/api_client_provider.dart';
+import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_contest/pages/contest/scoring_page.dart';
 import 'package:soar_score_contest/router.dart';
 import 'package:soar_score_contest/widgets/contest_scope.dart';
@@ -90,6 +92,9 @@ class ScoringServer {
 
   /// How many score-entry requests arrived: a bulk request counts once.
   int entryRequests = 0;
+
+  /// When set, a bulk request waits for this before it is answered.
+  Completer<void>? holdBulk;
 
   /// Stores one entry like the server does and answers it: the status and
   /// the body of the single-entry route, or, for a [bulk] entry, the
@@ -362,6 +367,7 @@ class ScoringServer {
     }
     if (request.method == 'POST' && path.endsWith('/scores/bulk')) {
       entryRequests++;
+      await holdBulk?.future;
       if (offlineOnEntry) {
         throw http.ClientException('offline', request.url);
       }
@@ -451,7 +457,11 @@ Future<void> pumpScoringPage(
         baseUrl: Uri.parse('http://localhost'),
         httpClient: MockClient(server.handle),
       ),
-      child: MaterialApp.router(routerConfig: router),
+      child: MaterialApp.router(
+        routerConfig: router,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+      ),
     ),
   );
   await tester.pumpAndSettle();

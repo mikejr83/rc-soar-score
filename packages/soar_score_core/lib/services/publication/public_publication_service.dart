@@ -62,7 +62,10 @@ class PublicPublicationService {
   }
 
   /// The Public publications, by contest start, newest first, with the
-  /// number of contests flown in the last 30 days.
+  /// number of contests in the time frame: those the [from] and [to] bounds
+  /// list when either is given, otherwise the contests flown in the last 30
+  /// days through the coming Sunday. The name and venue filters do not change
+  /// that count.
   ///
   /// [name] and [venue] match case-insensitively as substrings. [from] and
   /// [to] bound the contest start day (UTC, inclusive). Without a [to], only
@@ -115,9 +118,15 @@ class PublicPublicationService {
           offset: offset,
         ),
       ),
+      // The count answers for the list's time frame: with a date filter the
+      // same start-date bounds as the list; without one, contests flown in
+      // the last 30 days, through the coming Sunday.
       identityRepository.countPublicActive(
-        windowStart: day.subtract(const Duration(days: 30)),
-        at: day.add(const Duration(days: 1)),
+        startsOnOrAfter: fromDay,
+        endsOnOrAfter: fromDay == null && toDay == null
+            ? day.subtract(const Duration(days: 30))
+            : null,
+        startsBefore: startsBefore,
       ),
     ).wait;
     // One read for the whole page, not one per row.

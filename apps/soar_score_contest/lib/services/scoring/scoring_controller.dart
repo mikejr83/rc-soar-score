@@ -166,6 +166,10 @@ class ScoringController extends ChangeNotifier {
     return draft != null && draft.isDirty;
   }
 
+  /// Rows being saved right now, one or many.
+  int get savingCount => rows.where((r) => saveOf(r.id).isBusy).length;
+  bool get isSaving => savingCount > 0;
+
   int get dirtyCount => rows.where(isDirty).length;
   bool get hasUnsaved => dirtyCount > 0;
 
@@ -339,6 +343,20 @@ class ScoringController extends ChangeNotifier {
     notifyListeners();
     return false;
   }
+
+  /// Dirty rows that [saveAll] would save as a zero the director has not
+  /// confirmed yet (a motor restart, out of bounds or no altitude).
+  List<ScoringRow> get unconfirmedZeroRows => [
+    for (final row in rows.where(isDirty))
+      if (!const {
+            RowSaveKind.stale,
+            RowSaveKind.saving,
+          }.contains(saveOf(row.id).kind) &&
+          draftOf(row).problems.isEmpty &&
+          draftOf(row).needsZeroConfirmation &&
+          !draftOf(row).zeroConfirmed)
+        row,
+  ];
 
   /// Saves every dirty row, each as its own revision, in ONE bulk request
   /// (one row goes through the single-row route). A row the server refuses

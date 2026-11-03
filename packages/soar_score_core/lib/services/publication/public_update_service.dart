@@ -79,6 +79,35 @@ class PublicUpdateService {
     }
   }
 
+  /// Publishes after the contest was completed, so the public projection
+  /// carries the Completed status. [revision] is the completed contest's
+  /// revision, so a retried request publishes once.
+  ///
+  /// Whatever the update mode except Manual publishes: completing is the end
+  /// of the last round. Returns null when the mode or the contest's
+  /// publication state says not to.
+  Future<PublishResult?> afterCompletion(
+    Id contestId, {
+    required int revision,
+  }) async {
+    final identity = await repository.publicationIdentityRepository
+        .findForContest(contestId);
+    if (identity == null) return null;
+    final mode = await _modeOf(contestId);
+    if (mode == null || mode == PublicUpdateMode.manual) return null;
+    try {
+      return await _publication.publishAutomatically(
+        contestId,
+        clientMutationId: 'auto-complete-$revision',
+      );
+    } on ContestStateError {
+      rethrow;
+    } on Object {
+      await _auditFailure(contestId, identity.id, 'complete-$revision');
+      rethrow;
+    }
+  }
+
   Future<PublicUpdateMode?> _modeOf(Id contestId) async {
     final revision = await repository.contestConfigurationRevisionRepository
         .latestForContest(contestId);

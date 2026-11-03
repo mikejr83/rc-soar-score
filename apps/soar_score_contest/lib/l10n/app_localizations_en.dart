@@ -1698,4 +1698,39 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get publicationPolicyUnreadable =>
       'Public updates: the policy could not be read.';
+
+  @override
+  String get scoreSaveNeedsZeroConfirm =>
+      'Confirm the zero above to enable Save row.';
+
+  @override
+  String get scoreSaveAllZeroTitle => 'Confirm zero scores';
+
+  @override
+  String scoreSaveAllZeroBody(int count, String pilots) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'These $count rows will be saved as zeros: $pilots.',
+      one: 'This row will be saved as a zero: $pilots.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get scoreSaveAllZeroConfirm => 'Confirm and save';
+
+  @override
+  String get scoreSaveAllZeroCancel => 'Go back';
+
+  @override
+  String scoreSavingRows(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Saving $count rows…',
+      one: 'Saving 1 row…',
+    );
+    return '$_temp0';
+  }
 }

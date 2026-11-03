@@ -98,6 +98,33 @@ void _tests(Backend backend) {
           publishedBy: actor,
         );
 
+    test('the contest status is its lifecycle state at publish time', () async {
+      await scoreAndCalculate();
+      final contest = (await repository.contestRepository.findById(contestId))!;
+
+      expect(
+        (await build()).projection.contestIdentity['status'],
+        contest.lifecycleState == core.LifecycleState.completed
+            ? 'Completed'
+            : isNot('Completed'),
+      );
+
+      await repository.contestRepository.save(
+        contest.copyWithState(
+          lifecycleState: core.LifecycleState.completed,
+          updatedAt: contest.updatedAt,
+        ),
+        metadata: core.MutationMetadata(
+          clientMutationId: 'complete',
+          authority: core.Authority.director,
+          clientTime: contest.updatedAt,
+          actorId: actor,
+        ),
+      );
+
+      expect((await build()).projection.contestIdentity['status'], 'Completed');
+    });
+
     test('a scored contest becomes a projection of its results', () async {
       await scoreAndCalculate();
 
