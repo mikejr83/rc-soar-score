@@ -9,6 +9,18 @@ import 'support/open_settings.dart';
 final _deviceButton = find.byKey(const ValueKey('time-zone-device-button'));
 final _followsDevice = find.text('Following this device.');
 
+/// Taps [finder] after scrolling it to the middle of the page. Focusing the
+/// language field scrolls the page when the field sits at the edge of the
+/// view, and a scroll closes the menu that the tap just opened.
+Future<void> _tapCentred(WidgetTester tester, Finder finder) async {
+  await tester.ensureVisible(finder);
+  await tester.pump(const Duration(milliseconds: 100));
+  await Scrollable.ensureVisible(tester.element(finder), alignment: 0.5);
+  await tester.pumpAndSettle();
+  await tester.tap(finder);
+  await tester.pump(const Duration(milliseconds: 300));
+}
+
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
@@ -44,7 +56,7 @@ void main() {
     expect(find.textContaining('Rome'), findsWidgets);
 
     // The language choice lists the device and English.
-    await tapVisible(tester, find.byKey(const ValueKey('locale-null')));
+    await _tapCentred(tester, find.byKey(const ValueKey('locale-null')));
     await pumpUntilFound(tester, find.text('English (United States)').last);
     await tester.tap(find.text('English (United States)').last);
     await tester.pump(const Duration(milliseconds: 300));
@@ -53,7 +65,7 @@ void main() {
     // Leave the app on its defaults for the next run.
     await tapVisible(tester, _deviceButton);
     expect(_followsDevice, findsOneWidget);
-    await tapVisible(tester, find.byKey(const ValueKey('locale-en-US')));
+    await _tapCentred(tester, find.byKey(const ValueKey('locale-en-US')));
     await pumpUntilFound(tester, find.text("Use this device's language").last);
     await tester.tap(find.text("Use this device's language").last);
     await tester.pump(const Duration(milliseconds: 300));

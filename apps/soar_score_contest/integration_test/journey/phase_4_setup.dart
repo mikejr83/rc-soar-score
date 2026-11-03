@@ -506,12 +506,45 @@ Future<void> _movePilot(WidgetTester tester) async {
   await tapVisible(tester, _key('summary-toggle'));
   await pumpUntilFound(tester, find.byType(PilotRowTile));
 
-  // Highlight a pilot; the pilot actions menu is on their tiles.
-  final tile = find.byType(PilotRowTile).first;
-  await tapVisible(tester, tile);
+  // Highlight a pilot; the pilot actions menu is on their tiles. The round
+  // headings are a pinned row over the top of the grid, and scrolling a tile
+  // into view in a small window can leave it under them. Scroll the grid back
+  // to its corner and take the first tile a tap reaches.
+  final grid = _key('grid-scroll');
+  await tester.drag(grid, const Offset(0, 3000));
+  await tester.pumpAndSettle();
+  await tester.drag(grid, const Offset(3000, 0));
+  await tester.pumpAndSettle();
+  final tiles = find.byType(PilotRowTile);
+  var tile = tiles.first;
+  for (var i = 0; i < tiles.evaluate().length; i++) {
+    final box = tester.renderObject<RenderBox>(tiles.at(i));
+    final centre = box.localToGlobal(box.size.center(Offset.zero));
+    final reached = tester.hitTestOnBinding(centre).path.any((entry) {
+      final target = entry.target;
+      if (target is! RenderObject) return false;
+      for (RenderObject? o = target; o != null; o = o.parent) {
+        if (o == box) return true;
+      }
+      return false;
+    });
+    if (reached) {
+      tile = tiles.at(i);
+      break;
+    }
+  }
+  await tester.tap(tile);
+  await tester.pump(const Duration(milliseconds: 300));
   await pumpUntilFound(tester, _key('pilot-panel'));
   await pumpUntilFound(tester, _key('pilot-actions'));
-  await tapVisible(tester, _key('pilot-actions').first);
+  // Centred, not at the top edge, where the pinned headings cover it.
+  await Scrollable.ensureVisible(
+    tester.element(_key('pilot-actions').first),
+    alignment: 0.5,
+  );
+  await tester.pumpAndSettle();
+  await tester.tap(_key('pilot-actions').first);
+  await tester.pump(const Duration(milliseconds: 300));
   await pumpUntilFound(tester, _key('pilot-action-move'));
   await tester.tap(_key('pilot-action-move'));
   await pumpUntilFound(tester, _key('move-reason'));
