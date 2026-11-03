@@ -4,8 +4,9 @@ import type { Metadata } from "next";
 import { TopicCards } from "@/components/docs/bits";
 import styles from "@/components/docs/docs.module.css";
 import { landingLinks } from "@/components/docs/topics";
+import { pageMetadata } from "@/lib/page-metadata";
 
-export const metadata: Metadata = { title: "Documentation and Help" };
+export const metadata: Metadata = pageMetadata("Documentation and Help");
 
 export default function DocsLandingPage() {
   return (

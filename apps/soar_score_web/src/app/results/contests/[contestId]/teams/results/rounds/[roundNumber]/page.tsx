@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 
 import { ContestView } from "@/components/results/contest-view";
 import { parseRound } from "@/lib/results/round-param";
+import { pageMetadata } from "@/lib/page-metadata";
 
-export const metadata: Metadata = { title: "Team scores" };
+export const metadata: Metadata = pageMetadata("Team scores");
 
 /** Team Scores as of a round. */
 export default async function TeamResultsRoundPage({

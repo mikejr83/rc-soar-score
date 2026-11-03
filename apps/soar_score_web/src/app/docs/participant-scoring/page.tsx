@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { Callout, DraftNote, FigurePlaceholder } from "@/components/docs/bits";
+import { pageMetadata } from "@/lib/page-metadata";
 
-export const metadata: Metadata = { title: "Help Me Enter My Score" };
+export const metadata: Metadata = pageMetadata("Help Me Enter My Score");
 
 /** Participant scoring help (`/docs/participant-scoring`). Sources:
  *  plan/business-requirements/contest-self-scoring.md,

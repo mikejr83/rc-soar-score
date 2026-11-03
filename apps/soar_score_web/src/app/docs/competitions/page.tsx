@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 
 import { Callout, DraftNote, FigurePlaceholder } from "@/components/docs/bits";
 import { contestAppUrl, downloadUrl } from "@/lib/site";
+import { pageMetadata } from "@/lib/page-metadata";
 
-export const metadata: Metadata = { title: "Contest Director Getting Started" };
+export const metadata: Metadata = pageMetadata("Contest Director Getting Started");
 
 /** Competition help (`/docs/competitions`). Sources: plan/business-requirements
  *  contest-phases.md, contest-configuration.md, contest-draw.md,

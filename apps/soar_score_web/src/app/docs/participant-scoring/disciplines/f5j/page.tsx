@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { Callout, DraftNote, FigurePlaceholder } from "@/components/docs/bits";
+import { pageMetadata } from "@/lib/page-metadata";
 
-export const metadata: Metadata = { title: "F5J score entry quick reference" };
+export const metadata: Metadata = pageMetadata("F5J score entry quick reference");
 
 /** F5J quick reference (`/docs/participant-scoring/disciplines/f5j`).
  *  Source: plan/business-requirements/disciplines/f5j.md. */

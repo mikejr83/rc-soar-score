@@ -3,20 +3,13 @@ import type { ReactNode } from "react";
 
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { shareImage, siteDescription as description } from "@/lib/page-metadata";
 import { siteName, siteUrl, tagline } from "@/lib/site";
 
 import { accent, body, display } from "./fonts";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
 
-const description =
-  "Scoring and management for RC sailplane soaring contests: run a contest, enter and check scores, and publish results for pilots and spectators.";
-const shareImage = {
-  url: "/brand/share-image.png",
-  width: 1200,
-  height: 630,
-  alt: `${siteName}: ${tagline}`,
-};
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),

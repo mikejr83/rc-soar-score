@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 
 import { SupportForm } from "@/components/support/support-form";
+import { pageMetadata } from "@/lib/page-metadata";
 
-export const metadata: Metadata = { title: "Support" };
+export const metadata: Metadata = pageMetadata("Support");
 
 /** Support request page (`/support`, plan/ui/public-site/support.md). */
 export default function SupportPage() {

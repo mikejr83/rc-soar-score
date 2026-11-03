@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { Callout, DraftNote } from "@/components/docs/bits";
+import { pageMetadata } from "@/lib/page-metadata";
 
-export const metadata: Metadata = { title: "Finding Contests and Results" };
+export const metadata: Metadata = pageMetadata("Finding Contests and Results");
 
 /** Public contests help (`/docs/contests-and-scores`). Sources:
  *  plan/ui/public-site/contest-search.md, view-contest.md,
