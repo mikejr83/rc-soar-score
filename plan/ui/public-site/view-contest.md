@@ -101,7 +101,7 @@ A user navigating to this route will be redirected to the contest's root route i
 
 The most detailed view is the "Flight Group Scores". This view shows the individual scoring details for a single round. The view still respects the selected round. Instead of a single table, the view shows each group within the round as its own table.
 
-For each group in the round a section is generated. It is headed by the group number and if necessary the re-flight number.
+For each group in the round a section is generated. It is headed by the group number and if necessary the re-flight number. The number is the `re_flight` value on the published score entries and matrix assignments: the sequence number of a re-flight that re-flies a group (the whole group again, or a drawn group), absent for an original flight, for a pilot moved into another group, and for a cancelled re-flight.
 
 A table will appear for the flight group showing the following information as columns:
 

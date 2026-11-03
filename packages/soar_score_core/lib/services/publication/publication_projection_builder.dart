@@ -1,6 +1,8 @@
 import 'dart:math';
 
 import '../../enums/lifecycle_state.dart';
+import '../../enums/re_flight_status.dart';
+import '../../enums/re_flight_type.dart';
 import '../../enums/role_type.dart';
 import '../../enums/score_field_kind.dart';
 import '../../enums/score_field_type.dart';
@@ -104,6 +106,7 @@ class PublicationProjectionBuilder {
             .toList()
           ..sort((a, b) => a.ordinal.compareTo(b.ordinal));
     final teams = await _teams(contestId, keyOf);
+    final reFlights = await _publishedReFlights(contestId);
 
     final projection = PublicationProjection(
       id: _newId(),
@@ -122,8 +125,8 @@ class PublicationProjectionBuilder {
       ),
       participants: [for (final p in pilots) p.entry(teams.keyByPilot[p.key])],
       teams: teams.entries,
-      matrixInfo: await _matrixInfo(matrix, rounds, keyOf),
-      scores: await _scores(contestId, rounds, keyOf, scoreFields),
+      matrixInfo: await _matrixInfo(matrix, rounds, keyOf, reFlights),
+      scores: await _scores(contestId, rounds, keyOf, scoreFields, reFlights),
       standings: await _standings(contestId, keyOf, teams.keyById),
       calculationMetadata: await _metadata(
         contestId,
@@ -276,6 +279,7 @@ class PublicationProjectionBuilder {
     MatrixRevision matrix,
     List<Round> rounds,
     Map<Id, String> keyOf,
+    Map<Id, int> reFlights,
   ) async => {
     'rounds': [
       for (final round in rounds)
@@ -292,10 +296,24 @@ class PublicationProjectionBuilder {
                   'pilot_key': keyOf[a.contestParticipationId],
                   'group': a.group,
                   'lane': a.lane,
+                  're_flight': reFlights[a.reFlightId],
                 },
           ],
         },
     ],
+  };
+
+  /// The re-flights the public sees, by id, with their sequence number: those
+  /// that re-fly a group (a whole group again, or a drawn group), not
+  /// cancelled. A pilot moved into another group flies as part of it, so a
+  /// move carries no marker (#457).
+  Future<Map<Id, int>> _publishedReFlights(Id contestId) async => {
+    for (final reFlight in await repository.reFlightRepository.listForContest(
+      contestId,
+    ))
+      if (reFlight.type != ReFlightType.moveToGroup &&
+          reFlight.status != ReFlightStatus.cancelled)
+        reFlight.id: reFlight.sequence,
   };
 
   /// The score fields whose raw values are published: what the scorer enters
@@ -320,7 +338,23 @@ class PublicationProjectionBuilder {
     List<Round> rounds,
     Map<Id, String> keyOf,
     List<DisciplineScoreField> fields,
+    Map<Id, int> reFlights,
   ) async {
+    final assignmentOfPlaceholder = {
+      for (final placeholder
+          in await repository.scorePlaceholderRepository.listForContest(
+            contestId,
+          ))
+        placeholder.id: placeholder.assignmentId,
+    };
+    final reFlightOfAssignment = {
+      for (final round in rounds)
+        for (final a
+            in await repository.matrixAssignmentRepository.listLiveForRound(
+              round.id,
+            ))
+          a.id: reFlights[a.reFlightId],
+    };
     final official = <Id, Map<String, Object?>>{};
     final entries = <Object?>[];
     for (final round in rounds) {
@@ -338,6 +372,8 @@ class PublicationProjectionBuilder {
         entries.add({
           'round': round.ordinal,
           'group': flight.group,
+          're_flight':
+              reFlightOfAssignment[assignmentOfPlaceholder[placeholderId]],
           'pilot_key': keyOf[flight.participationId],
           'outcome': flight.result.outcome.name,
           'raw_points': flight.result.rawPoints,

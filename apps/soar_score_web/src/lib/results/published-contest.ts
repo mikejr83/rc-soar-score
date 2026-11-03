@@ -286,9 +286,9 @@ export class PublishedContest {
   flightGroupsOf(round: number): FlightGroup[] {
     const groups = new Map<string, FlightGroup>();
     for (const f of this.flights.get(round) ?? []) {
-      // TODO(#457): `reflight` is this page's provisional name for the ordinal.
-      const raw = f.reflight;
-      const reflight = typeof raw === "number" && raw > 0 ? raw : raw === true ? 1 : undefined;
+      // `re_flight` is the re-flight's number (#457); null for an original flight.
+      const raw = f.re_flight;
+      const reflight = typeof raw === "number" && raw > 0 ? raw : undefined;
       const group = num(f.group);
       const id = `${group}:${reflight ?? 0}`;
       let g = groups.get(id);

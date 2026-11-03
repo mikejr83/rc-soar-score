@@ -153,6 +153,101 @@ void _tests(Backend backend) {
       expect([for (final p in pilots) (p! as Map)['place']], [1, 2, 3, 4]);
     });
 
+    test('a re-flight group carries its number; moves and cancelled ones '
+        'carry none', () async {
+      await scoreAndCalculate();
+      final matrix = await MatrixService(repository).current(contestId);
+      final source = matrix.assignments.firstWhere(
+        (a) => a.id == firstRound.first.assignmentId,
+      );
+      final config = (await repository.contestConfigurationRevisionRepository
+          .latestForContest(contestId))!;
+      final metadata = core.MutationMetadata(
+        clientMutationId: 'rf-${mutations++}',
+        authority: core.Authority.director,
+        clientTime: now,
+        actorId: actor,
+      );
+
+      Future<core.Id> reFlightRow(
+        core.ReFlightType type,
+        int sequence,
+        int group, {
+        bool cancelled = false,
+      }) async {
+        final reFlight = await repository.reFlightRepository.save(
+          core.ReFlight(
+            id: core.Id.create(),
+            contestId: contestId,
+            creditedRoundId: source.scheduledRoundId,
+            sourceRoundId: source.scheduledRoundId,
+            sourceGroup: source.group,
+            type: type,
+            sequence: sequence,
+            status: cancelled
+                ? core.ReFlightStatus.cancelled
+                : core.ReFlightStatus.proposed,
+            reason: 'Interference',
+            scheduledRoundId: source.scheduledRoundId,
+            flownGroup: group,
+            configRevisionId: config.id,
+            createdBy: actor,
+            createdAt: now,
+            cancelledBy: cancelled ? actor : null,
+            cancelledAt: cancelled ? now : null,
+            cancelReason: cancelled ? 'Withdrawn' : null,
+          ),
+          metadata: metadata.forPart('rf-$sequence'),
+        );
+        await repository.matrixAssignmentRepository.append(
+          core.MatrixAssignment(
+            id: core.Id.create(),
+            contestId: contestId,
+            matrixRevisionId: source.matrixRevisionId,
+            contestParticipationId: source.contestParticipationId,
+            scheduledRoundId: source.scheduledRoundId,
+            creditedRoundId: source.creditedRoundId,
+            group: group,
+            flightSequence: sequence + 1,
+            assignmentType: core.AssignmentType.reflight,
+            sourceAssignmentId: source.id,
+            reFlightId: reFlight.id,
+            actorId: actor,
+            reason: 'Interference',
+            createdAt: now,
+          ),
+          metadata: metadata.forPart('rfa-$sequence'),
+        );
+        return reFlight.id;
+      }
+
+      await reFlightRow(core.ReFlightType.reflyEntireGroup, 1, 7);
+      await reFlightRow(core.ReFlightType.randomDraw, 2, 8, cancelled: true);
+      await reFlightRow(core.ReFlightType.moveToGroup, 3, 9);
+
+      final projection = (await build()).projection;
+
+      final assignments = [
+        for (final round in projection.matrixInfo!['rounds']! as List<Object?>)
+          for (final a in (round! as Map)['assignments']! as List<Object?>)
+            a! as Map<String, Object?>,
+      ];
+      expect(
+        {
+          for (final a in assignments)
+            if (a['group']! as int > 4) a['group']: a['re_flight'],
+        },
+        {7: 1, 8: null, 9: null},
+      );
+      expect(
+        assignments.where((a) => (a['group']! as int) <= 4),
+        everyElement(containsPair('re_flight', null)),
+      );
+      for (final score in projection.scores!) {
+        expect(score! as Map, containsPair('re_flight', null));
+      }
+    });
+
     test('each score carries the raw components the site labels', () async {
       await scoreAndCalculate();
 
