@@ -1,0 +1,99 @@
+{
+  "schema": "gs-import/v1",
+  "id": "00000000-0000-7000-8000-000000000001",
+  "sourceDbFile": "GliderScoreData.mdb",
+  "tables": [
+    {
+      "name": "Comps",
+      "rowCount": 3,
+      "rowCapExceeded": false,
+      "rows": [
+        {
+          "CompNo": 9101,
+          "CompDate": "06/14/26 00:00:00",
+          "CompID": "FIXTURE9101",
+          "CompName": "Fixture Open 9101",
+          "GSCompClass": "F5J"
+        },
+        {
+          "CompNo": 9102,
+          "CompDate": "06/14/26 00:00:00",
+          "CompID": "FIXTURE9102",
+          "CompName": "Fixture Open 9102",
+          "GSCompClass": "F5J"
+        },
+        {
+          "CompNo": 9102,
+          "CompDate": "06/14/26 00:00:00",
+          "CompID": "FIXTURE9102",
+          "CompName": "Fixture Open 9102",
+          "GSCompClass": "F5J"
+        }
+      ]
+    },
+    {
+      "name": "CompPilots",
+      "rowCount": 5,
+      "rowCapExceeded": false,
+      "rows": [
+        {
+          "CompNo": 9101,
+          "PilotNo": 2101,
+          "Role": "Plt"
+        },
+        {
+          "CompNo": 9101,
+          "PilotNo": 2102,
+          "Role": "Plt"
+        },
+        {
+          "CompNo": 9101,
+          "PilotNo": 2102,
+          "Role": "Plt"
+        },
+        {
+          "CompNo": 9101,
+          "PilotNo": 2999,
+          "Role": "Plt"
+        },
+        {
+          "CompNo": 9102,
+          "PilotNo": 2101,
+          "Role": "Plt"
+        }
+      ]
+    },
+    {
+      "name": "Pilots",
+      "rowCount": 2,
+      "rowCapExceeded": false,
+      "rows": [
+        {
+          "PilotNo": 2101,
+          "FirstName": "Ivy",
+          "LastName": "Integrityone"
+        },
+        {
+          "PilotNo": 2102,
+          "FirstName": "Jem",
+          "LastName": "Integritytwo"
+        }
+      ]
+    },
+    {
+      "name": "Dur",
+      "rowCount": 2,
+      "rowCapExceeded": false,
+      "rows": [
+        {
+          "CompNo": 9101,
+          "durTargetTime": 600
+        },
+        {
+          "CompNo": 9102,
+          "durTargetTime": 600
+        }
+      ]
+    }
+  ]
+}

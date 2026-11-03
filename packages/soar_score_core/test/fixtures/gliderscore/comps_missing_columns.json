@@ -1,0 +1,324 @@
+{
+  "schema": "gs-import/v1",
+  "id": "00000000-0000-7000-8000-000000000001",
+  "sourceDbFile": "GliderScoreData.mdb",
+  "tables": [
+    {
+      "name": "Comps",
+      "rowCount": 1,
+      "rowCapExceeded": false,
+      "rows": [
+        {
+          "CompNo": 22,
+          "CompName": "Fixture Open 22",
+          "GSCompClass": "F5J",
+          "CompDate": "03/18/22 00:00:00"
+        }
+      ]
+    },
+    {
+      "name": "CompPilots",
+      "rowCount": 31,
+      "rowCapExceeded": false,
+      "rows": [
+        {
+          "CompNo": 22,
+          "PilotNo": 98
+        },
+        {
+          "CompNo": 22,
+          "PilotNo": 85
+        },
+        {
+          "CompNo": 22,
+          "PilotNo": 115
+        },
+        {
+          "CompNo": 22,
+          "PilotNo": 97
+        },
+        {
+          "CompNo": 22,
+          "PilotNo": 84
+        },
+        {
+          "CompNo": 22,
+          "PilotNo": 124
+        },
+        {
+          "CompNo": 22,
+          "PilotNo": 117
+        },
+        {
+          "CompNo": 22,
+          "PilotNo": 76
+        },
+        {
+          "CompNo": 22,
+          "PilotNo": 78
+        },
+        {
+          "CompNo": 22,
+          "PilotNo": 123
+        },
+        {
+          "CompNo": 22,
+          "PilotNo": 118
+        },
+        {
+          "CompNo": 22,
+          "PilotNo": 119
+        },
+        {
+          "CompNo": 22,
+          "PilotNo": 125
+        },
+        {
+          "CompNo": 22,
+          "PilotNo": 75
+        },
+        {
+          "CompNo": 22,
+          "PilotNo": 92
+        },
+        {
+          "CompNo": 22,
+          "PilotNo": 126
+        },
+        {
+          "CompNo": 22,
+          "PilotNo": 127
+        },
+        {
+          "CompNo": 22,
+          "PilotNo": 121
+        },
+        {
+          "CompNo": 22,
+          "PilotNo": 106
+        },
+        {
+          "CompNo": 22,
+          "PilotNo": 109
+        },
+        {
+          "CompNo": 22,
+          "PilotNo": 108
+        },
+        {
+          "CompNo": 22,
+          "PilotNo": 116
+        },
+        {
+          "CompNo": 22,
+          "PilotNo": 104
+        },
+        {
+          "CompNo": 22,
+          "PilotNo": 129
+        },
+        {
+          "CompNo": 22,
+          "PilotNo": 130
+        },
+        {
+          "CompNo": 22,
+          "PilotNo": 81
+        },
+        {
+          "CompNo": 22,
+          "PilotNo": 132
+        },
+        {
+          "CompNo": 22,
+          "PilotNo": 133
+        },
+        {
+          "CompNo": 22,
+          "PilotNo": 134
+        },
+        {
+          "CompNo": 22,
+          "PilotNo": 105
+        },
+        {
+          "CompNo": 22,
+          "PilotNo": 135
+        }
+      ]
+    },
+    {
+      "name": "Pilots",
+      "rowCount": 31,
+      "rowCapExceeded": false,
+      "rows": [
+        {
+          "PilotNo": 75,
+          "FirstName": "Alex",
+          "LastName": "Ashdown3"
+        },
+        {
+          "PilotNo": 76,
+          "FirstName": "Harper",
+          "LastName": "Birchall3"
+        },
+        {
+          "PilotNo": 78,
+          "FirstName": "Val",
+          "LastName": "Dunmore3"
+        },
+        {
+          "PilotNo": 81,
+          "FirstName": "Riley",
+          "LastName": "Gladstone3"
+        },
+        {
+          "PilotNo": 84,
+          "FirstName": "Nico",
+          "LastName": "Jessup3"
+        },
+        {
+          "PilotNo": 85,
+          "FirstName": "Uma",
+          "LastName": "Kingsley3"
+        },
+        {
+          "PilotNo": 92,
+          "FirstName": "Taylor",
+          "LastName": "Ravenscroft3"
+        },
+        {
+          "PilotNo": 97,
+          "FirstName": "Eden",
+          "LastName": "Whitlock3"
+        },
+        {
+          "PilotNo": 98,
+          "FirstName": "Lane",
+          "LastName": "Yarrow3"
+        },
+        {
+          "PilotNo": 104,
+          "FirstName": "Dana",
+          "LastName": "Eastwick4"
+        },
+        {
+          "PilotNo": 105,
+          "FirstName": "Kai",
+          "LastName": "Fairweather4"
+        },
+        {
+          "PilotNo": 106,
+          "FirstName": "Riley",
+          "LastName": "Gladstone4"
+        },
+        {
+          "PilotNo": 108,
+          "FirstName": "Glenn",
+          "LastName": "Ironside4"
+        },
+        {
+          "PilotNo": 109,
+          "FirstName": "Nico",
+          "LastName": "Jessup4"
+        },
+        {
+          "PilotNo": 115,
+          "FirstName": "Frankie",
+          "LastName": "Pemberton4"
+        },
+        {
+          "PilotNo": 116,
+          "FirstName": "Morgan",
+          "LastName": "Quillfeather4"
+        },
+        {
+          "PilotNo": 117,
+          "FirstName": "Taylor",
+          "LastName": "Ravenscroft4"
+        },
+        {
+          "PilotNo": 118,
+          "FirstName": "Blair",
+          "LastName": "Sandford4"
+        },
+        {
+          "PilotNo": 119,
+          "FirstName": "Indigo",
+          "LastName": "Thistlewood4"
+        },
+        {
+          "PilotNo": 121,
+          "FirstName": "Wren",
+          "LastName": "Valence4"
+        },
+        {
+          "PilotNo": 123,
+          "FirstName": "Lane",
+          "LastName": "Yarrow4"
+        },
+        {
+          "PilotNo": 124,
+          "FirstName": "Sage",
+          "LastName": "Zephyr4"
+        },
+        {
+          "PilotNo": 125,
+          "FirstName": "Alex",
+          "LastName": "Ashdown5"
+        },
+        {
+          "PilotNo": 126,
+          "FirstName": "Harper",
+          "LastName": "Birchall5"
+        },
+        {
+          "PilotNo": 127,
+          "FirstName": "Oakley",
+          "LastName": "Candlewick5"
+        },
+        {
+          "PilotNo": 129,
+          "FirstName": "Dana",
+          "LastName": "Eastwick5"
+        },
+        {
+          "PilotNo": 130,
+          "FirstName": "Kai",
+          "LastName": "Fairweather5"
+        },
+        {
+          "PilotNo": 132,
+          "FirstName": "Zion",
+          "LastName": "Hawthorne5"
+        },
+        {
+          "PilotNo": 133,
+          "FirstName": "Glenn",
+          "LastName": "Ironside5"
+        },
+        {
+          "PilotNo": 134,
+          "FirstName": "Nico",
+          "LastName": "Jessup5"
+        },
+        {
+          "PilotNo": 135,
+          "FirstName": "Uma",
+          "LastName": "Kingsley5"
+        }
+      ]
+    },
+    {
+      "name": "Dur",
+      "rowCount": 1,
+      "rowCapExceeded": false,
+      "rows": [
+        {
+          "CompNo": 22,
+          "durTargetTime": 600
+        }
+      ]
+    }
+  ]
+}

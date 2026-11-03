@@ -1,0 +1,532 @@
+{
+  "schema": "gs-import/v1",
+  "id": "00000000-0000-7000-8000-000000000001",
+  "sourceDbFile": "GliderScoreData.mdb",
+  "tables": [
+    {
+      "name": "Comps",
+      "rowCount": 4,
+      "rowCapExceeded": false,
+      "rows": [
+        {
+          "CompNo": 9001,
+          "CompDate": "06/14/26 00:00:00",
+          "Drop1AtRound": 3,
+          "Drop2AtRound": 6,
+          "Drop3AtRound": 9,
+          "Drop4AtRound": 12,
+          "Drop5AtRound": 15,
+          "UseTeams": 1,
+          "UseTeamProtection": 1,
+          "UseClasses": 1,
+          "UseModels": 1,
+          "UsePilotNumbering": 1,
+          "Enforce20KHz": 1,
+          "GroupScoreDecimals": 2,
+          "ScoresLocked": 0,
+          "NbrForTeamScore": 2,
+          "printCountry": 0,
+          "RoundOrTruncate": 1,
+          "GroupScoreOption": 1,
+          "printRegistration": 0,
+          "UseRoles": 1,
+          "DropScoreOption": 0,
+          "CompID": "FIXTURE9001",
+          "AssignHelpers": 0,
+          "CompName": "Fixture Open 9001",
+          "CompVenue": "Example Field",
+          "DrawMode": 0,
+          "GSCompClass": "F5J",
+          "PrelimCompNo": -1,
+          "IsPublic": 0,
+          "UseRegistration": 0,
+          "UseRegistrationIdx": 0
+        },
+        {
+          "CompNo": 9002,
+          "CompDate": "06/14/26 00:00:00",
+          "Drop1AtRound": 99,
+          "Drop2AtRound": 99,
+          "Drop3AtRound": 99,
+          "Drop4AtRound": 99,
+          "Drop5AtRound": 99,
+          "UseTeams": 0,
+          "UseTeamProtection": 0,
+          "UseClasses": 0,
+          "UseModels": 0,
+          "UsePilotNumbering": 0,
+          "Enforce20KHz": 1,
+          "GroupScoreDecimals": 2,
+          "ScoresLocked": 0,
+          "NbrForTeamScore": 3,
+          "printCountry": 0,
+          "RoundOrTruncate": 0,
+          "GroupScoreOption": 1,
+          "printRegistration": 0,
+          "UseRoles": 1,
+          "DropScoreOption": 0,
+          "CompID": "FIXTURE9002",
+          "AssignHelpers": 0,
+          "CompName": "Fixture Open 9002",
+          "CompVenue": "Example Field",
+          "DrawMode": 0,
+          "GSCompClass": "F5J",
+          "PrelimCompNo": -1,
+          "IsPublic": 0,
+          "UseRegistration": 0,
+          "UseRegistrationIdx": 0
+        },
+        {
+          "CompNo": 9003,
+          "CompDate": "06/14/26 00:00:00",
+          "Drop1AtRound": 99,
+          "Drop2AtRound": 99,
+          "Drop3AtRound": 99,
+          "Drop4AtRound": 99,
+          "Drop5AtRound": 99,
+          "UseTeams": 0,
+          "UseTeamProtection": 0,
+          "UseClasses": 0,
+          "UseModels": 0,
+          "UsePilotNumbering": 0,
+          "Enforce20KHz": 1,
+          "GroupScoreDecimals": 2,
+          "ScoresLocked": 0,
+          "NbrForTeamScore": 3,
+          "printCountry": 0,
+          "RoundOrTruncate": 1,
+          "GroupScoreOption": 1,
+          "printRegistration": 0,
+          "UseRoles": 0,
+          "DropScoreOption": 0,
+          "CompID": "FIXTURE9003",
+          "AssignHelpers": 0,
+          "CompName": "Fixture Open 9003",
+          "CompVenue": "Example Field",
+          "DrawMode": 0,
+          "GSCompClass": "F5J",
+          "PrelimCompNo": -1,
+          "IsPublic": 0,
+          "UseRegistration": 0,
+          "UseRegistrationIdx": 0
+        },
+        {
+          "CompNo": 9004,
+          "CompDate": "06/14/26 00:00:00",
+          "Drop1AtRound": 99,
+          "Drop2AtRound": 99,
+          "Drop3AtRound": 99,
+          "Drop4AtRound": 99,
+          "Drop5AtRound": 99,
+          "UseTeams": 0,
+          "UseTeamProtection": 0,
+          "UseClasses": 0,
+          "UseModels": 0,
+          "UsePilotNumbering": 0,
+          "Enforce20KHz": 1,
+          "GroupScoreDecimals": 2,
+          "ScoresLocked": 0,
+          "NbrForTeamScore": 3,
+          "printCountry": 0,
+          "RoundOrTruncate": 1,
+          "GroupScoreOption": 1,
+          "printRegistration": 0,
+          "UseRoles": 0,
+          "DropScoreOption": 0,
+          "CompID": "FIXTURE9004",
+          "AssignHelpers": 0,
+          "CompName": "Fixture Open 9004",
+          "CompVenue": "Example Field",
+          "DrawMode": 0,
+          "GSCompClass": "F3Z",
+          "PrelimCompNo": -1,
+          "IsPublic": 0,
+          "UseRegistration": 0,
+          "UseRegistrationIdx": 0
+        }
+      ]
+    },
+    {
+      "name": "CompPilots",
+      "rowCount": 18,
+      "rowCapExceeded": false,
+      "rows": [
+        {
+          "CompNo": 9001,
+          "PilotNo": 2001,
+          "PilotClass": "Sr",
+          "Team": 1,
+          "DrawFreq": 2.4,
+          "Retired": 0,
+          "StartNo": 1,
+          "Model": "Alpha Glider",
+          "Role": "Plt",
+          "IsPilot": 1,
+          "OmitFromTeamScore": 0,
+          "ModelData": "-1"
+        },
+        {
+          "CompNo": 9001,
+          "PilotNo": 2002,
+          "PilotClass": "Sr",
+          "Team": 1,
+          "DrawFreq": 2.4,
+          "Retired": 0,
+          "StartNo": 2,
+          "Model": "Alpha Glider",
+          "Role": "Plt",
+          "IsPilot": 1,
+          "OmitFromTeamScore": 0,
+          "ModelData": "-1"
+        },
+        {
+          "CompNo": 9001,
+          "PilotNo": 2003,
+          "PilotClass": "Jr",
+          "Team": 1,
+          "DrawFreq": 2.4,
+          "Retired": 0,
+          "StartNo": 3,
+          "Model": "Beta Glider",
+          "Role": "Plt",
+          "IsPilot": 1,
+          "OmitFromTeamScore": 0,
+          "ModelData": "-1"
+        },
+        {
+          "CompNo": 9001,
+          "PilotNo": 2004,
+          "PilotClass": "Sr",
+          "Team": 2,
+          "DrawFreq": 2.4,
+          "Retired": 0,
+          "StartNo": 4,
+          "Model": "Gamma Glider",
+          "Role": "Plt",
+          "IsPilot": 1,
+          "OmitFromTeamScore": 0,
+          "ModelData": "-1"
+        },
+        {
+          "CompNo": 9001,
+          "PilotNo": 2005,
+          "PilotClass": "Sr",
+          "Team": 2,
+          "DrawFreq": 2.4,
+          "Retired": 0,
+          "StartNo": 5,
+          "Role": "Plt",
+          "IsPilot": 1,
+          "OmitFromTeamScore": 1,
+          "ModelData": "-1"
+        },
+        {
+          "CompNo": 9001,
+          "PilotNo": 2006,
+          "PilotClass": "Jr",
+          "Team": 2,
+          "DrawFreq": 2.4,
+          "Retired": 0,
+          "StartNo": 6,
+          "Model": "beta glider ",
+          "Role": "Plt",
+          "IsPilot": 1,
+          "OmitFromTeamScore": 0,
+          "ModelData": "-1"
+        },
+        {
+          "CompNo": 9001,
+          "PilotNo": 2007,
+          "Team": 1,
+          "DrawFreq": 2.4,
+          "Retired": 0,
+          "StartNo": 0,
+          "Role": "TM",
+          "IsPilot": 0,
+          "OmitFromTeamScore": 0,
+          "ModelData": "-1"
+        },
+        {
+          "CompNo": 9002,
+          "PilotNo": 2001,
+          "Team": 0,
+          "DrawFreq": 2.4,
+          "Retired": 0,
+          "StartNo": 1,
+          "Role": "Plt",
+          "IsPilot": 1,
+          "OmitFromTeamScore": 0,
+          "ModelData": "-1"
+        },
+        {
+          "CompNo": 9002,
+          "PilotNo": 2002,
+          "Team": 0,
+          "DrawFreq": 2.4,
+          "Retired": 1,
+          "StartNo": 2,
+          "Role": "Plt",
+          "IsPilot": 1,
+          "OmitFromTeamScore": 0,
+          "ModelData": "-1"
+        },
+        {
+          "CompNo": 9002,
+          "PilotNo": 2003,
+          "Team": 0,
+          "DrawFreq": 2.4,
+          "Retired": 1,
+          "StartNo": 3,
+          "Role": "Plt",
+          "IsPilot": 1,
+          "OmitFromTeamScore": 0,
+          "ModelData": "-1"
+        },
+        {
+          "CompNo": 9002,
+          "PilotNo": 2004,
+          "Team": 0,
+          "DrawFreq": 2.4,
+          "Retired": 0,
+          "StartNo": 4,
+          "Role": "TM/Plt",
+          "IsPilot": 1,
+          "OmitFromTeamScore": 0,
+          "ModelData": "-1"
+        },
+        {
+          "CompNo": 9002,
+          "PilotNo": 2005,
+          "Team": 0,
+          "DrawFreq": 2.4,
+          "Retired": 0,
+          "StartNo": 5,
+          "Role": "CD/Plt",
+          "IsPilot": 1,
+          "OmitFromTeamScore": 0,
+          "ModelData": "-1"
+        },
+        {
+          "CompNo": 9002,
+          "PilotNo": 2006,
+          "Team": 0,
+          "DrawFreq": 2.4,
+          "Retired": 0,
+          "StartNo": 0,
+          "Role": "CD",
+          "IsPilot": 0,
+          "OmitFromTeamScore": 0,
+          "ModelData": "-1"
+        },
+        {
+          "CompNo": 9002,
+          "PilotNo": 2007,
+          "Team": 0,
+          "DrawFreq": 2.4,
+          "Retired": 0,
+          "StartNo": 0,
+          "Role": "Hlp",
+          "IsPilot": 0,
+          "OmitFromTeamScore": 0,
+          "ModelData": "-1"
+        },
+        {
+          "CompNo": 9002,
+          "PilotNo": 2008,
+          "Team": 0,
+          "DrawFreq": 2.4,
+          "Retired": 0,
+          "StartNo": 0,
+          "Role": "TM",
+          "IsPilot": 0,
+          "OmitFromTeamScore": 0,
+          "ModelData": "-1"
+        },
+        {
+          "CompNo": 9003,
+          "PilotNo": 2001,
+          "Team": 0,
+          "DrawFreq": 2.4,
+          "Retired": 0,
+          "StartNo": 0,
+          "Role": "Plt",
+          "IsPilot": 1,
+          "OmitFromTeamScore": 0,
+          "ModelData": "-1"
+        },
+        {
+          "CompNo": 9003,
+          "PilotNo": 2002,
+          "Team": 0,
+          "DrawFreq": 2.4,
+          "Retired": 0,
+          "StartNo": 0,
+          "Role": "Plt",
+          "IsPilot": 1,
+          "OmitFromTeamScore": 0,
+          "ModelData": "-1"
+        },
+        {
+          "CompNo": 9004,
+          "PilotNo": 2001,
+          "Team": 0,
+          "DrawFreq": 2.4,
+          "Retired": 0,
+          "StartNo": 0,
+          "Role": "Plt",
+          "IsPilot": 1,
+          "OmitFromTeamScore": 0,
+          "ModelData": "-1"
+        }
+      ]
+    },
+    {
+      "name": "Pilots",
+      "rowCount": 8,
+      "rowCapExceeded": false,
+      "rows": [
+        {
+          "PilotNo": 2001,
+          "FirstName": "Ash",
+          "LastName": "Fixtureone",
+          "Email": "fixture2001@example.test",
+          "Country": "USA"
+        },
+        {
+          "PilotNo": 2002,
+          "FirstName": "Bo",
+          "LastName": "Fixturetwo",
+          "Email": "fixture2002@example.test",
+          "Country": "USA"
+        },
+        {
+          "PilotNo": 2003,
+          "FirstName": "Cy",
+          "LastName": "Fixturethree",
+          "Email": "fixture2003@example.test",
+          "Country": "USA"
+        },
+        {
+          "PilotNo": 2004,
+          "FirstName": "Di",
+          "LastName": "Fixturefour",
+          "Email": "fixture2004@example.test",
+          "Country": "USA"
+        },
+        {
+          "PilotNo": 2005,
+          "FirstName": "Ed",
+          "LastName": "Fixturefive",
+          "Email": "fixture2005@example.test",
+          "Country": "USA"
+        },
+        {
+          "PilotNo": 2006,
+          "FirstName": "Flo",
+          "LastName": "Fixturesix",
+          "Email": "fixture2006@example.test",
+          "Country": "USA"
+        },
+        {
+          "PilotNo": 2007,
+          "FirstName": "Gus",
+          "LastName": "Fixtureseven",
+          "Email": "fixture2007@example.test",
+          "Country": "USA"
+        },
+        {
+          "PilotNo": 2008,
+          "FirstName": "Hal",
+          "LastName": "Fixtureeight",
+          "Email": "fixture2008@example.test",
+          "Country": "USA"
+        }
+      ]
+    },
+    {
+      "name": "Roles",
+      "rowCount": 6,
+      "rowCapExceeded": false,
+      "rows": [
+        {
+          "Role": "TM",
+          "RoleName": "Team Manager"
+        },
+        {
+          "Role": "Plt",
+          "RoleName": "Pilot"
+        },
+        {
+          "Role": "TM/Plt",
+          "RoleName": "Team Manager/Pilot"
+        },
+        {
+          "Role": "CD/Plt",
+          "RoleName": "Comp Director/Pilot"
+        },
+        {
+          "Role": "Hlp",
+          "RoleName": "Helper"
+        },
+        {
+          "Role": "CD",
+          "RoleName": "Competition Director"
+        }
+      ]
+    },
+    {
+      "name": "Dur",
+      "rowCount": 2,
+      "rowCapExceeded": false,
+      "rows": [
+        {
+          "CompNo": 9001,
+          "durTargetTime": 600,
+          "durDecimalsForTiming": 0,
+          "durLndg": 9,
+          "durNumberOfTimekeepers": 1,
+          "durGroupsPerRound": 2,
+          "durPilotsMax": 8,
+          "durDrawLocked": 0,
+          "durFlightPenalty": 3,
+          "durNbrOfLanes": 0,
+          "durRefHeight": 200,
+          "durPenaltyUpToRefHeight": 0.5,
+          "durPenaltyOverRefHeight": 3,
+          "durAllowBackToBack": 0,
+          "DurPointsPerSecond": 1,
+          "F5JMotorRestartOption": 2
+        },
+        {
+          "CompNo": 9002,
+          "durTargetTime": 600,
+          "durDecimalsForTiming": 0,
+          "durLndg": 9,
+          "durNumberOfTimekeepers": 1,
+          "durGroupsPerRound": 2,
+          "durPilotsMax": 8,
+          "durDrawLocked": 0,
+          "durFlightPenalty": 3,
+          "durNbrOfLanes": 0,
+          "durRefHeight": 200,
+          "durPenaltyUpToRefHeight": 0.5,
+          "durPenaltyOverRefHeight": 3,
+          "durAllowBackToBack": 0,
+          "DurPointsPerSecond": 1,
+          "F5JMotorRestartOption": 0
+        }
+      ]
+    },
+    {
+      "name": "DBParams",
+      "rowCount": 1,
+      "rowCapExceeded": false,
+      "rows": [
+        {
+          "Property": "DBVersion",
+          "PRValue": "6.78"
+        }
+      ]
+    }
+  ]
+}
