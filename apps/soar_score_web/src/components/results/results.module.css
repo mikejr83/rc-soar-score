@@ -465,3 +465,9 @@
   font-size: 0.875rem;
   color: var(--text-muted);
 }
+
+/* A yes/no detail that happened, in place of the word "true" (#722). */
+.flagMark {
+  font-weight: 700;
+  color: var(--text);
+}
