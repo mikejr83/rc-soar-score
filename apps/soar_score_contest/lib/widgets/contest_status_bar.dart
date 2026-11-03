@@ -18,7 +18,7 @@ class ContestStatusBar extends StatelessWidget {
   const ContestStatusBar({super.key, this.contest});
 
   /// The selected contest, whose sync status (last synced, changes waiting)
-  /// the bar shows; none outside a contest.
+  /// the bar shows; outside a contest it shows the account's.
   final Contest? contest;
 
   static const String status = 'Ready';
@@ -78,7 +78,7 @@ class ContestStatusBar extends StatelessWidget {
                   ],
                 ),
               ),
-              if (contest != null) ShellSyncStatus(contest: contest),
+              ShellSyncStatus(contest: contest),
             ],
           );
           final right = Wrap(

@@ -4,6 +4,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:soar_score_ui/soar_score_ui.dart';
+import 'package:soar_score_core/soar_score_core.dart' show Id;
+
+import 'widgets/shell_destinations.dart' show contestIdFor;
 
 import 'api_client_provider.dart';
 import 'app_sync_provider.dart';
@@ -111,7 +114,8 @@ class SoarScoreContestApp extends StatefulWidget {
   State<SoarScoreContestApp> createState() => _SoarScoreContestAppState();
 }
 
-class _SoarScoreContestAppState extends State<SoarScoreContestApp> {
+class _SoarScoreContestAppState extends State<SoarScoreContestApp>
+    with WidgetsBindingObserver {
   late final AppModeNotifier? _appMode;
   late final bool _ownsAppMode;
   late final GoRouter _router;
@@ -190,10 +194,57 @@ class _SoarScoreContestAppState extends State<SoarScoreContestApp> {
       appMode: _appMode,
       auth: widget.bootstrap?.authSession,
     );
+    // The periodic sync check depends on where the director is, and nothing
+    // is asked of the service while the app is in the background.
+    WidgetsBinding.instance.addObserver(this);
+    _router.routerDelegate.addListener(_reportSyncFocus);
+    _reportSyncFocus();
+  }
+
+  String? _syncFocusContest;
+
+  void _reportSyncFocus() {
+    final bootstrap = widget.bootstrap;
+    if (bootstrap == null) return;
+    final path = _router.routerDelegate.currentConfiguration.uri.path;
+    final contestId = contestIdFor(path);
+    if (contestId == _syncFocusContest) return;
+    _syncFocusContest = contestId;
+    Id? id;
+    if (contestId != null) {
+      try {
+        id = Id.parse(contestId);
+      } on ArgumentError {
+        id = null;
+      }
+    }
+    bootstrap.syncFocusChanged(id);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // `inactive` is only a window that lost focus; the app is hidden when it
+    // is minimised.
+    final active = switch (state) {
+      AppLifecycleState.resumed => true,
+      AppLifecycleState.hidden ||
+      AppLifecycleState.paused ||
+      AppLifecycleState.detached => false,
+      AppLifecycleState.inactive => null,
+    };
+    if (active == null) return;
+    widget.bootstrap?.appActiveChanged(active: active);
+    if (active) {
+      widget.connectivity?.resume();
+    } else {
+      widget.connectivity?.pause();
+    }
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _router.routerDelegate.removeListener(_reportSyncFocus);
     // Closing the bootstrap also shuts down the embedded server on Windows;
     // the web variant only releases its HTTP client.
     final bootstrap = widget.bootstrap;

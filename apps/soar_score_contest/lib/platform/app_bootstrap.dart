@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_core/soar_score_core.dart' as core;
 import 'package:soar_score_ui_storage/soar_score_ui_storage.dart';
@@ -64,6 +66,19 @@ abstract class AppBootstrap {
   /// The native build uses it to resume synchronization; the web build has
   /// nothing to synchronize, so the default does nothing.
   void remoteReachabilityChanged({required bool reachable}) {}
+
+  /// What synchronization finds out about the service: true when a sync
+  /// reached it, false when it found no connection. Lets the connectivity
+  /// monitor stop its health checks while syncs keep working.
+  Stream<bool> get syncReachability => const Stream.empty();
+
+  /// The director moved to [contestId]'s pages, or to pages outside any
+  /// contest when it is null. Sets how often the service is asked for changes.
+  void syncFocusChanged(core.Id? contestId) {}
+
+  /// The app went to the background ([active] false) or came back. Nothing is
+  /// requested from the service in the background.
+  void appActiveChanged({required bool active}) {}
 
   /// The Auth0 session behind [remoteApiClient]'s bearer token, or `null`
   /// when the bootstrap has no sign-in (tests).

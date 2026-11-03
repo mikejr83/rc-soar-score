@@ -28,6 +28,18 @@ class EngineAppSync implements AppSync {
   @override
   bool get available => true;
 
+  core.SyncScopeKey? _accountScope;
+
+  @override
+  core.SyncScopeKey? get accountScope => _accountScope;
+
+  /// The signed-in account's own data scope, or null while nobody is.
+  void accountScopeChanged(core.SyncScopeKey? scope) {
+    if (scope == _accountScope) return;
+    _accountScope = scope;
+    if (!_controller.isClosed) _controller.add(state);
+  }
+
   @override
   AppSyncState get state => _translate(_engine.state);
 

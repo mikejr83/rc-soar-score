@@ -31,4 +31,16 @@ class FakeAppConnectivity extends ChangeNotifier implements AppConnectivity {
 
   @override
   void retryApi() {}
+
+  @override
+  void reportReachable() {}
+
+  @override
+  void reportUnreachable() {}
+
+  @override
+  void pause() {}
+
+  @override
+  void resume() {}
 }

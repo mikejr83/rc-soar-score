@@ -14,6 +14,9 @@ class NoAppSync implements AppSync {
   bool get available => false;
 
   @override
+  SyncScopeKey? get accountScope => null;
+
+  @override
   AppSyncState get state => const AppSyncState();
 
   @override

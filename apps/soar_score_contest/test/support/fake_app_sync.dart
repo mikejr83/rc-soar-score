@@ -39,6 +39,10 @@ class FakeAppSync implements AppSync {
         })
       >[];
 
+  /// The account scope the shell shows outside a contest.
+  @override
+  SyncScopeKey? accountScope;
+
   @override
   AppSyncState get state => _state;
 

@@ -51,9 +51,27 @@ class NativeSync {
       if (wasSyncing && !state.syncing) _discoverSoon();
       wasSyncing = state.syncing;
     });
+    // Whoever started a sync, the next periodic check is one interval after
+    // it, and a sync that found no connection says the service is unreachable.
+    _outcomeSubscription = engine.outcomes.listen((failure) {
+      _poller.synced();
+      if (!_reachability.isClosed) {
+        _reachability.add(failure != SyncFailureKind.offline);
+      }
+    });
+    _acting?.addListener(_accountChanged);
   }
 
   late final StreamSubscription<SyncState> _stateSubscription;
+  late final StreamSubscription<SyncFailureKind?> _outcomeSubscription;
+  late final SyncPoller _poller = SyncPoller(onPoll: _poll);
+  final _reachability = StreamController<bool>.broadcast();
+  bool _reachable = false;
+  SyncPollFocus _focus = const SyncPollLanding();
+
+  /// What syncs find out about the service: true when one reached it, false
+  /// when one found no connection.
+  Stream<bool> get reachability => _reachability.stream;
 
   final ApiClient _remote;
 
@@ -199,9 +217,64 @@ class NativeSync {
 
   /// The remote API became reachable (or stopped being so).
   void remoteReachabilityChanged({required bool reachable}) {
+    _reachable = reachable;
+    _updatePoller();
     if (!reachable) return;
     _scheduler.connectivityRestored();
     unawaited(discoverAccountContests());
+  }
+
+  /// The account a periodic check may sync for: the claimed one, while the app
+  /// still acts as it. Null before a sign-in claimed the Local account and
+  /// after the director signed out.
+  core.Id? get _syncAccount {
+    final account = _accountId;
+    if (account == null) return null;
+    final acting = _acting;
+    return acting == null || acting.leaseFor(account) != null ? account : null;
+  }
+
+  void _accountChanged() => _updatePoller();
+
+  /// Checks run only while the service is reachable and an account is signed
+  /// in; the screens show the account's sync status while there is one.
+  void _updatePoller() {
+    final account = _syncAccount;
+    _poller.enabled = _reachable && account != null;
+    appSync.accountScopeChanged(
+      account == null ? null : core.DirectorScopeKey(account),
+    );
+  }
+
+  /// The director moved to a contest's pages ([contestId]) or out of them.
+  /// Opening a contest not synced for a while syncs it at once.
+  void focusChanged(core.Id? contestId) {
+    _focus = contestId == null
+        ? const SyncPollLanding()
+        : SyncPollContest(contestId);
+    _poller.focusChanged(_focus);
+    if (contestId == null || !_reachable || _syncAccount == null) return;
+    final scope = core.ContestScopeKey(contestId);
+    final last = engine.state.scopes[scope]?.lastSyncedAt;
+    if (last == null ||
+        DateTime.now().difference(last) >= _poller.contestInterval) {
+      unawaited(engine.syncScope(scope));
+    }
+  }
+
+  /// The app went to the background or came back to the front.
+  void appActiveChanged({required bool active}) => _poller.paused = !active;
+
+  /// One periodic check: the contest in front, the director's data, and a
+  /// look for contests made on another installation.
+  Future<void> _poll(SyncPollFocus focus) async {
+    final account = _syncAccount;
+    if (account == null) return;
+    if (focus case SyncPollContest(:final contestId)) {
+      await engine.syncScope(core.ContestScopeKey(contestId));
+    }
+    await engine.syncScope(core.DirectorScopeKey(account));
+    await discoverAccountContests();
   }
 
   /// The Local account's data now belongs to [accountId]: sync every scope it
@@ -209,6 +282,7 @@ class NativeSync {
   /// contests), which were skipped while they were local only.
   Future<void> accountClaimed(core.Id accountId) async {
     _accountId = accountId;
+    _updatePoller();
     final scopes = <core.SyncScopeKey>[core.DirectorScopeKey(accountId)];
     try {
       for (final contest in await ContestRepository(_database).getAll()) {
@@ -288,6 +362,10 @@ class NativeSync {
   Future<void> close() async {
     await _subscription.cancel();
     await _stateSubscription.cancel();
+    await _outcomeSubscription.cancel();
+    _acting?.removeListener(_accountChanged);
+    _poller.dispose();
+    await _reachability.close();
     _discoveryTimer?.cancel();
     _scheduler.dispose();
     await appSync.close();

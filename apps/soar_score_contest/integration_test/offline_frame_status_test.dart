@@ -37,7 +37,8 @@ void main() {
     await pumpUntilFound(tester, find.text('Status: Available'));
     await tapVisible(tester, find.text('OK'));
 
-    // Outside a contest the bar has no sync entry.
+    // Outside a contest, signed out, the bar has no sync entry (once signed
+    // in it shows the account's, which this journey cannot do offline).
     final bar = find.byKey(const ValueKey('contest-status-bar'));
     final sync = find.descendant(
       of: bar,
