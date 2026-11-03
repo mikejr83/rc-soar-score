@@ -59,6 +59,14 @@ class WorkspaceServer {
   /// The visibilities requested, as sent (`Public` or `Unlisted`).
   final List<String> visibilities = [];
 
+  /// Starts the server with results hidden through [round] since [at].
+  void startHidden({int round = 2, DateTime? at}) {
+    contest = contest.copyWithState(
+      hideResultsThroughRound: round,
+      updatedAt: at ?? DateTime.utc(2026, 10, 17, 15),
+    );
+  }
+
   /// Starts the server with a published contest.
   void startPublished({String visibility = 'Unlisted'}) {
     publication = {
@@ -229,6 +237,15 @@ class WorkspaceServer {
       ),
       'unlock' => contest.copyWithState(
         adminLock: AdminLock.unlocked,
+        updatedAt: DateTime.utc(2026, 10, 17, 15),
+      ),
+      'hideResults' when contest.lifecycleState == LifecycleState.running =>
+        contest.copyWithState(
+          hideResultsThroughRound: 2,
+          updatedAt: DateTime.utc(2026, 10, 17, 15),
+        ),
+      'showResults' when contest.resultsHidden => contest.copyWithState(
+        clearResultsHiding: true,
         updatedAt: DateTime.utc(2026, 10, 17, 15),
       ),
       'complete' when contest.lifecycleState == LifecycleState.running =>

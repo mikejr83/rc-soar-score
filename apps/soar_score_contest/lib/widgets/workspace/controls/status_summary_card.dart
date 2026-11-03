@@ -58,11 +58,17 @@ class StatusSummaryCard extends StatelessWidget {
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
                     const SizedBox(width: 8),
-                    Expanded(child: Text(value.label)),
-                    Text(
-                      value.value,
-                      key: ValueKey('status-${value.id}-value'),
-                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    Expanded(flex: 3, child: Text(value.label)),
+                    // A long value ("Hidden through round 12") wraps instead
+                    // of overflowing the row.
+                    Flexible(
+                      flex: 2,
+                      child: Text(
+                        value.value,
+                        key: ValueKey('status-${value.id}-value'),
+                        textAlign: TextAlign.end,
+                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      ),
                     ),
                   ],
                 ),

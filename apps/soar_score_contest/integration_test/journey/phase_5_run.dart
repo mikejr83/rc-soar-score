@@ -342,6 +342,51 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
   );
 
   await journey.step(
+    'Overall results card: hide, show and undo, with the status in step',
+    () => inContest(() async {
+      await pumpUntilFound(tester, _key('workspace-control-results'));
+      expect(find.textContaining('goes here'), findsNothing);
+      expect(_status(tester, 'results'), 'Off');
+      expect(
+        tester
+            .widget<Text>(_key('control-results-current'))
+            .textSpan!
+            .toPlainText(),
+        'Now: Visible',
+      );
+
+      // Hiding takes effect at once; the card names the round and the end of
+      // the 24 hours, and the status summary follows.
+      await tapVisible(tester, _key('control-hideResults'));
+      await pumpUntilFound(tester, _key('control-showResults'));
+      expect(_status(tester, 'results'), startsWith('Hidden through round'));
+      expect(
+        tester
+            .widget<Text>(_key('control-results-current'))
+            .textSpan!
+            .toPlainText(),
+        contains('ends at'),
+      );
+      expect(
+        find.textContaining('24 hours after it was turned on'),
+        findsOneWidget,
+      );
+
+      // Undo in the snackbar puts it back.
+      await tapVisible(tester, find.text('Undo'));
+      await pumpUntilFound(tester, _key('control-hideResults'));
+      expect(_status(tester, 'results'), 'Off');
+
+      // Hide again and show with the card's own button.
+      await tapVisible(tester, _key('control-hideResults'));
+      await pumpUntilFound(tester, _key('control-showResults'));
+      await tapVisible(tester, _key('control-showResults'));
+      await pumpUntilFound(tester, _key('control-hideResults'));
+      expect(_status(tester, 'results'), 'Off');
+    }),
+  );
+
+  await journey.step(
     'Round 2: the rest of the round is scored',
     () => inContest(() async {
       await scoreRound(tester, data, 2, penalties: _penalised);

@@ -2503,6 +2503,108 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Public updates: the policy could not be read.'**
   String get publicationPolicyUnreadable;
+
+  /// Overall results card: current value when results are shown.
+  ///
+  /// In en, this message translates to:
+  /// **'Visible'**
+  String get resultsCardVisible;
+
+  /// Overall results card: current value while results are hidden. The time is in the contest time zone.
+  ///
+  /// In en, this message translates to:
+  /// **'Hidden through round {round}, ends at {time}'**
+  String resultsCardHidden(int round, String time);
+
+  /// Overall results card: what hiding does, shown while results are visible.
+  ///
+  /// In en, this message translates to:
+  /// **'Hiding removes overall scores and placing from the public site and participant views. Round scores stay visible.'**
+  String get resultsCardScopeVisible;
+
+  /// Overall results card: what is hidden and when hiding ends, shown while results are hidden.
+  ///
+  /// In en, this message translates to:
+  /// **'Overall scores and placing are hidden from the public site and participant views. Hiding ends by itself 24 hours after it was turned on, or when the contest completes. Showing results ends it now.'**
+  String get resultsCardScopeHidden;
+
+  /// Overall results card: countdown while hidden. The time is a phrase such as 5 hours.
+  ///
+  /// In en, this message translates to:
+  /// **'{time} left before results show again.'**
+  String resultsCardRemaining(String time);
+
+  /// Duration in whole hours for the results hiding countdown.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours, plural, =1{1 hour} other{{hours} hours}}'**
+  String resultsCardRemainingHours(int hours);
+
+  /// Duration in whole minutes for the results hiding countdown, under an hour.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes, plural, =1{1 minute} other{{minutes} minutes}}'**
+  String resultsCardRemainingMinutes(int minutes);
+
+  /// Button that hides overall results.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide results'**
+  String get resultsCardHide;
+
+  /// Button that shows overall results again.
+  ///
+  /// In en, this message translates to:
+  /// **'Show results'**
+  String get resultsCardShow;
+
+  /// Button label while results are being hidden.
+  ///
+  /// In en, this message translates to:
+  /// **'Hiding…'**
+  String get resultsCardHideBusy;
+
+  /// Button label while results are being shown.
+  ///
+  /// In en, this message translates to:
+  /// **'Showing…'**
+  String get resultsCardShowBusy;
+
+  /// Snackbar after hiding results.
+  ///
+  /// In en, this message translates to:
+  /// **'Results hidden. They show again after 24 hours, or when you show them or the contest completes.'**
+  String get resultsCardHiddenMessage;
+
+  /// Snackbar after showing results.
+  ///
+  /// In en, this message translates to:
+  /// **'Results are visible again.'**
+  String get resultsCardShownMessage;
+
+  /// Overall results card: reason the button is disabled while offline.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs a connection.'**
+  String get resultsCardNeedsConnection;
+
+  /// Overall results card: reason the button is disabled when the contest is not running.
+  ///
+  /// In en, this message translates to:
+  /// **'Results can be hidden only while the contest is running.'**
+  String get resultsCardNotRunning;
+
+  /// Overall results card: snackbar when there is no server connection object.
+  ///
+  /// In en, this message translates to:
+  /// **'No API client is available.'**
+  String get resultsCardNoApi;
+
+  /// Names the change in the stale-page banner: Your change to results hiding was not applied.
+  ///
+  /// In en, this message translates to:
+  /// **'results hiding'**
+  String get resultsCardWhat;
 }
 
 class _AppLocalizationsDelegate

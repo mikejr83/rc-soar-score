@@ -1698,4 +1698,79 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get publicationPolicyUnreadable =>
       'Public updates: the policy could not be read.';
+
+  @override
+  String get resultsCardVisible => 'Visible';
+
+  @override
+  String resultsCardHidden(int round, String time) {
+    return 'Hidden through round $round, ends at $time';
+  }
+
+  @override
+  String get resultsCardScopeVisible =>
+      'Hiding removes overall scores and placing from the public site and participant views. Round scores stay visible.';
+
+  @override
+  String get resultsCardScopeHidden =>
+      'Overall scores and placing are hidden from the public site and participant views. Hiding ends by itself 24 hours after it was turned on, or when the contest completes. Showing results ends it now.';
+
+  @override
+  String resultsCardRemaining(String time) {
+    return '$time left before results show again.';
+  }
+
+  @override
+  String resultsCardRemainingHours(int hours) {
+    String _temp0 = intl.Intl.pluralLogic(
+      hours,
+      locale: localeName,
+      other: '$hours hours',
+      one: '1 hour',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String resultsCardRemainingMinutes(int minutes) {
+    String _temp0 = intl.Intl.pluralLogic(
+      minutes,
+      locale: localeName,
+      other: '$minutes minutes',
+      one: '1 minute',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get resultsCardHide => 'Hide results';
+
+  @override
+  String get resultsCardShow => 'Show results';
+
+  @override
+  String get resultsCardHideBusy => 'Hiding…';
+
+  @override
+  String get resultsCardShowBusy => 'Showing…';
+
+  @override
+  String get resultsCardHiddenMessage =>
+      'Results hidden. They show again after 24 hours, or when you show them or the contest completes.';
+
+  @override
+  String get resultsCardShownMessage => 'Results are visible again.';
+
+  @override
+  String get resultsCardNeedsConnection => 'Needs a connection.';
+
+  @override
+  String get resultsCardNotRunning =>
+      'Results can be hidden only while the contest is running.';
+
+  @override
+  String get resultsCardNoApi => 'No API client is available.';
+
+  @override
+  String get resultsCardWhat => 'results hiding';
 }

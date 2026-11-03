@@ -2003,5 +2003,96 @@
   "publicationPolicyUnreadable": "Public updates: the policy could not be read.",
   "@publicationPolicyUnreadable": {
     "description": "Shown instead of the public update policy when the contest's configuration could not be read."
+  },
+  "resultsCardVisible": "Visible",
+  "@resultsCardVisible": {
+    "description": "Overall results card: current value when results are shown."
+  },
+  "resultsCardHidden": "Hidden through round {round}, ends at {time}",
+  "@resultsCardHidden": {
+    "description": "Overall results card: current value while results are hidden. The time is in the contest time zone.",
+    "placeholders": {
+      "round": {
+        "type": "int"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "resultsCardScopeVisible": "Hiding removes overall scores and placing from the public site and participant views. Round scores stay visible.",
+  "@resultsCardScopeVisible": {
+    "description": "Overall results card: what hiding does, shown while results are visible."
+  },
+  "resultsCardScopeHidden": "Overall scores and placing are hidden from the public site and participant views. Hiding ends by itself 24 hours after it was turned on, or when the contest completes. Showing results ends it now.",
+  "@resultsCardScopeHidden": {
+    "description": "Overall results card: what is hidden and when hiding ends, shown while results are hidden."
+  },
+  "resultsCardRemaining": "{time} left before results show again.",
+  "@resultsCardRemaining": {
+    "description": "Overall results card: countdown while hidden. The time is a phrase such as 5 hours.",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "resultsCardRemainingHours": "{hours, plural, =1{1 hour} other{{hours} hours}}",
+  "@resultsCardRemainingHours": {
+    "description": "Duration in whole hours for the results hiding countdown.",
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "resultsCardRemainingMinutes": "{minutes, plural, =1{1 minute} other{{minutes} minutes}}",
+  "@resultsCardRemainingMinutes": {
+    "description": "Duration in whole minutes for the results hiding countdown, under an hour.",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "resultsCardHide": "Hide results",
+  "@resultsCardHide": {
+    "description": "Button that hides overall results."
+  },
+  "resultsCardShow": "Show results",
+  "@resultsCardShow": {
+    "description": "Button that shows overall results again."
+  },
+  "resultsCardHideBusy": "Hiding…",
+  "@resultsCardHideBusy": {
+    "description": "Button label while results are being hidden."
+  },
+  "resultsCardShowBusy": "Showing…",
+  "@resultsCardShowBusy": {
+    "description": "Button label while results are being shown."
+  },
+  "resultsCardHiddenMessage": "Results hidden. They show again after 24 hours, or when you show them or the contest completes.",
+  "@resultsCardHiddenMessage": {
+    "description": "Snackbar after hiding results."
+  },
+  "resultsCardShownMessage": "Results are visible again.",
+  "@resultsCardShownMessage": {
+    "description": "Snackbar after showing results."
+  },
+  "resultsCardNeedsConnection": "Needs a connection.",
+  "@resultsCardNeedsConnection": {
+    "description": "Overall results card: reason the button is disabled while offline."
+  },
+  "resultsCardNotRunning": "Results can be hidden only while the contest is running.",
+  "@resultsCardNotRunning": {
+    "description": "Overall results card: reason the button is disabled when the contest is not running."
+  },
+  "resultsCardNoApi": "No API client is available.",
+  "@resultsCardNoApi": {
+    "description": "Overall results card: snackbar when there is no server connection object."
+  },
+  "resultsCardWhat": "results hiding",
+  "@resultsCardWhat": {
+    "description": "Names the change in the stale-page banner: Your change to results hiding was not applied."
   }
 }
