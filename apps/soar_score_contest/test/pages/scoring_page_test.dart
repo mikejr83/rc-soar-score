@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -362,6 +364,36 @@ void main() {
 
     expect(server.entryRequests, 1);
     expect(server.entries, hasLength(2));
+    expect(find.text('Saved 2 rows.'), findsOneWidget);
+  });
+
+  testWidgets('Save all shows that rows are saving until the answer', (
+    tester,
+  ) async {
+    final server = ScoringServer()..holdBulk = Completer<void>();
+    await pumpScoringPage(tester, server, round: 1, group: 1);
+    for (final pilot in [1, 2]) {
+      await _activate(tester, 1, pilot);
+      await tester.enterText(_time(1, pilot), '540');
+      await tester.enterText(_height(1, pilot), '180');
+      await tester.pump();
+    }
+
+    await tester.tap(find.byKey(const ValueKey('score-save-all')));
+    await tester.pump();
+
+    expect(find.text('Saving 2 rows…'), findsOneWidget);
+    expect(find.byKey(const ValueKey('score-saving-progress')), findsOneWidget);
+    expect(
+      tester
+          .widget<FilledButton>(find.byKey(const ValueKey('score-save-all')))
+          .onPressed,
+      isNull,
+    );
+
+    server.holdBulk!.complete();
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('score-saving-progress')), findsNothing);
     expect(find.text('Saved 2 rows.'), findsOneWidget);
   });
 

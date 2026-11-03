@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/scoring/scoring_controller.dart';
 import '../../services/workspace/next_step/next_step_text.dart';
 import 'completeness_menu.dart';
@@ -169,7 +170,13 @@ class ScoringToolbar extends StatelessWidget {
     final String primaryLabel;
     final IconData primaryIcon;
     final VoidCallback? primaryTap;
-    if (block != null) {
+    final savingCount = controller.savingCount;
+    final saving = savingCount > 0;
+    if (saving) {
+      primaryLabel = AppLocalizations.of(context).scoreSavingRows(savingCount);
+      primaryIcon = Icons.save;
+      primaryTap = null;
+    } else if (block != null) {
       primaryLabel = 'Save';
       primaryIcon = Icons.save;
       primaryTap = null;
@@ -190,7 +197,14 @@ class ScoringToolbar extends StatelessWidget {
       required String label,
       required VoidCallback? onTap,
       bool filled = false,
+      bool busy = false,
     }) {
+      final leading = busy
+          ? const SizedBox.square(
+              dimension: 18,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : Icon(icon, size: 20);
       final style = ButtonStyle(
         minimumSize: const WidgetStatePropertyAll(Size(0, 48)),
         shape: WidgetStatePropertyAll(
@@ -201,14 +215,14 @@ class ScoringToolbar extends StatelessWidget {
           ? FilledButton.icon(
               key: key,
               onPressed: onTap,
-              icon: Icon(icon, size: 20),
+              icon: leading,
               label: Text(label),
               style: style,
             )
           : OutlinedButton.icon(
               key: key,
               onPressed: onTap,
-              icon: Icon(icon, size: 20),
+              icon: leading,
               label: Text(label),
               style: style,
             );
@@ -266,6 +280,7 @@ class ScoringToolbar extends StatelessWidget {
             label: primaryLabel,
             onTap: primaryTap,
             filled: true,
+            busy: saving,
           ),
         ),
       ],
@@ -305,6 +320,15 @@ class ScoringToolbar extends StatelessWidget {
               );
             },
           ),
+          if (saving)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: LinearProgressIndicator(
+                key: const ValueKey('score-saving-progress'),
+                semanticsLabel: AppLocalizations.of(context)
+                    .scoreSavingRows(savingCount),
+              ),
+            ),
           if (block != null)
             Padding(
               padding: const EdgeInsets.only(top: 8),

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -91,6 +92,9 @@ class ScoringServer {
 
   /// How many score-entry requests arrived: a bulk request counts once.
   int entryRequests = 0;
+
+  /// When set, a bulk request waits for this before it is answered.
+  Completer<void>? holdBulk;
 
   /// Stores one entry like the server does and answers it: the status and
   /// the body of the single-entry route, or, for a [bulk] entry, the
@@ -363,6 +367,7 @@ class ScoringServer {
     }
     if (request.method == 'POST' && path.endsWith('/scores/bulk')) {
       entryRequests++;
+      await holdBulk?.future;
       if (offlineOnEntry) {
         throw http.ClientException('offline', request.url);
       }
