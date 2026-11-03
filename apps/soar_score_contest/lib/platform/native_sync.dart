@@ -302,8 +302,9 @@ class NativeSync {
   /// look for contests made on another installation.
   Future<void> _poll(SyncPollFocus focus) async {
     final account = _syncAccount;
-    // A sync under way is as good as this check.
-    if (account == null || engine.state.syncing) return;
+    // The engine runs syncs one after another, so a sync of another scope
+    // under way only delays this check.
+    if (account == null) return;
     final steps = <Future<Object?> Function()>[
       if (focus case SyncPollContest(:final contestId))
         () => engine.syncScope(core.ContestScopeKey(contestId)),

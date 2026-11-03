@@ -31,8 +31,8 @@ Only while signed in and the service is reachable.
 | Inside a contest                                      | that contest, and the director's own data                                      | 5 min  |
 
 - Each wait varies by up to 10 percent, so installations that started together
-  do not ask together. Checks never overlap, and a check is skipped when a sync
-  is already running.
+  do not ask together. Checks never overlap, and the engine runs syncs one after
+  another.
 - Any sync resets the timer: a manual one, one after a local change, or a
   scheduled one. The next check comes one interval after it.
 - Opening a contest that has not synced for 5 min syncs it at once.
