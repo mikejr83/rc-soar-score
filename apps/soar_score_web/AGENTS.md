@@ -16,6 +16,8 @@ The public web site: product marketing and information, documentation and help, 
 - `components/` — `site-header`, `site-footer`, `theme-toggle`, `brand-logo` (`BrandMark`, `BrandLockup`), `reveal` (IntersectionObserver, sets `data-inview`), `home/*` (hero with the working-time instrument, stations, flight plan, score anatomy, help links, closing panel), `docs/*` (nav, prose, topic cards), `support/*` (the form), `results/*` (contest search, header, round selector, the three tables, not-found, not-visible, states).
 - `lib/site.ts` — site name, external hosts and the primary navigation. `lib/results/` — the port of the Flutter results models: `publication.ts` (API shapes as served, snake_case), `api.ts` (fetch and `ApiHttpError`), `published-contest.ts` (standings, teams, flight groups as of a round), `contest-summary.ts`, `contest-filters.ts`, `contest-load.ts`, `format.ts`, `paths.ts`, with tests and `__fixtures__/fake-publication.ts`.
 
+- `public/.well-known/security.txt` (#681) points at the GitHub advisory route and support@rcsoarscore.com. Its `Expires` date lapses: renew it at least yearly (the test fails once it is past or more than a year out).
+
 ## Open source licences (`/open-source`, #687)
 
 - `src/app/open-source/page.tsx` renders `src/content/licences.json` through `components/open-source/open-source-view.tsx`; `lib/licences.ts` holds the types and helpers. The page has the anchors `#contest-app`, `#self-scoring`, `#server` and `#public-site`; the apps link to them, so keep the ids stable.

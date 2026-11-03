@@ -1,0 +1,6 @@
+Contact: https://github.com/mikejr83/rc-soar-score/security/advisories/new
+Contact: mailto:support@rcsoarscore.com
+Expires: 2027-10-31T00:00:00.000Z
+Preferred-Languages: en
+Canonical: https://rcsoarscore.com/.well-known/security.txt
+Policy: https://github.com/mikejr83/rc-soar-score/blob/master/SECURITY.md

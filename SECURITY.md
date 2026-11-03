@@ -16,6 +16,8 @@ Report it privately through GitHub:
 2. Choose **Report a vulnerability**.
 3. Describe the problem and how to reproduce it.
 
+If you cannot use GitHub, email support@rcsoarscore.com with "Security" in the subject. The same routes are published at `/.well-known/security.txt` on the public site.
+
 Useful details:
 
 - The affected app or package (contest app, public site, self-scoring app, server, or a shared package) and the commit or version.
