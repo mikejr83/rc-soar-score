@@ -14,7 +14,7 @@ describe("robots and sitemap", () => {
     const urls = sitemap().map((e) => e.url);
     expect(urls).toContain("https://rcsoarscore.com");
     expect(urls).toContain("https://rcsoarscore.com/results/contests");
-    expect(urls.every((u) => u.startsWith("https://rcsoarscore.com"))).toBe(true);
+    expect(urls.every((u) => new URL(u).origin === "https://rcsoarscore.com")).toBe(true);
     expect(new Set(urls).size).toBe(urls.length);
   });
 });
