@@ -22,6 +22,7 @@ Future<Map<String, Object?>> errorOf(Response response) async {
 }
 
 void main() {
+  securityHeadersTests();
   group('request id', () {
     Response ok(Request r) => Response.ok('x');
 
@@ -274,6 +275,51 @@ void main() {
         records.firstWhere((r) => r.loggerName == 'Requests').level,
         Level.WARNING,
       );
+    });
+  });
+}
+
+void securityHeadersTests() {
+  group('security headers', () {
+    Response ok(Request r) => Response.ok('x');
+
+    test('every response is nosniff and noindex', () async {
+      final response = await call(ok, '/a');
+      expect(response.headers['x-content-type-options'], 'nosniff');
+      expect(response.headers['x-robots-tag'], 'noindex, nofollow');
+    });
+
+    test('also on mapped errors', () async {
+      final response = await call((r) => throw StateError('x'), '/a');
+      expect(response.statusCode, 500);
+      expect(response.headers['x-content-type-options'], 'nosniff');
+    });
+
+    test('/api/v1 is no-store, /public keeps its own cache header', () async {
+      expect(
+        (await call(ok, '/api/v1/x')).headers['cache-control'],
+        'no-store',
+      );
+      expect((await call(ok, '/public/x')).headers['cache-control'], isNull);
+      final cached = await call(
+        (r) =>
+            Response.ok('x', headers: {'cache-control': 'public, max-age=30'}),
+        '/api/v1/x',
+      );
+      expect(cached.headers['cache-control'], 'public, max-age=30');
+    });
+
+    test('robots.txt disallows everything', () async {
+      final response = robotsTxtHandler(
+        Request('GET', Uri.parse('http://localhost/robots.txt')),
+      );
+      expect(await response.readAsString(), contains('Disallow: /'));
+    });
+
+    test('unknown routes answer a JSON 404', () async {
+      final response = await call((r) => Response.notFound('x'), '/nope');
+      expect(response.statusCode, 404);
+      expect((await errorOf(response))['code'], 'not_found');
     });
   });
 }

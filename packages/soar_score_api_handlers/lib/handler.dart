@@ -29,6 +29,7 @@ final _logger = Logger('Handler');
 ///
 /// Served routes:
 /// - `GET /health` — public health payload.
+/// - `GET /robots.txt` — disallows all crawlers.
 /// - `GET /api/v1/meta` — placeholder identifying the API.
 /// - `GET /api/v1/ping` — placeholder liveness probe.
 ///
@@ -94,6 +95,7 @@ Handler buildApiHandler({
   }
 
   final app = Router()
+    ..get('/robots.txt', robotsTxtHandler)
     ..mount('/', handlers.healthHandler)
     ..mount('/api/v1', api)
     ..mount('/public', handlers.publicHandler);

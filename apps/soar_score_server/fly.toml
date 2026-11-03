@@ -19,7 +19,7 @@ primary_region = "iad"
   # that issues the tokens (docs/auth0-setup.md).
   AUTH0_DOMAIN = "login.rcsoarscore.com"
   API_AUDIENCE = "https://soar-score.com/server"
-  CORS_ALLOWED_ORIGINS = "https://app.rcsoarscore.com,https://score.rcsoarscore.com,https://rcsoarscore.com,https://www.rcsoarscore.com"
+  CORS_ALLOWED_ORIGINS = "https://app.rcsoarscore.com,https://score.rcsoarscore.com,https://rcsoarscore.com"
 
 [http_service]
   internal_port = 8080
