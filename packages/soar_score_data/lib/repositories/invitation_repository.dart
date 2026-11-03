@@ -1,6 +1,7 @@
 import 'package:soar_score_core/soar_score_core.dart' as core;
 
 import 'drift_repository.dart';
+import 'latest_timestamps.dart';
 
 /// Invitations in the database; backend only, so written without a
 /// mutation.
@@ -56,6 +57,16 @@ class InvitationRepository extends DriftRepository
   @override
   Future<List<core.Invitation>> listForContest(core.Id contestId) async =>
       _store.whereId('contest_id', contestId, orderBy: 'id');
+
+  @override
+  Future<Map<core.Id, DateTime>> latestIssuedAtForContests(
+    Iterable<core.Id> contestIds,
+  ) => latestTimestampByContest(
+    db,
+    table: 'invitations',
+    column: 'issued_at',
+    contestIds: contestIds,
+  );
 
   @override
   Future<core.Invitation> save(core.Invitation invitation) async {

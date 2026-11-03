@@ -11,6 +11,114 @@ import '../support/fixtures.dart';
 
 void main() => forEachBackend(_tests);
 
+/// Counts the reads that give a listing its live status, to show they do not
+/// grow with the page.
+class _Counts {
+  int contestById = 0;
+  int contestsByIds = 0;
+  int scoreTimes = 0;
+  int invitationTimes = 0;
+  int invitationLists = 0;
+}
+
+class _CountingContests implements core.ContestRepository {
+  _CountingContests(this.inner, this.counts);
+  final core.ContestRepository inner;
+  final _Counts counts;
+
+  @override
+  Future<core.Contest?> findById(core.Id id) {
+    counts.contestById++;
+    return inner.findById(id);
+  }
+
+  @override
+  Future<Map<core.Id, core.Contest>> findByIds(Iterable<core.Id> ids) {
+    counts.contestsByIds++;
+    return inner.findByIds(ids);
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) =>
+      throw UnimplementedError('${invocation.memberName}');
+}
+
+class _CountingScores implements core.OfficialScoreRepository {
+  _CountingScores(this.inner, this.counts);
+  final core.OfficialScoreRepository inner;
+  final _Counts counts;
+
+  @override
+  Future<Map<core.Id, DateTime>> latestSetAtForContests(Iterable<core.Id> ids) {
+    counts.scoreTimes++;
+    return inner.latestSetAtForContests(ids);
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) =>
+      throw UnimplementedError('${invocation.memberName}');
+}
+
+class _CountingInvitations implements core.InvitationRepository {
+  _CountingInvitations(this.inner, this.counts);
+  final core.InvitationRepository inner;
+  final _Counts counts;
+
+  @override
+  Future<Map<core.Id, DateTime>> latestIssuedAtForContests(
+    Iterable<core.Id> ids,
+  ) {
+    counts.invitationTimes++;
+    return inner.latestIssuedAtForContests(ids);
+  }
+
+  @override
+  Future<List<core.Invitation>> listForContest(core.Id contestId) {
+    counts.invitationLists++;
+    return inner.listForContest(contestId);
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) =>
+      throw UnimplementedError('${invocation.memberName}');
+}
+
+/// The repositories the public service reads, three of them counted.
+class _CountingRepository implements core.Repository {
+  _CountingRepository(this.inner, this.counts);
+  final Repository inner;
+  final _Counts counts;
+
+  @override
+  late final contestRepository = _CountingContests(
+    inner.contestRepository,
+    counts,
+  );
+  @override
+  late final officialScoreRepository = _CountingScores(
+    inner.officialScoreRepository,
+    counts,
+  );
+  @override
+  late final invitationRepository = _CountingInvitations(
+    inner.invitationRepository,
+    counts,
+  );
+  @override
+  core.PublicationIdentityRepository get publicationIdentityRepository =>
+      inner.publicationIdentityRepository;
+  @override
+  core.PublicationProjectionRepository get publicationProjectionRepository =>
+      inner.publicationProjectionRepository;
+  @override
+  core.PublicationParticipantRepository get publicationParticipantRepository =>
+      inner.publicationParticipantRepository;
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) =>
+      throw UnimplementedError('${invocation.memberName}');
+}
+
 /// What an anonymous reader gets from published contests, against the real
 /// repositories: who can read what, and what never reaches the client.
 void _tests(Backend backend) {
@@ -324,6 +432,27 @@ void _tests(Backend backend) {
     Future<List<String>> names(PublicPublicationList list) async => [
       for (final p in list.publications) p.contest['name']! as String,
     ];
+
+    test('a listing reads its live status inputs in a fixed number of '
+        'queries', () async {
+      for (var i = 0; i < 3; i++) {
+        await publishPublic('Contest $i', DateTime.utc(2026, 10, 17, 14));
+      }
+      final counts = _Counts();
+      final counted = PublicPublicationService(
+        _CountingRepository(repository, counts),
+        clock: () => readNow,
+      );
+
+      final listed = (await counted.list()).publications;
+
+      expect(listed, hasLength(3));
+      expect(counts.contestById, 0);
+      expect(counts.contestsByIds, 1);
+      expect(counts.scoreTimes, 1);
+      expect(counts.invitationTimes, 1);
+      expect(counts.invitationLists, 0);
+    });
 
     // The service's clock is Saturday 2026-10-17; the coming Sunday is Oct 18.
     test('the listing is by contest start, newest first, and pages', () async {

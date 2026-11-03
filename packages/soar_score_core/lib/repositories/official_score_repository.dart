@@ -17,9 +17,9 @@ abstract interface class OfficialScoreRepository {
   /// revision, or `null` when none is set.
   Future<OfficialScore?> currentForPlaceholder(Id scorePlaceholderId);
 
-  /// When the latest official score of [contestId] was set, or null when
-  /// the contest has none.
-  Future<DateTime?> latestSetAtForContest(Id contestId);
+  /// When the latest official score of each of [contestIds] was set, in one
+  /// read. A contest with no score is absent from the map.
+  Future<Map<Id, DateTime>> latestSetAtForContests(Iterable<Id> contestIds);
 
   /// Stores a new [score].
   ///

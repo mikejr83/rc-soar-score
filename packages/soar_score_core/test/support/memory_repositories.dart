@@ -14,6 +14,12 @@ class MemoryContestRepository implements ContestRepository {
   Future<Contest?> findById(Id id) async => stored[id];
 
   @override
+  Future<Map<Id, Contest>> findByIds(Iterable<Id> ids) async => {
+    for (final id in ids)
+      if (stored[id] != null) id: stored[id]!,
+  };
+
+  @override
   Future<List<Contest>> getAll() async => stored.values.toList();
 
   @override

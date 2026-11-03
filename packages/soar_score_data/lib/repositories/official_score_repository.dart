@@ -1,8 +1,8 @@
-import 'package:drift/drift.dart' show Variable;
 import 'package:soar_score_core/soar_score_core.dart' as core;
 
 import 'audit_event_repository.dart';
 import 'drift_repository.dart';
+import 'latest_timestamps.dart';
 
 /// Official scores in the database; append-only.
 class OfficialScoreRepository extends DriftRepository
@@ -33,15 +33,14 @@ class OfficialScoreRepository extends DriftRepository
   }
 
   @override
-  Future<DateTime?> latestSetAtForContest(core.Id contestId) async {
-    final latest = await _store.whereSql(
-      'contest_id = ?',
-      [Variable<String>(contestId.value)],
-      orderBy: 'set_at DESC',
-      limit: 1,
-    );
-    return latest.isEmpty ? null : latest.single.setAt;
-  }
+  Future<Map<core.Id, DateTime>> latestSetAtForContests(
+    Iterable<core.Id> contestIds,
+  ) => latestTimestampByContest(
+    db,
+    table: 'official_scores',
+    column: 'set_at',
+    contestIds: contestIds,
+  );
 
   @override
   Future<core.OfficialScore> append(

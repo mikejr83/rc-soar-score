@@ -34,5 +34,9 @@ abstract interface class InvitationRepository {
   /// Stores [invitation], replacing the stored one with the same id. The
   /// database refuses a second active invitation for a participation, a
   /// repeated revision, and a repeated client mutation id.
+  /// When the latest invitation of each of [contestIds] was issued, in one
+  /// read. A contest with no invitation is absent from the map.
+  Future<Map<Id, DateTime>> latestIssuedAtForContests(Iterable<Id> contestIds);
+
   Future<Invitation> save(Invitation invitation);
 }

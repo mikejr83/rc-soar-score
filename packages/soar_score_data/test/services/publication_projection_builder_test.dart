@@ -153,9 +153,13 @@ void _tests(Backend backend) {
       expect([for (final p in pilots) (p! as Map)['place']], [1, 2, 3, 4]);
     });
 
-    test('a re-flight group carries its number; moves and cancelled ones '
-        'carry none', () async {
-      await scoreAndCalculate();
+    /// A re-flight of the first slot's group and the assignment it creates.
+    Future<(core.Id reFlightId, core.MatrixAssignment assignment)> reFlight(
+      core.ReFlightType type,
+      core.ReFlightStatus status,
+      int sequence,
+      int group,
+    ) async {
       final matrix = await MatrixService(repository).current(contestId);
       final source = matrix.assignments.firstWhere(
         (a) => a.id == firstRound.first.assignmentId,
@@ -168,84 +172,196 @@ void _tests(Backend backend) {
         clientTime: now,
         actorId: actor,
       );
-
-      Future<core.Id> reFlightRow(
-        core.ReFlightType type,
-        int sequence,
-        int group, {
-        bool cancelled = false,
-      }) async {
-        final reFlight = await repository.reFlightRepository.save(
-          core.ReFlight(
-            id: core.Id.create(),
-            contestId: contestId,
-            creditedRoundId: source.scheduledRoundId,
-            sourceRoundId: source.scheduledRoundId,
-            sourceGroup: source.group,
-            type: type,
-            sequence: sequence,
-            status: cancelled
-                ? core.ReFlightStatus.cancelled
-                : core.ReFlightStatus.proposed,
-            reason: 'Interference',
-            scheduledRoundId: source.scheduledRoundId,
-            flownGroup: group,
-            configRevisionId: config.id,
-            createdBy: actor,
-            createdAt: now,
-            cancelledBy: cancelled ? actor : null,
-            cancelledAt: cancelled ? now : null,
-            cancelReason: cancelled ? 'Withdrawn' : null,
-          ),
-          metadata: metadata.forPart('rf-$sequence'),
-        );
-        await repository.matrixAssignmentRepository.append(
-          core.MatrixAssignment(
-            id: core.Id.create(),
-            contestId: contestId,
-            matrixRevisionId: source.matrixRevisionId,
-            contestParticipationId: source.contestParticipationId,
-            scheduledRoundId: source.scheduledRoundId,
-            creditedRoundId: source.creditedRoundId,
-            group: group,
-            flightSequence: sequence + 1,
-            assignmentType: core.AssignmentType.reflight,
-            sourceAssignmentId: source.id,
-            reFlightId: reFlight.id,
-            actorId: actor,
-            reason: 'Interference',
-            createdAt: now,
-          ),
-          metadata: metadata.forPart('rfa-$sequence'),
-        );
-        return reFlight.id;
-      }
-
-      await reFlightRow(core.ReFlightType.reflyEntireGroup, 1, 7);
-      await reFlightRow(core.ReFlightType.randomDraw, 2, 8, cancelled: true);
-      await reFlightRow(core.ReFlightType.moveToGroup, 3, 9);
-
-      final projection = (await build()).projection;
-
-      final assignments = [
-        for (final round in projection.matrixInfo!['rounds']! as List<Object?>)
-          for (final a in (round! as Map)['assignments']! as List<Object?>)
-            a! as Map<String, Object?>,
-      ];
-      expect(
-        {
-          for (final a in assignments)
-            if (a['group']! as int > 4) a['group']: a['re_flight'],
-        },
-        {7: 1, 8: null, 9: null},
+      final groupDone =
+          status == core.ReFlightStatus.readyToFly ||
+          status == core.ReFlightStatus.finalized;
+      final finalized = status == core.ReFlightStatus.finalized;
+      final cancelled = status == core.ReFlightStatus.cancelled;
+      final saved = await repository.reFlightRepository.save(
+        core.ReFlight(
+          id: core.Id.create(),
+          contestId: contestId,
+          creditedRoundId: source.scheduledRoundId,
+          sourceRoundId: source.scheduledRoundId,
+          sourceGroup: source.group,
+          type: type,
+          sequence: sequence,
+          status: status,
+          reason: 'Interference',
+          scheduledRoundId: source.scheduledRoundId,
+          flownGroup: group,
+          configRevisionId: config.id,
+          createdBy: actor,
+          createdAt: now,
+          groupFinalizedBy: groupDone ? actor : null,
+          groupFinalizedAt: groupDone ? now : null,
+          finalizedBy: finalized ? actor : null,
+          finalizedAt: finalized ? now : null,
+          cancelledBy: cancelled ? actor : null,
+          cancelledAt: cancelled ? now : null,
+          cancelReason: cancelled ? 'Withdrawn' : null,
+        ),
+        metadata: metadata.forPart('rf-$sequence'),
       );
+      final assignment = await repository.matrixAssignmentRepository.append(
+        core.MatrixAssignment(
+          id: core.Id.create(),
+          contestId: contestId,
+          matrixRevisionId: source.matrixRevisionId,
+          contestParticipationId: source.contestParticipationId,
+          scheduledRoundId: source.scheduledRoundId,
+          creditedRoundId: source.creditedRoundId,
+          group: group,
+          flightSequence: sequence + 1,
+          assignmentType: core.AssignmentType.reflight,
+          sourceAssignmentId: source.id,
+          reFlightId: saved.id,
+          actorId: actor,
+          reason: 'Interference',
+          createdAt: now,
+        ),
+        metadata: metadata.forPart('rfa-$sequence'),
+      );
+      return (saved.id, assignment);
+    }
+
+    List<Map<String, Object?>> publishedAssignments(
+      core.PublicationProjection projection,
+    ) => [
+      for (final round in projection.matrixInfo!['rounds']! as List<Object?>)
+        for (final a in (round! as Map)['assignments']! as List<Object?>)
+          a! as Map<String, Object?>,
+    ];
+
+    test(
+      'a re-flight number is published only for a finalized group',
+      () async {
+        await scoreAndCalculate();
+        await reFlight(
+          core.ReFlightType.reflyEntireGroup,
+          core.ReFlightStatus.finalized,
+          1,
+          7,
+        );
+        await reFlight(
+          core.ReFlightType.randomDraw,
+          core.ReFlightStatus.readyToFly,
+          2,
+          8,
+        );
+        await reFlight(
+          core.ReFlightType.randomDraw,
+          core.ReFlightStatus.proposed,
+          3,
+          9,
+        );
+        await reFlight(
+          core.ReFlightType.randomDraw,
+          core.ReFlightStatus.drawPending,
+          4,
+          10,
+        );
+        await reFlight(
+          core.ReFlightType.randomDraw,
+          core.ReFlightStatus.awaitingResponses,
+          5,
+          11,
+        );
+        await reFlight(
+          core.ReFlightType.randomDraw,
+          core.ReFlightStatus.cancelled,
+          6,
+          12,
+        );
+        await reFlight(
+          core.ReFlightType.moveToGroup,
+          core.ReFlightStatus.finalized,
+          7,
+          13,
+        );
+
+        final assignments = publishedAssignments((await build()).projection);
+
+        expect(
+          {
+            for (final a in assignments)
+              if (a['group']! as int > 4) a['group']: a['re_flight'],
+          },
+          {7: 1, 8: 2, 9: null, 10: null, 11: null, 12: null, 13: null},
+        );
+        expect(
+          assignments.where((a) => (a['group']! as int) <= 4),
+          everyElement(containsPair('re_flight', null)),
+        );
+      },
+    );
+
+    test('a scored re-flight entry carries its number', () async {
+      await scoreAndCalculate();
+      final (_, assignment) = await reFlight(
+        core.ReFlightType.reflyEntireGroup,
+        core.ReFlightStatus.finalized,
+        1,
+        7,
+      );
+      await repository.scorePlaceholderRepository.save(
+        core.ScorePlaceholder(
+          id: core.Id.create(),
+          contestId: contestId,
+          contestParticipationId: assignment.contestParticipationId,
+          assignmentId: assignment.id,
+        ),
+        metadata: core.MutationMetadata(
+          clientMutationId: 'ph-${mutations++}',
+          authority: core.Authority.director,
+          clientTime: now,
+          actorId: actor,
+        ),
+      );
+      // Scoring does not support two flights in one round yet (recalculation
+      // refuses it), so the re-flight's result is stored the way the
+      // calculation will, from its official score, next to the others.
+      await enter(
+        MatrixSlot(assignment.id, assignment.contestParticipationId),
+        560,
+      );
+      final placeholder = (await repository.scorePlaceholderRepository
+          .findForAssignment(assignment.id))!;
+      final official = (await repository.officialScoreRepository
+          .currentForPlaceholder(placeholder.id))!;
+      final stored = await repository.flightResultRepository.listForContest(
+        contestId,
+      );
+      final reflown = core.FlightResult.fromJson({
+        ...stored.first.toJson(),
+        'id': core.Id.create().value,
+        'score_placeholder_id': placeholder.id.value,
+        'official_score_id': official.id.value,
+        'contest_participation_id': assignment.contestParticipationId.value,
+      });
+      await repository.flightResultRepository.replaceForContest(contestId, [
+        for (final result in [...stored, reflown])
+          core.FlightResult.fromJson({
+            ...result.toJson(),
+            'computed_at': core.formatUtcTimestamp(
+              now.add(const Duration(minutes: 1)),
+            ),
+          }),
+      ]);
+      now = now.add(const Duration(minutes: 2));
+
+      final scores = [
+        for (final score in (await build()).projection.scores!)
+          score! as Map<String, Object?>,
+      ];
+
+      final reflownEntries = scores.where((s) => s['group'] == 7).toList();
+      expect(reflownEntries, hasLength(1));
+      expect(reflownEntries.single['re_flight'], 1);
       expect(
-        assignments.where((a) => (a['group']! as int) <= 4),
+        scores.where((s) => s['group'] != 7),
         everyElement(containsPair('re_flight', null)),
       );
-      for (final score in projection.scores!) {
-        expect(score! as Map, containsPair('re_flight', null));
-      }
     });
 
     test('each score carries the raw components the site labels', () async {

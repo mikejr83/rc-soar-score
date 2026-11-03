@@ -66,19 +66,20 @@ class ContestActivity {
 
   final Repository repository;
 
-  /// When the contest last had activity: its latest official score, or, while
-  /// it has no score, the latest invitation sent. Null when it has neither.
-  Future<DateTime?> lastActivityAt(Id contestId) async {
+  /// When each of [contestIds] last had activity: its latest official score,
+  /// or, while it has no score, the latest invitation sent. A contest with
+  /// neither is absent. Two reads for any number of contests.
+  Future<Map<Id, DateTime>> lastActivityAtFor(Iterable<Id> contestIds) async {
+    final ids = contestIds.toSet();
     final scored = await repository.officialScoreRepository
-        .latestSetAtForContest(contestId);
-    if (scored != null) return scored;
-    DateTime? latest;
-    for (final invitation
-        in await repository.invitationRepository.listForContest(contestId)) {
-      if (latest == null || invitation.issuedAt.isAfter(latest)) {
-        latest = invitation.issuedAt;
-      }
-    }
-    return latest;
+        .latestSetAtForContests(ids);
+    final unscored = ids.where((id) => !scored.containsKey(id));
+    final invited = await repository.invitationRepository
+        .latestIssuedAtForContests(unscored);
+    return {...invited, ...scored};
   }
+
+  /// [lastActivityAtFor] for one contest.
+  Future<DateTime?> lastActivityAt(Id contestId) async =>
+      (await lastActivityAtFor([contestId]))[contestId];
 }

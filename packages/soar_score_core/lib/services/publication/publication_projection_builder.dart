@@ -304,15 +304,18 @@ class PublicationProjectionBuilder {
   };
 
   /// The re-flights the public sees, by id, with their sequence number: those
-  /// that re-fly a group (a whole group again, or a drawn group), not
-  /// cancelled. A pilot moved into another group flies as part of it, so a
-  /// move carries no marker (#457).
+  /// that re-fly a group (a whole group again, or a drawn group) whose group
+  /// the director has finalized (`ReadyToFly`, `Finalized`). A proposed or
+  /// still-forming re-flight, and a cancelled one, carry no number. A pilot
+  /// moved into another group flies as part of it, so a move carries no
+  /// marker (#457).
   Future<Map<Id, int>> _publishedReFlights(Id contestId) async => {
     for (final reFlight in await repository.reFlightRepository.listForContest(
       contestId,
     ))
       if (reFlight.type != ReFlightType.moveToGroup &&
-          reFlight.status != ReFlightStatus.cancelled)
+          (reFlight.status == ReFlightStatus.readyToFly ||
+              reFlight.status == ReFlightStatus.finalized))
         reFlight.id: reFlight.sequence,
   };
 

@@ -17,6 +17,10 @@ abstract interface class ContestRepository {
   /// Loads every persisted contest.
   Future<List<Contest>> getAll();
 
+  /// The stored contests among [ids], by id, in one read. An unknown id is
+  /// absent from the map.
+  Future<Map<Id, Contest>> findByIds(Iterable<Id> ids);
+
   /// Inserts [contest], or updates the stored row with the same id.
   ///
   /// The stored revision is bumped and a mutation is recorded. Throws a
