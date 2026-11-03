@@ -2003,5 +2003,36 @@
   "publicationPolicyUnreadable": "Public updates: the policy could not be read.",
   "@publicationPolicyUnreadable": {
     "description": "Shown instead of the public update policy when the contest's configuration could not be read."
+  },
+  "scoreSaveNeedsZeroConfirm": "Confirm the zero above to enable Save row.",
+  "@scoreSaveNeedsZeroConfirm": {
+    "description": "Next to the disabled Save row button while a zero score has not been confirmed."
+  },
+  "scoreSaveAllZeroTitle": "Confirm zero scores",
+  "@scoreSaveAllZeroTitle": {
+    "description": "Title of the dialog shown before Save rows records unconfirmed zeros."
+  },
+  "scoreSaveAllZeroBody": "{count, plural, one{This row will be saved as a zero: {pilots}.} other{These {count} rows will be saved as zeros: {pilots}.}}",
+  "@scoreSaveAllZeroBody": {
+    "description": "Body of the confirm-zeros dialog; pilots is a comma separated list of names.",
+    "placeholders": {
+      "count": {"type": "int"},
+      "pilots": {"type": "String"}
+    }
+  },
+  "scoreSaveAllZeroConfirm": "Confirm and save",
+  "@scoreSaveAllZeroConfirm": {
+    "description": "Button that confirms the zeros and saves every row."
+  },
+  "scoreSaveAllZeroCancel": "Go back",
+  "@scoreSaveAllZeroCancel": {
+    "description": "Button that closes the confirm-zeros dialog without saving."
+  },
+  "scoreSavingRows": "{count, plural, one{Saving 1 row…} other{Saving {count} rows…}}",
+  "@scoreSavingRows": {
+    "description": "Shown on the scoring toolbar while rows are being saved.",
+    "placeholders": {
+      "count": {"type": "int"}
+    }
   }
 }

@@ -206,6 +206,10 @@ void main() {
     await tester.pump();
     expect(find.text('Saving scores 0 for this pilot.'), findsOneWidget);
     expect(tester.widget<FilledButton>(_save(1, 1)).onPressed, isNull);
+    expect(
+      find.text('Confirm the zero above to enable Save row.'),
+      findsOneWidget,
+    );
     await tester.tap(find.byKey(ValueKey('score-confirm-zero-$id')));
     await tester.pump();
     await tester.tap(_save(1, 1));
@@ -359,6 +363,34 @@ void main() {
     expect(server.entryRequests, 1);
     expect(server.entries, hasLength(2));
     expect(find.text('Saved 2 rows.'), findsOneWidget);
+  });
+
+  testWidgets('Save all asks to confirm a zero first', (tester) async {
+    final server = ScoringServer();
+    await pumpScoringPage(tester, server, round: 1, group: 1);
+    await _activate(tester, 1, 1);
+    final id = scoringAssignmentId(1, 1).value;
+    await tester.tap(find.byKey(ValueKey('score-oob-$id')));
+    await tester.pump();
+    await _activate(tester, 1, 2);
+    await tester.enterText(_time(1, 2), '540');
+    await tester.enterText(_height(1, 2), '180');
+    await tester.pump();
+
+    await tester.tap(find.byKey(const ValueKey('score-save-all')));
+    await tester.pumpAndSettle();
+    expect(find.text('Confirm zero scores'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('confirm-zeros-cancel')));
+    await tester.pumpAndSettle();
+    expect(server.entryRequests, 0);
+
+    await tester.tap(find.byKey(const ValueKey('score-save-all')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('confirm-zeros-save')));
+    await tester.pumpAndSettle();
+    expect(server.entryRequests, 1);
+    expect(server.entries, hasLength(2));
   });
 
   testWidgets('Save all keeps a refused row and saves the others', (

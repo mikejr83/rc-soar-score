@@ -22,6 +22,7 @@ import '../../widgets/scoring/score_grid_columns.dart';
 import '../../widgets/scoring/score_row_tile.dart';
 import '../../widgets/scoring/scoring_context_strip.dart';
 import '../../widgets/scoring/scoring_toolbar.dart';
+import '../../widgets/scoring/confirm_zeros_dialog.dart';
 import '../../widgets/scoring/unsaved_edits_dialog.dart';
 import '../../widgets/unsaved_changes_guard.dart';
 
@@ -239,6 +240,10 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
         c.recordRemovalReason(r.id, reason);
       }
     }
+    // Save row asks for a zero to be confirmed, so saving many rows does too.
+    final zeros = c.unconfirmedZeroRows;
+    if (zeros.isNotEmpty && !await askConfirmZeros(context, zeros)) return 0;
+    if (!mounted) return 0;
     return c.saveAll();
   }
 
