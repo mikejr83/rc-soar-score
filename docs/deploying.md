@@ -21,7 +21,7 @@ because the server and the clients must ship together. The
       parallel with the site. Flutter 3.47.4 builds each app with
       `--dart-define=SOAR_SCORE_API_BASE_URL=https://api.rcsoarscore.com`, then
       `wrangler deploy --assets=apps/<app>/build/web` uploads it to the existing
-      Workers: `soar-score-contest` (`app.`) and `rc-soar-score-self-score`
+      Workers: `rc-soar-score-contest` (`app.`) and `rc-soar-score-self-score`
       (`score.`).
 4. Watch the run under Actions > Deploy. A failed API job stops the rest.
 
@@ -105,7 +105,7 @@ Do these once, in this order, so there is no gap.
    workflow by hand against a tag).
 4. Then stop the automatic deploys:
    - Vercel > Project > Settings > Git > Disconnect the repository.
-   - Cloudflare > Workers & Pages > `soar-score-contest` and
+   - Cloudflare > Workers & Pages > `rc-soar-score-contest` and
      `rc-soar-score-self-score` > Settings > Builds > disconnect the GitHub
      repository. The environment variable `SOAR_SCORE_API_BASE_URL` there is
      no longer used.
