@@ -1,6 +1,6 @@
 # Server-side GliderScore import: evaluation (2026-11-03)
 
-Evaluation only. No code changed, no tickets filed. Status: Mike agreed (2026-11-03) to a separate importer app on its own hostname, `import.rcsoarscore.com`. Related: epic #564, #577 (hosted/web decision, M5), Phase A (PR #707), Phase B drafts, periodic-worker analysis (2026-11-03).
+Evaluation only. No code changed, no tickets filed. Timing (Mike, 2026-11-03): implement after the entire native import flow is finished, post alpha; this is parked research until then. Status: Mike agreed (2026-11-03) to a separate importer app on its own hostname, `import.rcsoarscore.com`. Related: epic #564, #577 (hosted/web decision, M5), Phase A (PR #707), Phase B drafts, periodic-worker analysis (2026-11-03).
 
 ## Recommendation in one paragraph
 
@@ -107,8 +107,8 @@ H0 and H1 are cheap and can start before Phase B finishes. H3 and H4 wait for Ph
 1. Decided: separate importer app.
 2. Hostname: decided, `import.rcsoarscore.com` (see 2a).
 3. Upload cap 25 MB, gzip allowed from the client?
-4. Wait for Phase B (recommended), or ship pilots-only on the web first?
-5. Is web import needed for the alpha, or is native the only path until M5?
+4. Decided: wait until the whole native flow is finished (post alpha).
+5. Decided: not needed for the alpha; native is the only path until then.
 6. Accept zero retention of uploaded files (re-import asks for the file again)?
 7. Is a Linux mdbtools binary in the importer image fine under the current GPL approach?
 
