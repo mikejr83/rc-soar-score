@@ -15,6 +15,30 @@ Future<void> launchApp(
 }) async {
   await app.main();
   await tester.pump(initialPump);
+  _capWindow(tester);
+  await tester.pump(const Duration(milliseconds: 200));
+}
+
+/// The window the journeys are written for: a default 1280 x 720 window less
+/// its frame. A bigger window (a maximised one, a high-resolution screen)
+/// hides problems that the default window shows, so cap the size and the runs
+/// look the same on every machine. A smaller window (the web run's) is left.
+const _maxWindow = Size(1264, 681);
+
+void _capWindow(WidgetTester tester) {
+  final view = tester.view;
+  final logical = view.physicalSize / view.devicePixelRatio;
+  if (logical.width <= _maxWindow.width &&
+      logical.height <= _maxWindow.height) {
+    return;
+  }
+  view.physicalSize =
+      Size(
+        logical.width.clamp(0, _maxWindow.width),
+        logical.height.clamp(0, _maxWindow.height),
+      ) *
+      view.devicePixelRatio;
+  addTearDown(view.resetPhysicalSize);
 }
 
 /// Pumps frames until [finder] matches, up to [timeout]. Real startup and
