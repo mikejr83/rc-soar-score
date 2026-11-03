@@ -71,17 +71,27 @@ class PublicationIdentityRepository extends DriftRepository
 
   @override
   Future<int> countPublicActive({
-    required DateTime windowStart,
+    DateTime? startsOnOrAfter,
+    DateTime? endsOnOrAfter,
     required DateTime startsBefore,
-  }) => _store.countWhere(
-    "visibility = 'Public' AND published_at IS NOT NULL "
-    'AND contest_starts_at IS NOT NULL AND contest_starts_at < ? '
-    'AND COALESCE(contest_ends_at, contest_starts_at) >= ?',
-    [
+  }) {
+    final where = StringBuffer(
+      "visibility = 'Public' AND published_at IS NOT NULL "
+      'AND contest_starts_at IS NOT NULL AND contest_starts_at < ?',
+    );
+    final variables = <Variable>[
       Variable<String>(core.formatUtcTimestamp(startsBefore)),
-      Variable<String>(core.formatUtcTimestamp(windowStart)),
-    ],
-  );
+    ];
+    if (startsOnOrAfter != null) {
+      where.write(' AND contest_starts_at >= ?');
+      variables.add(Variable<String>(core.formatUtcTimestamp(startsOnOrAfter)));
+    }
+    if (endsOnOrAfter != null) {
+      where.write(' AND COALESCE(contest_ends_at, contest_starts_at) >= ?');
+      variables.add(Variable<String>(core.formatUtcTimestamp(endsOnOrAfter)));
+    }
+    return _store.countWhere(where.toString(), variables);
+  }
 
   /// Escapes `%`, `_` and the escape character `!` for a LIKE pattern.
   static String _likeEscape(String text) =>

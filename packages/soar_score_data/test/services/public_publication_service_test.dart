@@ -380,8 +380,30 @@ void _tests(Backend backend) {
       final all = await reading.list(from: DateTime.utc(2026, 1, 1));
 
       expect(old.recentCount, 1);
+      expect(await names(old), ['Old']);
       expect(named.recentCount, 2, reason: 'a name filter keeps the window');
       expect(all.recentCount, 3);
+    });
+
+    test('a from filter does not count a contest that started before it, and '
+        'a to filter is not limited to 30 days', () async {
+      // Starts 2026-10-10, ends the 12th; the clock is 2026-10-17.
+      await publishPublic(
+        'Spans',
+        DateTime.utc(2026, 10, 10, 14),
+        end: DateTime.utc(2026, 10, 12, 14),
+      );
+      await publishPublic('Old', DateTime.utc(2026, 8, 1, 14));
+
+      final fromAfterStart = await reading.list(
+        from: DateTime.utc(2026, 10, 11),
+      );
+      final toOnly = await reading.list(to: DateTime.utc(2026, 10, 17));
+
+      expect(await names(fromAfterStart), isEmpty);
+      expect(fromAfterStart.recentCount, 0);
+      expect(await names(toOnly), ['Spans', 'Old']);
+      expect(toOnly.recentCount, 2);
     });
 
     test('a contest starting later this week is in the summary', () async {

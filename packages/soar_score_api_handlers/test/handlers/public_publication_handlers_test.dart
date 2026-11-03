@@ -29,7 +29,8 @@ class _EmptyIdentities implements core.PublicationIdentityRepository {
 
   @override
   Future<int> countPublicActive({
-    required DateTime windowStart,
+    DateTime? startsOnOrAfter,
+    DateTime? endsOnOrAfter,
     required DateTime startsBefore,
   }) async => 0;
 

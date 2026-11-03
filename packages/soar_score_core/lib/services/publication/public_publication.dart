@@ -97,7 +97,7 @@ class PublicPublicationList extends Equatable {
   final List<PublicPublicationSummary> publications;
 
   /// Public contests completed or in progress in the time frame of the list
-  /// (the date filters, else the last 30 days through the coming Sunday),
+  /// (the date filters' start bounds, else the last 30 days through the coming Sunday),
   /// whatever the name and venue filters and the page.
   final int recentCount;
 
