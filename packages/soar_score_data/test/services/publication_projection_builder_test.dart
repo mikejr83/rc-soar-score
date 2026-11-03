@@ -98,12 +98,12 @@ void _tests(Backend backend) {
           publishedBy: actor,
         );
 
-    test('the contest status is its lifecycle state at publish time', () async {
+    test('the identity carries the lifecycle state and last activity at publish time', () async {
       await scoreAndCalculate();
       final contest = (await repository.contestRepository.findById(contestId))!;
 
       expect(
-        (await build()).projection.contestIdentity['status'],
+        (await build()).projection.contestIdentity['lifecycle_state'],
         contest.lifecycleState == core.LifecycleState.completed
             ? 'Completed'
             : isNot('Completed'),
@@ -122,7 +122,10 @@ void _tests(Backend backend) {
         ),
       );
 
-      expect((await build()).projection.contestIdentity['status'], 'Completed');
+      final identity = (await build()).projection.contestIdentity;
+      expect(identity['lifecycle_state'], 'Completed');
+      expect(identity['last_activity_at'], isNotNull);
+      expect(identity.containsKey('status'), isFalse);
     });
 
     test('a scored contest becomes a projection of its results', () async {

@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart' show Variable;
 import 'package:soar_score_core/soar_score_core.dart' as core;
 
 import 'audit_event_repository.dart';
@@ -29,6 +30,17 @@ class OfficialScoreRepository extends DriftRepository
   ) async {
     final scores = await listForPlaceholder(scorePlaceholderId);
     return scores.isEmpty ? null : scores.last;
+  }
+
+  @override
+  Future<DateTime?> latestSetAtForContest(core.Id contestId) async {
+    final latest = await _store.whereSql(
+      'contest_id = ?',
+      [Variable<String>(contestId.value)],
+      orderBy: 'set_at DESC',
+      limit: 1,
+    );
+    return latest.isEmpty ? null : latest.single.setAt;
   }
 
   @override

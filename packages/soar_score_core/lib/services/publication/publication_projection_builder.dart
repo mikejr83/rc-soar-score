@@ -19,6 +19,7 @@ import '../../models/results/participation_standing.dart';
 import '../../models/results/team_standing.dart';
 import '../../models/shared/shared.dart';
 import '../../repositories/repository.dart';
+import '../contest_activity.dart';
 import '../results_service.dart';
 import 'publication_build.dart';
 
@@ -114,7 +115,11 @@ class PublicationProjectionBuilder {
       disciplineType: profile.profile.type,
       disciplineRulesVersion: profile.profile.version,
       calculationVersion: await _calculationVersion(contestId),
-      contestIdentity: _identity(contest, profile.profile.name),
+      contestIdentity: _identity(
+        contest,
+        profile.profile.name,
+        await ContestActivity(repository).lastActivityAt(contestId),
+      ),
       participants: [for (final p in pilots) p.entry(teams.keyByPilot[p.key])],
       teams: teams.entries,
       matrixInfo: await _matrixInfo(matrix, rounds, keyOf),
@@ -138,7 +143,11 @@ class PublicationProjectionBuilder {
     );
   }
 
-  Map<String, Object?> _identity(Contest contest, String disciplineName) => {
+  Map<String, Object?> _identity(
+    Contest contest,
+    String disciplineName,
+    DateTime? lastActivityAt,
+  ) => {
     'name': contest.name,
     'start': formatUtcTimestamp(contest.startDateTime),
     'end': formatUtcTimestamp(contest.endDateTime),
@@ -148,16 +157,19 @@ class PublicationProjectionBuilder {
     'state': contest.state,
     'country': contest.country,
     'discipline': disciplineName,
-    // The lifecycle state at publish time: `Completed`, or the state of a
-    // contest still under way. The public site shows Completed or In
-    // progress from it (#454).
-    'status': switch (contest.lifecycleState) {
+    // What the status is worked out from when the contest is read (#454):
+    // the lifecycle state and the last activity at publish time. The status
+    // itself is never stored.
+    'lifecycle_state': switch (contest.lifecycleState) {
       LifecycleState.created => 'Created',
       LifecycleState.configuring => 'Configuring',
       LifecycleState.ready => 'Ready',
       LifecycleState.running => 'Running',
       LifecycleState.completed => 'Completed',
     },
+    'last_activity_at': lastActivityAt == null
+        ? null
+        : formatUtcTimestamp(lastActivityAt),
   };
 
   /// The pilots of the contest with their keys. A non-flying role is not

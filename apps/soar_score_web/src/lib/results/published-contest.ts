@@ -129,9 +129,11 @@ export function contestHeaderFrom(contest: JsonMap, now: Date): ContestHeader {
     end,
     venue: venueOf(contest),
     discipline: str(contest.discipline),
-    // Completed comes from the lifecycle state once the projection carries it
-    // (#454); until then a contest whose end date has passed counts.
-    isCompleted: typeof status === "string" ? status === "Completed" : end !== undefined && end < now,
+    // The server works the status out when the contest is read (#454):
+    // `completed` or `in_progress`. Without one, a contest whose end date has
+    // passed counts as completed.
+    isCompleted:
+      typeof status === "string" ? status.toLowerCase() === "completed" : end !== undefined && end < now,
   };
 }
 

@@ -6,6 +6,8 @@ import '../../models/publication/publication_participant.dart';
 import '../../models/publication/publication_projection.dart';
 import '../../repositories/publication_identity_repository.dart';
 import '../../repositories/repository.dart';
+import '../../enums/lifecycle_state.dart';
+import '../contest_activity.dart';
 import 'public_publication.dart';
 
 /// What anyone may read about published contests, without an account.
@@ -45,7 +47,7 @@ class PublicPublicationService {
       visibility: identity.toJson()['visibility']! as String,
       projectionRevision: projection.projectionRevision,
       publishedAt: projection.publishedAt,
-      contest: projection.contestIdentity,
+      contest: await _contestWithStatus(identity, projection),
       disciplineType: json['discipline_type']! as String,
       calculationVersion: projection.calculationVersion,
       resultsHiddenThroughRound: hiddenThrough,
@@ -145,12 +147,54 @@ class PublicPublicationService {
           publicationId: identity.id.value,
           publishedAt: identity.publishedAt!,
           projectionRevision: projection.projectionRevision,
-          contest: projection.contestIdentity,
+          contest: await _contestWithStatus(identity, projection),
           disciplineType: projection.toJson()['discipline_type']! as String,
         ),
       );
     }
     return PublicPublicationList(publications: summaries, recentCount: recent);
+  }
+
+  /// The projection's contest identity with the `status` to show: `completed`
+  /// or `in_progress` (#454).
+  ///
+  /// Worked out now, never stored. The lifecycle state and last activity come
+  /// from the live contest on this server; the values captured in the
+  /// projection stand in when it has none (a manually updated publication
+  /// whose contest is not here, or has no activity yet).
+  Future<Map<String, Object?>> _contestWithStatus(
+    PublicationIdentity identity,
+    PublicationProjection projection,
+  ) async {
+    final captured = projection.contestIdentity;
+    final contestId = identity.contestId;
+    final live = contestId == null
+        ? null
+        : await repository.contestRepository.findById(contestId);
+    final lifecycleState =
+        live?.lifecycleState ??
+        _lifecycleNamed(captured['lifecycle_state'] ?? captured['status']) ??
+        LifecycleState.running;
+    final lastActivityAt =
+        (live == null
+            ? null
+            : await ContestActivity(repository).lastActivityAt(live.id)) ??
+        DateTime.tryParse('${captured['last_activity_at'] ?? ''}');
+    return {
+      ...captured,
+      'status': contestDisplayStatus(
+        lifecycleState: lifecycleState,
+        lastActivityAt: lastActivityAt,
+        now: _clock(),
+      ).wireName,
+    };
+  }
+
+  static LifecycleState? _lifecycleNamed(Object? name) {
+    for (final state in LifecycleState.values) {
+      if (state.name == '$name'.toLowerCase()) return state;
+    }
+    return null;
   }
 
   static DateTime _day(DateTime value) {

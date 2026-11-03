@@ -34,9 +34,10 @@ export function venueOf(contest: JsonMap): string {
 }
 
 /**
- * The projection does not carry a contest status yet (#454). A recognised
- * `status` value wins; otherwise the contest is completed once its end date
- * has passed. `state` is the venue's state, not a status.
+ * The server sends `status` (`completed` or `in_progress`), worked out when
+ * the list is read (#454). A recognised value wins; otherwise the contest is
+ * completed once its end date has passed. `state` is the venue's state, not
+ * a status.
  */
 function statusOf(raw: string | undefined, end: Date, now: Date): ContestStatus {
   switch (raw?.toLowerCase()) {

@@ -17,6 +17,10 @@ abstract interface class OfficialScoreRepository {
   /// revision, or `null` when none is set.
   Future<OfficialScore?> currentForPlaceholder(Id scorePlaceholderId);
 
+  /// When the latest official score of [contestId] was set, or null when
+  /// the contest has none.
+  Future<DateTime?> latestSetAtForContest(Id contestId);
+
   /// Stores a new [score].
   ///
   /// Throws an `AlreadyStoredError` if one with the same id is stored.

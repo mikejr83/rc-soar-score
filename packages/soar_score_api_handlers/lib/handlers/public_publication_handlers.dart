@@ -17,6 +17,9 @@ import 'package:soar_score_core/soar_score_core.dart';
 ///   following Sunday when `today` is a Sunday). Unlisted ones are never
 ///   listed. The answer may be cached for 30 seconds ([listCacheControl]).
 ///
+/// Both payloads carry `contest.status`, `completed` or `in_progress`, worked
+/// out when the contest is read: Completed, or no activity for 48 hours (#454).
+///
 /// A Delisted or unknown publication is a 404. With [enabled] false (the
 /// embedded server) both routes answer 409 `publishing_not_available`.
 ///

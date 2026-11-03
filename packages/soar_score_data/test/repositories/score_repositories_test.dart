@@ -250,6 +250,17 @@ void _tests(Backend backend) {
       expect(await repo.currentForPlaceholder(open.id), isNull);
     });
 
+    test('reports when the contest latest score was set', () async {
+      final contestId = officials.first.contestId;
+      final latest = officials
+          .where((o) => o.contestId == contestId)
+          .map((o) => o.setAt)
+          .reduce((a, b) => a.isAfter(b) ? a : b);
+
+      expect(await repo.latestSetAtForContest(contestId), latest);
+      expect(await repo.latestSetAtForContest(core.Id.create()), isNull);
+    });
+
     test('append refuses an id that is already stored', () async {
       expect(
         repo.append(officials.first, metadata: metadata()),

@@ -22,17 +22,16 @@ void _tests(Backend backend) {
     late core.Id contestId;
     final actor = core.Id.create();
     var now = DateTime.utc(2026, 10, 17, 15);
+    var readNow = DateTime.utc(2026, 10, 17, 22);
 
     setUp(() async {
       inst = await Installation.open(backend, profile: DatabaseProfile.server);
       await SystemDataSeeder(inst.db).seed();
       repository = Repository(inst.db);
       now = DateTime.utc(2026, 10, 17, 15);
+      readNow = DateTime.utc(2026, 10, 17, 22);
       publishing = PublicationService(repository, clock: () => now);
-      reading = PublicPublicationService(
-        repository,
-        clock: () => DateTime.utc(2026, 10, 17, 22),
-      );
+      reading = PublicPublicationService(repository, clock: () => readNow);
       await repository.accountRepository.save(
         core.Account(
           id: actor,
@@ -120,6 +119,125 @@ void _tests(Backend backend) {
         revision: identity.revision,
       ),
     );
+
+    group('contest status (#454)', () {
+      Future<String> statusOf(core.Id id) async =>
+          (await reading.read(id)).contest['status']! as String;
+
+      test('a running contest scored within 48 hours is in progress', () async {
+        await scoreEverything();
+        final identity = await publish();
+
+        readNow = now.add(const Duration(hours: 47));
+
+        expect(await statusOf(identity.id), 'in_progress');
+      });
+
+      test('a running contest idle for more than 48 hours is completed, '
+          'in the list too', () async {
+        await scoreEverything();
+        final identity = await publish(
+          visibility: core.PublicationVisibility.public,
+        );
+
+        readNow = now.add(const Duration(hours: 49));
+
+        expect(await statusOf(identity.id), 'completed');
+        final listed = (await reading.list(
+          from: DateTime.utc(2026, 1),
+          to: DateTime.utc(2026, 12),
+          today: readNow,
+        )).publications;
+        expect(listed.single.contest['status'], 'completed');
+        // The lifecycle state is untouched: nothing was written back.
+        final contest = (await repository.contestRepository.findById(
+          contestId,
+        ))!;
+        expect(contest.lifecycleState, isNot(core.LifecycleState.completed));
+      });
+
+      test('a completed contest is completed at once', () async {
+        await scoreEverything();
+        final identity = await publish();
+        final contest = (await repository.contestRepository.findById(
+          contestId,
+        ))!;
+        await repository.contestRepository.save(
+          contest.copyWithState(
+            lifecycleState: core.LifecycleState.completed,
+            updatedAt: now,
+          ),
+          metadata: core.MutationMetadata(
+            clientMutationId: 'complete-${mutations++}',
+            authority: core.Authority.director,
+            clientTime: now,
+            actorId: actor,
+          ),
+        );
+
+        expect(await statusOf(identity.id), 'completed');
+      });
+
+      test('scoring again after it read as completed makes it in progress, '
+          'even though the projection is older', () async {
+        await scoreEverything();
+        final identity = await publish();
+        readNow = now.add(const Duration(hours: 60));
+        expect(await statusOf(identity.id), 'completed');
+
+        final matrix = await MatrixService(repository).current(contestId);
+        final assignment = matrix.assignments.first;
+        final later = readNow.subtract(const Duration(hours: 1));
+        await ScoresService(repository, clock: () => later).enterOfficialScore(
+          contestId,
+          assignment.id,
+          clientMutationId: 'entry-${mutations++}',
+          baseScoreRevision: 1,
+          components: {
+            'time_flown': 400,
+            'launch_height': 200,
+            'landing': 'points_50',
+          },
+          actorId: actor,
+          metadata: core.MutationMetadata(
+            clientMutationId: 'meta-${mutations++}',
+            authority: core.Authority.director,
+            clientTime: later,
+            actorId: actor,
+          ),
+          reason: 'late correction',
+        );
+
+        // Not republished: the live contest answers, not the projection.
+        expect(await statusOf(identity.id), 'in_progress');
+      });
+
+      test('the projection stands in when the server has no contest', () async {
+        await scoreEverything();
+        final identity = await publish();
+        await repository.publicationIdentityRepository.save(
+          core.PublicationIdentity(
+            id: identity.id,
+            contestId: null,
+            ownerPublicProfileId: identity.ownerPublicProfileId,
+            claimStatus: identity.claimStatus,
+            visibility: identity.visibility,
+            publishedAt: identity.publishedAt,
+            currentProjectionId: identity.currentProjectionId,
+            contestName: identity.contestName,
+            contestStartsAt: identity.contestStartsAt,
+            contestEndsAt: identity.contestEndsAt,
+            venue: identity.venue,
+            revision: identity.revision,
+          ),
+        );
+
+        readNow = now.add(const Duration(hours: 47));
+        expect(await statusOf(identity.id), 'in_progress');
+        readNow = now.add(const Duration(hours: 49));
+        expect(await statusOf(identity.id), 'completed');
+      });
+    });
 
     test('an Unlisted publication is readable by id', () async {
       await scoreEverything();
