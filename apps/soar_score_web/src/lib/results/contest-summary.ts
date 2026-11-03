@@ -1,6 +1,6 @@
 import type { JsonMap, PublicPublicationSummary } from "./publication";
 
-export type ContestStatus = "inProgress" | "completed";
+export type ContestStatus = "upcoming" | "inProgress" | "completed";
 
 /** One row of the contest search list, parsed once from the summary. */
 export interface ContestSummary {
@@ -34,19 +34,23 @@ export function venueOf(contest: JsonMap): string {
 }
 
 /**
- * The projection does not carry a contest status yet (#454). A recognised
- * `status` value wins; otherwise the contest is completed once its end date
- * has passed. `state` is the venue's state, not a status.
+ * The server sends `status` (`upcoming`, `in_progress` or `completed`), worked
+ * out when the list is read (#454). A recognised value wins; otherwise the
+ * contest is completed once its end date has passed and upcoming before its
+ * start. `state` is the venue's state, not a status.
  */
-function statusOf(raw: string | undefined, end: Date, now: Date): ContestStatus {
+export function statusOf(raw: string | undefined, start: Date, end: Date, now: Date): ContestStatus {
   switch (raw?.toLowerCase()) {
     case "completed":
       return "completed";
+    case "upcoming":
+      return "upcoming";
     case "in_progress":
     case "running":
       return "inProgress";
   }
-  return end < now ? "completed" : "inProgress";
+  if (end < now) return "completed";
+  return start > now ? "upcoming" : "inProgress";
 }
 
 export function contestSummaryFrom(dto: PublicPublicationSummary, now: Date): ContestSummary {
@@ -59,6 +63,6 @@ export function contestSummaryFrom(dto: PublicPublicationSummary, now: Date): Co
     start,
     end,
     venue: venueOf(contest),
-    status: statusOf(text(contest, "status"), end, now),
+    status: statusOf(text(contest, "status"), start, end, now),
   };
 }

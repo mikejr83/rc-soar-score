@@ -1,4 +1,5 @@
-import { venueOf } from "./contest-summary";
+import { statusOf, venueOf } from "./contest-summary";
+import type { ContestStatus } from "./contest-summary";
 import { label } from "./format";
 import type { JsonMap, PublicPublication } from "./publication";
 
@@ -38,6 +39,7 @@ export interface ContestHeader {
   venue: string;
   discipline: string;
   isCompleted: boolean;
+  status: ContestStatus;
 }
 
 /** One row of the Overall Individual Results as of a selected round. */
@@ -122,20 +124,28 @@ const parseDate = (v: unknown): Date | undefined => {
 
 export function contestHeaderFrom(contest: JsonMap, now: Date): ContestHeader {
   const end = parseDate(contest.end);
-  const status = contest.status;
+  const start = parseDate(contest.start);
+  const status = statusOf(
+    typeof contest.status === "string" ? contest.status : undefined,
+    start ?? now,
+    end ?? start ?? now,
+    now,
+  );
   return {
     name: str(contest.name, "Untitled contest"),
-    start: parseDate(contest.start),
+    start,
     end,
     venue: venueOf(contest),
     discipline: str(contest.discipline),
-    // Completed comes from the lifecycle state once the projection carries it
-    // (#454); until then a contest whose end date has passed counts.
-    isCompleted: typeof status === "string" ? status === "Completed" : end !== undefined && end < now,
+    // The server works the status out when the contest is read (#454);
+    // without one, the dates decide.
+    isCompleted: status === "completed",
+    status,
   };
 }
 
-export const headerStatus = (h: ContestHeader) => (h.isCompleted ? "Completed" : "In progress");
+export const headerStatus = (h: ContestHeader) =>
+  h.status === "completed" ? "Completed" : h.status === "upcoming" ? "Upcoming" : "In progress";
 
 function scoreFieldsFrom(calculation: JsonMap | null | undefined): ScoreFields {
   const byKey = new Map<string, ScoreFieldInfo>();
@@ -276,9 +286,9 @@ export class PublishedContest {
   flightGroupsOf(round: number): FlightGroup[] {
     const groups = new Map<string, FlightGroup>();
     for (const f of this.flights.get(round) ?? []) {
-      // TODO(#457): `reflight` is this page's provisional name for the ordinal.
-      const raw = f.reflight;
-      const reflight = typeof raw === "number" && raw > 0 ? raw : raw === true ? 1 : undefined;
+      // `re_flight` is the re-flight's number (#457); null for an original flight.
+      const raw = f.re_flight;
+      const reflight = typeof raw === "number" && raw > 0 ? raw : undefined;
       const group = num(f.group);
       const id = `${group}:${reflight ?? 0}`;
       let g = groups.get(id);

@@ -159,4 +159,17 @@ void _tests(Backend backend) {
       throwsA(anything),
     );
   });
+
+  test('reports when each contest latest invitation was issued', () async {
+    final latest = examples
+        .where((i) => i.contestId == first.contestId)
+        .map((i) => i.issuedAt)
+        .reduce((a, b) => a.isAfter(b) ? a : b);
+
+    expect(
+      await repo.latestIssuedAtForContests([first.contestId, core.Id.create()]),
+      {first.contestId: latest},
+    );
+    expect(await repo.latestIssuedAtForContests([]), isEmpty);
+  });
 }

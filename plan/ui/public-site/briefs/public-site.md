@@ -84,7 +84,7 @@ Both render in place of the contest page without changing the URL.
 - **Contest not found** (unknown id or delisted): spec `../contest-not-found.md`. Explain the three likely reasons, offer Contests and Home.
 - **Contest not visible** (results pending or marked private): this exact copy, then a note that the page re-checks every 15 minutes and a manual check button:
 
-  > This contest has pending results or has been marked private. It is not shown at this time. The contest will be shown after the final placing is announced and the contest director makes the results public or 48hrs after the last score entered.
+  > This contest has pending results or has been marked private. It is not shown at this time. The contest will be shown after the final placing is announced and the contest director makes the results public.
 
 ### Loading and failure
 

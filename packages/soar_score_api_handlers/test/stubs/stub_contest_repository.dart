@@ -22,6 +22,12 @@ class StubContestRepository implements ContestRepository {
   Future<Contest?> findById(Id id) async => _contests[id];
 
   @override
+  Future<Map<Id, Contest>> findByIds(Iterable<Id> ids) async => {
+    for (final id in ids)
+      if (_contests[id] != null) id: _contests[id]!,
+  };
+
+  @override
   Future<List<Contest>> getAll() async => _contests.values.toList();
 
   @override

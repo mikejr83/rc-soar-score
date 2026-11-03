@@ -17,7 +17,12 @@ import 'package:soar_score_core/soar_score_core.dart';
 ///   following Sunday when `today` is a Sunday). Unlisted ones are never
 ///   listed. The answer may be cached for 30 seconds ([listCacheControl]).
 ///
-/// A Delisted or unknown publication is a 404. With [enabled] false (the
+/// Both payloads carry `contest.status`, `upcoming`, `in_progress` or
+/// `completed`, worked out when the contest is read: before its start, Upcoming;
+/// Completed after the director completes it or 48 hours without activity (#454).
+///
+/// An unknown publication is a 404. One that exists but is not shown (Delisted,
+/// or with no projection yet) is a 403 `contest_not_visible`. With [enabled] false (the
 /// embedded server) both routes answer 409 `publishing_not_available`.
 ///
 /// The handlers only translate between HTTP and [PublicPublicationService].

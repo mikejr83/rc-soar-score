@@ -106,6 +106,19 @@ A contest that was published is deletable too. Its published record is not remov
 
 The automatic completion signals are advisory until accepted by the director: all non-retired pilots have a score or explicit zero for all flown groups, or no score has been entered for the configured inactivity period (currently 48 hours in the business requirements). A future matrix round may remain unflown when the director completes the contest.
 
+## Completed status shown to the public and participants
+
+The status the public site and participants see is a display rule worked out each time the contest is read. It is not a lifecycle transition and nothing is written back, so local and synced data are untouched. The lifecycle state stays `Running` until the director accepts completion.
+
+- **Completed** if the lifecycle state is `Completed`.
+- **Upcoming** if the contest has not started yet, however early it was published or invitations were sent.
+- Otherwise, a `Ready` or `Running` contest is **Completed** once more than 48 hours have passed since the later of its start and its last activity, and **In progress** until then.
+- **Last activity** is the time the latest official score was set. While a contest has no score, it is the time the latest invitation was sent. With neither, the clock runs from the contest's start.
+- **Source:** the live contest on the server when it is there; otherwise the lifecycle state and last activity captured in the published projection (`contest.lifecycle_state`, `contest.last_activity_at`, `contest.start`). This matters when the update mode is manual and the projection is older than the latest score.
+- Scoring again moves the last activity forward, so the contest reads as In progress again. No background job runs.
+- The public payloads (`GET /public/publications` and `GET /public/publications/{id}`) carry the result as `contest.status`: `upcoming`, `in_progress` or `completed`.
+- The 48 hours are the fixed platform value `contestInactivityPeriod` in `soar_score_core`, shared with the completion reminder above and with the automatic public release of results.
+
 ## Mutability by lifecycle state
 
 - `Created`: only minimum contest identity and location data are available.

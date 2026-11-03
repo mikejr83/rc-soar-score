@@ -10,7 +10,7 @@ export function ContestHeader({ header }: { header: Header }) {
     <header className={`card ${styles.header}`}>
       <div className={styles.headerTop}>
         <h1>{header.name}</h1>
-        <StatusPill completed={header.isCompleted} />
+        <StatusPill status={header.status} />
       </div>
       <div className={styles.headerMeta}>
         <span>

@@ -1,6 +1,8 @@
 import 'dart:math';
 
 import '../../enums/lifecycle_state.dart';
+import '../../enums/re_flight_status.dart';
+import '../../enums/re_flight_type.dart';
 import '../../enums/role_type.dart';
 import '../../enums/score_field_kind.dart';
 import '../../enums/score_field_type.dart';
@@ -19,6 +21,7 @@ import '../../models/results/participation_standing.dart';
 import '../../models/results/team_standing.dart';
 import '../../models/shared/shared.dart';
 import '../../repositories/repository.dart';
+import '../contest_activity.dart';
 import '../results_service.dart';
 import 'publication_build.dart';
 
@@ -103,6 +106,7 @@ class PublicationProjectionBuilder {
             .toList()
           ..sort((a, b) => a.ordinal.compareTo(b.ordinal));
     final teams = await _teams(contestId, keyOf);
+    final reFlights = await _publishedReFlights(contestId);
 
     final projection = PublicationProjection(
       id: _newId(),
@@ -114,11 +118,15 @@ class PublicationProjectionBuilder {
       disciplineType: profile.profile.type,
       disciplineRulesVersion: profile.profile.version,
       calculationVersion: await _calculationVersion(contestId),
-      contestIdentity: _identity(contest, profile.profile.name),
+      contestIdentity: _identity(
+        contest,
+        profile.profile.name,
+        await ContestActivity(repository).lastActivityAt(contestId),
+      ),
       participants: [for (final p in pilots) p.entry(teams.keyByPilot[p.key])],
       teams: teams.entries,
-      matrixInfo: await _matrixInfo(matrix, rounds, keyOf),
-      scores: await _scores(contestId, rounds, keyOf, scoreFields),
+      matrixInfo: await _matrixInfo(matrix, rounds, keyOf, reFlights),
+      scores: await _scores(contestId, rounds, keyOf, scoreFields, reFlights),
       standings: await _standings(contestId, keyOf, teams.keyById),
       calculationMetadata: await _metadata(
         contestId,
@@ -138,7 +146,11 @@ class PublicationProjectionBuilder {
     );
   }
 
-  Map<String, Object?> _identity(Contest contest, String disciplineName) => {
+  Map<String, Object?> _identity(
+    Contest contest,
+    String disciplineName,
+    DateTime? lastActivityAt,
+  ) => {
     'name': contest.name,
     'start': formatUtcTimestamp(contest.startDateTime),
     'end': formatUtcTimestamp(contest.endDateTime),
@@ -148,16 +160,19 @@ class PublicationProjectionBuilder {
     'state': contest.state,
     'country': contest.country,
     'discipline': disciplineName,
-    // The lifecycle state at publish time: `Completed`, or the state of a
-    // contest still under way. The public site shows Completed or In
-    // progress from it (#454).
-    'status': switch (contest.lifecycleState) {
+    // What the status is worked out from when the contest is read (#454):
+    // the lifecycle state and the last activity at publish time. The status
+    // itself is never stored.
+    'lifecycle_state': switch (contest.lifecycleState) {
       LifecycleState.created => 'Created',
       LifecycleState.configuring => 'Configuring',
       LifecycleState.ready => 'Ready',
       LifecycleState.running => 'Running',
       LifecycleState.completed => 'Completed',
     },
+    'last_activity_at': lastActivityAt == null
+        ? null
+        : formatUtcTimestamp(lastActivityAt),
   };
 
   /// The pilots of the contest with their keys. A non-flying role is not
@@ -264,6 +279,7 @@ class PublicationProjectionBuilder {
     MatrixRevision matrix,
     List<Round> rounds,
     Map<Id, String> keyOf,
+    Map<Id, int> reFlights,
   ) async => {
     'rounds': [
       for (final round in rounds)
@@ -280,10 +296,27 @@ class PublicationProjectionBuilder {
                   'pilot_key': keyOf[a.contestParticipationId],
                   'group': a.group,
                   'lane': a.lane,
+                  're_flight': reFlights[a.reFlightId],
                 },
           ],
         },
     ],
+  };
+
+  /// The re-flights the public sees, by id, with their sequence number: those
+  /// that re-fly a group (a whole group again, or a drawn group) whose group
+  /// the director has finalized (`ReadyToFly`, `Finalized`). A proposed or
+  /// still-forming re-flight, and a cancelled one, carry no number. A pilot
+  /// moved into another group flies as part of it, so a move carries no
+  /// marker (#457).
+  Future<Map<Id, int>> _publishedReFlights(Id contestId) async => {
+    for (final reFlight in await repository.reFlightRepository.listForContest(
+      contestId,
+    ))
+      if (reFlight.type != ReFlightType.moveToGroup &&
+          (reFlight.status == ReFlightStatus.readyToFly ||
+              reFlight.status == ReFlightStatus.finalized))
+        reFlight.id: reFlight.sequence,
   };
 
   /// The score fields whose raw values are published: what the scorer enters
@@ -308,7 +341,23 @@ class PublicationProjectionBuilder {
     List<Round> rounds,
     Map<Id, String> keyOf,
     List<DisciplineScoreField> fields,
+    Map<Id, int> reFlights,
   ) async {
+    final assignmentOfPlaceholder = {
+      for (final placeholder
+          in await repository.scorePlaceholderRepository.listForContest(
+            contestId,
+          ))
+        placeholder.id: placeholder.assignmentId,
+    };
+    final reFlightOfAssignment = {
+      for (final round in rounds)
+        for (final a
+            in await repository.matrixAssignmentRepository.listLiveForRound(
+              round.id,
+            ))
+          a.id: reFlights[a.reFlightId],
+    };
     final official = <Id, Map<String, Object?>>{};
     final entries = <Object?>[];
     for (final round in rounds) {
@@ -326,6 +375,8 @@ class PublicationProjectionBuilder {
         entries.add({
           'round': round.ordinal,
           'group': flight.group,
+          're_flight':
+              reFlightOfAssignment[assignmentOfPlaceholder[placeholderId]],
           'pilot_key': keyOf[flight.participationId],
           'outcome': flight.result.outcome.name,
           'raw_points': flight.result.rawPoints,

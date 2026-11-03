@@ -14,12 +14,17 @@ describe("overall results", () => {
     expect(contest.rowsAsOf(9)).toEqual([]);
   });
 
-  test("status derives from the end date until the projection carries it", () => {
+  test("status is the server's, else derives from the end date", () => {
     expect(contest.header.isCompleted).toBe(true);
     const running = new PublishedContest(fakePublication(), new Date(Date.UTC(2026, 9, 10, 15)));
     expect(headerStatus(running.header)).toBe("In progress");
     const stated = new PublishedContest(fakePublication({ contestStatus: "Running" }), new Date(Date.UTC(2027, 0)));
     expect(headerStatus(stated.header)).toBe("In progress");
+    const server = (contestStatus: string) =>
+      new PublishedContest(fakePublication({ contestStatus }), new Date(Date.UTC(2026, 9, 10, 15)));
+    expect(headerStatus(server("completed").header)).toBe("Completed");
+    expect(headerStatus(server("in_progress").header)).toBe("In progress");
+    expect(headerStatus(server("upcoming").header)).toBe("Upcoming");
     expect(contest.header.venue).toBe("Front Range Soaring, Boulder, CO, USA");
   });
 

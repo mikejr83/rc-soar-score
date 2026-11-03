@@ -1,11 +1,14 @@
 import '../../enums/publication_visibility.dart';
 import '../../errors/entity_not_found_error.dart';
+import '../../errors/forbidden_error.dart';
 import '../../models/id.dart';
 import '../../models/publication/publication_identity.dart';
 import '../../models/publication/publication_participant.dart';
 import '../../models/publication/publication_projection.dart';
 import '../../repositories/publication_identity_repository.dart';
 import '../../repositories/repository.dart';
+import '../../enums/lifecycle_state.dart';
+import '../contest_activity.dart';
 import 'public_publication.dart';
 
 /// What anyone may read about published contests, without an account.
@@ -19,6 +22,15 @@ class PublicPublicationService {
   PublicPublicationService(this.repository, {DateTime Function()? clock})
     : _clock = clock ?? DateTime.now;
 
+  /// The code of the [ForbiddenError] for a publication that exists but is
+  /// not shown.
+  static const notVisibleCode = 'contest_not_visible';
+
+  static ForbiddenError _notVisible() => ForbiddenError(
+    notVisibleCode,
+    'this contest is pending or private and is not shown',
+  );
+
   /// The most a listing returns in one call.
   static const maxListLimit = 100;
 
@@ -27,8 +39,10 @@ class PublicPublicationService {
 
   /// The current projection of [publicationId].
   ///
-  /// Throws an [EntityNotFoundError] when the publication does not exist, is
-  /// Delisted, or has no projection.
+  /// Throws an [EntityNotFoundError] when the publication does not exist, and
+  /// a [ForbiddenError] with [notVisibleCode] when it exists but is not shown:
+  /// Delisted (private), or with no projection yet (pending). The error
+  /// carries nothing about the contest (#463).
   Future<PublicPublication> read(Id publicationId) async {
     final identity = await _readable(publicationId);
     final projection = await _current(identity);
@@ -45,7 +59,7 @@ class PublicPublicationService {
       visibility: identity.toJson()['visibility']! as String,
       projectionRevision: projection.projectionRevision,
       publishedAt: projection.publishedAt,
-      contest: projection.contestIdentity,
+      contest: (await _contestsWithStatus([(identity, projection)])).single,
       disciplineType: json['discipline_type']! as String,
       calculationVersion: projection.calculationVersion,
       resultsHiddenThroughRound: hiddenThrough,
@@ -136,21 +150,84 @@ class PublicPublicationService {
             if (identity.currentProjectionId != null)
               identity.currentProjectionId!,
         ]);
-    final summaries = <PublicPublicationSummary>[];
-    for (final identity in identities) {
-      final projection = projections[identity.currentProjectionId];
-      if (projection == null) continue;
-      summaries.add(
+    final listed = [
+      for (final identity in identities)
+        if (projections[identity.currentProjectionId] != null)
+          (identity, projections[identity.currentProjectionId]!),
+    ];
+    final contests = await _contestsWithStatus(listed);
+    final summaries = [
+      for (var i = 0; i < listed.length; i++)
         PublicPublicationSummary(
-          publicationId: identity.id.value,
-          publishedAt: identity.publishedAt!,
-          projectionRevision: projection.projectionRevision,
-          contest: projection.contestIdentity,
-          disciplineType: projection.toJson()['discipline_type']! as String,
+          publicationId: listed[i].$1.id.value,
+          publishedAt: listed[i].$1.publishedAt!,
+          projectionRevision: listed[i].$2.projectionRevision,
+          contest: contests[i],
+          disciplineType: listed[i].$2.toJson()['discipline_type']! as String,
         ),
-      );
-    }
+    ];
     return PublicPublicationList(publications: summaries, recentCount: recent);
+  }
+
+  /// The projection's contest identity with the `status` to show for each of
+  /// [items]: `upcoming`, `in_progress` or `completed` (#454).
+  ///
+  /// Worked out now, never stored. The lifecycle state, start and last
+  /// activity come from the live contest on this server; the values captured
+  /// in the projection stand in when it has none (a manually updated
+  /// publication whose contest is not here, or has no activity yet). The live
+  /// facts of all [items] are read together, so a page costs the same few
+  /// queries however many contests it lists.
+  Future<List<Map<String, Object?>>> _contestsWithStatus(
+    List<(PublicationIdentity, PublicationProjection)> items,
+  ) async {
+    if (items.isEmpty) return const [];
+    final contestIds = [
+      for (final (identity, _) in items)
+        if (identity.contestId != null) identity.contestId!,
+    ];
+    final (live, activity) = await (
+      repository.contestRepository.findByIds(contestIds),
+      ContestActivity(repository).lastActivityAtFor(contestIds),
+    ).wait;
+    final now = _clock();
+    return [
+      for (final (identity, projection) in items)
+        () {
+          final captured = projection.contestIdentity;
+          final contest = live[identity.contestId];
+          final lifecycleState =
+              contest?.lifecycleState ??
+              _lifecycleNamed(
+                captured['lifecycle_state'] ?? captured['status'],
+              ) ??
+              LifecycleState.running;
+          return {
+            ...captured,
+            'status': contestDisplayStatus(
+              lifecycleState: lifecycleState,
+              startsAt:
+                  contest?.startDateTime ??
+                  DateTime.tryParse('${captured['start'] ?? ''}') ??
+                  projection.publishedAt,
+              // A live contest is authoritative, even with no activity (the
+              // clock then runs from its start). The projection's value
+              // stands in only when the contest is not on this server.
+              lastActivityAt: contest == null
+                  ? DateTime.tryParse('${captured['last_activity_at'] ?? ''}')
+                  : activity[contest.id],
+              now: now,
+            ).wireName,
+          };
+        }(),
+    ];
+  }
+
+  static LifecycleState? _lifecycleNamed(Object? name) {
+    for (final state in LifecycleState.values) {
+      if (state.name == '$name'.toLowerCase()) return state;
+    }
+    return null;
   }
 
   static DateTime _day(DateTime value) {
@@ -188,24 +265,21 @@ class PublicPublicationService {
     final identity = await repository.publicationIdentityRepository.findById(
       publicationId,
     );
-    if (identity == null ||
-        identity.visibility == PublicationVisibility.delisted) {
+    if (identity == null) {
       throw EntityNotFoundError(
         entityType: 'Publication',
         entityId: publicationId,
       );
+    }
+    if (identity.visibility == PublicationVisibility.delisted) {
+      throw _notVisible();
     }
     return identity;
   }
 
   Future<PublicationProjection> _current(PublicationIdentity identity) async {
     final projection = await _currentOrNull(identity);
-    if (projection == null) {
-      throw EntityNotFoundError(
-        entityType: 'Publication',
-        entityId: identity.id,
-      );
-    }
+    if (projection == null) throw _notVisible();
     return projection;
   }
 

@@ -147,7 +147,7 @@ function score(
     group_score: points,
     selected,
     preliminary: false,
-    ...(reflight !== undefined ? { reflight } : {}),
+    ...(reflight !== undefined ? { re_flight: reflight } : {}),
     ...(time !== undefined ? { raw_components: { time_flown: time, launch_height: height } } : {}),
   };
 }
