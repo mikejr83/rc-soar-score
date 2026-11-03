@@ -36,8 +36,8 @@ List<ScoreRowTile> _built(WidgetTester tester) =>
 
 /// The row of the pilot called [name] in the open group, or null when that
 /// pilot is not in it. A list builds only the rows near the screen, so the
-/// table is looked at from its top and, failing that, scrolled to its end,
-/// where it is left.
+/// table is looked at from its top and, failing that, scrolled down in steps
+/// to its end, where it is left.
 Future<ScoringRow?> rowOf(WidgetTester tester, String name) async {
   ScoringRow? built() {
     for (final tile in _built(tester)) {
@@ -55,9 +55,16 @@ Future<ScoringRow?> rowOf(WidgetTester tester, String name) async {
   if (top != null) {
     return top;
   }
-  await tester.drag(table, const Offset(0, -2000));
-  await tester.pump(const Duration(milliseconds: 300));
-  // Stay where the row is built, so the caller can use it at once.
+  // Walk down in steps: a small window builds only a few rows at a time, so
+  // a pilot in the middle of the list is built at neither the top nor the end.
+  for (var step = 0; step < 12; step++) {
+    await tester.drag(table, const Offset(0, -240));
+    await tester.pump(const Duration(milliseconds: 150));
+    final found = built();
+    if (found != null) {
+      return found;
+    }
+  }
   return built();
 }
 
@@ -158,10 +165,33 @@ Future<void> _enterFlight(
   final id = row.id.value;
   final name = row.pilot.name;
   final flight = flightOf(data, name);
-  final time = fieldWithKey('score-time-$id');
-  await pumpUntilFound(tester, time);
-  await tapVisible(tester, time);
-  await enterIn(tester, time, flight.time);
+  // Built when needed: fieldWithKey answers differently for a row that is
+  // not open yet, and that answer never matches once it opens.
+  Finder time() => fieldWithKey('score-time-$id');
+  // Saving one row opens the next a moment later, but a group Save or a
+  // retirement leaves no row open: let the page settle, then open this one.
+  // A tap on a row that is already open closes it, so look again each time.
+  for (var attempt = 0; attempt < 3; attempt++) {
+    await tester.pump(const Duration(milliseconds: 500));
+    if (time().evaluate().isNotEmpty) {
+      break;
+    }
+    // The row may be scrolled out of the built part of the list.
+    if (_key('score-row-$id').evaluate().isEmpty) {
+      await rowOf(tester, name);
+    }
+    await tapVisible(tester, _key('score-row-$id'));
+  }
+  if (time().evaluate().isEmpty) {
+    final rows = [
+      for (final tile in _built(tester))
+        '${tile.row.pilot.name} ${tile.row.id.value} ${tile.row.status}',
+    ];
+    fail('Could not open the row of $name ($id). Built rows: $rows');
+  }
+  await pumpUntilFound(tester, time());
+  await tapVisible(tester, time());
+  await enterIn(tester, time(), flight.time);
   await enterIn(tester, fieldWithKey('score-height-$id'), flight.height);
   // Landing is typed as table points, after the height; the caption names
   // the band it selected.
@@ -194,7 +224,11 @@ Future<List<String>> scoreOpenRowsTogether(
         tile.row,
   ].take(count).toList();
   expect(rows, hasLength(count), reason: 'the group has $count open rows');
-  for (final row in rows) {
+  final names = [for (final row in rows) row.pilot.name];
+  for (final name in names) {
+    // Entering a flight can scroll the list, which unbuilds the other rows:
+    // find each row again when its turn comes.
+    final row = (await rowOf(tester, name))!;
     await tapVisible(tester, _key('score-row-${row.id.value}'));
     await _enterFlight(tester, data, row, null);
   }

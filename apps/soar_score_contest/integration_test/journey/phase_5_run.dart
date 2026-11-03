@@ -451,13 +451,13 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
 
       // The retirement is on the Recent activity card too.
       await tapRail(tester, 'Workspace');
-      await pumpUntilFound(
-        tester,
-        find.textContaining(
-          kIsWeb ? 'was retired from round 3' : 'You retired pilot',
-        ),
+      // The Scoring page's snackbar can still be up, and it says the same, so
+      // count only the activity entry's own wording.
+      final retired = find.textContaining(
+        kIsWeb ? 'was retired from round 3' : 'You retired pilot',
       );
-      expect(find.textContaining('from round 3'), findsOneWidget);
+      await pumpUntilFound(tester, retired);
+      expect(retired, findsOneWidget);
 
       await scoreRound(tester, data, 3);
     }),
