@@ -34,6 +34,9 @@
 //   comps_edge_cases.json     hand-built comps: teams, retired pilots, every
 //                             role, five drops, no config row, unknown class
 //   comps_missing_columns.json  comp 22 reduced to its required columns
+//   comps_integrity_cases.json  hand-built broken references: a duplicated
+//                             CompNo, a duplicated (CompNo, PilotNo) and a
+//                             participant with no Pilots row
 //
 // Competition and venue names, comp ids and model names become fakes; the
 // rest of a comp row is codes and flags and is kept (allowlist, as for
@@ -414,9 +417,16 @@ Map<String, String> _competitionFixtures(
       _readJsonl(File('${dir.path}/$name.jsonl'));
   final comps = table('Comps');
   final compPilots = table('CompPilots');
-  final roles = table('Roles');
-  final dur = table('Dur');
-  final dbParams = table('DBParams');
+  final dur = [for (final r in table('Dur')) _validDur(r)];
+  // Roles and DBParams are never copied: the fixed lookup rows are emitted
+  // after the file's rows have been checked against them.
+  final roles = _validatedRoles(table('Roles'));
+  final dbParams = _validatedDbParams(table('DBParams'));
+  _reportDroppedColumns({
+    'Comps': (comps, {..._compsKept, 'CompID', 'CompName', 'CompVenue'}),
+    'CompPilots': (compPilots, {..._compPilotsKept, 'Model', 'ModelData'}),
+    'Dur': (dur, _durKept),
+  });
 
   // Model names are fakes, stable per original name.
   final models = <String, String>{};
@@ -482,11 +492,7 @@ Map<String, String> _competitionFixtures(
         for (final r in dur)
           if (inScope(r)) durRow(r),
       ],
-      if (withDbParams)
-        'DBParams': [
-          for (final r in dbParams)
-            if (r['Property'] == 'DBVersion') r,
-        ],
+      if (withDbParams) 'DBParams': dbParams,
     });
   }
 
@@ -529,6 +535,7 @@ Map<String, String> _competitionFixtures(
   final out = <String, String>{
     'comps_reference.json': snapshot(const [22, 39, 21, 20, 40]),
     'comps_edge_cases.json': _competitionEdgeCases(),
+    'comps_integrity_cases.json': _competitionIntegrityCases(),
     'comps_missing_columns.json': missingColumns(),
   };
 
@@ -548,6 +555,14 @@ Map<String, String> _competitionFixtures(
 
   collect(comps, _compsKept);
   collect(compPilots, _compPilotsKept);
+  // Every other table read is scanned too; only the validated lookup values
+  // (Roles, DBVersion, the Dur draw-option string) are excused, by shape.
+  collect(table('Roles'), const {});
+  collect([
+    for (final r in table('DBParams'))
+      if (r['Property'] != 'DBVersion') r,
+  ], const {});
+  collect(table('Dur'), _durKept);
   final text = out.values
       .join('\n')
       .toLowerCase()
@@ -557,6 +572,7 @@ Map<String, String> _competitionFixtures(
       // Fixture ids and fake names are built from these words on purpose.
       if (!secret.startsWith('fixture') &&
           !secret.startsWith('example') &&
+          !_validatedLookupValues.contains(secret) &&
           RegExp('(^|[^a-z])${RegExp.escape(secret)}(\$|[^a-z])')
               .hasMatch(text))
         secret,
@@ -754,6 +770,151 @@ String _competitionEdgeCases() {
     ],
     'DBParams': [
       {'Property': 'DBVersion', 'PRValue': '6.78'},
+    ],
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Validation of the lookup tables copied into the competition fixtures.
+
+/// The GliderScore `Roles` lookup: code to English name. A file that differs
+/// (an extra role, a renamed role, a personal value in a name) aborts the run
+/// so someone looks at it, rather than silently committing it.
+const _knownRoles = <String, String>{
+  'TM': 'Team Manager',
+  'Plt': 'Pilot',
+  'TM/Plt': 'Team Manager/Pilot',
+  'CD/Plt': 'Comp Director/Pilot',
+  'Hlp': 'Helper',
+  'CD': 'Competition Director',
+};
+
+/// Lower-cased lookup values that are excused from the leak scan because they
+/// are validated against fixed patterns or the table above.
+final _validatedLookupValues = <String>{
+  for (final e in _knownRoles.entries) ...[
+    e.key.toLowerCase(),
+    e.value.toLowerCase(),
+  ],
+};
+
+Never _abort(String message) {
+  stderr.writeln('refusing to write: $message');
+  exit(1);
+}
+
+List<Map<String, Object?>> _validatedRoles(List<Map<String, Object?>> rows) {
+  final seen = <String, String>{};
+  for (final row in rows) {
+    final extra = row.keys.toSet().difference({'Role', 'RoleName'});
+    if (extra.isNotEmpty) {
+      _abort('Roles has unexpected column(s): ${extra.join(', ')}');
+    }
+    final code = row['Role'];
+    final name = row['RoleName'];
+    if (code is! String || name is! String || _knownRoles[code] != name) {
+      _abort('Roles has a row that is not one of the six known roles');
+    }
+    seen[code] = name;
+  }
+  if (seen.length != _knownRoles.length) {
+    _abort('Roles does not hold exactly the six known roles');
+  }
+  return [
+    for (final e in _knownRoles.entries) {'Role': e.key, 'RoleName': e.value},
+  ];
+}
+
+List<Map<String, Object?>> _validatedDbParams(List<Map<String, Object?>> rows) {
+  final versions = [
+    for (final r in rows)
+      if (r['Property'] == 'DBVersion') r,
+  ];
+  if (versions.length != 1) {
+    _abort('DBParams must hold exactly one DBVersion row');
+  }
+  final value = versions.single['PRValue'];
+  if (value is! String || !RegExp(r'^\d+\.\d+$').hasMatch(value)) {
+    _abort('DBParams DBVersion is not a version number');
+  }
+  // Every other property (names, locale, list separator) is dropped.
+  return [
+    {'Property': 'DBVersion', 'PRValue': value},
+  ];
+}
+
+/// A `Dur` row holds numbers and the draw-option query string; anything else
+/// aborts the run.
+Map<String, Object?> _validDur(Map<String, Object?> row) {
+  final option = RegExp(r'^([A-Za-z0-9]+=[A-Za-z0-9.]*&?)*$');
+  // Older files hold a comma-coded list of digits instead.
+  final comma = RegExp(r'^[0-9,]*$');
+  for (final e in row.entries) {
+    if (!_durKept.contains(e.key)) {
+      continue;
+    }
+    final v = e.value;
+    final ok = switch (e.key) {
+      'durPilotsMin' =>
+        v is String && (option.hasMatch(v) || comma.hasMatch(v)),
+      _ => v == null || v is num,
+    };
+    if (!ok) {
+      _abort('Dur column ${e.key} has an unexpected value shape');
+    }
+  }
+  return row;
+}
+
+/// Names the columns of a source table that the allowlist drops, so a new
+/// GliderScore column is a visible decision. Column names only, never values.
+void _reportDroppedColumns(
+  Map<String, (List<Map<String, Object?>>, Set<String>)> tables,
+) {
+  for (final e in tables.entries) {
+    final dropped = {
+      for (final row in e.value.$1)
+        ...row.keys.where((k) => !e.value.$2.contains(k)),
+    }.toList()..sort();
+    if (dropped.isNotEmpty) {
+      stdout.writeln('${e.key}: dropped column(s) ${dropped.join(', ')}');
+    }
+  }
+}
+
+/// Broken references a real file can hold, for the mapper to report rather
+/// than crash on.
+String _competitionIntegrityCases() {
+  Map<String, Object?> comp(int no) => {
+    'CompNo': no,
+    'CompDate': '06/14/26 00:00:00',
+    'CompID': 'FIXTURE$no',
+    'CompName': 'Fixture Open $no',
+    'GSCompClass': 'F5J',
+  };
+  Map<String, Object?> member(int comp, int pilot) => {
+    'CompNo': comp,
+    'PilotNo': pilot,
+    'Role': 'Plt',
+  };
+  return _snapshotTables({
+    'Comps': [comp(9101), comp(9102), comp(9102)],
+    'CompPilots': [
+      member(9101, 2101),
+      // The same pilot twice in one competition.
+      member(9101, 2102),
+      member(9101, 2102),
+      // A participant with no row in Pilots.
+      member(9101, 2999),
+      member(9102, 2101),
+    ],
+    'Pilots': [
+      {'PilotNo': 2101, 'FirstName': 'Ivy', 'LastName': 'Integrityone'},
+      {'PilotNo': 2102, 'FirstName': 'Jem', 'LastName': 'Integritytwo'},
+    ],
+    'Dur': [
+      {'CompNo': 9101, 'durTargetTime': 600},
+      {'CompNo': 9102, 'durTargetTime': 600},
     ],
   });
 }

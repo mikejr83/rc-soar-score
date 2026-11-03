@@ -18,7 +18,10 @@ writes them: a column that is null in the database is absent from the row.
 | ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `comps_reference.json`       | Real comps 22, 39 and 21 (F5J, 31/27/12 participants, comp 21 with four retired pilots), 20 (F3J) and 40 (F5L) as skipped classes, with their pilots, `Roles`, `Dur` rows and `DBVersion`.                                                            |
 | `comps_edge_cases.json`      | Hand-built comps: 9001 with teams, team protection, all five drop slots, classes, models (same model with different case), numbering and a team manager; 9002 with retired pilots and every role; 9003 with no `Dur` row; 9004 with an unknown class. |
+| `comps_integrity_cases.json` | Broken references the mapper must report: a duplicated `CompNo`, the same pilot twice in one competition, and a participant with no `Pilots` row.                                                                                                     |
 | `comps_missing_columns.json` | Comp 22 reduced to its required columns (no `Roles`, no `DBParams`, no optional columns anywhere).                                                                                                                                                    |
+
+`Roles` and `DBParams` are never copied: the scrubber checks them against the six known roles and a `DBVersion` number and emits fixed rows, and aborts when they differ. It also names (not shows) any source column it drops.
 
 The real file has no F5J competition with teams and only plain pilots, which
 is why the edge cases are hand-built. Competition and venue names, comp ids and

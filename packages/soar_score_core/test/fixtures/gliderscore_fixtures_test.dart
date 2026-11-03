@@ -99,8 +99,76 @@ void main() {
     const compFiles = [
       'comps_reference.json',
       'comps_edge_cases.json',
+      'comps_integrity_cases.json',
       'comps_missing_columns.json',
     ];
+
+    // Every column a competition snapshot may carry, with the pattern every
+    // string value of that column must match. A column or string that is not
+    // listed fails, so a new value cannot reach a fixture unnoticed.
+    final patterns = <String, RegExp>{
+      'Comps.CompID': RegExp(r'^FIXTURE\d+$'),
+      'Comps.CompName': RegExp(r'^Fixture Open \d+$'),
+      'Comps.CompVenue': RegExp(r'^Example Field$'),
+      'Comps.CompDate': RegExp(r'^\d\d/\d\d/\d\d \d\d:\d\d:\d\d$'),
+      'Comps.GSCompClass': RegExp(r'^[A-Za-z0-9]+$'),
+      'Comps.F3QDrop6to10': RegExp(r'^[0-9,]*$'),
+      'CompPilots.PilotClass': RegExp(r'^[A-Za-z0-9]{1,4}$'),
+      'CompPilots.Role': RegExp(r'^(Plt|TM|TM/Plt|CD/Plt|Hlp|CD)$'),
+      'CompPilots.Model': RegExp(
+        r'^(Example Model \d+|Alpha Glider|Beta Glider|beta glider |Gamma Glider)$',
+      ),
+      'CompPilots.ModelData': RegExp(r'^-?\d+$'),
+      'Pilots.FirstName': RegExp(r'^[A-Za-z]+$'),
+      'Pilots.LastName': RegExp(r'^(ZZ)?[A-Za-z]+\d*$'),
+      'Pilots.Email': RegExp(r'^fixture\d+@example\.test$'),
+      'Pilots.Country': RegExp(r'^[A-Za-z]{0,3}$'),
+      'Pilots.State': RegExp(r'^[A-Za-z ]{0,3}$'),
+      'Pilots.UsualClass': RegExp(r'^[A-Za-z0-9]{0,8}$'),
+      'Pilots.Filter': RegExp(r'^[A-Za-z0-9]{0,3}$'),
+      'Pilots.FAINumber': RegExp(r'^(0|FAI-\d+)$'),
+      'Pilots.FAI_ID': RegExp(r'^(0|FAI-\d+)$'),
+      'Pilots.OtherRegistration': RegExp(r'^(0|REG-\d+)$'),
+      'Pilots.Club': RegExp(r'^Example Club \d$'),
+      'Pilots.Town': RegExp(r'^Exampleton$'),
+      'Roles.Role': RegExp(r'^(Plt|TM|TM/Plt|CD/Plt|Hlp|CD)$'),
+      'Roles.RoleName': RegExp(
+        r'^(Pilot|Team Manager|Team Manager/Pilot|Comp Director/Pilot|Helper|Competition Director)$',
+      ),
+      'Dur.durPilotsMin': RegExp(
+        r'^(([A-Za-z0-9]+=[A-Za-z0-9.]*&?)*|[0-9,]*)$',
+      ),
+      'DBParams.Property': RegExp(r'^DBVersion$'),
+      'DBParams.PRValue': RegExp(r'^\d+\.\d+$'),
+    };
+    // Columns that hold numbers and flags only, per table.
+    const numericKeys = <String, Set<String>>{
+      'Comps': {
+        'CompNo', 'Drop1AtRound', 'Drop2AtRound', 'Drop3AtRound',
+        'Drop4AtRound', 'Drop5AtRound', 'UseTeams', 'UseTeamProtection',
+        'UseClasses', 'UseModels', 'UsePilotNumbering', 'Enforce20KHz',
+        'GroupScoreDecimals', 'ScoresLocked', 'NbrForTeamScore',
+        'printCountry', 'RoundOrTruncate', 'GroupScoreOption',
+        'printRegistration', 'UseRoles', 'DropScoreOption', 'AssignHelpers',
+        'DrawMode', 'PrelimCompNo', 'IsPublic', 'UseRegistration',
+        'UseRegistrationIdx', //
+      },
+      'CompPilots': {
+        'CompNo', 'PilotNo', 'Team', 'DrawFreq', 'Retired', 'StartNo',
+        'IsPilot', 'OmitFromTeamScore', //
+      },
+      'Pilots': {'PilotNo'},
+      'Roles': {},
+      'DBParams': {},
+      'Dur': {
+        'CompNo', 'durTargetTime', 'durDecimalsForTiming', 'durLndg',
+        'durNumberOfTimekeepers', 'durGroupsPerRound', 'durPilotsMax',
+        'durDrawLocked', 'durFlightPenalty', 'durNbrOfLanes', 'durRefHeight',
+        'durPenaltyUpToRefHeight', 'durPenaltyOverRefHeight',
+        'durAllowBackToBack', 'DurPointsPerSecond', 'F5JMotorRestartOption',
+        //
+      },
+    };
 
     Map<String, List<Map<String, Object?>>> tables(String name) {
       final list = _load(name)['tables']! as List<Object?>;
@@ -125,6 +193,84 @@ void main() {
         }
       });
 
+      test('$file carries only known tables, columns and fake values', () {
+        final t = tables(file);
+        for (final entry in t.entries) {
+          expect(
+            numericKeys.keys,
+            contains(entry.key),
+            reason: 'unknown table ${entry.key} in $file',
+          );
+          final numeric = numericKeys[entry.key]!;
+          for (final row in entry.value) {
+            for (final cell in row.entries) {
+              final key = '${entry.key}.${cell.key}';
+              final value = cell.value;
+              if (value is String) {
+                final pattern = patterns[key];
+                expect(pattern, isNotNull, reason: 'unlisted text column $key');
+                expect(
+                  pattern!.hasMatch(value),
+                  isTrue,
+                  reason: '$file $key = "$value"',
+                );
+              } else {
+                expect(
+                  value == null || value is num,
+                  isTrue,
+                  reason: '$file $key is not text or a number',
+                );
+                expect(
+                  numeric.contains(cell.key),
+                  isTrue,
+                  reason: 'unlisted numeric column $key in $file',
+                );
+              }
+            }
+          }
+        }
+      });
+
+      test('$file uses only the fixed model names', () {
+        final models = {
+          for (final r in tables(file)['CompPilots']!)
+            if (r['Model'] != null) r['Model'] as String,
+        };
+        const hand = {
+          'Alpha Glider',
+          'Beta Glider',
+          'beta glider ',
+          'Gamma Glider',
+        };
+        for (final m in models) {
+          final generated = RegExp(r'^Example Model \d+$').hasMatch(m);
+          expect(generated || hand.contains(m), isTrue, reason: m);
+        }
+      });
+    }
+
+    test('the lookup tables are the fixed six roles and one DBVersion', () {
+      for (final file in ['comps_reference.json', 'comps_edge_cases.json']) {
+        final t = tables(file);
+        expect(t['Roles'], const [
+          {'Role': 'TM', 'RoleName': 'Team Manager'},
+          {'Role': 'Plt', 'RoleName': 'Pilot'},
+          {'Role': 'TM/Plt', 'RoleName': 'Team Manager/Pilot'},
+          {'Role': 'CD/Plt', 'RoleName': 'Comp Director/Pilot'},
+          {'Role': 'Hlp', 'RoleName': 'Helper'},
+          {'Role': 'CD', 'RoleName': 'Competition Director'},
+        ]);
+        expect(t['DBParams'], [
+          {'Property': 'DBVersion', 'PRValue': '6.78'},
+        ]);
+      }
+    });
+
+    for (final file in [
+      'comps_reference.json',
+      'comps_edge_cases.json',
+      'comps_missing_columns.json',
+    ]) {
       test('$file refers only to pilots it carries', () {
         final t = tables(file);
         final pilots = {for (final p in t['Pilots']!) p['PilotNo']};
@@ -132,32 +278,22 @@ void main() {
           expect(pilots, contains(row['PilotNo']), reason: '$row');
         }
       });
-
-      test('$file holds no real name, venue or email', () {
-        final t = tables(file);
-        for (final c in t['Comps']!) {
-          expect(c['CompName'], matches(RegExp(r'^Fixture Open \d+$')));
-          if (c['CompVenue'] != null) {
-            expect(c['CompVenue'], 'Example Field');
-          }
-        }
-        for (final row in t['CompPilots']!) {
-          final model = row['Model'];
-          if (model != null) {
-            expect(
-              (model as String).toLowerCase().trim(),
-              matches(RegExp(r'^(example model \d+|\w+ glider)$')),
-            );
-          }
-        }
-        for (final p in t['Pilots']!) {
-          final email = p['Email'];
-          if (email is String && email.trim().isNotEmpty) {
-            expect(email, endsWith('@example.test'));
-          }
-        }
-      });
     }
+
+    test('the integrity snapshot holds the broken references on purpose', () {
+      final t = tables('comps_integrity_cases.json');
+      final compNos = [for (final c in t['Comps']!) c['CompNo']];
+      expect(compNos.where((n) => n == 9102), hasLength(2));
+      final keys = [
+        for (final r in t['CompPilots']!) '${r['CompNo']}/${r['PilotNo']}',
+      ];
+      expect(keys.where((k) => k == '9101/2102'), hasLength(2));
+      final pilots = {for (final p in t['Pilots']!) p['PilotNo']};
+      expect(
+        t['CompPilots']!.where((r) => !pilots.contains(r['PilotNo'])),
+        hasLength(1),
+      );
+    });
 
     test('the reference snapshot has the F5J, F3J and F5L competitions', () {
       final t = tables('comps_reference.json');
