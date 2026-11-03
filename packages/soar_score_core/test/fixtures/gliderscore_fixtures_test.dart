@@ -94,4 +94,122 @@ void main() {
       }
     });
   });
+
+  group('GliderScore competition fixtures', () {
+    const compFiles = [
+      'comps_reference.json',
+      'comps_edge_cases.json',
+      'comps_missing_columns.json',
+    ];
+
+    Map<String, List<Map<String, Object?>>> tables(String name) {
+      final list = _load(name)['tables']! as List<Object?>;
+      return {
+        for (final t in list.cast<Map<String, Object?>>())
+          t['name']! as String: [
+            for (final row in (t['rows']! as List<Object?>))
+              (row as Map).cast<String, Object?>(),
+          ],
+      };
+    }
+
+    for (final file in compFiles) {
+      test('$file is a gs-import/v1 snapshot with consistent counts', () {
+        final snapshot = _load(file);
+        expect(snapshot['schema'], GliderScoreImportResult.schema);
+        for (final t
+            in (snapshot['tables']! as List<Object?>)
+                .cast<Map<String, Object?>>()) {
+          expect(t['rowCount'], (t['rows']! as List<Object?>).length);
+          expect(t['rowCapExceeded'], isFalse);
+        }
+      });
+
+      test('$file refers only to pilots it carries', () {
+        final t = tables(file);
+        final pilots = {for (final p in t['Pilots']!) p['PilotNo']};
+        for (final row in t['CompPilots']!) {
+          expect(pilots, contains(row['PilotNo']), reason: '$row');
+        }
+      });
+
+      test('$file holds no real name, venue or email', () {
+        final t = tables(file);
+        for (final c in t['Comps']!) {
+          expect(c['CompName'], matches(RegExp(r'^Fixture Open \d+$')));
+          if (c['CompVenue'] != null) {
+            expect(c['CompVenue'], 'Example Field');
+          }
+        }
+        for (final row in t['CompPilots']!) {
+          final model = row['Model'];
+          if (model != null) {
+            expect(
+              (model as String).toLowerCase().trim(),
+              matches(RegExp(r'^(example model \d+|\w+ glider)$')),
+            );
+          }
+        }
+        for (final p in t['Pilots']!) {
+          final email = p['Email'];
+          if (email is String && email.trim().isNotEmpty) {
+            expect(email, endsWith('@example.test'));
+          }
+        }
+      });
+    }
+
+    test('the reference snapshot has the F5J, F3J and F5L competitions', () {
+      final t = tables('comps_reference.json');
+      final classes = {
+        for (final c in t['Comps']!) c['CompNo']: c['GSCompClass'],
+      };
+      expect(classes, {20: 'F3J', 21: 'F5J', 22: 'F5J', 39: 'F5J', 40: 'F5L'});
+      expect(
+        t['Dur']!.map((r) => r['CompNo']).toSet(),
+        classes.keys.toSet(),
+        reason: 'every competition has its config row',
+      );
+      expect(
+        t['CompPilots']!.where((r) => r['CompNo'] == 21 && r['Retired'] == 1),
+        hasLength(4),
+      );
+    });
+
+    test('the edge-case snapshot covers teams, roles, drops and gaps', () {
+      final t = tables('comps_edge_cases.json');
+      final comps = {for (final c in t['Comps']!) c['CompNo']: c};
+      expect(comps[9001]!['UseTeams'], 1);
+      expect([
+        for (var i = 1; i <= 5; i++) comps[9001]!['Drop${i}AtRound'],
+      ], everyElement(lessThan(99)));
+      final roles = {
+        for (final r in t['CompPilots']!)
+          if (r['CompNo'] == 9002) r['Role'],
+      };
+      expect(roles, {'Plt', 'TM/Plt', 'CD/Plt', 'CD', 'Hlp', 'TM'});
+      expect(
+        t['CompPilots']!.where((r) => r['CompNo'] == 9002 && r['Retired'] == 1),
+        hasLength(2),
+      );
+      expect(t['Dur']!.map((r) => r['CompNo']), isNot(contains(9003)));
+      expect(comps[9004]!['GSCompClass'], 'F3Z');
+    });
+
+    test('the missing-columns snapshot keeps only the required columns', () {
+      final t = tables('comps_missing_columns.json');
+      expect(t.keys, isNot(contains('Roles')));
+      expect(t.keys, isNot(contains('DBParams')));
+      expect(t['Comps']!.single.keys.toSet(), {
+        'CompNo',
+        'CompName',
+        'GSCompClass',
+        'CompDate',
+      });
+      for (final row in t['CompPilots']!) {
+        expect(row.keys.toSet(), {'CompNo', 'PilotNo'});
+      }
+      expect(t['Dur']!.single.keys.toSet(), {'CompNo', 'durTargetTime'});
+    });
+  });
 }
