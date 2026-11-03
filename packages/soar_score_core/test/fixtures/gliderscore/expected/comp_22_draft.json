@@ -1,0 +1,389 @@
+{
+  "sourceCompNo": 22,
+  "sourceClass": "F5J",
+  "status": "importable",
+  "reason": null,
+  "name": "Fixture Open 22",
+  "host": "Example Field",
+  "startDate": "2022-03-18T00:00:00.000Z",
+  "disciplineType": "F5J",
+  "config": {
+    "core": {
+      "group_score_mode": "Normalized",
+      "rounding_mode": "Truncate",
+      "decimal_places": 2,
+      "draw_mode": "StandardManOnMan",
+      "drop_after_rounds": [5],
+      "teams_enabled": false,
+      "roles_enabled": false,
+      "classes_enabled": false,
+      "models_enabled": false,
+      "participant_numbers_enabled": false,
+      "lane_mode": "None"
+    },
+    "discipline": {
+      "working_time": 600,
+      "points_per_second": 1.0,
+      "fractional_seconds": 0,
+      "reference_launch_height": 200,
+      "minor_penalty_per_meter": 0.5,
+      "major_penalty_per_meter": 3.0,
+      "motor_restart_mode": "not_allowed"
+    }
+  },
+  "defaultedSettings": ["discipline.landing_table"],
+  "sourceLandingTableNo": 9,
+  "excludedTestUsers": 0,
+  "teams": [],
+  "participants": [
+    {
+      "sourcePilotNo": 98,
+      "role": "pilot",
+      "sourceRole": "Plt",
+      "retired": false,
+      "participantNumber": null,
+      "classification": null,
+      "sourceTeamNo": null,
+      "modelName": null,
+      "modelId": null
+    },
+    {
+      "sourcePilotNo": 85,
+      "role": "pilot",
+      "sourceRole": "Plt",
+      "retired": false,
+      "participantNumber": null,
+      "classification": null,
+      "sourceTeamNo": null,
+      "modelName": null,
+      "modelId": null
+    },
+    {
+      "sourcePilotNo": 115,
+      "role": "pilot",
+      "sourceRole": "Plt",
+      "retired": false,
+      "participantNumber": null,
+      "classification": null,
+      "sourceTeamNo": null,
+      "modelName": null,
+      "modelId": null
+    },
+    {
+      "sourcePilotNo": 97,
+      "role": "pilot",
+      "sourceRole": "Plt",
+      "retired": false,
+      "participantNumber": null,
+      "classification": null,
+      "sourceTeamNo": null,
+      "modelName": null,
+      "modelId": null
+    },
+    {
+      "sourcePilotNo": 84,
+      "role": "pilot",
+      "sourceRole": "Plt",
+      "retired": false,
+      "participantNumber": null,
+      "classification": null,
+      "sourceTeamNo": null,
+      "modelName": null,
+      "modelId": null
+    },
+    {
+      "sourcePilotNo": 124,
+      "role": "pilot",
+      "sourceRole": "Plt",
+      "retired": false,
+      "participantNumber": null,
+      "classification": null,
+      "sourceTeamNo": null,
+      "modelName": null,
+      "modelId": null
+    },
+    {
+      "sourcePilotNo": 117,
+      "role": "pilot",
+      "sourceRole": "Plt",
+      "retired": false,
+      "participantNumber": null,
+      "classification": null,
+      "sourceTeamNo": null,
+      "modelName": null,
+      "modelId": null
+    },
+    {
+      "sourcePilotNo": 76,
+      "role": "pilot",
+      "sourceRole": "Plt",
+      "retired": false,
+      "participantNumber": null,
+      "classification": null,
+      "sourceTeamNo": null,
+      "modelName": null,
+      "modelId": null
+    },
+    {
+      "sourcePilotNo": 78,
+      "role": "pilot",
+      "sourceRole": "Plt",
+      "retired": false,
+      "participantNumber": null,
+      "classification": null,
+      "sourceTeamNo": null,
+      "modelName": null,
+      "modelId": null
+    },
+    {
+      "sourcePilotNo": 123,
+      "role": "pilot",
+      "sourceRole": "Plt",
+      "retired": false,
+      "participantNumber": null,
+      "classification": null,
+      "sourceTeamNo": null,
+      "modelName": null,
+      "modelId": null
+    },
+    {
+      "sourcePilotNo": 118,
+      "role": "pilot",
+      "sourceRole": "Plt",
+      "retired": false,
+      "participantNumber": null,
+      "classification": null,
+      "sourceTeamNo": null,
+      "modelName": null,
+      "modelId": null
+    },
+    {
+      "sourcePilotNo": 119,
+      "role": "pilot",
+      "sourceRole": "Plt",
+      "retired": false,
+      "participantNumber": null,
+      "classification": null,
+      "sourceTeamNo": null,
+      "modelName": null,
+      "modelId": null
+    },
+    {
+      "sourcePilotNo": 125,
+      "role": "pilot",
+      "sourceRole": "Plt",
+      "retired": false,
+      "participantNumber": null,
+      "classification": null,
+      "sourceTeamNo": null,
+      "modelName": null,
+      "modelId": null
+    },
+    {
+      "sourcePilotNo": 75,
+      "role": "pilot",
+      "sourceRole": "Plt",
+      "retired": false,
+      "participantNumber": null,
+      "classification": null,
+      "sourceTeamNo": null,
+      "modelName": null,
+      "modelId": null
+    },
+    {
+      "sourcePilotNo": 92,
+      "role": "pilot",
+      "sourceRole": "Plt",
+      "retired": false,
+      "participantNumber": null,
+      "classification": null,
+      "sourceTeamNo": null,
+      "modelName": null,
+      "modelId": null
+    },
+    {
+      "sourcePilotNo": 126,
+      "role": "pilot",
+      "sourceRole": "Plt",
+      "retired": false,
+      "participantNumber": null,
+      "classification": null,
+      "sourceTeamNo": null,
+      "modelName": null,
+      "modelId": null
+    },
+    {
+      "sourcePilotNo": 127,
+      "role": "pilot",
+      "sourceRole": "Plt",
+      "retired": false,
+      "participantNumber": null,
+      "classification": null,
+      "sourceTeamNo": null,
+      "modelName": null,
+      "modelId": null
+    },
+    {
+      "sourcePilotNo": 121,
+      "role": "pilot",
+      "sourceRole": "Plt",
+      "retired": false,
+      "participantNumber": null,
+      "classification": null,
+      "sourceTeamNo": null,
+      "modelName": null,
+      "modelId": null
+    },
+    {
+      "sourcePilotNo": 106,
+      "role": "pilot",
+      "sourceRole": "Plt",
+      "retired": false,
+      "participantNumber": null,
+      "classification": null,
+      "sourceTeamNo": null,
+      "modelName": null,
+      "modelId": null
+    },
+    {
+      "sourcePilotNo": 109,
+      "role": "pilot",
+      "sourceRole": "Plt",
+      "retired": false,
+      "participantNumber": null,
+      "classification": null,
+      "sourceTeamNo": null,
+      "modelName": null,
+      "modelId": null
+    },
+    {
+      "sourcePilotNo": 108,
+      "role": "pilot",
+      "sourceRole": "Plt",
+      "retired": false,
+      "participantNumber": null,
+      "classification": null,
+      "sourceTeamNo": null,
+      "modelName": null,
+      "modelId": null
+    },
+    {
+      "sourcePilotNo": 116,
+      "role": "pilot",
+      "sourceRole": "Plt",
+      "retired": false,
+      "participantNumber": null,
+      "classification": null,
+      "sourceTeamNo": null,
+      "modelName": null,
+      "modelId": null
+    },
+    {
+      "sourcePilotNo": 104,
+      "role": "pilot",
+      "sourceRole": "Plt",
+      "retired": false,
+      "participantNumber": null,
+      "classification": null,
+      "sourceTeamNo": null,
+      "modelName": null,
+      "modelId": null
+    },
+    {
+      "sourcePilotNo": 129,
+      "role": "pilot",
+      "sourceRole": "Plt",
+      "retired": false,
+      "participantNumber": null,
+      "classification": null,
+      "sourceTeamNo": null,
+      "modelName": null,
+      "modelId": null
+    },
+    {
+      "sourcePilotNo": 130,
+      "role": "pilot",
+      "sourceRole": "Plt",
+      "retired": false,
+      "participantNumber": null,
+      "classification": null,
+      "sourceTeamNo": null,
+      "modelName": null,
+      "modelId": null
+    },
+    {
+      "sourcePilotNo": 81,
+      "role": "pilot",
+      "sourceRole": "Plt",
+      "retired": false,
+      "participantNumber": null,
+      "classification": null,
+      "sourceTeamNo": null,
+      "modelName": null,
+      "modelId": null
+    },
+    {
+      "sourcePilotNo": 132,
+      "role": "pilot",
+      "sourceRole": "Plt",
+      "retired": false,
+      "participantNumber": null,
+      "classification": null,
+      "sourceTeamNo": null,
+      "modelName": null,
+      "modelId": null
+    },
+    {
+      "sourcePilotNo": 133,
+      "role": "pilot",
+      "sourceRole": "Plt",
+      "retired": false,
+      "participantNumber": null,
+      "classification": null,
+      "sourceTeamNo": null,
+      "modelName": null,
+      "modelId": null
+    },
+    {
+      "sourcePilotNo": 134,
+      "role": "pilot",
+      "sourceRole": "Plt",
+      "retired": false,
+      "participantNumber": null,
+      "classification": null,
+      "sourceTeamNo": null,
+      "modelName": null,
+      "modelId": null
+    },
+    {
+      "sourcePilotNo": 105,
+      "role": "pilot",
+      "sourceRole": "Plt",
+      "retired": false,
+      "participantNumber": null,
+      "classification": null,
+      "sourceTeamNo": null,
+      "modelName": null,
+      "modelId": null
+    },
+    {
+      "sourcePilotNo": 135,
+      "role": "pilot",
+      "sourceRole": "Plt",
+      "retired": false,
+      "participantNumber": null,
+      "classification": null,
+      "sourceTeamNo": null,
+      "modelName": null,
+      "modelId": null
+    }
+  ],
+  "skippedParticipants": [],
+  "warnings": [
+    {
+      "code": "landing_table_not_imported",
+      "sourcePilotNo": null,
+      "detail": "9"
+    }
+  ]
+}

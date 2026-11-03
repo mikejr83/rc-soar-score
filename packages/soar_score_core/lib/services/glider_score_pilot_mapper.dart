@@ -46,7 +46,7 @@ class GliderScorePilotMapper {
     final skipped = <SkippedPilot>[];
     final dropped = <String, int>{};
     final seenNumbers = <int>{};
-    var excluded = 0;
+    final excludedNumbers = <int>{};
 
     for (final row in table.rows) {
       final no = _int(row['PilotNo']);
@@ -72,7 +72,7 @@ class GliderScorePilotMapper {
         continue;
       }
       if (last.toUpperCase().startsWith('ZZ')) {
-        excluded++;
+        excludedNumbers.add(no);
         continue;
       }
       if (!seenNumbers.add(no)) {
@@ -159,7 +159,8 @@ class GliderScorePilotMapper {
     return PilotImportDraft(
       pilots: pilots,
       skipped: skipped,
-      excludedTestUsers: excluded,
+      excludedTestUsers: excludedNumbers.length,
+      excludedPilotNumbers: excludedNumbers,
       droppedFieldCounts: dropped,
       warnings: warnings,
     );
