@@ -95,6 +95,7 @@ class PilotImportDraft {
     required this.excludedTestUsers,
     required this.droppedFieldCounts,
     required this.warnings,
+    this.excludedPilotNumbers = const {},
   });
 
   /// Pilots to review, in file order.
@@ -105,6 +106,10 @@ class PilotImportDraft {
   /// Pilots left out because their last name starts with `ZZ`, which
   /// GliderScore uses for its bundled test pilots.
   final int excludedTestUsers;
+
+  /// The `PilotNo` of each pilot counted in [excludedTestUsers], so a
+  /// competition's participants can tell a test pilot from an unknown one.
+  final Set<int> excludedPilotNumbers;
 
   /// For each GliderScore column with no profile field, how many included
   /// pilots had a value in it.

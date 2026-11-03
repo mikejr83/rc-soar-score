@@ -1,0 +1,152 @@
+{
+  "sourceCompNo": 9001,
+  "sourceClass": "F5J",
+  "status": "importable",
+  "reason": null,
+  "name": "Fixture Open 9001",
+  "host": "Example Field",
+  "startDate": "2026-06-14T00:00:00.000Z",
+  "disciplineType": "F5J",
+  "config": {
+    "core": {
+      "group_score_mode": "Normalized",
+      "rounding_mode": "Truncate",
+      "decimal_places": 2,
+      "draw_mode": "StandardManOnMan",
+      "drop_after_rounds": [3, 6],
+      "teams_enabled": true,
+      "team_pilot_count": 2,
+      "team_protection": true,
+      "roles_enabled": true,
+      "classes_enabled": true,
+      "models_enabled": true,
+      "participant_numbers_enabled": true,
+      "lane_mode": "None"
+    },
+    "discipline": {
+      "working_time": 600,
+      "points_per_second": 1.0,
+      "fractional_seconds": 0,
+      "reference_launch_height": 200,
+      "minor_penalty_per_meter": 0.5,
+      "major_penalty_per_meter": 3.0,
+      "motor_restart_mode": "allowed"
+    }
+  },
+  "defaultedSettings": ["discipline.landing_table"],
+  "sourceLandingTableNo": 9,
+  "sourceLaneCount": null,
+  "excludedTestUsers": 0,
+  "teams": [
+    {
+      "sourceTeamNo": 1,
+      "name": "Team 1"
+    },
+    {
+      "sourceTeamNo": 2,
+      "name": "Team 2"
+    }
+  ],
+  "participants": [
+    {
+      "sourcePilotNo": 2001,
+      "role": "pilot",
+      "sourceRole": "Plt",
+      "retired": false,
+      "participantNumber": 1,
+      "classification": "Sr",
+      "sourceTeamNo": 1,
+      "modelName": "Alpha Glider",
+      "modelId": null
+    },
+    {
+      "sourcePilotNo": 2002,
+      "role": "pilot",
+      "sourceRole": "Plt",
+      "retired": false,
+      "participantNumber": 2,
+      "classification": "Sr",
+      "sourceTeamNo": 1,
+      "modelName": "Alpha Glider",
+      "modelId": null
+    },
+    {
+      "sourcePilotNo": 2003,
+      "role": "pilot",
+      "sourceRole": "Plt",
+      "retired": false,
+      "participantNumber": 3,
+      "classification": "Jr",
+      "sourceTeamNo": 1,
+      "modelName": "Beta Glider",
+      "modelId": null
+    },
+    {
+      "sourcePilotNo": 2004,
+      "role": "pilot",
+      "sourceRole": "Plt",
+      "retired": false,
+      "participantNumber": 4,
+      "classification": "Sr",
+      "sourceTeamNo": 2,
+      "modelName": "Gamma Glider",
+      "modelId": null
+    },
+    {
+      "sourcePilotNo": 2005,
+      "role": "pilot",
+      "sourceRole": "Plt",
+      "retired": false,
+      "participantNumber": 5,
+      "classification": "Sr",
+      "sourceTeamNo": 2,
+      "modelName": null,
+      "modelId": null
+    },
+    {
+      "sourcePilotNo": 2006,
+      "role": "pilot",
+      "sourceRole": "Plt",
+      "retired": false,
+      "participantNumber": 6,
+      "classification": "Jr",
+      "sourceTeamNo": 2,
+      "modelName": "beta glider",
+      "modelId": null
+    },
+    {
+      "sourcePilotNo": 2007,
+      "role": "teamManager",
+      "sourceRole": "TM",
+      "retired": false,
+      "participantNumber": null,
+      "classification": null,
+      "sourceTeamNo": 1,
+      "modelName": null,
+      "modelId": null
+    }
+  ],
+  "skippedParticipants": [],
+  "warnings": [
+    {
+      "code": "drops_discarded",
+      "sourcePilotNo": null,
+      "detail": "kept 3,6; discarded 9,12,15"
+    },
+    {
+      "code": "landing_table_not_imported",
+      "sourcePilotNo": null,
+      "detail": "9"
+    },
+    {
+      "code": "omit_from_team_score_dropped",
+      "sourcePilotNo": 2005,
+      "detail": null
+    },
+    {
+      "code": "team_names_generated",
+      "sourcePilotNo": null,
+      "detail": "2"
+    }
+  ]
+}

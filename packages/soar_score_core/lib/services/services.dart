@@ -14,6 +14,7 @@ export 'score_correction_audit.dart';
 export 'contests_service.dart';
 export 'discipline_config_validator.dart';
 export 'glider_score_import_service.dart';
+export 'glider_score_contest_mapper.dart';
 export 'glider_score_pilot_mapper.dart';
 export 'pilot_import_matcher.dart';
 export 'pilot_import_service.dart';

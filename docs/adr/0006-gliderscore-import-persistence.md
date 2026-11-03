@@ -59,19 +59,20 @@ Written in the same transaction as the competition, so they roll back with it:
 
 Stamps are rows in one source-neutral table, not columns on each entity, so later phases and #576 add rows and not schema.
 
-| Column                | Notes                                                                                                                                              |
-| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `id`                  | UUIDv7                                                                                                                                             |
-| `contest_id`          | Set for contest and participation rows; null for profile rows (profiles belong to the director, not a contest)                                     |
-| `entity_type`         | `Contest`, `ContestParticipation` or `ParticipantProfile` (later phases add their own)                                                             |
-| `entity_id`           | The stamped entity                                                                                                                                 |
-| `source_system`       | `gliderscore`                                                                                                                                      |
-| `source_keys`         | JSON object of source keys: competition number for a contest, competition number plus pilot number for a participation, pilot number for a profile |
-| `file_fingerprint`    | Hash of the source file (and its file name), the same for every row of one import                                                                  |
-| `dedupe_key`          | Contest rows only: `<owner_account_id>:gliderscore:<file_fingerprint>:<comp_no>`; unique index (see above)                                         |
-| `import_operation_id` | One id per wizard run, shared by every row it wrote                                                                                                |
-| `tool_version`        | The importer version that wrote the row                                                                                                            |
-| `imported_at`         | UTC time                                                                                                                                           |
+| Column                | Notes                                                                                                                                                                                          |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`                  | UUIDv7                                                                                                                                                                                         |
+| `contest_id`          | Set for contest and participation rows; null for profile rows (profiles belong to the director, not a contest)                                                                                 |
+| `entity_type`         | `Contest`, `ContestParticipation` or `ParticipantProfile` (later phases add their own)                                                                                                         |
+| `entity_id`           | The stamped entity                                                                                                                                                                             |
+| `source_system`       | `gliderscore`                                                                                                                                                                                  |
+| `source_keys`         | JSON object of source keys: competition number for a contest, competition number plus pilot number for a participation, pilot number for a profile                                             |
+| `file_fingerprint`    | Hash of the source file (and its file name), the same for every row of one import                                                                                                              |
+| `source_values`       | Contest rows only: JSON object of source values that have no Soar Score field and are kept for review and later phases, for example `{"lane_count": 6, "landing_table_no": 9}`; null elsewhere |
+| `dedupe_key`          | Contest rows only: `<owner_account_id>:gliderscore:<file_fingerprint>:<comp_no>`; unique index (see above)                                                                                     |
+| `import_operation_id` | One id per wizard run, shared by every row it wrote                                                                                                                                            |
+| `tool_version`        | The importer version that wrote the row                                                                                                                                                        |
+| `imported_at`         | UTC time                                                                                                                                                                                       |
 
 Rules:
 
@@ -79,6 +80,7 @@ Rules:
 - Phase A profiles stay unstamped. A later import stamps them when it matches them by the phase A matching rules.
 - A stamp is never shown as editable data, never takes part in matching (phase A rules are unchanged), and never changes how an entity behaves.
 - Rows with a `contest_id` travel with `.rcsoar` export and sync through the contest stream like the entity they describe. Profile rows follow the director's participants list. The table is classified in `exchangeClassByTable` (contest rows exported, profile rows exported only for profiles the contest references).
+- **`source_values`:** never editable, never read by scoring or draw, exported and synced with the row. `lane_count` is `durNbrOfLanes` when it is above 0 (Soar Score has `lane_mode` only; the valid lanes of a drawn group are `1..capacity`, so the count is kept, not configured). The draw phase compares it with the drawn capacity and warns when they differ. `landing_table_no` is GliderScore's `durLndg` when it is not the default.
 - **Canonical `source_keys`:** a JSON object with keys sorted, integers as plain decimals (no leading zeros, no floats), no whitespace. One helper builds it and the `dedupe_key`, and is unit-tested; comparisons never use a differently serialised copy.
 - Deleting an entity deletes its stamp. A profile stamped by several imports holds one row per import operation, not one per competition. Deleting one imported contest removes its contest and participation stamps only; profile stamps belong to the director's participants list and stay.
 - Stamps are not personal data beyond what the entity already holds: source keys are GliderScore row numbers, not names.
