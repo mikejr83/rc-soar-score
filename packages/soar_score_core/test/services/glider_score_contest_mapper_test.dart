@@ -55,8 +55,8 @@ Set<String> _codes(ContestImportDraft c) => {
 GliderScoreImportResult _one({
   Map<String, Object?> comp = const {},
   Map<String, Object?> config = const {},
-  List<Map<String, Object?>> members = const [],
-  List<Map<String, Object?>> pilots = const [],
+  List<Map<String, Object?>>? members,
+  List<Map<String, Object?>>? pilots,
 }) => _tables({
   'Comps': [
     {
@@ -67,11 +67,24 @@ GliderScoreImportResult _one({
       ...comp,
     },
   ],
+  // One plain participant unless the test says otherwise, because a
+  // competition with nobody to import is blocked.
   'CompPilots': [
-    for (final m in members) {'CompNo': 1, ...m},
+    for (final m
+        in members ??
+            const [
+              {'PilotNo': 1},
+            ])
+      {'CompNo': 1, ...m},
   ],
   'Pilots': [
-    for (final p in pilots)
+    for (final p
+        in pilots ??
+            (members == null
+                ? const [
+                    {'PilotNo': 1},
+                  ]
+                : const <Map<String, Object?>>[]))
       {'FirstName': 'A${p['PilotNo']}', 'LastName': 'B${p['PilotNo']}', ...p},
   ],
   'Dur': [
@@ -94,6 +107,7 @@ Map<String, Object?> _golden(ContestImportDraft c) => {
   'config': c.config?.toJson(),
   'defaultedSettings': c.defaultedSettings,
   'sourceLandingTableNo': c.sourceLandingTableNo,
+  'sourceLaneCount': c.sourceLaneCount,
   'excludedTestUsers': c.excludedTestUsers,
   'teams': [
     for (final t in c.teams) {'sourceTeamNo': t.sourceTeamNo, 'name': t.name},
@@ -311,23 +325,52 @@ void main() {
       expect(c.config!.core['group_score_mode'], 'Time');
     });
 
-    test('a fractional reference height is rounded with a warning', () {
-      final c = _single(_one(config: {'durRefHeight': 150.4}));
+    test('a fractional whole-number setting is rounded and named', () {
+      final c = _single(
+        _one(
+          config: {
+            'durRefHeight': 150.4,
+            'durTargetTime': 600.6,
+            'durDecimalsForTiming': 1.2,
+          },
+        ),
+      );
       expect(c.config!.discipline['reference_launch_height'], 150);
-      expect(_codes(c), contains(ContestImportWarning.referenceHeightRounded));
+      expect(c.config!.discipline['working_time'], 601);
+      expect(c.config!.discipline['fractional_seconds'], 1);
+      expect(
+        {
+          for (final w in c.warnings)
+            if (w.code == ContestImportWarning.settingRounded) w.detail,
+        },
+        {
+          'reference_launch_height=150.4',
+          'working_time=600.6',
+          'fractional_seconds=1.2',
+        },
+      );
+      expect(_codes(c), isNot(contains('reference_height_rounded')));
     });
 
-    test('lanes become a mode and the count is only reported', () {
-      final c = _single(_one(config: {'durNbrOfLanes': 6}));
-      expect(c.config!.core['lane_mode'], 'Random');
-      expect(
-        c.warnings
-            .singleWhere(
-              (w) => w.code == ContestImportWarning.lanesCountNotStored,
-            )
-            .detail,
-        '6',
-      );
+    test('lanes become a mode and the count is kept as a source value', () {
+      for (final (lanes, mode, kept) in [
+        (0, 'None', null),
+        (2, 'Random', 2),
+        (6, 'Random', 6),
+        (6.0, 'Random', 6),
+        (-1, 'None', null),
+      ]) {
+        final c = _single(_one(config: {'durNbrOfLanes': lanes}));
+        expect(c.config!.core['lane_mode'], mode, reason: '$lanes');
+        expect(c.sourceLaneCount, kept, reason: '$lanes');
+        expect(
+          c.warnings.where(
+            (w) => w.code == ContestImportWarning.lanesCountKept,
+          ),
+          hasLength(kept == null ? 0 : 1),
+        );
+      }
+      expect(_single(_one()).sourceLaneCount, isNull);
     });
 
     test('prelim comps and locks are reported, not imported', () {
@@ -482,16 +525,51 @@ void main() {
         _one(
           members: [
             {'Role': 'Plt'},
+            {'PilotNo': 1},
+          ],
+          pilots: [
+            {'PilotNo': 1},
           ],
         ),
       );
       expect(c.skippedParticipants.single.sourcePilotNo, isNull);
+      expect(c.participants, hasLength(1));
     });
 
-    test('a comp with no participants still imports, with a warning', () {
-      final c = _single(_one());
-      expect(c.status, ContestImportStatus.importable);
-      expect(_codes(c), contains(ContestImportWarning.noParticipants));
+    test('a comp with nobody to import is blocked with the counts', () {
+      void blocked(GliderScoreImportResult r, String detail) {
+        final c = _single(r);
+        expect(c.status, ContestImportStatus.blocked);
+        expect(c.reason, ContestImportReason.noParticipants);
+        expect(c.reasonDetail, detail);
+        expect(c.participants, isEmpty);
+        expect(c.config, isNull);
+      }
+
+      blocked(_one(members: [], pilots: []), 'rows=0 skipped=0 test=0');
+      blocked(
+        _one(
+          members: [
+            {'PilotNo': 7},
+          ],
+          pilots: [],
+        ),
+        'rows=1 skipped=1 test=0',
+      );
+      blocked(
+        _one(
+          members: [
+            {'PilotNo': 1},
+            {'PilotNo': 2},
+          ],
+          pilots: [
+            {'PilotNo': 1, 'LastName': 'ZZa'},
+            {'PilotNo': 2, 'LastName': 'ZZb'},
+          ],
+        ),
+        'rows=2 skipped=0 test=2',
+      );
+      expect(_single(_one()).status, ContestImportStatus.importable);
     });
   });
 
@@ -521,6 +599,112 @@ void main() {
         all.participants.firstWhere((p) => p.sourcePilotNo == 2004).sourceRole,
         'TM/Plt',
       );
+    });
+
+    test('IsPilot decides flier or non-flier, the code picks the role', () {
+      // (code, IsPilot, expected role, warnings)
+      final cases = <(String, Object?, ImportedRole, Set<String>)>[
+        ('Plt', 1, ImportedRole.pilot, {}),
+        ('Plt', null, ImportedRole.pilot, {}),
+        (
+          'Plt',
+          0,
+          ImportedRole.helper,
+          {ContestImportWarning.roleConflictIsPilot},
+        ),
+        ('TM/Plt', 1, ImportedRole.pilot, {ContestImportWarning.roleComposite}),
+        (
+          'CD/Plt',
+          0,
+          ImportedRole.helper,
+          {
+            ContestImportWarning.roleComposite,
+            ContestImportWarning.roleConflictIsPilot,
+          },
+        ),
+        ('Hlp', 0, ImportedRole.helper, {}),
+        ('Hlp', null, ImportedRole.helper, {}),
+        (
+          'Hlp',
+          1,
+          ImportedRole.pilot,
+          {ContestImportWarning.roleConflictIsPilot},
+        ),
+        ('TM', 0, ImportedRole.teamManager, {}),
+        (
+          'TM',
+          1,
+          ImportedRole.pilot,
+          {ContestImportWarning.roleConflictIsPilot},
+        ),
+        ('CD', 0, ImportedRole.competitionDirector, {}),
+        (
+          'CD',
+          1,
+          ImportedRole.pilot,
+          {ContestImportWarning.roleConflictIsPilot},
+        ),
+        (
+          'plt',
+          0,
+          ImportedRole.helper,
+          {ContestImportWarning.roleConflictIsPilot},
+        ),
+      ];
+      for (final (code, isPilot, role, codes) in cases) {
+        final c = _single(
+          _one(
+            members: [
+              {'PilotNo': 1, 'Role': code, 'IsPilot': ?isPilot},
+              {'PilotNo': 2},
+            ],
+            pilots: [
+              {'PilotNo': 1},
+              {'PilotNo': 2},
+            ],
+          ),
+        );
+        final p = c.participants.first;
+        expect(p.role, role, reason: '$code IsPilot=$isPilot');
+        expect(p.sourceRole, code);
+        expect(
+          {
+            for (final w in c.warnings)
+              if (w.sourcePilotNo == 1) w.code,
+          },
+          codes,
+          reason: '$code IsPilot=$isPilot',
+        );
+      }
+    });
+
+    test('a demoted Plt gets no number, class, model or team slot', () {
+      final c = _single(
+        _one(
+          comp: {'UsePilotNumbering': 1, 'UseClasses': 1, 'UseModels': 1},
+          members: [
+            {
+              'PilotNo': 1,
+              'Role': 'Plt',
+              'IsPilot': 0,
+              'StartNo': 4,
+              'PilotClass': 'Sr',
+              'Model': 'M',
+            },
+            {'PilotNo': 2, 'IsPilot': 1},
+          ],
+          pilots: [
+            {'PilotNo': 1},
+            {'PilotNo': 2},
+          ],
+        ),
+      );
+      final p = c.participants.first;
+      expect(p.role, ImportedRole.helper);
+      expect(p.participantNumber, isNull);
+      expect(p.classification, isNull);
+      expect(p.modelName, isNull);
+      expect(c.participants.last.participantNumber, 1);
     });
 
     test('only fliers fly', () {

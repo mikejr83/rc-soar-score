@@ -54,6 +54,7 @@ class ContestImportDraft {
     this.config,
     this.defaultedSettings = const [],
     this.sourceLandingTableNo,
+    this.sourceLaneCount,
     this.participants = const [],
     this.skippedParticipants = const [],
     this.teams = const [],
@@ -100,6 +101,11 @@ class ContestImportDraft {
   /// only for review: landing tables are not imported in this phase.
   final int? sourceLandingTableNo;
 
+  /// GliderScore's lane count when it is above 0. Soar Score has no lane
+  /// count setting (`lane_mode` only), so persistence keeps the number as a
+  /// source value (ADR 0006) for review and for the draw phase to check.
+  final int? sourceLaneCount;
+
   final List<ParticipationDraft> participants;
   final List<SkippedParticipation> skippedParticipants;
   final List<TeamDraft> teams;
@@ -131,6 +137,10 @@ abstract final class ContestImportReason {
 
   /// The mapped settings do not form a valid configuration.
   static const configInvalid = 'config_invalid';
+
+  /// No participant of the competition can be imported, so the contest could
+  /// not be drawn or scored.
+  static const noParticipants = 'no_participants';
 }
 
 /// One participant of a competition.
@@ -277,11 +287,13 @@ class ContestImportWarning {
   /// A second row for the same pilot in one competition; skipped.
   static const duplicateParticipation = 'duplicate_participation';
 
-  /// A competition with no participants that can be imported.
-  static const noParticipants = 'no_participants';
+  /// A lane count is set; the contest gets `lane_mode: Random` and the count
+  /// is kept as a source value, not as a setting.
+  static const lanesCountKept = 'lanes_count_kept_as_source_value';
 
-  /// A lane count is set; Soar Score keeps lanes as a mode, not a count.
-  static const lanesCountNotStored = 'lanes_count_not_stored';
+  /// `IsPilot` and the `Role` code disagree about whether the participant
+  /// flies; `IsPilot` wins and the role follows it.
+  static const roleConflictIsPilot = 'role_conflict_is_pilot';
 
   /// A non-default landing table was used; landing tables are not imported.
   static const landingTableNotImported = 'landing_table_not_imported';
@@ -292,8 +304,9 @@ class ContestImportWarning {
   /// A setting had a value outside what Soar Score allows; the default stays.
   static const settingOutOfRange = 'setting_out_of_range';
 
-  /// `ReferenceHeight` is not a whole number; it is rounded.
-  static const referenceHeightRounded = 'reference_height_rounded';
+  /// A whole-number setting had a fractional value; it is rounded. The
+  /// detail names the setting.
+  static const settingRounded = 'setting_rounded';
 
   final String code;
   final int? sourcePilotNo;

@@ -86,7 +86,7 @@ class F5jClassMapper extends ClassMapper {
       if (rounded != value) {
         warnings.add(
           ContestImportWarning(
-            ContestImportWarning.referenceHeightRounded,
+            ContestImportWarning.settingRounded,
             detail: '$key=$value',
           ),
         );
@@ -490,7 +490,7 @@ class GliderScoreContestMapper {
     if (lanes > 0) {
       warnings.add(
         ContestImportWarning(
-          ContestImportWarning.lanesCountNotStored,
+          ContestImportWarning.lanesCountKept,
           detail: '$lanes',
         ),
       );
@@ -520,8 +520,11 @@ class GliderScoreContestMapper {
       warnings: warnings,
     );
     if (people.participants.isEmpty) {
-      warnings.add(
-        const ContestImportWarning(ContestImportWarning.noParticipants),
+      return refused(
+        'blocked',
+        ContestImportReason.noParticipants,
+        'rows=${members.length} skipped=${people.skipped.length} '
+            'test=${people.testPilots}',
       );
     }
 
@@ -536,6 +539,7 @@ class GliderScoreContestMapper {
       config: config,
       defaultedSettings: defaulted,
       sourceLandingTableNo: discipline.sourceLandingTableNo,
+      sourceLaneCount: lanes > 0 ? lanes : null,
       participants: people.participants,
       skippedParticipants: people.skipped,
       teams: people.teams,
@@ -823,22 +827,27 @@ class GliderScoreContestMapper {
     return result;
   }
 
+  /// `IsPilot` decides whether the participant flies; the role code only
+  /// chooses the role within that type (mapping plan 5.4).
   ImportedRole _role(
     String code,
     Map<String, Object?> row,
     int pilotNo,
     List<ContestImportWarning> warnings,
   ) {
+    final isPilot = row['IsPilot'] == null ? null : flag(row['IsPilot']);
+    ImportedRole base;
     switch (code.toLowerCase()) {
       case 'plt':
-        return ImportedRole.pilot;
+        base = ImportedRole.pilot;
       case 'hlp':
-        return ImportedRole.helper;
+        base = ImportedRole.helper;
       case 'tm':
-        return ImportedRole.teamManager;
+        base = ImportedRole.teamManager;
       case 'cd':
-        return ImportedRole.competitionDirector;
+        base = ImportedRole.competitionDirector;
       case 'tm/plt' || 'cd/plt':
+        base = ImportedRole.pilot;
         warnings.add(
           ContestImportWarning(
             ContestImportWarning.roleComposite,
@@ -846,18 +855,27 @@ class GliderScoreContestMapper {
             detail: code,
           ),
         );
-        return ImportedRole.pilot;
+      default:
+        warnings.add(
+          ContestImportWarning(
+            ContestImportWarning.roleUnknown,
+            sourcePilotNo: pilotNo,
+            detail: code,
+          ),
+        );
+        return isPilot == false ? ImportedRole.helper : ImportedRole.pilot;
     }
-    warnings.add(
-      ContestImportWarning(
-        ContestImportWarning.roleUnknown,
-        sourcePilotNo: pilotNo,
-        detail: code,
-      ),
-    );
-    return row['IsPilot'] != null && !flag(row['IsPilot'])
-        ? ImportedRole.helper
-        : ImportedRole.pilot;
+    if (isPilot != null && isPilot != base.flies) {
+      warnings.add(
+        ContestImportWarning(
+          ContestImportWarning.roleConflictIsPilot,
+          sourcePilotNo: pilotNo,
+          detail: code,
+        ),
+      );
+      return isPilot ? ImportedRole.pilot : ImportedRole.helper;
+    }
+    return base;
   }
 
   static GliderScoreTable? _table(GliderScoreImportResult r, String name) {

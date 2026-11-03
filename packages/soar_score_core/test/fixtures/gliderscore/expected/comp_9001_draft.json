@@ -35,6 +35,7 @@
   },
   "defaultedSettings": ["discipline.landing_table"],
   "sourceLandingTableNo": 9,
+  "sourceLaneCount": null,
   "excludedTestUsers": 0,
   "teams": [
     {
