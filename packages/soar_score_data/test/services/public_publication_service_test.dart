@@ -156,6 +156,23 @@ void _tests(Backend backend) {
         expect(contest.lifecycleState, isNot(core.LifecycleState.completed));
       });
 
+      test('a contest published before its start is upcoming', () async {
+        await scoreEverything();
+        final identity = await publish(
+          visibility: core.PublicationVisibility.public,
+        );
+
+        // The contest starts 2026-10-17 14:00 UTC.
+        readNow = DateTime.utc(2026, 10, 10);
+        expect(await statusOf(identity.id), 'upcoming');
+        final listed = (await reading.list(
+          from: DateTime.utc(2026, 1),
+          to: DateTime.utc(2026, 12),
+          today: readNow,
+        )).publications;
+        expect(listed.single.contest['status'], 'upcoming');
+      });
+
       test('a completed contest is completed at once', () async {
         await scoreEverything();
         final identity = await publish();

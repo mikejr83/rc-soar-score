@@ -453,6 +453,11 @@ code {
   border-color: var(--deep-orange);
   color: var(--white);
 }
+.pill--soon {
+  background: transparent;
+  border-color: var(--line);
+  color: inherit;
+}
 .pill--done {
   background: var(--ok-bg);
   border-color: transparent;

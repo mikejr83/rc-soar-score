@@ -1,4 +1,5 @@
-import { venueOf } from "./contest-summary";
+import { statusOf, venueOf } from "./contest-summary";
+import type { ContestStatus } from "./contest-summary";
 import { label } from "./format";
 import type { JsonMap, PublicPublication } from "./publication";
 
@@ -38,6 +39,7 @@ export interface ContestHeader {
   venue: string;
   discipline: string;
   isCompleted: boolean;
+  status: ContestStatus;
 }
 
 /** One row of the Overall Individual Results as of a selected round. */
@@ -122,22 +124,28 @@ const parseDate = (v: unknown): Date | undefined => {
 
 export function contestHeaderFrom(contest: JsonMap, now: Date): ContestHeader {
   const end = parseDate(contest.end);
-  const status = contest.status;
+  const start = parseDate(contest.start);
+  const status = statusOf(
+    typeof contest.status === "string" ? contest.status : undefined,
+    start ?? now,
+    end ?? start ?? now,
+    now,
+  );
   return {
     name: str(contest.name, "Untitled contest"),
-    start: parseDate(contest.start),
+    start,
     end,
     venue: venueOf(contest),
     discipline: str(contest.discipline),
-    // The server works the status out when the contest is read (#454):
-    // `completed` or `in_progress`. Without one, a contest whose end date has
-    // passed counts as completed.
-    isCompleted:
-      typeof status === "string" ? status.toLowerCase() === "completed" : end !== undefined && end < now,
+    // The server works the status out when the contest is read (#454);
+    // without one, the dates decide.
+    isCompleted: status === "completed",
+    status,
   };
 }
 
-export const headerStatus = (h: ContestHeader) => (h.isCompleted ? "Completed" : "In progress");
+export const headerStatus = (h: ContestHeader) =>
+  h.status === "completed" ? "Completed" : h.status === "upcoming" ? "Upcoming" : "In progress";
 
 function scoreFieldsFrom(calculation: JsonMap | null | undefined): ScoreFields {
   const byKey = new Map<string, ScoreFieldInfo>();

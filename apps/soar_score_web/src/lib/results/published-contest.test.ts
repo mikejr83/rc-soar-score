@@ -24,6 +24,7 @@ describe("overall results", () => {
       new PublishedContest(fakePublication({ contestStatus }), new Date(Date.UTC(2026, 9, 10, 15)));
     expect(headerStatus(server("completed").header)).toBe("Completed");
     expect(headerStatus(server("in_progress").header)).toBe("In progress");
+    expect(headerStatus(server("upcoming").header)).toBe("Upcoming");
     expect(contest.header.venue).toBe("Front Range Soaring, Boulder, CO, USA");
   });
 

@@ -184,6 +184,10 @@ class PublicPublicationService {
       ...captured,
       'status': contestDisplayStatus(
         lifecycleState: lifecycleState,
+        startsAt:
+            live?.startDateTime ??
+            DateTime.tryParse('${captured['start'] ?? ''}') ??
+            projection.publishedAt,
         lastActivityAt: lastActivityAt,
         now: _clock(),
       ).wireName,

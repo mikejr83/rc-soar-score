@@ -17,7 +17,7 @@ export function ContestRow({ contest }: { contest: ContestSummary }) {
       <span className={styles.rowName}>{contest.name}</span>
       <span className={styles.rowVenue}>{contest.venue}</span>
       <span className={styles.rowStatus}>
-        <StatusPill completed={contest.status === "completed"} />
+        <StatusPill status={contest.status} />
       </span>
     </Link>
   );

@@ -6,9 +6,11 @@ void main() {
   ContestDisplayStatus status(
     LifecycleState state,
     DateTime? activity,
-    Duration since,
-  ) => contestDisplayStatus(
+    Duration since, {
+    DateTime? start,
+  }) => contestDisplayStatus(
     lifecycleState: state,
+    startsAt: start ?? last.subtract(const Duration(days: 1)),
     lastActivityAt: activity,
     now: last.add(since),
   );
@@ -50,10 +52,61 @@ void main() {
       );
     });
 
-    test('no activity at all is in progress', () {
+    test('no activity counts from the start', () {
+      final start = last.subtract(const Duration(days: 1));
       expect(
-        status(LifecycleState.running, null, const Duration(days: 30)),
+        status(LifecycleState.ready, null, const Duration(hours: 20)),
         ContestDisplayStatus.inProgress,
+        reason: 'started 44 hours ago',
+      );
+      expect(
+        status(LifecycleState.ready, null, const Duration(hours: 25)),
+        ContestDisplayStatus.completed,
+        reason: 'started 49 hours ago ($start)',
+      );
+    });
+
+    test('before the start it is upcoming, whatever was sent or scored', () {
+      final start = last.add(const Duration(days: 7));
+      expect(
+        status(
+          LifecycleState.ready,
+          last.subtract(const Duration(days: 5)),
+          Duration.zero,
+          start: start,
+        ),
+        ContestDisplayStatus.upcoming,
+      );
+      expect(
+        status(
+          LifecycleState.ready,
+          last,
+          const Duration(days: 7, hours: 47),
+          start: start,
+        ),
+        ContestDisplayStatus.inProgress,
+        reason: 'the clock starts at the start, not at the invitations',
+      );
+      expect(
+        status(
+          LifecycleState.ready,
+          last,
+          const Duration(days: 7, hours: 49),
+          start: start,
+        ),
+        ContestDisplayStatus.completed,
+      );
+    });
+
+    test('a Completed contest is completed even before its start', () {
+      expect(
+        status(
+          LifecycleState.completed,
+          null,
+          Duration.zero,
+          start: last.add(const Duration(days: 1)),
+        ),
+        ContestDisplayStatus.completed,
       );
     });
 
@@ -67,6 +120,7 @@ void main() {
     test('wire names', () {
       expect(ContestDisplayStatus.inProgress.wireName, 'in_progress');
       expect(ContestDisplayStatus.completed.wireName, 'completed');
+      expect(ContestDisplayStatus.upcoming.wireName, 'upcoming');
     });
   });
 }

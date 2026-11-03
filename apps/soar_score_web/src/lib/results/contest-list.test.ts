@@ -16,6 +16,9 @@ describe("contest list rules", () => {
     expect(summary({ name: "Flying", start: new Date(2026, 9, 13, 9), end: new Date(2026, 9, 15, 17) }).status).toBe(
       "inProgress",
     );
+    expect(summary({ name: "Soon", start: new Date(2026, 9, 20, 9), end: new Date(2026, 9, 21, 17) }).status).toBe(
+      "upcoming",
+    );
     expect(
       summary({
         name: "Scoring",
