@@ -7,8 +7,10 @@ import '../api_client_provider.dart';
 import '../contest_draft_provider.dart';
 import '../l10n/app_localizations.dart';
 import '../router.dart';
+import '../services/competition_import/competition_import.dart';
 import '../services/contest_open_action.dart';
 import '../services/exchange/contest_exchange.dart';
+import '../widgets/competition_import/competition_import_dialog.dart';
 import '../widgets/contest_detail_pane.dart';
 import '../widgets/contest_list.dart';
 import '../widgets/exchange/contest_exchange_dialogs.dart';
@@ -91,6 +93,42 @@ class _HomePageState extends State<HomePage> {
     label: Text(AppLocalizations.of(context).importButton),
   );
 
+  /// Imports competitions of a GliderScore file as contests; opens one when
+  /// the director asks, else shows the first imported, selected.
+  Future<void> _importCompetitions() async {
+    final outcome = await importCompetitions(context);
+    if (outcome == null || !mounted) return;
+    final future = _load();
+    setState(() {
+      _contests = future;
+      _selectedId = outcome.open ?? outcome.imported.first;
+      _showDetail = true;
+    });
+    final open = outcome.open;
+    if (open == null) return;
+    final contests = await future;
+    if (!mounted) return;
+    for (final contest in contests) {
+      if (contest.id == open) {
+        _open(contest);
+        return;
+      }
+    }
+  }
+
+  Widget _importCompetitionsButton() => TextButton.icon(
+    key: const ValueKey('import-competitions'),
+    onPressed: _importCompetitions,
+    icon: const Icon(Icons.library_add_outlined, size: 18),
+    label: Text(AppLocalizations.of(context).competitionImportButton),
+  );
+
+  /// The import buttons of this build: files of contests, GliderScore files.
+  List<Widget> _importButtons() => [
+    if (ContestExchange.current != null) _importButton(),
+    if (CompetitionImportStore.current != null) _importCompetitionsButton(),
+  ];
+
   void _retry() {
     final contests = _load();
     setState(() {
@@ -135,7 +173,7 @@ class _HomePageState extends State<HomePage> {
                   );
                 },
               ),
-              if (ContestExchange.current != null) _importButton(),
+              ..._importButtons(),
             ],
           ),
         );
@@ -167,14 +205,14 @@ class _HomePageState extends State<HomePage> {
               : () => exportContest(context, selected),
         ),
       );
-      if (exchange == null) return master;
+      if (_importButtons().isEmpty) return master;
       return Column(
         children: [
           Align(
             alignment: Alignment.centerRight,
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
-              child: _importButton(),
+              child: Wrap(spacing: 8, children: _importButtons()),
             ),
           ),
           Expanded(child: master),

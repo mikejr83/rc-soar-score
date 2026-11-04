@@ -83,7 +83,7 @@ class _PilotImportDialogState extends State<PilotImportDialog> {
           l10n.pilotImportReading(_c.fileName ?? ''),
         ),
         PilotImportStep.applying => _busy(l10n.pilotImportSaving),
-        PilotImportStep.review => _Review(controller: _c),
+        PilotImportStep.review => PilotImportReviewList(controller: _c),
         PilotImportStep.done => _done(l10n),
         PilotImportStep.failed => _failed(l10n),
       };
@@ -189,8 +189,10 @@ class _PilotImportDialogState extends State<PilotImportDialog> {
   }
 }
 
-class _Review extends StatelessWidget {
-  const _Review({required this.controller});
+/// The review of the pilots a file holds: new, updated and "maybe" ones,
+/// each with its choice. Shared by the pilot and the competition import.
+class PilotImportReviewList extends StatelessWidget {
+  const PilotImportReviewList({super.key, required this.controller});
 
   final PilotImportController controller;
 

@@ -117,7 +117,12 @@ class PilotImportController extends ChangeNotifier {
     required this.store,
     required this.readFile,
     GliderScoreFiles? files,
+    this.pilotFilter,
   }) : _files = files ?? GliderScoreFiles.current;
+
+  /// When set, only the pilots it accepts are reviewed. The competition
+  /// import uses it to review just the pilots of the competitions it chose.
+  final bool Function(PilotDraft pilot)? pilotFilter;
 
   final PilotImportStore store;
   final Future<GliderScoreImportResult> Function(String path) readFile;
@@ -183,11 +188,31 @@ class PilotImportController extends ChangeNotifier {
     }
   }
 
+  /// Reviews the pilots of a [result] already read, as if [fileName] had been
+  /// chosen. The competition import reads the file once for both.
+  Future<void> loadResult(
+    GliderScoreImportResult result, {
+    String? fileName,
+  }) async {
+    _result = result;
+    _fileName = fileName ?? result.sourceDbFile;
+    _set(PilotImportStep.reading);
+    try {
+      await _prepare();
+    } on Object catch (e) {
+      _fail(e);
+    }
+  }
+
   Future<void> _prepare() async {
     final result = _result!;
     final draft = _mapper.map(result);
     final existing = await store.existing();
-    final matches = _matcher.match(draft.pilots, existing);
+    final filter = pilotFilter;
+    final matches = _matcher.match(
+      filter == null ? draft.pilots : draft.pilots.where(filter).toList(),
+      existing,
+    );
     _review = PilotImportReview(
       draft: draft,
       matches: matches,

@@ -2641,6 +2641,264 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, one{Saving 1 row…} other{Saving {count} rows…}}'**
   String scoreSavingRows(int count);
+
+  /// Button on the Contests page that imports competitions from a GliderScore database as contests.
+  ///
+  /// In en, this message translates to:
+  /// **'Import from GliderScore…'**
+  String get competitionImportButton;
+
+  /// Title of the dialog that imports competitions from a GliderScore database.
+  ///
+  /// In en, this message translates to:
+  /// **'Import GliderScore competitions'**
+  String get competitionImportTitle;
+
+  /// Shown while the file chooser is open.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a GliderScore file…'**
+  String get competitionImportChoosing;
+
+  /// Shown while the GliderScore file is read.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading {file}…'**
+  String competitionImportReading(String file);
+
+  /// Button that stops reading the GliderScore file.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get competitionImportCancelReading;
+
+  /// Introduction above the list of competitions found in a GliderScore file.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the competitions to import. Each becomes a contest with its settings and participants. The draw and the scores are not imported.'**
+  String get competitionImportIntro;
+
+  /// Shown when none of the competitions in the file can be imported.
+  ///
+  /// In en, this message translates to:
+  /// **'This file has no competition that can be imported.'**
+  String get competitionImportNothingImportable;
+
+  /// Chooses every competition that can be imported.
+  ///
+  /// In en, this message translates to:
+  /// **'Select all'**
+  String get competitionImportSelectAll;
+
+  /// Drops the choice of every competition.
+  ///
+  /// In en, this message translates to:
+  /// **'Select none'**
+  String get competitionImportSelectNone;
+
+  /// Details under a competition name: date, GliderScore class and number of participants.
+  ///
+  /// In en, this message translates to:
+  /// **'{date} · {className} · {count, plural, =1{1 participant} other{{count} participants}}'**
+  String competitionImportRowDetails(String date, String className, int count);
+
+  /// Note on a competition whose teams get generated names.
+  ///
+  /// In en, this message translates to:
+  /// **'Teams are named Team 1, Team 2 and so on, because GliderScore has no team names. You can rename them afterwards.'**
+  String get competitionImportWarningTeamNames;
+
+  /// Note on a competition that has retired pilots.
+  ///
+  /// In en, this message translates to:
+  /// **'Retired pilots stay active, because a retirement belongs to a round and there is no draw yet.'**
+  String get competitionImportWarningRetired;
+
+  /// Note on a competition that has other import warnings.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 more note: a setting was adjusted} other{{count} more notes: settings were adjusted}}'**
+  String competitionImportWarningOther(int count);
+
+  /// Why a competition of a class that will be supported later cannot be chosen.
+  ///
+  /// In en, this message translates to:
+  /// **'This class is not imported yet.'**
+  String get competitionImportReasonClassNotSupportedYet;
+
+  /// Why a competition of an unsupported class cannot be chosen.
+  ///
+  /// In en, this message translates to:
+  /// **'Soar Score does not support this class.'**
+  String get competitionImportReasonClassOutOfScope;
+
+  /// Why a competition of an unknown class cannot be chosen.
+  ///
+  /// In en, this message translates to:
+  /// **'This class is not known.'**
+  String get competitionImportReasonClassUnknown;
+
+  /// Why a competition without settings cannot be chosen.
+  ///
+  /// In en, this message translates to:
+  /// **'The settings of this competition are missing from the file.'**
+  String get competitionImportReasonConfigMissing;
+
+  /// Why a competition without a date cannot be chosen.
+  ///
+  /// In en, this message translates to:
+  /// **'This competition has no date.'**
+  String get competitionImportReasonDateMissing;
+
+  /// Why a competition with invalid settings cannot be chosen.
+  ///
+  /// In en, this message translates to:
+  /// **'The settings of this competition are not valid.'**
+  String get competitionImportReasonConfigInvalid;
+
+  /// Why a competition without importable participants cannot be chosen.
+  ///
+  /// In en, this message translates to:
+  /// **'Nobody in this competition can be imported.'**
+  String get competitionImportReasonNoParticipants;
+
+  /// Why a competition for an unlisted reason cannot be chosen.
+  ///
+  /// In en, this message translates to:
+  /// **'This competition cannot be imported.'**
+  String get competitionImportReasonOther;
+
+  /// Button that moves to the next step of the competition import.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get competitionImportContinue;
+
+  /// Button that returns to the previous step of the competition import.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get competitionImportBack;
+
+  /// Number of competitions chosen so far.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} chosen'**
+  String competitionImportChosenCount(int count);
+
+  /// Introduction on the last step before the competitions are written.
+  ///
+  /// In en, this message translates to:
+  /// **'Check what will be written, then import.'**
+  String get competitionImportConfirmIntro;
+
+  /// Summary line: number of contests the import creates.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 contest will be created.} other{{count} contests will be created.}}'**
+  String competitionImportSummaryContests(int count);
+
+  /// Summary line: participants the import adds and updates.
+  ///
+  /// In en, this message translates to:
+  /// **'{added} participants will be added and {updated} updated.'**
+  String competitionImportSummaryPilots(int added, int updated);
+
+  /// Reminder of what the competition import leaves out.
+  ///
+  /// In en, this message translates to:
+  /// **'Not imported: the draw, rounds, flights and scores.'**
+  String get competitionImportNotImported;
+
+  /// Button that writes the chosen competitions.
+  ///
+  /// In en, this message translates to:
+  /// **'Import'**
+  String get competitionImportConfirm;
+
+  /// Shown while the competitions are written.
+  ///
+  /// In en, this message translates to:
+  /// **'Importing…'**
+  String get competitionImportSaving;
+
+  /// Result line for a competition that became a contest.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}: imported.'**
+  String competitionImportResultImported(String name);
+
+  /// Note under an imported competition about participants that were left out.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 participant was left out because no pilot was chosen for them.} other{{count} participants were left out because no pilot was chosen for them.}}'**
+  String competitionImportResultSkippedPilots(int count);
+
+  /// Result line for a competition that was imported before.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}: already imported on {date}. Nothing was changed.'**
+  String competitionImportResultAlready(String name, String date);
+
+  /// Result line for a competition that could not be imported.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}: not imported. {reason}'**
+  String competitionImportResultFailed(String name, String reason);
+
+  /// Button that opens an imported contest.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get competitionImportOpen;
+
+  /// Button that closes the competition import after it finished.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get competitionImportDoneButton;
+
+  /// Why a competition could not be imported: no account.
+  ///
+  /// In en, this message translates to:
+  /// **'There is no account to own the contest.'**
+  String get competitionImportFailNoAccount;
+
+  /// Why a competition could not be imported: it is blocked or skipped.
+  ///
+  /// In en, this message translates to:
+  /// **'This competition cannot be imported.'**
+  String get competitionImportFailNotImportable;
+
+  /// Why a competition could not be imported: no discipline profile.
+  ///
+  /// In en, this message translates to:
+  /// **'No scoring rules are available for this class.'**
+  String get competitionImportFailProfileUnavailable;
+
+  /// Why a competition could not be imported: invalid settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Its settings are not valid for the scoring rules.'**
+  String get competitionImportFailConfigInvalid;
+
+  /// Why a competition could not be imported: a participant profile is gone.
+  ///
+  /// In en, this message translates to:
+  /// **'A participant you chose is no longer in your list.'**
+  String get competitionImportFailProfileMissing;
+
+  /// Why a competition could not be imported: any other reason.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong and nothing of this competition was kept.'**
+  String get competitionImportFailOther;
+
+  /// Shown when reading the file or saving the pilots failed.
+  ///
+  /// In en, this message translates to:
+  /// **'The import failed: {error}'**
+  String competitionImportFailed(String error);
 }
 
 class _AppLocalizationsDelegate

@@ -9,10 +9,12 @@ import '../services/pilot_import/pilot_import.dart';
 /// GliderScore pilot import.
 class NativePilotImportStore implements PilotImportStore {
   NativePilotImportStore(this._server, {DateTime Function()? clock})
-    : _clock = clock ?? DateTime.now;
+    : clock = clock ?? DateTime.now;
 
   final EmbeddedServer _server;
-  final DateTime Function() _clock;
+
+  /// The time of a change.
+  final DateTime Function() clock;
 
   @override
   Future<List<core.ParticipantProfile>> existing() => _server
@@ -28,14 +30,14 @@ class NativePilotImportStore implements PilotImportStore {
     final acting = _server.actingAccountId;
     return core.PilotImportService(
       _server.repository.participantProfileRepository,
-      clock: _clock,
+      clock: clock,
     ).apply(
       acting,
       selections,
       reviewedRevisions: reviewedRevisions,
       metadata: Principal(accountId: acting).mutationMetadata(
         clientMutationId: 'gliderscore-pilots-${core.Id.create().value}',
-        clientTime: _clock().toUtc(),
+        clientTime: clock().toUtc(),
       ),
     );
   }
