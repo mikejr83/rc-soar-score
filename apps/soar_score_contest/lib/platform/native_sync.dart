@@ -412,6 +412,16 @@ class NativeSync {
     await _reachability.close();
     _discoveryTimer?.cancel();
     _scheduler.dispose();
+    // A sync in flight finishes before the database closes under it.
+    await engine.dispose();
     await appSync.close();
+    // A look at the account's contests may still be reading the database,
+    // which answers from its own isolate: let it finish before the database
+    // closes under it.
+    try {
+      await _discovering;
+    } on Object {
+      // Logged where it happened.
+    }
   }
 }
