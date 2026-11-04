@@ -321,16 +321,10 @@ class PublicationService {
     final identity = await _requirePublication(contestId);
     final page = await repository.publicationProjectionRepository
         .pageForPublication(identity.id, limit: limit, offset: offset);
-    final systemRevisions = {
-      for (final event
-          in await repository.auditEventRepository.listForPublication(
-            identity.id,
-          ))
-        if (event.action == AuditAction.publicationAttempt &&
-            event.outcome == AuditOutcome.success &&
-            event.authority == Authority.system)
-          ?event.resultingRevision,
-    };
+    final systemRevisions = await repository.auditEventRepository
+        .systemPublishRevisions(identity.id, [
+          for (final projection in page) projection.projectionRevision,
+        ]);
     return [
       for (final projection in page)
         PublicationHistoryEntry(

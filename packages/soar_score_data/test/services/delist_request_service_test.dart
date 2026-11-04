@@ -422,6 +422,61 @@ void _tests(Backend backend) {
       expect(entries.last.projection.publishedBy, actor);
     });
 
+    test(
+      'system publishes are looked up only for the asked revisions',
+      () async {
+        final identity = await publish();
+        now = now.add(const Duration(hours: 1));
+        await publications.publishAutomatically(
+          contestId,
+          clientMutationId: 'a1',
+        );
+        now = now.add(const Duration(hours: 1));
+        await publications.publishAutomatically(
+          contestId,
+          clientMutationId: 'a2',
+        );
+
+        Future<Set<int>> asked(List<int> revisions) => repository
+            .auditEventRepository
+            .systemPublishRevisions(identity.id, revisions);
+
+        expect(await asked([1, 2]), {2});
+        expect(await asked([3]), {3});
+        expect(await asked([1]), isEmpty);
+        expect(await asked([]), isEmpty);
+      },
+    );
+
+    test('only the one-pending refusal counts as a request race', () async {
+      final identity = await publish();
+      core.DelistRequest mk() => core.DelistRequest(
+        id: core.Id.create(),
+        publicationId: identity.id,
+        requestedBy: actor,
+        trigger: core.DelistTrigger.ownerRequest,
+        requestedAt: now,
+      );
+      await repository.delistRequestRepository.save(mk());
+
+      Object? refusal;
+      try {
+        await repository.delistRequestRepository.save(mk());
+      } on Object catch (error) {
+        refusal = error;
+      }
+
+      expect(refusal, isNotNull);
+      expect(isPendingRequestViolation(refusal!), isTrue);
+      for (final other in [
+        'UNIQUE constraint failed: audit_events.id',
+        'duplicate key value violates unique constraint "audit_events_pkey"',
+        'duplicate key value violates unique constraint "some_new_index"',
+      ]) {
+        expect(isPendingRequestViolation(Exception(other)), isFalse);
+      }
+    });
+
     test('history of an unpublished contest is a 404', () async {
       await expectLater(
         publications.history(

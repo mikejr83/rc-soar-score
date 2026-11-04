@@ -3,7 +3,16 @@ import 'package:soar_score_core/soar_score_core.dart' as core;
 
 import 'audit_event_repository.dart';
 import 'drift_repository.dart';
-import 'unique_violation.dart';
+
+/// Whether [error] is the refusal of a second pending request for one
+/// publication (the `delist_requests_one_pending` index), as PostgreSQL
+/// names the constraint and SQLite names the column. Any other unique
+/// violation, such as one from the audit table, is not a request race.
+bool isPendingRequestViolation(Object error) {
+  final text = '$error'.toLowerCase();
+  return text.contains('delist_requests_one_pending') ||
+      text.contains('unique constraint failed: delist_requests.publication_id');
+}
 
 /// Delist requests in the database; backend only, so written without a
 /// mutation.
@@ -76,7 +85,7 @@ class DelistRequestRepository extends DriftRepository
       // A caller racing this one stored its pending request first and the
       // one-pending index refused ours (the transaction rolled back, so no
       // audit event was kept). Answer with the winner's request.
-      if (!isUniqueViolation(error)) rethrow;
+      if (!isPendingRequestViolation(error)) rethrow;
       final winner = await findPendingForPublication(request.publicationId);
       if (winner == null) rethrow;
       return (request: winner, created: false);

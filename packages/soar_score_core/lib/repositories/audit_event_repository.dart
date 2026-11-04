@@ -11,6 +11,15 @@ abstract interface class AuditEventRepository {
   /// Every event of [publicationId], oldest first by server time.
   Future<List<AuditEvent>> listForPublication(Id publicationId);
 
+  /// Which of [revisions] of [publicationId] were published by the system
+  /// (the director's update mode): the resulting revisions of its successful
+  /// publish attempts made under system authority. Reads only those
+  /// revisions, never the whole trail.
+  Future<Set<int>> systemPublishRevisions(
+    Id publicationId,
+    Iterable<int> revisions,
+  );
+
   /// The events of [contestId], newest first by server time.
   ///
   /// [action] keeps only events of that kind and [limit] the first that many.
