@@ -76,7 +76,10 @@ void _tests(Backend backend) {
 
     tearDown(() => inst.close());
 
-    Future<core.PublicationIdentity> publish([String id = 'p-1']) async {
+    Future<core.PublicationIdentity> publish([
+      String id = 'p-1',
+      bool public = true,
+    ]) async {
       final revision = (await repository.contestRepository.findById(contestId))!
           .revision;
       final result = await publications.publish(
@@ -86,7 +89,13 @@ void _tests(Backend backend) {
         clientMutationId: id,
         sourceContestRevision: revision,
       );
-      return result.view.identity;
+      if (!public) return result.view.identity;
+      return (await publications.setVisibility(
+        contestId,
+        core.PublicationVisibility.public,
+        actorId: actor,
+        authority: core.Authority.director,
+      )).identity;
     }
 
     Future<DelistRequestResult> request({String? reason}) => service.request(
@@ -232,6 +241,21 @@ void _tests(Backend backend) {
 
     test('an unpublished contest is a 404', () async {
       await expectLater(request(), throwsA(isA<core.EntityNotFoundError>()));
+    });
+
+    test('an Unlisted publication cannot be asked for', () async {
+      await publish('p-1', false);
+
+      await expectLater(
+        request(),
+        throwsA(
+          isA<core.ContestStateError>().having(
+            (e) => e.code,
+            'code',
+            'publication_not_public',
+          ),
+        ),
+      );
     });
 
     test('a delisted publication cannot be asked for again', () async {

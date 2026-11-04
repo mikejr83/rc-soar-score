@@ -105,6 +105,34 @@ class _PublicationActionsRowState extends State<PublicationActionsRow> {
                   : l10n.publicationActionPublish,
             ),
           ),
+        if (canSwitch && publication.delistPending)
+          OutlinedButton(
+            key: const ValueKey('publication-withdraw-delisting'),
+            onPressed: enabled
+                ? () => _run(
+                    () => PublicationFlow.withdrawDelisting(
+                      context,
+                      contestId: widget.contest.id,
+                    ),
+                  )
+                : null,
+            child: Text(l10n.publicationActionWithdrawDelisting),
+          ),
+        if (canSwitch &&
+            !publication.delistPending &&
+            visibility == PublicationVisibility.public)
+          OutlinedButton(
+            key: const ValueKey('publication-request-delisting'),
+            onPressed: enabled
+                ? () => _run(
+                    () => PublicationFlow.requestDelisting(
+                      context,
+                      contestId: widget.contest.id,
+                    ),
+                  )
+                : null,
+            child: Text(l10n.publicationActionRequestDelisting),
+          ),
         if (canSwitch)
           OutlinedButton(
             key: const ValueKey('publication-visibility'),

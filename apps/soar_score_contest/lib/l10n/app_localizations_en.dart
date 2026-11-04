@@ -1672,6 +1672,71 @@ class AppLocalizationsEn extends AppLocalizations {
   String get publicationFailOther => 'Publishing failed. Try again.';
 
   @override
+  String publicationStatePublishedDelistPending(String visibility) {
+    return 'Published, $visibility. Delisting requested.';
+  }
+
+  @override
+  String get publicationActionRequestDelisting => 'Request delisting';
+
+  @override
+  String get publicationActionWithdrawDelisting => 'Withdraw delisting request';
+
+  @override
+  String get delistDialogTitle => 'Request delisting?';
+
+  @override
+  String get delistDialogBody =>
+      'Delisting removes the publication from public view. A system administrator approves or denies the request, and you can withdraw it while it is pending. Nothing in the contest becomes read-only while a request is pending.';
+
+  @override
+  String get delistDialogReasonLabel => 'Reason (optional)';
+
+  @override
+  String get delistDialogConfirm => 'Request delisting';
+
+  @override
+  String get publicationDelistRequestedDone => 'Delisting requested.';
+
+  @override
+  String get publicationDelistWithdrawnDone => 'Delisting request withdrawn.';
+
+  @override
+  String get publicationFailNotPublic =>
+      'Delisting can only be requested for a Public publication.';
+
+  @override
+  String get publicationFailNothingPending =>
+      'There is no pending delisting request any more.';
+
+  @override
+  String publicationPageDelistPending(String time) {
+    return 'Delisting requested $time. A system administrator will decide.';
+  }
+
+  @override
+  String get publicationPageHistoryTitle => 'Publication history';
+
+  @override
+  String publicationPageHistoryEntry(
+    String number,
+    String revision,
+    String time,
+  ) {
+    return 'Copy $number, from contest revision $revision, $time';
+  }
+
+  @override
+  String get publicationPageHistoryByYou => 'Published by you';
+
+  @override
+  String get publicationPageHistoryAutomatic => 'Updated automatically';
+
+  @override
+  String get publicationPageHistoryFailed =>
+      'The publication history could not be read.';
+
+  @override
   String get publicationPageLatestCopy => 'Latest published copy';
 
   @override

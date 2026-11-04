@@ -78,6 +78,54 @@ abstract final class PublicationFlow {
     return outcome.succeeded;
   }
 
+  /// Confirms and asks to delist the publication of [contestId]; true when
+  /// the request was made.
+  static Future<bool> requestDelisting(
+    BuildContext context, {
+    required Id contestId,
+  }) async {
+    final client = apiClientOf(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final l10n = AppLocalizations.of(context);
+    if (client == null) {
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.publicationFailOther)),
+      );
+      return false;
+    }
+    final reason = await confirmRequestDelisting(context);
+    if (reason == null) {
+      return false;
+    }
+    final outcome = await PublicationActions(client)
+        .requestDelisting(contestId, reason: reason.isEmpty ? null : reason);
+    _report(messenger, l10n, outcome, l10n.publicationDelistRequestedDone);
+    return outcome.succeeded;
+  }
+
+  /// Withdraws the pending delisting request; true when it was withdrawn. A
+  /// request that is no longer pending is reported and counts as a change,
+  /// so the caller reads the publication again.
+  static Future<bool> withdrawDelisting(
+    BuildContext context, {
+    required Id contestId,
+  }) async {
+    final client = apiClientOf(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final l10n = AppLocalizations.of(context);
+    if (client == null) {
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.publicationFailOther)),
+      );
+      return false;
+    }
+    final outcome = await PublicationActions(client)
+        .withdrawDelisting(contestId);
+    _report(messenger, l10n, outcome, l10n.publicationDelistWithdrawnDone);
+    return outcome.succeeded ||
+        outcome.failure == PublicationFailure.nothingPending;
+  }
+
   static void _report(
     ScaffoldMessengerState messenger,
     AppLocalizations l10n,

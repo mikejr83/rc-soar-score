@@ -15,8 +15,8 @@ import '../../widgets/workspace/states/workspace_not_found_view.dart';
 /// The publication of one contest: its state, the public update policy, the
 /// latest published copy and the publish and visibility actions.
 ///
-/// Request delisting and the list of earlier copies wait for the delist
-/// request and projection history APIs (see #125's follow-ups).
+/// A director can also request delisting (and withdraw the request while it
+/// waits for a system administrator) and sees every published copy.
 class ContestPublicationPage extends StatefulWidget {
   const ContestPublicationPage({super.key, required this.contestId});
 
@@ -184,6 +184,15 @@ class _Ready extends StatelessWidget {
               : l10n.publicationScopeUnpublished,
           key: const ValueKey('publication-page-policy'),
         ),
+        if (publication.pendingDelist case final request?) ...[
+          const SizedBox(height: 4),
+          Text(
+            l10n.publicationPageDelistPending(
+              l10n.publicationTime(request.requestedAt),
+            ),
+            key: const ValueKey('publication-page-delist-pending'),
+          ),
+        ],
         if (data.contest.lifecycleState != LifecycleState.completed) ...[
           const SizedBox(height: 8),
           Text(
@@ -241,6 +250,51 @@ class _Ready extends StatelessWidget {
                 ),
             ],
           ),
+        if (publication.isPublished) ...[
+          const SizedBox(height: 24),
+          Text(
+            l10n.publicationPageHistoryTitle,
+            style: theme.textTheme.titleMedium,
+          ),
+          const SizedBox(height: 8),
+          if (data.historyReadFailed)
+            Text(
+              l10n.publicationPageHistoryFailed,
+              key: const ValueKey('publication-page-history-failed'),
+            )
+          else
+            Column(
+              key: const ValueKey('publication-page-history'),
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                for (final entry in data.history)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 6),
+                    child: Column(
+                      key: ValueKey(
+                        'publication-history-${entry.projectionRevision}',
+                      ),
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l10n.publicationPageHistoryEntry(
+                            '${entry.projectionRevision}',
+                            '${entry.contestRevision}',
+                            l10n.publicationTime(entry.publishedAt),
+                          ),
+                        ),
+                        Text(
+                          entry.isBySystem
+                              ? l10n.publicationPageHistoryAutomatic
+                              : l10n.publicationPageHistoryByYou,
+                          style: theme.textTheme.bodySmall,
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+        ],
       ],
     );
   }

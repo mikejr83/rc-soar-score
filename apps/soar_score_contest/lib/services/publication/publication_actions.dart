@@ -23,6 +23,13 @@ enum PublicationFailure {
   /// The server does not publish contests (409 `publishing_not_available`).
   unavailable,
 
+  /// Delisting can only be requested for a Public publication (409
+  /// `publication_not_public`).
+  notPublic,
+
+  /// There is no pending delisting request to withdraw (404).
+  nothingPending,
+
   /// Only the contest's director may do this (403).
   notDirector,
 
@@ -38,6 +45,9 @@ enum PublicationFailure {
 class PublicationOutcome {
   const PublicationOutcome.success(this.publication) : failure = null;
   const PublicationOutcome.failed(this.failure) : publication = null;
+
+  /// Done, with nothing to show: a delisting request was made or withdrawn.
+  const PublicationOutcome.done() : publication = null, failure = null;
 
   final Map<String, Object?>? publication;
   final PublicationFailure? failure;
@@ -106,6 +116,20 @@ class PublicationActions {
     );
   }
 
+  /// Asks to delist the publication of [contestId]; [reason] is optional.
+  /// Repeating it while a request is pending succeeds without a second one.
+  Future<PublicationOutcome> requestDelisting(Id contestId, {String? reason}) =>
+      _run(() async {
+        await client.requestDelisting(contestId, reason: reason);
+        return const PublicationOutcome.done();
+      }, forPublish: false);
+
+  /// Withdraws the pending delisting request of [contestId].
+  Future<PublicationOutcome> withdrawDelisting(Id contestId) => _run(() async {
+    await client.withdrawDelistRequest(contestId);
+    return const PublicationOutcome.done();
+  }, forPublish: false);
+
   Future<PublicationOutcome> _run(
     Future<PublicationOutcome> Function() call, {
     required bool forPublish,
@@ -130,11 +154,15 @@ class PublicationActions {
     if (error.statusCode == 403) {
       return PublicationFailure.notDirector;
     }
+    if (error.statusCode == 404 && !forPublish) {
+      return PublicationFailure.nothingPending;
+    }
     if (error.statusCode == 409) {
       return switch (error.error?.code) {
         'stale_source_revision' => PublicationFailure.staleContest,
         'results_stale' => PublicationFailure.staleResults,
         'publication_delisted' => PublicationFailure.delisted,
+        'publication_not_public' => PublicationFailure.notPublic,
         'publishing_not_available' => PublicationFailure.unavailable,
         _ =>
           forPublish

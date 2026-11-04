@@ -8,9 +8,18 @@ abstract final class PublicationFactsLoader {
   /// The publication of [id] as [PublicationFacts]: not published for a 404,
   /// unsupported when the server does not publish contests (409
   /// `publishing_not_available`), unknown for any other failure.
+  ///
+  /// A published, not delisted publication also gets its pending delisting
+  /// request, if any. A failed read of that request leaves it out: the
+  /// director can still ask, and the server answers with the pending one.
   static Future<PublicationFacts> load(ApiClient client, Id id) async {
     try {
-      return PublicationFacts.fromJson(await client.publication(id));
+      final facts = PublicationFacts.fromJson(await client.publication(id));
+      if (!facts.isPublished ||
+          facts.visibility == PublicationVisibility.delisted) {
+        return facts;
+      }
+      return facts.withPendingDelist(await _pendingDelist(client, id));
     } on ApiHttpError catch (error) {
       if (error.statusCode == 404) {
         return PublicationFacts.notPublished;
@@ -23,5 +32,14 @@ abstract final class PublicationFactsLoader {
       // Falls through to unknown.
     }
     return PublicationFacts.unknown;
+  }
+
+  static Future<DelistRequest?> _pendingDelist(ApiClient client, Id id) async {
+    try {
+      final latest = await client.currentDelistRequest(id);
+      return latest.isPending ? latest : null;
+    } on Object {
+      return null;
+    }
   }
 }

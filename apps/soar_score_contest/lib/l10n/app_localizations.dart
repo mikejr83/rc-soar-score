@@ -2462,6 +2462,112 @@ abstract class AppLocalizations {
   /// **'Publishing failed. Try again.'**
   String get publicationFailOther;
 
+  /// Current publication state: published with the given visibility and a delisting request waiting for a system administrator.
+  ///
+  /// In en, this message translates to:
+  /// **'Published, {visibility}. Delisting requested.'**
+  String publicationStatePublishedDelistPending(String visibility);
+
+  /// Button that asks a system administrator to remove the publication from public view.
+  ///
+  /// In en, this message translates to:
+  /// **'Request delisting'**
+  String get publicationActionRequestDelisting;
+
+  /// Button that withdraws the pending delisting request.
+  ///
+  /// In en, this message translates to:
+  /// **'Withdraw delisting request'**
+  String get publicationActionWithdrawDelisting;
+
+  /// Title of the confirmation dialog for requesting delisting.
+  ///
+  /// In en, this message translates to:
+  /// **'Request delisting?'**
+  String get delistDialogTitle;
+
+  /// Body of the request delisting dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Delisting removes the publication from public view. A system administrator approves or denies the request, and you can withdraw it while it is pending. Nothing in the contest becomes read-only while a request is pending.'**
+  String get delistDialogBody;
+
+  /// Label of the optional reason field in the request delisting dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason (optional)'**
+  String get delistDialogReasonLabel;
+
+  /// Confirm button of the request delisting dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Request delisting'**
+  String get delistDialogConfirm;
+
+  /// Snackbar after a delisting request was made.
+  ///
+  /// In en, this message translates to:
+  /// **'Delisting requested.'**
+  String get publicationDelistRequestedDone;
+
+  /// Snackbar after a delisting request was withdrawn.
+  ///
+  /// In en, this message translates to:
+  /// **'Delisting request withdrawn.'**
+  String get publicationDelistWithdrawnDone;
+
+  /// Delisting refused because the publication is not Public.
+  ///
+  /// In en, this message translates to:
+  /// **'Delisting can only be requested for a Public publication.'**
+  String get publicationFailNotPublic;
+
+  /// Withdrawing refused because no request is pending.
+  ///
+  /// In en, this message translates to:
+  /// **'There is no pending delisting request any more.'**
+  String get publicationFailNothingPending;
+
+  /// Publication page: a delisting request is waiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Delisting requested {time}. A system administrator will decide.'**
+  String publicationPageDelistPending(String time);
+
+  /// Heading of the list of every published copy on the Publication page.
+  ///
+  /// In en, this message translates to:
+  /// **'Publication history'**
+  String get publicationPageHistoryTitle;
+
+  /// One published copy in the history list.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy {number}, from contest revision {revision}, {time}'**
+  String publicationPageHistoryEntry(
+    String number,
+    String revision,
+    String time,
+  );
+
+  /// History list: the director published this copy.
+  ///
+  /// In en, this message translates to:
+  /// **'Published by you'**
+  String get publicationPageHistoryByYou;
+
+  /// History list: the update policy published this copy after a score.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated automatically'**
+  String get publicationPageHistoryAutomatic;
+
+  /// Shown instead of the history list when reading it failed.
+  ///
+  /// In en, this message translates to:
+  /// **'The publication history could not be read.'**
+  String get publicationPageHistoryFailed;
+
   /// Heading on the Publication page for the current projection.
   ///
   /// In en, this message translates to:

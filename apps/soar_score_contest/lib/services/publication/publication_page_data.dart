@@ -9,6 +9,9 @@ import '../workspace/publication_facts_loader.dart';
 
 final _logger = Logger('PublicationPageData');
 
+/// The most copies the server returns in one history request.
+const _historyPage = 100;
+
 /// What the Publication page shows about one contest.
 class PublicationPageData extends Equatable {
   const PublicationPageData({
@@ -16,6 +19,8 @@ class PublicationPageData extends Equatable {
     required this.publication,
     required this.policy,
     this.policyReadFailed = false,
+    this.history = const [],
+    this.historyReadFailed = false,
   });
 
   final Contest contest;
@@ -29,6 +34,14 @@ class PublicationPageData extends Equatable {
   /// rather than unset.
   final bool policyReadFailed;
 
+  /// Every published copy, newest first (empty when unpublished or when
+  /// [historyReadFailed]).
+  final List<PublicationHistoryEntryDto> history;
+
+  /// True when the history could not be read; the page says so and still
+  /// works.
+  final bool historyReadFailed;
+
   /// Loads the contest, its saved options and its publication. A failed
   /// publication read is [PublicationFacts.unknown], not an error.
   static Future<PublicationPageData> load(ApiClient client, Id id) async {
@@ -37,12 +50,44 @@ class PublicationPageData extends Equatable {
       _policy(client, id),
       PublicationFactsLoader.load(client, id),
     ).wait;
+    final (history, historyFailed) = publication.isPublished
+        ? await _history(client, id)
+        : (const <PublicationHistoryEntryDto>[], false);
     return PublicationPageData(
       contest: contest,
       publication: publication,
       policy: policyRead.$1,
       policyReadFailed: policyRead.$2,
+      history: history,
+      historyReadFailed: historyFailed,
     );
+  }
+
+  /// The newest copies and whether reading them failed; a failure is logged
+  /// and flagged, and does not fail the page.
+  static Future<(List<PublicationHistoryEntryDto>, bool)> _history(
+    ApiClient client,
+    Id id,
+  ) async {
+    try {
+      // The server pages at most 100 at a time; read until a short page so
+      // the list is every copy, not just the newest 100.
+      final all = <PublicationHistoryEntryDto>[];
+      while (true) {
+        final page = await client.publicationProjections(
+          id,
+          limit: _historyPage,
+          offset: all.length,
+        );
+        all.addAll(page);
+        if (page.length < _historyPage) {
+          return (all, false);
+        }
+      }
+    } on Object catch (error, stack) {
+      _logger.warning('Could not read the publication history', error, stack);
+      return (const <PublicationHistoryEntryDto>[], true);
+    }
   }
 
   /// The saved public update policy and whether reading it failed. Only the
@@ -65,5 +110,12 @@ class PublicationPageData extends Equatable {
   }
 
   @override
-  List<Object?> get props => [contest, publication, policy, policyReadFailed];
+  List<Object?> get props => [
+    contest,
+    publication,
+    policy,
+    policyReadFailed,
+    history.map((e) => e.id).toList(),
+    historyReadFailed,
+  ];
 }

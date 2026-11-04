@@ -53,6 +53,32 @@ class WorkspaceServer {
   int? publicationRefusal;
   String publicationRefusalCode = 'stale_source_revision';
 
+  /// The delisting request the server holds, as JSON (null: none). A request
+  /// made through the API is stored here as pending.
+  Map<String, Object?>? delistRequest;
+
+  /// When set, the next delisting request or withdrawal is refused with this
+  /// status and error code.
+  int? delistRefusal;
+  String delistRefusalCode = 'publication_delisted';
+
+  /// The reasons sent with delisting requests (null for none).
+  final List<String?> delistReasons = [];
+
+  /// How many withdrawals were received.
+  int delistWithdrawals = 0;
+
+  /// The query parameters of each publication history request received.
+  final List<Map<String, String>> historyRequests = [];
+
+  /// When not 200, reading the publication history fails with this status.
+  int historyStatus = 200;
+
+  /// The history the server answers with; while null it lists one automatic
+  /// copy per projection revision of the publication, newest first, the first
+  /// by the director.
+  List<Map<String, Object?>>? history;
+
   /// The bodies of the publish requests received.
   final List<Map<String, dynamic>> publishes = [];
 
@@ -157,6 +183,64 @@ class WorkspaceServer {
     if (path.endsWith('/configuration') && configurationStatus != 200) {
       return _error(configurationStatus, 'Configuration lookup failed.');
     }
+    if (path.endsWith('/publication/projections')) {
+      if (historyStatus != 200) {
+        return _coded(historyStatus, 'rejected');
+      }
+      final revision =
+          (publication?['current_projection']
+                  as Map<String, Object?>?)?['projection_revision']
+              as int? ??
+          0;
+      historyRequests.add(request.url.queryParameters);
+      final limit = int.parse(request.url.queryParameters['limit'] ?? '50');
+      final offset = int.parse(request.url.queryParameters['offset'] ?? '0');
+      final all =
+          history ??
+          [
+            for (var r = revision; r >= 1; r--)
+              {
+                'id':
+                    '019c0000-0000-7000-8000-'
+                    '${(0xe000 + r).toRadixString(16).padLeft(12, '0')}',
+                'projection_revision': r,
+                'contest_revision': 1,
+                'published_at': '2026-10-17T15:00:00.000Z',
+                'published_by': '019c0000-0000-7000-8000-000000000001',
+                'publisher_kind': r == 1 ? 'person' : 'system',
+              },
+          ];
+      return _json({'projections': all.skip(offset).take(limit).toList()});
+    }
+    if (path.endsWith('/publication/delist-requests')) {
+      final refusal = delistRefusal;
+      if (refusal != null) {
+        return _coded(refusal, delistRefusalCode);
+      }
+      final body = jsonDecode(request.body) as Map<String, dynamic>;
+      delistReasons.add(body['reason'] as String?);
+      final pending = delistRequest?['state'] == 'pending';
+      delistRequest = pending
+          ? delistRequest
+          : _delist(reason: body['reason'] as String?);
+      return _json(delistRequest!, pending ? 200 : 201);
+    }
+    if (path.endsWith('/publication/delist-requests/current')) {
+      final current = delistRequest;
+      if (request.method == 'DELETE') {
+        final refusal = delistRefusal;
+        if (refusal != null) {
+          return _coded(refusal, delistRefusalCode);
+        }
+        if (current == null || current['state'] != 'pending') {
+          return _coded(404, 'not_found');
+        }
+        delistWithdrawals++;
+        delistRequest = {...current, 'state': 'withdrawn'};
+        return _json(delistRequest!);
+      }
+      return current == null ? _coded(404, 'not_found') : _json(current);
+    }
     if (path.endsWith('/publication/visibility')) {
       final refusal = publicationRefusal;
       if (refusal != null) {
@@ -210,6 +294,23 @@ class WorkspaceServer {
     }
     return inner.handle(request);
   }
+
+  /// A pending delisting request as the server sends it.
+  static Map<String, Object?> _delist({String? reason}) => {
+    'id': '019c0000-0000-7000-8000-0000000000d1',
+    'publication_id': '019c0000-0000-7000-8000-000000000030',
+    'requested_by': '019c0000-0000-7000-8000-000000000001',
+    'trigger': 'owner_request',
+    'reason': reason,
+    'requested_at': '2026-10-18T09:00:00.000Z',
+    'state': 'pending',
+    'decided_by': null,
+    'decided_at': null,
+    'decision_note': null,
+  };
+
+  /// Starts the server with a pending delisting request.
+  void startDelistPending() => delistRequest = _delist();
 
   http.Response _action(Map<String, dynamic> body) {
     final name = body['action'] as String;

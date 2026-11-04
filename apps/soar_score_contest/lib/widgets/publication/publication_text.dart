@@ -27,7 +27,9 @@ extension PublicationText on AppLocalizations {
     if (!facts.isPublished || visibility == null) {
       return publicationStateUnpublished;
     }
-    return publicationStatePublished(visibilityName(visibility));
+    return facts.delistPending
+        ? publicationStatePublishedDelistPending(visibilityName(visibility))
+        : publicationStatePublished(visibilityName(visibility));
   }
 
   String updatePolicy(PublicUpdateMode? mode) => switch (mode) {
@@ -43,6 +45,8 @@ extension PublicationText on AppLocalizations {
     PublicationFailure.notReady => publicationFailNotReady,
     PublicationFailure.delisted => publicationFailDelisted,
     PublicationFailure.unavailable => publicationFailUnavailable,
+    PublicationFailure.notPublic => publicationFailNotPublic,
+    PublicationFailure.nothingPending => publicationFailNothingPending,
     PublicationFailure.notDirector => publicationFailNotDirector,
     PublicationFailure.network => publicationFailNetwork,
     PublicationFailure.other => publicationFailOther,

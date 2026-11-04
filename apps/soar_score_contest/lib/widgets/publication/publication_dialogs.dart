@@ -78,3 +78,67 @@ Future<bool> confirmMakePublic(BuildContext context) async {
   );
   return confirmed ?? false;
 }
+
+/// Asks the director to confirm requesting delisting, with an optional
+/// reason for the administrator. Resolves to null when cancelled, otherwise
+/// to the reason (empty when none was given).
+Future<String?> confirmRequestDelisting(BuildContext context) =>
+    showDialog<String>(
+      context: context,
+      builder: (context) => const _DelistDialog(),
+    );
+
+class _DelistDialog extends StatefulWidget {
+  const _DelistDialog();
+
+  @override
+  State<_DelistDialog> createState() => _DelistDialogState();
+}
+
+class _DelistDialogState extends State<_DelistDialog> {
+  final _reason = TextEditingController();
+
+  @override
+  void dispose() {
+    _reason.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return AlertDialog(
+      key: const ValueKey('delist-dialog'),
+      title: Text(l10n.delistDialogTitle),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(l10n.delistDialogBody),
+          const SizedBox(height: 12),
+          TextField(
+            key: const ValueKey('delist-dialog-reason'),
+            controller: _reason,
+            maxLines: 3,
+            decoration: InputDecoration(
+              labelText: l10n.delistDialogReasonLabel,
+              border: const OutlineInputBorder(),
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          key: const ValueKey('delist-dialog-cancel'),
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(l10n.publicationDialogCancel),
+        ),
+        FilledButton(
+          key: const ValueKey('delist-dialog-confirm'),
+          onPressed: () => Navigator.of(context).pop(_reason.text.trim()),
+          child: Text(l10n.delistDialogConfirm),
+        ),
+      ],
+    );
+  }
+}
