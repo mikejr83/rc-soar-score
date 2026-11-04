@@ -118,7 +118,7 @@ class _CompetitionImportDialogState extends State<CompetitionImportDialog> {
   );
 
   Widget _competitions(BuildContext context, AppLocalizations l10n) {
-    final contests = _c.draft?.contests ?? const <ContestImportDraft>[];
+    final contests = _c.listed;
     final hasImportable = _c.importable.isNotEmpty;
     return ConstrainedBox(
       constraints: const BoxConstraints(maxHeight: 460),

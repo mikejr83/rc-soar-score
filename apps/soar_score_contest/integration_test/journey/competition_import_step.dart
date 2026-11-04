@@ -16,17 +16,17 @@ Finder _key(String key) => find.byKey(ValueKey(key));
 const _spring = 'E2E GS Spring Open';
 
 GliderScoreImportResult _snapshot() {
-  Map<String, Object?> comp(int no, String name, String cls) => {
+  Map<String, Object?> comp(int no, String name, String cls, String date) => {
     'CompNo': no,
     'CompName': name,
     'GSCompClass': cls,
-    'CompDate': '06/14/26 00:00:00',
+    'CompDate': date,
   };
   final tables = <String, List<Map<String, Object?>>>{
     'Comps': [
-      comp(1, _spring, 'F5J'),
-      comp(2, 'E2E GS Old F3J', 'F3J'),
-      comp(3, 'E2E GS Empty Cup', 'F5J'),
+      comp(1, _spring, 'F5J', '06/14/26 00:00:00'),
+      comp(2, 'E2E GS Old F3J', 'F3J', '05/01/25 00:00:00'),
+      comp(3, 'E2E GS Empty Cup', 'F5J', '08/09/26 00:00:00'),
     ],
     'CompPilots': [
       {'CompNo': 1, 'PilotNo': 1},
@@ -118,6 +118,11 @@ Future<void> importCompetitionsFromGliderScore(
   await tapVisible(tester, _key('import-competitions'));
   await pumpUntilFound(tester, _key('competition-import-row-1'));
   expect(find.text(l10n.competitionImportChosenCount(0)), findsOneWidget);
+  // Newest start first: Empty Cup (Aug 2026), Spring Open (Jun 2026), Old F3J.
+  double top(int no) =>
+      tester.getTopLeft(_key('competition-import-row-$no')).dy;
+  expect(top(3), lessThan(top(1)));
+  expect(top(1), lessThan(top(2)));
   expect(
     find.textContaining(l10n.competitionImportReasonClassNotSupportedYet),
     findsOneWidget,
