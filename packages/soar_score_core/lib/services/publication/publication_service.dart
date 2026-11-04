@@ -10,7 +10,6 @@ import '../../models/accounts/account_public_profile.dart';
 import '../../models/contest/contest.dart';
 import '../../models/id.dart';
 import '../../models/publication/publication_identity.dart';
-import '../../models/publication/publication_projection.dart';
 import '../../models/shared/shared.dart';
 import '../../models/sync/audit_event.dart';
 import '../../repositories/repository.dart';
@@ -301,12 +300,13 @@ class PublicationService {
     );
   }
 
-  /// The projections of the director's publication, newest revision first.
+  /// The projections of the director's publication, newest revision first,
+  /// each with whether the system published it.
   ///
   /// [limit] and [offset] page the list. Throws an [EntityNotFoundError]
   /// when the contest or its publication does not exist, and a
   /// [ForbiddenError] for anyone but the director.
-  Future<List<PublicationProjection>> history(
+  Future<List<PublicationHistoryEntry>> history(
     Id contestId, {
     required Id actorId,
     required Authority authority,
@@ -319,9 +319,25 @@ class PublicationService {
     final contest = await _requireContest(contestId);
     _requireDirector(contest, actorId, authority);
     final identity = await _requirePublication(contestId);
-    final all = await repository.publicationProjectionRepository
-        .listForPublication(identity.id);
-    return all.reversed.skip(offset).take(limit).toList();
+    final page = await repository.publicationProjectionRepository
+        .pageForPublication(identity.id, limit: limit, offset: offset);
+    final systemRevisions = {
+      for (final event
+          in await repository.auditEventRepository.listForPublication(
+            identity.id,
+          ))
+        if (event.action == AuditAction.publicationAttempt &&
+            event.outcome == AuditOutcome.success &&
+            event.authority == Authority.system)
+          ?event.resultingRevision,
+    };
+    return [
+      for (final projection in page)
+        PublicationHistoryEntry(
+          projection: projection,
+          bySystem: systemRevisions.contains(projection.projectionRevision),
+        ),
+    ];
   }
 
   /// Switches the publication between Unlisted and Public.

@@ -57,7 +57,7 @@ class DelistRequestService {
     required Authority authority,
     String? reason,
   }) async {
-    final (contest, identity) = await _load(contestId, actorId, authority);
+    final (_, identity) = await _load(contestId, actorId, authority);
     final pending = await repository.delistRequestRepository
         .findPendingForPublication(identity.id);
     if (pending != null) {
@@ -70,24 +70,27 @@ class DelistRequestService {
       );
     }
     final trimmed = reason?.trim();
-    final saved = await repository.delistRequestRepository.save(
-      DelistRequest(
-        id: _newId(),
-        publicationId: identity.id,
-        requestedBy: actorId,
-        trigger: DelistTrigger.ownerRequest,
-        reason: trimmed == null || trimmed.isEmpty ? null : trimmed,
-        requestedAt: _clock(),
+    final draft = DelistRequest(
+      id: _newId(),
+      publicationId: identity.id,
+      requestedBy: actorId,
+      trigger: DelistTrigger.ownerRequest,
+      reason: trimmed == null || trimmed.isEmpty ? null : trimmed,
+      requestedAt: _clock(),
+    );
+    final stored = await repository.delistRequestRepository.createPending(
+      draft,
+      _event(
+        AuditAction.delistRequested,
+        draft,
+        actorId: actorId,
+        authority: authority,
       ),
     );
-    await _audit(
-      AuditAction.delistRequested,
-      saved,
-      contest: contest,
-      actorId: actorId,
-      authority: authority,
+    return DelistRequestResult(
+      request: stored.request,
+      created: stored.created,
     );
-    return DelistRequestResult(request: saved, created: true);
   }
 
   /// The most recent delist request of the publication, whatever its state.
@@ -100,17 +103,15 @@ class DelistRequestService {
     required Authority authority,
   }) async {
     final (_, identity) = await _load(contestId, actorId, authority);
-    final all = await repository.delistRequestRepository.listForPublication(
-      identity.id,
-    );
-    if (all.isEmpty) {
+    final latest = await repository.delistRequestRepository
+        .findLatestForPublication(identity.id);
+    if (latest == null) {
       throw EntityNotFoundError(
         entityType: 'DelistRequest',
         entityId: identity.id,
       );
     }
-    // Oldest first by id; ids are time ordered.
-    return all.last;
+    return latest;
   }
 
   /// Withdraws the pending request. Throws an [EntityNotFoundError] when
@@ -120,7 +121,7 @@ class DelistRequestService {
     required Id actorId,
     required Authority authority,
   }) async {
-    final (contest, identity) = await _load(contestId, actorId, authority);
+    final (_, identity) = await _load(contestId, actorId, authority);
     final pending = await repository.delistRequestRepository
         .findPendingForPublication(identity.id);
     if (pending == null) {
@@ -129,25 +130,24 @@ class DelistRequestService {
         entityId: identity.id,
       );
     }
-    final saved = await repository.delistRequestRepository.save(
-      DelistRequest(
-        id: pending.id,
-        publicationId: pending.publicationId,
-        requestedBy: pending.requestedBy,
-        trigger: pending.trigger,
-        reason: pending.reason,
-        requestedAt: pending.requestedAt,
-        state: DelistState.withdrawn,
+    final withdrawn = DelistRequest(
+      id: pending.id,
+      publicationId: pending.publicationId,
+      requestedBy: pending.requestedBy,
+      trigger: pending.trigger,
+      reason: pending.reason,
+      requestedAt: pending.requestedAt,
+      state: DelistState.withdrawn,
+    );
+    return repository.delistRequestRepository.saveWithAudit(
+      withdrawn,
+      _event(
+        AuditAction.delistWithdrawn,
+        withdrawn,
+        actorId: actorId,
+        authority: authority,
       ),
     );
-    await _audit(
-      AuditAction.delistWithdrawn,
-      saved,
-      contest: contest,
-      actorId: actorId,
-      authority: authority,
-    );
-    return saved;
   }
 
   Future<(Contest, PublicationIdentity)> _load(
@@ -173,23 +173,20 @@ class DelistRequestService {
     return (contest, identity);
   }
 
-  Future<void> _audit(
+  AuditEvent _event(
     AuditAction action,
     DelistRequest request, {
-    required Contest contest,
     required Id actorId,
     required Authority authority,
-  }) => repository.auditEventRepository.append(
-    AuditEvent(
-      id: _newId(),
-      entityType: 'DelistRequest',
-      entityId: request.id,
-      publicationId: request.publicationId,
-      action: action,
-      actorId: actorId,
-      authority: authority,
-      serverTimestamp: _clock(),
-      reason: request.reason,
-    ),
+  }) => AuditEvent(
+    id: _newId(),
+    entityType: 'DelistRequest',
+    entityId: request.id,
+    publicationId: request.publicationId,
+    action: action,
+    actorId: actorId,
+    authority: authority,
+    serverTimestamp: _clock(),
+    reason: request.reason,
   );
 }

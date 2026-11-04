@@ -108,7 +108,7 @@ void addPublicationRoutes(
       throw ArgumentError.value(limit, 'limit', 'must be 1 to 100');
     }
     final offset = _intParameter(query, 'offset') ?? 0;
-    final projections = await service.history(
+    final entries = await service.history(
       Id.parse(id),
       actorId: principal.accountId,
       authority: principal.authority,
@@ -117,16 +117,15 @@ void addPublicationRoutes(
     );
     return jsonResponse({
       'projections': [
-        for (final projection in projections)
-          {
-            'id': projection.id.value,
-            'projection_revision': projection.projectionRevision,
-            'contest_revision': projection.contestRevision,
-            'published_at': projection.publishedAt.toIso8601String(),
-            'published_by': projection.publishedBy == null
-                ? 'system'
-                : 'person',
-          },
+        for (final entry in entries)
+          PublicationHistoryEntryDto(
+            id: entry.projection.id,
+            projectionRevision: entry.projection.projectionRevision,
+            contestRevision: entry.projection.contestRevision,
+            publishedAt: entry.projection.publishedAt,
+            publishedBy: entry.projection.publishedBy,
+            publisherKind: entry.bySystem ? 'system' : 'person',
+          ).toJson(),
       ],
     });
   });

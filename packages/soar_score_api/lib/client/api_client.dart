@@ -29,6 +29,7 @@ import '../dto/matrix_revision_summary.dart';
 import '../dto/move_assignment_request.dart';
 import '../dto/public_publication_dto.dart';
 import '../dto/public_publication_summary_dto.dart';
+import '../dto/publication_history_entry_dto.dart';
 import '../dto/publish_contest_request.dart';
 import '../dto/register_installation_request.dart';
 import '../dto/redraw_matrix_request.dart';
@@ -964,11 +965,10 @@ class ApiClient {
   }
 
   /// `GET /api/v1/contests/{id}/publication/projections` — the projections
-  /// of the publication, newest first, as `projections` (each with `id`,
-  /// `projection_revision`, `contest_revision`, `published_at` and
-  /// `published_by`, `system` or `person`). [limit] is at most 100. An
-  /// unpublished contest is a 404.
-  Future<List<Map<String, Object?>>> publicationProjections(
+  /// of the publication, newest first, each with who published it (see
+  /// [PublicationHistoryEntryDto]). [limit] is at most 100. An unpublished
+  /// contest is a 404.
+  Future<List<PublicationHistoryEntryDto>> publicationProjections(
     Id contestId, {
     int? limit,
     int? offset,
@@ -982,12 +982,12 @@ class ApiClient {
               },
             );
     final response = await _send('GET', uri);
-    return _decode<List<Map<String, Object?>>>(
+    return _decode<List<PublicationHistoryEntryDto>>(
       response,
       uri,
       (json) => [
         for (final item in json['projections'] as List<dynamic>)
-          (item as Map).cast<String, Object?>(),
+          PublicationHistoryEntryDto.fromJson(item as Map<String, dynamic>),
       ],
     );
   }

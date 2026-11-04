@@ -39,6 +39,19 @@ class PublicationProjectionRepository extends DriftRepository
   );
 
   @override
+  Future<List<core.PublicationProjection>> pageForPublication(
+    core.Id publicationId, {
+    required int limit,
+    required int offset,
+  }) => _store.whereSql(
+    'publication_id = ?',
+    [Variable<String>(publicationId.value)],
+    orderBy: 'projection_revision DESC',
+    limit: limit,
+    offset: offset,
+  );
+
+  @override
   Future<core.PublicationProjection?> latestForPublication(
     core.Id publicationId,
   ) async {

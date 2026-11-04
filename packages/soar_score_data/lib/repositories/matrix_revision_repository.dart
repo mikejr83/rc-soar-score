@@ -2,6 +2,7 @@ import 'package:soar_score_core/soar_score_core.dart' as core;
 
 import 'audit_event_repository.dart';
 import 'drift_repository.dart';
+import 'unique_violation.dart';
 
 /// Matrix revisions, and the draws stored in them, in the database.
 class MatrixRevisionRepository extends DriftRepository
@@ -141,7 +142,7 @@ class MatrixRevisionRepository extends DriftRepository
       // index, and one is rolled back. When the matrix moved on, answer the
       // same stale_matrix the check would have; otherwise rethrow the
       // original error, so a rule the winner's commit broke still surfaces.
-      if (!_isUniqueViolation(error)) rethrow;
+      if (!isUniqueViolation(error)) rethrow;
       final latest = await latestForContest(contestId);
       if (latest == null || latest.revisionNumber != expectedBaseRevision) {
         throw _staleMatrix();
@@ -154,13 +155,4 @@ class MatrixRevisionRepository extends DriftRepository
     'stale_matrix',
     'the matrix moved on since it was read',
   );
-
-  /// Whether [error] is a broken unique rule on either backend, the only
-  /// failure the successor index can surface here.
-  static bool _isUniqueViolation(Object error) {
-    final text = '$error'.toLowerCase();
-    return text.contains('unique constraint') ||
-        text.contains('duplicate key') ||
-        text.contains('23505');
-  }
 }

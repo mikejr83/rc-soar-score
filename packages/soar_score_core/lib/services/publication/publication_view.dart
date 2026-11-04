@@ -37,6 +37,24 @@ class PublicationView extends Equatable {
   List<Object?> get props => [identity, current];
 }
 
+/// One projection in a publication's history, with who published it.
+class PublicationHistoryEntry extends Equatable {
+  const PublicationHistoryEntry({
+    required this.projection,
+    required this.bySystem,
+  });
+
+  final PublicationProjection projection;
+
+  /// True for an automatic publish by the director's update mode, false for
+  /// a publish the director asked for. Taken from the publish's audit event,
+  /// because an automatic publish still records the owner as `publishedBy`.
+  final bool bySystem;
+
+  @override
+  List<Object?> get props => [projection, bySystem];
+}
+
 /// The result of a publish request.
 class PublishResult extends Equatable {
   const PublishResult({required this.view, required this.created});

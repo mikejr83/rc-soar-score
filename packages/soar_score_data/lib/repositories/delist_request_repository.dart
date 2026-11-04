@@ -1,6 +1,9 @@
+import 'package:drift/drift.dart' show Variable;
 import 'package:soar_score_core/soar_score_core.dart' as core;
 
+import 'audit_event_repository.dart';
 import 'drift_repository.dart';
+import 'unique_violation.dart';
 
 /// Delist requests in the database; backend only, so written without a
 /// mutation.
@@ -9,6 +12,7 @@ class DelistRequestRepository extends DriftRepository
   DelistRequestRepository(super.db, {super.stores});
 
   late final _store = store<core.DelistRequest>('DelistRequest');
+  late final _audits = AuditEventRepository(db, stores: stores);
 
   @override
   Future<core.DelistRequest?> findById(core.Id id) => _store.find(id);
@@ -16,6 +20,19 @@ class DelistRequestRepository extends DriftRepository
   @override
   Future<List<core.DelistRequest>> listForPublication(core.Id publicationId) =>
       _store.whereId('publication_id', publicationId, orderBy: 'id');
+
+  @override
+  Future<core.DelistRequest?> findLatestForPublication(
+    core.Id publicationId,
+  ) async {
+    final latest = await _store.whereSql(
+      'publication_id = ?',
+      [Variable<String>(publicationId.value)],
+      orderBy: 'id DESC',
+      limit: 1,
+    );
+    return latest.firstOrNull;
+  }
 
   @override
   Future<core.DelistRequest?> findPendingForPublication(
@@ -41,4 +58,38 @@ class DelistRequestRepository extends DriftRepository
     await _store.upsertJson(_store.encode(request));
     return request;
   }
+
+  @override
+  Future<({core.DelistRequest request, bool created})> createPending(
+    core.DelistRequest request,
+    core.AuditEvent audit,
+  ) async {
+    final existing = await findPendingForPublication(request.publicationId);
+    if (existing != null) return (request: existing, created: false);
+    try {
+      await db.transaction(() async {
+        await _store.upsertJson(_store.encode(request));
+        await _audits.append(audit);
+      });
+      return (request: request, created: true);
+    } on Object catch (error) {
+      // A caller racing this one stored its pending request first and the
+      // one-pending index refused ours (the transaction rolled back, so no
+      // audit event was kept). Answer with the winner's request.
+      if (!isUniqueViolation(error)) rethrow;
+      final winner = await findPendingForPublication(request.publicationId);
+      if (winner == null) rethrow;
+      return (request: winner, created: false);
+    }
+  }
+
+  @override
+  Future<core.DelistRequest> saveWithAudit(
+    core.DelistRequest request,
+    core.AuditEvent audit,
+  ) => db.transaction(() async {
+    await _store.upsertJson(_store.encode(request));
+    await _audits.append(audit);
+    return request;
+  });
 }

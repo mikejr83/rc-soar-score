@@ -82,11 +82,12 @@ void main() {
       (_) => body({
         'projections': [
           {
-            'id': 'a',
+            'id': '019c0000-0000-7000-8000-0000000000e1',
             'projection_revision': 2,
             'contest_revision': 5,
             'published_at': '2026-11-03T12:00:00.000Z',
-            'published_by': 'person',
+            'published_by': '019c0000-0000-7000-8000-000000000001',
+            'publisher_kind': 'system',
           },
         ],
       }),
@@ -100,7 +101,12 @@ void main() {
 
     expect(seen.url.path, '$base/projections');
     expect(seen.url.queryParameters, {'limit': '10', 'offset': '5'});
-    expect(list.single['projection_revision'], 2);
+    expect(list.single.projectionRevision, 2);
+    expect(list.single.isBySystem, isTrue);
+    expect(
+      list.single.publishedBy,
+      Id.parse('019c0000-0000-7000-8000-000000000001'),
+    );
   });
 
   test('a refusal is an ApiHttpError', () async {

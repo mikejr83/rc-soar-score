@@ -33,6 +33,7 @@ export 'dto/matrix_revision_summary.dart';
 export 'dto/move_assignment_request.dart';
 export 'dto/public_publication_dto.dart';
 export 'dto/public_publication_summary_dto.dart';
+export 'dto/publication_history_entry_dto.dart';
 export 'dto/publish_contest_request.dart';
 export 'dto/register_installation_request.dart';
 export 'dto/redraw_matrix_request.dart';
