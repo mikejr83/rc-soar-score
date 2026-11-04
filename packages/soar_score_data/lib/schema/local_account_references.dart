@@ -11,6 +11,7 @@ const localAccountReferences = <String, List<String>>{
   'participant_profiles': ['owner_account_id'],
   'roles': ['owner_account_id'],
   'model_catalogs': ['owner_account_id'],
+  'import_provenance': ['owner_account_id'],
   'matrix_revisions': ['created_by', 'finalized_by'],
   'matrix_assignments': ['actor_id'],
   're_flights': [

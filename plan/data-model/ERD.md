@@ -193,6 +193,23 @@ erDiagram
         int  revision
     }
 
+    IMPORT_PROVENANCE {
+        uuid  id                    PK
+        uuid  owner_account_id      FK "importing director"
+        uuid  contest_id            FK "optional; absent for profile stamps"
+        text  stamped_entity_type   "Contest, ContestParticipation or ParticipantProfile"
+        uuid  stamped_entity_id
+        text  source_system
+        jsonb source_keys
+        jsonb source_values         "optional; Contest rows only"
+        text  file_fingerprint
+        text  dedupe_key            "optional; Contest rows only; unique per owner"
+        uuid  import_operation_id
+        text  tool_version
+        text  imported_at
+        int   revision
+    }
+
     %% Discipline / Config
     DISCIPLINE_PROFILE {
         uuid      id                       PK

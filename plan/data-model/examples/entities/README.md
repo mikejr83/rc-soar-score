@@ -303,6 +303,12 @@ One row per pilot.
 
 [`installation.json`](installation.json) · [specification](../../entities/installation.md)
 
+### ImportProvenance
+
+[`import_provenance.json`](import_provenance.json) · [specification](../../entities/import_provenance.md)
+
+Three stamps of one GliderScore import by Dana (`…0001`): a contest (with its dedupe key and source values), a participation, and a profile (no contest). The imported contest `…00e1` is illustrative and is not part of the shared scenario.
+
 ### InstallationActivation
 
 [`installation_activation.json`](installation_activation.json) · [specification](../../entities/installation_activation.md)

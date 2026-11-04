@@ -580,6 +580,84 @@ void main() {
       expect(jsonDecode(events.single.reason!)['file_name'], 'autumn.rcsoar');
     });
 
+    test('carries the import stamps of the contest, re-pointed', () async {
+      final contest = await source.contestNamed(_autumn);
+      final repo = Repository(source.db);
+      final participation =
+          (await repo.contestParticipationRepository.listForContest(contest.id))
+              .first;
+      core.ImportProvenance stamp(
+        String type,
+        core.Id entity, {
+        core.Id? contestId,
+        String? dedupeKey,
+      }) => core.ImportProvenance(
+        id: core.Id.create(),
+        ownerAccountId: source.localId,
+        contestId: contestId,
+        stampedEntityType: type,
+        stampedEntityId: entity,
+        sourceSystem: core.ImportProvenance.gliderScore,
+        sourceKeys: switch (type) {
+          core.ImportProvenance.contestEntityType => const {'comp_no': 22},
+          core.ImportProvenance.participationEntityType => const {
+            'comp_no': 22,
+            'pilot_no': 98,
+          },
+          _ => const {'pilot_no': 98},
+        },
+        sourceValues: dedupeKey == null ? null : const {'lane_count': 6},
+        fileFingerprint: 'sha256:abc',
+        dedupeKey: dedupeKey,
+        importOperationId: core.Id.create(),
+        toolVersion: '1.0.0',
+        importedAt: DateTime.utc(2026, 11, 3),
+      );
+      final stamps = [
+        stamp(
+          core.ImportProvenance.contestEntityType,
+          contest.id,
+          contestId: contest.id,
+          dedupeKey: 'gliderscore:sha256:abc:22',
+        ),
+        stamp(
+          core.ImportProvenance.participationEntityType,
+          participation.id,
+          contestId: contest.id,
+        ),
+        stamp(
+          core.ImportProvenance.profileEntityType,
+          participation.participantProfileId,
+        ),
+      ];
+      for (final s in stamps) {
+        await repo.importProvenanceRepository.save(s, metadata: metadata());
+      }
+
+      final file = await source.exportNamed(_autumn);
+      expect(file.rows('import_provenance'), hasLength(2));
+      await target.importer.import(
+        file,
+        mode: ImportMode.editable,
+        target: target.target,
+      );
+
+      final copied = await Repository(target.db).importProvenanceRepository
+          .listForContest(contest.id);
+      expect(
+        copied.map((c) => c.id),
+        unorderedEquals([stamps[0].id, stamps[1].id]),
+      );
+      expect(copied.every((c) => c.ownerAccountId == target.localId), isTrue);
+      expect(
+        (await Repository(target.db).importProvenanceRepository.findByDedupeKey(
+          target.localId,
+          'gliderscore:sha256:abc:22',
+        ))?.sourceValues,
+        {'lane_count': 6},
+      );
+    });
+
     test('keeps pending changes so they can be sent later', () async {
       final file = await source.exportNamed(_autumn);
       await target.importer.import(

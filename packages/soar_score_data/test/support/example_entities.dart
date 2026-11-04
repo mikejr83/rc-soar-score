@@ -23,6 +23,7 @@ const exampleEntities = <(String entity, String file)>[
   ('TeamMembership', 'team_membership'),
   ('ModelCatalog', 'model_catalog'),
   ('ContestModelLink', 'contest_model_link'),
+  ('ImportProvenance', 'import_provenance'),
   ('MatrixRevision', 'matrix_revision'),
   ('Round', 'round'),
   ('RoundGroup', 'round_group'),

@@ -39,6 +39,7 @@ class StubRepository implements core.Repository {
   final participations = StubContestParticipationRepository();
   final roles = StubRoleRepository();
   final modelCatalogs = StubModelCatalogRepository();
+  final importProvenance = StubImportProvenanceRepository();
   final modelLinks = StubContestModelLinkRepository();
   final teams = StubTeamRepository();
   final landingTables = StubLandingTableRepository();
@@ -103,6 +104,10 @@ class StubRepository implements core.Repository {
 
   @override
   core.ModelCatalogRepository get modelCatalogRepository => modelCatalogs;
+
+  @override
+  core.ImportProvenanceRepository get importProvenanceRepository =>
+      importProvenance;
 
   @override
   core.ContestModelLinkRepository get contestModelLinkRepository => modelLinks;

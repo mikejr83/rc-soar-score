@@ -11838,6 +11838,858 @@ class ContestModelLinksCompanion extends UpdateCompanion<ContestModelLinkData> {
   }
 }
 
+class $ImportProvenancesTable extends ImportProvenances
+    with TableInfo<$ImportProvenancesTable, ImportProvenanceData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ImportProvenancesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _ownerAccountIdMeta = const VerificationMeta(
+    'ownerAccountId',
+  );
+  @override
+  late final GeneratedColumn<String> ownerAccountId = GeneratedColumn<String>(
+    'owner_account_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _contestIdMeta = const VerificationMeta(
+    'contestId',
+  );
+  @override
+  late final GeneratedColumn<String> contestId = GeneratedColumn<String>(
+    'contest_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _stampedEntityTypeMeta = const VerificationMeta(
+    'stampedEntityType',
+  );
+  @override
+  late final GeneratedColumn<String> stampedEntityType =
+      GeneratedColumn<String>(
+        'stamped_entity_type',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      );
+  static const VerificationMeta _stampedEntityIdMeta = const VerificationMeta(
+    'stampedEntityId',
+  );
+  @override
+  late final GeneratedColumn<String> stampedEntityId = GeneratedColumn<String>(
+    'stamped_entity_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sourceSystemMeta = const VerificationMeta(
+    'sourceSystem',
+  );
+  @override
+  late final GeneratedColumn<String> sourceSystem = GeneratedColumn<String>(
+    'source_system',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sourceKeysMeta = const VerificationMeta(
+    'sourceKeys',
+  );
+  @override
+  late final GeneratedColumn<String> sourceKeys = GeneratedColumn<String>(
+    'source_keys',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sourceValuesMeta = const VerificationMeta(
+    'sourceValues',
+  );
+  @override
+  late final GeneratedColumn<String> sourceValues = GeneratedColumn<String>(
+    'source_values',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _fileFingerprintMeta = const VerificationMeta(
+    'fileFingerprint',
+  );
+  @override
+  late final GeneratedColumn<String> fileFingerprint = GeneratedColumn<String>(
+    'file_fingerprint',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _dedupeKeyMeta = const VerificationMeta(
+    'dedupeKey',
+  );
+  @override
+  late final GeneratedColumn<String> dedupeKey = GeneratedColumn<String>(
+    'dedupe_key',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _importOperationIdMeta = const VerificationMeta(
+    'importOperationId',
+  );
+  @override
+  late final GeneratedColumn<String> importOperationId =
+      GeneratedColumn<String>(
+        'import_operation_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      );
+  static const VerificationMeta _toolVersionMeta = const VerificationMeta(
+    'toolVersion',
+  );
+  @override
+  late final GeneratedColumn<String> toolVersion = GeneratedColumn<String>(
+    'tool_version',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _importedAtMeta = const VerificationMeta(
+    'importedAt',
+  );
+  @override
+  late final GeneratedColumn<String> importedAt = GeneratedColumn<String>(
+    'imported_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _revisionMeta = const VerificationMeta(
+    'revision',
+  );
+  @override
+  late final GeneratedColumn<int> revision = GeneratedColumn<int>(
+    'revision',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    ownerAccountId,
+    contestId,
+    stampedEntityType,
+    stampedEntityId,
+    sourceSystem,
+    sourceKeys,
+    sourceValues,
+    fileFingerprint,
+    dedupeKey,
+    importOperationId,
+    toolVersion,
+    importedAt,
+    revision,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'import_provenance';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ImportProvenanceData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('owner_account_id')) {
+      context.handle(
+        _ownerAccountIdMeta,
+        ownerAccountId.isAcceptableOrUnknown(
+          data['owner_account_id']!,
+          _ownerAccountIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_ownerAccountIdMeta);
+    }
+    if (data.containsKey('contest_id')) {
+      context.handle(
+        _contestIdMeta,
+        contestId.isAcceptableOrUnknown(data['contest_id']!, _contestIdMeta),
+      );
+    }
+    if (data.containsKey('stamped_entity_type')) {
+      context.handle(
+        _stampedEntityTypeMeta,
+        stampedEntityType.isAcceptableOrUnknown(
+          data['stamped_entity_type']!,
+          _stampedEntityTypeMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_stampedEntityTypeMeta);
+    }
+    if (data.containsKey('stamped_entity_id')) {
+      context.handle(
+        _stampedEntityIdMeta,
+        stampedEntityId.isAcceptableOrUnknown(
+          data['stamped_entity_id']!,
+          _stampedEntityIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_stampedEntityIdMeta);
+    }
+    if (data.containsKey('source_system')) {
+      context.handle(
+        _sourceSystemMeta,
+        sourceSystem.isAcceptableOrUnknown(
+          data['source_system']!,
+          _sourceSystemMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_sourceSystemMeta);
+    }
+    if (data.containsKey('source_keys')) {
+      context.handle(
+        _sourceKeysMeta,
+        sourceKeys.isAcceptableOrUnknown(data['source_keys']!, _sourceKeysMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_sourceKeysMeta);
+    }
+    if (data.containsKey('source_values')) {
+      context.handle(
+        _sourceValuesMeta,
+        sourceValues.isAcceptableOrUnknown(
+          data['source_values']!,
+          _sourceValuesMeta,
+        ),
+      );
+    }
+    if (data.containsKey('file_fingerprint')) {
+      context.handle(
+        _fileFingerprintMeta,
+        fileFingerprint.isAcceptableOrUnknown(
+          data['file_fingerprint']!,
+          _fileFingerprintMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_fileFingerprintMeta);
+    }
+    if (data.containsKey('dedupe_key')) {
+      context.handle(
+        _dedupeKeyMeta,
+        dedupeKey.isAcceptableOrUnknown(data['dedupe_key']!, _dedupeKeyMeta),
+      );
+    }
+    if (data.containsKey('import_operation_id')) {
+      context.handle(
+        _importOperationIdMeta,
+        importOperationId.isAcceptableOrUnknown(
+          data['import_operation_id']!,
+          _importOperationIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_importOperationIdMeta);
+    }
+    if (data.containsKey('tool_version')) {
+      context.handle(
+        _toolVersionMeta,
+        toolVersion.isAcceptableOrUnknown(
+          data['tool_version']!,
+          _toolVersionMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_toolVersionMeta);
+    }
+    if (data.containsKey('imported_at')) {
+      context.handle(
+        _importedAtMeta,
+        importedAt.isAcceptableOrUnknown(data['imported_at']!, _importedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_importedAtMeta);
+    }
+    if (data.containsKey('revision')) {
+      context.handle(
+        _revisionMeta,
+        revision.isAcceptableOrUnknown(data['revision']!, _revisionMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {ownerAccountId, dedupeKey},
+  ];
+  @override
+  ImportProvenanceData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ImportProvenanceData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      ownerAccountId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}owner_account_id'],
+      )!,
+      contestId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}contest_id'],
+      ),
+      stampedEntityType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}stamped_entity_type'],
+      )!,
+      stampedEntityId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}stamped_entity_id'],
+      )!,
+      sourceSystem: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source_system'],
+      )!,
+      sourceKeys: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source_keys'],
+      )!,
+      sourceValues: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source_values'],
+      ),
+      fileFingerprint: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}file_fingerprint'],
+      )!,
+      dedupeKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}dedupe_key'],
+      ),
+      importOperationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}import_operation_id'],
+      )!,
+      toolVersion: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}tool_version'],
+      )!,
+      importedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}imported_at'],
+      )!,
+      revision: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}revision'],
+      )!,
+    );
+  }
+
+  @override
+  $ImportProvenancesTable createAlias(String alias) {
+    return $ImportProvenancesTable(attachedDatabase, alias);
+  }
+}
+
+class ImportProvenanceData extends DataClass
+    implements Insertable<ImportProvenanceData> {
+  final String id;
+  final String ownerAccountId;
+  final String? contestId;
+  final String stampedEntityType;
+  final String stampedEntityId;
+  final String sourceSystem;
+  final String sourceKeys;
+  final String? sourceValues;
+  final String fileFingerprint;
+  final String? dedupeKey;
+  final String importOperationId;
+  final String toolVersion;
+  final String importedAt;
+  final int revision;
+  const ImportProvenanceData({
+    required this.id,
+    required this.ownerAccountId,
+    this.contestId,
+    required this.stampedEntityType,
+    required this.stampedEntityId,
+    required this.sourceSystem,
+    required this.sourceKeys,
+    this.sourceValues,
+    required this.fileFingerprint,
+    this.dedupeKey,
+    required this.importOperationId,
+    required this.toolVersion,
+    required this.importedAt,
+    required this.revision,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['owner_account_id'] = Variable<String>(ownerAccountId);
+    if (!nullToAbsent || contestId != null) {
+      map['contest_id'] = Variable<String>(contestId);
+    }
+    map['stamped_entity_type'] = Variable<String>(stampedEntityType);
+    map['stamped_entity_id'] = Variable<String>(stampedEntityId);
+    map['source_system'] = Variable<String>(sourceSystem);
+    map['source_keys'] = Variable<String>(sourceKeys);
+    if (!nullToAbsent || sourceValues != null) {
+      map['source_values'] = Variable<String>(sourceValues);
+    }
+    map['file_fingerprint'] = Variable<String>(fileFingerprint);
+    if (!nullToAbsent || dedupeKey != null) {
+      map['dedupe_key'] = Variable<String>(dedupeKey);
+    }
+    map['import_operation_id'] = Variable<String>(importOperationId);
+    map['tool_version'] = Variable<String>(toolVersion);
+    map['imported_at'] = Variable<String>(importedAt);
+    map['revision'] = Variable<int>(revision);
+    return map;
+  }
+
+  ImportProvenancesCompanion toCompanion(bool nullToAbsent) {
+    return ImportProvenancesCompanion(
+      id: Value(id),
+      ownerAccountId: Value(ownerAccountId),
+      contestId: contestId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(contestId),
+      stampedEntityType: Value(stampedEntityType),
+      stampedEntityId: Value(stampedEntityId),
+      sourceSystem: Value(sourceSystem),
+      sourceKeys: Value(sourceKeys),
+      sourceValues: sourceValues == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sourceValues),
+      fileFingerprint: Value(fileFingerprint),
+      dedupeKey: dedupeKey == null && nullToAbsent
+          ? const Value.absent()
+          : Value(dedupeKey),
+      importOperationId: Value(importOperationId),
+      toolVersion: Value(toolVersion),
+      importedAt: Value(importedAt),
+      revision: Value(revision),
+    );
+  }
+
+  factory ImportProvenanceData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ImportProvenanceData(
+      id: serializer.fromJson<String>(json['id']),
+      ownerAccountId: serializer.fromJson<String>(json['ownerAccountId']),
+      contestId: serializer.fromJson<String?>(json['contestId']),
+      stampedEntityType: serializer.fromJson<String>(json['stampedEntityType']),
+      stampedEntityId: serializer.fromJson<String>(json['stampedEntityId']),
+      sourceSystem: serializer.fromJson<String>(json['sourceSystem']),
+      sourceKeys: serializer.fromJson<String>(json['sourceKeys']),
+      sourceValues: serializer.fromJson<String?>(json['sourceValues']),
+      fileFingerprint: serializer.fromJson<String>(json['fileFingerprint']),
+      dedupeKey: serializer.fromJson<String?>(json['dedupeKey']),
+      importOperationId: serializer.fromJson<String>(json['importOperationId']),
+      toolVersion: serializer.fromJson<String>(json['toolVersion']),
+      importedAt: serializer.fromJson<String>(json['importedAt']),
+      revision: serializer.fromJson<int>(json['revision']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'ownerAccountId': serializer.toJson<String>(ownerAccountId),
+      'contestId': serializer.toJson<String?>(contestId),
+      'stampedEntityType': serializer.toJson<String>(stampedEntityType),
+      'stampedEntityId': serializer.toJson<String>(stampedEntityId),
+      'sourceSystem': serializer.toJson<String>(sourceSystem),
+      'sourceKeys': serializer.toJson<String>(sourceKeys),
+      'sourceValues': serializer.toJson<String?>(sourceValues),
+      'fileFingerprint': serializer.toJson<String>(fileFingerprint),
+      'dedupeKey': serializer.toJson<String?>(dedupeKey),
+      'importOperationId': serializer.toJson<String>(importOperationId),
+      'toolVersion': serializer.toJson<String>(toolVersion),
+      'importedAt': serializer.toJson<String>(importedAt),
+      'revision': serializer.toJson<int>(revision),
+    };
+  }
+
+  ImportProvenanceData copyWith({
+    String? id,
+    String? ownerAccountId,
+    Value<String?> contestId = const Value.absent(),
+    String? stampedEntityType,
+    String? stampedEntityId,
+    String? sourceSystem,
+    String? sourceKeys,
+    Value<String?> sourceValues = const Value.absent(),
+    String? fileFingerprint,
+    Value<String?> dedupeKey = const Value.absent(),
+    String? importOperationId,
+    String? toolVersion,
+    String? importedAt,
+    int? revision,
+  }) => ImportProvenanceData(
+    id: id ?? this.id,
+    ownerAccountId: ownerAccountId ?? this.ownerAccountId,
+    contestId: contestId.present ? contestId.value : this.contestId,
+    stampedEntityType: stampedEntityType ?? this.stampedEntityType,
+    stampedEntityId: stampedEntityId ?? this.stampedEntityId,
+    sourceSystem: sourceSystem ?? this.sourceSystem,
+    sourceKeys: sourceKeys ?? this.sourceKeys,
+    sourceValues: sourceValues.present ? sourceValues.value : this.sourceValues,
+    fileFingerprint: fileFingerprint ?? this.fileFingerprint,
+    dedupeKey: dedupeKey.present ? dedupeKey.value : this.dedupeKey,
+    importOperationId: importOperationId ?? this.importOperationId,
+    toolVersion: toolVersion ?? this.toolVersion,
+    importedAt: importedAt ?? this.importedAt,
+    revision: revision ?? this.revision,
+  );
+  ImportProvenanceData copyWithCompanion(ImportProvenancesCompanion data) {
+    return ImportProvenanceData(
+      id: data.id.present ? data.id.value : this.id,
+      ownerAccountId: data.ownerAccountId.present
+          ? data.ownerAccountId.value
+          : this.ownerAccountId,
+      contestId: data.contestId.present ? data.contestId.value : this.contestId,
+      stampedEntityType: data.stampedEntityType.present
+          ? data.stampedEntityType.value
+          : this.stampedEntityType,
+      stampedEntityId: data.stampedEntityId.present
+          ? data.stampedEntityId.value
+          : this.stampedEntityId,
+      sourceSystem: data.sourceSystem.present
+          ? data.sourceSystem.value
+          : this.sourceSystem,
+      sourceKeys: data.sourceKeys.present
+          ? data.sourceKeys.value
+          : this.sourceKeys,
+      sourceValues: data.sourceValues.present
+          ? data.sourceValues.value
+          : this.sourceValues,
+      fileFingerprint: data.fileFingerprint.present
+          ? data.fileFingerprint.value
+          : this.fileFingerprint,
+      dedupeKey: data.dedupeKey.present ? data.dedupeKey.value : this.dedupeKey,
+      importOperationId: data.importOperationId.present
+          ? data.importOperationId.value
+          : this.importOperationId,
+      toolVersion: data.toolVersion.present
+          ? data.toolVersion.value
+          : this.toolVersion,
+      importedAt: data.importedAt.present
+          ? data.importedAt.value
+          : this.importedAt,
+      revision: data.revision.present ? data.revision.value : this.revision,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ImportProvenanceData(')
+          ..write('id: $id, ')
+          ..write('ownerAccountId: $ownerAccountId, ')
+          ..write('contestId: $contestId, ')
+          ..write('stampedEntityType: $stampedEntityType, ')
+          ..write('stampedEntityId: $stampedEntityId, ')
+          ..write('sourceSystem: $sourceSystem, ')
+          ..write('sourceKeys: $sourceKeys, ')
+          ..write('sourceValues: $sourceValues, ')
+          ..write('fileFingerprint: $fileFingerprint, ')
+          ..write('dedupeKey: $dedupeKey, ')
+          ..write('importOperationId: $importOperationId, ')
+          ..write('toolVersion: $toolVersion, ')
+          ..write('importedAt: $importedAt, ')
+          ..write('revision: $revision')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    ownerAccountId,
+    contestId,
+    stampedEntityType,
+    stampedEntityId,
+    sourceSystem,
+    sourceKeys,
+    sourceValues,
+    fileFingerprint,
+    dedupeKey,
+    importOperationId,
+    toolVersion,
+    importedAt,
+    revision,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ImportProvenanceData &&
+          other.id == this.id &&
+          other.ownerAccountId == this.ownerAccountId &&
+          other.contestId == this.contestId &&
+          other.stampedEntityType == this.stampedEntityType &&
+          other.stampedEntityId == this.stampedEntityId &&
+          other.sourceSystem == this.sourceSystem &&
+          other.sourceKeys == this.sourceKeys &&
+          other.sourceValues == this.sourceValues &&
+          other.fileFingerprint == this.fileFingerprint &&
+          other.dedupeKey == this.dedupeKey &&
+          other.importOperationId == this.importOperationId &&
+          other.toolVersion == this.toolVersion &&
+          other.importedAt == this.importedAt &&
+          other.revision == this.revision);
+}
+
+class ImportProvenancesCompanion extends UpdateCompanion<ImportProvenanceData> {
+  final Value<String> id;
+  final Value<String> ownerAccountId;
+  final Value<String?> contestId;
+  final Value<String> stampedEntityType;
+  final Value<String> stampedEntityId;
+  final Value<String> sourceSystem;
+  final Value<String> sourceKeys;
+  final Value<String?> sourceValues;
+  final Value<String> fileFingerprint;
+  final Value<String?> dedupeKey;
+  final Value<String> importOperationId;
+  final Value<String> toolVersion;
+  final Value<String> importedAt;
+  final Value<int> revision;
+  final Value<int> rowid;
+  const ImportProvenancesCompanion({
+    this.id = const Value.absent(),
+    this.ownerAccountId = const Value.absent(),
+    this.contestId = const Value.absent(),
+    this.stampedEntityType = const Value.absent(),
+    this.stampedEntityId = const Value.absent(),
+    this.sourceSystem = const Value.absent(),
+    this.sourceKeys = const Value.absent(),
+    this.sourceValues = const Value.absent(),
+    this.fileFingerprint = const Value.absent(),
+    this.dedupeKey = const Value.absent(),
+    this.importOperationId = const Value.absent(),
+    this.toolVersion = const Value.absent(),
+    this.importedAt = const Value.absent(),
+    this.revision = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ImportProvenancesCompanion.insert({
+    required String id,
+    required String ownerAccountId,
+    this.contestId = const Value.absent(),
+    required String stampedEntityType,
+    required String stampedEntityId,
+    required String sourceSystem,
+    required String sourceKeys,
+    this.sourceValues = const Value.absent(),
+    required String fileFingerprint,
+    this.dedupeKey = const Value.absent(),
+    required String importOperationId,
+    required String toolVersion,
+    required String importedAt,
+    this.revision = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       ownerAccountId = Value(ownerAccountId),
+       stampedEntityType = Value(stampedEntityType),
+       stampedEntityId = Value(stampedEntityId),
+       sourceSystem = Value(sourceSystem),
+       sourceKeys = Value(sourceKeys),
+       fileFingerprint = Value(fileFingerprint),
+       importOperationId = Value(importOperationId),
+       toolVersion = Value(toolVersion),
+       importedAt = Value(importedAt);
+  static Insertable<ImportProvenanceData> custom({
+    Expression<String>? id,
+    Expression<String>? ownerAccountId,
+    Expression<String>? contestId,
+    Expression<String>? stampedEntityType,
+    Expression<String>? stampedEntityId,
+    Expression<String>? sourceSystem,
+    Expression<String>? sourceKeys,
+    Expression<String>? sourceValues,
+    Expression<String>? fileFingerprint,
+    Expression<String>? dedupeKey,
+    Expression<String>? importOperationId,
+    Expression<String>? toolVersion,
+    Expression<String>? importedAt,
+    Expression<int>? revision,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (ownerAccountId != null) 'owner_account_id': ownerAccountId,
+      if (contestId != null) 'contest_id': contestId,
+      if (stampedEntityType != null) 'stamped_entity_type': stampedEntityType,
+      if (stampedEntityId != null) 'stamped_entity_id': stampedEntityId,
+      if (sourceSystem != null) 'source_system': sourceSystem,
+      if (sourceKeys != null) 'source_keys': sourceKeys,
+      if (sourceValues != null) 'source_values': sourceValues,
+      if (fileFingerprint != null) 'file_fingerprint': fileFingerprint,
+      if (dedupeKey != null) 'dedupe_key': dedupeKey,
+      if (importOperationId != null) 'import_operation_id': importOperationId,
+      if (toolVersion != null) 'tool_version': toolVersion,
+      if (importedAt != null) 'imported_at': importedAt,
+      if (revision != null) 'revision': revision,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ImportProvenancesCompanion copyWith({
+    Value<String>? id,
+    Value<String>? ownerAccountId,
+    Value<String?>? contestId,
+    Value<String>? stampedEntityType,
+    Value<String>? stampedEntityId,
+    Value<String>? sourceSystem,
+    Value<String>? sourceKeys,
+    Value<String?>? sourceValues,
+    Value<String>? fileFingerprint,
+    Value<String?>? dedupeKey,
+    Value<String>? importOperationId,
+    Value<String>? toolVersion,
+    Value<String>? importedAt,
+    Value<int>? revision,
+    Value<int>? rowid,
+  }) {
+    return ImportProvenancesCompanion(
+      id: id ?? this.id,
+      ownerAccountId: ownerAccountId ?? this.ownerAccountId,
+      contestId: contestId ?? this.contestId,
+      stampedEntityType: stampedEntityType ?? this.stampedEntityType,
+      stampedEntityId: stampedEntityId ?? this.stampedEntityId,
+      sourceSystem: sourceSystem ?? this.sourceSystem,
+      sourceKeys: sourceKeys ?? this.sourceKeys,
+      sourceValues: sourceValues ?? this.sourceValues,
+      fileFingerprint: fileFingerprint ?? this.fileFingerprint,
+      dedupeKey: dedupeKey ?? this.dedupeKey,
+      importOperationId: importOperationId ?? this.importOperationId,
+      toolVersion: toolVersion ?? this.toolVersion,
+      importedAt: importedAt ?? this.importedAt,
+      revision: revision ?? this.revision,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (ownerAccountId.present) {
+      map['owner_account_id'] = Variable<String>(ownerAccountId.value);
+    }
+    if (contestId.present) {
+      map['contest_id'] = Variable<String>(contestId.value);
+    }
+    if (stampedEntityType.present) {
+      map['stamped_entity_type'] = Variable<String>(stampedEntityType.value);
+    }
+    if (stampedEntityId.present) {
+      map['stamped_entity_id'] = Variable<String>(stampedEntityId.value);
+    }
+    if (sourceSystem.present) {
+      map['source_system'] = Variable<String>(sourceSystem.value);
+    }
+    if (sourceKeys.present) {
+      map['source_keys'] = Variable<String>(sourceKeys.value);
+    }
+    if (sourceValues.present) {
+      map['source_values'] = Variable<String>(sourceValues.value);
+    }
+    if (fileFingerprint.present) {
+      map['file_fingerprint'] = Variable<String>(fileFingerprint.value);
+    }
+    if (dedupeKey.present) {
+      map['dedupe_key'] = Variable<String>(dedupeKey.value);
+    }
+    if (importOperationId.present) {
+      map['import_operation_id'] = Variable<String>(importOperationId.value);
+    }
+    if (toolVersion.present) {
+      map['tool_version'] = Variable<String>(toolVersion.value);
+    }
+    if (importedAt.present) {
+      map['imported_at'] = Variable<String>(importedAt.value);
+    }
+    if (revision.present) {
+      map['revision'] = Variable<int>(revision.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ImportProvenancesCompanion(')
+          ..write('id: $id, ')
+          ..write('ownerAccountId: $ownerAccountId, ')
+          ..write('contestId: $contestId, ')
+          ..write('stampedEntityType: $stampedEntityType, ')
+          ..write('stampedEntityId: $stampedEntityId, ')
+          ..write('sourceSystem: $sourceSystem, ')
+          ..write('sourceKeys: $sourceKeys, ')
+          ..write('sourceValues: $sourceValues, ')
+          ..write('fileFingerprint: $fileFingerprint, ')
+          ..write('dedupeKey: $dedupeKey, ')
+          ..write('importOperationId: $importOperationId, ')
+          ..write('toolVersion: $toolVersion, ')
+          ..write('importedAt: $importedAt, ')
+          ..write('revision: $revision, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $AccountsTable extends Accounts
     with TableInfo<$AccountsTable, AccountData> {
   @override
@@ -37185,6 +38037,8 @@ abstract class _$SoarScoreDatabase extends GeneratedDatabase {
   late final $ModelCatalogsTable modelCatalogs = $ModelCatalogsTable(this);
   late final $ContestModelLinksTable contestModelLinks =
       $ContestModelLinksTable(this);
+  late final $ImportProvenancesTable importProvenances =
+      $ImportProvenancesTable(this);
   late final $AccountsTable accounts = $AccountsTable(this);
   late final $AccountAliasesTable accountAliases = $AccountAliasesTable(this);
   late final $AccountIdentitiesTable accountIdentities =
@@ -37260,6 +38114,7 @@ abstract class _$SoarScoreDatabase extends GeneratedDatabase {
     teamMemberships,
     modelCatalogs,
     contestModelLinks,
+    importProvenances,
     accounts,
     accountAliases,
     accountIdentities,
@@ -50948,6 +51803,421 @@ typedef $$ContestModelLinksTableProcessedTableManager =
         bool contestParticipationId,
         bool modelCatalogId,
       })
+    >;
+typedef $$ImportProvenancesTableCreateCompanionBuilder =
+    ImportProvenancesCompanion Function({
+      required String id,
+      required String ownerAccountId,
+      Value<String?> contestId,
+      required String stampedEntityType,
+      required String stampedEntityId,
+      required String sourceSystem,
+      required String sourceKeys,
+      Value<String?> sourceValues,
+      required String fileFingerprint,
+      Value<String?> dedupeKey,
+      required String importOperationId,
+      required String toolVersion,
+      required String importedAt,
+      Value<int> revision,
+      Value<int> rowid,
+    });
+typedef $$ImportProvenancesTableUpdateCompanionBuilder =
+    ImportProvenancesCompanion Function({
+      Value<String> id,
+      Value<String> ownerAccountId,
+      Value<String?> contestId,
+      Value<String> stampedEntityType,
+      Value<String> stampedEntityId,
+      Value<String> sourceSystem,
+      Value<String> sourceKeys,
+      Value<String?> sourceValues,
+      Value<String> fileFingerprint,
+      Value<String?> dedupeKey,
+      Value<String> importOperationId,
+      Value<String> toolVersion,
+      Value<String> importedAt,
+      Value<int> revision,
+      Value<int> rowid,
+    });
+
+class $$ImportProvenancesTableFilterComposer
+    extends Composer<_$SoarScoreDatabase, $ImportProvenancesTable> {
+  $$ImportProvenancesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ownerAccountId => $composableBuilder(
+    column: $table.ownerAccountId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get contestId => $composableBuilder(
+    column: $table.contestId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get stampedEntityType => $composableBuilder(
+    column: $table.stampedEntityType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get stampedEntityId => $composableBuilder(
+    column: $table.stampedEntityId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sourceSystem => $composableBuilder(
+    column: $table.sourceSystem,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sourceKeys => $composableBuilder(
+    column: $table.sourceKeys,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sourceValues => $composableBuilder(
+    column: $table.sourceValues,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get fileFingerprint => $composableBuilder(
+    column: $table.fileFingerprint,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get dedupeKey => $composableBuilder(
+    column: $table.dedupeKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get importOperationId => $composableBuilder(
+    column: $table.importOperationId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get toolVersion => $composableBuilder(
+    column: $table.toolVersion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get importedAt => $composableBuilder(
+    column: $table.importedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get revision => $composableBuilder(
+    column: $table.revision,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ImportProvenancesTableOrderingComposer
+    extends Composer<_$SoarScoreDatabase, $ImportProvenancesTable> {
+  $$ImportProvenancesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ownerAccountId => $composableBuilder(
+    column: $table.ownerAccountId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get contestId => $composableBuilder(
+    column: $table.contestId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get stampedEntityType => $composableBuilder(
+    column: $table.stampedEntityType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get stampedEntityId => $composableBuilder(
+    column: $table.stampedEntityId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sourceSystem => $composableBuilder(
+    column: $table.sourceSystem,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sourceKeys => $composableBuilder(
+    column: $table.sourceKeys,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sourceValues => $composableBuilder(
+    column: $table.sourceValues,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get fileFingerprint => $composableBuilder(
+    column: $table.fileFingerprint,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get dedupeKey => $composableBuilder(
+    column: $table.dedupeKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get importOperationId => $composableBuilder(
+    column: $table.importOperationId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get toolVersion => $composableBuilder(
+    column: $table.toolVersion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get importedAt => $composableBuilder(
+    column: $table.importedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get revision => $composableBuilder(
+    column: $table.revision,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ImportProvenancesTableAnnotationComposer
+    extends Composer<_$SoarScoreDatabase, $ImportProvenancesTable> {
+  $$ImportProvenancesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get ownerAccountId => $composableBuilder(
+    column: $table.ownerAccountId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get contestId =>
+      $composableBuilder(column: $table.contestId, builder: (column) => column);
+
+  GeneratedColumn<String> get stampedEntityType => $composableBuilder(
+    column: $table.stampedEntityType,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get stampedEntityId => $composableBuilder(
+    column: $table.stampedEntityId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get sourceSystem => $composableBuilder(
+    column: $table.sourceSystem,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get sourceKeys => $composableBuilder(
+    column: $table.sourceKeys,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get sourceValues => $composableBuilder(
+    column: $table.sourceValues,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get fileFingerprint => $composableBuilder(
+    column: $table.fileFingerprint,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get dedupeKey =>
+      $composableBuilder(column: $table.dedupeKey, builder: (column) => column);
+
+  GeneratedColumn<String> get importOperationId => $composableBuilder(
+    column: $table.importOperationId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get toolVersion => $composableBuilder(
+    column: $table.toolVersion,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get importedAt => $composableBuilder(
+    column: $table.importedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get revision =>
+      $composableBuilder(column: $table.revision, builder: (column) => column);
+}
+
+class $$ImportProvenancesTableTableManager
+    extends
+        RootTableManager<
+          _$SoarScoreDatabase,
+          $ImportProvenancesTable,
+          ImportProvenanceData,
+          $$ImportProvenancesTableFilterComposer,
+          $$ImportProvenancesTableOrderingComposer,
+          $$ImportProvenancesTableAnnotationComposer,
+          $$ImportProvenancesTableCreateCompanionBuilder,
+          $$ImportProvenancesTableUpdateCompanionBuilder,
+          (
+            ImportProvenanceData,
+            BaseReferences<
+              _$SoarScoreDatabase,
+              $ImportProvenancesTable,
+              ImportProvenanceData
+            >,
+          ),
+          ImportProvenanceData,
+          PrefetchHooks Function()
+        > {
+  $$ImportProvenancesTableTableManager(
+    _$SoarScoreDatabase db,
+    $ImportProvenancesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ImportProvenancesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ImportProvenancesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ImportProvenancesTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> ownerAccountId = const Value.absent(),
+                Value<String?> contestId = const Value.absent(),
+                Value<String> stampedEntityType = const Value.absent(),
+                Value<String> stampedEntityId = const Value.absent(),
+                Value<String> sourceSystem = const Value.absent(),
+                Value<String> sourceKeys = const Value.absent(),
+                Value<String?> sourceValues = const Value.absent(),
+                Value<String> fileFingerprint = const Value.absent(),
+                Value<String?> dedupeKey = const Value.absent(),
+                Value<String> importOperationId = const Value.absent(),
+                Value<String> toolVersion = const Value.absent(),
+                Value<String> importedAt = const Value.absent(),
+                Value<int> revision = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ImportProvenancesCompanion(
+                id: id,
+                ownerAccountId: ownerAccountId,
+                contestId: contestId,
+                stampedEntityType: stampedEntityType,
+                stampedEntityId: stampedEntityId,
+                sourceSystem: sourceSystem,
+                sourceKeys: sourceKeys,
+                sourceValues: sourceValues,
+                fileFingerprint: fileFingerprint,
+                dedupeKey: dedupeKey,
+                importOperationId: importOperationId,
+                toolVersion: toolVersion,
+                importedAt: importedAt,
+                revision: revision,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String ownerAccountId,
+                Value<String?> contestId = const Value.absent(),
+                required String stampedEntityType,
+                required String stampedEntityId,
+                required String sourceSystem,
+                required String sourceKeys,
+                Value<String?> sourceValues = const Value.absent(),
+                required String fileFingerprint,
+                Value<String?> dedupeKey = const Value.absent(),
+                required String importOperationId,
+                required String toolVersion,
+                required String importedAt,
+                Value<int> revision = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ImportProvenancesCompanion.insert(
+                id: id,
+                ownerAccountId: ownerAccountId,
+                contestId: contestId,
+                stampedEntityType: stampedEntityType,
+                stampedEntityId: stampedEntityId,
+                sourceSystem: sourceSystem,
+                sourceKeys: sourceKeys,
+                sourceValues: sourceValues,
+                fileFingerprint: fileFingerprint,
+                dedupeKey: dedupeKey,
+                importOperationId: importOperationId,
+                toolVersion: toolVersion,
+                importedAt: importedAt,
+                revision: revision,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$ImportProvenancesTable, ImportProvenanceData>(
+                    table,
+                  ),
+                  BaseReferences<
+                    _$SoarScoreDatabase,
+                    $ImportProvenancesTable,
+                    ImportProvenanceData
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ImportProvenancesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$SoarScoreDatabase,
+      $ImportProvenancesTable,
+      ImportProvenanceData,
+      $$ImportProvenancesTableFilterComposer,
+      $$ImportProvenancesTableOrderingComposer,
+      $$ImportProvenancesTableAnnotationComposer,
+      $$ImportProvenancesTableCreateCompanionBuilder,
+      $$ImportProvenancesTableUpdateCompanionBuilder,
+      (
+        ImportProvenanceData,
+        BaseReferences<
+          _$SoarScoreDatabase,
+          $ImportProvenancesTable,
+          ImportProvenanceData
+        >,
+      ),
+      ImportProvenanceData,
+      PrefetchHooks Function()
     >;
 typedef $$AccountsTableCreateCompanionBuilder = AccountsCompanion Function({
   required String id,
@@ -73951,6 +75221,8 @@ class $SoarScoreDatabaseManager {
       $$ModelCatalogsTableTableManager(_db, _db.modelCatalogs);
   $$ContestModelLinksTableTableManager get contestModelLinks =>
       $$ContestModelLinksTableTableManager(_db, _db.contestModelLinks);
+  $$ImportProvenancesTableTableManager get importProvenances =>
+      $$ImportProvenancesTableTableManager(_db, _db.importProvenances);
   $$AccountsTableTableManager get accounts =>
       $$AccountsTableTableManager(_db, _db.accounts);
   $$AccountAliasesTableTableManager get accountAliases =>

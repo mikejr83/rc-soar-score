@@ -254,6 +254,37 @@ class StubModelCatalogRepository implements ModelCatalogRepository {
       models.remove(id) != null;
 }
 
+/// [ImportProvenanceRepository] for handler tests; no handler uses it.
+class StubImportProvenanceRepository implements ImportProvenanceRepository {
+  @override
+  Future<ImportProvenance?> findById(Id id) =>
+      throw UnimplementedError('not used by handlers');
+
+  @override
+  Future<List<ImportProvenance>> listForContest(Id contestId) =>
+      throw UnimplementedError('not used by handlers');
+
+  @override
+  Future<List<ImportProvenance>> listForEntity(Id stampedEntityId) =>
+      throw UnimplementedError('not used by handlers');
+
+  @override
+  Future<ImportProvenance?> findByDedupeKey(
+    Id ownerAccountId,
+    String dedupeKey,
+  ) => throw UnimplementedError('not used by handlers');
+
+  @override
+  Future<ImportProvenance> save(
+    ImportProvenance stamp, {
+    required MutationMetadata metadata,
+  }) => throw UnimplementedError('not used by handlers');
+
+  @override
+  Future<bool> delete(Id id, {required MutationMetadata metadata}) =>
+      throw UnimplementedError('not used by handlers');
+}
+
 /// In-memory [ContestModelLinkRepository] for handler tests; a stale save
 /// throws [StaleRevisionError] like the real one.
 class StubContestModelLinkRepository implements ContestModelLinkRepository {

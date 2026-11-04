@@ -16,12 +16,13 @@ class ContestRepository implements core.ContestRepository {
   ContestRepository(SoarScoreDatabase db)
     : this._(db, EntityStores.forDatabase(db));
 
-  ContestRepository._(this._db, EntityStores stores)
+  ContestRepository._(this._db, this.stores)
     : _store = stores.of('Contest') as EntityStore<core.Contest>,
       _unitOfWork = DriftUnitOfWork(_db, stores),
       _audits = AuditEventRepository(_db, stores: stores);
 
   final SoarScoreDatabase _db;
+  final EntityStores stores;
   final EntityStore<core.Contest> _store;
   final core.UnitOfWork _unitOfWork;
   final AuditEventRepository _audits;
@@ -59,6 +60,15 @@ class ContestRepository implements core.ContestRepository {
       _unitOfWork.run((context) async {
         final contest = await _store.find(id);
         if (contest == null) return false;
+        // The stamps are director data without a foreign key, so they are
+        // removed here, as synced deletes, with the contest they describe.
+        final stamps = stores.of('ImportProvenance');
+        for (final stamp in await stamps.whereId('contest_id', id)) {
+          await context.delete(
+            stamp as core.Synchronizable,
+            metadata: metadata,
+          );
+        }
         await context.delete(contest, metadata: metadata);
         return true;
       });

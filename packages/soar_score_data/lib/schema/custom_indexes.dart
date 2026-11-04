@@ -79,6 +79,15 @@ const customIndexes = <String, List<String>>{
         'model_catalogs (participant_profile_id, lower(name), '
         "lower(COALESCE(manufacturer, '')))",
   ],
+  'import_provenance': [
+    // A contest or participation is stamped once.
+    'CREATE UNIQUE INDEX import_provenance_one_per_entity ON '
+        'import_provenance (stamped_entity_type, stamped_entity_id) '
+        "WHERE stamped_entity_type <> 'ParticipantProfile'",
+    // A profile is stamped once per import operation.
+    'CREATE UNIQUE INDEX import_provenance_one_per_operation ON '
+        'import_provenance (stamped_entity_id, import_operation_id)',
+  ],
   'discipline_formulas': [
     // Only one formula per profile version is the primary one.
     'CREATE UNIQUE INDEX discipline_formulas_one_primary ON '

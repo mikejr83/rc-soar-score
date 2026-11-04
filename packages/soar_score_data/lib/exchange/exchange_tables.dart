@@ -45,6 +45,9 @@ const contestExchangeTables = <ExchangeTable>[
   ExchangeTable('teams', 'Team', 'contest_id'),
   ExchangeTable('team_memberships', 'TeamMembership', 'contest_id'),
   ExchangeTable('contest_model_links', 'ContestModelLink', 'contest_id'),
+  // The contest's and its participations' import stamps. Profile stamps carry
+  // no contest and stay with the director's data.
+  ExchangeTable('import_provenance', 'ImportProvenance', 'contest_id'),
   ExchangeTable('matrix_revisions', 'MatrixRevision', 'contest_id'),
   ExchangeTable('rounds', 'Round', 'contest_id'),
   ExchangeTable('round_groups', 'RoundGroup', 'contest_id'),
