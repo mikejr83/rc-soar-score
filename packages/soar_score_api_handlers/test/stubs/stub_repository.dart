@@ -110,6 +110,10 @@ class StubRepository implements core.Repository {
       importProvenance;
 
   @override
+  core.ContestImportRepository get contestImportRepository =>
+      throw UnimplementedError('not used by handlers');
+
+  @override
   core.ContestModelLinkRepository get contestModelLinkRepository => modelLinks;
 
   @override

@@ -109,6 +109,10 @@ class Repository implements core.Repository {
       syncAcceptorStore = DriftSyncAcceptorStore(database, stores),
       invitationRepository = InvitationRepository(database, stores: stores),
       modelCatalogRepository = ModelCatalogRepository(database, stores: stores),
+      contestImportRepository = ContestImportRepository(
+        database,
+        stores: stores,
+      ),
       importProvenanceRepository = ImportProvenanceRepository(
         database,
         stores: stores,
@@ -246,6 +250,9 @@ class Repository implements core.Repository {
 
   @override
   final core.ImportProvenanceRepository importProvenanceRepository;
+
+  @override
+  final core.ContestImportRepository contestImportRepository;
 
   @override
   final core.ContestConfigurationPresetRepository

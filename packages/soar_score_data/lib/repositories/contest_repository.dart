@@ -63,10 +63,20 @@ class ContestRepository implements core.ContestRepository {
         // The stamps are director data without a foreign key, so they are
         // removed here, as synced deletes, with the contest they describe.
         final stamps = stores.of('ImportProvenance');
+        // Each delete is its own mutation, so each gets its own request id.
+        var count = 0;
         for (final stamp in await stamps.whereId('contest_id', id)) {
           await context.delete(
             stamp as core.Synchronizable,
-            metadata: metadata,
+            metadata: core.MutationMetadata(
+              clientMutationId: '${metadata.clientMutationId}:stamp:${count++}',
+              authority: metadata.authority,
+              clientTime: metadata.clientTime,
+              actorId: metadata.actorId,
+              sourceInstallationId: metadata.sourceInstallationId,
+              sourceDevice: metadata.sourceDevice,
+              dependsOnMutationId: metadata.dependsOnMutationId,
+            ),
           );
         }
         await context.delete(contest, metadata: metadata);
