@@ -29,11 +29,13 @@ import '../dto/matrix_revision_summary.dart';
 import '../dto/move_assignment_request.dart';
 import '../dto/public_publication_dto.dart';
 import '../dto/public_publication_summary_dto.dart';
+import '../dto/publication_history_entry_dto.dart';
 import '../dto/publish_contest_request.dart';
 import '../dto/register_installation_request.dart';
 import '../dto/redraw_matrix_request.dart';
 import '../dto/rename_role_request.dart';
 import '../dto/resolve_conflict_request.dart';
+import '../dto/request_delisting_request.dart';
 import '../dto/save_configuration_request.dart';
 import '../dto/set_visibility_request.dart';
 import '../dto/sync_exchange_request.dart';
@@ -960,6 +962,71 @@ class ApiClient {
     );
     final response = await _send('PATCH', uri, body: request.toJson());
     return _decode<Map<String, Object?>>(response, uri, (json) => json);
+  }
+
+  /// `GET /api/v1/contests/{id}/publication/projections` — the projections
+  /// of the publication, newest first, each with who published it (see
+  /// [PublicationHistoryEntryDto]). [limit] is at most 100. An unpublished
+  /// contest is a 404.
+  Future<List<PublicationHistoryEntryDto>> publicationProjections(
+    Id contestId, {
+    int? limit,
+    int? offset,
+  }) async {
+    final uri =
+        _resolve('/api/v1/contests/${contestId.value}/publication/projections')
+            .replace(
+              queryParameters: {
+                'limit': ?limit?.toString(),
+                'offset': ?offset?.toString(),
+              },
+            );
+    final response = await _send('GET', uri);
+    return _decode<List<PublicationHistoryEntryDto>>(
+      response,
+      uri,
+      (json) => [
+        for (final item in json['projections'] as List<dynamic>)
+          PublicationHistoryEntryDto.fromJson(item as Map<String, dynamic>),
+      ],
+    );
+  }
+
+  /// `POST /api/v1/contests/{id}/publication/delist-requests` — asks a
+  /// system administrator to remove the publication from public view.
+  /// Repeating it while a request is pending returns that request. A
+  /// delisted publication is a 409; the embedded server answers 409
+  /// `publishing_not_available`.
+  Future<DelistRequest> requestDelisting(Id contestId, {String? reason}) async {
+    final uri = _resolve(
+      '/api/v1/contests/${contestId.value}/publication/delist-requests',
+    );
+    final response = await _send(
+      'POST',
+      uri,
+      body: RequestDelistingRequest(reason: reason).toJson(),
+    );
+    return _decode<DelistRequest>(response, uri, DelistRequest.fromJson);
+  }
+
+  /// `GET .../publication/delist-requests/current` — the latest delist
+  /// request, in any state; 404 when there is none.
+  Future<DelistRequest> currentDelistRequest(Id contestId) async {
+    final uri = _resolve(
+      '/api/v1/contests/${contestId.value}/publication/delist-requests/current',
+    );
+    final response = await _send('GET', uri);
+    return _decode<DelistRequest>(response, uri, DelistRequest.fromJson);
+  }
+
+  /// `DELETE .../publication/delist-requests/current` — withdraws the
+  /// pending delist request; 404 when none is pending.
+  Future<DelistRequest> withdrawDelistRequest(Id contestId) async {
+    final uri = _resolve(
+      '/api/v1/contests/${contestId.value}/publication/delist-requests/current',
+    );
+    final response = await _send('DELETE', uri);
+    return _decode<DelistRequest>(response, uri, DelistRequest.fromJson);
   }
 
   /// `GET /public/publications` — the Public publications by contest start,

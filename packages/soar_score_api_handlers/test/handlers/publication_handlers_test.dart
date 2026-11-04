@@ -26,6 +26,22 @@ void main() {
         '/contests/$_contestId/publication/visibility',
         {'visibility': 'Public'},
       ),
+      ('GET', '/contests/$_contestId/publication/projections', null),
+      (
+        'POST',
+        '/contests/$_contestId/publication/delist-requests',
+        <String, Object?>{},
+      ),
+      (
+        'GET',
+        '/contests/$_contestId/publication/delist-requests/current',
+        null,
+      ),
+      (
+        'DELETE',
+        '/contests/$_contestId/publication/delist-requests/current',
+        null,
+      ),
     ]) {
       test('$method $path answers 409 publishing_not_available', () async {
         final response = await api.send(method, path, body: body);
@@ -67,6 +83,52 @@ void main() {
         expect((await api.errorOf(response))['code'], 'invalid_request');
       });
     }
+
+    for (final limit in ['0', '101', 'many']) {
+      test('projection history limit "$limit" is a 400', () async {
+        final response = await api.send(
+          'GET',
+          '/contests/$_contestId/publication/projections?limit=$limit',
+        );
+
+        expect(response.statusCode, 400);
+      });
+    }
+
+    for (final (method, path, body) in [
+      ('GET', '/contests/$_contestId/publication/projections', null),
+      (
+        'POST',
+        '/contests/$_contestId/publication/delist-requests',
+        <String, Object?>{},
+      ),
+      (
+        'GET',
+        '/contests/$_contestId/publication/delist-requests/current',
+        null,
+      ),
+      (
+        'DELETE',
+        '/contests/$_contestId/publication/delist-requests/current',
+        null,
+      ),
+    ]) {
+      test('$method $path for an unknown contest is a 404', () async {
+        final response = await api.send(method, path, body: body);
+
+        expect(response.statusCode, 404);
+      });
+    }
+
+    test('a delist request body that is not an object is a 400', () async {
+      final response = await api.send(
+        'POST',
+        '/contests/$_contestId/publication/delist-requests',
+        body: {'reason': 5},
+      );
+
+      expect(response.statusCode, 400);
+    });
 
     test('a contest that does not exist is a 404', () async {
       final response = await api.send(

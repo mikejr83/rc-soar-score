@@ -14,6 +14,13 @@ abstract interface class PublicationProjectionRepository {
   /// Every projection of [publicationId], oldest revision first.
   Future<List<PublicationProjection>> listForPublication(Id publicationId);
 
+  /// A page of the projections of [publicationId], newest revision first.
+  Future<List<PublicationProjection>> pageForPublication(
+    Id publicationId, {
+    required int limit,
+    required int offset,
+  });
+
   /// The projection of [publicationId] with the highest revision, or `null`
   /// when it has none.
   Future<PublicationProjection?> latestForPublication(Id publicationId);

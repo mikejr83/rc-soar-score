@@ -300,6 +300,40 @@ class PublicationService {
     );
   }
 
+  /// The projections of the director's publication, newest revision first,
+  /// each with whether the system published it.
+  ///
+  /// [limit] and [offset] page the list. Throws an [EntityNotFoundError]
+  /// when the contest or its publication does not exist, and a
+  /// [ForbiddenError] for anyone but the director.
+  Future<List<PublicationHistoryEntry>> history(
+    Id contestId, {
+    required Id actorId,
+    required Authority authority,
+    int limit = 50,
+    int offset = 0,
+  }) async {
+    if (limit < 1 || offset < 0) {
+      throw ArgumentError('limit must be positive and offset not negative');
+    }
+    final contest = await _requireContest(contestId);
+    _requireDirector(contest, actorId, authority);
+    final identity = await _requirePublication(contestId);
+    final page = await repository.publicationProjectionRepository
+        .pageForPublication(identity.id, limit: limit, offset: offset);
+    final systemRevisions = await repository.auditEventRepository
+        .systemPublishRevisions(identity.id, [
+          for (final projection in page) projection.projectionRevision,
+        ]);
+    return [
+      for (final projection in page)
+        PublicationHistoryEntry(
+          projection: projection,
+          bySystem: systemRevisions.contains(projection.projectionRevision),
+        ),
+    ];
+  }
+
   /// Switches the publication between Unlisted and Public.
   ///
   /// The private contest is not touched. Throws an [ArgumentError] for any

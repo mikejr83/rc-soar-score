@@ -14,7 +14,18 @@ import 'package:soar_score_core/soar_score_core.dart';
 ///   (200);
 /// - `GET /contests/{id}/publication` is the director's view of it;
 /// - `PATCH /contests/{id}/publication/visibility` switches between
-///   `Unlisted` and `Public`.
+///   `Unlisted` and `Public`;
+/// - `GET /contests/{id}/publication/projections` lists the projections,
+///   newest first (`limit` up to 100, default 50, and `offset`);
+/// - `POST /contests/{id}/publication/delist-requests` asks to delist the
+///   publication (201; 200 with the pending request when one is already
+///   pending);
+/// - `GET /contests/{id}/publication/delist-requests/current` is the latest
+///   request, any state (404 when there is none);
+/// - `DELETE /contests/{id}/publication/delist-requests/current` withdraws
+///   the pending request (404 when none is pending).
+///
+/// The administrator's approve or deny flow plugs in beside the last two.
 ///
 /// Publishing exists only on the hosted server. With [enabled] false (the
 /// embedded server) every route answers 409 `publishing_not_available`, so a
@@ -27,6 +38,7 @@ void addPublicationRoutes(
   required bool enabled,
 }) {
   final service = PublicationService(repository);
+  final delisting = DelistRequestService(repository);
 
   Principal available(Request request) {
     final principal = requirePrincipal(request);
@@ -84,4 +96,88 @@ void addPublicationRoutes(
     );
     return jsonResponse(view.toJson());
   });
+
+  router.get('/contests/<id>/publication/projections', (
+    Request request,
+    String id,
+  ) async {
+    final principal = available(request);
+    final query = request.url.queryParameters;
+    final limit = _intParameter(query, 'limit') ?? 50;
+    if (limit < 1 || limit > 100) {
+      throw ArgumentError.value(limit, 'limit', 'must be 1 to 100');
+    }
+    final offset = _intParameter(query, 'offset') ?? 0;
+    final entries = await service.history(
+      Id.parse(id),
+      actorId: principal.accountId,
+      authority: principal.authority,
+      limit: limit,
+      offset: offset,
+    );
+    return jsonResponse({
+      'projections': [
+        for (final entry in entries)
+          PublicationHistoryEntryDto(
+            id: entry.projection.id,
+            projectionRevision: entry.projection.projectionRevision,
+            contestRevision: entry.projection.contestRevision,
+            publishedAt: entry.projection.publishedAt,
+            publishedBy: entry.projection.publishedBy,
+            publisherKind: entry.bySystem ? 'system' : 'person',
+          ).toJson(),
+      ],
+    });
+  });
+
+  router.post('/contests/<id>/publication/delist-requests', (
+    Request request,
+    String id,
+  ) async {
+    final principal = available(request);
+    final body = await readJsonBody(request, RequestDelistingRequest.fromJson);
+    final result = await delisting.request(
+      Id.parse(id),
+      actorId: principal.accountId,
+      authority: principal.authority,
+      reason: body.reason,
+    );
+    return jsonResponse(
+      result.request.toJson(),
+      statusCode: result.created ? 201 : 200,
+    );
+  });
+
+  router.get('/contests/<id>/publication/delist-requests/current', (
+    Request request,
+    String id,
+  ) async {
+    final principal = available(request);
+    final found = await delisting.current(
+      Id.parse(id),
+      actorId: principal.accountId,
+      authority: principal.authority,
+    );
+    return jsonResponse(found.toJson());
+  });
+
+  router.delete('/contests/<id>/publication/delist-requests/current', (
+    Request request,
+    String id,
+  ) async {
+    final principal = available(request);
+    final withdrawn = await delisting.withdraw(
+      Id.parse(id),
+      actorId: principal.accountId,
+      authority: principal.authority,
+    );
+    return jsonResponse(withdrawn.toJson());
+  });
+}
+
+int? _intParameter(Map<String, String> query, String name) {
+  final raw = query[name];
+  if (raw == null) return null;
+  return int.tryParse(raw) ??
+      (throw ArgumentError.value(raw, name, 'not a whole number'));
 }

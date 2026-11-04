@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart' show Variable;
 import 'package:soar_score_core/soar_score_core.dart' as core;
 
 import 'drift_repository.dart';
@@ -22,6 +23,30 @@ class AuditEventRepository extends DriftRepository
         publicationId,
         orderBy: 'server_timestamp, id',
       );
+
+  @override
+  Future<Set<int>> systemPublishRevisions(
+    core.Id publicationId,
+    Iterable<int> revisions,
+  ) async {
+    final wanted = revisions.toSet().toList();
+    if (wanted.isEmpty) return {};
+    final events = await _store.whereSql(
+      'publication_id = ? AND action = ? AND outcome = ? AND authority = ? '
+      'AND resulting_revision IN (${List.filled(wanted.length, '?').join(', ')})',
+      [
+        Variable<String>(publicationId.value),
+        Variable<String>(core.AuditAction.publicationAttempt.text),
+        Variable<String>('Success'),
+        Variable<String>('System'),
+        for (final revision in wanted) Variable<int>(revision),
+      ],
+    );
+    return {
+      for (final event in events)
+        if (event.resultingRevision != null) event.resultingRevision!,
+    };
+  }
 
   @override
   Future<List<core.AuditEvent>> listForContest(
