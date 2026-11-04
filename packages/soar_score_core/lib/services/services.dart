@@ -81,3 +81,5 @@ export 'sync/sync_mutation.dart';
 export 'sync/sync_versions.dart';
 export 'glider_score_restore_builder.dart';
 export 'glider_score_restore_comparison.dart';
+export 'glider_score_restore_mapper.dart';
+export 'glider_score_score_mapping.dart';

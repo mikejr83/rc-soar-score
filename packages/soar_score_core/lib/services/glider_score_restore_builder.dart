@@ -119,6 +119,7 @@ class GliderScoreRestoreBuilder {
   RestoredRows build({
     required RestorePlan plan,
     required ImportedDraw draw,
+    required List<ContestParticipation> participations,
     required Map<int, Id> participationIds,
     required Id contestId,
     required Id configRevisionId,
@@ -380,18 +381,20 @@ class GliderScoreRestoreBuilder {
         if (participationIds[r.sourcePilotNo] != null)
           participationIds[r.sourcePilotNo]!: r.retiredAtRound,
     };
+    final numbered = {for (final p in draw.numberedParticipations) p.id: p};
     final finalParticipations = [
-      for (final p in draw.numberedParticipations)
+      for (final p in participations.map((p) => numbered[p.id] ?? p))
         retiredAt.containsKey(p.id) ? p.withRetiredAtRound(retiredAt[p.id]) : p,
     ];
 
     final landing = plan.landing;
+    final scoresId = newId();
     final stamp = ImportProvenance(
       id: newId(),
       ownerAccountId: actorId,
       contestId: contestId,
       stampedEntityType: ImportProvenance.contestScoresEntityType,
-      stampedEntityId: contestId,
+      stampedEntityId: scoresId,
       sourceSystem: ImportProvenance.gliderScore,
       sourceKeys: {'comp_no': plan.sourceCompNo},
       sourceValues: {
@@ -417,7 +420,7 @@ class GliderScoreRestoreBuilder {
     final audit = AuditEvent(
       id: newId(),
       entityType: 'ContestScores',
-      entityId: contestId,
+      entityId: scoresId,
       contestId: contestId,
       action: AuditAction.restoration,
       actorId: metadata.actorId,
