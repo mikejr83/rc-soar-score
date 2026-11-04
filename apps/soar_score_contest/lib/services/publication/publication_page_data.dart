@@ -9,6 +9,9 @@ import '../workspace/publication_facts_loader.dart';
 
 final _logger = Logger('PublicationPageData');
 
+/// The most copies the server returns in one history request.
+const _historyPage = 100;
+
 /// What the Publication page shows about one contest.
 class PublicationPageData extends Equatable {
   const PublicationPageData({
@@ -67,7 +70,20 @@ class PublicationPageData extends Equatable {
     Id id,
   ) async {
     try {
-      return (await client.publicationProjections(id, limit: 100), false);
+      // The server pages at most 100 at a time; read until a short page so
+      // the list is every copy, not just the newest 100.
+      final all = <PublicationHistoryEntryDto>[];
+      while (true) {
+        final page = await client.publicationProjections(
+          id,
+          limit: _historyPage,
+          offset: all.length,
+        );
+        all.addAll(page);
+        if (page.length < _historyPage) {
+          return (all, false);
+        }
+      }
     } on Object catch (error, stack) {
       _logger.warning('Could not read the publication history', error, stack);
       return (const <PublicationHistoryEntryDto>[], true);

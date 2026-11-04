@@ -23,6 +23,10 @@ enum PublicationFailure {
   /// The server does not publish contests (409 `publishing_not_available`).
   unavailable,
 
+  /// Delisting can only be requested for a Public publication (409
+  /// `publication_not_public`).
+  notPublic,
+
   /// There is no pending delisting request to withdraw (404).
   nothingPending,
 
@@ -158,6 +162,7 @@ class PublicationActions {
         'stale_source_revision' => PublicationFailure.staleContest,
         'results_stale' => PublicationFailure.staleResults,
         'publication_delisted' => PublicationFailure.delisted,
+        'publication_not_public' => PublicationFailure.notPublic,
         'publishing_not_available' => PublicationFailure.unavailable,
         _ =>
           forPublish

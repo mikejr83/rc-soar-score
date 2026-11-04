@@ -1702,6 +1702,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get publicationDelistWithdrawnDone => 'Delisting request withdrawn.';
 
   @override
+  String get publicationFailNotPublic =>
+      'Delisting can only be requested for a Public publication.';
+
+  @override
   String get publicationFailNothingPending =>
       'There is no pending delisting request any more.';
 

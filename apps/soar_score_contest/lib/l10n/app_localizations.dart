@@ -2516,6 +2516,12 @@ abstract class AppLocalizations {
   /// **'Delisting request withdrawn.'**
   String get publicationDelistWithdrawnDone;
 
+  /// Delisting refused because the publication is not Public.
+  ///
+  /// In en, this message translates to:
+  /// **'Delisting can only be requested for a Public publication.'**
+  String get publicationFailNotPublic;
+
   /// Withdrawing refused because no request is pending.
   ///
   /// In en, this message translates to:

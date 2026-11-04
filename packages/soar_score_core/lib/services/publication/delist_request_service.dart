@@ -49,8 +49,10 @@ class DelistRequestService {
   /// Repeating the request while one is pending returns that request and
   /// records nothing. Throws an [EntityNotFoundError] for an unknown contest
   /// or a contest never published, a [ForbiddenError] for anyone but the
-  /// director, and a [ContestStateError] (`publication_delisted`) when the
-  /// publication is already delisted.
+  /// director, and a [ContestStateError] when the publication is already
+  /// delisted (`publication_delisted`) or is not Public
+  /// (`publication_not_public`): only a currently Public publication can be
+  /// delisted.
   Future<DelistRequestResult> request(
     Id contestId, {
     required Id actorId,
@@ -67,6 +69,12 @@ class DelistRequestService {
       throw ContestStateError(
         'publication_delisted',
         'the publication is already delisted',
+      );
+    }
+    if (identity.visibility != PublicationVisibility.public) {
+      throw ContestStateError(
+        'publication_not_public',
+        'only a Public publication can be delisted',
       );
     }
     final trimmed = reason?.trim();

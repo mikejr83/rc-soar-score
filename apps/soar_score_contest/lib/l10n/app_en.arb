@@ -2002,6 +2002,10 @@
   "@publicationDelistWithdrawnDone": {
     "description": "Snackbar after a delisting request was withdrawn."
   },
+  "publicationFailNotPublic": "Delisting can only be requested for a Public publication.",
+  "@publicationFailNotPublic": {
+    "description": "Delisting refused because the publication is not Public."
+  },
   "publicationFailNothingPending": "There is no pending delisting request any more.",
   "@publicationFailNothingPending": {
     "description": "Withdrawing refused because no request is pending."

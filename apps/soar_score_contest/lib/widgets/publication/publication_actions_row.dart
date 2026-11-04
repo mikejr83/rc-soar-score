@@ -118,7 +118,9 @@ class _PublicationActionsRowState extends State<PublicationActionsRow> {
                 : null,
             child: Text(l10n.publicationActionWithdrawDelisting),
           ),
-        if (canSwitch && !publication.delistPending)
+        if (canSwitch &&
+            !publication.delistPending &&
+            visibility == PublicationVisibility.public)
           OutlinedButton(
             key: const ValueKey('publication-request-delisting'),
             onPressed: enabled

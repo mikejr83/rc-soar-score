@@ -45,6 +45,7 @@ extension PublicationText on AppLocalizations {
     PublicationFailure.notReady => publicationFailNotReady,
     PublicationFailure.delisted => publicationFailDelisted,
     PublicationFailure.unavailable => publicationFailUnavailable,
+    PublicationFailure.notPublic => publicationFailNotPublic,
     PublicationFailure.nothingPending => publicationFailNothingPending,
     PublicationFailure.notDirector => publicationFailNotDirector,
     PublicationFailure.network => publicationFailNetwork,

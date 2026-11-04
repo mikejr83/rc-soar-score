@@ -172,7 +172,7 @@ void main() {
   });
 
   testWidgets('requests delisting from the page', (tester) async {
-    final server = _server()..startPublished();
+    final server = _server()..startPublished(visibility: 'Public');
     await _pump(tester, server);
     await tester.tap(_key('publication-request-delisting'));
     await tester.pumpAndSettle();
@@ -180,5 +180,24 @@ void main() {
     await tester.pumpAndSettle();
     expect(server.delistReasons, [null]);
     expect(_key('publication-page-delist-pending'), findsOneWidget);
+  });
+
+  testWidgets('reads the history in pages until it has every copy', (
+    tester,
+  ) async {
+    final server = _server()..startPublished();
+    server.publication!['current_projection'] = {
+      'projection_revision': 230,
+      'contest_revision': 1,
+      'published_at': '2026-10-17T15:00:00.000Z',
+    };
+    await _pump(tester, server);
+    expect(server.historyRequests, [
+      {'limit': '100', 'offset': '0'},
+      {'limit': '100', 'offset': '100'},
+      {'limit': '100', 'offset': '200'},
+    ]);
+    expect(_key('publication-history-230'), findsOneWidget);
+    expect(_key('publication-history-1'), findsOneWidget);
   });
 }

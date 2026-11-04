@@ -68,6 +68,9 @@ class WorkspaceServer {
   /// How many withdrawals were received.
   int delistWithdrawals = 0;
 
+  /// The query parameters of each publication history request received.
+  final List<Map<String, String>> historyRequests = [];
+
   /// When not 200, reading the publication history fails with this status.
   int historyStatus = 200;
 
@@ -189,21 +192,25 @@ class WorkspaceServer {
                   as Map<String, Object?>?)?['projection_revision']
               as int? ??
           0;
-      return _json({
-        'projections':
-            history ??
-            [
-              for (var r = revision; r >= 1; r--)
-                {
-                  'id': '019c0000-0000-7000-8000-0000000000${(10 + r)}',
-                  'projection_revision': r,
-                  'contest_revision': 1,
-                  'published_at': '2026-10-17T15:00:00.000Z',
-                  'published_by': '019c0000-0000-7000-8000-000000000001',
-                  'publisher_kind': r == 1 ? 'person' : 'system',
-                },
-            ],
-      });
+      historyRequests.add(request.url.queryParameters);
+      final limit = int.parse(request.url.queryParameters['limit'] ?? '50');
+      final offset = int.parse(request.url.queryParameters['offset'] ?? '0');
+      final all =
+          history ??
+          [
+            for (var r = revision; r >= 1; r--)
+              {
+                'id':
+                    '019c0000-0000-7000-8000-'
+                    '${(0xe000 + r).toRadixString(16).padLeft(12, '0')}',
+                'projection_revision': r,
+                'contest_revision': 1,
+                'published_at': '2026-10-17T15:00:00.000Z',
+                'published_by': '019c0000-0000-7000-8000-000000000001',
+                'publisher_kind': r == 1 ? 'person' : 'system',
+              },
+          ];
+      return _json({'projections': all.skip(offset).take(limit).toList()});
     }
     if (path.endsWith('/publication/delist-requests')) {
       final refusal = delistRefusal;

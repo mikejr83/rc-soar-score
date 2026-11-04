@@ -107,7 +107,7 @@ void main() {
     testWidgets('requesting delisting asks first, then shows it pending', (
       tester,
     ) async {
-      final server = _server()..startPublished();
+      final server = _server()..startPublished(visibility: 'Public');
       await pumpWorkspace(tester, server);
       expect(_key('publication-withdraw-delisting'), findsNothing);
       await tester.ensureVisible(_key('publication-request-delisting'));
@@ -128,7 +128,7 @@ void main() {
     testWidgets('cancelling the delisting dialog asks for nothing', (
       tester,
     ) async {
-      final server = _server()..startPublished();
+      final server = _server()..startPublished(visibility: 'Public');
       await pumpWorkspace(tester, server);
       await tester.ensureVisible(_key('publication-request-delisting'));
       await tester.tap(_key('publication-request-delisting'));
@@ -143,7 +143,7 @@ void main() {
       tester,
     ) async {
       final server = _server()
-        ..startPublished()
+        ..startPublished(visibility: 'Public')
         ..startDelistPending();
       await pumpWorkspace(tester, server);
       expect(_current(tester), contains('Delisting requested'));
@@ -160,7 +160,7 @@ void main() {
       tester,
     ) async {
       final server = _server()
-        ..startPublished()
+        ..startPublished(visibility: 'Public')
         ..startDelistPending();
       await pumpWorkspace(tester, server);
       server.delistRequest = null;
@@ -176,7 +176,7 @@ void main() {
 
     testWidgets('a refused delisting request is explained', (tester) async {
       final server = _server()
-        ..startPublished()
+        ..startPublished(visibility: 'Public')
         ..delistRefusal = 409;
       await pumpWorkspace(tester, server);
       await tester.ensureVisible(_key('publication-request-delisting'));
@@ -186,6 +186,31 @@ void main() {
       await tester.pumpAndSettle();
       expect(
         find.text('This publication was delisted and can no longer change.'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('an Unlisted publication cannot be delisted', (tester) async {
+      final server = _server()..startPublished();
+      await pumpWorkspace(tester, server);
+      expect(_key('publication-request-delisting'), findsNothing);
+    });
+
+    testWidgets('a server refusal for a non-Public publication is explained', (
+      tester,
+    ) async {
+      final server = _server()
+        ..startPublished(visibility: 'Public')
+        ..delistRefusal = 409
+        ..delistRefusalCode = 'publication_not_public';
+      await pumpWorkspace(tester, server);
+      await tester.ensureVisible(_key('publication-request-delisting'));
+      await tester.tap(_key('publication-request-delisting'));
+      await tester.pumpAndSettle();
+      await tester.tap(_key('delist-dialog-confirm'));
+      await tester.pumpAndSettle();
+      expect(
+        find.text('Delisting can only be requested for a Public publication.'),
         findsOneWidget,
       );
     });
@@ -200,7 +225,7 @@ void main() {
     testWidgets('offline disables delisting with the reason', (tester) async {
       final monitor = FakeAppConnectivity()
         ..internetStatus = ConnectivityStatus.unavailable;
-      final server = _server()..startPublished();
+      final server = _server()..startPublished(visibility: 'Public');
       await pumpWorkspace(tester, server, monitor: monitor);
       expect(_enabled(tester, 'publication-request-delisting'), isFalse);
       expect(find.text('Needs a connection.'), findsWidgets);
