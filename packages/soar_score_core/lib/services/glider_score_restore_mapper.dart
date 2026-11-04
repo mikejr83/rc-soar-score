@@ -169,13 +169,18 @@ class GliderScoreRestoreMapper {
     for (final key in cellKeys) {
       final (round, reflightNo, group) = key;
       final members = cells[key]!;
-      final original = {
+      final originalRows = [
         for (final f in draw.flights)
           if (!f.isReflight && f.roundNo == round && f.groupNo == group)
             f.sourcePilotNo,
-      };
+      ];
+      final original = originalRows.toSet();
       final again = {for (final f in members) f.sourcePilotNo};
-      if (original.length != again.length || !original.containsAll(again)) {
+      // A repeated pilot in either list is a malformed file, not a group.
+      if (originalRows.length != original.length ||
+          members.length != again.length ||
+          original.length != again.length ||
+          !original.containsAll(again)) {
         return refused(
           RestoreReason.reflightNotWholeGroup,
           detail: 'round $round group $group re-flight $reflightNo',

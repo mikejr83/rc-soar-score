@@ -462,6 +462,37 @@ void main() {
       );
     });
 
+    test('a repeated pilot in a re-flight group is refused', () {
+      final source = _snapshot('draws_reference.json');
+      final scores = source.tables.firstWhere((t) => t.name == 'Scores');
+      final copy = scores.rows.firstWhere(
+        (r) => r['CompNo'] == 21 && r['RoundNo'] == 8 && r['ReFlightNo'] != 0,
+      );
+      final rows = [
+        ...scores.rows,
+        {...copy},
+      ];
+      final result = GliderScoreImportResult(
+        id: source.id,
+        sourceDbFile: source.sourceDbFile,
+        tables: [
+          for (final t in source.tables)
+            if (t.name == 'Scores')
+              GliderScoreTable(
+                name: 'Scores',
+                rows: rows,
+                rowCount: rows.length,
+                rowCapExceeded: false,
+              )
+            else
+              t,
+        ],
+      );
+      final p = _mapper.map(result).firstWhere((p) => p.sourceCompNo == 21);
+      expect(p.status, RestoreStatus.refused);
+      expect(p.reason, RestoreReason.reflightNotWholeGroup);
+    });
+
     test('a re-flight of part of a group is refused', () {
       final p = _plan('scores_edge_cases.json', 9303);
       expect(p.status, RestoreStatus.refused);
