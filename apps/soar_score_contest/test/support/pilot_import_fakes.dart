@@ -22,8 +22,9 @@ ParticipantProfile profile({
   String? email,
   String? club,
   int revision = 0,
+  Id? id,
 }) => ParticipantProfile(
-  id: Id.create(),
+  id: id ?? Id.create(),
   ownerAccountId: Id.create(),
   firstName: first,
   lastName: last,
@@ -63,6 +64,7 @@ class FakePilotImportStore implements PilotImportStore {
         case PilotImportChoice.add:
           added.add(
             profile(
+              id: s.newProfileId,
               first: s.match.draft.firstName,
               last: s.match.draft.lastName,
             ),
@@ -71,7 +73,13 @@ class FakePilotImportStore implements PilotImportStore {
           if (s.match.isUnchanged) {
             unchanged++;
           } else {
-            updated.add(profile(first: 'x', last: 'y'));
+            updated.add(
+              profile(
+                id: s.targetProfileId ?? s.match.candidateIds.single,
+                first: 'x',
+                last: 'y',
+              ),
+            );
           }
       }
     }

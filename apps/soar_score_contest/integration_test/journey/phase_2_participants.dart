@@ -5,6 +5,7 @@ import '../support/interact.dart';
 import '../support/launch_app.dart';
 import '../support/participant_extras.dart';
 import '../support/participant_form.dart';
+import 'competition_import_step.dart';
 import 'journey.dart';
 import 'pilot_import_step.dart';
 
@@ -47,6 +48,11 @@ Future<void> runParticipantsPhase(Journey journey, JourneyContext data) async {
   await journey.step(
     'Pilots are imported from a GliderScore file, twice (native)',
     () => importPilotsFromGliderScore(tester, data),
+    nativeOnly: true,
+  );
+  await journey.step(
+    'Competitions are imported as contests, twice (native)',
+    () => importCompetitionsFromGliderScore(tester, data),
     nativeOnly: true,
   );
 }

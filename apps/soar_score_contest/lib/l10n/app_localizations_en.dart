@@ -1873,4 +1873,199 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get competitionImportButton => 'Import from GliderScore…';
+
+  @override
+  String get competitionImportTitle => 'Import GliderScore competitions';
+
+  @override
+  String get competitionImportChoosing => 'Choose a GliderScore file…';
+
+  @override
+  String competitionImportReading(String file) {
+    return 'Reading $file…';
+  }
+
+  @override
+  String get competitionImportCancelReading => 'Cancel';
+
+  @override
+  String get competitionImportIntro =>
+      'Choose the competitions to import. Each becomes a contest with its settings and participants. The draw and the scores are not imported.';
+
+  @override
+  String get competitionImportNothingImportable =>
+      'This file has no competition that can be imported.';
+
+  @override
+  String get competitionImportSelectAll => 'Select all';
+
+  @override
+  String get competitionImportSelectNone => 'Select none';
+
+  @override
+  String competitionImportRowDetails(String date, String className, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count participants',
+      one: '1 participant',
+    );
+    return '$date · $className · $_temp0';
+  }
+
+  @override
+  String get competitionImportWarningTeamNames =>
+      'Teams are named Team 1, Team 2 and so on, because GliderScore has no team names. You can rename them afterwards.';
+
+  @override
+  String get competitionImportWarningRetired =>
+      'Retired pilots stay active, because a retirement belongs to a round and there is no draw yet.';
+
+  @override
+  String competitionImportWarningOther(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count more notes: settings were adjusted',
+      one: '1 more note: a setting was adjusted',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get competitionImportReasonClassNotSupportedYet =>
+      'This class is not imported yet.';
+
+  @override
+  String get competitionImportReasonClassOutOfScope =>
+      'Soar Score does not support this class.';
+
+  @override
+  String get competitionImportReasonClassUnknown => 'This class is not known.';
+
+  @override
+  String get competitionImportReasonConfigMissing =>
+      'The settings of this competition are missing from the file.';
+
+  @override
+  String get competitionImportReasonDateMissing =>
+      'This competition has no date.';
+
+  @override
+  String get competitionImportReasonConfigInvalid =>
+      'The settings of this competition are not valid.';
+
+  @override
+  String get competitionImportReasonNoParticipants =>
+      'Nobody in this competition can be imported.';
+
+  @override
+  String get competitionImportReasonOther =>
+      'This competition cannot be imported.';
+
+  @override
+  String get competitionImportContinue => 'Continue';
+
+  @override
+  String get competitionImportBack => 'Back';
+
+  @override
+  String competitionImportChosenCount(int count) {
+    return '$count chosen';
+  }
+
+  @override
+  String get competitionImportConfirmIntro =>
+      'Check what will be written, then import.';
+
+  @override
+  String competitionImportSummaryContests(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count contests will be created.',
+      one: '1 contest will be created.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String competitionImportSummaryPilots(int added, int updated) {
+    return '$added participants will be added and $updated updated.';
+  }
+
+  @override
+  String get competitionImportNotImported =>
+      'Not imported: the draw, rounds, flights and scores.';
+
+  @override
+  String get competitionImportConfirm => 'Import';
+
+  @override
+  String get competitionImportSaving => 'Importing…';
+
+  @override
+  String competitionImportResultImported(String name) {
+    return '$name: imported.';
+  }
+
+  @override
+  String competitionImportResultSkippedPilots(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count participants were left out because no pilot was chosen for them.',
+      one: '1 participant was left out because no pilot was chosen for them.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String competitionImportResultAlready(String name, String date) {
+    return '$name: already imported on $date. Nothing was changed.';
+  }
+
+  @override
+  String competitionImportResultFailed(String name, String reason) {
+    return '$name: not imported. $reason';
+  }
+
+  @override
+  String get competitionImportOpen => 'Open';
+
+  @override
+  String get competitionImportDoneButton => 'Done';
+
+  @override
+  String get competitionImportFailNoAccount =>
+      'There is no account to own the contest.';
+
+  @override
+  String get competitionImportFailNotImportable =>
+      'This competition cannot be imported.';
+
+  @override
+  String get competitionImportFailProfileUnavailable =>
+      'No scoring rules are available for this class.';
+
+  @override
+  String get competitionImportFailConfigInvalid =>
+      'Its settings are not valid for the scoring rules.';
+
+  @override
+  String get competitionImportFailProfileMissing =>
+      'A participant you chose is no longer in your list.';
+
+  @override
+  String get competitionImportFailOther =>
+      'Something went wrong and nothing of this competition was kept.';
+
+  @override
+  String competitionImportFailed(String error) {
+    return 'The import failed: $error';
+  }
 }
