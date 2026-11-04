@@ -1,3 +1,5 @@
+import '../../enums/landing_input_unit.dart';
+
 import 'package:equatable/equatable.dart';
 
 import '../../enums/re_flight_participant_role.dart';
@@ -309,6 +311,7 @@ class LandingSelection extends Equatable {
     this.entryKeys = const {},
     this.unresolved = const {},
     this.sourceTableNo,
+    this.inputUnit = LandingInputUnit.points,
   });
 
   final LandingMatch match;
@@ -332,6 +335,10 @@ class LandingSelection extends Equatable {
   /// GliderScore's table number (`durLndg`).
   final int? sourceTableNo;
 
+  /// What a scorer picks in a rebuilt table: the points (the value is the
+  /// points awarded) or metres (the value is a distance).
+  final LandingInputUnit inputUnit;
+
   bool get isReconstructed => match == LandingMatch.reconstructed;
 
   @override
@@ -343,6 +350,7 @@ class LandingSelection extends Equatable {
     entryKeys,
     unresolved,
     sourceTableNo,
+    inputUnit,
   ];
 }
 

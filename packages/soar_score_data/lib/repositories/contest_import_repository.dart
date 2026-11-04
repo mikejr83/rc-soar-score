@@ -679,7 +679,7 @@ class ContestImportRepository extends DriftRepository
     for (final table in await store<core.LandingTable>(
       'LandingTable',
     ).whereId('owner_account_id', owner)) {
-      if (table.name != name) continue;
+      if (table.name != name || table.inputUnit != landing.inputUnit) continue;
       final results = await store<core.LandingResult>('LandingResult')
           .whereId('landing_table_id', table.id);
       if (results.length == wanted.length &&
@@ -691,7 +691,7 @@ class ContestImportRepository extends DriftRepository
       id: _newId(),
       ownerAccountId: owner,
       name: name,
-      inputUnit: core.LandingInputUnit.points,
+      inputUnit: landing.inputUnit,
       createdAt: now,
     );
     await context.appendLandingTable(

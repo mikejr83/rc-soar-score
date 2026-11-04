@@ -139,6 +139,7 @@ class F5jScoreMapper extends ClassScoreMapper {
       entryKeys: bestKeys,
       unresolved: unresolved,
       sourceTableNo: sourceTableNo,
+      inputUnit: chosen.inputUnit,
     );
   }
 
@@ -277,7 +278,13 @@ class F5jScoreMapper extends ClassScoreMapper {
 
 /// A landing table the observed values are tried against.
 class _Candidate {
-  _Candidate._(this.name, this.rebuilt, this.entries, this._table);
+  _Candidate._(
+    this.name,
+    this.rebuilt,
+    this.entries,
+    this._table, [
+    this.inputUnit = LandingInputUnit.points,
+  ]);
 
   /// A table the system ships.
   factory _Candidate.system(String name, LandingTableWithResults table) =>
@@ -286,21 +293,31 @@ class _Candidate {
   /// The competition's own table, rebuilt from the file: one entry per
   /// landing value.
   factory _Candidate.rebuilt(List<({int value, num points})> rows) {
+    // A table whose values are the points it awards is picked in points;
+    // any other is a table of distances, picked in metres.
+    final inPoints = rows.every((r) => r.value == r.points);
     final entries = [
       for (final r in rows)
         LandingEntryDraft(
           entryKey: 'gs_${r.value}',
-          label: '${r.value}',
+          label: inPoints ? '${r.value}' : '${r.value}m',
           points: r.points.round(),
         ),
     ];
-    return _Candidate._('rebuilt', true, entries, null);
+    return _Candidate._(
+      'rebuilt',
+      true,
+      entries,
+      null,
+      inPoints ? LandingInputUnit.points : LandingInputUnit.meters,
+    );
   }
 
   final String name;
   final bool rebuilt;
   final List<LandingEntryDraft> entries;
   final LandingTableWithResults? _table;
+  final LandingInputUnit inputUnit;
 
   /// The entry that stands for the landing [value] awarding [points].
   ///

@@ -375,6 +375,9 @@ void main() {
       expect(l.systemTable, isNull);
       expect(l.reconstructedName, 'Example Table');
       expect([for (final e in l.entries) e.points], [37, 22, 11]);
+      // The values are not the points, so the scorer picks a distance.
+      expect(l.inputUnit, LandingInputUnit.meters);
+      expect([for (final e in l.entries) e.label], ['1m', '2m', '3m']);
       expect(l.entryKeys, {1: 'gs_1', 2: 'gs_2', 3: 'gs_3'});
       expect(p.flights.first.components['landing'], 'gs_1');
     });
