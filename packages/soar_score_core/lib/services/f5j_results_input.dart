@@ -81,19 +81,29 @@ class F5jResultsInput {
       final live = await repository.matrixAssignmentRepository.listLiveForRound(
         round.id,
       );
-      // A pilot whose re-flight is scored counts the re-flight; the flight it
-      // replaced no longer does.
-      final reflown = <Id>{};
+      // A pilot whose re-flight is scored counts one flight for the round: the
+      // latest scored re-flight (the highest flight sequence; a re-flight of a
+      // re-flight takes the next number). The flights it replaced no longer
+      // count. The documented rule is "the discipline's result-selection
+      // rule"; for F5J this is the latest scored flight (see #752).
+      final counted = <Id, MatrixAssignment>{};
       for (final assignment in live) {
         if (assignment.assignmentType != AssignmentType.reflight) continue;
         final placeholder = placeholders[assignment.id];
-        if (placeholder != null && await officialOf(placeholder.id) != null) {
-          reflown.add(assignment.contestParticipationId);
+        if (placeholder == null || await officialOf(placeholder.id) == null) {
+          continue;
+        }
+        final best = counted[assignment.contestParticipationId];
+        if (best == null || assignment.flightSequence > best.flightSequence) {
+          counted[assignment.contestParticipationId] = assignment;
         }
       }
       for (final assignment in live) {
-        if (assignment.assignmentType != AssignmentType.reflight &&
-            reflown.contains(assignment.contestParticipationId)) {
+        final chosen = counted[assignment.contestParticipationId];
+        if (chosen != null &&
+            (assignment.assignmentType == AssignmentType.original ||
+                assignment.assignmentType == AssignmentType.reflight) &&
+            assignment.id != chosen.id) {
           continue;
         }
         if (assignment.creditedRoundId != assignment.scheduledRoundId) continue;

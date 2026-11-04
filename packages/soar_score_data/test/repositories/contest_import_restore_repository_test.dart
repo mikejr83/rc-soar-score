@@ -305,6 +305,65 @@ void _tests(Backend backend) {
       },
     );
 
+    test('a pilot with two scored re-flights counts one flight', () async {
+      final plan = _mapped('draws_reference.json', 21);
+      final r = plan.reflights.single;
+      // The same group is re-flown a second time with the same results.
+      final second = core.ReflightDraft(
+        taskNo: r.taskNo,
+        roundNo: r.roundNo,
+        reflightNo: r.reflightNo + 1,
+        sourceGroupNo: r.sourceGroupNo,
+        flownGroupNo: r.flownGroupNo + 1,
+        members: r.members,
+      );
+      final again = [
+        for (final f in plan.flights)
+          if (f.isReflight && f.reflightNo == r.reflightNo)
+            core.RestoredFlight(
+              taskNo: f.taskNo,
+              roundNo: f.roundNo,
+              sourceGroupNo: f.sourceGroupNo,
+              groupNo: f.groupNo + 1,
+              reflightNo: f.reflightNo + 1,
+              sourcePilotNo: f.sourcePilotNo,
+              kind: f.kind,
+              components: f.components,
+              rawComponents: f.rawComponents,
+              sourceRawScore: f.sourceRawScore,
+            ),
+      ];
+      expect(again, isNotEmpty);
+      final twice = core.RestorePlan(
+        sourceCompNo: plan.sourceCompNo,
+        identity: plan.identity,
+        status: plan.status,
+        contest: plan.contest,
+        draw: plan.draw,
+        flights: [...plan.flights, ...again],
+        reflights: [r, second],
+        retirements: plan.retirements,
+        landing: plan.landing,
+        trailingUnflownRounds: plan.trailingUnflownRounds,
+        contentHash: 'twice',
+      );
+      final done = await restore(twice) as core.CompetitionRestored;
+      final results = await core.ResultsService(repository)
+          .read(done.contestId);
+      expect(results.standings, isNotEmpty);
+      // One result per pilot and round, whatever the number of re-flights.
+      final selected = await repository.flightResultRepository.listForContest(
+        done.contestId,
+      );
+      final perPilotRound = <String>{};
+      for (final f in selected.where((f) => f.isSelected)) {
+        expect(
+          perPilotRound.add('${f.contestParticipationId}/${f.creditedRoundId}'),
+          isTrue,
+        );
+      }
+    });
+
     test('a re-flight member the file contradicts is refused', () async {
       final plan = _mapped('draws_reference.json', 21);
       final r = plan.reflights.single;
