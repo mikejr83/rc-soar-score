@@ -53,8 +53,29 @@ class ImportProvenance extends Equatable implements Synchronizable {
     if (sourceValues != null && stampedEntityType != contestEntityType) {
       throw ArgumentError('only a Contest row carries source_values');
     }
-    if (contestId == null && stampedEntityType != profileEntityType) {
+    if (!entityTypes.contains(stampedEntityType)) {
+      throw ArgumentError.value(
+        stampedEntityType,
+        'stampedEntityType',
+        'must be one of ${entityTypes.join(', ')}',
+      );
+    }
+    if (!sourceSystems.contains(sourceSystem)) {
+      throw ArgumentError.value(
+        sourceSystem,
+        'sourceSystem',
+        'must be one of ${sourceSystems.join(', ')}',
+      );
+    }
+    if (stampedEntityType == profileEntityType) {
+      if (contestId != null) {
+        throw ArgumentError('a ParticipantProfile row has no contest_id');
+      }
+    } else if (contestId == null) {
       throw ArgumentError('a $stampedEntityType row needs a contest_id');
+    } else if (stampedEntityType == contestEntityType &&
+        stampedEntityId != contestId) {
+      throw ArgumentError('a Contest row stamps its own contest');
     }
   }
 
@@ -73,6 +94,17 @@ class ImportProvenance extends Equatable implements Synchronizable {
 
   /// The only source system so far.
   static const gliderScore = 'gliderscore';
+
+  /// The entity types a stamp may describe. A new source or phase that
+  /// stamps another type adds it here, in the entity doc and in the ADR.
+  static const entityTypes = {
+    contestEntityType,
+    participationEntityType,
+    profileEntityType,
+  };
+
+  /// The source systems a stamp may name.
+  static const sourceSystems = {gliderScore};
 
   @override
   final Id id;

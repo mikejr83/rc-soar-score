@@ -265,7 +265,7 @@ class StubImportProvenanceRepository implements ImportProvenanceRepository {
       throw UnimplementedError('not used by handlers');
 
   @override
-  Future<ImportProvenance?> findForEntity(Id stampedEntityId) =>
+  Future<List<ImportProvenance>> listForEntity(Id stampedEntityId) =>
       throw UnimplementedError('not used by handlers');
 
   @override

@@ -17,14 +17,12 @@ class ImportProvenanceRepository extends DriftRepository
       _store.whereId('contest_id', contestId, orderBy: 'imported_at, id');
 
   @override
-  Future<core.ImportProvenance?> findForEntity(core.Id stampedEntityId) async {
-    final rows = await _store.whereId(
-      'stamped_entity_id',
-      stampedEntityId,
-      orderBy: 'imported_at, id',
-    );
-    return rows.isEmpty ? null : rows.first;
-  }
+  Future<List<core.ImportProvenance>> listForEntity(core.Id stampedEntityId) =>
+      _store.whereId(
+        'stamped_entity_id',
+        stampedEntityId,
+        orderBy: 'imported_at, id',
+      );
 
   @override
   Future<core.ImportProvenance?> findByDedupeKey(

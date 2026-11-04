@@ -10,8 +10,10 @@ abstract interface class ImportProvenanceRepository {
   /// The stamps of [contestId] (the contest and its participations), by id.
   Future<List<ImportProvenance>> listForContest(Id contestId);
 
-  /// The stamp of the entity [stampedEntityId], if it has one.
-  Future<ImportProvenance?> findForEntity(Id stampedEntityId);
+  /// Every stamp of the entity [stampedEntityId], oldest import first. A
+  /// contest or participation has at most one; a profile has one per import
+  /// operation that created or updated it.
+  Future<List<ImportProvenance>> listForEntity(Id stampedEntityId);
 
   /// The contest stamp of [ownerAccountId] with this [dedupeKey], if any: the
   /// earlier import of the same competition.

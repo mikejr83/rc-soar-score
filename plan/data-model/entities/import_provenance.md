@@ -14,27 +14,29 @@
 
 ## Fields/Properties
 
-| Field                 | Type     | Required | Default | Description                                                                                                                                                |
-| --------------------- | -------- | -------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `id`                  | UUIDv7   | Yes      | —       | Primary key                                                                                                                                                |
-| `owner_account_id`    | UUIDv7   | Yes      | —       | FK Account of the importing director: the signed-in account, otherwise the installation's Local account (re-pointed when that is claimed)                  |
-| `contest_id`          | UUIDv7   | No       | —       | Not a foreign key (director data); set for `Contest` and `ContestParticipation` rows, absent for `ParticipantProfile` rows. Deleted with the contest       |
-| `stamped_entity_type` | String   | Yes      | —       | `Contest`, `ContestParticipation` or `ParticipantProfile`                                                                                                  |
-| `stamped_entity_id`   | UUIDv7   | Yes      | —       | The stamped entity                                                                                                                                         |
-| `source_system`       | String   | Yes      | —       | `gliderscore`                                                                                                                                              |
-| `source_keys`         | JSON     | Yes      | —       | Whole-number source keys: `comp_no` for a contest, `comp_no` and `pilot_no` for a participation, `pilot_no` for a profile. Stored in canonical form        |
-| `source_values`       | JSON     | No       | —       | `Contest` rows only: source values that have no Soar Score field and are kept for review and later phases, for example `lane_count` and `landing_table_no` |
-| `file_fingerprint`    | String   | Yes      | —       | Hash of the source file, the same for every row of one import                                                                                              |
-| `dedupe_key`          | String   | No       | —       | `Contest` rows only: `<source_system>:<file_fingerprint>:<comp_no>`                                                                                        |
-| `import_operation_id` | UUIDv7   | Yes      | —       | One id per import run, shared by every row it wrote                                                                                                        |
-| `tool_version`        | String   | Yes      | —       | Importer version that wrote the row                                                                                                                        |
-| `imported_at`         | DateTime | Yes      | —       | UTC                                                                                                                                                        |
-| `revision`            | Integer  | Yes      | 0       | Revision counter for optimistic locking; a stamp is not edited, so it stays 0                                                                              |
+| Field                 | Type     | Required | Default | Description                                                                                                                                                                                              |
+| --------------------- | -------- | -------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`                  | UUIDv7   | Yes      | —       | Primary key                                                                                                                                                                                              |
+| `owner_account_id`    | UUIDv7   | Yes      | —       | FK Account of the importing director: the signed-in account, otherwise the installation's Local account (re-pointed when that is claimed)                                                                |
+| `contest_id`          | UUIDv7   | No       | —       | Not a foreign key (director data); set for `Contest` and `ContestParticipation` rows, absent for `ParticipantProfile` rows. Deleted with the contest                                                     |
+| `stamped_entity_type` | String   | Yes      | —       | `Contest`, `ContestParticipation` or `ParticipantProfile`                                                                                                                                                |
+| `stamped_entity_id`   | UUIDv7   | Yes      | —       | The stamped entity                                                                                                                                                                                       |
+| `source_system`       | String   | Yes      | —       | `gliderscore`                                                                                                                                                                                            |
+| `source_keys`         | JSON     | Yes      | —       | Whole-number source keys: `comp_no` for a contest, `comp_no` and `pilot_no` for a participation, `pilot_no` for a profile. Stored in canonical form                                                      |
+| `source_values`       | JSON     | No       | —       | `Contest` rows only: source values that have no Soar Score field and are kept for review and later phases, for example `lane_count` and `landing_table_no`                                               |
+| `file_fingerprint`    | String   | Yes      | —       | Hash of the source file, the same for every row of one import                                                                                                                                            |
+| `dedupe_key`          | String   | No       | —       | `Contest` rows only: `<source_system>:<file_fingerprint>:<comp_no>`                                                                                                                                      |
+| `import_operation_id` | UUIDv7   | Yes      | —       | One id per import run, shared by every row it wrote                                                                                                                                                      |
+| `tool_version`        | String   | Yes      | —       | Importer version that wrote the row                                                                                                                                                                      |
+| `imported_at`         | DateTime | Yes      | —       | UTC                                                                                                                                                                                                      |
+| `revision`            | Integer  | Yes      | 0       | Revision counter for optimistic locking. The app never edits a stamp, so it normally stays 0; it is revisioned so a stamp syncs and deletes like other director data, and a later import may re-save one |
 
 ## Invariants and Constraints
 
 - (`owner_account_id`, `dedupe_key`) is unique where `dedupe_key` is set: a director imports a competition of a file once. The importer treats a violation as "already imported" and rolls back that competition
-- Only `Contest` rows carry `dedupe_key` and `source_values`; only `ParticipantProfile` rows have no `contest_id`
+- Only `Contest` rows carry `dedupe_key` and `source_values`. `ParticipantProfile` rows have no `contest_id`; `Contest` and `ContestParticipation` rows must have one, and a `Contest` row stamps its own contest
+- `stamped_entity_type` is one of `Contest`, `ContestParticipation`, `ParticipantProfile` and `source_system` is `gliderscore`; the model rejects anything else, so a new source or type is a deliberate change here, in the model and in the ADR
+- A contest or participation has at most one stamp; a profile has one per import operation, so read them with `listForEntity`
 - `source_keys` are whole numbers in canonical form (sorted keys, plain decimals, no whitespace), so equal keys compare equal as text
 - Never shown as editable data and never takes part in matching profiles
 

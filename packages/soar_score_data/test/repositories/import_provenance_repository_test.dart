@@ -60,10 +60,11 @@ void _tests(Backend backend) {
         isTrue,
       );
       expect(
-        (await repo.findForEntity(contestStamp.stampedEntityId))?.id,
-        contestStamp.id,
+        (await repo.listForEntity(contestStamp.stampedEntityId))
+            .map((s) => s.id),
+        [contestStamp.id],
       );
-      expect(await repo.findForEntity(core.Id.create()), isNull);
+      expect(await repo.listForEntity(core.Id.create()), isEmpty);
     });
 
     test('finds a contest stamp by owner and dedupe key', () async {
@@ -102,6 +103,14 @@ void _tests(Backend backend) {
       final participation = examples.firstWhere((s) => s.dedupeKey == null);
       await repo.save(another(participation), metadata: metadata());
       await repo.save(another(participation), metadata: metadata());
+    });
+
+    test('a shared profile lists one stamp per import operation', () async {
+      final profile = examples.firstWhere((s) => s.contestId == null);
+      final second = await repo.save(another(profile), metadata: metadata());
+      final listed = await repo.listForEntity(profile.stampedEntityId);
+      expect(listed.map((s) => s.id), containsAll([profile.id, second.id]));
+      expect(listed, hasLength(2));
     });
 
     test('save bumps the revision and refuses a stale read', () async {

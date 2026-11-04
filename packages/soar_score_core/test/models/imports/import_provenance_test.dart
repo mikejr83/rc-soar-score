@@ -6,23 +6,28 @@ ImportProvenance _stamp({
   Id? contestId,
   String? dedupeKey,
   Map<String, Object?>? values,
-}) => ImportProvenance(
-  id: Id.create(),
-  ownerAccountId: Id.create(),
-  contestId: type == ImportProvenance.profileEntityType
+}) {
+  final contest = type == ImportProvenance.profileEntityType
       ? contestId
-      : contestId ?? Id.create(),
-  stampedEntityType: type,
-  stampedEntityId: Id.create(),
-  sourceSystem: ImportProvenance.gliderScore,
-  sourceKeys: const {'comp_no': 22},
-  sourceValues: values,
-  fileFingerprint: 'sha256:abc',
-  dedupeKey: dedupeKey,
-  importOperationId: Id.create(),
-  toolVersion: '1.0.0',
-  importedAt: DateTime.utc(2026, 11, 3),
-);
+      : contestId ?? Id.create();
+  return ImportProvenance(
+    id: Id.create(),
+    ownerAccountId: Id.create(),
+    contestId: contest,
+    stampedEntityType: type,
+    stampedEntityId: type == ImportProvenance.contestEntityType
+        ? contest!
+        : Id.create(),
+    sourceSystem: ImportProvenance.gliderScore,
+    sourceKeys: const {'comp_no': 22},
+    sourceValues: values,
+    fileFingerprint: 'sha256:abc',
+    dedupeKey: dedupeKey,
+    importOperationId: Id.create(),
+    toolVersion: '1.0.0',
+    importedAt: DateTime.utc(2026, 11, 3),
+  );
+}
 
 void main() {
   group('ImportProvenance', () {
@@ -81,6 +86,53 @@ void main() {
         _stamp(type: ImportProvenance.profileEntityType).contestId,
         isNull,
       );
+    });
+
+    test('a profile row never has a contest', () {
+      expect(
+        () => _stamp(
+          type: ImportProvenance.profileEntityType,
+          contestId: Id.create(),
+        ),
+        throwsArgumentError,
+      );
+    });
+
+    test('a contest row stamps its own contest', () {
+      expect(
+        () => ImportProvenance(
+          id: Id.create(),
+          ownerAccountId: Id.create(),
+          contestId: Id.create(),
+          stampedEntityType: ImportProvenance.contestEntityType,
+          stampedEntityId: Id.create(),
+          sourceSystem: 'gliderscore',
+          sourceKeys: const {'comp_no': 1},
+          fileFingerprint: 'f',
+          importOperationId: Id.create(),
+          toolVersion: 'v',
+          importedAt: DateTime.utc(2026),
+        ),
+        throwsArgumentError,
+      );
+    });
+
+    test('an unknown entity type or source system is refused', () {
+      ImportProvenance build(String type, String source) => ImportProvenance(
+        id: Id.create(),
+        ownerAccountId: Id.create(),
+        stampedEntityType: type,
+        stampedEntityId: Id.create(),
+        sourceSystem: source,
+        sourceKeys: const {'pilot_no': 1},
+        fileFingerprint: 'f',
+        importOperationId: Id.create(),
+        toolVersion: 'v',
+        importedAt: DateTime.utc(2026),
+      );
+      expect(() => build('Round', 'gliderscore'), throwsArgumentError);
+      expect(() => build('ParticipantProfile', 'f3x'), throwsArgumentError);
+      expect(build('ParticipantProfile', 'gliderscore'), isNotNull);
     });
 
     test('blank text is refused', () {
