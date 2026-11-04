@@ -142,6 +142,8 @@ Future<void> importCompetitionsFromGliderScore(
   await tapVisible(tester, _key('competition-import-open-1'));
   await pumpUntilGone(tester, _key('competition-import-dialog'));
   await pumpUntilFound(tester, find.text('Workspace'));
+  // Open lands on Configuration; the note is on the Workspace page.
+  await tapRail(tester, 'Workspace');
   // The workspace says where the contest came from and what it lacks.
   await pumpUntilFound(tester, _key('workspace-banner-imported'));
   expect(find.textContaining(l10n.importedContestNoteNoDraw), findsOneWidget);
@@ -193,6 +195,7 @@ Future<void> importCompetitionsFromGliderScore(
   await pumpUntilGone(tester, _key('competition-import-dialog'));
   await pumpUntilFound(tester, find.text('Workspace'));
   // The note now says the draw is GliderScore's.
+  await tapRail(tester, 'Workspace');
   await pumpUntilFound(
     tester,
     find.textContaining(l10n.importedContestNoteDraw),
