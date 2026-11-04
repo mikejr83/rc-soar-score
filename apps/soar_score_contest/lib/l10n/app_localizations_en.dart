@@ -2275,4 +2275,12 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get importedContestNoteNoDraw =>
       'The draw was not imported. Build it as for any contest.';
+
+  @override
+  String get importedChipLabel => 'Imported from GliderScore';
+
+  @override
+  String importedChipTooltip(String date) {
+    return 'Imported from GliderScore on $date';
+  }
 }

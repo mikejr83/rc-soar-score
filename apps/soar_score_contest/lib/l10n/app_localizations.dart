@@ -3185,6 +3185,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The draw was not imported. Build it as for any contest.'**
   String get importedContestNoteNoDraw;
+
+  /// Chip on the detail of a contest that was imported from GliderScore.
+  ///
+  /// In en, this message translates to:
+  /// **'Imported from GliderScore'**
+  String get importedChipLabel;
+
+  /// Tooltip of the imported chip.
+  ///
+  /// In en, this message translates to:
+  /// **'Imported from GliderScore on {date}'**
+  String importedChipTooltip(String date);
 }
 
 class _AppLocalizationsDelegate

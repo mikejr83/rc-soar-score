@@ -160,6 +160,15 @@ Future<void> importCompetitionsFromGliderScore(
   );
   await scrollListTo(tester, row);
   await pumpUntilFound(tester, row);
+  // The detail pane marks the contest as imported.
+  await tapVisible(tester, row);
+  await pumpUntilFound(tester, _key('imported-label'));
+  expect(find.text(l10n.importedChipLabel), findsOneWidget);
+  // A narrow window shows the detail alone; go back to the list.
+  if (_key('contest-detail-back').evaluate().isNotEmpty) {
+    await tapVisible(tester, _key('contest-detail-back'));
+    await pumpUntilFound(tester, row);
+  }
 
   // Second run of the same file: refused, nothing is added twice.
   await tapVisible(tester, _key('import-competitions'));

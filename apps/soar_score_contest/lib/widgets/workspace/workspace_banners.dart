@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../../l10n/app_localizations.dart';
@@ -92,8 +93,7 @@ class WorkspaceBanners extends StatelessWidget {
 
   Widget _importedBanner(BuildContext context, ImportedContestNote note) {
     final l10n = AppLocalizations.of(context);
-    final date = MaterialLocalizations.of(context)
-        .formatMediumDate(note.importedAt.toLocal());
+    final date = DateFormat.yMMMd().format(note.importedAt.toLocal());
     final lines = [
       if (note.drawImported)
         l10n.importedContestNoteDraw

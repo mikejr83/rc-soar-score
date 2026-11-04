@@ -265,6 +265,9 @@ void main() {
       store.drawTargets[1] = stampedTarget(1, contestId: contestId);
       await openWithDraw(tester);
 
+      // The list is newest first, so the row may be below the fold.
+      await tester.ensureVisible(key('competition-import-draw-1'));
+      await tester.pumpAndSettle();
       await tester.tap(key('competition-import-draw-1'));
       await tester.pump();
       expect(find.text(l10n.competitionImportChosenCount(1)), findsOneWidget);
@@ -300,6 +303,9 @@ void main() {
         DrawImportReason.alreadyDrawn,
       );
       await openWithDraw(tester);
+      // The list is newest first, so the row may be below the fold.
+      await tester.ensureVisible(key('competition-import-draw-1'));
+      await tester.pumpAndSettle();
       await tester.tap(key('competition-import-draw-1'));
       await tester.pump();
       await tester.tap(key('competition-import-continue'));

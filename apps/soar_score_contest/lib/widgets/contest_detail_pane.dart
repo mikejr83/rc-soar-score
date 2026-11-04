@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../l10n/app_localizations.dart';
@@ -17,6 +18,7 @@ class ContestDetailPane extends StatelessWidget {
     required this.onOpen,
     this.onBack,
     this.inspection = false,
+    this.importedAt,
     this.onExport,
   });
 
@@ -27,6 +29,10 @@ class ContestDetailPane extends StatelessWidget {
   /// Whether the contest is a local copy imported for inspection, which is
   /// never synced.
   final bool inspection;
+
+  /// When the contest was imported from GliderScore; `null` for a contest
+  /// that was not.
+  final DateTime? importedAt;
 
   /// Exports the contest to a file; `null` when this build cannot.
   final VoidCallback? onExport;
@@ -70,6 +76,18 @@ class ContestDetailPane extends StatelessWidget {
                           avatar: const Icon(Icons.cloud_off, size: 16),
                           label: Text(l10n.inspectionChipLabel),
                           visualDensity: VisualDensity.compact,
+                        ),
+                      if (importedAt case final at?)
+                        Tooltip(
+                          message: l10n.importedChipTooltip(
+                            DateFormat.yMMMd().format(at.toLocal()),
+                          ),
+                          child: Chip(
+                            key: const ValueKey('imported-label'),
+                            avatar: const Icon(Icons.file_download, size: 16),
+                            label: Text(l10n.importedChipLabel),
+                            visualDensity: VisualDensity.compact,
+                          ),
                         ),
                     ],
                   ),

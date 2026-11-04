@@ -40,6 +40,21 @@ class _HomePageState extends State<HomePage> {
   /// The contests imported for inspection.
   Set<Id> _inspection = const {};
 
+  // When each selected contest was imported from GliderScore, kept so a
+  // rebuild does not ask again. Cleared when the list loads.
+  final Map<Id, Future<DateTime?>> _imported = {};
+
+  /// When [id] was imported, or `null` (also in a build without a store).
+  Future<DateTime?> _importedAt(Id id) => _imported.putIfAbsent(id, () async {
+    final store = CompetitionImportStore.current;
+    if (store == null) return null;
+    try {
+      return (await store.noteFor(id))?.importedAt;
+    } catch (_) {
+      return null; // The chip is a courtesy.
+    }
+  });
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -47,6 +62,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<List<Contest>> _load() {
+    _imported.clear();
     final client = apiClientOf(context);
     if (client == null) {
       return Future.error(StateError('No API client is available.'));
@@ -195,14 +211,18 @@ class _HomePageState extends State<HomePage> {
           }),
           onOpen: _open,
         ),
-        detail: (context, wide) => ContestDetailPane(
-          contest: selected,
-          onBack: wide ? null : () => setState(() => _showDetail = false),
-          onOpen: () => _open(selected),
-          inspection: _inspection.contains(selected.id),
-          onExport: exchange == null
-              ? null
-              : () => exportContest(context, selected),
+        detail: (context, wide) => FutureBuilder<DateTime?>(
+          future: _importedAt(selected.id),
+          builder: (context, imported) => ContestDetailPane(
+            contest: selected,
+            onBack: wide ? null : () => setState(() => _showDetail = false),
+            onOpen: () => _open(selected),
+            inspection: _inspection.contains(selected.id),
+            importedAt: imported.data,
+            onExport: exchange == null
+                ? null
+                : () => exportContest(context, selected),
+          ),
         ),
       );
       if (_importButtons().isEmpty) return master;

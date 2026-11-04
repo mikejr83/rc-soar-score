@@ -2360,5 +2360,9 @@
   "importedContestNoteNoLanes": "GliderScore used no lanes, so none are set.",
   "@importedContestNoteNoLanes": {"description": "Banner text on an imported draw without lanes."},
   "importedContestNoteNoDraw": "The draw was not imported. Build it as for any contest.",
-  "@importedContestNoteNoDraw": {"description": "Banner text on an imported contest without a draw."}
+  "@importedContestNoteNoDraw": {"description": "Banner text on an imported contest without a draw."},
+  "importedChipLabel": "Imported from GliderScore",
+  "@importedChipLabel": {"description": "Chip on the detail of a contest that was imported from GliderScore."},
+  "importedChipTooltip": "Imported from GliderScore on {date}",
+  "@importedChipTooltip": {"description": "Tooltip of the imported chip.", "placeholders": {"date": {"type": "String"}}}
 }

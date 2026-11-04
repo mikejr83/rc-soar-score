@@ -9,7 +9,10 @@ import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_contest/api_client_provider.dart';
 import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_contest/pages/home_page.dart';
+import 'package:soar_score_contest/services/competition_import/competition_import.dart';
 import 'package:soar_score_core/soar_score_core.dart';
+
+import '../support/competition_import_fakes.dart';
 
 Contest _contest(String name, {int day = 17}) => Contest(
   id: Id.parse('019c0000-0000-7000-8000-0000000000$day'),
@@ -230,5 +233,54 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byKey(const ValueKey('empty-create-contest')), findsOneWidget);
+  });
+
+  group('the imported chip', () {
+    late FakeCompetitionImportStore store;
+    setUp(() {
+      store = FakeCompetitionImportStore(const []);
+      CompetitionImportStore.current = store;
+    });
+    tearDown(() => CompetitionImportStore.current = null);
+
+    ApiClient twoContests() => _client(
+      (_) async => _json({
+        'contests': [
+          _contest('Imported Open').toJson(),
+          _contest('Home Made Open', day: 24).toJson(),
+        ],
+      }),
+    );
+
+    testWidgets('shows on an imported contest and not on another', (
+      tester,
+    ) async {
+      store.notes[_contest('Imported Open').id] = ImportedContestNote(
+        importedAt: DateTime.utc(2026, 11, 4),
+        drawImported: false,
+        lanesKept: true,
+      );
+      await tester.pumpWidget(_app(twoContests()));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Imported Open'));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('imported-label')), findsOneWidget);
+
+      await tester.tap(find.text('Home Made Open'));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('imported-label')), findsNothing);
+    });
+
+    testWidgets('a store that cannot answer leaves the chip out', (
+      tester,
+    ) async {
+      CompetitionImportStore.current = null;
+      await tester.pumpWidget(_app(twoContests()));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Imported Open'));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('imported-label')), findsNothing);
+    });
   });
 }
