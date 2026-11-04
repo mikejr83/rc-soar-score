@@ -2,7 +2,9 @@
 
 The Windows contest app can add the pilots in a GliderScore database to your
 participants list. It reads the file on your computer; nothing is sent
-anywhere. Only pilots are imported: not contests, draws or scores.
+anywhere. Only pilots are imported: not contests, draws or scores. To import
+competitions as contests, see
+[import competitions](import-competitions-from-gliderscore.md).
 
 ## How to use it
 
