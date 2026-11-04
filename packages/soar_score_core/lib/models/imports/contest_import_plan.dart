@@ -1,6 +1,5 @@
 import '../id.dart';
 import 'contest_import_draft.dart';
-import 'draw_import_draft.dart';
 import 'restore_plan.dart';
 
 /// Who owns what an import writes.
@@ -156,89 +155,6 @@ abstract final class CompetitionImportFailure {
 
   /// A participant's profile is not stored or belongs to another owner.
   static const profileMissing = 'participant_profile_missing';
-
-  /// Anything else; the competition was rolled back.
-  static const failed = 'import_failed';
-}
-
-/// Everything needed to add the draw of one competition to the contest phase
-/// B made from it (ADR 0006 amendment).
-class DrawImportPlan {
-  const DrawImportPlan({
-    required this.draft,
-    required this.contestId,
-    required this.owner,
-    required this.importOperationId,
-    required this.fileFingerprint,
-    required this.toolVersion,
-  });
-
-  /// The reviewed draw; it must be importable.
-  final DrawImportDraft draft;
-
-  /// The contest phase B created, from [DrawImportTarget.contestId].
-  final Id contestId;
-
-  final ImportOwner owner;
-
-  /// One id per wizard run, shared by every row it writes.
-  final Id importOperationId;
-
-  /// Hash of the source file; it must be the one on the contest's stamp.
-  final String fileFingerprint;
-
-  final String toolVersion;
-}
-
-/// What happened to the draw of one competition.
-sealed class DrawImportResult {
-  const DrawImportResult(this.sourceCompNo);
-
-  final int sourceCompNo;
-}
-
-/// The contest now has the competition's draw and is `Ready`.
-class DrawImported extends DrawImportResult {
-  const DrawImported(
-    super.sourceCompNo, {
-    required this.contestId,
-    required this.revisionCount,
-    required this.roundCount,
-    required this.assignmentCount,
-  });
-
-  final Id contestId;
-  final int revisionCount;
-  final int roundCount;
-  final int assignmentCount;
-}
-
-/// The draw could not be written; nothing of it is kept.
-class DrawImportFailed extends DrawImportResult {
-  const DrawImportFailed(super.sourceCompNo, this.code, [this.detail]);
-
-  /// A [DrawImportReason] code (the contest no longer fits) or a
-  /// [DrawImportFailure] code.
-  final String code;
-  final String? detail;
-}
-
-/// Stable codes of [DrawImportFailed] that are not refusals of the draw.
-abstract final class DrawImportFailure {
-  /// Neither a signed-in nor a Local account exists (ADR 0006).
-  static const noAccount = 'import_no_account';
-
-  /// The draft is refused or holds nothing to write.
-  static const notImportable = 'not_importable';
-
-  /// A pilot of the draw has no participation in the contest.
-  static const participationMissing = 'participation_missing';
-
-  /// The contest has no saved configuration.
-  static const notConfigured = 'not_configured';
-
-  /// The contest is locked by its director.
-  static const contestLocked = 'contest_locked';
 
   /// Anything else; the competition was rolled back.
   static const failed = 'import_failed';

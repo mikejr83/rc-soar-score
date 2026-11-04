@@ -1,5 +1,4 @@
 import '../models/imports/contest_import_plan.dart';
-import '../models/imports/draw_import_draft.dart';
 import '../models/imports/restore_plan.dart';
 import 'mutation_metadata.dart';
 
@@ -22,32 +21,6 @@ abstract interface class ContestImportRepository {
   /// happened.
   Future<CompetitionImportResult> importCompetition(
     CompetitionImportPlan plan, {
-    required MutationMetadata metadata,
-  });
-
-  /// What the draw import needs to know about the contest phase B made from
-  /// competition [compNo] of the file with [fileFingerprint]: the contest, its
-  /// stamp, whether it already has a matrix or an accepted score, and the
-  /// pilots that have a participation. The contest stamp with the same
-  /// fingerprint wins; otherwise the newest one. A competition with no
-  /// stamped contest comes back with `stamped` false.
-  Future<DrawImportTarget> drawTarget(
-    ImportOwner owner,
-    int compNo,
-    String fileFingerprint,
-  );
-
-  /// Adds [plan]'s draw to its contest in one transaction: the finalized
-  /// matrix revision(s) with rounds, groups, `Original` assignments and
-  /// `NotEntered` score placeholders, the participant numbers, the contest
-  /// moved from `Configuring` to `Ready`, a stamp per revision and the
-  /// `Restoration` audit events. The fill rule is checked again inside the
-  /// transaction. A failure part-way keeps nothing of this competition.
-  ///
-  /// Never throws for a competition-level problem; the result says what
-  /// happened.
-  Future<DrawImportResult> importDraw(
-    DrawImportPlan plan, {
     required MutationMetadata metadata,
   });
 
