@@ -28,11 +28,8 @@ Contest _contest(String id) => Contest(
   updatedAt: DateTime.utc(2026, 9),
 );
 
-ImportedContestNote _note() => ImportedContestNote(
-  importedAt: DateTime.utc(2026, 11, 4),
-  drawImported: true,
-  lanesKept: true,
-);
+ImportedContestNote _note() =>
+    ImportedContestNote(importedAt: DateTime.utc(2026, 11, 4), lanesKept: true);
 
 /// Answers each contest's lookup when the test says so.
 class _SlowStore extends FakeCompetitionImportStore {

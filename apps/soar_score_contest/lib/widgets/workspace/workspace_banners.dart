@@ -95,12 +95,8 @@ class WorkspaceBanners extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final date = DateFormat.yMMMd().format(note.importedAt.toLocal());
     final lines = [
-      if (note.drawImported)
-        l10n.importedContestNoteDraw
-      else
-        l10n.importedContestNoteNoDraw,
-      if (note.drawImported && !note.lanesKept) l10n.importedContestNoteNoLanes,
       l10n.importedContestNoteBody,
+      if (!note.lanesKept) l10n.importedContestNoteNoLanes,
     ];
     return PageBanner(
       key: const ValueKey('workspace-banner-imported'),

@@ -25,54 +25,51 @@ abstract class CompetitionImportStore implements PilotImportStore {
     required List<ProfileStampEntry> entries,
   });
 
-  /// Writes one competition as a contest. Never throws for a problem of the
-  /// competition itself; the result says what happened.
-  Future<CompetitionImportResult> importCompetition({
-    required ContestImportDraft draft,
+  /// What restoring the competition with [identity] would meet: the contest
+  /// an earlier import made of it, if any (ADR 0006, amendment 2).
+  Future<RestoreTarget> restoreTarget(RestoreIdentity identity);
+
+  /// Restores one competition: its contest, participants, draw, scores,
+  /// re-flights, retirements and final state, in one transaction. Never throws
+  /// for a problem of the competition itself; the result says what happened.
+  Future<RestoreImportResult> importRestore({
+    required RestorePlan plan,
     required Map<int, Id> profileIds,
     required Id operationId,
     required String fingerprint,
+    required bool completed,
+    required bool confirmedReplace,
+    Id? updateContestId,
   });
 
-  /// What adding the draw of competition [compNo] needs to know about the
-  /// contest an earlier run made from it (ADR 0006 amendment).
-  Future<DrawImportTarget> drawTarget({
-    required int compNo,
-    required String fingerprint,
-  });
-
-  /// Adds the draw of one competition to the contest [contestId] made from
-  /// it. Never throws for a problem of the competition itself; the result says
-  /// what happened.
-  Future<DrawImportResult> importDraw({
-    required DrawImportDraft draft,
-    required Id contestId,
-    required Id operationId,
-    required String fingerprint,
-  });
-
-  /// What the import left out of [contestId], or `null` when the contest was
-  /// not imported.
+  /// What the import left in [contestId], or `null` when the contest was not
+  /// imported.
   Future<ImportedContestNote?> noteFor(Id contestId);
 }
 
-/// The draw of a competition whose contest an earlier run made, and what
-/// adding it would do. Refused offers say why; the rest can be chosen.
-class DrawOffer {
-  const DrawOffer({required this.target, required this.draft});
+/// A file read and mapped: one restore plan per competition.
+class MappedGliderScoreFile {
+  const MappedGliderScoreFile(this.plans);
 
-  final DrawImportTarget target;
-  final DrawImportDraft draft;
-
-  bool get canAdd => draft.isImportable && target.contestId != null;
+  final List<RestorePlan> plans;
 }
+
+/// Maps every competition of [result]. Pure and made of plain data, so it can
+/// run on a background isolate.
+MappedGliderScoreFile mapGliderScoreFile(GliderScoreImportResult result) =>
+    MappedGliderScoreFile(const GliderScoreRestoreMapper().map(result));
+
+/// Maps [result] without blocking the UI isolate on a large file.
+Future<MappedGliderScoreFile> mapGliderScoreFileInBackground(
+  GliderScoreImportResult result,
+) => compute(mapGliderScoreFile, result);
 
 /// Where the competition import is.
 enum CompetitionImportStep {
   /// Waiting for the first file.
   idle,
 
-  /// Reading the file.
+  /// Reading and mapping the file, off the UI thread.
   reading,
 
   /// Choosing which competitions to import.
@@ -95,7 +92,7 @@ enum CompetitionImportStep {
 }
 
 /// The state of one competition import: choose a file, read it, choose
-/// competitions, review pilots, confirm, write.
+/// competitions, review pilots, confirm, restore.
 ///
 /// Holds no widgets, so it is tested on its own. The pilot review is the
 /// Phase A [PilotImportController], limited to the pilots the chosen
@@ -106,8 +103,10 @@ class CompetitionImportController extends ChangeNotifier {
     required this.readFile,
     GliderScoreFiles? files,
     Id Function()? newId,
+    Future<MappedGliderScoreFile> Function(GliderScoreImportResult)? mapFile,
   }) : _files = files ?? GliderScoreFiles.current,
-       _newId = newId ?? Id.create {
+       _newId = newId ?? Id.create,
+       _mapFile = mapFile ?? mapGliderScoreFileInBackground {
     pilots = PilotImportController(
       store: store,
       readFile: (_) async => throw StateError('the file is read once'),
@@ -118,8 +117,7 @@ class CompetitionImportController extends ChangeNotifier {
 
   /// The tables a competition import reads, all of which the mappers use.
   ///
-  /// `Scores` holds the drawn flights; it is read for the draw a competition
-  /// imported before can still receive.
+  /// `Scores` holds the drawn and the scored flights.
   static const tables = [
     'Pilots',
     'Comps',
@@ -159,12 +157,11 @@ class CompetitionImportController extends ChangeNotifier {
   final Future<GliderScoreImportResult> Function(String path) readFile;
   final GliderScoreFiles _files;
   final Id Function() _newId;
+  final Future<MappedGliderScoreFile> Function(GliderScoreImportResult)
+  _mapFile;
 
   /// The review of the pilots the chosen competitions use.
   late final PilotImportController pilots;
-
-  static const _mapper = GliderScoreContestMapper();
-  static const _drawMapper = GliderScoreDrawMapper();
 
   CompetitionImportStep _step = CompetitionImportStep.idle;
   CompetitionImportStep get step => _step;
@@ -173,37 +170,32 @@ class CompetitionImportController extends ChangeNotifier {
   String? get fileName => _fileName;
 
   GliderScoreImportResult? _result;
-  CompetitionImportDraft? _draft;
-  CompetitionImportDraft? get draft => _draft;
-
+  List<RestorePlan> _plans = const [];
   String? _fingerprint;
+
+  /// What each importable competition would meet in this installation.
+  Map<int, RestoreTarget> _targets = const {};
 
   final Set<int> _chosen = {};
   Set<int> get chosen => Set.unmodifiable(_chosen);
 
+  final Map<int, bool> _completed = {};
+
+  /// Competitions without a `CompID` that the director said are the contest
+  /// of an earlier import with the same number.
+  final Set<int> _sameAs = {};
+
+  bool _replaceConfirmed = false;
+
   Set<int> get _usedPilots => {
-    for (final c in _draft?.contests ?? const <ContestImportDraft>[])
-      if (_chosen.contains(c.sourceCompNo) && c.isImportable)
-        for (final p in c.participants) p.sourcePilotNo,
+    for (final plan in chosenPlans)
+      for (final p in plan.contest.participants) p.sourcePilotNo,
   };
 
-  /// The draws that can be added, by competition number: every competition
-  /// of the file with a contest from an earlier run.
-  Map<int, DrawOffer> _offers = const {};
-  Map<int, DrawOffer> get offers => _offers;
-
-  final Set<int> _chosenDraws = {};
-  Set<int> get chosenDraws => Set.unmodifiable(_chosenDraws);
-
-  List<DrawImportResult> _drawResults = const [];
-
-  /// What happened to each chosen draw, in `CompNo` order.
-  List<DrawImportResult> get drawResults => _drawResults;
-
-  List<CompetitionImportResult> _results = const [];
+  List<RestoreImportResult> _results = const [];
 
   /// What happened to each chosen competition, in `CompNo` order.
-  List<CompetitionImportResult> get results => _results;
+  List<RestoreImportResult> get results => _results;
 
   Object? _error;
 
@@ -235,13 +227,18 @@ class CompetitionImportController extends ChangeNotifier {
       final fingerprint = await store.fingerprint(path);
       // A director who cancelled while the file was read wants none of it.
       if (_step != CompetitionImportStep.reading) return true;
+      final mapped = await _mapFile(result);
+      if (_step != CompetitionImportStep.reading) return true;
+      final targets = await _findTargets(mapped.plans);
+      if (_step != CompetitionImportStep.reading) return true;
       _result = result;
       _fingerprint = fingerprint;
-      _draft = _mapper.map(result);
+      _plans = mapped.plans;
+      _targets = targets;
       _chosen.clear();
-      _chosenDraws.clear();
-      _offers = await _findOffers(result, fingerprint);
-      if (_step != CompetitionImportStep.reading) return true;
+      _completed.clear();
+      _sameAs.clear();
+      _replaceConfirmed = false;
       _set(CompetitionImportStep.competitions);
     } on Object catch (e) {
       if (_step == CompetitionImportStep.reading) _fail(e);
@@ -249,30 +246,20 @@ class CompetitionImportController extends ChangeNotifier {
     return true;
   }
 
-  /// The draws of competitions that already have a contest. A competition
-  /// whose lookup or mapping fails simply has no offer.
-  Future<Map<int, DrawOffer>> _findOffers(
-    GliderScoreImportResult result,
-    String fingerprint,
-  ) async {
-    final offers = <int, DrawOffer>{};
-    for (final c in _draft?.contests ?? const <ContestImportDraft>[]) {
-      if (!c.isImportable) continue;
+  /// What an earlier import of each importable competition left. A
+  /// competition whose lookup fails is treated as new.
+  Future<Map<int, RestoreTarget>> _findTargets(List<RestorePlan> plans) async {
+    final targets = <int, RestoreTarget>{};
+    for (final plan in plans) {
+      if (!plan.isImportable) continue;
       try {
-        final target = await store.drawTarget(
-          compNo: c.sourceCompNo,
-          fingerprint: fingerprint,
-        );
-        if (!target.stamped) continue;
-        offers[c.sourceCompNo] = DrawOffer(
-          target: target,
-          draft: _drawMapper.mapCompetition(result, target),
-        );
+        final target = await store.restoreTarget(plan.identity);
+        if (target.exists) targets[plan.sourceCompNo] = target;
       } on Object {
         continue;
       }
     }
-    return offers;
+    return targets;
   }
 
   /// Drops the read in progress. A result that arrives later is ignored.
@@ -284,77 +271,140 @@ class CompetitionImportController extends ChangeNotifier {
 
   /// The competitions of the file as the wizard lists them: the most recent
   /// start first, undated ones last. Ties go by name (A to Z), then `CompNo`.
-  List<ContestImportDraft> get listed {
-    final all = [...?_draft?.contests];
+  List<RestorePlan> get listed {
+    final all = [..._plans];
     all.sort((a, b) {
-      final x = a.startDate;
-      final y = b.startDate;
+      final x = a.contest.startDate;
+      final y = b.contest.startDate;
       if (x != y) {
         if (x == null) return 1;
         if (y == null) return -1;
         return y.compareTo(x);
       }
-      final byName = (a.name ?? a.sourceClass).toLowerCase().compareTo(
-        (b.name ?? b.sourceClass).toLowerCase(),
-      );
+      final byName = (a.contest.name ?? a.contest.sourceClass)
+          .toLowerCase()
+          .compareTo((b.contest.name ?? b.contest.sourceClass).toLowerCase());
       return byName != 0 ? byName : a.sourceCompNo.compareTo(b.sourceCompNo);
     });
     return all;
   }
 
+  RestorePlan? planOf(int compNo) {
+    for (final plan in _plans) {
+      if (plan.sourceCompNo == compNo) return plan;
+    }
+    return null;
+  }
+
+  /// What the earlier import of [compNo] left, or null for a new competition.
+  RestoreTarget? targetOf(int compNo) => _targets[compNo];
+
+  /// The contest [compNo] replaces, or null when it makes a new one.
+  RestoreTarget? replacedBy(int compNo) {
+    final target = _targets[compNo];
+    if (target == null) return null;
+    return switch (target.kind) {
+      RestoreTargetKind.same => target,
+      RestoreTargetKind.numberMatch => _sameAs.contains(compNo) ? target : null,
+      RestoreTargetKind.none => null,
+    };
+  }
+
+  /// A [RestoreRefusal] code when the competition cannot be restored over the
+  /// contest it would replace, else null.
+  String? refusalOf(int compNo) {
+    final target = replacedBy(compNo);
+    if (target == null) return null;
+    if (target.published) return RestoreRefusal.resultsPublished;
+    if (target.synced) return RestoreRefusal.contestSynced;
+    return null;
+  }
+
   /// The competitions of the file that can be chosen.
-  List<ContestImportDraft> get importable => [
-    for (final c in _draft?.contests ?? const <ContestImportDraft>[])
-      if (c.isImportable) c,
+  List<RestorePlan> get importable => [
+    for (final plan in _plans)
+      if (plan.isImportable && refusalOf(plan.sourceCompNo) == null) plan,
   ];
 
   /// Chooses or drops competition [compNo]. Only an importable one can be
   /// chosen.
   void toggle(int compNo) {
-    if (!importable.any((c) => c.sourceCompNo == compNo)) return;
-    if (!_chosen.remove(compNo)) _chosen.add(compNo);
+    if (!importable.any((p) => p.sourceCompNo == compNo)) return;
+    if (!_chosen.remove(compNo)) {
+      _chosen.add(compNo);
+      _completed.putIfAbsent(compNo, () => planOf(compNo)!.completedByDefault);
+    }
+    _replaceConfirmed = false;
     notifyListeners();
   }
-
-  /// Chooses or drops adding the draw of competition [compNo]. Only an offer
-  /// that can be added can be chosen.
-  void toggleDraw(int compNo) {
-    if (_offers[compNo]?.canAdd != true) return;
-    if (!_chosenDraws.remove(compNo)) _chosenDraws.add(compNo);
-    notifyListeners();
-  }
-
-  /// Contests and draws chosen so far.
-  int get chosenTotal => _chosen.length + _chosenDraws.length;
-
-  /// The chosen draws, in `CompNo` order.
-  List<DrawOffer> get chosenOffers => [
-    for (final no in _chosenDraws.toList()..sort()) _offers[no]!,
-  ];
 
   /// Chooses every importable competition, or none.
   void setAll(bool chosen) {
-    _chosen
-      ..clear()
-      ..addAll(chosen ? importable.map((c) => c.sourceCompNo) : const <int>[]);
+    _chosen.clear();
+    if (chosen) {
+      for (final plan in importable) {
+        _chosen.add(plan.sourceCompNo);
+        _completed.putIfAbsent(
+          plan.sourceCompNo,
+          () => plan.completedByDefault,
+        );
+      }
+    }
+    _replaceConfirmed = false;
+    notifyListeners();
+  }
+
+  /// Whether [compNo] ends Completed: the director's checkbox, preselected
+  /// from the file.
+  bool completed(int compNo) =>
+      _completed[compNo] ?? planOf(compNo)?.completedByDefault ?? false;
+
+  void setCompleted(int compNo, bool value) {
+    if (completed(compNo) == value && _completed.containsKey(compNo)) return;
+    _completed[compNo] = value;
+    notifyListeners();
+  }
+
+  /// Whether the director said [compNo] is the competition of the earlier
+  /// contest with the same number.
+  bool isSameAs(int compNo) => _sameAs.contains(compNo);
+
+  void setSameAs(int compNo, bool value) {
+    if (value ? !_sameAs.add(compNo) : !_sameAs.remove(compNo)) return;
+    if (!importable.any((p) => p.sourceCompNo == compNo)) {
+      _chosen.remove(compNo);
+    }
+    _replaceConfirmed = false;
     notifyListeners();
   }
 
   /// The chosen competitions, in `CompNo` order.
-  List<ContestImportDraft> get chosenCompetitions => [
-    for (final c in importable)
-      if (_chosen.contains(c.sourceCompNo)) c,
+  List<RestorePlan> get chosenPlans => [
+    for (final plan in importable)
+      if (_chosen.contains(plan.sourceCompNo)) plan,
   ];
 
-  /// From the competitions on: to the pilots of the chosen contests, or, when
-  /// only draws are chosen, straight to the summary (their participants
-  /// are already in the contests).
-  Future<void> continueFromCompetitions() async {
-    if (_chosen.isEmpty && _chosenDraws.isNotEmpty) {
-      _set(CompetitionImportStep.confirm);
-      return;
-    }
-    await continueToPilots();
+  /// Competitions chosen so far.
+  int get chosenTotal => _chosen.length;
+
+  /// What the director is asked to confirm: contests replaced that were
+  /// changed in Soar Score after the import.
+  List<RestoreTarget> get changedTargets => [
+    for (final plan in chosenPlans)
+      if (replacedBy(plan.sourceCompNo) case final target?)
+        if (target.changes.any &&
+            !target.isUnchanged(plan.contentHash, completed(plan.sourceCompNo)))
+          target,
+  ];
+
+  /// Whether the director must tick "replace" before importing.
+  bool get needsReplaceConfirmation => changedTargets.isNotEmpty;
+
+  bool get replaceConfirmed => _replaceConfirmed;
+
+  void setReplaceConfirmed(bool value) {
+    _replaceConfirmed = value;
+    notifyListeners();
   }
 
   /// From the competitions to the pilots of the chosen ones.
@@ -375,13 +425,8 @@ class CompetitionImportController extends ChangeNotifier {
   /// From the pilots to the summary.
   void continueToConfirm() => _set(CompetitionImportStep.confirm);
 
-  /// Back from the summary to the pilots, or to the competitions when only
-  /// draws were chosen.
-  void backToPilots() => _set(
-    _chosen.isEmpty
-        ? CompetitionImportStep.competitions
-        : CompetitionImportStep.pilots,
-  );
+  /// Back from the summary to the pilots.
+  void backToPilots() => _set(CompetitionImportStep.pilots);
 
   /// Reads the participants again and rebuilds the pilot review after a
   /// participant changed under it.
@@ -393,63 +438,67 @@ class CompetitionImportController extends ChangeNotifier {
     await continueToPilots();
   }
 
-  /// How many contests, new pilots and updated pilots the import will write.
-  ({int contests, int newPilots, int updatedPilots, int skippedPilots})
-  get plan {
-    if (_chosen.isEmpty) {
-      return (contests: 0, newPilots: 0, updatedPilots: 0, skippedPilots: 0);
+  /// What the import will do.
+  ({
+    int created,
+    int replaced,
+    int unchanged,
+    int flights,
+    int completed,
+    int newPilots,
+    int updatedPilots,
+    int skippedPilots,
+  })
+  get summary {
+    var created = 0;
+    var replaced = 0;
+    var unchanged = 0;
+    var flights = 0;
+    var closed = 0;
+    for (final plan in chosenPlans) {
+      final target = replacedBy(plan.sourceCompNo);
+      final done = completed(plan.sourceCompNo);
+      if (target == null) {
+        created++;
+      } else if (target.isUnchanged(plan.contentHash, done)) {
+        unchanged++;
+      } else {
+        replaced++;
+      }
+      flights += plan.flights.length;
+      if (done && plan.hasScoredFlights) closed++;
     }
     final p = pilots.plan;
     return (
-      contests: _chosen.length,
-      newPilots: p.added,
-      updatedPilots: p.updated,
-      skippedPilots: p.skipped,
+      created: created,
+      replaced: replaced,
+      unchanged: unchanged,
+      flights: flights,
+      completed: closed,
+      newPilots: _chosen.isEmpty ? 0 : p.added,
+      updatedPilots: _chosen.isEmpty ? 0 : p.updated,
+      skippedPilots: _chosen.isEmpty ? 0 : p.skipped,
     );
   }
 
-  /// How many draws the import will add.
-  int get drawsToAdd => _chosenDraws.length;
-
-  /// Saves the pilots, stamps them, then writes each chosen competition and
-  /// adds each chosen draw. One competition failing does not undo the others.
+  /// Saves the pilots, stamps them, then restores each chosen competition.
+  /// One competition failing does not undo the others.
   Future<void> apply() async {
     _set(CompetitionImportStep.applying);
     final operation = _newId();
     try {
-      final results = _chosen.isEmpty
-          ? <CompetitionImportResult>[]
-          : await _applyContests(operation);
+      final results = await _applyContests(operation);
       if (results == null) return;
-      final drawResults = <DrawImportResult>[];
-      for (final offer in chosenOffers) {
-        final compNo = offer.draft.sourceCompNo;
-        try {
-          drawResults.add(
-            await store.importDraw(
-              draft: offer.draft,
-              contestId: offer.target.contestId!,
-              operationId: operation,
-              fingerprint: _fingerprint!,
-            ),
-          );
-        } on Object catch (e) {
-          drawResults.add(
-            DrawImportFailed(compNo, DrawImportFailure.failed, '$e'),
-          );
-        }
-      }
       _results = results;
-      _drawResults = drawResults;
       _set(CompetitionImportStep.done);
     } on Object catch (e) {
       _fail(e);
     }
   }
 
-  /// Saves and stamps the pilots, then writes the chosen competitions as
-  /// contests. Null when the pilots were not saved (the step has failed).
-  Future<List<CompetitionImportResult>?> _applyContests(Id operation) async {
+  /// Saves and stamps the pilots, then restores the chosen competitions.
+  /// Null when the pilots were not saved (the step has failed).
+  Future<List<RestoreImportResult>?> _applyContests(Id operation) async {
     await pilots.apply();
     if (pilots.step != PilotImportStep.done) {
       _fail(pilots.error ?? StateError('the pilots were not saved'));
@@ -489,23 +538,29 @@ class CompetitionImportController extends ChangeNotifier {
       fingerprint: _fingerprint!,
       entries: entries,
     );
-    final results = <CompetitionImportResult>[];
-    for (final competition in chosenCompetitions) {
+    final results = <RestoreImportResult>[];
+    for (final plan in chosenPlans) {
+      final replaced = replacedBy(plan.sourceCompNo);
       try {
         results.add(
-          await store.importCompetition(
-            draft: competition,
+          await store.importRestore(
+            plan: plan,
             profileIds: profileIds,
             operationId: operation,
             fingerprint: _fingerprint!,
+            completed: completed(plan.sourceCompNo),
+            confirmedReplace: _replaceConfirmed,
+            updateContestId: replaced?.kind == RestoreTargetKind.numberMatch
+                ? replaced!.contestId
+                : null,
           ),
         );
       } on Object catch (e) {
         results.add(
-          CompetitionImportFailed(
-            competition.sourceCompNo,
-            CompetitionImportFailure.failed,
-            '$e',
+          CompetitionRestoreFailed(
+            plan.sourceCompNo,
+            RestoreFailure.failed,
+            detail: '$e',
           ),
         );
       }
@@ -513,18 +568,14 @@ class CompetitionImportController extends ChangeNotifier {
     return results;
   }
 
-  /// True when at least one contest was written or received a draw.
-  bool get anyImported =>
-      _results.any((r) => r is CompetitionImported) ||
-      _drawResults.any((r) => r is DrawImported);
+  /// True when at least one contest was written.
+  bool get anyImported => _results.any((r) => r is CompetitionRestored);
 
-  /// The contests written or given a draw, for the caller to show.
-  List<Id> get importedContestIds => {
+  /// The contests written, for the caller to show.
+  List<Id> get importedContestIds => [
     for (final r in _results)
-      if (r is CompetitionImported) r.contestId,
-    for (final r in _drawResults)
-      if (r is DrawImported) r.contestId,
-  }.toList();
+      if (r is CompetitionRestored) r.contestId,
+  ];
 
   void _fail(Object error) {
     _error = error;

@@ -29,6 +29,8 @@ void main() {
       store: store,
       readFile: read ?? (_) async => competitionsSnapshot(),
       files: GliderScoreFiles(choose: () async => chosen),
+      // The app maps on a background isolate; the tests map in place.
+      mapFile: (result) async => mapGliderScoreFile(result),
     );
     addTearDown(controller.dispose);
     tester.view.physicalSize = const Size(1000, 1200);
@@ -97,6 +99,13 @@ void main() {
     expect(controller.chosen, isEmpty);
   });
 
+  Future<void> toConfirm(WidgetTester tester) async {
+    await tester.tap(key('competition-import-continue'));
+    await tester.pumpAndSettle();
+    await tester.tap(key('competition-import-continue'));
+    await tester.pumpAndSettle();
+  }
+
   testWidgets('imports the chosen competition and offers to open it', (
     tester,
   ) async {
@@ -104,6 +113,13 @@ void main() {
     await tester.tap(key('competition-import-row-1'));
     await tester.pump();
     expect(find.text(l10n.competitionImportChosenCount(1)), findsOneWidget);
+    // The Completed box starts on, because every flown round is scored.
+    expect(
+      tester
+          .widget<CheckboxListTile>(key('competition-import-completed-1'))
+          .value,
+      isTrue,
+    );
 
     await tester.tap(key('competition-import-continue'));
     await tester.pumpAndSettle();
@@ -115,15 +131,19 @@ void main() {
 
     await tester.tap(key('competition-import-continue'));
     await tester.pumpAndSettle();
-    expect(key('competition-import-summary-contests'), findsOneWidget);
     expect(find.text(l10n.competitionImportSummaryContests(1)), findsOneWidget);
-    expect(find.text(l10n.competitionImportNotImported), findsOneWidget);
+    expect(find.text(l10n.competitionImportSummaryFlights(4)), findsOneWidget);
+    expect(
+      find.text(l10n.competitionImportSummaryCompleted(1)),
+      findsOneWidget,
+    );
+    expect(find.text(l10n.competitionImportSummaryCheck), findsOneWidget);
 
     await tester.tap(key('competition-import-confirm'));
     await tester.pumpAndSettle();
-    expect(store.imported.map((i) => i.$1), [1]);
+    expect(store.restored.map((i) => i.compNo), [1]);
     expect(
-      find.text(l10n.competitionImportResultImported('Spring Open')),
+      find.text(l10n.competitionImportResultRestored('Spring Open', 4)),
       findsOneWidget,
     );
 
@@ -134,26 +154,95 @@ void main() {
     expect(outcome!.open, outcome!.imported.single);
   });
 
-  testWidgets('shows an already imported competition', (tester) async {
-    store.answers[1] = CompetitionAlreadyImported(
+  testWidgets('the director can leave the contest open for scoring', (
+    tester,
+  ) async {
+    await open(tester);
+    await tester.tap(key('competition-import-row-1'));
+    await tester.pump();
+    await tester.ensureVisible(key('competition-import-completed-1'));
+    await tester.pumpAndSettle();
+    await tester.tap(key('competition-import-completed-1'));
+    await tester.pump();
+    expect(controller.completed(1), isFalse);
+    await toConfirm(tester);
+    expect(find.text(l10n.competitionImportSummaryCompleted(1)), findsNothing);
+    await tester.tap(key('competition-import-confirm'));
+    await tester.pumpAndSettle();
+    expect(store.restored.single.completed, isFalse);
+  });
+
+  testWidgets('replacing a contest changed since asks for confirmation', (
+    tester,
+  ) async {
+    store.targets[1] = earlierImport(
+      changes: const ContestChanges(scoresEntered: 2),
+    );
+    await open(tester);
+    expect(
+      find.textContaining(l10n.competitionImportTargetReplaces('Spring Open')),
+      findsOneWidget,
+    );
+    await tester.tap(key('competition-import-row-1'));
+    await tester.pump();
+    await toConfirm(tester);
+
+    expect(find.text(l10n.competitionImportSummaryReplaced(1)), findsOneWidget);
+    expect(
+      tester.widget<FilledButton>(key('competition-import-confirm')).onPressed,
+      isNull,
+    );
+    await tester.tap(key('competition-import-confirm-replace'));
+    await tester.pump();
+    await tester.tap(key('competition-import-confirm'));
+    await tester.pumpAndSettle();
+
+    expect(store.restored.single.confirmedReplace, isTrue);
+    expect(
+      find.text(l10n.competitionImportResultReplaced('Spring Open', 4)),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('a contest that cannot be replaced says why', (tester) async {
+    store.targets[1] = earlierImport(synced: true);
+    await open(tester);
+
+    expect(find.textContaining(l10n.competitionImportTargetSynced), findsOne);
+    await tester.tap(key('competition-import-row-1'));
+    await tester.pump();
+    expect(controller.chosen, isEmpty);
+  });
+
+  testWidgets('a number match asks whether it is the same competition', (
+    tester,
+  ) async {
+    store.targets[1] = earlierImport(kind: RestoreTargetKind.numberMatch);
+    await open(tester);
+
+    expect(key('competition-import-same-1'), findsOneWidget);
+    await tester.ensureVisible(key('competition-import-same-1'));
+    await tester.pumpAndSettle();
+    await tester.tap(key('competition-import-same-1'));
+    await tester.pump();
+    expect(controller.isSameAs(1), isTrue);
+  });
+
+  testWidgets('shows a competition that is already up to date', (tester) async {
+    store.answers[1] = CompetitionUnchanged(
       1,
       contestId: Id.create(),
       importedAt: DateTime.utc(2026, 11, 1),
-      importOperationId: Id.create(),
     );
     await open(tester);
     await tester.tap(key('competition-import-row-1'));
     await tester.pump();
-    await tester.tap(key('competition-import-continue'));
-    await tester.pumpAndSettle();
-    await tester.tap(key('competition-import-continue'));
-    await tester.pumpAndSettle();
+    await toConfirm(tester);
     await tester.tap(key('competition-import-confirm'));
     await tester.pumpAndSettle();
 
-    expect(key('competition-import-result-1'), findsOneWidget);
     expect(
-      find.textContaining('Spring Open: already imported'),
+      find.text(l10n.competitionImportResultUnchanged('Spring Open')),
       findsOneWidget,
     );
     // Nothing was written, so the dialog reports no import.
@@ -162,34 +251,49 @@ void main() {
     expect(outcome, isNull);
   });
 
-  testWidgets('shows why a competition failed and keeps the others', (
-    tester,
-  ) async {
-    store.answers[2] = const CompetitionImportFailed(
+  testWidgets('names the first flights when the check against GliderScore '
+      'fails, and keeps the others', (tester) async {
+    store.answers[2] = const CompetitionRestoreFailed(
       2,
-      CompetitionImportFailure.profileUnavailable,
+      RestoreFailure.comparisonFailed,
+      mismatchCount: 3,
+      mismatches: [
+        RestoreMismatch(
+          roundNo: 1,
+          groupNo: 2,
+          sourcePilotNo: 7,
+          reflightNo: 0,
+        ),
+        RestoreMismatch(
+          roundNo: 4,
+          groupNo: 1,
+          sourcePilotNo: 9,
+          reflightNo: 0,
+        ),
+      ],
     );
     await open(tester);
     await tester.tap(key('competition-import-select-all'));
     await tester.pump();
-    await tester.tap(key('competition-import-continue'));
-    await tester.pumpAndSettle();
-    await tester.tap(key('competition-import-continue'));
-    await tester.pumpAndSettle();
+    await toConfirm(tester);
     await tester.tap(key('competition-import-confirm'));
     await tester.pumpAndSettle();
 
     expect(
       find.text(
-        l10n.competitionImportResultFailed(
+        l10n.competitionImportResultRefused(
           'Autumn Open',
-          l10n.competitionImportFailProfileUnavailable,
+          l10n.competitionImportFailComparison(
+            3,
+            '${l10n.competitionImportMismatchFlight(1, 2, 7)}; '
+            '${l10n.competitionImportMismatchFlight(4, 1, 9)}',
+          ),
         ),
       ),
       findsOneWidget,
     );
     expect(
-      find.text(l10n.competitionImportResultImported('Spring Open')),
+      find.text(l10n.competitionImportResultRestored('Spring Open', 4)),
       findsOneWidget,
     );
     await tester.tap(key('competition-import-done'));
@@ -203,128 +307,18 @@ void main() {
     expect(key('competition-import-error'), findsOneWidget);
   });
 
-  testWidgets('cancelling while reading closes the dialog', (tester) async {
+  testWidgets('shows the reading state, animated, and cancelling closes it', (
+    tester,
+  ) async {
     final gate = Completer<GliderScoreImportResult>();
     await open(tester, read: (_) => gate.future, settle: false);
     expect(find.text(l10n.competitionImportReading('Contest.mdb')), findsOne);
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
     await tester.tap(key('competition-import-cancel-reading'));
     await tester.pumpAndSettle();
     expect(key('competition-import-dialog'), findsNothing);
     gate.complete(competitionsSnapshot());
     await tester.pumpAndSettle();
     expect(outcome, isNull);
-  });
-
-  group('the draw of a competition imported before', () {
-    Future<void> openWithDraw(WidgetTester tester) =>
-        open(tester, read: (_) async => competitionsSnapshotWithDraw());
-
-    testWidgets('shows the counts and notes of the dry run', (tester) async {
-      store.drawTargets[1] = stampedTarget(1);
-      await openWithDraw(tester);
-
-      expect(key('competition-import-draw-1'), findsOneWidget);
-      expect(key('competition-import-draw-2'), findsNothing);
-      expect(
-        find.textContaining(l10n.competitionImportDrawDetails(2, 1, 2)),
-        findsOneWidget,
-      );
-      expect(
-        find.textContaining(l10n.competitionImportDrawNoteHistory),
-        findsOneWidget,
-      );
-      expect(
-        find.textContaining(l10n.competitionImportDrawNoLanes),
-        findsOneWidget,
-      );
-      // Nothing in the fixture is scored.
-      expect(
-        find.textContaining(l10n.competitionImportDrawNoScores),
-        findsOneWidget,
-      );
-      expect(
-        tester
-            .widget<FilledButton>(key('competition-import-continue'))
-            .onPressed,
-        isNull,
-        reason: 'nothing is chosen yet',
-      );
-    });
-
-    testWidgets('says why a draw cannot be added', (tester) async {
-      store.drawTargets[1] = stampedTarget(1, hasMatrix: true);
-      await openWithDraw(tester);
-
-      expect(key('competition-import-draw-1'), findsNothing);
-      expect(key('competition-import-draw-refused-1'), findsOneWidget);
-      expect(find.text(l10n.competitionImportDrawReasonDrawn), findsOneWidget);
-    });
-
-    testWidgets('adds the draw without a pilot review', (tester) async {
-      final contestId = Id.create();
-      store.drawTargets[1] = stampedTarget(1, contestId: contestId);
-      await openWithDraw(tester);
-
-      // The list is newest first, so the row may be below the fold.
-      await tester.ensureVisible(key('competition-import-draw-1'));
-      await tester.pumpAndSettle();
-      await tester.tap(key('competition-import-draw-1'));
-      await tester.pump();
-      expect(find.text(l10n.competitionImportChosenCount(1)), findsOneWidget);
-      await tester.tap(key('competition-import-continue'));
-      await tester.pumpAndSettle();
-
-      expect(controller.step, CompetitionImportStep.confirm);
-      expect(key('competition-import-summary-draws'), findsOneWidget);
-      expect(find.text(l10n.competitionImportSummaryDraws(1)), findsOneWidget);
-      expect(key('competition-import-summary-contests'), findsNothing);
-      expect(find.text(l10n.competitionImportDrawNotImported), findsOneWidget);
-
-      await tester.tap(key('competition-import-confirm'));
-      await tester.pumpAndSettle();
-      expect(store.drawn, [(1, contestId)]);
-      expect(
-        find.text(l10n.competitionImportResultDrawAdded('Spring Open', 2, 4)),
-        findsOneWidget,
-      );
-
-      await tester.tap(key('competition-import-open-draw-1'));
-      await tester.pumpAndSettle();
-      expect(outcome!.imported, [contestId]);
-      expect(outcome!.open, contestId);
-    });
-
-    testWidgets('reports a draw that was refused when it was written', (
-      tester,
-    ) async {
-      store.drawTargets[1] = stampedTarget(1);
-      store.drawAnswers[1] = const DrawImportFailed(
-        1,
-        DrawImportReason.alreadyDrawn,
-      );
-      await openWithDraw(tester);
-      // The list is newest first, so the row may be below the fold.
-      await tester.ensureVisible(key('competition-import-draw-1'));
-      await tester.pumpAndSettle();
-      await tester.tap(key('competition-import-draw-1'));
-      await tester.pump();
-      await tester.tap(key('competition-import-continue'));
-      await tester.pumpAndSettle();
-      await tester.tap(key('competition-import-confirm'));
-      await tester.pumpAndSettle();
-
-      expect(
-        find.text(
-          l10n.competitionImportResultDrawFailed(
-            'Spring Open',
-            l10n.competitionImportDrawReasonDrawn,
-          ),
-        ),
-        findsOneWidget,
-      );
-      await tester.tap(key('competition-import-done'));
-      await tester.pumpAndSettle();
-      expect(outcome, isNull);
-    });
   });
 }

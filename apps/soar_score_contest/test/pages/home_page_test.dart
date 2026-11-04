@@ -257,7 +257,6 @@ void main() {
     ) async {
       store.notes[_contest('Imported Open').id] = ImportedContestNote(
         importedAt: DateTime.utc(2026, 11, 4),
-        drawImported: false,
         lanesKept: true,
       );
       await tester.pumpWidget(_app(twoContests()));

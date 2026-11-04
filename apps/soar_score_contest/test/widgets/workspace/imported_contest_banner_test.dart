@@ -17,12 +17,10 @@ Future<void> _pump(WidgetTester tester, ImportedContestNote? note) =>
       ),
     );
 
-ImportedContestNote _note({bool draw = true, bool lanes = true}) =>
-    ImportedContestNote(
-      importedAt: DateTime.utc(2026, 11, 4, 12),
-      drawImported: draw,
-      lanesKept: lanes,
-    );
+ImportedContestNote _note({bool lanes = true}) => ImportedContestNote(
+  importedAt: DateTime.utc(2026, 11, 4, 12),
+  lanesKept: lanes,
+);
 
 void main() {
   testWidgets('a contest that was not imported has no note', (tester) async {
@@ -30,23 +28,11 @@ void main() {
     expect(find.byKey(_key), findsNothing);
   });
 
-  testWidgets('says what the import left out and keeps the draw as a copy', (
-    tester,
-  ) async {
+  testWidgets('says the contest is as GliderScore held it', (tester) async {
     await _pump(tester, _note());
     expect(find.byKey(_key), findsOneWidget);
     expect(find.textContaining(_l10n.importedContestNoteBody), findsOneWidget);
-    expect(find.textContaining(_l10n.importedContestNoteDraw), findsOneWidget);
     expect(find.textContaining(_l10n.importedContestNoteNoLanes), findsNothing);
-  });
-
-  testWidgets('says when there is no draw', (tester) async {
-    await _pump(tester, _note(draw: false));
-    expect(
-      find.textContaining(_l10n.importedContestNoteNoDraw),
-      findsOneWidget,
-    );
-    expect(find.textContaining(_l10n.importedContestNoteDraw), findsNothing);
   });
 
   testWidgets('says when the draw has no lanes', (tester) async {

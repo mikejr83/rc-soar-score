@@ -118,7 +118,7 @@ class _CompetitionImportDialogState extends State<CompetitionImportDialog> {
   );
 
   Widget _competitions(BuildContext context, AppLocalizations l10n) {
-    final contests = _c.listed;
+    final plans = _c.listed;
     final hasImportable = _c.importable.isNotEmpty;
     return ConstrainedBox(
       constraints: const BoxConstraints(maxHeight: 460),
@@ -149,67 +149,73 @@ class _CompetitionImportDialogState extends State<CompetitionImportDialog> {
                 ),
               ],
             ),
-          for (final c in contests) _CompetitionRow(controller: _c, draft: c),
+          for (final plan in plans) _CompetitionRow(controller: _c, plan: plan),
         ],
       ),
     );
   }
 
   Widget _confirm(BuildContext context, AppLocalizations l10n) {
-    final plan = _c.plan;
+    final summary = _c.summary;
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(l10n.competitionImportConfirmIntro),
         const SizedBox(height: 12),
-        for (final c in _c.chosenCompetitions)
+        for (final plan in _c.chosenPlans)
           Text(
-            '• ${c.name ?? ''}',
-            key: ValueKey('competition-import-sum-${c.sourceCompNo}'),
+            '• ${plan.contest.name ?? ''}',
+            key: ValueKey('competition-import-sum-${plan.sourceCompNo}'),
           ),
         const SizedBox(height: 12),
-        if (plan.contests > 0) ...[
+        if (summary.created > 0)
           Text(
-            l10n.competitionImportSummaryContests(plan.contests),
+            l10n.competitionImportSummaryContests(summary.created),
             key: const ValueKey('competition-import-summary-contests'),
           ),
+        if (summary.replaced > 0)
           Text(
-            l10n.competitionImportSummaryPilots(
-              plan.newPilots,
-              plan.updatedPilots,
-            ),
-            key: const ValueKey('competition-import-summary-pilots'),
+            l10n.competitionImportSummaryReplaced(summary.replaced),
+            key: const ValueKey('competition-import-summary-replaced'),
           ),
-          const SizedBox(height: 8),
-          Text(l10n.competitionImportNotImported),
-        ],
-        if (_c.drawsToAdd > 0) ...[
-          for (final offer in _c.chosenOffers)
-            Text(
-              '• ${_nameOf(offer.draft.sourceCompNo)}',
-              key: ValueKey(
-                'competition-import-sum-draw-${offer.draft.sourceCompNo}',
-              ),
-            ),
-          const SizedBox(height: 8),
+        if (summary.unchanged > 0)
           Text(
-            l10n.competitionImportSummaryDraws(_c.drawsToAdd),
-            key: const ValueKey('competition-import-summary-draws'),
+            l10n.competitionImportSummaryUnchanged(summary.unchanged),
+            key: const ValueKey('competition-import-summary-unchanged'),
           ),
-          const SizedBox(height: 8),
-          Text(l10n.competitionImportDrawNotImported),
-        ],
+        Text(
+          l10n.competitionImportSummaryPilots(
+            summary.newPilots,
+            summary.updatedPilots,
+          ),
+          key: const ValueKey('competition-import-summary-pilots'),
+        ),
+        Text(
+          l10n.competitionImportSummaryFlights(summary.flights),
+          key: const ValueKey('competition-import-summary-flights'),
+        ),
+        if (summary.completed > 0)
+          Text(
+            l10n.competitionImportSummaryCompleted(summary.completed),
+            key: const ValueKey('competition-import-summary-completed'),
+          ),
+        const SizedBox(height: 8),
+        Text(l10n.competitionImportSummaryCheck),
+        if (_c.needsReplaceConfirmation)
+          CheckboxListTile(
+            key: const ValueKey('competition-import-confirm-replace'),
+            controlAffinity: ListTileControlAffinity.leading,
+            contentPadding: EdgeInsets.zero,
+            value: _c.replaceConfirmed,
+            onChanged: (v) => _c.setReplaceConfirmed(v ?? false),
+            title: Text(l10n.competitionImportConfirmReplace),
+          ),
       ],
     );
   }
 
-  String _nameOf(int compNo) {
-    for (final c in _c.draft?.contests ?? const <ContestImportDraft>[]) {
-      if (c.sourceCompNo == compNo) return c.name ?? '';
-    }
-    return '';
-  }
+  String _nameOf(int compNo) => _c.planOf(compNo)?.contest.name ?? '';
 
   Widget _done(BuildContext context, AppLocalizations l10n) => ConstrainedBox(
     constraints: const BoxConstraints(maxHeight: 460),
@@ -219,69 +225,29 @@ class _CompetitionImportDialogState extends State<CompetitionImportDialog> {
       children: [
         for (final r in _c.results)
           _resultRow(context, l10n, r, _nameOf(r.sourceCompNo)),
-        for (final r in _c.drawResults)
-          _drawResultRow(l10n, r, _nameOf(r.sourceCompNo)),
       ],
     ),
   );
 
-  Widget _drawResultRow(
-    AppLocalizations l10n,
-    DrawImportResult r,
-    String name,
-  ) {
-    final key = ValueKey('competition-import-draw-result-${r.sourceCompNo}');
-    switch (r) {
-      case DrawImported():
-        return ListTile(
-          key: key,
-          dense: true,
-          leading: const Icon(Icons.check_circle_outline),
-          title: Text(
-            l10n.competitionImportResultDrawAdded(
-              name,
-              r.roundCount,
-              r.assignmentCount,
-            ),
-          ),
-          trailing: TextButton(
-            key: ValueKey('competition-import-open-draw-${r.sourceCompNo}'),
-            onPressed: () => _close(r.contestId),
-            child: Text(l10n.competitionImportOpen),
-          ),
-        );
-      case DrawImportFailed():
-        return ListTile(
-          key: key,
-          dense: true,
-          leading: Icon(
-            Icons.error_outline,
-            color: Theme.of(context).colorScheme.error,
-          ),
-          title: Text(
-            l10n.competitionImportResultDrawFailed(
-              name,
-              _drawReasonText(l10n, r.code),
-            ),
-          ),
-        );
-    }
-  }
-
   Widget _resultRow(
     BuildContext context,
     AppLocalizations l10n,
-    CompetitionImportResult r,
+    RestoreImportResult r,
     String name,
   ) {
     final key = ValueKey('competition-import-result-${r.sourceCompNo}');
+    final error = Theme.of(context).colorScheme.error;
     switch (r) {
-      case CompetitionImported():
+      case CompetitionRestored():
         return ListTile(
           key: key,
           dense: true,
           leading: const Icon(Icons.check_circle_outline),
-          title: Text(l10n.competitionImportResultImported(name)),
+          title: Text(
+            r.updated
+                ? l10n.competitionImportResultReplaced(name, r.flightCount)
+                : l10n.competitionImportResultRestored(name, r.flightCount),
+          ),
           subtitle: r.skippedParticipants.isEmpty
               ? null
               : Text(
@@ -295,36 +261,37 @@ class _CompetitionImportDialogState extends State<CompetitionImportDialog> {
             child: Text(l10n.competitionImportOpen),
           ),
         );
-      case CompetitionAlreadyImported():
-        final date = MaterialLocalizations.of(context)
-            .formatMediumDate(r.importedAt.toLocal());
-        final id = r.contestId;
+      case CompetitionUnchanged():
         return ListTile(
           key: key,
           dense: true,
           leading: const Icon(Icons.info_outline),
-          title: Text(l10n.competitionImportResultAlready(name, date)),
-          trailing: id == null
-              ? null
-              : TextButton(
-                  key: ValueKey('competition-import-open-${r.sourceCompNo}'),
-                  onPressed: () => _close(id),
-                  child: Text(l10n.competitionImportOpen),
-                ),
+          title: Text(l10n.competitionImportResultUnchanged(name)),
+          trailing: TextButton(
+            key: ValueKey('competition-import-open-${r.sourceCompNo}'),
+            onPressed: () => _close(r.contestId),
+            child: Text(l10n.competitionImportOpen),
+          ),
         );
-      case CompetitionImportFailed():
+      case CompetitionRefused():
         return ListTile(
           key: key,
           dense: true,
-          leading: Icon(
-            Icons.error_outline,
-            color: Theme.of(context).colorScheme.error,
-          ),
+          leading: Icon(Icons.error_outline, color: error),
           title: Text(
-            l10n.competitionImportResultFailed(
+            l10n.competitionImportResultRefused(
               name,
-              _failureText(l10n, r.code),
+              _refusalText(l10n, r.code),
             ),
+          ),
+        );
+      case CompetitionRestoreFailed():
+        return ListTile(
+          key: key,
+          dense: true,
+          leading: Icon(Icons.error_outline, color: error),
+          title: Text(
+            l10n.competitionImportResultRefused(name, _failureText(l10n, r)),
           ),
         );
     }
@@ -370,7 +337,7 @@ class _CompetitionImportDialogState extends State<CompetitionImportDialog> {
           ),
           FilledButton(
             key: const ValueKey('competition-import-continue'),
-            onPressed: _c.chosenTotal == 0 ? null : _c.continueFromCompetitions,
+            onPressed: _c.chosenTotal == 0 ? null : _c.continueToPilots,
             child: Text(l10n.competitionImportContinue),
           ),
         ];
@@ -396,7 +363,9 @@ class _CompetitionImportDialogState extends State<CompetitionImportDialog> {
           ),
           FilledButton(
             key: const ValueKey('competition-import-confirm'),
-            onPressed: _c.apply,
+            onPressed: _c.needsReplaceConfirmation && !_c.replaceConfirmed
+                ? null
+                : _c.apply,
             child: Text(l10n.competitionImportConfirm),
           ),
         ];
@@ -425,21 +394,46 @@ class _CompetitionImportDialogState extends State<CompetitionImportDialog> {
   }
 }
 
-String _failureText(AppLocalizations l10n, String code) => switch (code) {
-  CompetitionImportFailure.noAccount => l10n.competitionImportFailNoAccount,
-  CompetitionImportFailure.notImportable =>
-    l10n.competitionImportFailNotImportable,
-  CompetitionImportFailure.profileUnavailable =>
-    l10n.competitionImportFailProfileUnavailable,
-  CompetitionImportFailure.configInvalid =>
-    l10n.competitionImportFailConfigInvalid,
-  CompetitionImportFailure.profileMissing =>
-    l10n.competitionImportFailProfileMissing,
+/// Why a restore failed and kept nothing.
+String _failureText(AppLocalizations l10n, CompetitionRestoreFailed r) =>
+    switch (r.code) {
+      RestoreFailure.noAccount => l10n.competitionImportFailNoAccount,
+      RestoreFailure.notImportable => l10n.competitionImportFailNotImportable,
+      RestoreFailure.profileUnavailable =>
+        l10n.competitionImportFailProfileUnavailable,
+      RestoreFailure.configInvalid => l10n.competitionImportFailConfigInvalid,
+      RestoreFailure.profileMissing => l10n.competitionImportFailProfileMissing,
+      RestoreFailure.comparisonFailed => l10n.competitionImportFailComparison(
+        r.mismatchCount,
+        [
+          for (final m in r.mismatches)
+            l10n.competitionImportMismatchFlight(
+              m.roundNo,
+              m.groupNo,
+              m.sourcePilotNo,
+            ),
+        ].join('; '),
+      ),
+      _ => l10n.competitionImportFailOther,
+    };
+
+String _refusalText(AppLocalizations l10n, String code) => switch (code) {
+  RestoreRefusal.contestSynced => l10n.competitionImportRefuseSynced,
+  RestoreRefusal.resultsPublished => l10n.competitionImportRefusePublished,
+  RestoreRefusal.needsConfirmation => l10n.competitionImportRefuseConfirm,
+  RestoreRefusal.notRestorable => l10n.competitionImportRefuseNotRestorable,
   _ => l10n.competitionImportFailOther,
 };
 
-String _reasonText(AppLocalizations l10n, String? code) => switch (code) {
-  ContestImportReason.classNotSupportedYet =>
+/// Why a competition cannot be listed as importable.
+String _reasonText(
+  AppLocalizations l10n,
+  String? code,
+  String? detail,
+) => switch (code) {
+  ContestImportReason.classNotSupportedYet ||
+  RestoreReason.classNotSupported ||
+  DrawImportReason.classNotSupported =>
     l10n.competitionImportReasonClassNotSupportedYet,
   ContestImportReason.classOutOfScope =>
     l10n.competitionImportReasonClassOutOfScope,
@@ -451,69 +445,89 @@ String _reasonText(AppLocalizations l10n, String? code) => switch (code) {
     l10n.competitionImportReasonConfigInvalid,
   ContestImportReason.noParticipants =>
     l10n.competitionImportReasonNoParticipants,
-  _ => l10n.competitionImportReasonOther,
-};
-
-/// Why the draw of a competition cannot be added, for a refusal or a failure.
-String _drawReasonText(AppLocalizations l10n, String? code) => switch (code) {
-  DrawImportReason.fingerprintChanged =>
-    l10n.competitionImportDrawReasonFingerprint,
-  DrawImportReason.alreadyDrawn => l10n.competitionImportDrawReasonDrawn,
-  DrawImportReason.hasAcceptedScores => l10n.competitionImportDrawReasonScores,
-  DrawImportReason.noDraw => l10n.competitionImportDrawReasonNoDraw,
-  DrawImportReason.pilotWithoutParticipation ||
-  DrawImportFailure.participationMissing =>
-    l10n.competitionImportDrawReasonPilot,
-  DrawImportReason.creditMoved => l10n.competitionImportDrawReasonMoved,
+  DrawImportReason.scoresUnavailable => l10n.competitionImportReasonNoScores,
+  DrawImportReason.creditMoved => l10n.competitionImportReasonMoved,
+  RestoreReason.reflightNotWholeGroup => l10n.competitionImportReasonReflights,
+  RestoreReason.flightNotRepresentable => l10n.competitionImportReasonFlights(
+    detail ?? '',
+  ),
   DrawImportReason.taskRangesOverlap ||
   DrawImportReason.taskRangesGapped ||
   DrawImportReason.duplicateFlight ||
   DrawImportReason.reflightWithoutOriginal ||
-  DrawImportReason.keyMissing => l10n.competitionImportDrawReasonRounds,
-  DrawImportFailure.contestLocked => l10n.competitionImportDrawFailLocked,
-  DrawImportFailure.noAccount => l10n.competitionImportFailNoAccount,
-  DrawImportFailure.failed => l10n.competitionImportFailOther,
-  _ => l10n.competitionImportDrawReasonOther,
+  DrawImportReason.pilotWithoutParticipation ||
+  DrawImportReason.noDraw ||
+  DrawImportReason.keyMissing => l10n.competitionImportReasonRounds,
+  _ => l10n.competitionImportReasonOther,
 };
 
 /// One competition of the file: a checkbox when it can be imported, else the
-/// reason it cannot.
+/// reason it cannot; the Completed choice and the earlier import it replaces
+/// when chosen.
 class _CompetitionRow extends StatelessWidget {
-  const _CompetitionRow({required this.controller, required this.draft});
+  const _CompetitionRow({required this.controller, required this.plan});
 
   final CompetitionImportController controller;
-  final ContestImportDraft draft;
+  final RestorePlan plan;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final no = draft.sourceCompNo;
+    final no = plan.sourceCompNo;
+    final draft = plan.contest;
     final name = draft.name ?? draft.sourceClass;
-    final importable = draft.isImportable;
+    final refusal = controller.refusalOf(no);
+    final importable = plan.isImportable && refusal == null;
+    final material = MaterialLocalizations.of(context);
     final date = draft.startDate == null
         ? ''
-        : MaterialLocalizations.of(context).formatMediumDate(draft.startDate!);
-    final warnings = {for (final w in draft.warnings) w.code};
+        : material.formatMediumDate(draft.startDate!);
+    int count(String code) => plan.warnings.where((w) => w.code == code).length;
+    final teamNames = draft.warnings.any(
+      (w) => w.code == ContestImportWarning.teamNamesGenerated,
+    );
     final other = draft.warnings
         .where(
           (w) =>
               w.code != ContestImportWarning.teamNamesGenerated &&
-              w.code != ContestImportWarning.retiredKeptActive,
+              w.code != ContestImportWarning.retiredKeptActive &&
+              w.code != ContestImportWarning.landingTableNotImported,
         )
         .length;
+    final target = controller.targetOf(no);
+    final replaced = controller.replacedBy(no);
     final notes = [
-      if (!importable) _reasonText(l10n, draft.reason),
-      if (importable)
-        l10n.competitionImportRowDetails(
-          date,
-          draft.sourceClass,
-          draft.participants.length,
-        ),
-      if (warnings.contains(ContestImportWarning.teamNamesGenerated))
-        l10n.competitionImportWarningTeamNames,
-      if (warnings.contains(ContestImportWarning.retiredKeptActive))
-        l10n.competitionImportWarningRetired,
-      if (other > 0) l10n.competitionImportWarningOther(other),
+      if (!plan.isImportable)
+        _reasonText(l10n, plan.reason, plan.reasonDetail)
+      else ...[
+        '${l10n.competitionImportRowDetails(date, draft.sourceClass, draft.participants.length)}'
+            ' · ${l10n.competitionImportRowFlights(plan.flights.length)}',
+        if (teamNames) l10n.competitionImportWarningTeamNames,
+        if (count(RestoreWarning.retirementInferred) > 0)
+          l10n.competitionImportWarningRetirement(
+            count(RestoreWarning.retirementInferred),
+          ),
+        if (plan.reflights.isNotEmpty)
+          l10n.competitionImportWarningReflights(plan.reflights.length),
+        if (count(RestoreWarning.motorRestartKept) > 0)
+          l10n.competitionImportWarningRestart(
+            count(RestoreWarning.motorRestartKept),
+          ),
+        if (count(RestoreWarning.roundPartlyFlown) > 0)
+          l10n.competitionImportWarningUnflown(
+            count(RestoreWarning.roundPartlyFlown),
+          ),
+        if (count(RestoreWarning.allZeroFlight) > 0)
+          l10n.competitionImportWarningZero(
+            count(RestoreWarning.allZeroFlight),
+          ),
+        if (count(RestoreWarning.landingUnresolved) > 0)
+          l10n.competitionImportWarningLanding(
+            count(RestoreWarning.landingUnresolved),
+          ),
+        if (other > 0) l10n.competitionImportWarningOther(other),
+        ?_targetNote(l10n, target, replaced, refusal),
+      ],
     ];
     final tile = CheckboxListTile(
       key: ValueKey('competition-import-row-$no'),
@@ -525,81 +539,73 @@ class _CompetitionRow extends StatelessWidget {
       title: Text(name),
       subtitle: Text(notes.join('\n')),
     );
-    final offer = controller.offers[no];
-    if (offer == null) return tile;
+    final numberMatch = target?.kind == RestoreTargetKind.numberMatch;
+    final chosen = controller.chosen.contains(no);
+    final showSame = plan.isImportable && numberMatch;
+    if (!showSame && !(chosen && plan.hasScoredFlights)) return tile;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         tile,
-        Padding(
-          padding: const EdgeInsets.only(left: 32),
-          child: _DrawOfferTile(controller: controller, offer: offer),
-        ),
+        if (showSame)
+          Padding(
+            padding: const EdgeInsets.only(left: 32),
+            child: SwitchListTile(
+              key: ValueKey('competition-import-same-$no'),
+              dense: true,
+              value: controller.isSameAs(no),
+              onChanged: (v) => controller.setSameAs(no, v),
+              title: Text(
+                l10n.competitionImportTargetSame(target!.contestName ?? ''),
+              ),
+            ),
+          ),
+        if (chosen && plan.hasScoredFlights)
+          Padding(
+            padding: const EdgeInsets.only(left: 32),
+            child: CheckboxListTile(
+              key: ValueKey('competition-import-completed-$no'),
+              controlAffinity: ListTileControlAffinity.leading,
+              dense: true,
+              value: controller.completed(no),
+              onChanged: (v) => controller.setCompleted(no, v ?? false),
+              title: Text(l10n.competitionImportCompleted),
+              subtitle: Text(l10n.competitionImportCompletedHint),
+            ),
+          ),
       ],
     );
   }
-}
 
-/// The draw a competition imported before can still receive: a checkbox with
-/// the counts and notes of the dry run, or the reason it cannot be added.
-class _DrawOfferTile extends StatelessWidget {
-  const _DrawOfferTile({required this.controller, required this.offer});
-
-  final CompetitionImportController controller;
-  final DrawOffer offer;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final draft = offer.draft;
-    final no = draft.sourceCompNo;
-    if (!offer.canAdd) {
-      return ListTile(
-        key: ValueKey('competition-import-draw-refused-$no'),
-        dense: true,
-        leading: const Icon(Icons.info_outline),
-        title: Text(l10n.competitionImportDrawTitle),
-        subtitle: Text(_drawReasonText(l10n, draft.reason)),
+  String? _targetNote(
+    AppLocalizations l10n,
+    RestoreTarget? target,
+    RestoreTarget? replaced,
+    String? refusal,
+  ) {
+    if (target == null) return null;
+    if (target.kind == RestoreTargetKind.numberMatch && replaced == null) {
+      return l10n.competitionImportTargetNumberMatch(
+        plan.identity.compNo,
+        target.contestName ?? '',
+        target.sourceDate ?? '',
       );
     }
-    int count(Set<String> codes) =>
-        draft.warnings.where((w) => codes.contains(w.code)).length;
-    final groups = count({DrawImportWarning.groupsPerRoundDiffers});
-    final sizes = count({DrawImportWarning.groupSizesDiffer});
-    final lanes = count({DrawImportWarning.laneBeyondLaneCount});
-    final other = count({
-      DrawImportWarning.emptyGroup,
-      DrawImportWarning.seqNoDuplicate,
-      DrawImportWarning.seqNoMissing,
-    });
-    final notes = [
-      l10n.competitionImportDrawIntro,
-      l10n.competitionImportDrawDetails(
-        draft.roundCount,
-        draft.maxGroupsPerRound,
-        draft.pilots.length,
-      ),
-      draft.laneCount > 0
-          ? l10n.competitionImportDrawLanes(draft.laneCount)
-          : l10n.competitionImportDrawNoLanes,
-      if (draft.probablyUnflownRounds.length == draft.roundCount)
-        l10n.competitionImportDrawNoScores
-      else if (draft.probablyUnflownRounds.isNotEmpty)
-        l10n.competitionImportDrawUnflown(draft.probablyUnflownRounds.length),
-      l10n.competitionImportDrawNoteHistory,
-      if (groups > 0) l10n.competitionImportDrawWarningGroups(groups),
-      if (sizes > 0) l10n.competitionImportDrawWarningSizes(sizes),
-      if (lanes > 0) l10n.competitionImportDrawWarningLanes(lanes),
-      if (other > 0) l10n.competitionImportDrawWarningOther(other),
-    ];
-    return CheckboxListTile(
-      key: ValueKey('competition-import-draw-$no'),
-      controlAffinity: ListTileControlAffinity.leading,
-      dense: true,
-      value: controller.chosenDraws.contains(no),
-      onChanged: (_) => controller.toggleDraw(no),
-      title: Text(l10n.competitionImportDrawTitle),
-      subtitle: Text(notes.join('\n')),
-    );
+    if (refusal == RestoreRefusal.resultsPublished) {
+      return l10n.competitionImportTargetPublished;
+    }
+    if (refusal == RestoreRefusal.contestSynced) {
+      return l10n.competitionImportTargetSynced;
+    }
+    final note =
+        target.isUnchanged(
+          plan.contentHash,
+          controller.completed(plan.sourceCompNo),
+        )
+        ? l10n.competitionImportTargetUnchanged
+        : l10n.competitionImportTargetReplaces(target.contestName ?? '');
+    return target.changes.any && replaced != null
+        ? '$note\n${l10n.competitionImportTargetChanges(target.changes.scoresEntered)}'
+        : note;
   }
 }
