@@ -15,9 +15,9 @@ void main() {
   final catalog = files.catalog();
   final registry = buildExampleRegistry();
 
-  test('the catalog lists 49 distinct entities and files', () {
-    expect(catalog.map((e) => e.entity).toSet(), hasLength(49));
-    expect(catalog.map((e) => e.stem).toSet(), hasLength(49));
+  test('the catalog lists 50 distinct entities and files', () {
+    expect(catalog.map((e) => e.entity).toSet(), hasLength(50));
+    expect(catalog.map((e) => e.stem).toSet(), hasLength(50));
   });
 
   test('every catalog entity has an example file and none is stray', () {

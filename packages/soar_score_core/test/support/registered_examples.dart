@@ -38,6 +38,10 @@ ExampleRegistry buildExampleRegistry() => ExampleRegistry()
     'DisciplineValidation',
     (json) => DisciplineValidation.fromJson(json).toJson(),
   )
+  ..register(
+    'ImportProvenance',
+    (json) => ImportProvenance.fromJson(json).toJson(),
+  )
   ..register('LandingResult', (json) => LandingResult.fromJson(json).toJson())
   ..register('LandingTable', (json) => LandingTable.fromJson(json).toJson())
   ..register(

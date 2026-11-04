@@ -79,6 +79,7 @@ abstract final class SyncEntityCatalog {
         SyncEntityShape.revisioned,
       ),
       SyncEntityKind('Role', _director, SyncEntityShape.revisioned),
+      SyncEntityKind('ImportProvenance', _director, SyncEntityShape.revisioned),
       SyncEntityKind('ModelCatalog', _director, SyncEntityShape.revisioned),
       SyncEntityKind(
         'ContestConfigurationPreset',

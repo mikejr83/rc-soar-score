@@ -1,0 +1,50 @@
+[
+  {
+    "id": "019c0000-0000-7000-8000-0000000000e0",
+    "owner_account_id": "019c0000-0000-7000-8000-000000000001",
+    "contest_id": "019c0000-0000-7000-8000-0000000000e1",
+    "stamped_entity_type": "Contest",
+    "stamped_entity_id": "019c0000-0000-7000-8000-0000000000e1",
+    "source_system": "gliderscore",
+    "source_keys": { "comp_no": 22 },
+    "source_values": { "lane_count": 6, "landing_table_no": 9 },
+    "file_fingerprint": "sha256:5f1c0a9e8d7b6a5f4e3d2c1b0a99887766554433221100ffeeddccbbaa998877",
+    "dedupe_key": "gliderscore:sha256:5f1c0a9e8d7b6a5f4e3d2c1b0a99887766554433221100ffeeddccbbaa998877:22",
+    "import_operation_id": "019c0000-0000-7000-8000-0000000000e4",
+    "tool_version": "1.0.0",
+    "imported_at": "2026-11-03T22:40:00Z",
+    "revision": 0
+  },
+  {
+    "id": "019c0000-0000-7000-8000-0000000000e2",
+    "owner_account_id": "019c0000-0000-7000-8000-000000000001",
+    "contest_id": "019c0000-0000-7000-8000-0000000000e1",
+    "stamped_entity_type": "ContestParticipation",
+    "stamped_entity_id": "019c0000-0000-7000-8000-0000000000e5",
+    "source_system": "gliderscore",
+    "source_keys": { "comp_no": 22, "pilot_no": 98 },
+    "source_values": null,
+    "file_fingerprint": "sha256:5f1c0a9e8d7b6a5f4e3d2c1b0a99887766554433221100ffeeddccbbaa998877",
+    "dedupe_key": null,
+    "import_operation_id": "019c0000-0000-7000-8000-0000000000e4",
+    "tool_version": "1.0.0",
+    "imported_at": "2026-11-03T22:40:00Z",
+    "revision": 0
+  },
+  {
+    "id": "019c0000-0000-7000-8000-0000000000e3",
+    "owner_account_id": "019c0000-0000-7000-8000-000000000001",
+    "contest_id": null,
+    "stamped_entity_type": "ParticipantProfile",
+    "stamped_entity_id": "019c0000-0000-7000-8000-000000000020",
+    "source_system": "gliderscore",
+    "source_keys": { "pilot_no": 98 },
+    "source_values": null,
+    "file_fingerprint": "sha256:5f1c0a9e8d7b6a5f4e3d2c1b0a99887766554433221100ffeeddccbbaa998877",
+    "dedupe_key": null,
+    "import_operation_id": "019c0000-0000-7000-8000-0000000000e4",
+    "tool_version": "1.0.0",
+    "imported_at": "2026-11-03T22:40:00Z",
+    "revision": 0
+  }
+]

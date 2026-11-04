@@ -22,6 +22,7 @@ import 'schema/tables/discipline_profiles_table.dart';
 import 'schema/tables/discipline_rules_table.dart';
 import 'schema/tables/discipline_score_fields_table.dart';
 import 'schema/tables/discipline_validations_table.dart';
+import 'schema/tables/import_provenance_table.dart';
 import 'schema/tables/landing_results_table.dart';
 import 'schema/tables/landing_tables_table.dart';
 import 'schema/tables/local_account_table.dart';
@@ -89,6 +90,7 @@ part 'database.g.dart';
     TeamMemberships,
     ModelCatalogs,
     ContestModelLinks,
+    ImportProvenances,
     Accounts,
     AccountAliases,
     AccountIdentities,

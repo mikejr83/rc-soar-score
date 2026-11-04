@@ -16,6 +16,7 @@ import '../schema/tables/roles_table.dart';
 import '../schema/tables/contest_participations_table.dart';
 import '../schema/tables/teams_table.dart';
 import '../schema/tables/team_memberships_table.dart';
+import '../schema/tables/import_provenance_table.dart';
 import '../schema/tables/model_catalogs_table.dart';
 import '../schema/tables/contest_model_links_table.dart';
 import '../schema/tables/matrix_revisions_table.dart';
@@ -227,6 +228,17 @@ class EntityStores {
         jsonColumns: modelCatalogsJsonColumns,
       ),
       decode: core.ModelCatalog.fromJson,
+      encode: (entity) => entity.toJson(),
+      hasRevision: true,
+    ),
+    EntityStore<core.ImportProvenance>(
+      entityType: 'ImportProvenance',
+      mapper: TableMapper(
+        db,
+        db.importProvenances,
+        jsonColumns: importProvenancesJsonColumns,
+      ),
+      decode: core.ImportProvenance.fromJson,
       encode: (entity) => entity.toJson(),
       hasRevision: true,
     ),

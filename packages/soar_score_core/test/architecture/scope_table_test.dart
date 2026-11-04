@@ -71,6 +71,9 @@ final _table = <_Expected>[
     SyncScope.backendOnly,
   }),
   _Expected('Invitation', Invitation.fromJson, {SyncScope.issued}),
+  _Expected('ImportProvenance', ImportProvenance.fromJson, {
+    SyncScope.director,
+  }),
   _Expected('LandingTable', LandingTable.fromJson, {
     SyncScope.system,
     SyncScope.director,
@@ -130,7 +133,7 @@ void main() {
 
   test('the table covers every catalog entity once, plus LandingResult', () {
     final named = [for (final e in _table) e.entity, 'LandingResult'];
-    expect(named, hasLength(49));
+    expect(named, hasLength(50));
     expect(named.toSet(), catalog.map((e) => e.entity).toSet());
   });
 
