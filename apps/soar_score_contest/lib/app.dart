@@ -308,6 +308,10 @@ class _SoarScoreContestAppState extends State<SoarScoreContestApp>
       }
       app = AppSyncInherited(sync: bootstrap.appSync, child: app);
       app = ApiClientInherited(client: bootstrap.apiClient, child: app);
+      app = PublicationClientInherited(
+        client: bootstrap.publicationApiClient,
+        child: app,
+      );
       final auth = bootstrap.authSession;
       if (auth != null) {
         app = AuthSessionInherited(session: auth, child: app);

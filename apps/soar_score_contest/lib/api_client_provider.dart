@@ -27,3 +27,31 @@ class ApiClientInherited extends InheritedWidget {
 /// (e.g. tests that pump the app without one).
 ApiClient? apiClientOf(BuildContext context) =>
     context.dependOnInheritedWidgetOfExactType<ApiClientInherited>()?.client;
+
+/// Exposes the `ApiClient` that publishes contests to the widget tree.
+///
+/// Publishing needs the hosted server: the embedded server of the native
+/// build never publishes. So on native this is the remote client (which sends
+/// the sign-in token); on web it is the one client the app has.
+class PublicationClientInherited extends InheritedWidget {
+  const PublicationClientInherited({
+    super.key,
+    required this.client,
+    required super.child,
+  });
+
+  final ApiClient client;
+
+  @override
+  bool updateShouldNotify(PublicationClientInherited oldWidget) =>
+      client != oldWidget.client;
+}
+
+/// The client for publication calls: the one the app provides for them, else
+/// the app-wide client (tests that pump the app with a single client), or
+/// `null` when there is none.
+ApiClient? publicationClientOf(BuildContext context) =>
+    context
+        .dependOnInheritedWidgetOfExactType<PublicationClientInherited>()
+        ?.client ??
+    apiClientOf(context);

@@ -195,6 +195,10 @@ abstract final class NextStepCopy {
         ? ''
         : 'The contest was completed '
               '${NextStepText.when(completedAt, f.contest.timezone)}. ';
+    if (publication.needsSignIn) {
+      return '${completed}Sign in to publish the results. '
+          'Reports are available.';
+    }
     if (!publication.isKnown) {
       return '${completed}Publication status can’t be loaded right now. '
           'Reports are available.';

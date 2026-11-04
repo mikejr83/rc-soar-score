@@ -2222,6 +2222,30 @@ abstract class AppLocalizations {
   /// **'Unknown'**
   String get publicationStateUnknown;
 
+  /// Current publication state when nobody is signed in, so the hosted server cannot be asked.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in required'**
+  String get publicationStateSignIn;
+
+  /// Reason publishing is disabled while nobody is signed in.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to publish. Publishing goes through the hosted server.'**
+  String get publicationSignInReason;
+
+  /// Shown when publishing was refused because nobody is signed in.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to publish this contest.'**
+  String get publicationFailSignIn;
+
+  /// Shown when the hosted server does not know the contest because it has not synced.
+  ///
+  /// In en, this message translates to:
+  /// **'The server does not have this contest yet. Wait for it to sync, then publish again.'**
+  String get publicationFailNotSynced;
+
   /// Current publication state when the server does not publish contests.
   ///
   /// In en, this message translates to:

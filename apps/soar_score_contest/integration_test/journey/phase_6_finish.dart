@@ -55,8 +55,9 @@ Future<void> runFinishPhase(Journey journey, JourneyContext data) async {
     'Publication: the card and page say this server does not publish, with no delisting or history',
     () => inContest(() async {
       await pumpUntilFound(tester, _key('status-summary'));
-      // The contest runs on the embedded server here, which never publishes,
-      // so the card explains instead of offering a button that would fail.
+      // Publishing goes to the server the app syncs with (the remote client),
+      // not to the embedded server. The E2E server never publishes, so the
+      // card explains instead of offering a button that would fail.
       await pumpUntilFound(tester, _key('workspace-control-publication'));
       await pumpUntilFound(tester, _key('control-publication-reason'));
       expect(_key('publication-publish'), findsOneWidget);

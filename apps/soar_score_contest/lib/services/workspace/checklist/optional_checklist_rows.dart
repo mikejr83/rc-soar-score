@@ -34,6 +34,16 @@ abstract final class OptionalChecklistRows {
   /// Publication. A failed read is "unknown", never "not published".
   static ChecklistItem publication(WorkspaceFacts facts) {
     final publication = facts.publication;
+    if (publication.needsSignIn) {
+      return const ChecklistItem(
+        id: ChecklistItemId.publication,
+        status: ChecklistStatus.unknown,
+        title: 'Sign in to publish',
+        detail:
+            'Publishing goes through the hosted server and needs a sign-in.',
+        target: ChecklistTarget.publicationControl,
+      );
+    }
     if (!publication.isKnown) {
       return const ChecklistItem(
         id: ChecklistItemId.publication,

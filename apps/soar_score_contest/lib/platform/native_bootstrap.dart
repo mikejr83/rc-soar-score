@@ -92,6 +92,9 @@ class NativeBootstrap extends AppBootstrap {
   ApiClient get remoteApiClient => _remoteClient;
 
   @override
+  ApiClient get publicationApiClient => _remoteClient;
+
+  @override
   AppSync get appSync => sync.appSync;
 
   @override

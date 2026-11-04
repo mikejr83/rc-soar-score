@@ -143,6 +143,15 @@ void main() {
     expect(facts.hasMatrix, isTrue);
   });
 
+  test(
+    'a 401 publication read asks for a sign-in, not a failed read',
+    () async {
+      final facts = await _load(publicationStatus: 401);
+      expect(facts.publication, PublicationFacts.signInRequired);
+      expect(facts.publication.needsSignIn, isTrue);
+    },
+  );
+
   test('a failed publication read is unknown, not unpublished', () async {
     final facts = await _load(publicationStatus: 500);
     expect(facts.unavailable, {WorkspaceFactSource.publication});

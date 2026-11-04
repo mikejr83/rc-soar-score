@@ -33,6 +33,13 @@ enum PublicationFailure {
   /// Only the contest's director may do this (403).
   notDirector,
 
+  /// Nobody is signed in, so the hosted server refused the call (401).
+  signInRequired,
+
+  /// The hosted server does not have the contest yet: it has not synced (404
+  /// on publish).
+  notSynced,
+
   /// The server could not be reached.
   network,
 
@@ -151,11 +158,16 @@ class PublicationActions {
   }
 
   static PublicationFailure _classify(ApiHttpError error, bool forPublish) {
+    if (error.statusCode == 401) {
+      return PublicationFailure.signInRequired;
+    }
     if (error.statusCode == 403) {
       return PublicationFailure.notDirector;
     }
-    if (error.statusCode == 404 && !forPublish) {
-      return PublicationFailure.nothingPending;
+    if (error.statusCode == 404) {
+      return forPublish
+          ? PublicationFailure.notSynced
+          : PublicationFailure.nothingPending;
     }
     if (error.statusCode == 409) {
       return switch (error.error?.code) {

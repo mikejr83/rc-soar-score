@@ -21,7 +21,7 @@ abstract final class PublicationFlow {
     required PublicationFacts publication,
     required String policyText,
   }) async {
-    final client = apiClientOf(context);
+    final client = publicationClientOf(context);
     final messenger = ScaffoldMessenger.of(context);
     final l10n = AppLocalizations.of(context);
     if (client == null) {
@@ -54,7 +54,7 @@ abstract final class PublicationFlow {
     required Id contestId,
     required PublicationVisibility target,
   }) async {
-    final client = apiClientOf(context);
+    final client = publicationClientOf(context);
     final messenger = ScaffoldMessenger.of(context);
     final l10n = AppLocalizations.of(context);
     if (client == null) {
@@ -84,7 +84,7 @@ abstract final class PublicationFlow {
     BuildContext context, {
     required Id contestId,
   }) async {
-    final client = apiClientOf(context);
+    final client = publicationClientOf(context);
     final messenger = ScaffoldMessenger.of(context);
     final l10n = AppLocalizations.of(context);
     if (client == null) {
@@ -110,7 +110,7 @@ abstract final class PublicationFlow {
     BuildContext context, {
     required Id contestId,
   }) async {
-    final client = apiClientOf(context);
+    final client = publicationClientOf(context);
     final messenger = ScaffoldMessenger.of(context);
     final l10n = AppLocalizations.of(context);
     if (client == null) {

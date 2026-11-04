@@ -23,3 +23,7 @@ The secret is 32 random bytes generated at each launch, held in memory only and 
 ## Tests
 
 `apps/soar_score_contest/test/server/embedded_guard_test.dart` covers no token, wrong token, bad `Host`, an `Origin` header, wrong content type and the client round trip. Every other embedded-server test builds its `ApiClient` with the secret.
+
+## Publishing does not run on the embedded server
+
+The embedded server never publishes contests (`publishingEnabled` is off, so its publication routes answer 409 `publishing_not_available`). The Windows app therefore sends publication reads and writes (publish, visibility, delisting, history) to the hosted server through its remote client, with the director's sign-in token (#777). The director must be signed in, and the contest must have synced to the server first; the app says so when either is missing. To try publishing from a debug build, run the API server locally and start the app with `--dart-define=SOAR_SCORE_API_BASE_URL=http://127.0.0.1:8080`.

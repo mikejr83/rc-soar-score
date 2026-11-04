@@ -54,7 +54,11 @@ class _ContestPublicationPageState extends State<ContestPublicationPage> {
     } on ArgumentError {
       return Future.error(const _NotFound());
     }
-    return PublicationPageData.load(client, id);
+    return PublicationPageData.load(
+      client,
+      id,
+      publicationClient: publicationClientOf(context),
+    );
   }
 
   void _reload() {

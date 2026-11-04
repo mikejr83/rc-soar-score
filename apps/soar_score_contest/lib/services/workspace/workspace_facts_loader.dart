@@ -23,9 +23,13 @@ abstract final class WorkspaceFactsLoader {
   ///
   /// [actingAccountId] is the account the app acts as, so a lock by it reads
   /// "by you".
+  ///
+  /// The publication is read through [publicationClient], the hosted server
+  /// on native; it defaults to [client].
   static Future<WorkspaceFacts> load(
     ApiClient client,
     Contest contest, {
+    ApiClient? publicationClient,
     bool isOffline = false,
     String? actingAccountId,
   }) async {
@@ -34,7 +38,7 @@ abstract final class WorkspaceFactsLoader {
     final results = await Future.wait<Object?>([
       MatrixPageData.forContest(client, contest),
       _scores(client, id, unavailable),
-      _publication(client, id, unavailable),
+      _publication(publicationClient ?? client, id, unavailable),
       _landingTables(client, unavailable),
       _audit(client, contest, actingAccountId),
     ]);

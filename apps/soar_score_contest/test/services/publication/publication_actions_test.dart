@@ -75,4 +75,34 @@ void main() {
     expect(records.single.level, Level.SEVERE);
     expect(records.single.error, isA<StateError>());
   });
+
+  PublicationActions answering(int status) => PublicationActions(
+    ApiClient(
+      baseUrl: Uri.parse('http://localhost'),
+      httpClient: MockClient(
+        (request) async => http.Response(
+          jsonEncode({
+            'error': {'code': 'x', 'message': 'no'},
+          }),
+          status,
+          headers: {'content-type': 'application/json'},
+        ),
+      ),
+    ),
+  );
+
+  test('a 401 means sign in', () async {
+    final outcome = await answering(401).publish(contest);
+    expect(outcome.failure, PublicationFailure.signInRequired);
+  });
+
+  test('a 404 on publish means the server has no such contest yet', () async {
+    final outcome = await answering(404).publish(contest);
+    expect(outcome.failure, PublicationFailure.notSynced);
+  });
+
+  test('a 404 on withdrawing a request still means nothing pending', () async {
+    final outcome = await answering(404).withdrawDelisting(contest.id);
+    expect(outcome.failure, PublicationFailure.nothingPending);
+  });
 }
