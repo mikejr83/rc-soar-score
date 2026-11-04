@@ -658,6 +658,85 @@ void main() {
       );
     });
 
+    test('an imported GliderScore contest keeps its stamps', () async {
+      final repo = Repository(source.db);
+      final profiles = <int, core.Id>{};
+      for (var n = 1; n <= 2; n++) {
+        final saved = await repo.participantProfileRepository.save(
+          core.ParticipantProfile(
+            id: core.Id.create(),
+            ownerAccountId: source.localId,
+            firstName: 'Pilot',
+            lastName: 'Number$n',
+            createdAt: DateTime.utc(2026),
+            updatedAt: DateTime.utc(2026),
+          ),
+          metadata: metadata(),
+        );
+        profiles[n] = saved.id;
+      }
+      core.CompetitionImportPlan plan() => core.CompetitionImportPlan(
+        draft: core.ContestImportDraft(
+          sourceCompNo: 22,
+          sourceClass: 'F5J',
+          status: core.ContestImportStatus.importable,
+          name: 'Imported Open',
+          startDate: DateTime.utc(2026, 5, 9),
+          disciplineType: 'F5J',
+          config: core.ContestConfig(core: const {}, discipline: const {}),
+          sourceLaneCount: 6,
+          participants: const [
+            core.ParticipationDraft(
+              sourcePilotNo: 1,
+              role: core.ImportedRole.pilot,
+              sourceRole: 'Plt',
+            ),
+            core.ParticipationDraft(
+              sourcePilotNo: 2,
+              role: core.ImportedRole.pilot,
+              sourceRole: 'Plt',
+            ),
+          ],
+        ),
+        profileIds: profiles,
+        owner: core.ImportOwner(localAccountId: source.localId),
+        timezone: 'UTC',
+        importOperationId: core.Id.parse(
+          '019c0000-0000-7000-8000-0000000000f1',
+        ),
+        fileFingerprint: 'sha256:abc',
+        toolVersion: '1.0.0',
+      );
+      final first = await repo.contestImportRepository.importCompetition(
+        plan(),
+        metadata: metadata(),
+      ) as core.CompetitionImported;
+
+      final file = await source.exportNamed('Imported Open');
+      expect(file.rows('import_provenance'), hasLength(3));
+      await target.importer.import(
+        file,
+        mode: ImportMode.editable,
+        target: target.target,
+      );
+
+      final copied = Repository(target.db);
+      final stamps = await copied.importProvenanceRepository.listForContest(
+        first.contestId,
+      );
+      expect(stamps, hasLength(3));
+      expect(stamps.every((s) => s.ownerAccountId == target.localId), isTrue);
+      final contest = await copied.contestRepository.findById(first.contestId);
+      expect(contest!.ownerAccountId, target.localId);
+      expect(
+        (await copied.importProvenanceRepository.findByDedupeKey(
+          target.localId,
+          'gliderscore:sha256:abc:22',
+        ))?.sourceValues,
+        {'lane_count': 6},
+      );
+    });
+
     test('keeps pending changes so they can be sent later', () async {
       final file = await source.exportNamed(_autumn);
       await target.importer.import(

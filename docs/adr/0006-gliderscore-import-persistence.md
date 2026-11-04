@@ -98,6 +98,10 @@ Schema changes go in version 1 in place (a director deletes a stale local `soar_
 - **Merging a re-import into a contest that already has a draw or scores:** needs the compare-and-reconcile design of #576 and is not needed for the first release.
 - **A second contest per phase:** testers would reconcile two contests by hand.
 
+## Implementation
+
+`ContestImportRepository` (contract in `soar_score_core`, Drift implementation in `soar_score_data`) has two calls. `stampProfiles` stamps the profiles an operation created or updated, once per operation, before any competition is written. `importCompetition` writes one competition in one unit of work and returns `CompetitionImported`, `CompetitionAlreadyImported` or `CompetitionImportFailed` with a stable code; it never throws for a competition-level problem. Each write in the unit of work gets its own request id (`<id>:<n>`), because the mutation log is unique on scope and request id.
+
 ## Consequences
 
 - Data-model docs: the persistence ticket (#746) adds `plan/data-model/entities/import_provenance.md` with its example JSON and Dart model (the entity catalog test requires all three together), and a line in `contest.md` saying a contest may carry an import stamp.

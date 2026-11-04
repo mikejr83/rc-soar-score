@@ -35,6 +35,8 @@ void main() {
         'backend-only; needs a server demo (#305)',
     'participantDirectoryEntryRepository':
         'backend-only; needs a server demo (#305)',
+    'contestImportRepository':
+        'written only by the GliderScore import (#746); the demo is hand-made',
     'importProvenanceRepository':
         'written only by the GliderScore import (#746); the demo is hand-made',
     'reFlightRepository': 're-flights are awarded in #136',
