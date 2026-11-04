@@ -98,6 +98,22 @@ class ContestParticipation extends Equatable implements Synchronizable {
         revision: revision,
       );
 
+  /// This participation retired at the start of round [round] (null clears
+  /// the retirement).
+  ContestParticipation withRetiredAtRound(int? round) => ContestParticipation(
+    id: id,
+    contestId: contestId,
+    participantProfileId: participantProfileId,
+    classification: classification,
+    roleId: roleId,
+    roleName: roleName,
+    roleType: roleType,
+    participantNumber: participantNumber,
+    scoringUuid: scoringUuid,
+    retiredAtRound: round,
+    revision: revision,
+  );
+
   bool get isPilot => roleType == RoleType.pilot;
   bool get isRetired => retiredAtRound != null;
 

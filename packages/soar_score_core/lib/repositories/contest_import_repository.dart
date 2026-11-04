@@ -1,5 +1,6 @@
 import '../models/imports/contest_import_plan.dart';
 import '../models/imports/draw_import_draft.dart';
+import '../models/imports/restore_plan.dart';
 import 'mutation_metadata.dart';
 
 /// Writes imported competitions as contests, with their provenance.
@@ -47,6 +48,28 @@ abstract interface class ContestImportRepository {
   /// happened.
   Future<DrawImportResult> importDraw(
     DrawImportPlan plan, {
+    required MutationMetadata metadata,
+  });
+
+  /// What a restore of [identity] would meet: the contest an earlier import
+  /// made of the same competition, whether its results are published, whether
+  /// it reached the server, and what was changed in Soar Score since.
+  Future<RestoreTarget> restoreTarget(
+    ImportOwner owner,
+    RestoreIdentity identity,
+  );
+
+  /// Restores [plan]'s competition in one transaction: creates the contest,
+  /// or replaces the contents of the contest an earlier import made of the
+  /// same competition, keeping its id. Contest, configuration, participations,
+  /// draw, scores, re-flights, retirements and final state are written
+  /// together, then every restored flight is recalculated and compared with
+  /// GliderScore's score; a difference rolls everything back.
+  ///
+  /// Writes nothing when the content is unchanged. Never throws for a
+  /// competition-level problem; the result says what happened.
+  Future<RestoreImportResult> importRestore(
+    RestoreImportPlan plan, {
     required MutationMetadata metadata,
   });
 }
