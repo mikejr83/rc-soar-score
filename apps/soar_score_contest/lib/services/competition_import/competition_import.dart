@@ -50,6 +50,10 @@ abstract class CompetitionImportStore implements PilotImportStore {
     required Id operationId,
     required String fingerprint,
   });
+
+  /// What the import left out of [contestId], or `null` when the contest was
+  /// not imported.
+  Future<ImportedContestNote?> noteFor(Id contestId);
 }
 
 /// The draw of a competition whose contest an earlier run made, and what

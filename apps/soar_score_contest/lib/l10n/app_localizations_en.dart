@@ -2254,4 +2254,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get competitionImportDrawNoScores => 'No round has scores yet.';
+
+  @override
+  String importedContestNoteTitle(String date) {
+    return 'Imported from GliderScore on $date';
+  }
+
+  @override
+  String get importedContestNoteBody =>
+      'Scores, penalties, re-flights and retirements were not imported. Scoring starts from here.';
+
+  @override
+  String get importedContestNoteDraw =>
+      'The draw is a copy of GliderScore\'s draw at the time of the import.';
+
+  @override
+  String get importedContestNoteNoLanes =>
+      'GliderScore used no lanes, so none are set.';
+
+  @override
+  String get importedContestNoteNoDraw =>
+      'The draw was not imported. Build it as for any contest.';
 }

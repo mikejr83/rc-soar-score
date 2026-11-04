@@ -142,6 +142,9 @@ Future<void> importCompetitionsFromGliderScore(
   await tapVisible(tester, _key('competition-import-open-1'));
   await pumpUntilGone(tester, _key('competition-import-dialog'));
   await pumpUntilFound(tester, find.text('Workspace'));
+  // The workspace says where the contest came from and what it lacks.
+  await pumpUntilFound(tester, _key('workspace-banner-imported'));
+  expect(find.textContaining(l10n.importedContestNoteNoDraw), findsOneWidget);
   await goToMainPage(tester);
   // The list builds only the rows in view, so scroll to the new contest.
   final row = find.descendant(
@@ -189,6 +192,12 @@ Future<void> importCompetitionsFromGliderScore(
   await tapVisible(tester, _key('competition-import-open-draw-1'));
   await pumpUntilGone(tester, _key('competition-import-dialog'));
   await pumpUntilFound(tester, find.text('Workspace'));
+  // The note now says the draw is GliderScore's.
+  await pumpUntilFound(
+    tester,
+    find.textContaining(l10n.importedContestNoteDraw),
+  );
+  expect(find.textContaining(l10n.importedContestNoteNoDraw), findsNothing);
   await goToMainPage(tester);
 
   // Fourth run: the contest has its draw now, so the offer is refused.

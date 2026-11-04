@@ -106,4 +106,12 @@ class NativeCompetitionImportStore extends NativePilotImportStore
     ),
     metadata: _metadata('draw'),
   );
+
+  @override
+  Future<core.ImportedContestNote?> noteFor(core.Id contestId) async =>
+      core.ImportedContestNote.fromStamps(
+        await _server.repository.importProvenanceRepository.listForContest(
+          contestId,
+        ),
+      );
 }

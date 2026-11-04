@@ -2350,5 +2350,15 @@
   "competitionImportDrawUnflown": "{count, plural, =1{The last round has no scores yet. It may not have been flown.} other{The last {count} rounds have no scores yet. They may not have been flown.}}",
   "@competitionImportDrawUnflown": {"description": "Dry-run note: trailing rounds without a scored flight.", "placeholders": {"count": {"type": "int"}}},
   "competitionImportDrawNoScores": "No round has scores yet.",
-  "@competitionImportDrawNoScores": {"description": "Dry-run note: the draw has no scored flight at all."}
+  "@competitionImportDrawNoScores": {"description": "Dry-run note: the draw has no scored flight at all."},
+  "importedContestNoteTitle": "Imported from GliderScore on {date}",
+  "@importedContestNoteTitle": {"description": "Title of the banner on a contest that was imported from GliderScore.", "placeholders": {"date": {"type": "String"}}},
+  "importedContestNoteBody": "Scores, penalties, re-flights and retirements were not imported. Scoring starts from here.",
+  "@importedContestNoteBody": {"description": "Banner text: what an imported contest does not carry."},
+  "importedContestNoteDraw": "The draw is a copy of GliderScore's draw at the time of the import.",
+  "@importedContestNoteDraw": {"description": "Banner text on an imported contest that holds GliderScore's draw."},
+  "importedContestNoteNoLanes": "GliderScore used no lanes, so none are set.",
+  "@importedContestNoteNoLanes": {"description": "Banner text on an imported draw without lanes."},
+  "importedContestNoteNoDraw": "The draw was not imported. Build it as for any contest.",
+  "@importedContestNoteNoDraw": {"description": "Banner text on an imported contest without a draw."}
 }

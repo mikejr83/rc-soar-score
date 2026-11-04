@@ -5,7 +5,8 @@ contests. It reads the file on your computer; nothing is sent anywhere. The
 file is not changed, and GliderScore does not need to be running.
 
 Each competition you choose becomes a contest with its settings and its
-participants. The draw, rounds, flights and scores are **not** imported.
+participants. You can add the draw in a second run. Scores, penalties and
+re-flights are **not** imported.
 
 ## How to use it
 
@@ -38,15 +39,43 @@ any contest: check the settings, then build the draw.
 
 ## What is not imported
 
-- The draw, rounds, flights, scores and results. Scores come in a later phase.
-- Retirements. A retirement belongs to a round, and there is no draw yet, so
-  retired pilots stay active. The list of competitions says which ones.
+- Scores, penalties, re-flights and results. Every flight waits for a score,
+  and a later import phase will bring them.
+- Retirements. They are not imported, so retired pilots stay active. The list
+  of competitions says which ones.
 - Publication settings, audio profiles, score locks, and a preliminary
   competition linked to another one.
 - Street, post code, phone numbers, usual class and usual model of a pilot.
 - GliderScore's own test pilots (last name starting with `ZZ`).
-- The number of lanes. Soar Score has no lane count setting; the number is kept
-  with the import for the draw phase to check.
+- The lane count setting. Soar Score has none; the draw uses it once (see
+  below) and the number stays with the import.
+
+## Adding the draw
+
+A competition you imported before offers its draw the next time you choose
+**Import from GliderScore…** with the same file. The row says how many rounds,
+groups per round and pilots the draw has. Tick it and choose **Import**; adding
+a draw needs no pilot review.
+
+- The contest gets the rounds, groups and every pilot's place as GliderScore
+  drew them, and becomes **Ready**. It is a copy of the draw at that moment.
+  It cannot be reproduced from a seed; rounds without scores can be redrawn like
+  any other.
+- If the competition has lanes, each pilot's lane follows their place in the
+  group. A place beyond the lane count gets the next lane, and the row warns
+  about it. If the competition has no lanes, none are set and the order in each
+  group is kept with the import.
+- The draw is offered only while the contest has no draw and no scores. The
+  row says why when it is refused, for example because the contest already has
+  a draw or the file changed since the contest was imported.
+- A flight that was moved to another round in GliderScore cannot be imported.
+- The row warns when the last rounds have no scores in GliderScore, because they
+  may not have been flown.
+- A draw added by mistake cannot yet be replaced by importing again. Delete the
+  contest and import it again.
+
+The contest workspace shows a note, from the date of the import, saying what
+the import left out. It disappears with the contest.
 
 ## Which competitions can be imported
 

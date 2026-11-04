@@ -3155,6 +3155,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No round has scores yet.'**
   String get competitionImportDrawNoScores;
+
+  /// Title of the banner on a contest that was imported from GliderScore.
+  ///
+  /// In en, this message translates to:
+  /// **'Imported from GliderScore on {date}'**
+  String importedContestNoteTitle(String date);
+
+  /// Banner text: what an imported contest does not carry.
+  ///
+  /// In en, this message translates to:
+  /// **'Scores, penalties, re-flights and retirements were not imported. Scoring starts from here.'**
+  String get importedContestNoteBody;
+
+  /// Banner text on an imported contest that holds GliderScore's draw.
+  ///
+  /// In en, this message translates to:
+  /// **'The draw is a copy of GliderScore\'s draw at the time of the import.'**
+  String get importedContestNoteDraw;
+
+  /// Banner text on an imported draw without lanes.
+  ///
+  /// In en, this message translates to:
+  /// **'GliderScore used no lanes, so none are set.'**
+  String get importedContestNoteNoLanes;
+
+  /// Banner text on an imported contest without a draw.
+  ///
+  /// In en, this message translates to:
+  /// **'The draw was not imported. Build it as for any contest.'**
+  String get importedContestNoteNoDraw;
 }
 
 class _AppLocalizationsDelegate

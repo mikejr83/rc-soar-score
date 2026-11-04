@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:soar_score_core/soar_score_core.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../page_states/page_banner.dart';
 
 /// The banner area above the workspace sections: one banner per cause, so a
@@ -14,6 +16,7 @@ class WorkspaceBanners extends StatelessWidget {
     this.onRetry,
     this.staleChange,
     this.onRefresh,
+    this.importNote,
   });
 
   /// The connectivity monitor says the device is offline.
@@ -34,10 +37,15 @@ class WorkspaceBanners extends StatelessWidget {
   final String? staleChange;
   final VoidCallback? onRefresh;
 
+  /// What the contest's GliderScore import left out; `null` for a contest
+  /// that was not imported.
+  final ImportedContestNote? importNote;
+
   @override
   Widget build(BuildContext context) {
     final copyTime = localCopyTime;
     final change = staleChange;
+    final imported = importNote;
     return Column(
       key: const ValueKey('workspace-banners'),
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -65,6 +73,7 @@ class WorkspaceBanners extends StatelessWidget {
             actionLabel: 'Try again',
             onAction: onRetry,
           ),
+        if (imported != null) _importedBanner(context, imported),
         if (offline)
           PageBanner(
             key: const ValueKey('workspace-banner-offline'),
@@ -78,6 +87,27 @@ class WorkspaceBanners extends StatelessWidget {
                       'what is on screen may be out of date.',
           ),
       ],
+    );
+  }
+
+  Widget _importedBanner(BuildContext context, ImportedContestNote note) {
+    final l10n = AppLocalizations.of(context);
+    final date = MaterialLocalizations.of(context)
+        .formatMediumDate(note.importedAt.toLocal());
+    final lines = [
+      if (note.drawImported)
+        l10n.importedContestNoteDraw
+      else
+        l10n.importedContestNoteNoDraw,
+      if (note.drawImported && !note.lanesKept) l10n.importedContestNoteNoLanes,
+      l10n.importedContestNoteBody,
+    ];
+    return PageBanner(
+      key: const ValueKey('workspace-banner-imported'),
+      kind: PageBannerKind.info,
+      icon: Icons.history,
+      title: l10n.importedContestNoteTitle(date),
+      text: lines.join(' '),
     );
   }
 }

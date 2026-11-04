@@ -152,6 +152,12 @@ class FakeCompetitionImportStore extends FakePilotImportStore
         );
   }
 
+  /// The note each contest shows, when it has one.
+  final notes = <Id, ImportedContestNote>{};
+
+  @override
+  Future<ImportedContestNote?> noteFor(Id contestId) async => notes[contestId];
+
   @override
   Future<String> fingerprint(String path) async => 'sha256:fake';
 
