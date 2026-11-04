@@ -123,10 +123,13 @@ Future<void> importCompetitionsFromGliderScore(
   await pumpUntilGone(tester, _key('competition-import-dialog'));
   await pumpUntilFound(tester, find.text('Workspace'));
   await goToMainPage(tester);
-  await pumpUntilFound(
-    tester,
-    find.descendant(of: find.byType(ListTile), matching: find.text(_spring)),
+  // The list builds only the rows in view, so scroll to the new contest.
+  final row = find.descendant(
+    of: find.byType(ListTile),
+    matching: find.text(_spring),
   );
+  await scrollListTo(tester, row);
+  await pumpUntilFound(tester, row);
 
   // Second run of the same file: refused, nothing is added twice.
   await tapVisible(tester, _key('import-competitions'));
@@ -140,8 +143,6 @@ Future<void> importCompetitionsFromGliderScore(
   );
   await tapVisible(tester, _key('competition-import-done'));
   await pumpUntilGone(tester, _key('competition-import-dialog'));
-  expect(
-    find.descendant(of: find.byType(ListTile), matching: find.text(_spring)),
-    findsOneWidget,
-  );
+  await scrollListTo(tester, row);
+  expect(row, findsOneWidget);
 }
