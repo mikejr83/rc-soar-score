@@ -2781,7 +2781,7 @@ abstract class AppLocalizations {
   /// Introduction above the list of competitions found in a GliderScore file.
   ///
   /// In en, this message translates to:
-  /// **'Choose the competitions to import. Each becomes a contest with its settings and participants. The draw and the scores are not imported.'**
+  /// **'Choose the competitions to import. Each becomes a contest with its settings and participants. The draw and the scores are not imported with it, but a competition you imported before can have its draw added.'**
   String get competitionImportIntro;
 
   /// Shown when none of the competitions in the file can be imported.
@@ -3005,6 +3005,156 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The import failed: {error}'**
   String competitionImportFailed(String error);
+
+  /// Title of the choice that adds the draw of a competition imported before to its contest.
+  ///
+  /// In en, this message translates to:
+  /// **'Add the draw'**
+  String get competitionImportDrawTitle;
+
+  /// Explains what adding the draw of an imported competition does.
+  ///
+  /// In en, this message translates to:
+  /// **'Imported before. Adding the draw gives the contest its rounds, groups and every pilot\'s place, and makes it Ready. Every flight waits for a score.'**
+  String get competitionImportDrawIntro;
+
+  /// Counts under the choice to add a draw: rounds, groups per round and pilots.
+  ///
+  /// In en, this message translates to:
+  /// **'{rounds, plural, =1{1 round} other{{rounds} rounds}} · {groups, plural, =1{1 group per round} other{{groups} groups per round}} · {pilots, plural, =1{1 pilot} other{{pilots} pilots}}'**
+  String competitionImportDrawDetails(int rounds, int groups, int pilots);
+
+  /// Note on a draw that is added to a contest.
+  ///
+  /// In en, this message translates to:
+  /// **'The draw is kept as GliderScore drew it. It cannot be reproduced from a seed, but rounds without scores can be redrawn like any other.'**
+  String get competitionImportDrawNoteHistory;
+
+  /// Note on a draw whose groups differ from the competition setting.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{In 1 round the groups per round setting differs from the groups drawn. The groups as drawn are used.} other{In {count} rounds the groups per round setting differs from the groups drawn. The groups as drawn are used.}}'**
+  String competitionImportDrawWarningGroups(int count);
+
+  /// Note on a draw with uneven group sizes.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{In 1 round the group sizes are not an even split. They are imported as drawn.} other{In {count} rounds the group sizes are not an even split. They are imported as drawn.}}'**
+  String competitionImportDrawWarningSizes(int count);
+
+  /// Note on a draw with more pilots in a group than lanes.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 place is beyond the lane count of the competition and gets the next lane.} other{{count} places are beyond the lane count of the competition and get the next lanes.}}'**
+  String competitionImportDrawWarningLanes(int count);
+
+  /// Note on a draw with other warnings.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 more note about the order of pilots in a group.} other{{count} more notes about the order of pilots in groups.}}'**
+  String competitionImportDrawWarningOther(int count);
+
+  /// Why a draw cannot be added: the file changed.
+  ///
+  /// In en, this message translates to:
+  /// **'This contest was imported from a different version of the file, so its pilots may no longer line up. Delete the contest and import the competition again to add its draw.'**
+  String get competitionImportDrawReasonFingerprint;
+
+  /// Why a draw cannot be added: the contest has a draw.
+  ///
+  /// In en, this message translates to:
+  /// **'The contest already has a draw.'**
+  String get competitionImportDrawReasonDrawn;
+
+  /// Why a draw cannot be added: the contest has scores.
+  ///
+  /// In en, this message translates to:
+  /// **'The contest already has scores.'**
+  String get competitionImportDrawReasonScores;
+
+  /// Why a draw cannot be added: the file holds none.
+  ///
+  /// In en, this message translates to:
+  /// **'This competition has no drawn flights.'**
+  String get competitionImportDrawReasonNoDraw;
+
+  /// Why a draw cannot be added: a pilot is missing from the contest.
+  ///
+  /// In en, this message translates to:
+  /// **'A pilot in the draw is not a participant of the contest.'**
+  String get competitionImportDrawReasonPilot;
+
+  /// Why a draw cannot be added: a flight was moved.
+  ///
+  /// In en, this message translates to:
+  /// **'A flight was moved to another round in GliderScore. Moved flights cannot be imported.'**
+  String get competitionImportDrawReasonMoved;
+
+  /// Why a draw cannot be added: the rounds do not line up.
+  ///
+  /// In en, this message translates to:
+  /// **'The rounds or flights of this competition are not in a form that can be imported.'**
+  String get competitionImportDrawReasonRounds;
+
+  /// Why a draw cannot be added: any other reason.
+  ///
+  /// In en, this message translates to:
+  /// **'The draw of this competition cannot be added.'**
+  String get competitionImportDrawReasonOther;
+
+  /// Why a draw was not added: the contest is locked.
+  ///
+  /// In en, this message translates to:
+  /// **'The contest is locked. Unlock it, then try again.'**
+  String get competitionImportDrawFailLocked;
+
+  /// Summary line: number of draws the import adds.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{The draw of 1 contest will be added.} other{The draws of {count} contests will be added.}}'**
+  String competitionImportSummaryDraws(int count);
+
+  /// Reminder of what adding a draw leaves out.
+  ///
+  /// In en, this message translates to:
+  /// **'Not imported with the draw: flights and scores.'**
+  String get competitionImportDrawNotImported;
+
+  /// Result line for a draw that was added to a contest.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}: the draw was added. {rounds, plural, =1{1 round} other{{rounds} rounds}} and {places, plural, =1{1 place} other{{places} places}}. The contest is Ready.'**
+  String competitionImportResultDrawAdded(String name, int rounds, int places);
+
+  /// Result line for a draw that could not be added.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}: the draw was not added. {reason}'**
+  String competitionImportResultDrawFailed(String name, String reason);
+
+  /// Dry-run note: the competition has a lane count, so lanes follow the order in the group.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Lanes: 1 lane. Each pilot\'s lane follows their place in the group.} other{Lanes: {count} lanes. Each pilot\'s lane follows their place in the group.}}'**
+  String competitionImportDrawLanes(int count);
+
+  /// Dry-run note: the competition has no lanes.
+  ///
+  /// In en, this message translates to:
+  /// **'No lanes: the competition has none, so the order in each group is kept but no lane is set.'**
+  String get competitionImportDrawNoLanes;
+
+  /// Dry-run note: trailing rounds without a scored flight.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{The last round has no scores yet. It may not have been flown.} other{The last {count} rounds have no scores yet. They may not have been flown.}}'**
+  String competitionImportDrawUnflown(int count);
+
+  /// Dry-run note: the draw has no scored flight at all.
+  ///
+  /// In en, this message translates to:
+  /// **'No round has scores yet.'**
+  String get competitionImportDrawNoScores;
 }
 
 class _AppLocalizationsDelegate

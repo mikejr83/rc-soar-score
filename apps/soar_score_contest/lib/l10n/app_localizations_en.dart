@@ -1893,7 +1893,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get competitionImportIntro =>
-      'Choose the competitions to import. Each becomes a contest with its settings and participants. The draw and the scores are not imported.';
+      'Choose the competitions to import. Each becomes a contest with its settings and participants. The draw and the scores are not imported with it, but a competition you imported before can have its draw added.';
 
   @override
   String get competitionImportNothingImportable =>
@@ -2068,4 +2068,190 @@ class AppLocalizationsEn extends AppLocalizations {
   String competitionImportFailed(String error) {
     return 'The import failed: $error';
   }
+
+  @override
+  String get competitionImportDrawTitle => 'Add the draw';
+
+  @override
+  String get competitionImportDrawIntro =>
+      'Imported before. Adding the draw gives the contest its rounds, groups and every pilot\'s place, and makes it Ready. Every flight waits for a score.';
+
+  @override
+  String competitionImportDrawDetails(int rounds, int groups, int pilots) {
+    String _temp0 = intl.Intl.pluralLogic(
+      rounds,
+      locale: localeName,
+      other: '$rounds rounds',
+      one: '1 round',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      groups,
+      locale: localeName,
+      other: '$groups groups per round',
+      one: '1 group per round',
+    );
+    String _temp2 = intl.Intl.pluralLogic(
+      pilots,
+      locale: localeName,
+      other: '$pilots pilots',
+      one: '1 pilot',
+    );
+    return '$_temp0 · $_temp1 · $_temp2';
+  }
+
+  @override
+  String get competitionImportDrawNoteHistory =>
+      'The draw is kept as GliderScore drew it. It cannot be reproduced from a seed, but rounds without scores can be redrawn like any other.';
+
+  @override
+  String competitionImportDrawWarningGroups(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'In $count rounds the groups per round setting differs from the groups drawn. The groups as drawn are used.',
+      one: 'In 1 round the groups per round setting differs from the groups drawn. The groups as drawn are used.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String competitionImportDrawWarningSizes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'In $count rounds the group sizes are not an even split. They are imported as drawn.',
+      one: 'In 1 round the group sizes are not an even split. They are imported as drawn.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String competitionImportDrawWarningLanes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count places are beyond the lane count of the competition and get the next lanes.',
+      one: '1 place is beyond the lane count of the competition and gets the next lane.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String competitionImportDrawWarningOther(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count more notes about the order of pilots in groups.',
+      one: '1 more note about the order of pilots in a group.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get competitionImportDrawReasonFingerprint =>
+      'This contest was imported from a different version of the file, so its pilots may no longer line up. Delete the contest and import the competition again to add its draw.';
+
+  @override
+  String get competitionImportDrawReasonDrawn =>
+      'The contest already has a draw.';
+
+  @override
+  String get competitionImportDrawReasonScores =>
+      'The contest already has scores.';
+
+  @override
+  String get competitionImportDrawReasonNoDraw =>
+      'This competition has no drawn flights.';
+
+  @override
+  String get competitionImportDrawReasonPilot =>
+      'A pilot in the draw is not a participant of the contest.';
+
+  @override
+  String get competitionImportDrawReasonMoved =>
+      'A flight was moved to another round in GliderScore. Moved flights cannot be imported.';
+
+  @override
+  String get competitionImportDrawReasonRounds =>
+      'The rounds or flights of this competition are not in a form that can be imported.';
+
+  @override
+  String get competitionImportDrawReasonOther =>
+      'The draw of this competition cannot be added.';
+
+  @override
+  String get competitionImportDrawFailLocked =>
+      'The contest is locked. Unlock it, then try again.';
+
+  @override
+  String competitionImportSummaryDraws(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'The draws of $count contests will be added.',
+      one: 'The draw of 1 contest will be added.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get competitionImportDrawNotImported =>
+      'Not imported with the draw: flights and scores.';
+
+  @override
+  String competitionImportResultDrawAdded(String name, int rounds, int places) {
+    String _temp0 = intl.Intl.pluralLogic(
+      rounds,
+      locale: localeName,
+      other: '$rounds rounds',
+      one: '1 round',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      places,
+      locale: localeName,
+      other: '$places places',
+      one: '1 place',
+    );
+    return '$name: the draw was added. $_temp0 and $_temp1. The contest is Ready.';
+  }
+
+  @override
+  String competitionImportResultDrawFailed(String name, String reason) {
+    return '$name: the draw was not added. $reason';
+  }
+
+  @override
+  String competitionImportDrawLanes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Lanes: $count lanes. Each pilot\'s lane follows their place in the group.',
+      one:
+          'Lanes: 1 lane. Each pilot\'s lane follows their place in the group.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get competitionImportDrawNoLanes =>
+      'No lanes: the competition has none, so the order in each group is kept but no lane is set.';
+
+  @override
+  String competitionImportDrawUnflown(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'The last $count rounds have no scores yet. They may not have been flown.',
+      one: 'The last round has no scores yet. It may not have been flown.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get competitionImportDrawNoScores => 'No round has scores yet.';
 }

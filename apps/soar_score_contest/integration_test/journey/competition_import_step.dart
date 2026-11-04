@@ -50,6 +50,22 @@ GliderScoreImportResult _snapshot() {
     'Dur': [
       for (final no in [1, 3]) {'CompNo': no, 'durTargetTime': 600},
     ],
+    // The drawn flights of the Spring Open: two rounds, one group of two.
+    'Scores': [
+      for (var round = 1; round <= 2; round++)
+        for (final pilot in [1, 2])
+          {
+            'CompNo': 1,
+            'TaskNo': 1,
+            'RoundNo': round,
+            'GroupNo': 1,
+            'ReFlightNo': 0,
+            'PilotNo': pilot,
+            'SeqNo': pilot,
+            'OriginalRoundNo': round,
+            'Updated': 'False',
+          },
+    ],
   };
   return GliderScoreImportResult(
     id: Id.create(),
@@ -66,8 +82,9 @@ GliderScoreImportResult _snapshot() {
   );
 }
 
-/// Imports a GliderScore competition as a contest, then imports the same
-/// file again. Native only: the web build holds no local data.
+/// Imports a GliderScore competition as a contest, imports the same file
+/// again (refused), then adds the draw of the imported competition, twice.
+/// Native only: the web build holds no local data.
 ///
 /// The file chooser and the GliderScore reader are replaced, as for the pilot
 /// import; the file itself is a stand-in that only gives the import something
@@ -114,6 +131,9 @@ Future<void> importCompetitionsFromGliderScore(
   expect(find.text(l10n.competitionImportChosenCount(0)), findsOneWidget);
   await tapVisible(tester, _key('competition-import-row-1'));
   expect(find.text(l10n.competitionImportChosenCount(1)), findsOneWidget);
+  // No contest yet, so there is no draw to add.
+  expect(_key('competition-import-draw-1'), findsNothing);
+  expect(_key('competition-import-draw-refused-1'), findsNothing);
   await toResults();
   expect(
     find.text(l10n.competitionImportResultImported(_spring)),
@@ -145,4 +165,37 @@ Future<void> importCompetitionsFromGliderScore(
   await pumpUntilGone(tester, _key('competition-import-dialog'));
   await scrollListTo(tester, row);
   expect(row, findsOneWidget);
+
+  // Third run: the competition imported before offers its draw, with the
+  // counts of the dry run. Adding it needs no pilot review.
+  await tapVisible(tester, _key('import-competitions'));
+  await pumpUntilFound(tester, _key('competition-import-draw-1'));
+  expect(
+    find.textContaining(l10n.competitionImportDrawDetails(2, 1, 2)),
+    findsOneWidget,
+  );
+  expect(find.text(l10n.competitionImportChosenCount(0)), findsOneWidget);
+  await tapVisible(tester, _key('competition-import-draw-1'));
+  expect(find.text(l10n.competitionImportChosenCount(1)), findsOneWidget);
+  await tapVisible(tester, _key('competition-import-continue'));
+  await pumpUntilFound(tester, _key('competition-import-confirm'));
+  expect(find.text(l10n.competitionImportSummaryDraws(1)), findsOneWidget);
+  await tapVisible(tester, _key('competition-import-confirm'));
+  await pumpUntilFound(tester, _key('competition-import-result'));
+  expect(
+    find.text(l10n.competitionImportResultDrawAdded(_spring, 2, 4)),
+    findsOneWidget,
+  );
+  await tapVisible(tester, _key('competition-import-open-draw-1'));
+  await pumpUntilGone(tester, _key('competition-import-dialog'));
+  await pumpUntilFound(tester, find.text('Workspace'));
+  await goToMainPage(tester);
+
+  // Fourth run: the contest has its draw now, so the offer is refused.
+  await tapVisible(tester, _key('import-competitions'));
+  await pumpUntilFound(tester, _key('competition-import-draw-refused-1'));
+  expect(find.text(l10n.competitionImportDrawReasonDrawn), findsOneWidget);
+  expect(_key('competition-import-draw-1'), findsNothing);
+  await tapVisible(tester, find.text(l10n.cancelButton));
+  await pumpUntilGone(tester, _key('competition-import-dialog'));
 }
