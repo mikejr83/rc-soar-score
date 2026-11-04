@@ -18,7 +18,8 @@ The public web site: product marketing and information, documentation and help, 
 
 ## Search and sharing (#679, #680)
 
-- `app/robots.ts` and `app/sitemap.ts` serve `/robots.txt` and `/sitemap.xml`; add new static pages to the sitemap list. `siteUrl` in `lib/site.ts` (`NEXT_PUBLIC_SITE_URL`, default the apex) is the canonical origin; `next.config.ts` redirects `www.rcsoarscore.com` to it. The root layout sets `metadataBase`, a per-page canonical (`"./"`), Open Graph and Twitter tags with `public/brand/share-image.png` (1200x630, the dark lockup on night; regenerate from the lockup SVG if the brand changes).
+- `app/robots.ts` and `app/sitemap.ts` serve `/robots.txt` and `/sitemap.xml`; add new static pages to the sitemap list. `siteUrl` in `lib/site.ts` (`NEXT_PUBLIC_SITE_URL`, default the apex) is the canonical origin; `next.config.ts` redirects `www.rcsoarscore.com` to it. The root layout sets `metadataBase`, a per-page canonical (`"./"`), Open Graph and Twitter tags with `public/brand/share-image.png`; a page sets its own with `pageMetadata(title, description?)` from `lib/page-metadata.ts` (a page's `openGraph` replaces the root's, so never set it by hand without the image) (1200x630, the dark lockup on night; regenerate from the lockup SVG if the brand changes).
+- `public/.well-known/security.txt` (#681) points at the GitHub advisory route and support@rcsoarscore.com. Its `Expires` date lapses: renew it at least yearly (the test fails once it is past or more than a year out).
 
 ## Open source licences (`/open-source`, #687)
 
