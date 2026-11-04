@@ -32,8 +32,25 @@ class ContestImportRepository extends DriftRepository
     core.ProfileStampPlan plan, {
     required core.MutationMetadata metadata,
   }) async {
-    final owner = plan.owner.accountId;
-    if (owner == null || plan.entries.isEmpty) return;
+    if (plan.owner.accountId == null || plan.entries.isEmpty) return;
+    // Two callers with the same plan can both see no stamp and race to insert;
+    // the unique index lets one win. The loser's transaction is rolled back,
+    // so it reads again, finds the winner's stamps and writes nothing.
+    for (var attempt = 1; ; attempt++) {
+      try {
+        await _stampProfiles(plan, metadata);
+        return;
+      } on Object catch (error) {
+        if (attempt >= 3 || !isUniqueViolation(error)) rethrow;
+      }
+    }
+  }
+
+  Future<void> _stampProfiles(
+    core.ProfileStampPlan plan,
+    core.MutationMetadata metadata,
+  ) async {
+    final owner = plan.owner.accountId!;
     final now = _clock();
     final writes = _Writes(metadata);
     await unitOfWork.run((context) async {

@@ -424,6 +424,32 @@ void _tests(Backend backend) {
       );
     });
 
+    test('two callers with one plan write it once', () async {
+      final ids = await profiles(3);
+      final operation = core.Id.create();
+      core.ProfileStampPlan stamps() => core.ProfileStampPlan(
+        owner: signedIn,
+        importOperationId: operation,
+        fileFingerprint: _fingerprint,
+        toolVersion: '1.0.0',
+        entries: [
+          for (final n in ids.keys)
+            core.ProfileStampEntry(
+              sourcePilotNo: n,
+              profileId: ids[n]!,
+              created: true,
+            ),
+        ],
+      );
+      await Future.wait([
+        importer.stampProfiles(stamps(), metadata: metadata()),
+        importer.stampProfiles(stamps(), metadata: metadata()),
+        importer.stampProfiles(stamps(), metadata: metadata()),
+      ]);
+      expect(await inst.count('import_provenance'), 3);
+      expect(await inst.count('audit_events'), 3);
+    });
+
     test('a shared profile survives deleting one contest', () async {
       final ids = await profiles(4);
       await importer.stampProfiles(
