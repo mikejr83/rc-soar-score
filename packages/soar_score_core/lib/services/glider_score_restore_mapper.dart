@@ -310,8 +310,18 @@ class GliderScoreRestoreMapper {
     // Rounds flown, partly flown and not flown.
     final lastFlown = scored.map((f) => f.roundNo).fold<int>(0, math.max);
     final partly = <int>{};
+    // An original flight a scored re-flight replaced is not left unflown.
+    final replaced = {
+      for (final r in reflights)
+        for (final m in r.members)
+          if (m.scored) '${r.roundNo}/${r.sourceGroupNo}/${m.sourcePilotNo}',
+    };
     for (final f in draw.flights) {
       if (f.scored || f.roundNo > lastFlown) {
+        continue;
+      }
+      if (!f.isReflight &&
+          replaced.contains('${f.roundNo}/${f.groupNo}/${f.sourcePilotNo}')) {
         continue;
       }
       final retired = retiredAt[f.sourcePilotNo];
@@ -462,6 +472,7 @@ class GliderScoreRestoreMapper {
           'match': plan.landing!.match.name,
           'system': plan.landing!.systemTable,
           'name': plan.landing!.reconstructedName,
+          'unit': plan.landing!.inputUnit.name,
           'entries': [
             for (final e in plan.landing!.entries)
               [e.entryKey, e.label, e.points],

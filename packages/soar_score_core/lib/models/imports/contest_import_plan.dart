@@ -434,6 +434,10 @@ abstract final class RestoreFailure {
   /// A participant's profile is not stored or belongs to another owner.
   static const profileMissing = 'participant_profile_missing';
 
+  /// A pilot who is drawn or flew was not chosen in the pilot step, so the draw
+  /// cannot be restored whole. The detail lists their GliderScore numbers.
+  static const drawParticipantMissing = 'draw_participant_missing';
+
   /// A restored score differs from GliderScore's; the competition was rolled
   /// back.
   static const comparisonFailed = 'comparison_failed';

@@ -2289,6 +2289,8 @@
   "@competitionImportFailConfigInvalid": {"description": "Why a competition could not be imported: invalid settings."},
   "competitionImportFailProfileMissing": "A participant you chose is no longer in your list.",
   "@competitionImportFailProfileMissing": {"description": "Why a competition could not be imported: a participant profile is gone."},
+  "competitionImportFailDrawParticipant": "Pilots who flew or were drawn were not chosen in the pilot step (GliderScore pilot numbers {pilots}). Import again and add them.",
+  "@competitionImportFailDrawParticipant": {"description": "Why a competition could not be imported: pilots of the draw were skipped.", "placeholders": {"pilots": {"type": "String"}}},
   "competitionImportFailOther": "Something went wrong and nothing of this competition was kept.",
   "@competitionImportFailOther": {"description": "Why a competition could not be imported: any other reason."},
   "competitionImportFailed": "The import failed: {error}",

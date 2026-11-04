@@ -2043,6 +2043,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'A participant you chose is no longer in your list.';
 
   @override
+  String competitionImportFailDrawParticipant(String pilots) {
+    return 'Pilots who flew or were drawn were not chosen in the pilot step (GliderScore pilot numbers $pilots). Import again and add them.';
+  }
+
+  @override
   String get competitionImportFailOther =>
       'Something went wrong and nothing of this competition was kept.';
 
@@ -2332,19 +2337,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get importedContestNoteBody =>
-      'Scores, penalties, re-flights and retirements were not imported. Scoring starts from here.';
-
-  @override
-  String get importedContestNoteDraw =>
-      'The draw is a copy of GliderScore\'s draw at the time of the import.';
+      'The draw, scores, re-flights and retirements are as GliderScore held them when the file was made. Importing the competition again replaces them.';
 
   @override
   String get importedContestNoteNoLanes =>
       'GliderScore used no lanes, so none are set.';
-
-  @override
-  String get importedContestNoteNoDraw =>
-      'The draw was not imported. Build it as for any contest.';
 
   @override
   String get importedChipLabel => 'Imported from GliderScore';

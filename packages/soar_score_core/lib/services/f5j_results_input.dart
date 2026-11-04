@@ -61,6 +61,16 @@ class F5jResultsInput {
         placeholder.assignmentId: placeholder,
     };
 
+    // Each placeholder's current score is read once, however often it is used.
+    final officials = <Id, OfficialScore?>{};
+    Future<OfficialScore?> officialOf(Id placeholderId) async {
+      if (officials.containsKey(placeholderId)) {
+        return officials[placeholderId];
+      }
+      return officials[placeholderId] = await repository.officialScoreRepository
+          .currentForPlaceholder(placeholderId);
+    }
+
     final scored = <ScoredSlot>[];
     final roundInputs = <F5jRoundInput>[];
     final incompleteRounds = <int>{};
@@ -77,11 +87,7 @@ class F5jResultsInput {
       for (final assignment in live) {
         if (assignment.assignmentType != AssignmentType.reflight) continue;
         final placeholder = placeholders[assignment.id];
-        if (placeholder != null &&
-            await repository.officialScoreRepository.currentForPlaceholder(
-                  placeholder.id,
-                ) !=
-                null) {
+        if (placeholder != null && await officialOf(placeholder.id) != null) {
           reflown.add(assignment.contestParticipationId);
         }
       }
@@ -97,9 +103,7 @@ class F5jResultsInput {
         final placeholder = placeholders[assignment.id];
         final official = placeholder == null
             ? null
-            : await repository.officialScoreRepository.currentForPlaceholder(
-                placeholder.id,
-              );
+            : await officialOf(placeholder.id);
         if (official == null) {
           if (!retired) {
             incompleteRounds.add(round.ordinal);

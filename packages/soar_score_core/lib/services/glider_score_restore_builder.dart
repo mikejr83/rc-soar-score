@@ -101,6 +101,33 @@ class RestoredRows {
       scores.length + reflights.fold(0, (n, r) => n + r.scores.length);
 }
 
+/// The rows built do not hold exactly the scored flights of the file: a
+/// flight is missing, extra, or disagrees with its re-flight member. The
+/// restore is refused rather than written with a not-entered placeholder.
+class RestoreCoverageError implements Exception {
+  RestoreCoverageError({
+    this.missing = const [],
+    this.extra = const [],
+    this.inconsistent = const [],
+  });
+
+  /// Flight keys (`task,round,group,reflight,pilot`) in the file with no score.
+  final List<String> missing;
+
+  /// Scores built for flights the file does not have.
+  final List<String> extra;
+
+  /// Re-flight members whose scored state disagrees with the file's rows.
+  final List<String> inconsistent;
+
+  int get count => missing.length + extra.length + inconsistent.length;
+
+  @override
+  String toString() =>
+      'restore coverage: ${missing.length} missing, ${extra.length} extra, '
+      '${inconsistent.length} inconsistent';
+}
+
 /// Turns a [RestorePlan] and the draw built from it into the rows of the
 /// scores, re-flights, retirements and final round states.
 ///
@@ -151,11 +178,14 @@ class GliderScoreRestoreBuilder {
       }
     }
 
+    final producedKeys = <String>[];
+    final inconsistent = <String>[];
     RestoredScoreRows score(
       RestoredFlight flight,
       MatrixAssignment assignment,
       ScorePlaceholder placeholder,
     ) {
+      producedKeys.add(flight.key);
       final attempt = ScoreAttempt(
         id: newId(),
         contestId: contestId,
@@ -322,6 +352,12 @@ class GliderScoreRestoreBuilder {
           ),
         );
         final flight = byPilot[member.sourcePilotNo];
+        if (member.scored != (flight != null)) {
+          inconsistent.add(
+            '${draft.roundNo},${draft.sourceGroupNo},${draft.reflightNo},'
+            '${member.sourcePilotNo}',
+          );
+        }
         if (flight != null) rows.add(score(flight, assignment, placeholder));
       }
       reflights.add(
@@ -432,6 +468,20 @@ class GliderScoreRestoreBuilder {
       reason: 'import:gliderscore:${operationId.value}',
       outcome: AuditOutcome.success,
     );
+    // Every scored flight of the file has exactly one score, and nothing else.
+    final expected = [for (final f in plan.flights) f.key];
+    final missing = [...expected];
+    final extra = <String>[];
+    for (final key in producedKeys) {
+      if (!missing.remove(key)) extra.add(key);
+    }
+    if (missing.isNotEmpty || extra.isNotEmpty || inconsistent.isNotEmpty) {
+      throw RestoreCoverageError(
+        missing: missing,
+        extra: extra,
+        inconsistent: inconsistent,
+      );
+    }
     return RestoredRows(
       rounds: finalRounds,
       groups: finalGroups,

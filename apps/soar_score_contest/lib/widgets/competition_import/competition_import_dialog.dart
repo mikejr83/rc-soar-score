@@ -403,6 +403,8 @@ String _failureText(AppLocalizations l10n, CompetitionRestoreFailed r) =>
         l10n.competitionImportFailProfileUnavailable,
       RestoreFailure.configInvalid => l10n.competitionImportFailConfigInvalid,
       RestoreFailure.profileMissing => l10n.competitionImportFailProfileMissing,
+      RestoreFailure.drawParticipantMissing =>
+        l10n.competitionImportFailDrawParticipant(r.detail ?? ''),
       RestoreFailure.comparisonFailed => l10n.competitionImportFailComparison(
         r.mismatchCount,
         [

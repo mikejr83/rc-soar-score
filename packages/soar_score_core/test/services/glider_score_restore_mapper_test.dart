@@ -496,6 +496,50 @@ void main() {
       expect(p.reason, RestoreReason.reflightNotWholeGroup);
     });
 
+    test('a round scored only through its re-flight is not partly flown', () {
+      final source = _snapshot('draws_reference.json');
+      final scores = source.tables.firstWhere((t) => t.name == 'Scores');
+      // The original flights of round 8 group 2 are replaced by the re-flight
+      // and carry no score of their own.
+      final rows = [
+        for (final r in scores.rows)
+          if (r['CompNo'] == 21 &&
+              r['RoundNo'] == 8 &&
+              r['GroupNo'] == 2 &&
+              r['ReFlightNo'] == 0)
+            {...r, 'Updated': 'False'}
+          else
+            r,
+      ];
+      final result = GliderScoreImportResult(
+        id: source.id,
+        sourceDbFile: source.sourceDbFile,
+        tables: [
+          for (final t in source.tables)
+            if (t.name == 'Scores')
+              GliderScoreTable(
+                name: 'Scores',
+                rows: rows,
+                rowCount: rows.length,
+                rowCapExceeded: false,
+              )
+            else
+              t,
+        ],
+      );
+      final p = _mapper.map(result).firstWhere((p) => p.sourceCompNo == 21);
+      expect(p.isImportable, isTrue);
+      expect(p.partlyFlownRounds, isNot(contains(8)));
+    });
+
+    test('the content hash covers the landing input unit', () {
+      final p = _plan('scores_edge_cases.json', 9302);
+      expect(
+        GliderScoreRestoreMapper.canonicalContent(p),
+        contains('"unit":"meters"'),
+      );
+    });
+
     test('a re-flight of part of a group is refused', () {
       final p = _plan('scores_edge_cases.json', 9303);
       expect(p.status, RestoreStatus.refused);

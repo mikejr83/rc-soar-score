@@ -394,6 +394,26 @@ class ContestImportRepository extends DriftRepository
       members.add((draft: participant, profileId: profileId));
     }
 
+    // Everyone the draw, the scores or a re-flight names must be restored with
+    // a participation; a half-drawn contest is refused before anything is
+    // written.
+    final needed = <int>{
+      for (final f in drawDraft.flights) f.sourcePilotNo,
+      for (final r in restore.reflights)
+        for (final m in r.members) m.sourcePilotNo,
+      for (final f in restore.flights) f.sourcePilotNo,
+    };
+    final missing = [
+      for (final number in skipped)
+        if (needed.contains(number)) number,
+    ]..sort();
+    if (missing.isNotEmpty) {
+      return fail(
+        core.RestoreFailure.drawParticipantMissing,
+        missing.join(','),
+      );
+    }
+
     try {
       return await unitOfWork.run<core.RestoreImportResult>((context) async {
         final target = await _restoreTargetFor(plan);
@@ -426,6 +446,32 @@ class ContestImportRepository extends DriftRepository
       });
     } on _GateFailed catch (failed) {
       return failed.result;
+    } on core.RestoreCoverageError catch (error) {
+      // The scores built are not exactly the file's scored flights.
+      core.RestoreMismatch at(String text, String reason) {
+        final n = text.split(',').map(int.parse).toList();
+        // A flight key is task,round,group,reflight,pilot; a re-flight member
+        // is round,group,reflight,pilot.
+        final k = n.length == 5 ? n.sublist(1) : n;
+        return core.RestoreMismatch(
+          roundNo: k[0],
+          groupNo: k[1],
+          reflightNo: k[2],
+          sourcePilotNo: k[3],
+          error: reason,
+        );
+      }
+
+      return core.CompetitionRestoreFailed(
+        compNo,
+        core.RestoreFailure.comparisonFailed,
+        mismatches: [
+          for (final k in error.missing) at(k, 'score missing'),
+          for (final k in error.extra) at(k, 'score not in the file'),
+          for (final k in error.inconsistent) at(k, 'scored state differs'),
+        ].take(5).toList(),
+        mismatchCount: error.count,
+      );
     } on Object catch (error) {
       return fail(core.RestoreFailure.failed, '$error');
     }
@@ -440,21 +486,30 @@ class ContestImportRepository extends DriftRepository
       final target = await restoreTarget(plan.owner, plan.plan.identity);
       return target.kind == core.RestoreTargetKind.same ? target : null;
     }
+    // Exactly one stamp of this director's GliderScore import, and it must be
+    // of the competition being restored: the same identity, or (without a
+    // CompID) the same competition number, which the director confirmed.
+    final identity = plan.plan.identity;
     final stamps = [
       for (final s in await _stamps.whereId('contest_id', forced))
-        if (s.stampedEntityType == core.ImportProvenance.contestEntityType &&
-            s.ownerAccountId == plan.owner.accountId &&
-            (s.dedupeKey ?? '').startsWith('gliderscore:'))
-          s,
+        if (s.stampedEntityType == core.ImportProvenance.contestEntityType) s,
     ];
-    if (stamps.isEmpty) {
+    final stamp = stamps.length == 1 ? stamps.single : null;
+    final key = stamp?.dedupeKey ?? '';
+    final matches =
+        stamp != null &&
+        stamp.ownerAccountId == plan.owner.accountId &&
+        (key == identity.dedupeKey ||
+            (!identity.hasCompId &&
+                key.startsWith('gliderscore:no:${identity.compNo}|')));
+    if (!matches) {
       return core.CompetitionRefused(
         compNo,
         core.RestoreRefusal.notRestorable,
         contestId: forced,
       );
     }
-    return _targetOf(stamps.first, core.RestoreTargetKind.same);
+    return _targetOf(stamp, core.RestoreTargetKind.same);
   }
 
   core.CompetitionRefused? _replaceRefusal(

@@ -2970,6 +2970,12 @@ abstract class AppLocalizations {
   /// **'A participant you chose is no longer in your list.'**
   String get competitionImportFailProfileMissing;
 
+  /// Why a competition could not be imported: pilots of the draw were skipped.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilots who flew or were drawn were not chosen in the pilot step (GliderScore pilot numbers {pilots}). Import again and add them.'**
+  String competitionImportFailDrawParticipant(String pilots);
+
   /// Why a competition could not be imported: any other reason.
   ///
   /// In en, this message translates to:
@@ -3214,29 +3220,17 @@ abstract class AppLocalizations {
   /// **'Imported from GliderScore on {date}'**
   String importedContestNoteTitle(String date);
 
-  /// Banner text: what an imported contest does not carry.
+  /// Banner text: what an imported contest holds and what importing again does.
   ///
   /// In en, this message translates to:
-  /// **'Scores, penalties, re-flights and retirements were not imported. Scoring starts from here.'**
+  /// **'The draw, scores, re-flights and retirements are as GliderScore held them when the file was made. Importing the competition again replaces them.'**
   String get importedContestNoteBody;
-
-  /// Banner text on an imported contest that holds GliderScore's draw.
-  ///
-  /// In en, this message translates to:
-  /// **'The draw is a copy of GliderScore\'s draw at the time of the import.'**
-  String get importedContestNoteDraw;
 
   /// Banner text on an imported draw without lanes.
   ///
   /// In en, this message translates to:
   /// **'GliderScore used no lanes, so none are set.'**
   String get importedContestNoteNoLanes;
-
-  /// Banner text on an imported contest without a draw.
-  ///
-  /// In en, this message translates to:
-  /// **'The draw was not imported. Build it as for any contest.'**
-  String get importedContestNoteNoDraw;
 
   /// Chip on the detail of a contest that was imported from GliderScore.
   ///

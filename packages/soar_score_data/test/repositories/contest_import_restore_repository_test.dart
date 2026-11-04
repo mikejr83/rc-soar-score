@@ -229,6 +229,153 @@ void _tests(Backend backend) {
       );
     });
 
+    test('a replacement leaves no row of the contest it replaced', () async {
+      Future<Set<String>> ids(String sql) async => {
+        for (final row in await inst.db.customSelect(sql).get())
+          row.read<String>('id'),
+      };
+      final first = await restore(
+        _mapped('reimport_v1.json', 19),
+      ) as core.CompetitionRestored;
+      final oldResults = await ids('SELECT id FROM flight_results');
+      final oldStandings = await ids('SELECT id FROM participation_standings');
+      final oldMutations = await ids(
+        'SELECT client_mutation_id AS id FROM mutation_records '
+        'WHERE contest_id IS NOT NULL',
+      );
+      expect(oldResults, isNotEmpty);
+      expect(oldStandings, isNotEmpty);
+      expect(oldMutations, isNotEmpty);
+
+      final second = await restore(
+        _mapped('reimport_v2.json', 19),
+      ) as core.CompetitionRestored;
+      expect(second.contestId, first.contestId);
+      expect(
+        await ids('SELECT id FROM flight_results'),
+        isNot(anyElement(isIn(oldResults))),
+      );
+      expect(
+        await ids('SELECT id FROM participation_standings'),
+        isNot(anyElement(isIn(oldStandings))),
+      );
+      expect(
+        await ids(
+          'SELECT client_mutation_id AS id FROM mutation_records '
+          'WHERE contest_id IS NOT NULL',
+        ),
+        isNot(anyElement(isIn(oldMutations))),
+      );
+      expect(await count('tombstones'), 0);
+      expect(
+        await count('flight_results'),
+        _mapped('reimport_v2.json', 19).flights.length,
+      );
+    });
+
+    test(
+      'a pilot of the draw who was not chosen refuses the restore',
+      () async {
+        final plan = _mapped('draws_reference.json', 21);
+        final whole = await planFor(plan);
+        final drawn = plan.draw!.flights.first.sourcePilotNo;
+        final partial = core.RestoreImportPlan(
+          plan: plan,
+          profileIds: {
+            for (final e in whole.profileIds.entries)
+              if (e.key != drawn) e.key: e.value,
+          },
+          owner: signedIn,
+          timezone: 'UTC',
+          importOperationId: core.Id.create(),
+          fileFingerprint: 'sha256:abc',
+          toolVersion: '1.0.0',
+          completed: true,
+          confirmedReplace: false,
+        );
+        final result = await importer.importRestore(
+          partial,
+          metadata: metadata(),
+        );
+        final failed = result as core.CompetitionRestoreFailed;
+        expect(failed.code, core.RestoreFailure.drawParticipantMissing);
+        expect(failed.detail, contains('$drawn'));
+        expect(await count('contests'), 0);
+        expect(await count('official_scores'), 0);
+      },
+    );
+
+    test('a re-flight member the file contradicts is refused', () async {
+      final plan = _mapped('draws_reference.json', 21);
+      final r = plan.reflights.single;
+      final broken = core.RestorePlan(
+        sourceCompNo: plan.sourceCompNo,
+        identity: plan.identity,
+        status: plan.status,
+        contest: plan.contest,
+        draw: plan.draw,
+        flights: plan.flights,
+        reflights: [
+          core.ReflightDraft(
+            taskNo: r.taskNo,
+            roundNo: r.roundNo,
+            reflightNo: r.reflightNo,
+            sourceGroupNo: r.sourceGroupNo,
+            flownGroupNo: r.flownGroupNo,
+            members: [
+              for (final (i, m) in r.members.indexed)
+                core.ReflightMemberDraft(
+                  sourcePilotNo: m.sourcePilotNo,
+                  role: m.role,
+                  position: m.position,
+                  // The first member claims no score although the file has one.
+                  scored: i == 0 ? !m.scored : m.scored,
+                ),
+            ],
+          ),
+        ],
+        retirements: plan.retirements,
+        landing: plan.landing,
+        trailingUnflownRounds: plan.trailingUnflownRounds,
+        contentHash: plan.contentHash,
+      );
+      final result = await importer.importRestore(
+        await planFor(broken),
+        metadata: metadata(),
+      );
+      final failed = result as core.CompetitionRestoreFailed;
+      expect(failed.code, core.RestoreFailure.comparisonFailed);
+      expect(failed.mismatchCount, greaterThan(0));
+      expect(await count('contests'), 0);
+      expect(await count('official_scores'), 0);
+    });
+
+    test('a forced replacement needs exactly the matching stamp', () async {
+      final plan = _mapped('reimport_no_compid.json', 19);
+      final first =
+          await restore(plan, completed: false) as core.CompetitionRestored;
+      final other = _mapped('draws_reference.json', 21);
+      final whole = await planFor(other);
+      final forced = core.RestoreImportPlan(
+        plan: other,
+        profileIds: whole.profileIds,
+        owner: signedIn,
+        timezone: 'UTC',
+        importOperationId: core.Id.create(),
+        fileFingerprint: 'sha256:abc',
+        toolVersion: '1.0.0',
+        completed: true,
+        confirmedReplace: true,
+        updateContestId: first.contestId,
+      );
+      final result = await importer.importRestore(forced, metadata: metadata());
+      expect(
+        (result as core.CompetitionRefused).code,
+        core.RestoreRefusal.notRestorable,
+      );
+      expect(await count('contests'), 1);
+    });
+
     test('scores entered in Soar Score need confirming', () async {
       final v1 = _mapped('reimport_v1.json', 19);
       final first = await restore(v1, completed: false);
