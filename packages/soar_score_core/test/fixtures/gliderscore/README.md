@@ -21,6 +21,15 @@ writes them: a column that is null in the database is absent from the row.
 | `comps_integrity_cases.json` | Broken references the mapper must report: a duplicated `CompNo`, the same pilot twice in one competition, and a participant with no `Pilots` row.                                                                                                     |
 | `comps_missing_columns.json` | Comp 22 reduced to its required columns (no `Roles`, no `DBParams`, no optional columns anywhere).                                                                                                                                                    |
 
+### Draw snapshots (phase C, #768)
+
+| File                     | Purpose                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `draws_reference.json`   | Real F5J comps 15, 21, 26, 28 and 39 with their `Scores` rows (806 rows, the drawn flights whether scored or not), `Comps`, `CompPilots`, `Pilots`, `Roles`, `Dur` and `DBParams`. **15**: lane count 6, a group of 7 pilots, gaps in `SeqNo`, retired pilots, unscored rounds. **21**: lane count 0, gaps in `SeqNo`, unequal groups, re-flights, retired pilots, scored and unscored rows (kept for phase D). **26**: configured groups per round (1) differ from the 2 groups drawn. **28**: trailing rounds drawn but not flown. **39**: a pure draw, nothing scored. |
+| `draws_edge_cases.json`  | Hand-built comp 9201 (four pilots, two rounds): round 2 holds a flight drawn in round 2 but credited to round 1 (`OriginalRoundNo` differs), which the importer refuses.                                                                                                                                                                                                                                                              |
+
+`Scores` holds numbers and the True/False `Updated` flag only; the scrubber checks the shape of every value, carries only an allowlist of columns and aborts on anything else. Rows of `Scores` are written one per line to keep the file reviewable. **Size ceiling:** the draw snapshots stay under 500 KB in total (now about 345 KB); adding a competition means dropping another.
+
 `Roles` and `DBParams` are never copied: the scrubber checks them against the six known roles and a `DBVersion` number and emits fixed rows, and aborts when they differ. It also names (not shows) any source column it drops.
 
 The real file has no F5J competition with teams and only plain pilots, which
@@ -39,4 +48,4 @@ placeholders) is kept. The script refuses to write if any original first name,
 last name or email would appear in the output. No real personal data is
 committed; the source database stays out of the repository.
 
-For competitions, export `Comps`, `CompPilots`, `Roles`, `Dur` and `DBParams` with `mdb-json` into one directory and pass it as the third argument. Regenerate with the steps at the top of the script. The output is deterministic.
+For competitions, export `Comps`, `CompPilots`, `Roles`, `Dur` and `DBParams` with `mdb-json` into one directory and pass it as the third argument. For the draw snapshots add `mdb-json GliderScoreData.mdb Scores > comps/Scores.jsonl` to the same directory. Regenerate with the steps at the top of the script. The output is deterministic.

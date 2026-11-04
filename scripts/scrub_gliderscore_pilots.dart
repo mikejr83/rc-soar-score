@@ -38,6 +38,17 @@
 //                             CompNo, a duplicated (CompNo, PilotNo) and a
 //                             participant with no Pilots row
 //
+// Draw fixtures (#768, phase C): when the directory also holds Scores.jsonl
+// (`mdb-json GliderScoreData.mdb Scores > comps/Scores.jsonl`) the script
+// also writes
+//
+//   draws_reference.json      real comps 15, 21, 26, 28 and 39 with their
+//                             Scores rows (the drawn flights, scored or not)
+//   draws_edge_cases.json     hand-built comps for the draw refusals
+//
+// Scores holds numbers only (plus the True/False `Updated` flag); every
+// value's shape is checked and the script aborts on anything else.
+//
 // Competition and venue names, comp ids and model names become fakes; the
 // rest of a comp row is codes and flags and is kept (allowlist, as for
 // pilots).
@@ -403,6 +414,35 @@ const _durKept = <String>{
   'DurPointsPerSecond', 'durPilotsMin', 'F5JMotorRestartOption', //
 };
 
+/// Every column of `Scores` the importer knows. All are numbers except
+/// `Updated`, a True/False flag. Nothing else is carried over.
+const _scoresKept = <String>{
+  'CompNo', 'TaskNo', 'RoundNo', 'GroupNo', 'ReFlightNo', 'PilotNo', 'SeqNo',
+  'DrawFreq', 'Time1Mins', 'Time1Secs', 'Time2Mins', 'Time2Secs',
+  'FlightScoreDeduction', 'Landing', 'RawScore', 'NormalisedScore', 'Penalty',
+  'OriginalRoundNo', 'ScoresChecked', 'Updated', 'LandingOver75m', 'Helper',
+  'Laps', 'F5JMotorReStarted', //
+};
+
+/// Keeps the allowlisted columns of one `Scores` row after checking each
+/// value's shape: a number, or True/False for `Updated`. A text value in
+/// any other column would be personal data, so the script stops.
+Map<String, Object?> _validScores(Map<String, Object?> row) {
+  final out = <String, Object?>{};
+  for (final e in row.entries) {
+    if (!_scoresKept.contains(e.key) || e.value == null) {
+      continue;
+    }
+    final v = e.value;
+    final ok = e.key == 'Updated' ? v == 'True' || v == 'False' : v is num;
+    if (!ok) {
+      _abort('Scores column ${e.key} has an unexpected value shape');
+    }
+    out[e.key] = v;
+  }
+  return out;
+}
+
 List<Map<String, Object?>> _readJsonl(File file) => [
   for (final line in file.readAsLinesSync())
     if (line.trim().isNotEmpty)
@@ -496,6 +536,36 @@ Map<String, String> _competitionFixtures(
     });
   }
 
+  // Draw fixtures: needs Scores.jsonl next to the other exports.
+  Map<String, String> scoresFixtures() {
+    final file = File('${dir.path}/Scores.jsonl');
+    if (!file.existsSync()) {
+      return const {};
+    }
+    final scores = [for (final r in _readJsonl(file)) _validScores(r)];
+    _reportDroppedColumns({'Scores': (scores, _scoresKept)});
+    const nos = [15, 21, 26, 28, 39];
+    final base = jsonDecode(snapshot(nos)) as Map<String, Object?>;
+    final tables = [
+      for (final t in (base['tables']! as List<Object?>))
+        {...(t! as Map<String, Object?>)},
+    ];
+    final rows = [
+      for (final r in scores)
+        if (nos.contains(r['CompNo'])) r,
+    ];
+    tables.add({
+      'name': 'Scores',
+      'rowCount': rows.length,
+      'rowCapExceeded': false,
+      'rows': rows,
+    });
+    return {
+      'draws_reference.json': _snapshotJson({...base, 'tables': tables}),
+      'draws_edge_cases.json': _drawEdgeCases(),
+    };
+  }
+
   // Comp 22 reduced to the columns the mapper cannot do without.
   String missingColumns() {
     final c = comps.firstWhere((r) => r['CompNo'] == 22);
@@ -534,6 +604,7 @@ Map<String, String> _competitionFixtures(
 
   final out = <String, String>{
     'comps_reference.json': snapshot(const [22, 39, 21, 20, 40]),
+    ...scoresFixtures(),
     'comps_edge_cases.json': _competitionEdgeCases(),
     'comps_integrity_cases.json': _competitionIntegrityCases(),
     'comps_missing_columns.json': missingColumns(),
@@ -588,7 +659,7 @@ Map<String, String> _competitionFixtures(
 }
 
 String _snapshotTables(Map<String, List<Map<String, Object?>>> tables) {
-  final snapshot = <String, Object?>{
+  return _snapshotJson({
     'schema': 'gs-import/v1',
     'id': _snapshotId,
     'sourceDbFile': 'GliderScoreData.mdb',
@@ -601,8 +672,42 @@ String _snapshotTables(Map<String, List<Map<String, Object?>>> tables) {
           'rows': e.value,
         },
     ],
-  };
-  return '${const JsonEncoder.withIndent('  ').convert(snapshot)}\n';
+  });
+}
+
+/// Renders a snapshot with two-space indentation, except that the rows of
+/// the `Scores` table are one line each: a draw is hundreds of rows and the
+/// fixtures stay small and reviewable that way.
+String _snapshotJson(Map<String, Object?> snapshot) {
+  const indent = JsonEncoder.withIndent('  ');
+  final tables = (snapshot['tables']! as List<Object?>)
+      .cast<Map<String, Object?>>();
+  final compact = <String, List<Object?>>{};
+  final shaped = <Map<String, Object?>>[];
+  for (final table in tables) {
+    if (table['name'] == 'Scores') {
+      final rows = (table['rows']! as List<Object?>);
+      compact[table['name']! as String] = rows;
+      shaped.add({...table, 'rows': <Object?>[]});
+    } else {
+      shaped.add(table);
+    }
+  }
+  var text = indent.convert({...snapshot, 'tables': shaped});
+  for (final e in compact.entries) {
+    final body = e.value.isEmpty
+        ? '[]'
+        : '[\n${[for (final r in e.value) '          ${jsonEncode(r)}'].join(',\n')}\n        ]';
+    final marker = '"name": "${e.key}",';
+    final start = text.indexOf(marker);
+    final rowsAt = text.indexOf('"rows": []', start);
+    text = text.replaceRange(
+      rowsAt,
+      rowsAt + '"rows": []'.length,
+      '"rows": $body',
+    );
+  }
+  return '$text\n';
 }
 
 /// Hand-built competitions for rules the real file does not exercise (it has
@@ -915,6 +1020,70 @@ String _competitionIntegrityCases() {
     'Dur': [
       {'CompNo': 9101, 'durTargetTime': 600},
       {'CompNo': 9102, 'durTargetTime': 600},
+    ],
+  });
+}
+
+/// Hand-built draws the real file does not hold: a flight credited to a
+/// different round than it was drawn in, which the importer refuses.
+String _drawEdgeCases() {
+  Map<String, Object?> comp(int no) => {
+    'CompNo': no,
+    'CompDate': '06/14/26 00:00:00',
+    'CompID': 'FIXTURE$no',
+    'CompName': 'Fixture Open $no',
+    'CompVenue': 'Example Field',
+    'GSCompClass': 'F5J',
+  };
+  Map<String, Object?> member(int comp, int pilot) => {
+    'CompNo': comp,
+    'PilotNo': pilot,
+    'Role': 'Plt',
+  };
+  Map<String, Object?> flight(
+    int comp,
+    int round,
+    int group,
+    int pilot,
+    int seq, {
+    int? credit,
+    bool scored = false,
+  }) => {
+    'CompNo': comp,
+    'TaskNo': 1,
+    'RoundNo': round,
+    'GroupNo': group,
+    'ReFlightNo': 0,
+    'PilotNo': pilot,
+    'SeqNo': seq,
+    'OriginalRoundNo': credit ?? round,
+    'Updated': scored ? 'True' : 'False',
+    if (scored) ...{'RawScore': 900, 'NormalisedScore': 1000},
+  };
+  return _snapshotTables({
+    'Comps': [comp(9201)],
+    'CompPilots': [
+      for (final pilot in [2201, 2202, 2203, 2204]) member(9201, pilot),
+    ],
+    'Pilots': [
+      {'PilotNo': 2201, 'FirstName': 'Kim', 'LastName': 'Drawone'},
+      {'PilotNo': 2202, 'FirstName': 'Lou', 'LastName': 'Drawtwo'},
+      {'PilotNo': 2203, 'FirstName': 'Max', 'LastName': 'Drawthree'},
+      {'PilotNo': 2204, 'FirstName': 'Ned', 'LastName': 'Drawfour'},
+    ],
+    'Dur': [
+      {'CompNo': 9201, 'durTargetTime': 600, 'durGroupsPerRound': 2},
+    ],
+    'Scores': [
+      flight(9201, 1, 1, 2201, 1, scored: true),
+      flight(9201, 1, 1, 2202, 2, scored: true),
+      flight(9201, 1, 2, 2203, 1, scored: true),
+      flight(9201, 1, 2, 2204, 2, scored: true),
+      // Drawn in round 2, credited to round 1: a moved credit.
+      flight(9201, 2, 1, 2201, 1, credit: 1),
+      flight(9201, 2, 1, 2203, 2),
+      flight(9201, 2, 2, 2202, 1),
+      flight(9201, 2, 2, 2204, 2),
     ],
   });
 }

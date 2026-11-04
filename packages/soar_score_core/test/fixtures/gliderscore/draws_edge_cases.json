@@ -1,0 +1,103 @@
+{
+  "schema": "gs-import/v1",
+  "id": "00000000-0000-7000-8000-000000000001",
+  "sourceDbFile": "GliderScoreData.mdb",
+  "tables": [
+    {
+      "name": "Comps",
+      "rowCount": 1,
+      "rowCapExceeded": false,
+      "rows": [
+        {
+          "CompNo": 9201,
+          "CompDate": "06/14/26 00:00:00",
+          "CompID": "FIXTURE9201",
+          "CompName": "Fixture Open 9201",
+          "CompVenue": "Example Field",
+          "GSCompClass": "F5J"
+        }
+      ]
+    },
+    {
+      "name": "CompPilots",
+      "rowCount": 4,
+      "rowCapExceeded": false,
+      "rows": [
+        {
+          "CompNo": 9201,
+          "PilotNo": 2201,
+          "Role": "Plt"
+        },
+        {
+          "CompNo": 9201,
+          "PilotNo": 2202,
+          "Role": "Plt"
+        },
+        {
+          "CompNo": 9201,
+          "PilotNo": 2203,
+          "Role": "Plt"
+        },
+        {
+          "CompNo": 9201,
+          "PilotNo": 2204,
+          "Role": "Plt"
+        }
+      ]
+    },
+    {
+      "name": "Pilots",
+      "rowCount": 4,
+      "rowCapExceeded": false,
+      "rows": [
+        {
+          "PilotNo": 2201,
+          "FirstName": "Kim",
+          "LastName": "Drawone"
+        },
+        {
+          "PilotNo": 2202,
+          "FirstName": "Lou",
+          "LastName": "Drawtwo"
+        },
+        {
+          "PilotNo": 2203,
+          "FirstName": "Max",
+          "LastName": "Drawthree"
+        },
+        {
+          "PilotNo": 2204,
+          "FirstName": "Ned",
+          "LastName": "Drawfour"
+        }
+      ]
+    },
+    {
+      "name": "Dur",
+      "rowCount": 1,
+      "rowCapExceeded": false,
+      "rows": [
+        {
+          "CompNo": 9201,
+          "durTargetTime": 600,
+          "durGroupsPerRound": 2
+        }
+      ]
+    },
+    {
+      "name": "Scores",
+      "rowCount": 8,
+      "rowCapExceeded": false,
+      "rows": [
+          {"CompNo":9201,"TaskNo":1,"RoundNo":1,"GroupNo":1,"ReFlightNo":0,"PilotNo":2201,"SeqNo":1,"OriginalRoundNo":1,"Updated":"True","RawScore":900,"NormalisedScore":1000},
+          {"CompNo":9201,"TaskNo":1,"RoundNo":1,"GroupNo":1,"ReFlightNo":0,"PilotNo":2202,"SeqNo":2,"OriginalRoundNo":1,"Updated":"True","RawScore":900,"NormalisedScore":1000},
+          {"CompNo":9201,"TaskNo":1,"RoundNo":1,"GroupNo":2,"ReFlightNo":0,"PilotNo":2203,"SeqNo":1,"OriginalRoundNo":1,"Updated":"True","RawScore":900,"NormalisedScore":1000},
+          {"CompNo":9201,"TaskNo":1,"RoundNo":1,"GroupNo":2,"ReFlightNo":0,"PilotNo":2204,"SeqNo":2,"OriginalRoundNo":1,"Updated":"True","RawScore":900,"NormalisedScore":1000},
+          {"CompNo":9201,"TaskNo":1,"RoundNo":2,"GroupNo":1,"ReFlightNo":0,"PilotNo":2201,"SeqNo":1,"OriginalRoundNo":1,"Updated":"False"},
+          {"CompNo":9201,"TaskNo":1,"RoundNo":2,"GroupNo":1,"ReFlightNo":0,"PilotNo":2203,"SeqNo":2,"OriginalRoundNo":2,"Updated":"False"},
+          {"CompNo":9201,"TaskNo":1,"RoundNo":2,"GroupNo":2,"ReFlightNo":0,"PilotNo":2202,"SeqNo":1,"OriginalRoundNo":2,"Updated":"False"},
+          {"CompNo":9201,"TaskNo":1,"RoundNo":2,"GroupNo":2,"ReFlightNo":0,"PilotNo":2204,"SeqNo":2,"OriginalRoundNo":2,"Updated":"False"}
+        ]
+    }
+  ]
+}

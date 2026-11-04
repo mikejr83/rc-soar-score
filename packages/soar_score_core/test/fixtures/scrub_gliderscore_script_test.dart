@@ -158,4 +158,20 @@ void main() {
       expect(text, isNot(contains('Real Field')));
     }
   });
+
+  test('a text value in a Scores number column aborts the run', () {
+    writeInputs();
+    jsonl('Scores', [
+      {'CompNo': 22, 'RoundNo': 1, 'PilotNo': 1, 'Updated': 'False'},
+    ]);
+    expect(run().exitCode, 0);
+    Directory('${work.path}/out').deleteSync(recursive: true);
+    jsonl('Scores', [
+      {'CompNo': 22, 'RoundNo': 1, 'PilotNo': 'Pat Realperson'},
+    ]);
+    final result = run();
+    expect(result.exitCode, isNot(0));
+    expect(result.stderr, contains('Scores'));
+    expect(wroteNothing(), isTrue);
+  });
 }
