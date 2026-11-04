@@ -8,6 +8,7 @@ import '../../api_client_provider.dart';
 import '../../router.dart';
 import '../../ui_account_provider.dart';
 import '../../connectivity_provider.dart';
+import '../../services/competition_import/competition_import.dart';
 import '../../services/workspace/attention/needs_attention.dart';
 import '../../services/workspace/next_step/completion_dismissals.dart';
 import '../../services/workspace/workspace_control.dart';
@@ -89,6 +90,8 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
 
   // What a rejected change was about, while the stale-page banner shows.
   String? _staleWhat;
+  ImportedContestNote? _importNote;
+  Id? _importNoteFor;
 
   // The contest the page last showed ready. A failed reload keeps it on
   // screen (with the stale banner, if one is up) instead of replacing the
@@ -223,11 +226,36 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
     _ensureFacts(contest);
   }
 
+  /// The note on a contest that came from GliderScore. Only the native build
+  /// keeps import records, so elsewhere there is none.
+  Future<void> _loadImportNote(Contest contest) async {
+    final store = CompetitionImportStore.current;
+    if (store == null) {
+      return;
+    }
+    try {
+      final note = await store.noteFor(contest.id);
+      // Only the contest on show may take the answer; a slow lookup for the
+      // one before must not.
+      if (mounted && _importNoteFor == contest.id && note != _importNote) {
+        setState(() => _importNote = note);
+      }
+    } catch (_) {
+      // The note is a courtesy; the page works without it.
+    }
+  }
+
   void _ensureFacts(Contest contest) {
     if (_factsFor == contest) {
       return;
     }
+    if (_importNoteFor != contest.id) {
+      // Another contest: the note of the last one must not show meanwhile.
+      _importNote = null;
+      _importNoteFor = contest.id;
+    }
     _factsFor = contest;
+    _loadImportNote(contest);
     final client = apiClientOf(context);
     if (client == null) {
       return;
@@ -394,6 +422,9 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
             offline: offline,
             staleChange: _staleWhat,
             onRefresh: _tryAgain,
+            // Facts load after the first frame of a contest, so the note of
+            // the last one must not show in that frame.
+            importNote: _importNoteFor == contest.id ? _importNote : null,
           ),
           Expanded(
             child: Stack(

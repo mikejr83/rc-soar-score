@@ -23,6 +23,8 @@ export 'models/accounts/accounts.dart';
 export 'models/contest/contest_models.dart';
 export 'models/discipline/discipline.dart';
 export 'models/imports/contest_import_draft.dart';
+export 'models/imports/draw_import_draft.dart';
+export 'models/imports/imported_contest_note.dart';
 export 'models/imports/glider_score_import_result.dart';
 export 'models/imports/contest_import_plan.dart';
 export 'models/imports/import_provenance.dart';

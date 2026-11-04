@@ -8,7 +8,7 @@
 
 ## Relationships
 
-- Points at one Contest, ContestParticipation or ParticipantProfile through (`stamped_entity_type`, `stamped_entity_id`). There is no foreign key on the stamped entity, because the three types live in three tables
+- Points at one Contest, ContestParticipation, MatrixRevision or ParticipantProfile through (`stamped_entity_type`, `stamped_entity_id`). There is no foreign key on the stamped entity, because the three types live in three tables
 - Belongs to the importing director's Account (`owner_account_id`), which is the synchronization scope
 - Rows for a contest or its participations also carry `contest_id`, so an export and a contest delete find them. Rows for profiles have no contest
 
@@ -19,7 +19,7 @@
 | `id`                  | UUIDv7   | Yes      | —       | Primary key                                                                                                                                                                                              |
 | `owner_account_id`    | UUIDv7   | Yes      | —       | FK Account of the importing director: the signed-in account, otherwise the installation's Local account (re-pointed when that is claimed)                                                                |
 | `contest_id`          | UUIDv7   | No       | —       | Not a foreign key (director data); set for `Contest` and `ContestParticipation` rows, absent for `ParticipantProfile` rows. Deleted with the contest                                                     |
-| `stamped_entity_type` | String   | Yes      | —       | `Contest`, `ContestParticipation` or `ParticipantProfile`                                                                                                                                                |
+| `stamped_entity_type` | String   | Yes      | —       | `Contest`, `ContestParticipation`, `MatrixRevision` or `ParticipantProfile`                                                                                                                                                |
 | `stamped_entity_id`   | UUIDv7   | Yes      | —       | The stamped entity                                                                                                                                                                                       |
 | `source_system`       | String   | Yes      | —       | `gliderscore`                                                                                                                                                                                            |
 | `source_keys`         | JSON     | Yes      | —       | Whole-number source keys: `comp_no` for a contest, `comp_no` and `pilot_no` for a participation, `pilot_no` for a profile. Stored in canonical form                                                      |
@@ -34,11 +34,12 @@
 ## Invariants and Constraints
 
 - (`owner_account_id`, `dedupe_key`) is unique where `dedupe_key` is set: a director imports a competition of a file once. The importer treats a violation as "already imported" and rolls back that competition
-- Only `Contest` rows carry `dedupe_key` and `source_values`. `ParticipantProfile` rows have no `contest_id`; `Contest` and `ContestParticipation` rows must have one, and a `Contest` row stamps its own contest
-- `stamped_entity_type` is one of `Contest`, `ContestParticipation`, `ParticipantProfile` and `source_system` is `gliderscore`; the model rejects anything else, so a new source or type is a deliberate change here, in the model and in the ADR
-- A contest or participation has at most one stamp (unique index on `stamped_entity_type` and `stamped_entity_id`, partial: not for profiles); a profile has at most one per import operation (unique index on `stamped_entity_id` and `import_operation_id`). Read them with `listForEntity`
+- Only `Contest` rows carry `dedupe_key` and `source_values`. `ParticipantProfile` rows have no `contest_id`; `Contest`, `ContestParticipation` and `MatrixRevision` rows must have one, and a `Contest` row stamps its own contest
+- `stamped_entity_type` is one of `Contest`, `ContestParticipation`, `MatrixRevision`, `ParticipantProfile` and `source_system` is `gliderscore`; the model rejects anything else, so a new source or type is a deliberate change here, in the model and in the ADR
+- A contest, participation or matrix revision has at most one stamp (unique index on `stamped_entity_type` and `stamped_entity_id`, partial: not for profiles); a profile has at most one per import operation (unique index on `stamped_entity_id` and `import_operation_id`). Read them with `listForEntity`
 - `source_keys` are whole numbers in canonical form (sorted keys, plain decimals, no whitespace), so equal keys compare equal as text. The model rejects anything else and stores the keys sorted. A `Contest` row has exactly `comp_no`, a `ContestParticipation` row `comp_no` and `pilot_no`, a `ParticipantProfile` row `pilot_no`
 - When set, `dedupe_key` must equal `<source_system>:<file_fingerprint>:<comp_no>` of the same row
+- A `MatrixRevision` row (phase C) has a `contest_id`, `comp_no` and `task_no` as source keys, and `source_values` with the round range and group count (and the `SeqNo` positions for a competition with lane count 0). There is no stamp per assignment. At most one stamp per matrix revision
 - Never shown as editable data and never takes part in matching profiles
 
 ## Lifecycle

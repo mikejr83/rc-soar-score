@@ -737,6 +737,136 @@ void main() {
       );
     });
 
+    test('a contest with an imported draw keeps its draw and stamps', () async {
+      final repo = Repository(source.db);
+      final profiles = <int, core.Id>{};
+      for (var n = 1; n <= 4; n++) {
+        final saved = await repo.participantProfileRepository.save(
+          core.ParticipantProfile(
+            id: core.Id.create(),
+            ownerAccountId: source.localId,
+            firstName: 'Pilot',
+            lastName: 'Number$n',
+            createdAt: DateTime.utc(2026),
+            updatedAt: DateTime.utc(2026),
+          ),
+          metadata: metadata(),
+        );
+        profiles[n] = saved.id;
+      }
+      final owner = core.ImportOwner(localAccountId: source.localId);
+      final first = await repo.contestImportRepository.importCompetition(
+        core.CompetitionImportPlan(
+          draft: core.ContestImportDraft(
+            sourceCompNo: 22,
+            sourceClass: 'F5J',
+            status: core.ContestImportStatus.importable,
+            name: 'Imported Draw Open',
+            startDate: DateTime.utc(2026, 5, 9),
+            disciplineType: 'F5J',
+            config: core.ContestConfig(core: const {}, discipline: const {}),
+            participants: [
+              for (var n = 1; n <= 4; n++)
+                core.ParticipationDraft(
+                  sourcePilotNo: n,
+                  role: core.ImportedRole.pilot,
+                  sourceRole: 'Plt',
+                ),
+            ],
+          ),
+          profileIds: profiles,
+          owner: owner,
+          timezone: 'UTC',
+          importOperationId: core.Id.create(),
+          fileFingerprint: 'sha256:abc',
+          toolVersion: '1.0.0',
+        ),
+        metadata: metadata(),
+      ) as core.CompetitionImported;
+      final rows = [
+        for (var r = 1; r <= 2; r++)
+          for (var p = 1; p <= 4; p++)
+            {
+              'CompNo': 22,
+              'TaskNo': 1,
+              'RoundNo': r,
+              'GroupNo': (p - 1) ~/ 2 + 1,
+              'ReFlightNo': 0,
+              'PilotNo': p,
+              'SeqNo': (p - 1) % 2 + 1,
+              'OriginalRoundNo': r,
+              'Updated': 'False',
+            },
+      ];
+      core.GliderScoreTable table(String name, List<Map<String, Object?>> r) =>
+          core.GliderScoreTable(
+            name: name,
+            rows: r,
+            rowCount: r.length,
+            rowCapExceeded: false,
+          );
+      final draft = const core.GliderScoreDrawMapper().mapCompetition(
+        core.GliderScoreImportResult(
+          id: core.Id.create(),
+          sourceDbFile: 'x.mdb',
+          tables: [
+            table('Comps', [
+              {'CompNo': 22, 'GSCompClass': 'F5J'},
+            ]),
+            table('Dur', [
+              {'CompNo': 22, 'durNbrOfLanes': 0},
+            ]),
+            table('Scores', rows),
+          ],
+        ),
+        core.DrawImportTarget(
+          sourceCompNo: 22,
+          fileFingerprint: 'sha256:abc',
+          stampedFingerprint: 'sha256:abc',
+          participantPilotNos: const {1, 2, 3, 4},
+        ),
+      );
+      await repo.contestImportRepository.importDraw(
+        core.DrawImportPlan(
+          draft: draft,
+          contestId: first.contestId,
+          owner: owner,
+          importOperationId: core.Id.create(),
+          fileFingerprint: 'sha256:abc',
+          toolVersion: '1.0.0',
+        ),
+        metadata: metadata(),
+      );
+
+      final file = await source.exportNamed('Imported Draw Open');
+      // Contest, four participations and the revision.
+      expect(file.rows('import_provenance'), hasLength(6));
+      await target.importer.import(
+        file,
+        mode: ImportMode.editable,
+        target: target.target,
+      );
+
+      final copied = Repository(target.db);
+      final stamps = await copied.importProvenanceRepository.listForContest(
+        first.contestId,
+      );
+      expect(
+        stamps.where((s) => s.stampedEntityType == 'MatrixRevision'),
+        hasLength(1),
+      );
+      expect(stamps.every((s) => s.ownerAccountId == target.localId), isTrue);
+      final matrix = await core.MatrixService(copied).current(first.contestId);
+      expect(matrix.rounds, hasLength(2));
+      expect(matrix.assignments, hasLength(8));
+      expect(matrix.revision!.algorithmVersion, 'import:gliderscore/1');
+      expect(
+        (await copied.contestRepository.findById(first.contestId))!
+            .lifecycleState,
+        core.LifecycleState.ready,
+      );
+    });
+
     test('keeps pending changes so they can be sent later', () async {
       final file = await source.exportNamed(_autumn);
       await target.importer.import(

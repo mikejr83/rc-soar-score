@@ -67,6 +67,7 @@
 
 ## Audit and Synchronization
 
+- A revision restored from a GliderScore file is stamped in `import_provenance` (`stamped_entity_type` `MatrixRevision`); it has `random_seed` 0, `algorithm_version` `import:gliderscore/1` and an empty `seeding_snapshot`, so it is history and not reproducible (ADR 0006)
 - A revision is immutable once created, except for the single write-once finalization (`finalized_by`, `finalized_at`)
 - Creating and finalizing a revision each record an AuditEvent
 - Two clients finalizing at the same time are resolved first-write-wins through the standard conflict process

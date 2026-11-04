@@ -50,8 +50,12 @@ class ImportProvenance extends Equatable implements Synchronizable {
     if (dedupeKey != null && stampedEntityType != contestEntityType) {
       throw ArgumentError('only a Contest row carries a dedupe_key');
     }
-    if (sourceValues != null && stampedEntityType != contestEntityType) {
-      throw ArgumentError('only a Contest row carries source_values');
+    if (sourceValues != null &&
+        stampedEntityType != contestEntityType &&
+        stampedEntityType != matrixRevisionEntityType) {
+      throw ArgumentError(
+        'only a Contest or MatrixRevision row carries source_values',
+      );
     }
     if (!entityTypes.contains(stampedEntityType)) {
       throw ArgumentError.value(
@@ -70,6 +74,7 @@ class ImportProvenance extends Equatable implements Synchronizable {
     final expectedKeys = switch (stampedEntityType) {
       contestEntityType => const {'comp_no'},
       participationEntityType => const {'comp_no', 'pilot_no'},
+      matrixRevisionEntityType => const {'comp_no', 'task_no'},
       _ => const {'pilot_no'},
     };
     if (this.sourceKeys.keys.toSet().difference(expectedKeys).isNotEmpty ||
@@ -109,11 +114,43 @@ class ImportProvenance extends Equatable implements Synchronizable {
   factory ImportProvenance.fromJson(Map<String, Object?> json) =>
       _$ImportProvenanceFromJson(json);
 
+  /// The Contest stamp to treat as the one for a competition when several
+  /// imports of it exist: a stamp of the same file first, then the newest by
+  /// `importedAt`, then the greater id so equal times still choose one.
+  /// `null` when [candidates] is empty.
+  static ImportProvenance? preferred(
+    Iterable<ImportProvenance> candidates,
+    String fileFingerprint,
+  ) {
+    ImportProvenance? best;
+    for (final c in candidates) {
+      if (best == null || _outranks(c, best, fileFingerprint)) best = c;
+    }
+    return best;
+  }
+
+  static bool _outranks(
+    ImportProvenance a,
+    ImportProvenance b,
+    String fileFingerprint,
+  ) {
+    final aSame = a.fileFingerprint == fileFingerprint;
+    final bSame = b.fileFingerprint == fileFingerprint;
+    if (aSame != bSame) return aSame;
+    final byTime = a.importedAt.compareTo(b.importedAt);
+    if (byTime != 0) return byTime > 0;
+    return a.id.value.compareTo(b.id.value) > 0;
+  }
+
   /// The `stamped_entity_type` of a contest row.
   static const contestEntityType = 'Contest';
 
   /// The `stamped_entity_type` of a participation row.
   static const participationEntityType = 'ContestParticipation';
+
+  /// The `stamped_entity_type` of a matrix revision row (phase C): one per
+  /// imported revision, with the competition and task as keys.
+  static const matrixRevisionEntityType = 'MatrixRevision';
 
   /// The `stamped_entity_type` of a profile row, the only one with no
   /// contest.
@@ -127,6 +164,7 @@ class ImportProvenance extends Equatable implements Synchronizable {
   static const entityTypes = {
     contestEntityType,
     participationEntityType,
+    matrixRevisionEntityType,
     profileEntityType,
   };
 
@@ -143,7 +181,8 @@ class ImportProvenance extends Equatable implements Synchronizable {
   /// Set for contest and participation rows, null for profile rows.
   final Id? contestId;
 
-  /// `Contest`, `ContestParticipation` or `ParticipantProfile`.
+  /// `Contest`, `ContestParticipation`, `MatrixRevision` or
+  /// `ParticipantProfile`.
   final String stampedEntityType;
   final Id stampedEntityId;
 
@@ -154,8 +193,9 @@ class ImportProvenance extends Equatable implements Synchronizable {
   /// a profile. See `canonicalSourceKeys`.
   final Map<String, Object?> sourceKeys;
 
-  /// Contest rows only: source values that have no field in Soar Score and
-  /// are kept for review and later phases (for example the lane count).
+  /// Contest and matrix revision rows only: source values that have no field
+  /// in Soar Score and are kept for review and later phases (for example the
+  /// lane count, or the round range and `SeqNo` positions of a revision).
   final Map<String, Object?>? sourceValues;
 
   /// Hash of the source file, the same for every row of one import.

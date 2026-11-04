@@ -49,6 +49,55 @@ GliderScoreImportResult competitionsSnapshot() {
   );
 }
 
+/// [competitionsSnapshot] with the drawn flights of "Spring Open" (competition
+/// 1): two rounds, one group of two pilots each.
+GliderScoreImportResult competitionsSnapshotWithDraw() {
+  final base = competitionsSnapshot();
+  final rows = [
+    for (var round = 1; round <= 2; round++)
+      for (final pilot in [1, 2])
+        {
+          'CompNo': 1,
+          'TaskNo': 1,
+          'RoundNo': round,
+          'GroupNo': 1,
+          'ReFlightNo': 0,
+          'PilotNo': pilot,
+          'SeqNo': pilot,
+          'OriginalRoundNo': round,
+          'Updated': 'False',
+        },
+  ];
+  return GliderScoreImportResult(
+    id: base.id,
+    sourceDbFile: base.sourceDbFile,
+    tables: [
+      ...base.tables,
+      GliderScoreTable(
+        name: 'Scores',
+        rows: rows,
+        rowCount: rows.length,
+        rowCapExceeded: false,
+      ),
+    ],
+  );
+}
+
+/// The phase B contest of competition [compNo], as the store reports it.
+DrawImportTarget stampedTarget(
+  int compNo, {
+  String fingerprint = 'sha256:fake',
+  bool hasMatrix = false,
+  Id? contestId,
+}) => DrawImportTarget(
+  sourceCompNo: compNo,
+  fileFingerprint: 'sha256:fake',
+  contestId: contestId ?? Id.create(),
+  stampedFingerprint: fingerprint,
+  hasMatrix: hasMatrix,
+  participantPilotNos: const {1, 2},
+);
+
 /// A [CompetitionImportStore] that records what it was asked to write.
 class FakeCompetitionImportStore extends FakePilotImportStore
     implements CompetitionImportStore {
@@ -62,6 +111,52 @@ class FakeCompetitionImportStore extends FakePilotImportStore
 
   /// Competitions whose import throws instead of answering.
   final throwsFor = <int>{};
+
+  /// The contest each competition already has, when it has one.
+  final drawTargets = <int, DrawImportTarget>{};
+
+  /// What [importDraw] answers for a competition, when not the usual.
+  final drawAnswers = <int, DrawImportResult>{};
+
+  /// The draws that were asked for, by competition number.
+  final drawn = <(int compNo, Id contestId)>[];
+
+  @override
+  Future<DrawImportTarget> drawTarget({
+    required int compNo,
+    required String fingerprint,
+  }) async =>
+      drawTargets[compNo] ??
+      DrawImportTarget(
+        sourceCompNo: compNo,
+        fileFingerprint: fingerprint,
+        stamped: false,
+      );
+
+  @override
+  Future<DrawImportResult> importDraw({
+    required DrawImportDraft draft,
+    required Id contestId,
+    required Id operationId,
+    required String fingerprint,
+  }) async {
+    final no = draft.sourceCompNo;
+    drawn.add((no, contestId));
+    return drawAnswers[no] ??
+        DrawImported(
+          no,
+          contestId: contestId,
+          revisionCount: draft.revisions.length,
+          roundCount: draft.roundCount,
+          assignmentCount: draft.assignmentCount,
+        );
+  }
+
+  /// The note each contest shows, when it has one.
+  final notes = <Id, ImportedContestNote>{};
+
+  @override
+  Future<ImportedContestNote?> noteFor(Id contestId) async => notes[contestId];
 
   @override
   Future<String> fingerprint(String path) async => 'sha256:fake';

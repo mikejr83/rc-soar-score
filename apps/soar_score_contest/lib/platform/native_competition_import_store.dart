@@ -78,4 +78,40 @@ class NativeCompetitionImportStore extends NativePilotImportStore
     ),
     metadata: _metadata('contest'),
   );
+
+  @override
+  Future<core.DrawImportTarget> drawTarget({
+    required int compNo,
+    required String fingerprint,
+  }) => _server.repository.contestImportRepository.drawTarget(
+    _owner,
+    compNo,
+    fingerprint,
+  );
+
+  @override
+  Future<core.DrawImportResult> importDraw({
+    required core.DrawImportDraft draft,
+    required core.Id contestId,
+    required core.Id operationId,
+    required String fingerprint,
+  }) => _server.repository.contestImportRepository.importDraw(
+    core.DrawImportPlan(
+      draft: draft,
+      contestId: contestId,
+      owner: _owner,
+      importOperationId: operationId,
+      fileFingerprint: fingerprint,
+      toolVersion: toolVersion,
+    ),
+    metadata: _metadata('draw'),
+  );
+
+  @override
+  Future<core.ImportedContestNote?> noteFor(core.Id contestId) async =>
+      core.ImportedContestNote.fromStamps(
+        await _server.repository.importProvenanceRepository.listForContest(
+          contestId,
+        ),
+      );
 }

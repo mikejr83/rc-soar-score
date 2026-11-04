@@ -214,4 +214,117 @@ void main() {
     await tester.pumpAndSettle();
     expect(outcome, isNull);
   });
+
+  group('the draw of a competition imported before', () {
+    Future<void> openWithDraw(WidgetTester tester) =>
+        open(tester, read: (_) async => competitionsSnapshotWithDraw());
+
+    testWidgets('shows the counts and notes of the dry run', (tester) async {
+      store.drawTargets[1] = stampedTarget(1);
+      await openWithDraw(tester);
+
+      expect(key('competition-import-draw-1'), findsOneWidget);
+      expect(key('competition-import-draw-2'), findsNothing);
+      expect(
+        find.textContaining(l10n.competitionImportDrawDetails(2, 1, 2)),
+        findsOneWidget,
+      );
+      expect(
+        find.textContaining(l10n.competitionImportDrawNoteHistory),
+        findsOneWidget,
+      );
+      expect(
+        find.textContaining(l10n.competitionImportDrawNoLanes),
+        findsOneWidget,
+      );
+      // Nothing in the fixture is scored.
+      expect(
+        find.textContaining(l10n.competitionImportDrawNoScores),
+        findsOneWidget,
+      );
+      expect(
+        tester
+            .widget<FilledButton>(key('competition-import-continue'))
+            .onPressed,
+        isNull,
+        reason: 'nothing is chosen yet',
+      );
+    });
+
+    testWidgets('says why a draw cannot be added', (tester) async {
+      store.drawTargets[1] = stampedTarget(1, hasMatrix: true);
+      await openWithDraw(tester);
+
+      expect(key('competition-import-draw-1'), findsNothing);
+      expect(key('competition-import-draw-refused-1'), findsOneWidget);
+      expect(find.text(l10n.competitionImportDrawReasonDrawn), findsOneWidget);
+    });
+
+    testWidgets('adds the draw without a pilot review', (tester) async {
+      final contestId = Id.create();
+      store.drawTargets[1] = stampedTarget(1, contestId: contestId);
+      await openWithDraw(tester);
+
+      // The list is newest first, so the row may be below the fold.
+      await tester.ensureVisible(key('competition-import-draw-1'));
+      await tester.pumpAndSettle();
+      await tester.tap(key('competition-import-draw-1'));
+      await tester.pump();
+      expect(find.text(l10n.competitionImportChosenCount(1)), findsOneWidget);
+      await tester.tap(key('competition-import-continue'));
+      await tester.pumpAndSettle();
+
+      expect(controller.step, CompetitionImportStep.confirm);
+      expect(key('competition-import-summary-draws'), findsOneWidget);
+      expect(find.text(l10n.competitionImportSummaryDraws(1)), findsOneWidget);
+      expect(key('competition-import-summary-contests'), findsNothing);
+      expect(find.text(l10n.competitionImportDrawNotImported), findsOneWidget);
+
+      await tester.tap(key('competition-import-confirm'));
+      await tester.pumpAndSettle();
+      expect(store.drawn, [(1, contestId)]);
+      expect(
+        find.text(l10n.competitionImportResultDrawAdded('Spring Open', 2, 4)),
+        findsOneWidget,
+      );
+
+      await tester.tap(key('competition-import-open-draw-1'));
+      await tester.pumpAndSettle();
+      expect(outcome!.imported, [contestId]);
+      expect(outcome!.open, contestId);
+    });
+
+    testWidgets('reports a draw that was refused when it was written', (
+      tester,
+    ) async {
+      store.drawTargets[1] = stampedTarget(1);
+      store.drawAnswers[1] = const DrawImportFailed(
+        1,
+        DrawImportReason.alreadyDrawn,
+      );
+      await openWithDraw(tester);
+      // The list is newest first, so the row may be below the fold.
+      await tester.ensureVisible(key('competition-import-draw-1'));
+      await tester.pumpAndSettle();
+      await tester.tap(key('competition-import-draw-1'));
+      await tester.pump();
+      await tester.tap(key('competition-import-continue'));
+      await tester.pumpAndSettle();
+      await tester.tap(key('competition-import-confirm'));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text(
+          l10n.competitionImportResultDrawFailed(
+            'Spring Open',
+            l10n.competitionImportDrawReasonDrawn,
+          ),
+        ),
+        findsOneWidget,
+      );
+      await tester.tap(key('competition-import-done'));
+      await tester.pumpAndSettle();
+      expect(outcome, isNull);
+    });
+  });
 }

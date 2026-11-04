@@ -3,6 +3,7 @@
 - Status: proposed
 - Date: 2026-11-03
 - Decision issue: #743 (phase B of the GliderScore import, epic #742; replaces #566 for phase B)
+- Amended 2026-11-04 by #767 (phase C, epic #766): see "Amendment: restore semantics and the draw import". Where the amendment and the text above differ, the amendment wins.
 
 ## Context
 
@@ -14,7 +15,7 @@ Phase A (PR #707) imports GliderScore pilots into the director's participants li
 
 - A phase B contest is created in `Configuring`. It has no matrix, so no later state is reachable (`contest-state-and-transitions.md`). It is never `Completed`, whatever the source competition looked like.
 - `scoring_access` is `Closed` and `admin_lock` is `Unlocked`. No results hiding, no publication.
-- The contest shows a note that the draw and scores were not imported. The note is derived from the provenance row (a contest with an import stamp and an empty draw), not stored as text, so it disappears when a later phase fills the contest.
+- The contest shows a note that the draw and scores were not imported (refined by the amendment below). The note is derived from the provenance row (a contest with an import stamp and an empty draw), not stored as text, so it disappears when a later phase fills the contest.
 - Retired pilots stay active (a retirement is a round-bound fact and there are no rounds yet); the import warns.
 
 ### Later phases fill the same contest
@@ -90,6 +91,43 @@ Rules:
 ### Schema
 
 Schema changes go in version 1 in place (a director deletes a stale local `soar_score.db`). `database.g.dart` is regenerated. Tests run on SQLite and PostgreSQL.
+
+## Amendment: restore semantics and the draw import (2026-11-04, #767)
+
+Decided by Mike on 2026-11-04 while planning phase C. It amends the lifecycle, fill, audit and note rules above for phases C and D. Phase B's code is unchanged.
+
+### The import is a point-in-time restore
+
+- The import restores a completed contest, or the last state of one in competition. It is not a replay of how the contest would have been created and scored in Soar Score. Nothing is fabricated: no score attempts, no review history, no entry times.
+- Phases B and C are **build stages** of the restore. `Configuring` (after B) and `Ready` (after C) are not states a director is meant to leave a contest in after a restore. Phase D brings the contest to the snapshot's final state.
+- Final state (phase D): `Completed` or `Running`, chosen per competition by the director with a "Completed" checkbox. It is preselected, and unchecked where a flown round has unscored flights. Checking it anyway counts those flights as not entered. Trailing rounds with no scored flight restore as `Cancelled` when the contest is `Completed`. A completed restore comes in with its rounds and groups locked.
+- **Audit:** phases C and D write their events with the existing `Restoration` action (`AuditAction.restoration`) and `reason` `import:gliderscore:<import_operation_id>`. This replaces the `StateTransition` action this ADR names for the Created to Configuring event. The events phase B already writes stay as written (no migration).
+
+### Fill rule
+
+- **Phase C** fills a phase B contest that has **no matrix and no accepted scores**. Otherwise the competition is skipped with a reason code. It ends with the contest `Ready`.
+- **Phase D** works on a phase B contest with **no accepted scores** and **replaces a phase C draw** in one transaction: draw and scores are written together. This replaces "D needs a contest whose draw was imported by C". Scores entered by hand make phase D refuse.
+- The file must still match the stamp (same fingerprint); otherwise the phase refuses until the re-import of #576.
+- The phase C draw is therefore a build stage that phase D can overwrite. No migration is provided: the only tester starts from a fresh database, and to import again a director deletes the contest.
+
+### Draw rules (phase C)
+
+- The draw comes from `Scores`, one row per drawn flight whether scored or not. Pilots are found through the phase B participation stamps, never by name.
+- **Lanes:** GliderScore has only two lane settings. A lane count above 0 means `Random` lane mode and lane = rank of `SeqNo` within the group (the first listed pilot is lane 1; gaps close up; a pilot beyond the lane count gets the next lane, with a warning). A lane count of 0 means no lanes: the lane stays empty and the `SeqNo` positions are kept in the stamp.
+- Observed groups win over the configured groups per round, with a warning. Group sizes are imported as drawn, with a warning when they differ from the derived sizes.
+- Every drawn row of every pilot is imported, retired or not. **Phase D** sets `retired_at_round` inside the restore (a retirement is an overlay; the assignments stay as history).
+- Matrix revision: `random_seed` 0, `algorithm_version` `import:gliderscore/1`, `draw_mode` `StandardManOnMan`, empty `seeding_snapshot`; a warning says the draw is history, not reproducible.
+
+### Draw stamps
+
+- The **matrix revision** is stamped: one `MatrixRevision` row in `import_provenance` per revision, with `source_keys` `comp_no` and `task_no`, and `source_values` holding the round range and group count. A competition with several revisions (runs of rounds with different group counts) has one row for each.
+- For competitions with lane count 0, `source_values` also holds the `SeqNo` position of every assignment (keyed by round, group and pilot number), because the lane field is empty.
+- There are **no per-assignment stamps**. Phase D matches scores to assignments by competition, task, round, group and pilot number, which the draw carries.
+- `stamped_entity_type` gains `MatrixRevision`. The stamp has the same operation id and fingerprint as the contest's. It travels with the contest in a `.rcsoar` file and is deleted with the contest.
+
+### Contest note
+
+The note that says what was not imported is derived from the stamps, never stored: a contest with an import stamp and no matrix revision stamp shows "draw and scores were not imported"; one with a matrix stamp and no score stamp shows "scores were not imported"; it disappears when phase D has filled the contest.
 
 ## Rejected options
 

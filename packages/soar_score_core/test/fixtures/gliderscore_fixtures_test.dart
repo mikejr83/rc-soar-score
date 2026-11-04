@@ -101,6 +101,8 @@ void main() {
       'comps_edge_cases.json',
       'comps_integrity_cases.json',
       'comps_missing_columns.json',
+      'draws_reference.json',
+      'draws_edge_cases.json',
     ];
 
     // Every column a competition snapshot may carry, with the pattern every
@@ -140,6 +142,7 @@ void main() {
       ),
       'DBParams.Property': RegExp(r'^DBVersion$'),
       'DBParams.PRValue': RegExp(r'^\d+\.\d+$'),
+      'Scores.Updated': RegExp(r'^(True|False)$'),
     };
     // Columns that hold numbers and flags only, per table.
     const numericKeys = <String, Set<String>>{
@@ -158,6 +161,13 @@ void main() {
         'IsPilot', 'OmitFromTeamScore', //
       },
       'Pilots': {'PilotNo'},
+      'Scores': {
+        'CompNo', 'TaskNo', 'RoundNo', 'GroupNo', 'ReFlightNo', 'PilotNo',
+        'SeqNo', 'DrawFreq', 'Time1Mins', 'Time1Secs', 'Time2Mins',
+        'Time2Secs', 'FlightScoreDeduction', 'Landing', 'RawScore',
+        'NormalisedScore', 'Penalty', 'OriginalRoundNo', 'ScoresChecked',
+        'LandingOver75m', 'Helper', 'Laps', 'F5JMotorReStarted', //
+      },
       'Roles': {},
       'DBParams': {},
       'Dur': {
@@ -270,6 +280,8 @@ void main() {
       'comps_reference.json',
       'comps_edge_cases.json',
       'comps_missing_columns.json',
+      'draws_reference.json',
+      'draws_edge_cases.json',
     ]) {
       test('$file refers only to pilots it carries', () {
         final t = tables(file);
@@ -279,6 +291,104 @@ void main() {
         }
       });
     }
+
+    group('draw fixtures (Scores)', () {
+      // The (round, group) cells of one competition's first flights.
+      Map<String, List<Map<String, Object?>>> cells(
+        List<Map<String, Object?>> scores,
+        int comp, {
+        bool reflights = false,
+      }) {
+        final out = <String, List<Map<String, Object?>>>{};
+        for (final r in scores) {
+          if (r['CompNo'] != comp || (r['ReFlightNo'] != 0) != reflights) {
+            continue;
+          }
+          (out['${r['RoundNo']}/${r['GroupNo']}'] ??= []).add(r);
+        }
+        return out;
+      }
+
+      late Map<String, List<Map<String, Object?>>> t;
+      setUpAll(() => t = tables('draws_reference.json'));
+
+      test(
+        'every Scores row belongs to a competition and pilot it carries',
+        () {
+          final members = {
+            for (final r in t['CompPilots']!) '${r['CompNo']}/${r['PilotNo']}',
+          };
+          expect(t['Scores']!.length, greaterThan(500));
+          for (final r in t['Scores']!) {
+            expect(
+              members,
+              contains('${r['CompNo']}/${r['PilotNo']}'),
+              reason: '$r',
+            );
+          }
+        },
+      );
+
+      test('the reference holds the five scenarios of the draw plan', () {
+        final scores = t['Scores']!;
+        expect(
+          {for (final c in t['Comps']!) c['CompNo']},
+          {
+            15, 21, 26, 28, 39, //
+          },
+        );
+        Map<int, Object?> dur = {
+          for (final d in t['Dur']!) d['CompNo']! as int: d,
+        };
+
+        // 15: lane count 6 and a group of 7 pilots (one lane too many).
+        expect(dur[15]!, containsPair('durNbrOfLanes', 6));
+        expect(cells(scores, 15).values.map((c) => c.length), contains(7));
+        // 21: lane count 0, gaps in SeqNo, unequal groups, re-flights and
+        // retired pilots (scored, unscored and re-flight rows for phase D).
+        expect(dur[21]!, containsPair('durNbrOfLanes', 0));
+        expect(
+          cells(scores, 21).values.where((c) {
+            final seq = [for (final r in c) r['SeqNo']! as int]..sort();
+            return seq.first != 1 || seq.last != seq.length;
+          }),
+          isNotEmpty,
+        );
+        expect(cells(scores, 21, reflights: true), isNotEmpty);
+        expect(
+          t['CompPilots']!.where((r) => r['CompNo'] == 21 && r['Retired'] == 1),
+          isNotEmpty,
+        );
+        // 26: configured groups per round (1) differ from the groups drawn.
+        expect(dur[26]!, containsPair('durGroupsPerRound', 1));
+        final groups26 = {
+          for (final r in scores)
+            if (r['CompNo'] == 26) r['GroupNo'],
+        };
+        expect(groups26.length, greaterThan(1));
+        // 28: the last rounds are drawn but not flown.
+        final flown = {
+          for (final r in scores)
+            if (r['CompNo'] == 28 && r['Updated'] == 'True') r['RoundNo'],
+        };
+        final drawn = {
+          for (final r in scores)
+            if (r['CompNo'] == 28) r['RoundNo'],
+        };
+        expect(drawn.length, greaterThan(flown.length));
+        // 39: a pure draw, nothing scored.
+        expect(
+          scores.where((r) => r['CompNo'] == 39 && r['Updated'] == 'True'),
+          isEmpty,
+        );
+      });
+
+      test('draws_edge_cases holds a flight credited to another round', () {
+        final scores = tables('draws_edge_cases.json')['Scores']!;
+        final moved = scores.where((r) => r['OriginalRoundNo'] != r['RoundNo']);
+        expect(moved, hasLength(1));
+      });
+    });
 
     test('the integrity snapshot holds the broken references on purpose', () {
       final t = tables('comps_integrity_cases.json');
