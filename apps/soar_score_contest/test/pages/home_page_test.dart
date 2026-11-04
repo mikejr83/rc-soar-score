@@ -61,11 +61,15 @@ void main() {
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
     await tester.pumpAndSettle();
 
-    expect(find.text('Second Open'), findsOneWidget);
-    // The first contest is listed and shown in the detail pane.
-    expect(find.text('Front Range ALES Open'), findsNWidgets(2));
-    expect(find.text(l10n.lifecycleCreated), findsNWidgets(3));
-    expect(find.text('Oct 17, 2026 to Oct 18, 2026'), findsNWidgets(2));
+    // The latest start is listed first and shown in the detail pane.
+    expect(find.text('Second Open'), findsNWidgets(2));
+    expect(find.text('Front Range ALES Open'), findsOneWidget);
+    expect(
+      tester.getTopLeft(find.text('Second Open').first).dy,
+      lessThan(tester.getTopLeft(find.text('Front Range ALES Open')).dy),
+    );
+    expect(find.text(l10n.lifecycleCreated), findsNWidgets(4));
+    expect(find.text('Oct 24, 2026 to Oct 25, 2026'), findsNWidgets(2));
   });
 
   testWidgets('selecting a contest shows its detail', (tester) async {
@@ -80,11 +84,11 @@ void main() {
 
     await tester.pumpWidget(_app(client));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Second Open'));
+    await tester.tap(find.text('Front Range ALES Open'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Second Open'), findsNWidgets(2));
-    expect(find.text('Oct 24, 2026 to Oct 25, 2026'), findsNWidgets(2));
+    expect(find.text('Front Range ALES Open'), findsNWidgets(2));
+    expect(find.text('Oct 17, 2026 to Oct 18, 2026'), findsNWidgets(2));
     expect(find.byKey(const ValueKey('open-contest')), findsOneWidget);
   });
 

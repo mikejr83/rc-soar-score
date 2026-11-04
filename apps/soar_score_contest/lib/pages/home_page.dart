@@ -60,7 +60,7 @@ class _HomePageState extends State<HomePage> {
     _inspection = exchange == null
         ? const {}
         : await exchange.inspectionContests();
-    return contests;
+    return ContestList.newestFirst(contests);
   }
 
   /// Imports a file and shows the imported contest, selected.
