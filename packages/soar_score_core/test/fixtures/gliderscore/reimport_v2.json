@@ -124,7 +124,7 @@
         },
         {
           "CompNo": 19,
-          "PilotNo": 1,
+          "PilotNo": 76,
           "Team": 0,
           "DrawFreq": 2.4,
           "Retired": 0,
@@ -142,15 +142,6 @@
       "rowCapExceeded": false,
       "rows": [
         {
-          "PilotNo": 1,
-          "Country": "AUS",
-          "FAINumber": "0",
-          "UsualClass": "E",
-          "Filter": "N",
-          "FirstName": "Harper",
-          "LastName": "ZZBirchall"
-        },
-        {
           "PilotNo": 75,
           "Country": "USA",
           "FAINumber": "0",
@@ -161,6 +152,18 @@
           "FAI_ID": "0",
           "FirstName": "Alex",
           "LastName": "Ashdown3"
+        },
+        {
+          "PilotNo": 76,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "State": "NC",
+          "Email": "fixture76@example.test",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Harper",
+          "LastName": "Birchall3"
         },
         {
           "PilotNo": 84,

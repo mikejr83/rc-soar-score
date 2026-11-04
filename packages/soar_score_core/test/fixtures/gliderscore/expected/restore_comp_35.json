@@ -1,0 +1,641 @@
+{
+  "comp_no": 35,
+  "identity": "id:fixture35",
+  "status": "importable",
+  "reason": null,
+  "flights": [
+    {
+      "key": "1,1,1,0,85",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 389,
+        "launch_height": 110,
+        "landing": "points_35"
+      },
+      "raw_score": 369
+    },
+    {
+      "key": "1,1,1,0,150",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 408,
+        "launch_height": 98,
+        "landing": "points_45"
+      },
+      "raw_score": 404
+    },
+    {
+      "key": "1,1,1,0,116",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 494,
+        "launch_height": 77,
+        "landing": "points_50"
+      },
+      "raw_score": 505.5
+    },
+    {
+      "key": "1,1,1,0,138",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 594,
+        "launch_height": 100,
+        "landing": "points_50"
+      },
+      "raw_score": 594
+    },
+    {
+      "key": "1,1,2,0,98",
+      "group": 2,
+      "kind": "entered",
+      "components": {
+        "time_flown": 596,
+        "launch_height": 105,
+        "landing": "points_40"
+      },
+      "raw_score": 583.5
+    },
+    {
+      "key": "1,1,2,0,108",
+      "group": 2,
+      "kind": "entered",
+      "components": {
+        "time_flown": 559,
+        "launch_height": 187,
+        "landing": "points_40"
+      },
+      "raw_score": 505.5
+    },
+    {
+      "key": "1,1,2,0,154",
+      "group": 2,
+      "kind": "entered",
+      "components": {
+        "time_flown": 395,
+        "launch_height": 101,
+        "landing": "points_40"
+      },
+      "raw_score": 384.5
+    },
+    {
+      "key": "1,1,2,0,75",
+      "group": 2,
+      "kind": "entered",
+      "components": {
+        "time_flown": 527,
+        "launch_height": 118,
+        "landing": "points_45"
+      },
+      "raw_score": 513
+    },
+    {
+      "key": "1,2,1,0,150",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 392,
+        "launch_height": 99,
+        "landing": "points_50"
+      },
+      "raw_score": 392.5
+    },
+    {
+      "key": "1,2,1,0,154",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 209,
+        "launch_height": 120
+      },
+      "raw_score": 149
+    },
+    {
+      "key": "1,2,1,0,85",
+      "group": 1,
+      "kind": "restartZero",
+      "components": {
+        "motor_restart": true
+      },
+      "raw_score": 0
+    },
+    {
+      "key": "1,2,1,0,138",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 418,
+        "launch_height": 93,
+        "landing": "points_45"
+      },
+      "raw_score": 416.5
+    },
+    {
+      "key": "1,2,2,0,75",
+      "group": 2,
+      "kind": "entered",
+      "components": {
+        "time_flown": 596,
+        "launch_height": 90,
+        "landing": "points_50"
+      },
+      "raw_score": 601
+    },
+    {
+      "key": "1,2,2,0,98",
+      "group": 2,
+      "kind": "entered",
+      "components": {
+        "time_flown": 425,
+        "launch_height": 153,
+        "landing": "points_35"
+      },
+      "raw_score": 383.5
+    },
+    {
+      "key": "1,2,2,0,108",
+      "group": 2,
+      "kind": "entered",
+      "components": {
+        "time_flown": 405,
+        "launch_height": 143,
+        "landing": "points_45"
+      },
+      "raw_score": 378.5
+    },
+    {
+      "key": "1,2,2,0,116",
+      "group": 2,
+      "kind": "entered",
+      "components": {
+        "time_flown": 597,
+        "launch_height": 140,
+        "landing": "points_50"
+      },
+      "raw_score": 577
+    },
+    {
+      "key": "1,3,1,0,108",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 595,
+        "launch_height": 185,
+        "landing": "points_45"
+      },
+      "raw_score": 547.5
+    },
+    {
+      "key": "1,3,1,0,150",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 598,
+        "launch_height": 98,
+        "landing": "points_50"
+      },
+      "raw_score": 599
+    },
+    {
+      "key": "1,3,1,0,98",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 596,
+        "launch_height": 127,
+        "landing": "points_30"
+      },
+      "raw_score": 562.5
+    },
+    {
+      "key": "1,3,1,0,85",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 593,
+        "launch_height": 143,
+        "landing": "points_45"
+      },
+      "raw_score": 566.5
+    },
+    {
+      "key": "1,3,2,0,75",
+      "group": 2,
+      "kind": "entered",
+      "components": {
+        "time_flown": 595,
+        "launch_height": 59,
+        "landing": "points_50"
+      },
+      "raw_score": 615.5
+    },
+    {
+      "key": "1,3,2,0,116",
+      "group": 2,
+      "kind": "entered",
+      "components": {
+        "time_flown": 599,
+        "launch_height": 60,
+        "landing": "points_50"
+      },
+      "raw_score": 619
+    },
+    {
+      "key": "1,3,2,0,154",
+      "group": 2,
+      "kind": "entered",
+      "components": {
+        "time_flown": 585,
+        "launch_height": 111,
+        "landing": "points_50"
+      },
+      "raw_score": 579.5
+    },
+    {
+      "key": "1,3,2,0,138",
+      "group": 2,
+      "kind": "entered",
+      "components": {
+        "time_flown": 595,
+        "launch_height": 60,
+        "landing": "points_50"
+      },
+      "raw_score": 615
+    },
+    {
+      "key": "1,4,1,0,116",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 596,
+        "launch_height": 71,
+        "landing": "points_45"
+      },
+      "raw_score": 605.5
+    },
+    {
+      "key": "1,4,1,0,138",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 599,
+        "launch_height": 73,
+        "landing": "points_50"
+      },
+      "raw_score": 612.5
+    },
+    {
+      "key": "1,4,1,0,98",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 595,
+        "launch_height": 150,
+        "landing": "points_20"
+      },
+      "raw_score": 540
+    },
+    {
+      "key": "1,4,1,0,150",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 598,
+        "launch_height": 67,
+        "landing": "points_50"
+      },
+      "raw_score": 614.5
+    },
+    {
+      "key": "1,4,2,0,75",
+      "group": 2,
+      "kind": "entered",
+      "components": {
+        "time_flown": 176,
+        "launch_height": 74
+      },
+      "raw_score": 139
+    },
+    {
+      "key": "1,4,2,0,85",
+      "group": 2,
+      "kind": "entered",
+      "components": {
+        "time_flown": 326,
+        "launch_height": 75,
+        "landing": "points_45"
+      },
+      "raw_score": 333.5
+    },
+    {
+      "key": "1,4,2,0,108",
+      "group": 2,
+      "kind": "entered",
+      "components": {
+        "time_flown": 275,
+        "launch_height": 126,
+        "landing": "points_25"
+      },
+      "raw_score": 237
+    },
+    {
+      "key": "1,4,2,0,154",
+      "group": 2,
+      "kind": "entered",
+      "components": {
+        "time_flown": 528,
+        "launch_height": 109,
+        "landing": "points_35"
+      },
+      "raw_score": 508.5
+    },
+    {
+      "key": "1,5,1,0,154",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 586,
+        "launch_height": 113,
+        "landing": "points_35"
+      },
+      "raw_score": 564.5
+    },
+    {
+      "key": "1,5,1,0,116",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 595,
+        "launch_height": 78,
+        "landing": "points_45"
+      },
+      "raw_score": 601
+    },
+    {
+      "key": "1,5,1,0,85",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 594,
+        "launch_height": 76,
+        "landing": "points_45"
+      },
+      "raw_score": 601
+    },
+    {
+      "key": "1,5,1,0,138",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 594,
+        "launch_height": 56
+      },
+      "raw_score": 566
+    },
+    {
+      "key": "1,5,2,0,75",
+      "group": 2,
+      "kind": "restartZero",
+      "components": {
+        "motor_restart": true
+      },
+      "raw_score": 0
+    },
+    {
+      "key": "1,5,2,0,108",
+      "group": 2,
+      "kind": "entered",
+      "components": {
+        "time_flown": 596,
+        "launch_height": 142,
+        "landing": "points_45"
+      },
+      "raw_score": 570
+    },
+    {
+      "key": "1,5,2,0,150",
+      "group": 2,
+      "kind": "entered",
+      "components": {
+        "time_flown": 598,
+        "launch_height": 78,
+        "landing": "points_45"
+      },
+      "raw_score": 604
+    },
+    {
+      "key": "1,5,2,0,98",
+      "group": 2,
+      "kind": "entered",
+      "components": {
+        "time_flown": 597,
+        "launch_height": 93,
+        "landing": "points_40"
+      },
+      "raw_score": 590.5
+    },
+    {
+      "key": "1,6,1,0,108",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 598,
+        "launch_height": 129,
+        "landing": "points_25"
+      },
+      "raw_score": 558.5
+    },
+    {
+      "key": "1,6,1,0,116",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 597,
+        "launch_height": 88,
+        "landing": "points_50"
+      },
+      "raw_score": 603
+    },
+    {
+      "key": "1,6,1,0,85",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 596,
+        "launch_height": 107,
+        "landing": "points_45"
+      },
+      "raw_score": 587.5
+    },
+    {
+      "key": "1,6,1,0,98",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 598,
+        "launch_height": 74,
+        "landing": "points_50"
+      },
+      "raw_score": 611
+    },
+    {
+      "key": "1,6,2,0,75",
+      "group": 2,
+      "kind": "entered",
+      "components": {
+        "time_flown": 596,
+        "launch_height": 37,
+        "landing": "points_50"
+      },
+      "raw_score": 627.5
+    },
+    {
+      "key": "1,6,2,0,138",
+      "group": 2,
+      "kind": "entered",
+      "components": {
+        "time_flown": 593,
+        "launch_height": 39,
+        "landing": "points_50"
+      },
+      "raw_score": 623.5
+    },
+    {
+      "key": "1,6,2,0,150",
+      "group": 2,
+      "kind": "entered",
+      "components": {
+        "time_flown": 595,
+        "launch_height": 77,
+        "landing": "points_50"
+      },
+      "raw_score": 606.5
+    },
+    {
+      "key": "1,6,2,0,154",
+      "group": 2,
+      "kind": "entered",
+      "components": {
+        "time_flown": 592,
+        "launch_height": 117,
+        "landing": "points_35"
+      },
+      "raw_score": 568.5
+    },
+    {
+      "key": "1,7,1,0,108",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 597,
+        "launch_height": 98,
+        "landing": "points_35"
+      },
+      "raw_score": 583
+    },
+    {
+      "key": "1,7,1,0,138",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 597,
+        "launch_height": 37,
+        "landing": "points_50"
+      },
+      "raw_score": 628.5
+    },
+    {
+      "key": "1,7,1,0,75",
+      "group": 1,
+      "kind": "restartZero",
+      "components": {
+        "motor_restart": true
+      },
+      "raw_score": 0
+    },
+    {
+      "key": "1,7,1,0,85",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 594,
+        "launch_height": 67,
+        "landing": "points_45"
+      },
+      "raw_score": 605.5
+    },
+    {
+      "key": "1,7,2,0,98",
+      "group": 2,
+      "kind": "entered",
+      "components": {
+        "time_flown": 598,
+        "launch_height": 60,
+        "landing": "points_40"
+      },
+      "raw_score": 608
+    },
+    {
+      "key": "1,7,2,0,116",
+      "group": 2,
+      "kind": "entered",
+      "components": {
+        "time_flown": 597,
+        "launch_height": 134,
+        "landing": "points_50"
+      },
+      "raw_score": 580
+    },
+    {
+      "key": "1,7,2,0,150",
+      "group": 2,
+      "kind": "entered",
+      "components": {
+        "time_flown": 598,
+        "launch_height": 62,
+        "landing": "points_50"
+      },
+      "raw_score": 617
+    },
+    {
+      "key": "1,7,2,0,154",
+      "group": 2,
+      "kind": "entered",
+      "components": {
+        "time_flown": 598,
+        "launch_height": 108,
+        "landing": "points_35"
+      },
+      "raw_score": 579
+    }
+  ],
+  "reflights": [],
+  "retirements": [
+    {
+      "pilot": 136,
+      "round": 1
+    }
+  ],
+  "landing": "system",
+  "partly_flown_rounds": [],
+  "trailing_unflown_rounds": [
+    8
+  ],
+  "completed_by_default": true,
+  "warnings": [
+    "retirement_round_inferred"
+  ],
+  "content_hash": "a2d2a97bc1bd1562",
+  "landing_entry_keys": {
+    "35": "points_35",
+    "45": "points_45",
+    "50": "points_50",
+    "40": "points_40",
+    "30": "points_30",
+    "20": "points_20",
+    "25": "points_25"
+  }
+}

@@ -1,0 +1,174 @@
+{
+  "comp_no": 19,
+  "identity": "id:fixture19",
+  "status": "importable",
+  "reason": null,
+  "flights": [
+    {
+      "key": "1,1,1,0,75",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 209,
+        "launch_height": 209,
+        "landing": "points_50"
+      },
+      "raw_score": 132
+    },
+    {
+      "key": "1,1,1,0,84",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 130,
+        "launch_height": 194
+      },
+      "raw_score": 33
+    },
+    {
+      "key": "1,1,1,0,105",
+      "group": 1,
+      "kind": "allZero",
+      "components": {},
+      "raw_score": 0
+    },
+    {
+      "key": "1,1,1,0,109",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 247,
+        "launch_height": 204,
+        "landing": "points_45"
+      },
+      "raw_score": 180
+    },
+    {
+      "key": "1,1,1,0,111",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 192,
+        "launch_height": 202,
+        "landing": "points_45"
+      },
+      "raw_score": 131
+    },
+    {
+      "key": "1,1,1,0,115",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 184,
+        "launch_height": 105
+      },
+      "raw_score": 131.5
+    },
+    {
+      "key": "1,2,1,0,75",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 892,
+        "launch_height": 176,
+        "landing": "points_45"
+      },
+      "raw_score": 849
+    },
+    {
+      "key": "1,2,1,0,84",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 894,
+        "launch_height": 175,
+        "landing": "points_50"
+      },
+      "raw_score": 856.5
+    },
+    {
+      "key": "1,2,1,0,109",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 540,
+        "launch_height": 166,
+        "landing": "points_50"
+      },
+      "raw_score": 507
+    },
+    {
+      "key": "1,2,1,0,111",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 10,
+        "launch_height": 14
+      },
+      "raw_score": 3
+    },
+    {
+      "key": "1,3,1,0,75",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 898,
+        "launch_height": 166,
+        "landing": "points_50"
+      },
+      "raw_score": 865
+    },
+    {
+      "key": "1,3,1,0,84",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 894,
+        "launch_height": 194,
+        "landing": "points_50"
+      },
+      "raw_score": 847
+    },
+    {
+      "key": "1,3,1,0,109",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 895,
+        "launch_height": 203,
+        "landing": "points_45"
+      },
+      "raw_score": 831
+    },
+    {
+      "key": "1,3,1,0,111",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 893,
+        "launch_height": 196,
+        "landing": "points_50"
+      },
+      "raw_score": 845
+    }
+  ],
+  "reflights": [],
+  "retirements": [],
+  "landing": "system",
+  "partly_flown_rounds": [
+    2,
+    3
+  ],
+  "trailing_unflown_rounds": [],
+  "completed_by_default": false,
+  "warnings": [
+    "all_zero_flight",
+    "round_partly_flown",
+    "round_partly_flown"
+  ],
+  "content_hash": "8ad6afc039166029",
+  "landing_entry_keys": {
+    "50": "points_50",
+    "45": "points_45"
+  }
+}

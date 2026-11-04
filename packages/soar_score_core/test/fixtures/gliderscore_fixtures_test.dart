@@ -108,6 +108,7 @@ void main() {
       'reimport_v1.json',
       'reimport_v2.json',
       'reimport_v1_copy.json',
+      'reimport_no_compid.json',
     ];
 
     // Every column a competition snapshot may carry, with the pattern every
@@ -299,6 +300,7 @@ void main() {
       'reimport_v1.json',
       'reimport_v2.json',
       'reimport_v1_copy.json',
+      'reimport_no_compid.json',
     ]) {
       test('$file refers only to pilots it carries', () {
         final t = tables(file);
@@ -427,7 +429,7 @@ void main() {
         final scores = t['Scores']!;
         final dur = {for (final d in t['Dur']!) d['CompNo']! as int: d};
         final comps = {for (final c in t['Comps']!) c['CompNo']! as int: c};
-        expect(comps.keys.toSet(), {10, 16, 19, 29, 35});
+        expect(comps.keys.toSet(), {16, 19, 29, 35});
 
         // Motor restart option 1 (35), 2 (29) and NULL (16, with a flagged
         // flight that kept its score).
@@ -496,17 +498,12 @@ void main() {
             reason: 'comp $comp has a partly flown round',
           );
         }
-        // 10 has no CompID and uses landing table 5, with all rounds flown;
-        // the other competitions carry a CompID.
-        expect(comps[10]!.containsKey('CompID'), isFalse);
-        expect(dur[10]!, containsPair('durLndg', 5));
-        expect(scores.where((r) => r['CompNo'] == 10).every(scored), isTrue);
         for (final comp in [16, 19, 29, 35]) {
           expect(comps[comp]!['CompID'], 'FIXTURE$comp');
         }
-        // The landing tables the competitions use are carried.
-        expect({for (final r in t['LndgNames']!) r['LndgNo']}, {5, 9});
-        expect(t['LndgPoints']!.length, 20);
+        // The landing table the competitions use is carried.
+        expect({for (final r in t['LndgNames']!) r['LndgNo']}, {9});
+        expect(t['LndgPoints']!.length, 10);
       });
 
       test('the edge cases hold a partial match, a custom table, a subset '
@@ -526,7 +523,11 @@ void main() {
           t['Dur']!.firstWhere((d) => d['CompNo'] == 9302),
           containsPair('durLndg', 11),
         );
-        expect({for (final r in t['LndgNames']!) r['LndgNo']}, {9, 11});
+        expect({for (final r in t['LndgNames']!) r['LndgNo']}, {5, 9, 11});
+        expect(
+          t['Dur']!.firstWhere((d) => d['CompNo'] == 9305),
+          containsPair('durLndg', 5),
+        );
         expect(
           t['CompPilots']!.where(
             (r) => r['CompNo'] == 9302 && r['Retired'] == 1,
@@ -557,6 +558,11 @@ void main() {
         final copy = tables('reimport_v1_copy.json');
         // The copy is the same content from another file.
         expect(copy, equals(v1));
+        // A database before 2019 has no CompID.
+        final noId = tables('reimport_no_compid.json');
+        expect(noId['Comps']!.single.containsKey('CompID'), isFalse);
+        expect(v1['Comps']!.single['CompID'], 'FIXTURE19');
+        expect(noId['Scores'], equals(v1['Scores']));
         expect(
           _load('reimport_v1_copy.json')['id'],
           isNot(_load('reimport_v1.json')['id']),

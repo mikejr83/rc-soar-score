@@ -53,12 +53,11 @@
 // LndgNames.jsonl and LndgPoints.jsonl (same `mdb-json` call) the script
 // also writes
 //
-//   scores_reference.json     real comps 35, 29, 16, 19 and 10 with their
+//   scores_reference.json     real comps 35, 29, 16 and 19 with their
 //                             Scores rows and landing tables (restart option
 //                             1, 2 and NULL, restart zeros, a floored zero,
 //                             all-zero flights, partly flown rounds, a retired
-//                             pilot, unflown trailing rounds, a competition
-//                             with no CompID and a non-default landing table)
+//                             pilot and unflown trailing rounds)
 //   scores_edge_cases.json    hand-built comps: a partial landing match, a
 //                             reconstructed landing table, a retired pilot
 //                             with no scores, a subset re-flight and
@@ -67,6 +66,7 @@
 //   reimport_v2.json          comp 19 later: round 3 scored, one score
 //                             changed, one pilot added
 //   reimport_v1_copy.json     the same content as v1 from another file
+//   reimport_no_compid.json   v1 without a CompID (a database before 2019)
 //
 // Competition and venue names, comp ids and model names become fakes; the
 // rest of a comp row is codes and flags and is kept (allowlist, as for
@@ -533,6 +533,7 @@ Map<String, String> _competitionFixtures(
     String id = _snapshotId,
     String sourceDbFile = 'GliderScoreData.mdb',
     List<Map<String, Object?>> extraCompPilots = const [],
+    bool dropCompId = false,
   }) {
     final nos = compNos.toSet();
     bool inScope(Map<String, Object?> r) => nos.contains(r['CompNo']);
@@ -546,7 +547,8 @@ Map<String, String> _competitionFixtures(
       {
         'Comps': [
           for (final r in comps)
-            if (inScope(r)) compRow(r),
+            if (inScope(r))
+              if (dropCompId) {...compRow(r)..remove('CompID')} else compRow(r),
         ],
         'CompPilots': cp,
         'Pilots': [
@@ -633,7 +635,7 @@ Map<String, String> _competitionFixtures(
       };
     }
 
-    const refNos = [35, 29, 16, 19, 10];
+    const refNos = [35, 29, 16, 19];
     // Comp 19 early (round 3 only drawn), later (everything scored, one
     // landing changed and one pilot added) and an identical copy of the
     // early file.
@@ -675,7 +677,10 @@ Map<String, String> _competitionFixtures(
         if (r['CompNo'] == 19) (r['PilotNo']! as num).toInt(),
     };
     final addedPilot = (pilotsByNo.keys.toList()..sort()).firstWhere(
-      (no) => !inComp19.contains(no) && (pilotsByNo[no]!['IsPilot'] ?? 1) != 0,
+      (no) =>
+          !inComp19.contains(no) &&
+          // Test users (ZZ) are left out of every import.
+          !(pilotsByNo[no]!['LastName'] as String? ?? '').startsWith('ZZ'),
     );
     final added = {
       ...compPilotRow(compPilots.firstWhere((r) => r['CompNo'] == 19)),
@@ -701,6 +706,14 @@ Map<String, String> _competitionFixtures(
         extraCompPilots: [added],
         id: '00000000-0000-7000-8000-000000000012',
         sourceDbFile: 'GliderScoreData.mdb',
+      ),
+      // The same early file from a database that predates CompID: the
+      // competition is known by number, name and date.
+      'reimport_no_compid.json': snapshot(
+        const [19],
+        extraTables: {...extra19, 'Scores': early},
+        id: '00000000-0000-7000-8000-000000000014',
+        dropCompId: true,
       ),
       'reimport_v1_copy.json': snapshot(
         const [19],
@@ -1285,7 +1298,8 @@ List<Map<String, Object?>> _validLndgPoints(List<Map<String, Object?>> rows) {
 /// Hand-built score cases the real file does not hold: a landing table with
 /// one value that matches nothing (a partial match), a table only the
 /// competition has (reconstructed), a retired pilot who never scored, a
-/// subset re-flight (refused) and two tasks whose rounds overlap (refused).
+/// subset re-flight (refused), two tasks whose rounds overlap (refused) and
+/// a distance landing table.
 String _scoreEdgeCases() {
   Map<String, Object?> comp(int no) => {
     'CompNo': no,
@@ -1312,6 +1326,8 @@ String _scoreEdgeCases() {
     'durPenaltyOverRefHeight': 3,
     'F5JMotorRestartOption': 2,
   };
+  // A scored flight: 9:00 flown (packed 900) from 100 m, so 540 - 50 = 490
+  // points before the landing, which awards [points].
   Map<String, Object?> flight(
     int comp,
     int round,
@@ -1321,7 +1337,8 @@ String _scoreEdgeCases() {
     int group = 1,
     int reflight = 0,
     int? landing,
-    int? raw,
+    int points = 0,
+    bool scored = true,
   }) => {
     'CompNo': comp,
     'TaskNo': task,
@@ -1331,32 +1348,37 @@ String _scoreEdgeCases() {
     'PilotNo': pilot,
     'SeqNo': seq,
     'DrawFreq': 2.4,
-    'Time1Mins': raw == null ? 0 : 1000,
-    'FlightScoreDeduction': raw == null ? 0 : 100,
+    'Time1Mins': scored ? 900 : 0,
+    'FlightScoreDeduction': scored ? 100 : 0,
     'Landing': landing ?? 0,
-    'RawScore': raw ?? 0,
-    'NormalisedScore': raw == null ? 0 : 1000,
+    'RawScore': scored ? 490 + points : 0,
+    'NormalisedScore': scored ? 1000 : 0,
     'OriginalRoundNo': round,
-    'Updated': raw == null ? 'False' : 'True',
+    'Updated': scored ? 'True' : 'False',
     'F5JMotorReStarted': 0,
   };
   // Points table 9 holds 5..50; the landing 7 matches no entry.
   final tableNine = [
     for (var p = 5; p <= 50; p += 5) {'LndgNo': 9, 'Distance': p, 'Points': p},
   ];
-  // A table only 9302 has: three entries with points that differ from
-  // the shipped tables.
+  // Table 5 awards 50 points at 1 m down to 5 at 10 m.
+  final tableFive = [
+    for (var m = 1; m <= 10; m++)
+      {'LndgNo': 5, 'Distance': m, 'Points': 55 - 5 * m},
+  ];
+  // A table only 9302 has: three entries whose points no shipped table
+  // awards.
   final custom = [
-    {'LndgNo': 11, 'Distance': 1, 'Points': 40},
-    {'LndgNo': 11, 'Distance': 2, 'Points': 25},
-    {'LndgNo': 11, 'Distance': 3, 'Points': 10},
+    {'LndgNo': 11, 'Distance': 1, 'Points': 37},
+    {'LndgNo': 11, 'Distance': 2, 'Points': 22},
+    {'LndgNo': 11, 'Distance': 3, 'Points': 11},
   ];
   return _snapshotTables({
     'Comps': [
-      for (final no in [9301, 9302, 9303, 9304]) comp(no),
+      for (final no in [9301, 9302, 9303, 9304, 9305]) comp(no),
     ],
     'CompPilots': [
-      for (final no in [9301, 9302, 9303, 9304])
+      for (final no in [9301, 9302, 9303, 9304, 9305])
         for (final pilot in [2301, 2302, 2303, 2304])
           member(no, pilot, retired: no == 9302 && pilot == 2304),
     ],
@@ -1366,38 +1388,50 @@ String _scoreEdgeCases() {
       {'PilotNo': 2303, 'FirstName': 'Quin', 'LastName': 'Scorethree'},
       {'PilotNo': 2304, 'FirstName': 'Rae', 'LastName': 'Scorefour'},
     ],
-    'Dur': [dur(9301, 9), dur(9302, 11), dur(9303, 9, groups: 2), dur(9304, 9)],
+    'Dur': [
+      dur(9301, 9),
+      dur(9302, 11),
+      dur(9303, 9, groups: 2),
+      dur(9304, 9),
+      dur(9305, 5),
+    ],
     'LndgNames': [
+      {'LndgNo': 5, 'Name': 'F5J Enter Distance'},
       {'LndgNo': 9, 'Name': 'F5J Enter Points'},
       {'LndgNo': 11, 'Name': 'Example Table'},
     ],
-    'LndgPoints': [...tableNine, ...custom],
+    'LndgPoints': [...tableFive, ...tableNine, ...custom],
     'Scores': [
       // 9301: one landing (7) matches nothing in the pinned table.
-      flight(9301, 1, 2301, 1, landing: 50, raw: 640),
-      flight(9301, 1, 2302, 2, landing: 7, raw: 600),
-      flight(9301, 1, 2303, 3, landing: 45, raw: 590),
-      flight(9301, 1, 2304, 4, landing: 40, raw: 580),
+      flight(9301, 1, 2301, 1, landing: 50, points: 50),
+      flight(9301, 1, 2302, 2, landing: 7, points: 35),
+      flight(9301, 1, 2303, 3, landing: 45, points: 45),
+      flight(9301, 1, 2304, 4, landing: 40, points: 40),
       // 9302: landing values come from the competition's own table; pilot
       // 2304 is retired and never scored.
-      flight(9302, 1, 2301, 1, landing: 1, raw: 640),
-      flight(9302, 1, 2302, 2, landing: 2, raw: 600),
-      flight(9302, 1, 2303, 3, landing: 3, raw: 590),
-      flight(9302, 1, 2304, 4),
+      flight(9302, 1, 2301, 1, landing: 1, points: 37),
+      flight(9302, 1, 2302, 2, landing: 2, points: 22),
+      flight(9302, 1, 2303, 3, landing: 3, points: 11),
+      flight(9302, 1, 2304, 4, scored: false),
       // 9303: a re-flight of two of the four pilots of a group (a subset).
-      flight(9303, 1, 2301, 1, landing: 50, raw: 640),
-      flight(9303, 1, 2302, 2, landing: 45, raw: 600),
-      flight(9303, 1, 2303, 3, landing: 40, raw: 590),
-      flight(9303, 1, 2304, 4, landing: 35, raw: 580),
-      flight(9303, 1, 2301, 1, reflight: 1, landing: 50, raw: 645),
-      flight(9303, 1, 2302, 2, reflight: 1, landing: 45, raw: 605),
+      flight(9303, 1, 2301, 1, landing: 50, points: 50),
+      flight(9303, 1, 2302, 2, landing: 45, points: 45),
+      flight(9303, 1, 2303, 3, landing: 40, points: 40),
+      flight(9303, 1, 2304, 4, landing: 35, points: 35),
+      flight(9303, 1, 2301, 1, reflight: 1, landing: 50, points: 50),
+      flight(9303, 1, 2302, 2, reflight: 1, landing: 45, points: 45),
       // 9304: task 1 holds rounds 1 and 2, task 2 starts again at round 2.
-      flight(9304, 1, 2301, 1, landing: 50, raw: 640),
-      flight(9304, 1, 2302, 2, landing: 45, raw: 600),
-      flight(9304, 2, 2301, 1, landing: 50, raw: 640),
-      flight(9304, 2, 2302, 2, landing: 45, raw: 600),
-      flight(9304, 2, 2301, 1, task: 2, landing: 50, raw: 640),
-      flight(9304, 2, 2302, 2, task: 2, landing: 45, raw: 600),
+      flight(9304, 1, 2301, 1, landing: 50, points: 50),
+      flight(9304, 1, 2302, 2, landing: 45, points: 45),
+      flight(9304, 2, 2301, 1, landing: 50, points: 50),
+      flight(9304, 2, 2302, 2, landing: 45, points: 45),
+      flight(9304, 2, 2303, 1, task: 2, landing: 50, points: 50),
+      flight(9304, 2, 2304, 2, task: 2, landing: 45, points: 45),
+      // 9305: landing table 5 awards by distance (1 m is 50 points).
+      flight(9305, 1, 2301, 1, landing: 1, points: 50),
+      flight(9305, 1, 2302, 2, landing: 3, points: 40),
+      flight(9305, 1, 2303, 3, landing: 10, points: 5),
+      flight(9305, 1, 2304, 4, landing: 2, points: 45),
     ],
   });
 }

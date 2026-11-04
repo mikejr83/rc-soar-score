@@ -1,0 +1,1072 @@
+{
+  "comp_no": 21,
+  "identity": "id:fixture21",
+  "status": "importable",
+  "reason": null,
+  "flights": [
+    {
+      "key": "1,1,1,0,97",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 405,
+        "launch_height": 162,
+        "landing": "points_35"
+      },
+      "raw_score": 359
+    },
+    {
+      "key": "1,1,1,0,93",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 460,
+        "launch_height": 153
+      },
+      "raw_score": 383.5
+    },
+    {
+      "key": "1,1,1,0,105",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 462,
+        "launch_height": 158,
+        "landing": "points_50"
+      },
+      "raw_score": 433
+    },
+    {
+      "key": "1,1,1,0,121",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 150,
+        "launch_height": 98
+      },
+      "raw_score": 101
+    },
+    {
+      "key": "1,1,2,0,118",
+      "group": 2,
+      "kind": "entered",
+      "components": {
+        "time_flown": 278,
+        "launch_height": 205,
+        "landing": "points_15"
+      },
+      "raw_score": 178
+    },
+    {
+      "key": "1,1,2,0,85",
+      "group": 2,
+      "kind": "entered",
+      "components": {
+        "time_flown": 230,
+        "launch_height": 142,
+        "landing": "points_10"
+      },
+      "raw_score": 169
+    },
+    {
+      "key": "1,1,2,0,116",
+      "group": 2,
+      "kind": "entered",
+      "components": {
+        "time_flown": 319,
+        "launch_height": 208,
+        "landing": "points_45"
+      },
+      "raw_score": 240
+    },
+    {
+      "key": "1,1,3,0,75",
+      "group": 3,
+      "kind": "entered",
+      "components": {
+        "time_flown": 341,
+        "launch_height": 106,
+        "landing": "points_50"
+      },
+      "raw_score": 338
+    },
+    {
+      "key": "1,1,3,0,82",
+      "group": 3,
+      "kind": "entered",
+      "components": {
+        "time_flown": 365,
+        "launch_height": 177,
+        "landing": "points_5"
+      },
+      "raw_score": 281.5
+    },
+    {
+      "key": "1,1,3,0,84",
+      "group": 3,
+      "kind": "entered",
+      "components": {
+        "time_flown": 383,
+        "launch_height": 131,
+        "landing": "points_50"
+      },
+      "raw_score": 367.5
+    },
+    {
+      "key": "1,1,3,0,117",
+      "group": 3,
+      "kind": "entered",
+      "components": {
+        "time_flown": 172,
+        "launch_height": 132,
+        "landing": "points_45"
+      },
+      "raw_score": 151
+    },
+    {
+      "key": "1,1,3,0,120",
+      "group": 3,
+      "kind": "entered",
+      "components": {
+        "time_flown": 505,
+        "launch_height": 142,
+        "landing": "points_20"
+      },
+      "raw_score": 454
+    },
+    {
+      "key": "1,2,1,0,75",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 186,
+        "launch_height": 145
+      },
+      "raw_score": 113.5
+    },
+    {
+      "key": "1,2,1,0,118",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 201,
+        "launch_height": 162
+      },
+      "raw_score": 120
+    },
+    {
+      "key": "1,2,1,0,97",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 242,
+        "launch_height": 136
+      },
+      "raw_score": 174
+    },
+    {
+      "key": "1,2,1,0,116",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 335,
+        "launch_height": 174,
+        "landing": "points_45"
+      },
+      "raw_score": 293
+    },
+    {
+      "key": "1,2,2,0,84",
+      "group": 2,
+      "kind": "entered",
+      "components": {
+        "time_flown": 365,
+        "launch_height": 189,
+        "landing": "points_50"
+      },
+      "raw_score": 320.5
+    },
+    {
+      "key": "1,2,2,0,105",
+      "group": 2,
+      "kind": "entered",
+      "components": {
+        "time_flown": 457,
+        "launch_height": 158,
+        "landing": "points_50"
+      },
+      "raw_score": 428
+    },
+    {
+      "key": "1,2,2,0,93",
+      "group": 2,
+      "kind": "entered",
+      "components": {
+        "time_flown": 467,
+        "launch_height": 102,
+        "landing": "points_45"
+      },
+      "raw_score": 461
+    },
+    {
+      "key": "1,2,3,0,82",
+      "group": 3,
+      "kind": "entered",
+      "components": {
+        "time_flown": 308,
+        "launch_height": 191,
+        "landing": "points_50"
+      },
+      "raw_score": 262.5
+    },
+    {
+      "key": "1,2,3,0,85",
+      "group": 3,
+      "kind": "entered",
+      "components": {
+        "time_flown": 245,
+        "launch_height": 182
+      },
+      "raw_score": 154
+    },
+    {
+      "key": "1,2,3,0,117",
+      "group": 3,
+      "kind": "entered",
+      "components": {
+        "time_flown": 205,
+        "launch_height": 135,
+        "landing": "points_45"
+      },
+      "raw_score": 182.5
+    },
+    {
+      "key": "1,2,3,0,121",
+      "group": 3,
+      "kind": "entered",
+      "components": {
+        "time_flown": 221,
+        "launch_height": 140
+      },
+      "raw_score": 151
+    },
+    {
+      "key": "1,2,3,0,120",
+      "group": 3,
+      "kind": "entered",
+      "components": {
+        "time_flown": 351,
+        "launch_height": 171,
+        "landing": "points_45"
+      },
+      "raw_score": 310.5
+    },
+    {
+      "key": "1,3,1,0,117",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 262,
+        "launch_height": 161,
+        "landing": "points_10"
+      },
+      "raw_score": 191.5
+    },
+    {
+      "key": "1,3,1,0,116",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 247,
+        "launch_height": 186,
+        "landing": "points_20"
+      },
+      "raw_score": 174
+    },
+    {
+      "key": "1,3,1,0,93",
+      "group": 1,
+      "kind": "allZero",
+      "components": {},
+      "raw_score": 0
+    },
+    {
+      "key": "1,3,1,0,84",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 227,
+        "launch_height": 185,
+        "landing": "points_50"
+      },
+      "raw_score": 184.5
+    },
+    {
+      "key": "1,3,1,0,118",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 211,
+        "launch_height": 167
+      },
+      "raw_score": 127.5
+    },
+    {
+      "key": "1,3,2,0,82",
+      "group": 2,
+      "kind": "entered",
+      "components": {
+        "time_flown": 208,
+        "launch_height": 184,
+        "landing": "points_30"
+      },
+      "raw_score": 146
+    },
+    {
+      "key": "1,3,2,0,97",
+      "group": 2,
+      "kind": "entered",
+      "components": {
+        "time_flown": 258,
+        "launch_height": 192,
+        "landing": "points_25"
+      },
+      "raw_score": 187
+    },
+    {
+      "key": "1,3,2,0,120",
+      "group": 2,
+      "kind": "allZero",
+      "components": {},
+      "raw_score": 0
+    },
+    {
+      "key": "1,3,3,0,75",
+      "group": 3,
+      "kind": "entered",
+      "components": {
+        "time_flown": 135,
+        "launch_height": 110,
+        "landing": "points_40"
+      },
+      "raw_score": 120
+    },
+    {
+      "key": "1,3,3,0,85",
+      "group": 3,
+      "kind": "entered",
+      "components": {
+        "time_flown": 327,
+        "launch_height": 199
+      },
+      "raw_score": 227.5
+    },
+    {
+      "key": "1,3,3,0,105",
+      "group": 3,
+      "kind": "entered",
+      "components": {
+        "time_flown": 382,
+        "launch_height": 182,
+        "landing": "points_45"
+      },
+      "raw_score": 336
+    },
+    {
+      "key": "1,3,3,0,121",
+      "group": 3,
+      "kind": "entered",
+      "components": {
+        "time_flown": 242,
+        "launch_height": 165
+      },
+      "raw_score": 159.5
+    },
+    {
+      "key": "1,4,1,0,117",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 499,
+        "launch_height": 166,
+        "landing": "points_50"
+      },
+      "raw_score": 466
+    },
+    {
+      "key": "1,4,1,0,105",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 588,
+        "launch_height": 161,
+        "landing": "points_40"
+      },
+      "raw_score": 547.5
+    },
+    {
+      "key": "1,4,1,0,75",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 175,
+        "launch_height": 139,
+        "landing": "points_45"
+      },
+      "raw_score": 150.5
+    },
+    {
+      "key": "1,4,1,0,116",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 593,
+        "launch_height": 174,
+        "landing": "points_40"
+      },
+      "raw_score": 546
+    },
+    {
+      "key": "1,4,2,0,82",
+      "group": 2,
+      "kind": "entered",
+      "components": {
+        "time_flown": 228,
+        "launch_height": 198
+      },
+      "raw_score": 129
+    },
+    {
+      "key": "1,4,2,0,118",
+      "group": 2,
+      "kind": "allZero",
+      "components": {},
+      "raw_score": 0
+    },
+    {
+      "key": "1,4,2,0,93",
+      "group": 2,
+      "kind": "entered",
+      "components": {
+        "time_flown": 162,
+        "launch_height": 120
+      },
+      "raw_score": 102
+    },
+    {
+      "key": "1,4,2,0,121",
+      "group": 2,
+      "kind": "entered",
+      "components": {
+        "time_flown": 141,
+        "launch_height": 144
+      },
+      "raw_score": 69
+    },
+    {
+      "key": "1,4,3,0,84",
+      "group": 3,
+      "kind": "entered",
+      "components": {
+        "time_flown": 330,
+        "launch_height": 200,
+        "landing": "points_50"
+      },
+      "raw_score": 280
+    },
+    {
+      "key": "1,4,3,0,85",
+      "group": 3,
+      "kind": "allZero",
+      "components": {},
+      "raw_score": 0
+    },
+    {
+      "key": "1,4,3,0,97",
+      "group": 3,
+      "kind": "entered",
+      "components": {
+        "time_flown": 288,
+        "launch_height": 168,
+        "landing": "points_30"
+      },
+      "raw_score": 234
+    },
+    {
+      "key": "1,4,3,0,120",
+      "group": 3,
+      "kind": "entered",
+      "components": {
+        "time_flown": 253,
+        "launch_height": 189
+      },
+      "raw_score": 158.5
+    },
+    {
+      "key": "1,5,1,0,121",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 184,
+        "launch_height": 154
+      },
+      "raw_score": 107
+    },
+    {
+      "key": "1,5,1,0,116",
+      "group": 1,
+      "kind": "allZero",
+      "components": {},
+      "raw_score": 0
+    },
+    {
+      "key": "1,5,1,0,84",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 254,
+        "launch_height": 195,
+        "landing": "points_50"
+      },
+      "raw_score": 206.5
+    },
+    {
+      "key": "1,5,1,0,82",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 214,
+        "launch_height": 198,
+        "landing": "points_10"
+      },
+      "raw_score": 125
+    },
+    {
+      "key": "1,5,2,0,105",
+      "group": 2,
+      "kind": "entered",
+      "components": {
+        "time_flown": 150,
+        "launch_height": 145
+      },
+      "raw_score": 77.5
+    },
+    {
+      "key": "1,5,2,0,118",
+      "group": 2,
+      "kind": "allZero",
+      "components": {},
+      "raw_score": 0
+    },
+    {
+      "key": "1,5,2,0,120",
+      "group": 2,
+      "kind": "entered",
+      "components": {
+        "time_flown": 244,
+        "launch_height": 136,
+        "landing": "points_15"
+      },
+      "raw_score": 191
+    },
+    {
+      "key": "1,5,2,0,117",
+      "group": 2,
+      "kind": "entered",
+      "components": {
+        "time_flown": 227,
+        "launch_height": 138
+      },
+      "raw_score": 158
+    },
+    {
+      "key": "1,5,3,0,75",
+      "group": 3,
+      "kind": "entered",
+      "components": {
+        "time_flown": 134,
+        "launch_height": 78,
+        "landing": "points_20"
+      },
+      "raw_score": 115
+    },
+    {
+      "key": "1,5,3,0,85",
+      "group": 3,
+      "kind": "allZero",
+      "components": {},
+      "raw_score": 0
+    },
+    {
+      "key": "1,5,3,0,93",
+      "group": 3,
+      "kind": "entered",
+      "components": {
+        "time_flown": 181,
+        "launch_height": 147,
+        "landing": "points_50"
+      },
+      "raw_score": 157.5
+    },
+    {
+      "key": "1,5,3,0,97",
+      "group": 3,
+      "kind": "allZero",
+      "components": {},
+      "raw_score": 0
+    },
+    {
+      "key": "1,6,1,0,82",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 465,
+        "launch_height": 225,
+        "landing": "points_40"
+      },
+      "raw_score": 330
+    },
+    {
+      "key": "1,6,1,0,93",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 277,
+        "launch_height": 134
+      },
+      "raw_score": 210
+    },
+    {
+      "key": "1,6,1,0,116",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 545,
+        "launch_height": 197,
+        "landing": "points_35"
+      },
+      "raw_score": 481.5
+    },
+    {
+      "key": "1,6,1,0,85",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 349,
+        "launch_height": 204
+      },
+      "raw_score": 237
+    },
+    {
+      "key": "1,6,2,0,75",
+      "group": 2,
+      "kind": "entered",
+      "components": {
+        "time_flown": 589,
+        "launch_height": 150,
+        "landing": "points_45"
+      },
+      "raw_score": 559
+    },
+    {
+      "key": "1,6,2,0,84",
+      "group": 2,
+      "kind": "entered",
+      "components": {
+        "time_flown": 590,
+        "launch_height": 203,
+        "landing": "points_45"
+      },
+      "raw_score": 526
+    },
+    {
+      "key": "1,6,2,0,97",
+      "group": 2,
+      "kind": "entered",
+      "components": {
+        "time_flown": 4,
+        "launch_height": 3
+      },
+      "raw_score": 2.5
+    },
+    {
+      "key": "1,6,2,0,121",
+      "group": 2,
+      "kind": "entered",
+      "components": {
+        "time_flown": 265,
+        "launch_height": 184
+      },
+      "raw_score": 173
+    },
+    {
+      "key": "1,7,1,0,75",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 180,
+        "launch_height": 134,
+        "landing": "points_40"
+      },
+      "raw_score": 153
+    },
+    {
+      "key": "1,7,1,0,93",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 595,
+        "launch_height": 126,
+        "landing": "points_50"
+      },
+      "raw_score": 582
+    },
+    {
+      "key": "1,7,1,0,82",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 317,
+        "launch_height": 232,
+        "landing": "points_45"
+      },
+      "raw_score": 166
+    },
+    {
+      "key": "1,7,1,0,85",
+      "group": 1,
+      "kind": "allZero",
+      "components": {},
+      "raw_score": 0
+    },
+    {
+      "key": "1,7,2,0,84",
+      "group": 2,
+      "kind": "entered",
+      "components": {
+        "time_flown": 592,
+        "launch_height": 162,
+        "landing": "points_50"
+      },
+      "raw_score": 561
+    },
+    {
+      "key": "1,7,2,0,97",
+      "group": 2,
+      "kind": "entered",
+      "components": {
+        "time_flown": 276,
+        "launch_height": 194,
+        "landing": "points_40"
+      },
+      "raw_score": 219
+    },
+    {
+      "key": "1,7,2,0,116",
+      "group": 2,
+      "kind": "entered",
+      "components": {
+        "time_flown": 587,
+        "launch_height": 220,
+        "landing": "points_45"
+      },
+      "raw_score": 472
+    },
+    {
+      "key": "1,7,2,0,121",
+      "group": 2,
+      "kind": "entered",
+      "components": {
+        "time_flown": 374,
+        "launch_height": 173
+      },
+      "raw_score": 287.5
+    },
+    {
+      "key": "1,8,1,0,84",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 405,
+        "launch_height": 181,
+        "landing": "points_50"
+      },
+      "raw_score": 364.5
+    },
+    {
+      "key": "1,8,1,0,85",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 410,
+        "launch_height": 226,
+        "landing": "points_45"
+      },
+      "raw_score": 277
+    },
+    {
+      "key": "1,8,1,0,82",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 524,
+        "launch_height": 186,
+        "landing": "points_45"
+      },
+      "raw_score": 476
+    },
+    {
+      "key": "1,8,1,0,97",
+      "group": 1,
+      "kind": "allZero",
+      "components": {},
+      "raw_score": 0
+    },
+    {
+      "key": "1,8,2,0,75",
+      "group": 2,
+      "kind": "entered",
+      "components": {
+        "time_flown": 379,
+        "launch_height": 116,
+        "landing": "points_10"
+      },
+      "raw_score": 331
+    },
+    {
+      "key": "1,8,2,0,93",
+      "group": 2,
+      "kind": "entered",
+      "components": {
+        "time_flown": 382,
+        "launch_height": 106,
+        "landing": "points_40"
+      },
+      "raw_score": 369
+    },
+    {
+      "key": "1,8,2,0,116",
+      "group": 2,
+      "kind": "allZero",
+      "components": {},
+      "raw_score": 0
+    },
+    {
+      "key": "1,8,2,0,121",
+      "group": 2,
+      "kind": "entered",
+      "components": {
+        "time_flown": 147,
+        "launch_height": 129,
+        "landing": "points_35"
+      },
+      "raw_score": 117.5
+    },
+    {
+      "key": "1,8,2,1,75",
+      "group": 3,
+      "kind": "entered",
+      "components": {
+        "time_flown": 267,
+        "launch_height": 110,
+        "landing": "points_25"
+      },
+      "raw_score": 237
+    },
+    {
+      "key": "1,8,2,1,93",
+      "group": 3,
+      "kind": "entered",
+      "components": {
+        "time_flown": 592,
+        "launch_height": 162,
+        "landing": "points_45"
+      },
+      "raw_score": 556
+    },
+    {
+      "key": "1,8,2,1,116",
+      "group": 3,
+      "kind": "entered",
+      "components": {
+        "time_flown": 447,
+        "launch_height": 181,
+        "landing": "points_50"
+      },
+      "raw_score": 406.5
+    },
+    {
+      "key": "1,8,2,1,121",
+      "group": 3,
+      "kind": "entered",
+      "components": {
+        "time_flown": 169,
+        "launch_height": 135,
+        "landing": "points_35"
+      },
+      "raw_score": 136.5
+    },
+    {
+      "key": "1,9,1,0,82",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 528,
+        "launch_height": 199,
+        "landing": "points_45"
+      },
+      "raw_score": 473.5
+    },
+    {
+      "key": "1,9,1,0,116",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 576,
+        "launch_height": 201,
+        "landing": "points_35"
+      },
+      "raw_score": 508
+    },
+    {
+      "key": "1,9,1,0,97",
+      "group": 1,
+      "kind": "allZero",
+      "components": {},
+      "raw_score": 0
+    },
+    {
+      "key": "1,9,1,0,75",
+      "group": 1,
+      "kind": "entered",
+      "components": {
+        "time_flown": 278,
+        "launch_height": 117,
+        "landing": "points_10"
+      },
+      "raw_score": 229.5
+    },
+    {
+      "key": "1,9,2,0,84",
+      "group": 2,
+      "kind": "entered",
+      "components": {
+        "time_flown": 593,
+        "launch_height": 183,
+        "landing": "points_50"
+      },
+      "raw_score": 551.5
+    },
+    {
+      "key": "1,9,2,0,85",
+      "group": 2,
+      "kind": "allZero",
+      "components": {},
+      "raw_score": 0
+    },
+    {
+      "key": "1,9,2,0,93",
+      "group": 2,
+      "kind": "entered",
+      "components": {
+        "time_flown": 594,
+        "launch_height": 184,
+        "landing": "points_45"
+      },
+      "raw_score": 547
+    },
+    {
+      "key": "1,9,2,0,121",
+      "group": 2,
+      "kind": "entered",
+      "components": {
+        "time_flown": 534,
+        "launch_height": 172
+      },
+      "raw_score": 448
+    }
+  ],
+  "reflights": [
+    {
+      "round": 8,
+      "source_group": 2,
+      "flown_group": 3,
+      "members": [
+        {
+          "pilot": 75,
+          "role": "groupMember",
+          "position": 1
+        },
+        {
+          "pilot": 93,
+          "role": "groupMember",
+          "position": 2
+        },
+        {
+          "pilot": 116,
+          "role": "groupMember",
+          "position": 3
+        },
+        {
+          "pilot": 121,
+          "role": "groupMember",
+          "position": 4
+        }
+      ]
+    }
+  ],
+  "retirements": [
+    {
+      "pilot": 105,
+      "round": 6
+    },
+    {
+      "pilot": 117,
+      "round": 6
+    },
+    {
+      "pilot": 118,
+      "round": 6
+    },
+    {
+      "pilot": 120,
+      "round": 6
+    }
+  ],
+  "landing": "system",
+  "partly_flown_rounds": [],
+  "trailing_unflown_rounds": [],
+  "completed_by_default": true,
+  "warnings": [
+    "all_zero_flight",
+    "all_zero_flight",
+    "all_zero_flight",
+    "all_zero_flight",
+    "all_zero_flight",
+    "all_zero_flight",
+    "all_zero_flight",
+    "all_zero_flight",
+    "all_zero_flight",
+    "all_zero_flight",
+    "all_zero_flight",
+    "all_zero_flight",
+    "all_zero_flight",
+    "retirement_round_inferred",
+    "retirement_round_inferred",
+    "retirement_round_inferred",
+    "retirement_round_inferred"
+  ],
+  "content_hash": "5e044c9b783d508e",
+  "landing_entry_keys": {
+    "35": "points_35",
+    "50": "points_50",
+    "15": "points_15",
+    "10": "points_10",
+    "45": "points_45",
+    "5": "points_5",
+    "20": "points_20",
+    "30": "points_30",
+    "25": "points_25",
+    "40": "points_40"
+  }
+}

@@ -5,7 +5,7 @@
   "tables": [
     {
       "name": "Comps",
-      "rowCount": 4,
+      "rowCount": 5,
       "rowCapExceeded": false,
       "rows": [
         {
@@ -39,12 +39,20 @@
           "CompName": "Fixture Open 9304",
           "CompVenue": "Example Field",
           "GSCompClass": "F5J"
+        },
+        {
+          "CompNo": 9305,
+          "CompDate": "06/14/26 00:00:00",
+          "CompID": "FIXTURE9305",
+          "CompName": "Fixture Open 9305",
+          "CompVenue": "Example Field",
+          "GSCompClass": "F5J"
         }
       ]
     },
     {
       "name": "CompPilots",
-      "rowCount": 16,
+      "rowCount": 20,
       "rowCapExceeded": false,
       "rows": [
         {
@@ -143,6 +151,30 @@
           "PilotNo": 2304,
           "Role": "Plt",
           "IsPilot": 1
+        },
+        {
+          "CompNo": 9305,
+          "PilotNo": 2301,
+          "Role": "Plt",
+          "IsPilot": 1
+        },
+        {
+          "CompNo": 9305,
+          "PilotNo": 2302,
+          "Role": "Plt",
+          "IsPilot": 1
+        },
+        {
+          "CompNo": 9305,
+          "PilotNo": 2303,
+          "Role": "Plt",
+          "IsPilot": 1
+        },
+        {
+          "CompNo": 9305,
+          "PilotNo": 2304,
+          "Role": "Plt",
+          "IsPilot": 1
         }
       ]
     },
@@ -175,7 +207,7 @@
     },
     {
       "name": "Dur",
-      "rowCount": 4,
+      "rowCount": 5,
       "rowCapExceeded": false,
       "rows": [
         {
@@ -217,14 +249,28 @@
           "durPenaltyUpToRefHeight": 0.5,
           "durPenaltyOverRefHeight": 3,
           "F5JMotorRestartOption": 2
+        },
+        {
+          "CompNo": 9305,
+          "durTargetTime": 600,
+          "durGroupsPerRound": 1,
+          "durLndg": 5,
+          "durRefHeight": 200,
+          "durPenaltyUpToRefHeight": 0.5,
+          "durPenaltyOverRefHeight": 3,
+          "F5JMotorRestartOption": 2
         }
       ]
     },
     {
       "name": "LndgNames",
-      "rowCount": 2,
+      "rowCount": 3,
       "rowCapExceeded": false,
       "rows": [
+        {
+          "LndgNo": 5,
+          "Name": "F5J Enter Distance"
+        },
         {
           "LndgNo": 9,
           "Name": "F5J Enter Points"
@@ -237,9 +283,59 @@
     },
     {
       "name": "LndgPoints",
-      "rowCount": 13,
+      "rowCount": 23,
       "rowCapExceeded": false,
       "rows": [
+        {
+          "LndgNo": 5,
+          "Distance": 1,
+          "Points": 50
+        },
+        {
+          "LndgNo": 5,
+          "Distance": 2,
+          "Points": 45
+        },
+        {
+          "LndgNo": 5,
+          "Distance": 3,
+          "Points": 40
+        },
+        {
+          "LndgNo": 5,
+          "Distance": 4,
+          "Points": 35
+        },
+        {
+          "LndgNo": 5,
+          "Distance": 5,
+          "Points": 30
+        },
+        {
+          "LndgNo": 5,
+          "Distance": 6,
+          "Points": 25
+        },
+        {
+          "LndgNo": 5,
+          "Distance": 7,
+          "Points": 20
+        },
+        {
+          "LndgNo": 5,
+          "Distance": 8,
+          "Points": 15
+        },
+        {
+          "LndgNo": 5,
+          "Distance": 9,
+          "Points": 10
+        },
+        {
+          "LndgNo": 5,
+          "Distance": 10,
+          "Points": 5
+        },
         {
           "LndgNo": 9,
           "Distance": 5,
@@ -293,45 +389,49 @@
         {
           "LndgNo": 11,
           "Distance": 1,
-          "Points": 40
+          "Points": 37
         },
         {
           "LndgNo": 11,
           "Distance": 2,
-          "Points": 25
+          "Points": 22
         },
         {
           "LndgNo": 11,
           "Distance": 3,
-          "Points": 10
+          "Points": 11
         }
       ]
     },
     {
       "name": "Scores",
-      "rowCount": 20,
+      "rowCount": 24,
       "rowCapExceeded": false,
       "rows": [
-          {"CompNo":9301,"TaskNo":1,"RoundNo":1,"GroupNo":1,"ReFlightNo":0,"PilotNo":2301,"SeqNo":1,"DrawFreq":2.4,"Time1Mins":1000,"FlightScoreDeduction":100,"Landing":50,"RawScore":640,"NormalisedScore":1000,"OriginalRoundNo":1,"Updated":"True","F5JMotorReStarted":0},
-          {"CompNo":9301,"TaskNo":1,"RoundNo":1,"GroupNo":1,"ReFlightNo":0,"PilotNo":2302,"SeqNo":2,"DrawFreq":2.4,"Time1Mins":1000,"FlightScoreDeduction":100,"Landing":7,"RawScore":600,"NormalisedScore":1000,"OriginalRoundNo":1,"Updated":"True","F5JMotorReStarted":0},
-          {"CompNo":9301,"TaskNo":1,"RoundNo":1,"GroupNo":1,"ReFlightNo":0,"PilotNo":2303,"SeqNo":3,"DrawFreq":2.4,"Time1Mins":1000,"FlightScoreDeduction":100,"Landing":45,"RawScore":590,"NormalisedScore":1000,"OriginalRoundNo":1,"Updated":"True","F5JMotorReStarted":0},
-          {"CompNo":9301,"TaskNo":1,"RoundNo":1,"GroupNo":1,"ReFlightNo":0,"PilotNo":2304,"SeqNo":4,"DrawFreq":2.4,"Time1Mins":1000,"FlightScoreDeduction":100,"Landing":40,"RawScore":580,"NormalisedScore":1000,"OriginalRoundNo":1,"Updated":"True","F5JMotorReStarted":0},
-          {"CompNo":9302,"TaskNo":1,"RoundNo":1,"GroupNo":1,"ReFlightNo":0,"PilotNo":2301,"SeqNo":1,"DrawFreq":2.4,"Time1Mins":1000,"FlightScoreDeduction":100,"Landing":1,"RawScore":640,"NormalisedScore":1000,"OriginalRoundNo":1,"Updated":"True","F5JMotorReStarted":0},
-          {"CompNo":9302,"TaskNo":1,"RoundNo":1,"GroupNo":1,"ReFlightNo":0,"PilotNo":2302,"SeqNo":2,"DrawFreq":2.4,"Time1Mins":1000,"FlightScoreDeduction":100,"Landing":2,"RawScore":600,"NormalisedScore":1000,"OriginalRoundNo":1,"Updated":"True","F5JMotorReStarted":0},
-          {"CompNo":9302,"TaskNo":1,"RoundNo":1,"GroupNo":1,"ReFlightNo":0,"PilotNo":2303,"SeqNo":3,"DrawFreq":2.4,"Time1Mins":1000,"FlightScoreDeduction":100,"Landing":3,"RawScore":590,"NormalisedScore":1000,"OriginalRoundNo":1,"Updated":"True","F5JMotorReStarted":0},
+          {"CompNo":9301,"TaskNo":1,"RoundNo":1,"GroupNo":1,"ReFlightNo":0,"PilotNo":2301,"SeqNo":1,"DrawFreq":2.4,"Time1Mins":900,"FlightScoreDeduction":100,"Landing":50,"RawScore":540,"NormalisedScore":1000,"OriginalRoundNo":1,"Updated":"True","F5JMotorReStarted":0},
+          {"CompNo":9301,"TaskNo":1,"RoundNo":1,"GroupNo":1,"ReFlightNo":0,"PilotNo":2302,"SeqNo":2,"DrawFreq":2.4,"Time1Mins":900,"FlightScoreDeduction":100,"Landing":7,"RawScore":525,"NormalisedScore":1000,"OriginalRoundNo":1,"Updated":"True","F5JMotorReStarted":0},
+          {"CompNo":9301,"TaskNo":1,"RoundNo":1,"GroupNo":1,"ReFlightNo":0,"PilotNo":2303,"SeqNo":3,"DrawFreq":2.4,"Time1Mins":900,"FlightScoreDeduction":100,"Landing":45,"RawScore":535,"NormalisedScore":1000,"OriginalRoundNo":1,"Updated":"True","F5JMotorReStarted":0},
+          {"CompNo":9301,"TaskNo":1,"RoundNo":1,"GroupNo":1,"ReFlightNo":0,"PilotNo":2304,"SeqNo":4,"DrawFreq":2.4,"Time1Mins":900,"FlightScoreDeduction":100,"Landing":40,"RawScore":530,"NormalisedScore":1000,"OriginalRoundNo":1,"Updated":"True","F5JMotorReStarted":0},
+          {"CompNo":9302,"TaskNo":1,"RoundNo":1,"GroupNo":1,"ReFlightNo":0,"PilotNo":2301,"SeqNo":1,"DrawFreq":2.4,"Time1Mins":900,"FlightScoreDeduction":100,"Landing":1,"RawScore":527,"NormalisedScore":1000,"OriginalRoundNo":1,"Updated":"True","F5JMotorReStarted":0},
+          {"CompNo":9302,"TaskNo":1,"RoundNo":1,"GroupNo":1,"ReFlightNo":0,"PilotNo":2302,"SeqNo":2,"DrawFreq":2.4,"Time1Mins":900,"FlightScoreDeduction":100,"Landing":2,"RawScore":512,"NormalisedScore":1000,"OriginalRoundNo":1,"Updated":"True","F5JMotorReStarted":0},
+          {"CompNo":9302,"TaskNo":1,"RoundNo":1,"GroupNo":1,"ReFlightNo":0,"PilotNo":2303,"SeqNo":3,"DrawFreq":2.4,"Time1Mins":900,"FlightScoreDeduction":100,"Landing":3,"RawScore":501,"NormalisedScore":1000,"OriginalRoundNo":1,"Updated":"True","F5JMotorReStarted":0},
           {"CompNo":9302,"TaskNo":1,"RoundNo":1,"GroupNo":1,"ReFlightNo":0,"PilotNo":2304,"SeqNo":4,"DrawFreq":2.4,"Time1Mins":0,"FlightScoreDeduction":0,"Landing":0,"RawScore":0,"NormalisedScore":0,"OriginalRoundNo":1,"Updated":"False","F5JMotorReStarted":0},
-          {"CompNo":9303,"TaskNo":1,"RoundNo":1,"GroupNo":1,"ReFlightNo":0,"PilotNo":2301,"SeqNo":1,"DrawFreq":2.4,"Time1Mins":1000,"FlightScoreDeduction":100,"Landing":50,"RawScore":640,"NormalisedScore":1000,"OriginalRoundNo":1,"Updated":"True","F5JMotorReStarted":0},
-          {"CompNo":9303,"TaskNo":1,"RoundNo":1,"GroupNo":1,"ReFlightNo":0,"PilotNo":2302,"SeqNo":2,"DrawFreq":2.4,"Time1Mins":1000,"FlightScoreDeduction":100,"Landing":45,"RawScore":600,"NormalisedScore":1000,"OriginalRoundNo":1,"Updated":"True","F5JMotorReStarted":0},
-          {"CompNo":9303,"TaskNo":1,"RoundNo":1,"GroupNo":1,"ReFlightNo":0,"PilotNo":2303,"SeqNo":3,"DrawFreq":2.4,"Time1Mins":1000,"FlightScoreDeduction":100,"Landing":40,"RawScore":590,"NormalisedScore":1000,"OriginalRoundNo":1,"Updated":"True","F5JMotorReStarted":0},
-          {"CompNo":9303,"TaskNo":1,"RoundNo":1,"GroupNo":1,"ReFlightNo":0,"PilotNo":2304,"SeqNo":4,"DrawFreq":2.4,"Time1Mins":1000,"FlightScoreDeduction":100,"Landing":35,"RawScore":580,"NormalisedScore":1000,"OriginalRoundNo":1,"Updated":"True","F5JMotorReStarted":0},
-          {"CompNo":9303,"TaskNo":1,"RoundNo":1,"GroupNo":1,"ReFlightNo":1,"PilotNo":2301,"SeqNo":1,"DrawFreq":2.4,"Time1Mins":1000,"FlightScoreDeduction":100,"Landing":50,"RawScore":645,"NormalisedScore":1000,"OriginalRoundNo":1,"Updated":"True","F5JMotorReStarted":0},
-          {"CompNo":9303,"TaskNo":1,"RoundNo":1,"GroupNo":1,"ReFlightNo":1,"PilotNo":2302,"SeqNo":2,"DrawFreq":2.4,"Time1Mins":1000,"FlightScoreDeduction":100,"Landing":45,"RawScore":605,"NormalisedScore":1000,"OriginalRoundNo":1,"Updated":"True","F5JMotorReStarted":0},
-          {"CompNo":9304,"TaskNo":1,"RoundNo":1,"GroupNo":1,"ReFlightNo":0,"PilotNo":2301,"SeqNo":1,"DrawFreq":2.4,"Time1Mins":1000,"FlightScoreDeduction":100,"Landing":50,"RawScore":640,"NormalisedScore":1000,"OriginalRoundNo":1,"Updated":"True","F5JMotorReStarted":0},
-          {"CompNo":9304,"TaskNo":1,"RoundNo":1,"GroupNo":1,"ReFlightNo":0,"PilotNo":2302,"SeqNo":2,"DrawFreq":2.4,"Time1Mins":1000,"FlightScoreDeduction":100,"Landing":45,"RawScore":600,"NormalisedScore":1000,"OriginalRoundNo":1,"Updated":"True","F5JMotorReStarted":0},
-          {"CompNo":9304,"TaskNo":1,"RoundNo":2,"GroupNo":1,"ReFlightNo":0,"PilotNo":2301,"SeqNo":1,"DrawFreq":2.4,"Time1Mins":1000,"FlightScoreDeduction":100,"Landing":50,"RawScore":640,"NormalisedScore":1000,"OriginalRoundNo":2,"Updated":"True","F5JMotorReStarted":0},
-          {"CompNo":9304,"TaskNo":1,"RoundNo":2,"GroupNo":1,"ReFlightNo":0,"PilotNo":2302,"SeqNo":2,"DrawFreq":2.4,"Time1Mins":1000,"FlightScoreDeduction":100,"Landing":45,"RawScore":600,"NormalisedScore":1000,"OriginalRoundNo":2,"Updated":"True","F5JMotorReStarted":0},
-          {"CompNo":9304,"TaskNo":2,"RoundNo":2,"GroupNo":1,"ReFlightNo":0,"PilotNo":2301,"SeqNo":1,"DrawFreq":2.4,"Time1Mins":1000,"FlightScoreDeduction":100,"Landing":50,"RawScore":640,"NormalisedScore":1000,"OriginalRoundNo":2,"Updated":"True","F5JMotorReStarted":0},
-          {"CompNo":9304,"TaskNo":2,"RoundNo":2,"GroupNo":1,"ReFlightNo":0,"PilotNo":2302,"SeqNo":2,"DrawFreq":2.4,"Time1Mins":1000,"FlightScoreDeduction":100,"Landing":45,"RawScore":600,"NormalisedScore":1000,"OriginalRoundNo":2,"Updated":"True","F5JMotorReStarted":0}
+          {"CompNo":9303,"TaskNo":1,"RoundNo":1,"GroupNo":1,"ReFlightNo":0,"PilotNo":2301,"SeqNo":1,"DrawFreq":2.4,"Time1Mins":900,"FlightScoreDeduction":100,"Landing":50,"RawScore":540,"NormalisedScore":1000,"OriginalRoundNo":1,"Updated":"True","F5JMotorReStarted":0},
+          {"CompNo":9303,"TaskNo":1,"RoundNo":1,"GroupNo":1,"ReFlightNo":0,"PilotNo":2302,"SeqNo":2,"DrawFreq":2.4,"Time1Mins":900,"FlightScoreDeduction":100,"Landing":45,"RawScore":535,"NormalisedScore":1000,"OriginalRoundNo":1,"Updated":"True","F5JMotorReStarted":0},
+          {"CompNo":9303,"TaskNo":1,"RoundNo":1,"GroupNo":1,"ReFlightNo":0,"PilotNo":2303,"SeqNo":3,"DrawFreq":2.4,"Time1Mins":900,"FlightScoreDeduction":100,"Landing":40,"RawScore":530,"NormalisedScore":1000,"OriginalRoundNo":1,"Updated":"True","F5JMotorReStarted":0},
+          {"CompNo":9303,"TaskNo":1,"RoundNo":1,"GroupNo":1,"ReFlightNo":0,"PilotNo":2304,"SeqNo":4,"DrawFreq":2.4,"Time1Mins":900,"FlightScoreDeduction":100,"Landing":35,"RawScore":525,"NormalisedScore":1000,"OriginalRoundNo":1,"Updated":"True","F5JMotorReStarted":0},
+          {"CompNo":9303,"TaskNo":1,"RoundNo":1,"GroupNo":1,"ReFlightNo":1,"PilotNo":2301,"SeqNo":1,"DrawFreq":2.4,"Time1Mins":900,"FlightScoreDeduction":100,"Landing":50,"RawScore":540,"NormalisedScore":1000,"OriginalRoundNo":1,"Updated":"True","F5JMotorReStarted":0},
+          {"CompNo":9303,"TaskNo":1,"RoundNo":1,"GroupNo":1,"ReFlightNo":1,"PilotNo":2302,"SeqNo":2,"DrawFreq":2.4,"Time1Mins":900,"FlightScoreDeduction":100,"Landing":45,"RawScore":535,"NormalisedScore":1000,"OriginalRoundNo":1,"Updated":"True","F5JMotorReStarted":0},
+          {"CompNo":9304,"TaskNo":1,"RoundNo":1,"GroupNo":1,"ReFlightNo":0,"PilotNo":2301,"SeqNo":1,"DrawFreq":2.4,"Time1Mins":900,"FlightScoreDeduction":100,"Landing":50,"RawScore":540,"NormalisedScore":1000,"OriginalRoundNo":1,"Updated":"True","F5JMotorReStarted":0},
+          {"CompNo":9304,"TaskNo":1,"RoundNo":1,"GroupNo":1,"ReFlightNo":0,"PilotNo":2302,"SeqNo":2,"DrawFreq":2.4,"Time1Mins":900,"FlightScoreDeduction":100,"Landing":45,"RawScore":535,"NormalisedScore":1000,"OriginalRoundNo":1,"Updated":"True","F5JMotorReStarted":0},
+          {"CompNo":9304,"TaskNo":1,"RoundNo":2,"GroupNo":1,"ReFlightNo":0,"PilotNo":2301,"SeqNo":1,"DrawFreq":2.4,"Time1Mins":900,"FlightScoreDeduction":100,"Landing":50,"RawScore":540,"NormalisedScore":1000,"OriginalRoundNo":2,"Updated":"True","F5JMotorReStarted":0},
+          {"CompNo":9304,"TaskNo":1,"RoundNo":2,"GroupNo":1,"ReFlightNo":0,"PilotNo":2302,"SeqNo":2,"DrawFreq":2.4,"Time1Mins":900,"FlightScoreDeduction":100,"Landing":45,"RawScore":535,"NormalisedScore":1000,"OriginalRoundNo":2,"Updated":"True","F5JMotorReStarted":0},
+          {"CompNo":9304,"TaskNo":2,"RoundNo":2,"GroupNo":1,"ReFlightNo":0,"PilotNo":2303,"SeqNo":1,"DrawFreq":2.4,"Time1Mins":900,"FlightScoreDeduction":100,"Landing":50,"RawScore":540,"NormalisedScore":1000,"OriginalRoundNo":2,"Updated":"True","F5JMotorReStarted":0},
+          {"CompNo":9304,"TaskNo":2,"RoundNo":2,"GroupNo":1,"ReFlightNo":0,"PilotNo":2304,"SeqNo":2,"DrawFreq":2.4,"Time1Mins":900,"FlightScoreDeduction":100,"Landing":45,"RawScore":535,"NormalisedScore":1000,"OriginalRoundNo":2,"Updated":"True","F5JMotorReStarted":0},
+          {"CompNo":9305,"TaskNo":1,"RoundNo":1,"GroupNo":1,"ReFlightNo":0,"PilotNo":2301,"SeqNo":1,"DrawFreq":2.4,"Time1Mins":900,"FlightScoreDeduction":100,"Landing":1,"RawScore":540,"NormalisedScore":1000,"OriginalRoundNo":1,"Updated":"True","F5JMotorReStarted":0},
+          {"CompNo":9305,"TaskNo":1,"RoundNo":1,"GroupNo":1,"ReFlightNo":0,"PilotNo":2302,"SeqNo":2,"DrawFreq":2.4,"Time1Mins":900,"FlightScoreDeduction":100,"Landing":3,"RawScore":530,"NormalisedScore":1000,"OriginalRoundNo":1,"Updated":"True","F5JMotorReStarted":0},
+          {"CompNo":9305,"TaskNo":1,"RoundNo":1,"GroupNo":1,"ReFlightNo":0,"PilotNo":2303,"SeqNo":3,"DrawFreq":2.4,"Time1Mins":900,"FlightScoreDeduction":100,"Landing":10,"RawScore":495,"NormalisedScore":1000,"OriginalRoundNo":1,"Updated":"True","F5JMotorReStarted":0},
+          {"CompNo":9305,"TaskNo":1,"RoundNo":1,"GroupNo":1,"ReFlightNo":0,"PilotNo":2304,"SeqNo":4,"DrawFreq":2.4,"Time1Mins":900,"FlightScoreDeduction":100,"Landing":2,"RawScore":535,"NormalisedScore":1000,"OriginalRoundNo":1,"Updated":"True","F5JMotorReStarted":0}
         ]
     }
   ]
