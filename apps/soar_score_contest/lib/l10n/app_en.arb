@@ -1961,6 +1961,91 @@
   "@publicationFailOther": {
     "description": "Change failed for an unknown reason."
   },
+  "publicationStatePublishedDelistPending": "Published, {visibility}. Delisting requested.",
+  "@publicationStatePublishedDelistPending": {
+    "description": "Current publication state: published with the given visibility and a delisting request waiting for a system administrator.",
+    "placeholders": {
+      "visibility": {
+        "type": "String"
+      }
+    }
+  },
+  "publicationActionRequestDelisting": "Request delisting",
+  "@publicationActionRequestDelisting": {
+    "description": "Button that asks a system administrator to remove the publication from public view."
+  },
+  "publicationActionWithdrawDelisting": "Withdraw delisting request",
+  "@publicationActionWithdrawDelisting": {
+    "description": "Button that withdraws the pending delisting request."
+  },
+  "delistDialogTitle": "Request delisting?",
+  "@delistDialogTitle": {
+    "description": "Title of the confirmation dialog for requesting delisting."
+  },
+  "delistDialogBody": "Delisting removes the publication from public view. A system administrator approves or denies the request, and you can withdraw it while it is pending. Nothing in the contest becomes read-only while a request is pending.",
+  "@delistDialogBody": {
+    "description": "Body of the request delisting dialog."
+  },
+  "delistDialogReasonLabel": "Reason (optional)",
+  "@delistDialogReasonLabel": {
+    "description": "Label of the optional reason field in the request delisting dialog."
+  },
+  "delistDialogConfirm": "Request delisting",
+  "@delistDialogConfirm": {
+    "description": "Confirm button of the request delisting dialog."
+  },
+  "publicationDelistRequestedDone": "Delisting requested.",
+  "@publicationDelistRequestedDone": {
+    "description": "Snackbar after a delisting request was made."
+  },
+  "publicationDelistWithdrawnDone": "Delisting request withdrawn.",
+  "@publicationDelistWithdrawnDone": {
+    "description": "Snackbar after a delisting request was withdrawn."
+  },
+  "publicationFailNothingPending": "There is no pending delisting request any more.",
+  "@publicationFailNothingPending": {
+    "description": "Withdrawing refused because no request is pending."
+  },
+  "publicationPageDelistPending": "Delisting requested {time}. A system administrator will decide.",
+  "@publicationPageDelistPending": {
+    "description": "Publication page: a delisting request is waiting.",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "publicationPageHistoryTitle": "Publication history",
+  "@publicationPageHistoryTitle": {
+    "description": "Heading of the list of every published copy on the Publication page."
+  },
+  "publicationPageHistoryEntry": "Copy {number}, from contest revision {revision}, {time}",
+  "@publicationPageHistoryEntry": {
+    "description": "One published copy in the history list.",
+    "placeholders": {
+      "number": {
+        "type": "String"
+      },
+      "revision": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "publicationPageHistoryByYou": "Published by you",
+  "@publicationPageHistoryByYou": {
+    "description": "History list: the director published this copy."
+  },
+  "publicationPageHistoryAutomatic": "Updated automatically",
+  "@publicationPageHistoryAutomatic": {
+    "description": "History list: the update policy published this copy after a score."
+  },
+  "publicationPageHistoryFailed": "The publication history could not be read.",
+  "@publicationPageHistoryFailed": {
+    "description": "Shown instead of the history list when reading it failed."
+  },
   "publicationPageLatestCopy": "Latest published copy",
   "@publicationPageLatestCopy": {
     "description": "Heading on the Publication page for the current projection."

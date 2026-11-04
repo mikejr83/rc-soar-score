@@ -52,7 +52,7 @@ Future<void> runFinishPhase(Journey journey, JourneyContext data) async {
   );
 
   await journey.step(
-    'Publication: the card and page say this server does not publish',
+    'Publication: the card and page say this server does not publish, with no delisting or history',
     () => inContest(() async {
       await pumpUntilFound(tester, _key('status-summary'));
       // The contest runs on the embedded server here, which never publishes,
@@ -73,6 +73,10 @@ Future<void> runFinishPhase(Journey journey, JourneyContext data) async {
         tester.widget<ButtonStyleButton>(_key('publication-publish')).onPressed,
         isNull,
       );
+      // Nothing was published, so there is nothing to delist and no history.
+      expect(_key('publication-request-delisting'), findsNothing);
+      expect(_key('publication-withdraw-delisting'), findsNothing);
+      expect(_key('publication-page-history'), findsNothing);
     }),
   );
 

@@ -117,4 +117,68 @@ void main() {
       findsNWidgets(2),
     );
   });
+
+  testWidgets('lists every published copy, newest first', (tester) async {
+    final server = _server()..startPublished();
+    await _pump(tester, server);
+    // Publish twice more: copies 2 and 3.
+    for (var i = 0; i < 2; i++) {
+      await tester.tap(_key('publication-publish'));
+      await tester.pumpAndSettle();
+      await tester.tap(_key('publish-dialog-confirm'));
+      await tester.pumpAndSettle();
+    }
+    expect(_key('publication-history-3'), findsOneWidget);
+    expect(_key('publication-history-2'), findsOneWidget);
+    expect(_key('publication-history-1'), findsOneWidget);
+    expect(
+      tester.getTopLeft(_key('publication-history-3')).dy,
+      lessThan(tester.getTopLeft(_key('publication-history-1')).dy),
+    );
+    expect(find.text('Published by you'), findsOneWidget);
+    expect(find.text('Updated automatically'), findsNWidgets(2));
+    expect(find.textContaining('Copy 3, from contest revision 1,'), findsOne);
+  });
+
+  testWidgets('an unpublished contest has no history', (tester) async {
+    await _pump(tester, _server());
+    expect(find.text('Publication history'), findsNothing);
+  });
+
+  testWidgets('says so when the history could not be read', (tester) async {
+    final server = _server()
+      ..startPublished()
+      ..historyStatus = 500;
+    await _pump(tester, server);
+    expect(_key('publication-page-history-failed'), findsOneWidget);
+    // The rest of the page still works.
+    expect(_key('publication-publish'), findsOneWidget);
+  });
+
+  testWidgets('shows a pending delisting request and withdraws it', (
+    tester,
+  ) async {
+    final server = _server()
+      ..startPublished()
+      ..startDelistPending();
+    await _pump(tester, server);
+    expect(find.text('Published, Unlisted. Delisting requested.'), findsOne);
+    expect(_key('publication-page-delist-pending'), findsOneWidget);
+    await tester.tap(_key('publication-withdraw-delisting'));
+    await tester.pumpAndSettle();
+    expect(server.delistWithdrawals, 1);
+    expect(_key('publication-page-delist-pending'), findsNothing);
+    expect(find.text('Published, Unlisted'), findsOneWidget);
+  });
+
+  testWidgets('requests delisting from the page', (tester) async {
+    final server = _server()..startPublished();
+    await _pump(tester, server);
+    await tester.tap(_key('publication-request-delisting'));
+    await tester.pumpAndSettle();
+    await tester.tap(_key('delist-dialog-confirm'));
+    await tester.pumpAndSettle();
+    expect(server.delistReasons, [null]);
+    expect(_key('publication-page-delist-pending'), findsOneWidget);
+  });
 }

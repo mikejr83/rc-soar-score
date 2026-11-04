@@ -104,6 +104,118 @@ void main() {
       expect(_current(tester), contains('Published, Unlisted'));
     });
 
+    testWidgets('requesting delisting asks first, then shows it pending', (
+      tester,
+    ) async {
+      final server = _server()..startPublished();
+      await pumpWorkspace(tester, server);
+      expect(_key('publication-withdraw-delisting'), findsNothing);
+      await tester.ensureVisible(_key('publication-request-delisting'));
+      await tester.tap(_key('publication-request-delisting'));
+      await tester.pumpAndSettle();
+      expect(_key('delist-dialog'), findsOneWidget);
+      expect(find.textContaining('Nothing in the contest becomes'), findsOne);
+      await tester.enterText(_key('delist-dialog-reason'), ' Wrong contest ');
+      await tester.tap(_key('delist-dialog-confirm'));
+      await tester.pumpAndSettle();
+      expect(server.delistReasons, ['Wrong contest']);
+      expect(find.text('Delisting requested.'), findsOneWidget);
+      expect(_current(tester), contains('Delisting requested'));
+      expect(_key('publication-request-delisting'), findsNothing);
+      expect(_key('publication-withdraw-delisting'), findsOneWidget);
+    });
+
+    testWidgets('cancelling the delisting dialog asks for nothing', (
+      tester,
+    ) async {
+      final server = _server()..startPublished();
+      await pumpWorkspace(tester, server);
+      await tester.ensureVisible(_key('publication-request-delisting'));
+      await tester.tap(_key('publication-request-delisting'));
+      await tester.pumpAndSettle();
+      await tester.tap(_key('delist-dialog-cancel'));
+      await tester.pumpAndSettle();
+      expect(server.delistReasons, isEmpty);
+      expect(_current(tester), isNot(contains('Delisting requested')));
+    });
+
+    testWidgets('a pending request shows on the card and can be withdrawn', (
+      tester,
+    ) async {
+      final server = _server()
+        ..startPublished()
+        ..startDelistPending();
+      await pumpWorkspace(tester, server);
+      expect(_current(tester), contains('Delisting requested'));
+      await tester.ensureVisible(_key('publication-withdraw-delisting'));
+      await tester.tap(_key('publication-withdraw-delisting'));
+      await tester.pumpAndSettle();
+      expect(server.delistWithdrawals, 1);
+      expect(find.text('Delisting request withdrawn.'), findsOneWidget);
+      expect(_current(tester), isNot(contains('Delisting requested')));
+      expect(_key('publication-request-delisting'), findsOneWidget);
+    });
+
+    testWidgets('withdrawing a request that is gone says so and refreshes', (
+      tester,
+    ) async {
+      final server = _server()
+        ..startPublished()
+        ..startDelistPending();
+      await pumpWorkspace(tester, server);
+      server.delistRequest = null;
+      await tester.ensureVisible(_key('publication-withdraw-delisting'));
+      await tester.tap(_key('publication-withdraw-delisting'));
+      await tester.pumpAndSettle();
+      expect(
+        find.text('There is no pending delisting request any more.'),
+        findsOneWidget,
+      );
+      expect(_key('publication-request-delisting'), findsOneWidget);
+    });
+
+    testWidgets('a refused delisting request is explained', (tester) async {
+      final server = _server()
+        ..startPublished()
+        ..delistRefusal = 409;
+      await pumpWorkspace(tester, server);
+      await tester.ensureVisible(_key('publication-request-delisting'));
+      await tester.tap(_key('publication-request-delisting'));
+      await tester.pumpAndSettle();
+      await tester.tap(_key('delist-dialog-confirm'));
+      await tester.pumpAndSettle();
+      expect(
+        find.text('This publication was delisted and can no longer change.'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('unpublished and delisted contests offer no delisting', (
+      tester,
+    ) async {
+      await pumpWorkspace(tester, _server());
+      expect(_key('publication-request-delisting'), findsNothing);
+    });
+
+    testWidgets('offline disables delisting with the reason', (tester) async {
+      final monitor = FakeAppConnectivity()
+        ..internetStatus = ConnectivityStatus.unavailable;
+      final server = _server()..startPublished();
+      await pumpWorkspace(tester, server, monitor: monitor);
+      expect(_enabled(tester, 'publication-request-delisting'), isFalse);
+      expect(find.text('Needs a connection.'), findsWidgets);
+    });
+
+    testWidgets('offline disables withdrawing too', (tester) async {
+      final monitor = FakeAppConnectivity()
+        ..internetStatus = ConnectivityStatus.unavailable;
+      final server = _server()
+        ..startPublished()
+        ..startDelistPending();
+      await pumpWorkspace(tester, server, monitor: monitor);
+      expect(_enabled(tester, 'publication-withdraw-delisting'), isFalse);
+    });
+
     testWidgets('a stale contest is explained', (tester) async {
       final server = _server()
         ..publicationRefusal = 409

@@ -8,6 +8,7 @@ class PublicationFacts extends Equatable {
     this.visibility,
     this.publishedAt,
     this.projection,
+    this.pendingDelist,
     this.isKnown = true,
     this.supported = true,
   });
@@ -55,6 +56,25 @@ class PublicationFacts extends Equatable {
   /// The latest published copy of the results, when the server sent one.
   final PublicationProjectionFacts? projection;
 
+  /// The delisting request waiting for a system administrator, or null when
+  /// there is none (or it could not be read).
+  final DelistRequest? pendingDelist;
+
+  /// A delisting request is waiting for a decision.
+  bool get delistPending => pendingDelist != null;
+
+  /// These facts with [request] as the pending delisting request.
+  PublicationFacts withPendingDelist(DelistRequest? request) =>
+      PublicationFacts(
+        isPublished: isPublished,
+        visibility: visibility,
+        publishedAt: publishedAt,
+        projection: projection,
+        pendingDelist: request,
+        isKnown: isKnown,
+        supported: supported,
+      );
+
   /// False for [unknown].
   final bool isKnown;
 
@@ -69,6 +89,7 @@ class PublicationFacts extends Equatable {
     visibility,
     publishedAt,
     projection,
+    pendingDelist,
     isKnown,
     supported,
   ];
