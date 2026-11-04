@@ -155,6 +155,9 @@ class _CompetitionImportDialogState extends State<CompetitionImportDialog> {
     );
   }
 
+  /// The summary lists the contests by name when there are fewer than this.
+  static const _namedContestsLimit = 10;
+
   Widget _confirm(BuildContext context, AppLocalizations l10n) {
     final summary = _c.summary;
     return Column(
@@ -163,12 +166,16 @@ class _CompetitionImportDialogState extends State<CompetitionImportDialog> {
       children: [
         Text(l10n.competitionImportConfirmIntro),
         const SizedBox(height: 12),
-        for (final plan in _c.chosenPlans)
-          Text(
-            '• ${plan.contest.name ?? ''}',
-            key: ValueKey('competition-import-sum-${plan.sourceCompNo}'),
-          ),
-        const SizedBox(height: 12),
+        // A long list would overflow the dialog: name the contests only when
+        // there are few, otherwise the counts below say it.
+        if (_c.chosenPlans.length < _namedContestsLimit) ...[
+          for (final plan in _c.chosenPlans)
+            Text(
+              '• ${plan.contest.name ?? ''}',
+              key: ValueKey('competition-import-sum-${plan.sourceCompNo}'),
+            ),
+          const SizedBox(height: 12),
+        ],
         if (summary.created > 0)
           Text(
             l10n.competitionImportSummaryContests(summary.created),

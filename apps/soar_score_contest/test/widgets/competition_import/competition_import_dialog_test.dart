@@ -138,6 +138,8 @@ void main() {
       findsOneWidget,
     );
     expect(find.text(l10n.competitionImportSummaryCheck), findsOneWidget);
+    // A short list is named.
+    expect(key('competition-import-sum-1'), findsOneWidget);
 
     await tester.tap(key('competition-import-confirm'));
     await tester.pumpAndSettle();
@@ -152,6 +154,27 @@ void main() {
     expect(outcome, isNotNull);
     expect(outcome!.imported, hasLength(1));
     expect(outcome!.open, outcome!.imported.single);
+  });
+
+  testWidgets('a long list of contests is counted, not named', (tester) async {
+    await open(tester);
+    await tester.tap(key('competition-import-row-1'));
+    await tester.pump();
+    await toConfirm(tester);
+    expect(key('competition-import-sum-1'), findsOneWidget);
+    // Ten or more chosen competitions would overflow the dialog.
+    final many = _TenChosen(controller);
+    await tester.pumpWidget(
+      MaterialApp(
+        key: UniqueKey(),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(body: CompetitionImportDialog(controller: many)),
+      ),
+    );
+    await tester.pump();
+    expect(find.textContaining('• '), findsNothing);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('the director can leave the contest open for scoring', (
@@ -321,4 +344,23 @@ void main() {
     await tester.pumpAndSettle();
     expect(outcome, isNull);
   });
+}
+
+/// A controller whose chosen list is long, to see the summary of a big run.
+class _TenChosen extends CompetitionImportController {
+  _TenChosen(CompetitionImportController from)
+    : _plans = [for (var i = 0; i < 10; i++) from.chosenPlans.single],
+      super(
+        store: from.store,
+        readFile: from.readFile,
+        mapFile: (result) async => mapGliderScoreFile(result),
+      );
+
+  final List<RestorePlan> _plans;
+
+  @override
+  CompetitionImportStep get step => CompetitionImportStep.confirm;
+
+  @override
+  List<RestorePlan> get chosenPlans => _plans;
 }

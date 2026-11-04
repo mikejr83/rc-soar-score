@@ -128,8 +128,8 @@ keeps its place in your list.
   moved pilots, changed settings), the summary says so and you must tick that
   you understand those changes are replaced before the import can run.
 - A contest whose results are published, or that has been sent to the server,
-  cannot be replaced yet. Delete the contest and import it again, or
-  unpublish first.
+  cannot be replaced yet, and the list says so. (Soar Score has no way to delete
+  a contest yet.)
 
 If one competition fails, the others are still imported, and the failed one
 leaves nothing behind. Pilots saved in step 5 stay in your participants list.
