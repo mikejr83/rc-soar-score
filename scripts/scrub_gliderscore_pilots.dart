@@ -49,6 +49,25 @@
 // Scores holds numbers only (plus the True/False `Updated` flag); every
 // value's shape is checked and the script aborts on anything else.
 //
+// Score fixtures (#768, phase D): when the directory also holds
+// LndgNames.jsonl and LndgPoints.jsonl (same `mdb-json` call) the script
+// also writes
+//
+//   scores_reference.json     real comps 35, 29, 16, 19 and 10 with their
+//                             Scores rows and landing tables (restart option
+//                             1, 2 and NULL, restart zeros, a floored zero,
+//                             all-zero flights, partly flown rounds, a retired
+//                             pilot, unflown trailing rounds, a competition
+//                             with no CompID and a non-default landing table)
+//   scores_edge_cases.json    hand-built comps: a partial landing match, a
+//                             reconstructed landing table, a retired pilot
+//                             with no scores, a subset re-flight and
+//                             overlapping task ranges
+//   reimport_v1.json          comp 19 early: rounds 1 and 2 scored
+//   reimport_v2.json          comp 19 later: round 3 scored, one score
+//                             changed, one pilot added
+//   reimport_v1_copy.json     the same content as v1 from another file
+//
 // Competition and venue names, comp ids and model names become fakes; the
 // rest of a comp row is codes and flags and is kept (allowlist, as for
 // pilots).
@@ -480,7 +499,8 @@ Map<String, String> _competitionFixtures(
     return {
       for (final e in row.entries)
         if (_compsKept.contains(e.key) && e.value != null) e.key: e.value,
-      'CompID': 'FIXTURE$no',
+      // Older files carry no CompID; the fixture keeps that difference.
+      if (_hasText(row['CompID'])) 'CompID': 'FIXTURE$no',
       'CompName': 'Fixture Open $no',
       'CompVenue': 'Example Field',
     };
@@ -509,31 +529,41 @@ Map<String, String> _competitionFixtures(
     Iterable<int> compNos, {
     bool withRoles = true,
     bool withDbParams = true,
+    Map<String, List<Map<String, Object?>>> extraTables = const {},
+    String id = _snapshotId,
+    String sourceDbFile = 'GliderScoreData.mdb',
+    List<Map<String, Object?>> extraCompPilots = const [],
   }) {
     final nos = compNos.toSet();
     bool inScope(Map<String, Object?> r) => nos.contains(r['CompNo']);
     final cp = [
       for (final r in compPilots)
         if (inScope(r)) compPilotRow(r),
+      ...extraCompPilots,
     ];
     final pilotNos = {for (final r in cp) (r['PilotNo']! as num).toInt()};
-    return _snapshotTables({
-      'Comps': [
-        for (final r in comps)
-          if (inScope(r)) compRow(r),
-      ],
-      'CompPilots': cp,
-      'Pilots': [
-        for (final no in pilotNos.toList()..sort())
-          if (pilotsByNo[no] != null) pilotsByNo[no]!,
-      ],
-      if (withRoles) 'Roles': roles,
-      'Dur': [
-        for (final r in dur)
-          if (inScope(r)) durRow(r),
-      ],
-      if (withDbParams) 'DBParams': dbParams,
-    });
+    return _snapshotTables(
+      {
+        'Comps': [
+          for (final r in comps)
+            if (inScope(r)) compRow(r),
+        ],
+        'CompPilots': cp,
+        'Pilots': [
+          for (final no in pilotNos.toList()..sort())
+            if (pilotsByNo[no] != null) pilotsByNo[no]!,
+        ],
+        if (withRoles) 'Roles': roles,
+        'Dur': [
+          for (final r in dur)
+            if (inScope(r)) durRow(r),
+        ],
+        if (withDbParams) 'DBParams': dbParams,
+        ...extraTables,
+      },
+      id: id,
+      sourceDbFile: sourceDbFile,
+    );
   }
 
   // Draw fixtures: needs Scores.jsonl next to the other exports.
@@ -563,6 +593,121 @@ Map<String, String> _competitionFixtures(
     return {
       'draws_reference.json': _snapshotJson({...base, 'tables': tables}),
       'draws_edge_cases.json': _drawEdgeCases(),
+    };
+  }
+
+  // Score fixtures (phase D): needs Scores, LndgNames and LndgPoints.
+  Map<String, String> scoreFixtures() {
+    final scoresFile = File('${dir.path}/Scores.jsonl');
+    final namesFile = File('${dir.path}/LndgNames.jsonl');
+    final pointsFile = File('${dir.path}/LndgPoints.jsonl');
+    if (!scoresFile.existsSync() ||
+        !namesFile.existsSync() ||
+        !pointsFile.existsSync()) {
+      return const {};
+    }
+    final scores = [for (final r in _readJsonl(scoresFile)) _validScores(r)];
+    final names = _validLndgNames(_readJsonl(namesFile));
+    final points = _validLndgPoints(_readJsonl(pointsFile));
+    _reportDroppedColumns({'Scores': (scores, _scoresKept)});
+
+    List<Map<String, Object?>> scoresOf(Iterable<int> nos) => [
+      for (final r in scores)
+        if (nos.contains(r['CompNo'])) r,
+    ];
+    Map<String, List<Map<String, Object?>>> landing(Iterable<int> nos) {
+      final used = {
+        for (final d in dur)
+          if (nos.contains(d['CompNo']) && d['durLndg'] != null)
+            (d['durLndg']! as num).toInt(),
+      };
+      return {
+        'LndgNames': [
+          for (final r in names)
+            if (used.contains(r['LndgNo'])) r,
+        ],
+        'LndgPoints': [
+          for (final r in points)
+            if (used.contains(r['LndgNo'])) r,
+        ],
+      };
+    }
+
+    const refNos = [35, 29, 16, 19, 10];
+    // Comp 19 early (round 3 only drawn), later (everything scored, one
+    // landing changed and one pilot added) and an identical copy of the
+    // early file.
+    final comp19 = scoresOf(const [19]);
+    final early = [
+      for (final r in comp19)
+        if (r['RoundNo'] == 3)
+          {
+            for (final e in r.entries)
+              e.key: switch (e.key) {
+                'Updated' => 'False',
+                'Time1Mins' ||
+                'Time1Secs' ||
+                'Time2Mins' ||
+                'Time2Secs' ||
+                'FlightScoreDeduction' ||
+                'Landing' ||
+                'RawScore' ||
+                'NormalisedScore' ||
+                'Penalty' ||
+                'Laps' => 0,
+                _ => e.value,
+              },
+          }
+        else
+          r,
+    ];
+    // Round 1, pilot 109: the landing was corrected from 50 to 45, which
+    // lowers the raw score by 5 (group scores are not recomputed).
+    final later = [
+      for (final r in comp19)
+        if (r['RoundNo'] == 1 && r['PilotNo'] == 109)
+          {...r, 'Landing': 45, 'RawScore': (r['RawScore']! as num) - 5}
+        else
+          r,
+    ];
+    final inComp19 = {
+      for (final r in compPilots)
+        if (r['CompNo'] == 19) (r['PilotNo']! as num).toInt(),
+    };
+    final addedPilot = (pilotsByNo.keys.toList()..sort()).firstWhere(
+      (no) => !inComp19.contains(no) && (pilotsByNo[no]!['IsPilot'] ?? 1) != 0,
+    );
+    final added = {
+      ...compPilotRow(compPilots.firstWhere((r) => r['CompNo'] == 19)),
+      'PilotNo': addedPilot,
+    };
+    final extra19 = landing(const [19]);
+
+    return {
+      'scores_reference.json': snapshot(
+        refNos,
+        extraTables: {...landing(refNos), 'Scores': scoresOf(refNos)},
+      ),
+      'scores_edge_cases.json': _scoreEdgeCases(),
+      'reimport_v1.json': snapshot(
+        const [19],
+        extraTables: {...extra19, 'Scores': early},
+        id: '00000000-0000-7000-8000-000000000011',
+        sourceDbFile: 'GliderScoreData.mdb',
+      ),
+      'reimport_v2.json': snapshot(
+        const [19],
+        extraTables: {...extra19, 'Scores': later},
+        extraCompPilots: [added],
+        id: '00000000-0000-7000-8000-000000000012',
+        sourceDbFile: 'GliderScoreData.mdb',
+      ),
+      'reimport_v1_copy.json': snapshot(
+        const [19],
+        extraTables: {...extra19, 'Scores': early},
+        id: '00000000-0000-7000-8000-000000000013',
+        sourceDbFile: 'GliderScoreDataCopy.mdb',
+      ),
     };
   }
 
@@ -605,6 +750,7 @@ Map<String, String> _competitionFixtures(
   final out = <String, String>{
     'comps_reference.json': snapshot(const [22, 39, 21, 20, 40]),
     ...scoresFixtures(),
+    ...scoreFixtures(),
     'comps_edge_cases.json': _competitionEdgeCases(),
     'comps_integrity_cases.json': _competitionIntegrityCases(),
     'comps_missing_columns.json': missingColumns(),
@@ -658,11 +804,15 @@ Map<String, String> _competitionFixtures(
   return out;
 }
 
-String _snapshotTables(Map<String, List<Map<String, Object?>>> tables) {
+String _snapshotTables(
+  Map<String, List<Map<String, Object?>>> tables, {
+  String id = _snapshotId,
+  String sourceDbFile = 'GliderScoreData.mdb',
+}) {
   return _snapshotJson({
     'schema': 'gs-import/v1',
-    'id': _snapshotId,
-    'sourceDbFile': 'GliderScoreData.mdb',
+    'id': id,
+    'sourceDbFile': sourceDbFile,
     'tables': [
       for (final e in tables.entries)
         {
@@ -901,6 +1051,7 @@ final _validatedLookupValues = <String>{
     e.key.toLowerCase(),
     e.value.toLowerCase(),
   ],
+  for (final name in _knownLandingNames.values) name.toLowerCase(),
 };
 
 Never _abort(String message) {
@@ -1084,6 +1235,169 @@ String _drawEdgeCases() {
       flight(9201, 2, 1, 2203, 2),
       flight(9201, 2, 2, 2202, 1),
       flight(9201, 2, 2, 2204, 2),
+    ],
+  });
+}
+
+/// GliderScore's own landing table names. They are lookup values, not
+/// personal data, and are checked against this list.
+const _knownLandingNames = <int, String>{
+  0: 'None',
+  1: 'FAI 15 Metre Tape',
+  2: 'F3J Enter Dist',
+  3: 'F3J Enter Points',
+  4: 'F3J Enter Pts to 2m',
+  5: 'F5J Enter Distance',
+  6: 'ALES Landing',
+  7: 'F3J Enter Cms',
+  8: 'F5B Enter Distance',
+  9: 'F5J Enter Points',
+  10: 'FAI 15m Points',
+};
+
+List<Map<String, Object?>> _validLndgNames(List<Map<String, Object?>> rows) {
+  for (final row in rows) {
+    final extra = row.keys.toSet().difference({'LndgNo', 'Name'});
+    final no = row['LndgNo'];
+    if (extra.isNotEmpty ||
+        no is! num ||
+        _knownLandingNames[no.toInt()] != row['Name']) {
+      _abort('LndgNames has a row that is not one of the known tables');
+    }
+  }
+  return rows;
+}
+
+List<Map<String, Object?>> _validLndgPoints(List<Map<String, Object?>> rows) {
+  for (final row in rows) {
+    if (row.keys.toSet().difference({
+          'LndgNo',
+          'Distance',
+          'Points',
+        }).isNotEmpty ||
+        row.values.any((v) => v is! num)) {
+      _abort('LndgPoints has an unexpected column or value shape');
+    }
+  }
+  return rows;
+}
+
+/// Hand-built score cases the real file does not hold: a landing table with
+/// one value that matches nothing (a partial match), a table only the
+/// competition has (reconstructed), a retired pilot who never scored, a
+/// subset re-flight (refused) and two tasks whose rounds overlap (refused).
+String _scoreEdgeCases() {
+  Map<String, Object?> comp(int no) => {
+    'CompNo': no,
+    'CompDate': '06/14/26 00:00:00',
+    'CompID': 'FIXTURE$no',
+    'CompName': 'Fixture Open $no',
+    'CompVenue': 'Example Field',
+    'GSCompClass': 'F5J',
+  };
+  Map<String, Object?> member(int comp, int pilot, {bool retired = false}) => {
+    'CompNo': comp,
+    'PilotNo': pilot,
+    'Role': 'Plt',
+    'IsPilot': 1,
+    if (retired) 'Retired': 1,
+  };
+  Map<String, Object?> dur(int comp, int landing, {int groups = 1}) => {
+    'CompNo': comp,
+    'durTargetTime': 600,
+    'durGroupsPerRound': groups,
+    'durLndg': landing,
+    'durRefHeight': 200,
+    'durPenaltyUpToRefHeight': 0.5,
+    'durPenaltyOverRefHeight': 3,
+    'F5JMotorRestartOption': 2,
+  };
+  Map<String, Object?> flight(
+    int comp,
+    int round,
+    int pilot,
+    int seq, {
+    int task = 1,
+    int group = 1,
+    int reflight = 0,
+    int? landing,
+    int? raw,
+  }) => {
+    'CompNo': comp,
+    'TaskNo': task,
+    'RoundNo': round,
+    'GroupNo': group,
+    'ReFlightNo': reflight,
+    'PilotNo': pilot,
+    'SeqNo': seq,
+    'DrawFreq': 2.4,
+    'Time1Mins': raw == null ? 0 : 1000,
+    'FlightScoreDeduction': raw == null ? 0 : 100,
+    'Landing': landing ?? 0,
+    'RawScore': raw ?? 0,
+    'NormalisedScore': raw == null ? 0 : 1000,
+    'OriginalRoundNo': round,
+    'Updated': raw == null ? 'False' : 'True',
+    'F5JMotorReStarted': 0,
+  };
+  // Points table 9 holds 5..50; the landing 7 matches no entry.
+  final tableNine = [
+    for (var p = 5; p <= 50; p += 5) {'LndgNo': 9, 'Distance': p, 'Points': p},
+  ];
+  // A table only 9302 has: three entries with points that differ from
+  // the shipped tables.
+  final custom = [
+    {'LndgNo': 11, 'Distance': 1, 'Points': 40},
+    {'LndgNo': 11, 'Distance': 2, 'Points': 25},
+    {'LndgNo': 11, 'Distance': 3, 'Points': 10},
+  ];
+  return _snapshotTables({
+    'Comps': [
+      for (final no in [9301, 9302, 9303, 9304]) comp(no),
+    ],
+    'CompPilots': [
+      for (final no in [9301, 9302, 9303, 9304])
+        for (final pilot in [2301, 2302, 2303, 2304])
+          member(no, pilot, retired: no == 9302 && pilot == 2304),
+    ],
+    'Pilots': [
+      {'PilotNo': 2301, 'FirstName': 'Orla', 'LastName': 'Scoreone'},
+      {'PilotNo': 2302, 'FirstName': 'Pat', 'LastName': 'Scoretwo'},
+      {'PilotNo': 2303, 'FirstName': 'Quin', 'LastName': 'Scorethree'},
+      {'PilotNo': 2304, 'FirstName': 'Rae', 'LastName': 'Scorefour'},
+    ],
+    'Dur': [dur(9301, 9), dur(9302, 11), dur(9303, 9, groups: 2), dur(9304, 9)],
+    'LndgNames': [
+      {'LndgNo': 9, 'Name': 'F5J Enter Points'},
+      {'LndgNo': 11, 'Name': 'Example Table'},
+    ],
+    'LndgPoints': [...tableNine, ...custom],
+    'Scores': [
+      // 9301: one landing (7) matches nothing in the pinned table.
+      flight(9301, 1, 2301, 1, landing: 50, raw: 640),
+      flight(9301, 1, 2302, 2, landing: 7, raw: 600),
+      flight(9301, 1, 2303, 3, landing: 45, raw: 590),
+      flight(9301, 1, 2304, 4, landing: 40, raw: 580),
+      // 9302: landing values come from the competition's own table; pilot
+      // 2304 is retired and never scored.
+      flight(9302, 1, 2301, 1, landing: 1, raw: 640),
+      flight(9302, 1, 2302, 2, landing: 2, raw: 600),
+      flight(9302, 1, 2303, 3, landing: 3, raw: 590),
+      flight(9302, 1, 2304, 4),
+      // 9303: a re-flight of two of the four pilots of a group (a subset).
+      flight(9303, 1, 2301, 1, landing: 50, raw: 640),
+      flight(9303, 1, 2302, 2, landing: 45, raw: 600),
+      flight(9303, 1, 2303, 3, landing: 40, raw: 590),
+      flight(9303, 1, 2304, 4, landing: 35, raw: 580),
+      flight(9303, 1, 2301, 1, reflight: 1, landing: 50, raw: 645),
+      flight(9303, 1, 2302, 2, reflight: 1, landing: 45, raw: 605),
+      // 9304: task 1 holds rounds 1 and 2, task 2 starts again at round 2.
+      flight(9304, 1, 2301, 1, landing: 50, raw: 640),
+      flight(9304, 1, 2302, 2, landing: 45, raw: 600),
+      flight(9304, 2, 2301, 1, landing: 50, raw: 640),
+      flight(9304, 2, 2302, 2, landing: 45, raw: 600),
+      flight(9304, 2, 2301, 1, task: 2, landing: 50, raw: 640),
+      flight(9304, 2, 2302, 2, task: 2, landing: 45, raw: 600),
     ],
   });
 }
