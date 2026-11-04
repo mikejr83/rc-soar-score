@@ -114,6 +114,34 @@ class ImportProvenance extends Equatable implements Synchronizable {
   factory ImportProvenance.fromJson(Map<String, Object?> json) =>
       _$ImportProvenanceFromJson(json);
 
+  /// The Contest stamp to treat as the one for a competition when several
+  /// imports of it exist: a stamp of the same file first, then the newest by
+  /// `importedAt`, then the greater id so equal times still choose one.
+  /// `null` when [candidates] is empty.
+  static ImportProvenance? preferred(
+    Iterable<ImportProvenance> candidates,
+    String fileFingerprint,
+  ) {
+    ImportProvenance? best;
+    for (final c in candidates) {
+      if (best == null || _outranks(c, best, fileFingerprint)) best = c;
+    }
+    return best;
+  }
+
+  static bool _outranks(
+    ImportProvenance a,
+    ImportProvenance b,
+    String fileFingerprint,
+  ) {
+    final aSame = a.fileFingerprint == fileFingerprint;
+    final bSame = b.fileFingerprint == fileFingerprint;
+    if (aSame != bSame) return aSame;
+    final byTime = a.importedAt.compareTo(b.importedAt);
+    if (byTime != 0) return byTime > 0;
+    return a.id.value.compareTo(b.id.value) > 0;
+  }
+
   /// The `stamped_entity_type` of a contest row.
   static const contestEntityType = 'Contest';
 

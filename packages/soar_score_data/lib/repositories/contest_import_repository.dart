@@ -204,14 +204,8 @@ class ContestImportRepository extends DriftRepository
         if (stamp.sourceKeys['comp_no'] == compNo && stamp.contestId != null)
           stamp,
     ];
-    if (candidates.isEmpty) return missing();
-    candidates.sort((a, b) {
-      final same = (b.fileFingerprint == fileFingerprint ? 1 : 0).compareTo(
-        a.fileFingerprint == fileFingerprint ? 1 : 0,
-      );
-      return same != 0 ? same : b.importedAt.compareTo(a.importedAt);
-    });
-    final stamp = candidates.first;
+    final stamp = core.ImportProvenance.preferred(candidates, fileFingerprint);
+    if (stamp == null) return missing();
     final contestId = stamp.contestId!;
     final contestVar = [Variable<String>(contestId.value)];
     final hasMatrix =
@@ -344,6 +338,9 @@ class ContestImportRepository extends DriftRepository
     if (contest == null || contest.ownerAccountId != owner) {
       return refuse(core.DrawImportReason.notStamped);
     }
+    // A contest has at most one Contest stamp (unique index on type and
+    // entity id), so this is the stamp of the contest the plan names and
+    // never another import's.
     final stamps = [
       for (final stamp in await _stamps.whereId(
         'stamped_entity_id',
@@ -352,10 +349,10 @@ class ContestImportRepository extends DriftRepository
         if (stamp.stampedEntityType == core.ImportProvenance.contestEntityType)
           stamp,
     ];
-    if (stamps.isEmpty || stamps.first.sourceKeys['comp_no'] != compNo) {
+    if (stamps.length != 1 || stamps.single.sourceKeys['comp_no'] != compNo) {
       return refuse(core.DrawImportReason.notStamped);
     }
-    if (stamps.first.fileFingerprint != plan.fileFingerprint) {
+    if (stamps.single.fileFingerprint != plan.fileFingerprint) {
       return refuse(core.DrawImportReason.fingerprintChanged);
     }
     final contestVar = [Variable<String>(plan.contestId.value)];

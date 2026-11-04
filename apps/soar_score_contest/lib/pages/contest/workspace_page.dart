@@ -91,6 +91,7 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
   // What a rejected change was about, while the stale-page banner shows.
   String? _staleWhat;
   ImportedContestNote? _importNote;
+  Id? _importNoteFor;
 
   // The contest the page last showed ready. A failed reload keeps it on
   // screen (with the stale banner, if one is up) instead of replacing the
@@ -234,7 +235,9 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
     }
     try {
       final note = await store.noteFor(contest.id);
-      if (mounted && _factsFor == contest && note != _importNote) {
+      // Only the contest on show may take the answer; a slow lookup for the
+      // one before must not.
+      if (mounted && _importNoteFor == contest.id && note != _importNote) {
         setState(() => _importNote = note);
       }
     } catch (_) {
@@ -245,6 +248,11 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
   void _ensureFacts(Contest contest) {
     if (_factsFor == contest) {
       return;
+    }
+    if (_importNoteFor != contest.id) {
+      // Another contest: the note of the last one must not show meanwhile.
+      _importNote = null;
+      _importNoteFor = contest.id;
     }
     _factsFor = contest;
     _loadImportNote(contest);
@@ -414,7 +422,9 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
             offline: offline,
             staleChange: _staleWhat,
             onRefresh: _tryAgain,
-            importNote: _importNote,
+            // Facts load after the first frame of a contest, so the note of
+            // the last one must not show in that frame.
+            importNote: _importNoteFor == contest.id ? _importNote : null,
           ),
           Expanded(
             child: Stack(

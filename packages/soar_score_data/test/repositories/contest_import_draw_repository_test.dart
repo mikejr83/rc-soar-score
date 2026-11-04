@@ -286,6 +286,50 @@ void _tests(Backend backend) {
       );
     });
 
+    test('the draw lands in the contest of the same file only', () async {
+      final older = await contestFor(fingerprint: 'sha256:older');
+      final newer = await contestFor(fingerprint: 'sha256:newer');
+      final target = await importer.drawTarget(signedIn, 22, 'sha256:older');
+      expect(target.contestId, older);
+      final result = await importer.importDraw(
+        plan(
+          drawDraft(drawRows(22, [2])),
+          target.contestId!,
+          fingerprint: 'sha256:older',
+        ),
+        metadata: metadata(),
+      );
+      expect(result, isA<core.DrawImported>());
+      expect(
+        (await importer.drawTarget(signedIn, 22, 'sha256:older')).hasMatrix,
+        isTrue,
+      );
+      expect(
+        (await importer.drawTarget(signedIn, 22, 'sha256:newer')).hasMatrix,
+        isFalse,
+        reason: 'the other contest of the competition is untouched',
+      );
+      expect(newer, isNot(older));
+    });
+
+    test('with no stamp of the same file the newest is offered and the '
+        'transaction refuses it for the same reason', () async {
+      await contestFor(fingerprint: 'sha256:older');
+      final newer = await contestFor(fingerprint: 'sha256:newer');
+      final target = await importer.drawTarget(signedIn, 22, 'sha256:other');
+      expect(target.contestId, newer);
+      expect(target.stampedFingerprint, 'sha256:newer');
+      final result = await importer.importDraw(
+        plan(drawDraft(drawRows(22, [2])), newer, fingerprint: 'sha256:other'),
+        metadata: metadata(),
+      );
+      expect(result, isA<core.DrawImportFailed>());
+      expect(
+        (result as core.DrawImportFailed).code,
+        core.DrawImportReason.fingerprintChanged,
+      );
+    });
+
     group('refuses', () {
       Future<void> expectUntouched(core.Id contestId) async {
         expect(await inst.count('matrix_revisions'), 0);
