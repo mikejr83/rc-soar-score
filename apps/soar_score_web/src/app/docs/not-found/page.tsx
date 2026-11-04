@@ -4,8 +4,9 @@ import Link from "next/link";
 import { TopicCards } from "@/components/docs/bits";
 import styles from "@/components/docs/docs.module.css";
 import { landingLinks } from "@/components/docs/topics";
+import { pageMetadata } from "@/lib/page-metadata";
 
-export const metadata: Metadata = { title: "Page Not Found" };
+export const metadata: Metadata = pageMetadata("Page Not Found");
 
 /** Any unknown route under /docs lands here (docs-help.md, "Not Found"). */
 export default function DocsNotFoundPage() {

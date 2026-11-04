@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 
 import { Callout, DraftNote } from "@/components/docs/bits";
 import { contestAppUrl } from "@/lib/site";
+import { pageMetadata } from "@/lib/page-metadata";
 
-export const metadata: Metadata = { title: "I Need An Account?" };
+export const metadata: Metadata = pageMetadata("I Need An Account?");
 
 /** User account help (`/docs/user-accounts`).
  *  Source: plan/business-requirements/accounts.md, docs/adr/0001. */

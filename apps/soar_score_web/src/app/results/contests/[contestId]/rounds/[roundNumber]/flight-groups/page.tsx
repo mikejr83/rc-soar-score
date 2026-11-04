@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 
 import { ContestView } from "@/components/results/contest-view";
 import { parseRound } from "@/lib/results/round-param";
+import { pageMetadata } from "@/lib/page-metadata";
 
-export const metadata: Metadata = { title: "Flight group scores" };
+export const metadata: Metadata = pageMetadata("Flight group scores");
 
 /** The flight groups of a round; `?pilot=` scrolls to that pilot's flight. */
 export default async function FlightGroupsPage({

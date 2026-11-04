@@ -3,19 +3,36 @@ import type { ReactNode } from "react";
 
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
-import { siteName, tagline } from "@/lib/site";
+import { shareImage, siteDescription as description } from "@/lib/page-metadata";
+import { siteName, siteUrl, tagline } from "@/lib/site";
 
 import { accent, body, display } from "./fonts";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
 
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
+  // Relative to each page, so every route names itself as its canonical URL.
+  alternates: { canonical: "./" },
+  openGraph: {
+    type: "website",
+    siteName,
+    title: `${siteName} · ${tagline}`,
+    description,
+    images: [shareImage],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${siteName} · ${tagline}`,
+    description,
+    images: [shareImage.url],
+  },
   title: {
     default: `${siteName} · ${tagline}`,
     template: `%s · ${siteName}`,
   },
-  description:
-    "Scoring and management for RC sailplane soaring contests: run a contest, enter and check scores, and publish results for pilots and spectators.",
+  description,
   icons: {
     icon: "/brand/rc-soar-score-mark-tiny.svg",
     apple: "/brand/rc-soar-score-app-icon.svg",

@@ -4,12 +4,9 @@ import { OpenSourceView } from "@/components/open-source/open-source-view";
 import licences from "@/content/licences.json";
 import type { LicenceData } from "@/lib/licences";
 import { repositoryUrl } from "@/lib/site";
+import { pageMetadata } from "@/lib/page-metadata";
 
-export const metadata: Metadata = {
-  title: "Open source",
-  description:
-    "The licences of RC Soar Score and of the open source software it includes.",
-};
+export const metadata: Metadata = pageMetadata("Open source", "The licences of RC Soar Score and of the open source software it includes.");
 
 /**
  * Open source licences and credits (`/open-source`, #687). The data is

@@ -13,6 +13,9 @@ export const tagline = "RC glider contest scoring";
 const env = (name: string, fallback: string) =>
   process.env[name]?.trim() || fallback;
 
+/** This site's canonical origin (apex host, no trailing slash). `www` redirects to it (#679). */
+export const siteUrl = env("NEXT_PUBLIC_SITE_URL", "https://rcsoarscore.com").replace(/\/+$/, "");
+
 /** The API server; the results pages read `/public/publications` from it. */
 export const apiBaseUrl = '/api';
 
