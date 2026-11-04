@@ -33,17 +33,26 @@ void _tests(Backend backend) {
       orElse: () => throw StateError('no contest stamp in the examples'),
     );
 
+    /// A stamp like [base] for another entity of the same kind (a profile
+    /// keeps its entity and gets another import operation).
     core.ImportProvenance another(
       core.ImportProvenance base, {
       core.Id? owner,
       String? dedupeKey,
-    }) => core.ImportProvenance.fromJson({
-      ...base.toJson(),
-      'id': core.Id.create().value,
-      'owner_account_id': (owner ?? base.ownerAccountId).value,
-      'dedupe_key': dedupeKey ?? base.dedupeKey,
-      'revision': 0,
-    });
+    }) {
+      final isProfile = base.stampedEntityType == 'ParticipantProfile';
+      final entity = isProfile ? base.stampedEntityId : core.Id.create();
+      return core.ImportProvenance.fromJson({
+        ...base.toJson(),
+        'id': core.Id.create().value,
+        'owner_account_id': (owner ?? base.ownerAccountId).value,
+        'stamped_entity_id': entity.value,
+        if (base.stampedEntityType == 'Contest') 'contest_id': entity.value,
+        'import_operation_id': core.Id.create().value,
+        'dedupe_key': dedupeKey ?? base.dedupeKey,
+        'revision': 0,
+      });
+    }
 
     test('reads back the example stamps unchanged', () async {
       for (final stamp in examples) {
@@ -100,9 +109,42 @@ void _tests(Backend backend) {
     });
 
     test('stamps without a dedupe key never clash', () async {
-      final participation = examples.firstWhere((s) => s.dedupeKey == null);
+      final participation = examples.firstWhere(
+        (s) => s.stampedEntityType == 'ContestParticipation',
+      );
       await repo.save(another(participation), metadata: metadata());
       await repo.save(another(participation), metadata: metadata());
+    });
+
+    test('a contest or participation is stamped once', () async {
+      final participation = examples.firstWhere(
+        (s) => s.stampedEntityType == 'ContestParticipation',
+      );
+      for (final base in [contestStamp, participation]) {
+        final again = core.ImportProvenance.fromJson({
+          ...base.toJson(),
+          'id': core.Id.create().value,
+          'import_operation_id': core.Id.create().value,
+          'dedupe_key': null,
+        });
+        await expectLater(
+          repo.save(again, metadata: metadata()),
+          throwsA(anything),
+          reason: 'second stamp of one ${base.stampedEntityType}',
+        );
+      }
+    });
+
+    test('a profile is stamped once per import operation', () async {
+      final profile = examples.firstWhere((s) => s.contestId == null);
+      final sameOperation = core.ImportProvenance.fromJson({
+        ...profile.toJson(),
+        'id': core.Id.create().value,
+      });
+      await expectLater(
+        repo.save(sameOperation, metadata: metadata()),
+        throwsA(anything),
+      );
     });
 
     test('a shared profile lists one stamp per import operation', () async {
@@ -141,6 +183,8 @@ void _tests(Backend backend) {
             'id': core.Id.create().value,
             'contest_id': contest.id.value,
             'stamped_entity_id': contest.id.value,
+            'source_keys': {'comp_no': 1},
+            'file_fingerprint': 'sha256:test',
             'dedupe_key': 'gliderscore:sha256:test:1',
             'revision': 0,
           }),

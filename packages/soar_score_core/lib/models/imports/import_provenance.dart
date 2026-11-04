@@ -39,7 +39,7 @@ class ImportProvenance extends Equatable implements Synchronizable {
          'stampedEntityType',
        ),
        sourceSystem = requireNotBlank(sourceSystem, 'sourceSystem'),
-       sourceKeys = Map.unmodifiable(sourceKeys),
+       sourceKeys = ProvenanceKeys.normalizedSourceKeys(sourceKeys),
        sourceValues = sourceValues == null
            ? null
            : Map.unmodifiable(sourceValues),
@@ -65,6 +65,33 @@ class ImportProvenance extends Equatable implements Synchronizable {
         sourceSystem,
         'sourceSystem',
         'must be one of ${sourceSystems.join(', ')}',
+      );
+    }
+    final expectedKeys = switch (stampedEntityType) {
+      contestEntityType => const {'comp_no'},
+      participationEntityType => const {'comp_no', 'pilot_no'},
+      _ => const {'pilot_no'},
+    };
+    if (this.sourceKeys.keys.toSet().difference(expectedKeys).isNotEmpty ||
+        expectedKeys.difference(this.sourceKeys.keys.toSet()).isNotEmpty) {
+      throw ArgumentError.value(
+        this.sourceKeys.keys.toList(),
+        'sourceKeys',
+        'a $stampedEntityType row has the keys ${expectedKeys.toList()..sort()}',
+      );
+    }
+    final key = dedupeKey;
+    if (key != null &&
+        key !=
+            ProvenanceKeys.contestDedupeKey(
+              sourceSystem: sourceSystem,
+              fileFingerprint: fileFingerprint,
+              compNo: this.sourceKeys['comp_no']! as int,
+            )) {
+      throw ArgumentError.value(
+        key,
+        'dedupeKey',
+        'must be <source_system>:<file_fingerprint>:<comp_no>',
       );
     }
     if (stampedEntityType == profileEntityType) {
@@ -192,6 +219,14 @@ abstract final class ProvenanceKeys {
       parts.add('"${_escape(name)}":$value');
     }
     return '{${parts.join(',')}}';
+  }
+
+  /// [keys] checked as [canonicalSourceKeys] does and returned as an
+  /// unmodifiable map in sorted order, so the stored JSON text is canonical.
+  static Map<String, Object?> normalizedSourceKeys(Map<String, Object?> keys) {
+    canonicalSourceKeys(keys);
+    final names = keys.keys.toList()..sort();
+    return Map.unmodifiable({for (final name in names) name: keys[name]});
   }
 
   /// The contest dedupe key.

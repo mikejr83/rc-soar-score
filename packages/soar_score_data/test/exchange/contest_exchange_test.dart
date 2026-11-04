@@ -598,7 +598,14 @@ void main() {
         stampedEntityType: type,
         stampedEntityId: entity,
         sourceSystem: core.ImportProvenance.gliderScore,
-        sourceKeys: const {'comp_no': 22},
+        sourceKeys: switch (type) {
+          core.ImportProvenance.contestEntityType => const {'comp_no': 22},
+          core.ImportProvenance.participationEntityType => const {
+            'comp_no': 22,
+            'pilot_no': 98,
+          },
+          _ => const {'pilot_no': 98},
+        },
         sourceValues: dedupeKey == null ? null : const {'lane_count': 6},
         fileFingerprint: 'sha256:abc',
         dedupeKey: dedupeKey,

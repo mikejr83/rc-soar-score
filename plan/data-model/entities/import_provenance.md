@@ -36,8 +36,9 @@
 - (`owner_account_id`, `dedupe_key`) is unique where `dedupe_key` is set: a director imports a competition of a file once. The importer treats a violation as "already imported" and rolls back that competition
 - Only `Contest` rows carry `dedupe_key` and `source_values`. `ParticipantProfile` rows have no `contest_id`; `Contest` and `ContestParticipation` rows must have one, and a `Contest` row stamps its own contest
 - `stamped_entity_type` is one of `Contest`, `ContestParticipation`, `ParticipantProfile` and `source_system` is `gliderscore`; the model rejects anything else, so a new source or type is a deliberate change here, in the model and in the ADR
-- A contest or participation has at most one stamp; a profile has one per import operation, so read them with `listForEntity`
-- `source_keys` are whole numbers in canonical form (sorted keys, plain decimals, no whitespace), so equal keys compare equal as text
+- A contest or participation has at most one stamp (unique index on `stamped_entity_type` and `stamped_entity_id`, partial: not for profiles); a profile has at most one per import operation (unique index on `stamped_entity_id` and `import_operation_id`). Read them with `listForEntity`
+- `source_keys` are whole numbers in canonical form (sorted keys, plain decimals, no whitespace), so equal keys compare equal as text. The model rejects anything else and stores the keys sorted. A `Contest` row has exactly `comp_no`, a `ContestParticipation` row `comp_no` and `pilot_no`, a `ParticipantProfile` row `pilot_no`
+- When set, `dedupe_key` must equal `<source_system>:<file_fingerprint>:<comp_no>` of the same row
 - Never shown as editable data and never takes part in matching profiles
 
 ## Lifecycle

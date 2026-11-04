@@ -19,7 +19,14 @@ ImportProvenance _stamp({
         ? contest!
         : Id.create(),
     sourceSystem: ImportProvenance.gliderScore,
-    sourceKeys: const {'comp_no': 22},
+    sourceKeys: switch (type) {
+      ImportProvenance.contestEntityType => const {'comp_no': 22},
+      ImportProvenance.participationEntityType => const {
+        'comp_no': 22,
+        'pilot_no': 98,
+      },
+      _ => const {'pilot_no': 98},
+    },
     sourceValues: values,
     fileFingerprint: 'sha256:abc',
     dedupeKey: dedupeKey,
@@ -86,6 +93,59 @@ void main() {
         _stamp(type: ImportProvenance.profileEntityType).contestId,
         isNull,
       );
+    });
+
+    test('source keys are whole numbers, sorted and the right set', () {
+      ImportProvenance build(Map<String, Object?> keys) => ImportProvenance(
+        id: Id.create(),
+        ownerAccountId: Id.create(),
+        contestId: Id.create(),
+        stampedEntityType: ImportProvenance.participationEntityType,
+        stampedEntityId: Id.create(),
+        sourceSystem: 'gliderscore',
+        sourceKeys: keys,
+        fileFingerprint: 'f',
+        importOperationId: Id.create(),
+        toolVersion: 'v',
+        importedAt: DateTime.utc(2026),
+      );
+      expect(build({'pilot_no': 98, 'comp_no': 22}).sourceKeys.keys.toList(), [
+        'comp_no',
+        'pilot_no',
+      ], reason: 'stored in sorted order');
+      expect(() => build({'comp_no': 22}), throwsArgumentError);
+      expect(
+        () => build({'comp_no': 22, 'pilot_no': 98, 'x': 1}),
+        throwsArgumentError,
+      );
+      expect(
+        () => build({'comp_no': 22.0, 'pilot_no': 98}),
+        throwsArgumentError,
+      );
+      expect(
+        () => build({'comp_no': '22', 'pilot_no': 98}),
+        throwsArgumentError,
+      );
+    });
+
+    test('a dedupe key must match the source and the competition', () {
+      ImportProvenance build(String key) => ImportProvenance(
+        id: Id.create(),
+        ownerAccountId: Id.create(),
+        contestId: Id.parse('019c0000-0000-7000-8000-0000000000e1'),
+        stampedEntityType: ImportProvenance.contestEntityType,
+        stampedEntityId: Id.parse('019c0000-0000-7000-8000-0000000000e1'),
+        sourceSystem: 'gliderscore',
+        sourceKeys: const {'comp_no': 22},
+        fileFingerprint: 'sha256:abc',
+        dedupeKey: key,
+        importOperationId: Id.create(),
+        toolVersion: 'v',
+        importedAt: DateTime.utc(2026),
+      );
+      expect(build('gliderscore:sha256:abc:22'), isNotNull);
+      expect(() => build('gliderscore:sha256:abc:23'), throwsArgumentError);
+      expect(() => build('gliderscore:sha256:other:22'), throwsArgumentError);
     });
 
     test('a profile row never has a contest', () {
