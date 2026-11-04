@@ -1,4 +1,5 @@
 import '../models/contest/contest_configuration_revision.dart';
+import '../enums/assignment_type.dart';
 import '../models/id.dart';
 import '../models/matrix/matrix_assignment.dart';
 import '../models/matrix/round.dart';
@@ -67,10 +68,28 @@ class F5jResultsInput {
     var completedRounds = 0;
     for (final round in rounds) {
       final groups = <int, List<F5jFlightEntry>>{};
-      for (final assignment
-          in await repository.matrixAssignmentRepository.listLiveForRound(
-            round.id,
-          )) {
+      final live = await repository.matrixAssignmentRepository.listLiveForRound(
+        round.id,
+      );
+      // A pilot whose re-flight is scored counts the re-flight; the flight it
+      // replaced no longer does.
+      final reflown = <Id>{};
+      for (final assignment in live) {
+        if (assignment.assignmentType != AssignmentType.reflight) continue;
+        final placeholder = placeholders[assignment.id];
+        if (placeholder != null &&
+            await repository.officialScoreRepository.currentForPlaceholder(
+                  placeholder.id,
+                ) !=
+                null) {
+          reflown.add(assignment.contestParticipationId);
+        }
+      }
+      for (final assignment in live) {
+        if (assignment.assignmentType != AssignmentType.reflight &&
+            reflown.contains(assignment.contestParticipationId)) {
+          continue;
+        }
         if (assignment.creditedRoundId != assignment.scheduledRoundId) continue;
         final participation = byId[assignment.contestParticipationId];
         if (participation == null || !participation.isPilot) continue;

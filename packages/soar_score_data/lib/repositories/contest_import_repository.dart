@@ -4,6 +4,7 @@ import 'package:soar_score_core/soar_score_core.dart' as core;
 import 'audit_event_repository.dart';
 import 'discipline_profile_repository.dart';
 import 'drift_repository.dart';
+import 'repository.dart';
 import '../sync/sql_placeholders.dart';
 import 'unique_violation.dart';
 
@@ -644,6 +645,9 @@ class ContestImportRepository extends DriftRepository
         ),
       );
     }
+    // The stored results (flight results and standings of every round), so
+    // the reports show the restored contest. Part of this transaction.
+    await core.ResultsService(Repository(db)).recalculate(contestId);
     return core.CompetitionRestored(
       compNo,
       contestId: contestId,

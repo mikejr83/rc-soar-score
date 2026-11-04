@@ -125,6 +125,13 @@ void _tests(Backend backend) {
       expect(done.updated, isFalse);
       expect(done.flightCount, plan.flights.length);
       expect(done.finalState, core.RestoreFinalState.completed);
+      // The reports read stored results, so the restore stores them.
+      expect(await count('participation_standings'), greaterThan(0));
+      expect(await count('flight_results'), plan.flights.length);
+      expect(
+        (await core.ResultsService(repository).read(done.contestId)).standings,
+        isNotEmpty,
+      );
 
       final contest = (await repository.contestRepository.findById(
         done.contestId,
@@ -175,6 +182,11 @@ void _tests(Backend backend) {
     test('stores re-flights and retirements', () async {
       final plan = _mapped('draws_reference.json', 21);
       final done = await restore(plan) as core.CompetitionRestored;
+      // The re-flown flights count in place of the ones they replaced.
+      expect(
+        (await core.ResultsService(repository).read(done.contestId)).standings,
+        isNotEmpty,
+      );
       final reflights = await repository.reFlightRepository.listForContest(
         done.contestId,
       );
