@@ -191,6 +191,26 @@ class CompetitionImportController extends ChangeNotifier {
     }
   }
 
+  /// The competitions of the file as the wizard lists them: the most recent
+  /// start first, undated ones last. Ties go by name (A to Z), then `CompNo`.
+  List<ContestImportDraft> get listed {
+    final all = [...?_draft?.contests];
+    all.sort((a, b) {
+      final x = a.startDate;
+      final y = b.startDate;
+      if (x != y) {
+        if (x == null) return 1;
+        if (y == null) return -1;
+        return y.compareTo(x);
+      }
+      final byName = (a.name ?? a.sourceClass).toLowerCase().compareTo(
+        (b.name ?? b.sourceClass).toLowerCase(),
+      );
+      return byName != 0 ? byName : a.sourceCompNo.compareTo(b.sourceCompNo);
+    });
+    return all;
+  }
+
   /// The competitions of the file that can be chosen.
   List<ContestImportDraft> get importable => [
     for (final c in _draft?.contests ?? const <ContestImportDraft>[])

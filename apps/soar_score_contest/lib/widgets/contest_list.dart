@@ -33,6 +33,16 @@ class ContestList extends StatefulWidget {
   @override
   State<ContestList> createState() => _ContestListState();
 
+  /// [contests] with the most recent start first. Ties go by name (A to Z),
+  /// then id, so the order does not shift between loads.
+  static List<Contest> newestFirst(Iterable<Contest> contests) =>
+      [...contests]..sort((a, b) {
+        final byStart = b.startDateTime.compareTo(a.startDateTime);
+        if (byStart != 0) return byStart;
+        final byName = a.name.toLowerCase().compareTo(b.name.toLowerCase());
+        return byName != 0 ? byName : a.id.value.compareTo(b.id.value);
+      });
+
   /// The contest's date range, e.g. `Oct 17, 2026 to Oct 18, 2026`.
   static String contestDates(AppLocalizations l10n, Contest contest) {
     final format = DateFormat.yMMMd();

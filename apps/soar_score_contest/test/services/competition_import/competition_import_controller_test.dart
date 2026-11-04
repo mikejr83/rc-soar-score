@@ -45,6 +45,41 @@ void main() {
     );
   });
 
+  test('lists competitions newest first, undated last, ties by name', () async {
+    GliderScoreImportResult snapshot() {
+      Map<String, Object?> comp(int no, String name, String? date) => {
+        'CompNo': no,
+        'CompName': name,
+        'GSCompClass': 'F5J',
+        'CompDate': ?date,
+      };
+      final rows = [
+        comp(1, 'Spring', '03/14/26 00:00:00'),
+        comp(2, 'Autumn', '10/10/26 00:00:00'),
+        comp(3, 'No date', null),
+        comp(4, 'Beta', '06/14/26 00:00:00'),
+        comp(5, 'Alpha', '06/14/26 00:00:00'),
+      ];
+      return GliderScoreImportResult(
+        id: Id.create(),
+        sourceDbFile: 'Contest.mdb',
+        tables: [
+          GliderScoreTable(
+            name: 'Comps',
+            rows: rows,
+            rowCount: rows.length,
+            rowCapExceeded: false,
+          ),
+        ],
+      );
+    }
+
+    final c = build(read: (_) async => snapshot());
+    addTearDown(c.dispose);
+    await c.chooseAndRead();
+    expect(c.listed.map((d) => d.sourceCompNo), [2, 5, 4, 1, 3]);
+  });
+
   test('a cancelled chooser changes nothing', () async {
     chosenPath = null;
     expect(await controller.chooseAndRead(), isFalse);
