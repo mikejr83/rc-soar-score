@@ -1,3 +1,5 @@
+import '../id.dart';
+
 /// What the draw import knows about the contest a competition was imported
 /// into by phase B, read by the caller from the database (ADR 0006
 /// amendment). The mapper is pure and decides from this, never from storage.
@@ -5,6 +7,7 @@ class DrawImportTarget {
   const DrawImportTarget({
     required this.sourceCompNo,
     required this.fileFingerprint,
+    this.contestId,
     this.stamped = true,
     this.stampedFingerprint,
     this.hasMatrix = false,
@@ -17,6 +20,9 @@ class DrawImportTarget {
 
   /// Hash of the file being read now.
   final String fileFingerprint;
+
+  /// The contest phase B made from this competition, when there is one.
+  final Id? contestId;
 
   /// False when no phase B contest carries a stamp for this competition.
   final bool stamped;
@@ -303,6 +309,11 @@ class DrawImportDraft {
     0,
     (n, r) => n + r.rounds.fold(0, (m, round) => m + round.groups.length),
   );
+
+  /// The most groups any round has (the groups per round when they all have
+  /// the same number).
+  int get maxGroupsPerRound =>
+      revisions.fold(0, (n, r) => r.groupsPerRound > n ? r.groupsPerRound : n);
 
   /// Drawn slots (first flights).
   int get assignmentCount => revisions.fold(

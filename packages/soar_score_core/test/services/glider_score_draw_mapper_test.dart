@@ -298,6 +298,7 @@ void main() {
       expect(d.revisions.single.firstRound, 1);
       expect(d.revisions.single.lastRound, 2);
       expect(d.assignmentCount, 8);
+      expect(d.maxGroupsPerRound, 2);
       expect(d.pilots, {1, 2, 3, 4});
     });
 

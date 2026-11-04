@@ -25,6 +25,10 @@ ImportProvenance _stamp({
         'comp_no': 22,
         'pilot_no': 98,
       },
+      ImportProvenance.matrixRevisionEntityType => const {
+        'comp_no': 22,
+        'task_no': 1,
+      },
       _ => const {'pilot_no': 98},
     },
     sourceValues: values,
@@ -70,6 +74,39 @@ void main() {
           values: {'a': 1},
         ),
         throwsArgumentError,
+      );
+    });
+
+    test('a matrix revision row carries source values but no dedupe key', () {
+      final stamp = _stamp(
+        type: ImportProvenance.matrixRevisionEntityType,
+        values: {'first_round': 1, 'last_round': 10, 'groups_per_round': 3},
+      );
+      expect(stamp.sourceKeys, {'comp_no': 22, 'task_no': 1});
+      expect(ImportProvenance.fromJson(stamp.toJson()), stamp);
+      expect(
+        () => _stamp(
+          type: ImportProvenance.matrixRevisionEntityType,
+          dedupeKey: 'gliderscore:sha256:abc:22',
+        ),
+        throwsArgumentError,
+      );
+      expect(
+        () => ImportProvenance(
+          id: Id.create(),
+          ownerAccountId: Id.create(),
+          contestId: Id.create(),
+          stampedEntityType: ImportProvenance.matrixRevisionEntityType,
+          stampedEntityId: Id.create(),
+          sourceSystem: 'gliderscore',
+          sourceKeys: const {'comp_no': 22},
+          fileFingerprint: 'f',
+          importOperationId: Id.create(),
+          toolVersion: 'v',
+          importedAt: DateTime.utc(2026),
+        ),
+        throwsArgumentError,
+        reason: 'task_no is required',
       );
     });
 
