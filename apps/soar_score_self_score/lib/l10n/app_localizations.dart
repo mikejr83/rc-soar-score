@@ -129,6 +129,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not open the link. Check your network connection and try again.'**
   String get linkOpenFailed;
+
+  /// Spoken label while the invitation link is checked.
+  ///
+  /// In en, this message translates to:
+  /// **'Opening your link'**
+  String get invitationOpening;
+
+  /// Heading on the invitation page once the link is checked. The name is the pilot the link belongs to.
+  ///
+  /// In en, this message translates to:
+  /// **'Hello, {name}'**
+  String invitationHeading(String name);
+
+  /// Explains what the invitation link does. Placeholder is the contest name.
+  ///
+  /// In en, this message translates to:
+  /// **'You are scoring for {contest}. Continue as a guest to enter your scores. You can come back through the same link at any time.'**
+  String invitationBody(String contest);
+
+  /// Primary button on the invitation page.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue as guest'**
+  String get continueAsGuest;
+
+  /// Button on the invitation page. Not connected yet.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in'**
+  String get signInButton;
+
+  /// Button on the invitation page. Not connected yet.
+  ///
+  /// In en, this message translates to:
+  /// **'Create account'**
+  String get createAccountButton;
+
+  /// Shown under the Sign in and Create account buttons while they are not connected.
+  ///
+  /// In en, this message translates to:
+  /// **'Accounts are coming soon. For now, continue as a guest.'**
+  String get accountsComingSoon;
+
+  /// Heading when an invitation link is unknown, expired or replaced.
+  ///
+  /// In en, this message translates to:
+  /// **'This link does not work'**
+  String get invalidLinkTitle;
+
+  /// Tells the person what to do about a link that does not work. Does not say why, on purpose.
+  ///
+  /// In en, this message translates to:
+  /// **'The link may have expired or been replaced. Ask your contest director for your link.'**
+  String get invalidLinkBody;
+
+  /// Shown when the server could not be reached while checking an invitation link.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open your link. Check your network connection and try again.'**
+  String get invitationLoadFailed;
+
+  /// Heading when an invitation link is valid but for a role this release does not support.
+  ///
+  /// In en, this message translates to:
+  /// **'This link is not for scoring yet'**
+  String get unsupportedRoleTitle;
+
+  /// Explains a link for a role (such as a helper) that the app does not support yet.
+  ///
+  /// In en, this message translates to:
+  /// **'Your link works, but this version of the app only supports pilots entering their own scores. Ask your contest director.'**
+  String get unsupportedRoleBody;
+
+  /// Button on a page whose session ended. Goes to the start page, where the person opens their link again.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to start'**
+  String get backToStart;
 }
 
 class _AppLocalizationsDelegate

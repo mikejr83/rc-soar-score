@@ -27,4 +27,51 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get linkOpenFailed =>
       'Could not open the link. Check your network connection and try again.';
+
+  @override
+  String get invitationOpening => 'Opening your link';
+
+  @override
+  String invitationHeading(String name) {
+    return 'Hello, $name';
+  }
+
+  @override
+  String invitationBody(String contest) {
+    return 'You are scoring for $contest. Continue as a guest to enter your scores. You can come back through the same link at any time.';
+  }
+
+  @override
+  String get continueAsGuest => 'Continue as guest';
+
+  @override
+  String get signInButton => 'Sign in';
+
+  @override
+  String get createAccountButton => 'Create account';
+
+  @override
+  String get accountsComingSoon =>
+      'Accounts are coming soon. For now, continue as a guest.';
+
+  @override
+  String get invalidLinkTitle => 'This link does not work';
+
+  @override
+  String get invalidLinkBody =>
+      'The link may have expired or been replaced. Ask your contest director for your link.';
+
+  @override
+  String get invitationLoadFailed =>
+      'Could not open your link. Check your network connection and try again.';
+
+  @override
+  String get unsupportedRoleTitle => 'This link is not for scoring yet';
+
+  @override
+  String get unsupportedRoleBody =>
+      'Your link works, but this version of the app only supports pilots entering their own scores. Ask your contest director.';
+
+  @override
+  String get backToStart => 'Back to start';
 }

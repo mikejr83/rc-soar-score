@@ -207,14 +207,15 @@ Documentation, help and support (spec: `plan/ui/public-site/docs-help.md`, `supp
 | ---------------------------------------------- | ------------------------------------------------------------ | -------------------------------- |
 | Landing page (Sign in / Sign up)               | `/`                                                          | `pages/home_page.dart`           |
 | Contests list, "Is this you?"                  | `/contests`                                                  | `pages/contests_page.dart`       |
-| Contest entry (redirects to the team overview) | `/contests/:contestId`                                       | `router.dart`                    |
+| Invitation link (guest session)                | `/invitations/:credential`                                   | `pages/invitation_page.dart`     |
+| Contest entry (guest: pilot overview; else team overview) | `/contests/:contestId`                            | `router.dart`                    |
 | Team overview (helper view, team standings)    | `/contests/:contestId/team`                                  | `pages/team_page.dart`           |
 | Pilot overview (round cards, retire)           | `/contests/:contestId/pilots/:pilotId`                       | `pages/pilot_overview_page.dart` |
 | Score entry (F5J form, landing sheet/combobox) | `/contests/:contestId/pilots/:pilotId/rounds/:roundId`       | `pages/score_entry_page.dart`    |
 | Group results (not in the spec's route table)  | `/contests/:contestId/pilots/:pilotId/rounds/:roundId/group` | `pages/group_results_page.dart`  |
 | Results (latest, or `?round=N` as of a round)  | `/contests/:contestId/results`                               | `pages/results_page.dart`        |
 
-Routes follow `plan/ui/participant-scoring/participant-scoring.md`. Not built yet: the invitation handler (`/invitations/{credential}`). Contest entry sends everyone to the team overview until role routing exists (#142). On the pilot overview, View opens the group results for the round until the read-only score view exists; Copy invitation link and Retire are not connected to the API. The path helpers are at the top of `router.dart`.
+Routes follow `plan/ui/participant-scoring/participant-scoring.md`. The invitation handler checks the link, then Continue as guest stores the guest session (`session/`, browser local storage) and replaces the address with the pilot overview; Sign in and Create account are inert until #545/#546. The app uses path URLs (not `#/`), so `apps/soar_score_self_score/wrangler.jsonc` turns on the SPA fallback and the page sends no referrer. Contest entry sends a guest to their pilot overview and everyone else to the team overview until accounts and helpers exist. On the pilot overview, View opens the group results for the round until the read-only score view exists; Copy invitation link and Retire are not connected to the API. The path helpers are at the top of `router.dart`.
 
 Pages read through `SelfScoreRepository` (`data/self_score_repository.dart`, provided by `SelfScoreScope`) and load with `LoadableScaffold` (loading, error and Retry states). Until the self-scoring API exists the app uses `SampleSelfScoreRepository`, backed by `data/sample_data.dart`; the API-backed repository replaces it in `main.dart` without changing a page. The landing field picks its control by table size (`widgets/landing_control.dart`: sheet up to 20 results, autocomplete above); see `plan/ui/participant-scoring/landing-control-decision.md`.
 

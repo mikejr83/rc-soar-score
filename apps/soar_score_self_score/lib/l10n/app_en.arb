@@ -23,5 +23,67 @@
   "linkOpenFailed": "Could not open the link. Check your network connection and try again.",
   "@linkOpenFailed": {
     "description": "Snackbar when a link to the public site could not be opened."
+  },
+  "invitationOpening": "Opening your link",
+  "@invitationOpening": {
+    "description": "Spoken label while the invitation link is checked."
+  },
+  "invitationHeading": "Hello, {name}",
+  "@invitationHeading": {
+    "description": "Heading on the invitation page once the link is checked. The name is the pilot the link belongs to.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "invitationBody": "You are scoring for {contest}. Continue as a guest to enter your scores. You can come back through the same link at any time.",
+  "@invitationBody": {
+    "description": "Explains what the invitation link does. Placeholder is the contest name.",
+    "placeholders": {
+      "contest": {
+        "type": "String"
+      }
+    }
+  },
+  "continueAsGuest": "Continue as guest",
+  "@continueAsGuest": {
+    "description": "Primary button on the invitation page."
+  },
+  "signInButton": "Sign in",
+  "@signInButton": {
+    "description": "Button on the invitation page. Not connected yet."
+  },
+  "createAccountButton": "Create account",
+  "@createAccountButton": {
+    "description": "Button on the invitation page. Not connected yet."
+  },
+  "accountsComingSoon": "Accounts are coming soon. For now, continue as a guest.",
+  "@accountsComingSoon": {
+    "description": "Shown under the Sign in and Create account buttons while they are not connected."
+  },
+  "invalidLinkTitle": "This link does not work",
+  "@invalidLinkTitle": {
+    "description": "Heading when an invitation link is unknown, expired or replaced."
+  },
+  "invalidLinkBody": "The link may have expired or been replaced. Ask your contest director for your link.",
+  "@invalidLinkBody": {
+    "description": "Tells the person what to do about a link that does not work. Does not say why, on purpose."
+  },
+  "invitationLoadFailed": "Could not open your link. Check your network connection and try again.",
+  "@invitationLoadFailed": {
+    "description": "Shown when the server could not be reached while checking an invitation link."
+  },
+  "unsupportedRoleTitle": "This link is not for scoring yet",
+  "@unsupportedRoleTitle": {
+    "description": "Heading when an invitation link is valid but for a role this release does not support."
+  },
+  "unsupportedRoleBody": "Your link works, but this version of the app only supports pilots entering their own scores. Ask your contest director.",
+  "@unsupportedRoleBody": {
+    "description": "Explains a link for a role (such as a helper) that the app does not support yet."
+  },
+  "backToStart": "Back to start",
+  "@backToStart": {
+    "description": "Button on a page whose session ended. Goes to the start page, where the person opens their link again."
   }
 }
