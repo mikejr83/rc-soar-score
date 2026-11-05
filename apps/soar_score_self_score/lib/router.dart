@@ -3,14 +3,20 @@ import 'package:go_router/go_router.dart';
 import 'pages/contests_page.dart';
 import 'pages/group_results_page.dart';
 import 'pages/home_page.dart';
+import 'pages/invitation_page.dart';
 import 'pages/pilot_overview_page.dart';
 import 'pages/results_page.dart';
 import 'pages/score_entry_page.dart';
 import 'pages/team_page.dart';
+import 'session/guest_session_scope.dart';
 
 /// Routes follow `plan/ui/participant-scoring/participant-scoring.md`.
 const homePath = '/';
 const contestsPath = '/contests';
+
+/// The address an invitation link carries. Matches `/invitations/{credential}`
+/// in the participant-scoring spec.
+String invitationPath(String credential) => '/invitations/$credential';
 
 String contestPath(String contestId) => '/contests/$contestId';
 String teamPath(String contestId) => '/contests/$contestId/team';
@@ -30,17 +36,27 @@ final router = GoRouter(
   routes: [
     GoRoute(path: homePath, builder: (context, state) => const HomePage()),
     GoRoute(
+      path: '/invitations/:credential',
+      builder: (context, state) =>
+          InvitationPage(credential: state.pathParameters['credential']!),
+    ),
+    GoRoute(
       path: contestsPath,
       builder: (context, state) => const ContestsPage(),
       routes: [
-        // The contest entry route sends a helper to the team overview and a
-        // pilot to their pilot overview. Pilot overview is not built yet, so
-        // every participant goes to the team overview for now.
+        // The contest entry route sends a pilot to their pilot overview. A
+        // guest session names the pilot; everyone else goes to the team
+        // overview until accounts and helpers exist.
         GoRoute(
           path: ':contestId',
           redirect: (context, state) {
             if (state.uri.pathSegments.length > 2) return null;
-            return teamPath(state.pathParameters['contestId']!);
+            final contestId = state.pathParameters['contestId']!;
+            final session = context.guestSessions.read();
+            if (session != null && session.contestId == contestId) {
+              return pilotPath(contestId, session.pilotId);
+            }
+            return teamPath(contestId);
           },
           routes: [
             GoRoute(

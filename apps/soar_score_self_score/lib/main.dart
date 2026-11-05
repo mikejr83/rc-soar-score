@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_ui/soar_score_ui.dart';
 
@@ -7,8 +8,13 @@ import 'app.dart';
 import 'bundled_licences.dart';
 import 'data/sample_self_score_repository.dart';
 import 'data/self_score_scope.dart';
+import 'session/browser_slot_stub.dart'
+    if (dart.library.js_interop) 'session/browser_slot_web.dart';
+import 'session/guest_session_scope.dart';
 
 void main() {
+  // Invitation links are plain paths, not `#/...` addresses.
+  usePathUrlStrategy();
   registerBrandFontLicenses();
   registerProjectLicence();
   const String defaultUrl = 'http://localhost:8080';
@@ -22,9 +28,12 @@ void main() {
   runApp(
     ApiClientInherited(
       client: client,
-      child: const SelfScoreScope(
-        repository: SampleSelfScoreRepository(),
-        child: SelfScoreApp(),
+      child: GuestSessionScope(
+        store: openGuestSessionStore(),
+        child: const SelfScoreScope(
+          repository: SampleSelfScoreRepository(),
+          child: SelfScoreApp(),
+        ),
       ),
     ),
   );

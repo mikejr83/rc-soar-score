@@ -122,6 +122,8 @@ jobs:
           - name: Self-scoring app
             app: soar_score_self_score
             worker: rc-soar-score-self-score
+            # Serves index.html for deep links such as /invitations/{credential}.
+            config: apps/soar_score_self_score/wrangler.jsonc
     steps:
       - uses: actions/checkout@v4
         with:
@@ -145,7 +147,7 @@ jobs:
       - name: Deploy to Cloudflare
         run: >
           npx --yes wrangler@4 deploy
-          --assets=apps/${{ matrix.app }}/build/web
+          ${{ matrix.config && format('--config {0}', matrix.config) || format('--assets=apps/{0}/build/web', matrix.app) }}
           --name ${{ matrix.worker }}
           --compatibility-date=2026-10-25
         env:

@@ -1,0 +1,78 @@
+import 'dart:convert';
+
+import '../models/guest_session.dart';
+
+/// Keeps the guest session so a pilot can close the browser and come back.
+/// Kept thin so a native app can swap in secure storage later.
+abstract interface class GuestSessionStore {
+  GuestSession? read();
+
+  void write(GuestSession session);
+
+  void clear();
+}
+
+/// Holds the session for the life of the page. Used in tests and when the
+/// browser refuses to store anything.
+class MemoryGuestSessionStore implements GuestSessionStore {
+  GuestSession? _session;
+
+  @override
+  GuestSession? read() => _session;
+
+  @override
+  void write(GuestSession session) => _session = session;
+
+  @override
+  void clear() => _session = null;
+}
+
+/// Reads and writes the session as JSON in a string slot. [StringSlot] is the
+/// browser's local storage on the web.
+class StringSlotGuestSessionStore implements GuestSessionStore {
+  StringSlotGuestSessionStore(this._slot);
+
+  final StringSlot _slot;
+
+  @override
+  GuestSession? read() {
+    try {
+      final raw = _slot.read();
+      if (raw == null) return null;
+      return GuestSession.fromJson(
+        (jsonDecode(raw) as Map).cast<String, Object?>(),
+      );
+    } on Object {
+      // A damaged or blocked slot counts as no session.
+      return null;
+    }
+  }
+
+  @override
+  void write(GuestSession session) {
+    try {
+      _slot.write(jsonEncode(session.toJson()));
+    } on Object {
+      // Storage can be blocked, for example in a private window. The session
+      // still works until the page closes.
+    }
+  }
+
+  @override
+  void clear() {
+    try {
+      _slot.clear();
+    } on Object {
+      // See write.
+    }
+  }
+}
+
+/// One string kept somewhere durable.
+abstract interface class StringSlot {
+  String? read();
+
+  void write(String value);
+
+  void clear();
+}

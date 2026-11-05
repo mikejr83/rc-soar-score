@@ -20,7 +20,9 @@ because the server and the clients must ship together. The
    3. **Contest app and self-scoring (Cloudflare):** after the API, in
       parallel with the site. Flutter 3.47.4 builds each app with
       `--dart-define=SOAR_SCORE_API_BASE_URL=https://api.rcsoarscore.com`, then
-      `wrangler deploy --assets=apps/<app>/build/web` uploads it to the existing
+      `wrangler deploy` uploads it (`--assets=apps/<app>/build/web`, or for the
+      self-scoring app `--config apps/soar_score_self_score/wrangler.jsonc`, which
+      adds the single-page-app fallback that invitation deep links need) to the existing
       Workers: `rc-soar-score-contest` (`app.`) and `rc-soar-score-self-score`
       (`score.`).
 4. Watch the run under Actions > Deploy. A failed API job stops the rest.

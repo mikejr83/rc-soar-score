@@ -1,11 +1,13 @@
-# Cloudflare Pages response headers. Copied into the build output by Flutter.
-# Cloudflare serves index.html for unknown paths (SPA fallback) as long as the
-# build output has no 404.html and no _redirects file; do not add either.
+# Cloudflare response headers. Copied into the build output by Flutter.
+# Unknown paths load index.html through wrangler.jsonc (single-page-application
+# fallback), which deep links such as /invitations/{credential} need. Do not
+# add a 404.html or _redirects file.
 
 /*
   X-Robots-Tag: noindex, nofollow
   X-Content-Type-Options: nosniff
-  Referrer-Policy: strict-origin-when-cross-origin
+  # No referrer at all, so an invitation credential never leaks to another site.
+  Referrer-Policy: no-referrer
   Permissions-Policy: camera=(), microphone=(), geolocation=()
 
 # Entry points and version files must always revalidate so deploys are picked up.
