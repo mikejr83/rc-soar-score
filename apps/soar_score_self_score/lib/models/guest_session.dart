@@ -7,6 +7,8 @@ class GuestSession {
     required this.pilotId,
     required this.pilotName,
     required this.token,
+    this.role = 'pilot',
+    this.expiresAt,
   });
 
   factory GuestSession.fromJson(Map<String, Object?> json) => GuestSession(
@@ -15,6 +17,11 @@ class GuestSession {
     pilotId: json['pilotId']! as String,
     pilotName: json['pilotName']! as String,
     token: json['token']! as String,
+    role: json['role'] as String? ?? 'pilot',
+    expiresAt: switch (json['expiresAt']) {
+      final String text => DateTime.tryParse(text),
+      _ => null,
+    },
   );
 
   final String contestId;
@@ -25,11 +32,24 @@ class GuestSession {
   /// Sent with every request. Never shown, and never put in an address.
   final String token;
 
+  /// What the link makes the person: `pilot` is the only role in the first
+  /// field release. The server decides what the role may see.
+  final String role;
+
+  /// When the server stops accepting [token]. Null when it did not say.
+  final DateTime? expiresAt;
+
+  /// Whether the server would already refuse [token] at [now].
+  bool isExpired(DateTime now) =>
+      expiresAt != null && !now.isBefore(expiresAt!);
+
   Map<String, Object?> toJson() => {
     'contestId': contestId,
     'contestName': contestName,
     'pilotId': pilotId,
     'pilotName': pilotName,
     'token': token,
+    'role': role,
+    'expiresAt': expiresAt?.toUtc().toIso8601String(),
   };
 }
