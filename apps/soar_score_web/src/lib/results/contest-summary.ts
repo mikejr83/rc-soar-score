@@ -10,6 +10,8 @@ export interface ContestSummary {
   end: Date;
   /** Host, city, state and country, whichever are set; empty when none are. */
   venue: string;
+  /** The discipline's name; empty when the summary carries none. */
+  discipline: string;
   status: ContestStatus;
 }
 
@@ -63,6 +65,7 @@ export function contestSummaryFrom(dto: PublicPublicationSummary, now: Date): Co
     start,
     end,
     venue: venueOf(contest),
+    discipline: text(contest, "discipline") ?? "",
     status: statusOf(text(contest, "status"), start, end, now),
   };
 }
