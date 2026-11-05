@@ -96,6 +96,7 @@ Handler buildApiHandler({
     drawRunner: drawRunner,
     invitations: invitations,
     invitationRateLimiter: invitationRateLimiter,
+    corsAllowedOrigins: corsAllowedOrigins,
   );
   Handler api = handlers.apiHandler;
 

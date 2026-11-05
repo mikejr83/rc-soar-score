@@ -29,6 +29,7 @@ class _RefusingService implements core.InvitationService {
 }
 
 void main() {
+  cookieTests();
   var now = DateTime.utc(2026, 11, 5, 12);
   Handler build({core.InvitationService? service}) => buildApiHandler(
     name: 'soar_score_server',
@@ -152,5 +153,44 @@ void main() {
     expect(participantPrincipalOf(request), isNull);
     expect(() => requireParticipant(request), throwsStateError);
     expect(() => requirePrincipal(request), throwsStateError);
+  });
+}
+
+void cookieTests() {
+  group('guest session cookie', () {
+    test('is read out of a Cookie header', () {
+      expect(
+        guestSessionFromCookieHeader('a=1; __Host-soar_guest=tok.en; b=2'),
+        'tok.en',
+      );
+      expect(guestSessionFromCookieHeader('a=1'), isNull);
+      expect(guestSessionFromCookieHeader('__Host-soar_guest='), isNull);
+      expect(guestSessionFromCookieHeader('x__Host-soar_guest=1'), isNull);
+      expect(guestSessionFromCookieHeader(null), isNull);
+    });
+
+    test('a cookie write needs the header and an allowed origin', () {
+      const allowed = {'https://score.rcsoarscore.com'};
+      Request post(Map<String, String> headers) =>
+          Request('POST', Uri.parse('http://localhost/x'), headers: headers);
+      expect(requireCookieWriteIsSameSite(post({}), allowed)?.statusCode, 403);
+      expect(
+        requireCookieWriteIsSameSite(
+          post({'x-requested-with': 'a', 'origin': 'https://evil.example'}),
+          allowed,
+        )?.statusCode,
+        403,
+      );
+      expect(
+        requireCookieWriteIsSameSite(
+          post({
+            'x-requested-with': 'a',
+            'origin': 'https://score.rcsoarscore.com',
+          }),
+          allowed,
+        ),
+        isNull,
+      );
+    });
   });
 }

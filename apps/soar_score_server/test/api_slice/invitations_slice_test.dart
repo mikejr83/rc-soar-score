@@ -321,6 +321,87 @@ void _tests(SliceBackend backend) {
     expect((answer['error']! as Map)['code'], 'session_invalid');
   });
 
+  test('the web app keeps the session in a cookie, not the body', () async {
+    await configureAndAddPilots();
+    final issued = await issue();
+    Future<Response> send(
+      String method,
+      String path, {
+      Map<String, String> headers = const {},
+      Object? body,
+    }) async => handler(
+      Request(
+        method,
+        Uri.parse('http://localhost/api/v1/self-scoring$path'),
+        body: body == null ? null : jsonEncode(body),
+        headers: headers,
+      ),
+    );
+
+    final resolved = await send(
+      'POST',
+      '/invitations/resolve',
+      headers: {'x-requested-with': 'soar-score-self-score'},
+      body: {'credential': issued.credential},
+    );
+    expect(resolved.statusCode, 200);
+    final json = jsonDecode(await resolved.readAsString()) as Map;
+    expect(json['session_token'], isNull);
+    expect(json['session_expires_at'], isNotNull);
+    final setCookie = resolved.headers['set-cookie']!;
+    expect(
+      setCookie,
+      allOf(
+        startsWith('__Host-soar_guest='),
+        contains('Secure'),
+        contains('HttpOnly'),
+        contains('SameSite=Lax'),
+        contains('Path=/'),
+        isNot(contains('Domain')),
+      ),
+    );
+    final cookie = setCookie.split(';').first;
+
+    final session = await send('GET', '/session', headers: {'cookie': cookie});
+    expect(session.statusCode, 200);
+
+    // A write on the cookie needs the web app's header.
+    final forged = await send(
+      'POST',
+      '/session/end',
+      headers: {'cookie': cookie},
+    );
+    expect(forged.statusCode, 403);
+    final ended = await send(
+      'POST',
+      '/session/end',
+      headers: {'cookie': cookie, 'x-requested-with': 'soar-score-self-score'},
+    );
+    expect(ended.statusCode, 204);
+    expect(ended.headers['set-cookie'], contains('Max-Age=0'));
+
+    // A dead cookie is a 401 that also clears it.
+    final dead = await send(
+      'GET',
+      '/session',
+      headers: {'cookie': '__Host-soar_guest=garbage'},
+    );
+    expect(dead.statusCode, 401);
+    expect(dead.headers['set-cookie'], contains('Max-Age=0'));
+
+    // The same resolve without the header returns the token, no cookie.
+    final native = await send(
+      'POST',
+      '/invitations/resolve',
+      body: {'credential': issued.credential},
+    );
+    expect(native.headers['set-cookie'], isNull);
+    expect(
+      (jsonDecode(await native.readAsString()) as Map)['session_token'],
+      isA<String>(),
+    );
+  });
+
   test('a session needs a valid token', () async {
     await configureAndAddPilots();
     final issued = await issue();

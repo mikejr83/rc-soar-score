@@ -46,6 +46,7 @@ createHandlers(
   DrawRunner? drawRunner,
   InvitationService? invitations,
   FailureRateLimiter? invitationRateLimiter,
+  Set<String> corsAllowedOrigins = const {},
 }) {
   final router = Router()
     ..get(
@@ -92,6 +93,7 @@ createHandlers(
       repository,
       service: invitations,
       limiter: invitationRateLimiter,
+      allowedOrigins: corsAllowedOrigins,
     ),
   );
 }

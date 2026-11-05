@@ -41,6 +41,7 @@ void main() {
 
       expect(response.statusCode, 204);
       expect(response.headers['access-control-allow-origin'], origin);
+      expect(response.headers['access-control-allow-credentials'], 'true');
       expect(
         response.headers['access-control-allow-headers'],
         'authorization,content-type',

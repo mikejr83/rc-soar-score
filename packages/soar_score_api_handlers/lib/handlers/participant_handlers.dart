@@ -5,6 +5,7 @@ import 'package:shelf_router/shelf_router.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../auth/guest_session_auth.dart';
+import '../auth/guest_session_cookie.dart';
 import '../auth/participant_principal.dart';
 import '../middleware/error_mapping.dart';
 import '../middleware/failure_rate_limiter.dart';
@@ -23,6 +24,7 @@ final _logger = Logger('ParticipantHandlers');
 ///   pilot the link is for.
 ///   Every link that does not open is the same 404 `invalid_invitation`;
 ///   too many failures from one address is a 429 `rate_limited`.
+/// - `POST /session/end` removes the session cookie (204).
 /// - `GET /session` is the session's own context, behind the guest session
 ///   layer: the call the app makes to check a stored session.
 ///
@@ -34,7 +36,10 @@ Handler buildParticipantHandler(
   Repository repository, {
   required InvitationService? service,
   FailureRateLimiter? limiter,
+  Set<String> allowedOrigins = const {},
+  DateTime Function()? clock,
 }) {
+  final now = clock ?? DateTime.now;
   final rateLimiter = limiter ?? FailureRateLimiter();
   final router = Router();
 
@@ -62,8 +67,21 @@ Handler buildParticipantHandler(
     try {
       final resolution = await invitations.resolve(body.credential.trim());
       final answer = await _resolution(repository, resolution);
-      return jsonResponse(answer.toJson())
-          .change(headers: {'cache-control': 'no-store'});
+      final json = answer.toJson();
+      // The web app (it sends X-Requested-With) keeps the session in a
+      // cookie and never sees the token; other clients get it in the body.
+      final web = (request.headers[webClientHeader] ?? '').isNotEmpty;
+      if (web) json['session_token'] = null;
+      return jsonResponse(json).change(
+        headers: {
+          'cache-control': 'no-store',
+          if (web)
+            'set-cookie': guestSessionSetCookie(
+              resolution.sessionToken,
+              resolution.sessionExpiresAt.difference(now()),
+            ),
+        },
+      );
     } on InvitationAccessError {
       rateLimiter.recordFailure(key);
       rethrow;
@@ -80,6 +98,24 @@ Handler buildParticipantHandler(
       }).change(headers: {'cache-control': 'no-store'});
     });
 
+  // Ends the session in this browser: removes the cookie. Needs no valid
+  // session (a dead cookie must be removable); a cookie write still has to
+  // pass the same-site check.
+  router.post('/session/end', (Request request) {
+    final cookie = guestSessionFromCookieHeader(request.headers['cookie']);
+    if (cookie != null) {
+      final refusal = requireCookieWriteIsSameSite(request, allowedOrigins);
+      if (refusal != null) return refusal;
+    }
+    return Response(
+      204,
+      headers: {
+        'set-cookie': guestSessionClearCookie(),
+        'cache-control': 'no-store',
+      },
+    );
+  });
+
   router.mount(
     '/',
     service == null
@@ -87,7 +123,9 @@ Handler buildParticipantHandler(
             'invitations_not_available',
             'this server does not issue invitations',
           )
-        : guestSessionAuth(service)(session.call),
+        : guestSessionAuth(service, allowedOrigins: allowedOrigins)(
+            session.call,
+          ),
   );
   return router.call;
 }

@@ -8,6 +8,7 @@ library;
 export 'auth/account_principal_resolver.dart';
 export 'auth/bearer_auth.dart';
 export 'auth/guest_session_auth.dart';
+export 'auth/guest_session_cookie.dart';
 export 'auth/participant_principal.dart';
 export 'auth/principal.dart';
 export 'auth/token_verifier.dart';
