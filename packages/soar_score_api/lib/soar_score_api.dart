@@ -65,6 +65,7 @@ export 'dto/update_team_request.dart';
 export 'errors/api_exception.dart';
 export 'errors/api_http_error.dart';
 export 'errors/api_network_error.dart';
+export 'errors/participant_api_error.dart';
 export 'errors/sync_refused_error.dart';
 
 export 'package:soar_score_core/services/calculated_flight.dart';
