@@ -17,7 +17,7 @@ enum GroupRowKind {
 class GroupResultRow {
   const GroupResultRow({
     required this.name,
-    required this.pilotNumber,
+    this.pilotNumber,
     required this.kind,
     this.time,
     this.score,
@@ -27,7 +27,7 @@ class GroupResultRow {
   });
 
   final String name;
-  final int pilotNumber;
+  final int? pilotNumber;
   final GroupRowKind kind;
 
   /// Formatted time such as `6:30.4`; null when there is none.

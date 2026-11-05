@@ -6,14 +6,14 @@ class PilotRound {
   const PilotRound({
     required this.number,
     required this.group,
-    required this.lane,
+    this.lane,
     required this.status,
     this.enteredBy,
   });
 
   final int number;
   final String group;
-  final int lane;
+  final int? lane;
   final PilotRoundStatus status;
 
   /// Who entered the score: `You` or a name. Null before a score exists.

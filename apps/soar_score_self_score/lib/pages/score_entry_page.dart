@@ -34,10 +34,16 @@ class ScoreEntryPage extends StatelessWidget {
       appBar: (context, data) => SelfScoreAppBar(
         title: data == null
             ? 'Score entry'
+            : data.pilotNumber == null
+            ? data.pilotName
             : '${data.pilotName}, pilot ${data.pilotNumber}',
         contextLine: data == null
             ? null
-            : 'Round ${data.round} · Group ${data.group} · Lane ${data.lane}',
+            : [
+                'Round ${data.round}',
+                'Group ${data.group}',
+                if (data.lane != null) 'Lane ${data.lane}',
+              ].join(' · '),
         onBack: () => context.go(pilotPath(contestId, pilotId)),
         backLabel: 'Back to pilot overview',
         actions: data == null

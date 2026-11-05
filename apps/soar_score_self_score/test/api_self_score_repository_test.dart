@@ -88,7 +88,7 @@ void main() {
     final entry = await _repository(_fixtures).entryContext('c', 'p', 2);
     expect(entry.pilotName, 'Alex Rivera');
     expect(entry.group, 'B');
-    expect(entry.lane, 5);
+    expect(entry.lane, isNull);
     expect(entry.roundCount, 5);
     expect(entry.landingTable.map((l) => l.label), ['Good', 'Fair', 'Off']);
   });
