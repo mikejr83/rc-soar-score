@@ -73,5 +73,17 @@
   "invitationLoadFailed": "Could not open your link. Check your network connection and try again.",
   "@invitationLoadFailed": {
     "description": "Shown when the server could not be reached while checking an invitation link."
+  },
+  "unsupportedRoleTitle": "This link is not for scoring yet",
+  "@unsupportedRoleTitle": {
+    "description": "Heading when an invitation link is valid but for a role this release does not support."
+  },
+  "unsupportedRoleBody": "Your link works, but this version of the app only supports pilots entering their own scores. Ask your contest director.",
+  "@unsupportedRoleBody": {
+    "description": "Explains a link for a role (such as a helper) that the app does not support yet."
+  },
+  "backToStart": "Back to start",
+  "@backToStart": {
+    "description": "Button on a page whose session ended. Goes to the start page, where the person opens their link again."
   }
 }

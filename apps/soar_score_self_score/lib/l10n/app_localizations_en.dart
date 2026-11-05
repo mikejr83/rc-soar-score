@@ -64,4 +64,14 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get invitationLoadFailed =>
       'Could not open your link. Check your network connection and try again.';
+
+  @override
+  String get unsupportedRoleTitle => 'This link is not for scoring yet';
+
+  @override
+  String get unsupportedRoleBody =>
+      'Your link works, but this version of the app only supports pilots entering their own scores. Ask your contest director.';
+
+  @override
+  String get backToStart => 'Back to start';
 }
