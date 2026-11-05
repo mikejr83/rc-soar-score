@@ -7,7 +7,7 @@ import { contestResultsPath } from "@/lib/results/paths";
 import styles from "./results.module.css";
 import { StatusPill } from "./status-pill";
 
-/** One contest in the search list: start date, name, venue and status. */
+/** One contest in the search list: start date, name, discipline, venue and status. */
 export function ContestRow({ contest }: { contest: ContestSummary }) {
   return (
     <Link href={contestResultsPath(contest.publicationId)} className={styles.row}>
@@ -15,6 +15,7 @@ export function ContestRow({ contest }: { contest: ContestSummary }) {
         {formatDay(contest.start)}
       </time>
       <span className={styles.rowName}>{contest.name}</span>
+      {contest.discipline && <span className={styles.rowDiscipline}>{contest.discipline}</span>}
       <span className={styles.rowVenue}>{contest.venue}</span>
       <span className={styles.rowStatus}>
         <StatusPill status={contest.status} />

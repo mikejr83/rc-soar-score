@@ -191,6 +191,7 @@ export function fakeSummary({
   state,
   country,
   status,
+  discipline,
   id,
 }: {
   name: string;
@@ -201,6 +202,7 @@ export function fakeSummary({
   state?: string;
   country?: string;
   status?: string;
+  discipline?: string;
   id?: string;
 }): PublicPublicationSummary {
   return {
@@ -216,7 +218,7 @@ export function fakeSummary({
       city,
       state,
       country,
-      discipline: "F5J",
+      ...(discipline !== undefined ? { discipline } : {}),
       ...(status ? { status } : {}),
     },
     discipline_type: "f5j",
