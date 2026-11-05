@@ -10,6 +10,8 @@ import 'package:soar_score_contest/api_client_provider.dart';
 import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_contest/pages/home_page.dart';
 import 'package:soar_score_contest/services/competition_import/competition_import.dart';
+import 'package:soar_score_contest/services/ui_account/ui_account.dart';
+import 'package:soar_score_contest/ui_account_provider.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../support/competition_import_fakes.dart';
@@ -33,6 +35,37 @@ Widget _app(ApiClient? client) {
   return client == null
       ? page
       : ApiClientInherited(client: client, child: page);
+}
+
+/// The page wrapped in a [UiAccountInherited], so the page sees an acting
+/// account the way the native build does.
+Widget _appWithAccount(ApiClient client, UiAccount account) {
+  final page = MaterialApp(
+    home: const Scaffold(body: HomePage()),
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
+  );
+  return UiAccountInherited(
+    account: account,
+    child: ApiClientInherited(client: client, child: page),
+  );
+}
+
+/// A [UiAccount] whose id can be flipped, standing in for the native build's
+/// acting account, which moves from the Local account to the signed-in one
+/// when the claim completes.
+class _MutableUiAccount extends ChangeNotifier implements UiAccount {
+  _MutableUiAccount(this._id);
+
+  String _id;
+
+  @override
+  String get id => _id;
+
+  void changeTo(String id) {
+    _id = id;
+    notifyListeners();
+  }
 }
 
 ApiClient _client(Future<http.Response> Function(http.Request) respond) =>
@@ -280,6 +313,60 @@ void main() {
       await tester.tap(find.text('Imported Open'));
       await tester.pumpAndSettle();
       expect(find.byKey(const ValueKey('imported-label')), findsNothing);
+    });
+  });
+
+  group('when the acting account changes', () {
+    testWidgets('a first load that races the sign-in reloads when the '
+        'acting account is claimed', (tester) async {
+      // First the embedded server acts as the Local account (no contests),
+      // then the claim re-points it at the signed-in account (with them).
+      var signedIn = false;
+      final client = _client((_) async => _json({
+        'contests': signedIn
+            ? [_contest('Signed In Open').toJson()]
+            : <Object>[],
+      }));
+      final account = _MutableUiAccount('local-account');
+      account.addListener(() {
+        if (account.id == 'signed-in-account') signedIn = true;
+      });
+
+      await tester.pumpWidget(_appWithAccount(client, account));
+      await tester.pumpAndSettle();
+
+      // The first load answered while acting as the Local account: empty.
+      expect(find.text(l10n.contestsEmpty), findsOneWidget);
+
+      // The claim completes: the embedded server now acts as the signed-in
+      // account. The page must reload and show the account's contests.
+      account.changeTo('signed-in-account');
+      await tester.pumpAndSettle();
+
+      expect(find.text('Signed In Open'), findsNWidgets(2));
+      expect(find.text(l10n.contestsEmpty), findsNothing);
+    });
+
+    testWidgets('changing to the same account does not reload', (tester) async {
+      var calls = 0;
+      final client = _client((_) async {
+        calls++;
+        return _json({
+          'contests': [_contest('Same Account Open').toJson()],
+        });
+      });
+      final account = _MutableUiAccount('local-account');
+
+      await tester.pumpWidget(_appWithAccount(client, account));
+      await tester.pumpAndSettle();
+      expect(calls, 1);
+
+      // A change to the account the list already belongs to must not ask
+      // again.
+      account.changeTo('local-account');
+      await tester.pumpAndSettle();
+      expect(calls, 1);
+      expect(find.text('Same Account Open'), findsNWidgets(2));
     });
   });
 }

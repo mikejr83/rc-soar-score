@@ -10,6 +10,7 @@ import '../router.dart';
 import '../services/competition_import/competition_import.dart';
 import '../services/contest_open_action.dart';
 import '../services/exchange/contest_exchange.dart';
+import '../ui_account_provider.dart';
 import '../widgets/competition_import/competition_import_dialog.dart';
 import '../widgets/contest_detail_pane.dart';
 import '../widgets/contest_list.dart';
@@ -34,6 +35,17 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   Future<List<Contest>>? _contests;
+
+  /// Whether the first load has started, so a reload is triggered only by a
+  /// change of the acting account, not by the first build or by another
+  /// inherited widget in scope.
+  bool _started = false;
+
+  /// The account the list was loaded for; a change reloads it, because a
+  /// native load races the sign-in that re-points the embedded server at the
+  /// signed-in account and would otherwise keep showing the Local account's
+  /// (empty) list.
+  String? _loadedFor;
   Id? _selectedId;
   bool _showDetail = false;
 
@@ -58,11 +70,26 @@ class _HomePageState extends State<HomePage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _contests ??= _load();
+    // The embedded server of the native build serves the acting account,
+    // which is still the Local account until the sign-in's claim re-points
+    // it. The first load can race that claim and answer empty; a change of
+    // the acting account (which the tree hears through the [UiAccount])
+    // reloads the list.
+    final account = _account();
+    if (_started && account == _loadedFor) return;
+    _started = true;
+    _loadedFor = account;
+    _selectedId = null;
+    _showDetail = false;
+    _contests = _load();
   }
+
+  /// The account the tree acts as, or `null` when none is provided (tests).
+  String? _account() => uiAccountOf(context)?.id;
 
   Future<List<Contest>> _load() {
     _imported.clear();
+    _loadedFor = _account();
     final client = apiClientOf(context);
     if (client == null) {
       return Future.error(StateError('No API client is available.'));
