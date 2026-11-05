@@ -76,7 +76,7 @@ abstract final class PublicationFlow {
     }
     final outcome = await PublicationActions(
       client,
-      signedIn: _signedIn(context),
+      signedIn: signedIn,
     ).setVisibility(contestId, target);
     _report(
       messenger,
@@ -109,7 +109,7 @@ abstract final class PublicationFlow {
     }
     final outcome = await PublicationActions(
       client,
-      signedIn: _signedIn(context),
+      signedIn: signedIn,
     ).requestDelisting(contestId, reason: reason.isEmpty ? null : reason);
     _report(messenger, l10n, outcome, l10n.publicationDelistRequestedDone);
     return outcome.succeeded;
@@ -134,7 +134,7 @@ abstract final class PublicationFlow {
     }
     final outcome = await PublicationActions(
       client,
-      signedIn: _signedIn(context),
+      signedIn: signedIn,
     ).withdrawDelisting(contestId);
     _report(messenger, l10n, outcome, l10n.publicationDelistWithdrawnDone);
     return outcome.succeeded ||
