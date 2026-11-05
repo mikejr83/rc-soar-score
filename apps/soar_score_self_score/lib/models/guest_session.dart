@@ -6,9 +6,9 @@ class GuestSession {
     required this.contestName,
     required this.pilotId,
     required this.pilotName,
+    required this.expiresAt,
     this.token,
     this.role = 'pilot',
-    this.expiresAt,
   });
 
   factory GuestSession.fromJson(Map<String, Object?> json) => GuestSession(
@@ -18,10 +18,8 @@ class GuestSession {
     pilotName: json['pilotName']! as String,
     token: json['token'] as String?,
     role: json['role'] as String? ?? 'pilot',
-    expiresAt: switch (json['expiresAt']) {
-      final String text => DateTime.tryParse(text),
-      _ => null,
-    },
+    // A stored session with no readable expiry is refused, not kept for ever.
+    expiresAt: DateTime.parse(json['expiresAt']! as String),
   );
 
   final String contestId;
@@ -39,12 +37,12 @@ class GuestSession {
   /// field release. The server decides what the role may see.
   final String role;
 
-  /// When the server stops accepting [token]. Null when it did not say.
-  final DateTime? expiresAt;
+  /// When the server stops accepting the session. Always known: the server
+  /// sends it with the session, and a stored one without it is not used.
+  final DateTime expiresAt;
 
   /// Whether the server would already refuse [token] at [now].
-  bool isExpired(DateTime now) =>
-      expiresAt != null && !now.isBefore(expiresAt!);
+  bool isExpired(DateTime now) => !now.isBefore(expiresAt);
 
   Map<String, Object?> toJson() => {
     'contestId': contestId,
@@ -53,6 +51,6 @@ class GuestSession {
     'pilotName': pilotName,
     if (token != null) 'token': token,
     'role': role,
-    'expiresAt': expiresAt?.toUtc().toIso8601String(),
+    'expiresAt': expiresAt.toUtc().toIso8601String(),
   };
 }

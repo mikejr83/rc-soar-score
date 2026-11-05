@@ -279,6 +279,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The score was not accepted. Ask your contest director.'**
   String get scoreRejectedOther;
+
+  /// Heading when an invitation link is valid but for a role this release does not support.
+  ///
+  /// In en, this message translates to:
+  /// **'This link is not for scoring yet'**
+  String get unsupportedRoleTitle;
+
+  /// Explains a link for a role (such as a helper) that the app does not support yet.
+  ///
+  /// In en, this message translates to:
+  /// **'Your link works, but this version of the app only supports pilots entering their own scores. Ask your contest director.'**
+  String get unsupportedRoleBody;
+
+  /// Button on a page whose session ended. Goes to the start page, where the person opens their link again.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to start'**
+  String get backToStart;
 }
 
 class _AppLocalizationsDelegate
