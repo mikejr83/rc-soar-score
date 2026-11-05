@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../../api_client_provider.dart';
+import '../../auth/auth_session_inherited.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/publication/publication_actions.dart';
 import '../../services/workspace/publication_facts.dart';
@@ -11,6 +12,9 @@ import 'publication_text.dart';
 /// The publish and visibility flows shared by the workspace card and the
 /// Publication page: confirm, call the API, say what happened.
 abstract final class PublicationFlow {
+  static bool _signedIn(BuildContext context) =>
+      authSessionOf(context)?.isSignedIn ?? false;
+
   /// Confirms and publishes [contest]; true when it was published.
   ///
   /// The visibility shown in the dialog is the current one, or Unlisted for a
@@ -22,6 +26,7 @@ abstract final class PublicationFlow {
     required String policyText,
   }) async {
     final client = publicationClientOf(context);
+    final signedIn = _signedIn(context);
     final messenger = ScaffoldMessenger.of(context);
     final l10n = AppLocalizations.of(context);
     if (client == null) {
@@ -39,10 +44,11 @@ abstract final class PublicationFlow {
     if (!confirmed) {
       return false;
     }
-    final outcome = await PublicationActions(client).publish(
-      contest,
-      projectionRevision: publication.projection?.projectionRevision ?? 0,
-    );
+    final outcome = await PublicationActions(client, signedIn: signedIn)
+        .publish(
+          contest,
+          projectionRevision: publication.projection?.projectionRevision ?? 0,
+        );
     _report(messenger, l10n, outcome, l10n.publicationPublishedDone);
     return outcome.succeeded;
   }
@@ -55,6 +61,7 @@ abstract final class PublicationFlow {
     required PublicationVisibility target,
   }) async {
     final client = publicationClientOf(context);
+    final signedIn = _signedIn(context);
     final messenger = ScaffoldMessenger.of(context);
     final l10n = AppLocalizations.of(context);
     if (client == null) {
@@ -67,8 +74,10 @@ abstract final class PublicationFlow {
         !await confirmMakePublic(context)) {
       return false;
     }
-    final outcome = await PublicationActions(client)
-        .setVisibility(contestId, target);
+    final outcome = await PublicationActions(
+      client,
+      signedIn: _signedIn(context),
+    ).setVisibility(contestId, target);
     _report(
       messenger,
       l10n,
@@ -85,6 +94,7 @@ abstract final class PublicationFlow {
     required Id contestId,
   }) async {
     final client = publicationClientOf(context);
+    final signedIn = _signedIn(context);
     final messenger = ScaffoldMessenger.of(context);
     final l10n = AppLocalizations.of(context);
     if (client == null) {
@@ -97,8 +107,10 @@ abstract final class PublicationFlow {
     if (reason == null) {
       return false;
     }
-    final outcome = await PublicationActions(client)
-        .requestDelisting(contestId, reason: reason.isEmpty ? null : reason);
+    final outcome = await PublicationActions(
+      client,
+      signedIn: _signedIn(context),
+    ).requestDelisting(contestId, reason: reason.isEmpty ? null : reason);
     _report(messenger, l10n, outcome, l10n.publicationDelistRequestedDone);
     return outcome.succeeded;
   }
@@ -111,6 +123,7 @@ abstract final class PublicationFlow {
     required Id contestId,
   }) async {
     final client = publicationClientOf(context);
+    final signedIn = _signedIn(context);
     final messenger = ScaffoldMessenger.of(context);
     final l10n = AppLocalizations.of(context);
     if (client == null) {
@@ -119,8 +132,10 @@ abstract final class PublicationFlow {
       );
       return false;
     }
-    final outcome = await PublicationActions(client)
-        .withdrawDelisting(contestId);
+    final outcome = await PublicationActions(
+      client,
+      signedIn: _signedIn(context),
+    ).withdrawDelisting(contestId);
     _report(messenger, l10n, outcome, l10n.publicationDelistWithdrawnDone);
     return outcome.succeeded ||
         outcome.failure == PublicationFailure.nothingPending;

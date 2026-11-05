@@ -2240,6 +2240,12 @@ abstract class AppLocalizations {
   /// **'Sign in to publish this contest.'**
   String get publicationFailSignIn;
 
+  /// Shown when the server refused a publication call although the director was signed in.
+  ///
+  /// In en, this message translates to:
+  /// **'Your sign-in expired. Sign in again to publish this contest.'**
+  String get publicationFailSignInExpired;
+
   /// Shown when the hosted server does not know the contest because it has not synced.
   ///
   /// In en, this message translates to:

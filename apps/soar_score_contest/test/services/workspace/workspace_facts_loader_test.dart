@@ -38,6 +38,7 @@ Future<WorkspaceFacts> _load({
   String? failingAuditAction,
   List<Map<String, Object?>> auditEvents = const [],
   String? actingAccountId,
+  ApiClient? publicationClient,
 }) {
   final matrix = drawnMatrix();
   final server = MatrixServer(configuration: configRevision(3), matrix: matrix);
@@ -101,6 +102,7 @@ Future<WorkspaceFacts> _load({
   return WorkspaceFactsLoader.load(
     client,
     contest ?? matrixContest(state: LifecycleState.running),
+    publicationClient: publicationClient,
     isOffline: offline,
     actingAccountId: actingAccountId,
   );
@@ -121,6 +123,55 @@ void main() {
       requests.where((path) => path.endsWith('/contests/$matrixContestId')),
       isEmpty,
     );
+  });
+
+  group('publication events come from the publication client', () {
+    ApiClient hosted(List<String> requests, int status) => ApiClient(
+      baseUrl: Uri.parse('http://hosted'),
+      httpClient: MockClient((request) async {
+        requests.add('${request.url.path}?${request.url.query}');
+        return status == 200
+            ? _json({'audit_events': <Object>[]})
+            : _json({
+                'error': {'code': 'x', 'message': 'no'},
+              }, status);
+      }),
+    );
+
+    test('only the publication audit read goes to the hosted client', () async {
+      final hostedRequests = <String>[];
+      final localRequests = <String>[];
+      final facts = await _load(
+        requests: localRequests,
+        publicationClient: hosted(hostedRequests, 200),
+      );
+      expect(
+        hostedRequests.where((r) => r.contains('audit-events')),
+        hasLength(1),
+      );
+      expect(
+        hostedRequests.any(
+          (r) => r.contains('publicationAttempt') || r.contains('publication'),
+        ),
+        isTrue,
+      );
+      expect(hostedRequests.any((r) => r.contains('/scores')), isFalse);
+      expect(facts.activity, isNot(ActivityFacts.unavailable));
+    });
+
+    for (final status in [401, 404]) {
+      test('a $status there is no events, not an unavailable card', () async {
+        final facts = await _load(
+          publicationClient: hosted(<String>[], status),
+        );
+        expect(facts.activity, isNot(ActivityFacts.unavailable));
+      });
+    }
+
+    test('another failure there makes the activity unavailable', () async {
+      final facts = await _load(publicationClient: hosted(<String>[], 500));
+      expect(facts.activity, ActivityFacts.unavailable);
+    });
   });
 
   test('reads a publication', () async {

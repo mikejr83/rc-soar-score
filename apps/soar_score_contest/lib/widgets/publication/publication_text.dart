@@ -52,6 +52,7 @@ extension PublicationText on AppLocalizations {
     PublicationFailure.nothingPending => publicationFailNothingPending,
     PublicationFailure.notDirector => publicationFailNotDirector,
     PublicationFailure.signInRequired => publicationFailSignIn,
+    PublicationFailure.signInExpired => publicationFailSignInExpired,
     PublicationFailure.notSynced => publicationFailNotSynced,
     PublicationFailure.network => publicationFailNetwork,
     PublicationFailure.other => publicationFailOther,

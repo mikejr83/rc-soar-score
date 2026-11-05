@@ -1793,6 +1793,10 @@
   "@publicationFailSignIn": {
     "description": "Shown when publishing was refused because nobody is signed in."
   },
+  "publicationFailSignInExpired": "Your sign-in expired. Sign in again to publish this contest.",
+  "@publicationFailSignInExpired": {
+    "description": "Shown when the server refused a publication call although the director was signed in."
+  },
   "publicationFailNotSynced": "The server does not have this contest yet. Wait for it to sync, then publish again.",
   "@publicationFailNotSynced": {
     "description": "Shown when the hosted server does not know the contest because it has not synced."

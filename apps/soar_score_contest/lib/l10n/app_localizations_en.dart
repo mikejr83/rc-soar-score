@@ -1538,6 +1538,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get publicationFailSignIn => 'Sign in to publish this contest.';
 
   @override
+  String get publicationFailSignInExpired =>
+      'Your sign-in expired. Sign in again to publish this contest.';
+
+  @override
   String get publicationFailNotSynced =>
       'The server does not have this contest yet. Wait for it to sync, then publish again.';
 

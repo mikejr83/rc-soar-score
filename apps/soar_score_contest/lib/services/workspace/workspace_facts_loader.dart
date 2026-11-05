@@ -40,7 +40,7 @@ abstract final class WorkspaceFactsLoader {
       _scores(client, id, unavailable),
       _publication(publicationClient ?? client, id, unavailable),
       _landingTables(client, unavailable),
-      _audit(client, contest, actingAccountId),
+      _audit(client, publicationClient ?? client, contest, actingAccountId),
     ]);
     final audit = results[4]! as _AuditFacts;
     return WorkspaceFacts.derive(
@@ -77,8 +77,12 @@ abstract final class WorkspaceFactsLoader {
   ///
   /// The reads fail on their own: a failed publication read still leaves the
   /// transition facts known, and marks only the activity as failed.
+  ///
+  /// Publishing happens on the hosted server, so the publication events are
+  /// read from [publicationClient]; the rest come from [client].
   static Future<_AuditFacts> _audit(
     ApiClient client,
+    ApiClient publicationClient,
     Contest contest,
     String? actingAccountId,
   ) async {
@@ -108,12 +112,7 @@ abstract final class WorkspaceFactsLoader {
         AuditAction.scoreAttempt,
         limit: ActivityFacts.shown,
       ),
-      _auditEvents(
-        client,
-        contest,
-        AuditAction.publicationAttempt,
-        limit: ActivityFacts.shown,
-      ),
+      _publicationEvents(publicationClient, contest),
     ).wait;
     final activityReads = [
       transitions,
@@ -140,6 +139,37 @@ abstract final class WorkspaceFactsLoader {
               ...publications!,
             ], actingAccountId: actingAccountId),
     );
+  }
+
+  /// The publication events of [contest] on the server that publishes. A
+  /// director who is signed out (401) or whose contest has not synced yet
+  /// (404) has none there, which is not a failed read.
+  static Future<List<AuditEventDto>?> _publicationEvents(
+    ApiClient client,
+    Contest contest,
+  ) async {
+    try {
+      return await client.auditEvents(
+        contest.id,
+        action: AuditAction.publicationAttempt,
+        limit: ActivityFacts.shown,
+      );
+    } on ApiHttpError catch (error) {
+      if (error.statusCode == 401 || error.statusCode == 404) {
+        return const <AuditEventDto>[];
+      }
+      _logger.warning(
+        'Could not read the publication audit events of ${contest.id}',
+        error,
+      );
+      return null;
+    } on Object catch (error) {
+      _logger.warning(
+        'Could not read the publication audit events of ${contest.id}',
+        error,
+      );
+      return null;
+    }
   }
 
   static Future<List<AuditEventDto>?> _auditEvents(
