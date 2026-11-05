@@ -5,6 +5,7 @@ import '../models/guest_session.dart';
 import '../models/landing_result.dart';
 import '../models/pilot_overview.dart';
 import '../models/results_view.dart';
+import '../models/score_submission.dart';
 import '../models/team_overview.dart';
 import '../models/team_pilot.dart';
 import 'sample_data.dart';
@@ -42,6 +43,12 @@ class SampleSelfScoreRepository implements SelfScoreRepository {
       pilotName: SampleData.pilotName,
       token: 'sample-token',
     );
+  }
+
+  @override
+  Future<SubmitResult> submitScore(ScoreSubmission submission) async {
+    _requireContest(submission.contestId);
+    return const ScoreAccepted(flightScore: '863');
   }
 
   @override

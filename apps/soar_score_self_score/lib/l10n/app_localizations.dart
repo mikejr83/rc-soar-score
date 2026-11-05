@@ -189,6 +189,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not open your link. Check your network connection and try again.'**
   String get invitationLoadFailed;
+
+  /// Shown on the Submit button while the score is on its way.
+  ///
+  /// In en, this message translates to:
+  /// **'Sending your score'**
+  String get scoreSending;
+
+  /// Heading when a score could not reach the server.
+  ///
+  /// In en, this message translates to:
+  /// **'Not sent yet'**
+  String get scoreQueuedTitle;
+
+  /// Explains a score that has not reached the server.
+  ///
+  /// In en, this message translates to:
+  /// **'Your score is saved on this phone and is not official yet. It will send again when the connection is back. You can also try now.'**
+  String get scoreQueuedBody;
+
+  /// Button that sends a waiting score again.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again now'**
+  String get scoreRetryNow;
+
+  /// Shown after the server accepted the score. The score is the server's calculation.
+  ///
+  /// In en, this message translates to:
+  /// **'Official score: {score}'**
+  String scoreAcceptedLine(String score);
+
+  /// Shown after the server accepted the score but gave no calculated value.
+  ///
+  /// In en, this message translates to:
+  /// **'Your score was received.'**
+  String get scoreAcceptedNoValue;
+
+  /// Shown when the server already had a score for the flight.
+  ///
+  /// In en, this message translates to:
+  /// **'This flight already has a score. The stored score stands.'**
+  String get scoreAlreadyThere;
+
+  /// Shown when the server already had a score for the flight. The score is the stored one.
+  ///
+  /// In en, this message translates to:
+  /// **'This flight already has a score: {score}. The stored score stands.'**
+  String scoreAlreadyThereWith(String score);
+
+  /// Shown when the entry form opens for a flight that is already scored.
+  ///
+  /// In en, this message translates to:
+  /// **'This flight already has a score, so it is read-only. See the group results for the score.'**
+  String get scoreExistingReadOnly;
+
+  /// Shown when the server refused the values.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your entries. The score was not sent.'**
+  String get scoreRejectedValidation;
+
+  /// Shown when the contest or round no longer takes scores.
+  ///
+  /// In en, this message translates to:
+  /// **'Scoring is closed for this flight. Ask your contest director.'**
+  String get scoreRejectedClosed;
+
+  /// Shown when an earlier round has no score yet.
+  ///
+  /// In en, this message translates to:
+  /// **'Score the earlier round first.'**
+  String get scoreRejectedOutOfOrder;
+
+  /// Shown when the draw changed after the form was opened.
+  ///
+  /// In en, this message translates to:
+  /// **'The draw changed. Go back to your rounds and open this round again.'**
+  String get scoreRejectedStaleDraw;
+
+  /// Shown when the guest session is no longer valid.
+  ///
+  /// In en, this message translates to:
+  /// **'Your session has ended. Open your invitation link again.'**
+  String get scoreRejectedSession;
+
+  /// Shown for any other refusal.
+  ///
+  /// In en, this message translates to:
+  /// **'The score was not accepted. Ask your contest director.'**
+  String get scoreRejectedOther;
 }
 
 class _AppLocalizationsDelegate

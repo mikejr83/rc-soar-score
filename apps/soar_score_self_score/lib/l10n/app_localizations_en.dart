@@ -64,4 +64,61 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get invitationLoadFailed =>
       'Could not open your link. Check your network connection and try again.';
+
+  @override
+  String get scoreSending => 'Sending your score';
+
+  @override
+  String get scoreQueuedTitle => 'Not sent yet';
+
+  @override
+  String get scoreQueuedBody =>
+      'Your score is saved on this phone and is not official yet. It will send again when the connection is back. You can also try now.';
+
+  @override
+  String get scoreRetryNow => 'Try again now';
+
+  @override
+  String scoreAcceptedLine(String score) {
+    return 'Official score: $score';
+  }
+
+  @override
+  String get scoreAcceptedNoValue => 'Your score was received.';
+
+  @override
+  String get scoreAlreadyThere =>
+      'This flight already has a score. The stored score stands.';
+
+  @override
+  String scoreAlreadyThereWith(String score) {
+    return 'This flight already has a score: $score. The stored score stands.';
+  }
+
+  @override
+  String get scoreExistingReadOnly =>
+      'This flight already has a score, so it is read-only. See the group results for the score.';
+
+  @override
+  String get scoreRejectedValidation =>
+      'Check your entries. The score was not sent.';
+
+  @override
+  String get scoreRejectedClosed =>
+      'Scoring is closed for this flight. Ask your contest director.';
+
+  @override
+  String get scoreRejectedOutOfOrder => 'Score the earlier round first.';
+
+  @override
+  String get scoreRejectedStaleDraw =>
+      'The draw changed. Go back to your rounds and open this round again.';
+
+  @override
+  String get scoreRejectedSession =>
+      'Your session has ended. Open your invitation link again.';
+
+  @override
+  String get scoreRejectedOther =>
+      'The score was not accepted. Ask your contest director.';
 }

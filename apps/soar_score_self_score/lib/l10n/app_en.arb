@@ -73,5 +73,75 @@
   "invitationLoadFailed": "Could not open your link. Check your network connection and try again.",
   "@invitationLoadFailed": {
     "description": "Shown when the server could not be reached while checking an invitation link."
+  },
+  "scoreSending": "Sending your score",
+  "@scoreSending": {
+    "description": "Shown on the Submit button while the score is on its way."
+  },
+  "scoreQueuedTitle": "Not sent yet",
+  "@scoreQueuedTitle": {
+    "description": "Heading when a score could not reach the server."
+  },
+  "scoreQueuedBody": "Your score is saved on this phone and is not official yet. It will send again when the connection is back. You can also try now.",
+  "@scoreQueuedBody": {
+    "description": "Explains a score that has not reached the server."
+  },
+  "scoreRetryNow": "Try again now",
+  "@scoreRetryNow": {
+    "description": "Button that sends a waiting score again."
+  },
+  "scoreAcceptedLine": "Official score: {score}",
+  "@scoreAcceptedLine": {
+    "description": "Shown after the server accepted the score. The score is the server's calculation.",
+    "placeholders": {
+      "score": {
+        "type": "String"
+      }
+    }
+  },
+  "scoreAcceptedNoValue": "Your score was received.",
+  "@scoreAcceptedNoValue": {
+    "description": "Shown after the server accepted the score but gave no calculated value."
+  },
+  "scoreAlreadyThere": "This flight already has a score. The stored score stands.",
+  "@scoreAlreadyThere": {
+    "description": "Shown when the server already had a score for the flight."
+  },
+  "scoreAlreadyThereWith": "This flight already has a score: {score}. The stored score stands.",
+  "@scoreAlreadyThereWith": {
+    "description": "Shown when the server already had a score for the flight. The score is the stored one.",
+    "placeholders": {
+      "score": {
+        "type": "String"
+      }
+    }
+  },
+  "scoreExistingReadOnly": "This flight already has a score, so it is read-only. See the group results for the score.",
+  "@scoreExistingReadOnly": {
+    "description": "Shown when the entry form opens for a flight that is already scored."
+  },
+  "scoreRejectedValidation": "Check your entries. The score was not sent.",
+  "@scoreRejectedValidation": {
+    "description": "Shown when the server refused the values."
+  },
+  "scoreRejectedClosed": "Scoring is closed for this flight. Ask your contest director.",
+  "@scoreRejectedClosed": {
+    "description": "Shown when the contest or round no longer takes scores."
+  },
+  "scoreRejectedOutOfOrder": "Score the earlier round first.",
+  "@scoreRejectedOutOfOrder": {
+    "description": "Shown when an earlier round has no score yet."
+  },
+  "scoreRejectedStaleDraw": "The draw changed. Go back to your rounds and open this round again.",
+  "@scoreRejectedStaleDraw": {
+    "description": "Shown when the draw changed after the form was opened."
+  },
+  "scoreRejectedSession": "Your session has ended. Open your invitation link again.",
+  "@scoreRejectedSession": {
+    "description": "Shown when the guest session is no longer valid."
+  },
+  "scoreRejectedOther": "The score was not accepted. Ask your contest director.",
+  "@scoreRejectedOther": {
+    "description": "Shown for any other refusal."
   }
 }

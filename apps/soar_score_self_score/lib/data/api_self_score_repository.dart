@@ -10,6 +10,7 @@ import '../models/pilot_overview.dart';
 import '../models/pilot_round.dart';
 import '../models/results_snapshot.dart';
 import '../models/results_view.dart';
+import '../models/score_submission.dart';
 import '../models/team_overview.dart';
 import '../services/flight_time_input.dart';
 import '../services/score_format.dart';
@@ -76,6 +77,49 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
       throw const SelfScoreLoadException(_unreachable);
     } on ApiException {
       throw const SelfScoreLoadException(_unreachable);
+    }
+  }
+
+  @override
+  Future<SubmitResult> submitScore(ScoreSubmission submission) async {
+    try {
+      final answer = await _client.submitParticipantScore(
+        submission.round,
+        SubmitParticipantScoreRequest(
+          clientMutationId: submission.clientMutationId,
+          matrixRevision: submission.matrixRevision,
+          components: submission.components,
+        ),
+      );
+      final score = answer.score.flightScore;
+      return ScoreAccepted(
+        flightScore: score == null ? null : ScoreFormat.score(score),
+        nextRound: answer.nextRound,
+      );
+    } on ApiHttpError catch (error) {
+      final refusal = error.participantError;
+      final transient =
+          error.statusCode >= 500 ||
+          error.statusCode == 408 ||
+          error.statusCode == 429;
+      if (refusal == null || transient) {
+        throw const SelfScoreOfflineException(_unreachable);
+      }
+      if (refusal.code == ParticipantErrorCodes.scoreAlreadySubmitted) {
+        final score = refusal.acceptedScore?.flightScore;
+        return ScoreAlreadySubmitted(
+          flightScore: score == null ? null : ScoreFormat.score(score),
+        );
+      }
+      return ScoreRejected(
+        code: refusal.code,
+        message: refusal.message,
+        fields: [for (final field in refusal.fieldErrors) field.field],
+      );
+    } on ApiException {
+      // Network failure or an answer that could not be read: the score may or
+      // may not be stored, and sending it again with the same id is safe.
+      throw const SelfScoreOfflineException(_unreachable);
     }
   }
 
@@ -162,6 +206,12 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
           ),
       ],
       allowsMotorRestart: entry.allowsMotorRestart,
+      matrixRevision: entry.matrixRevision,
+      alreadySubmitted: switch (entry.state) {
+        ParticipantScoreState.notEntered ||
+        ParticipantScoreState.draft => false,
+        _ => true,
+      },
     );
   });
 

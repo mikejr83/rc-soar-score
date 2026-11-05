@@ -4,6 +4,7 @@ import '../models/group_results.dart';
 import '../models/guest_session.dart';
 import '../models/pilot_overview.dart';
 import '../models/results_view.dart';
+import '../models/score_submission.dart';
 import '../models/team_overview.dart';
 
 /// Why a page could not load, in words the person can read.
@@ -14,6 +15,13 @@ class SelfScoreLoadException implements Exception {
 
   @override
   String toString() => message;
+}
+
+/// The server could not be reached, or failed in a way that may pass. Used by
+/// [SelfScoreRepository.submitScore] to tell a score that must be sent again
+/// from one the server refused.
+class SelfScoreOfflineException extends SelfScoreLoadException {
+  const SelfScoreOfflineException(super.message);
 }
 
 /// The invitation link is unknown, expired or replaced. The three look the
@@ -34,6 +42,12 @@ abstract interface class SelfScoreRepository {
   /// Throws [InvalidInvitationException] when the link does not work, and
   /// [SelfScoreLoadException] when the server could not be reached.
   Future<GuestSession> acceptInvitation(String credential);
+
+  /// Sends a score. Resolves with what the server decided; a refusal is a
+  /// [ScoreRejected] result, not an exception. Throws
+  /// [SelfScoreOfflineException] when the server could not be reached, in
+  /// which case the same [ScoreSubmission] can be sent again safely.
+  Future<SubmitResult> submitScore(ScoreSubmission submission);
 
   Future<ContestsView> contests();
 
