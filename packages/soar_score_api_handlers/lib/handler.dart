@@ -1,8 +1,10 @@
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:soar_score_api_handlers/handlers/handlers.dart';
+import 'package:soar_score_api_handlers/middleware/failure_rate_limiter.dart';
 import 'package:soar_score_api_handlers/middleware/middleware.dart';
 import 'package:soar_score_core/repositories/repository.dart';
+import 'package:soar_score_core/services/invitations/invitation_service.dart';
 import 'package:soar_score_core/services/recalculation/recalculation_service.dart';
 import 'package:soar_score_core/services/sync/sync_versions.dart';
 import 'package:soar_score_core/import/glider_score_import_runner.dart';
@@ -58,6 +60,12 @@ final _logger = Logger('Handler');
 /// default, so a long draw never stops the API from answering. Tests and the
 /// E2E servers pass another runner.
 ///
+/// [invitations], when provided, turns on the participant routes at
+/// `/api/v1/self-scoring` (opening an invitation link and the guest session); they
+/// need no account sign-in and sit outside [authMiddleware]. Without it they
+/// answer 409 `invitations_not_available`. [invitationRateLimiter] replaces
+/// the default limit on failed link attempts (tests).
+///
 /// [corsAllowedOrigins] are the exact browser origins (for example
 /// `http://127.0.0.1:8091`) allowed to call the API cross-origin. Empty, the
 /// default, adds no CORS headers.
@@ -73,6 +81,8 @@ Handler buildApiHandler({
   GliderScoreImportRunner? gliderScoreImport,
   DrawRunner? drawRunner,
   Set<String> corsAllowedOrigins = const {},
+  InvitationService? invitations,
+  FailureRateLimiter? invitationRateLimiter,
 }) {
   final handlers = createHandlers(
     name,
@@ -84,6 +94,8 @@ Handler buildApiHandler({
     syncVersions: SyncVersions.exactly(schemaRevision ?? 1),
     gliderScoreImport: gliderScoreImport,
     drawRunner: drawRunner,
+    invitations: invitations,
+    invitationRateLimiter: invitationRateLimiter,
   );
   Handler api = handlers.apiHandler;
 
@@ -97,6 +109,9 @@ Handler buildApiHandler({
   final app = Router()
     ..get('/robots.txt', robotsTxtHandler)
     ..mount('/', handlers.healthHandler)
+    // Before `/api/v1`, so these routes keep the DTO paths but answer to
+    // their own guest session instead of the account sign-in.
+    ..mount('/api/v1/self-scoring', handlers.participantHandler)
     ..mount('/api/v1', api)
     ..mount('/public', handlers.publicHandler);
 
