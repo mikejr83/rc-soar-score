@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../data/self_score_repository.dart';
+import '../session/guest_session_scope.dart';
 import 'load_error_view.dart';
 
 /// A page scaffold that loads its data, shows a loading state while waiting,
@@ -30,19 +31,34 @@ class LoadableScaffold<T> extends StatefulWidget {
 }
 
 class _LoadableScaffoldState<T> extends State<LoadableScaffold<T>> {
-  late Future<T> _future = widget.load();
+  late Future<T> _future = _start();
+
+  /// Loads, and drops the stored guest session when the server says it is
+  /// over, so nothing routes from it again.
+  Future<T> _start() {
+    final future = widget.load();
+    future.then<void>(
+      (_) {},
+      onError: (Object error) {
+        if (error is SessionEndedException && mounted) {
+          context.guestSessions.clear();
+        }
+      },
+    );
+    return future;
+  }
 
   @override
   void didUpdateWidget(LoadableScaffold<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.reloadKey != widget.reloadKey) {
-      _future = widget.load();
+      _future = _start();
     }
   }
 
   void _retry() {
     setState(() {
-      _future = widget.load();
+      _future = _start();
     });
   }
 

@@ -5,6 +5,7 @@ import 'package:soar_score_self_score/data/self_score_repository.dart';
 import 'package:soar_score_self_score/data/self_score_scope.dart';
 import 'package:soar_score_self_score/l10n/app_localizations.dart';
 import 'package:soar_score_self_score/models/guest_session.dart';
+import 'package:soar_score_self_score/models/pilot_overview.dart';
 import 'package:soar_score_self_score/router.dart';
 import 'package:soar_score_self_score/session/guest_session_scope.dart';
 import 'package:soar_score_self_score/session/guest_session_store.dart';
@@ -45,6 +46,7 @@ Future<void> _pump(
 }
 
 void main() {
+  _securityTests();
   testWidgets('a good link asks the pilot to continue as a guest', (
     tester,
   ) async {
@@ -214,4 +216,90 @@ class _BlockedSlot implements StringSlot {
 
   @override
   void clear() => throw StateError('blocked');
+}
+
+class _SessionEndedRepository extends SampleSelfScoreRepository {
+  const _SessionEndedRepository();
+
+  @override
+  Future<PilotOverview> pilotOverview(String contestId, String pilotId) async =>
+      throw const SessionEndedException();
+}
+
+void _securityTests() {
+  const session = GuestSession(
+    contestId: 'spring-open',
+    contestName: 'Spring Open',
+    pilotId: '12',
+    pilotName: 'Jane Smith',
+    token: 'sample-token',
+  );
+
+  testWidgets('a hand-edited pilot id returns to the guest\'s own pilot', (
+    tester,
+  ) async {
+    final store = MemoryGuestSessionStore()..write(session);
+    await _pump(tester, store: store);
+    router.go('/contests/spring-open/pilots/3');
+    await tester.pumpAndSettle();
+    expect(
+      router.routeInformationProvider.value.uri.path,
+      '/contests/spring-open/pilots/12',
+    );
+  });
+
+  testWidgets('another contest\'s pages lead back to the guest\'s contest', (
+    tester,
+  ) async {
+    final store = MemoryGuestSessionStore()..write(session);
+    await _pump(tester, store: store);
+    router.go('/contests/other/pilots/12');
+    await tester.pumpAndSettle();
+    expect(
+      router.routeInformationProvider.value.uri.path,
+      '/contests/spring-open/pilots/12',
+    );
+  });
+
+  testWidgets('an ended session is dropped when a page finds out', (
+    tester,
+  ) async {
+    final store = MemoryGuestSessionStore()..write(session);
+    await _pump(
+      tester,
+      store: store,
+      repository: const _SessionEndedRepository(),
+    );
+    router.go('/contests/spring-open/pilots/12');
+    await tester.pumpAndSettle();
+    expect(
+      find.textContaining('Open your invitation link again'),
+      findsOneWidget,
+    );
+    expect(store.read(), isNull);
+  });
+
+  test('credentials with reserved characters stay one path segment', () {
+    expect(invitationPath('a/b?c#d e'), '/invitations/a%2Fb%3Fc%23d%20e');
+  });
+
+  test('an expired session reads as no session', () {
+    final slot = _MapSlot();
+    var now = DateTime.utc(2026, 11, 8);
+    final store = StringSlotGuestSessionStore(slot, now: () => now)
+      ..write(
+        GuestSession(
+          contestId: 'c',
+          contestName: 'C',
+          pilotId: 'p',
+          pilotName: 'P',
+          token: 't',
+          expiresAt: DateTime.utc(2026, 11, 9),
+        ),
+      );
+    expect(store.read()?.expiresAt, DateTime.utc(2026, 11, 9));
+    now = DateTime.utc(2026, 11, 9);
+    expect(store.read(), isNull);
+    expect(slot.value, isNull, reason: 'the stale session is removed');
+  });
 }

@@ -16,7 +16,8 @@ const contestsPath = '/contests';
 
 /// The address an invitation link carries. Matches `/invitations/{credential}`
 /// in the participant-scoring spec.
-String invitationPath(String credential) => '/invitations/$credential';
+String invitationPath(String credential) =>
+    '/invitations/${Uri.encodeComponent(credential)}';
 
 String contestPath(String contestId) => '/contests/$contestId';
 String teamPath(String contestId) => '/contests/$contestId/team';
@@ -75,6 +76,23 @@ final router = GoRouter(
             ),
             GoRoute(
               path: 'pilots/:pilotId',
+              // A guest sees only their own pilot. The server checks the token
+              // on every read; this keeps a hand-edited address from showing
+              // another pilot's page shell.
+              redirect: (context, state) {
+                final session = context.guestSessions.read();
+                final contestId = state.pathParameters['contestId']!;
+                final pilotId = state.pathParameters['pilotId']!;
+                if (session != null &&
+                    session.contestId == contestId &&
+                    session.pilotId != pilotId) {
+                  return pilotPath(contestId, session.pilotId);
+                }
+                if (session != null && session.contestId != contestId) {
+                  return contestPath(session.contestId);
+                }
+                return null;
+              },
               builder: (context, state) => PilotOverviewPage(
                 contestId: state.pathParameters['contestId']!,
                 pilotId: state.pathParameters['pilotId']!,
