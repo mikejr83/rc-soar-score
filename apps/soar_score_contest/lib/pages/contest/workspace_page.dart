@@ -265,6 +265,7 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
     WorkspaceFactsLoader.load(
       client,
       contest,
+      publicationClient: publicationClientOf(context),
       isOffline: offline,
       actingAccountId: uiAccountIdOf(context),
     ).then(

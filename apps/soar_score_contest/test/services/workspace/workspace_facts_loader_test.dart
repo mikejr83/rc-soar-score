@@ -38,6 +38,7 @@ Future<WorkspaceFacts> _load({
   String? failingAuditAction,
   List<Map<String, Object?>> auditEvents = const [],
   String? actingAccountId,
+  ApiClient? publicationClient,
 }) {
   final matrix = drawnMatrix();
   final server = MatrixServer(configuration: configRevision(3), matrix: matrix);
@@ -101,6 +102,7 @@ Future<WorkspaceFacts> _load({
   return WorkspaceFactsLoader.load(
     client,
     contest ?? matrixContest(state: LifecycleState.running),
+    publicationClient: publicationClient,
     isOffline: offline,
     actingAccountId: actingAccountId,
   );
@@ -123,6 +125,63 @@ void main() {
     );
   });
 
+  group('publication events come from the publication client', () {
+    ApiClient hosted(List<String> requests, int status) => ApiClient(
+      baseUrl: Uri.parse('http://hosted'),
+      httpClient: MockClient((request) async {
+        requests.add(request.url.toString());
+        return status == 200
+            ? _json({'audit_events': <Object>[]})
+            : _json({
+                'error': {'code': 'x', 'message': 'no'},
+              }, status);
+      }),
+    );
+
+    test('only the publication audit read goes to the hosted client', () async {
+      final hostedRequests = <String>[];
+      final localRequests = <String>[];
+      final facts = await _load(
+        requests: localRequests,
+        publicationClient: hosted(hostedRequests, 200),
+      );
+      final hostedUris = hostedRequests.map(Uri.parse).toList();
+      // The hosted client is asked for the publication and its events only.
+      expect(
+        hostedUris.map((uri) => uri.path.split('/').skip(5).join('/')),
+        unorderedEquals(['publication', 'audit-events']),
+      );
+      final hostedAudit = hostedUris.singleWhere(
+        (uri) => uri.path.endsWith('/audit-events'),
+      );
+      expect(hostedAudit.queryParameters['action'], 'PublicationAttempt');
+      // The local client is not asked for them.
+      final localAudit = localRequests
+          .map(Uri.parse)
+          .where((uri) => uri.path.endsWith('/audit-events'));
+      expect(localAudit, isNotEmpty);
+      expect(
+        localAudit.map((uri) => uri.queryParameters['action']),
+        isNot(contains('PublicationAttempt')),
+      );
+      expect(facts.activity, isNot(ActivityFacts.unavailable));
+    });
+
+    for (final status in [401, 404]) {
+      test('a $status there is no events, not an unavailable card', () async {
+        final facts = await _load(
+          publicationClient: hosted(<String>[], status),
+        );
+        expect(facts.activity, isNot(ActivityFacts.unavailable));
+      });
+    }
+
+    test('another failure there makes the activity unavailable', () async {
+      final facts = await _load(publicationClient: hosted(<String>[], 500));
+      expect(facts.activity, ActivityFacts.unavailable);
+    });
+  });
+
   test('reads a publication', () async {
     final facts = await _load(
       publicationStatus: 200,
@@ -142,6 +201,15 @@ void main() {
     expect(facts.rounds, isEmpty);
     expect(facts.hasMatrix, isTrue);
   });
+
+  test(
+    'a 401 publication read asks for a sign-in, not a failed read',
+    () async {
+      final facts = await _load(publicationStatus: 401);
+      expect(facts.publication, PublicationFacts.signInRequired);
+      expect(facts.publication.needsSignIn, isTrue);
+    },
+  );
 
   test('a failed publication read is unknown, not unpublished', () async {
     final facts = await _load(publicationStatus: 500);

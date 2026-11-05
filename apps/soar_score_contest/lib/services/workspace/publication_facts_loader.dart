@@ -7,7 +7,8 @@ import 'publication_facts.dart';
 abstract final class PublicationFactsLoader {
   /// The publication of [id] as [PublicationFacts]: not published for a 404,
   /// unsupported when the server does not publish contests (409
-  /// `publishing_not_available`), unknown for any other failure.
+  /// `publishing_not_available`), sign-in required for a 401, unknown for any
+  /// other failure.
   ///
   /// A published, not delisted publication also gets its pending delisting
   /// request, if any. A failed read of that request leaves it out: the
@@ -23,6 +24,9 @@ abstract final class PublicationFactsLoader {
     } on ApiHttpError catch (error) {
       if (error.statusCode == 404) {
         return PublicationFacts.notPublished;
+      }
+      if (error.statusCode == 401) {
+        return PublicationFacts.signInRequired;
       }
       if (error.statusCode == 409 &&
           error.error?.code == 'publishing_not_available') {

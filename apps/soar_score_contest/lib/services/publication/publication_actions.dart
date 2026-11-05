@@ -33,6 +33,17 @@ enum PublicationFailure {
   /// Only the contest's director may do this (403).
   notDirector,
 
+  /// Nobody is signed in, so the hosted server refused the call (401).
+  signInRequired,
+
+  /// The director was signed in but the server no longer accepts the
+  /// sign-in (401): it expired or was revoked.
+  signInExpired,
+
+  /// The hosted server does not have the contest yet: it has not synced (404
+  /// on publish).
+  notSynced,
+
   /// The server could not be reached.
   network,
 
@@ -57,9 +68,13 @@ class PublicationOutcome {
 
 /// Publishes a contest and changes its visibility with the publication API.
 class PublicationActions {
-  PublicationActions(this.client);
+  PublicationActions(this.client, {this.signedIn = false});
 
   final ApiClient client;
+
+  /// Whether a director is signed in. A 401 then means the sign-in no longer
+  /// works, not that there is none.
+  final bool signedIn;
 
   /// The mutation id of publishing [contest] on top of the copy numbered
   /// [projectionRevision] (0 when never published).
@@ -150,12 +165,19 @@ class PublicationActions {
     }
   }
 
-  static PublicationFailure _classify(ApiHttpError error, bool forPublish) {
+  PublicationFailure _classify(ApiHttpError error, bool forPublish) {
+    if (error.statusCode == 401) {
+      return signedIn
+          ? PublicationFailure.signInExpired
+          : PublicationFailure.signInRequired;
+    }
     if (error.statusCode == 403) {
       return PublicationFailure.notDirector;
     }
-    if (error.statusCode == 404 && !forPublish) {
-      return PublicationFailure.nothingPending;
+    if (error.statusCode == 404) {
+      return forPublish
+          ? PublicationFailure.notSynced
+          : PublicationFailure.nothingPending;
     }
     if (error.statusCode == 409) {
       return switch (error.error?.code) {

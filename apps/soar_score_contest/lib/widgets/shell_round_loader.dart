@@ -78,6 +78,7 @@ class _ShellRoundLoaderState extends State<ShellRoundLoader> {
     WorkspaceFactsLoader.load(
       client,
       widget.contest,
+      publicationClient: publicationClientOf(context),
       isOffline: offline,
       actingAccountId: uiAccountIdOf(context),
     ).then(

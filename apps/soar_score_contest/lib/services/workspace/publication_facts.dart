@@ -11,6 +11,7 @@ class PublicationFacts extends Equatable {
     this.pendingDelist,
     this.isKnown = true,
     this.supported = true,
+    this.needsSignIn = false,
   });
 
   /// The contest was never published (the server answered 404).
@@ -24,6 +25,15 @@ class PublicationFacts extends Equatable {
   static const unsupported = PublicationFacts(
     isPublished: false,
     supported: false,
+  );
+
+  /// Nobody is signed in, and the hosted server only answers a signed-in
+  /// director (it answered 401); a stable state the director can fix, not a
+  /// failed read.
+  static const signInRequired = PublicationFacts(
+    isPublished: false,
+    isKnown: false,
+    needsSignIn: true,
   );
 
   /// Reads the director's view of a publication, defensively: a missing or
@@ -73,6 +83,7 @@ class PublicationFacts extends Equatable {
         pendingDelist: request,
         isKnown: isKnown,
         supported: supported,
+        needsSignIn: needsSignIn,
       );
 
   /// False for [unknown].
@@ -83,6 +94,9 @@ class PublicationFacts extends Equatable {
   /// as a failed read.
   final bool supported;
 
+  /// True for [signInRequired]; [isKnown] is false then too.
+  final bool needsSignIn;
+
   @override
   List<Object?> get props => [
     isPublished,
@@ -92,6 +106,7 @@ class PublicationFacts extends Equatable {
     pendingDelist,
     isKnown,
     supported,
+    needsSignIn,
   ];
 }
 

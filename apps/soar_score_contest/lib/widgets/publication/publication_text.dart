@@ -17,6 +17,9 @@ extension PublicationText on AppLocalizations {
   /// The current state line: Unpublished, Published and its visibility, or
   /// why the state is not known.
   String publicationState(PublicationFacts facts) {
+    if (facts.needsSignIn) {
+      return publicationStateSignIn;
+    }
     if (!facts.isKnown) {
       return publicationStateUnknown;
     }
@@ -48,6 +51,9 @@ extension PublicationText on AppLocalizations {
     PublicationFailure.notPublic => publicationFailNotPublic,
     PublicationFailure.nothingPending => publicationFailNothingPending,
     PublicationFailure.notDirector => publicationFailNotDirector,
+    PublicationFailure.signInRequired => publicationFailSignIn,
+    PublicationFailure.signInExpired => publicationFailSignInExpired,
+    PublicationFailure.notSynced => publicationFailNotSynced,
     PublicationFailure.network => publicationFailNetwork,
     PublicationFailure.other => publicationFailOther,
   };

@@ -1528,6 +1528,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get publicationStateUnknown => 'Unknown';
 
   @override
+  String get publicationStateSignIn => 'Sign in required';
+
+  @override
+  String get publicationSignInReason =>
+      'Sign in to publish. Publishing goes through the hosted server.';
+
+  @override
+  String get publicationFailSignIn => 'Sign in to publish this contest.';
+
+  @override
+  String get publicationFailSignInExpired =>
+      'Your sign-in expired. Sign in again to publish this contest.';
+
+  @override
+  String get publicationFailNotSynced =>
+      'The server does not have this contest yet. Wait for it to sync, then publish again.';
+
+  @override
   String get publicationStateUnavailable => 'Not available';
 
   @override

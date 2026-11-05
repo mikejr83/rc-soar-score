@@ -1781,6 +1781,26 @@
   "@publicationStateUnknown": {
     "description": "Current publication state when it could not be read."
   },
+  "publicationStateSignIn": "Sign in required",
+  "@publicationStateSignIn": {
+    "description": "Current publication state when nobody is signed in, so the hosted server cannot be asked."
+  },
+  "publicationSignInReason": "Sign in to publish. Publishing goes through the hosted server.",
+  "@publicationSignInReason": {
+    "description": "Reason publishing is disabled while nobody is signed in."
+  },
+  "publicationFailSignIn": "Sign in to publish this contest.",
+  "@publicationFailSignIn": {
+    "description": "Shown when publishing was refused because nobody is signed in."
+  },
+  "publicationFailSignInExpired": "Your sign-in expired. Sign in again to publish this contest.",
+  "@publicationFailSignInExpired": {
+    "description": "Shown when the server refused a publication call although the director was signed in."
+  },
+  "publicationFailNotSynced": "The server does not have this contest yet. Wait for it to sync, then publish again.",
+  "@publicationFailNotSynced": {
+    "description": "Shown when the hosted server does not know the contest because it has not synced."
+  },
   "publicationStateUnavailable": "Not available",
   "@publicationStateUnavailable": {
     "description": "Current publication state when the server does not publish contests."
