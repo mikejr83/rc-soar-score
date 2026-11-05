@@ -165,7 +165,7 @@ void main() {
       );
     });
 
-    test('a dedupe key must match the source and the competition', () {
+    test('a dedupe key starts with the source system and has an identity', () {
       ImportProvenance build(String key) => ImportProvenance(
         id: Id.create(),
         ownerAccountId: Id.create(),
@@ -180,9 +180,10 @@ void main() {
         toolVersion: 'v',
         importedAt: DateTime.utc(2026),
       );
-      expect(build('gliderscore:sha256:abc:22'), isNotNull);
-      expect(() => build('gliderscore:sha256:abc:23'), throwsArgumentError);
-      expect(() => build('gliderscore:sha256:other:22'), throwsArgumentError);
+      expect(build('gliderscore:id:fixture22'), isNotNull);
+      expect(build('gliderscore:no:22|open|2026-05-09'), isNotNull);
+      expect(() => build('other:id:fixture22'), throwsArgumentError);
+      expect(() => build('id:fixture22'), throwsArgumentError);
     });
 
     test('a profile row never has a contest', () {

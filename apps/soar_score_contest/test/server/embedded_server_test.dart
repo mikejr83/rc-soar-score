@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -109,6 +110,45 @@ void main() {
       await rebind.close();
     },
   );
+
+  test('closing waits for a request still using the database', () async {
+    final server = await startEmbeddedServer(databasePath);
+    final client = ApiClient(
+      baseUrl: server.baseUrl,
+      tokenProvider: () async => server.secret,
+    );
+    final id = Id.create();
+    final created = await client.createContest(
+      CreateContestRequest(
+        id: id,
+        name: 'Spring Open',
+        startDateTime: DateTime.utc(2026, 10, 17, 14),
+        endDateTime: DateTime.utc(2026, 10, 18, 22),
+        timezone: 'America/Denver',
+      ),
+    );
+
+    // A transaction holds the database, so the request below waits in its
+    // handler for it.
+    final hold = Completer<void>();
+    final holding = server.database.transaction(() => hold.future);
+    await Future<void>.delayed(const Duration(milliseconds: 100));
+    final request = client.contest(id);
+    await Future<void>.delayed(const Duration(milliseconds: 300));
+
+    var closed = false;
+    final closing = server.close().then((_) => closed = true);
+    await Future<void>.delayed(const Duration(milliseconds: 300));
+    expect(closed, isFalse, reason: 'a handler is still running');
+
+    hold.complete();
+    await holding;
+    // The handler finished against an open database and answered.
+    expect(await request, created);
+    await closing;
+    expect(closed, isTrue);
+    client.close();
+  });
 
   test(
     'a contest created through the API is owned by the Local account',

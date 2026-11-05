@@ -43,6 +43,7 @@ class NativeSync {
     this._discoveryDelay,
     this._acting,
     this._inspection,
+    this._changes,
   ) : appSync = EngineAppSync(engine) {
     // Every ordinary sync, scheduled or started by the director, ends with a
     // look at the account's contests.
@@ -112,6 +113,7 @@ class NativeSync {
   final EngineAppSync appSync;
   final SyncScheduler _scheduler;
   final StreamSubscription<core.SyncScopeKey> _subscription;
+  final _LocalChanges _changes;
 
   /// Builds the engine over [database], talking to [remote].
   static Future<NativeSync> start({
@@ -195,10 +197,13 @@ class NativeSync {
       ),
     );
     final scheduler = SyncScheduler(engine);
+    // Each look at a local change reads the database (who owns the scope),
+    // so close() must wait for the ones still running.
+    final changes = _LocalChanges();
     final subscription = database.localChanges.listen((scope) {
-      unawaited(() async {
+      changes.run(() async {
         if (await mayQueue(scope)) scheduler.notifyLocalChange(scope);
-      }());
+      });
     });
     _logger.info('Sync engine ready for installation $installationId');
     return NativeSync._(
@@ -211,6 +216,7 @@ class NativeSync {
       discoveryDelay,
       acting,
       inspection,
+      changes,
     );
   }
 
@@ -404,7 +410,11 @@ class NativeSync {
   }
 
   Future<void> close() async {
+    // Nothing new starts, and what already started finishes while the
+    // database is still open.
+    _changes.closing = true;
     await _subscription.cancel();
+    await _changes.idle();
     await _stateSubscription.cancel();
     await _outcomeSubscription.cancel();
     _acting?.removeListener(_accountChanged);
@@ -412,6 +422,42 @@ class NativeSync {
     await _reachability.close();
     _discoveryTimer?.cancel();
     _scheduler.dispose();
+    // A sync in flight finishes before the database closes under it.
+    await engine.dispose();
     await appSync.close();
+    // A look at the account's contests may still be reading the database,
+    // which answers from its own isolate: let it finish before the database
+    // closes under it.
+    try {
+      await _discovering;
+    } on Object {
+      // Logged where it happened.
+    }
+  }
+}
+
+/// The look at each local change that is still running, so closing can wait
+/// for them instead of leaving them to read a closed database.
+class _LocalChanges {
+  final _running = <Future<void>>{};
+
+  /// Set once the sync is closing: later changes are not looked at.
+  bool closing = false;
+
+  void run(Future<void> Function() work) {
+    if (closing) return;
+    late final Future<void> done;
+    done = work()
+        .catchError((Object error, StackTrace stack) {
+          _logger.warning('A local change was not queued', error, stack);
+        })
+        .whenComplete(() => _running.remove(done));
+    _running.add(done);
+  }
+
+  Future<void> idle() async {
+    while (_running.isNotEmpty) {
+      await Future.wait(_running.toList());
+    }
   }
 }

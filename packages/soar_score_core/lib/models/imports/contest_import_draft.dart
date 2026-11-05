@@ -45,6 +45,7 @@ class ContestImportDraft {
     required this.sourceCompNo,
     required this.sourceClass,
     required this.status,
+    this.sourceCompId,
     this.reason,
     this.reasonDetail,
     this.name,
@@ -67,6 +68,10 @@ class ContestImportDraft {
 
   /// GliderScore's `GSCompClass`, as written (trimmed).
   final String sourceClass;
+
+  /// GliderScore's `CompID` (null in files before 2019): the competition's
+  /// identity across copies of a file.
+  final String? sourceCompId;
 
   final ContestImportStatus status;
 

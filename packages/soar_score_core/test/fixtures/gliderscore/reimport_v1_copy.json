@@ -1,0 +1,360 @@
+{
+  "schema": "gs-import/v1",
+  "id": "00000000-0000-7000-8000-000000000013",
+  "sourceDbFile": "GliderScoreDataCopy.mdb",
+  "tables": [
+    {
+      "name": "Comps",
+      "rowCount": 1,
+      "rowCapExceeded": false,
+      "rows": [
+        {
+          "CompNo": 19,
+          "CompDate": "02/29/20 00:00:00",
+          "Drop1AtRound": 5,
+          "Drop2AtRound": 99,
+          "Drop3AtRound": 99,
+          "Drop4AtRound": 99,
+          "Drop5AtRound": 99,
+          "UseTeams": 0,
+          "UseTeamProtection": 0,
+          "UseClasses": 0,
+          "UseModels": 0,
+          "UsePilotNumbering": 0,
+          "Enforce20KHz": 1,
+          "GroupScoreDecimals": 1,
+          "ScoresLocked": 0,
+          "NbrForTeamScore": 3,
+          "printCountry": 0,
+          "RoundOrTruncate": 0,
+          "GroupScoreOption": 1,
+          "printRegistration": 0,
+          "UseRoles": 0,
+          "DropScoreOption": 0,
+          "AssignHelpers": 0,
+          "DrawMode": 0,
+          "GSCompClass": "F5J",
+          "PrelimCompNo": 18,
+          "F3QDrop6to10": "99,99,99,99,99",
+          "IsPublic": 1,
+          "UseRegistration": 0,
+          "UseRegistrationIdx": 0,
+          "CompID": "FIXTURE19",
+          "CompName": "Fixture Open 19",
+          "CompVenue": "Example Field"
+        }
+      ]
+    },
+    {
+      "name": "CompPilots",
+      "rowCount": 6,
+      "rowCapExceeded": false,
+      "rows": [
+        {
+          "CompNo": 19,
+          "PilotNo": 84,
+          "Team": 0,
+          "DrawFreq": 2.4,
+          "Retired": 0,
+          "StartNo": 0,
+          "Role": "Plt",
+          "IsPilot": 1,
+          "OmitFromTeamScore": 0,
+          "ModelData": "-1"
+        },
+        {
+          "CompNo": 19,
+          "PilotNo": 105,
+          "Team": 0,
+          "DrawFreq": 2.4,
+          "Retired": 0,
+          "StartNo": 0,
+          "Role": "Plt",
+          "IsPilot": 1,
+          "OmitFromTeamScore": 0,
+          "ModelData": "-1"
+        },
+        {
+          "CompNo": 19,
+          "PilotNo": 111,
+          "Team": 0,
+          "DrawFreq": 2.4,
+          "Retired": 0,
+          "StartNo": 0,
+          "Role": "Plt",
+          "IsPilot": 1,
+          "OmitFromTeamScore": 0,
+          "ModelData": "-1"
+        },
+        {
+          "CompNo": 19,
+          "PilotNo": 109,
+          "Team": 0,
+          "DrawFreq": 2.4,
+          "Retired": 0,
+          "StartNo": 0,
+          "Role": "Plt",
+          "IsPilot": 1,
+          "OmitFromTeamScore": 0,
+          "ModelData": "-1"
+        },
+        {
+          "CompNo": 19,
+          "PilotNo": 115,
+          "Team": 0,
+          "DrawFreq": 2.4,
+          "Retired": 0,
+          "StartNo": 0,
+          "Role": "Plt",
+          "IsPilot": 1,
+          "OmitFromTeamScore": 0,
+          "ModelData": "-1"
+        },
+        {
+          "CompNo": 19,
+          "PilotNo": 75,
+          "Team": 0,
+          "DrawFreq": 2.4,
+          "Retired": 0,
+          "StartNo": 0,
+          "Role": "Plt",
+          "IsPilot": 1,
+          "OmitFromTeamScore": 0,
+          "ModelData": "-1"
+        }
+      ]
+    },
+    {
+      "name": "Pilots",
+      "rowCount": 6,
+      "rowCapExceeded": false,
+      "rows": [
+        {
+          "PilotNo": 75,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "Y",
+          "State": "FL",
+          "Email": "fixture75@example.test",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Alex",
+          "LastName": "Ashdown3"
+        },
+        {
+          "PilotNo": 84,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "State": "NC",
+          "Email": "fixture84@example.test",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Nico",
+          "LastName": "Jessup3"
+        },
+        {
+          "PilotNo": 105,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "Y",
+          "State": "FL",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Kai",
+          "LastName": "Fairweather4"
+        },
+        {
+          "PilotNo": 109,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Nico",
+          "LastName": "Jessup4"
+        },
+        {
+          "PilotNo": 111,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Casey",
+          "LastName": "Larkspur4"
+        },
+        {
+          "PilotNo": 115,
+          "Country": "USA",
+          "FAINumber": "0",
+          "Filter": "N",
+          "OtherRegistration": "0",
+          "FAI_ID": "0",
+          "FirstName": "Frankie",
+          "LastName": "Pemberton4"
+        }
+      ]
+    },
+    {
+      "name": "Roles",
+      "rowCount": 6,
+      "rowCapExceeded": false,
+      "rows": [
+        {
+          "Role": "TM",
+          "RoleName": "Team Manager"
+        },
+        {
+          "Role": "Plt",
+          "RoleName": "Pilot"
+        },
+        {
+          "Role": "TM/Plt",
+          "RoleName": "Team Manager/Pilot"
+        },
+        {
+          "Role": "CD/Plt",
+          "RoleName": "Comp Director/Pilot"
+        },
+        {
+          "Role": "Hlp",
+          "RoleName": "Helper"
+        },
+        {
+          "Role": "CD",
+          "RoleName": "Competition Director"
+        }
+      ]
+    },
+    {
+      "name": "Dur",
+      "rowCount": 1,
+      "rowCapExceeded": false,
+      "rows": [
+        {
+          "CompNo": 19,
+          "durTargetTime": 900,
+          "durDecimalsForTiming": 0,
+          "durLndg": 9,
+          "durNumberOfTimekeepers": 1,
+          "durGroupsPerRound": 1,
+          "durPilotsMax": 6,
+          "durDrawLocked": 0,
+          "durFlightPenalty": 3,
+          "durNbrOfLanes": 0,
+          "durRefHeight": 200,
+          "durPenaltyUpToRefHeight": 0.5,
+          "durPenaltyOverRefHeight": 3,
+          "durAllowBackToBack": 0,
+          "DurPointsPerSecond": 1,
+          "durPilotsMin": "0,1,0,1"
+        }
+      ]
+    },
+    {
+      "name": "DBParams",
+      "rowCount": 1,
+      "rowCapExceeded": false,
+      "rows": [
+        {
+          "Property": "DBVersion",
+          "PRValue": "6.78"
+        }
+      ]
+    },
+    {
+      "name": "LndgNames",
+      "rowCount": 1,
+      "rowCapExceeded": false,
+      "rows": [
+        {
+          "LndgNo": 9,
+          "Name": "F5J Enter Points"
+        }
+      ]
+    },
+    {
+      "name": "LndgPoints",
+      "rowCount": 10,
+      "rowCapExceeded": false,
+      "rows": [
+        {
+          "LndgNo": 9,
+          "Distance": 50,
+          "Points": 50
+        },
+        {
+          "LndgNo": 9,
+          "Distance": 45,
+          "Points": 45
+        },
+        {
+          "LndgNo": 9,
+          "Distance": 40,
+          "Points": 40
+        },
+        {
+          "LndgNo": 9,
+          "Distance": 35,
+          "Points": 35
+        },
+        {
+          "LndgNo": 9,
+          "Distance": 30,
+          "Points": 30
+        },
+        {
+          "LndgNo": 9,
+          "Distance": 25,
+          "Points": 25
+        },
+        {
+          "LndgNo": 9,
+          "Distance": 20,
+          "Points": 20
+        },
+        {
+          "LndgNo": 9,
+          "Distance": 15,
+          "Points": 15
+        },
+        {
+          "LndgNo": 9,
+          "Distance": 10,
+          "Points": 10
+        },
+        {
+          "LndgNo": 9,
+          "Distance": 5,
+          "Points": 5
+        }
+      ]
+    },
+    {
+      "name": "Scores",
+      "rowCount": 18,
+      "rowCapExceeded": false,
+      "rows": [
+          {"CompNo":19,"TaskNo":1,"RoundNo":3,"GroupNo":1,"ReFlightNo":0,"PilotNo":75,"SeqNo":1,"DrawFreq":2.4,"Time1Mins":0,"Time1Secs":0,"Time2Mins":0,"Time2Secs":0,"FlightScoreDeduction":0,"Landing":0,"RawScore":0,"NormalisedScore":0,"Penalty":0,"OriginalRoundNo":3,"ScoresChecked":0,"Updated":"False","LandingOver75m":0,"Laps":0,"F5JMotorReStarted":0},
+          {"CompNo":19,"TaskNo":1,"RoundNo":3,"GroupNo":1,"ReFlightNo":0,"PilotNo":84,"SeqNo":2,"DrawFreq":2.4,"Time1Mins":0,"Time1Secs":0,"Time2Mins":0,"Time2Secs":0,"FlightScoreDeduction":0,"Landing":0,"RawScore":0,"NormalisedScore":0,"Penalty":0,"OriginalRoundNo":3,"ScoresChecked":0,"Updated":"False","LandingOver75m":0,"Laps":0,"F5JMotorReStarted":0},
+          {"CompNo":19,"TaskNo":1,"RoundNo":3,"GroupNo":1,"ReFlightNo":0,"PilotNo":105,"SeqNo":3,"DrawFreq":2.4,"Time1Mins":0,"Time1Secs":0,"Time2Mins":0,"Time2Secs":0,"FlightScoreDeduction":0,"Landing":0,"RawScore":0,"NormalisedScore":0,"Penalty":0,"OriginalRoundNo":3,"ScoresChecked":0,"Updated":"False","LandingOver75m":0,"Laps":0,"F5JMotorReStarted":0},
+          {"CompNo":19,"TaskNo":1,"RoundNo":3,"GroupNo":1,"ReFlightNo":0,"PilotNo":109,"SeqNo":4,"DrawFreq":2.4,"Time1Mins":0,"Time1Secs":0,"Time2Mins":0,"Time2Secs":0,"FlightScoreDeduction":0,"Landing":0,"RawScore":0,"NormalisedScore":0,"Penalty":0,"OriginalRoundNo":3,"ScoresChecked":0,"Updated":"False","LandingOver75m":0,"Laps":0,"F5JMotorReStarted":0},
+          {"CompNo":19,"TaskNo":1,"RoundNo":3,"GroupNo":1,"ReFlightNo":0,"PilotNo":111,"SeqNo":5,"DrawFreq":2.4,"Time1Mins":0,"Time1Secs":0,"Time2Mins":0,"Time2Secs":0,"FlightScoreDeduction":0,"Landing":0,"RawScore":0,"NormalisedScore":0,"Penalty":0,"OriginalRoundNo":3,"ScoresChecked":0,"Updated":"False","LandingOver75m":0,"Laps":0,"F5JMotorReStarted":0},
+          {"CompNo":19,"TaskNo":1,"RoundNo":3,"GroupNo":1,"ReFlightNo":0,"PilotNo":115,"SeqNo":6,"DrawFreq":2.4,"Time1Mins":0,"Time1Secs":0,"Time2Mins":0,"Time2Secs":0,"FlightScoreDeduction":0,"Landing":0,"RawScore":0,"NormalisedScore":0,"Penalty":0,"OriginalRoundNo":3,"ScoresChecked":0,"Updated":"False","LandingOver75m":0,"Laps":0,"F5JMotorReStarted":0},
+          {"CompNo":19,"TaskNo":1,"RoundNo":1,"GroupNo":1,"ReFlightNo":0,"PilotNo":75,"SeqNo":1,"DrawFreq":2.4,"Time1Mins":329,"Time1Secs":0,"Time2Mins":0,"Time2Secs":0,"FlightScoreDeduction":209,"Landing":50,"RawScore":132,"NormalisedScore":713.5,"Penalty":0,"OriginalRoundNo":1,"ScoresChecked":0,"Updated":"True","LandingOver75m":0,"Laps":0,"F5JMotorReStarted":0},
+          {"CompNo":19,"TaskNo":1,"RoundNo":1,"GroupNo":1,"ReFlightNo":0,"PilotNo":105,"SeqNo":3,"DrawFreq":2.4,"Time1Mins":0,"Time1Secs":0,"Time2Mins":0,"Time2Secs":0,"FlightScoreDeduction":0,"Landing":0,"RawScore":0,"NormalisedScore":0,"Penalty":0,"OriginalRoundNo":1,"ScoresChecked":0,"Updated":"True","LandingOver75m":0,"Laps":0,"F5JMotorReStarted":0},
+          {"CompNo":19,"TaskNo":1,"RoundNo":1,"GroupNo":1,"ReFlightNo":0,"PilotNo":109,"SeqNo":4,"DrawFreq":2.4,"Time1Mins":407,"Time1Secs":0,"Time2Mins":0,"Time2Secs":0,"FlightScoreDeduction":204,"Landing":50,"RawScore":185,"NormalisedScore":1000,"Penalty":0,"OriginalRoundNo":1,"ScoresChecked":0,"Updated":"True","LandingOver75m":0,"Laps":0,"F5JMotorReStarted":0},
+          {"CompNo":19,"TaskNo":1,"RoundNo":1,"GroupNo":1,"ReFlightNo":0,"PilotNo":111,"SeqNo":5,"DrawFreq":2.4,"Time1Mins":312,"Time1Secs":0,"Time2Mins":0,"Time2Secs":0,"FlightScoreDeduction":202,"Landing":45,"RawScore":131,"NormalisedScore":708.1,"Penalty":0,"OriginalRoundNo":1,"ScoresChecked":0,"Updated":"True","LandingOver75m":0,"Laps":0,"F5JMotorReStarted":0},
+          {"CompNo":19,"TaskNo":1,"RoundNo":1,"GroupNo":1,"ReFlightNo":0,"PilotNo":115,"SeqNo":6,"DrawFreq":2.4,"Time1Mins":304,"Time1Secs":0,"Time2Mins":0,"Time2Secs":0,"FlightScoreDeduction":105,"Landing":0,"RawScore":131.5,"NormalisedScore":710.8,"Penalty":0,"OriginalRoundNo":1,"ScoresChecked":0,"Updated":"True","LandingOver75m":0,"Laps":0,"F5JMotorReStarted":0},
+          {"CompNo":19,"TaskNo":1,"RoundNo":2,"GroupNo":1,"ReFlightNo":0,"PilotNo":75,"SeqNo":1,"DrawFreq":2.4,"Time1Mins":1452,"Time1Secs":0,"Time2Mins":0,"Time2Secs":0,"FlightScoreDeduction":176,"Landing":45,"RawScore":849,"NormalisedScore":991.2,"Penalty":0,"OriginalRoundNo":2,"ScoresChecked":0,"Updated":"True","LandingOver75m":0,"Laps":0,"F5JMotorReStarted":0},
+          {"CompNo":19,"TaskNo":1,"RoundNo":2,"GroupNo":1,"ReFlightNo":0,"PilotNo":84,"SeqNo":2,"DrawFreq":2.4,"Time1Mins":1454,"Time1Secs":0,"Time2Mins":0,"Time2Secs":0,"FlightScoreDeduction":175,"Landing":50,"RawScore":856.5,"NormalisedScore":1000,"Penalty":0,"OriginalRoundNo":2,"ScoresChecked":0,"Updated":"True","LandingOver75m":0,"Laps":0,"F5JMotorReStarted":0},
+          {"CompNo":19,"TaskNo":1,"RoundNo":2,"GroupNo":1,"ReFlightNo":0,"PilotNo":105,"SeqNo":3,"DrawFreq":2.4,"Time1Mins":0,"Time1Secs":0,"Time2Mins":0,"Time2Secs":0,"FlightScoreDeduction":0,"Landing":0,"RawScore":0,"NormalisedScore":0,"Penalty":0,"OriginalRoundNo":2,"ScoresChecked":0,"Updated":"False","LandingOver75m":0,"Laps":0,"F5JMotorReStarted":0},
+          {"CompNo":19,"TaskNo":1,"RoundNo":2,"GroupNo":1,"ReFlightNo":0,"PilotNo":109,"SeqNo":4,"DrawFreq":2.4,"Time1Mins":900,"Time1Secs":0,"Time2Mins":0,"Time2Secs":0,"FlightScoreDeduction":166,"Landing":50,"RawScore":507,"NormalisedScore":591.9,"Penalty":0,"OriginalRoundNo":2,"ScoresChecked":0,"Updated":"True","LandingOver75m":0,"Laps":0,"F5JMotorReStarted":0},
+          {"CompNo":19,"TaskNo":1,"RoundNo":2,"GroupNo":1,"ReFlightNo":0,"PilotNo":111,"SeqNo":5,"DrawFreq":2.4,"Time1Mins":10,"Time1Secs":0,"Time2Mins":0,"Time2Secs":0,"FlightScoreDeduction":14,"Landing":0,"RawScore":3,"NormalisedScore":3.5,"Penalty":0,"OriginalRoundNo":2,"ScoresChecked":0,"Updated":"True","LandingOver75m":0,"Laps":0,"F5JMotorReStarted":0},
+          {"CompNo":19,"TaskNo":1,"RoundNo":2,"GroupNo":1,"ReFlightNo":0,"PilotNo":115,"SeqNo":6,"DrawFreq":2.4,"Time1Mins":0,"Time1Secs":0,"Time2Mins":0,"Time2Secs":0,"FlightScoreDeduction":0,"Landing":0,"RawScore":0,"NormalisedScore":0,"Penalty":0,"OriginalRoundNo":2,"ScoresChecked":0,"Updated":"False","LandingOver75m":0,"Laps":0,"F5JMotorReStarted":0},
+          {"CompNo":19,"TaskNo":1,"RoundNo":1,"GroupNo":1,"ReFlightNo":0,"PilotNo":84,"SeqNo":2,"DrawFreq":2.4,"Time1Mins":210,"Time1Secs":0,"Time2Mins":0,"Time2Secs":0,"FlightScoreDeduction":194,"Landing":0,"RawScore":33,"NormalisedScore":178.4,"Penalty":0,"OriginalRoundNo":1,"ScoresChecked":0,"Updated":"True","LandingOver75m":0,"Laps":0,"F5JMotorReStarted":0}
+        ]
+    }
+  ]
+}

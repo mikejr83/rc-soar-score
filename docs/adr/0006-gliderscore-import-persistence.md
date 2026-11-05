@@ -3,7 +3,8 @@
 - Status: proposed
 - Date: 2026-11-03
 - Decision issue: #743 (phase B of the GliderScore import, epic #742; replaces #566 for phase B)
-- Amended 2026-11-04 by #767 (phase C, epic #766): see "Amendment: restore semantics and the draw import". Where the amendment and the text above differ, the amendment wins.
+- Amended 2026-11-04 by #767 (phase C, epic #766): see "Amendment: restore semantics and the draw import".
+- Amended again 2026-11-04 by #767 (phase D, epic #766): see "Amendment 2: the end-to-end restore". Where an amendment and the text above differ, the later amendment wins. Amendment 2 supersedes the fill rule, the fingerprint rules, the dedupe key and the "draw and scores not imported" note of the earlier text.
 
 ## Context
 
@@ -129,11 +130,87 @@ Decided by Mike on 2026-11-04 while planning phase C. It amends the lifecycle, f
 
 The note that says what was not imported is derived from the stamps, never stored: a contest with an import stamp and no matrix revision stamp shows "draw and scores were not imported"; one with a matrix stamp and no score stamp shows "scores were not imported"; it disappears when phase D has filled the contest.
 
+## Amendment 2: the end-to-end restore (2026-11-04, #767, phase D)
+
+Decided by Mike on 2026-11-04. No tester will ever see a phase B or C contest: the feature reaches users as one complete restore, and nothing is added to contests imported by earlier phases (no migration; the only tester starts from a fresh database).
+
+### Superseded
+
+- "Fill only a phase B contest" and "phase D replaces a phase C draw" (fill rule). A restore is one operation that creates or updates everything of a competition.
+- "The file must still match the stamp (fingerprint)", and the fingerprint inside the dedupe key. The same competition from a changed file is the same contest.
+- "Already imported is refused". A second import updates the contest in place (below).
+- The "draw and scores not imported" contest note and the `Configuring` and `Ready` build-stage states. The wizard has a single import flow; the phase B and C steps go away.
+- "Re-importing a changed file is #576": the first release covers it as below. What #576 keeps is a diff-and-apply merge, which is not planned.
+
+### One operation per competition
+
+One database transaction per competition creates or updates the contest, its configuration revision, participations, the draw, every scored flight, re-flights, retirements and the final state, then runs the comparison gate. Phase B's contest persistence and phase C's draw persistence become steps inside it. A failed competition leaves nothing of itself and does not undo the others.
+
+### Identity and re-import
+
+- A competition is identified by `CompID` when the row has one (26 of the 38 competitions in the reference file do, from 2019 on). Without one, by competition number + name + date, and the wizard asks for confirmation naming the source file ("update this contest or import as a new one") when the number matches but the name or date differs.
+- The identity is stored in the contest stamp's `source_keys` (`comp_id` or `comp_no`, `comp_name`, `comp_date`). The dedupe key is `gliderscore:<identity>` without the file fingerprint; the unique index on `(owner_account_id, dedupe_key)` stays and still decides a race (one winner, the other reports `already_imported`).
+- **Re-import replaces the imported contents in place and keeps the contest id.** Participations, draw, scores, re-flights, retirements and state are rewritten from the file in one transaction; removed rows leave tombstones so sync converges. Anything done in Soar Score after the import is lost; there is no diff.
+- **Content hash:** the plan carries a hash of the content the file would produce. It is stored in the contest stamp's `source_values`. An equal hash means nothing is written at all (not a revision, not an audit event). The hash covers mapped content only, never the file name or fingerprint, and is the same for the same file every time.
+- **Guard:** a re-import into a contest changed in Soar Score since the import (a score entered, a pilot added, the draw changed) shows what will be replaced, with counts, and needs a confirmation. A contest whose results are published is **refused**, with a reason; the director un-publishes first.
+- **Participants:** pilots follow the phase A rules (non-blank values overwrite, names never change). A participation no longer in the file is removed if it has no scores, otherwise it is retired. New pilots are added.
+- **Locked contests:** a completed, locked contest is unlocked, replaced and locked again according to the checkbox; if the hash is equal it is untouched.
+
+### The restore attempt
+
+An `OfficialScore` must cite the `ScoreAttempt` that produced it. The restore therefore writes **exactly one attempt per scored flight**, marked as an import: authority `Director`, actor the importing account, `source_device` `import:gliderscore`, `client_mutation_id` `gs:<identity>:<task>,<round>,<group>,<reflight>,<pilot>`, `raw_components` holding the GliderScore values verbatim. It is a record of what the file said, not a simulated entry. No review requests, no second attempts, no entry times. The official score has `set_by` the importing account, `set_at` the import instant and `reason` `restored from GliderScore`. Placeholder revisions advance as the normal path advances them (attempt accepted, then official). The earlier sentence "no score attempts" is replaced by: **no review history and no entry times; each restored flight has one restore attempt.**
+
+### Score values
+
+- `Updated = False` rows stay `NotEntered` (a pending flight, not a zero).
+- `Time1Mins` is packed `M:SS` and decoded as `(v ~/ 100) * 60 + (v % 100)`; the raw value is kept in `raw_components`.
+- `FlightScoreDeduction` is the F5J launch height in metres (Soar computes the height penalty). `Penalty` is `flight_penalty`. `Landing` resolves through the landing table (below).
+- `F5JMotorReStarted = 1` with restart option 1 or 2 is a zero with reason `motor_restart`, components kept beside the flag. Option NULL (oldest competitions) keeps the recorded score, keeps the flag as provenance and warns.
+- **All-zero flights are imported as entered** (time 0, no landing, height 0, penalty 0) and the calculator produces the zero. A launch height of 0 is not a valid height in Soar Score, so the normalized components of such a flight are empty (no time, no height) and the GliderScore values stay in `raw_components`; the calculator treats a flight with no time or height as a zero. `LandingOver75m` is kept in `raw_components` only and is not turned into an out-of-bounds reason. **No new zero reason** is added; the "imported, reason unknown" idea is dropped. A flight with a time and height whose `RawScore` is 0 is imported as is; the calculator reproduces the zero.
+- `Helper`, `Laps`, `DrawFreq`, `ScoresChecked`, `LandingOver75m`, `OriginalRoundNo`, `RawScore` and `NormalisedScore` go to `raw_components` or to the comparison only. `RawScore` and `NormalisedScore` are never stored as results; Soar recomputes.
+
+### Landing table selection
+
+Per competition, the candidates are tried in order: the F5J system default table, the other shipped table, then the table reconstructed from the competition's own `LndgNames` and `LndgPoints`. The first one in which every observed non-zero landing value resolves to exactly one entry that awards the points GliderScore awarded is pinned in the configuration. A semantic match is required, not a name match. If none matches fully, the best candidate is pinned with a per-row warning; the comparison gate then decides whether the competition can be imported.
+
+### Re-flights
+
+Only whole-group re-flights are restored (`ReflyEntireGroup`). The re-flight group is **numbered after the regular groups** of its round; GliderScore's own group number is kept in the stamp. A printed Soar sheet therefore shows a different group number than GliderScore for that re-flight. Roles: a pilot with no score in the original flight is `Awarded`, every other pilot in the group is `GroupMember`. Subset re-flights, moved credits and overlapping task ranges are refused for that competition, with a reason.
+
+### Retirement
+
+A pilot with `Retired = 1` gets `retired_at_round` set to the round after their last scored flight (round 1 if none). It is an overlay: the later assignments stay. The review lists the inferred rounds.
+
+### Lifecycle walk and final state
+
+`ContestLifecycle.complete` works only from `Running`, and the first accepted score moves `Ready` to `Running`. The restore walks the same states inside the transaction (Ready, Running, then Completed if chosen) and writes **one `Restoration` audit event per competition**, not one per step. Final state:
+
+- A competition with no scored flights stays `Ready` and the review says so.
+- Otherwise `Running`, or `Completed` when the director's "Completed" checkbox is on. The checkbox is preselected, and unchecked where a flown round has unscored flights; checking it anyway counts those flights as not entered.
+- On `Completed`, trailing rounds with no scored flight are restored as `Cancelled`; the contest (`admin_lock`) and its rounds and groups are locked.
+- Audit actor, `reason` and `installation_id` follow the earlier rules.
+
+### Comparison gate
+
+Inside the transaction, after everything is written, Soar's calculator is run over the restored flights and compared with GliderScore's `RawScore`. The comparison is **exact**. Any difference rolls the competition back and the wizard says plainly that it could not be imported, naming the first few flights (round, group, pilot number); a log entry holds the rest. It is internal: no report screen, no stored report. `NormalisedScore` (group scores) is measured in tests first and gates only once a tolerance is known. Strictness is revisited once real files have gone through.
+
+### Stamps
+
+- The contest stamp's `source_values` gains the identity, the content hash and the final-state choice.
+- A score stamp: one `FlightScore` row per scored flight is **not** written (thousands of rows). A single `Scores` stamp per competition (`stamped_entity_type` `ContestScores`, `source_keys` `comp_no`) records the number of restored flights, the landing table pinned and the hash; it travels with the contest in a `.rcsoar` file and is deleted with it. The restore attempts and official scores are themselves the per-flight provenance (`source_device` `import:gliderscore`).
+- `stamped_entity_type` gains `ContestScores`. Re-flight group numbers and retirement inferences are kept in `source_values` of the contest stamp.
+
+### Responsiveness
+
+Reading the file, parsing, mapping and the database writes run off the UI isolate (#774); the wizard shows a progress state and the main thread never waits for a whole competition.
+
 ## Rejected options
 
 - **Provenance columns on every entity:** a schema change per entity and per later phase.
 - **Provenance in the contest only:** profiles and participations would carry no source, and a later phase could not tell which participation came from which GliderScore row.
-- **Merging a re-import into a contest that already has a draw or scores:** needs the compare-and-reconcile design of #576 and is not needed for the first release.
+- **Merging a re-import into a contest that already has a draw or scores (diff and apply):** needs a rule for every kind of change; replaced in place instead (amendment 2). Revisit when testers ask.
+- **An optional attempt reference on `OfficialScore`:** changes a core invariant and every reader (sync, publication, history); one restore attempt per flight instead.
+- **A new zero reason for flights with no recorded details:** nothing is silently relabelled; the details are imported as entered and the calculator produces the zero.
 - **A second contest per phase:** testers would reconcile two contests by hand.
 
 ## Implementation

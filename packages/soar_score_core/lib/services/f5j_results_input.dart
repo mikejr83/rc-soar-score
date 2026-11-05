@@ -1,4 +1,5 @@
 import '../models/contest/contest_configuration_revision.dart';
+import '../enums/assignment_type.dart';
 import '../models/id.dart';
 import '../models/matrix/matrix_assignment.dart';
 import '../models/matrix/round.dart';
@@ -60,6 +61,16 @@ class F5jResultsInput {
         placeholder.assignmentId: placeholder,
     };
 
+    // Each placeholder's current score is read once, however often it is used.
+    final officials = <Id, OfficialScore?>{};
+    Future<OfficialScore?> officialOf(Id placeholderId) async {
+      if (officials.containsKey(placeholderId)) {
+        return officials[placeholderId];
+      }
+      return officials[placeholderId] = await repository.officialScoreRepository
+          .currentForPlaceholder(placeholderId);
+    }
+
     final scored = <ScoredSlot>[];
     final roundInputs = <F5jRoundInput>[];
     final incompleteRounds = <int>{};
@@ -67,10 +78,34 @@ class F5jResultsInput {
     var completedRounds = 0;
     for (final round in rounds) {
       final groups = <int, List<F5jFlightEntry>>{};
-      for (final assignment
-          in await repository.matrixAssignmentRepository.listLiveForRound(
-            round.id,
-          )) {
+      final live = await repository.matrixAssignmentRepository.listLiveForRound(
+        round.id,
+      );
+      // A pilot whose re-flight is scored counts one flight for the round: the
+      // latest scored re-flight (the highest flight sequence; a re-flight of a
+      // re-flight takes the next number). The flights it replaced no longer
+      // count. The documented rule is "the discipline's result-selection
+      // rule"; for F5J this is the latest scored flight (see #752).
+      final counted = <Id, MatrixAssignment>{};
+      for (final assignment in live) {
+        if (assignment.assignmentType != AssignmentType.reflight) continue;
+        final placeholder = placeholders[assignment.id];
+        if (placeholder == null || await officialOf(placeholder.id) == null) {
+          continue;
+        }
+        final best = counted[assignment.contestParticipationId];
+        if (best == null || assignment.flightSequence > best.flightSequence) {
+          counted[assignment.contestParticipationId] = assignment;
+        }
+      }
+      for (final assignment in live) {
+        final chosen = counted[assignment.contestParticipationId];
+        if (chosen != null &&
+            (assignment.assignmentType == AssignmentType.original ||
+                assignment.assignmentType == AssignmentType.reflight) &&
+            assignment.id != chosen.id) {
+          continue;
+        }
         if (assignment.creditedRoundId != assignment.scheduledRoundId) continue;
         final participation = byId[assignment.contestParticipationId];
         if (participation == null || !participation.isPilot) continue;
@@ -78,9 +113,7 @@ class F5jResultsInput {
         final placeholder = placeholders[assignment.id];
         final official = placeholder == null
             ? null
-            : await repository.officialScoreRepository.currentForPlaceholder(
-                placeholder.id,
-              );
+            : await officialOf(placeholder.id);
         if (official == null) {
           if (!retired) {
             incompleteRounds.add(round.ordinal);

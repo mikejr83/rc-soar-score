@@ -61,50 +61,35 @@ class NativeCompetitionImportStore extends NativePilotImportStore
   );
 
   @override
-  Future<core.CompetitionImportResult> importCompetition({
-    required core.ContestImportDraft draft,
+  Future<core.RestoreTarget> restoreTarget(core.RestoreIdentity identity) =>
+      _server.repository.contestImportRepository.restoreTarget(
+        _owner,
+        identity,
+      );
+
+  @override
+  Future<core.RestoreImportResult> importRestore({
+    required core.RestorePlan plan,
     required Map<int, core.Id> profileIds,
     required core.Id operationId,
     required String fingerprint,
-  }) => _server.repository.contestImportRepository.importCompetition(
-    core.CompetitionImportPlan(
-      draft: draft,
+    required bool completed,
+    required bool confirmedReplace,
+    core.Id? updateContestId,
+  }) => _server.repository.contestImportRepository.importRestore(
+    core.RestoreImportPlan(
+      plan: plan,
       profileIds: profileIds,
       owner: _owner,
       timezone: timeZone ?? TimeZones.device(),
       importOperationId: operationId,
       fileFingerprint: fingerprint,
       toolVersion: toolVersion,
+      completed: completed,
+      confirmedReplace: confirmedReplace,
+      updateContestId: updateContestId,
     ),
-    metadata: _metadata('contest'),
-  );
-
-  @override
-  Future<core.DrawImportTarget> drawTarget({
-    required int compNo,
-    required String fingerprint,
-  }) => _server.repository.contestImportRepository.drawTarget(
-    _owner,
-    compNo,
-    fingerprint,
-  );
-
-  @override
-  Future<core.DrawImportResult> importDraw({
-    required core.DrawImportDraft draft,
-    required core.Id contestId,
-    required core.Id operationId,
-    required String fingerprint,
-  }) => _server.repository.contestImportRepository.importDraw(
-    core.DrawImportPlan(
-      draft: draft,
-      contestId: contestId,
-      owner: _owner,
-      importOperationId: operationId,
-      fileFingerprint: fingerprint,
-      toolVersion: toolVersion,
-    ),
-    metadata: _metadata('draw'),
+    metadata: _metadata('restore'),
   );
 
   @override

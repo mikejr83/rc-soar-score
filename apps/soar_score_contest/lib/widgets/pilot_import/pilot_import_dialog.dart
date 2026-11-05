@@ -382,37 +382,51 @@ class _MaybeRow extends StatelessWidget {
       dense: true,
       title: Text('${draft.firstName} ${draft.lastName}'),
       subtitle: notes.isEmpty ? null : Text(notes),
-      trailing: DropdownButton<String>(
-        key: ValueKey('pilot-import-choice-$no'),
-        value: current,
-        onChanged: (value) {
-          if (value == null) return;
-          if (value == _skip) {
-            controller.choose(index, PilotImportChoice.skip);
-          } else if (value == _add) {
-            controller.choose(index, PilotImportChoice.add);
-          } else {
-            controller.choose(
-              index,
-              PilotImportChoice.update,
-              target: Id.parse(value.substring('update:'.length)),
-            );
-          }
-        },
-        items: [
-          DropdownMenuItem(
-            value: _skip,
-            child: Text(l10n.pilotImportChoiceSkip),
-          ),
-          DropdownMenuItem(value: _add, child: Text(l10n.pilotImportChoiceAdd)),
-          for (final id in match.candidateIds)
+      trailing: SizedBox(
+        width: 120,
+        child: DropdownButton<String>(
+          key: ValueKey('pilot-import-choice-$no'),
+          isExpanded: true,
+          value: current,
+          onChanged: (value) {
+            if (value == null) return;
+            if (value == _skip) {
+              controller.choose(index, PilotImportChoice.skip);
+            } else if (value == _add) {
+              controller.choose(index, PilotImportChoice.add);
+            } else {
+              controller.choose(
+                index,
+                PilotImportChoice.update,
+                target: Id.parse(value.substring('update:'.length)),
+              );
+            }
+          },
+          items: [
             DropdownMenuItem(
-              value: 'update:${id.value}',
+              value: _skip,
               child: Text(
-                l10n.pilotImportChoiceUpdate(_name(review.profile(id))),
+                l10n.pilotImportChoiceSkip,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
-        ],
+            DropdownMenuItem(
+              value: _add,
+              child: Text(
+                l10n.pilotImportChoiceAdd,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            for (final id in match.candidateIds)
+              DropdownMenuItem(
+                value: 'update:${id.value}',
+                child: Text(
+                  l10n.pilotImportChoiceUpdate(_name(review.profile(id))),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }

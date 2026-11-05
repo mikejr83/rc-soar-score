@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -41,7 +42,9 @@ Future<void> main(List<String> args) async {
   final repository = Repository(database);
   await DemoDataSeeder(repository, localAccountId: localAccountId).seed();
 
-  final handler = const Pipeline()
+  final inFlight = InFlightRequests();
+  final handler = Pipeline()
+      .addMiddleware(inFlight.middleware)
       .addMiddleware(_cors())
       .addMiddleware(_journeyLog())
       .addMiddleware(_failNextWrite())
@@ -65,7 +68,15 @@ Future<void> main(List<String> args) async {
   );
 
   Future<void> stop(ProcessSignal _) async {
-    await server.close(force: true);
+    // Refuse new requests, let the running ones answer, and only then close
+    // the database under them; force is the fallback for a stuck connection.
+    final graceful = server.close();
+    await inFlight.drain();
+    try {
+      await graceful.timeout(const Duration(seconds: 10));
+    } on TimeoutException {
+      await server.close(force: true);
+    }
     await database.close();
     if (directory != null) await directory.delete(recursive: true);
     exit(0);
