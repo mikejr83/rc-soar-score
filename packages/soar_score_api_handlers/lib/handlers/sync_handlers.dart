@@ -33,9 +33,17 @@ void addSyncRoutes(
   Router router,
   Repository repository, {
   required SyncVersions versions,
+  RecalculationService? recalculation,
 }) {
   final installations = InstallationSyncService(repository);
-  final acceptor = SyncAcceptorService(repository, versions: versions);
+  // Results never sync, so the service rebuilds a contest's after it accepts
+  // changes to it.
+  final acceptor = SyncAcceptorService(
+    repository,
+    versions: versions,
+    recalculation:
+        recalculation ?? RecalculationService(ResultsService(repository)),
+  );
 
   router.get(
     '/sync/info',

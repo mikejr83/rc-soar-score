@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import '../../enums/conflict_resolution_choice.dart';
+import '../../enums/mutation_outcome.dart';
 import '../../errors/forbidden_error.dart';
 import '../../errors/sync_refusal.dart';
 import '../../models/id.dart';
@@ -18,6 +19,7 @@ import 'exchange_context.dart';
 import 'keyed_lock.dart';
 import 'mutation_payloads.dart';
 import 'mutation_processor.dart';
+import '../recalculation/recalculation_service.dart';
 import 'mutation_result.dart';
 import 'sync_entity_catalog.dart';
 import 'sync_exchange.dart';
@@ -31,13 +33,13 @@ import 'sync_versions.dart';
 /// service is domain logic; the routes only translate to and from the wire.
 class SyncAcceptorService {
   SyncAcceptorService(
-    Repository repository, {
+    this._repository, {
     required this.versions,
     DateTime Function()? clock,
     Id Function()? newId,
     this.pageSize = SyncProtocol.defaultPageSize,
-  }) : _repository = repository,
-       _clock = clock ?? (() => DateTime.now().toUtc()),
+    this.recalculation,
+  }) : _clock = clock ?? (() => DateTime.now().toUtc()),
        _newId = newId ?? Id.create;
 
   /// The protocol and schema ranges accepted.
@@ -45,6 +47,12 @@ class SyncAcceptorService {
 
   /// The most changes one response carries; a longer pull is paged.
   final int pageSize;
+
+  /// Rebuilds a contest's results after an exchange accepted changes to it.
+  /// Results are derived data that never sync, so without this the service
+  /// holds a synced contest's scores and no standings, and publishing refuses
+  /// it as stale. Null (the default) recalculates nothing.
+  final RecalculationService? recalculation;
 
   final Repository _repository;
   final DateTime Function() _clock;
@@ -114,7 +122,10 @@ class SyncAcceptorService {
         newId: _newId,
       );
       final results = <MutationResult>[];
-      if (position == null) results.addAll(await _decideAll(ctx, input));
+      if (position == null) {
+        results.addAll(await _decideAll(ctx, input));
+        await _recalculateAfter(scope, results);
+      }
       final after = position ?? input.lastAcknowledgedSequence;
       return _store.transaction((tx) => _pull(tx, ctx, input, results, after));
     });
@@ -185,6 +196,20 @@ class SyncAcceptorService {
       decided[i] = await _processor.process(ctx, input.mutations[i]);
     }
     return [for (var i = 0; i < input.mutations.length; i++) decided[i]!];
+  }
+
+  /// Recalculates the results of the contest in [scope] when [results]
+  /// accepted a change to it. The changes are already committed, so a failure
+  /// is reported by [RecalculationService] in the log and leaves the results
+  /// stale; it never fails the exchange.
+  Future<void> _recalculateAfter(
+    SyncScopeKey scope,
+    List<MutationResult> results,
+  ) async {
+    final recalculation = this.recalculation;
+    if (recalculation == null || scope is! ContestScopeKey) return;
+    if (!results.any((r) => r.outcome == MutationOutcome.accepted)) return;
+    await recalculation.recalculateAfterEntry(scope.contestId, cause: 'a sync');
   }
 
   Future<SyncExchangeOutput> _pull(

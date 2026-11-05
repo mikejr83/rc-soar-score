@@ -71,6 +71,7 @@ createHandlers(
     router,
     repository,
     versions: syncVersions ?? const SyncVersions.exactly(1),
+    recalculation: recalculation,
   );
 
   return (
