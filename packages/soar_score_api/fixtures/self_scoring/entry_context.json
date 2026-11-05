@@ -1,0 +1,11 @@
+{"assignment_id":"0192f6a0-0000-7000-8000-0000000000a2","round":2,"round_count":5,"group":"B","lane":null,"task_type":null,"matrix_revision":3,"score_revision":0,"rules_version":"f5j-2026.1","state":"not_entered","allows_motor_restart":true,
+"fields":[
+{"key":"time_flown","label":"Time flown","type":"seconds","required":true,"unit":"seconds","precision":1,"min":0,"max":900,"options":[],"depends_on":{}},
+{"key":"launch_height","label":"Launch height","type":"integer","required":true,"unit":"metres","precision":0,"min":0,"max":200,"options":[],"depends_on":{}},
+{"key":"landing","label":"Landing","type":"landing","required":true,"unit":null,"precision":null,"min":null,"max":null,"options":[],"depends_on":{"disabled_when":{"late_landing":true}}},
+{"key":"motor_restart","label":"Motor restart","type":"boolean","required":false,"unit":null,"precision":null,"min":null,"max":null,"options":[],"depends_on":{}},
+{"key":"flight_penalty","label":"Flight penalty","type":"integer","required":false,"unit":"points","precision":0,"min":0,"max":null,"options":[],"depends_on":{}}],
+"landing_table":[
+{"id":"good_50","label":"Good","points":50,"description":"Within 1 m"},
+{"id":"fair_30","label":"Fair","points":30,"description":"1 to 5 m"},
+{"id":"off_0","label":"Off","points":0,"description":null}]}
