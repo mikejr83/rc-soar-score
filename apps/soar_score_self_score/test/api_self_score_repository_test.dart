@@ -115,6 +115,15 @@ void main() {
     expect(session.expiresAt, DateTime.utc(2026, 11, 8, 23));
   });
 
+  test('a cookie session keeps no token in the stored session', () async {
+    final session = await _repository(
+      (_) => _json(_fixture('resolve_invitation_response_cookie')),
+    ).acceptInvitation('abc');
+    expect(session.token, isNull);
+    expect(session.toJson().containsKey('token'), isFalse);
+    expect(jsonEncode(session.toJson()), isNot(contains('session')));
+  });
+
   test('an invalid link is the one invalid-link failure', () async {
     final repository = _repository(
       (_) => _json(_fixture('error_invalid_invitation'), 404),

@@ -22,7 +22,7 @@ Participant self-scoring web app: pilots enter their own scores for a contest.
 
 ## Guest session storage
 
-The guest session token is kept in browser local storage (`session/`), as agreed for the first field release (#143 comment, 2026-10-18: keep the storage layer thin and swappable). Any script on the page can read it, so the page loads no third-party scripts, and the token is only as strong as the server's expiry and revocation: the server checks it on every request, the app drops a session that has expired locally or that the server calls ended (`SessionEndedException`), and the pilot routes refuse another pilot's address. Moving to an HttpOnly cookie set by the resolve endpoint is a server and hosting change (the API is on another origin) and is tracked with the account work, not done here.
+On the web the guest session is an HttpOnly cookie (`__Host-soar_guest`, host-only on the API, Secure, SameSite=Lax) that the API sets when the invitation is resolved. The page cannot read it. The app sends it with every request (`session/api_http_client_web.dart` uses a credentialed browser client) and adds `X-Requested-With: soar-score-self-score`, which tells the API to use the cookie and is the API's CSRF check on writes. Browser storage keeps only display data (pilot, contest, role, expiry, in `session/`), which lets the router decide where to go and drop an expired session. A server answer of `session_invalid` clears it (`SessionEndedException`), and the pilot routes refuse another pilot's address. A body token (`GuestSession.token`, set when the request has no `X-Requested-With`: native clients and tests) is sent as a bearer token instead. `ApiClient.endGuestSession` clears the cookie on the server.
 
 ## Design Notes
 

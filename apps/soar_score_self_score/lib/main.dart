@@ -10,6 +10,8 @@ import 'data/api_self_score_repository.dart';
 import 'data/sample_self_score_repository.dart';
 import 'data/self_score_repository.dart';
 import 'data/self_score_scope.dart';
+import 'session/api_http_client_stub.dart'
+    if (dart.library.js_interop) 'session/api_http_client_web.dart';
 import 'session/browser_storage_stub.dart'
     if (dart.library.js_interop) 'session/browser_storage_web.dart';
 import 'session/guest_session_scope.dart';
@@ -26,14 +28,18 @@ void main() {
     'SOAR_SCORE_API_BASE_URL',
   );
   final baseUrl = configuredUrl.isEmpty ? defaultUrl : configuredUrl;
-  // The guest session token goes with every request except resolving the
-  // invitation link itself.
+  // The guest session is an HttpOnly cookie the API sets, which the web client
+  // sends with every request. `X-Requested-With` tells the API this is the
+  // app, so it sets the cookie and accepts cookie-authenticated writes. A
+  // body token (native, tests) is sent as a bearer token instead.
   final storage = openBrowserStorage();
   final sessions = StringSlotGuestSessionStore(
     KeyValueSlot(storage, 'soar_score_self_score.guest_session'),
   );
   final client = ApiClient(
     baseUrl: Uri.parse(baseUrl),
+    httpClient: openApiHttpClient(),
+    defaultHeaders: const {'X-Requested-With': 'soar-score-self-score'},
     tokenProvider: () async => sessions.read()?.token,
   );
 

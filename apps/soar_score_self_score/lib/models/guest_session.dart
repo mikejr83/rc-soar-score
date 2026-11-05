@@ -6,7 +6,7 @@ class GuestSession {
     required this.contestName,
     required this.pilotId,
     required this.pilotName,
-    required this.token,
+    this.token,
     this.role = 'pilot',
     this.expiresAt,
   });
@@ -16,7 +16,7 @@ class GuestSession {
     contestName: json['contestName']! as String,
     pilotId: json['pilotId']! as String,
     pilotName: json['pilotName']! as String,
-    token: json['token']! as String,
+    token: json['token'] as String?,
     role: json['role'] as String? ?? 'pilot',
     expiresAt: switch (json['expiresAt']) {
       final String text => DateTime.tryParse(text),
@@ -29,8 +29,11 @@ class GuestSession {
   final String pilotId;
   final String pilotName;
 
-  /// Sent with every request. Never shown, and never put in an address.
-  final String token;
+  /// Sent as a bearer token when the server gave one in the body (native
+  /// clients and tests). Null on the web, where the session lives in an
+  /// HttpOnly cookie that the page cannot read. Never shown, and never put in
+  /// an address.
+  final String? token;
 
   /// What the link makes the person: `pilot` is the only role in the first
   /// field release. The server decides what the role may see.
@@ -48,7 +51,7 @@ class GuestSession {
     'contestName': contestName,
     'pilotId': pilotId,
     'pilotName': pilotName,
-    'token': token,
+    if (token != null) 'token': token,
     'role': role,
     'expiresAt': expiresAt?.toUtc().toIso8601String(),
   };
