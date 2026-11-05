@@ -13,7 +13,7 @@ part 'participant_results_dto.g.dart';
 class ParticipantGroupRowDto {
   const ParticipantGroupRowDto({
     required this.pilotName,
-    required this.pilotNumber,
+    this.pilotNumber,
     required this.state,
     required this.isYou,
     required this.isEstimate,
@@ -21,6 +21,8 @@ class ParticipantGroupRowDto {
     this.launchHeight,
     this.landing,
     this.flightScore,
+    this.rawScore,
+    this.roundScore,
     this.zeroReason,
     this.reviewPending = false,
   });
@@ -29,7 +31,7 @@ class ParticipantGroupRowDto {
       _$ParticipantGroupRowDtoFromJson(json);
 
   final String pilotName;
-  final int pilotNumber;
+  final int? pilotNumber;
   final ParticipantScoreState state;
   final bool isYou;
 
@@ -41,6 +43,8 @@ class ParticipantGroupRowDto {
 
   /// The calculated normalised flight score.
   final num? flightScore;
+  final num? rawScore;
+  final num? roundScore;
   final String? zeroReason;
   final bool reviewPending;
 
@@ -61,6 +65,7 @@ class ParticipantGroupResultsDto {
     required this.latestRound,
     required this.preliminary,
     required this.rows,
+    this.pendingReviewAffectsPlacement = false,
   });
 
   factory ParticipantGroupResultsDto.fromJson(Map<String, dynamic> json) =>
@@ -75,6 +80,7 @@ class ParticipantGroupResultsDto {
   /// True while the group or ranking is incomplete.
   final bool preliminary;
   final List<ParticipantGroupRowDto> rows;
+  final bool pendingReviewAffectsPlacement;
 
   Map<String, dynamic> toJson() => _$ParticipantGroupResultsDtoToJson(this);
 }
@@ -89,7 +95,7 @@ class ParticipantStandingDto {
   const ParticipantStandingDto({
     required this.place,
     required this.pilotName,
-    required this.pilotNumber,
+    this.pilotNumber,
     required this.score,
     required this.isYou,
     this.tied = false,
@@ -100,7 +106,7 @@ class ParticipantStandingDto {
 
   final int place;
   final String pilotName;
-  final int pilotNumber;
+  final int? pilotNumber;
   final num score;
   final bool isYou;
   final bool tied;
@@ -124,6 +130,7 @@ class ParticipantOverallResultsDto {
     this.heldAtRound,
     this.yourPlace,
     this.yourScore,
+    this.teamStandings,
   });
 
   factory ParticipantOverallResultsDto.fromJson(Map<String, dynamic> json) =>
@@ -142,5 +149,35 @@ class ParticipantOverallResultsDto {
   final num? yourScore;
   final List<ParticipantStandingDto> standings;
 
+  /// Optional in contests without teams; present when team standings are
+  /// enabled for participants.
+  final List<ParticipantTeamStandingDto>? teamStandings;
+
   Map<String, dynamic> toJson() => _$ParticipantOverallResultsDtoToJson(this);
+}
+
+@JsonSerializable(
+  checked: true,
+  fieldRename: FieldRename.snake,
+  includeIfNull: true,
+)
+class ParticipantTeamStandingDto {
+  const ParticipantTeamStandingDto({
+    required this.place,
+    required this.teamName,
+    required this.score,
+    required this.isYourTeam,
+    this.tied = false,
+  });
+
+  factory ParticipantTeamStandingDto.fromJson(Map<String, dynamic> json) =>
+      _$ParticipantTeamStandingDtoFromJson(json);
+
+  final int place;
+  final String teamName;
+  final num score;
+  final bool isYourTeam;
+  final bool tied;
+
+  Map<String, dynamic> toJson() => _$ParticipantTeamStandingDtoToJson(this);
 }

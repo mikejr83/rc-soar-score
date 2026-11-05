@@ -6,6 +6,20 @@ part of 'participant_overview_dto.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
+ParticipantAccessDto _$ParticipantAccessDtoFromJson(
+  Map<String, dynamic> json,
+) => $checkedCreate('ParticipantAccessDto', json, ($checkedConvert) {
+  final val = ParticipantAccessDto(
+    code: $checkedConvert('code', (v) => v as String),
+    message: $checkedConvert('message', (v) => v as String?),
+  );
+  return val;
+});
+
+Map<String, dynamic> _$ParticipantAccessDtoToJson(
+  ParticipantAccessDto instance,
+) => <String, dynamic>{'code': instance.code, 'message': instance.message};
+
 ParticipantRoundDto _$ParticipantRoundDtoFromJson(Map<String, dynamic> json) =>
     $checkedCreate(
       'ParticipantRoundDto',
@@ -14,7 +28,8 @@ ParticipantRoundDto _$ParticipantRoundDtoFromJson(Map<String, dynamic> json) =>
         final val = ParticipantRoundDto(
           round: $checkedConvert('round', (v) => (v as num).toInt()),
           group: $checkedConvert('group', (v) => v as String),
-          lane: $checkedConvert('lane', (v) => (v as num).toInt()),
+          lane: $checkedConvert('lane', (v) => (v as num?)?.toInt()),
+          taskType: $checkedConvert('task_type', (v) => v as String?),
           assignmentId: $checkedConvert(
             'assignment_id',
             (v) => const IdConverter().fromJson(v as String),
@@ -37,6 +52,7 @@ ParticipantRoundDto _$ParticipantRoundDtoFromJson(Map<String, dynamic> json) =>
         return val;
       },
       fieldKeyMap: const {
+        'taskType': 'task_type',
         'assignmentId': 'assignment_id',
         'isNextToScore': 'is_next_to_score',
         'enteredBy': 'entered_by',
@@ -51,6 +67,7 @@ Map<String, dynamic> _$ParticipantRoundDtoToJson(
   'round': instance.round,
   'group': instance.group,
   'lane': instance.lane,
+  'task_type': instance.taskType,
   'assignment_id': const IdConverter().toJson(instance.assignmentId),
   'state': _$ParticipantScoreStateEnumMap[instance.state]!,
   'is_next_to_score': instance.isNextToScore,
@@ -87,7 +104,10 @@ ParticipantOverviewDto _$ParticipantOverviewDtoFromJson(
       'matrix_revision',
       (v) => (v as num).toInt(),
     ),
-    locked: $checkedConvert('locked', (v) => v as bool),
+    access: $checkedConvert(
+      'access',
+      (v) => ParticipantAccessDto.fromJson(v as Map<String, dynamic>),
+    ),
     rounds: $checkedConvert(
       'rounds',
       (v) => (v as List<dynamic>)
@@ -104,6 +124,6 @@ Map<String, dynamic> _$ParticipantOverviewDtoToJson(
   'contest': instance.contest,
   'participant': instance.participant,
   'matrix_revision': instance.matrixRevision,
-  'locked': instance.locked,
+  'access': instance.access,
   'rounds': instance.rounds,
 };

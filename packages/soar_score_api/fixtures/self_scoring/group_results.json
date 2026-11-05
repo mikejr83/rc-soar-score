@@ -1,4 +1,4 @@
-{"round":1,"group":"A","latest_round":2,"preliminary":false,"rows":[
-{"pilot_name":"Alex Rivera","pilot_number":7,"state":"submitted","is_you":true,"is_estimate":false,"time_flown_seconds":540,"launch_height":45,"landing":"Good 50","flight_score":962.5,"zero_reason":null,"review_pending":false},
-{"pilot_name":"Sam Chen","pilot_number":3,"state":"zero","is_you":false,"is_estimate":false,"time_flown_seconds":null,"launch_height":null,"landing":null,"flight_score":0,"zero_reason":"Landed out","review_pending":false},
-{"pilot_name":"Jo Patel","pilot_number":11,"state":"not_entered","is_you":false,"is_estimate":true,"time_flown_seconds":null,"launch_height":null,"landing":null,"flight_score":900.0,"zero_reason":null,"review_pending":false}]}
+{"round":1,"group":"A","latest_round":2,"preliminary":false,"pending_review_affects_placement":false,"rows":[
+{"pilot_name":"Alex Rivera","pilot_number":7,"state":"submitted","is_you":true,"is_estimate":false,"time_flown_seconds":540,"launch_height":45,"landing":"Good 50","flight_score":962.5,"raw_score":962.5,"round_score":962.5,"zero_reason":null,"review_pending":false},
+{"pilot_name":"Sam Chen","pilot_number":3,"state":"zero","is_you":false,"is_estimate":false,"time_flown_seconds":null,"launch_height":null,"landing":null,"flight_score":0,"raw_score":0,"round_score":0,"zero_reason":"Landed out","review_pending":false},
+{"pilot_name":"Jo Patel","pilot_number":11,"state":"not_entered","is_you":false,"is_estimate":true,"time_flown_seconds":null,"launch_height":null,"landing":null,"flight_score":900.0,"raw_score":null,"round_score":900.0,"zero_reason":null,"review_pending":false}]}
