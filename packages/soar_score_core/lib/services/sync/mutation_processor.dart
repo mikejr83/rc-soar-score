@@ -147,6 +147,7 @@ class MutationProcessor {
           );
         }
         bootstrap = true;
+        ctx.createdContestId = scope.contestId;
       }
     }
 
@@ -164,6 +165,7 @@ class MutationProcessor {
           : await tx.findEntity('Contest', scope.contestId);
       if (m.entityType != 'Contest' &&
           contest != null &&
+          ctx.createdContestId != scope.contestId &&
           (contest['admin_lock'] == 'Locked' ||
               contest['lifecycle_state'] == 'Completed')) {
         return reject(
