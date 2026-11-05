@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:logging/logging.dart';
@@ -125,16 +126,34 @@ class EmbeddedServer {
       gliderScoreImport: GliderScoreImportProcessRunner(),
       drawRunner: drawRunner,
     );
-    final guarded = const Pipeline()
+    final guarded = Pipeline()
+        .addMiddleware(_inFlight.middleware)
         .addMiddleware(embeddedGuard(secret: secret, port: () => port))
         .addHandler(handler);
     _server = await shelf_io.serve(guarded, InternetAddress.loopbackIPv4, 0);
   }
 
+  final _inFlight = InFlightRequests();
+
   /// Shuts down the HTTP server and closes the local database, releasing the
   /// port and the SQLite file handle.
-  Future<void> close() async {
-    await _server.close(force: true);
+  ///
+  /// New requests are refused and the running ones finish before the
+  /// database closes under them. Connections still open after
+  /// [drainTimeout] (an abnormal shutdown) are then closed by force.
+  Future<void> close({
+    Duration drainTimeout = const Duration(seconds: 10),
+  }) async {
+    final graceful = _server.close();
+    if (!await _inFlight.drain(timeout: drainTimeout)) {
+      _logger.warning('Closing with ${_inFlight.count} requests still running');
+    }
+    // The handlers are done; the connections finish writing their answers.
+    try {
+      await graceful.timeout(drainTimeout);
+    } on TimeoutException {
+      await _server.close(force: true);
+    }
     await _database.close();
   }
 }
