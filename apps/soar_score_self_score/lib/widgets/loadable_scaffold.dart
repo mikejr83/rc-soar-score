@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../data/self_score_repository.dart';
+import '../l10n/app_localizations.dart';
+import '../router.dart';
 import '../session/guest_session_scope.dart';
 import 'load_error_view.dart';
 
@@ -71,13 +74,21 @@ class _LoadableScaffoldState<T> extends State<LoadableScaffold<T>> {
         final Widget body;
         if (snapshot.hasError) {
           final error = snapshot.error;
-          body = LoadErrorView(
-            message: error is SelfScoreLoadException
-                ? error.message
-                : 'Could not load this page. Check your connection and try '
-                      'again.',
-            onRetry: _retry,
-          );
+          body = error is SessionEndedException
+              // Retrying cannot help: the person needs their link again.
+              ? LoadErrorView(
+                  message: error.message,
+                  onRetry: () => context.go(homePath),
+                  actionLabel: AppLocalizations.of(context).backToStart,
+                  actionIcon: Icons.home_outlined,
+                )
+              : LoadErrorView(
+                  message: error is SelfScoreLoadException
+                      ? error.message
+                      : 'Could not load this page. Check your connection and try '
+                            'again.',
+                  onRetry: _retry,
+                );
         } else if (data == null) {
           body = Center(
             child: Semantics(

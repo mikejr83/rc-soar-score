@@ -121,4 +121,14 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get scoreRejectedOther =>
       'The score was not accepted. Ask your contest director.';
+
+  @override
+  String get unsupportedRoleTitle => 'This link is not for scoring yet';
+
+  @override
+  String get unsupportedRoleBody =>
+      'Your link works, but this version of the app only supports pilots entering their own scores. Ask your contest director.';
+
+  @override
+  String get backToStart => 'Back to start';
 }

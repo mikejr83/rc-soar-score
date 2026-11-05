@@ -56,6 +56,11 @@ class _InvitationPageState extends State<InvitationPage> {
               future: _future,
               builder: (context, snapshot) {
                 final session = snapshot.data;
+                if (session != null && session.role != 'pilot') {
+                  // A link for another role: this release has no page for it,
+                  // and it is not treated as a pilot.
+                  return const _UnsupportedRole();
+                }
                 if (session != null) {
                   return _Welcome(
                     session: session,
@@ -154,6 +159,47 @@ class _Welcome extends StatelessWidget {
         const SizedBox(height: 24),
         const LegalFooter(),
       ],
+    );
+  }
+}
+
+/// A valid link for a role this release does not support yet.
+class _UnsupportedRole extends StatelessWidget {
+  const _UnsupportedRole();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.person_off_outlined,
+            size: 40,
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+          const SizedBox(height: 12),
+          Semantics(
+            liveRegion: true,
+            child: Text(
+              l10n.unsupportedRoleTitle,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.titleLarge,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            l10n.unsupportedRoleBody,
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodyLarge,
+          ),
+          const SizedBox(height: 24),
+          const LegalFooter(),
+        ],
+      ),
     );
   }
 }

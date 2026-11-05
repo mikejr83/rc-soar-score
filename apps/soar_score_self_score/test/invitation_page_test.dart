@@ -132,12 +132,13 @@ void main() {
   ) async {
     final store = MemoryGuestSessionStore()
       ..write(
-        const GuestSession(
+        GuestSession(
           contestId: 'spring-open',
           contestName: 'Spring Open',
           pilotId: '12',
           pilotName: 'Jane Smith',
           token: 'sample-token',
+          expiresAt: DateTime.utc(2099),
         ),
       );
     await _pump(tester, store: store);
@@ -155,12 +156,13 @@ void main() {
     test('keeps and clears a session', () {
       final slot = _MapSlot();
       final store = StringSlotGuestSessionStore(slot);
-      const session = GuestSession(
+      final session = GuestSession(
         contestId: 'c',
         contestName: 'Contest',
         pilotId: 'p',
         pilotName: 'Pat',
         token: 't',
+        expiresAt: DateTime.utc(2099),
       );
       store.write(session);
       expect(store.read()?.token, 't');
@@ -179,12 +181,13 @@ void main() {
       expect(store.read, returnsNormally);
       expect(
         () => store.write(
-          const GuestSession(
+          GuestSession(
             contestId: 'c',
             contestName: 'C',
             pilotId: 'p',
             pilotName: 'P',
             token: 't',
+            expiresAt: DateTime.utc(2099),
           ),
         ),
         returnsNormally,
@@ -218,6 +221,24 @@ class _BlockedSlot implements StringSlot {
   void clear() => throw StateError('blocked');
 }
 
+class _HelperLinkRepository extends SampleSelfScoreRepository {
+  _HelperLinkRepository();
+
+  @override
+  Future<GuestSession> acceptInvitation(String credential) async {
+    final session = await super.acceptInvitation(credential);
+    return GuestSession(
+      contestId: session.contestId,
+      contestName: session.contestName,
+      pilotId: session.pilotId,
+      pilotName: session.pilotName,
+      token: session.token,
+      role: 'helper',
+      expiresAt: session.expiresAt,
+    );
+  }
+}
+
 class _SessionEndedRepository extends SampleSelfScoreRepository {
   const _SessionEndedRepository();
 
@@ -227,12 +248,13 @@ class _SessionEndedRepository extends SampleSelfScoreRepository {
 }
 
 void _securityTests() {
-  const session = GuestSession(
+  final session = GuestSession(
     contestId: 'spring-open',
     contestName: 'Spring Open',
     pilotId: '12',
     pilotName: 'Jane Smith',
     token: 'sample-token',
+    expiresAt: DateTime.utc(2099),
   );
 
   testWidgets('a hand-edited pilot id returns to the guest\'s own pilot', (
@@ -277,6 +299,63 @@ void _securityTests() {
       findsOneWidget,
     );
     expect(store.read(), isNull);
+
+    // Retrying cannot help, so the page offers the way back instead.
+    expect(find.text('Retry'), findsNothing);
+    await tester.tap(find.text('Back to start'));
+    await tester.pumpAndSettle();
+    expect(router.routeInformationProvider.value.uri.path, '/');
+  });
+
+  testWidgets('a link for another role is not treated as a pilot', (
+    tester,
+  ) async {
+    await _pump(
+      tester,
+      store: MemoryGuestSessionStore(),
+      repository: _HelperLinkRepository(),
+    );
+    router.go(invitationPath('sample-link'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('This link is not for scoring yet'), findsOneWidget);
+    expect(find.text('Continue as guest'), findsNothing);
+  });
+
+  testWidgets('a stored helper session never routes to a pilot page', (
+    tester,
+  ) async {
+    final store = MemoryGuestSessionStore()
+      ..write(
+        GuestSession(
+          contestId: 'spring-open',
+          contestName: 'Spring Open',
+          pilotId: 'helper-1',
+          pilotName: 'Helper',
+          token: 't',
+          role: 'helper',
+          expiresAt: DateTime.utc(2099),
+        ),
+      );
+    await _pump(tester, store: store);
+    router.go('/contests/spring-open/pilots/helper-1');
+    await tester.pumpAndSettle();
+    expect(
+      router.routeInformationProvider.value.uri.path,
+      '/contests/spring-open/team',
+    );
+  });
+
+  test('a stored session without a readable expiry is not used', () {
+    for (final json in [
+      '{"contestId":"c","contestName":"C","pilotId":"p","pilotName":"P",'
+          '"token":"t"}',
+      '{"contestId":"c","contestName":"C","pilotId":"p","pilotName":"P",'
+          '"token":"t","expiresAt":"soon"}',
+    ]) {
+      final slot = _MapSlot()..value = json;
+      expect(StringSlotGuestSessionStore(slot).read(), isNull);
+    }
   });
 
   test('credentials with reserved characters stay one path segment', () {
