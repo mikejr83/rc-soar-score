@@ -80,6 +80,7 @@ Future<RunningServer> startServer(
         db,
         authMiddleware: authMiddleware ?? _auth0Middleware(config, db),
         corsAllowedOrigins: config.corsAllowedOrigins,
+        invitationSecret: config.invitationSecret,
       ),
       address ?? InternetAddress.anyIPv4,
       config.port,

@@ -152,19 +152,20 @@ tenant it accepts tokens from. It exits at startup, listing every problem, if
 The server loads variables from the process environment and from a `.env` file
 (`.env` and `.env.*` are git-ignored; never commit them).
 
-| Variable               | Default         | Purpose                                                                                                                                                        |
-| ---------------------- | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `DATABASE_URL`         | none            | Optional connection URL, `postgresql://user:password@host:port/db?sslmode=...`. Wins over the `POSTGRES_*` variables. A missing `sslmode` means `require` TLS. |
-| `POSTGRES_PASSWORD`    | none (required) | Database password, when no `DATABASE_URL` is set. Unset means "not configured".                                                                                |
-| `POSTGRES_HOST`        | `localhost`     | Database host, when no `DATABASE_URL` is set.                                                                                                                  |
-| `POSTGRES_PORT`        | `5432`          | Database port, when no `DATABASE_URL` is set.                                                                                                                  |
-| `POSTGRES_DB`          | `rc_soar_score` | Database name, when no `DATABASE_URL` is set.                                                                                                                  |
-| `POSTGRES_USER`        | `postgres`      | Database user, when no `DATABASE_URL` is set.                                                                                                                  |
-| `POSTGRES_SSLMODE`     | `disable`       | One of `disable`, `require`, `verifyFull`, when no `DATABASE_URL` is set.                                                                                      |
-| `PORT`                 | `8080`          | HTTP port the server listens on.                                                                                                                               |
-| `AUTH0_DOMAIN`         | none (required) | Auth0 tenant host name, no scheme (`tenant.us.auth0.com`).                                                                                                     |
-| `API_AUDIENCE`         | none (required) | Expected JWT audience (`https://soar-score.com/server`).                                                                                                       |
-| `CORS_ALLOWED_ORIGINS` | none            | Comma-separated browser origins allowed to call the API, e.g. `http://127.0.0.1:8091`. Empty adds no CORS headers.                                             |
+| Variable               | Default         | Purpose                                                                                                                                                                    |
+| ---------------------- | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URL`         | none            | Optional connection URL, `postgresql://user:password@host:port/db?sslmode=...`. Wins over the `POSTGRES_*` variables. A missing `sslmode` means `require` TLS.             |
+| `POSTGRES_PASSWORD`    | none (required) | Database password, when no `DATABASE_URL` is set. Unset means "not configured".                                                                                            |
+| `POSTGRES_HOST`        | `localhost`     | Database host, when no `DATABASE_URL` is set.                                                                                                                              |
+| `POSTGRES_PORT`        | `5432`          | Database port, when no `DATABASE_URL` is set.                                                                                                                              |
+| `POSTGRES_DB`          | `rc_soar_score` | Database name, when no `DATABASE_URL` is set.                                                                                                                              |
+| `POSTGRES_USER`        | `postgres`      | Database user, when no `DATABASE_URL` is set.                                                                                                                              |
+| `POSTGRES_SSLMODE`     | `disable`       | One of `disable`, `require`, `verifyFull`, when no `DATABASE_URL` is set.                                                                                                  |
+| `PORT`                 | `8080`          | HTTP port the server listens on.                                                                                                                                           |
+| `AUTH0_DOMAIN`         | none (required) | Auth0 tenant host name, no scheme (`tenant.us.auth0.com`).                                                                                                                 |
+| `API_AUDIENCE`         | none (required) | Expected JWT audience (`https://soar-score.com/server`).                                                                                                                   |
+| `CORS_ALLOWED_ORIGINS` | none            | Comma-separated browser origins allowed to call the API, e.g. `http://127.0.0.1:8091`. Empty adds no CORS headers.                                                         |
+| `INVITATION_SECRET`    | none            | At least 32 characters. Signs invitation links and guest sessions. Without it the self-scoring routes answer 409 `invitations_not_available`. Changing it ends every link. |
 
 A minimal local `.env` at the repo root:
 
