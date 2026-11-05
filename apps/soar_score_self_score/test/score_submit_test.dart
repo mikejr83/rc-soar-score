@@ -199,6 +199,20 @@ void main() {
     );
   });
 
+  testWidgets('an ended session refused on submit is dropped', (tester) async {
+    final repository = _ScriptedRepository([
+      const ScoreRejected(code: 'session_invalid', message: 'x'),
+    ]);
+    await _pump(tester, repository);
+    await _fillAndSubmit(tester);
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('Your session has ended. Open your invitation link again.'),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('a flight that already has a score keeps the stored one', (
     tester,
   ) async {

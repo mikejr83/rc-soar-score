@@ -24,6 +24,13 @@ class SelfScoreOfflineException extends SelfScoreLoadException {
   const SelfScoreOfflineException(super.message);
 }
 
+/// The guest session is no longer valid: expired, replaced or revoked. The
+/// stored session is dropped and the person opens their link again.
+class SessionEndedException extends SelfScoreLoadException {
+  const SessionEndedException()
+    : super('Your session has ended. Open your invitation link again.');
+}
+
 /// The invitation link is unknown, expired or replaced. The three look the
 /// same on purpose, so a link never reveals whether a contest or pilot exists.
 class InvalidInvitationException implements Exception {

@@ -255,6 +255,7 @@ class _ScoreEntryFormState extends State<ScoreEntryForm> {
     _retryTimer?.cancel();
     final repository = context.repository;
     final drafts = context.scoreDrafts;
+    final sessions = context.guestSessions;
     final components = _components;
     try {
       final result = await repository.submitScore(
@@ -273,7 +274,9 @@ class _ScoreEntryFormState extends State<ScoreEntryForm> {
           _accept(flightScore, alreadyThere: false);
         case ScoreAlreadySubmitted(:final flightScore):
           _accept(flightScore, alreadyThere: true);
-        case ScoreRejected():
+        case ScoreRejected(:final code):
+          // The server ended the session: drop it so nothing routes from it.
+          if (code == 'session_invalid') sessions.clear();
           // Nothing was stored. The next try is a new attempt with a new id.
           setState(() {
             _pending = null;
