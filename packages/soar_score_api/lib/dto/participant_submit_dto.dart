@@ -81,6 +81,9 @@ class ParticipantScoreDto {
     required this.enteredBy,
     required this.enteredAt,
     this.flightScore,
+    this.rawScore,
+    this.roundScore,
+    this.cumulativePenalty,
     this.validationMessages = const [],
   });
 
@@ -99,6 +102,9 @@ class ParticipantScoreDto {
 
   /// The calculated flight score. A calculated value, not an entered one.
   final num? flightScore;
+  final num? rawScore;
+  final num? roundScore;
+  final num? cumulativePenalty;
   final List<String> validationMessages;
 
   Map<String, dynamic> toJson() => _$ParticipantScoreDtoToJson(this);

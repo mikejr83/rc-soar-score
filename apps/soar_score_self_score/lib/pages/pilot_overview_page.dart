@@ -63,6 +63,8 @@ class PilotOverviewPage extends StatelessWidget {
       appBar: (context, data) => SelfScoreAppBar(
         title: data == null
             ? 'Pilot overview'
+            : data.pilotNumber == null
+            ? data.pilotName
             : '${data.pilotName}, pilot ${data.pilotNumber}',
         contextLine: data == null
             ? null

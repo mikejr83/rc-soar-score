@@ -4,11 +4,11 @@ import 'landing_result.dart';
 class EntryContext {
   const EntryContext({
     required this.pilotName,
-    required this.pilotNumber,
+    this.pilotNumber,
     required this.round,
     required this.roundCount,
     required this.group,
-    required this.lane,
+    this.lane,
     required this.landingTable,
     this.allowsMotorRestart = true,
     this.matrixRevision = 0,
@@ -16,11 +16,13 @@ class EntryContext {
   });
 
   final String pilotName;
-  final int pilotNumber;
+  final int? pilotNumber;
   final int round;
   final int roundCount;
   final String group;
-  final int lane;
+
+  /// Null for disciplines that fly without lanes.
+  final int? lane;
 
   /// The contest's landing table; its size picks the landing control.
   final List<LandingResult> landingTable;

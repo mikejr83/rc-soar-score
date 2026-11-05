@@ -14,10 +14,15 @@ part 'participant_entry_dto.g.dart';
 class ScoreFieldDto {
   const ScoreFieldDto({
     required this.key,
+    required this.label,
     required this.type,
     required this.required,
+    this.unit,
+    this.precision,
     this.min,
     this.max,
+    this.options = const [],
+    this.dependsOn = const {},
   });
 
   factory ScoreFieldDto.fromJson(Map<String, dynamic> json) =>
@@ -26,13 +31,41 @@ class ScoreFieldDto {
   /// The component key sent back in a submission, for example `time_flown`.
   final String key;
 
+  final String label;
+
   /// `seconds`, `integer`, `landing` or `boolean`.
   final String type;
   final bool required;
+  final String? unit;
+  final int? precision;
   final num? min;
   final num? max;
 
+  /// Values for enum-like fields, such as landing choices.
+  final List<ScoreFieldOptionDto> options;
+
+  /// Conditions supplied by the discipline schema, interpreted by the app
+  /// only for presentation. Submission validation remains server-side.
+  final Map<String, Object?> dependsOn;
+
   Map<String, dynamic> toJson() => _$ScoreFieldDtoToJson(this);
+}
+
+@JsonSerializable(
+  checked: true,
+  fieldRename: FieldRename.snake,
+  includeIfNull: true,
+)
+class ScoreFieldOptionDto {
+  const ScoreFieldOptionDto({required this.value, required this.label});
+
+  factory ScoreFieldOptionDto.fromJson(Map<String, dynamic> json) =>
+      _$ScoreFieldOptionDtoFromJson(json);
+
+  final String value;
+  final String label;
+
+  Map<String, dynamic> toJson() => _$ScoreFieldOptionDtoToJson(this);
 }
 
 /// One result from the contest's landing table.
@@ -75,7 +108,8 @@ class ParticipantEntryContextDto {
     required this.round,
     required this.roundCount,
     required this.group,
-    required this.lane,
+    this.lane,
+    this.taskType,
     required this.matrixRevision,
     required this.scoreRevision,
     required this.rulesVersion,
@@ -92,7 +126,8 @@ class ParticipantEntryContextDto {
   final int round;
   final int roundCount;
   final String group;
-  final int lane;
+  final int? lane;
+  final String? taskType;
   final int matrixRevision;
   final int scoreRevision;
 

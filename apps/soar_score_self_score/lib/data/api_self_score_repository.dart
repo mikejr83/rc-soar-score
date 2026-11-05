@@ -152,7 +152,7 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
             number: round.round,
             group: round.group,
             lane: round.lane,
-            status: _status(round, locked: dto.locked),
+            status: _status(round, locked: dto.access.code != 'open'),
             enteredBy: switch (round.enteredBy) {
               null => null,
               final name when name == you => 'you',
@@ -291,8 +291,17 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
                   tied: line.tied,
                 ),
             ],
-            // Teams are not part of the first field release.
-            teams: const [],
+            // Absent in the first field release, which has no teams.
+            teams: [
+              for (final team in overall.teamStandings ?? const [])
+                StandingLine(
+                  place: team.tied ? '${team.place}=' : '${team.place}',
+                  name: team.teamName,
+                  score: ScoreFormat.score(team.score),
+                  isYou: team.isYourTeam,
+                  tied: team.tied,
+                ),
+            ],
           ),
         );
       });

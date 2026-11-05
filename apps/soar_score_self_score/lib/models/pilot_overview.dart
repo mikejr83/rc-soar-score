@@ -6,14 +6,16 @@ class PilotOverview {
     required this.contestName,
     required this.teamName,
     required this.pilotName,
-    required this.pilotNumber,
+    this.pilotNumber,
     required this.rounds,
   });
 
   final String contestName;
   final String? teamName;
   final String pilotName;
-  final int pilotNumber;
+
+  /// Null when the contest gives pilots no number.
+  final int? pilotNumber;
   final List<PilotRound> rounds;
 
   /// The round that must be scored before any later one opens.

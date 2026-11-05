@@ -68,6 +68,12 @@ ParticipantScoreDto _$ParticipantScoreDtoFromJson(Map<String, dynamic> json) =>
             (v) => DateTime.parse(v as String),
           ),
           flightScore: $checkedConvert('flight_score', (v) => v as num?),
+          rawScore: $checkedConvert('raw_score', (v) => v as num?),
+          roundScore: $checkedConvert('round_score', (v) => v as num?),
+          cumulativePenalty: $checkedConvert(
+            'cumulative_penalty',
+            (v) => v as num?,
+          ),
           validationMessages: $checkedConvert(
             'validation_messages',
             (v) =>
@@ -82,6 +88,9 @@ ParticipantScoreDto _$ParticipantScoreDtoFromJson(Map<String, dynamic> json) =>
         'enteredBy': 'entered_by',
         'enteredAt': 'entered_at',
         'flightScore': 'flight_score',
+        'rawScore': 'raw_score',
+        'roundScore': 'round_score',
+        'cumulativePenalty': 'cumulative_penalty',
         'validationMessages': 'validation_messages',
       },
     );
@@ -97,6 +106,9 @@ Map<String, dynamic> _$ParticipantScoreDtoToJson(
   'entered_by': instance.enteredBy,
   'entered_at': instance.enteredAt.toIso8601String(),
   'flight_score': instance.flightScore,
+  'raw_score': instance.rawScore,
+  'round_score': instance.roundScore,
+  'cumulative_penalty': instance.cumulativePenalty,
   'validation_messages': instance.validationMessages,
 };
 

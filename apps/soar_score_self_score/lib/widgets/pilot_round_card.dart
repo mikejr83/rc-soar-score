@@ -51,7 +51,7 @@ class PilotRoundCard extends StatelessWidget {
     };
     final draw = [
       'Group ${round.group}',
-      'Lane ${round.lane}',
+      if (round.lane != null) 'Lane ${round.lane}',
       if (round.enteredBy != null)
         round.enteredBy == 'you'
             ? 'Entered by you'
