@@ -10,22 +10,58 @@ ScoreFieldDto _$ScoreFieldDtoFromJson(Map<String, dynamic> json) =>
     $checkedCreate('ScoreFieldDto', json, ($checkedConvert) {
       final val = ScoreFieldDto(
         key: $checkedConvert('key', (v) => v as String),
+        label: $checkedConvert('label', (v) => v as String),
         type: $checkedConvert('type', (v) => v as String),
         required: $checkedConvert('required', (v) => v as bool),
+        unit: $checkedConvert('unit', (v) => v as String?),
+        precision: $checkedConvert('precision', (v) => (v as num?)?.toInt()),
         min: $checkedConvert('min', (v) => v as num?),
         max: $checkedConvert('max', (v) => v as num?),
+        options: $checkedConvert(
+          'options',
+          (v) =>
+              (v as List<dynamic>?)
+                  ?.map(
+                    (e) =>
+                        ScoreFieldOptionDto.fromJson(e as Map<String, dynamic>),
+                  )
+                  .toList() ??
+              const [],
+        ),
+        dependsOn: $checkedConvert(
+          'depends_on',
+          (v) => v as Map<String, dynamic>? ?? const {},
+        ),
       );
       return val;
-    });
+    }, fieldKeyMap: const {'dependsOn': 'depends_on'});
 
 Map<String, dynamic> _$ScoreFieldDtoToJson(ScoreFieldDto instance) =>
     <String, dynamic>{
       'key': instance.key,
+      'label': instance.label,
       'type': instance.type,
       'required': instance.required,
+      'unit': instance.unit,
+      'precision': instance.precision,
       'min': instance.min,
       'max': instance.max,
+      'options': instance.options,
+      'depends_on': instance.dependsOn,
     };
+
+ScoreFieldOptionDto _$ScoreFieldOptionDtoFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('ScoreFieldOptionDto', json, ($checkedConvert) {
+      final val = ScoreFieldOptionDto(
+        value: $checkedConvert('value', (v) => v as String),
+        label: $checkedConvert('label', (v) => v as String),
+      );
+      return val;
+    });
+
+Map<String, dynamic> _$ScoreFieldOptionDtoToJson(
+  ScoreFieldOptionDto instance,
+) => <String, dynamic>{'value': instance.value, 'label': instance.label};
 
 LandingOptionDto _$LandingOptionDtoFromJson(Map<String, dynamic> json) =>
     $checkedCreate('LandingOptionDto', json, ($checkedConvert) {
@@ -60,7 +96,8 @@ ParticipantEntryContextDto _$ParticipantEntryContextDtoFromJson(
       round: $checkedConvert('round', (v) => (v as num).toInt()),
       roundCount: $checkedConvert('round_count', (v) => (v as num).toInt()),
       group: $checkedConvert('group', (v) => v as String),
-      lane: $checkedConvert('lane', (v) => (v as num).toInt()),
+      lane: $checkedConvert('lane', (v) => (v as num?)?.toInt()),
+      taskType: $checkedConvert('task_type', (v) => v as String?),
       matrixRevision: $checkedConvert(
         'matrix_revision',
         (v) => (v as num).toInt(),
@@ -96,6 +133,7 @@ ParticipantEntryContextDto _$ParticipantEntryContextDtoFromJson(
   fieldKeyMap: const {
     'assignmentId': 'assignment_id',
     'roundCount': 'round_count',
+    'taskType': 'task_type',
     'matrixRevision': 'matrix_revision',
     'scoreRevision': 'score_revision',
     'rulesVersion': 'rules_version',
@@ -112,6 +150,7 @@ Map<String, dynamic> _$ParticipantEntryContextDtoToJson(
   'round_count': instance.roundCount,
   'group': instance.group,
   'lane': instance.lane,
+  'task_type': instance.taskType,
   'matrix_revision': instance.matrixRevision,
   'score_revision': instance.scoreRevision,
   'rules_version': instance.rulesVersion,

@@ -83,7 +83,7 @@ ParticipantLinkDto _$ParticipantLinkDtoFromJson(Map<String, dynamic> json) =>
           pilotName: $checkedConvert('pilot_name', (v) => v as String),
           pilotNumber: $checkedConvert(
             'pilot_number',
-            (v) => (v as num).toInt(),
+            (v) => (v as num?)?.toInt(),
           ),
           role: $checkedConvert('role', (v) => v as String),
           teamName: $checkedConvert('team_name', (v) => v as String?),

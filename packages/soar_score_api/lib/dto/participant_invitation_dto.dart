@@ -85,7 +85,7 @@ class ParticipantLinkDto {
   const ParticipantLinkDto({
     required this.participationId,
     required this.pilotName,
-    required this.pilotNumber,
+    this.pilotNumber,
     required this.role,
     this.teamName,
   });
@@ -96,7 +96,7 @@ class ParticipantLinkDto {
   /// The contest-scoped participant link id (never an account id or email).
   final Id participationId;
   final String pilotName;
-  final int pilotNumber;
+  final int? pilotNumber;
 
   /// `pilot` in the first release; `helper` arrives with teams.
   final String role;
