@@ -155,7 +155,7 @@ _context(Repository repository, ParticipantAccess access) async {
         profile?.firstName,
         profile?.lastName,
       ].whereType<String>().join(' '),
-      pilotNumber: access.participation.participantNumber ?? 0,
+      pilotNumber: access.participation.participantNumber,
       role: 'pilot',
     ),
   );
