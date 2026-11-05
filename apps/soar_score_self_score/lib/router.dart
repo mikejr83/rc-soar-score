@@ -54,7 +54,9 @@ final router = GoRouter(
             if (state.uri.pathSegments.length > 2) return null;
             final contestId = state.pathParameters['contestId']!;
             final session = context.guestSessions.read();
-            if (session != null && session.contestId == contestId) {
+            if (session != null &&
+                session.role == 'pilot' &&
+                session.contestId == contestId) {
               return pilotPath(contestId, session.pilotId);
             }
             return teamPath(contestId);
@@ -83,6 +85,11 @@ final router = GoRouter(
                 final session = context.guestSessions.read();
                 final contestId = state.pathParameters['contestId']!;
                 final pilotId = state.pathParameters['pilotId']!;
+                // Only pilot sessions exist in the first field release. Any
+                // other role has no pilot page and goes through contest entry.
+                if (session != null && session.role != 'pilot') {
+                  return contestPath(contestId);
+                }
                 if (session != null &&
                     session.contestId == contestId &&
                     session.pilotId != pilotId) {

@@ -5,11 +5,17 @@ class LoadErrorView extends StatelessWidget {
   const LoadErrorView({
     required this.message,
     required this.onRetry,
+    this.actionLabel = 'Retry',
+    this.actionIcon = Icons.refresh,
     super.key,
   });
 
   final String message;
   final VoidCallback onRetry;
+
+  /// What the button says and shows. Retry unless the page cannot be retried.
+  final String actionLabel;
+  final IconData actionIcon;
 
   @override
   Widget build(BuildContext context) {
@@ -38,8 +44,8 @@ class LoadErrorView extends StatelessWidget {
             FilledButton.icon(
               style: FilledButton.styleFrom(minimumSize: const Size(0, 48)),
               onPressed: onRetry,
-              icon: const Icon(Icons.refresh),
-              label: const Text('Retry'),
+              icon: Icon(actionIcon),
+              label: Text(actionLabel),
             ),
           ],
         ),

@@ -35,12 +35,13 @@ class SampleSelfScoreRepository implements SelfScoreRepository {
     if (credential != sampleCredential) {
       throw const InvalidInvitationException();
     }
-    return const GuestSession(
+    return GuestSession(
       contestId: SampleData.contestId,
       contestName: SampleData.contestName,
       pilotId: '12',
       pilotName: SampleData.pilotName,
       token: 'sample-token',
+      expiresAt: DateTime.utc(2099),
     );
   }
 
