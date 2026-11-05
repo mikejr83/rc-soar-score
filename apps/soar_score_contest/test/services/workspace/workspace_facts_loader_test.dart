@@ -129,7 +129,7 @@ void main() {
     ApiClient hosted(List<String> requests, int status) => ApiClient(
       baseUrl: Uri.parse('http://hosted'),
       httpClient: MockClient((request) async {
-        requests.add('${request.url.path}?${request.url.query}');
+        requests.add(request.url.toString());
         return status == 200
             ? _json({'audit_events': <Object>[]})
             : _json({
@@ -145,17 +145,25 @@ void main() {
         requests: localRequests,
         publicationClient: hosted(hostedRequests, 200),
       );
+      final hostedUris = hostedRequests.map(Uri.parse).toList();
+      // The hosted client is asked for the publication and its events only.
       expect(
-        hostedRequests.where((r) => r.contains('audit-events')),
-        hasLength(1),
+        hostedUris.map((uri) => uri.path.split('/').skip(5).join('/')),
+        unorderedEquals(['publication', 'audit-events']),
       );
+      final hostedAudit = hostedUris.singleWhere(
+        (uri) => uri.path.endsWith('/audit-events'),
+      );
+      expect(hostedAudit.queryParameters['action'], 'PublicationAttempt');
+      // The local client is not asked for them.
+      final localAudit = localRequests
+          .map(Uri.parse)
+          .where((uri) => uri.path.endsWith('/audit-events'));
+      expect(localAudit, isNotEmpty);
       expect(
-        hostedRequests.any(
-          (r) => r.contains('publicationAttempt') || r.contains('publication'),
-        ),
-        isTrue,
+        localAudit.map((uri) => uri.queryParameters['action']),
+        isNot(contains('PublicationAttempt')),
       );
-      expect(hostedRequests.any((r) => r.contains('/scores')), isFalse);
       expect(facts.activity, isNot(ActivityFacts.unavailable));
     });
 
