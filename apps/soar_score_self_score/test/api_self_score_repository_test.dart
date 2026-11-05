@@ -51,6 +51,8 @@ void main() {
     expect(session.contestName, 'Summer Heater 2026');
     expect(session.token, 'example-session-token');
     expect(session.pilotId, '0192f6a0-0000-7000-8000-000000000002');
+    expect(session.role, 'pilot');
+    expect(session.expiresAt, DateTime.utc(2026, 11, 8, 23));
   });
 
   test('an invalid link is the one invalid-link failure', () async {
@@ -61,6 +63,18 @@ void main() {
       repository.acceptInvitation('nope'),
       throwsA(isA<InvalidInvitationException>()),
     );
+  });
+
+  test('every kind of bad link reads the same, whatever the server says', () {
+    for (final status in [400, 404, 410]) {
+      final repository = _repository(
+        (_) => _json(_fixture('error_invalid_invitation'), status),
+      );
+      expect(
+        repository.acceptInvitation('x'),
+        throwsA(isA<InvalidInvitationException>()),
+      );
+    }
   });
 
   test('a server fault while accepting is a load failure, not invalid', () {
@@ -143,6 +157,10 @@ void main() {
           contains('invitation link'),
         ),
       ),
+    );
+    expect(
+      repository.pilotOverview('c', 'p'),
+      throwsA(isA<SessionEndedException>()),
     );
   });
 

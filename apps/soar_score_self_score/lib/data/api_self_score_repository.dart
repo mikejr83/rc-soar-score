@@ -25,8 +25,6 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
 
   static const _unreachable =
       'Could not reach the server. Check your connection and try again.';
-  static const _sessionEnded =
-      'Your session has ended. Open your invitation link again.';
 
   /// Runs an API call and turns its failures into words the person can read.
   Future<T> _read<T>(Future<T> Function() call) async {
@@ -38,7 +36,7 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
       final refusal = error.participantError;
       if (refusal?.code == ParticipantErrorCodes.sessionInvalid ||
           error.statusCode == 401) {
-        throw const SelfScoreLoadException(_sessionEnded);
+        throw const SessionEndedException();
       }
       if (error.statusCode == 404) {
         throw const SelfScoreLoadException('This page could not be found.');
@@ -66,6 +64,8 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
         pilotId: answer.participant.participationId.value,
         pilotName: answer.participant.pilotName,
         token: answer.sessionToken,
+        role: answer.participant.role,
+        expiresAt: answer.sessionExpiresAt,
       );
     } on ApiHttpError catch (error) {
       if (error.participantError?.code ==
