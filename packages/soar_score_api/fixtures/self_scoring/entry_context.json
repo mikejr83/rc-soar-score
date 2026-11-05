@@ -1,0 +1,11 @@
+{"assignment_id":"0192f6a0-0000-7000-8000-0000000000a2","round":2,"round_count":5,"group":"B","lane":5,"matrix_revision":3,"score_revision":0,"rules_version":"f5j-2026.1","state":"not_entered","allows_motor_restart":true,
+"fields":[
+{"key":"time_flown","type":"seconds","required":true,"min":0,"max":900},
+{"key":"launch_height","type":"integer","required":true,"min":0,"max":200},
+{"key":"landing","type":"landing","required":true,"min":null,"max":null},
+{"key":"motor_restart","type":"boolean","required":false,"min":null,"max":null},
+{"key":"flight_penalty","type":"integer","required":false,"min":0,"max":null}],
+"landing_table":[
+{"id":"good_50","label":"Good","points":50,"description":"Within 1 m"},
+{"id":"fair_30","label":"Fair","points":30,"description":"1 to 5 m"},
+{"id":"off_0","label":"Off","points":0,"description":null}]}
