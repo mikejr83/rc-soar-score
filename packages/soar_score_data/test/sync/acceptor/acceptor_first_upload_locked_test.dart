@@ -15,7 +15,9 @@ void _tests(Backend backend) {
   late core.Id contestId;
   late core.ContestScopeKey scope;
 
-  setUp(() async {
+  /// Opens a client with one score entered and the contest finished: always
+  /// Completed, and Locked when [lock] says so.
+  Future<void> prepare(core.AdminLock lock) async {
     harness = await AcceptorHarness.open(backend, recalculates: true);
     contestId = await harness.drawContestOnClient();
     scope = core.ContestScopeKey(contestId);
@@ -50,7 +52,7 @@ void _tests(Backend backend) {
     await harness.clientRepository.contestRepository.save(
       contest.copyWithState(
         lifecycleState: core.LifecycleState.completed,
-        adminLock: core.AdminLock.locked,
+        adminLock: lock,
         updatedAt: DateTime.utc(2026, 10, 15),
       ),
       metadata: core.MutationMetadata(
@@ -60,10 +62,12 @@ void _tests(Backend backend) {
         actorId: harness.account,
       ),
     );
-  });
+  }
+
   tearDown(() => harness.close());
 
   test('a completed, locked contest uploads in full', () async {
+    await prepare(core.AdminLock.locked);
     await harness.uploadAll(
       contestId,
     ); // throws unless every change is accepted
@@ -79,6 +83,7 @@ void _tests(Backend backend) {
   });
 
   test('a later exchange is still refused for a locked contest', () async {
+    await prepare(core.AdminLock.locked);
     await harness.uploadAll(contestId);
     final participation =
         (await harness.server.stores.of('ContestParticipation').all()).first
@@ -89,12 +94,42 @@ void _tests(Backend backend) {
       mutations: [
         harness.save('ContestParticipation', {
           ...participation.toJson(),
-          'number': 99,
+          'participant_number': 99,
         }, base: participation.revision),
       ],
     );
 
     expect(out.results.single.outcome, core.MutationOutcome.rejected);
+    expect(out.results.single.reasonCode, 'locked');
+  });
+
+  test('a completed contest that is not locked uploads in full', () async {
+    await prepare(core.AdminLock.unlocked);
+    await harness.uploadAll(contestId);
+
+    final stored = await harness.stored('Contest', contestId);
+    expect(stored!['admin_lock'], 'Unlocked');
+    expect(stored['lifecycle_state'], 'Completed');
+    expect(await harness.server.count('official_scores'), 1);
+  });
+
+  test('a later exchange is still refused for a completed contest', () async {
+    await prepare(core.AdminLock.unlocked);
+    await harness.uploadAll(contestId);
+    final participation =
+        (await harness.server.stores.of('ContestParticipation').all()).first
+            as core.ContestParticipation;
+
+    final out = await harness.exchange(
+      scope,
+      mutations: [
+        harness.save('ContestParticipation', {
+          ...participation.toJson(),
+          'participant_number': 99,
+        }, base: participation.revision),
+      ],
+    );
+
     expect(out.results.single.reasonCode, 'locked');
   });
 }

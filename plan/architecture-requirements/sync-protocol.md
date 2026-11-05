@@ -222,6 +222,7 @@ The acceptor applies the authority table in [offline-synchronization.md](offline
 ## Current implementation notes
 
 - The first accepted upload for a contest from the director's installation creates the `Initial` activation when none exists, so the engine does not call the activation route for a first upload.
+- The lock and completed rules do not apply to the other mutations of the exchange that creates a contest (its first upload): they are the contest's history, so a restored or offline-completed contest uploads in full. Later exchanges are refused as usual.
 - `GET /sync/system-data` answers an empty page at the seeded sequence until system data changes are published.
 - Exchanges for one scope are serialized with an in-process lock. A deployment with several service instances needs a database lock.
 
