@@ -20,6 +20,24 @@ enum ParticipantScoreState {
   retired,
 }
 
+@JsonSerializable(
+  checked: true,
+  fieldRename: FieldRename.snake,
+  includeIfNull: true,
+)
+class ParticipantAccessDto {
+  const ParticipantAccessDto({required this.code, this.message});
+
+  factory ParticipantAccessDto.fromJson(Map<String, dynamic> json) =>
+      _$ParticipantAccessDtoFromJson(json);
+
+  /// `open`, `scoring_closed`, `contest_completed`, `locked`, or `retired`.
+  final String code;
+  final String? message;
+
+  Map<String, dynamic> toJson() => _$ParticipantAccessDtoToJson(this);
+}
+
 /// One round of the pilot's draw and the state of its score.
 @JsonSerializable(
   checked: true,
@@ -31,7 +49,8 @@ class ParticipantRoundDto {
   const ParticipantRoundDto({
     required this.round,
     required this.group,
-    required this.lane,
+    this.lane,
+    this.taskType,
     required this.assignmentId,
     required this.state,
     required this.isNextToScore,
@@ -45,7 +64,8 @@ class ParticipantRoundDto {
 
   final int round;
   final String group;
-  final int lane;
+  final int? lane;
+  final String? taskType;
 
   /// The server derives the assignment from the session; the app sends
   /// this id back only to name the round it is entering.
@@ -76,7 +96,7 @@ class ParticipantOverviewDto {
     required this.contest,
     required this.participant,
     required this.matrixRevision,
-    required this.locked,
+    required this.access,
     required this.rounds,
   });
 
@@ -87,8 +107,7 @@ class ParticipantOverviewDto {
   final ParticipantLinkDto participant;
   final int matrixRevision;
 
-  /// True when the administration lock or lifecycle stops all submissions.
-  final bool locked;
+  final ParticipantAccessDto access;
   final List<ParticipantRoundDto> rounds;
 
   Map<String, dynamic> toJson() => _$ParticipantOverviewDtoToJson(this);
