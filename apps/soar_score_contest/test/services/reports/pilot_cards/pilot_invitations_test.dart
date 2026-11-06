@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:logging/logging.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:soar_score_api/soar_score_api.dart';
@@ -54,6 +55,32 @@ void main() {
       expect(read.sendUnavailableReason, 'this one is completed');
     },
   );
+
+  test('logs each link so a developer can copy one from the console', () async {
+    final records = <LogRecord>[];
+    final sub = Logger('PilotInvitations').onRecord.listen(records.add);
+    addTearDown(sub.cancel);
+    Logger.root.level = Level.ALL;
+    final client = clientFor(
+      (_) => http.Response(
+        jsonEncode({
+          'contest_id': contest.value,
+          'can_issue': true,
+          'invitations': [
+            {'participation_id': lee.value, 'link': 'https://s.example/i/abc'},
+          ],
+        }),
+        200,
+        headers: headers,
+      ),
+    );
+    await source.read(client, contest);
+    expect(records, hasLength(1));
+    expect(
+      records.single.message,
+      contains('${lee.value}: https://s.example/i/abc'),
+    );
+  });
 
   test('a contest the server does not have is not synchronized', () async {
     final read = await source.read(

@@ -1,6 +1,21 @@
 import 'package:flutter/foundation.dart';
+import 'package:logging/logging.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_core/soar_score_core.dart';
+
+final _logger = Logger('PilotInvitations');
+
+/// Writes each invitation link to the log, so a developer can copy one from
+/// the console and open it. A link opens a pilot's scoring page, so this is for
+/// debug and profile builds only and a release build logs nothing.
+void logInvitationLinks(Id contestId, Map<String, String> links) {
+  if (kReleaseMode || links.isEmpty) return;
+  final lines = [for (final e in links.entries) '  ${e.key}: ${e.value}'];
+  _logger.info(
+    'Invitation links of contest ${contestId.value} (development builds only):'
+    '\n${lines.join('\n')}',
+  );
+}
 
 /// The invitations a contest has issued, as the cards need them: for each
 /// pilot that has one, the link its QR code carries.
@@ -100,11 +115,13 @@ class ApiPilotInvitationSource implements PilotInvitationSource {
   Future<PilotInvitations> read(ApiClient client, Id contestId) async {
     try {
       final answer = await client.contestInvitations(contestId);
+      final links = {
+        for (final invitation in answer.invitations)
+          invitation.participationId.value: invitation.link,
+      };
+      logInvitationLinks(contestId, links);
       return PilotInvitations(
-        links: {
-          for (final invitation in answer.invitations)
-            invitation.participationId.value: invitation.link,
-        },
+        links: links,
         sendUnavailableReason: answer.canIssue
             ? null
             : answer.cannotIssueReason,
