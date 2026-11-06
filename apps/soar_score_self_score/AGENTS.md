@@ -8,7 +8,7 @@ Participant self-scoring web app: pilots enter their own scores for a contest.
 - `lib/router.dart` — go_router routes per `plan/ui/participant-scoring/participant-scoring.md`; see the self-score page map in the root `AGENTS.md`
 - `lib/pages/` — one file per page
 - `lib/widgets/` — page widgets; `landing_control.dart` picks sheet or autocomplete by landing-table size
-- `lib/data/` — `SelfScoreRepository` (what pages read), its sample implementation and `SelfScoreScope`; pages never read `SampleData` or the API client directly
+- `lib/data/` — `SelfScoreRepository` (what pages read), its API-backed and sample implementations and `SelfScoreScope`; pages never read `SampleData` or the API client directly
 - `lib/models/`, `lib/services/` — view models the pages show, and pure logic (time parsing, landing search)
 - `lib/api_client_provider.dart` — supplies the `soar_score_api` client to pages
 - `test/` — widget and unit tests

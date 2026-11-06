@@ -152,6 +152,75 @@ void main() {
     expect(find.text('Next to score'), findsOneWidget);
   });
 
+  testWidgets('the overview says when scoring is closed', (tester) async {
+    final store = MemoryGuestSessionStore()
+      ..write(
+        GuestSession(
+          contestId: 'spring-open',
+          contestName: 'Spring Open',
+          pilotId: '12',
+          pilotName: 'Jane Smith',
+          token: 't',
+          expiresAt: DateTime.utc(2099),
+        ),
+      );
+    await _pump(tester, store: store, repository: _ClosedRepository());
+    router.go('/contests/spring-open/pilots/12');
+    await tester.pumpAndSettle();
+    expect(find.text('Scoring closed'), findsOneWidget);
+    expect(find.text('Scoring open'), findsNothing);
+  });
+
+  group('a guest session fixes the contest and pilot', () {
+    Future<MemoryGuestSessionStore> signedIn(WidgetTester tester) async {
+      final store = MemoryGuestSessionStore()
+        ..write(
+          GuestSession(
+            contestId: 'spring-open',
+            contestName: 'Spring Open',
+            pilotId: '12',
+            pilotName: 'Jane Smith',
+            token: 'sample-token',
+            expiresAt: DateTime.utc(2099),
+          ),
+        );
+      await _pump(tester, store: store);
+      return store;
+    }
+
+    String path() => router.routeInformationProvider.value.uri.path;
+
+    testWidgets('another contest sends the guest to their own', (tester) async {
+      await signedIn(tester);
+      for (final address in [
+        '/contests/other/results',
+        '/contests/other/team',
+        '/contests/other/pilots/12',
+        '/contests/other/pilots/12/rounds/4',
+      ]) {
+        router.go(address);
+        await tester.pumpAndSettle();
+        expect(path(), '/contests/spring-open/pilots/12', reason: address);
+      }
+    });
+
+    testWidgets('another pilot sends the guest to their own page', (
+      tester,
+    ) async {
+      await signedIn(tester);
+      router.go('/contests/spring-open/pilots/99');
+      await tester.pumpAndSettle();
+      expect(path(), '/contests/spring-open/pilots/12');
+    });
+
+    testWidgets('their own contest pages stay where they are', (tester) async {
+      await signedIn(tester);
+      router.go('/contests/spring-open/results');
+      await tester.pumpAndSettle();
+      expect(path(), '/contests/spring-open/results');
+    });
+  });
+
   group('StringSlotGuestSessionStore', () {
     test('keeps and clears a session', () {
       final slot = _MapSlot();
@@ -381,4 +450,21 @@ void _securityTests() {
     expect(store.read(), isNull);
     expect(slot.value, isNull, reason: 'the stale session is removed');
   });
+}
+
+class _ClosedRepository extends SampleSelfScoreRepository {
+  _ClosedRepository();
+
+  @override
+  Future<PilotOverview> pilotOverview(String contestId, String pilotId) async {
+    final open = await super.pilotOverview(contestId, pilotId);
+    return PilotOverview(
+      contestName: open.contestName,
+      teamName: open.teamName,
+      pilotName: open.pilotName,
+      pilotNumber: open.pilotNumber,
+      rounds: open.rounds,
+      access: ScoringAccess.closed,
+    );
+  }
 }
