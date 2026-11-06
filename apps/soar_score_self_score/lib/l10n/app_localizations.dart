@@ -327,6 +327,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Back to start'**
   String get backToStart;
+
+  /// The contest is taking scores.
+  ///
+  /// In en, this message translates to:
+  /// **'Scoring open'**
+  String get scoringOpen;
+
+  /// Scoring has not opened.
+  ///
+  /// In en, this message translates to:
+  /// **'Scoring not open yet'**
+  String get scoringNotStarted;
+
+  /// The contest is not taking scores now.
+  ///
+  /// In en, this message translates to:
+  /// **'Scoring closed'**
+  String get scoringClosed;
+
+  /// The contest is over.
+  ///
+  /// In en, this message translates to:
+  /// **'Contest completed'**
+  String get scoringCompleted;
 }
 
 class _AppLocalizationsDelegate

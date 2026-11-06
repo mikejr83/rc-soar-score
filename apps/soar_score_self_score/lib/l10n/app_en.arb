@@ -200,5 +200,21 @@
   "backToStart": "Back to start",
   "@backToStart": {
     "description": "Button on a page whose session ended. Goes to the start page, where the person opens their link again."
+  },
+  "scoringOpen": "Scoring open",
+  "@scoringOpen": {
+    "description": "The contest is taking scores."
+  },
+  "scoringNotStarted": "Scoring not open yet",
+  "@scoringNotStarted": {
+    "description": "Scoring has not opened."
+  },
+  "scoringClosed": "Scoring closed",
+  "@scoringClosed": {
+    "description": "The contest is not taking scores now."
+  },
+  "scoringCompleted": "Contest completed",
+  "@scoringCompleted": {
+    "description": "The contest is over."
   }
 }

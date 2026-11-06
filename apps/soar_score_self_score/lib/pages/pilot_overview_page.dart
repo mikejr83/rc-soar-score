@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../data/self_score_scope.dart';
+import '../l10n/app_localizations.dart';
 import '../models/pilot_overview.dart';
 import '../router.dart';
 import '../widgets/connection_indicator.dart';
@@ -80,10 +81,7 @@ class PilotOverviewPage extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const StatusChip(
-                label: 'Scoring open',
-                icon: Icons.lock_open_outlined,
-              ),
+              _AccessChip(access: data.access),
               Text(
                 '${data.rounds.length} rounds',
                 style: theme.textTheme.bodyMedium?.copyWith(color: muted),
@@ -151,5 +149,38 @@ class PilotOverviewPage extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+/// The contest-level scoring state, from the server's access answer.
+class _AccessChip extends StatelessWidget {
+  const _AccessChip({required this.access});
+
+  final ScoringAccess access;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return switch (access) {
+      ScoringAccess.open => StatusChip(
+        label: l10n.scoringOpen,
+        icon: Icons.lock_open_outlined,
+      ),
+      ScoringAccess.notStarted => StatusChip(
+        label: l10n.scoringNotStarted,
+        icon: Icons.schedule,
+        style: StatusChipStyle.quiet,
+      ),
+      ScoringAccess.closed => StatusChip(
+        label: l10n.scoringClosed,
+        icon: Icons.lock_outline,
+        style: StatusChipStyle.quiet,
+      ),
+      ScoringAccess.completed => StatusChip(
+        label: l10n.scoringCompleted,
+        icon: Icons.flag_outlined,
+        style: StatusChipStyle.quiet,
+      ),
+    };
   }
 }
