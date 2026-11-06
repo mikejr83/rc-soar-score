@@ -168,4 +168,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get scoringCompleted => 'Contest completed';
+
+  @override
+  String get endSession => 'End session';
 }

@@ -6,8 +6,8 @@ class GuestSession {
     required this.contestName,
     required this.pilotId,
     required this.pilotName,
-    required this.token,
     required this.expiresAt,
+    this.token,
     this.pilotNumber,
     this.role = 'pilot',
   });
@@ -17,7 +17,7 @@ class GuestSession {
     contestName: json['contestName']! as String,
     pilotId: json['pilotId']! as String,
     pilotName: json['pilotName']! as String,
-    token: json['token']! as String,
+    token: json['token'] as String?,
     pilotNumber: json['pilotNumber'] as int?,
     role: json['role'] as String? ?? 'pilot',
     // A stored session with no readable expiry is refused, not kept for ever.
@@ -32,8 +32,11 @@ class GuestSession {
   /// Null when the contest gives pilots no number.
   final int? pilotNumber;
 
-  /// Sent with every request. Never shown, and never put in an address.
-  final String token;
+  /// Sent as a bearer token when the server gave one in the body (native
+  /// clients and tests). Null on the web, where the session lives in an
+  /// HttpOnly cookie that the page cannot read. Never shown, and never put in
+  /// an address.
+  final String? token;
 
   /// What the link makes the person: `pilot` is the only role in the first
   /// field release. The server decides what the role may see.
@@ -52,7 +55,7 @@ class GuestSession {
     'pilotId': pilotId,
     'pilotName': pilotName,
     'pilotNumber': ?pilotNumber,
-    'token': token,
+    if (token != null) 'token': token,
     'role': role,
     'expiresAt': expiresAt.toUtc().toIso8601String(),
   };

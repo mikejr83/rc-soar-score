@@ -23,6 +23,10 @@ void main() {
     'resolve_invitation_response',
     ResolveInvitationResponse.fromJson,
   );
+  _roundTrips(
+    'resolve_invitation_response_cookie',
+    ResolveInvitationResponse.fromJson,
+  );
   _roundTrips('participant_overview', ParticipantOverviewDto.fromJson);
   _roundTrips('entry_context', ParticipantEntryContextDto.fromJson);
   _roundTrips('submit_request', SubmitParticipantScoreRequest.fromJson);

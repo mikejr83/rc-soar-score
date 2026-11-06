@@ -351,6 +351,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Contest completed'**
   String get scoringCompleted;
+
+  /// Tooltip of the button that ends the guest session and returns to the start page.
+  ///
+  /// In en, this message translates to:
+  /// **'End session'**
+  String get endSession;
 }
 
 class _AppLocalizationsDelegate
