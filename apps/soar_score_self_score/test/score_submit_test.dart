@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:soar_score_self_score/data/sample_data.dart';
 import 'package:soar_score_self_score/data/sample_self_score_repository.dart';
 import 'package:soar_score_self_score/data/self_score_repository.dart';
@@ -10,6 +11,7 @@ import 'package:soar_score_self_score/models/score_submission.dart';
 import 'package:soar_score_self_score/pages/score_entry_page.dart';
 import 'package:soar_score_self_score/services/score_components.dart';
 import 'package:soar_score_self_score/session/guest_session_scope.dart';
+import 'package:soar_score_self_score/session/guest_session_store.dart';
 import 'package:soar_score_self_score/session/key_value_store.dart';
 import 'package:soar_score_self_score/session/score_draft_store.dart';
 
@@ -199,18 +201,72 @@ void main() {
     );
   });
 
-  testWidgets('an ended session refused on submit is dropped', (tester) async {
+  testWidgets('an ended session goes back to start and keeps the draft', (
+    tester,
+  ) async {
+    final drafts = ScoreDraftStore(MemoryKeyValueStore());
     final repository = _ScriptedRepository([
-      const ScoreRejected(code: 'session_invalid', message: 'x'),
+      const ScoreRejected(code: 'session_invalid', message: ''),
     ]);
-    await _pump(tester, repository);
+    tester.view.physicalSize = const Size(800, 2400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final testRouter = GoRouter(
+      initialLocation: '/entry',
+      routes: [
+        GoRoute(path: '/', builder: (_, _) => const Text('start page')),
+        GoRoute(
+          path: '/entry',
+          builder: (_, _) => const ScoreEntryPage(
+            contestId: SampleData.contestId,
+            pilotId: '12',
+            roundId: '4',
+          ),
+        ),
+      ],
+    );
+    await tester.pumpWidget(
+      GuestSessionScope(
+        store: MemoryGuestSessionStore(),
+        child: ScoreDraftScope(
+          store: drafts,
+          child: SelfScoreScope(
+            repository: repository,
+            child: MaterialApp.router(
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              routerConfig: testRouter,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
     await _fillAndSubmit(tester);
     await tester.pumpAndSettle();
 
-    expect(
-      find.text('Your session has ended. Open your invitation link again.'),
-      findsOneWidget,
+    expect(find.text('start page'), findsOneWidget);
+    expect(find.text('Submit score'), findsNothing);
+    final kept = drafts.read(SampleData.contestId, '12', 4);
+    expect(kept, isNotNull);
+    expect(kept!.time, '630.4');
+    expect(kept.pending, isNull);
+  });
+
+  testWidgets('a scored flight clears a stale draft', (tester) async {
+    final drafts = ScoreDraftStore(MemoryKeyValueStore())
+      ..write(
+        SampleData.contestId,
+        '12',
+        4,
+        const ScoreDraft(time: '630.4', height: '45'),
+      );
+    await _pump(
+      tester,
+      _ScriptedRepository([], alreadySubmitted: true),
+      drafts: drafts,
     );
+    expect(find.text('Submitted'), findsOneWidget);
+    expect(drafts.read(SampleData.contestId, '12', 4), isNull);
   });
 
   testWidgets('a flight that already has a score keeps the stored one', (

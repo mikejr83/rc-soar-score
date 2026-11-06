@@ -85,6 +85,13 @@ class _ScoreEntryFormState extends State<ScoreEntryForm> {
     if (_restored) return;
     _restored = true;
     if (widget.data.alreadySubmitted) {
+      // The server has a score, so any draft left from an earlier send that
+      // it did answer is stale.
+      context.scoreDrafts.clear(
+        widget.contestId,
+        widget.pilotId,
+        widget.data.round,
+      );
       _phase = _Phase.accepted;
       return;
     }
@@ -277,7 +284,13 @@ class _ScoreEntryFormState extends State<ScoreEntryForm> {
           _accept(flightScore, details, alreadyThere: true);
         case ScoreRejected(:final code):
           // The server ended the session: drop it so nothing routes from it.
-          if (code == 'session_invalid') sessions.clear();
+          if (code == 'session_invalid') {
+            sessions.clear();
+            // The draft stays stored; opening the link again restores it.
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) context.go(homePath);
+            });
+          }
           // Nothing was stored. The next try is a new attempt with a new id.
           setState(() {
             _pending = null;

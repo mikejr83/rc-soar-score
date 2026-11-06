@@ -117,6 +117,15 @@ void main() {
       expect(result.fields, ['time_flown', 'landing']);
     });
 
+    test('a 401 with no body ends the session instead of queueing', () async {
+      for (final body in ['', '<html>']) {
+        final result = await _repository((_) => _json(body, 401))
+            .submitScore(_submission);
+        expect(result, isA<ScoreRejected>());
+        expect((result as ScoreRejected).code, 'session_invalid');
+      }
+    });
+
     test('a server fault is retryable, not a refusal', () {
       expect(
         _repository((_) => _json('<html>', 503)).submitScore(_submission),
