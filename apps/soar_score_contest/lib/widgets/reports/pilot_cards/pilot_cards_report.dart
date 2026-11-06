@@ -284,6 +284,7 @@ class PilotCardsReport extends DataReportDefinition<PilotCardsData> {
       subtitle: contestLine,
       pages: pages.isEmpty ? const [SizedBox.shrink()] : pages,
       banners: invitationBanners(
+        l10n: context.l10n,
         session: session,
         selected: selected,
         missing: missing,

@@ -69,18 +69,12 @@ void main() {
       clientFor((_) => error(401, 'unauthorized')),
       contest,
     );
-    expect(
-      signedOut.sendUnavailableReason,
-      ApiPilotInvitationSource.signInReason,
-    );
+    expect(signedOut.sendUnavailable, SendUnavailable.signIn);
     final none = await source.read(
       clientFor((_) => error(409, 'invitations_not_available')),
       contest,
     );
-    expect(
-      none.sendUnavailableReason,
-      ApiPilotInvitationSource.notAvailableReason,
-    );
+    expect(none.sendUnavailable, SendUnavailable.serverIssuesNone);
   });
 
   test('other failures read as a failed load, not as no invitations', () async {
@@ -110,10 +104,7 @@ void main() {
         ),
         contest,
       );
-      expect(
-        read.sendUnavailableReason,
-        ApiPilotInvitationSource.unreproducibleReason,
-      );
+      expect(read.sendUnavailable, SendUnavailable.linksUnreproducible);
     },
   );
 
