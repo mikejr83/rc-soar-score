@@ -11,6 +11,7 @@ import '../middleware/error_mapping.dart';
 import '../middleware/failure_rate_limiter.dart';
 import '../middleware/request_id.dart';
 import 'health_handler.dart';
+import 'participant_score_handlers.dart';
 import 'request_body.dart';
 
 final _logger = Logger('ParticipantHandlers');
@@ -37,6 +38,8 @@ Handler buildParticipantHandler(
   required InvitationService? service,
   FailureRateLimiter? limiter,
   Set<String> allowedOrigins = const {},
+  RecalculationService? recalculation,
+  bool publishingEnabled = false,
   DateTime Function()? clock,
 }) {
   final now = clock ?? DateTime.now;
@@ -97,6 +100,14 @@ Handler buildParticipantHandler(
         'participant': context.participant.toJson(),
       }).change(headers: {'cache-control': 'no-store'});
     });
+
+  addParticipantScoreRoutes(
+    session,
+    repository,
+    recalculation: recalculation,
+    publishingEnabled: publishingEnabled,
+    clock: clock,
+  );
 
   // Ends the session in this browser: removes the cookie. Needs no valid
   // session (a dead cookie must be removable); a cookie write still has to

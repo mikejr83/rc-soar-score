@@ -7,6 +7,7 @@ export 'contest_configuration_service.dart';
 export 'contest_details.dart';
 export 'contest_results.dart';
 export 'contest_scores.dart';
+export 'participant_submission.dart';
 export 'contest_activity.dart';
 export 'contest_lifecycle.dart';
 export 'contest_transition_audit.dart';
