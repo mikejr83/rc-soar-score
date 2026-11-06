@@ -8,6 +8,7 @@ import '../enums/score_placeholder_state.dart';
 import '../errors/contest_state_error.dart';
 import '../errors/entity_not_found_error.dart';
 import '../errors/scoring_validation_error.dart';
+import '../errors/sync_constraint_error.dart';
 import '../models/contest/contest.dart';
 import '../models/contest/contest_configuration_revision.dart';
 import '../models/id.dart';

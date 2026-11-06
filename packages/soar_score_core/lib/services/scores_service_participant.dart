@@ -140,17 +140,42 @@ extension ParticipantScoresService on ScoresService {
       clientTime: now,
       actorId: access.guestAccountId,
     );
-    await repository.scoreAttemptRepository.recordAttempt(
-      attempt,
-      placeholder,
-      contest: contest.lifecycleState == LifecycleState.ready
-          ? contest.copyWithState(
-              lifecycleState: LifecycleState.running,
-              updatedAt: now,
-            )
-          : null,
-      metadata: metadata,
-    );
+    try {
+      await repository.scoreAttemptRepository.recordAttempt(
+        attempt,
+        placeholder,
+        contest: contest.lifecycleState == LifecycleState.ready
+            ? contest.copyWithState(
+                lifecycleState: LifecycleState.running,
+                updatedAt: now,
+              )
+            : null,
+        metadata: metadata,
+      );
+    } on SyncConstraintError catch (error) {
+      // A concurrent request with the same id stored its attempt first: this
+      // one is a repeat of it.
+      if (error.kind != SyncConstraintKind.unique) rethrow;
+      final winner = await repository.scoreAttemptRepository
+          .findByClientMutationId(contest.id, clientMutationId);
+      if (winner == null) rethrow;
+      return _participantReplay(context, slot, winner, components);
+    } on StaleRevisionError {
+      // A concurrent request stored a score for the slot first.
+      final current = await repository.scorePlaceholderRepository
+          .findForAssignment(slot.assignment.id);
+      if (current == null || current.scoreRevision == 0) rethrow;
+      throw ParticipantSubmissionRefusal(
+        409,
+        'score_already_submitted',
+        'this flight already has a score',
+        accepted: await _accepted(
+          context,
+          _Slot(slot.assignment, current, round: slot.round),
+          round,
+        ),
+      );
+    }
     return ParticipantSubmission(
       assignmentId: slot.assignment.id,
       round: round,

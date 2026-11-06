@@ -263,6 +263,37 @@ void _tests(SliceBackend backend) {
     expect(attempts, hasLength(1));
   });
 
+  test('concurrent identical submissions store one and agree', () async {
+    final results = await Future.wait([for (var i = 0; i < 4; i++) submit(1)]);
+    expect(results.map((r) => r.$1).where((c) => c == 201), hasLength(1));
+    expect(results.map((r) => r.$1).where((c) => c == 200), hasLength(3));
+    final scores = {for (final r in results) jsonEncode(r.$2['score'])};
+    expect(scores, hasLength(1));
+    final attempts = await repository.scoreAttemptRepository.listForPlaceholder(
+      (await placeholderOf(1, 1)).id,
+    );
+    expect(attempts, hasLength(1));
+    expect(
+      (results.first.$2['score']! as Map)['entered_at'],
+      attempts.single.acceptedAt.toIso8601String(),
+    );
+  });
+
+  test('concurrent submissions with different ids store one', () async {
+    final results = await Future.wait([
+      for (var i = 0; i < 3; i++) submit(1, mutation: 'm-$i'),
+    ]);
+    expect(results.map((r) => r.$1).where((c) => c == 201), hasLength(1));
+    expect(results.map((r) => r.$1).where((c) => c == 409), hasLength(2));
+    for (final r in results.where((r) => r.$1 == 409)) {
+      expect(r.$2['code'], 'score_already_submitted');
+    }
+    final attempts = await repository.scoreAttemptRepository.listForPlaceholder(
+      (await placeholderOf(1, 1)).id,
+    );
+    expect(attempts, hasLength(1));
+  });
+
   test('a request id reused with other data is a mutation_conflict', () async {
     await submit(1);
     final (status, body) = await submit(

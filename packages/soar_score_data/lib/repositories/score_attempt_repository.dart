@@ -1,5 +1,6 @@
 import 'package:soar_score_core/soar_score_core.dart' as core;
 
+import '../sync/drift_sync_acceptor_store.dart' show asConstraintError;
 import 'drift_repository.dart';
 
 /// Score attempts in the database; append-only.
@@ -78,19 +79,31 @@ class ScoreAttemptRepository extends DriftRepository
     if (placeholder.id != attempt.scorePlaceholderId) {
       throw ArgumentError('the placeholder is not the attempt\'s');
     }
-    return unitOfWork.run((context) async {
-      await context.append(attempt, metadata: metadata);
-      await context.save(
-        placeholder,
-        metadata: metadata.forPart(placeholder.id.value),
-      );
-      if (contest != null) {
+    return _translated(
+      () => unitOfWork.run((context) async {
+        await context.append(attempt, metadata: metadata);
         await context.save(
-          contest,
-          metadata: metadata.forPart(contest.id.value),
+          placeholder,
+          metadata: metadata.forPart(placeholder.id.value),
         );
-      }
-      return attempt;
-    });
+        if (contest != null) {
+          await context.save(
+            contest,
+            metadata: metadata.forPart(contest.id.value),
+          );
+        }
+        return attempt;
+      }),
+    );
+  }
+
+  /// Runs [body], turning a broken unique rule (two requests with one client
+  /// mutation id) into a `SyncConstraintError` the service can answer.
+  Future<T> _translated<T>(Future<T> Function() body) async {
+    try {
+      return await body();
+    } on Object catch (error) {
+      throw asConstraintError(error) ?? error;
+    }
   }
 }
