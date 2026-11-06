@@ -38,8 +38,6 @@ Handler buildParticipantHandler(
   required InvitationService? service,
   FailureRateLimiter? limiter,
   Set<String> allowedOrigins = const {},
-  RecalculationService? recalculation,
-  bool publishingEnabled = false,
   DateTime Function()? clock,
 }) {
   final now = clock ?? DateTime.now;
@@ -101,13 +99,7 @@ Handler buildParticipantHandler(
       }).change(headers: {'cache-control': 'no-store'});
     });
 
-  addParticipantScoreRoutes(
-    session,
-    repository,
-    recalculation: recalculation,
-    publishingEnabled: publishingEnabled,
-    clock: clock,
-  );
+  addParticipantScoreRoutes(session, repository, clock: clock);
 
   // Ends the session in this browser: removes the cookie. Needs no valid
   // session (a dead cookie must be removable); a cookie write still has to

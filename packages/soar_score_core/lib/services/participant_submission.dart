@@ -2,18 +2,17 @@ import 'package:equatable/equatable.dart';
 
 import '../enums/authority.dart';
 import '../models/id.dart';
-import '../models/scores/official_score.dart';
-import '../models/scores/score_placeholder.dart';
 import 'calculated_flight.dart';
 
-/// A pilot's score as stored: the official score that came from the pilot's
-/// own submission, with what the participant is shown about it.
+/// A score as the participant is shown it: the pilot's own preliminary
+/// submission, or the director's official score that stands over it.
 class ParticipantSubmission extends Equatable {
   const ParticipantSubmission({
     required this.assignmentId,
     required this.round,
-    required this.officialScore,
-    required this.placeholder,
+    required this.components,
+    required this.revision,
+    required this.enteredAt,
     required this.calculated,
     required this.authority,
     this.nextRound,
@@ -24,12 +23,19 @@ class ParticipantSubmission extends Equatable {
 
   /// The ordinal of the round the score is for.
   final int round;
-  final OfficialScore officialScore;
-  final ScorePlaceholder placeholder;
+
+  /// The components as submitted (or as the director entered them).
+  final Map<String, Object?> components;
+
+  /// The slot's score revision after this score.
+  final int revision;
+
+  /// When the score was accepted.
+  final DateTime enteredAt;
   final CalculatedFlight calculated;
 
-  /// Who made the stored score: [Authority.participant] for the pilot's own
-  /// submission, [Authority.director] when the director entered it first.
+  /// Who made the score: [Authority.participant] for the pilot's own
+  /// preliminary submission, [Authority.director] for an official score.
   final Authority authority;
 
   /// The next round the pilot has to score, or null after the last one.
@@ -43,8 +49,9 @@ class ParticipantSubmission extends Equatable {
   List<Object?> get props => [
     assignmentId,
     round,
-    officialScore,
-    placeholder,
+    components,
+    revision,
+    enteredAt,
     calculated,
     authority,
     nextRound,

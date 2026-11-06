@@ -1,3 +1,4 @@
+import '../models/contest/contest.dart';
 import '../models/id.dart';
 import '../models/scores/score_attempt.dart';
 import '../models/scores/score_placeholder.dart';
@@ -34,11 +35,15 @@ abstract interface class ScoreAttemptRepository {
   /// transaction, so the placeholder never shows a state its attempts do not
   /// back.
   ///
+  /// With [contest], the contest is stored in the same transaction (the
+  /// first accepted score moves a `Ready` contest to `Running`).
+  ///
   /// Throws an `ArgumentError` if [placeholder] is not the attempt's, and a
   /// `StaleRevisionError` if it was read at an older revision.
   Future<ScoreAttempt> recordAttempt(
     ScoreAttempt attempt,
     ScorePlaceholder placeholder, {
+    Contest? contest,
     required MutationMetadata metadata,
   });
 }

@@ -49,6 +49,7 @@ class ScoreAttemptRepository extends DriftRepository
   Future<core.ScoreAttempt> recordAttempt(
     core.ScoreAttempt attempt,
     core.ScorePlaceholder placeholder, {
+    core.Contest? contest,
     required core.MutationMetadata metadata,
   }) {
     if (placeholder.id != attempt.scorePlaceholderId) {
@@ -60,6 +61,12 @@ class ScoreAttemptRepository extends DriftRepository
         placeholder,
         metadata: metadata.forPart(placeholder.id.value),
       );
+      if (contest != null) {
+        await context.save(
+          contest,
+          metadata: metadata.forPart(contest.id.value),
+        );
+      }
       return attempt;
     });
   }

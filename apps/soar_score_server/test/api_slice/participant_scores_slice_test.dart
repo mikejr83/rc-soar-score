@@ -199,25 +199,57 @@ void _tests(SliceBackend backend) {
       expect(await contestState(), 'Running');
 
       final placeholder = await placeholderOf(1, 1);
-      expect(placeholder.state, core.ScorePlaceholderState.official);
+      expect(placeholder.state, core.ScorePlaceholderState.submitted);
+      expect(placeholder.scoreRevision, 1);
       final attempts = await repository.scoreAttemptRepository
           .listForPlaceholder(placeholder.id);
       expect(attempts, hasLength(1));
       expect(attempts.single.authority, core.Authority.participant);
       expect(attempts.single.invitationId, isNotNull);
       expect(attempts.single.clientMutationId, 'm-1');
-      final official = (await repository.officialScoreRepository
-          .currentForPlaceholder(placeholder.id))!;
-      expect(official.scoreAttemptId, attempts.single.id);
-      expect(official.setBy, attempts.single.actorId);
+      expect(attempts.single.rawComponents, _goodScore);
+      // Preliminary: no official score exists.
+      expect(
+        await repository.officialScoreRepository.currentForPlaceholder(
+          placeholder.id,
+        ),
+        isNull,
+      );
     },
   );
 
-  test('the results are recalculated after a submission', () async {
+  test('a submission stays out of the official scores', () async {
     await submit(1);
-    final results = await api.expectOk('GET', '/contests/$_contestId/results');
-    expect(results['as_of_round'], 1);
-    expect((results['standings']! as List), isNotEmpty);
+    final scores = await api.expectOk('GET', '/contests/$_contestId/scores');
+    final slots = (scores['scores']! as List).cast<Map<String, Object?>>();
+    expect(slots.where((s) => s['official_score'] != null), isEmpty);
+    expect(
+      slots.where((s) => (s['placeholder']! as Map)['state'] == 'Submitted'),
+      hasLength(1),
+    );
+  });
+
+  test('the director can enter the official score over a submission', () async {
+    final (_, first) = await submit(1);
+    final slot = assignments.singleWhere(
+      (a) =>
+          a['scheduled_round_id'] == rounds[0]['id'] &&
+          a['contest_participation_id'] == _participationId(1),
+    );
+    await api.expectOk(
+      'POST',
+      '/contests/$_contestId/assignments/${slot['id']}/scores',
+      status: 201,
+      body: {
+        'client_mutation_id': 'director-1',
+        'base_score_revision': (first['score']! as Map)['revision'],
+        'components': {..._goodScore, 'time_flown': 500},
+        'reason': 'Checked the logger',
+      },
+    );
+    final (status, body) = await submit(1, mutation: 'm-2');
+    expect(status, 409);
+    expect((body['accepted_score']! as Map)['state'], 'official');
   });
 
   test('a repeat of the same request answers the first acceptance', () async {

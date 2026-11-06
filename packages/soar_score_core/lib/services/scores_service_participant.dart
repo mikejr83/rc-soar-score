@@ -3,23 +3,20 @@ part of 'scores_service.dart';
 /// A pilot's own score submission (`POST /self-scoring/rounds/{round}/scores`),
 /// on top of the checks and the store of a director's entry.
 extension ParticipantScoresService on ScoresService {
-  /// The reason stored with a score the pilot submitted.
-  static const String participantReason = 'Entered by the pilot';
-
-  /// Stores the score the pilot of [access] submits for [round].
+  /// Stores the score the pilot of [access] submits for [round], as a
+  /// preliminary score.
   ///
   /// The pilot and the slot come from [access] and the current matrix, never
-  /// from the request. The submission becomes the slot's first score: it is
-  /// stored like a director's entry (attempt, official score, placeholder and
-  /// the move of a `Ready` contest to `Running`, in one transaction) but with
-  /// authority `Participant`, the guest as actor and the invitation as access
-  /// reference. A director's later entry for the slot is a correction on top
-  /// of it, so the director's value wins and the pilot's stays in the history.
+  /// from the request. The submission is stored as a score attempt with
+  /// authority `Participant` (the guest as actor, the invitation as access
+  /// reference) and the slot becomes `Submitted`; no official score is made,
+  /// so official results and the public site do not see it. A `Ready`
+  /// contest moves to `Running` in the same transaction. The director's own
+  /// entry for the slot is what makes it official.
   ///
   /// A repeat of [clientMutationId] with the same components returns the
   /// first answer ([ParticipantSubmission.replayed]); with other components
-  /// it is a `mutation_conflict`. The recalculation and the publish that
-  /// follow are the caller's.
+  /// it is a `mutation_conflict`.
   ///
   /// Throws a [ParticipantSubmissionRefusal] for a stale matrix, a round that
   /// is not the pilot's next, a slot that already has a score, a rejected
@@ -42,7 +39,7 @@ extension ParticipantScoresService on ScoresService {
     final earlier = await repository.scoreAttemptRepository
         .findByClientMutationId(contest.id, clientMutationId);
     if (earlier != null) {
-      return _participantReplay(contest, context, slot, earlier, components);
+      return _participantReplay(context, slot, earlier, components);
     }
 
     final revision = await repository.matrixRevisionRepository.findById(
@@ -89,28 +86,16 @@ extension ParticipantScoresService on ScoresService {
       );
     }
 
-    final _Prepared prepared;
-    try {
-      prepared = await _prepare(
-        contest,
-        context,
-        slot.assignment.id,
-        clientMutationId: clientMutationId,
-        baseScoreRevision: 0,
-        components: components,
-        reason: participantReason,
-        actorId: access.guestAccountId,
-        metadata: MutationMetadata(
-          clientMutationId: clientMutationId,
-          authority: Authority.participant,
-          clientTime: _clock(),
-          actorId: access.guestAccountId,
-        ),
-        moveContest: true,
-        authority: Authority.participant,
-        invitationId: access.invitation.id,
-        sourceDevice: sourceDevice,
+    _requireScoringAllowed(contest);
+    if (slot.placeholder.isLocked) {
+      throw ContestStateError(
+        'score_locked',
+        'this score is locked; ask the director',
       );
+    }
+    final CalculatedFlight calculated;
+    try {
+      calculated = await _calculate(context, components);
     } on ScoringValidationError catch (error) {
       throw ParticipantSubmissionRefusal(
         400,
@@ -119,21 +104,59 @@ extension ParticipantScoresService on ScoresService {
         fieldErrors: _issueFieldErrors(error.issues),
       );
     }
-    final recorded = await repository.officialScoreRepository.recordEntry(
-      prepared.entry!,
-      metadata: MutationMetadata(
-        clientMutationId: clientMutationId,
-        authority: Authority.participant,
-        clientTime: _clock(),
-        actorId: access.guestAccountId,
-      ),
+
+    // The pilot's score is preliminary: an attempt and a `Submitted` slot,
+    // no official score. The director's entry makes it official.
+    final now = _clock();
+    final attempt = ScoreAttempt(
+      id: _newId(),
+      contestId: contest.id,
+      scorePlaceholderId: slot.placeholder.id,
+      configRevisionId: context.revision.id,
+      matrixRevisionId: slot.assignment.matrixRevisionId,
+      rawComponents: components,
+      actorId: access.guestAccountId,
+      authority: Authority.participant,
+      invitationId: access.invitation.id,
+      sourceDevice: sourceDevice,
+      clientMutationId: clientMutationId,
+      baseScoreRevision: 0,
+    );
+    final placeholder = ScorePlaceholder(
+      id: slot.placeholder.id,
+      contestId: contest.id,
+      contestParticipationId: slot.placeholder.contestParticipationId,
+      assignmentId: slot.placeholder.assignmentId,
+      state: ScorePlaceholderState.submitted,
+      scoreRevision: 1,
+      lockedBy: slot.placeholder.lockedBy,
+      lockedAt: slot.placeholder.lockedAt,
+      revision: slot.placeholder.revision,
+    );
+    final metadata = MutationMetadata(
+      clientMutationId: clientMutationId,
+      authority: Authority.participant,
+      clientTime: now,
+      actorId: access.guestAccountId,
+    );
+    await repository.scoreAttemptRepository.recordAttempt(
+      attempt,
+      placeholder,
+      contest: contest.lifecycleState == LifecycleState.ready
+          ? contest.copyWithState(
+              lifecycleState: LifecycleState.running,
+              updatedAt: now,
+            )
+          : null,
+      metadata: metadata,
     );
     return ParticipantSubmission(
       assignmentId: slot.assignment.id,
       round: round,
-      officialScore: recorded.officialScore,
-      placeholder: recorded.placeholder,
-      calculated: prepared.calculated!,
+      components: components,
+      revision: 1,
+      enteredAt: _attemptTime(attempt),
+      calculated: calculated,
       authority: Authority.participant,
       nextRound: (await _nextParticipantRound(access, round)).after,
     );
@@ -199,19 +222,13 @@ extension ParticipantScoresService on ScoresService {
 
   /// The first answer to a mutation id that was stored before.
   Future<ParticipantSubmission> _participantReplay(
-    Contest contest,
     _Configuration context,
     _Slot slot,
     ScoreAttempt earlier,
     Map<String, Object?> components,
   ) async {
-    final official =
-        (await repository.officialScoreRepository.listForPlaceholder(
-          slot.placeholder.id,
-        )).where((score) => score.scoreAttemptId == earlier.id).firstOrNull;
     if (earlier.scorePlaceholderId != slot.placeholder.id ||
         earlier.authority != Authority.participant ||
-        official == null ||
         !_sameComponents(earlier.rawComponents, components)) {
       throw ParticipantSubmissionRefusal(
         409,
@@ -222,32 +239,55 @@ extension ParticipantScoresService on ScoresService {
     return ParticipantSubmission(
       assignmentId: slot.assignment.id,
       round: slot.round,
-      officialScore: official,
-      placeholder: slot.placeholder,
-      calculated: await _calculate(context, official.components),
+      components: earlier.rawComponents,
+      revision: 1,
+      enteredAt: _attemptTime(earlier),
+      calculated: await _calculate(context, earlier.rawComponents),
       authority: Authority.participant,
       replayed: true,
     );
   }
 
-  /// The score now official on the slot, for `score_already_submitted`.
+  /// The score that stands on the slot, for `score_already_submitted`: the
+  /// director's official score when there is one, else the pilot's attempt.
   Future<ParticipantSubmission> _accepted(
     _Configuration context,
     _Slot slot,
     int round,
   ) async {
-    final official = (await repository.officialScoreRepository
-        .currentForPlaceholder(slot.placeholder.id))!;
-    final attempt = await repository.scoreAttemptRepository.findById(
-      official.scoreAttemptId,
-    );
+    final official = await repository.officialScoreRepository
+        .currentForPlaceholder(slot.placeholder.id);
+    if (official != null) {
+      return ParticipantSubmission(
+        assignmentId: slot.assignment.id,
+        round: round,
+        components: official.components,
+        revision: official.scoreRevision,
+        enteredAt: official.setAt,
+        calculated: await _calculate(context, official.components),
+        authority: Authority.director,
+      );
+    }
+    final attempt = (await repository.scoreAttemptRepository
+        .latestForPlaceholder(slot.placeholder.id))!;
     return ParticipantSubmission(
       assignmentId: slot.assignment.id,
       round: round,
-      officialScore: official,
-      placeholder: slot.placeholder,
-      calculated: await _calculate(context, official.components),
-      authority: attempt?.authority ?? Authority.director,
+      components: attempt.rawComponents,
+      revision: slot.placeholder.scoreRevision,
+      enteredAt: _attemptTime(attempt),
+      calculated: await _calculate(context, attempt.rawComponents),
+      authority: attempt.authority,
+    );
+  }
+
+  /// When [attempt] was accepted: the time its UUIDv7 id was made, which the
+  /// service sets when it accepts the attempt.
+  DateTime _attemptTime(ScoreAttempt attempt) {
+    final hex = attempt.id.value.replaceAll('-', '').substring(0, 12);
+    return DateTime.fromMillisecondsSinceEpoch(
+      int.parse(hex, radix: 16),
+      isUtc: true,
     );
   }
 

@@ -14,7 +14,7 @@ final _logger = Logger('ParticipantScores');
 /// The pilot's score submission, added to the guest-session router of the
 /// participant routes (`/api/v1/self-scoring`):
 ///
-/// - `POST /rounds/{round}/scores` stores the score the pilot of the session
+/// - `POST /rounds/{round}/scores` stores the preliminary score the pilot of the session
 ///   enters for one of their own rounds (201 with a
 ///   [SubmitParticipantScoreResponse]). The pilot and the slot come from the
 ///   session, never from the body. A repeat of the same `client_mutation_id`
@@ -24,21 +24,15 @@ final _logger = Logger('ParticipantScores');
 ///   `stale_matrix`, `out_of_order` and `mutation_conflict` (409). A closed
 ///   or locked contest is 409 `scoring_closed` / `contest_locked`.
 ///
-/// After a stored score the results are recalculated once, and on a server
-/// that publishes the contest's public update mode decides whether the score
-/// reaches the public projection; a failed recalculation or publish is
-/// logged and never fails the submission (the score is stored).
+/// The score is preliminary: an attempt and a `Submitted` slot, no official
+/// score, so the official results and the public projection are unchanged
+/// and nothing is recalculated or published.
 void addParticipantScoreRoutes(
   Router router,
   Repository repository, {
-  RecalculationService? recalculation,
-  bool publishingEnabled = false,
   DateTime Function()? clock,
 }) {
   final scores = ScoresService(repository, clock: clock);
-  final recalculationService =
-      recalculation ?? RecalculationService(ResultsService(repository));
-  final publicUpdates = PublicUpdateService(repository);
 
   router.post('/rounds/<round>/scores', (Request request, String round) async {
     final principal = requireParticipant(request);
@@ -60,35 +54,6 @@ void addParticipantScoreRoutes(
         components: body.components,
         sourceDevice: _sourceDevice(request),
       );
-      // A repeat runs both again, so a request that stopped after the store
-      // is finished by its retry (both are safe to repeat).
-      {
-        final warning = await recalculationService.recalculateAfterEntry(
-          principal.contestId,
-        );
-        if (warning != null) {
-          _logger.info(
-            'Recalculation warning after a participant score in contest '
-            '${principal.contestId.value}: $warning',
-          );
-        }
-        if (publishingEnabled) {
-          try {
-            await publicUpdates.afterScoreEntry(
-              principal.contestId,
-              assignmentId: stored.assignmentId,
-              entryMutationId: body.clientMutationId,
-            );
-          } on Object catch (error, stackTrace) {
-            _logger.warning(
-              'Public update after a participant score failed; the last '
-              'projection stays public',
-              error,
-              stackTrace,
-            );
-          }
-        }
-      }
       final name = await _pilotName(repository, principal);
       return _json(
         SubmitParticipantScoreResponse(
@@ -150,10 +115,10 @@ ParticipantScoreDto _scoreDto(ParticipantSubmission stored, String pilotName) {
     state: byPilot
         ? ParticipantScoreState.submitted
         : ParticipantScoreState.official,
-    revision: stored.placeholder.scoreRevision,
-    components: stored.officialScore.components,
+    revision: stored.revision,
+    components: stored.components,
     enteredBy: byPilot ? pilotName : 'Director',
-    enteredAt: stored.officialScore.setAt,
+    enteredAt: stored.enteredAt,
     flightScore: stored.calculated.rawScore,
     rawScore: stored.calculated.rawScore,
   );

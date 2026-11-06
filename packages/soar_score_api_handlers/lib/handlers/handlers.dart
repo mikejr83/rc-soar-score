@@ -94,8 +94,6 @@ createHandlers(
       service: invitations,
       limiter: invitationRateLimiter,
       allowedOrigins: corsAllowedOrigins,
-      recalculation: recalculation,
-      publishingEnabled: publishingEnabled,
     ),
   );
 }
