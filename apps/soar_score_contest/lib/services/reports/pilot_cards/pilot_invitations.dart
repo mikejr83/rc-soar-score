@@ -12,7 +12,12 @@ class PilotInvitations {
     this.links = const {},
     this.synchronized = true,
     this.sendUnavailableReason,
+    this.loadFailed = false,
   });
+
+  /// True when the invitations could not be read. The report stays printable
+  /// (cards without QR codes) and offers a retry.
+  final bool loadFailed;
 
   /// The invitation link by participation id.
   final Map<String, String> links;
@@ -94,6 +99,9 @@ class ApiPilotInvitationSource implements PilotInvitationSource {
 
   static const notAvailableReason =
       'This server doesn’t issue invitations, so QR codes can’t be made.';
+  static const unreproducibleReason =
+      'Some invitations can’t be shown as QR codes because the server’s '
+      'invitation secret changed after they were issued.';
   static const signInReason = 'Sign in to send invitations.';
 
   @override
@@ -105,9 +113,11 @@ class ApiPilotInvitationSource implements PilotInvitationSource {
           for (final invitation in answer.invitations)
             invitation.participationId.value: invitation.link,
         },
-        sendUnavailableReason: answer.canIssue
+        sendUnavailableReason: !answer.canIssue
+            ? answer.cannotIssueReason
+            : answer.unreproducibleParticipationIds.isEmpty
             ? null
-            : answer.cannotIssueReason,
+            : unreproducibleReason,
       );
     } on ApiHttpError catch (error) {
       switch (error.statusCode) {
@@ -120,7 +130,9 @@ class ApiPilotInvitationSource implements PilotInvitationSource {
             sendUnavailableReason: notAvailableReason,
           );
       }
-      rethrow;
+      return const PilotInvitations(loadFailed: true);
+    } on ApiException {
+      return const PilotInvitations(loadFailed: true);
     }
   }
 
@@ -152,9 +164,12 @@ enum InvitationPhase {
   /// Sent, and the cards now have their QR codes.
   sent,
 
-  /// Sent, but the invitations could not be read afterwards, so the cards do
-  /// not show the QR codes yet. Sending again would only repeat the emails.
+  /// Created, but the invitations could not be read afterwards, so the cards
+  /// do not show the QR codes yet. Creating them again is not needed.
   sentNotLoaded,
+
+  /// The invitations could not be read when the report opened.
+  loadFailed,
 }
 
 /// The invitations of one open report and the send in progress. The report's
@@ -165,14 +180,17 @@ class PilotInvitationSession extends ChangeNotifier {
     required this.client,
     required this.contestId,
     required PilotInvitations initial,
-  }) : _invitations = initial;
+  }) : _invitations = initial,
+       _phase = initial.loadFailed
+           ? InvitationPhase.loadFailed
+           : InvitationPhase.idle;
 
   final PilotInvitationSource source;
   final ApiClient client;
   final Id contestId;
 
   PilotInvitations _invitations;
-  InvitationPhase _phase = InvitationPhase.idle;
+  InvitationPhase _phase;
   bool _disposed = false;
 
   PilotInvitations get invitations => _invitations;
@@ -206,14 +224,21 @@ class PilotInvitationSession extends ChangeNotifier {
     if (sending) {
       return false;
     }
+    final opening = _phase == InvitationPhase.loadFailed;
     _set(InvitationPhase.sending);
-    return _load(InvitationPhase.sent, InvitationPhase.sentNotLoaded);
+    return opening
+        ? _load(InvitationPhase.idle, InvitationPhase.loadFailed)
+        : _load(InvitationPhase.sent, InvitationPhase.sentNotLoaded);
   }
 
   Future<bool> _load(InvitationPhase ok, InvitationPhase failed) async {
     try {
       final fresh = await source.read(client, contestId);
       if (_disposed) {
+        return false;
+      }
+      if (fresh.loadFailed) {
+        _set(failed);
         return false;
       }
       _invitations = fresh;

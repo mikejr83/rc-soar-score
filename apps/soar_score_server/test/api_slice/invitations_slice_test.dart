@@ -784,6 +784,127 @@ void _tests(SliceBackend backend) {
       expect((body['error']! as Map)['code'], 'invitations_not_issuable');
     });
 
+    test('a batch that fails after its first write issues nothing', () async {
+      await configureAndAddPilots();
+      var n = 0;
+      core.Id next() => core.Id.parse(
+        '019c0000-0000-7000-8000-0000000003${(n++).toString().padLeft(2, '0')}',
+      );
+      // issueMany asks for ids in this order: invitation 1, its event,
+      // invitation 2, its event. Occupy the second event's id so the second
+      // audit write is refused, after the first invitation was written.
+      final collidingEvent = core.Id.parse(
+        '019c0000-0000-7000-8000-000000000303',
+      );
+      await repository.auditEventRepository.append(
+        core.AuditEvent(
+          id: collidingEvent,
+          entityType: 'Contest',
+          entityId: core.Id.parse(_contestId),
+          contestId: core.Id.parse(_contestId),
+          action: core.AuditAction.invitationIssued,
+          authority: core.Authority.director,
+          resultingRevision: 1,
+          serverTimestamp: clock,
+        ),
+      );
+      final failing = core.InvitationService(
+        repository,
+        core.InvitationCodec.fromText(_secret),
+        clock: () => clock,
+        newId: next,
+      );
+      await expectLater(
+        failing.issueMany(
+          contestId: core.Id.parse(_contestId),
+          participationIds: [
+            core.Id.parse(_participationId),
+            core.Id.parse(_otherParticipationId),
+          ],
+          issuedBy: api.director,
+          requestId: 'req-x',
+        ),
+        throwsA(isA<core.AlreadyStoredError>()),
+      );
+      expect(
+        await repository.invitationRepository.listForContest(
+          core.Id.parse(_contestId),
+        ),
+        isEmpty,
+      );
+      final events = await repository.auditEventRepository.listForContest(
+        core.Id.parse(_contestId),
+      );
+      expect(
+        events.where((e) => e.entityType == 'Invitation'),
+        isEmpty,
+        reason: 'the first invitation\'s event went with it',
+      );
+    });
+
+    test('removing an invited pilot works and keeps a revoked event', () async {
+      await configureAndAddPilots();
+      final (_, issued) = await director(
+        'POST',
+        body: issueBody([_participationId]),
+      );
+      expect(issued['issued_count'], 1);
+      final stored = (await repository.invitationRepository.listForContest(
+        core.Id.parse(_contestId),
+      )).single;
+
+      await api.expectOk(
+        'DELETE',
+        '/contests/$_contestId/participations/$_participationId',
+      );
+
+      expect(
+        await repository.invitationRepository.listForContest(
+          core.Id.parse(_contestId),
+        ),
+        isEmpty,
+      );
+      final events = await repository.auditEventRepository.listForContest(
+        core.Id.parse(_contestId),
+      );
+      expect(
+        events.where(
+          (e) =>
+              e.entityId == stored.id &&
+              e.action == core.AuditAction.invitationRevoked,
+        ),
+        hasLength(1),
+      );
+      // The old link no longer opens.
+      final link = (links(issued).single['link']! as String).split('/').last;
+      expect((await resolve(link)).$1, 404);
+    });
+
+    test(
+      'after the secret changes the links are reported, not served',
+      () async {
+        await configureAndAddPilots();
+        await director('POST', body: issueBody([_participationId]));
+        final rotated = createServerHandler(
+          api.database,
+          authMiddleware: fixedPrincipal(Principal(accountId: api.director)),
+          invitationSecret: 'a-different-secret-that-is-32-bytes-long!!',
+        );
+        var (status, body) = await director('GET', as: rotated);
+        expect(status, 200);
+        expect(links(body), isEmpty);
+        expect(body['unreproducible_participation_ids'], [_participationId]);
+
+        (status, body) = await director(
+          'POST',
+          body: issueBody([_participationId], 'req-9'),
+          as: rotated,
+        );
+        expect(status, 409);
+        expect((body['error']! as Map)['code'], 'invitation_link_unavailable');
+      },
+    );
+
     test('only the director may list or issue', () async {
       await configureAndAddPilots();
       for (final (method, body) in [

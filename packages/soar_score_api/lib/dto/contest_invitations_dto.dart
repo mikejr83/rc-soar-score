@@ -48,6 +48,7 @@ class ContestInvitationsDto {
     this.cannotIssueCode,
     this.cannotIssueReason,
     this.invitations = const [],
+    this.unreproducibleParticipationIds = const [],
   });
 
   factory ContestInvitationsDto.fromJson(Map<String, dynamic> json) =>
@@ -66,6 +67,11 @@ class ContestInvitationsDto {
 
   /// The invitations that are active now, one per participation at most.
   final List<ContestInvitationDto> invitations;
+
+  /// Participations whose active invitation cannot be shown as a link
+  /// because the server's invitation secret changed after it was issued. A
+  /// card for them cannot carry a working QR code.
+  final List<Id> unreproducibleParticipationIds;
 
   Map<String, dynamic> toJson() => _$ContestInvitationsDtoToJson(this);
 }

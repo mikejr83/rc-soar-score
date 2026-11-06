@@ -118,9 +118,9 @@ jobs:
         # run them locally with scripts/e2e.ps1.
         run: melos test -c 3
 
-      - name: Data package tests against PostgreSQL
+      - name: Data package and server slice tests against PostgreSQL
         # Spin up a throwaway postgres:17 container, run the data package
-        # suite against it (SQLite + PostgreSQL groups), then remove the
+        # suite and the server's API slice tests against it (SQLite + PostgreSQL groups), then remove the
         # container even when the tests fail. Without POSTGRES_PASSWORD the
         # PostgreSQL group is skipped, which is not a pass.
         run: bash scripts/test-postgres.sh

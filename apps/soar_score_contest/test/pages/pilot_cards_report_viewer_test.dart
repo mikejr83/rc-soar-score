@@ -25,6 +25,7 @@ class _FakeInvitations implements PilotInvitationSource {
     Set<String>? invited,
     this.fail = false,
     this.failRead = false,
+    this.failReadAlways = false,
   }) : _invited = {...?invited};
 
   final Set<String> _invited;
@@ -32,12 +33,15 @@ class _FakeInvitations implements PilotInvitationSource {
 
   /// Reading fails after the send worked.
   bool failRead;
+
+  /// Reading always fails.
+  bool failReadAlways;
   int sends = 0;
   List<Id> lastSent = const [];
 
   @override
   Future<PilotInvitations> read(ApiClient client, Id contestId) async {
-    if (failRead && sends > 0) {
+    if (failReadAlways || (failRead && sends > 0)) {
       throw StateError('read failed');
     }
     return PilotInvitations(
@@ -268,6 +272,9 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Send invitations?'), findsOneWidget);
     expect(find.textContaining('4 QR codes'), findsOneWidget);
+    // Issuing sends no email, so the dialog and the result must not say so.
+    expect(find.textContaining('Nobody is emailed'), findsOneWidget);
+    expect(find.textContaining('also emailed'), findsNothing);
     await tester.tap(find.byKey(const ValueKey('cards-send-confirm')));
     await tester.pumpAndSettle();
 
@@ -275,7 +282,7 @@ void main() {
     expect(source.lastSent, hasLength(4));
     expect(find.byType(QrCodeView), findsNWidgets(4));
     expect(
-      find.textContaining('Invitations sent.', findRichText: true),
+      find.textContaining('QR codes created.', findRichText: true),
       findsOneWidget,
     );
     expect(
@@ -298,11 +305,11 @@ void main() {
 
       expect(source.sends, 1);
       expect(
-        find.textContaining('Invitations were sent.', findRichText: true),
+        find.textContaining('QR codes were created.', findRichText: true),
         findsOneWidget,
       );
       expect(
-        find.textContaining('could not be sent', findRichText: true),
+        find.textContaining('could not be created', findRichText: true),
         findsNothing,
       );
       // Nothing offers to send again; the director can load the codes.
@@ -317,6 +324,40 @@ void main() {
       expect(find.byType(QrCodeView), findsNWidgets(4));
     },
   );
+
+  testWidgets('cards still print when the invitations cannot be read', (
+    tester,
+  ) async {
+    final source = _FakeInvitations(failReadAlways: true);
+    PilotInvitationSources.current = source;
+    final printer = FakeReportPrinter(ReportPrintResult.sent);
+    await _pump(tester, printer: printer);
+
+    expect(find.byType(QrCodeView), findsNothing);
+    expect(
+      find.byKey(const ValueKey('cards-banner-load-failed')),
+      findsOneWidget,
+    );
+    expect(find.text('Scan to enter scores'), findsNothing);
+
+    await tester.tap(find.byKey(const ValueKey('viewer-print')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('cards-reminder-dialog')), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('cards-reminder-without')));
+    await tester.pumpAndSettle();
+    expect(printer.printed, isNotEmpty);
+
+    source.failReadAlways = false;
+    await tester.tap(find.byKey(const ValueKey('cards-banner-load-retry')));
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const ValueKey('cards-banner-load-failed')),
+      findsNothing,
+    );
+    // Read now, nobody has an invitation yet: the usual banner.
+    expect(find.byKey(const ValueKey('cards-banner-missing')), findsOneWidget);
+  });
 
   testWidgets('printing waits for the codes after a send that was not read', (
     tester,
@@ -349,7 +390,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      find.textContaining('Invitations could not be sent.', findRichText: true),
+      find.textContaining('QR codes could not be created.', findRichText: true),
       findsOneWidget,
     );
     expect(find.byType(QrCodeView), findsNothing);
@@ -622,7 +663,7 @@ void main() {
       expect(printer.printed, isEmpty);
       expect(
         find.textContaining(
-          'Invitations could not be sent.',
+          'QR codes could not be created.',
           findRichText: true,
         ),
         findsOneWidget,

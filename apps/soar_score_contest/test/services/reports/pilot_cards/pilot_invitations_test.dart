@@ -83,12 +83,39 @@ void main() {
     );
   });
 
-  test('other failures are not hidden', () async {
-    await expectLater(
-      source.read(clientFor((_) => error(500, 'internal')), contest),
-      throwsA(isA<ApiHttpError>()),
+  test('other failures read as a failed load, not as no invitations', () async {
+    final read = await source.read(
+      clientFor((_) => error(500, 'internal')),
+      contest,
     );
+    expect(read.loadFailed, isTrue);
+    expect(read.links, isEmpty);
   });
+
+  test(
+    'links the server cannot reproduce block sending with a reason',
+    () async {
+      final read = await source.read(
+        clientFor(
+          (_) => http.Response(
+            jsonEncode({
+              'contest_id': contest.value,
+              'can_issue': true,
+              'invitations': <Object>[],
+              'unreproducible_participation_ids': [lee.value],
+            }),
+            200,
+            headers: headers,
+          ),
+        ),
+        contest,
+      );
+      expect(
+        read.sendUnavailableReason,
+        ApiPilotInvitationSource.unreproducibleReason,
+      );
+    },
+  );
 
   test('send issues for the chosen pilots only, with no email field', () async {
     late http.Request seen;

@@ -1,5 +1,6 @@
 import '../models/id.dart';
 import '../models/scores/invitation.dart';
+import '../models/sync/audit_event.dart';
 
 /// Abstract persistence contract for [Invitation]s.
 ///
@@ -39,4 +40,11 @@ abstract interface class InvitationRepository {
   Future<Map<Id, DateTime>> latestIssuedAtForContests(Iterable<Id> contestIds);
 
   Future<Invitation> save(Invitation invitation);
+
+  /// Stores every invitation in [invitations] and every event in [audits] in
+  /// one transaction: if any write fails, none is kept.
+  Future<void> saveIssued(
+    List<Invitation> invitations,
+    List<AuditEvent> audits,
+  );
 }

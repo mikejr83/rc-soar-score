@@ -60,7 +60,8 @@ void addInvitationRoutes(
         canIssue: check.canIssue,
         cannotIssueCode: check.code,
         cannotIssueReason: check.reason,
-        invitations: active.map(dto).toList(),
+        invitations: active.links.map(dto).toList(),
+        unreproducibleParticipationIds: active.unreproducible,
       ).toJson(),
     ).change(headers: {'cache-control': 'no-store'});
   });

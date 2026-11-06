@@ -57,6 +57,14 @@ ContestInvitationsDto _$ContestInvitationsDtoFromJson(
                 .toList() ??
             const [],
       ),
+      unreproducibleParticipationIds: $checkedConvert(
+        'unreproducible_participation_ids',
+        (v) =>
+            (v as List<dynamic>?)
+                ?.map((e) => const IdConverter().fromJson(e as String))
+                .toList() ??
+            const [],
+      ),
     );
     return val;
   },
@@ -65,6 +73,7 @@ ContestInvitationsDto _$ContestInvitationsDtoFromJson(
     'canIssue': 'can_issue',
     'cannotIssueCode': 'cannot_issue_code',
     'cannotIssueReason': 'cannot_issue_reason',
+    'unreproducibleParticipationIds': 'unreproducible_participation_ids',
   },
 );
 
@@ -76,6 +85,9 @@ Map<String, dynamic> _$ContestInvitationsDtoToJson(
   'cannot_issue_code': instance.cannotIssueCode,
   'cannot_issue_reason': instance.cannotIssueReason,
   'invitations': instance.invitations.map((e) => e.toJson()).toList(),
+  'unreproducible_participation_ids': instance.unreproducibleParticipationIds
+      .map(const IdConverter().toJson)
+      .toList(),
 };
 
 IssueInvitationsRequest _$IssueInvitationsRequestFromJson(

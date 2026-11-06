@@ -125,10 +125,17 @@ class PilotCardsReport extends DataReportDefinition<PilotCardsData> {
   Future<ReportLoad<PilotCardsData>> loadData(ReportDataRequest request) async {
     final page = await ScoringPageData.load(request.client, request.contestId);
     final invitationSource = source ?? PilotInvitationSources.current;
-    final invitations = await invitationSource.read(
-      request.client,
-      request.contestId,
-    );
+    // A failed read must not stop the cards from printing: they print without
+    // QR codes, with a banner to retry.
+    PilotInvitations invitations;
+    try {
+      invitations = await invitationSource.read(
+        request.client,
+        request.contestId,
+      );
+    } on Object {
+      invitations = const PilotInvitations(loadFailed: true);
+    }
     return ReportLoaded(
       PilotCardsData.of(
         page: page.base,
