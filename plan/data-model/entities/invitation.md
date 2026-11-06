@@ -75,6 +75,8 @@ Active -> Expired
 - Invitation state and timestamps are shared within the contest context
 - Delivery outcomes are visible to contest administrators. They record delivery requests, not message contents
 - Errors for an invalid, expired, revoked, or unauthorized credential must not reveal whether a contest, participant, or credential exists
+- The responses to a participant are identical for a malformed, forged, unknown, replaced, revoked, or expired link. The audit trail is not: a link that names a stored invitation but no longer authorizes (replaced, revoked, expired) records `InvitationAccessFailed` against that invitation, while a malformed, forged, or unknown link records nothing. Audit events are visible only to contest administrators and are never returned by a participant route, so this is an internal signal, not an oracle for the person holding the link. No event or log line ever contains a raw credential, its tag, or its stored hash
+- The guest account of an invitation has an id derived from the invitation and the server secret, so concurrent first opens of one link make and agree on the same account
 
 ## Audit and Synchronization
 

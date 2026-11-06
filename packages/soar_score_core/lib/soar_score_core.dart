@@ -10,6 +10,7 @@ export 'errors/backend_only_error.dart';
 export 'errors/contest_state_error.dart';
 export 'errors/entity_not_found_error.dart';
 export 'errors/forbidden_error.dart';
+export 'errors/invitation_access_error.dart';
 export 'errors/scoring_validation_error.dart';
 export 'errors/sync_constraint_error.dart';
 export 'errors/sync_payload_error.dart';

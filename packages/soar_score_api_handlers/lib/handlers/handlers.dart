@@ -12,7 +12,10 @@ import 'package:soar_score_api_handlers/handlers/contests_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/landing_table_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/matrix_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/models_handlers.dart';
+import 'package:soar_score_api_handlers/handlers/participant_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/participants_handlers.dart';
+import 'package:soar_score_api_handlers/middleware/failure_rate_limiter.dart';
+import 'package:soar_score_core/soar_score_core.dart' show InvitationService;
 import 'package:soar_score_api_handlers/handlers/participations_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/roles_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/public_publication_handlers.dart';
@@ -25,7 +28,12 @@ import 'package:soar_score_core/services/recalculation/recalculation_service.dar
 import 'package:soar_score_core/import/glider_score_import_runner.dart';
 import 'package:soar_score_api_handlers/handlers/import_handlers.dart';
 
-({Handler healthHandler, Handler apiHandler, Handler publicHandler})
+({
+  Handler healthHandler,
+  Handler apiHandler,
+  Handler publicHandler,
+  Handler participantHandler,
+})
 createHandlers(
   String name,
   String displayName,
@@ -36,6 +44,9 @@ createHandlers(
   SyncVersions? syncVersions,
   GliderScoreImportRunner? gliderScoreImport,
   DrawRunner? drawRunner,
+  InvitationService? invitations,
+  FailureRateLimiter? invitationRateLimiter,
+  Set<String> corsAllowedOrigins = const {},
 }) {
   final router = Router()
     ..get(
@@ -78,5 +89,11 @@ createHandlers(
     healthHandler: createHealthHandler(name, displayName, version, repository),
     apiHandler: router.call,
     publicHandler: buildPublicHandler(repository, enabled: publishingEnabled),
+    participantHandler: buildParticipantHandler(
+      repository,
+      service: invitations,
+      limiter: invitationRateLimiter,
+      allowedOrigins: corsAllowedOrigins,
+    ),
   );
 }
